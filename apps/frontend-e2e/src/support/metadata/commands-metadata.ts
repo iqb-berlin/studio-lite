@@ -1,6 +1,6 @@
 import { WsSettings } from '../testData';
 
-// 35
+// 30
 Cypress.Commands.add('getRegistryAPI',
   (token:string) => {
     const authorization = `bearer ${token}`;
@@ -15,7 +15,7 @@ Cypress.Commands.add('getRegistryAPI',
     });
   });
 
-// 36
+// 31
 Cypress.Commands.add('getMetadataAPI', (profile:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -29,7 +29,7 @@ Cypress.Commands.add('getMetadataAPI', (profile:string, token:string) => {
   });
 });
 
-// 37
+// 32
 Cypress.Commands.add('updateGroupMetadataAPI', (groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -57,7 +57,7 @@ Cypress.Commands.add('updateGroupMetadataAPI', (groupId: string, token:string) =
   });
 });
 
-// 38
+// 33
 Cypress.Commands.add('getVocabularyMetadataAPI', (profile: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -74,14 +74,10 @@ Cypress.Commands.add('getVocabularyMetadataAPI', (profile: string, token:string)
   });
 });
 
-// 39
+// 34
 Cypress.Commands.add('updateWsMetadataAPI',
   (wsId: string, settings: WsSettings, token:string) => {
     const authorization = `bearer ${token}`;
-    // defaultEditor: `${settings.defaultEditor}`,
-    // defaultPlayer: `${settings.defaultPlayer}`,
-    // defaultSchemer: `${settings.defaultSchemer}`,
-    // stableModulesOnly: `${settings.stableModulesOnly}`,
     cy.request({
       method: 'PATCH',
       url: `/api/workspaces/${wsId}/settings`,

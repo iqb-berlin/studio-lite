@@ -5,15 +5,14 @@ import {
   createNewUser,
   deleteFirstUser,
   deleteGroup,
-  deleteUser
+  deleteUser, findAdminSettings
 } from '../../../support/util';
 import { checkMultipleProfiles, checkProfile } from '../../../support/metadata/metadata-util';
 import { UserData } from '../../../support/testData';
 
 describe('Load metadata profile', () => {
   const groups = ['Mathematik Primär und Sek I',
-    'Deutsch Primär und Sek I',
-    'Englisch Sek I'];
+    'Deutsch Primär und Sek I'];
   const newUser: UserData = {
     username: 'normaluser',
     password: '5678'
@@ -41,9 +40,7 @@ describe('Load metadata profile', () => {
   it('should be possible load a metadata profile from administration settings', () => {
     const searchProfile:string = 'Deutsch';
     // cy.get('[data-cy="goto-admin"]').click();
-    cy.get('div')
-      .contains('studio-lite-wrapped-icon', 'settings')
-      .click();
+    findAdminSettings().click();
     cy.get('span:contains("Bereichsgruppen")')
       .eq(0)
       .click();
@@ -71,10 +68,7 @@ describe('Load metadata profile', () => {
 
   it('should be possible load more metadata profile', () => {
     const searchProfiles:string[] = ['Englisch', 'Mathematik'];
-    // cy.get('[data-cy="goto-admin"]').click();
-    cy.get('div')
-      .contains('studio-lite-wrapped-icon', 'settings')
-      .click();
+    findAdminSettings().click();
     cy.get('span:contains("Bereichsgruppen")')
       .eq(0)
       .click();

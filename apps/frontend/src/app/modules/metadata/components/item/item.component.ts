@@ -7,16 +7,17 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { ItemsMetadataValues, ProfileMetadataValues } from '@studio-lite-lib/api-dto';
 import { MDProfile } from '@iqb/metadata';
+import { MatIcon } from '@angular/material/icon';
 import { ProfileFormComponent } from '../profile-form/profile-form.component';
 import { AliasId } from '../../models/alias-id.interface';
 
 interface ItemModel {
   id?: string;
-  variableId?: string;
-  variableReadOnlyId?: string;
+  variableId?: string | null;
+  variableReadOnlyId?: string | null;
   description?: string;
   weighting?: number;
-  [key: string]: string | number | undefined;
+  [key: string]: string | number | null | undefined;
 }
 
 @Component({
@@ -24,7 +25,7 @@ interface ItemModel {
   templateUrl: './item.component.html',
   styleUrls: ['./item.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, FormlyModule, ProfileFormComponent, TranslateModule]
+  imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, FormlyModule, ProfileFormComponent, TranslateModule, MatIcon]
 })
 export class ItemComponent implements OnInit, OnChanges {
   constructor(private translateService:TranslateService) { }
@@ -72,14 +73,17 @@ export class ItemComponent implements OnInit, OnChanges {
             props: {
               placeholder: this.translateService.instant('metadata.choose-item-variable'),
               label: this.translateService.instant('metadata.choose-item-variable'),
-              options: [{ value: '', label: '' }, ...this.variables.map(variable => ({
-                value: variable.alias,
-                label: variable.alias
-              }))]
+              options: [
+                { value: null, label: '' },
+                ...this.variables.map(variable => ({
+                  value: variable.alias,
+                  label: variable.alias
+                }))
+              ]
             },
             expressions: {
               'model.variableReadOnlyId': (field: FormlyFieldConfig) => this.variables
-                .find(variable => variable.alias === field.model.variableId)?.id
+                .find(variable => variable.alias === field.model.variableId)?.id || null
             }
           },
           {
@@ -130,14 +134,17 @@ export class ItemComponent implements OnInit, OnChanges {
     if (!!this.model.variableId && this.metadata[this.itemIndex].variableId !== this.model.variableId) {
       this.metadata[this.itemIndex].variableId = this.model.variableId;
       this.emitMetadata();
+    } else if (!this.model.variableId && this.metadata[this.itemIndex].variableId) {
+      // variable was removed
+      this.metadata[this.itemIndex].variableId = null;
+      this.metadata[this.itemIndex].variableReadOnlyId = null;
+      this.emitMetadata();
     }
   }
 
   onModelChange(): void {
     Object.entries(this.model).forEach((entry => {
-      if (entry[1] !== undefined) {
-        this.metadata[this.itemIndex][entry[0]] = entry[1];
-      }
+      this.metadata[this.itemIndex][entry[0]] = entry[1];
     }));
     this.emitMetadata();
   }

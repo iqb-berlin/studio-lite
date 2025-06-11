@@ -1,6 +1,15 @@
 <mat-expansion-panel [expanded]="false">
   <mat-expansion-panel-header >
-    <mat-panel-title>{{model.id || 'metadata.without-id' | translate}}
+    <mat-panel-title class="fx-row-start-center fx-gap-5">
+      <span class="fx-flex-row-50">{{model.id || 'metadata.without-id' | translate}}</span>
+      <span class="fx-flex-row-fill fx-row-start-center fx-gap-5">
+        @if (model.variableId) {
+          <mat-icon color="primary">link</mat-icon>
+          <span class="linked">{{model.variableId}}</span>
+        } @else {
+          <mat-icon class="not-linked">link_off</mat-icon>
+        }
+      </span>
     </mat-panel-title>
   </mat-expansion-panel-header>
     <form [formGroup]="form">

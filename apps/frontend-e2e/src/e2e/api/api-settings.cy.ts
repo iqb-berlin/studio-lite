@@ -40,11 +40,11 @@ describe('Admin settings API tests', () => {
       });
   });
   after(() => {
-    cy.deleteUserAPI(Cypress.env(`id_${user2.username}`), Cypress.env(`token_${Cypress.env('username')}`))
+    cy.deleteUsersAPI([Cypress.env(`id_${user2.username}`)], Cypress.env(`token_${Cypress.env('username')}`))
       .then(resp => {
         expect(resp.status).to.equal(200);
       });
-    cy.deleteUserAPI(Cypress.env(`id_${Cypress.env('username')}`), Cypress.env(`token_${Cypress.env('username')}`))
+    cy.deleteUsersAPI([Cypress.env(`id_${Cypress.env('username')}`)], Cypress.env(`token_${Cypress.env('username')}`))
       .then(resp => {
         Cypress.env('token_admin', '');
         expect(resp.status).to.equal(200);

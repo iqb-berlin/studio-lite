@@ -50,7 +50,7 @@ describe('Identity tests users API tests', () => {
       cy.keycloakAPI(cloakUser1)
         .then(resp => {
           Cypress.env(`token_${cloakUser1.username}`, resp.body);
-          expect(resp.status).to.equal(201); // We use dummy data, with real data we use code 201
+          expect(resp.status).to.equal(201);
           cy.getUserIdAPI(resp.body)
             .then(resp2 => {
               Cypress.env(`id_${cloakUser1.username}`, resp2.body.userId);
@@ -60,7 +60,7 @@ describe('Identity tests users API tests', () => {
       cy.keycloakAPI(cloakUser2)
         .then(resp => {
           Cypress.env(`token_${cloakUser2.username}`, resp.body);
-          expect(resp.status).to.equal(201); // We use dummy data, with real data we use code 201
+          expect(resp.status).to.equal(201);
           cy.getUserIdAPI(resp.body)
             .then(resp2 => {
               Cypress.env(`id_${cloakUser2.username}`, resp2.body.userId);
@@ -100,7 +100,7 @@ describe('Identity tests users API tests', () => {
     it('500/201 negative test identity: should not create' +
       ' a user if we do not type correctly the parameter identity.', () => {
       // It does not create the user, if we don't type identity parameter correctly but other parameters.
-      // create the token but not the id
+      // It creates the token but not the id
       cy.request({
         method: 'POST',
         url: '/api/keycloak-login',
@@ -152,7 +152,7 @@ describe('Identity tests users API tests', () => {
       });
     });
     it('500/201 negative test: should not create a user with the same email twice.', () => {
-      // But, it does not create a same user twice, but there is no way to get a bad  response.
+      // It does not create twice the same user, but there is no way to get a bad response.
       cy.keycloakAPI(cloakUser1)
         .then(resp => {
           expect(resp.status).to.equal(201);

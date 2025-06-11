@@ -19,10 +19,10 @@ export class MetadataValues {
 export class ItemsMetadataValues extends ProfileMetadataValues {
   id?: string;
   description?: string;
-  variableId?: string;
-  variableReadOnlyId?: string;
+  variableId?: string | null;
+  variableReadOnlyId?: string | null;
   weighting?: number;
-  [key: string]: string | number | MetadataValues[] | undefined;
+  [key: string]: string | number | MetadataValues[] | null | undefined;
 }
 
 export class MetadataValuesEntry {
