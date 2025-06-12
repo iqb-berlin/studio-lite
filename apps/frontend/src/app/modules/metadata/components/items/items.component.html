@@ -1,5 +1,15 @@
 <div class="fx-row-end-center">
   @if (!isTextOnlyView) {
+
+    <select [ngModel]="itemSortService.currenItemSorting"
+            (ngModelChange)="sortItems($event)">
+      @for (sorting of itemSortService.itemSortings; track sorting) {
+        <option [value]="sorting">
+          {{'metadata.sort-by-'+sorting | translate}}
+        </option>
+      }
+    </select>
+
     <button type="button" mat-icon-button
             matTooltip="{{'metadata.items-read-only-view' | translate}}"
             [matTooltipPosition]="'above'"
