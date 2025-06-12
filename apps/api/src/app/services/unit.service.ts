@@ -661,6 +661,9 @@ export class UnitService {
           const found = variableAliasId.find(v => v.id === item.id);
           if (found) {
             item.alias = found.alias;
+          } else if (item.sourceType === 'BASE_NO_VALUE') {
+            schemeObject.variableCodings = schemeObject
+              .variableCodings.filter((v: unknown) => v !== item);
           }
         }
       });
