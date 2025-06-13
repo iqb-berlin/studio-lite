@@ -64,7 +64,9 @@
 }
 @if (isTextOnlyView) {
   <div>
-    <studio-lite-metadata-readonly-items [items]="items">
+    <studio-lite-metadata-readonly-items
+      [items]="items"
+      [variables]="variables">
     </studio-lite-metadata-readonly-items>
   </div>
 }
