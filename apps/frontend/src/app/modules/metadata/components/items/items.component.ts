@@ -12,6 +12,7 @@ import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { ItemsMetadataValues, ProfileMetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
 import { MDProfile } from '@iqb/metadata';
+import { FormsModule } from '@angular/forms';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { ItemComponent } from '../item/item.component';
 import {
@@ -19,13 +20,14 @@ import {
 } from '../../../shared/components/metadata-readonly-items/metadata-readonly-items.component';
 import { AliasId } from '../../models/alias-id.interface';
 import { NewItemComponent } from '../new-item/new-item.component';
+import { ItemSortService } from '../../services/item-sort.service';
 
 @Component({
   selector: 'studio-lite-items',
   templateUrl: './items.component.html',
   styleUrls: ['./items.component.scss'],
   imports: [MatIconButton, MatTooltip, WrappedIconComponent, ItemComponent, MatIcon,
-    MatFabButton, MetadataReadonlyItemsComponent, TranslateModule]
+    MatFabButton, MetadataReadonlyItemsComponent, TranslateModule, FormsModule]
 })
 
 export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
@@ -41,7 +43,10 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
 
   @Output() metadataChange: EventEmitter<UnitMetadataValues> = new EventEmitter();
 
-  constructor(private addItemDialog: MatDialog) {}
+  constructor(
+    private addItemDialog: MatDialog,
+    public itemSortService: ItemSortService
+  ) {}
 
   ngOnInit(): void {
     this.variablesLoader
@@ -49,7 +54,12 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
       .subscribe(variables => {
         this.variables = variables;
       });
+    this.setItems();
+  }
+
+  private setItems(): void {
     this.items = this.metadata.items || [];
+    this.sortItems(this.itemSortService.currenItemSorting);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -57,7 +67,7 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
     if (changes[metadata] &&
       !changes[metadata].firstChange &&
       changes[metadata].previousValue !== changes[metadata].currentValue) {
-      this.items = this.metadata.items || [];
+      this.setItems();
     }
   }
 
@@ -132,6 +142,12 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
 
   private emitMetadata(): void {
     this.metadataChange.emit(this.metadata);
+  }
+
+  sortItems(key: string) {
+    this.items
+      .sort((a, b) => ((a[key] || '0') > (b[key] || '0') ? 1 : -1));
+    this.itemSortService.currenItemSorting = key;
   }
 
   ngOnDestroy(): void {

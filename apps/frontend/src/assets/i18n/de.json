@@ -283,7 +283,9 @@
     "key": "Aufgabe",
     "variableId": "Variable",
     "unitMetadataReportFileName": "{{date}} Bericht Aufgaben Metadaten",
-    "itemsMetadataReportFileName": "{{date}} Bericht Items Metadaten"
+    "itemsMetadataReportFileName": "{{date}} Bericht Items Metadaten",
+    "sort-by-variableId": "Nach Variablen ID sortieren",
+    "sort-by-id": "Nach Item ID sortieren"
   },
   "wsg-settings": {
     "save-settings": "Einstellungen speichern",
