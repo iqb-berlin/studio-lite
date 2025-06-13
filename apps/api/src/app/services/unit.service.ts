@@ -656,17 +656,24 @@ export class UnitService {
   private static getUpdatedScheme(scheme: string, variableAliasId: { id: string; alias: string }[]): string {
     const schemeObject = JSON.parse(scheme);
     if (schemeObject.variableCodings) {
-      schemeObject.variableCodings.forEach(item => {
-        if (item.sourceType === 'BASE' || item.sourceType === 'BASE_NO_VALUE') {
+      schemeObject.variableCodings = schemeObject.variableCodings.reduce((acc, item) => {
+        if (item.sourceType === 'BASE_NO_VALUE') {
           const found = variableAliasId.find(v => v.id === item.id);
           if (found) {
             item.alias = found.alias;
-          } else if (item.sourceType === 'BASE_NO_VALUE') {
-            schemeObject.variableCodings = schemeObject
-              .variableCodings.filter((v: unknown) => v !== item);
+            acc.push(item);
           }
+        } else if (item.sourceType === 'BASE') {
+          const found = variableAliasId.find(v => v.id === item.id);
+          if (found) {
+            item.alias = found.alias;
+          }
+          acc.push(item);
+        } else {
+          acc.push(item);
         }
-      });
+        return acc;
+      }, []);
       return JSON.stringify(schemeObject);
     }
     return scheme;
