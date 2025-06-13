@@ -3,22 +3,14 @@ import {
 } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
-import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { ItemsMetadataValues, ProfileMetadataValues } from '@studio-lite-lib/api-dto';
 import { MDProfile } from '@iqb/metadata';
 import { MatIcon } from '@angular/material/icon';
 import { ProfileFormComponent } from '../profile-form/profile-form.component';
 import { AliasId } from '../../models/alias-id.interface';
-
-interface ItemModel {
-  id?: string;
-  variableId?: string | null;
-  variableReadOnlyId?: string | null;
-  description?: string;
-  weighting?: number;
-  [key: string]: string | number | null | undefined;
-}
+import { ItemModel } from '../../models/item-model.interface';
 
 @Component({
   selector: 'studio-lite-item',
@@ -72,16 +64,16 @@ export class ItemComponent implements OnInit, OnChanges {
             key: 'variableId',
             props: {
               placeholder: this.translateService.instant('metadata.choose-item-variable'),
-              label: this.translateService.instant('metadata.choose-item-variable'),
-              options: [
+              label: this.translateService.instant('metadata.choose-item-variable')
+            },
+            expressions: {
+              'props.options': () => [
                 { value: null, label: '' },
-                ...this.variables.map(variable => ({
+                ...this.getNotUsedVariables().map(variable => ({
                   value: variable.alias,
                   label: variable.alias
                 }))
-              ]
-            },
-            expressions: {
+              ],
               'model.variableReadOnlyId': (field: FormlyFieldConfig) => this.variables
                 .find(variable => variable.alias === field.model.variableId)?.id || null
             }
@@ -110,6 +102,13 @@ export class ItemComponent implements OnInit, OnChanges {
         ]
       }
     ];
+  }
+
+  getNotUsedVariables(): AliasId[] {
+    // Filter out variables that are already used in the metadata but not in the current item
+    return this.variables.filter(variable => !this.metadata
+      .some(item => item.variableReadOnlyId === variable.id && item.variableId !== this.model.variableId)
+    );
   }
 
   private initModel(): void {
