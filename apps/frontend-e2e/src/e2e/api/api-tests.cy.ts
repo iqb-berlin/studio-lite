@@ -81,7 +81,7 @@ describe('Studio API tests', () => {
     unitMDProfile: '',
     itemMDProfile: ''
   };
-
+  
   describe('Auth API tests', () => {
     describe('1. POST /api/init-login', () => {
       it('201 positive test: should create a first user.', () => {
