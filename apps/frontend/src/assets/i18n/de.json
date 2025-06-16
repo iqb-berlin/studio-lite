@@ -269,6 +269,7 @@
     "item-content": "Inhalt für Item übernehmen",
     "choose-item-variable": "Variable auswählen",
     "variable-id": "Variablen Id",
+    "id-assigned": "Item ID mehrfach zugewiesen",
     "description": "Notiz",
     "weighting": "Wichtung",
     "formly-field-required": "Pflichtfeld",

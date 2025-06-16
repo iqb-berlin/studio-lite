@@ -34,6 +34,7 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
   items: ItemsMetadataValues[] = [];
   variables!: AliasId[];
   isTextOnlyView = false;
+  lastUpdatedItemIndex: BehaviorSubject<number> = new BehaviorSubject<number>(-1);
   private ngUnsubscribe = new Subject<void>();
 
   @Input() variablesLoader!: BehaviorSubject<AliasId[]>;

@@ -1,13 +1,17 @@
 import {
-  Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges
+  Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges
 } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
+import { FormlyFieldConfig, FormlyFormOptions, FormlyModule } from '@ngx-formly/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { ItemsMetadataValues, ProfileMetadataValues } from '@studio-lite-lib/api-dto';
 import { MDProfile } from '@iqb/metadata';
 import { MatIcon } from '@angular/material/icon';
+import {
+  BehaviorSubject, delay, map, Observable, Subject, takeUntil
+} from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 import { ProfileFormComponent } from '../profile-form/profile-form.component';
 import { AliasId } from '../../models/alias-id.interface';
 import { ItemModel } from '../../models/item-model.interface';
@@ -17,24 +21,44 @@ import { ItemModel } from '../../models/item-model.interface';
   templateUrl: './item.component.html',
   styleUrls: ['./item.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, FormlyModule, ProfileFormComponent, TranslateModule, MatIcon]
+  imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, FormlyModule, ProfileFormComponent, TranslateModule, MatIcon, AsyncPipe]
 })
-export class ItemComponent implements OnInit, OnChanges {
-  constructor(private translateService:TranslateService) { }
+export class ItemComponent implements OnInit, OnChanges, OnDestroy {
   @Input() variables!: AliasId[];
   @Input() metadata!: ItemsMetadataValues[];
   @Input() profile!: MDProfile;
   @Input() itemIndex!: number;
   @Input() language!: string;
+  @Input() lastUpdatedItemIndex!: BehaviorSubject<number>;
+  @Output() metadataChange: EventEmitter<ItemsMetadataValues[]> = new EventEmitter();
+
+  hasError!: Observable<boolean>;
+  private ngUnsubscribe = new Subject<void>();
   form = new FormGroup({});
   fields!: FormlyFieldConfig[];
   model: ItemModel = {};
+  options: FormlyFormOptions = {};
 
-  @Output() metadataChange: EventEmitter<ItemsMetadataValues[]> = new EventEmitter();
+  constructor(private translateService:TranslateService) { }
 
   ngOnInit(): void {
     this.initModel();
     this.initField();
+    this.lastUpdatedItemIndex
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(index => {
+        if (index > -1 && index !== this.itemIndex) {
+          this.updateModelVariableId();
+          this.initField();
+        }
+      });
+    this.hasError = this
+      .form.statusChanges
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        delay(100),
+        map(() => !this.form.valid)
+      );
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -56,7 +80,16 @@ export class ItemComponent implements OnInit, OnChanges {
             props: {
               placeholder: 'Item ID',
               label: 'Item ID',
-              required: true
+              assignedIds: this.getOtherIds()
+            },
+            validators: {
+              validation: ['id']
+            },
+            validation: {
+              show: true
+            },
+            expressions: {
+              'props.assignedIds': () => this.getOtherIds()
             }
           },
           {
@@ -111,6 +144,14 @@ export class ItemComponent implements OnInit, OnChanges {
     );
   }
 
+  getOtherIds(): string[] {
+    // Get all IDs from the metadata except the current item's ID
+    return this.metadata
+      .filter((_, index) => index !== this.itemIndex)
+      .map(item => item.id)
+      .filter(id => !!id) as string[]; // Filter out null or undefined IDs
+  }
+
   private initModel(): void {
     if (this.metadata[this.itemIndex].id) this.model.id = this.metadata[this.itemIndex].id;
     if (this.metadata[this.itemIndex].description) this.model.description = this.metadata[this.itemIndex].description;
@@ -145,6 +186,7 @@ export class ItemComponent implements OnInit, OnChanges {
     Object.entries(this.model).forEach((entry => {
       this.metadata[this.itemIndex][entry[0]] = entry[1];
     }));
+    this.lastUpdatedItemIndex.next(this.itemIndex);
     this.emitMetadata();
   }
 
@@ -155,5 +197,10 @@ export class ItemComponent implements OnInit, OnChanges {
 
   private emitMetadata(): void {
     this.metadataChange.emit(this.metadata);
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
