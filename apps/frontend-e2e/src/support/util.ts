@@ -523,7 +523,7 @@ export function createItem(itemId: string) {
   cy.get('.add-button > .mdc-button__label').click();
   cy.clickButton('Bestätigen');
   cy.get('mat-expansion-panel:contains("ohne ID")').click();
-  cy.get('mat-label:contains("Item ID *")').eq(-1).type(itemId);
+  cy.get('mat-label:contains("Item ID")').eq(-1).type(itemId);
 }
 
 export function assignVariableToItem(variableName: string) {
