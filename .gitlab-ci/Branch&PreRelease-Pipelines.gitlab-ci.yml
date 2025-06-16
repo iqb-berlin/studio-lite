@@ -570,7 +570,7 @@ test-app-e2e-api:
     - npx nx e2e frontend-e2e
         --prod
         --browser chrome
-        --spec "./apps/frontend-e2e/src/e2e/api/*" ||
+        --spec "./apps/frontend-e2e/src/e2e/api/**/*" ||
       ( pkill npx && exit 1 )
   after_script:
     - docker logout ${REGISTRY}
@@ -614,7 +614,7 @@ test-app-e2e-ui-chrome:
     - npx nx e2e frontend-e2e
         --prod
         --browser chrome
-        --spec "./apps/frontend-e2e/src/e2e/ui/*" ||
+        --spec "./apps/frontend-e2e/src/e2e/ui/**/*" ||
       ( pkill npx && exit 1 )
   after_script:
     - docker logout ${REGISTRY}
@@ -658,7 +658,7 @@ test-app-e2e-ui-chrome-mobile:
     - npx nx e2e frontend-e2e
         --prod
         --browser chrome
-        --spec "./apps/frontend-e2e/src/e2e/ui/*"
+        --spec "./apps/frontend-e2e/src/e2e/ui/**/*"
         --config "viewportWidth=375,viewportHeight=667" ||
       ( pkill npx && exit 1 )
   after_script:
@@ -703,7 +703,7 @@ test-app-e2e-ui-firefox:
     - npx nx e2e frontend-e2e
         --prod
         --browser firefox
-        --spec "./apps/frontend-e2e/src/e2e/ui/*" ||
+        --spec "./apps/frontend-e2e/src/e2e/ui/**/*" ||
       ( pkill npx && exit 1 )
   after_script:
     - docker logout ${REGISTRY}
@@ -747,7 +747,7 @@ test-app-e2e-ui-firefox-mobile:
     - npx nx e2e frontend-e2e
         --prod
         --browser firefox
-        --spec "./apps/frontend-e2e/src/e2e/ui/*"
+        --spec "./apps/frontend-e2e/src/e2e/ui/**/*"
         --config "viewportWidth=375,viewportHeight=667" ||
       ( pkill npx && exit 1 )
   after_script:
@@ -792,7 +792,7 @@ test-app-e2e-ui-edge:
     - npx nx e2e frontend-e2e
         --prod
         --browser edge
-        --spec "./apps/frontend-e2e/src/e2e/ui/*" ||
+        --spec "./apps/frontend-e2e/src/e2e/ui/**/*" ||
       ( pkill npx && exit 1 )
   after_script:
     - docker logout ${REGISTRY}
@@ -836,7 +836,7 @@ test-app-e2e-ui-edge-mobile:
     - npx nx e2e frontend-e2e
         --prod
         --browser edge
-        --spec "./apps/frontend-e2e/src/e2e/ui/*"
+        --spec "./apps/frontend-e2e/src/e2e/ui/**/*"
         --config "viewportWidth=375,viewportHeight=667" ||
       ( pkill npx && exit 1 )
   after_script:
