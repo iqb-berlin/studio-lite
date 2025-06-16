@@ -208,13 +208,13 @@ export function getItem(profile:string, moreThanOne: boolean, copyItem?: string)
   } else if (moreThanOne) {
     cy.clickButton('Bestätigen');
     cy.get('mat-expansion-panel:contains("ohne ID")').click();
-    cy.get('mat-label:contains("Item ID *")').eq(-1).type(IqbProfileExamples.get(profile).get('Item ID'));
+    cy.get('mat-label:contains("Item ID")').eq(-1).type(IqbProfileExamples.get(profile).get('Item ID'));
     cy.get('mat-label:contains("Wichtung")').eq(-1).type(IqbProfileExamples.get(profile).get('Wichtung'));
     cy.get('mat-label:contains("Notiz")').eq(-1).type(IqbProfileExamples.get(profile).get('Notiz'));
     getStructure(profile, moreThanOne);
   } else {
     cy.get('mat-expansion-panel:contains("ohne ID")').click();
-    cy.get('mat-label:contains("Item ID *")').type(IqbProfileExamples.get(profile).get('Item ID'));
+    cy.get('mat-label:contains("Item ID")').type(IqbProfileExamples.get(profile).get('Item ID'));
     cy.get('mat-label:contains("Wichtung")').type(IqbProfileExamples.get(profile).get('Wichtung'));
     cy.get('mat-label:contains("Notiz")').eq(1).type(IqbProfileExamples.get(profile).get('Notiz'));
     getStructure(profile, moreThanOne);

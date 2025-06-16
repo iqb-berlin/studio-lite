@@ -26,7 +26,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     deleteFirstUser();
   });
 
-  it('prepares context', () => {
+  it('prepares the context', () => {
     addModules(modules, 'Module');
     cy.visit('/');
     createGroup(group);
@@ -47,17 +47,24 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     selectUnit('MA_01');
     goToItem('01');
     assignVariableToItem('text-field_1');
+    cy.contains('Speichern').click();
   });
 
-  it('checks that for the item 02, text-field_1 is not available', () => {
+  it('creates the item 02 and checks that text-field_1 is not available', () => {
     createItem('02');
     cy.get('mat-select[placeholder="Variable auswählen"]').eq(-1).find('svg').click();
     cy.get('mat-option:contains("text-field_1")').should('not.exist');
     cy.get('mat-option:contains("radio_1")').eq(0).click();
+    cy.contains('Speichern').click();
   });
 
-  it('checks that the text-field_1 is not available at dropdown list', () => {
-    createItem('03');
+  it('checks that it shows a warning when we try to create an item with same name as an existent item', () => {
+    createItem('02');
+    cy.get('mat-form-field').find('mat-error').should('exist');
+  });
+
+  it('replaces the name of the third item', () => {
+    cy.get('mat-label:contains("Item ID")').eq(-1).type('{backspace}{backspace}03');
     assignVariableToItem('drop-list_1');
     cy.contains('Speichern').click();
   });
@@ -92,7 +99,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.clickButton('Schließen');
   });
 
-  it('checks that the select order by variable is present and that the order of the items are sorted', () => {
+  it('checks the order of items before and after clicking Nach Variable ID Sortieren is not the same', () => {
     cy.get('studio-lite-item').eq(2).find('span:contains("03")').should('exist');
     cy.get('studio-lite-item').eq(0).find('span:contains("01")').should('exist');
     cy.get('select.sort-items').select('Nach Variablen ID sortieren', { force: true });
@@ -112,6 +119,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     assignVariableToItem('');
     cy.contains('mat-icon', 'visibility').click({ force: true });
     cy.contains('span.item_value', 'drop-list_1').should('not.exist');
+    cy.pause();
   });
 
   it('deletes the data', () => {
