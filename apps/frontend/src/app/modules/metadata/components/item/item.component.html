@@ -1,5 +1,5 @@
 <mat-expansion-panel [expanded]="false">
-  <mat-expansion-panel-header >
+  <mat-expansion-panel-header [class.error]="hasError | async">
     <mat-panel-title class="fx-row-start-center fx-gap-5">
       <span class="fx-flex-row-50">{{model.id || 'metadata.without-id' | translate}}</span>
       <span class="fx-flex-row-fill fx-row-start-center fx-gap-5">
@@ -15,6 +15,7 @@
     <form [formGroup]="form">
      <formly-form [model]="model"
                   [fields]="fields"
+                  [options]="options"
                   [form]="form"
                   (modelChange)="onModelChange()">
      </formly-form>
