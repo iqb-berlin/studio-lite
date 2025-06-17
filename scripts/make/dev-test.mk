@@ -63,7 +63,7 @@ dev-test-e2e-api:
 				--network app-net\
 			studio-lite-frontend-e2e:$(TAG) e2e frontend-e2e --baseUrl=http://frontend:8080\
 				--browser=chrome\
-				--spec="./apps/frontend-e2e/src/e2e/api/*"
+				--spec="./apps/frontend-e2e/src/e2e/api/**/*"
 
 # Run all e2e ui tests with chrome browser in dev environment (only in combination with 'make dev-up')
 dev-test-e2e-ui-chrome:
@@ -75,7 +75,7 @@ dev-test-e2e-ui-chrome:
 				--network app-net\
 			studio-lite-frontend-e2e:$(TAG) e2e frontend-e2e --baseUrl=http://frontend:8080\
 				--browser=chrome\
-				--spec="./apps/frontend-e2e/src/e2e/ui/*"
+				--spec="./apps/frontend-e2e/src/e2e/ui/**/*"
 
 # Run all e2e ui tests with chrome browser for mobiles in dev environment (only in combination with 'make dev-up')
 dev-test-e2e-ui-chrome-mobile:
@@ -87,7 +87,7 @@ dev-test-e2e-ui-chrome-mobile:
 				--network app-net\
 			studio-lite-frontend-e2e:$(TAG) e2e frontend-e2e --baseUrl=http://frontend:8080\
 				--browser=chrome\
-				--spec="./apps/frontend-e2e/src/e2e/ui/*"\
+				--spec="./apps/frontend-e2e/src/e2e/ui/**/*"\
 				--config="viewportWidth=375,viewportHeight=667"
 
 # Run all e2e ui tests with firefox browser in dev environment (only in combination with 'make dev-up')
@@ -100,7 +100,7 @@ dev-test-e2e-ui-firefox:
 				--network app-net\
 			studio-lite-frontend-e2e:$(TAG) e2e frontend-e2e --baseUrl=http://frontend:8080\
 				--browser=firefox\
-				--spec="./apps/frontend-e2e/src/e2e/ui/*"\
+				--spec="./apps/frontend-e2e/src/e2e/ui/**/*"\
 
 # Run all e2e ui tests with firefox browser for mobiles in dev environment (only in combination with 'make dev-up')
 dev-test-e2e-ui-firefox-mobile:
@@ -112,7 +112,7 @@ dev-test-e2e-ui-firefox-mobile:
 				--network app-net\
 			studio-lite-frontend-e2e:$(TAG) e2e frontend-e2e --baseUrl=http://frontend:8080\
 				--browser=firefox\
-				--spec="./apps/frontend-e2e/src/e2e/ui/*"\
+				--spec="./apps/frontend-e2e/src/e2e/ui/**/*"\
 				--config="viewportWidth=375,viewportHeight=667"
 
 # Run all e2e ui tests with edge browser in dev environment (only in combination with 'make dev-up')
@@ -125,7 +125,7 @@ dev-test-e2e-ui-edge:
 				--network app-net\
 			studio-lite-frontend-e2e:$(TAG) e2e frontend-e2e --baseUrl=http://frontend:8080\
 				--browser=edge\
-				--spec="./apps/frontend-e2e/src/e2e/ui/*"
+				--spec="./apps/frontend-e2e/src/e2e/ui/**/*"
 
 # Run all e2e ui tests with edge browser for mobiles in dev environment (only in combination with 'make dev-up')
 dev-test-e2e-ui-edge-mobile:
@@ -137,5 +137,5 @@ dev-test-e2e-ui-edge-mobile:
 				--network app-net\
 			studio-lite-frontend-e2e:$(TAG) e2e frontend-e2e --baseUrl=http://frontend:8080\
 				--browser=edge\
-				--spec="./apps/frontend-e2e/src/e2e/ui/*"\
+				--spec="./apps/frontend-e2e/src/e2e/ui/**/*"\
 				--config="viewportWidth=375,viewportHeight=667"
