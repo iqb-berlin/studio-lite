@@ -49,7 +49,7 @@ Cypress.Commands.add('loadModule', (filename:string) => {
       action: 'select',
       force: true
     });
-  cy.contains(name)
+  cy.contains('mat-row', name)
     .should('exist');
 });
 

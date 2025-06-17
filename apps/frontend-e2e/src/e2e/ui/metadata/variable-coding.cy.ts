@@ -21,12 +21,13 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
   before(() => {
     addFirstUser();
   });
+
   after(() => {
     deleteFirstUser();
   });
 
-  it('prepares context', () => {
-    addModules(modules, 'Module');
+  it('prepares the context', () => {
+    addModules(modules);
     cy.visit('/');
     createGroup(group);
     cy.visit('/');
@@ -40,15 +41,30 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     importExercise('variable_metadata.zip');
   });
 
-  it('adds new items, and select the corresponding variable', () => {
+  it('adds a new item 01, and select the corresponding variable text-field_1', () => {
     cy.visit('/');
     cy.visitWs(mathArea);
     selectUnit('MA_01');
     goToItem('01');
     assignVariableToItem('text-field_1');
+    cy.contains('Speichern').click();
+  });
+
+  it('creates the item 02 and checks that text-field_1 is not available', () => {
     createItem('02');
-    assignVariableToItem('radio_1');
-    createItem('03');
+    cy.get('mat-select[placeholder="Variable auswählen"]').eq(-1).find('svg').click();
+    cy.get('mat-option:contains("text-field_1")').should('not.exist');
+    cy.get('mat-option:contains("radio_1")').eq(0).click();
+    cy.contains('Speichern').click();
+  });
+
+  it('checks that it shows a warning when we try to create an item with same name as an existent item', () => {
+    createItem('02');
+    cy.get('mat-form-field').find('mat-error').should('exist');
+  });
+
+  it('replaces the name of the third item', () => {
+    cy.get('mat-label:contains("Item ID")').eq(-1).type('{backspace}{backspace}03');
     assignVariableToItem('drop-list_1');
     cy.contains('Speichern').click();
   });
@@ -81,6 +97,18 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.get('.mdc-tab__text-label:contains("Metadaten Items")').click();
     cy.get('mat-dialog-container:contains("drop-list_1")').should('have.length', 0);
     cy.clickButton('Schließen');
+  });
+
+  it('checks the order of items before and after clicking Nach Variable ID Sortieren is not the same', () => {
+    cy.get('studio-lite-item').eq(2).find('span:contains("03")').should('exist');
+    cy.get('studio-lite-item').eq(0).find('span:contains("01")').should('exist');
+    cy.get('select.sort-items').select('Nach Variablen ID sortieren', { force: true });
+    cy.get('studio-lite-item').eq(0).find('span:contains("03")').should('exist');
+    cy.get('studio-lite-item').eq(2).find('span:contains("01")').should('exist');
+  });
+
+  it('checks that the select order by Id exists', () => {
+    cy.get('select.sort-items').select('Nach Item ID sortieren', { force: true });
   });
 
   it('checks that drop-list_1 is not present at eye view', () => {

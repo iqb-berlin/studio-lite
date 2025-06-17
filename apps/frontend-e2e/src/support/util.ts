@@ -98,7 +98,6 @@ export function addStatus(statusName:string, position:number) {
 export function grantRemovePrivilegeAtWs(users:string[], ws: string, rights:AccessLevel[]):void {
   cy.get('mat-table')
     .contains(`${ws}`)
-    .should('exist')
     .click();
   users.forEach((user, index) => {
     switch (rights[index]) {
@@ -190,6 +189,7 @@ export function clickSaveButtonRight() {
     }
   });
 }
+
 export function deleteFirstUser() {
   cy.visit('/');
   deleteUser(Cypress.env('username'));
@@ -202,14 +202,30 @@ export function login(username: string, password = '') {
   cy.buttonToContinue('Weiter', [201], '/api/login', 'POST', 'responseLogin');
 }
 
-export function addModules(filenames:string[], type:string):void {
+export function addModules(filenames:string[]):void {
   findAdminSettings().click();
-  cy.get(`span:contains("${type}")`)
+  cy.get('span:contains("Module")')
     .eq(0)
     .click();
   filenames.forEach(filename => {
     cy.loadModule(filename, filename);
   });
+}
+
+export function addResourcePackage(resource: string):void {
+  const path:string = `../frontend-e2e/src/fixtures/${resource}`;
+  findAdminSettings().click();
+  cy.get('span:contains("Pakete")')
+    .eq(0)
+    .click();
+  const name = resource.replace(/.itcr.zip/, '');
+  cy.get('input[type=file]')
+    .selectFile(path, {
+      action: 'select',
+      force: true
+    });
+  cy.contains('mat-row', name)
+    .should('exist');
 }
 
 export function setVeronaWs(ws:string):void {
@@ -523,7 +539,7 @@ export function createItem(itemId: string) {
   cy.get('.add-button > .mdc-button__label').click();
   cy.clickButton('Bestätigen');
   cy.get('mat-expansion-panel:contains("ohne ID")').click();
-  cy.get('mat-label:contains("Item ID *")').eq(-1).type(itemId);
+  cy.get('mat-label:contains("Item ID")').eq(-1).type(itemId);
 }
 
 export function assignVariableToItem(variableName: string) {
