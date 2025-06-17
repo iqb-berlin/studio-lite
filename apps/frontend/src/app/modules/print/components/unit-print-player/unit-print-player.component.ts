@@ -1,7 +1,7 @@
 import {
-  AfterViewInit, Component, ElementRef, Input, ViewChild
+  AfterViewInit, Component, ElementRef, Input, OnDestroy, Output, ViewChild
 } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { fromEvent, Subject, takeUntil } from 'rxjs';
 import { ModuleService } from '../../../shared/services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
@@ -14,13 +14,14 @@ import { UnitDefinitionStore } from '../../../workspace/classes/unit-definition-
   styleUrls: ['./unit-print-player.component.scss'],
   standalone: true
 })
-export class UnitPrintPlayerComponent implements AfterViewInit {
+export class UnitPrintPlayerComponent implements AfterViewInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
 
   @Input() unitId!: number;
   @Input() workspaceId!: number;
   @Input() iFrameHeight!: number;
   @Input() playerId!: string;
+  @Output() iFrameHeightChange = new Subject<number>();
 
   private iFrameElement: HTMLIFrameElement | undefined;
   private ngUnsubscribe = new Subject<void>();
@@ -113,7 +114,8 @@ export class UnitPrintPlayerComponent implements AfterViewInit {
           },
           playerConfig: {
             stateReportPolicy: 'eager',
-            pagingMode: 'concat-scroll', // Best to print
+            pagingMode: 'concat-scroll',
+            printMode: 'on',
             directDownloadUrl: this.backendService.getDirectDownloadLink()
           },
           unitDefinition: unitDef.definition ? unitDef.definition : ''
@@ -139,7 +141,23 @@ export class UnitPrintPlayerComponent implements AfterViewInit {
 
   private setupPlayerIFrame(playerHtml: string): void {
     if (this.iFrameElement && this.iFrameElement.parentElement) {
+      fromEvent(this.iFrameElement, 'load')
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(() => {
+          setTimeout(() => {
+            this.calculateIFrameHeight();
+          }, 1000);
+        });
       this.iFrameElement.srcdoc = playerHtml;
+    }
+  }
+
+  private calculateIFrameHeight(): void {
+    const iframeDoc = this.iFrameElement?.contentDocument || this.iFrameElement?.contentWindow?.document;
+    const height = iframeDoc && iframeDoc.body.offsetHeight;
+    if (height) {
+      this.iFrameHeight = height;
+      this.iFrameHeightChange.next(height);
     }
   }
 
