@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import {
-  addFirstUser, addModules,
+  addFirstUser, addModules, addResourcePackage,
   createGroup,
   createNewUser,
   createWs,
@@ -47,13 +47,17 @@ describe('UI Administration Management', () => {
     grantRemovePrivilegeAtWs([Cypress.env('username')], 'Mathematik I', [AccessLevel.Basic]);
   });
 
-  it('user with admin credentials can Modules upload', () => {
-    addModules(modules, 'Module');
-  });
+  it('user with admin credentials can Modules upload',
+    { defaultCommandTimeout: 100000 },
+    () => {
+      addModules(modules);
+    });
 
-  it('user with admin credentials can upload the resource package', () => {
-    addModules([resource], 'Pakete');
-  });
+  it('user with admin credentials can upload the resource package',
+    { defaultCommandTimeout: 200000 },
+    () => {
+      addResourcePackage(resource);
+    });
 
   it('user with admin credentials deletes Modules', () => {
     deleteModule();

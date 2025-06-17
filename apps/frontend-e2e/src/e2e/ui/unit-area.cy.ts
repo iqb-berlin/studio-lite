@@ -70,7 +70,7 @@ describe('UI check: workspace', () => {
 
   it('prepares the context for unit test', () => {
     cy.visit('/');
-    addModules(modules, 'Module');
+    addModules(modules);
     cy.visit('/');
     createGroup(group1);
     cy.visit('/');
@@ -192,7 +192,6 @@ describe('UI check: workspace', () => {
   });
 
   it('deletes the context ', () => {
-    cy.pause();
     deleteGroup(group1);
     cy.visit('/');
     deleteUser(newUser.username);
