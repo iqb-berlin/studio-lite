@@ -58,6 +58,8 @@
     <div >
       @if (playerId) {
         <studio-lite-unit-print-player
+          [printElementIds]="printOptions | include : 'printElementIds'"
+          [printPreviewAutoHeight]="printOptions | include : 'printPreviewAutoHeight'"
           [(iFrameHeight)]="printPreviewHeight"
           [playerId]="playerId"
           [unitId]="unitId"

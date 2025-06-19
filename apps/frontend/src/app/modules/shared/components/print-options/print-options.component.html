@@ -3,6 +3,7 @@
     @if (option.key !== 'printPreviewHeight') {
       <mat-checkbox
         [(ngModel)]="option.value"
+        [disabled]="(option.key === 'printElementIds' || option.key === 'printPreviewAutoHeight') && !(printOptions | isActivePrintOption : 'printPreview')"
         (ngModelChange)="setPrintOptions(printOptions)">
         {{ 'print.' + option.key | translate }}
       </mat-checkbox>
@@ -15,7 +16,7 @@
           type="number"
           min="0"
           step="10"
-          [disabled]="!(printOptions | isActivePrintOption : 'printPreview')"
+          [disabled]="!(printOptions | isActivePrintOption : 'printPreview') || (printOptions | isActivePrintOption : 'printPreviewAutoHeight')"
           [(ngModel)]="option.value"
           (ngModelChange)="setPrintOptions(printOptions)">
       </mat-form-field>

@@ -21,6 +21,8 @@ export class UnitPrintPlayerComponent implements AfterViewInit, OnDestroy {
   @Input() workspaceId!: number;
   @Input() iFrameHeight!: number;
   @Input() playerId!: string;
+  @Input() printElementIds!: boolean;
+  @Input() printPreviewAutoHeight!: boolean;
   @Output() iFrameHeightChange = new Subject<number>();
 
   private iFrameElement: HTMLIFrameElement | undefined;
@@ -115,7 +117,7 @@ export class UnitPrintPlayerComponent implements AfterViewInit, OnDestroy {
           playerConfig: {
             stateReportPolicy: 'eager',
             pagingMode: 'concat-scroll',
-            printMode: 'on',
+            printMode: this.printElementIds ? 'on-with-ids' : 'on',
             directDownloadUrl: this.backendService.getDirectDownloadLink()
           },
           unitDefinition: unitDef.definition ? unitDef.definition : ''
@@ -141,13 +143,15 @@ export class UnitPrintPlayerComponent implements AfterViewInit, OnDestroy {
 
   private setupPlayerIFrame(playerHtml: string): void {
     if (this.iFrameElement && this.iFrameElement.parentElement) {
-      fromEvent(this.iFrameElement, 'load')
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(() => {
-          setTimeout(() => {
-            this.calculateIFrameHeight();
-          }, 1000);
-        });
+      if (this.printPreviewAutoHeight) {
+        fromEvent(this.iFrameElement, 'load')
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(() => {
+            setTimeout(() => {
+              this.calculateIFrameHeight();
+            }, 1000);
+          });
+      }
       this.iFrameElement.srcdoc = playerHtml;
     }
   }
