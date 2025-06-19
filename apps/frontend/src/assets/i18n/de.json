@@ -796,6 +796,8 @@
     "printComments":  "Kommentare drucken",
     "printCoding":  "Kodierung drucken",
     "printPreview": "Vorschau(Player) drucken",
+    "printPreviewAutoHeight": "Vorschau(Player)-Höhe automatisch ermitteln",
+    "printElementIds": "Element-Ids in Vorschau(Player) einbetten",
     "printPreviewHeight": "Höhe der Vorschau",
     "print": "Drucken",
     "description": "Beschreibung/Notizen",
