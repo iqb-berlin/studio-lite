@@ -92,8 +92,6 @@
     "express": "4.21.2",
     "file-saver-es": "^2.0.5",
     "image-size": "^1.1.1",
-    "keycloak-angular": "19.0.2",
-    "keycloak-js": "^23.0.6",
     "multer": "^1.4.5-lts.1",
     "ngx-tiptap": "^10.1.0",
     "openid-client": "^5.5.0",
