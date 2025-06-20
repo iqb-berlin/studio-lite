@@ -63,19 +63,4 @@ describe('UI check: initial page', () => {
     cy.get('input[placeholder="Kennwort"]')
       .clear();
   });
-
-  it('should be present open ID connector', () => {
-    cy.get('[data-cy="alternative-login"]')
-      .should('exist');
-  });
-
-  it('should be able to link with open ID connector ', () => {
-    cy.get('[data-cy="alternative-login"]')
-      .click();
-    cy.get('studio-lite-login-alternative-warning')
-      .should('exist');
-    cy.get('span:contains("Schließen")')
-      .should('exist')
-      .click();
-  });
 });

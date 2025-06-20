@@ -7,15 +7,11 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiHeader,
-  ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse
 } from '@nestjs/swagger';
-import {
-  AuthDataDto
-  // eslint-disable-next-line import/no-duplicates, import/order
-} from '@studio-lite-lib/api-dto';
+import { AuthDataDto, MyDataDto, ChangePasswordDto } from '@studio-lite-lib/api-dto';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
 import { AuthService } from '../services/auth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -26,12 +22,6 @@ import { UserId } from '../decorators/user-id.decorator';
 import { UserName } from '../decorators/user-name.decorator';
 import { ReviewService } from '../services/review.service';
 import { AppVersionGuard } from '../guards/app-version.guard';
-// eslint-disable-next-line import/no-duplicates, import/order
-import { CreateUserDto } from '@studio-lite-lib/api-dto';
-// eslint-disable-next-line import/no-duplicates, import/order
-import { MyDataDto } from '@studio-lite-lib/api-dto';
-// eslint-disable-next-line import/no-duplicates, import/order
-import { ChangePasswordDto } from '@studio-lite-lib/api-dto';
 
 @Controller()
 export class AppController {
@@ -73,16 +63,6 @@ export class AppController {
   async initLogin(@Body() body: { username: string, password: string }
   ) {
     const token = await this.authService.initLogin(body.username, body.password);
-    return `"${token}"`;
-  }
-
-  @Post('keycloak-login')
-  @UseGuards(AppVersionGuard)
-  @ApiTags('auth')
-  @ApiOkResponse({ description: 'Keycloak login successful.' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
-  async keycloakLogin(@Body() user: CreateUserDto) {
-    const token = await this.authService.keycloakLogin(user);
     return `"${token}"`;
   }
 
