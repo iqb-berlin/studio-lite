@@ -12,7 +12,6 @@ import { UserMenuComponent } from '../user-menu/user-menu.component';
 import { WarningComponent } from '../warning/warning.component';
 import { UserWorkspacesGroupsComponent } from '../user-workspaces-groups/user-workspaces-groups.component';
 import { BackendService } from '../../services/backend.service';
-import { AuthService } from '../../modules/auth/service/auth.service';
 
 describe('UserWorkspacesAreaComponent', () => {
   let component: UserWorkspacesAreaComponent;
@@ -43,8 +42,6 @@ describe('UserWorkspacesAreaComponent', () => {
 
   class MockBackendService {}
 
-  class MockAuthService {}
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
@@ -54,10 +51,6 @@ describe('UserWorkspacesAreaComponent', () => {
         {
           provide: BackendService,
           useValue: MockBackendService
-        },
-        {
-          provide: AuthService,
-          useValue: MockAuthService
         },
         {
           provide: 'SERVER_URL',

@@ -5,7 +5,6 @@ import { LogoutDirective } from './logout.directive';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 import { environment } from '../../environments/environment';
-import { AuthService } from '../modules/auth/service/auth.service';
 
 describe('LogoutDirective', () => {
   beforeEach(async () => {
@@ -25,10 +24,9 @@ describe('LogoutDirective', () => {
       appService: AppService,
       dialog: MatDialog,
       backendService: BackendService,
-      translateService:TranslateService,
-      authServices:AuthService
+      translateService:TranslateService
     ) => {
-      const directive = new LogoutDirective(appService, dialog, backendService, translateService, authServices);
+      const directive = new LogoutDirective(appService, dialog, backendService, translateService);
       expect(directive).toBeTruthy();
     }));
 });
