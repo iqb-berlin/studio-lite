@@ -6,8 +6,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { BackendService } from '../services/backend.service';
 import { ChangePasswordDirective } from './change-password.directive';
-import { AuthService } from '../modules/auth/service/auth.service';
-import { AppService } from '../services/app.service';
 
 describe('ChangePasswordDirective', () => {
   beforeEach(async () => {
@@ -30,11 +28,9 @@ describe('ChangePasswordDirective', () => {
       (dialog: MatDialog,
        backendService: BackendService,
        snackBar: MatSnackBar,
-       translateService: TranslateService,
-       authService: AuthService,
-       appService: AppService) => {
+       translateService: TranslateService) => {
         const directive =
-          new ChangePasswordDirective(dialog, backendService, snackBar, translateService, appService, authService);
+          new ChangePasswordDirective(dialog, backendService, snackBar, translateService);
         expect(directive).toBeTruthy();
       }));
 });
