@@ -151,8 +151,10 @@ export class UnitPreviewComponent
             case 'vopStateChangedNotification':
               if (msgData.playerState) {
                 const pages = msgData.playerState.validPages;
+                const targets = (Array.isArray(pages)) ? pages
+                  .map((p: { id: string, label: string }) => p.id) : Object.keys(pages);
                 this.setPageList(
-                  Object.keys(pages),
+                  targets,
                   msgData.playerState.currentPage
                 );
               }

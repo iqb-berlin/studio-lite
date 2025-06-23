@@ -171,6 +171,12 @@ export class UnitsComponent implements OnInit, OnDestroy {
         case 'vopStateChangedNotification':
           if (msgData.playerState) {
             const pages = msgData.playerState.validPages;
+            const targets = (Array.isArray(pages)) ? pages
+              .map((p: { id: string, label: string }) => p.id) : Object.keys(pages);
+            this.setPageList(
+              targets,
+              msgData.playerState.currentPage
+            );
             this.setPageList(Object.keys(pages), msgData.playerState.currentPage);
           }
           if (msgData.unitState) {
