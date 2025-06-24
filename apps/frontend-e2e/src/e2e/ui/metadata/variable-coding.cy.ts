@@ -119,6 +119,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     assignVariableToItem('');
     cy.contains('mat-icon', 'visibility').click({ force: true });
     cy.contains('span.item_value', 'drop-list_1').should('not.exist');
+    cy.pause();
   });
 
   it('deletes the data', () => {

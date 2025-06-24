@@ -357,6 +357,10 @@ Cypress.Commands.add(
         {
           accessLevel: `${l[1].access}`,
           id: `${l[1].id}`
+        },
+        {
+          accessLevel: `${l[2].access}`,
+          id: `${l[2].id}`
         }
       ],
       failOnStatusCode: false
