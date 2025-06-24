@@ -24,6 +24,8 @@ export class PrintOptionsComponent implements OnInit {
     { key: 'printComments', value: true },
     { key: 'printCoding', value: true },
     { key: 'printPreview', value: true },
+    { key: 'printElementIds', value: true },
+    { key: 'printPreviewAutoHeight', value: true },
     { key: 'printPreviewHeight', value: 1000 }
   ];
 

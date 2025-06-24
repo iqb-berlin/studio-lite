@@ -1,4 +1,14 @@
 <div class="fx-row-end-center">
+
+  <select class="sort-items" [ngModel]="itemSortService.currenItemSorting"
+          (ngModelChange)="sortItems($event)">
+    @for (sorting of itemSortService.itemSortings; track sorting) {
+      <option [value]="sorting">
+        {{'metadata.sort-by-'+sorting | translate}}
+      </option>
+    }
+  </select>
+
   @if (!isTextOnlyView) {
     <button type="button" mat-icon-button
             matTooltip="{{'metadata.items-read-only-view' | translate}}"
@@ -31,6 +41,7 @@
             [metadata]="items"
             [language]="language"
             [profile] = profile
+            [lastUpdatedItemIndex]="lastUpdatedItemIndex"
             (metadataChange)="onMetadataChange($event)">
           </studio-lite-item>
           <button mat-icon-button
@@ -54,7 +65,9 @@
 }
 @if (isTextOnlyView) {
   <div>
-    <studio-lite-metadata-readonly-items [items]="items">
+    <studio-lite-metadata-readonly-items
+      [items]="items"
+      [variables]="variables">
     </studio-lite-metadata-readonly-items>
   </div>
 }

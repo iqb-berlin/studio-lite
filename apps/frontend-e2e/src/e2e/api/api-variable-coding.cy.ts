@@ -145,12 +145,6 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
     cy.clickButton('Schließen');
   });
 
-  // TODO Fix Schemer
-  it.skip('checks that text-field_1 is not present at Menu > Berichte > Kodierung does not exist', () => {
-    focusOnMenu('Berichte', 'Kodierung');
-    cy.contains('td', 'text-field_1').should('not.exist');
-  });
-
   it('deletes the data', () => {
     cy.visit('/');
     deleteGroup(group1.name);

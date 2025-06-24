@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { FormlyModule, FORMLY_CONFIG } from '@ngx-formly/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormlyModule, FORMLY_CONFIG, FormlyFieldConfig } from '@ngx-formly/core';
+import {
+  AbstractControl, FormsModule, ReactiveFormsModule, ValidationErrors
+} from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -41,9 +43,23 @@ export function formlyValidationConfig(translate: TranslateService) {
         message() {
           return translate.stream('metadata.formly-field-required');
         }
+      },
+      {
+        name: 'id',
+        message() {
+          return translate.stream('metadata.id-assigned');
+        }
       }
     ]
   };
+}
+
+export function IdValidator(control: AbstractControl, field: FormlyFieldConfig): ValidationErrors | null {
+  const key = 'assignedIds';
+  const assignedIds: string[] = ((field.props && field.props[key]) || []);
+  const error = assignedIds
+    .includes(control.value as string);
+  return error ? { id: true } : null;
 }
 
 @NgModule({
@@ -71,6 +87,13 @@ export function formlyValidationConfig(translate: TranslateService) {
     MatDialogModule,
     FormlyMatToggleModule,
     FormlyModule.forRoot({
+      validators: [
+        {
+          name: 'id',
+          validation: IdValidator,
+          options: { ids: [] }
+        }
+      ],
       wrappers: [
         {
           name: 'panel',

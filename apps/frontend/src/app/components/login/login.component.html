@@ -2,16 +2,16 @@
   <studio-lite-area-title
     [title]="(appService.appConfig.hasUsers ? 'home.login' : 'home.first-login') | translate">
   </studio-lite-area-title>
-  @if (!loggedInKeycloak) {
-    <button type="button" mat-icon-button
-      matTooltip="{{'login.alternative' | translate}}"
-      [matTooltipPosition]="'above'"
-      [matTooltipShowDelay]="300"
-      (click)="loginKeycloak()"
-      data-cy="alternative-login">
-      <studio-lite-wrapped-icon icon="call_made"></studio-lite-wrapped-icon>
-    </button>
-  }
+<!--  @if (!loggedInKeycloak) {-->
+<!--    <button type="button" mat-icon-button-->
+<!--      matTooltip="{{'login.alternative' | translate}}"-->
+<!--      [matTooltipPosition]="'above'"-->
+<!--      [matTooltipShowDelay]="300"-->
+<!--      (click)="loginKeycloak()"-->
+<!--      data-cy="alternative-login">-->
+<!--      <studio-lite-wrapped-icon icon="call_made"></studio-lite-wrapped-icon>-->
+<!--    </button>-->
+<!--  }-->
   @if (appService.globalWarning) {
     <studio-lite-warning
       [warnMessage]="appService.globalWarning">

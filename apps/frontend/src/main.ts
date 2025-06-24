@@ -29,7 +29,6 @@ import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { AuthInterceptor } from './app/interceptors/auth.interceptor';
-import { AuthModule } from './app/modules/auth/auth.module';
 import { AppRoutingModule } from './app/app-routing.module';
 import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
@@ -48,7 +47,7 @@ if (environment.production) {
 bootstrapApplication(AppComponent, {
   providers: [
     // eslint-disable-next-line max-len
-    importProvidersFrom(AuthModule, ApplicationModule, BrowserModule, MatButtonModule, MatFormFieldModule, MatMenuModule, MatToolbarModule, MatIconModule, MatInputModule, MatTooltipModule, MatDialogModule, MatCardModule, MatIconModule, MatTabsModule, MatTableModule, ReactiveFormsModule, MatProgressSpinnerModule, MatSnackBarModule, RouterModule, ReactiveFormsModule, AppRoutingModule, IqbComponentsModule.forRoot(), TranslateModule.forRoot({
+    importProvidersFrom(ApplicationModule, BrowserModule, MatButtonModule, MatFormFieldModule, MatMenuModule, MatToolbarModule, MatIconModule, MatInputModule, MatTooltipModule, MatDialogModule, MatCardModule, MatIconModule, MatTabsModule, MatTableModule, ReactiveFormsModule, MatProgressSpinnerModule, MatSnackBarModule, RouterModule, ReactiveFormsModule, AppRoutingModule, IqbComponentsModule.forRoot(), TranslateModule.forRoot({
       defaultLanguage: 'de',
       loader: {
         provide: TranslateLoader,
@@ -90,7 +89,7 @@ bootstrapApplication(AppComponent, {
     },
     {
       provide: 'APP_VERSION',
-      useValue: '12.3.1'
+      useValue: '12.4.0'
     },
     provideAnimations(),
     provideHttpClient(withInterceptorsFromDi())

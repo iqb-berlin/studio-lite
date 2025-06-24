@@ -14,7 +14,6 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { LoginComponent } from './login.component';
-import { AuthService } from '../../modules/auth/service/auth.service';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -28,14 +27,6 @@ describe('LoginComponent', () => {
   @Component({ selector: 'studio-lite-area-title', template: '', standalone: false })
   class MockAreaTitleComponent {
     @Input() title!: string;
-  }
-
-  class MockAuthService {
-    loggedIn: boolean = false;
-
-    isLoggedIn() {
-      return this.loggedIn;
-    }
   }
 
   beforeEach(async () => {
@@ -65,10 +56,6 @@ describe('LoginComponent', () => {
         {
           provide: MAT_DIALOG_DATA,
           useValue: {}
-        },
-        {
-          provide: AuthService,
-          useClass: MockAuthService
         }
       ]
     }).compileComponents();

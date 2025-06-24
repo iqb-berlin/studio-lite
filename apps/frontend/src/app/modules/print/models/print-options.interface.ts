@@ -1,5 +1,5 @@
 export type PrintOption = 'printProperties' | 'printMetadata' | 'printComments' |
-'printCoding' | 'printPreview' | 'printPreviewHeight';
+'printCoding' | 'printPreview' | 'printPreviewAutoHeight' | 'printPreviewHeight' | 'printElementIds';
 
 export interface PrintOptions {
   key: PrintOption;

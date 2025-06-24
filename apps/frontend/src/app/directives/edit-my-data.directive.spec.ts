@@ -7,7 +7,6 @@ import { EditMyDataDirective } from './edit-my-data.directive';
 import { environment } from '../../environments/environment';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
-import { AuthService } from '../modules/auth/service/auth.service';
 
 describe('EditMyDataDirective', () => {
   beforeEach(async () => {
@@ -28,10 +27,9 @@ describe('EditMyDataDirective', () => {
       dialog: MatDialog,
       backendService: BackendService,
       snackBar: MatSnackBar,
-      translateService: TranslateService,
-      authService: AuthService) => {
+      translateService: TranslateService) => {
       const directive =
-        new EditMyDataDirective(appService, dialog, backendService, snackBar, translateService, authService);
+        new EditMyDataDirective(appService, dialog, backendService, snackBar, translateService);
       expect(directive).toBeTruthy();
     }));
 });
