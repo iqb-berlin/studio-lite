@@ -113,7 +113,7 @@
     "@angular-devkit/build-angular": "19.2.5",
     "@angular-devkit/core": "19.2.5",
     "@angular-devkit/schematics": "19.2.5",
-    "@angular-devkit/schematics-cli": "17.3.8",
+    "@angular-devkit/schematics-cli": "19.2.4",
     "@angular-eslint/eslint-plugin": "19.3.0",
     "@angular-eslint/eslint-plugin-template": "19.3.0",
     "@angular-eslint/template-parser": "19.3.0",
