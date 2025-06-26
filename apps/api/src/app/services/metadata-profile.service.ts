@@ -66,7 +66,7 @@ export class MetadataProfileService {
       .map(entry => (entry.parameters as unknown as ProfileEntryParametersVocabulary).url);
     await Promise.all(vocabularyIds
       .map(async id => {
-        vocabularies.push(await this.metadataVocabularyService.getMetadataVocabularyById(id));
+        vocabularies.push(await this.metadataVocabularyService.getStoredMetadataVocabularyById(id));
       }));
     return vocabularies;
   }
