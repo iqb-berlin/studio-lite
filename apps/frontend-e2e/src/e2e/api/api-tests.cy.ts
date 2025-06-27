@@ -81,7 +81,14 @@ describe('Studio API tests', () => {
     unitMDProfile: '',
     itemMDProfile: ''
   };
-  
+  before(() => {
+    if (Cypress.env('cancelled') === 'cancelled') {
+      cy.log('Stop tests - environment is not setup correctly');
+      Cypress.stop();
+      // eslint-disable-next-line no-useless-return
+      return;
+    }
+  });
   describe('Auth API tests', () => {
     describe('1. POST /api/init-login', () => {
       it('201 positive test: should create a first user.', () => {

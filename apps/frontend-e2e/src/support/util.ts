@@ -2,6 +2,12 @@ import { AccessLevel, UnitData, UserData } from './testData';
 import Chainable = Cypress.Chainable;
 
 export function addFirstUser() {
+  if (Cypress.env('cancelled') === 'cancelled') {
+    cy.log('Stop tests - environment is not setup correctly');
+    Cypress.stop();
+    // eslint-disable-next-line no-useless-return
+    return;
+  }
   cy.visit('/');
   cy.login(Cypress.env('username'), Cypress.env('password'));
   cy.buttonToContinue('Weiter', [201], '/api/init-login', 'POST', 'responseLogin');

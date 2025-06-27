@@ -18,6 +18,12 @@ import { buildQueryParameters, buildQueryParametersComplex } from './utilAPI';
 
 // 1
 Cypress.Commands.add('addFirstUserAPI', (username: string, password: string) => {
+  if (Cypress.env('cancelled') === 'cancelled') {
+    cy.log('Stop tests - environment is not setup correctly');
+    Cypress.stop();
+    // eslint-disable-next-line no-useless-return
+    return;
+  }
   cy.request({
     method: 'POST',
     url: '/api/init-login',
