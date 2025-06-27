@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { HttpService } from '@nestjs/axios';
 import {
   catchError, firstValueFrom, map, of
