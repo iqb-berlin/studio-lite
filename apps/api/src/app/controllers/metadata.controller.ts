@@ -30,7 +30,7 @@ export class MetadataController {
   @ApiUnauthorizedResponse({ description: 'No privileges to retrieve metadata profile.' })
   @ApiTags('metadata')
   async getMetadataProfileByUrl(@Query('url') url: string) {
-    return this.metadataProfileService.getMetadataProfile(url);
+    return this.metadataProfileService.getStoredMetadataProfile(url);
   }
 
   @Get('vocabularies')

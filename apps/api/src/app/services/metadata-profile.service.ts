@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { HttpService } from '@nestjs/axios';
 import {
   catchError, firstValueFrom, map, of
@@ -19,7 +18,18 @@ export class MetadataProfileService {
     private metadataVocabularyService: MetadataVocabularyService,
     private http: HttpService) {}
 
-  async getMetadataProfile(url: string): Promise<MetadataProfileDto | null> {
+  async getStoredMetadataProfile(url: string): Promise<MetadataProfileDto | null> {
+    const storedProfile = await this.metadataProfileRepository
+      .findOneBy({ id: url });
+    if (storedProfile) {
+      // without await to update the profile in the background
+      this.getMetadataProfile(url);
+      return storedProfile;
+    }
+    return this.getMetadataProfile(url);
+  }
+
+  private async getMetadataProfile(url: string): Promise<MetadataProfileDto | null> {
     const profile = await firstValueFrom(
       this.http.get<MetadataProfileDto>(url)
         .pipe(
@@ -29,12 +39,6 @@ export class MetadataProfileService {
     );
     if (profile) {
       await this.storeProfile(profile, url);
-    } else {
-      const storedProfile = await this.metadataProfileRepository
-        .findOneBy({ id: url });
-      if (storedProfile) {
-        return storedProfile;
-      }
     }
     return profile;
   }
@@ -57,7 +61,7 @@ export class MetadataProfileService {
   }
 
   async getProfileVocabularies(url: string): Promise<MetadataVocabularyDto[]> {
-    const profile = await this.getMetadataProfile(url);
+    const profile = await this.getStoredMetadataProfile(url);
     const vocabularies: MetadataVocabularyDto[] = [];
     const vocabularyIds = profile.groups
       .map(group => group.entries)
