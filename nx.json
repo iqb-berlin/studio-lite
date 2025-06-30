@@ -54,6 +54,5 @@
     "sharedGlobals": [],
     "production": ["default"]
   },
-  "defaultBase": "main",
-  "useLegacyCache": true
+  "defaultBase": "main"
 }

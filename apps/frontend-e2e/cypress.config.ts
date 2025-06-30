@@ -30,7 +30,9 @@ export default defineConfig({
      * You should consider enabling this once you verify tests do not depend on each other
      * More Info: https://docs.cypress.io/guides/references/migration-guide#Test-Isolation
      * */
-    testIsolation: false
+    testIsolation: false,
+    // Please ensure you use `cy.origin()` when navigating between domains and remove this option.
+    // See https://docs.cypress.io/app/references/migration-guide#Changes-to-cyorigin
+    injectDocumentDomain: true
   }
-
 });
