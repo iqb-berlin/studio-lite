@@ -26,15 +26,24 @@ export class RegisteredMetadataProfileService {
       return Promise
         .all(profileUrls
           .map(async url => {
-            const profile = await this.getProfileToRegister(url);
-            if (profile) return this.storeRegisteredMetadataProfile(profile, url);
             const storedProfile = await this.registeredMetadataProfileRepository
               .findOneBy({ url: url });
-            if (storedProfile) return storedProfile;
+            if (storedProfile) {
+              // without await to update the profile in the background
+              this.updateRegisteredMetadataProfiles(url);
+              return storedProfile;
+            }
+            const profile = await this.getProfileToRegister(url);
+            if (profile) return this.storeRegisteredMetadataProfile(profile, url);
             return null;
           }));
     }
     return null;
+  }
+
+  private async updateRegisteredMetadataProfiles(url: string): Promise<void> {
+    const profile = await this.getProfileToRegister(url);
+    if (profile) this.storeRegisteredMetadataProfile(profile, url);
   }
 
   private async getRegisteredMetadataProfilesAsCSV(): Promise<string> {
