@@ -20,16 +20,7 @@ export class RegisteredMetadataProfileService {
     private http: HttpService) {}
 
   async getRegisteredMetadataProfiles(): Promise<RegisteredMetadataProfile[] | null> {
-    let registryCsv = await this.getRegistryCsv();
-    if (registryCsv) {
-      await this.storeRegistry(registryCsv);
-    } else {
-      const registry = await this.metadataProfileRegistryRepository
-        .findOneBy({ id: this.PROFILE_REGISTRY });
-      if (registry) {
-        registryCsv = registry.csv;
-      }
-    }
+    const registryCsv = await this.getRegisteredMetadataProfilesAsCSV();
     if (registryCsv) {
       const profileUrls = RegisteredMetadataProfileService.getProfileURLs(registryCsv, '"');
       return Promise
@@ -44,6 +35,22 @@ export class RegisteredMetadataProfileService {
           }));
     }
     return null;
+  }
+
+  private async getRegisteredMetadataProfilesAsCSV(): Promise<string> {
+    const registry = await this.metadataProfileRegistryRepository
+      .findOneBy({ id: this.PROFILE_REGISTRY });
+    if (registry) {
+      this.updateRegistry();
+      return registry.csv;
+    }
+    const registryCsv = await this.getRegistryCsv();
+    await this.storeRegistry(registryCsv);
+    return registryCsv;
+  }
+
+  private async updateRegistry(): Promise<void> {
+    await this.storeRegistry(await this.getRegistryCsv());
   }
 
   private getRegistryCsv(): Promise<string | null> {
