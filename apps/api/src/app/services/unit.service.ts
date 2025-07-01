@@ -571,29 +571,6 @@ export class UnitService {
     });
   }
 
-  async deleteState(workspaceGroup:number, state_id: string): Promise<void> {
-    const workspaces = await this.workspaceRepository.find({
-      where: { groupId: workspaceGroup }
-    });
-    let units = [];
-    // eslint-disable-next-line no-restricted-syntax
-    for await (const workspace of workspaces) {
-      this.logger.log('workspace', JSON.stringify(workspace));
-      const unit = await this.unitsRepository.find({
-        where: { state: state_id, workspaceId: workspace.id }
-      });
-      this.logger.log('unit', JSON.stringify(unit));
-      if (unit.length) units = [...units, unit[0]];
-    }
-    if (units.length) {
-      // eslint-disable-next-line no-restricted-syntax
-      for await (const unit of units) {
-        unit.state = '';
-        await this.unitsRepository.save(unit);
-      }
-    }
-  }
-
   async removeUnitState(id: number): Promise<void> {
     const unitToUpdate = await this.unitsRepository.findOne({ where: { id: id } });
     await this.unitsRepository.save({ ...unitToUpdate, state: '0' }
