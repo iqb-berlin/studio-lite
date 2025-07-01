@@ -1,20 +1,20 @@
 <mat-table matSort
-  matSortDisableClear
-  matSortActive="key"
-  matSortDirection="asc"
-  [dataSource]="dataSource"
-  (matSortChange)="onSortChange($event)">
+           matSortDisableClear
+           matSortActive="key"
+           matSortDirection="asc"
+           [dataSource]="dataSource"
+           (matSortChange)="onSortChange($event)">
   <ng-container matColumnDef="key">
     <mat-header-cell class="unit-cell" *matHeaderCellDef
-      mat-sort-header
-      [sortActionDescription]="'workspace.sort-by-key' | translate">
+                     mat-sort-header
+                     [sortActionDescription]="'workspace.sort-by-key' | translate">
       {{'workspace.unit-key' | translate}}
     </mat-header-cell>
-    <mat-cell *matCellDef="let element" class="unit-cell fx-gap-2">
-      <div
-        [style.opacity]="(element | hasNewComments) ? 1: 0"
-        class="new-comments"
-        [matTooltip]="(element | hasNewComments) ? ('workspace.new-comments' | translate) : ''">
+    <mat-cell *matCellDef="let element"
+              class="unit-cell fx-gap-2">
+      <div [style.opacity]="(element | hasNewComments) ? 1: 0"
+           class="new-comments"
+           [matTooltip]="(element | hasNewComments) ? ('workspace.new-comments' | translate) : ''">
       </div>
       <div [style.opacity]="element.sourceWorkspaceId ? 1: 0"
            [matTooltip]=" element | unitDropBoxTooltip"
@@ -31,24 +31,27 @@
 
   <ng-container matColumnDef="name">
     <mat-header-cell class="unit-cell" *matHeaderCellDef
-      mat-sort-header
-      [sortActionDescription]="'workspace.sort-by-name' | translate">
+                     mat-sort-header
+                     [sortActionDescription]="'workspace.sort-by-name' | translate">
       {{'workspace.unit-name' | translate}}
     </mat-header-cell>
     <mat-cell class="unit-cell"
-      *matCellDef="let element">
+              *matCellDef="let element">
       {{element.name}}
     </mat-cell>
   </ng-container>
 
   @if (hasSortHeader) {
     <mat-header-row class="unit-sort"
-      *matHeaderRowDef="displayedColumns; sticky: true">
+                    *matHeaderRowDef="displayedColumns; sticky: true">
     </mat-header-row>
   }
   <mat-row class="unit-row"
-    [class.selected]="selectedUnitId===row.id"
-    *matRowDef="let row; columns: displayedColumns;"
-    (click)="onUnitClick(row.id)">
+           [class.selected]="selectedUnitId===row.id"
+           studioLiteScrollIntoView
+           [rowId]="row.id"
+           [selectedUnitId]="selectedUnitId"
+           *matRowDef="let row; columns: displayedColumns;"
+           (click)="onUnitClick(row.id)">
   </mat-row>
 </mat-table>
