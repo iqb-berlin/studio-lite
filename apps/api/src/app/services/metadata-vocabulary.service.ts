@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { HttpService } from '@nestjs/axios';
 import {
   catchError, firstValueFrom, map, of
@@ -16,7 +15,18 @@ export class MetadataVocabularyService {
     private metadataVocabularyRepository: Repository<MetadataVocabulary>,
     private http: HttpService) {}
 
-  async getMetadataVocabularyById(id: string): Promise<MetadataVocabularyDto | null> {
+  async getStoredMetadataVocabularyById(id: string): Promise<MetadataVocabularyDto | null> {
+    const storedVocabulary = await this.metadataVocabularyRepository
+      .findOneBy({ id: id });
+    if (storedVocabulary) {
+      // without await to update the stored vocabulary in the background
+      this.getMetadataVocabulary(id);
+      return storedVocabulary;
+    }
+    return this.getMetadataVocabulary(id);
+  }
+
+  private async getMetadataVocabulary(id: string): Promise<MetadataVocabularyDto | null> {
     const url = `${id}index.jsonld`;
     const vocabulary = await firstValueFrom(
       this.http.get<MetadataVocabularyDto>(url)
@@ -27,12 +37,6 @@ export class MetadataVocabularyService {
     );
     if (vocabulary) {
       await this.storeVocabulary(vocabulary, id);
-    } else {
-      const storedVocabulary = await this.metadataVocabularyRepository
-        .findOneBy({ id: id });
-      if (storedVocabulary) {
-        return storedVocabulary;
-      }
     }
     return vocabulary;
   }
