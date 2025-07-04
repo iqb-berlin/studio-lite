@@ -12,7 +12,7 @@ import { Highlight } from '@tiptap/extension-highlight';
 import { Image } from '@tiptap/extension-image';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatDialogContent } from '@angular/material/dialog';
-import { NgxTiptapModule } from 'ngx-tiptap';
+import { TiptapEditorDirective } from 'ngx-tiptap';
 import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -25,7 +25,7 @@ import { IsCommentCommittablePipe } from '../../pipes/is-comment-commitable.pipe
   templateUrl: './comment-editor.component.html',
   styleUrls: ['./comment-editor.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatIconButton, MatTooltip, WrappedIconComponent, MatSelect, MatInput, NgxTiptapModule, MatDialogContent, MatFabButton, TranslateModule, IsCommentCommittablePipe]
+  imports: [MatIconButton, MatTooltip, WrappedIconComponent, MatSelect, MatInput, TiptapEditorDirective, MatDialogContent, MatFabButton, TranslateModule, IsCommentCommittablePipe]
 })
 export class CommentEditorComponent implements OnInit {
   @Input() submitLabel!: string;
