@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FieldType } from '@ngx-formly/material';
-import { FieldTypeConfig, FormlyFieldProps } from '@ngx-formly/core/public_api';
+import { FieldTypeConfig, FormlyFieldProps } from '@ngx-formly/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
@@ -34,7 +34,7 @@ export class FormlyDurationComponent
     this.setMinMaxValues();
     this.formControl.valueChanges
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(v => this.convertSecondsToMinutes(v || 0));
+      .subscribe((v: unknown) => this.convertSecondsToMinutes(v as number || 0));
   }
 
   private setMinMaxValues(): void {
