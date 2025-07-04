@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatIcon } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -25,9 +25,8 @@ interface RoleAccess {
 
 @Component({
   selector: 'studio-lite-roles-matrix',
-  imports: [CommonModule, MatIcon, TranslateModule, MatTooltip, MatButton, MatDialogActions, MatDialogClose,
-    MatDialogTitle, MatDialogContent, MatTable, MatTableModule, MatHeaderCellDef, MatCellDef, MatHeaderRowDef,
-    MatRowDef],
+  // eslint-disable-next-line max-len
+  imports: [MatIcon, TranslateModule, MatTooltip, MatButton, MatDialogActions, MatDialogClose, MatDialogTitle, MatDialogContent, MatTable, MatTableModule, MatHeaderCellDef, MatCellDef, MatHeaderRowDef, MatRowDef],
   templateUrl: './roles-matrix.component.html',
   styleUrl: './roles-matrix.component.scss'
 })
