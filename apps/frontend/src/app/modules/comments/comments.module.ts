@@ -9,7 +9,7 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { NgxTiptapModule } from 'ngx-tiptap';
+import { TiptapEditorDirective } from 'ngx-tiptap';
 import { MatInputModule } from '@angular/material/input';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -44,7 +44,7 @@ import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
     MatSelectModule,
     MatMenuModule,
     MatTooltipModule,
-    NgxTiptapModule,
+    TiptapEditorDirective,
     FormsModule,
     MatInputModule,
     MatProgressSpinnerModule,
