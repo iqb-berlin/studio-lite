@@ -102,10 +102,7 @@ export class SettingService {
   async findMissingsProfiles(): Promise<MissingsProfilesDto[] | null> {
     this.logger.log('Returning settings missings profiles config.');
     const missingsProfiles = await this.settingsRepository.findOne({ where: { key: 'missings-profile-iqb-standard' } });
-    if (!missingsProfiles) {
-      return [];
-    }
-    return missingsProfiles ? JSON.parse(missingsProfiles.content) : new MissingsProfilesDto();
+    return missingsProfiles ? JSON.parse(missingsProfiles.content) : [];
   }
 
   async patchMissingsProfiles(newMissingsProfiles: MissingsProfilesDto): Promise<void> {
