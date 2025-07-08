@@ -4,6 +4,7 @@
   "projectType": "application",
   "sourceRoot": "apps/frontend/src",
   "prefix": "studio-lite",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:browser-esbuild",
@@ -69,7 +70,8 @@
         "proxyConfig": "apps/frontend/proxy.conf.json",
         "buildTarget": "frontend:build:development"
       },
-      "defaultConfiguration": "development"
+      "defaultConfiguration": "development",
+      "continuous": true
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
@@ -122,6 +124,5 @@
         ]
       }
     }
-  },
-  "tags": []
+  }
 }

@@ -382,7 +382,7 @@ export class WorkspaceService {
         this.unitService.findAllForWorkspace(workspace.id).then(async units => {
           await Promise
             .all(units
-              .map(async unit => this.unitService.removeUnitState(unit.id, user))
+              .map(async unit => this.unitService.removeUnitState(unit.id))
             );
         });
       }

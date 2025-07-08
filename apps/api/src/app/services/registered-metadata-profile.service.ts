@@ -20,30 +20,46 @@ export class RegisteredMetadataProfileService {
     private http: HttpService) {}
 
   async getRegisteredMetadataProfiles(): Promise<RegisteredMetadataProfile[] | null> {
-    let registryCsv = await this.getRegistryCsv();
-    if (registryCsv) {
-      await this.storeRegistry(registryCsv);
-    } else {
-      const registry = await this.metadataProfileRegistryRepository
-        .findOneBy({ id: this.PROFILE_REGISTRY });
-      if (registry) {
-        registryCsv = registry.csv;
-      }
-    }
+    const registryCsv = await this.getRegisteredMetadataProfilesAsCSV();
     if (registryCsv) {
       const profileUrls = RegisteredMetadataProfileService.getProfileURLs(registryCsv, '"');
       return Promise
         .all(profileUrls
           .map(async url => {
-            const profile = await this.getProfileToRegister(url);
-            if (profile) return this.storeRegisteredMetadataProfile(profile, url);
             const storedProfile = await this.registeredMetadataProfileRepository
               .findOneBy({ url: url });
-            if (storedProfile) return storedProfile;
+            if (storedProfile) {
+              // without await to update the profile in the background
+              this.updateRegisteredMetadataProfiles(url);
+              return storedProfile;
+            }
+            const profile = await this.getProfileToRegister(url);
+            if (profile) return this.storeRegisteredMetadataProfile(profile, url);
             return null;
           }));
     }
     return null;
+  }
+
+  private async updateRegisteredMetadataProfiles(url: string): Promise<void> {
+    const profile = await this.getProfileToRegister(url);
+    if (profile) this.storeRegisteredMetadataProfile(profile, url);
+  }
+
+  private async getRegisteredMetadataProfilesAsCSV(): Promise<string> {
+    const registry = await this.metadataProfileRegistryRepository
+      .findOneBy({ id: this.PROFILE_REGISTRY });
+    if (registry) {
+      this.updateRegistry();
+      return registry.csv;
+    }
+    const registryCsv = await this.getRegistryCsv();
+    await this.storeRegistry(registryCsv);
+    return registryCsv;
+  }
+
+  private async updateRegistry(): Promise<void> {
+    await this.storeRegistry(await this.getRegistryCsv());
   }
 
   private getRegistryCsv(): Promise<string | null> {
