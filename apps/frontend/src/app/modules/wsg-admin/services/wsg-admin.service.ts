@@ -16,7 +16,7 @@ export class WsgAdminService {
   settingsChanged: boolean = false;
   profileStores: ProfileStoreWithProfiles[] = [];
   selectedWorkspaceGroupId: BehaviorSubject<number> = new BehaviorSubject(0);
-  selectedWorkspaceGroupName = '';
+  selectedWorkspaceGroupName: BehaviorSubject<string> = new BehaviorSubject('');
   selectedWorkspaceGroupSettings: WorkspaceGroupSettingsDto = {
     defaultSchemer: '',
     defaultPlayer: '',
