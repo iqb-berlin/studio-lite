@@ -2,7 +2,9 @@ import {
   MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef,
   MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
-import { ViewChild, Component, OnInit } from '@angular/core';
+import {
+  ViewChild, Component, OnInit, OnDestroy
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -17,6 +19,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
+import { Subject, takeUntil } from 'rxjs';
 import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
@@ -44,7 +47,7 @@ import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
     MatButton, MatTooltip, WrappedIconComponent, FormsModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe,
     IsSelectedIdPipe, TranslateModule, MatIcon, RolesHeaderComponent, WorkspaceNamePipe]
 })
-export class WorkspacesComponent implements OnInit {
+export class WorkspacesComponent implements OnInit, OnDestroy {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
   workspaces: WorkspaceInListDto[] = [];
   displayedColumns = ['selectCheckbox', 'name', 'unitsCount', 'dropBoxId'];
@@ -53,6 +56,11 @@ export class WorkspacesComponent implements OnInit {
   selectedWorkspaceId = 0;
   workspaceUsers = new WorkspaceUserToCheckCollection([]);
   isWorkspaceGroupAdmin = false;
+  isBackUpWorkspaceGroup = false;
+  maxWorkspaceCount = 10;
+
+  private ngUnsubscribe = new Subject<void>();
+  private backUpFolderName = 'backup';
 
   @ViewChild(MatSort) sort = new MatSort();
 
@@ -80,6 +88,14 @@ export class WorkspacesComponent implements OnInit {
 
   ngOnInit(): void {
     this.createUserList();
+    this.wsgAdminService.selectedWorkspaceGroupName
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(
+        name => {
+          this.isBackUpWorkspaceGroup = name ? name
+            .toLowerCase()
+            .includes(this.backUpFolderName) : false;
+        });
   }
 
   changeAccessLevel(checked: boolean, user: WorkspaceUserChecked, level: number): void {
@@ -355,5 +371,10 @@ export class WorkspacesComponent implements OnInit {
       this.translateService.instant('error'),
       { duration: 3000 }
     );
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
