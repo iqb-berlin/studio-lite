@@ -17,7 +17,7 @@
     </studio-lite-workspace-menu>
 
     @if (isBackUpWorkspaceGroup && workspaces.length > maxWorkspaceCount) {
-      <div class="warning">{{'wsg-admin.too-many-workspaces' | translate : {maxWorkspaceCount: maxWorkspaceCount} }}</div>
+      <div class="warning">{{'wsg-admin.too-many-workspaces' | translate : {maxWorkspaceCount: maxWorkspaceCount, unitsCount: unitsCount} }}</div>
     }
 
     @if (objectsDatasource.data.length) {

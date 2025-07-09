@@ -395,7 +395,7 @@
     "drop-box-not-selected": "Konnte Abgabebereich nicht ändern",
     "no-drop-box": "Kein Abgabebereich",
     "drop-box": "Abgabebereich",
-    "too-many-workspaces": "In dieser Arbeitsbereichsgruppe sind mehr als {{maxWorkspaceCount}} Arbeitsbereiche vorhanden. Bitte löschen Sie erst Arbeitsbereiche, bevor Sie neue anlegen."
+    "too-many-workspaces": "In dieser Arbeitsbereichsgruppe sind mehr als {{maxWorkspaceCount}} Arbeitsbereiche mit insgesamt {{unitsCount}} Aufgaben vorhanden. Bitte löschen Sie erst Arbeitsbereiche, bevor Sie neue anlegen."
   },
   "workspace-settings": {
     "modules": "Verona Module",

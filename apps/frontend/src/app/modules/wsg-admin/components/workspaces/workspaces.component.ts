@@ -58,6 +58,7 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   isWorkspaceGroupAdmin = false;
   isBackUpWorkspaceGroup = false;
   maxWorkspaceCount = 10;
+  unitsCount = 0;
 
   private ngUnsubscribe = new Subject<void>();
   private backUpFolderName = 'backup';
@@ -168,6 +169,7 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
       .subscribe(
         (workspaces: WorkspaceInListDto[]) => {
           this.workspaces = workspaces;
+          this.unitsCount = this.getUnitsCount();
           this.setObjectsDatasource(workspaces);
           this.tableSelectionCheckboxes.clear();
           this.tableSelectionRow.clear();
@@ -376,5 +378,9 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
+  }
+
+  private getUnitsCount(): number {
+    return this.workspaces.reduce((acc, workspace) => acc + (workspace.unitsCount || 0), 0);
   }
 }
