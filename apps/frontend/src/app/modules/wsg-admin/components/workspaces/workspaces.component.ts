@@ -148,7 +148,7 @@ export class WorkspacesComponent implements OnInit {
     this.selectedWorkspaceId = 0;
     this.updateUserList();
     this.appService.dataLoading = true;
-    this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId)
+    this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId.value)
       .subscribe(
         (workspaces: WorkspaceInListDto[]) => {
           this.workspaces = workspaces;
@@ -197,7 +197,7 @@ export class WorkspacesComponent implements OnInit {
 
   xlsxDownloadWorkspaceReport() {
     this.appService.dataLoading = true;
-    this.backendService.getXlsWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId)
+    this.backendService.getXlsWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId.value)
       .subscribe(workspace => {
         const datePipe = new DatePipe('de-DE');
         const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
@@ -262,7 +262,7 @@ export class WorkspacesComponent implements OnInit {
     this.appService.dataLoading = true;
     this.backendService.addWorkspace(<CreateWorkspaceDto>{
       name: result,
-      groupId: this.wsgAdminService.selectedWorkspaceGroupId
+      groupId: this.wsgAdminService.selectedWorkspaceGroupId.value
     }).subscribe(
       respOk => {
         if (respOk) {

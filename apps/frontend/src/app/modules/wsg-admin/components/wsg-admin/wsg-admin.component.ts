@@ -28,8 +28,8 @@ export class WsgAdminComponent implements OnInit {
 
   ngOnInit(): void {
     const routeKey = 'wsg';
-    this.wsgAdminService.selectedWorkspaceGroupId = Number(this.route.snapshot.params[routeKey]);
-    this.backendService.getWorkspaceGroupData(this.wsgAdminService.selectedWorkspaceGroupId)
+    this.wsgAdminService.selectedWorkspaceGroupId.next(Number(this.route.snapshot.params[routeKey]));
+    this.backendService.getWorkspaceGroupData(this.wsgAdminService.selectedWorkspaceGroupId.value)
       .subscribe(wsgData => {
         if (wsgData) {
           this.wsgAdminService.selectedWorkspaceGroupName = wsgData.name ||
