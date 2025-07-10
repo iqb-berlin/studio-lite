@@ -28,15 +28,15 @@ export class WsgAdminComponent implements OnInit {
 
   ngOnInit(): void {
     const routeKey = 'wsg';
-    this.wsgAdminService.selectedWorkspaceGroupId = Number(this.route.snapshot.params[routeKey]);
-    this.backendService.getWorkspaceGroupData(this.wsgAdminService.selectedWorkspaceGroupId)
+    this.wsgAdminService.selectedWorkspaceGroupId.next(Number(this.route.snapshot.params[routeKey]));
+    this.backendService.getWorkspaceGroupData(this.wsgAdminService.selectedWorkspaceGroupId.value)
       .subscribe(wsgData => {
         if (wsgData) {
-          this.wsgAdminService.selectedWorkspaceGroupName = wsgData.name ||
-          this.translateService.instant('wsg-admin.unknown');
+          this.wsgAdminService.selectedWorkspaceGroupName
+            .next(wsgData.name || this.translateService.instant('wsg-admin.unknown'));
           this.appService.appConfig.setPageTitle(
             this.translateService.instant('wsg-admin.title', {
-              name: this.wsgAdminService.selectedWorkspaceGroupName
+              name: this.wsgAdminService.selectedWorkspaceGroupName.value
             })
           );
           this.wsgAdminService.selectedWorkspaceGroupSettings = wsgData.settings || {
@@ -45,7 +45,7 @@ export class WsgAdminComponent implements OnInit {
             defaultEditor: ''
           };
         } else {
-          this.wsgAdminService.selectedWorkspaceGroupName = this.translateService.instant('wsg-admin.error');
+          this.wsgAdminService.selectedWorkspaceGroupName.next(this.translateService.instant('wsg-admin.error'));
           this.wsgAdminService.selectedWorkspaceGroupSettings = {
             defaultSchemer: '',
             defaultPlayer: '',

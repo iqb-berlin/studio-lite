@@ -116,7 +116,7 @@ export class UsersComponent implements OnInit {
         this.appService.dataLoading = true;
         this.backendService.setWorkspacesByUser(
           this.selectedUser,
-          this.userWorkspaces.getChecks(this.wsgAdminService.selectedWorkspaceGroupId)
+          this.userWorkspaces.getChecks(this.wsgAdminService.selectedWorkspaceGroupId.value)
         ).subscribe(
           respOk => {
             if (respOk) {
@@ -160,7 +160,7 @@ export class UsersComponent implements OnInit {
 
   createWorkspaceList(): void {
     this.userWorkspaces = new WorkspaceToCheckCollection([]);
-    this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId)
+    this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId.value)
       .subscribe(workspaces => {
         this.userWorkspaces = new WorkspaceToCheckCollection(workspaces);
         this.updateUserList();

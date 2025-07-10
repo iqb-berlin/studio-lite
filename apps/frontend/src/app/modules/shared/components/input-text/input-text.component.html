@@ -1,4 +1,9 @@
 <h1 mat-dialog-title>{{typedData.title}}</h1>
+
+@if (typedData.isBackUpWorkspaceGroup && typedData.workspacesCount > typedData.maxWorkspaceCount ) {
+  <div class="warning">{{'wsg-admin.too-many-workspaces-warning-small' | translate : {maxWorkspaceCount: typedData.maxWorkspaceCount} }}</div>
+}
+
 <mat-dialog-content>
   <form [formGroup]="textInputForm"
         class="fx-column-start-stretch">

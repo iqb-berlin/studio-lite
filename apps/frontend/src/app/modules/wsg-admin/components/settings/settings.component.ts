@@ -41,7 +41,7 @@ export class WorkspaceSettingsComponent implements OnInit {
 
   async saveGroupSettings() {
     this.wsgAdminService.setWorkspaceGroupSettings(
-      this.wsgAdminService.selectedWorkspaceGroupId, this.settings)
+      this.wsgAdminService.selectedWorkspaceGroupId.value, this.settings)
       .pipe(
         takeUntil(this.ngUnsubscribe))
       .subscribe(

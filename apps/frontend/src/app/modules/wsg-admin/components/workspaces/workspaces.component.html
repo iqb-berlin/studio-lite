@@ -1,6 +1,8 @@
 <div class="fx-row-space-between-start admin-tab-content">
   <div class="fx-flex-row-50 fx-column-start-stretch object-list">
     <studio-lite-workspace-menu
+      [isBackUpWorkspaceGroup]="isBackUpWorkspaceGroup"
+      [maxWorkspaceCount]="maxWorkspaceCount"
       [isWorkspaceGroupAdmin]="isWorkspaceGroupAdmin"
       [selectedWorkspaceId]="selectedWorkspaceId"
       [selectedRows]="tableSelectionRow.selected"
@@ -16,6 +18,15 @@
       (download)="xlsxDownloadWorkspaceReport()">
     </studio-lite-workspace-menu>
 
+    @if (isBackUpWorkspaceGroup) {
+      @if (workspaces.length > maxWorkspaceCount) {
+        <div class="warning">{{'wsg-admin.too-many-workspaces-warning' | translate : {maxWorkspaceCount: maxWorkspaceCount, unitsCount: unitsCount} }}</div>
+      } @else {
+        <div class="info">{{'wsg-admin.units-count-info' | translate : {unitsCount: unitsCount} }}</div>
+      }
+    } @else {
+      <div class="info">{{'wsg-admin.units-count-info' | translate : {unitsCount: unitsCount} }}</div>
+    }
     @if (objectsDatasource.data.length) {
       <studio-lite-search-filter [title]="'search-filter.filter-workspaces' | translate"
         (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">

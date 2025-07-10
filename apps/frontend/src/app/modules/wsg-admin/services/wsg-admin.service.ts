@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { MDProfile, MDProfileStore } from '@iqb/metadata';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 
@@ -15,8 +15,8 @@ export type ProfileStoreWithProfiles = {
 export class WsgAdminService {
   settingsChanged: boolean = false;
   profileStores: ProfileStoreWithProfiles[] = [];
-  selectedWorkspaceGroupId = 0;
-  selectedWorkspaceGroupName = '';
+  selectedWorkspaceGroupId: BehaviorSubject<number> = new BehaviorSubject(0);
+  selectedWorkspaceGroupName: BehaviorSubject<string> = new BehaviorSubject('');
   selectedWorkspaceGroupSettings: WorkspaceGroupSettingsDto = {
     defaultSchemer: '',
     defaultPlayer: '',
