@@ -1,5 +1,5 @@
 import { Component, Inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatButton } from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
@@ -15,8 +15,8 @@ import { MatFormField, MatLabel, MatSelect } from '@angular/material/select';
 
 @Component({
   selector: 'studio-lite-select-drop-box',
-  imports: [CommonModule, MatButton, MatDialogActions, MatDialogContent, MatDialogTitle, TranslateModule,
-    MatDialogClose, MatOption, MatSelect, MatLabel, MatFormField],
+  // eslint-disable-next-line max-len
+  imports: [MatButton, MatDialogActions, MatDialogContent, MatDialogTitle, TranslateModule, MatDialogClose, MatOption, MatSelect, MatLabel, MatFormField],
   templateUrl: './select-drop-box.component.html',
   styleUrl: './select-drop-box.component.scss'
 })
