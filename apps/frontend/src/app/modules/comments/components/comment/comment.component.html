@@ -48,35 +48,34 @@
         }
       </div>
 
-      <div class="fx-flex-row-fix-150">
-        <button mat-icon-button
-          class="comment-action"
-          matTooltip = "{{'comment.reply' | translate}}"
-          [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
-          (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.replying })">
-          <studio-lite-wrapped-icon icon="reply"></studio-lite-wrapped-icon>
-        </button>
-        @if (ownComment) {
-          <button
-            mat-icon-button
+      @if (!(activeComment | isEditing: comment) && !(activeComment | isReplying: comment)) {
+        <div class="fx-flex-row-fix-150">
+          <button mat-icon-button
             class="comment-action"
-            matTooltip = "{{'comment.edit' | translate}}"
-            [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
-            (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.editing })">
-            <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
+            matTooltip = "{{'comment.reply' | translate}}"
+            (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.replying })">
+            <studio-lite-wrapped-icon icon="reply"></studio-lite-wrapped-icon>
           </button>
-        }
-        @if (ownComment || adminMode) {
-          <button
-            mat-icon-button
-            class="comment-action"
-            matTooltip = "{{'comment.delete' | translate}}"
-            [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
-            (click)="deleteComment.emit({ commentId: comment.id, numberOfReplies: replies.length })">
-            <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
-          </button>
-        }
-      </div>
+          @if (ownComment) {
+            <button
+              mat-icon-button
+              class="comment-action"
+              matTooltip = "{{'comment.edit' | translate}}"
+              (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.editing })">
+              <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
+            </button>
+          }
+          @if (ownComment || adminMode) {
+            <button
+              mat-icon-button
+              class="comment-action"
+              matTooltip = "{{'comment.delete' | translate}}"
+              (click)="deleteComment.emit({ commentId: comment.id, numberOfReplies: replies.length })">
+              <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
+            </button>
+          }
+        </div>
+      }
     </div>
 
     @if (replies.length) {
