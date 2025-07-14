@@ -145,9 +145,17 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
     this.metadataChange.emit(this.metadata);
   }
 
+  static sortAscending<T>(a: T, b: T, key: keyof T): number {
+    if (!a[key]) return 1;
+    if (!b[key]) return -1;
+    if (a[key] < b[key]) return -1;
+    if (a[key] > b[key]) return 1;
+    return 0;
+  }
+
   sortItems(key: string) {
     this.items
-      .sort((a, b) => ((a[key] || '0') > (b[key] || '0') ? 1 : -1));
+      .sort((a, b) => ItemsComponent.sortAscending(a, b, key));
     this.itemSortService.currenItemSorting = key;
   }
 
