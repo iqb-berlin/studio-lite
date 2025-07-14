@@ -7,6 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import UnitItem from '../entities/unit-item.entity';
 import { UnitItemMetadataService } from './unit-item-metadata.service';
+import { ItemCommentService } from './item-comment.service';
+import UnitCommentUnitItem from '../entities/unit-comment-unit-item.entity';
 
 export class UnitItemService {
   private readonly logger = new Logger(UnitItemService.name);
@@ -14,11 +16,13 @@ export class UnitItemService {
   constructor(
     @InjectRepository(UnitItem)
     private unitItemRepository: Repository<UnitItem>,
-    private unitItemMetadataService: UnitItemMetadataService
+    private unitItemMetadataService: UnitItemMetadataService,
+    private itemCommentService: ItemCommentService
   ) {}
 
-  // eslint-disable-next-line max-len
-  async getAllByUnitId(unitId: number, orderKey: string = 'id', direction: 'DESC' | 'ASC' = 'ASC'): Promise<UnitItemDto[]> {
+  async getAllByUnitId(unitId: number,
+                       orderKey: string = 'id',
+                       direction: 'DESC' | 'ASC' = 'ASC'): Promise<UnitItemDto[]> {
     return this.unitItemRepository
       .find(
         { where: { unitId: unitId }, order: { [orderKey]: direction } });
@@ -91,5 +95,9 @@ export class UnitItemService {
 
   async removeItem(uuid: string): Promise<void> {
     await this.unitItemRepository.delete(uuid);
+  }
+
+  async findItemCommentsByUnitId(unitId: number): Promise<UnitCommentUnitItem[]> {
+    return this.itemCommentService.findItemCommentsByUnitId(unitId);
   }
 }

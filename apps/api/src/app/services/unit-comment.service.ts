@@ -6,6 +6,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import UnitComment from '../entities/unit-comment.entity';
 import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-found.exception';
+import { ItemCommentService } from './item-comment.service';
 
 @Injectable()
 export class UnitCommentService {
@@ -13,16 +14,22 @@ export class UnitCommentService {
 
   constructor(
     @InjectRepository(UnitComment)
-    private unitCommentsRepository: Repository<UnitComment>
+    private unitCommentsRepository: Repository<UnitComment>,
+    private itemCommentService: ItemCommentService
   ) {}
 
   async findOnesComments(unitId: number): Promise<UnitCommentDto[]> {
     this.logger.log(`Returning comments for unit with id: ${unitId}`);
-    return this.unitCommentsRepository
+    const comments = await this.unitCommentsRepository
       .find({
         where: { unitId: unitId },
         order: { createdAt: 'ASC' }
       });
+    return Promise.all(comments.map(async comment => ({
+      ...comment,
+      itemUuids: (await this.itemCommentService.findUnitItemComments(unitId, comment.id))
+        .map(i => i.unitItemUuid)
+    })));
   }
 
   async copyComments(oldUnitId: number, newUnitId: number): Promise<void> {

@@ -2,8 +2,8 @@ import {
   Body,
   Controller,
   Delete,
-  Get, Param,
-  Post,
+  Get, Param, ParseBoolPipe,
+  Post, Query,
   UseGuards
 } from '@nestjs/common';
 import {
@@ -17,6 +17,7 @@ import { WriteAccessGuard } from '../guards/write-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { UnitItemService } from '../services/unit-item.service';
 import { UnitId } from '../decorators/unit-id.decorator';
+import UnitCommentUnitItem from '../entities/unit-comment-unit-item.entity';
 
 @Controller('workspaces/:workspace_id/units/:unit_id/items')
 export class UnitItemController {
@@ -31,7 +32,13 @@ export class UnitItemController {
   @ApiParam({ name: 'unit_id', type: Number })
   @ApiOkResponse()
   @ApiTags('unit item')
-  async findAll(@UnitId() unitId: number): Promise<UnitItemDto[]> {
+  async findAll(
+    @UnitId() unitId: number,
+      @Query('withoutMetadata', new ParseBoolPipe({ optional: true })) withoutMetadata: boolean
+  ): Promise<UnitItemDto[] | UnitItemWithMetadataDto[]> {
+    if (withoutMetadata) {
+      return this.unitItemsService.getAllByUnitId(unitId);
+    }
     return this.unitItemsService.getAllByUnitIdWithMetadata(unitId);
   }
 
@@ -63,5 +70,16 @@ export class UnitItemController {
   })
   async remove(@Param('uuid') uuid: string): Promise<void> {
     return this.unitItemsService.removeItem(uuid);
+  }
+
+  @Get('comments')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, WorkspaceAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'unit_id', type: Number })
+  @ApiOkResponse()
+  @ApiTags('unit item')
+  async findItemCommentsByUnitId(@UnitId() unitId: number): Promise<UnitCommentUnitItem[]> {
+    return this.unitItemsService.findItemCommentsByUnitId(unitId);
   }
 }

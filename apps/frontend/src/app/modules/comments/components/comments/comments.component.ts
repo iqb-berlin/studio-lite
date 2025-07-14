@@ -1,13 +1,14 @@
 import {
-  Component, EventEmitter, Input, OnInit, Output
+  Component, EventEmitter, Input, OnDestroy, OnInit, Output
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import {
-  switchMap, Subject, takeUntil, of, Observable
+  switchMap, Subject, takeUntil, of, Observable, tap
 } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
+import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../../services/backend.service';
 import { ActiveComment } from '../../models/active-comment.interface';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
@@ -25,11 +26,12 @@ import { CommentComponent } from '../comment/comment.component';
   // eslint-disable-next-line max-len
   imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe]
 })
-export class CommentsComponent implements OnInit {
+export class CommentsComponent implements OnInit, OnDestroy {
   @Input() userId!: number;
   @Input() userName!: string;
   @Input() unitId!: number;
   @Input() workspaceId!: number;
+  @Input() unitItems!: UnitItemDto[];
   @Input() reviewId = 0;
   @Input() newCommentOnly = false;
   @Input() adminMode = false;
@@ -59,18 +61,26 @@ export class CommentsComponent implements OnInit {
       });
   }
 
-  updateComment({ text, commentId }: { text: string; commentId: number; }): void {
+  updateComment({ text, commentId, items }: { text: string; commentId: number; items: string[] }): void {
     this.isCommentProcessing = true;
     if (!this.newCommentOnly) {
       const updateComment = { body: text, userId: this.userId };
+
       this.backendService
         .updateComment(commentId, updateComment, this.workspaceId, this.unitId, this.reviewId)
         .pipe(
           takeUntil(this.ngUnsubscribe),
-          switchMap(() => {
-            this.setActiveComment(null);
-            return this.getUpdatedComments();
-          })
+          switchMap(() => this.backendService
+            .updateCommentItemConnections(
+              { userId: this.userId, unitItemUuids: items },
+              this.workspaceId,
+              this.unitId,
+              this.reviewId,
+              commentId
+            )
+          ),
+          tap(() => this.setActiveComment(null)),
+          switchMap(() => this.getUpdatedComments())
         )
         .subscribe(() => {
           this.setLatestCommentId();
@@ -101,7 +111,8 @@ export class CommentsComponent implements OnInit {
         switchMap(result => {
           if (result) {
             this.isCommentProcessing = true;
-            return this.backendService.deleteComment(commentId, this.workspaceId, this.unitId, this.reviewId);
+            return this.backendService
+              .deleteComment(commentId, this.workspaceId, this.unitId, this.reviewId);
           }
           return of(null);
         }),
@@ -122,7 +133,7 @@ export class CommentsComponent implements OnInit {
     }
   }
 
-  addComment({ text, parentId }: { text: string; parentId: number | null; }): void {
+  addComment({ text, parentId, items }: { text: string; parentId: number | null; items: string[]; }): void {
     this.isCommentProcessing = true;
     const comment = {
       body: text,
@@ -131,15 +142,30 @@ export class CommentsComponent implements OnInit {
       parentId: parentId,
       unitId: this.unitId
     };
+
     this.backendService
       .createComment(comment, this.workspaceId, this.unitId, this.reviewId)
       .pipe(
         takeUntil(this.ngUnsubscribe),
-        switchMap(() => {
+        switchMap(commentId => {
+          if (!commentId) return of(null);
+
+          return this.backendService
+            .updateCommentItemConnections(
+              { userId: this.userId, unitItemUuids: items },
+              this.workspaceId,
+              this.unitId,
+              this.reviewId,
+              commentId
+            );
+        }),
+        tap(() => {
           this.setActiveComment(null);
-          if (this.newCommentOnly) this.onCommentsUpdated.emit();
-          return this.getUpdatedComments();
-        })
+          if (this.newCommentOnly) {
+            this.onCommentsUpdated.emit();
+          }
+        }),
+        switchMap(() => this.getUpdatedComments())
       )
       .subscribe(() => {
         this.setLatestCommentId();

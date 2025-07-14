@@ -14,6 +14,9 @@ export class UnitCommentDto {
     userId!: number;
 
   @ApiProperty()
+    itemUuids?: string[];
+
+  @ApiProperty()
     parentId?: number | null;
 
   @ApiProperty()

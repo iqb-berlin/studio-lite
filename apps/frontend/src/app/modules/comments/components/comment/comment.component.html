@@ -4,11 +4,14 @@
     [ownComment]="ownComment">
   </studio-lite-comment-badge>
 
-  <div class="fx-column-start-stretch">
+  <div class="fx-column-start-start">
 
-    <div class="comment-meta fx-row-start-stretch">
+    <div class="comment-meta fx-row-start-end">
       <div>{{ comment.userName }}</div>
       <div>{{ comment.createdAt | fullTimestamp }}</div>
+      @for (itemUuid of comment.itemUuids; track itemUuid) {
+        <studio-lite-comment-item [label]="itemUuid | commentItemLabel : unitItems"></studio-lite-comment-item>
+      }
     </div>
 
     <div class="fx-row-start-stretch fx-wrap">
@@ -26,7 +29,9 @@
             studioLiteScrollEditorIntoView [isVisible] = "activeComment | isEditing: comment"
             submitLabel="comment-editor.edit"
             [initialHTML]="comment.body"
-            (handleSubmit)="updateComment.emit({ text: $event, commentId: comment.id })"
+            [unitItems]="unitItems"
+            [selectedItems]="comment.itemUuids"
+            (handleSubmit)="updateComment.emit({ text: $event.text, commentId: comment.id, items: $event.items })"
             (handleCancel)="setActiveComment.emit(null)">
           </studio-lite-comment-editor>
         }
@@ -35,8 +40,10 @@
           <studio-lite-comment-editor
             studioLiteScrollEditorIntoView [isVisible] = "activeComment | isReplying: comment"
             submitLabel="comment-editor.reply"
+            [unitItems]="unitItems"
+            [selectedItems]="comment.itemUuids"
             (handleCancel)="setActiveComment.emit(null)"
-            (handleSubmit)="addComment.emit({ text: $event, parentId: replyId })">
+            (handleSubmit)="addComment.emit({ text: $event.text, parentId: replyId, items: $event.items })">
           </studio-lite-comment-editor>
         }
       </div>
@@ -80,6 +87,7 @@
           [parentId]="comment.id"
           [replies]="[]"
           [userId]="userId"
+          [unitItems]="unitItems"
           [adminMode]="adminMode"
           [latestCommentId]="latestCommentId"
           (setActiveComment)="setActiveComment.emit($event)"

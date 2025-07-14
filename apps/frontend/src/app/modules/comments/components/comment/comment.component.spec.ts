@@ -87,6 +87,7 @@ describe('CommentComponent', () => {
       id: 1,
       body: '<p>Hi</p>',
       userName: 'tester',
+      itemUuids: [],
       userId: 1,
       unitId: 1,
       parentId: null,

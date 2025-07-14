@@ -713,12 +713,14 @@
     "text-color": "Textfarbe",
     "text-background": "Texthintergrund",
     "enumeration": "Aufzählung",
-    "image": "Bild"
+    "image": "Bild",
+    "link-to-item": "Mit Item verbinden"
   },
   "comment": {
     "edit": "Bearbeiten",
     "reply": "Antworten",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "item": "Item {{itemAlias}}"
   },
   "comments": {
     "comment-delete-title": "Kommentar löschen",

@@ -8,9 +8,7 @@
 .editor-menubar {
   margin-left: auto;
   color: #666666;
-}
-
-.editor-menubar {
+  margin-bottom: 5px;
   .mat-mdc-icon-button {
     height: 35px;
     width: 35px;
@@ -20,6 +18,7 @@
 
 .editor-label{
   color: #003333;
+  padding: 10px 0;
 }
 
 .editor-container{
@@ -45,6 +44,11 @@
     margin-right: -25px;
     margin-bottom: -15px;
   }
+}
+
+.select-item {
+  margin-bottom: -20px;
+  max-width: 300px;
 }
 
 :host ::ng-deep div.ProseMirror {

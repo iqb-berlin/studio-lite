@@ -72,3 +72,5 @@ export { UnitMetadataDto } from './lib/dtos/metadata/unit-metadata-dto';
 export { UnitItemMetadataDto } from './lib/dtos/metadata/unit-item-metadata-dto';
 export { UnitItemWithMetadataDto } from './lib/dtos/unit-item/unit-item-with-metadata-dto';
 export { UnitFullMetadataDto } from './lib/dtos/unit/unit-full-metadata-dto';
+export { UnitCommentUnitItemDto } from './lib/dtos/unit-comment-unit-items/unit-comment-unit-item-dto';
+export { UpdateUnitCommentUnitItemsDto } from './lib/dtos/unit-comment-unit-items/update-unit-comment-unit-items-dto';

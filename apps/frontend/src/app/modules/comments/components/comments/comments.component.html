@@ -1,4 +1,4 @@
-<div class="fx-column-start-stretch full-height">
+<div class="fx-column-start-stretch full-height comments-container">
   @if (isCommentProcessing) {
     <div class="spinner-container">
       <mat-spinner class="fx-flex-fix-100" ></mat-spinner>
@@ -10,6 +10,7 @@
         <studio-lite-comment
           [comment]="rootComment"
           [userId]="userId"
+          [unitItems]="unitItems"
           [replies]="comments | replies: rootComment.id"
           [activeComment]="activeComment"
           [latestCommentId]="latestCommentId"
@@ -29,8 +30,9 @@
   <div class="new-comment">
     <studio-lite-comment-editor
       submitLabel="comment-editor.write"
+      [unitItems]="unitItems"
       [label]="'comments.write-comment' | translate"
-      (handleSubmit)="addComment({ text: $event, parentId: null })">
+      (handleSubmit)="addComment({ text: $event.text, parentId: null, items: $event.items })">
     </studio-lite-comment-editor>
   </div>
 </div>
