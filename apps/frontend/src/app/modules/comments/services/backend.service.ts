@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
-import { UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
+import { UnitCommentUnitItemDto, UpdateUnitCommentUnitItemsDto, UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
 import { Comment } from '../models/comment.interface';
 
 @Injectable()
@@ -67,6 +67,44 @@ export class BackendService {
       `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments/${id}`;
     return this.httpClient
       .delete(url)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  getUnitItemComments(workspaceId: number, unitId: number, itemUuid: string): Observable <UnitCommentUnitItemDto[]> {
+    return this.httpClient
+      .get<UnitCommentUnitItemDto[]>(
+      `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/items/${itemUuid}/comments`
+    )
+      .pipe(
+        catchError(() => [])
+      );
+  }
+
+  createItemCommentConnection(
+    workspaceId: number, unitId: number, reviewId: number, itemUuid: string, commentId: number
+  ): Observable<number | null> {
+    const url = reviewId > 0 ?
+      `${this.serverUrl}reviews/${reviewId}/units/${unitId}/items/${itemUuid}/comments` :
+      `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/items/${itemUuid}/comments`;
+    return this.httpClient
+      .post<number>(url, { unitCommentId: commentId })
+      .pipe(
+        catchError(() => of(null)),
+        map(returnId => Number(returnId))
+      );
+  }
+
+  updateCommentItemConnections(
+    comment: UpdateUnitCommentUnitItemsDto, workspaceId: number, unitId: number, reviewId: number, commentId: number
+  ): Observable<boolean> {
+    const url = reviewId > 0 ?
+      `${this.serverUrl}reviews/${reviewId}/units/${unitId}/comments/${commentId}/items` :
+      `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments/${commentId}/items`;
+    return this.httpClient
+      .patch(url, comment) // TODO User Id of comment
       .pipe(
         map(() => true),
         catchError(() => of(false))

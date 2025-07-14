@@ -73,6 +73,8 @@ import { UnitItemMetadataController } from './controllers/unit-item-metadata.con
 import { UnitMetadataService } from './services/unit-metadata.service';
 import UnitMetadataToDelete from './entities/unit-metadata-to-delete.entity';
 import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.service';
+import { ItemCommentService } from './services/item-comment.service';
+import UnitCommentUnitItem from './entities/unit-comment-unit-item.entity';
 
 @Module({
   imports: [
@@ -100,6 +102,7 @@ import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.
     VeronaModule,
     UnitDefinition,
     UnitComment,
+    UnitCommentUnitItem,
     UnitDropBoxHistory,
     MetadataProfile,
     MetadataVocabulary,
@@ -135,6 +138,7 @@ import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.
           Setting,
           Unit,
           UnitComment,
+          UnitCommentUnitItem,
           UnitDropBoxHistory,
           MetadataProfile,
           MetadataVocabulary,
@@ -165,6 +169,7 @@ import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.
       Setting,
       Unit,
       UnitComment,
+      UnitCommentUnitItem,
       UnitDropBoxHistory,
       MetadataProfile,
       MetadataVocabulary,
@@ -218,6 +223,7 @@ import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.
     UnitService,
     UnitCommentService,
     MetadataProfileService,
+    ItemCommentService,
     MetadataVocabularyService,
     RegisteredMetadataProfileService,
     UnitUserService,

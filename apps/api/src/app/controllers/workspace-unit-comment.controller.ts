@@ -12,7 +12,7 @@ import {
 import {
   CreateUnitCommentDto,
   UnitCommentDto,
-  UpdateUnitCommentDto,
+  UpdateUnitCommentDto, UpdateUnitCommentUnitItemsDto,
   UpdateUnitUserDto
 } from '@studio-lite-lib/api-dto';
 import { UnitCommentService } from '../services/unit-comment.service';
@@ -22,12 +22,15 @@ import { CommentAccessGuard } from '../guards/comment-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { CommentWriteGuard } from '../guards/comment-write.guard';
 import { UnitUserService } from '../services/unit-user.service';
+import { ItemCommentService } from '../services/item-comment.service';
+import { UnitId } from '../decorators/unit-id.decorator';
 
 @Controller('workspaces/:workspace_id/units/:unit_id/comments')
 export class WorkspaceUnitCommentController {
   constructor(
     private unitUserService: UnitUserService,
-    private unitCommentService: UnitCommentService
+    private unitCommentService: UnitCommentService,
+    private itemCommentService: ItemCommentService
   ) {}
 
   @Get()
@@ -95,6 +98,22 @@ export class WorkspaceUnitCommentController {
   @ApiTags('workspace unit comment')
   async patchCommentBody(@Param('id', ParseIntPipe) id: number, @Body() comment: UpdateUnitCommentDto) {
     return this.unitCommentService.patchCommentBody(id, comment);
+  }
+
+  @Patch(':comment_id/items')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard, CommentWriteGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'unit_id', type: Number })
+  @ApiParam({ name: 'comment_id', type: Number })
+  @ApiOkResponse({ description: 'Comment item connections for successfully updated.' })
+  @ApiNotFoundResponse({ description: 'Comment not found.' })
+  @ApiUnauthorizedResponse({ description: 'Not authorized to update comment.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
+  async patchCommentItems(@Param('comment_id', ParseIntPipe) commentId: number,
+    @UnitId() unitId: number,
+    @Body() comment: UpdateUnitCommentUnitItemsDto) {
+    return this.itemCommentService.updateCommentItems(unitId, commentId, comment.unitItemUuids);
   }
 
   // todo CommentDeleteGuard: but include workspacegroupadmin
