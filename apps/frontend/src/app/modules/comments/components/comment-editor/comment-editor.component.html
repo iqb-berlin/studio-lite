@@ -5,7 +5,7 @@
       [unitItems]="unitItems"
       [(selectedItems)]="selectedItems"
       [label]="'comment-editor.link-to-item' | translate"
-      [disabled]="!(editorHTML | isCommentCommittable) && !selectedItems.length"
+      [disabled]="(!(editorHTML | isCommentCommittable) && !(initialHTML | isCommentCommittable)) && !selectedItems.length"
       (selectedItemsChange)="onSelectedItemChange()">
     </studio-lite-comment-item-selection>
 

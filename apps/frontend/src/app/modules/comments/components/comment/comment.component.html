@@ -28,7 +28,7 @@
           <studio-lite-comment-editor
             studioLiteScrollEditorIntoView [isVisible] = "activeComment | isEditing: comment"
             submitLabel="comment-editor.edit"
-            [placeholder]="'comment-editor.write-comment' | translate"
+            [placeholder]="'comments.write-comment' | translate"
             [initialHTML]="comment.body"
             [unitItems]="unitItems"
             [selectedItems]="comment.itemUuids"
@@ -41,7 +41,7 @@
           <studio-lite-comment-editor
             studioLiteScrollEditorIntoView [isVisible] = "activeComment | isReplying: comment"
             submitLabel="comment-editor.reply"
-            [placeholder]="'comment-editor.write-comment' | translate"
+            [placeholder]="'comments.write-comment' | translate"
             [unitItems]="unitItems"
             [selectedItems]="comment.itemUuids"
             (handleCancel)="setActiveComment.emit(null)"
