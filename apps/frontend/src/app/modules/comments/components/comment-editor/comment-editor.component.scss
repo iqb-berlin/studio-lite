@@ -16,11 +16,6 @@
   }
 }
 
-.editor-label{
-  color: #003333;
-  padding: 10px 0;
-}
-
 .editor-container{
   margin-top: 1px;
 }
@@ -61,6 +56,13 @@
   p strong {
     letter-spacing: 0.04em !important;
     font-weight: 600 !important;
+  }
+  p.is-editor-empty:first-child::before {
+    color: #adb5bd;
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
   }
 }
 

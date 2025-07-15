@@ -75,6 +75,7 @@
     "@tiptap/extension-text-align": "^2.1.10",
     "@tiptap/extension-text-style": "^2.1.10",
     "@tiptap/extension-underline": "^2.1.10",
+    "@tiptap/extension-placeholder": "^2.1.10",
     "@tiptap/pm": "^2.1.10",
     "@tiptap/starter-kit": "^2.1.10",
     "@types/adm-zip": "^0.5.5",

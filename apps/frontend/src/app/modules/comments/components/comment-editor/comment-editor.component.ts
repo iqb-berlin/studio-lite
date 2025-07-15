@@ -10,6 +10,7 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
 import { Image } from '@tiptap/extension-image';
+import { Placeholder } from '@tiptap/extension-placeholder';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatDialogContent } from '@angular/material/dialog';
 import { TiptapEditorDirective } from 'ngx-tiptap';
@@ -34,7 +35,7 @@ export class CommentEditorComponent implements OnInit {
   @Input() submitLabel!: string;
   @Input() initialHTML: string = '';
   @Input() editorHTML: string = '';
-  @Input() label: string = '';
+  @Input() placeholder: string = '';
   @Input() unitItems!: UnitItemDto[];
   @Input() selectedItems: string[] = [];
 
@@ -56,6 +57,9 @@ export class CommentEditorComponent implements OnInit {
           HTMLAttributes: {
             style: 'max-width: 500px;'
           }
+        }),
+        Placeholder.configure({
+          placeholder: this.placeholder
         }),
         Highlight.configure({
           multicolor: true

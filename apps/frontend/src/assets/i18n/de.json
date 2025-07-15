@@ -727,7 +727,7 @@
     "comment-delete-question": "Soll der Kommentar gelöscht werden?",
     "comments-delete-title": "Kommentare löschen",
     "comments-delete-question": "Soll der Kommentar einschließlich aller Antworten gelöscht werden?",
-    "write-comment": "Neuen Kommentar verfassen:",
+    "write-comment": "Kommentar verfassen ...",
     "send-comment": "Kommentar senden",
     "filter-items": "Kommentare nach Items filtern"
   },

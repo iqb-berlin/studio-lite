@@ -39,7 +39,7 @@
     <studio-lite-comment-editor
       submitLabel="comment-editor.write"
       [unitItems]="unitItems"
-      [label]="'comments.write-comment' | translate"
+      [placeholder]="'comments.write-comment' | translate"
       (handleSubmit)="addComment({ text: $event.text, parentId: null, items: $event.items })">
     </studio-lite-comment-editor>
   </div>
