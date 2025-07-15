@@ -8,7 +8,7 @@ import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { CommentsComponent } from '../../../comments/components/comments/comments.component';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
-import { ItemsComponent } from '../../../metadata/components/items/items.component';
+import { SortAscendingPipe } from '../../../comments/pipes/sort-ascending.pipe';
 
 @Component({
   templateUrl: './unit-comments.component.html',
@@ -49,7 +49,7 @@ export class UnitCommentsComponent implements OnDestroy {
 
   private setUnitItems(items: UnitItemDto[]) {
     this.unitItems = items
-      .sort((a, b) => ItemsComponent
+      .sort((a, b) => SortAscendingPipe
         .sortAscending(a, b, 'id'));
   }
 

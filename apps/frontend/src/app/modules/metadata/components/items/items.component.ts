@@ -21,6 +21,7 @@ import {
 import { AliasId } from '../../models/alias-id.interface';
 import { NewItemComponent } from '../new-item/new-item.component';
 import { ItemSortService } from '../../services/item-sort.service';
+import { SortAscendingPipe } from '../../../comments/pipes/sort-ascending.pipe';
 
 @Component({
   selector: 'studio-lite-items',
@@ -145,17 +146,9 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
     this.metadataChange.emit(this.metadata);
   }
 
-  static sortAscending<T>(a: T, b: T, key: keyof T): number {
-    if (!a[key]) return 1;
-    if (!b[key]) return -1;
-    if (a[key] < b[key]) return -1;
-    if (a[key] > b[key]) return 1;
-    return 0;
-  }
-
   sortItems(key: string) {
     this.items
-      .sort((a, b) => ItemsComponent.sortAscending(a, b, key));
+      .sort((a, b) => SortAscendingPipe.sortAscending(a, b, key));
     this.itemSortService.currenItemSorting = key;
   }
 
