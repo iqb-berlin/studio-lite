@@ -31,6 +31,7 @@ import { ScrollEditorIntoViewDirective } from './directives/scroll-editor-into-v
 import { FromNowPipe } from './pipes/from-now.pipe';
 import { Comment } from './models/comment.interface';
 import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
+import { CommentItemSelectionComponent } from './components/comment-item-selection/comment-item-selection.component';
 
 @NgModule({
   imports: [
@@ -51,6 +52,7 @@ import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
     CommentsComponent,
     CommentComponent,
     CommentEditorComponent,
+    CommentItemSelectionComponent,
     SafeResourceHTMLPipe,
     IsEditingPipe,
     IsReplyingPipe,

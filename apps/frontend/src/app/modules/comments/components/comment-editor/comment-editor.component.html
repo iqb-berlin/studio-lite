@@ -3,19 +3,15 @@
     <div class="editor-label">{{label}}</div>
   }
   <div class="fx-row-space-between-end fx-wrap">
-    <mat-form-field class="select-item fx-flex-fill">
-      <mat-label>{{'comment-editor.link-to-item' | translate}}</mat-label>
-      <mat-select multiple
-                  [(value)]="selectedItems"
-                  [disabled]="(!(editorHTML | isCommentCommittable) && !selectedItems.length)"
-                  (valueChange)="onSelectedItemChange()">
-        @for (item of unitItems; track item;) {
-          <mat-option [value]="item.uuid">
-            {{item.id ? item.id : ('metadata.without-id' | translate)}}
-          </mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+
+    <studio-lite-comment-item-selection
+      class="select-item fx-flex-fill"
+      [unitItems]="unitItems"
+      [(selectedItems)]="selectedItems"
+      [label]="'comment-editor.link-to-item' | translate"
+      [disabled]="!(editorHTML | isCommentCommittable) && !selectedItems.length"
+      (selectedItemsChange)="onSelectedItemChange()">
+    </studio-lite-comment-item-selection>
 
     <div class="editor-menubar fx-row-end-stretch fx-wrap">
       <button type="button" mat-icon-button
