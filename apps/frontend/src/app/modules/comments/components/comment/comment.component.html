@@ -9,8 +9,8 @@
     <div class="comment-meta fx-row-start-end">
       <div>{{ comment.userName }}</div>
       <div>{{ comment.createdAt | fullTimestamp }}</div>
-      @for (itemUuid of comment.itemUuids; track itemUuid) {
-        <studio-lite-comment-item [label]="itemUuid | commentItemLabel : unitItems"></studio-lite-comment-item>
+      @for (uuidId of (comment.itemUuids | commentItemUuidsIds : unitItems) | sortAscending : 'id'; track uuidId) {
+        <studio-lite-comment-item [label]="uuidId.id"></studio-lite-comment-item>
       }
     </div>
 
