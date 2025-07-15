@@ -27,6 +27,7 @@ export class NestedTreeParameters {
   maxLevel!: number;
   hideNumbering!: boolean;
   hideTitle!: boolean;
+  label!: string;
 }
 
 export class Vocabulary {
