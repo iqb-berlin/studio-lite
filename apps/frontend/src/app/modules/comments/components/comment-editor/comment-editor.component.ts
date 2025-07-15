@@ -13,21 +13,22 @@ import { Image } from '@tiptap/extension-image';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatDialogContent } from '@angular/material/dialog';
 import { TiptapEditorDirective } from 'ngx-tiptap';
-import { MatFormField, MatInput, MatLabel } from '@angular/material/input';
-import { MatOption, MatSelect } from '@angular/material/select';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { FormsModule } from '@angular/forms';
 import { IsCommentCommittablePipe } from '../../pipes/is-comment-commitable.pipe';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { CommentItemSelectionComponent } from '../comment-item-selection/comment-item-selection.component';
 
 @Component({
   selector: 'studio-lite-comment-editor',
   templateUrl: './comment-editor.component.html',
   styleUrls: ['./comment-editor.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatIconButton, MatTooltip, WrappedIconComponent, MatSelect, MatInput, TiptapEditorDirective, MatDialogContent, MatFabButton, TranslateModule, IsCommentCommittablePipe, MatFormField, MatLabel, MatOption, FormsModule]
+  imports: [MatIconButton, MatTooltip, WrappedIconComponent, MatSelect, MatInput, TiptapEditorDirective, MatDialogContent, MatFabButton, TranslateModule, IsCommentCommittablePipe, CommentItemSelectionComponent, FormsModule]
 })
 export class CommentEditorComponent implements OnInit {
   @Input() submitLabel!: string;
