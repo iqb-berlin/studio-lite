@@ -20,7 +20,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import {
-  DialogData, VocabFlatNode, VocabNode, Vocabulary
+  DialogData, VocabFlatNode, VocabNode
 } from '../../models/vocabulary.class';
 import { AreAllDescendantsSelectedPipe } from '../../pipes/are-all-descendants-selected.pipe';
 import { AreSomeDescendantsSelectedPipe } from '../../pipes/are-some-descendants-selected.pipe';
@@ -66,10 +66,8 @@ export class NestedTreeComponent implements OnInit {
   }
 
   ngOnInit() {
-    const vocabulary = this.dialogData.vocabularies
-      ?.find((vocab: { url: string, data: Vocabulary }) => vocab.url === this.dialogData.props.url);
-    if (vocabulary && vocabulary.data) {
-      this.vocabularyTitle = vocabulary.data.title.de;
+    if (this.dialogData && this.dialogData.props) {
+      this.vocabularyTitle = this.dialogData.props.label || '';
     }
     if (this.dialogData && this.dialogData.value) {
       this.dialogData.value.forEach(v => {
