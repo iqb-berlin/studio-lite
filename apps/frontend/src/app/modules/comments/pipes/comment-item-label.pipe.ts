@@ -8,7 +8,6 @@ import { TranslateService } from '@ngx-translate/core';
 })
 
 export class CommentItemLabelPipe implements PipeTransform {
-
   constructor(private translateService: TranslateService) {}
 
   // eslint-disable-next-line class-methods-use-this
