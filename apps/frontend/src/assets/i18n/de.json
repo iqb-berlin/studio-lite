@@ -728,7 +728,8 @@
     "comments-delete-title": "Kommentare löschen",
     "comments-delete-question": "Soll der Kommentar einschließlich aller Antworten gelöscht werden?",
     "write-comment": "Neuen Kommentar verfassen:",
-    "send-comment": "Kommentar senden"
+    "send-comment": "Kommentar senden",
+    "filter-items": "Kommentare nach Items filtern"
   },
   "delete-dialog": {
     "cancel": "Abbrechen",

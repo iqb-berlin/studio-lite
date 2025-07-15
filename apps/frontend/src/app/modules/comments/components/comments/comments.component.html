@@ -5,13 +5,21 @@
     </div>
   }
   @if (!newCommentOnly) {
+    <studio-lite-comment-item-selection
+      class="comment-item-selection fx-row-start-stretch"
+      [unitItems]="unitItems"
+      [(selectedItems)]="filteredItems"
+      [label]="'comments.filter-items' | translate">
+    </studio-lite-comment-item-selection>
+
+
     <div class="comments fx-flex-fill">
-      @for (rootComment of comments | rootComments; track rootComment) {
+      @for (rootComment of (comments | filteredComments : filteredItems) | rootComments; track rootComment) {
         <studio-lite-comment
           [comment]="rootComment"
           [userId]="userId"
           [unitItems]="unitItems"
-          [replies]="comments | replies: rootComment.id"
+          [replies]="(comments | filteredComments : filteredItems) | replies: rootComment.id"
           [activeComment]="activeComment"
           [latestCommentId]="latestCommentId"
           [adminMode]="adminMode"

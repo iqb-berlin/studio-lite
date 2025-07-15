@@ -18,13 +18,15 @@ import { RootCommentsPipe } from '../../pipes/root-comments.pipe';
 import { CommentEditorComponent } from '../comment-editor/comment-editor.component';
 import { ScrollCommentIntoViewDirective } from '../../directives/scroll-comment-into-view.directive';
 import { CommentComponent } from '../comment/comment.component';
+import { CommentItemSelectionComponent } from '../comment-item-selection/comment-item-selection.component';
+import { FilteredCommentsPipe } from '../../pipes/filtered-comments.pipe';
 
 @Component({
   selector: 'studio-lite-comments',
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe]
+  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe, CommentItemSelectionComponent, FilteredCommentsPipe]
 })
 export class CommentsComponent implements OnInit, OnDestroy {
   @Input() userId!: number;
@@ -41,6 +43,7 @@ export class CommentsComponent implements OnInit, OnDestroy {
   activeComment: ActiveComment | null = null;
   latestCommentId: Subject<number> = new Subject();
   isCommentProcessing: boolean = false;
+  filteredItems: string[] = [];
 
   private latestComment!: Comment;
   private ngUnsubscribe = new Subject<void>();
