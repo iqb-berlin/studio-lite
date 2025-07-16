@@ -63,7 +63,7 @@ import { ReviewUnitCommentController } from './controllers/review-unit-comment.c
 import { VeronaModuleController } from './controllers/verona-module.controller';
 import { ResourcePackageController } from './controllers/resource-package.controller';
 import { GroupAdminUserController } from './controllers/group-admin-user-controller';
-import { UnitItemController } from './controllers/unit-item.controller';
+import { WorkspaceUnitItemController } from './controllers/workspace-unit-item.controller';
 import { UnitItemService } from './services/unit-item.service';
 import UnitItem from './entities/unit-item.entity';
 import UnitItemMetadata from './entities/unit-item-metadata.entity';
@@ -206,7 +206,7 @@ import UnitCommentUnitItem from './entities/unit-comment-unit-item.entity';
     ReviewUnitCommentController,
     MetadataController,
     WorkspaceGroupController,
-    UnitItemController,
+    WorkspaceUnitItemController,
     UnitItemMetadataController
   ],
   providers: [
