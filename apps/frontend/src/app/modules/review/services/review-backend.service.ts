@@ -1,10 +1,10 @@
 import { catchError, map } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Inject, Injectable } from '@angular/core';
 import {
   ReviewFullDto,
-  UnitDefinitionDto,
+  UnitDefinitionDto, UnitItemDto,
   UnitPropertiesDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { Comment } from '../../comments/models/comment.interface';
@@ -57,6 +57,15 @@ export class ReviewBackendService {
       .pipe(
         catchError(() => of([])),
         map(comments => comments)
+      );
+  }
+
+  getUnitItems(reviewId: number, unitId: number): Observable <UnitItemDto[]> {
+    const queryParams = new HttpParams().set('withoutMetadata', true);
+    return this.http
+      .get<UnitItemDto[]>(`${this.serverUrl}reviews/${reviewId}/units/${unitId}/items`, { params: queryParams })
+      .pipe(
+        catchError(() => [])
       );
   }
 
