@@ -18,8 +18,7 @@ import {
   UnitSchemeDto,
   UsersInWorkspaceDto,
   WorkspaceGroupFullDto,
-  UnitItemDto,
-  UnitCommentUnitItemDto
+  UnitItemDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -393,14 +392,6 @@ export class WorkspaceBackendService {
     const queryParams = new HttpParams().set('withoutMetadata', true);
     return this.http
       .get<UnitItemDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/items`, { params: queryParams })
-      .pipe(
-        catchError(() => [])
-      );
-  }
-
-  getUnitItemComments(workspaceId: number, unitId: number): Observable <UnitCommentUnitItemDto[]> {
-    return this.http
-      .get<UnitCommentUnitItemDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/items/comments`)
       .pipe(
         catchError(() => [])
       );

@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
-import { UnitCommentUnitItemDto, UpdateUnitCommentUnitItemsDto, UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
+import { UpdateUnitCommentUnitItemsDto, UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
 import { Comment } from '../models/comment.interface';
 
 @Injectable()
@@ -70,16 +70,6 @@ export class BackendService {
       .pipe(
         map(() => true),
         catchError(() => of(false))
-      );
-  }
-
-  getUnitItemComments(workspaceId: number, unitId: number, itemUuid: string): Observable <UnitCommentUnitItemDto[]> {
-    return this.httpClient
-      .get<UnitCommentUnitItemDto[]>(
-      `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/items/${itemUuid}/comments`
-    )
-      .pipe(
-        catchError(() => [])
       );
   }
 
