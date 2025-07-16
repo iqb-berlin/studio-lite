@@ -75,6 +75,7 @@ import UnitMetadataToDelete from './entities/unit-metadata-to-delete.entity';
 import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.service';
 import { ItemCommentService } from './services/item-comment.service';
 import UnitCommentUnitItem from './entities/unit-comment-unit-item.entity';
+import { ReviewUnitItemController } from './controllers/review-unit-item.controller';
 
 @Module({
   imports: [
@@ -204,6 +205,7 @@ import UnitCommentUnitItem from './entities/unit-comment-unit-item.entity';
     ReviewController,
     ReviewUnitController,
     ReviewUnitCommentController,
+    ReviewUnitItemController,
     MetadataController,
     WorkspaceGroupController,
     WorkspaceUnitItemController,

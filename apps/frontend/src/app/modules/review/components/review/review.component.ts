@@ -1,6 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
-
 import { ReviewService } from '../../services/review.service';
 import { AppService } from '../../../../services/app.service';
 import { AddCommentButtonComponent } from '../add-comment-button/add-comment-button.component';
@@ -12,7 +11,7 @@ import { UnitNavComponent } from '../unit-nav/unit-nav.component';
   styleUrls: ['./review.component.scss'],
   imports: [UnitNavComponent, AddCommentButtonComponent, RouterOutlet]
 })
-export class ReviewComponent {
+export class ReviewComponent implements OnInit {
   constructor(
     public appService: AppService,
     private route: ActivatedRoute,
