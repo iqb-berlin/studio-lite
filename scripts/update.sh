@@ -92,181 +92,6 @@ create_app_dir_backup() {
   printf "Application directory backup created.\n\n"
 }
 
-validate_source_and_target_release_tag() {
-  if ! check_version_tag_exists "${SOURCE_VERSION}"; then
-    printf -- "- Source release tag: '%s' doesn't exist (anymore)!\n" "${SOURCE_VERSION}"
-
-    return 1
-  fi
-  if ! check_version_tag_exists "${TARGET_VERSION}"; then
-    printf -- "- Target release tag: '%s' doesn't exist (anymore)!\n" "${TARGET_VERSION}"
-
-    return 1
-  fi
-
-  if ! [[ "${SOURCE_VERSION}" =~ ${PRERELEASE_REGEX} || "${SOURCE_VERSION}" =~ ${RELEASE_REGEX} ]]; then
-    printf -- "- Source tag '%s' is neither a valid release nor a valid pre-release tag!\n" "${SOURCE_VERSION}"
-
-    return 1
-  fi
-  if ! [[ "${TARGET_VERSION}" =~ ${PRERELEASE_REGEX} || "${TARGET_VERSION}" =~ ${RELEASE_REGEX} ]]; then
-    printf -- "- Target tag '%s' is neither a valid release nor a valid pre-release tag!\n" "${TARGET_VERSION}"
-
-    return 1
-  fi
-
-  return 0
-}
-
-run_complementary_migration_scripts() {
-  printf "3. Complementary migration scripts check\n"
-
-  if ! validate_source_and_target_release_tag; then
-    printf "  The existence of possible migration scripts could not be determined.\n"
-    printf "Complementary migration scripts check done.\n\n"
-
-    return
-  fi
-
-  declare normalized_source_release_tag="${SOURCE_VERSION}"
-  declare normalized_target_release_tag="${TARGET_VERSION}"
-  declare release_tags
-
-  if [[ "${SOURCE_VERSION}" =~ ${PRERELEASE_REGEX} ]]; then
-    normalized_source_release_tag=$(printf '%s' "${SOURCE_VERSION}" | cut -d'-' -f1)
-  fi
-  if [[ "${TARGET_VERSION}" =~ ${PRERELEASE_REGEX} ]]; then
-    normalized_target_release_tag=$(printf '%s' "${TARGET_VERSION}" | cut -d'-' -f1)
-  fi
-
-  # source <= target
-  if printf '%s\n%s' "${normalized_source_release_tag}" "${normalized_target_release_tag}" | sort -C -V; then
-    # source < target
-    if [ "${normalized_source_release_tag}" != "${normalized_target_release_tag}" ]; then
-      release_tags=$(
-        curl --silent ${REPO_API}/releases?per_page=100 |                                       # get all releases in json format
-          grep tag_name |                                                                       # extract 'tag_name' key and value ("key":"value")
-          cut -d : -f 2,3 |                                                                     # cut off key and delimiter ("value")
-          tr -d \" |                                                                            # truncate quotes  (value)
-          tr -d , |                                                                             # truncate end comma
-          tr -d " " |                                                                           # truncate start space
-          grep -Po "${ALL_RELEASE_REGEX}" |                                                     # use only release and pre-release versions
-          cut -d '-' -f 1 |                                                                     # cut off pre-release suffixes
-          sort -u -V |                                                                          # remove duplicates and sort versions ascending
-          sed -ne "\|${normalized_source_release_tag}|,\|${normalized_target_release_tag}|p" |  # use only versions between source and target version
-          tail -n +2                                                                            # exclude source version
-      )
-    fi
-  fi
-
-  if [ -z "${release_tags}" ]; then
-    printf -- "- No complementary migration scripts to execute.\n"
-
-  else
-    declare release_tag
-
-    for release_tag in ${release_tags}; do
-      declare -a migration_scripts
-      declare migration_script_check_url
-      migration_script_check_url="${REPO_URL}/${TARGET_VERSION}/scripts/migration/${release_tag}.sh"
-      if curl --head --silent --fail --output /dev/null "${migration_script_check_url}" 2>/dev/null; then
-        migration_scripts+=("${release_tag}".sh)
-      fi
-    done
-
-    if [ ${#migration_scripts[@]} -eq 0 ]; then
-      printf -- "- No complementary migration scripts to execute.\n"
-
-    else
-      printf -- "- Complementary Migration script(s) available.\n\n"
-      printf "3.1 Migration script download\n"
-      mkdir -p "${APP_DIR}/scripts/migration"
-      declare migration_script
-      for migration_script in "${migration_scripts[@]}"; do
-        download_file "scripts/migration/${migration_script}" "scripts/migration/${migration_script}"
-        chmod +x "${APP_DIR}/scripts/migration/${migration_script}"
-      done
-
-      printf "\n3.2 Migration script execution\n"
-      printf "  The following migration scripts will be executed for the migration from version %s to version %s:\n" \
-        "${SOURCE_VERSION}" "${TARGET_VERSION}"
-      for migration_script in "${migration_scripts[@]}"; do
-        printf -- "  - %s\n" "${migration_script}"
-      done
-
-      printf "\n  We strongly recommend the installation of the migration scripts, otherwise it is very likely that "
-      printf "errors will occur during operation of the application.\n\n"
-
-      read -p "  Do you want to proceed with the migration? [Y/n] " -er -n 1 continue
-      if [[ ${continue} =~ ^[nN]$ ]]; then
-        HAS_MIGRATION_FILES=true
-
-        printf "\n  If you want to ensure the smooth operation of the application, you can also install the migration "
-        printf "scripts manually.\n"
-        printf "  To do this, change to directory './scripts/migration' and execute the above scripts in ascending "
-        printf "order!\n\n"
-
-        printf "Complementary migration scripts check done.\n\n"
-
-        printf "Since the migration scripts have not been executed, "
-        printf "it is not recommended to proceed with the update procedure.\n"
-
-        declare proceed
-        read -p "Do you want to proceed? [y/N] " -er -n 1 proceed
-
-        if [[ ${proceed} =~ ^[yY]$ ]]; then
-          return
-        fi
-
-        printf "'%s' update script finished.\n\n" "${APP_NAME}"
-        exit 0
-      fi
-      printf "\n"
-
-      declare has_errors=false
-      for migration_script in "${migration_scripts[@]}"; do
-        printf -- "  - Executing '%s' ...\n" "${migration_script}"
-        if bash "${APP_DIR}/scripts/migration/${migration_script}"; then
-          rm "${APP_DIR}/scripts/migration/${migration_script}"
-          printf "  '%s' successfully executed.\n\n" "${migration_script}"
-        else
-          declare proceed
-
-          printf "  '%s' executed with errors.\n\n" "${migration_script}"
-          read -p "  Do you want to proceed? [Y/n] " -er -n 1 proceed
-
-          if [[ ${proceed} =~ ^[nN]$ ]]; then
-            printf "\n  The update has failed!\n\n"
-            printf "  Up to this point, only migration scripts have been executed.\n"
-            printf "  If you want to examine the failed script, you can view it under "
-            printf "'%s'.\n" "${APP_DIR}/scripts/migration/${migration_script}"
-            printf "  Edit and execute it manually if necessary.\n\n"
-
-            printf "  If you want to restore the initial state, you can do this with the backup of the "
-            printf "installation directory under '%s'.\n\n" "${APP_DIR}/backup/release/${SOURCE_VERSION}"
-
-            printf "'%s' update script finished with error.\n\n" "${APP_NAME}"
-
-            exit 1
-          fi
-
-          has_errors=true
-        fi
-      done
-
-      if ${has_errors}; then
-        printf "  Migration scripts executed with errors.\n\n"
-      else
-        printf "  Migration scripts successfully executed.\n\n"
-      fi
-
-    fi
-
-  fi
-
-  printf "Complementary migration scripts check done.\n\n"
-}
-
 load_docker_environment_variables() {
   # shellcheck source=.env.studio-lite
   source ".env.${APP_NAME}"
@@ -357,7 +182,7 @@ export_backend_volume() {
 }
 
 create_data_backup() {
-  printf "4. Data backup creation\n"
+  printf "3. Data backup creation\n"
 
   declare backup
   read -p "  Do you want to create a data backup? [Y/n] " -er -n 1 backup
@@ -375,6 +200,181 @@ create_data_backup() {
   fi
 
   printf "Data backup creation done.\n\n"
+}
+
+validate_source_and_target_release_tag() {
+  if ! check_version_tag_exists "${SOURCE_VERSION}"; then
+    printf -- "- Source release tag: '%s' doesn't exist (anymore)!\n" "${SOURCE_VERSION}"
+
+    return 1
+  fi
+  if ! check_version_tag_exists "${TARGET_VERSION}"; then
+    printf -- "- Target release tag: '%s' doesn't exist (anymore)!\n" "${TARGET_VERSION}"
+
+    return 1
+  fi
+
+  if ! [[ "${SOURCE_VERSION}" =~ ${PRERELEASE_REGEX} || "${SOURCE_VERSION}" =~ ${RELEASE_REGEX} ]]; then
+    printf -- "- Source tag '%s' is neither a valid release nor a valid pre-release tag!\n" "${SOURCE_VERSION}"
+
+    return 1
+  fi
+  if ! [[ "${TARGET_VERSION}" =~ ${PRERELEASE_REGEX} || "${TARGET_VERSION}" =~ ${RELEASE_REGEX} ]]; then
+    printf -- "- Target tag '%s' is neither a valid release nor a valid pre-release tag!\n" "${TARGET_VERSION}"
+
+    return 1
+  fi
+
+  return 0
+}
+
+run_complementary_migration_scripts() {
+  printf "4. Complementary migration scripts check\n"
+
+  if ! validate_source_and_target_release_tag; then
+    printf "  The existence of possible migration scripts could not be determined.\n"
+    printf "Complementary migration scripts check done.\n\n"
+
+    return
+  fi
+
+  declare normalized_source_release_tag="${SOURCE_VERSION}"
+  declare normalized_target_release_tag="${TARGET_VERSION}"
+  declare release_tags
+
+  if [[ "${SOURCE_VERSION}" =~ ${PRERELEASE_REGEX} ]]; then
+    normalized_source_release_tag=$(printf '%s' "${SOURCE_VERSION}" | cut -d'-' -f1)
+  fi
+  if [[ "${TARGET_VERSION}" =~ ${PRERELEASE_REGEX} ]]; then
+    normalized_target_release_tag=$(printf '%s' "${TARGET_VERSION}" | cut -d'-' -f1)
+  fi
+
+  # source <= target
+  if printf '%s\n%s' "${normalized_source_release_tag}" "${normalized_target_release_tag}" | sort -C -V; then
+    # source < target
+    if [ "${normalized_source_release_tag}" != "${normalized_target_release_tag}" ]; then
+      release_tags=$(
+        curl --silent ${REPO_API}/releases?per_page=100 |                                       # get all releases in json format
+          grep tag_name |                                                                       # extract 'tag_name' key and value ("key":"value")
+          cut -d : -f 2,3 |                                                                     # cut off key and delimiter ("value")
+          tr -d \" |                                                                            # truncate quotes  (value)
+          tr -d , |                                                                             # truncate end comma
+          tr -d " " |                                                                           # truncate start space
+          grep -Po "${ALL_RELEASE_REGEX}" |                                                     # use only release and pre-release versions
+          cut -d '-' -f 1 |                                                                     # cut off pre-release suffixes
+          sort -u -V |                                                                          # remove duplicates and sort versions ascending
+          sed -ne "\|${normalized_source_release_tag}|,\|${normalized_target_release_tag}|p" |  # use only versions between source and target version
+          tail -n +2                                                                            # exclude source version
+      )
+    fi
+  fi
+
+  if [ -z "${release_tags}" ]; then
+    printf -- "- No complementary migration scripts to execute.\n"
+
+  else
+    declare release_tag
+
+    for release_tag in ${release_tags}; do
+      declare -a migration_scripts
+      declare migration_script_check_url
+      migration_script_check_url="${REPO_URL}/${TARGET_VERSION}/scripts/migration/${release_tag}.sh"
+      if curl --head --silent --fail --output /dev/null "${migration_script_check_url}" 2>/dev/null; then
+        migration_scripts+=("${release_tag}".sh)
+      fi
+    done
+
+    if [ ${#migration_scripts[@]} -eq 0 ]; then
+      printf -- "- No complementary migration scripts to execute.\n"
+
+    else
+      printf -- "- Complementary Migration script(s) available.\n\n"
+      printf "4.1 Migration script download\n"
+      mkdir -p "${APP_DIR}/scripts/migration"
+      declare migration_script
+      for migration_script in "${migration_scripts[@]}"; do
+        download_file "scripts/migration/${migration_script}" "scripts/migration/${migration_script}"
+        chmod +x "${APP_DIR}/scripts/migration/${migration_script}"
+      done
+
+      printf "\n4.2 Migration script execution\n"
+      printf "  The following migration scripts will be executed for the migration from version %s to version %s:\n" \
+        "${SOURCE_VERSION}" "${TARGET_VERSION}"
+      for migration_script in "${migration_scripts[@]}"; do
+        printf -- "  - %s\n" "${migration_script}"
+      done
+
+      printf "\n  We strongly recommend the installation of the migration scripts, otherwise it is very likely that "
+      printf "errors will occur during operation of the application.\n\n"
+
+      read -p "  Do you want to proceed with the migration? [Y/n] " -er -n 1 continue
+      if [[ ${continue} =~ ^[nN]$ ]]; then
+        HAS_MIGRATION_FILES=true
+
+        printf "\n  If you want to ensure the smooth operation of the application, you can also install the migration "
+        printf "scripts manually.\n"
+        printf "  To do this, change to directory './scripts/migration' and execute the above scripts in ascending "
+        printf "order!\n\n"
+
+        printf "Complementary migration scripts check done.\n\n"
+
+        printf "Since the migration scripts have not been executed, "
+        printf "it is not recommended to proceed with the update procedure.\n"
+
+        declare proceed
+        read -p "Do you want to proceed? [y/N] " -er -n 1 proceed
+
+        if [[ ${proceed} =~ ^[yY]$ ]]; then
+          return
+        fi
+
+        printf "'%s' update script finished.\n\n" "${APP_NAME}"
+        exit 0
+      fi
+      printf "\n"
+
+      declare has_errors=false
+      for migration_script in "${migration_scripts[@]}"; do
+        printf -- "  - Executing '%s' ...\n" "${migration_script}"
+        if bash "${APP_DIR}/scripts/migration/${migration_script}"; then
+          rm "${APP_DIR}/scripts/migration/${migration_script}"
+          printf "  '%s' successfully executed.\n\n" "${migration_script}"
+        else
+          declare proceed
+
+          printf "  '%s' executed with errors.\n\n" "${migration_script}"
+          read -p "  Do you want to proceed? [Y/n] " -er -n 1 proceed
+
+          if [[ ${proceed} =~ ^[nN]$ ]]; then
+            printf "\n  The update has failed!\n\n"
+            printf "  Up to this point, only migration scripts have been executed.\n"
+            printf "  If you want to examine the failed script, you can view it under "
+            printf "'%s'.\n" "${APP_DIR}/scripts/migration/${migration_script}"
+            printf "  Edit and execute it manually if necessary.\n\n"
+
+            printf "  If you want to restore the initial state, you can do this with the backup of the "
+            printf "installation directory under '%s'.\n\n" "${APP_DIR}/backup/release/${SOURCE_VERSION}"
+
+            printf "'%s' update script finished with error.\n\n" "${APP_NAME}"
+
+            exit 1
+          fi
+
+          has_errors=true
+        fi
+      done
+
+      if ${has_errors}; then
+        printf "  Migration scripts executed with errors.\n\n"
+      else
+        printf "  Migration scripts successfully executed.\n\n"
+      fi
+
+    fi
+
+  fi
+
+  printf "Complementary migration scripts check done.\n\n"
 }
 
 run_update_script_in_selected_version() {
@@ -847,9 +847,9 @@ main() {
 
         get_new_release_version
         create_app_dir_backup
-        run_complementary_migration_scripts
         load_docker_environment_variables
         create_data_backup
+        run_complementary_migration_scripts
         run_update_script_in_selected_version
         prepare_installation_dir
         update_files
