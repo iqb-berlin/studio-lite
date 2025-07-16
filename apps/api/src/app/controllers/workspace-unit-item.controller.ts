@@ -20,7 +20,7 @@ import { UnitId } from '../decorators/unit-id.decorator';
 import UnitCommentUnitItem from '../entities/unit-comment-unit-item.entity';
 
 @Controller('workspaces/:workspace_id/units/:unit_id/items')
-export class UnitItemController {
+export class WorkspaceUnitItemController {
   constructor(
     private unitItemsService: UnitItemService
   ) {}
@@ -31,7 +31,7 @@ export class UnitItemController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
   @ApiOkResponse()
-  @ApiTags('unit item')
+  @ApiTags('workspace unit item')
   async findAll(
     @UnitId() unitId: number,
       @Query('withoutMetadata', new ParseBoolPipe({ optional: true })) withoutMetadata: boolean
@@ -48,7 +48,7 @@ export class UnitItemController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
   @ApiCreatedResponse({ description: 'Unit item created' })
-  @ApiTags('unit item')
+  @ApiTags('workspace unit item')
   async create(
     @UnitId() unitId: number, @Body() body: UnitItemWithMetadataDto
   ): Promise<string> {
@@ -58,7 +58,7 @@ export class UnitItemController {
   @Delete(':uuid')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
-  @ApiTags('unit item')
+  @ApiTags('workspace unit item')
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
   @ApiOkResponse()
@@ -78,7 +78,7 @@ export class UnitItemController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
   @ApiOkResponse()
-  @ApiTags('unit item')
+  @ApiTags('workspace unit item')
   async findItemCommentsByUnitId(@UnitId() unitId: number): Promise<UnitCommentUnitItem[]> {
     return this.unitItemsService.findItemCommentsByUnitId(unitId);
   }
