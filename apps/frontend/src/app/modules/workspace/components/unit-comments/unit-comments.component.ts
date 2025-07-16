@@ -1,9 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
-import {
-  forkJoin, Subject, switchMap, takeUntil
-} from 'rxjs';
+import { Subject, switchMap, takeUntil } from 'rxjs';
 
-import { UnitCommentUnitItemDto, UnitItemDto } from '@studio-lite-lib/api-dto';
+import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { CommentsComponent } from '../../../comments/components/comments/comments.component';
@@ -21,8 +19,6 @@ export class UnitCommentsComponent implements OnDestroy {
   unitId: number = 0;
   workspaceId: number = 0;
   unitItems: UnitItemDto[] = [];
-  unitItemsComments: UnitCommentUnitItemDto[] = []; // This should be a more specific type if needed
-
   private ngUnsubscribe = new Subject<void>();
 
   constructor(
@@ -35,26 +31,17 @@ export class UnitCommentsComponent implements OnDestroy {
         takeUntil(this.ngUnsubscribe),
         switchMap(unitId => {
           this.updateComments(unitId);
-          return forkJoin([
-            this.workspaceBackendService.getUnitItems(this.workspaceService.selectedWorkspaceId, unitId),
-            this.workspaceBackendService.getUnitItemComments(this.workspaceService.selectedWorkspaceId, unitId)
-          ]);
+          return this.workspaceBackendService
+            .getUnitItems(this.workspaceService.selectedWorkspaceId, unitId);
         })
       )
-      .subscribe(([items, comments]) => {
-        this.setUnitItems(items);
-        this.setUnitItemsComments(comments);
-      });
+      .subscribe(items => this.setUnitItems(items));
   }
 
   private setUnitItems(items: UnitItemDto[]) {
     this.unitItems = items
       .sort((a, b) => SortAscendingPipe
         .sortAscending(a, b, 'id'));
-  }
-
-  private setUnitItemsComments(unitItemsComments: UnitCommentUnitItemDto[]) {
-    this.unitItemsComments = unitItemsComments;
   }
 
   private updateComments(unitId: number) {
