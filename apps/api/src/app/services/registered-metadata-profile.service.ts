@@ -107,7 +107,7 @@ export class RegisteredMetadataProfileService {
       .findOneBy({ id: this.PROFILE_REGISTRY });
     if (registry) {
       await this.metadataProfileRegistryRepository
-        .save({ ...registry, modifiedAt: new Date() });
+        .save({ ...registry, csv: csv, modifiedAt: new Date() });
     } else {
       await this.createMetadataProfileRegistry(csv);
     }
