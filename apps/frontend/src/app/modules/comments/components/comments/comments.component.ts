@@ -12,6 +12,7 @@ import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatBadge } from '@angular/material/badge';
 import { BackendService } from '../../services/backend.service';
 import { ActiveComment } from '../../models/active-comment.interface';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
@@ -29,7 +30,7 @@ import { FilteredCommentsPipe } from '../../pipes/filtered-comments.pipe';
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe, CommentItemSelectionComponent, FilteredCommentsPipe, MatMenuTrigger, MatMenu, MatFabButton, MatIcon]
+  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe, CommentItemSelectionComponent, FilteredCommentsPipe, MatMenuTrigger, MatMenu, MatFabButton, MatIcon, MatBadge]
 })
 export class CommentsComponent implements OnInit, OnDestroy {
   @Input() userId!: number;
