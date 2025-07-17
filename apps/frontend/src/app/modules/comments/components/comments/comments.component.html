@@ -5,13 +5,15 @@
     </div>
   }
   @if (!newCommentOnly) {
-    <studio-lite-comment-item-selection
-      class="comment-item-selection fx-row-start-stretch"
-      [unitItems]="unitItems"
-      [(selectedItems)]="filteredItems"
-      [label]="'comments.filter-items' | translate">
-    </studio-lite-comment-item-selection>
-
+    <button class="filter-button" matFab [matMenuTriggerFor]="menu"><mat-icon>filter_alt</mat-icon></button>
+    <mat-menu class="comments-filter-menu" #menu="matMenu" [xPosition] = "'before'" [yPosition] = "'below'">
+      <studio-lite-comment-item-selection
+        class="comment-item-selection fx-row-start-stretch"
+        [unitItems]="unitItems"
+        [(selectedItems)]="filteredItems"
+        [label]="'comments.filter-items' | translate">
+      </studio-lite-comment-item-selection>
+    </mat-menu>
 
     <div class="comments fx-flex-fill">
       @for (rootComment of (comments | filteredComments : filteredItems) | rootComments; track rootComment) {
