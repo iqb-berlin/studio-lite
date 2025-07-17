@@ -60,7 +60,9 @@ export class CommentsComponent implements OnInit, OnDestroy {
     this.getUpdatedComments()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        this.setLatestCommentId();
+        setTimeout(() => {
+          this.setLatestCommentId();
+        });
       });
   }
 
@@ -182,12 +184,18 @@ export class CommentsComponent implements OnInit, OnDestroy {
       .pipe(
         switchMap(comments => {
           this.comments = comments;
-          if (this.comments.length && this.reviewId <= 0) {
+          if (this.comments.length) {
             this.latestComment = this.comments
               .reduce((previousComment, currentComment) => (
                 previousComment.changedAt > currentComment.changedAt ? previousComment : currentComment));
-            const updateUnitUser = { lastSeenCommentChangedAt: this.latestComment.changedAt, userId: this.userId };
-            return this.backendService.updateComments(updateUnitUser, this.workspaceId, this.unitId);
+            if (this.reviewId <= 0) {
+              const updateUnitUser = {
+                lastSeenCommentChangedAt: this.latestComment.changedAt,
+                userId: this.userId
+              };
+              return this.backendService.updateComments(updateUnitUser, this.workspaceId, this.unitId);
+            }
+            return of(true);
           }
           return of(false);
         })
