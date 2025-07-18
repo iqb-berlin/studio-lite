@@ -13,6 +13,8 @@ import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatBadge } from '@angular/material/badge';
+import { MatListOption, MatSelectionList } from '@angular/material/list';
+import { FormsModule } from '@angular/forms';
 import { BackendService } from '../../services/backend.service';
 import { ActiveComment } from '../../models/active-comment.interface';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
@@ -22,7 +24,6 @@ import { RootCommentsPipe } from '../../pipes/root-comments.pipe';
 import { CommentEditorComponent } from '../comment-editor/comment-editor.component';
 import { ScrollCommentIntoViewDirective } from '../../directives/scroll-comment-into-view.directive';
 import { CommentComponent } from '../comment/comment.component';
-import { CommentItemSelectionComponent } from '../comment-item-selection/comment-item-selection.component';
 import { FilteredCommentsPipe } from '../../pipes/filtered-comments.pipe';
 
 @Component({
@@ -30,7 +31,7 @@ import { FilteredCommentsPipe } from '../../pipes/filtered-comments.pipe';
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe, CommentItemSelectionComponent, FilteredCommentsPipe, MatMenuTrigger, MatMenu, MatFabButton, MatIcon, MatBadge]
+  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe, FilteredCommentsPipe, MatMenuTrigger, MatMenu, MatFabButton, MatIcon, MatBadge, MatSelectionList, MatListOption, FormsModule]
 })
 export class CommentsComponent implements OnInit, OnDestroy {
   @Input() userId!: number;

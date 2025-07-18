@@ -5,18 +5,26 @@
     </div>
   }
   @if (!newCommentOnly) {
-    <button class="filter-button" matFab [matMenuTriggerFor]="menu">
+    <button class="filter-button" matFab
+            [matMenuTriggerFor]="filterMenu">
       <mat-icon matBadgeOverlap="false"
                 [matBadgeHidden]="!filteredItems.length"
                 [matBadge]="filteredItems.length">filter_alt</mat-icon>
     </button>
-    <mat-menu class="comments-filter-menu" #menu="matMenu" [xPosition] = "'before'" [yPosition] = "'below'">
-      <studio-lite-comment-item-selection
-        class="comment-item-selection fx-row-start-stretch"
-        [unitItems]="unitItems"
-        [(selectedItems)]="filteredItems"
-        [label]="'comments.filter-items' | translate">
-      </studio-lite-comment-item-selection>
+
+    <mat-menu #filterMenu="matMenu"
+              class="comments-filter-menu"
+              [xPosition] = "'before'"
+              [yPosition] = "'below'">
+      <mat-selection-list [(ngModel)]="filteredItems">
+        @for (item of unitItems; track item) {
+          <mat-list-option togglePosition="before"
+                           [value]="item.uuid"
+                           (click)="$event.stopPropagation()">
+            {{item.id ? item.id : ('metadata.without-id' | translate)}}
+          </mat-list-option>
+        }
+      </mat-selection-list>
     </mat-menu>
 
     <div class="comments fx-flex-fill">
