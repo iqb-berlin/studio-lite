@@ -5,27 +5,10 @@
     </div>
   }
   @if (!newCommentOnly) {
-    <button class="filter-button" matFab
-            [matMenuTriggerFor]="filterMenu">
-      <mat-icon matBadgeOverlap="false"
-                [matBadgeHidden]="!filteredItems.length"
-                [matBadge]="filteredItems.length">filter_alt</mat-icon>
-    </button>
-
-    <mat-menu #filterMenu="matMenu"
-              class="comments-filter-menu"
-              [xPosition] = "'before'"
-              [yPosition] = "'below'">
-      <mat-selection-list [(ngModel)]="filteredItems">
-        @for (item of unitItems; track item) {
-          <mat-list-option togglePosition="before"
-                           [value]="item.uuid"
-                           (click)="$event.stopPropagation()">
-            {{item.id ? item.id : ('metadata.without-id' | translate)}}
-          </mat-list-option>
-        }
-      </mat-selection-list>
-    </mat-menu>
+    <studio-lite-comment-item-filter class="filter-button"
+                                     [(filteredItems)]="filteredItems"
+                                     [unitItems]="unitItems">
+    </studio-lite-comment-item-filter>
 
     <div class="comments fx-flex-fill">
       @for (rootComment of rootCommentsWithReplies | filteredRootComments : filteredItems; track rootComment) {

@@ -7,13 +7,7 @@ import {
   switchMap, Subject, takeUntil, of, Observable, tap
 } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
-import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
-import { MatFabButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { MatBadge } from '@angular/material/badge';
-import { MatListOption, MatSelectionList } from '@angular/material/list';
 import { FormsModule } from '@angular/forms';
 import { BackendService } from '../../services/backend.service';
 import { ActiveComment } from '../../models/active-comment.interface';
@@ -25,13 +19,14 @@ import { CommentComponent } from '../comment/comment.component';
 import { FilteredCommentsPipe } from '../../pipes/filtered-comments.pipe';
 import { FilteredRootCommentsPipe } from '../../pipes/filtered-root-comments.pipe';
 import { RootCommentWithReplies } from '../../models/root-comment-with-replies.interface';
+import { CommentItemFilterComponent } from '../comment-item-filter/comment-item-filter.component';
 
 @Component({
   selector: 'studio-lite-comments',
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, FilteredCommentsPipe, MatMenuTrigger, MatMenu, MatFabButton, MatIcon, MatBadge, MatSelectionList, MatListOption, FormsModule, FilteredRootCommentsPipe]
+  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, FilteredCommentsPipe, FormsModule, FilteredRootCommentsPipe, CommentItemFilterComponent]
 })
 export class CommentsComponent implements OnInit, OnDestroy {
   @Input() userId!: number;
