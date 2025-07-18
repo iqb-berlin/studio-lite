@@ -720,7 +720,11 @@
     "edit": "Bearbeiten",
     "reply": "Antworten",
     "delete": "Löschen",
-    "item": "Item {{itemAlias}}"
+    "item": "Item {{itemAlias}}",
+    "sent": "Kommentar gesendet",
+    "not-sent": "Kommentar konnte nicht gesendet werden",
+    "updated": "Kommentar aktualisiert",
+    "not-updated": "Kommentar konnte nicht aktualisiert werden"
   },
   "comments": {
     "comment-delete-title": "Kommentar löschen",

@@ -9,6 +9,7 @@ import {
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { FormsModule } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../../services/backend.service';
 import { ActiveComment } from '../../models/active-comment.interface';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
@@ -52,7 +53,8 @@ export class CommentsComponent implements OnInit, OnDestroy {
   constructor(
     private translateService: TranslateService,
     private backendService: BackendService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {
     this.latestCommentId.subscribe(() => this.onCommentsUpdated.emit());
   }
@@ -76,15 +78,29 @@ export class CommentsComponent implements OnInit, OnDestroy {
         .updateComment(commentId, updateComment, this.workspaceId, this.unitId, this.reviewId)
         .pipe(
           takeUntil(this.ngUnsubscribe),
-          switchMap(() => this.backendService
-            .updateCommentItemConnections(
-              { userId: this.userId, unitItemUuids: items },
-              this.workspaceId,
-              this.unitId,
-              this.reviewId,
-              commentId
-            )
-          ),
+          switchMap(result => {
+            if (!result) {
+              this.snackBar.open(
+                this.translateService.instant('comment.not-updated'),
+                this.translateService.instant('error'),
+                { duration: 3000 }
+              );
+              return of(null);
+            }
+            this.snackBar.open(
+              this.translateService.instant('comment.updated'),
+              '',
+              { duration: 1000 }
+            );
+            return this.backendService
+              .updateCommentItemConnections(
+                { userId: this.userId, unitItemUuids: items },
+                this.workspaceId,
+                this.unitId,
+                this.reviewId,
+                commentId
+              );
+          }),
           tap(() => this.setActiveComment(null)),
           switchMap(() => this.getUpdatedComments())
         )
@@ -154,8 +170,18 @@ export class CommentsComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.ngUnsubscribe),
         switchMap(commentId => {
-          if (!commentId) return of(null);
-
+          if (!commentId) {
+            this.snackBar.open(
+              this.translateService.instant('comment.not-sent'),
+              this.translateService.instant('error'),
+              { duration: 3000 }
+            );
+            return of(null);
+          }
+          this.snackBar.open(
+            this.translateService.instant('comment.sent'),
+            '',
+            { duration: 1000 });
           return this.backendService
             .updateCommentItemConnections(
               { userId: this.userId, unitItemUuids: items },
