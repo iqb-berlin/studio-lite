@@ -19,19 +19,19 @@ import { BackendService } from '../../services/backend.service';
 import { ActiveComment } from '../../models/active-comment.interface';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
 import { Comment } from '../../models/comment.interface';
-import { RepliesPipe } from '../../pipes/replies.pipe';
-import { RootCommentsPipe } from '../../pipes/root-comments.pipe';
 import { CommentEditorComponent } from '../comment-editor/comment-editor.component';
 import { ScrollCommentIntoViewDirective } from '../../directives/scroll-comment-into-view.directive';
 import { CommentComponent } from '../comment/comment.component';
 import { FilteredCommentsPipe } from '../../pipes/filtered-comments.pipe';
+import { FilteredRootCommentsPipe } from '../../pipes/filtered-root-comments.pipe';
+import { RootCommentWithReplies } from '../../models/root-comment-with-replies.interface';
 
 @Component({
   selector: 'studio-lite-comments',
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, RootCommentsPipe, RepliesPipe, FilteredCommentsPipe, MatMenuTrigger, MatMenu, MatFabButton, MatIcon, MatBadge, MatSelectionList, MatListOption, FormsModule]
+  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, FilteredCommentsPipe, MatMenuTrigger, MatMenu, MatFabButton, MatIcon, MatBadge, MatSelectionList, MatListOption, FormsModule, FilteredRootCommentsPipe]
 })
 export class CommentsComponent implements OnInit, OnDestroy {
   @Input() userId!: number;
@@ -45,6 +45,7 @@ export class CommentsComponent implements OnInit, OnDestroy {
   @Output() onCommentsUpdated = new EventEmitter<void>();
 
   comments: Comment[] = [];
+  rootCommentsWithReplies: RootCommentWithReplies[] = [];
   activeComment: ActiveComment | null = null;
   latestCommentId: Subject<number> = new Subject();
   isCommentProcessing: boolean = false;
@@ -183,12 +184,26 @@ export class CommentsComponent implements OnInit, OnDestroy {
       });
   }
 
+  private setComments(comments: Comment[]): void {
+    this.comments = comments;
+    this.setRootCommentsWithReplies();
+  }
+
+  private setRootCommentsWithReplies(): void {
+    this.rootCommentsWithReplies = this.comments.filter(c => c.parentId === null)
+      .map(comment => (
+        {
+          rootComment: comment,
+          replies: this.comments.filter(reply => reply.parentId === comment.id)
+        }));
+  }
+
   private getUpdatedComments(): Observable<boolean> {
     if (this.newCommentOnly) return of(true);
     return this.backendService.getComments(this.workspaceId, this.unitId, this.reviewId)
       .pipe(
         switchMap(comments => {
-          this.comments = comments;
+          this.setComments(comments);
           if (this.comments.length) {
             this.latestComment = this.comments
               .reduce((previousComment, currentComment) => (
