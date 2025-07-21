@@ -286,7 +286,9 @@
     "unitMetadataReportFileName": "{{date}} Bericht Aufgaben Metadaten",
     "itemsMetadataReportFileName": "{{date}} Bericht Items Metadaten",
     "sort-by-variableId": "Nach Variablen ID sortieren",
-    "sort-by-id": "Nach Item ID sortieren"
+    "sort-by-id": "Nach Item ID sortieren",
+    "delete-item": "Item löschen",
+    "delete-item-question": "Soll Item \"{{itemId}}\" gelöscht werden?"
   },
   "wsg-settings": {
     "save-settings": "Einstellungen speichern",

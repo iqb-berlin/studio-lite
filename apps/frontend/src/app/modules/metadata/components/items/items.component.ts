@@ -4,7 +4,7 @@ import {
 import {
   BehaviorSubject, Subject, takeUntil
 } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
@@ -22,6 +22,7 @@ import { AliasId } from '../../models/alias-id.interface';
 import { NewItemComponent } from '../new-item/new-item.component';
 import { ItemSortService } from '../../services/item-sort.service';
 import { SortAscendingPipe } from '../../../comments/pipes/sort-ascending.pipe';
+import { DeleteDialogComponent } from '../../../comments/components/delete-dialog/delete-dialog.component';
 
 @Component({
   selector: 'studio-lite-items',
@@ -47,8 +48,11 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
 
   constructor(
     private addItemDialog: MatDialog,
-    public itemSortService: ItemSortService
-  ) {}
+    public itemSortService: ItemSortService,
+    private translateService: TranslateService,
+    private dialog: MatDialog
+  ) {
+  }
 
   ngOnInit(): void {
     this.variablesLoader
@@ -77,10 +81,30 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
     this.isTextOnlyView = !this.isTextOnlyView;
   }
 
-  remove(index: number): void {
+  private remove(index: number): void {
     this.items.splice(index, 1);
     this.metadata.items = this.items;
     this.emitMetadata();
+  }
+
+  openDeleteDialog(itemIndex: number): void {
+    this.dialog
+      .open(DeleteDialogComponent, {
+        width: '400px',
+        data: {
+          title: this.translateService.instant('metadata.delete-item'),
+          content: this.translateService
+            .instant('metadata.delete-item-question',
+              { itemId: (this.items[itemIndex].id || this.translateService.instant('metadata.without-id')) })
+        }
+      })
+      .afterClosed()
+      .pipe(
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe((result: boolean) => {
+        if (result) this.remove(itemIndex);
+      });
   }
 
   add(): void {
