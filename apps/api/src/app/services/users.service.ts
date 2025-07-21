@@ -203,12 +203,10 @@ export class UsersService {
   }
 
   async hasUsers(): Promise<boolean> {
-    this.logger.log('Checking hasUsers');
     const user = await this.usersRepository.findOne({
       where: { id: MoreThan(0) },
       select: { id: true }
     });
-    this.logger.log(user);
     return !!user;
   }
 
