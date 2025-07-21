@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../../services/backend.service';
 import { ActiveComment } from '../../models/active-comment.interface';
-import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
+import { DeleteDialogComponent } from '../../../shared/components/delete-dialog/delete-dialog.component';
 import { Comment } from '../../models/comment.interface';
 import { CommentEditorComponent } from '../comment-editor/comment-editor.component';
 import { ScrollCommentIntoViewDirective } from '../../directives/scroll-comment-into-view.directive';

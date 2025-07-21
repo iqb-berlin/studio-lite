@@ -22,7 +22,7 @@ import { AliasId } from '../../models/alias-id.interface';
 import { NewItemComponent } from '../new-item/new-item.component';
 import { ItemSortService } from '../../services/item-sort.service';
 import { SortAscendingPipe } from '../../../comments/pipes/sort-ascending.pipe';
-import { DeleteDialogComponent } from '../../../comments/components/delete-dialog/delete-dialog.component';
+import { DeleteDialogComponent } from '../../../shared/components/delete-dialog/delete-dialog.component';
 
 @Component({
   selector: 'studio-lite-items',
