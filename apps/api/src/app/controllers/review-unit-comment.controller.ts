@@ -17,9 +17,6 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { UnitCommentService } from '../services/unit-comment.service';
-import { WorkspaceGuard } from '../guards/workspace.guard';
-import { CommentAccessGuard } from '../guards/comment-access.guard';
-import { CommentWriteGuard } from '../guards/comment-write.guard';
 import { UnitId } from '../decorators/unit-id.decorator';
 import { ItemCommentService } from '../services/item-comment.service';
 
@@ -76,7 +73,7 @@ export class ReviewUnitCommentController {
   }
 
   @Patch(':comment_id/items')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard, CommentWriteGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
