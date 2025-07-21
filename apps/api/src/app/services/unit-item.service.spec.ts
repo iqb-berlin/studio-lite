@@ -21,6 +21,10 @@ describe('UnitItemService', () => {
         {
           provide: UnitItemMetadataService,
           useValue: createMock<UnitItemMetadataService>()
+        },
+        {
+          provide: UnitItemService,
+          useValue: createMock<UnitItemMetadataService>()
         }
       ]
     }).compile();
