@@ -134,7 +134,7 @@
                 </div>
               </mat-expansion-panel>
 
-              @if (workspaceService.userAccessLevel > 1) {
+              @if (workspaceService.userAccessLevel > 0) {
                 <mat-expansion-panel>
                   <mat-expansion-panel-header>
                     <mat-panel-title>
@@ -142,7 +142,7 @@
                     </mat-panel-title>
                   </mat-expansion-panel-header>
                   <div class="fx-column-start-start fx-gap-10">
-                    @if (workspaceService.userAccessLevel > 1) {
+                    @if (workspaceService.userAccessLevel > 0) {
                       <div class="fx-row-start-center fx-gap-20">
                         <button mat-raised-button
                                 color="primary"
