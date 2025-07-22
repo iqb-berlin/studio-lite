@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import {
-  addFirstUser, addModules, assignVariableToItem,
+  addFirstUser, addModules, assignVariableToItem, clickIndexTab,
   createGroup, createItem,
   createWs,
   deleteFirstUser,
@@ -121,8 +121,13 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.contains('span.item_value', 'drop-list_1').should('not.exist');
   });
 
-  it('creates a comment ', () => {
-    cy.pause();
+  it('creates a comment to items ', () => {
+    clickIndexTab('Kommentare');
+    cy.get('tiptap-editor').type('Neue Kommentar zu item1');
+    cy.get('.fx-row-space-between-end').find('svg').eq(0).click();
+    cy.get('.mat-pseudo-checkbox').next().contains('01').click();
+    cy.get('.mat-pseudo-checkbox').next().contains('02').click();
+    cy.contains('button', 'send').click({ force: true });
   });
 
   it('deletes the data', () => {
