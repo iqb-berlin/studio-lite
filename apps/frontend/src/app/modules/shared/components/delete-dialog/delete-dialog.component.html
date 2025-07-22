@@ -5,11 +5,11 @@
   <p>{{content}}</p>
 </div>
 <div mat-dialog-actions align="end">
-  <button mat-button color='warn'
+  <button mat-raised-button color='primary'
           (click)="confirm()">
     {{'delete-dialog.delete' | translate}}
   </button>
-  <button mat-button
+  <button mat-raised-button
           cdkFocusInitial
           (click)="decline()">
     {{'delete-dialog.cancel' | translate}}
