@@ -1,13 +1,13 @@
 <div class="home-body fx-row-center-stretch fx-wrap">
   @if (appService.authData.userId === 0 && appService.authData.reviews.length === 0) {
     <studio-lite-login
-      class="fx-column-start-stretch box-left">
+      class="fx-column-start-stretch box box-left">
     </studio-lite-login>
   }
 
   @if (appService.authData.userId > 0) {
     <studio-lite-user-workspaces-area
-      class="fx-column-start-stretch box-left"
+      class="fx-column-start-stretch box box-left"
       [workspaceGroups]="appService.authData.workspaces"
       [warning]="appService.globalWarning"
       [isAdmin]="appService.authData.isAdmin">
@@ -16,13 +16,13 @@
 
   @if (appService.authData.reviews.length > 0) {
     <studio-lite-user-reviews-area
-      class="fx-column-start-stretch box-left"
+      class="fx-column-start-stretch box box-left"
       [reviews]="appService.authData.reviews"
       [isReviewUser]="appService.authData.userId === 0">
     </studio-lite-user-reviews-area>
   }
 
-  <studio-lite-app-info class="fx-column-start-stretch box-right"
+  <studio-lite-app-info class="fx-column-start-stretch box box-right"
     [appTitle]="appService.appConfig.appTitle"
     [introHtml]="appService.appConfig.introHtml"
     [hasReviews]="appService.authData.reviews.length > 0"
