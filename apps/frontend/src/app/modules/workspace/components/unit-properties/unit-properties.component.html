@@ -156,7 +156,7 @@
                         }
                       </div>
                     }
-                    @if (workspaceService.userAccessLevel > 2) {
+                    @if (workspaceService.userAccessLevel > 0) {
                       <button mat-raised-button
                               color="primary"
                               [disabled]="!(selectedUnitId | canReturnUnit : workspaceService.unitList)"
