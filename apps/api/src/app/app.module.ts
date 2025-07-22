@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_FILTER } from '@nestjs/core';
 import { AppController } from './controllers/app.controller';
 import { AppVersionProvider } from './guards/app-version.guard';
 import { GroupAdminWorkspaceController } from './controllers/group-admin-workspace.controller';
@@ -76,6 +77,7 @@ import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.
 import { ItemCommentService } from './services/item-comment.service';
 import UnitCommentUnitItem from './entities/unit-comment-unit-item.entity';
 import { ReviewUnitItemController } from './controllers/review-unit-item.controller';
+import { HttpExceptionFilter } from './exceptions/http-exception.filter';
 
 @Module({
   imports: [
@@ -212,6 +214,11 @@ import { ReviewUnitItemController } from './controllers/review-unit-item.control
     UnitItemMetadataController
   ],
   providers: [
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter
+    },
+
     AppVersionProvider,
     AuthService,
     LocalStrategy,

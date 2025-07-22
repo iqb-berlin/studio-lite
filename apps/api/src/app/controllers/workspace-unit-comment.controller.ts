@@ -107,8 +107,8 @@ export class WorkspaceUnitCommentController {
   @ApiParam({ name: 'unit_id', type: Number })
   @ApiParam({ name: 'comment_id', type: Number })
   @ApiOkResponse({ description: 'Comment item connections for successfully updated.' })
-  @ApiNotFoundResponse({ description: 'Comment not found.' })
-  @ApiUnauthorizedResponse({ description: 'Not authorized to update comment.' })
+  @ApiNotFoundResponse({ description: 'Comment item connections not found.' })
+  @ApiUnauthorizedResponse({ description: 'Not authorized to update comment item connections.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   async patchCommentItems(@Param('comment_id', ParseIntPipe) commentId: number,
     @UnitId() unitId: number,
