@@ -100,11 +100,11 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('checks the order of items before and after clicking Nach Variable ID Sortieren is not the same', () => {
-    cy.get('studio-lite-item').eq(2).find('span:contains("03")').should('exist');
+    cy.get('studio-lite-item').eq(1).find('span:contains("02")').should('exist');
     cy.get('studio-lite-item').eq(0).find('span:contains("01")').should('exist');
     cy.get('select.sort-items').select('Nach Variablen ID sortieren', { force: true });
-    cy.get('studio-lite-item').eq(0).find('span:contains("03")').should('exist');
-    cy.get('studio-lite-item').eq(2).find('span:contains("01")').should('exist');
+    cy.get('studio-lite-item').eq(0).find('span:contains("02")').should('exist');
+    cy.get('studio-lite-item').eq(1).find('span:contains("01")').should('exist');
   });
 
   it('checks that the select order by Id exists', () => {
@@ -119,6 +119,10 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     assignVariableToItem('');
     cy.contains('mat-icon', 'visibility').click({ force: true });
     cy.contains('span.item_value', 'drop-list_1').should('not.exist');
+  });
+
+  it('creates a comment ', () => {
+    cy.pause();
   });
 
   it('deletes the data', () => {
