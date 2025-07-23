@@ -111,7 +111,7 @@
     "zone.js": "0.15.0"
   },
   "overrides": {
-    "stylus": "github:stylus/stylus#0.64.4"
+    "stylus": "0.0.1-security"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "20.0.5",
