@@ -1,6 +1,6 @@
 {
   "name": "studio-lite",
-  "version": "12.5.1",
+  "version": "13.0.0",
   "author": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen",
   "license": "MIT",
   "scripts": {
@@ -109,6 +109,9 @@
     "uuid": "^8.3.2",
     "xmlbuilder2": "^3.0.2",
     "zone.js": "0.15.0"
+  },
+  "overrides": {
+    "stylus": "github:stylus/stylus#0.64.4"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "20.0.5",
