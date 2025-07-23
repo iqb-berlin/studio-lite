@@ -834,7 +834,8 @@
     "rules": "Regeln",
     "no-coding": "Keine Kodierung",
     "metadata": "Metadaten",
-    "no-metadata": "Keine Metadaten"
+    "no-metadata": "Keine Metadaten",
+    "connected-items": "Verbundene Items"
   },
   "review": {
     "header": "Review",

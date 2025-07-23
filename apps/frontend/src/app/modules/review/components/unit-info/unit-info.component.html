@@ -50,6 +50,7 @@
 
     @if (reviewService.reviewConfig.showOthersComments && properties) {
       <studio-lite-unit-print-comments
+        [metadata]="properties && properties.metadata && properties.metadata.items || null"
         [unitId]="properties.id"
         [reviewId]="reviewService.reviewId"
         [comments]="reviewService.allComments">
