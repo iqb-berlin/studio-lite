@@ -41,6 +41,7 @@
 
   @if (printOptions | include : 'printComments') {
     <studio-lite-unit-print-comments
+      [metadata]="unitProperties && unitProperties.metadata && unitProperties.metadata.items || null"
       [unitId]="unitId"
       [workspaceId]="workspaceId">
     </studio-lite-unit-print-comments>

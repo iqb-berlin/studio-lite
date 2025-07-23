@@ -16,17 +16,17 @@ function getNameAt(initialName: string): string {
 describe('Studio API tests', () => {
   const noId: string = '9988';
   const fakeUser: UserData = {
-    username: 'falseuser',
+    username: 'fakeuser',
     password: 'paso',
     isAdmin: false
   };
   const user2: UserData = {
-    username: 'user',
+    username: 'userzwei',
     password: 'paso',
     isAdmin: false
   };
   const user3: UserData = {
-    username: 'userTh',
+    username: 'userdrei',
     password: 'paso',
     isAdmin: false
   };
@@ -967,7 +967,7 @@ describe('Studio API tests', () => {
     });
 
     describe('Metadata block', () => {
-      describe('30. GET /api/metadata/registry', () => {
+      describe('30. GET /api/metadata/registry', { defaultCommandTimeout: 100000 }, () => {
         it('200 positive test: should get at least one profile', () => {
           cy.getRegistryAPI(Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {

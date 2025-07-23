@@ -14,3 +14,12 @@
   font-weight: normal;
   margin-left: 10px;
 }
+
+.comment-item {
+  font-weight: normal;
+  margin-left: 2px;
+}
+
+.comment-items {
+  @extend .comment-date;
+}

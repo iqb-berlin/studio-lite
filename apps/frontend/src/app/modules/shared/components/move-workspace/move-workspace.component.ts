@@ -34,6 +34,6 @@ export class MoveWorkspaceComponent {
   constructor(@Inject(MAT_DIALOG_DATA) data: unknown, private wsg_admin_service:WsgAdminService) {
     this.typedData = data as MoveComponentData;
     this.typedData.workspaceGroups = this.typedData.workspaceGroups && this.typedData.workspaceGroups
-      .filter(wsg => wsg.id !== wsg_admin_service.selectedWorkspaceGroupId);
+      .filter(wsg => wsg.id !== wsg_admin_service.selectedWorkspaceGroupId.value);
   }
 }

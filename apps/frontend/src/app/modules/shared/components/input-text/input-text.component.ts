@@ -14,7 +14,10 @@ export interface InputTextData {
   title: string,
   prompt: string,
   default: string,
-  okButtonLabel: string
+  okButtonLabel: string,
+  isBackUpWorkspaceGroup: boolean,
+  maxWorkspaceCount: number,
+  workspacesCount: number
 }
 
 @Component({

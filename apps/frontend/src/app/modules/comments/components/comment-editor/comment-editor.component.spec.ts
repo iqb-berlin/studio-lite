@@ -4,7 +4,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Pipe, PipeTransform } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
-import { NgxTiptapModule } from 'ngx-tiptap';
+import { TiptapEditorDirective } from 'ngx-tiptap';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommentEditorComponent } from './comment-editor.component';
 
@@ -76,7 +76,7 @@ describe('CommentEditorComponent', () => {
         MatIconModule,
         MatSelectModule,
         MatTooltipModule,
-        NgxTiptapModule
+        TiptapEditorDirective
       ]
     }).compileComponents();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -8,11 +8,17 @@ import {
   CodeBookContentSetting,
   CreateReviewDto,
   CreateUnitDto,
-  RequestReportDto, ReviewFullDto, ReviewInListDto,
-  UnitDefinitionDto, UnitDownloadSettingsDto,
+  RequestReportDto,
+  ReviewFullDto,
+  ReviewInListDto,
+  UnitDefinitionDto,
+  UnitDownloadSettingsDto,
   UnitInListDto,
   UnitPropertiesDto,
-  UnitSchemeDto, UsersInWorkspaceDto, WorkspaceGroupFullDto
+  UnitSchemeDto,
+  UsersInWorkspaceDto,
+  WorkspaceGroupFullDto,
+  UnitItemDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -379,6 +385,15 @@ export class WorkspaceBackendService {
       .get<CodingReportDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/scheme`)
       .pipe(
         catchError(() => of([]))
+      );
+  }
+
+  getUnitItems(workspaceId: number, unitId: number): Observable <UnitItemDto[]> {
+    const queryParams = new HttpParams().set('withoutMetadata', true);
+    return this.http
+      .get<UnitItemDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/items`, { params: queryParams })
+      .pipe(
+        catchError(() => [])
       );
   }
 }

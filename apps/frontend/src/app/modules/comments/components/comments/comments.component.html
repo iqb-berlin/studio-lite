@@ -1,16 +1,22 @@
-<div class="fx-column-start-stretch full-height">
+<div class="fx-column-start-stretch full-height comments-container">
   @if (isCommentProcessing) {
     <div class="spinner-container">
       <mat-spinner class="fx-flex-fix-100" ></mat-spinner>
     </div>
   }
   @if (!newCommentOnly) {
+    <studio-lite-comment-item-filter class="filter-button"
+                                     [(filteredItems)]="filteredItems"
+                                     [unitItems]="unitItems">
+    </studio-lite-comment-item-filter>
+
     <div class="comments fx-flex-fill">
-      @for (rootComment of comments | rootComments; track rootComment) {
+      @for (rootComment of rootCommentsWithReplies | filteredRootComments : filteredItems; track rootComment) {
         <studio-lite-comment
-          [comment]="rootComment"
+          [comment]="rootComment.rootComment"
           [userId]="userId"
-          [replies]="comments | replies: rootComment.id"
+          [unitItems]="unitItems"
+          [replies]="(rootComment.replies | filteredComments : filteredItems)"
           [activeComment]="activeComment"
           [latestCommentId]="latestCommentId"
           [adminMode]="adminMode"
@@ -19,7 +25,7 @@
           (deleteComment)="deleteComment($event)"
           (updateComment)="updateComment($event)"
           studioLiteScrollCommentIntoView
-          [id]="rootComment.id"
+          [id]="rootComment.rootComment.id"
           [scrollTargetId]="latestCommentId">
         </studio-lite-comment>
       }
@@ -29,8 +35,9 @@
   <div class="new-comment">
     <studio-lite-comment-editor
       submitLabel="comment-editor.write"
-      [label]="'comments.write-comment' | translate"
-      (handleSubmit)="addComment({ text: $event, parentId: null })">
+      [unitItems]="unitItems"
+      [placeholder]="'comments.write-comment' | translate"
+      (handleSubmit)="addComment({ text: $event.text, parentId: null, items: $event.items })">
     </studio-lite-comment-editor>
   </div>
 </div>

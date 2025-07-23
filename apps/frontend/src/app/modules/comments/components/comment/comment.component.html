@@ -4,11 +4,14 @@
     [ownComment]="ownComment">
   </studio-lite-comment-badge>
 
-  <div class="fx-column-start-stretch">
+  <div class="fx-column-start-start">
 
-    <div class="comment-meta fx-row-start-stretch">
+    <div class="comment-meta fx-row-start-end">
       <div>{{ comment.userName }}</div>
       <div>{{ comment.createdAt | fullTimestamp }}</div>
+      @for (uuidId of (comment.itemUuids | commentItemUuidsIds : unitItems) | sortAscending : 'id'; track uuidId) {
+        <studio-lite-comment-item [label]="uuidId.id"></studio-lite-comment-item>
+      }
     </div>
 
     <div class="fx-row-start-stretch fx-wrap">
@@ -25,8 +28,11 @@
           <studio-lite-comment-editor
             studioLiteScrollEditorIntoView [isVisible] = "activeComment | isEditing: comment"
             submitLabel="comment-editor.edit"
+            [placeholder]="'comments.write-comment' | translate"
             [initialHTML]="comment.body"
-            (handleSubmit)="updateComment.emit({ text: $event, commentId: comment.id })"
+            [unitItems]="unitItems"
+            [selectedItems]="comment.itemUuids"
+            (handleSubmit)="updateComment.emit({ text: $event.text, commentId: comment.id, items: $event.items })"
             (handleCancel)="setActiveComment.emit(null)">
           </studio-lite-comment-editor>
         }
@@ -35,41 +41,43 @@
           <studio-lite-comment-editor
             studioLiteScrollEditorIntoView [isVisible] = "activeComment | isReplying: comment"
             submitLabel="comment-editor.reply"
+            [placeholder]="'comments.write-comment' | translate"
+            [unitItems]="unitItems"
+            [selectedItems]="comment.itemUuids"
             (handleCancel)="setActiveComment.emit(null)"
-            (handleSubmit)="addComment.emit({ text: $event, parentId: replyId })">
+            (handleSubmit)="addComment.emit({ text: $event.text, parentId: replyId, items: $event.items })">
           </studio-lite-comment-editor>
         }
       </div>
 
-      <div class="fx-flex-row-fix-150">
-        <button mat-icon-button
-          class="comment-action"
-          matTooltip = "{{'comment.reply' | translate}}"
-          [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
-          (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.replying })">
-          <studio-lite-wrapped-icon icon="reply"></studio-lite-wrapped-icon>
-        </button>
-        @if (ownComment) {
-          <button
-            mat-icon-button
+      @if (!(activeComment | isEditing: comment) && !(activeComment | isReplying: comment)) {
+        <div class="fx-flex-row-fix-150">
+          <button mat-icon-button
             class="comment-action"
-            matTooltip = "{{'comment.edit' | translate}}"
-            [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
-            (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.editing })">
-            <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
+            matTooltip = "{{'comment.reply' | translate}}"
+            (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.replying })">
+            <studio-lite-wrapped-icon icon="reply"></studio-lite-wrapped-icon>
           </button>
-        }
-        @if (ownComment || adminMode) {
-          <button
-            mat-icon-button
-            class="comment-action"
-            matTooltip = "{{'comment.delete' | translate}}"
-            [disabled] ="(activeComment | isEditing: comment) || (activeComment | isReplying: comment)"
-            (click)="deleteComment.emit({ commentId: comment.id, numberOfReplies: replies.length })">
-            <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
-          </button>
-        }
-      </div>
+          @if (ownComment) {
+            <button
+              mat-icon-button
+              class="comment-action"
+              matTooltip = "{{'comment.edit' | translate}}"
+              (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.editing })">
+              <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
+            </button>
+          }
+          @if (ownComment || adminMode) {
+            <button
+              mat-icon-button
+              class="comment-action"
+              matTooltip = "{{'comment.delete' | translate}}"
+              (click)="deleteComment.emit({ commentId: comment.id, numberOfReplies: replies.length })">
+              <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
+            </button>
+          }
+        </div>
+      }
     </div>
 
     @if (replies.length) {
@@ -80,6 +88,7 @@
           [parentId]="comment.id"
           [replies]="[]"
           [userId]="userId"
+          [unitItems]="unitItems"
           [adminMode]="adminMode"
           [latestCommentId]="latestCommentId"
           (setActiveComment)="setActiveComment.emit($event)"

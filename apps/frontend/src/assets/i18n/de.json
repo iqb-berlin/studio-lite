@@ -286,7 +286,9 @@
     "unitMetadataReportFileName": "{{date}} Bericht Aufgaben Metadaten",
     "itemsMetadataReportFileName": "{{date}} Bericht Items Metadaten",
     "sort-by-variableId": "Nach Variablen ID sortieren",
-    "sort-by-id": "Nach Item ID sortieren"
+    "sort-by-id": "Nach Item ID sortieren",
+    "delete-item": "Item löschen",
+    "delete-item-question": "Soll Item \"{{itemId}}\" gelöscht werden?"
   },
   "wsg-settings": {
     "save-settings": "Einstellungen speichern",
@@ -394,7 +396,10 @@
     "drop-box-selected": "Abgabebereich geändert",
     "drop-box-not-selected": "Konnte Abgabebereich nicht ändern",
     "no-drop-box": "Kein Abgabebereich",
-    "drop-box": "Abgabebereich"
+    "drop-box": "Abgabebereich",
+    "too-many-workspaces-warning": "In dieser Arbeitsbereichsgruppe sind mehr als {{maxWorkspaceCount}} Arbeitsbereiche mit insgesamt {{unitsCount}} Aufgaben vorhanden. Bitte löschen Sie erst Arbeitsbereiche, bevor Sie neue anlegen.",
+    "too-many-workspaces-warning-small": "In dieser Arbeitsbereichsgruppe sind mehr als {{maxWorkspaceCount}} Arbeitsbereiche vorhanden. Bitte löschen Sie erst Arbeitsbereiche, bevor Sie neue anlegen.",
+    "units-count-info": "In dieser Arbeitsbereichsgruppe sind insgesamt {{unitsCount}} Aufgaben vorhanden."
   },
   "workspace-settings": {
     "modules": "Verona Module",
@@ -710,20 +715,27 @@
     "text-color": "Textfarbe",
     "text-background": "Texthintergrund",
     "enumeration": "Aufzählung",
-    "image": "Bild"
+    "image": "Bild",
+    "link-to-item": "Mit Item verbinden"
   },
   "comment": {
     "edit": "Bearbeiten",
     "reply": "Antworten",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "item": "Item {{itemAlias}}",
+    "sent": "Kommentar gesendet",
+    "not-sent": "Kommentar konnte nicht gesendet werden",
+    "updated": "Kommentar aktualisiert",
+    "not-updated": "Kommentar konnte nicht aktualisiert werden"
   },
   "comments": {
     "comment-delete-title": "Kommentar löschen",
     "comment-delete-question": "Soll der Kommentar gelöscht werden?",
     "comments-delete-title": "Kommentare löschen",
     "comments-delete-question": "Soll der Kommentar einschließlich aller Antworten gelöscht werden?",
-    "write-comment": "Neuen Kommentar verfassen:",
-    "send-comment": "Kommentar senden"
+    "write-comment": "Kommentar verfassen ...",
+    "send-comment": "Kommentar senden",
+    "filter-items": "Kommentare nach Items filtern"
   },
   "delete-dialog": {
     "cancel": "Abbrechen",
@@ -822,7 +834,8 @@
     "rules": "Regeln",
     "no-coding": "Keine Kodierung",
     "metadata": "Metadaten",
-    "no-metadata": "Keine Metadaten"
+    "no-metadata": "Keine Metadaten",
+    "connected-items": "Verbundene Items"
   },
   "review": {
     "header": "Review",

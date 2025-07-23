@@ -1,0 +1,13 @@
+<mat-form-field class="items-selection fx-flex-fill">
+  <mat-label>{{label}}</mat-label>
+  <mat-select multiple
+              [value]="selectedItems"
+              [disabled]="disabled"
+              (valueChange)="selectedItemsChange.emit($event)">
+    @for (item of unitItems; track item;) {
+      <mat-option [value]="item.uuid">
+        {{item.id ? item.id : ('metadata.without-id' | translate)}}
+      </mat-option>
+    }
+  </mat-select>
+</mat-form-field>

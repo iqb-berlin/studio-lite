@@ -9,7 +9,7 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { NgxTiptapModule } from 'ngx-tiptap';
+import { TiptapEditorDirective } from 'ngx-tiptap';
 import { MatInputModule } from '@angular/material/input';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -20,9 +20,6 @@ import { CommentsComponent } from './components/comments/comments.component';
 import { BackendService } from './services/backend.service';
 import { IsEditingPipe } from './pipes/is-editing.pipe';
 import { IsReplyingPipe } from './pipes/is-replying.pipe';
-import { DeleteDialogComponent } from './components/delete-dialog/delete-dialog.component';
-import { RootCommentsPipe } from './pipes/root-comments.pipe';
-import { RepliesPipe } from './pipes/replies.pipe';
 import { SafeResourceHTMLPipe } from './pipes/safe-resource-html.pipe';
 import { ScrollCommentIntoViewDirective } from './directives/scroll-comment-into-view.directive';
 import { AuthInterceptor } from '../../interceptors/auth.interceptor';
@@ -31,6 +28,7 @@ import { ScrollEditorIntoViewDirective } from './directives/scroll-editor-into-v
 import { FromNowPipe } from './pipes/from-now.pipe';
 import { Comment } from './models/comment.interface';
 import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
+import { CommentItemSelectionComponent } from './components/comment-item-selection/comment-item-selection.component';
 
 @NgModule({
   imports: [
@@ -44,19 +42,17 @@ import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
     MatSelectModule,
     MatMenuModule,
     MatTooltipModule,
-    NgxTiptapModule,
+    TiptapEditorDirective,
     FormsModule,
     MatInputModule,
     MatProgressSpinnerModule,
     CommentsComponent,
     CommentComponent,
     CommentEditorComponent,
+    CommentItemSelectionComponent,
     SafeResourceHTMLPipe,
     IsEditingPipe,
     IsReplyingPipe,
-    DeleteDialogComponent,
-    RootCommentsPipe,
-    RepliesPipe,
     ScrollCommentIntoViewDirective,
     ScrollEditorIntoViewDirective,
     CommentBadgeComponent,

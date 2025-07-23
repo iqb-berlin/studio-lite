@@ -30,6 +30,8 @@ export class WorkspaceMenuComponent {
   @Input() checkedRows!: WorkspaceInListDto[];
   @Input() workspaces!: WorkspaceInListDto[];
   @Input() isWorkspaceGroupAdmin!: boolean;
+  @Input() maxWorkspaceCount!: number;
+  @Input() isBackUpWorkspaceGroup!: boolean;
 
   @Output() workspaceAdded: EventEmitter<string> = new EventEmitter<string>();
   @Output() workspaceRenamed: EventEmitter<{ selection: WorkspaceInListDto[], name: string }> =
@@ -68,7 +70,10 @@ export class WorkspaceMenuComponent {
         title: this.translateService.instant('wsg-admin.new-workspace'),
         prompt: this.translateService.instant('wsg-admin.enter-name'),
         default: '',
-        okButtonLabel: this.translateService.instant('wsg-admin.create')
+        okButtonLabel: this.translateService.instant('wsg-admin.create'),
+        isBackUpWorkspaceGroup: this.isBackUpWorkspaceGroup,
+        maxWorkspaceCount: this.maxWorkspaceCount,
+        workspacesCount: this.workspaces.length
       }
     });
     dialogRef.afterClosed().subscribe(result => {
