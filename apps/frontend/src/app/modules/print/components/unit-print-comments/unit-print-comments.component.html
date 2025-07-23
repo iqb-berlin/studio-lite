@@ -15,6 +15,21 @@
       }
       {{comment.userName}}
       <span class="comment-date">{{comment.changedAt | date : 'dd.MM.yyyy HH:mm' }}</span>
+      @if (comment.itemUuids && comment.itemUuids.length && metadata) {
+
+        <span class="comment-items">
+          {{'print.connected-items' | translate}}:
+        </span>
+
+        @for (uuidId of (comment.itemUuids | commentItemUuidsIds : metadata) | sortAscending : 'id'; track uuidId; let last = $last) {
+          <span class="comment-item">
+            {{uuidId.id}}
+            @if (!last) {
+              <span>, </span>
+            }
+          </span>
+        }
+      }
     </h4>
     <div [innerHTML]="comment.body"
       [class.reply]="comment.parentId">

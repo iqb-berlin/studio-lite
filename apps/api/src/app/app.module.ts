@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_FILTER } from '@nestjs/core';
 import { AppController } from './controllers/app.controller';
 import { AppVersionProvider } from './guards/app-version.guard';
 import { GroupAdminWorkspaceController } from './controllers/group-admin-workspace.controller';
@@ -63,7 +64,7 @@ import { ReviewUnitCommentController } from './controllers/review-unit-comment.c
 import { VeronaModuleController } from './controllers/verona-module.controller';
 import { ResourcePackageController } from './controllers/resource-package.controller';
 import { GroupAdminUserController } from './controllers/group-admin-user-controller';
-import { UnitItemController } from './controllers/unit-item.controller';
+import { WorkspaceUnitItemController } from './controllers/workspace-unit-item.controller';
 import { UnitItemService } from './services/unit-item.service';
 import UnitItem from './entities/unit-item.entity';
 import UnitItemMetadata from './entities/unit-item-metadata.entity';
@@ -73,6 +74,10 @@ import { UnitItemMetadataController } from './controllers/unit-item-metadata.con
 import { UnitMetadataService } from './services/unit-metadata.service';
 import UnitMetadataToDelete from './entities/unit-metadata-to-delete.entity';
 import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.service';
+import { ItemCommentService } from './services/item-comment.service';
+import UnitCommentUnitItem from './entities/unit-comment-unit-item.entity';
+import { ReviewUnitItemController } from './controllers/review-unit-item.controller';
+import { HttpExceptionFilter } from './exceptions/http-exception.filter';
 
 @Module({
   imports: [
@@ -100,6 +105,7 @@ import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.
     VeronaModule,
     UnitDefinition,
     UnitComment,
+    UnitCommentUnitItem,
     UnitDropBoxHistory,
     MetadataProfile,
     MetadataVocabulary,
@@ -135,6 +141,7 @@ import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.
           Setting,
           Unit,
           UnitComment,
+          UnitCommentUnitItem,
           UnitDropBoxHistory,
           MetadataProfile,
           MetadataVocabulary,
@@ -165,6 +172,7 @@ import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.
       Setting,
       Unit,
       UnitComment,
+      UnitCommentUnitItem,
       UnitDropBoxHistory,
       MetadataProfile,
       MetadataVocabulary,
@@ -199,12 +207,18 @@ import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.
     ReviewController,
     ReviewUnitController,
     ReviewUnitCommentController,
+    ReviewUnitItemController,
     MetadataController,
     WorkspaceGroupController,
-    UnitItemController,
+    WorkspaceUnitItemController,
     UnitItemMetadataController
   ],
   providers: [
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter
+    },
+
     AppVersionProvider,
     AuthService,
     LocalStrategy,
@@ -218,6 +232,7 @@ import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.
     UnitService,
     UnitCommentService,
     MetadataProfileService,
+    ItemCommentService,
     MetadataVocabularyService,
     RegisteredMetadataProfileService,
     UnitUserService,

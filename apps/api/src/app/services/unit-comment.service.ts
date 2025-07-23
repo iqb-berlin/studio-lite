@@ -6,6 +6,8 @@ import {
 } from '@studio-lite-lib/api-dto';
 import UnitComment from '../entities/unit-comment.entity';
 import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-found.exception';
+import { ItemCommentService } from './item-comment.service';
+import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 
 @Injectable()
 export class UnitCommentService {
@@ -13,27 +15,34 @@ export class UnitCommentService {
 
   constructor(
     @InjectRepository(UnitComment)
-    private unitCommentsRepository: Repository<UnitComment>
+    private unitCommentsRepository: Repository<UnitComment>,
+    private itemCommentService: ItemCommentService
   ) {}
 
   async findOnesComments(unitId: number): Promise<UnitCommentDto[]> {
     this.logger.log(`Returning comments for unit with id: ${unitId}`);
-    return this.unitCommentsRepository
+    const comments = await this.unitCommentsRepository
       .find({
         where: { unitId: unitId },
         order: { createdAt: 'ASC' }
       });
+    return Promise.all(comments.map(async comment => ({
+      ...comment,
+      itemUuids: (await this.itemCommentService.findUnitItemComments(unitId, comment.id))
+        .map(i => i.unitItemUuid)
+    })));
   }
 
-  async copyComments(oldUnitId: number, newUnitId: number): Promise<void> {
+  async copyComments(oldUnitId: number, newUnitId: number, itemUuidLookups: ItemUuidLookup[]): Promise<void> {
     const comments = await this.findOnesComments(oldUnitId);
-    await this.createComments(comments, newUnitId);
+    await this.createComments(comments, newUnitId, itemUuidLookups);
   }
 
   private async copyComment(comment: UnitCommentDto,
                             newUnitId: number,
                             comments: UnitCommentDto[],
-                            parentId: number | null): Promise<number> {
+                            parentId: number | null,
+                            itemUuidLookups: ItemUuidLookup[]): Promise<number> {
     const newComment = this.unitCommentsRepository
       .create({
         ...comment,
@@ -42,13 +51,29 @@ export class UnitCommentService {
         unitId: newUnitId
       });
     await this.unitCommentsRepository.save(newComment);
+    if (comment.itemUuids && comment.itemUuids.length) {
+      await this.createCommentConnections(newComment.id, newUnitId, comment.itemUuids, itemUuidLookups);
+    }
     if (parentId === null) {
       const childComments = comments.filter(c => c.parentId === comment.id);
       await Promise.all(childComments.map(async child => {
-        await this.copyComment(child, newUnitId, comments, newComment.id);
+        await this.copyComment(child, newUnitId, comments, newComment.id, itemUuidLookups);
       }));
     }
     return newComment.id;
+  }
+
+  async createCommentConnections(commentId: number,
+                                 unitId: number,
+                                 commentItemUuids: string[],
+                                 itemUuidLookup: ItemUuidLookup[]): Promise<number[]> {
+    const newItemUuids = commentItemUuids
+      .map(itemUuid => itemUuidLookup
+        .find(lookup => lookup.oldUuid === itemUuid).newUuid);
+    return Promise.all(
+      newItemUuids
+        .map(itemUuid => this.itemCommentService
+          .createCommentItemConnection(unitId, itemUuid, commentId)));
   }
 
   async findOnesLastChangedComment(unitId: number): Promise<UnitCommentDto | null> {
@@ -72,10 +97,10 @@ export class UnitCommentService {
     return newComment.id;
   }
 
-  async createComments(comments: UnitCommentDto[], unitId: number): Promise<void> {
+  async createComments(comments: UnitCommentDto[], unitId: number, itemUuids: ItemUuidLookup[]): Promise<void> {
     const parentComments = comments.filter(c => !c.parentId);
     await Promise.all(parentComments.map(async comment => {
-      await this.copyComment(comment, unitId, comments, comment.parentId);
+      await this.copyComment(comment, unitId, comments, comment.parentId, itemUuids);
     }));
   }
 

@@ -5,7 +5,7 @@ import { Subject } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
-
+import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { ActiveComment, ActiveCommentType } from '../../models/active-comment.interface';
 import { Comment } from '../../models/comment.interface';
 import { IsReplyingPipe } from '../../pipes/is-replying.pipe';
@@ -17,27 +17,31 @@ import { ScrollEditorIntoViewDirective } from '../../directives/scroll-editor-in
 import { CommentEditorComponent } from '../comment-editor/comment-editor.component';
 import { CommentBadgeComponent } from '../comment-badge/comment-badge.component';
 import { FullTimestampPipe } from '../../pipes/full-timestamp.pipe';
+import { CommentItemComponent } from '../comment-item/comment-item/comment-item.component';
+import { CommentItemUuidsIdsPipe } from '../../pipes/comment-item-uuids-ids.pipe';
+import { SortAscendingPipe } from '../../pipes/sort-ascending.pipe';
 
 @Component({
   selector: 'studio-lite-comment',
   templateUrl: './comment.component.html',
   styleUrls: ['./comment.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FullTimestampPipe]
+  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FullTimestampPipe, CommentItemComponent, CommentItemUuidsIdsPipe, SortAscendingPipe]
 })
 export class CommentComponent implements OnInit {
   @Input() comment!: Comment;
   @Input() activeComment!: ActiveComment | null;
   @Input() replies!: Comment[];
   @Input() userId!: number;
+  @Input() unitItems!: UnitItemDto[];
   @Input() parentId!: number | null;
   @Input() latestCommentId!: Subject<number>;
   @Input() adminMode = false;
 
   @Output() setActiveComment = new EventEmitter<ActiveComment | null>();
   @Output() deleteComment = new EventEmitter<{ commentId: number; numberOfReplies: number }>();
-  @Output() addComment = new EventEmitter<{ text: string; parentId: number | null }>();
-  @Output() updateComment = new EventEmitter<{ text: string; commentId: number }>();
+  @Output() addComment = new EventEmitter<{ text: string; parentId: number | null, items: string[] }>();
+  @Output() updateComment = new EventEmitter<{ text: string; commentId: number, items: string[] }>();
 
   ownComment: boolean = false;
   activeCommentType = ActiveCommentType;

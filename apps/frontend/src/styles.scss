@@ -212,6 +212,15 @@ div.logo img {
   justify-content: flex-start;
   align-items: stretch;
 }
+
+.fx-row-start-baseline {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: baseline;
+}
+
 .fx-row-center-start {
   box-sizing: border-box;
   display: flex;

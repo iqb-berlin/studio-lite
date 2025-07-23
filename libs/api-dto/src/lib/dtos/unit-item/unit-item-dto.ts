@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UnitItemDto {
   @ApiProperty()
-    uuid!: string;
+    uuid?: string;
 
   @ApiProperty()
     id?: string;
@@ -17,10 +17,10 @@ export class UnitItemDto {
     locked?: boolean;
 
   @ApiProperty()
-    variableId?: string;
+    variableId?: string | null;
 
   @ApiProperty()
-    variableReadOnlyId?: string;
+    variableReadOnlyId?: string | null;
 
   @ApiProperty()
     weighting?: number;
@@ -29,7 +29,7 @@ export class UnitItemDto {
     description?: string;
 
   @ApiProperty()
-    unitId!: number;
+    unitId?: number;
 
   @ApiProperty()
     createdAt?: Date;

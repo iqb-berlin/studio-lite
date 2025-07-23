@@ -17,12 +17,19 @@ export class MetadataValues {
 }
 
 export class ItemsMetadataValues extends ProfileMetadataValues {
+  uuid?: string;
+  order?: number;
+  position?: string;
+  locked?: boolean;
+  unitId?: number;
+  createdAt?: Date;
+  changedAt?: Date;
   id?: string;
   description?: string;
   variableId?: string | null;
   variableReadOnlyId?: string | null;
   weighting?: number;
-  [key: string]: string | number | MetadataValues[] | null | undefined;
+  [key: string]: string | number | MetadataValues[] | null | undefined | boolean | Date;
 }
 
 export class MetadataValuesEntry {

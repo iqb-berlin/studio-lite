@@ -2,9 +2,21 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  CreateWorkspaceDto, WorkspaceGroupDto, WorkspaceFullDto, RequestReportDto, WorkspaceSettingsDto,
-  UnitPropertiesDto, UsersWorkspaceInListDto, UserWorkspaceAccessDto, UserWorkspaceFullDto,
-  CodingReportDto, WorkspaceInListDto, GroupNameDto, RenameGroupNameDto, UnitFullMetadataDto, ItemsMetadataValues
+  CreateWorkspaceDto,
+  WorkspaceGroupDto,
+  WorkspaceFullDto,
+  RequestReportDto,
+  WorkspaceSettingsDto,
+  UnitPropertiesDto,
+  UsersWorkspaceInListDto,
+  UserWorkspaceAccessDto,
+  UserWorkspaceFullDto,
+  CodingReportDto,
+  WorkspaceInListDto,
+  GroupNameDto,
+  RenameGroupNameDto,
+  UnitFullMetadataDto,
+  ItemsMetadataValues
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import {
@@ -31,6 +43,7 @@ import UserEntity from '../entities/user.entity';
 import { UnitCommentService } from './unit-comment.service';
 // eslint-disable-next-line import/no-duplicates
 import User from '../entities/user.entity';
+import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 
 @Injectable()
 export class WorkspaceService {
@@ -553,12 +566,12 @@ export class WorkspaceService {
         unitImportData.metadata = JSON.parse(notXmlFiles[unitImportData.metadataFileName].buffer.toString());
         usedFiles.push(unitImportData.metadataFileName);
       }
-      await this.patchUnitProperties(workspaceId, newUnitId, unitImportData, user);
+      const itemUuidLookups = await this.importUnitProperties(workspaceId, newUnitId, unitImportData, user);
 
       if (unitImportData.commentsFileName && notXmlFiles[unitImportData.commentsFileName]) {
         const comments = notXmlFiles[unitImportData.commentsFileName].buffer.toString();
         usedFiles.push(unitImportData.commentsFileName);
-        await this.importComments(newUnitId, comments);
+        await this.importComments(newUnitId, comments, itemUuidLookups);
       }
 
       if (unitImportData.codingSchemeFileName && notXmlFiles[unitImportData.codingSchemeFileName]) {
@@ -603,12 +616,13 @@ export class WorkspaceService {
     return files;
   }
 
-  private async patchUnitProperties(
+  private async importUnitProperties(
     workspaceId: number,
     newUnitId: number,
     unitImportData: UnitImportData,
     user: UserEntity
-  ) {
+  ) : Promise<ItemUuidLookup[]> {
+    let itemUuidLookups: ItemUuidLookup[] = [];
     await this.unitService.patchUnitProperties(newUnitId, {
       id: newUnitId,
       editor: unitImportData.editor,
@@ -630,8 +644,9 @@ export class WorkspaceService {
         workspace.settings?.itemMDProfile,
         unitImportData.metadata as UnitFullMetadataDto
       );
-      await this.unitService.addMetadata(newUnitId, metadata);
+      itemUuidLookups = await this.unitService.copyItemsWithMetadata(newUnitId, metadata);
     }
+    return itemUuidLookups;
   }
 
   private async importDefinition(
@@ -656,8 +671,8 @@ export class WorkspaceService {
     }, user);
   }
 
-  private async importComments(unitId: number, comments: string) {
-    await this.unitCommentService.createComments(JSON.parse(comments), unitId);
+  private async importComments(unitId: number, comments: string, itemUuidLookups: ItemUuidLookup[]) {
+    await this.unitCommentService.createComments(JSON.parse(comments), unitId, itemUuidLookups);
   }
 
   private async checkForProfileUpdate(workspace: Workspace, newSettings: WorkspaceSettingsDto) {

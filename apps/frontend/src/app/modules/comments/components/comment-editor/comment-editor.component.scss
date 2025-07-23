@@ -8,18 +8,12 @@
 .editor-menubar {
   margin-left: auto;
   color: #666666;
-}
-
-.editor-menubar {
+  margin-bottom: 5px;
   .mat-mdc-icon-button {
     height: 35px;
     width: 35px;
     padding: 5px;
   }
-}
-
-.editor-label{
-  color: #003333;
 }
 
 .editor-container{
@@ -47,6 +41,10 @@
   }
 }
 
+.select-item {
+  max-width: 300px;
+}
+
 :host ::ng-deep div.ProseMirror {
   height: 120px;
   overflow: auto;
@@ -57,6 +55,13 @@
   p strong {
     letter-spacing: 0.04em !important;
     font-weight: 600 !important;
+  }
+  p.is-editor-empty:first-child::before {
+    color: #adb5bd;
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
   }
 }
 

@@ -27,6 +27,7 @@ import { UnitMetadataService } from './unit-metadata.service';
 import { UnitItemService } from './unit-item.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
+import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 
 export class UnitService {
   private readonly logger = new Logger(UnitService.name);
@@ -185,7 +186,7 @@ export class UnitService {
           workspace.settings?.itemMDProfile,
           metadata as UnitFullMetadataDto
         );
-        await this.addMetadata(newUnit.id, metadata as UnitFullMetadataDto);
+        const itemUuidLookups = await this.copyItemsWithMetadata(newUnit.id, metadata as UnitFullMetadataDto);
 
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition) {
@@ -195,7 +196,7 @@ export class UnitService {
         if (unitSourceScheme && unitSourceScheme.scheme) {
           await this.patchScheme(newUnit.id, unitSourceScheme, user);
         }
-        if (addComments) await this.unitCommentService.copyComments(unit.createFrom, newUnit.id);
+        if (addComments) await this.unitCommentService.copyComments(unit.createFrom, newUnit.id, itemUuidLookups);
       }
     } else {
       if (unit.player) newUnit.player = unit.player;
@@ -317,15 +318,23 @@ export class UnitService {
       .map(item => this.unitItemService.addItem(unitId, item));
   }
 
-  async addMetadata(unitId: number, metadata: UnitFullMetadataDto): Promise<void> {
+  async copyItemsWithMetadata(
+    unitId: number,
+    metadata: UnitFullMetadataDto
+  ): Promise<ItemUuidLookup[]> {
     const profiles = metadata.profiles || [];
     profiles
-      .map(profile => this.unitMetadataService.addMetadata(unitId, profile as UnitMetadataDto));
+      .map(profile => this.unitMetadataService
+        .addMetadata(unitId, profile as UnitMetadataDto));
     const items = metadata.items || [];
-    items
-      .map(item => this.unitItemService.addItem(unitId, item as UnitItemWithMetadataDto));
-
+    const itemUuids = await Promise.all(items
+      .map(async item => ({
+        newUuid: await this.unitItemService
+          .addItem(unitId, item as UnitItemWithMetadataDto),
+        oldUuid: item.uuid
+      })));
     await this.unitMetadataToDeleteService.upsertOneForUnit(unitId);
+    return itemUuids;
   }
 
   async patchMetadata(unitId: number, metadata: UnitMetadataValues): Promise<void> {

@@ -10,6 +10,7 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
 import { Image } from '@tiptap/extension-image';
+import { Placeholder } from '@tiptap/extension-placeholder';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatDialogContent } from '@angular/material/dialog';
 import { TiptapEditorDirective } from 'ngx-tiptap';
@@ -17,23 +18,28 @@ import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { UnitItemDto } from '@studio-lite-lib/api-dto';
+import { FormsModule } from '@angular/forms';
 import { IsCommentCommittablePipe } from '../../pipes/is-comment-commitable.pipe';
+import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { CommentItemSelectionComponent } from '../comment-item-selection/comment-item-selection.component';
 
 @Component({
   selector: 'studio-lite-comment-editor',
   templateUrl: './comment-editor.component.html',
   styleUrls: ['./comment-editor.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatIconButton, MatTooltip, WrappedIconComponent, MatSelect, MatInput, TiptapEditorDirective, MatDialogContent, MatFabButton, TranslateModule, IsCommentCommittablePipe]
+  imports: [MatIconButton, MatTooltip, WrappedIconComponent, MatSelect, MatInput, TiptapEditorDirective, MatDialogContent, MatFabButton, TranslateModule, IsCommentCommittablePipe, CommentItemSelectionComponent, FormsModule]
 })
 export class CommentEditorComponent implements OnInit {
   @Input() submitLabel!: string;
   @Input() initialHTML: string = '';
   @Input() editorHTML: string = '';
-  @Input() label: string = '';
+  @Input() placeholder: string = '';
+  @Input() unitItems!: UnitItemDto[];
+  @Input() selectedItems: string[] = [];
 
-  @Output() handleSubmit = new EventEmitter<string>();
+  @Output() handleSubmit = new EventEmitter<{ text: string, items: string[] }>();
   @Output() handleCancel = new EventEmitter<void>();
 
   editor!: Editor;
@@ -52,15 +58,22 @@ export class CommentEditorComponent implements OnInit {
             style: 'max-width: 500px;'
           }
         }),
+        Placeholder.configure({
+          placeholder: this.placeholder
+        }),
         Highlight.configure({
           multicolor: true
         })],
       content: this.initialHTML
     });
     this.editor.commands.focus();
-    this.editor.on('update', ({ editor }) => {
-      this.editorHTML = editor.getHTML();
+    this.editor.on('update', () => {
+      this.updateEditorHtml();
     });
+  }
+
+  private updateEditorHtml(): void {
+    this.editorHTML = this.editor.getHTML();
   }
 
   onReset(): void {
@@ -72,12 +85,13 @@ export class CommentEditorComponent implements OnInit {
   onSubmit(): void {
     const editorContent = this.editor.getHTML();
     if (editorContent !== '<p></p>') {
-      this.handleSubmit.emit(editorContent);
+      this.handleSubmit.emit({ text: editorContent, items: this.selectedItems });
     } else {
       this.handleCancel.emit();
     }
     this.editor.commands.clearContent(true);
     this.editor.commands.focus();
+    this.selectedItems = [];
   }
 
   async addImage(): Promise<void> {
@@ -137,5 +151,12 @@ export class CommentEditorComponent implements OnInit {
 
   applyHighlightColor(): void {
     this.editor.chain().focus().toggleHighlight({ color: this.selectedHighlightColor }).run();
+  }
+
+  onSelectedItemChange(): void {
+    const editorContent = this.editor.getHTML();
+    if (editorContent !== '<p></p>') {
+      this.updateEditorHtml(); // triggers submit button state update
+    }
   }
 }

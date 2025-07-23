@@ -1,6 +1,14 @@
 <div class="editor-container fx-column-start-stretch">
-  <div class="fx-row-space-between-center fx-wrap">
-    <div class="editor-label">{{label}}</div>
+  <div class="fx-row-space-between-end fx-wrap">
+    <studio-lite-comment-item-selection
+      class="select-item fx-flex-fill"
+      [unitItems]="unitItems"
+      [(selectedItems)]="selectedItems"
+      [label]="'comment-editor.link-to-item' | translate"
+      [disabled]="(!(editorHTML | isCommentCommittable) && !(initialHTML | isCommentCommittable)) && !selectedItems.length"
+      (selectedItemsChange)="onSelectedItemChange()">
+    </studio-lite-comment-item-selection>
+
     <div class="editor-menubar fx-row-end-stretch fx-wrap">
       <button type="button" mat-icon-button
               matTooltip="{{'comment-editor.bold' | translate}}"

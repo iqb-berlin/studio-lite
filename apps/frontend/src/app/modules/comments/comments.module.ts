@@ -20,9 +20,6 @@ import { CommentsComponent } from './components/comments/comments.component';
 import { BackendService } from './services/backend.service';
 import { IsEditingPipe } from './pipes/is-editing.pipe';
 import { IsReplyingPipe } from './pipes/is-replying.pipe';
-import { DeleteDialogComponent } from './components/delete-dialog/delete-dialog.component';
-import { RootCommentsPipe } from './pipes/root-comments.pipe';
-import { RepliesPipe } from './pipes/replies.pipe';
 import { SafeResourceHTMLPipe } from './pipes/safe-resource-html.pipe';
 import { ScrollCommentIntoViewDirective } from './directives/scroll-comment-into-view.directive';
 import { AuthInterceptor } from '../../interceptors/auth.interceptor';
@@ -31,6 +28,7 @@ import { ScrollEditorIntoViewDirective } from './directives/scroll-editor-into-v
 import { FromNowPipe } from './pipes/from-now.pipe';
 import { Comment } from './models/comment.interface';
 import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
+import { CommentItemSelectionComponent } from './components/comment-item-selection/comment-item-selection.component';
 
 @NgModule({
   imports: [
@@ -51,12 +49,10 @@ import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
     CommentsComponent,
     CommentComponent,
     CommentEditorComponent,
+    CommentItemSelectionComponent,
     SafeResourceHTMLPipe,
     IsEditingPipe,
     IsReplyingPipe,
-    DeleteDialogComponent,
-    RootCommentsPipe,
-    RepliesPipe,
     ScrollCommentIntoViewDirective,
     ScrollEditorIntoViewDirective,
     CommentBadgeComponent,
