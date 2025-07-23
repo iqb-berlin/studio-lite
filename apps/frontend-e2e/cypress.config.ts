@@ -13,8 +13,8 @@ const cypressJsonConfig = {
 };
 export default defineConfig({
   env: {
-    username: 'admin',
-    password: '1234',
+    username: 'fadmin',
+    password: '4445',
     version: '12.5.1'
   },
   e2e: {

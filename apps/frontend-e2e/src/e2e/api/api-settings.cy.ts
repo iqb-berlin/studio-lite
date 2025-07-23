@@ -8,7 +8,7 @@ export interface UnitExport {
 describe('Admin settings API tests', () => {
   const noId: string = '9988';
   const user2: UserData = {
-    username: 'user',
+    username: 'userzwei',
     password: 'paso',
     isAdmin: false
   };
