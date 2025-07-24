@@ -56,6 +56,7 @@
             <mat-error>{{'metadata.no-unit-profiles-hint' | translate }}</mat-error>
           }
           <mat-select  class="select-profile" placeholder="{{'metadata.select-profile' | translate }}" [(value)]="selectedUnitMDProfile" (click)="$event.stopPropagation()" (selectionChange)="selectUnitMDProfile($event)" >
+            <mat-option [value]="undefined"></mat-option>
             @for (unitMDProfile of unitMDProfiles; track unitMDProfile) {
               <mat-option [value]="unitMDProfile.id">
                 {{unitMDProfile.label }}
@@ -73,6 +74,7 @@
             [(value)]="selectedItemMDProfile"
             (click)="$event.stopPropagation()"
             (selectionChange)="selectItemMDProfile($event)" >
+            <mat-option [value]="undefined"></mat-option>
             @for (itemMDProfile of itemMDProfiles; track itemMDProfile) {
               <mat-option [value]="itemMDProfile.id">
                 {{itemMDProfile.label}}
