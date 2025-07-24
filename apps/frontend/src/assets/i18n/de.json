@@ -247,7 +247,14 @@
     "groups-not-deleted": "Arbeitsbereichsgruppe(n) konnten nicht gelöscht werden",
     "groups-title": "Admin: Arbeitsbereichsgruppen",
     "edit-group-settings": "Arbeitsbereichsgruppe Einstellungen",
-    "download-units": "Aufgabenliste als CSV-Datei herunterladen"
+    "download-units": "Aufgabenliste als CSV-Datei herunterladen",
+    "error": "Fehler",
+    "delete-one-package" : "Paket löschen",
+    "delete-many-packages" : "{{count}} Pakete löschen",
+    "delete-one-package-confirmation" : "Soll das Paket gelöscht werden?",
+    "delete-many-packages-confirmation" : "Sollen {{count}} Pakete gelöscht werden?",
+    "package-deleted": "Paket(e) gelöscht",
+    "package-not-deleted": "Konnte Paket(e) nicht löschen"
   },
   "metadata": {
     "metadata": "Metadaten",
