@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Get, Param, Patch, Query, UseGuards
+  Body, Controller, Get, Param, ParseBoolPipe, Patch, Query, UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiInternalServerErrorResponse, ApiOkResponse,
@@ -33,7 +33,8 @@ export class GroupAdminUserController {
     type: Boolean,
     required: false
   })
-  async findAll(@Query('full') full: boolean): Promise<WorkspaceUserInListDto[] | UserFullDto[]> {
+  async findAll(@Query('full',
+    new ParseBoolPipe({ optional: true })) full?: boolean): Promise<WorkspaceUserInListDto[] | UserFullDto[]> {
     if (full) {
       return this.usersService.findAllFull();
     }
