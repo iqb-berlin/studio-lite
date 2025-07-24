@@ -50,7 +50,7 @@ import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
 export class WorkspacesComponent implements OnInit, OnDestroy {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
   workspaces: WorkspaceInListDto[] = [];
-  displayedColumns = ['selectCheckbox', 'name', 'unitsCount', 'dropBoxId'];
+  displayedColumns = ['selectCheckbox', 'name', 'id', 'unitsCount', 'dropBoxId'];
   tableSelectionCheckboxes = new SelectionModel <WorkspaceInListDto>(true, []);
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
   selectedWorkspaceId = 0;
@@ -181,8 +181,9 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   private setObjectsDatasource(workspaces: WorkspaceInListDto[]): void {
     this.objectsDatasource = new MatTableDataSource(workspaces);
     this.objectsDatasource
-      .filterPredicate = (workspaceList: WorkspaceInListDto, filter) => ['name']
-        .some(column => (workspaceList[column as keyof WorkspaceInListDto] as string || '')
+      .filterPredicate = (workspaceList: WorkspaceInListDto, filter) => ['name', 'id', 'unitsCount']
+        .some(column => (workspaceList[column as keyof WorkspaceInListDto] || '')
+          .toString()
           .toLowerCase()
           .includes(filter));
     this.objectsDatasource.sort = this.sort;
