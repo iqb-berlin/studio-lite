@@ -66,6 +66,17 @@
         </mat-cell>
       </ng-container>
 
+      <ng-container matColumnDef="id">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header="id">
+          {{'id' | translate}}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row"
+                  class="secondary-cell">
+          {{row.id}}
+        </mat-cell>
+      </ng-container>
+
       <ng-container matColumnDef="description">
         <mat-header-cell *matHeaderCellDef
           mat-sort-header="description">
