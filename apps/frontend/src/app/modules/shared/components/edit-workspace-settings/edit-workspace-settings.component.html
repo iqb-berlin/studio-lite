@@ -10,11 +10,11 @@
           {{'workspace-settings.default-editor' | translate}}
         </mat-label>
         <studio-lite-select-module class="fx-flex-row-60"
-          moduleType="editor"
-          [modules]="this.moduleService.editors"
-          [value]="dialogData.defaultEditor"
-          (selectionChanged)="selectModule('editor', $event)"
-          [stableOnly]="false">
+                                   moduleType="editor"
+                                   [modules]="this.moduleService.editors"
+                                   [value]="dialogData.defaultEditor"
+                                   [stableOnly]="false"
+                                   (selectionChanged)="selectModule('editor', $event)">
         </studio-lite-select-module>
       </div>
       <div class="fx-row-space-between-start fx-gap-10">
@@ -22,11 +22,11 @@
           {{'workspace-settings.default-player' | translate}}
         </mat-label>
         <studio-lite-select-module class="fx-flex-row-60"
-          moduleType="player"
-          [modules]="this.moduleService.players"
-          [value]="dialogData.defaultPlayer"
-          [stableOnly]="false"
-          (selectionChanged)="selectModule('player', $event)">
+                                   moduleType="player"
+                                   [modules]="this.moduleService.players"
+                                   [value]="dialogData.defaultPlayer"
+                                   [stableOnly]="false"
+                                   (selectionChanged)="selectModule('player', $event)">
         </studio-lite-select-module>
       </div>
       <div class="fx-row-space-between-start fx-gap-10">
@@ -34,19 +34,19 @@
           {{'workspace-settings.default-schemer' | translate}}
         </mat-label>
         <studio-lite-select-module class="fx-flex-row-60"
-          moduleType="schemer"
-          [modules]="this.moduleService.schemers"
-          [value]="dialogData.defaultSchemer"
-          [stableOnly]="false"
-          (selectionChanged)="selectModule('schemer', $event)">
+                                   moduleType="schemer"
+                                   [modules]="this.moduleService.schemers"
+                                   [value]="dialogData.defaultSchemer"
+                                   [stableOnly]="false"
+                                   (selectionChanged)="selectModule('schemer', $event)">
         </studio-lite-select-module>
       </div>
       <div class="fx-row-start-stretch fx-gap-15 margin-bottom">
-        <mat-checkbox (click)="$event.stopPropagation()"
-          (change)="$event ? setStableChecked($event) : null"
-          [checked]="dialogData.stableModulesOnly">
+        <mat-checkbox [checked]="dialogData.stableModulesOnly"
+                      (click)="$event.stopPropagation()"
+                      (change)="$event ? setStableChecked($event) : null">
         </mat-checkbox>
-        <div> {{'workspace-settings.only-stable-modules' | translate}}</div>
+        <div>{{'workspace-settings.only-stable-modules' | translate}}</div>
       </div>
       <div>
         <h4>{{'metadata.metadata' | translate }}</h4>
@@ -70,10 +70,10 @@
             <mat-error>{{'metadata.no-item-profiles-hint' | translate }}</mat-error>
           }
           <mat-select class="select-profile"
-            placeholder="{{'metadata.select-profile' | translate }}"
-            [(value)]="selectedItemMDProfile"
-            (click)="$event.stopPropagation()"
-            (selectionChange)="selectItemMDProfile($event)" >
+                      placeholder="{{'metadata.select-profile' | translate }}"
+                      [(value)]="selectedItemMDProfile"
+                      (click)="$event.stopPropagation()"
+                      (selectionChange)="selectItemMDProfile($event)" >
             <mat-option [value]="undefined"></mat-option>
             @for (itemMDProfile of itemMDProfiles; track itemMDProfile) {
               <mat-option [value]="itemMDProfile.id">
@@ -87,14 +87,14 @@
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-raised-button
-      color="primary"
-      type="submit"
-      (click)="addData()"
-      [mat-dialog-close]="dialogData">
+            color="primary"
+            type="submit"
+            [mat-dialog-close]="dialogData"
+            (click)="addData()">
       {{'save' | translate}}
     </button>
     <button mat-raised-button
-      [mat-dialog-close]="false">
+            [mat-dialog-close]="false">
       {{'cancel' | translate}}
     </button>
   </mat-dialog-actions>
