@@ -50,7 +50,7 @@ import { Profile } from '../../../shared/models/profile.type';
 })
 export class WorkspaceGroupsComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();
-  displayedColumns = ['selectCheckbox', 'name'];
+  displayedColumns = ['selectCheckbox', 'name', 'id'];
   tableSelectionCheckboxes = new SelectionModel<WorkspaceGroupInListDto>(true, []);
   tableSelectionRow = new SelectionModel<WorkspaceGroupInListDto>(false, []);
   selectedWorkspaceGroupId = 0;
@@ -252,8 +252,9 @@ export class WorkspaceGroupsComponent implements OnInit {
     this.objectsDatasource = new MatTableDataSource(groups);
     this.objectsDatasource
       .filterPredicate = (groupList: WorkspaceGroupInListDto, filter) => [
-        'name'
-      ].some(column => (groupList[column as keyof WorkspaceGroupInListDto] as string || '')
+        'name', 'id'
+      ].some(column => (groupList[column as keyof WorkspaceGroupInListDto] || '')
+        .toString()
         .toLowerCase()
         .includes(filter));
     this.objectsDatasource.sort = this.sort;
