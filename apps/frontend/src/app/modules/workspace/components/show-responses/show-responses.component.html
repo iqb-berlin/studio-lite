@@ -1,29 +1,29 @@
 <h2 mat-dialog-title>{{ 'workspace.responses' | translate }}</h2>
+
+@if (data.responses && data.responses.length && data.table) {
+  <mat-slide-toggle class="slide-toggle"
+                    [(ngModel)]="showJsonData">
+    {{'coding.raw-responses' | translate}}
+  </mat-slide-toggle>
+}
+
 <mat-dialog-content>
   @if (data.responses && data.responses.length) {
-    @if (data.table) {
-      <mat-slide-toggle class="example-margin"
-                        [(ngModel)]="showJsonData">
-        {{'coding.raw-responses' | translate}}
-      </mat-slide-toggle>
-      @if (!showJsonData) {
-        <table mat-table [dataSource]="dataSource">
-          @for (column of displayedColumns; track column) {
-            <ng-container [matColumnDef]="column">
-              <th mat-header-cell class="capitalized" *matHeaderCellDef>{{column}}</th>
-              <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
-            </ng-container>
-          }
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
-      } @else {
-        <pre>
-          {{data.responses | json}}
-        </pre>
-      }
+    @if (data.table && !showJsonData) {
+      <table mat-table [dataSource]="dataSource">
+        @for (column of displayedColumns; track column) {
+          <ng-container [matColumnDef]="column">
+            <th mat-header-cell class="capitalized" *matHeaderCellDef>{{column}}</th>
+            <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
+          </ng-container>
+        }
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
     } @else {
-      {{data.responses | json}}
+      <pre>
+        {{data.responses | json}}
+      </pre>
     }
   } @else {
     <p>{{ 'workspace.no-responses' | translate }}</p>
