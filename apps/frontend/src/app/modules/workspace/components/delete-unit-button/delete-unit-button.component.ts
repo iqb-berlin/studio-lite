@@ -1,5 +1,7 @@
-import { Component, Input } from '@angular/core';
-import { lastValueFrom, map } from 'rxjs';
+import { Component, Input, OnDestroy } from '@angular/core';
+import {
+  lastValueFrom, map, Subject, takeUntil
+} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -12,6 +14,7 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { AppService } from '../../../../services/app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { DeleteDialogComponent } from '../../../shared/components/delete-dialog/delete-dialog.component';
 
 @Component({
   selector: 'studio-lite-delete-unit-button',
@@ -19,9 +22,12 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   styleUrls: ['./delete-unit-button.component.scss'],
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
-export class DeleteUnitButtonComponent extends SelectUnitDirective {
+export class DeleteUnitButtonComponent extends SelectUnitDirective implements OnDestroy {
   @Input() selectedUnitId!: number;
   @Input() disabled!: boolean;
+
+  private ngUnsubscribe = new Subject<void>();
+
   constructor(
     public workspaceService: WorkspaceService,
     public router: Router,
@@ -30,45 +36,63 @@ export class DeleteUnitButtonComponent extends SelectUnitDirective {
     public backendService: WorkspaceBackendService,
     private snackBar: MatSnackBar,
     private translateService: TranslateService,
-    private selectUnitDialog: MatDialog
+    private dialog: MatDialog
   ) {
     super();
   }
 
   deleteUnit(): void {
-    this.deleteUnitDialog().then((unitsToDelete: number[] | boolean) => {
-      if (typeof unitsToDelete !== 'boolean') {
-        this.backendService.deleteUnits(
-          this.workspaceService.selectedWorkspaceId,
-          unitsToDelete
-        ).subscribe(
-          ok => {
-            // todo db-error?
-            if (ok) {
-              this.snackBar.open(
-                this.translateService.instant('workspace.unit-deleted'),
-                '',
-                { duration: 1000 }
-              );
-              this.updateUnitList();
-            } else {
-              this.snackBar.open(
-                this.translateService.instant('workspace.unit-not-deleted'),
-                this.translateService.instant('workspace.error'),
-                { duration: 3000 }
-              );
-              this.appService.dataLoading = false;
+    this.deleteUnitDialog()
+      .then((unitsToDelete: number[] | boolean) => {
+        if (typeof unitsToDelete !== 'boolean') {
+          const titleKey = unitsToDelete.length === 1 ?
+            'workspace.delete-one-unit' : 'workspace.delete-many-units';
+          const contentKey = unitsToDelete.length === 1 ?
+            'workspace.delete-one-unit-confirmation' : 'workspace.delete-many-units-confirmation';
+          this.dialog.open(DeleteDialogComponent, {
+            width: '400px',
+            data: {
+              title: this.translateService
+                .instant(titleKey, { count: unitsToDelete.length }),
+              content: this.translateService
+                .instant(contentKey, { count: unitsToDelete.length })
             }
-          }
-        );
-      }
-    });
+          })
+            .afterClosed()
+            .subscribe(confirmed => {
+              if (!confirmed) return;
+              this.backendService.deleteUnits(
+                this.workspaceService.selectedWorkspaceId,
+                unitsToDelete
+              ).pipe(takeUntil(this.ngUnsubscribe))
+                .subscribe(
+                  ok => {
+                    if (ok) {
+                      this.snackBar.open(
+                        this.translateService.instant('workspace.unit-deleted'),
+                        '',
+                        { duration: 1000 }
+                      );
+                      this.updateUnitList();
+                    } else {
+                      this.snackBar.open(
+                        this.translateService.instant('workspace.unit-not-deleted'),
+                        this.translateService.instant('workspace.error'),
+                        { duration: 3000 }
+                      );
+                      this.appService.dataLoading = false;
+                    }
+                  }
+                );
+            });
+        }
+      });
   }
 
   private async deleteUnitDialog(): Promise<number[] | boolean> {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
-      const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
+      const dialogRef = this.dialog.open(SelectUnitComponent, {
         width: '800px',
         height: '700px',
         data: <SelectUnitData>{
@@ -93,5 +117,10 @@ export class DeleteUnitButtonComponent extends SelectUnitDirective {
         ));
     }
     return false;
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
