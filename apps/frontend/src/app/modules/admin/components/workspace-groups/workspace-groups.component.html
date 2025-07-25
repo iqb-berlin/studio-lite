@@ -46,6 +46,17 @@
         <mat-cell *matCellDef="let element"> {{element.name}} </mat-cell>
       </ng-container>
 
+      <ng-container matColumnDef="id">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header="id">
+          {{'id' | translate}}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element"
+                  class="secondary-cell">
+          {{element.id}}
+        </mat-cell>
+      </ng-container>
+
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row *matRowDef="let row; columns: displayedColumns;"
         [class.selected] = "row | isSelectedId: selectedWorkspaceGroupId"

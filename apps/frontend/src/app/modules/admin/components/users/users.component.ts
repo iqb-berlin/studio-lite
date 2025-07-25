@@ -37,7 +37,7 @@ import { UsersMenuComponent } from '../users-menu/users-menu.component';
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>();
-  displayedColumns = ['selectCheckbox', 'name', 'displayName', 'email', 'description'];
+  displayedColumns = ['selectCheckbox', 'name', 'displayName', 'email', 'id', 'description'];
   tableSelectionCheckboxes = new SelectionModel <UserFullDto>(true, []);
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
@@ -222,8 +222,9 @@ export class UsersComponent implements OnInit {
     this.objectsDatasource = new MatTableDataSource(users);
     this.objectsDatasource
       .filterPredicate = (userList: UserFullDto, filter) => [
-        'name', 'firstName', 'lastName', 'email', 'description'
-      ].some(column => (userList[column as keyof UserFullDto] as string || '')
+        'name', 'firstName', 'lastName', 'email', 'id', 'description'
+      ].some(column => (userList[column as keyof UserFullDto] || '')
+        .toString()
         .toLowerCase()
         .includes(filter));
     this.objectsDatasource.sort = this.sort;
