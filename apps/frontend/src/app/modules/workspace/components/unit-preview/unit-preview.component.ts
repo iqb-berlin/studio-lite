@@ -602,7 +602,7 @@ export class UnitPreviewComponent
             .open(ShowResponsesComponent, {
               data: {
                 responses: responses,
-                table: !this.isIqbStandardResponse()
+                table: this.isIqbStandardResponse()
               },
               height: '80%',
               width: '60%'

@@ -13,6 +13,8 @@ import {
   MatHeaderRowDef, MatRow, MatRowDef,
   MatTable
 } from '@angular/material/table';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   templateUrl: './show-responses.component.html',
@@ -31,7 +33,9 @@ import {
     MatRowDef,
     MatRow,
     MatCell,
-    MatHeaderCell
+    MatHeaderCell,
+    MatSlideToggle,
+    FormsModule
   ],
   styleUrls: ['show-responses.component.scss']
 })
@@ -39,6 +43,8 @@ import {
 export class ShowResponsesComponent {
   displayedColumns: string[] = [];
   dataSource: Response[] = [];
+  showJsonData: boolean = false;
+
   constructor(@Inject(MAT_DIALOG_DATA) public data: { responses: Response[], table: boolean }) {
     if (data.table) this.initTable();
   }
