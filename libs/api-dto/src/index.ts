@@ -10,6 +10,7 @@ export { UsersInWorkspaceDto } from './lib/dtos/user/users-in-workspace-dto';
 export { WorkspaceGroupSettingsDto } from './lib/dtos/workspace-group/workspace-group-settings-dto';
 export { MyDataDto } from './lib/dtos/user/my-data-dto';
 export { UnitExportConfigDto } from './lib/dtos/setting/unit-export-config-dto';
+export { ProfilesRegistryDto } from './lib/dtos/setting/profiles-registry-dto';
 export { UnitDownloadSettingsDto } from './lib/dtos/unit/unit-download-settings-dto';
 export { RequestReportDto } from './lib/dtos/request-report-dto';
 export { UnitSchemeDto } from './lib/dtos/unit/unit-scheme-dto';

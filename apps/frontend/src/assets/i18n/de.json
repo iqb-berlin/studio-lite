@@ -311,7 +311,11 @@
     "texts": "Texte",
     "logo-and-colors": "Logo und Farben",
     "unit-export-params": "Parameter für den Unit-Export",
-    "missings-profiles": "Kodierung: Missings Profile"
+    "missings-profiles": "Kodierung: Missings Profile",
+    "profiles-registry": "Profilregistrierung"
+  },
+  "profiles-registry": {
+    "csv-url": "URL der CSV-Datei"
   },
   "config": {
     "start-page-warning": "Warnung auf der Startseite",

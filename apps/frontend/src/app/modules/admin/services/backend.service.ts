@@ -15,7 +15,7 @@ import {
   UnitExportConfigDto,
   WorkspaceGroupSettingsDto,
   WorkspaceFullDto,
-  UnitByDefinitionIdDto
+  UnitByDefinitionIdDto, ProfilesRegistryDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -204,6 +204,20 @@ export class BackendService {
     ids.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
       .delete(`${this.serverUrl}admin/resource-packages`, { params: queryParams })
+      .pipe(
+        catchError(() => of(false)),
+        map(() => true)
+      );
+  }
+
+  getProfilesRegistry(): Observable<ProfilesRegistryDto> {
+    return this.http
+      .get<ProfilesRegistryDto>(`${this.serverUrl}admin/settings/profiles-registry`);
+  }
+
+  setProfilesRegistry(profilesRegistryDto: ProfilesRegistryDto): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}admin/settings/profiles-registry`, profilesRegistryDto)
       .pipe(
         catchError(() => of(false)),
         map(() => true)

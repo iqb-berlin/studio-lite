@@ -1,0 +1,16 @@
+<form [formGroup]="configForm"
+      class="fx-column-start-stretch">
+  <mat-form-field class="fx-column-start-stretch">
+    <mat-label>{{'profiles-registry.csv-url' | translate}}</mat-label>
+    <input matInput
+           formControlName="csvUrl">
+  </mat-form-field>
+  <div class="fx-row-start-start fx-gap-30 save-button">
+    <button mat-raised-button
+            color="primary"
+            [disabled]="!dataChanged"
+            (click)="saveData()">
+      {{'save' | translate}}
+    </button>
+  </div>
+</form>

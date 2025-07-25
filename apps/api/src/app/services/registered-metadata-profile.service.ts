@@ -6,23 +6,25 @@ import { HttpService } from '@nestjs/axios';
 import {
   catchError, firstValueFrom, map, of
 } from 'rxjs';
+import { ProfilesRegistryDto } from '@studio-lite-lib/api-dto';
 import RegisteredMetadataProfile from '../entities/registered-metadata-profile.entity';
 import MetadataProfileRegistry from '../entities/metadata-profile-registry.entity';
+import { SettingService } from './setting.service';
 
 @Injectable()
 export class RegisteredMetadataProfileService {
-  PROFILE_REGISTRY = 'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv';
   constructor(
     @InjectRepository(MetadataProfileRegistry)
     private metadataProfileRegistryRepository: Repository<MetadataProfileRegistry>,
     @InjectRepository(RegisteredMetadataProfile)
     private registeredMetadataProfileRepository: Repository<RegisteredMetadataProfile>,
+    private settingsService: SettingService,
     private http: HttpService) {}
 
   async getRegisteredMetadataProfiles(): Promise<RegisteredMetadataProfile[] | null> {
     const registryCsv = await this.getRegisteredMetadataProfilesAsCSV();
     if (registryCsv) {
-      const profileUrls = RegisteredMetadataProfileService.getProfileURLs(registryCsv, '"');
+      const profileUrls = RegisteredMetadataProfileService.getProfileUrls(registryCsv, '"');
       return Promise
         .all(profileUrls
           .map(async url => {
@@ -47,8 +49,9 @@ export class RegisteredMetadataProfileService {
   }
 
   private async getRegisteredMetadataProfilesAsCSV(): Promise<string> {
+    const profileRegistry: ProfilesRegistryDto = await this.settingsService.findUnitProfilesRegistry();
     const registry = await this.metadataProfileRegistryRepository
-      .findOneBy({ id: this.PROFILE_REGISTRY });
+      .findOneBy({ id: profileRegistry.csvUrl });
     if (registry) {
       this.updateRegistry();
       return registry.csv;
@@ -62,9 +65,10 @@ export class RegisteredMetadataProfileService {
     await this.storeRegistry(await this.getRegistryCsv());
   }
 
-  private getRegistryCsv(): Promise<string | null> {
+  private async getRegistryCsv(): Promise<string | null> {
+    const profileRegistry: ProfilesRegistryDto = await this.settingsService.findUnitProfilesRegistry();
     return firstValueFrom(
-      this.http.get<string>(this.PROFILE_REGISTRY)
+      this.http.get<string>(profileRegistry.csvUrl)
         .pipe(
           catchError(() => of({ data: null })),
           map(result => result.data)
@@ -103,8 +107,9 @@ export class RegisteredMetadataProfileService {
   }
 
   private async storeRegistry(csv: string): Promise<void> {
+    const profileRegistry: ProfilesRegistryDto = await this.settingsService.findUnitProfilesRegistry();
     const registry = await this.metadataProfileRegistryRepository
-      .findOneBy({ id: this.PROFILE_REGISTRY });
+      .findOneBy({ id: profileRegistry.csvUrl });
     if (registry) {
       await this.metadataProfileRegistryRepository
         .save({ ...registry, csv: csv, modifiedAt: new Date() });
@@ -114,12 +119,13 @@ export class RegisteredMetadataProfileService {
   }
 
   private async createMetadataProfileRegistry(csv: string) {
+    const profileRegistry: ProfilesRegistryDto = await this.settingsService.findUnitProfilesRegistry();
     const registry = this.metadataProfileRegistryRepository
-      .create({ id: this.PROFILE_REGISTRY, csv, modifiedAt: new Date() });
+      .create({ id: profileRegistry.csvUrl, csv, modifiedAt: new Date() });
     await this.metadataProfileRegistryRepository.save(registry);
   }
 
-  private static getProfileURLs(stringVal:string, splitter:string): string[] {
+  private static getProfileUrls(stringVal:string, splitter:string): string[] {
     const [, ...rest] = stringVal
       .trim()
       .split('\n')
