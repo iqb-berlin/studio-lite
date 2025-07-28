@@ -37,7 +37,7 @@ import { AppConfigComponent } from './components/app-config/app-config.component
 import { AuthInterceptor } from '../../interceptors/auth.interceptor';
 import { EditUserComponent } from './components/edit-user/edit-user.component';
 import { AppLogoComponent } from './components/app-logo/app-logo.component';
-import { UnitExportConfigComponent } from './components/unit-export-config/unit-export-config.component';
+import { ProfilesRegistryComponent } from './components/profiles-registry/profiles-registry.component';
 import { ResourcePackagesComponent } from './components/resource-packages/resource-packages.component';
 import { ResourcePackagesTableComponent } from './components/resource-packages-table/resource-packages-table.component';
 import { TableDataSourcePipe } from './pipes/table-data-source.pipe';
@@ -89,7 +89,7 @@ import {
     EditWorkspaceGroupComponent,
     AppConfigComponent,
     AppLogoComponent,
-    UnitExportConfigComponent,
+    ProfilesRegistryComponent,
     ResourcePackagesComponent,
     ResourcePackagesTableComponent,
     TableDataSourcePipe,
