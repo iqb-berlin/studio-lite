@@ -11,6 +11,7 @@ import { SettingService } from '../services/setting.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { AppVersionGuard } from '../guards/app-version.guard';
+import { ApiNotAcceptableResponse } from '@nestjs/swagger/dist/decorators/api-response.decorator';
 
 @Controller('admin/settings')
 export class SettingController {
@@ -81,6 +82,7 @@ export class SettingController {
   @Get('profiles-registry')
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ description: 'Profiles registry retrieved successfully.' })
+  @ApiNotAcceptableResponse({ description: 'Profiles registry not acceptable.' })
   @ApiTags('admin settings')
   async findUnitProfilesRegistry(): Promise<ProfilesRegistryDto> {
     return this.settingService.findUnitProfilesRegistry();
@@ -88,8 +90,9 @@ export class SettingController {
 
   @Patch('profiles-registry')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
-  @ApiOkResponse({ description: 'Profiles registry  updated successfully.' })
+  @ApiOkResponse({ description: 'Profiles registry updated successfully.' })
   @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiNotAcceptableResponse({ description: 'Profiles registry not acceptable.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchProfilesRegistry(@Body() newProfilesRegistry: ProfilesRegistryDto) {

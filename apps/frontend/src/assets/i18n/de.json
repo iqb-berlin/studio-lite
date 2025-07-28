@@ -315,7 +315,9 @@
     "profiles-registry": "Profilregistrierung"
   },
   "profiles-registry": {
-    "csv-url": "URL der CSV-Datei"
+    "csv-url": "URL der CSV-Datei",
+    "csv-url-saved": "URl zur Profilregistrierung gespeichert",
+    "csv-url-not-saved": "Konnte URl zur Profilregistrierung nicht speichern"
   },
   "config": {
     "start-page-warning": "Warnung auf der Startseite",

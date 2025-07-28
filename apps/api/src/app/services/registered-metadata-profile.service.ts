@@ -10,6 +10,7 @@ import { ProfilesRegistryDto } from '@studio-lite-lib/api-dto';
 import RegisteredMetadataProfile from '../entities/registered-metadata-profile.entity';
 import MetadataProfileRegistry from '../entities/metadata-profile-registry.entity';
 import { SettingService } from './setting.service';
+import { ProfilesRegistryNotAcceptableException } from '../exceptions/profiles-registry-not-acceptable.exception';
 
 @Injectable()
 export class RegisteredMetadataProfileService {
@@ -106,7 +107,10 @@ export class RegisteredMetadataProfileService {
     return this.registeredMetadataProfileRepository.save(newProfile);
   }
 
-  private async storeRegistry(csv: string): Promise<void> {
+  private async storeRegistry(csv: string | null): Promise<void> {
+    if (!csv) {
+      throw new ProfilesRegistryNotAcceptableException('csv', 'storeRegistry');
+    }
     const profileRegistry: ProfilesRegistryDto = await this.settingsService.findUnitProfilesRegistry();
     const registry = await this.metadataProfileRegistryRepository
       .findOneBy({ id: profileRegistry.csvUrl });
