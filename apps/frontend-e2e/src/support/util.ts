@@ -358,7 +358,10 @@ export function deleteUnit(shortname:string):void {
     .click()
     .type(shortname);
   cy.get(`mat-cell:contains("${shortname}")`).prev().click();
-  cy.buttonToContinue('Löschen', [200], '/api/workspaces/*/units*', 'DELETE', 'deleteUnit');
+  cy.get('mat-dialog-container').within(() => {
+    cy.contains('button', 'Löschen').click();
+  });
+  cy.contains('button', 'Löschen').click();
 }
 
 export function addUnit(kurzname: string):void {

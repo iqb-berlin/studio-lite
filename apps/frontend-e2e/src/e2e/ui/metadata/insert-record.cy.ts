@@ -5,7 +5,6 @@ import {
   createWs,
   deleteFirstUser,
   deleteGroup,
-  deleteUnit,
   grantRemovePrivilegeAtWs
 } from '../../../support/util';
 import {
@@ -99,18 +98,7 @@ describe('Metadata Management', () => {
     cy.contains('Speichern').click();
   });
 
-  it('creates a definition for the unit1', () => {
-    cy.visitWs(ws1);
-  });
-
   it('deletes the data', () => {
-    cy.visitWs(ws1);
-    deleteUnit('D1_001');
-    deleteUnit('D1_002');
-    cy.visit('/');
-    cy.visitWs(ws2);
-    deleteUnit('M1_001');
-    cy.visit('/');
     deleteGroup(group);
     cy.visit('/');
   });
