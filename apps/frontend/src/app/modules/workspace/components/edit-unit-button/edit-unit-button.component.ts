@@ -366,25 +366,34 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
   }
 
   showMetadata(): void {
-    if (Object.keys(this.workspaceService.unitList).length > 0) {
-      this.selectUnitDialog.open(ShowMetadataComponent, {
-        width: '800px',
-        data: { warning: '' }
-      }).afterClosed().subscribe(res => {
-        this.metadataService.createMetadataReport()
-          .subscribe((units: UnitPropertiesDto[] | boolean) => {
-            if (res) {
-              const selectedUnits = (units as UnitPropertiesDto[])
-                .filter((unit: UnitPropertiesDto) => res.selectedUnits.includes(unit.id));
-              this.showMetadataDialog.open(TableViewComponent, {
-                width: '80%',
-                data: { units: selectedUnits, warning: '' },
-                autoFocus: false
+    setTimeout(() => {
+      if (Object.keys(this.workspaceService.unitList).length > 0) {
+        this.selectUnitDialog.open(ShowMetadataComponent, {
+          width: '800px',
+          data: {
+
+          }
+        })
+          .afterClosed()
+          .subscribe(res => {
+            this.metadataService.createMetadataReport()
+              .subscribe((units: UnitPropertiesDto[] | boolean) => {
+                if (res) {
+                  const selectedUnits = (units as UnitPropertiesDto[])
+                    .filter((unit: UnitPropertiesDto) => res.selectedUnits.includes(unit.id));
+                  this.showMetadataDialog.open(TableViewComponent, {
+                    width: '80%',
+                    data: {
+                      units: selectedUnits,
+                      warning: ''
+                    },
+                    autoFocus: false
+                  });
+                }
               });
-            }
           });
-      });
-    }
+      }
+    });
   }
 
   exportCodingBook():void {
