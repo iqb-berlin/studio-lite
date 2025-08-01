@@ -63,10 +63,10 @@
           [hidden]="selectedGroup">{{'workspace.select-group' | translate}}</div>
           <div class="units fx-flex-fill">
             <studio-lite-select-unit-list #unitSelectionTable
-              [hidden]="!selectedGroup"
-              [show-groups]="false"
-              [workspace]="workspaceService.selectedWorkspaceId"
-              (selectionChanged)="unitSelectionChanged()">
+                                          [hidden]="!selectedGroup"
+                                          [show-groups]="false"
+                                          [workspace]="workspaceService.selectedWorkspaceId"
+                                          (selectionChanged)="unitSelectionChanged()">
             </studio-lite-select-unit-list>
           </div>
 

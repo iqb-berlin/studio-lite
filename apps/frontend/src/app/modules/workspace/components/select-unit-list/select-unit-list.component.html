@@ -20,11 +20,11 @@
   </studio-lite-search-filter>
 
   <mat-table class="unit-list"
-    matSortDisableClear
-    matSortActive="key"
-    matSortDirection="asc"
-    matSort
-    [dataSource]="objectsDatasource">
+             matSortDisableClear
+             matSortActive="key"
+             matSortDirection="asc"
+             matSort
+             [dataSource]="objectsDatasource">
     <ng-container matColumnDef="selectCheckbox">
       <mat-header-cell *matHeaderCellDef  class="fx-flex-row-fix-70">
         <mat-checkbox (change)="$event ? masterToggle() : null"
@@ -33,10 +33,10 @@
         </mat-checkbox>
       </mat-header-cell>
       <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">
-        <mat-checkbox (click)="$event.stopPropagation()"
-          [disabled]="disabledUnits | include : row.id"
-          (change)="$event ? tableSelectionCheckboxes.toggle(row) : null"
-          [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length">
+        <mat-checkbox [disabled]="disabledUnits | include : row.id"
+                      [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length"
+                      (change)="$event ? tableSelectionCheckboxes.toggle(row) : null"
+                      (click)="$event.stopPropagation()">
         </mat-checkbox>
       </mat-cell>
     </ng-container>
@@ -44,7 +44,10 @@
     <ng-container matColumnDef="key">
       <mat-header-cell *matHeaderCellDef mat-sort-header="key">{{'workspace.unit-key' | translate}}</mat-header-cell>
       <mat-cell *matCellDef="let element"
-                [class.disabled-element]="disabledUnits | include : element.id">
+                [class.disabled-element]="disabledUnits | include : element.id"
+                studioLiteScrollIntoView
+                [rowId]="element.id"
+                [selectedUnitId]="selectedUnitId">
                 {{element.key}}
       </mat-cell>
     </ng-container>
