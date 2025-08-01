@@ -1,6 +1,7 @@
 import { Directive, Input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
+import { switchMap } from 'rxjs/operators';
 import { WorkspaceService } from '../services/workspace.service';
 import { WorkspaceBackendService } from '../services/workspace-backend.service';
 import { RoutingHelperService } from '../services/routing-helper.service';
@@ -21,15 +22,17 @@ export abstract class SelectUnitDirective {
 
   updateUnitList(unitToSelect?: number): void {
     this.backendService.getUnitGroups(this.workspaceService.selectedWorkspaceId)
-      .subscribe(groups => {
-        this.workspaceService.workspaceSettings.unitGroups = groups;
-      });
-    let queryParams = new HttpParams();
-    queryParams = queryParams
-      .append('targetWorkspaceId', this.workspaceService.selectedWorkspaceId)
-      .append('withLastSeenCommentTimeStamp', true);
-    this.backendService.getUnitList(this.workspaceService.selectedWorkspaceId, queryParams).subscribe(
-      units => {
+      .pipe(
+        switchMap(groups => {
+          this.workspaceService.workspaceSettings.unitGroups = groups;
+          let queryParams = new HttpParams();
+          queryParams = queryParams
+            .append('targetWorkspaceId', this.workspaceService.selectedWorkspaceId)
+            .append('withLastSeenCommentTimeStamp', true);
+          return this.backendService.getUnitList(this.workspaceService.selectedWorkspaceId, queryParams);
+        })
+      )
+      .subscribe(units => {
         this.workspaceService.resetUnitList(units);
         this.workspaceService.hasDroppedUnits = units
           .some(unit => unit.targetWorkspaceId === this.workspaceService.selectedWorkspaceId);
@@ -38,8 +41,7 @@ export abstract class SelectUnitDirective {
           this.workspaceService.selectedUnit$.next(0);
           this.router.navigate([`/a/${this.workspaceService.selectedWorkspaceId}`]);
         }
-      }
-    );
+      });
   }
 
   async selectUnit(unitId?: number): Promise<boolean> {
