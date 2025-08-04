@@ -3,7 +3,7 @@ import { RequestReportDto, UnitDownloadSettingsDto, UnitPropertiesDto } from '@s
 import { format } from 'date-fns';
 import { saveAs } from 'file-saver-es';
 import { MessageDialogComponent, MessageDialogData, MessageType } from '@studio-lite-lib/iqb-components';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -271,66 +271,54 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
   }
 
   private async submitUnitsDialog(): Promise<number[] | boolean> {
-    const routingOk = await this.selectUnit(0);
-    if (routingOk) {
-      const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
-        width: '800px',
-        height: '700px',
-        data: <SelectUnitData>{
-          title: this.translateService.instant('workspace.submit-units-title'),
-          buttonLabel: this.translateService.instant('workspace.submit-units'),
-          fromOtherWorkspacesToo: false,
-          multiple: true,
-          selectedUnitId: this.workspaceService.selectedUnit$.getValue()
-        }
-      });
-      return lastValueFrom(dialogRef.afterClosed()
-        .pipe(
-          map(dialogResult => {
-            if (typeof dialogResult !== 'undefined') {
-              const dialogComponent = dialogRef.componentInstance;
-              if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
-                return dialogComponent.selectedUnitIds;
-              }
+    const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
+      width: '800px',
+      height: '700px',
+      data: <SelectUnitData>{
+        title: this.translateService.instant('workspace.submit-units-title'),
+        buttonLabel: this.translateService.instant('workspace.submit-units'),
+        fromOtherWorkspacesToo: false,
+        multiple: true,
+        selectedUnitId: this.workspaceService.selectedUnit$.getValue()
+      }
+    });
+    return this.handleSelectUnitDialogResult(dialogRef);
+  }
+
+  private async handleSelectUnitDialogResult(
+    dialogRef: MatDialogRef<SelectUnitComponent>
+  ): Promise<number[] | boolean> {
+    return lastValueFrom(dialogRef.afterClosed()
+      .pipe(
+        map(async dialogResult => {
+          if (typeof dialogResult !== 'undefined') {
+            const dialogComponent = dialogRef.componentInstance;
+            if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
+              await this.selectUnit(0);
+              return dialogComponent.selectedUnitIds;
             }
-            return false;
-          })
-        ));
-    }
-    return false;
+          }
+          return false;
+        })
+      ));
   }
 
   private async returnSubmittedUnitsDialog(): Promise<number[] | boolean> {
-    const routingOk = await this.selectUnit(0);
-    if (routingOk) {
-      const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
-        width: '800px',
-        height: '700px',
-        data: <SelectUnitData>{
-          title: this.translateService.instant('workspace.return-submitted-units-title'),
-          buttonLabel: this.translateService.instant('workspace.return-submitted-units'),
-          fromOtherWorkspacesToo: false,
-          multiple: true,
-          selectedUnitId: this.workspaceService.selectedUnit$.getValue(),
-          queryParams: (new HttpParams())
-            .append('targetWorkspaceId', this.workspaceService.selectedWorkspaceId.toString())
-            .append('filterTargetWorkspaceId', true)
-        }
-      });
-      return lastValueFrom(dialogRef.afterClosed()
-        .pipe(
-          map(dialogResult => {
-            if (typeof dialogResult !== 'undefined') {
-              const dialogComponent = dialogRef.componentInstance;
-              if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
-                return dialogComponent.selectedUnitIds;
-              }
-            }
-            return false;
-          })
-        ));
-    }
-    return false;
+    const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
+      width: '800px',
+      height: '700px',
+      data: <SelectUnitData>{
+        title: this.translateService.instant('workspace.return-submitted-units-title'),
+        buttonLabel: this.translateService.instant('workspace.return-submitted-units'),
+        fromOtherWorkspacesToo: false,
+        multiple: true,
+        selectedUnitId: this.workspaceService.selectedUnit$.getValue(),
+        queryParams: (new HttpParams())
+          .append('targetWorkspaceId', this.workspaceService.selectedWorkspaceId.toString())
+          .append('filterTargetWorkspaceId', true)
+      }
+    });
+    return this.handleSelectUnitDialogResult(dialogRef);
   }
 
   async returnSubmittedUnits(): Promise<void> {
