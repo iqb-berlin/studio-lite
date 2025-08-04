@@ -130,9 +130,8 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
   }
 
   async moveOrCopyUnit(moveOnly: boolean): Promise<void> {
-    const routingOk = moveOnly ? await this.selectUnit(0) : true;
-    if (routingOk) {
-      const dialogRef = this.selectUnitDialog.open(MoveUnitComponent, {
+    const dialogRef = this.selectUnitDialog
+      .open(MoveUnitComponent, {
         width: '800px',
         height: '700px',
         data: <MoveUnitData>{
@@ -148,34 +147,32 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
         }
       });
 
-      dialogRef.afterClosed()
-        .subscribe(result => {
-          if (typeof result !== 'undefined') {
-            if (result !== false) {
-              const dialogComponent = dialogRef.componentInstance;
-              if (dialogComponent.targetWorkspace > 0) {
-                if (moveOnly) {
-                  this.backendService.moveUnits(
-                    this.workspaceService.selectedWorkspaceId,
-                    dialogComponent.selectedUnits,
-                    dialogComponent.targetWorkspace
-                  ).subscribe(uploadStatus => {
-                    this.moveOrCopyUnitSubscription(uploadStatus, moveOnly);
-                  });
-                } else {
-                  this.backendService.copyUnits(
-                    dialogComponent.targetWorkspace,
-                    dialogComponent.selectedUnits,
-                    dialogComponent.copyComments
-                  ).subscribe(uploadStatus => {
-                    this.moveOrCopyUnitSubscription(uploadStatus, moveOnly);
-                  });
-                }
-              }
+    dialogRef.afterClosed()
+      .subscribe(async result => {
+        if (typeof result !== 'undefined' && result !== false) {
+          const dialogComponent = dialogRef.componentInstance;
+          if (dialogComponent.targetWorkspace > 0) {
+            if (moveOnly) {
+              await this.selectUnit(0);
+              this.backendService.moveUnits(
+                this.workspaceService.selectedWorkspaceId,
+                dialogComponent.selectedUnits,
+                dialogComponent.targetWorkspace
+              ).subscribe(uploadStatus => {
+                this.moveOrCopyUnitSubscription(uploadStatus, moveOnly);
+              });
+            } else {
+              this.backendService.copyUnits(
+                dialogComponent.targetWorkspace,
+                dialogComponent.selectedUnits,
+                dialogComponent.copyComments
+              ).subscribe(uploadStatus => {
+                this.moveOrCopyUnitSubscription(uploadStatus, moveOnly);
+              });
             }
           }
-        });
-    }
+        }
+      });
   }
 
   moveOrCopyUnitSubscription(uploadStatus: boolean | RequestReportDto, moveOnly: boolean): void {
