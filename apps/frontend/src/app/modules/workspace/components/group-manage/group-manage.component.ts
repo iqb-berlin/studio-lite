@@ -9,7 +9,7 @@ import {
   // eslint-disable-next-line max-len
   MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatBadge } from '@angular/material/badge';
 
@@ -50,7 +50,8 @@ export class GroupManageComponent implements OnInit {
     public workspaceService: WorkspaceService,
     public appService: AppService,
     private backendService: WorkspaceBackendService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private translateService: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -140,14 +141,16 @@ export class GroupManageComponent implements OnInit {
         this.groupUnitsToChange
       ).subscribe(ok => {
         if (ok) {
-          this.snackBar.open(
-            'Gruppe gespeichert', '', { duration: 1000 }
-          );
           this.loadGroups(this.selectedGroup);
+          this.snackBar.open(
+            this.translateService.instant('workspace.group-saved'),
+            '',
+            { duration: 1000 });
         } else {
           this.snackBar.open(
-            'Konnte Gruppe nicht speichern', 'Fehler', { duration: 3000 }
-          );
+            this.translateService.instant('workspace.group-not-saved'),
+            this.translateService.instant('error'),
+            { duration: 3000 });
         }
       });
     }
@@ -159,6 +162,13 @@ export class GroupManageComponent implements OnInit {
   }
 
   addGroup(group: string) {
+    if (!group || group.length < 2) {
+      this.snackBar.open(
+        this.translateService.instant('workspace.new-group-not-saved'),
+        this.translateService.instant('error'),
+        { duration: 3000 });
+      return;
+    }
     this.appService.dataLoading = true;
     this.backendService.addUnitGroup(
       this.workspaceService.selectedWorkspaceId,
@@ -167,13 +177,27 @@ export class GroupManageComponent implements OnInit {
       this.appService.dataLoading = false;
       if (isOK) {
         this.loadGroups(group);
+        this.snackBar.open(
+          this.translateService.instant('workspace.new-group-saved'),
+          '',
+          { duration: 1000 });
       } else {
-        this.snackBar.open('Konnte neue Gruppe nicht anlegen.', '', { duration: 3000 });
+        this.snackBar.open(
+          this.translateService.instant('workspace.new-group-not-saved'),
+          this.translateService.instant('error'),
+          { duration: 3000 });
       }
     });
   }
 
   renameGroup(group: string) {
+    if (!group || group.length < 2) {
+      this.snackBar.open(
+        this.translateService.instant('workspace.group-not-renamed'),
+        this.translateService.instant('error'),
+        { duration: 3000 });
+      return;
+    }
     this.appService.dataLoading = true;
     this.backendService.renameUnitGroup(
       this.workspaceService.selectedWorkspaceId,
@@ -183,8 +207,15 @@ export class GroupManageComponent implements OnInit {
       this.appService.dataLoading = false;
       if (isOK) {
         this.loadGroups(group);
+        this.snackBar.open(
+          this.translateService.instant('workspace.group-renamed'),
+          '',
+          { duration: 1000 });
       } else {
-        this.snackBar.open('Konnte Gruppe nicht umbenennen.', '', { duration: 3000 });
+        this.snackBar.open(
+          this.translateService.instant('workspace.group-not-renamed'),
+          this.translateService.instant('error'),
+          { duration: 3000 });
       }
     });
   }
@@ -199,10 +230,15 @@ export class GroupManageComponent implements OnInit {
       this.appService.dataLoading = false;
       if (ok) {
         this.loadGroups();
+        this.snackBar.open(
+          this.translateService.instant('workspace.group-deleted'),
+          '',
+          { duration: 1000 });
       } else {
         this.snackBar.open(
-          'Konnte Gruppe nicht löschen', 'Fehler', { duration: 3000 }
-        );
+          this.translateService.instant('workspace.group-not-deleted'),
+          this.translateService.instant('error'),
+          { duration: 3000 });
       }
     });
   }

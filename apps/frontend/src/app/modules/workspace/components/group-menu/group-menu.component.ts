@@ -42,9 +42,7 @@ export class GroupMenuComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (typeof result === 'string') {
-        if (result.length > 1) {
-          this.groupAdded.emit(result);
-        }
+        this.groupAdded.emit(result || '');
       }
     });
   }
@@ -62,9 +60,7 @@ export class GroupMenuComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (typeof result === 'string') {
-        if (result.length > 1) {
-          this.groupRenamed.emit(result);
-        }
+        this.groupRenamed.emit(result || '');
       }
     });
   }
