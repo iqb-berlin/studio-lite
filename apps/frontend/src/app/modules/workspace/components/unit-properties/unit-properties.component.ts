@@ -28,6 +28,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIcon } from '@angular/material/icon';
 import { MDProfile } from '@iqb/metadata';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
 import { ProfileFormComponent } from '../../../metadata/components/profile-form/profile-form.component';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
@@ -91,6 +92,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     public snackBar: MatSnackBar,
     public selectUnitDialog: MatDialog,
     public uploadReportDialog: MatDialog,
+    private confirmDialog: MatDialog,
     public translateService: TranslateService,
     private metadataBackendService: MetadataBackendService,
     private metadataService: MetadataService
@@ -370,31 +372,59 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   }
 
   async submitUnit(): Promise<void> {
-    const routingOk = await this.selectUnit(0);
-    if (routingOk) {
-      this.backendService.submitUnits(
-        this.workspaceService.selectedWorkspaceId,
-        this.workspaceService.dropBoxId!,
-        [this.selectedUnitId]
-      )
-        .subscribe(
-          uploadStatus => {
-            this.showRequestMessage(uploadStatus, 'workspace.unit-not-submitted', 'workspace.unit-submitted');
-          });
-    }
+    this.confirmDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translateService.instant('workspace.submit-unit'),
+        content: this.translateService.instant('workspace.submit-unit-confirm'),
+        confirmButtonLabel: this.translateService.instant('workspace.submit-units'),
+        showCancel: true
+      }
+    })
+      .afterClosed()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(async confirmed => {
+        if (!confirmed) return;
+        const routingOk = await this.selectUnit(0);
+        if (routingOk) {
+          this.backendService.submitUnits(
+            this.workspaceService.selectedWorkspaceId,
+            this.workspaceService.dropBoxId!,
+            [this.selectedUnitId]
+          )
+            .subscribe(
+              uploadStatus => {
+                this.showRequestMessage(uploadStatus, 'workspace.unit-not-submitted', 'workspace.unit-submitted');
+              });
+        }
+      });
   }
 
   async returnSubmittedUnit(): Promise<void> {
-    const routingOk = await this.selectUnit(0);
-    if (routingOk) {
-      this.backendService.returnSubmittedUnits(
-        this.workspaceService.selectedWorkspaceId,
-        [this.selectedUnitId]
-      )
-        .subscribe(
-          uploadStatus => {
-            this.showRequestMessage(uploadStatus, 'workspace.unit-not-returned', 'workspace.unit-returned');
-          });
-    }
+    this.confirmDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translateService.instant('workspace.return-submitted-unit'),
+        content: this.translateService.instant('workspace.return-submitted-unit-confirm'),
+        confirmButtonLabel: this.translateService.instant('workspace.return-submitted-unit'),
+        showCancel: true
+      }
+    })
+      .afterClosed()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(async confirmed => {
+        if (!confirmed) return;
+        const routingOk = await this.selectUnit(0);
+        if (routingOk) {
+          this.backendService.returnSubmittedUnits(
+            this.workspaceService.selectedWorkspaceId,
+            [this.selectedUnitId]
+          )
+            .subscribe(
+              uploadStatus => {
+                this.showRequestMessage(uploadStatus, 'workspace.unit-not-returned', 'workspace.unit-returned');
+              });
+        }
+      });
   }
 }
