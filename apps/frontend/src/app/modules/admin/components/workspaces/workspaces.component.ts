@@ -1,7 +1,6 @@
 import {
   AfterViewInit, Component, OnInit, ViewChild
 } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import {
@@ -32,7 +31,6 @@ export class WorkspacesComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['id', 'name', 'groupId'];
 
   @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(private backendService: BackendService) {
   }
@@ -48,6 +46,5 @@ export class WorkspacesComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
-    this.dataSource.paginator = this.paginator;
   }
 }
