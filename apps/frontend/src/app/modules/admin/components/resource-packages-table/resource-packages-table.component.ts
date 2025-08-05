@@ -12,13 +12,14 @@ import { BehaviorSubject } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
 import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
+import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 
 @Component({
   selector: 'studio-lite-resource-packages-table',
   templateUrl: './resource-packages-table.component.html',
   styleUrls: ['./resource-packages-table.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatTable, MatSort, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, DatePipe, TranslateModule, SafeUrlPipe]
+  imports: [MatTable, MatSort, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, DatePipe, TranslateModule, SafeUrlPipe, SearchFilterComponent]
 })
 export class ResourcePackagesTableComponent implements OnChanges {
   resourcePackageProperties: string[] = ['name', 'createdAt'];

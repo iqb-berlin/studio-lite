@@ -723,6 +723,7 @@
   "search-filter": {
     "filter-users": "Suche nach Nutzer:innen",
     "filter-workspaces": "Suche nach Arbeitsbereichen",
+    "filter-packages": "Suche nach Paketen",
     "filter-groups": "Suche nach Gruppen",
     "filter-reviews": "Suche nach Aufgabenfolgen",
     "filter-units": "Suche nach Aufgaben",
