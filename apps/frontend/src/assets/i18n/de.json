@@ -203,6 +203,7 @@
     "v-modules": "Module",
     "settings": "Einstellungen",
     "packages": "Pakete",
+    "units": "Aufgaben",
     "upload-resource-package": "Resource-Package hochladen/aktualisieren",
     "delete-selected": "Markierte löschen",
     "reload-page": "Nach dem Speichern bitte die Seite neu laden, damit die Änderungen wirksam werden!",
@@ -256,7 +257,7 @@
     "delete-many-packages-confirmation" : "Sollen {{count}} Pakete gelöscht werden?",
     "package-deleted": "Paket(e) gelöscht",
     "package-not-deleted": "Konnte Paket(e) nicht löschen",
-    "workspaces-count-info": "Das System enthält insgesamt {{workspacesCount}} Arbeitsbereiche."
+    "issue-count-info": "Das System enthält insgesamt {{count}} {{issue}}."
   },
   "metadata": {
     "metadata": "Metadaten",
@@ -723,6 +724,7 @@
   "search-filter": {
     "filter-users": "Suche nach Nutzer:innen",
     "filter-workspaces": "Suche nach Arbeitsbereichen",
+    "filter-packages": "Suche nach Paketen",
     "filter-groups": "Suche nach Gruppen",
     "filter-reviews": "Suche nach Aufgabenfolgen",
     "filter-units": "Suche nach Aufgaben",

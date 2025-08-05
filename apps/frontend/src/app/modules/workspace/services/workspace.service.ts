@@ -172,7 +172,6 @@ export class WorkspaceService {
           this.lastChangedMetadataUser = undefined;
           this.lastChangedDefinitionUser = undefined;
           this.lastChangedSchemeUser = undefined;
-          // explicit Date object due to timezone
           if (unitData) {
             if (unitData.lastChangedMetadata) {
               unitData.lastChangedMetadata = new Date(unitData.lastChangedMetadata);
