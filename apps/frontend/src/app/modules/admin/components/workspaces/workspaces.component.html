@@ -2,7 +2,11 @@
 
   @if (dataSource.data.length) {
 
-    <div class="info">{{'admin.workspaces-count-info' | translate : { workspacesCount: dataSource.data.length} }}</div>
+    <div class="info">
+      {{'admin.issue-count-info' | translate :
+          { count: dataSource.data.length, issue: ('admin.workspaces' | translate)}
+      }}
+    </div>
 
     <studio-lite-search-filter
       [title]="'search-filter.filter-workspaces' | translate"

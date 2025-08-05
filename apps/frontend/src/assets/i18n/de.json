@@ -256,7 +256,7 @@
     "delete-many-packages-confirmation" : "Sollen {{count}} Pakete gelöscht werden?",
     "package-deleted": "Paket(e) gelöscht",
     "package-not-deleted": "Konnte Paket(e) nicht löschen",
-    "workspaces-count-info": "Das System enthält insgesamt {{workspacesCount}} Arbeitsbereiche."
+    "issue-count-info": "Das System enthält insgesamt {{count}} {{issue}}."
   },
   "metadata": {
     "metadata": "Metadaten",
