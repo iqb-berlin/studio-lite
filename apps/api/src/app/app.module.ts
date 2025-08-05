@@ -78,6 +78,7 @@ import { ItemCommentService } from './services/item-comment.service';
 import UnitCommentUnitItem from './entities/unit-comment-unit-item.entity';
 import { ReviewUnitItemController } from './controllers/review-unit-item.controller';
 import { HttpExceptionFilter } from './exceptions/http-exception.filter';
+import { AdminController } from './controllers/admin.controller';
 
 @Module({
   imports: [
@@ -195,6 +196,7 @@ import { HttpExceptionFilter } from './exceptions/http-exception.filter';
     AdminUserController,
     GroupAdminUserController,
     AdminWorkspaceGroupController,
+    AdminController,
     SettingController,
     AdminResourcePackageController,
     ResourcePackageController,

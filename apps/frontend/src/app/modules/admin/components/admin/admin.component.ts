@@ -14,6 +14,7 @@ export class AdminComponent {
   navLinks = [
     'users',
     'workspace-groups',
+    'workspaces',
     'v-modules',
     'settings',
     'packages'

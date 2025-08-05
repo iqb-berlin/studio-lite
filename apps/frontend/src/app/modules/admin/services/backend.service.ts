@@ -27,6 +27,13 @@ export class BackendService {
     private http: HttpClient
   ) {}
 
+  getAllWorkspaces(): Observable<WorkspaceFullDto[] | boolean> {
+    return this.http.get<WorkspaceFullDto[]>(`${this.serverUrl}admin/workspaces`)
+      .pipe(
+        catchError(() => of(false))
+      );
+  }
+
   setWorkspaceGroupProfiles(settings:WorkspaceGroupSettingsDto, workspaceGroupId: number): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`,

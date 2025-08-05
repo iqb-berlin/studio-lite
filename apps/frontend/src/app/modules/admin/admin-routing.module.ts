@@ -7,6 +7,7 @@ import { AdminComponent } from './components/admin/admin.component';
 import { VeronaModulesComponent } from './components/verona-modules/verona-modules.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { ResourcePackagesComponent } from './components/resource-packages/resource-packages.component';
+import { WorkspacesComponent } from './components/workspaces/workspaces.component';
 
 const routes: Routes = [
   {
@@ -16,6 +17,7 @@ const routes: Routes = [
       { path: '', redirectTo: 'users', pathMatch: 'full' },
       { path: 'users', component: UsersComponent },
       { path: 'workspace-groups', component: WorkspaceGroupsComponent },
+      { path: 'workspaces', component: WorkspacesComponent },
       { path: 'v-modules', component: VeronaModulesComponent },
       { path: 'settings', component: SettingsComponent },
       { path: 'packages', component: ResourcePackagesComponent },

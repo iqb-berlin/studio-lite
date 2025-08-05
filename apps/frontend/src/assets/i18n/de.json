@@ -199,6 +199,7 @@
     "users-deleted": "Nutzer:in(en) gelöscht",
     "users-not-deleted": "Nutzer:in(en) konnten nicht gelöscht werden",
     "workspace-groups": "Bereichsgruppen",
+    "workspaces": "Arbeitsbereiche",
     "v-modules": "Module",
     "settings": "Einstellungen",
     "packages": "Pakete",
@@ -254,7 +255,8 @@
     "delete-one-package-confirmation" : "Soll das Paket gelöscht werden?",
     "delete-many-packages-confirmation" : "Sollen {{count}} Pakete gelöscht werden?",
     "package-deleted": "Paket(e) gelöscht",
-    "package-not-deleted": "Konnte Paket(e) nicht löschen"
+    "package-not-deleted": "Konnte Paket(e) nicht löschen",
+    "workspaces-count-info": "Das System enthält insgesamt {{workspacesCount}} Arbeitsbereiche."
   },
   "metadata": {
     "metadata": "Metadaten",
