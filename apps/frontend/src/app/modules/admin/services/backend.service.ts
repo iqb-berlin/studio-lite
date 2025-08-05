@@ -34,6 +34,13 @@ export class BackendService {
       );
   }
 
+  getAllUnits(): Observable<UnitByDefinitionIdDto[] | boolean> {
+    return this.http.get<UnitByDefinitionIdDto[]>(`${this.serverUrl}admin/units`)
+      .pipe(
+        catchError(() => of(false))
+      );
+  }
+
   setWorkspaceGroupProfiles(settings:WorkspaceGroupSettingsDto, workspaceGroupId: number): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`,

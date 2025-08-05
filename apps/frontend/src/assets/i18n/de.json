@@ -203,6 +203,7 @@
     "v-modules": "Module",
     "settings": "Einstellungen",
     "packages": "Pakete",
+    "units": "Aufgaben",
     "upload-resource-package": "Resource-Package hochladen/aktualisieren",
     "delete-selected": "Markierte löschen",
     "reload-page": "Nach dem Speichern bitte die Seite neu laden, damit die Änderungen wirksam werden!",
