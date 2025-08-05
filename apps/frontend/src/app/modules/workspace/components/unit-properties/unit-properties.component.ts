@@ -43,6 +43,7 @@ import { CanReturnUnitPipe } from '../../pipes/can-return-unit.pipe';
 import { AliasId } from '../../../metadata/models/alias-id.interface';
 import { MetadataBackendService } from '../../../metadata/services/metadata-backend.service';
 import { MetadataService } from '../../../metadata/services/metadata.service';
+import { I18nService } from '../../../../services/i18n.service';
 
 @Component({
   templateUrl: './unit-properties.component.html',
@@ -70,7 +71,6 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   metadataLoader: BehaviorSubject<UnitMetadataValues> = new BehaviorSubject({});
   variablesLoader: BehaviorSubject<AliasId[]> = new BehaviorSubject<AliasId[]>([]);
   unitForm: UntypedFormGroup;
-  timeZone = 'Europe/Berlin';
   form = new FormGroup({});
   selectedStateId: string | null = null;
   selectedStateColor = '';
@@ -95,10 +95,10 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     private confirmDialog: MatDialog,
     public translateService: TranslateService,
     private metadataBackendService: MetadataBackendService,
-    private metadataService: MetadataService
+    private metadataService: MetadataService,
+    public i18nService: I18nService
   ) {
     super();
-    this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     this.unitForm = this.fb.group({
       key: this.fb.control(''),
       name: this.fb.control(''),

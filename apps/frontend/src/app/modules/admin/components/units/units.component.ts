@@ -18,6 +18,7 @@ import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { BackendService } from '../../services/backend.service';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { I18nService } from '../../../../services/i18n.service';
 
 @Component({
   selector: 'studio-lite-units',
@@ -28,7 +29,6 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
 })
 
 export class UnitsComponent implements OnInit, AfterViewInit {
-  timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   dataSource = new MatTableDataSource<UnitByDefinitionIdDto>([]);
   displayedColumns: string[] = [
     'id',
@@ -46,7 +46,8 @@ export class UnitsComponent implements OnInit, AfterViewInit {
 
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private backendService: BackendService) {
+  constructor(private backendService: BackendService,
+              public i18nService: I18nService) {
   }
 
   ngOnInit(): void {
@@ -57,25 +58,6 @@ export class UnitsComponent implements OnInit, AfterViewInit {
         }
       });
   }
-
-
-
-  // select: {
-  //   definitionId: true,
-  //   key: true,
-  //   name: true,
-  //   groupName: true,
-  //   id: true,
-  //   workspaceId: true,
-  //   lastChangedDefinition: true,
-  //   lastChangedDefinitionUser: true,
-  //   lastChangedMetadata: true,
-  //   lastChangedMetadataUser: true,
-  //   lastChangedScheme: true,
-  //   lastChangedSchemeUser: true,
-  //   metadata: false,
-  //   variables: false
-  // }
 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;

@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import { saveAs } from 'file-saver-es';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatAnchor } from '@angular/material/button';
+import { MatAnchor, MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DatePipe } from '@angular/common';
 import { BytesPipe } from '@studio-lite-lib/iqb-components';
@@ -20,13 +20,14 @@ import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
 import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
 import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
+import { I18nService } from '../../../../services/i18n.service';
 
 @Component({
   selector: 'studio-lite-verona-modules-table',
   templateUrl: './verona-modules-table.component.html',
   styleUrls: ['./verona-modules-table.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe]
+  imports: [MatButton, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe]
 })
 export class VeronaModulesTableComponent implements OnInit, OnDestroy {
   @Input() type!: 'editor' | 'player' | 'schemer';
@@ -43,15 +44,13 @@ export class VeronaModulesTableComponent implements OnInit, OnDestroy {
   @ViewChild(MatSort) sort = new MatSort();
   objectsDatasource = new MatTableDataSource<VeronaModuleClass>();
   tableSelectionCheckboxes = new SelectionModel <VeronaModuleClass>(true, []);
-  timeZone = 'Europe/Berlin';
   displayedColumns = ['selectCheckbox', 'name', 'id', 'version', 'veronaVersion', 'fileDateTime', 'filesize'];
   private selectionChangedSubscription: Subscription | undefined;
 
   constructor(
-    private backendService: BackendService
-  ) {
-    this.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  }
+    private backendService: BackendService,
+    public i18nService: I18nService
+  ) {}
 
   ngOnInit(): void {
     this.selectionChangedSubscription = this.tableSelectionCheckboxes.changed.subscribe(() => {

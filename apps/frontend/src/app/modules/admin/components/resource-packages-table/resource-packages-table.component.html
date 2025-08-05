@@ -60,7 +60,7 @@
         }
         @if (column === 'createdAt') {
           <span>
-            {{element[column] | date : 'dd.MM.yyyy HH:mm' : timeZone}}
+            {{element[column] | date : i18nService.dateTimeFormat : i18nService.timeZone}}
           </span>
         }
       </mat-cell>

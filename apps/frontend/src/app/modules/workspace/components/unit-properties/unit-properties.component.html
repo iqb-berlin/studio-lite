@@ -179,7 +179,8 @@
                     <div>
                       {{
                         'workspace.last-changed-metadata' | translate: {
-                          date: (workspaceService.lastChangedMetadata | date : 'dd.MM.yyyy HH:mm' : timeZone),
+                          date: (workspaceService.lastChangedMetadata |
+                            date : i18nService.dateTimeFormat : i18nService.timeZone),
                           user: workspaceService.lastChangedMetadataUser || 'workspace.unknown' | translate
                         }
                       }}
@@ -189,7 +190,8 @@
                     <div>
                       {{
                         'workspace.last-changed-definition' | translate: {
-                          date: (workspaceService.lastChangedDefinition | date : 'dd.MM.yyyy HH:mm' : timeZone),
+                          date: (workspaceService.lastChangedDefinition |
+                            date : i18nService.dateTimeFormat : i18nService.timeZone),
                           user: workspaceService.lastChangedDefinitionUser || 'workspace.unknown' | translate
                         }
                       }}
@@ -199,7 +201,8 @@
                     <div>
                       {{
                         'workspace.last-changed-scheme' | translate: {
-                          date: (workspaceService.lastChangedScheme | date : 'dd.MM.yyyy HH:mm' : timeZone),
+                          date: (workspaceService.lastChangedScheme |
+                            date : i18nService.dateTimeFormat : i18nService.timeZone),
                           user: workspaceService.lastChangedSchemeUser || 'workspace.unknown' | translate
                         }
                       }}

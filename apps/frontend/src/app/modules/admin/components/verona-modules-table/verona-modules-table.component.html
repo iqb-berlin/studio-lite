@@ -47,43 +47,36 @@
       <mat-cell *matCellDef="let element" >{{element.key}}</mat-cell>
     </ng-container>
     <ng-container matColumnDef="version">
-      <mat-header-cell *matHeaderCellDef
-        class="fx-flex-row-fix-80">
+      <mat-header-cell *matHeaderCellDef>
         {{'admin.module-version' | translate}}
       </mat-header-cell>
-      <mat-cell *matCellDef="let element"
-        class="fx-flex-row-fix-80">
+      <mat-cell *matCellDef="let element">
         {{element.metadata.version}}
       </mat-cell>
     </ng-container>
     <ng-container matColumnDef="fileDateTime">
       <mat-header-cell *matHeaderCellDef
-        mat-sort-header="fileDateTime"
-        class="fx-flex-row-fix-160">
+        mat-sort-header="fileDateTime">
         {{'admin.module-date' | translate}}
       </mat-header-cell>
-      <mat-cell *matCellDef="let element" class="fx-flex-row-fix-160">
-        {{element.fileDateTime | date : 'dd.MM.yyyy HH:mm' : timeZone}}
+      <mat-cell *matCellDef="let element">
+        {{element.fileDateTime | date : i18nService.dateTimeFormat : i18nService.timeZone}}
       </mat-cell>
     </ng-container>
     <ng-container matColumnDef="filesize">
       <mat-header-cell *matHeaderCellDef
-        mat-sort-header="fileSize"
-        class="fx-flex-row-fix-80">
+        mat-sort-header="fileSize">
         {{'admin.module-size' | translate}}
       </mat-header-cell>
-      <mat-cell *matCellDef="let element"
-        class="fx-flex-row-fix-80">
+      <mat-cell *matCellDef="let element">
         {{element.fileSize | bytes}}
       </mat-cell>
     </ng-container>
     <ng-container matColumnDef="veronaVersion">
-      <mat-header-cell *matHeaderCellDef
-        class="fx-flex-row-fix-100">
+      <mat-header-cell *matHeaderCellDef>
         {{'admin.module-api-version' | translate}}
       </mat-header-cell>
-      <mat-cell *matCellDef="let element"
-        class="fx-flex-row-fix-100">
+      <mat-cell *matCellDef="let element">
         {{element.metadata.specVersion}}
       </mat-cell>
     </ng-container>
