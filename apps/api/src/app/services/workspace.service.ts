@@ -68,6 +68,11 @@ export class WorkspaceService {
   ) {
   }
 
+  async getAllWorkspaces(): Promise<WorkspaceFullDto[]> {
+    return this.workspacesRepository
+      .find({ order: { id: 'ASC' } });
+  }
+
   async findAll(userId: number): Promise<UsersWorkspaceInListDto[]> {
     this.logger.log(`Returning workspaces${userId ? ` for userId: ${userId}` : '.'}`);
     const validWorkspaces: UserWorkspaceAccessDto[] = [];
