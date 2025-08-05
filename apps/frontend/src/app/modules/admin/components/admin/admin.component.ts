@@ -13,7 +13,7 @@ import { MatTabNav, MatTabLink, MatTabNavPanel } from '@angular/material/tabs';
 export class AdminComponent {
   navLinks = [
     'users',
-    'workspaces',
+    'workspace-groups',
     'v-modules',
     'settings',
     'packages'

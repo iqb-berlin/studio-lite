@@ -15,7 +15,7 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: 'users', pathMatch: 'full' },
       { path: 'users', component: UsersComponent },
-      { path: 'workspaces', component: WorkspaceGroupsComponent },
+      { path: 'workspace-groups', component: WorkspaceGroupsComponent },
       { path: 'v-modules', component: VeronaModulesComponent },
       { path: 'settings', component: SettingsComponent },
       { path: 'packages', component: ResourcePackagesComponent },
