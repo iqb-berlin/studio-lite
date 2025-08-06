@@ -1,11 +1,12 @@
 <div class="fx-column-start-stretch">
-  <h1 mat-dialog-title>{{ 'workspace.print-preview-units' | translate }}</h1>
+  <h2 mat-dialog-title>{{ 'workspace.print-preview-units' | translate }}</h2>
   <mat-dialog-content class="fx-row-start-stretch dialog-content">
     <studio-lite-select-unit-list #unitSelectionTable
                                   class="fx-flex-row-50"
                                   [filter]="data && data.units ? data.units : []"
                                   [initialSelection]="data && data.units ? data.units : []"
                                   [workspace]="workspaceService.selectedWorkspaceId"
+                                  [selectedUnitId]="workspaceService.selectedUnit$.value"
                                   (selectionChanged)="unitPrintSettings.unitIds = $event">
     </studio-lite-select-unit-list>
     <div class="fx-flex-row-50 settings">

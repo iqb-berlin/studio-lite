@@ -3,8 +3,9 @@
   <mat-dialog-content class="fx-row-start-stretch dialog-content">
     <div class="fx-row-space-between-stretch">
       <studio-lite-select-unit-list #unitSelectionTable
-        [workspace]="workspaceService.selectedWorkspaceId"
-        (selectionChanged)="unitList = $event">
+                                    [workspace]="workspaceService.selectedWorkspaceId"
+                                    [selectedUnitId]="workspaceService.selectedUnit$.value"
+                                    (selectionChanged)="unitList = $event">
       </studio-lite-select-unit-list>
       <div class="settings">
         <section class="example-section fx-column-start-start">

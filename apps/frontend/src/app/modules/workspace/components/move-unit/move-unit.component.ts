@@ -17,6 +17,7 @@ import { WorkspaceDataFlat } from '../../../../models/workspace-data-flat.interf
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { AppService } from '../../../../services/app.service';
 import { MoveUnitData } from '../../models/move-unit-data.interface';
+import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
   selector: 'studio-lite-move-unit',
@@ -43,6 +44,7 @@ export class MoveUnitComponent implements OnInit {
   constructor(
     private fb: UntypedFormBuilder,
     private appService: AppService,
+    public workspaceService: WorkspaceService,
     @Inject(MAT_DIALOG_DATA) public data: MoveUnitData
   ) {
     this.selectForm = this.fb.group({

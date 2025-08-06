@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  ConfigDto, AppLogoDto, UnitExportConfigDto, MissingsProfilesDto
+  ConfigDto, AppLogoDto, UnitExportConfigDto, MissingsProfilesDto, ProfilesRegistryDto
 } from '@studio-lite-lib/api-dto';
 
 import Setting from '../entities/setting.entity';
@@ -76,14 +76,12 @@ export class SettingService {
     }
   }
 
-  // TODO: Kein null als Rückgabe sondern exception. Frontend muss damit umgehen
   async findUnitExportConfig(): Promise<UnitExportConfigDto | null> {
     this.logger.log('Returning settings unit export config.');
     const unitExportConfig = await this.settingsRepository.findOne({ where: { key: 'unit-export-config' } });
     return unitExportConfig ? JSON.parse(unitExportConfig.content) : new UnitExportConfigDto();
   }
 
-  // TODO: ist das in diesem Fall ein PUT?
   async patchUnitExportConfig(newUnitExportConfig: UnitExportConfigDto): Promise<void> {
     this.logger.log('Updating settings unit export config.');
     const settingToUpdate = await this.settingsRepository.findOne({ where: { key: 'unit-export-config' } });
@@ -115,6 +113,27 @@ export class SettingService {
       const newSetting = this.settingsRepository.create({
         key: 'missings-profile-iqb-standard',
         content: JSON.stringify(newMissingsProfiles)
+      });
+      await this.settingsRepository.save(newSetting);
+    }
+  }
+
+  async findUnitProfilesRegistry(): Promise<ProfilesRegistryDto> {
+    this.logger.log('Returning settings profiles registry.');
+    const profilesRegistry = await this.settingsRepository.findOne({ where: { key: 'profiles-registry' } });
+    return profilesRegistry ? JSON.parse(profilesRegistry.content) : new ProfilesRegistryDto();
+  }
+
+  async patchProfilesRegistry(newProfilesRegistry: ProfilesRegistryDto) {
+    this.logger.log('Updating settings profiles registry.');
+    const settingToUpdate = await this.settingsRepository.findOne({ where: { key: 'profiles-registry' } });
+    if (settingToUpdate) {
+      settingToUpdate.content = JSON.stringify(newProfilesRegistry);
+      await this.settingsRepository.save(settingToUpdate);
+    } else {
+      const newSetting = this.settingsRepository.create({
+        key: 'profiles-registry',
+        content: JSON.stringify(newProfilesRegistry)
       });
       await this.settingsRepository.save(newSetting);
     }

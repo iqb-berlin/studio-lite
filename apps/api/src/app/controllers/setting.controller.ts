@@ -5,8 +5,9 @@ import {
   ApiBearerAuth, ApiHeader, ApiOkResponse, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
-  MissingsProfilesDto, ConfigDto, AppLogoDto, UnitExportConfigDto
+  MissingsProfilesDto, ConfigDto, AppLogoDto, UnitExportConfigDto, ProfilesRegistryDto
 } from '@studio-lite-lib/api-dto';
+import { ApiNotAcceptableResponse } from '@nestjs/swagger/dist/decorators/api-response.decorator';
 import { SettingService } from '../services/setting.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
@@ -76,6 +77,26 @@ export class SettingController {
   @ApiTags('admin settings')
   async patchUnitExportConfig(@Body() newUnitExportConfig: UnitExportConfigDto) {
     return this.settingService.patchUnitExportConfig(newUnitExportConfig);
+  }
+
+  @Get('profiles-registry')
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ description: 'Profiles registry retrieved successfully.' })
+  @ApiNotAcceptableResponse({ description: 'Profiles registry not acceptable.' })
+  @ApiTags('admin settings')
+  async findUnitProfilesRegistry(): Promise<ProfilesRegistryDto> {
+    return this.settingService.findUnitProfilesRegistry();
+  }
+
+  @Patch('profiles-registry')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiOkResponse({ description: 'Profiles registry updated successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiNotAcceptableResponse({ description: 'Profiles registry not acceptable.' })
+  @ApiBearerAuth()
+  @ApiTags('admin settings')
+  async patchProfilesRegistry(@Body() newProfilesRegistry: ProfilesRegistryDto) {
+    return this.settingService.patchProfilesRegistry(newProfilesRegistry);
   }
 
   @Get('missings-profiles')

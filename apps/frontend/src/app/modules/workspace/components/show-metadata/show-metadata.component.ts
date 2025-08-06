@@ -23,7 +23,7 @@ import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.co
 
 export class ShowMetadataComponent {
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { units: number[], warning: string },
+    @Inject(MAT_DIALOG_DATA) public data: { units: number[] },
     public workspaceService: WorkspaceService
   ) {
   }

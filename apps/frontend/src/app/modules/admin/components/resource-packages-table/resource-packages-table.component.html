@@ -3,6 +3,21 @@
     {{'resource-packages.no-packages' | translate}}
   </p>
 }
+
+@if (dataSource && dataSource.data.length) {
+
+  <div class="info">
+    {{'admin.issue-count-info' | translate :
+    { count: dataSource.data.length, issue: ('admin.packages' | translate)}
+    }}
+  </div>
+
+  <studio-lite-search-filter
+    [title]="'search-filter.filter-packages' | translate"
+    (valueChange)="dataSource.filter = $event.trim().toLowerCase()">
+  </studio-lite-search-filter>
+}
+
 <mat-table matSort
   matSortDisableClear
   [dataSource]="dataSource">
@@ -45,7 +60,7 @@
         }
         @if (column === 'createdAt') {
           <span>
-            {{element[column] | date : 'dd.MM.yyyy HH:mm' : timeZone}}
+            {{element[column] | date : i18nService.dateTimeFormat : i18nService.timeZone}}
           </span>
         }
       </mat-cell>

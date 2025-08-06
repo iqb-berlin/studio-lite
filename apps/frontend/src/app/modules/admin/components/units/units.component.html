@@ -1,0 +1,41 @@
+<div class="admin-tab-content fx-column-start-stretch">
+
+  @if (dataSource.data.length) {
+
+    <div class="info">
+      {{'admin.issue-count-info' | translate :
+          { count: dataSource.data.length, issue: ('admin.units' | translate)}
+      }}
+    </div>
+
+    <studio-lite-search-filter
+      [title]="'search-filter.filter-units' | translate"
+      (valueChange)="dataSource.filter = $event.trim().toLowerCase()">
+    </studio-lite-search-filter>
+  }
+
+  <div class="admin-tab-content">
+    <table mat-table [dataSource]="dataSource" matSort>
+
+      @for (column of displayedColumns; track column) {
+        <ng-container [matColumnDef]="column">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <span class="capitalized">{{ column }}</span>
+          </th>
+          <td mat-cell *matCellDef="let unit">
+            @if (column === 'id') {
+              <a [routerLink]="`/a/${unit.workspaceId}/${unit.id}`">{{ unit.id }}</a>
+            } @else if (column === 'lastChangedDefinition' || column === 'lastChangedMetadata' || column === 'lastChangedScheme') {
+              {{ unit[column] | date : i18nService.dateTimeFormat : i18nService.timeZone }}
+            } @else {
+              {{ unit[column] }}
+            }
+          </td>
+        </ng-container>
+      }
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+</div>

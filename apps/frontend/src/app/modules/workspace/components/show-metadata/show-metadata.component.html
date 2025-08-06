@@ -1,42 +1,24 @@
-@if(!this.data.warning){
-  <div class="fx-column-start-stretch">
-    <h2 mat-dialog-title>{{ 'workspace.show-metadata' | translate }}</h2>
+<div class="fx-column-start-stretch">
+  <h2 mat-dialog-title>{{ 'workspace.show-metadata' | translate }}</h2>
 
-    <mat-dialog-content class="fx-row-start-stretch dialog-content">
-      <studio-lite-select-unit-list #unitSelectionTable
-                                    [filter]="data && data.units ? data.units : []"
-                                    [initialSelection]="data && data.units ? data.units : []"
-                                    [workspace]="workspaceService.selectedWorkspaceId"
-                                    (selectionChanged)="unitList = $event">
-      </studio-lite-select-unit-list>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
+  <mat-dialog-content class="fx-row-start-stretch dialog-content">
+    <studio-lite-select-unit-list class="full-width"
+                                  [workspace]="workspaceService.selectedWorkspaceId"
+                                  [selectedUnitId]="workspaceService.selectedUnit$.value"
+                                  (selectionChanged)="unitList = $event">
+    </studio-lite-select-unit-list>
+  </mat-dialog-content>
 
-      <button mat-raised-button color="primary"
-              type="submit"
-              [disabled]="unitList.length === 0"
-              [mat-dialog-close]="{selectedUnits:unitList}"
-      >
-        {{ 'display' | translate }}
-      </button>
-      <button mat-raised-button [mat-dialog-close]="false">
-        {{ 'dialogs.cancel' | translate }}
-      </button>
-    </mat-dialog-actions>
-  </div>
-} @else {
-  <div class="fx-column-start-stretch">
-    <mat-dialog-content class="fx-row-start-stretch dialog-content">
-      <div>
-        {{data.warning}}
-      </div>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-raised-button color="primary" [mat-dialog-close]="false">
-        {{ 'dialogs.close' | translate }}
-      </button>
-    </mat-dialog-actions>
-  </div>
-
-}
+  <mat-dialog-actions align="end">
+    <button mat-raised-button color="primary"
+            type="submit"
+            [disabled]="!unitList.length"
+            [mat-dialog-close]="{selectedUnits: unitList}">
+      {{ 'display' | translate }}
+    </button>
+    <button mat-raised-button [mat-dialog-close]="false">
+      {{ 'dialogs.cancel' | translate }}
+    </button>
+  </mat-dialog-actions>
+</div>
 

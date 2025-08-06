@@ -126,14 +126,27 @@ export class WorkspaceService {
 
   resetUnitList(data: UnitInListDto[]) {
     this.unitList = {};
+    const unitGroups = [...this.workspaceSettings.unitGroups || []];
+    const usedUnitGroups: string[] = [];
     data.forEach(u => {
       const groupName = u.groupName ? u.groupName : '';
+      if (groupName && !usedUnitGroups.includes(groupName)) {
+        usedUnitGroups.push(groupName);
+      }
       if (this.unitList[groupName]) {
         this.unitList[groupName].push(u);
       } else {
         this.unitList[groupName] = [u];
       }
     });
+    const notUsedGroups = unitGroups.filter(g => !usedUnitGroups.includes(g));
+    notUsedGroups.forEach(groupName => this.addEmptyUnitGroup(groupName));
+  }
+
+  private addEmptyUnitGroup(groupName: string) {
+    if (!this.unitList[groupName]) {
+      this.unitList[groupName] = [];
+    }
   }
 
   setWorkspaceGroupStates(): void {
@@ -159,7 +172,6 @@ export class WorkspaceService {
           this.lastChangedMetadataUser = undefined;
           this.lastChangedDefinitionUser = undefined;
           this.lastChangedSchemeUser = undefined;
-          // explicit Date object due to timezone
           if (unitData) {
             if (unitData.lastChangedMetadata) {
               unitData.lastChangedMetadata = new Date(unitData.lastChangedMetadata);

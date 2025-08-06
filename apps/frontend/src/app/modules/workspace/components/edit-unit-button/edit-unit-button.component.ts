@@ -3,7 +3,7 @@ import { RequestReportDto, UnitDownloadSettingsDto, UnitPropertiesDto } from '@s
 import { format } from 'date-fns';
 import { saveAs } from 'file-saver-es';
 import { MessageDialogComponent, MessageDialogData, MessageType } from '@studio-lite-lib/iqb-components';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -130,9 +130,8 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
   }
 
   async moveOrCopyUnit(moveOnly: boolean): Promise<void> {
-    const routingOk = moveOnly ? await this.selectUnit(0) : true;
-    if (routingOk) {
-      const dialogRef = this.selectUnitDialog.open(MoveUnitComponent, {
+    const dialogRef = this.selectUnitDialog
+      .open(MoveUnitComponent, {
         width: '800px',
         height: '700px',
         data: <MoveUnitData>{
@@ -148,34 +147,32 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
         }
       });
 
-      dialogRef.afterClosed()
-        .subscribe(result => {
-          if (typeof result !== 'undefined') {
-            if (result !== false) {
-              const dialogComponent = dialogRef.componentInstance;
-              if (dialogComponent.targetWorkspace > 0) {
-                if (moveOnly) {
-                  this.backendService.moveUnits(
-                    this.workspaceService.selectedWorkspaceId,
-                    dialogComponent.selectedUnits,
-                    dialogComponent.targetWorkspace
-                  ).subscribe(uploadStatus => {
-                    this.moveOrCopyUnitSubscription(uploadStatus, moveOnly);
-                  });
-                } else {
-                  this.backendService.copyUnits(
-                    dialogComponent.targetWorkspace,
-                    dialogComponent.selectedUnits,
-                    dialogComponent.copyComments
-                  ).subscribe(uploadStatus => {
-                    this.moveOrCopyUnitSubscription(uploadStatus, moveOnly);
-                  });
-                }
-              }
+    dialogRef.afterClosed()
+      .subscribe(async result => {
+        if (typeof result !== 'undefined' && result !== false) {
+          const dialogComponent = dialogRef.componentInstance;
+          if (dialogComponent.targetWorkspace > 0) {
+            if (moveOnly) {
+              await this.selectUnit(0);
+              this.backendService.moveUnits(
+                this.workspaceService.selectedWorkspaceId,
+                dialogComponent.selectedUnits,
+                dialogComponent.targetWorkspace
+              ).subscribe(uploadStatus => {
+                this.moveOrCopyUnitSubscription(uploadStatus, moveOnly);
+              });
+            } else {
+              this.backendService.copyUnits(
+                dialogComponent.targetWorkspace,
+                dialogComponent.selectedUnits,
+                dialogComponent.copyComments
+              ).subscribe(uploadStatus => {
+                this.moveOrCopyUnitSubscription(uploadStatus, moveOnly);
+              });
             }
           }
-        });
-    }
+        }
+      });
   }
 
   moveOrCopyUnitSubscription(uploadStatus: boolean | RequestReportDto, moveOnly: boolean): void {
@@ -274,66 +271,54 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
   }
 
   private async submitUnitsDialog(): Promise<number[] | boolean> {
-    const routingOk = await this.selectUnit(0);
-    if (routingOk) {
-      const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
-        width: '800px',
-        height: '700px',
-        data: <SelectUnitData>{
-          title: this.translateService.instant('workspace.submit-units-title'),
-          buttonLabel: this.translateService.instant('workspace.submit-units'),
-          fromOtherWorkspacesToo: false,
-          multiple: true,
-          selectedUnitId: this.workspaceService.selectedUnit$.getValue()
-        }
-      });
-      return lastValueFrom(dialogRef.afterClosed()
-        .pipe(
-          map(dialogResult => {
-            if (typeof dialogResult !== 'undefined') {
-              const dialogComponent = dialogRef.componentInstance;
-              if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
-                return dialogComponent.selectedUnitIds;
-              }
+    const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
+      width: '800px',
+      height: '700px',
+      data: <SelectUnitData>{
+        title: this.translateService.instant('workspace.submit-units-title'),
+        buttonLabel: this.translateService.instant('workspace.submit-units'),
+        fromOtherWorkspacesToo: false,
+        multiple: true,
+        selectedUnitId: this.workspaceService.selectedUnit$.getValue()
+      }
+    });
+    return this.handleSelectUnitDialogResult(dialogRef);
+  }
+
+  private async handleSelectUnitDialogResult(
+    dialogRef: MatDialogRef<SelectUnitComponent>
+  ): Promise<number[] | boolean> {
+    return lastValueFrom(dialogRef.afterClosed()
+      .pipe(
+        map(async dialogResult => {
+          if (typeof dialogResult !== 'undefined') {
+            const dialogComponent = dialogRef.componentInstance;
+            if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
+              await this.selectUnit(0);
+              return dialogComponent.selectedUnitIds;
             }
-            return false;
-          })
-        ));
-    }
-    return false;
+          }
+          return false;
+        })
+      ));
   }
 
   private async returnSubmittedUnitsDialog(): Promise<number[] | boolean> {
-    const routingOk = await this.selectUnit(0);
-    if (routingOk) {
-      const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
-        width: '800px',
-        height: '700px',
-        data: <SelectUnitData>{
-          title: this.translateService.instant('workspace.return-submitted-units-title'),
-          buttonLabel: this.translateService.instant('workspace.return-submitted-units'),
-          fromOtherWorkspacesToo: false,
-          multiple: true,
-          selectedUnitId: this.workspaceService.selectedUnit$.getValue(),
-          queryParams: (new HttpParams())
-            .append('targetWorkspaceId', this.workspaceService.selectedWorkspaceId.toString())
-            .append('filterTargetWorkspaceId', true)
-        }
-      });
-      return lastValueFrom(dialogRef.afterClosed()
-        .pipe(
-          map(dialogResult => {
-            if (typeof dialogResult !== 'undefined') {
-              const dialogComponent = dialogRef.componentInstance;
-              if (dialogResult !== false && dialogComponent.selectedUnitIds.length > 0) {
-                return dialogComponent.selectedUnitIds;
-              }
-            }
-            return false;
-          })
-        ));
-    }
-    return false;
+    const dialogRef = this.selectUnitDialog.open(SelectUnitComponent, {
+      width: '800px',
+      height: '700px',
+      data: <SelectUnitData>{
+        title: this.translateService.instant('workspace.return-submitted-units-title'),
+        buttonLabel: this.translateService.instant('workspace.return-submitted-units'),
+        fromOtherWorkspacesToo: false,
+        multiple: true,
+        selectedUnitId: this.workspaceService.selectedUnit$.getValue(),
+        queryParams: (new HttpParams())
+          .append('targetWorkspaceId', this.workspaceService.selectedWorkspaceId.toString())
+          .append('filterTargetWorkspaceId', true)
+      }
+    });
+    return this.handleSelectUnitDialogResult(dialogRef);
   }
 
   async returnSubmittedUnits(): Promise<void> {
@@ -368,22 +353,25 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
   showMetadata(): void {
     if (Object.keys(this.workspaceService.unitList).length > 0) {
       this.selectUnitDialog.open(ShowMetadataComponent, {
-        width: '800px',
-        data: { warning: '' }
-      }).afterClosed().subscribe(res => {
-        this.metadataService.createMetadataReport()
-          .subscribe((units: UnitPropertiesDto[] | boolean) => {
-            if (res) {
-              const selectedUnits = (units as UnitPropertiesDto[])
-                .filter((unit: UnitPropertiesDto) => res.selectedUnits.includes(unit.id));
-              this.showMetadataDialog.open(TableViewComponent, {
-                width: '80%',
-                data: { units: selectedUnits, warning: '' },
-                autoFocus: false
-              });
-            }
-          });
-      });
+        width: '800px'
+      }).afterClosed()
+        .subscribe(res => {
+          this.metadataService.createMetadataReport()
+            .subscribe((units: UnitPropertiesDto[] | boolean) => {
+              if (res) {
+                const selectedUnits = (units as UnitPropertiesDto[])
+                  .filter((unit: UnitPropertiesDto) => res.selectedUnits.includes(unit.id));
+                this.showMetadataDialog.open(TableViewComponent, {
+                  width: '80%',
+                  data: {
+                    units: selectedUnits,
+                    warning: ''
+                  },
+                  autoFocus: false
+                });
+              }
+            });
+        });
     }
   }
 

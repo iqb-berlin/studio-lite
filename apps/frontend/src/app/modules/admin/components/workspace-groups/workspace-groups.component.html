@@ -14,6 +14,12 @@
     </studio-lite-workspace-groups-menu>
 
     @if (objectsDatasource.data.length) {
+      <div class="info">
+        {{'admin.issue-count-info' | translate :
+        { count: objectsDatasource.data.length, issue: ('admin.workspace-groups' | translate)}
+        }}
+      </div>
+
       <studio-lite-search-filter
         [title]="'search-filter.filter-groups' | translate"
         (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
@@ -44,6 +50,17 @@
           {{'admin.group-name' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let element"> {{element.name}} </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="id">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header="id">
+          {{'id' | translate}}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element"
+                  class="secondary-cell">
+          {{element.id}}
+        </mat-cell>
       </ng-container>
 
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>

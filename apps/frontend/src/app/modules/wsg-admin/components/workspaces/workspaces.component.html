@@ -62,12 +62,22 @@
           {{element.name}}
         </mat-cell>
       </ng-container>
+      <ng-container matColumnDef="id">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header="id">
+          {{'id' | translate}}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element"
+                  class="secondary-text">
+          {{element.id}}
+        </mat-cell>
+      </ng-container>
       <ng-container matColumnDef="unitsCount">
         <mat-header-cell *matHeaderCellDef class="header-center"
           mat-sort-header="unitsCount">{{'wsg-admin.units-count' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let element">
-          <span class="center">{{element.unitsCount}}</span>
+          <span class="secondary-text">{{element.unitsCount}}</span>
         </mat-cell>
       </ng-container>
       <ng-container matColumnDef="dropBoxId">

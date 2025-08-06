@@ -6,11 +6,10 @@
       class="fx-column-start-stretch">
       <mat-form-field>
         <mat-select formControlName="wsSelector"
-          [placeholder]="'workspace.title' | translate"
-          (selectionChange)="updateWorkspace($event.value)">
+                    [placeholder]="'workspace.title' | translate"
+                    (selectionChange)="updateWorkspace($event.value)">
           @for (workspace of workspaceList; track workspace) {
-            <mat-option
-              [value]="workspace.id">
+            <mat-option [value]="workspace.id">
               {{workspace.groupName}}: {{workspace.name}}
             </mat-option>
           }
@@ -30,14 +29,14 @@
 
   <mat-dialog-actions align="end">
     <button mat-raised-button
-      color="primary"
-      type="submit"
-      [mat-dialog-close]="true"
-      [disabled]="!unitSelectionTable.selectionCount">
+            color="primary"
+            type="submit"
+            [mat-dialog-close]="true"
+            [disabled]="!unitSelectionTable.selectionCount">
       {{data.buttonLabel}}
     </button>
     <button mat-raised-button
-      [mat-dialog-close]="false">
+            [mat-dialog-close]="false">
       {{'cancel' | translate}}
     </button>
   </mat-dialog-actions>

@@ -4,10 +4,6 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import {
   Router, RouterState, RouterLink, RouterOutlet
 } from '@angular/router';
-import { registerLocaleData } from '@angular/common';
-import localeDe from '@angular/common/locales/de';
-import { de } from 'date-fns/locale';
-import { setDefaultOptions } from 'date-fns';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
@@ -18,6 +14,7 @@ import { AppConfig } from './models/app-config.class';
 import { IsInArrayPipe } from './pipes/is-in-array.pipe';
 import { DataLoadingAsTextPipe } from './pipes/data-loading-as-text.pipe';
 import { DataLoadingIsNumberPipe } from './pipes/data-loading-is-number.pipe';
+import { I18nService } from './services/i18n.service';
 
 @Component({
   selector: 'app-root',
@@ -34,10 +31,10 @@ export class AppComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private translateService: TranslateService,
     private titleService: Title,
-    private router: Router
+    private router: Router,
+    private i18nService: I18nService
   ) {
-    setDefaultOptions({ locale: de });
-    this.translateService.use('de');
+    this.i18nService.setLocale();
   }
 
   ngOnInit(): void {
@@ -75,8 +72,6 @@ export class AppComponent implements OnInit {
           this.appService.authData = authData;
         });
       }
-
-      registerLocaleData(localeDe);
 
       window.addEventListener('message', event => {
         this.appService.processMessagePost(event);

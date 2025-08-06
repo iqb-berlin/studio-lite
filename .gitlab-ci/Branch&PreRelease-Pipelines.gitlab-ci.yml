@@ -239,6 +239,8 @@ build-cicd-base-image:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
     - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
@@ -277,6 +279,8 @@ build-e2e-base-image:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
     - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
@@ -323,6 +327,8 @@ build-db-image:
   variables:
     DB_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db"
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
     - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
@@ -358,6 +364,8 @@ build-liquibase-image:
   variables:
     LIQUIBASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase"
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
     - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
@@ -407,6 +415,10 @@ test-db:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
+    - ip a | grep mtu
+    - docker network inspect bridge | grep mtu
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - echo "${REGISTRY_PASSWORD}" | docker login -u ${REGISTRY_USER} --password-stdin ${REGISTRY}
@@ -510,6 +522,8 @@ test-app:
 #        entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
 #        alias: docker
 #  before_script:
+#    - docker --version
+#    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
 #    - docker network create app-net
 #    - echo "${REGISTRY_PASSWORD}" | docker login -u ${REGISTRY_USER} --password-stdin ${REGISTRY}
 #    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
@@ -550,6 +564,8 @@ test-app-e2e-api:
         entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
         alias: docker
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - docker network create app-net
     - echo "${REGISTRY_PASSWORD}" | docker login -u ${REGISTRY_USER} --password-stdin ${REGISTRY}
     - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
@@ -594,6 +610,8 @@ test-app-e2e-ui-chrome:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - docker network create app-net
     - echo "${REGISTRY_PASSWORD}" | docker login -u ${REGISTRY_USER} --password-stdin ${REGISTRY}
     - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
@@ -638,6 +656,8 @@ test-app-e2e-ui-chrome-mobile:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - docker network create app-net
     - echo "${REGISTRY_PASSWORD}" | docker login -u ${REGISTRY_USER} --password-stdin ${REGISTRY}
     - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
@@ -683,6 +703,8 @@ test-app-e2e-ui-firefox:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - docker network create app-net
     - echo "${REGISTRY_PASSWORD}" | docker login -u ${REGISTRY_USER} --password-stdin ${REGISTRY}
     - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
@@ -727,6 +749,8 @@ test-app-e2e-ui-firefox-mobile:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - docker network create app-net
     - echo "${REGISTRY_PASSWORD}" | docker login -u ${REGISTRY_USER} --password-stdin ${REGISTRY}
     - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
@@ -772,6 +796,8 @@ test-app-e2e-ui-edge:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - docker network create app-net
     - echo "${REGISTRY_PASSWORD}" | docker login -u ${REGISTRY_USER} --password-stdin ${REGISTRY}
     - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
@@ -816,6 +842,8 @@ test-app-e2e-ui-edge-mobile:
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
       alias: docker
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - docker network create app-net
     - echo "${REGISTRY_PASSWORD}" | docker login -u ${REGISTRY_USER} --password-stdin ${REGISTRY}
     - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
@@ -882,6 +910,8 @@ build-develop-commit-db-image:
   variables:
     DB_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db"
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
     - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
@@ -916,6 +946,8 @@ build-develop-commit-liquibase-image:
   variables:
     LIQUIBASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase"
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
     - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
@@ -950,6 +982,8 @@ build-develop-commit-base-image:
   variables:
     BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
     - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
@@ -984,6 +1018,8 @@ build-develop-commit-backend-image:
     BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
     BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
     - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
@@ -1024,6 +1060,8 @@ build-develop-commit-frontend-image:
     BASE_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-base"
     FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
     - docker login -u ${CI_DEPENDENCY_PROXY_USER} -p ${CI_DEPENDENCY_PROXY_PASSWORD} ${CI_DEPENDENCY_PROXY_SERVER}
@@ -1355,6 +1393,10 @@ build-pre-release:
     BACKEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-backend"
     FRONTEND_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend"
   before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
+    - ip a | grep mtu
+    - docker network inspect bridge | grep mtu
     - echo "${DOCKERHUB_PASSWORD}" | docker login -u ${DOCKERHUB_USER} --password-stdin
     - docker pull --quiet ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
     - docker pull --quiet ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}

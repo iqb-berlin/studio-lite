@@ -61,6 +61,29 @@ export class UnitService {
     return units.map(unit => unit.id);
   }
 
+  async getAllUnits(): Promise<UnitByDefinitionIdDto[]> {
+    this.logger.log('Retrieving all units');
+    return this.unitsRepository.find({
+      order: { id: 'ASC' },
+      select: {
+        definitionId: true,
+        key: true,
+        name: true,
+        groupName: true,
+        id: true,
+        workspaceId: true,
+        lastChangedDefinition: true,
+        lastChangedDefinitionUser: true,
+        lastChangedMetadata: true,
+        lastChangedMetadataUser: true,
+        lastChangedScheme: true,
+        lastChangedSchemeUser: true,
+        metadata: false,
+        variables: false
+      }
+    });
+  }
+
   async findAll(): Promise<UnitByDefinitionIdDto[]> {
     this.logger.log('Retrieving units for workspaceId');
     const units = await this.unitsRepository.find({

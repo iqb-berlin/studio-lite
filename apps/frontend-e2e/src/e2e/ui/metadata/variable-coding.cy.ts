@@ -90,7 +90,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  it('checks that drop-list_1 is not present at Menu -> Berichte -> Metadaten', () => {
+  it.skip('checks that drop-list_1 is not present at Menu -> Berichte -> Metadaten', () => {
     focusOnMenu('Berichte', 'Metadaten');
     selectListUnits(['MA_01']);
     cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');

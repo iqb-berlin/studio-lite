@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatLabel } from '@angular/material/form-field';
-import { UnitExportConfigComponent } from '../unit-export-config/unit-export-config.component';
+import { ProfilesRegistryComponent } from '../profiles-registry/profiles-registry.component';
 import { AppLogoComponent } from '../app-logo/app-logo.component';
 import { AppConfigComponent } from '../app-config/app-config.component';
 import { MissingsProfilesConfigComponent } from '../missings-profiles-config/missings-profiles-config.component';
+import { UnitExportConfigComponent } from '../unit-export-config/unit-export-config.component';
 
 @Component({
   selector: 'studio-lite-settings',
@@ -14,9 +15,10 @@ import { MissingsProfilesConfigComponent } from '../missings-profiles-config/mis
     MatLabel,
     AppConfigComponent,
     AppLogoComponent,
-    UnitExportConfigComponent,
+    ProfilesRegistryComponent,
     TranslateModule,
-    MissingsProfilesConfigComponent
+    MissingsProfilesConfigComponent,
+    UnitExportConfigComponent
   ]
 })
 export class SettingsComponent {}

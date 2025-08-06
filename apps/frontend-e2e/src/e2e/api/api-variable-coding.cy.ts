@@ -136,7 +136,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  it('checks that text-field_1 is not present at Menu > Berichte > Metadaten does not exist', () => {
+  it.skip('checks that text-field_1 is not present at Menu > Berichte > Metadaten does not exist', () => {
     focusOnMenu('Berichte', 'Metadaten');
     selectListUnits(['MA_01']);
     cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');

@@ -12,18 +12,19 @@ import { BehaviorSubject } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
 import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
+import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { I18nService } from '../../../../services/i18n.service';
 
 @Component({
   selector: 'studio-lite-resource-packages-table',
   templateUrl: './resource-packages-table.component.html',
   styleUrls: ['./resource-packages-table.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatTable, MatSort, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, DatePipe, TranslateModule, SafeUrlPipe]
+  imports: [MatTable, MatSort, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, DatePipe, TranslateModule, SafeUrlPipe, SearchFilterComponent]
 })
 export class ResourcePackagesTableComponent implements OnChanges {
   resourcePackageProperties: string[] = ['name', 'createdAt'];
   displayedColumns: string[] = ['selectCheckbox', ...this.resourcePackageProperties];
-  timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   resourcePackagesPath!: string;
 
   @Input() dataSource!: MatTableDataSource<ResourcePackageDto>;
@@ -32,7 +33,8 @@ export class ResourcePackagesTableComponent implements OnChanges {
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChildren(MatCheckbox) checkBoxes!: QueryList<MatCheckbox>;
 
-  constructor(@Inject('SERVER_URL') public serverUrl: string) {
+  constructor(@Inject('SERVER_URL') public serverUrl: string,
+              public i18nService: I18nService) {
     this.resourcePackagesPath = `${serverUrl}packages/`;
   }
 
