@@ -867,7 +867,9 @@
     "no-metadata": "Keine Metadaten",
     "connected-items": "Verbundene Items"
   },
+
   "review": {
+    "info": "Arbeitsbereich {{workspace}} (Bereichsgruppe {{workspaceGroup}})",
     "header": "Review",
     "end": "Ende der Aufgabenfolge",
     "end-page": "Endseite",

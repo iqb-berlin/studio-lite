@@ -60,5 +60,11 @@ export class ReviewDto {
     workspaceName?: string;
 
   @ApiProperty()
+    workspaceGroupId?: number;
+
+  @ApiProperty()
+    workspaceGroupName?: string;
+
+  @ApiProperty()
     numberOfUnits?: number;
 }
