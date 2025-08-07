@@ -7,7 +7,7 @@ import { MatAnchor } from '@angular/material/button';
 
 import { WrappedIconComponent } from '../../modules/shared/components/wrapped-icon/wrapped-icon.component';
 import { UserIssuesComponent } from '../user-issues/user-issues.component';
-import { UserIssuesPipe } from '../../pipes/issues-pipe.pipe';
+import { UserIssuesPipe } from '../../pipes/user-issues.pipe';
 
 @Component({
   selector: 'studio-lite-user-workspaces-groups',

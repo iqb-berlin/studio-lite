@@ -1,6 +1,6 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { UserIssuesPipe } from './issues-pipe.pipe';
+import { UserIssuesPipe } from './user-issues.pipe';
 
 describe('UserIssuesPipe', () => {
   beforeEach(() => {
