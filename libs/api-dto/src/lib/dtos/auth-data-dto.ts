@@ -1,5 +1,6 @@
-// eslint-disable-next-line max-classes-per-file
 import { ApiProperty } from '@nestjs/swagger';
+import { ReviewDto } from './review/review-dto';
+import { WorkspaceGroupDto } from './workspace-group/workspace-group-dto';
 
 export class AuthDataDto {
   @ApiProperty()
@@ -19,52 +20,4 @@ export class AuthDataDto {
 
   @ApiProperty()
     reviews!: ReviewDto[];
-}
-
-export class WorkspaceGroupDto {
-  @ApiProperty()
-    id!: number;
-
-  @ApiProperty()
-    name!: string;
-
-  @ApiProperty()
-    isAdmin!: boolean;
-
-  @ApiProperty()
-    workspaces!: WorkspaceDto[];
-}
-
-export class WorkspaceDto {
-  @ApiProperty()
-    id!: number;
-
-  @ApiProperty()
-    name!: string;
-
-  @ApiProperty()
-    userAccessLevel!: number;
-}
-
-export class ReviewDto {
-  @ApiProperty()
-    id!: number;
-
-  @ApiProperty()
-    name!: string;
-
-  @ApiProperty()
-    workspaceId!: number;
-
-  @ApiProperty()
-    workspaceName?: string;
-
-  @ApiProperty()
-    workspaceGroupId?: number;
-
-  @ApiProperty()
-    workspaceGroupName?: string;
-
-  @ApiProperty()
-    numberOfUnits?: number;
 }
