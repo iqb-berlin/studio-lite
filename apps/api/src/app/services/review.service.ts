@@ -70,7 +70,9 @@ export class ReviewService {
       id: review.id,
       name: review.name,
       workspaceId: review.workspaceId,
-      workspaceName: `Arbeitsbereich ${workspaceData.name} (Gruppe ${workspaceData.workspaceGroup.name})`,
+      workspaceName: workspaceData.name,
+      workspaceGroupId: workspaceData.workspaceGroup.id,
+      workspaceGroupName: workspaceData.workspaceGroup.name,
       link: review.link,
       password: review.password,
       settings: review.settings,
@@ -108,9 +110,17 @@ export class ReviewService {
         'workspaceGroup'
       ]
     });
-    const workspaceInfo: { [key: string]: string } = {};
+    const workspaceInfo: { [key: string]: {
+      name: string;
+      groupId: number;
+      groupName: string;
+    } } = {};
     workspaceList.forEach(ws => {
-      workspaceInfo[ws.id] = `Arbeitsbereich ${ws.name} (Gruppe ${ws.workspaceGroup.name})`;
+      workspaceInfo[ws.id] = {
+        name: ws.name,
+        groupId: ws.workspaceGroup.id,
+        groupName: ws.workspaceGroup.name
+      };
     });
     const reviews = await this.reviewRepository.find({
       where: {
@@ -128,7 +138,9 @@ export class ReviewService {
       id: r.id,
       name: r.name,
       workspaceId: r.workspaceId,
-      workspaceName: workspaceInfo[r.workspaceId]
+      workspaceName: workspaceInfo[r.workspaceId].name,
+      workspaceGroupId: workspaceInfo[r.workspaceId].groupId,
+      workspaceGroupName: workspaceInfo[r.workspaceId].groupName
     });
   }
 
