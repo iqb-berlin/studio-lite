@@ -2,7 +2,11 @@ import { enableProdMode, ApplicationModule, importProvidersFrom } from '@angular
 
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import {
+  TranslateModule,
+  TranslateLoader,
+  TranslateService, TranslateParser
+} from '@ngx-translate/core';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { RouterModule } from '@angular/router';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -18,6 +22,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
+import { MatPaginatorModule, MatPaginatorIntl } from '@angular/material/paginator';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { DateFnsAdapter } from '@angular/material-date-fns-adapter';
@@ -25,6 +30,7 @@ import { MAT_DATE_LOCALE, DateAdapter } from '@angular/material/core';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { PaginatorIntlService } from './app/services/paginator-intl.service';
 import { AuthInterceptor } from './app/interceptors/auth.interceptor';
 import { AppRoutingModule } from './app/app-routing.module';
 import { AppComponent } from './app/app.component';
@@ -35,7 +41,8 @@ import { BackendService } from './app/services/backend.service';
 const hash = (str: string) => str.split('').reduce((prev, curr) => Math.imul(31, prev) + curr.charCodeAt(0) | 0, 0);
 
 export function createTranslateLoader(http: HttpClient) {
-  return new TranslateHttpLoader(http, './assets/i18n/', `.json?v=${Math.abs(hash(new Date().toISOString()))}`);
+  return new TranslateHttpLoader(http, './assets/i18n/', `.json?v=${Math
+    .abs(hash(new Date().toISOString()))}`);
 }
 if (environment.production) {
   enableProdMode();
@@ -61,6 +68,7 @@ bootstrapApplication(AppComponent, {
       ReactiveFormsModule,
       MatProgressSpinnerModule,
       MatSnackBarModule,
+      MatPaginatorModule,
       RouterModule,
       ReactiveFormsModule,
       AppRoutingModule,
@@ -75,9 +83,15 @@ bootstrapApplication(AppComponent, {
       }),
       MatCheckboxModule,
       MatSelectModule,
-      FormsModule),
+      FormsModule
+    ),
     BackendService,
     MatDialog,
+    {
+      provide: MatPaginatorIntl,
+      useClass: PaginatorIntlService,
+      deps: [TranslateService, TranslateParser]
+    },
     {
       provide: LocationStrategy,
       useClass: HashLocationStrategy
