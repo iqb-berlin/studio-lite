@@ -890,5 +890,11 @@
     "unit": "Aufgabe {{index}}",
     "block": "Review \"{{name}}\" (Block)",
     "booklet": "Review \"{{name}}\" (Testheft)"
+  },
+  "paginator": {
+    "items-per-page": "Einträge pro Seite",
+    "next-page": "Nächste Seite",
+    "previous-page": "Vorherige Seite",
+    "range": "{{start}} - {{end}} von {{total}}"
   }
 }
