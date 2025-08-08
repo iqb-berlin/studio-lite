@@ -18,11 +18,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
-import {
-  HTTP_INTERCEPTORS, withInterceptorsFromDi, provideHttpClient, HttpClient
-} from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { DateFnsAdapter } from '@angular/material-date-fns-adapter';
 import { MAT_DATE_LOCALE, DateAdapter } from '@angular/material/core';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
@@ -46,15 +43,39 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
   providers: [
-    // eslint-disable-next-line max-len
-    importProvidersFrom(ApplicationModule, BrowserModule, MatButtonModule, MatFormFieldModule, MatMenuModule, MatToolbarModule, MatIconModule, MatInputModule, MatTooltipModule, MatDialogModule, MatCardModule, MatIconModule, MatTabsModule, MatTableModule, ReactiveFormsModule, MatProgressSpinnerModule, MatSnackBarModule, RouterModule, ReactiveFormsModule, AppRoutingModule, IqbComponentsModule.forRoot(), TranslateModule.forRoot({
-      defaultLanguage: 'de',
-      loader: {
-        provide: TranslateLoader,
-        useFactory: createTranslateLoader,
-        deps: [HttpClient]
-      }
-    }), MatCheckboxModule, MatSelectModule, FormsModule),
+    importProvidersFrom(
+      ApplicationModule,
+      BrowserModule,
+      MatButtonModule,
+      MatFormFieldModule,
+      MatMenuModule,
+      MatToolbarModule,
+      MatIconModule,
+      MatInputModule,
+      MatTooltipModule,
+      MatDialogModule,
+      MatCardModule,
+      MatIconModule,
+      MatTabsModule,
+      MatTableModule,
+      ReactiveFormsModule,
+      MatProgressSpinnerModule,
+      MatSnackBarModule,
+      RouterModule,
+      ReactiveFormsModule,
+      AppRoutingModule,
+      IqbComponentsModule.forRoot(),
+      TranslateModule.forRoot({
+        defaultLanguage: 'de',
+        loader: {
+          provide: TranslateLoader,
+          useFactory: createTranslateLoader,
+          deps: [HttpClient]
+        }
+      }),
+      MatCheckboxModule,
+      MatSelectModule,
+      FormsModule),
     BackendService,
     MatDialog,
     {
@@ -90,10 +111,6 @@ bootstrapApplication(AppComponent, {
     {
       provide: 'APP_VERSION',
       useValue: '13.1.0'
-    },
-    provideAnimations(),
-    provideHttpClient(withInterceptorsFromDi())
+    }
   ]
-})
-  // eslint-disable-next-line no-console
-  .catch(err => console.log(err));
+});
