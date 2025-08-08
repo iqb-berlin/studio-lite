@@ -54,6 +54,7 @@ export class WorkspaceMenuComponent {
     private editWorkspaceDialog: MatDialog,
     private editWorkspaceSettingsDialog: MatDialog,
     private deleteConfirmDialog: MatDialog,
+    private confirmDialog: MatDialog,
     private selectDropBoxDialog: MatDialog,
     private backendService: BackendService,
     private appBackendService: AppBackendService,
@@ -64,23 +65,37 @@ export class WorkspaceMenuComponent {
   userId:number = 0;
 
   addObject(): void {
-    const dialogRef = this.editWorkspaceDialog.open(InputTextComponent, {
-      width: '600px',
-      data: {
-        title: this.translateService.instant('wsg-admin.new-workspace'),
-        prompt: this.translateService.instant('wsg-admin.enter-name'),
-        default: '',
-        okButtonLabel: this.translateService.instant('wsg-admin.create'),
-        isBackUpWorkspaceGroup: this.isBackUpWorkspaceGroup,
-        maxWorkspaceCount: this.maxWorkspaceCount,
-        workspacesCount: this.workspaces.length
-      }
-    });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.workspaceAdded.emit(result as string);
-      }
-    });
+    if (this.isBackUpWorkspaceGroup && this.workspaces.length >= this.maxWorkspaceCount) {
+      this.confirmDialog.open(ConfirmDialogComponent, {
+        width: '600px',
+        data: <ConfirmDialogData>{
+          title: this.translateService.instant('wsg-admin.backup-workspace-group-limit-reached'),
+          content: this.translateService.instant('wsg-admin.backup-workspace-group-limit-reached-hint', {
+            maxWorkspaceCount: this.maxWorkspaceCount
+          }),
+          confirmButtonLabel: this.translateService.instant('close'),
+          showCancel: false
+        }
+      });
+    } else {
+      const dialogRef = this.editWorkspaceDialog.open(InputTextComponent, {
+        width: '600px',
+        data: {
+          title: this.translateService.instant('wsg-admin.new-workspace'),
+          prompt: this.translateService.instant('wsg-admin.enter-name'),
+          default: '',
+          okButtonLabel: this.translateService.instant('wsg-admin.create'),
+          isBackUpWorkspaceGroup: this.isBackUpWorkspaceGroup,
+          maxWorkspaceCount: this.maxWorkspaceCount,
+          workspacesCount: this.workspaces.length
+        }
+      });
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.workspaceAdded.emit(result as string);
+        }
+      });
+    }
   }
 
   moveObject() {
