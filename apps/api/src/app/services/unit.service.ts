@@ -3,16 +3,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Not, Repository } from 'typeorm';
 import {
   CreateUnitDto,
+  MetadataDto,
   RequestReportDto,
-  UnitDefinitionDto,
   UnitByDefinitionIdDto,
+  UnitDefinitionDto,
+  UnitFullMetadataDto,
   UnitInListDto,
-  UnitPropertiesDto,
-  UnitSchemeDto,
-  UnitMetadataValues,
-  UnitMetadataDto,
+  UnitItemMetadataDto,
   UnitItemWithMetadataDto,
-  UnitFullMetadataDto, UnitItemMetadataDto, MetadataDto
+  UnitMetadataDto,
+  UnitMetadataValues,
+  UnitPropertiesDto,
+  UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import Workspace from '../entities/workspace.entity';
@@ -128,7 +130,13 @@ export class UnitService {
         key: true,
         name: true,
         groupName: true,
-        state: true
+        state: true,
+        lastChangedDefinition: true,
+        lastChangedDefinitionUser: true,
+        lastChangedMetadata: true,
+        lastChangedMetadataUser: true,
+        lastChangedScheme: true,
+        lastChangedSchemeUser: true
       }
     }) as UnitInListDto[];
     if (userId && withLastSeenCommentTimeStamp) {
@@ -186,7 +194,9 @@ export class UnitService {
       const unitSourceData = await this.unitsRepository.findOne({
         where: { id: unit.createFrom },
         select: ['id', 'editor', 'schemer', 'metadata', 'schemeType',
-          'player', 'description', 'reference', 'transcript']
+          'player', 'description', 'reference', 'transcript',
+          'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme',
+          'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser']
       });
       if (unitSourceData) {
         newUnit.description = unitSourceData.description;
@@ -200,6 +210,9 @@ export class UnitService {
         newUnit.lastChangedDefinitionUser = displayName;
         newUnit.lastChangedMetadataUser = displayName;
         newUnit.lastChangedSchemeUser = displayName;
+        newUnit.lastChangedDefinition = unitSourceData.lastChangedDefinition || new Date();
+        newUnit.lastChangedMetadata = unitSourceData.lastChangedMetadata || new Date();
+        newUnit.lastChangedScheme = unitSourceData.lastChangedScheme || new Date();
         await this.unitsRepository.save(newUnit);
 
         const metadata = await this.getMetadataOfUnit(newUnit, unit.createFrom);
@@ -213,11 +226,11 @@ export class UnitService {
 
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition) {
-          await this.patchDefinition(newUnit.id, unitSourceDefinition, user);
+          await this.patchDefinition(newUnit.id, unitSourceDefinition, user, newUnit.lastChangedDefinition);
         }
         const unitSourceScheme = await this.findOnesScheme(unit.createFrom);
         if (unitSourceScheme && unitSourceScheme.scheme) {
-          await this.patchScheme(newUnit.id, unitSourceScheme, user);
+          await this.patchScheme(newUnit.id, unitSourceScheme, user, newUnit.lastChangedScheme);
         }
         if (addComments) await this.unitCommentService.copyComments(unit.createFrom, newUnit.id, itemUuidLookups);
       }
@@ -609,14 +622,16 @@ export class UnitService {
     );
   }
 
-  async patchDefinition(unitId: number, unitDefinitionDto: UnitDefinitionDto, user: User) {
+  async patchDefinition(unitId: number,
+                        unitDefinitionDto: UnitDefinitionDto,
+                        user: User, definitionDate: Date = new Date()): Promise<void> {
     const unitToUpdate = await this.unitsRepository.findOne({
       where: { id: unitId }
     });
 
     const displayName = await this.getDisplayNameForUser(user.id);
     let newUnitDefinitionId = -1;
-    unitToUpdate.lastChangedDefinition = new Date();
+    unitToUpdate.lastChangedDefinition = definitionDate;
     unitToUpdate.lastChangedDefinitionUser = displayName;
     if (unitToUpdate.definitionId) {
       const unitDefinitionToUpdate = await this.unitDefinitionsRepository.findOne({
@@ -682,7 +697,7 @@ export class UnitService {
     return scheme;
   }
 
-  async patchScheme(unitId: number, unitSchemeDto: UnitSchemeDto, user: User) {
+  async patchScheme(unitId: number, unitSchemeDto: UnitSchemeDto, user: User, schemeDate: Date = new Date()) {
     const unitToUpdate = await this.unitsRepository.findOne({
       where: { id: unitId }
     });
@@ -692,7 +707,7 @@ export class UnitService {
     UnitService.updateMetadataVariableId(unitToUpdate, scheme.variableCodings
       .map((item: VariableCodingData) => ({ id: item.id, alias: item.alias || item.id })));
     unitToUpdate.schemeType = unitSchemeDto.schemeType;
-    unitToUpdate.lastChangedScheme = new Date();
+    unitToUpdate.lastChangedScheme = schemeDate;
     unitToUpdate.lastChangedSchemeUser = displayName;
     await this.unitsRepository.save(unitToUpdate);
   }

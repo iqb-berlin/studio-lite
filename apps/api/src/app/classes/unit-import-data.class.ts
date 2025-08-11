@@ -50,7 +50,7 @@ export class UnitImportData {
     if (codingSchemeElement.length > 0) {
       this.schemer = codingSchemeElement.attr('schemer');
       this.schemeType = codingSchemeElement.attr('schemetype');
-      const lastChangedScheme = codingSchemeElement.attr('lastchange');
+      const lastChangedScheme = codingSchemeElement.attr('lastChange');
       if (lastChangedScheme) this.lastChangedScheme = new Date(lastChangedScheme);
       this.codingSchemeFileName = this.getFolder() + codingSchemeElement.text();
     }
@@ -68,7 +68,7 @@ export class UnitImportData {
     if (definitionRefElement.length > 0) {
       this.player = definitionRefElement.attr('player');
       this.editor = definitionRefElement.attr('editor');
-      const lastChangedDefinition = definitionRefElement.attr('lastchange');
+      const lastChangedDefinition = definitionRefElement.attr('lastChange');
       if (lastChangedDefinition) this.lastChangedDefinition = new Date(lastChangedDefinition);
       this.definitionFileName = this.getFolder() + definitionRefElement.text();
     } else {
@@ -76,7 +76,7 @@ export class UnitImportData {
       if (definitionElement.length > 0) {
         this.player = definitionElement.attr('player');
         this.editor = definitionElement.attr('editor');
-        const lastChangedDefinition = definitionElement.attr('lastchange');
+        const lastChangedDefinition = definitionElement.attr('lastChange');
         if (lastChangedDefinition) this.lastChangedDefinition = new Date(lastChangedDefinition);
         this.definition = definitionElement.text() || '';
       }
@@ -110,7 +110,7 @@ export class UnitImportData {
       this.lastChangedDefinition = new Date(unitLastChangeElement.text());
       this.lastChangedScheme = new Date(unitLastChangeElement.text());
     }
-    const lastChangedMetadata = metadataElement.attr('lastchange');
+    const lastChangedMetadata = metadataElement.attr('lastChange');
     if (lastChangedMetadata) this.lastChangedMetadata = new Date(lastChangedMetadata);
   }
 

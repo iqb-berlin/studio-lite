@@ -662,7 +662,7 @@ export class WorkspaceService {
     await this.unitService.patchDefinition(newUnitId, {
       definition: unitImportData.definition,
       variables: unitImportData.baseVariables
-    }, user);
+    }, user, unitImportData.lastChangedDefinition);
   }
 
   private async importScheme(
@@ -673,7 +673,7 @@ export class WorkspaceService {
     await this.unitService.patchScheme(newUnitId, {
       scheme: unitImportData.codingScheme,
       schemeType: unitImportData.schemeType
-    }, user);
+    }, user, unitImportData.lastChangedScheme);
   }
 
   private async importComments(unitId: number, comments: string, itemUuidLookups: ItemUuidLookup[]) {
