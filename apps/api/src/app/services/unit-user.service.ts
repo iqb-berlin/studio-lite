@@ -27,7 +27,6 @@ export class UnitUserService {
   }
 
   async findLastSeenCommentTimestamp(userId: number, unitId: number): Promise<Date> {
-    this.logger.log(`Retrieving last seen comment timestamp for userId ${userId} & unitId ${unitId}`);
     const unitUser = await this.unitUserRepository.findOne({
       where: {
         userId: userId,
