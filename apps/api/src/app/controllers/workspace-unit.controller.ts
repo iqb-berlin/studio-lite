@@ -333,7 +333,8 @@ export class WorkspaceUnitController {
     return this.unitService.patchDefinition(
       unitId,
       unitDefinitionDto,
-      await this.unitService.getDisplayNameForUser(user.id));
+      await this.unitService.getDisplayNameForUser(user.id),
+      new Date());
   }
 
   @Patch(':id/scheme')
@@ -350,7 +351,8 @@ export class WorkspaceUnitController {
     return this.unitService.patchScheme(
       unitId,
       unitSchemeDto,
-      await this.unitService.getDisplayNameForUser(user.id));
+      await this.unitService.getDisplayNameForUser(user.id),
+      new Date());
   }
 
   @Post()

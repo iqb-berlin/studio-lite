@@ -564,7 +564,9 @@ export class WorkspaceService {
       if (unitImportData.definitionFileName && notXmlFiles[unitImportData.definitionFileName]) {
         unitImportData.definition = notXmlFiles[unitImportData.definitionFileName].buffer.toString();
         usedFiles.push(unitImportData.definitionFileName);
-        await this.importDefinition(newUnitId, unitImportData);
+        if (unitImportData.definition || unitImportData.lastChangedDefinition) {
+          await this.importDefinition(newUnitId, unitImportData);
+        }
       }
 
       if (unitImportData.metadataFileName && notXmlFiles[unitImportData.metadataFileName]) {
@@ -641,7 +643,7 @@ export class WorkspaceService {
       lastChangedMetadataUser: unitImportData.lastChangedMetadataUser,
       lastChangedDefinitionUser: unitImportData.lastChangedDefinitionUser,
       lastChangedSchemeUser: unitImportData.lastChangedSchemeUser
-    }, '');
+    }, null);
     if (unitImportData.metadata) {
       const workspace = await this.workspacesRepository.findOne({ where: { id: workspaceId } });
       const metadata = UnitService.setCurrentProfiles(
@@ -661,7 +663,7 @@ export class WorkspaceService {
     await this.unitService.patchDefinition(newUnitId, {
       definition: unitImportData.definition,
       variables: unitImportData.baseVariables
-    }, '', unitImportData.lastChangedDefinition);
+    }, null, unitImportData.lastChangedDefinition);
   }
 
   private async importScheme(
@@ -671,7 +673,7 @@ export class WorkspaceService {
     await this.unitService.patchScheme(newUnitId, {
       scheme: unitImportData.codingScheme,
       schemeType: unitImportData.schemeType
-    }, '', unitImportData.lastChangedScheme);
+    }, null, unitImportData.lastChangedScheme);
   }
 
   private async importComments(unitId: number, comments: string, itemUuidLookups: ItemUuidLookup[]) {

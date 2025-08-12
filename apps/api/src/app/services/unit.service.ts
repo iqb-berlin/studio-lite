@@ -223,9 +223,9 @@ export class UnitService {
         newUnit.lastChangedDefinitionUser = unitSourceData.lastChangedDefinitionUser;
         newUnit.lastChangedMetadataUser = await this.getLastChangedMetadataUser(unitSourceData, newUnit.key, user);
         newUnit.lastChangedSchemeUser = unitSourceData.lastChangedSchemeUser;
-        newUnit.lastChangedDefinition = unitSourceData.lastChangedDefinition || new Date();
+        newUnit.lastChangedDefinition = unitSourceData.lastChangedDefinition || null;
         newUnit.lastChangedMetadata = UnitService.getLastChangedMetadata(unitSourceData, newUnit.key);
-        newUnit.lastChangedScheme = unitSourceData.lastChangedScheme || new Date();
+        newUnit.lastChangedScheme = unitSourceData.lastChangedScheme || null;
         await this.unitsRepository.save(newUnit);
 
         const metadata = await this.getMetadataOfUnit(newUnit, unit.createFrom);
@@ -238,7 +238,7 @@ export class UnitService {
         const itemUuidLookups = await this.copyItemsWithMetadata(newUnit.id, metadata as UnitFullMetadataDto);
 
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
-        if (unitSourceDefinition) {
+        if (unitSourceDefinition.definition || newUnit.lastChangedDefinition) {
           await this.patchDefinition(
             newUnit.id,
             unitSourceDefinition,
@@ -402,7 +402,7 @@ export class UnitService {
     await this.unitMetadataToDeleteService.upsertOneForUnit(unitId);
   }
 
-  async patchUnit(unitId: number, newData: UnitPropertiesDto, userName: string): Promise<void> {
+  async patchUnit(unitId: number, newData: UnitPropertiesDto, userName: string | null): Promise<void> {
     await this.patchUnitProperties(unitId, newData, userName);
     const dataKeys = Object.keys(newData);
     if (dataKeys.indexOf('metadata') >= 0) {
@@ -642,14 +642,15 @@ export class UnitService {
 
   async patchDefinition(unitId: number,
                         unitDefinitionDto: UnitDefinitionDto,
-                        userName: string,
-                        definitionDate: Date = new Date()): Promise<void> {
+                        userName: string | null,
+                        definitionDate: Date | null): Promise<void> {
     const unitToUpdate = await this.unitsRepository.findOne({
       where: { id: unitId }
     });
-    let newUnitDefinitionId = -1;
+
     unitToUpdate.lastChangedDefinition = definitionDate;
     unitToUpdate.lastChangedDefinitionUser = userName;
+
     if (unitToUpdate.definitionId) {
       const unitDefinitionToUpdate = await this.unitDefinitionsRepository.findOne({
         where: { id: unitToUpdate.definitionId }
@@ -659,24 +660,20 @@ export class UnitService {
     } else {
       const newUnitDefinition = this.unitDefinitionsRepository.create({ data: unitDefinitionDto.definition });
       await this.unitDefinitionsRepository.save(newUnitDefinition);
-      newUnitDefinitionId = newUnitDefinition.id;
+      unitToUpdate.definitionId = newUnitDefinition.id;
     }
-    if (unitDefinitionDto.variables || newUnitDefinitionId >= 0) {
-      if (newUnitDefinitionId >= 0) unitToUpdate.definitionId = newUnitDefinitionId;
-      if (unitDefinitionDto.variables) {
-        unitToUpdate.variables = unitDefinitionDto.variables;
-        const aliasIds = unitDefinitionDto.variables.map(item => ({
-          id: item.id,
-          alias: item.alias || item.id
-        }));
-        if (unitToUpdate.scheme) {
-          unitToUpdate.scheme = UnitService.getUpdatedScheme(unitToUpdate.scheme, aliasIds);
-        }
-        UnitService.updateMetadataVariableId(unitToUpdate, aliasIds);
+    if (unitDefinitionDto.variables) {
+      unitToUpdate.variables = unitDefinitionDto.variables;
+      const aliasIds = unitDefinitionDto.variables.map(item => ({
+        id: item.id,
+        alias: item.alias || item.id
+      }));
+      if (unitToUpdate.scheme) {
+        unitToUpdate.scheme = UnitService.getUpdatedScheme(unitToUpdate.scheme, aliasIds);
       }
-
-      await this.unitsRepository.save(unitToUpdate);
+      UnitService.updateMetadataVariableId(unitToUpdate, aliasIds);
     }
+    await this.unitsRepository.save(unitToUpdate);
   }
 
   private static updateMetadataVariableId(unit: Unit, variableAliasId: { id: string; alias: string }[]): void {
@@ -715,7 +712,10 @@ export class UnitService {
     return scheme;
   }
 
-  async patchScheme(unitId: number, unitSchemeDto: UnitSchemeDto, userName: string, schemeDate: Date = new Date()) {
+  async patchScheme(unitId: number,
+                    unitSchemeDto: UnitSchemeDto,
+                    userName: string | null,
+                    schemeDate: Date | null): Promise<void> {
     const unitToUpdate = await this.unitsRepository.findOne({
       where: { id: unitId }
     });
