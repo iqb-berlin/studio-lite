@@ -564,13 +564,14 @@ export class WorkspaceService {
       if (unitImportData.definitionFileName && notXmlFiles[unitImportData.definitionFileName]) {
         unitImportData.definition = notXmlFiles[unitImportData.definitionFileName].buffer.toString();
         usedFiles.push(unitImportData.definitionFileName);
+        await this.importDefinition(newUnitId, unitImportData);
       }
-      await this.importDefinition(newUnitId, unitImportData);
 
       if (unitImportData.metadataFileName && notXmlFiles[unitImportData.metadataFileName]) {
         unitImportData.metadata = JSON.parse(notXmlFiles[unitImportData.metadataFileName].buffer.toString());
         usedFiles.push(unitImportData.metadataFileName);
       }
+
       const itemUuidLookups = await this.importUnitProperties(workspaceId, newUnitId, unitImportData);
 
       if (unitImportData.commentsFileName && notXmlFiles[unitImportData.commentsFileName]) {

@@ -37,10 +37,8 @@ export class UnitImportData {
     this.setMetaData(xmlDocument);
     this.setDefinitionRef(xmlDocument);
     this.setCommentsRef(xmlDocument);
-    if (this.definition || this.definitionFileName) {
-      this.setBaseVariables(xmlDocument);
-      this.setCodingSchemeRef(xmlDocument);
-    }
+    this.setBaseVariables(xmlDocument);
+    this.setCodingSchemeRef(xmlDocument);
   }
 
   private setCodingSchemeRef(xmlDocument: cheerio.CheerioAPI) {
