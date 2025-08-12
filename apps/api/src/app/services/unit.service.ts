@@ -173,6 +173,20 @@ export class UnitService {
     return units;
   }
 
+  private async getLastChangedMetadataUser(unit: Unit, newKey: string, user: User): Promise<string> {
+    if (unit.key !== newKey) {
+      return this.getDisplayNameForUser(user.id);
+    }
+    return unit.lastChangedMetadataUser;
+  }
+
+  private static getLastChangedMetadata(unit: Unit, newKey: string): Date {
+    if (unit.key !== newKey || !unit.lastChangedMetadata) {
+      return new Date();
+    }
+    return unit.lastChangedMetadata;
+  }
+
   async create(workspaceId: number, unit: CreateUnitDto, user: User, addComments: boolean): Promise<number> {
     const existingUnitId = await this.unitsRepository.findOne({
       where: { workspaceId: workspaceId, key: unit.key },
@@ -189,11 +203,10 @@ export class UnitService {
     await Promise.all(workspaceUsers.map(async workspaceUser => {
       await this.unitUserService.createUnitUser(workspaceUser.userId, newUnit.id);
     }));
-    const displayName = await this.getDisplayNameForUser(user.id);
     if (unit.createFrom) {
       const unitSourceData = await this.unitsRepository.findOne({
         where: { id: unit.createFrom },
-        select: ['id', 'editor', 'schemer', 'metadata', 'schemeType',
+        select: ['id', 'key', 'editor', 'schemer', 'metadata', 'schemeType',
           'player', 'description', 'reference', 'transcript',
           'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme',
           'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser']
@@ -207,11 +220,11 @@ export class UnitService {
         newUnit.editor = unitSourceData.editor;
         newUnit.schemer = unitSourceData.schemer;
         newUnit.schemeType = unitSourceData.schemeType;
-        newUnit.lastChangedDefinitionUser = displayName;
-        newUnit.lastChangedMetadataUser = displayName;
-        newUnit.lastChangedSchemeUser = displayName;
+        newUnit.lastChangedDefinitionUser = unitSourceData.lastChangedDefinitionUser;
+        newUnit.lastChangedMetadataUser = await this.getLastChangedMetadataUser(unitSourceData, newUnit.key, user);
+        newUnit.lastChangedSchemeUser = unitSourceData.lastChangedSchemeUser;
         newUnit.lastChangedDefinition = unitSourceData.lastChangedDefinition || new Date();
-        newUnit.lastChangedMetadata = unitSourceData.lastChangedMetadata || new Date();
+        newUnit.lastChangedMetadata = UnitService.getLastChangedMetadata(unitSourceData, newUnit.key);
         newUnit.lastChangedScheme = unitSourceData.lastChangedScheme || new Date();
         await this.unitsRepository.save(newUnit);
 
@@ -226,11 +239,19 @@ export class UnitService {
 
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition) {
-          await this.patchDefinition(newUnit.id, unitSourceDefinition, user, newUnit.lastChangedDefinition);
+          await this.patchDefinition(
+            newUnit.id,
+            unitSourceDefinition,
+            newUnit.lastChangedDefinitionUser,
+            newUnit.lastChangedDefinition);
         }
         const unitSourceScheme = await this.findOnesScheme(unit.createFrom);
         if (unitSourceScheme && unitSourceScheme.scheme) {
-          await this.patchScheme(newUnit.id, unitSourceScheme, user, newUnit.lastChangedScheme);
+          await this.patchScheme(
+            newUnit.id,
+            unitSourceScheme,
+            newUnit.lastChangedSchemeUser,
+            newUnit.lastChangedScheme);
         }
         if (addComments) await this.unitCommentService.copyComments(unit.createFrom, newUnit.id, itemUuidLookups);
       }
@@ -239,9 +260,7 @@ export class UnitService {
       if (unit.editor) newUnit.editor = unit.editor;
       if (unit.schemer) newUnit.schemer = unit.schemer;
       newUnit.groupName = unit.groupName;
-      newUnit.lastChangedDefinitionUser = displayName;
-      newUnit.lastChangedMetadataUser = displayName;
-      newUnit.lastChangedSchemeUser = displayName;
+      newUnit.lastChangedMetadataUser = await this.getDisplayNameForUser(user.id);
       await this.unitsRepository.save(newUnit);
     }
     return newUnit.id;
@@ -313,7 +332,7 @@ export class UnitService {
     return metadata;
   }
 
-  private async getDisplayNameForUser(id: number): Promise<string> {
+  async getDisplayNameForUser(id: number): Promise<string> {
     const user = await this.usersRepository.findOne({
       where: { id: id }
     });
@@ -383,17 +402,16 @@ export class UnitService {
     await this.unitMetadataToDeleteService.upsertOneForUnit(unitId);
   }
 
-  async patchUnit(unitId: number, newData: UnitPropertiesDto, user: User): Promise<void> {
-    await this.patchUnitProperties(unitId, newData, user);
+  async patchUnit(unitId: number, newData: UnitPropertiesDto, userName: string): Promise<void> {
+    await this.patchUnitProperties(unitId, newData, userName);
     const dataKeys = Object.keys(newData);
     if (dataKeys.indexOf('metadata') >= 0) {
       await this.patchMetadata(unitId, newData.metadata);
     }
   }
 
-  async patchUnitProperties(unitId: number, newData: UnitPropertiesDto, user: User): Promise<void> {
+  async patchUnitProperties(unitId: number, newData: UnitPropertiesDto, userName: string): Promise<void> {
     const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
-    const displayName = await this.getDisplayNameForUser(user.id);
     const dataKeys = Object.keys(newData);
     if (dataKeys.indexOf('key') >= 0) unit.key = newData.key;
     if (dataKeys.indexOf('name') >= 0) unit.name = newData.name;
@@ -413,14 +431,14 @@ export class UnitService {
     } else {
       unit.lastChangedMetadata = new Date();
     }
-    unit.lastChangedMetadataUser = displayName;
+    unit.lastChangedMetadataUser = userName;
     if (dataKeys.indexOf('lastChangedDefinition') >= 0) {
       unit.lastChangedDefinition = newData.lastChangedDefinition;
-      unit.lastChangedDefinitionUser = displayName;
+      unit.lastChangedDefinitionUser = userName;
     }
     if (dataKeys.indexOf('lastChangedScheme') >= 0) {
       unit.lastChangedScheme = newData.lastChangedScheme;
-      unit.lastChangedSchemeUser = displayName;
+      unit.lastChangedSchemeUser = userName;
     }
     await this.unitsRepository.save(unit);
   }
@@ -544,7 +562,7 @@ export class UnitService {
         }, { key: unitToCopy.key, groupName: '', createFrom: unitToCopy.id });
       const newUnitId = await this.create(
         newWorkspace,
-        { ...keysToCopy, createFrom: unitToCopy.id },
+        { ...keysToCopy, createFrom: unitToCopy.id, createFromKey: unitToCopy.key },
         user,
         addComments);
       return <RequestReportDto>{
@@ -624,15 +642,14 @@ export class UnitService {
 
   async patchDefinition(unitId: number,
                         unitDefinitionDto: UnitDefinitionDto,
-                        user: User, definitionDate: Date = new Date()): Promise<void> {
+                        userName: string,
+                        definitionDate: Date = new Date()): Promise<void> {
     const unitToUpdate = await this.unitsRepository.findOne({
       where: { id: unitId }
     });
-
-    const displayName = await this.getDisplayNameForUser(user.id);
     let newUnitDefinitionId = -1;
     unitToUpdate.lastChangedDefinition = definitionDate;
-    unitToUpdate.lastChangedDefinitionUser = displayName;
+    unitToUpdate.lastChangedDefinitionUser = userName;
     if (unitToUpdate.definitionId) {
       const unitDefinitionToUpdate = await this.unitDefinitionsRepository.findOne({
         where: { id: unitToUpdate.definitionId }
@@ -657,6 +674,7 @@ export class UnitService {
         }
         UnitService.updateMetadataVariableId(unitToUpdate, aliasIds);
       }
+
       await this.unitsRepository.save(unitToUpdate);
     }
   }
@@ -697,18 +715,17 @@ export class UnitService {
     return scheme;
   }
 
-  async patchScheme(unitId: number, unitSchemeDto: UnitSchemeDto, user: User, schemeDate: Date = new Date()) {
+  async patchScheme(unitId: number, unitSchemeDto: UnitSchemeDto, userName: string, schemeDate: Date = new Date()) {
     const unitToUpdate = await this.unitsRepository.findOne({
       where: { id: unitId }
     });
-    const displayName = await this.getDisplayNameForUser(user.id);
     unitToUpdate.scheme = unitSchemeDto.scheme;
     const scheme = JSON.parse(unitSchemeDto.scheme);
     UnitService.updateMetadataVariableId(unitToUpdate, scheme.variableCodings
       .map((item: VariableCodingData) => ({ id: item.id, alias: item.alias || item.id })));
     unitToUpdate.schemeType = unitSchemeDto.schemeType;
     unitToUpdate.lastChangedScheme = schemeDate;
-    unitToUpdate.lastChangedSchemeUser = displayName;
+    unitToUpdate.lastChangedSchemeUser = userName;
     await this.unitsRepository.save(unitToUpdate);
   }
 

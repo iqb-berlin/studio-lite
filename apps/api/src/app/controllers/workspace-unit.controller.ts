@@ -271,7 +271,7 @@ export class WorkspaceUnitController {
   async patchUnitProperties(@Param('id', ParseIntPipe) unitId: number,
     @User() user: UserEntity,
     @Body() unitProperties: UnitPropertiesDto) {
-    return this.unitService.patchUnit(unitId, unitProperties, user);
+    return this.unitService.patchUnit(unitId, unitProperties, await this.unitService.getDisplayNameForUser(user.id));
   }
 
   @Patch('workspace-id')
@@ -330,7 +330,10 @@ export class WorkspaceUnitController {
   async patchDefinition(@Param('id', ParseIntPipe) unitId: number,
     @User() user: UserEntity,
     @Body() unitDefinitionDto: UnitDefinitionDto) {
-    return this.unitService.patchDefinition(unitId, unitDefinitionDto, user);
+    return this.unitService.patchDefinition(
+      unitId,
+      unitDefinitionDto,
+      await this.unitService.getDisplayNameForUser(user.id));
   }
 
   @Patch(':id/scheme')
@@ -344,7 +347,10 @@ export class WorkspaceUnitController {
   async patchScheme(@Param('id', ParseIntPipe) unitId: number,
     @User() user: UserEntity,
     @Body() unitSchemeDto: UnitSchemeDto) {
-    return this.unitService.patchScheme(unitId, unitSchemeDto, user);
+    return this.unitService.patchScheme(
+      unitId,
+      unitSchemeDto,
+      await this.unitService.getDisplayNameForUser(user.id));
   }
 
   @Post()

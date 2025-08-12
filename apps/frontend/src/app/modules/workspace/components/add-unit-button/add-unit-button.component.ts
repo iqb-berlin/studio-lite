@@ -63,6 +63,7 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
           if (typeof createUnitDto !== 'boolean') {
             this.appService.dataLoading = true;
             createUnitDto.createFrom = unitSource.id;
+            createUnitDto.createFromKey = unitSource.key;
             this.backendService.addUnit(
               this.workspaceService.selectedWorkspaceId, createUnitDto
             ).subscribe(
