@@ -134,9 +134,9 @@ export class UnitImportData {
             // eslint-disable-next-line @typescript-eslint/dot-notation
             format: variableRecord.attribs['format'],
             // eslint-disable-next-line @typescript-eslint/dot-notation
-            nullable: variableRecord.attribs['nullable'],
+            nullable: variableRecord.attribs['nullable'] ? variableRecord.attribs['nullable'] === 'true' : false,
             // eslint-disable-next-line @typescript-eslint/dot-notation
-            multiple: variableRecord.attribs['multiple'],
+            multiple: variableRecord.attribs['multiple'] ? variableRecord.attribs['multiple'] === 'true' : false,
             // eslint-disable-next-line @typescript-eslint/dot-notation
             page: variableRecord.attribs['page'],
             // eslint-disable-next-line @typescript-eslint/dot-notation
