@@ -1,4 +1,5 @@
 <button class="filter-button" matFab
+        [disabled]="!unitItems.length"
         [matMenuTriggerFor]="filterMenu"
         [matTooltip]="'comments.filter-items' | translate"
         [matTooltipPosition]="'above'">
