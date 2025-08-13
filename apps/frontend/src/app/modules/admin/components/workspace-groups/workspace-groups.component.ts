@@ -40,6 +40,7 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
 import { Profile } from '../../../shared/models/profile.type';
+import { I18nService } from '../../../../services/i18n.service';
 
 @Component({
   selector: 'studio-lite-workspace-groups',
@@ -62,7 +63,8 @@ export class WorkspaceGroupsComponent implements OnInit {
     private appService: AppService,
     private backendService: BackendService,
     private snackBar: MatSnackBar,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private i18nService: I18nService
   ) {
     this.tableSelectionRow.changed.subscribe(
       r => {
@@ -313,10 +315,10 @@ export class WorkspaceGroupsComponent implements OnInit {
     ].join('\r\n');
   }
 
-  private static saveFile(csv: string): void {
+  private saveFile(csv: string): void {
     const blob = new Blob([csv], { type: 'text/plain;charset=utf-8' });
-    const datePipe = new DatePipe('de-DE');
-    const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
+    const datePipe = new DatePipe(this.i18nService.fullLocale);
+    const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
     saveAs(blob, `${thisDate} Units.csv`);
   }
 
@@ -327,7 +329,7 @@ export class WorkspaceGroupsComponent implements OnInit {
         .subscribe(units => {
           const items = WorkspaceGroupsComponent.cleanUnitsData(units);
           const csv = WorkspaceGroupsComponent.toCSV(items);
-          WorkspaceGroupsComponent.saveFile(csv);
+          this.saveFile(csv);
           this.appService.dataLoading = false;
         });
     } catch (e) {
@@ -339,8 +341,8 @@ export class WorkspaceGroupsComponent implements OnInit {
     this.appService.dataLoading = true;
     try {
       this.backendService.getXlsWorkspaces().subscribe(b => {
-        const datePipe = new DatePipe('de-DE');
-        const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
+        const datePipe = new DatePipe(this.i18nService.fullLocale);
+        const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
         saveAs(b, `${thisDate} ${this.translateService.instant('wsg-admin.report-workspaces')}.xlsx`);
         this.appService.dataLoading = false;
       });

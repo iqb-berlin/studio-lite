@@ -37,6 +37,7 @@ import { WorkspaceUserToCheckCollection } from '../../models/workspace-users-to-
 import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
+import { I18nService } from '../../../../services/i18n.service';
 
 @Component({
   selector: 'studio-lite-workspaces',
@@ -72,7 +73,8 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
     private workspaceBackendService: WorkspaceBackendService,
     private wsgAdminService: WsgAdminService,
     private snackBar: MatSnackBar,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private i18nService: I18nService
   ) {
     this.tableSelectionRow.changed.subscribe(
       r => {
@@ -218,8 +220,8 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
     this.appService.dataLoading = true;
     this.backendService.getXlsWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId.value)
       .subscribe(workspace => {
-        const datePipe = new DatePipe('de-DE');
-        const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
+        const datePipe = new DatePipe(this.i18nService.fullLocale);
+        const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
         saveAs(
           workspace,
           this.translateService.instant('wsg-admin.workspaces-excel-name', { date: thisDate })

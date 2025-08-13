@@ -15,8 +15,7 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { AppService } from '../../../../services/app.service';
-
-const datePipe = new DatePipe('de-DE');
+import { I18nService } from '../../../../services/i18n.service';
 
 @Component({
   templateUrl: './export-coding-book.component.html',
@@ -38,7 +37,8 @@ export class ExportCodingBookComponent implements OnInit {
     // @Inject(MAT_DIALOG_DATA) public data: { units: number[] },
     public workspaceService: WorkspaceService,
     private backendService: WorkspaceBackendService,
-    private appService: AppService
+    private appService: AppService,
+    private i18nService: I18nService
   ) {
   }
 
@@ -78,7 +78,8 @@ export class ExportCodingBookComponent implements OnInit {
         this.unitList)
       .subscribe(data => {
         if (data) {
-          const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
+          const datePipe = new DatePipe(this.i18nService.fullLocale);
+          const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
           // eslint-disable-next-line max-len
           saveAs(data, `${thisDate} Codebook ${this.workspaceService.selectedWorkspaceName}${(this.contentOptions.exportFormat === 'json') ? '.json' : '.docx'}`);
           this.appService.dataLoading = false;
