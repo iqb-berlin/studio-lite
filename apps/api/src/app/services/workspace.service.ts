@@ -564,14 +564,17 @@ export class WorkspaceService {
       if (unitImportData.definitionFileName && notXmlFiles[unitImportData.definitionFileName]) {
         unitImportData.definition = notXmlFiles[unitImportData.definitionFileName].buffer.toString();
         usedFiles.push(unitImportData.definitionFileName);
+        if (unitImportData.definition || unitImportData.lastChangedDefinition) {
+          await this.importDefinition(newUnitId, unitImportData);
+        }
       }
-      await this.importDefinition(newUnitId, unitImportData, user);
 
       if (unitImportData.metadataFileName && notXmlFiles[unitImportData.metadataFileName]) {
         unitImportData.metadata = JSON.parse(notXmlFiles[unitImportData.metadataFileName].buffer.toString());
         usedFiles.push(unitImportData.metadataFileName);
       }
-      const itemUuidLookups = await this.importUnitProperties(workspaceId, newUnitId, unitImportData, user);
+
+      const itemUuidLookups = await this.importUnitProperties(workspaceId, newUnitId, unitImportData);
 
       if (unitImportData.commentsFileName && notXmlFiles[unitImportData.commentsFileName]) {
         const comments = notXmlFiles[unitImportData.commentsFileName].buffer.toString();
@@ -582,7 +585,7 @@ export class WorkspaceService {
       if (unitImportData.codingSchemeFileName && notXmlFiles[unitImportData.codingSchemeFileName]) {
         unitImportData.codingScheme = notXmlFiles[unitImportData.codingSchemeFileName].buffer.toString();
         usedFiles.push(unitImportData.codingSchemeFileName);
-        await this.importScheme(newUnitId, unitImportData, user);
+        await this.importScheme(newUnitId, unitImportData);
       }
     } else {
       functionReturn.messages.push({
@@ -624,8 +627,7 @@ export class WorkspaceService {
   private async importUnitProperties(
     workspaceId: number,
     newUnitId: number,
-    unitImportData: UnitImportData,
-    user: UserEntity
+    unitImportData: UnitImportData
   ) : Promise<ItemUuidLookup[]> {
     let itemUuidLookups: ItemUuidLookup[] = [];
     await this.unitService.patchUnitProperties(newUnitId, {
@@ -641,7 +643,7 @@ export class WorkspaceService {
       lastChangedMetadataUser: unitImportData.lastChangedMetadataUser,
       lastChangedDefinitionUser: unitImportData.lastChangedDefinitionUser,
       lastChangedSchemeUser: unitImportData.lastChangedSchemeUser
-    }, user);
+    }, null);
     if (unitImportData.metadata) {
       const workspace = await this.workspacesRepository.findOne({ where: { id: workspaceId } });
       const metadata = UnitService.setCurrentProfiles(
@@ -656,24 +658,22 @@ export class WorkspaceService {
 
   private async importDefinition(
     newUnitId: number,
-    unitImportData: UnitImportData,
-    user: UserEntity
+    unitImportData: UnitImportData
   ) {
     await this.unitService.patchDefinition(newUnitId, {
       definition: unitImportData.definition,
       variables: unitImportData.baseVariables
-    }, user);
+    }, null, unitImportData.lastChangedDefinition);
   }
 
   private async importScheme(
     newUnitId: number,
-    unitImportData: UnitImportData,
-    user: UserEntity
+    unitImportData: UnitImportData
   ) {
     await this.unitService.patchScheme(newUnitId, {
       scheme: unitImportData.codingScheme,
       schemeType: unitImportData.schemeType
-    }, user);
+    }, null, unitImportData.lastChangedScheme);
   }
 
   private async importComments(unitId: number, comments: string, itemUuidLookups: ItemUuidLookup[]) {

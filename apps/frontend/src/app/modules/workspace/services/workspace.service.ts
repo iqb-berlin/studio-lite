@@ -197,6 +197,10 @@ export class WorkspaceService {
       ));
   }
 
+  private getDisplayUserName(): string {
+    return this.appService.authData.userLongName || this.appService.authData.userName;
+  }
+
   async saveUnitData(): Promise<boolean> {
     let reloadUnitList = false;
     let saveOk = true;
@@ -209,6 +213,7 @@ export class WorkspaceService {
         reloadUnitList = this.unitMetadataStore.isKeyOrNameOrGroupOrStateChanged();
         this.unitMetadataStore.applyChanges();
         this.lastChangedMetadata = new Date();
+        this.lastChangedMetadataUser = this.getDisplayUserName();
       }
     }
     if (saveOk && this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) {
@@ -218,6 +223,7 @@ export class WorkspaceService {
       if (saveOk) {
         this.unitDefinitionStore.applyChanges();
         this.lastChangedDefinition = new Date();
+        this.lastChangedDefinitionUser = this.getDisplayUserName();
       }
     }
     if (saveOk && this.unitSchemeStore && this.unitSchemeStore.isChanged()) {
@@ -227,6 +233,7 @@ export class WorkspaceService {
       if (saveOk) {
         this.unitSchemeStore.applyChanges();
         this.lastChangedScheme = new Date();
+        this.lastChangedSchemeUser = this.getDisplayUserName();
       }
     }
     if (reloadUnitList) {

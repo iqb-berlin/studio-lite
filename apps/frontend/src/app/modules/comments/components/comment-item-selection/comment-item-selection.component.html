@@ -2,7 +2,7 @@
   <mat-label>{{label}}</mat-label>
   <mat-select multiple
               [value]="selectedItems"
-              [disabled]="disabled"
+              [disabled]="disabled || !unitItems.length"
               (valueChange)="selectedItemsChange.emit($event)">
     @for (item of unitItems; track item;) {
       <mat-option [value]="item.uuid">
