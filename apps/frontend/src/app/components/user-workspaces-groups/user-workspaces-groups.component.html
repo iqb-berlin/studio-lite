@@ -9,7 +9,7 @@
       <div class="fx-column-start-stretch workspace-group-container mat-elevation-z2">
         @if (wsg.workspaces.length || wsg.isAdmin) {
           <div class="fx-row-space-between-center workspace-group-header">
-            <div [id]="'iosaihoihlnkk_' + wsg.id">{{wsg.name}}</div>
+            <div>{{wsg.name}}</div>
             @if (wsg.isAdmin) {
               <a mat-button
                  class="admin-button"
