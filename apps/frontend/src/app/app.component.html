@@ -13,17 +13,17 @@
 }
 @if (appService.errorMessages.length) {
   <div
-    class="error-container fx-column-start-center">
+    class="error-container fx-column-start-stretch mat-elevation-z8">
     @for (e of appService.errorMessages; track e) {
-      <div
-        class="fx-row-space-between-center fx-gap-10">
+      <div class="fx-row-space-between-center fx-gap-10">
         <div class="fx-flex-fill"
           [matTooltip]="e.message">{{('app-http-error.' + e.status) | translate}}
         </div>
         @if (e.status | isInArray: [401, 403, 410]) {
           <button mat-raised-button
-            (click)="logout_from_error()">
-            {{'app-http-error.login' | translate}}
+                  [color]="'primary'"
+                  (click)="logout_from_error()">
+                {{'app-http-error.login' | translate}}
           </button>
         }
         <button mat-button
