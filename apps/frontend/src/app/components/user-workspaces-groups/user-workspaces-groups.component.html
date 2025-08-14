@@ -3,30 +3,25 @@
     <p>{{'home.no-user-workspaces' | translate}}</p>
   </div>
 }
-@if (workspaceGroups.length > 0) {
-  <div
-    class="fx-column-start-stretch workspace-gap">
+@if (workspaceGroups.length) {
+  <div class="fx-column-start-stretch fx-gap-10">
     @for (wsg of workspaceGroups; track wsg) {
-      <div
-        class="fx-column-start-stretch">
-        @if (wsg.workspaces.length > 0 || wsg.isAdmin) {
-          <div
-            class="fx-row-space-between-center workspace-group-header">
+      <div class="fx-column-start-stretch workspace-group-container mat-elevation-z2">
+        @if (wsg.workspaces.length || wsg.isAdmin) {
+          <div class="fx-row-space-between-center workspace-group-header">
             <div [id]="'iosaihoihlnkk_' + wsg.id">{{wsg.name}}</div>
             @if (wsg.isAdmin) {
-              <a
-                mat-button
-                [routerLink]="['/wsg-admin/' + wsg.id]"
-                [matTooltip]="'home.goto-wsg-admin' | translate">
+              <a mat-button
+                 class="admin-button"
+                 [routerLink]="['/wsg-admin/' + wsg.id]"
+                 [matTooltip]="'home.goto-wsg-admin' | translate">
                 <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>
               </a>
             }
           </div>
         }
-        @if (wsg.workspaces.length > 0) {
-          <div
-            class="fx-row-start-stretch"
-            [style.overflow-y]="'auto'">
+        @if (wsg.workspaces.length) {
+          <div class="fx-row-start-stretch workspaces">
             <studio-lite-user-issues
               class="fx-column-start-start"
               layout="small"
