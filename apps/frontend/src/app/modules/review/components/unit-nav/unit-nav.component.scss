@@ -27,17 +27,17 @@
 
   .unit-nav-item,
   .unit-nav-item-selected {
-    border-left: lightgray 1px solid;
+    border-left: #ddd 1px solid;
     min-height: 36px;
   }
 
   .unit-nav-item:last-child {
-    border-right: lightgray 1px solid;
+    border-right: #ddd 1px solid;
   }
 
   .unit-list {
-    border-bottom: lightgray 1px solid;
-    border-top: lightgray 1px solid;
+    border-bottom: #ddd 1px solid;
+    border-top: #ddd 1px solid;
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
