@@ -1,20 +1,30 @@
-.label {
-  padding: 2px 10px;
+.led {
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  box-shadow: 0 0 1px 1px #ddd, 0 0 3px 0 #333 inset;
 }
 
 .complete {
-  @extend .label;
-  background-color: LimeGreen;
+  @extend .led;
+  background-image: -webkit-linear-gradient(#13fB04 0%, #58e343 50%, #ADED99 100%)
+}
+
+.label {
+  position: absolute;
+  margin-left: 10px;
+  margin-top: 6px;
+  color: #333;
 }
 
 .some {
-  @extend .label;
-  background-color: LightCoral;
+  @extend .led;
+  background-image: -webkit-linear-gradient(#ff9800 0, #e3a937ff 50%, #ead698 100%);
 }
 
 .none {
-  @extend .label;
-  background-color: DarkGray;
+  @extend .led;
+  background-image: -webkit-linear-gradient(#444 0, #888 50%, #ddd 100%);
 }
 
 .yes {
@@ -23,4 +33,17 @@
 
 .no {
   @extend .some;
+}
+
+
+.led:after {
+  display: block;
+  content: '';
+  margin-top: 3px;
+  margin-left: 6px;
+  margin-right: 1px;
+  width: 8px;
+  height: 6px;
+  -webkit-border-radius: 4px 3px;
+  background-image: -webkit-linear-gradient(rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.2) 100%);
 }
