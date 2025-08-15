@@ -2,27 +2,19 @@
   <studio-lite-area-title
     [title]="(appService.appConfig.hasUsers ? 'home.login' : 'home.first-login') | translate">
   </studio-lite-area-title>
-<!--  @if (!loggedInKeycloak) {-->
-<!--    <button type="button" mat-icon-button-->
-<!--      matTooltip="{{'login.alternative' | translate}}"-->
-<!--      [matTooltipPosition]="'above'"-->
-<!--      [matTooltipShowDelay]="300"-->
-<!--      (click)="loginKeycloak()"-->
-<!--      data-cy="alternative-login">-->
-<!--      <studio-lite-wrapped-icon icon="call_made"></studio-lite-wrapped-icon>-->
-<!--    </button>-->
-<!--  }-->
-  @if (appService.globalWarning) {
-    <studio-lite-warning
-      [warnMessage]="appService.globalWarning">
-    </studio-lite-warning>
-  }
-  @if (!appService.appConfig.hasUsers) {
-    <studio-lite-warning
-      [warnMessage]="'home.no-user' | translate">
-    </studio-lite-warning>
-  }
 </div>
+
+@if (appService.globalWarning) {
+  <studio-lite-warning
+    [warnMessage]="appService.globalWarning">
+  </studio-lite-warning>
+}
+@if (!appService.appConfig.hasUsers) {
+  <studio-lite-warning
+    [warnMessage]="'home.no-user' | translate">
+  </studio-lite-warning>
+}
+
 <form class="fx-column-start-stretch"
   [formGroup]="loginForm"
   (ngSubmit)="login()">
