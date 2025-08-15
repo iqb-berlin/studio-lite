@@ -1,7 +1,7 @@
 <div class="page-footer fx-row-space-between-center fx-gap-30">
   <studio-lite-status-indication [presentationProgress]="presentationProgress"
-    [responseProgress]="responseProgress"
-    [hasFocus]="hasFocus">
+                                 [responseProgress]="responseProgress"
+                                 [hasFocus]="hasFocus">
   </studio-lite-status-indication>
   <div class="fx-row-space-between-center fx-gap-20">
     <button matMiniFab
@@ -24,16 +24,14 @@
       <mat-icon>print</mat-icon>
     </button>
     @if (pageList) {
-      <studio-lite-paging-mode-selection
-        class="paging-mode-selection-container mat-elevation-z3">
+      <studio-lite-paging-mode-selection class="paging-mode-selection-container mat-elevation-z3">
       </studio-lite-paging-mode-selection>
+
+      <studio-lite-page-navigation [matTooltip]="'workspace.page-selection' | translate"
+                                   [pageList]="pageList"
+                                   (gotoPage)="gotoPage.emit($event)">
+      </studio-lite-page-navigation>
     }
-    <studio-lite-page-navigation [matTooltip]="'workspace.page-selection' | translate"
-                                 [pageList]="pageList"
-                                 (gotoPage)="gotoPage.emit($event)">
-    </studio-lite-page-navigation>
   </div>
-
   <p class="player-name">{{ playerName }}</p>
-
 </div>
