@@ -1,37 +1,37 @@
-<div class="page-footer fx-row-space-between-center">
-  <div class="fx-row-space-between-center fx-gap-10">
-    <studio-lite-status-indication [presentationProgress]="presentationProgress"
-      [responseProgress]="responseProgress"
-      [hasFocus]="hasFocus">
-    </studio-lite-status-indication>
-    <button mat-raised-button
-      [disabled]="(playerApiVersion < 3) || (postMessageTarget === null)"
-      [matTooltip]="'workspace.send-navigation-denied' | translate"
-      (click)="navigationDenied.emit()">
-      {{'workspace.validate' | translate}}
+<div class="page-footer fx-row-space-between-center fx-gap-30">
+  <studio-lite-status-indication [presentationProgress]="presentationProgress"
+                                 [responseProgress]="responseProgress"
+                                 [hasFocus]="hasFocus">
+  </studio-lite-status-indication>
+  <div class="fx-row-space-between-center fx-gap-20">
+    <button matMiniFab
+            [color]="'primary'"
+            [disabled]="(playerApiVersion < 3) || (postMessageTarget === null)"
+            [matTooltip]="'workspace.send-navigation-denied' | translate"
+            (click)="navigationDenied.emit()">
+      <mat-icon>warning</mat-icon>
     </button>
-    <button mat-raised-button (click)="checkCoding.emit()">
-      {{ 'workspace.coding-check' | translate }}
+    <button matMiniFab
+            [color]="'primary'"
+            [matTooltip]="'workspace.coding-check' | translate"
+            (click)="checkCoding.emit()">
+      <mat-icon>check_circle_outline</mat-icon>
     </button>
-    <p>{{ playerName }}</p>
-  </div>
-
-  @if (pageList) {
-    <studio-lite-paging-mode-selection
-      class="paging-mode-selection-container">
-    </studio-lite-paging-mode-selection>
-  }
-
-  @if (unitId) {
-    <button mat-icon-button
-      [matTooltip]="'workspace.print' | translate"
-      (click)="print.emit()">
+    <button matMiniFab
+            [color]="'primary'"
+            [matTooltip]="'workspace.print' | translate"
+            (click)="print.emit()">
       <mat-icon>print</mat-icon>
     </button>
-  }
+    @if (pageList) {
+      <studio-lite-paging-mode-selection class="paging-mode-selection-container mat-elevation-z3">
+      </studio-lite-paging-mode-selection>
 
-  <studio-lite-page-navigation [pageList]="pageList"
-    (gotoPage)="gotoPage.emit($event)">
-  </studio-lite-page-navigation>
-
+      <studio-lite-page-navigation [matTooltip]="'workspace.page-selection' | translate"
+                                   [pageList]="pageList"
+                                   (gotoPage)="gotoPage.emit($event)">
+      </studio-lite-page-navigation>
+    }
+  </div>
+  <div class="player-name">{{ playerName }}</div>
 </div>

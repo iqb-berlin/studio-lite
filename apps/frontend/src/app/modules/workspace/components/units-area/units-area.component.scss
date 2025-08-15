@@ -1,5 +1,5 @@
 .area-container {
-  background-color:whitesmoke;
+  background-color: #eee;
   height: 100%;
   margin: 0;
 }
@@ -12,7 +12,12 @@
   box-sizing: border-box;
   padding-left: 15px;
   padding-right: 10px;
-  background-color: #ffcc00;
+}
+
+
+.save-area {
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 .unit-list {

@@ -1,18 +1,31 @@
 .page-nav {
   font-size: 1.2em;
+  border-radius: 5px;
+  background-color: #7fafb1 ;
 }
 
-.page-nav-prompt {
-  padding: 2px 8px;
-  color: white;
+.nav-button {
+  border-radius: 5px;
+  background-color: #eee;
 }
 
 .page-nav-disabled {
-  height: 5px;
-  background-color: orangered;
+  height: 5.5px;
+  background-color: #7fafb1;
 }
 
 .page-nav-enabled {
-  height: 5px;
-  background-color: darkgrey;
+  height: 5.5px;
+  background-color: #006064
 }
+
+.selected-page {
+  color: #006064;
+  border: 1px solid #7fafb1 !important;
+}
+
+.page-button {
+  border-radius: 0;
+  border: 1px solid #006064;
+}
+

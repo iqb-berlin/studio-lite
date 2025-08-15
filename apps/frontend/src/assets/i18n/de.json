@@ -690,9 +690,9 @@
     "no-player": "Kein gültiger Player zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "player-send-page-navigation-request": "Player sendet PageNavigationRequest: \"{{target}}\"",
     "player-send-unit-navigation-request": "Player sendet UnitNavigationRequest: \"{{target}}\"",
-    "page-selection": "Seitenauswahl",
+    "page-selection": "Seite auswählen",
     "validate": "Validieren",
-    "send-navigation-denied": "Sende die Nachricht \"Verweigerte Navigation\"",
+    "send-navigation-denied": "Pflichtfelder prüfen",
     "save-unit-data-changes-warning": "Formularfelder sind ungültig ausgefüllt. Bitte korrigieren Sie diese vorher.",
     "vocabs-not-loaded":  "Vokabulare für das Metadatenprofil \"{{profileUrl}}\" können aktuell nicht geladen werden",
     "profile-not-loaded":  "Metadatenprofil \"{{profileUrl}}\" kann aktuell nicht geladen werden"
@@ -713,15 +713,15 @@
   },
   "presentation-progress": {
     "label": "P",
-    "description": "Status: Vollständigkeit der Präsentation"
+    "description": "Vollständigkeit der Präsentation"
   },
   "response-progress": {
     "label": "R",
-    "description": "Status: Vollständigkeit der Antworten"
+    "description": "Vollständigkeit der verpflichtenden Antworten"
   },
   "player-has-focus": {
     "label": "F",
-    "description": "Status: Player hat Fenster-Fokus"
+    "description": "Status des Player-Fokus"
   },
   "search-filter": {
     "filter-users": "Suche nach Nutzer:innen",

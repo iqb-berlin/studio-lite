@@ -1,24 +1,18 @@
 @if (pageList.length) {
-  <div
-    class="page-nav fx-row-space-between-center">
-    <div class="page-nav-prompt">
-      {{'workspace.page-selection' | translate}}
-    </div>
+  <div class="page-nav fx-row-space-between-center mat-elevation-z3">
     @for (p of pageList; track p) {
-      <div>
+      <div class="nav-button">
         @if (p.type === '#previous') {
-          <button
-            class="fx-row-center-center"
-            [disabled]="p.disabled"
-            (click)="gotoPage.emit({ action: p.type })">
+          <button class="fx-row-center-center"
+                  [disabled]="p.disabled"
+                  (click)="gotoPage.emit({ action: p.type })">
             <studio-lite-wrapped-icon icon="chevron_left"></studio-lite-wrapped-icon>
           </button>
         }
         @if (p.type === '#next') {
-          <button
-            class="fx-row-center-center"
-            [disabled]="p.disabled"
-            (click)="gotoPage.emit({ action: p.type })">
+          <button class="fx-row-center-center"
+                  [disabled]="p.disabled"
+                  (click)="gotoPage.emit({ action: p.type })">
             <studio-lite-wrapped-icon icon="chevron_right"></studio-lite-wrapped-icon>
           </button>
         }
@@ -31,8 +25,10 @@
             @if (p.disabled) {
               <div class="page-nav-disabled"></div>
             }
-            <button [disabled]="p.disabled"
-              (click)="gotoPage.emit({ action: p.type, index: p.index })">
+            <button class="page-button"
+                    [class.selected-page]="p.disabled"
+                    [disabled]="p.disabled"
+                    (click)="gotoPage.emit({ action: p.type, index: p.index })">
               {{ p.index }}
             </button>
             @if (!p.disabled) {

@@ -1,7 +1,6 @@
-<label class="selection-label">
-  {{'unit-preview.paging-selection-mode.label' | translate}}
-</label>
-<select [ngModel]="previewService.pagingMode.value"
+<select class="paging-mode-selection"
+        [ngModel]="previewService.pagingMode.value"
+        [matTooltip]="'unit-preview.paging-selection-mode.label' | translate"
   (ngModelChange)="previewService.setPagingMode($event)">
   @for (mode of pagingModes; track mode) {
     <option [value]="mode">
