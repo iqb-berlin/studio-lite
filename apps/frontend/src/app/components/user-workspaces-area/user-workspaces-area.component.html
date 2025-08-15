@@ -5,11 +5,11 @@
   <div>
     @if (isAdmin) {
       <button mat-button
-        [routerLink]="['/admin']"
-        [matTooltip]="'home.goto-admin' | translate"
-        matTooltipPosition="above"
-        data-cy="goto-admin">
-        <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>
+              [routerLink]="['/admin']"
+              [matTooltip]="'home.goto-admin' | translate"
+              matTooltipPosition="above"
+              data-cy="goto-admin">
+        <studio-lite-wrapped-icon icon="construction"></studio-lite-wrapped-icon>
       </button>
     }
     <studio-lite-user-menu></studio-lite-user-menu>
