@@ -2,6 +2,10 @@
   font-size: 1.2em;
 }
 
+.row {
+  border-radius: 5px;
+}
+
 .page-nav-disabled {
   height: 5px;
   background-color: #7fafb1;
@@ -11,3 +15,9 @@
   height: 5px;
   background-color: #006064
 }
+
+.page-button {
+  border-radius: 0;
+  border: 1px solid #ddd;
+}
+

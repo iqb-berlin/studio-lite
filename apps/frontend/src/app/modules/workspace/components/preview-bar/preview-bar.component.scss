@@ -1,11 +1,15 @@
 .page-footer {
   width: 100%;
   bottom: 0;
-  background-color: slategray;
+  background-color: #eee;
   padding: 0 30px;
 }
 
 .paging-mode-selection-container{
-  color: white;
+  border-radius: 5px;
+}
+
+.player-name {
+  color: #006064
 }
 
