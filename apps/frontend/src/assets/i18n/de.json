@@ -690,7 +690,7 @@
     "no-player": "Kein gültiger Player zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "player-send-page-navigation-request": "Player sendet PageNavigationRequest: \"{{target}}\"",
     "player-send-unit-navigation-request": "Player sendet UnitNavigationRequest: \"{{target}}\"",
-    "page-selection": "Seitenauswahl",
+    "page-selection": "Seite auswählen",
     "validate": "Validieren",
     "send-navigation-denied": "Pflichtfelder prüfen",
     "save-unit-data-changes-warning": "Formularfelder sind ungültig ausgefüllt. Bitte korrigieren Sie diese vorher.",

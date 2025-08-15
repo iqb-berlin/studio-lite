@@ -1,9 +1,5 @@
 @if (pageList.length) {
-  <div
-    class="page-nav fx-row-space-between-center">
-    <div class="page-nav-prompt">
-      {{'workspace.page-selection' | translate}}
-    </div>
+  <div class="page-nav fx-row-space-between-center">
     @for (p of pageList; track p) {
       <div>
         @if (p.type === '#previous') {
