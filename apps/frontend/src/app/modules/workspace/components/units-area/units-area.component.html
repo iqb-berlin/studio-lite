@@ -1,10 +1,13 @@
 <div class="fx-column-start-stretch area-container">
 
-  <div class="fx-row-space-between-center">
+  <div class="fx-row-space-between-center mat-elevation-z3">
     @if (workspaceService.userAccessLevel > 1) {
       <studio-lite-unit-save-button></studio-lite-unit-save-button>
     } @else {
-      <div class="no-access-level-hint">{{'access-rights.no-access-level' | translate}}</div>
+      <div class="no-access-level-hint fx-row-start-center fx-gap-10">
+        <mat-icon>lock</mat-icon>
+        <span>{{'access-rights.no-access-level' | translate}}</span>
+      </div>
     }
     <studio-lite-update-units-button></studio-lite-update-units-button>
   </div>
