@@ -145,7 +145,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
     cy.clickButton('Schließen');
   });
 
-  it.skip('deletes the data', () => {
+  it('deletes the data', () => {
     cy.visit('/');
     deleteGroup(group1.name);
     cy.visit('/');

@@ -68,7 +68,7 @@ export function findAdminSettings(): Chainable {
   //   .parent().parent()
   //   .contains('studio-lite-wrapped-icon', 'settings');
   return cy.get('div')
-    .contains('studio-lite-wrapped-icon', 'settings');
+    .contains('studio-lite-wrapped-icon', 'construction');
 }
 
 export function createWs(ws:string, group:string):void {
