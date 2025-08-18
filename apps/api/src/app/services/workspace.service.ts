@@ -38,10 +38,7 @@ import { UnitUserService } from './unit-user.service';
 import {
   UserWorkspaceGroupNotAdminException
 } from '../exceptions/user-workspace-group-not-admin';
-// eslint-disable-next-line import/no-duplicates
-import UserEntity from '../entities/user.entity';
 import { UnitCommentService } from './unit-comment.service';
-// eslint-disable-next-line import/no-duplicates
 import User from '../entities/user.entity';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 import { GroupAdminUnprocessableWorkspaceException } from '../exceptions/group-admin-unprocessable-workspace.exception';
@@ -510,7 +507,7 @@ export class WorkspaceService {
     await this.workspacesRepository.delete(id);
   }
 
-  async uploadFiles(workspaceId: number, originalFiles: FileIo[], user: UserEntity): Promise<RequestReportDto> {
+  async uploadFiles(workspaceId: number, originalFiles: FileIo[], user: User): Promise<RequestReportDto> {
     const functionReturn: RequestReportDto = {
       source: 'upload-units',
       messages: []
@@ -563,7 +560,7 @@ export class WorkspaceService {
     usedFiles: string[],
     unitImportData: UnitImportData,
     workspaceId: number,
-    user: UserEntity,
+    user: User,
     functionReturn: RequestReportDto,
     notXmlFiles: { [fName: string]: FileIo }
   ) {
