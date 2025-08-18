@@ -38,13 +38,10 @@ import { UnitUserService } from './unit-user.service';
 import {
   UserWorkspaceGroupNotAdminException
 } from '../exceptions/user-workspace-group-not-admin';
-// eslint-disable-next-line import/no-duplicates
-import UserEntity from '../entities/user.entity';
 import { UnitCommentService } from './unit-comment.service';
-// eslint-disable-next-line import/no-duplicates
 import User from '../entities/user.entity';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
-import { GroupAdminWorkspaceForbiddenException } from '../exceptions/group-admin-workspace-forbidden.exception';
+import { GroupAdminUnprocessableWorkspaceException } from '../exceptions/group-admin-unprocessable-workspace.exception';
 
 @Injectable()
 export class WorkspaceService {
@@ -242,18 +239,16 @@ export class WorkspaceService {
     const workspaceGroup = await this.workspaceGroupRepository.findOne({
       where: { id: workspace.groupId }
     });
-
     const isBackupFolder = workspaceGroup.name.toLowerCase()
       .includes('backup');
     if (isBackupFolder) {
       const workspaces = await this.workspacesRepository
         .find({ where: { groupId: workspace.groupId } });
-      if (workspaces.length >= 10) {
+      if (workspaces.length >= 10) { // same maximum used in frontend
         this.logger.warn(`Cannot create more than 10 workspaces in backup group: ${workspaceGroup.name}`);
-        throw new GroupAdminWorkspaceForbiddenException(workspace.groupId, 'POST');
+        throw new GroupAdminUnprocessableWorkspaceException(workspace.groupId, 'POST');
       }
     }
-
     this.logger.log(`Creating workspace with name: ${workspace.name}`);
     const newWorkspace = this.workspacesRepository.create(workspace);
     const savedWorkspace = await this.workspacesRepository.save(newWorkspace);
@@ -512,7 +507,7 @@ export class WorkspaceService {
     await this.workspacesRepository.delete(id);
   }
 
-  async uploadFiles(workspaceId: number, originalFiles: FileIo[], user: UserEntity): Promise<RequestReportDto> {
+  async uploadFiles(workspaceId: number, originalFiles: FileIo[], user: User): Promise<RequestReportDto> {
     const functionReturn: RequestReportDto = {
       source: 'upload-units',
       messages: []
@@ -565,7 +560,7 @@ export class WorkspaceService {
     usedFiles: string[],
     unitImportData: UnitImportData,
     workspaceId: number,
-    user: UserEntity,
+    user: User,
     functionReturn: RequestReportDto,
     notXmlFiles: { [fName: string]: FileIo }
   ) {
