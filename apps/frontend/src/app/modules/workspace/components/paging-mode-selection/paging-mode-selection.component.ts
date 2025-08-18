@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { FormsModule } from '@angular/forms';
+import { MatTooltip } from '@angular/material/tooltip';
 import { PagingMode } from '../../models/types';
 import { PreviewService } from '../../services/preview.service';
 
@@ -9,7 +10,7 @@ import { PreviewService } from '../../services/preview.service';
   selector: 'studio-lite-paging-mode-selection',
   templateUrl: './paging-mode-selection.component.html',
   styleUrls: ['./paging-mode-selection.component.scss'],
-  imports: [FormsModule, TranslateModule]
+  imports: [FormsModule, TranslateModule, MatTooltip]
 })
 export class PagingModeSelectionComponent {
   pagingModes: PagingMode[] = ['separate', 'buttons', 'concat-scroll', 'concat-scroll-snap'];

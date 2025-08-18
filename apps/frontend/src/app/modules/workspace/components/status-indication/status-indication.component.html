@@ -1,19 +1,22 @@
-<div class="fx-row-start-stretch fx-gap-5">
-  <div [class.complete]="presentationProgress === 'complete'"
+<div class="fx-row-start-stretch fx-gap-10">
+  <div class = "mat-elevation-z3"
+       [class.complete]="presentationProgress === 'complete'"
        [class.some]="presentationProgress === 'some'"
        [class.none]="presentationProgress === 'none'"
        [matTooltip]="'presentation-progress.description' | translate">
-    {{'presentation-progress.label' | translate}}
+    <span class="label">{{'presentation-progress.label' | translate}}</span>
   </div>
-  <div [class.complete]="responseProgress === 'complete'"
+  <div class = "mat-elevation-z3"
+       [class.complete]="responseProgress === 'complete'"
        [class.some]="responseProgress === 'some'"
        [class.none]="responseProgress === 'none'"
        [matTooltip]="'response-progress.description' | translate">
-    {{'response-progress.label' | translate}}
+    <span class="label">{{'response-progress.label' | translate}}</span>
   </div>
-  <div [class.yes]="hasFocus"
+  <div class = "mat-elevation-z3"
+       [class.yes]="hasFocus"
        [class.no]="!hasFocus"
        [matTooltip]="'player-has-focus.description' | translate">
-    {{'player-has-focus.label' | translate}}
+    <span class="label">{{'player-has-focus.label' | translate}}</span>
   </div>
 </div>

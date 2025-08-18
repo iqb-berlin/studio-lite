@@ -44,6 +44,7 @@ import { UnitCommentService } from './unit-comment.service';
 // eslint-disable-next-line import/no-duplicates
 import User from '../entities/user.entity';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
+import { GroupAdminWorkspaceForbiddenException } from '../exceptions/group-admin-workspace-forbidden.exception';
 
 @Injectable()
 export class WorkspaceService {
@@ -238,6 +239,21 @@ export class WorkspaceService {
   }
 
   async create(workspace: CreateWorkspaceDto): Promise<number> {
+    const workspaceGroup = await this.workspaceGroupRepository.findOne({
+      where: { id: workspace.groupId }
+    });
+
+    const isBackupFolder = workspaceGroup.name.toLowerCase()
+      .includes('backup');
+    if (isBackupFolder) {
+      const workspaces = await this.workspacesRepository
+        .find({ where: { groupId: workspace.groupId } });
+      if (workspaces.length >= 10) {
+        this.logger.warn(`Cannot create more than 10 workspaces in backup group: ${workspaceGroup.name}`);
+        throw new GroupAdminWorkspaceForbiddenException(workspace.groupId, 'POST');
+      }
+    }
+
     this.logger.log(`Creating workspace with name: ${workspace.name}`);
     const newWorkspace = this.workspacesRepository.create(workspace);
     const savedWorkspace = await this.workspacesRepository.save(newWorkspace);

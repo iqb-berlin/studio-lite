@@ -1,6 +1,7 @@
 <div class="fx-row-end-center">
 
-  <select class="sort-items" [ngModel]="itemSortService.currenItemSorting"
+  <select class="sort-items mat-elevation-z3"
+          [ngModel]="itemSortService.currenItemSorting"
           (ngModelChange)="sortItems($event)">
     @for (sorting of itemSortService.itemSortings; track sorting) {
       <option [value]="sorting">

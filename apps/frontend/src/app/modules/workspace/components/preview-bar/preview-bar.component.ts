@@ -4,7 +4,7 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMiniFabButton } from '@angular/material/button';
 import { PageData } from '../../models/page-data.interface';
 import { WorkspaceService } from '../../services/workspace.service';
 import { Progress } from '../../models/types';
@@ -16,8 +16,8 @@ import { StatusIndicationComponent } from '../status-indication/status-indicatio
   selector: 'studio-lite-preview-bar',
   templateUrl: './preview-bar.component.html',
   styleUrls: ['./preview-bar.component.scss'],
-  imports: [StatusIndicationComponent, MatButton, MatTooltip, PagingModeSelectionComponent,
-    MatIconButton, MatIcon, PageNavigationComponent, TranslateModule]
+  imports: [StatusIndicationComponent, MatTooltip, PagingModeSelectionComponent,
+    MatIcon, PageNavigationComponent, TranslateModule, MatMiniFabButton]
 })
 export class PreviewBarComponent {
   @Input() pageList!: PageData[];
