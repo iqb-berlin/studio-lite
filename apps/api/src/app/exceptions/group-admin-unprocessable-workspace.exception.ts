@@ -1,6 +1,6 @@
-import { ForbiddenException } from '@nestjs/common';
+import { UnprocessableEntityException } from '@nestjs/common';
 
-export class GroupAdminWorkspaceForbiddenException extends ForbiddenException {
+export class GroupAdminUnprocessableWorkspaceException extends UnprocessableEntityException {
   constructor(groupId: number, method: string) {
     const description = `Creating of workspace in group with id ${groupId} is forbidden`;
     const objectOrError = {
