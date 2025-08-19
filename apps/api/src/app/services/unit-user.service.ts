@@ -49,7 +49,7 @@ export class UnitUserService {
     }
   }
 
-  async deleteUnitUsers(workspaceId: number, userId: number) {
+  async deleteUnitUsersByWorkspaceId(workspaceId: number, userId: number) {
     const units = await this.unitRepository.find({ where: { workspaceId: workspaceId } });
     await Promise.all(units.map(async unit => {
       const existingUnitUser = await this.unitUserRepository.findOne({

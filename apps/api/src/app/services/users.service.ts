@@ -362,32 +362,55 @@ export class UsersService {
 
   async setUsersByWorkspace(workspaceId: number, users: UserWorkspaceAccessDto[]) {
     this.logger.log(`Adding users for workspaceId: ${workspaceId}`);
-    return this.workspaceUsersRepository.delete({ workspaceId: workspaceId }).then(async () => {
-      await Promise.all(users.map(async user => {
-        const newWorkspaceUser = this.workspaceUsersRepository.create(<WorkspaceUser>{
+
+    // Remove all existing workspace users
+    await this.workspaceUsersRepository.delete({ workspaceId: workspaceId });
+
+    // Get all units and create workspace users in parallel
+    const [units, workspaceUsers] = await Promise.all([
+      this.unitService.findAllForWorkspace(workspaceId),
+      Promise.all(users.map(user => this.workspaceUsersRepository
+        .create({
           userId: user.id,
           workspaceId: workspaceId,
           accessLevel: user.accessLevel
-        });
-        await this.workspaceUsersRepository.save(newWorkspaceUser);
-        const units = await this.unitService.findAllForWorkspace(workspaceId);
+        })
+      ))
+    ]);
 
-        await Promise.all(units.map(async unit => {
-          this.unitUserService.findByUnitId(unit.id).then(async unitUsers => {
-            const unitUsersIds = unitUsers.map(unitUser => unitUser.userId);
-            if (!unitUsersIds.includes(user.id)) {
-              await this.unitUserService.createUnitUser(user.id, unit.id);
-            } else {
-              unitUsersIds.map(async unitUserId => {
-                if (!users.find(u => u.id === unitUserId)) {
-                  await this.unitUserService.deleteUnitUsers(workspaceId, unitUserId);
-                }
-              });
-            }
-          });
-        }));
-      }));
-    });
+    // Save all workspace users at once
+    await this.workspaceUsersRepository.save(workspaceUsers);
+
+    const newUserIds = users.map(u => u.id);
+
+    // Get all existing unit users to determine global users to remove
+    const allUnitUsers = await Promise.all(
+      units.map(unit => this.unitUserService.findByUnitId(unit.id))
+    );
+    const allExistingUserIds = [...new Set(allUnitUsers.flat().map(uu => uu.userId))];
+    const globalUsersToRemove = allExistingUserIds.filter(userId => !newUserIds.includes(userId));
+
+    // Remove users from all units once (outside the unit loop)
+    if (globalUsersToRemove.length > 0) {
+      await Promise.all(
+        globalUsersToRemove.map(userId => this.unitUserService
+          .deleteUnitUsersByWorkspaceId(workspaceId, userId)
+        )
+      );
+    }
+
+    // Process unit access - only additions now
+    await Promise.all(units.map(async unit => {
+      const existingUnitUsers = await this.unitUserService.findByUnitId(unit.id);
+      const existingUnitUserIds = existingUnitUsers.map(uu => uu.userId);
+
+      const usersToAdd = newUserIds.filter(userId => !existingUnitUserIds.includes(userId));
+
+      // Only execute additions
+      await Promise.all(
+        usersToAdd.map(userId => this.unitUserService.createUnitUser(userId, unit.id))
+      );
+    }));
   }
 
   // TODO: mit Dtos
