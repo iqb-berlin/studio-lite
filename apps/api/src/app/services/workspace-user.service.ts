@@ -27,7 +27,7 @@ export class WorkspaceUserService {
       await this.workspaceUserRepository.delete({
         userId: userId, workspaceId: workspaceData.id
       });
-      await this.unitUserService.deleteUnitUsers(workspaceData.id, userId);
+      await this.unitUserService.deleteUnitUsersByWorkspaceId(workspaceData.id, userId);
     }));
   }
 

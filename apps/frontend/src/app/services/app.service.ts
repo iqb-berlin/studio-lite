@@ -6,11 +6,10 @@ import { AppHttpError } from '../models/app-http-error.class';
 import { AppConfig } from '../models/app-config.class';
 
 export const standardLogo: AppLogoDto = {
-  data: 'assets/IQB-LogoA.png',
+  data: 'assets/studio-logo-144.png',
   alt: 'Zur Startseite',
-  // eslint-disable-next-line max-len
-  bodyBackground: 'linear-gradient(180deg, rgba(7,70,94,1) 0%, rgba(6,112,123,1) 24%, rgba(1,192,229,1) 85%)',
-  boxBackground: 'lightgray'
+  bodyBackground: '#7fafb1',
+  boxBackground: '#eeeeee'
 };
 export const defaultAppConfig = <ConfigDto>{
   appTitle: 'IQB-Studio',

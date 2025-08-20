@@ -7,6 +7,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { ToTextFactory, CodeAsText } from '@iqb/responses';
 import { CodingScheme, VariableCodingData, CodeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { Logger } from '@nestjs/common';
 import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
 import { DownloadDocx } from './downloadDocx.class';
@@ -193,6 +194,10 @@ export class DownloadWorkspacesClass {
     const codebook: CodebookUnitDto[] = selectedUnits
       .map((unit: UnitPropertiesDto) => DownloadWorkspacesClass
         .getCodeBookDataForUnit(unit, contentSetting, missings));
+    if (codebook.length === 0) {
+      const logger = new Logger(DownloadWorkspacesClass.name);
+      logger.warn(`Can not create codebook for units in workspace ${workspaceId} with unit ids ${unitList}`);
+    }
     if (contentSetting.exportFormat === 'docx') {
       return new Promise(resolve => {
         resolve(DownloadDocx.getDocXCodebook(codebook, contentSetting));

@@ -50,7 +50,7 @@ function getTimeNumber(time: string, propName:string, profile:string, moreThanOn
 export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile) {
   // cy.get('[data-cy="goto-admin"]').click();
   cy.get('div')
-    .contains('studio-lite-wrapped-icon', 'settings')
+    .contains('studio-lite-wrapped-icon', 'construction')
     .click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)

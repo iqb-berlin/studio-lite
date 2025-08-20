@@ -1,8 +1,8 @@
 @import "../../../node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css";
 
 :root {
-  --st-body-background: linear-gradient(180deg, rgba(7,70,94,1) 0%, rgba(6,112,123,1) 24%, rgba(1,192,229,1) 85%);
-  --st-box-background: lightgray;
+  --st-body-background: #7fafb1;
+  --st-box-background: #eeeeee;
   min-height: 100%;
 }
 a,a:visited,a:active,a:hover,a:hover {
@@ -72,16 +72,18 @@ body {
 }
 
 .error-container {
-  width: 600px;
-  max-height: 600px;
+  width: 700px;
+  max-height: 800px;
   overflow-y: auto;
-  top: 20px;
-  left: 20px;
+  top: 50px;
+  left: 50px;
   margin: auto;
   position: fixed;
-  background-color: darksalmon;
-  padding: 10px;
-  z-index: 1111;
+  background-color: white;
+  border: 2px solid #b71c1c;
+  padding: 30px;
+  z-index: 1000;
+  border-radius: 5px;
 }
 
 .spinner-container .mat-progress-spinner {

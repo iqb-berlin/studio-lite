@@ -1,19 +1,19 @@
-<div class="fx-row-start-stretch fx-gap-5">
+<div class="fx-row-start-stretch fx-gap-10">
   <div [class.complete]="presentationProgress === 'complete'"
        [class.some]="presentationProgress === 'some'"
        [class.none]="presentationProgress === 'none'"
-       [matTooltip]="'presentation-progress.description' | translate">
-    {{'presentation-progress.label' | translate}}
+       [matTooltip]="'presentation-progress.description' | translate : { status: 'status.' + presentationProgress | translate }">
+    <span class="label">{{'presentation-progress.label' | translate}}</span>
   </div>
   <div [class.complete]="responseProgress === 'complete'"
        [class.some]="responseProgress === 'some'"
        [class.none]="responseProgress === 'none'"
-       [matTooltip]="'response-progress.description' | translate">
-    {{'response-progress.label' | translate}}
+       [matTooltip]="'response-progress.description' | translate : { status: 'status.' + responseProgress | translate }">
+    <span class="label">{{'response-progress.label' | translate}}</span>
   </div>
   <div [class.yes]="hasFocus"
        [class.no]="!hasFocus"
-       [matTooltip]="'player-has-focus.description' | translate">
-    {{'player-has-focus.label' | translate}}
+       [matTooltip]="'player-has-focus.description' | translate : { status: 'status.' + hasFocus | translate}">
+    <span class="label">{{'player-has-focus.label' | translate}}</span>
   </div>
 </div>

@@ -21,6 +21,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MetadataService } from '../../services/metadata.service';
 import { IncludePipe } from '../../../shared/pipes/include.pipe';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
+import { I18nService } from '../../../../services/i18n.service';
 
 interface ColumnValues {
   key?: string;
@@ -68,7 +69,8 @@ export class TableViewComponent implements OnInit {
     private workspaceService: WorkspaceService,
     private translateService: TranslateService,
     @Inject(MAT_DIALOG_DATA)
-    public data: { units: UnitPropertiesDto[]; warning: string }
+    public data: { units: UnitPropertiesDto[]; warning: string },
+    private i18nService: I18nService
   ) {}
 
   @ViewChild('tabGroup') tabGroup!: MatTabGroup;
@@ -236,7 +238,8 @@ export class TableViewComponent implements OnInit {
   }
 
   downloadMetadata(): void {
-    const datePipe = new DatePipe('de-DE');
+    const datePipe = new DatePipe(this.i18nService.fullLocale);
+    const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
     if (this.viewMode === 'units') {
       this.metadataService
         .downloadMetadataReport(
@@ -245,7 +248,6 @@ export class TableViewComponent implements OnInit {
           this.data.units.map(unit => unit.id)
         )
         .subscribe(b => {
-          const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
           saveAs(
             b,
             `${this.translateService.instant(
@@ -263,7 +265,6 @@ export class TableViewComponent implements OnInit {
           this.data.units.map(unit => unit.id)
         )
         .subscribe(b => {
-          const thisDate = datePipe.transform(new Date(), 'yyyy-MM-dd');
           saveAs(
             b,
             `${this.translateService.instant(

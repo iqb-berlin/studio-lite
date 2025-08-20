@@ -8,7 +8,7 @@ import {
   ApiOkResponse,
   ApiQuery,
   ApiTags,
-  ApiUnauthorizedResponse
+  ApiUnauthorizedResponse, ApiUnprocessableEntityResponse
 } from '@nestjs/swagger';
 import {
   CreateWorkspaceDto,
@@ -100,6 +100,7 @@ export class GroupAdminWorkspaceController {
     description: 'Sends back the id of the new Workspace in database',
     type: Number
   })
+  @ApiUnprocessableEntityResponse({ description: 'Creating of workspace in group is forbidden' })
   @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('group-admin workspace')

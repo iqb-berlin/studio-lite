@@ -27,7 +27,6 @@ export class UnitUserService {
   }
 
   async findLastSeenCommentTimestamp(userId: number, unitId: number): Promise<Date> {
-    this.logger.log(`Retrieving last seen comment timestamp for userId ${userId} & unitId ${unitId}`);
     const unitUser = await this.unitUserRepository.findOne({
       where: {
         userId: userId,
@@ -50,7 +49,7 @@ export class UnitUserService {
     }
   }
 
-  async deleteUnitUsers(workspaceId: number, userId: number) {
+  async deleteUnitUsersByWorkspaceId(workspaceId: number, userId: number) {
     const units = await this.unitRepository.find({ where: { workspaceId: workspaceId } });
     await Promise.all(units.map(async unit => {
       const existingUnitUser = await this.unitUserRepository.findOne({

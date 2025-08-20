@@ -414,9 +414,11 @@
     "drop-box-not-selected": "Konnte Abgabebereich nicht ändern",
     "no-drop-box": "Kein Abgabebereich",
     "drop-box": "Abgabebereich",
-    "too-many-workspaces-warning": "In dieser Arbeitsbereichsgruppe sind mehr als {{maxWorkspaceCount}} Arbeitsbereiche mit insgesamt {{unitsCount}} Aufgaben vorhanden. Bitte löschen Sie erst Arbeitsbereiche, bevor Sie neue anlegen.",
-    "too-many-workspaces-warning-small": "In dieser Arbeitsbereichsgruppe sind mehr als {{maxWorkspaceCount}} Arbeitsbereiche vorhanden. Bitte löschen Sie erst Arbeitsbereiche, bevor Sie neue anlegen.",
-    "units-count-info": "In dieser Arbeitsbereichsgruppe sind insgesamt {{unitsCount}} Aufgaben vorhanden."
+    "too-many-workspaces-warning": "In dieser Arbeitsbereichsgruppe sind mehr als {{maxWorkspaceCount}} Arbeitsbereiche mit insgesamt {{unitsCount}} Aufgaben vorhanden. Bitte löschen Sie Arbeitsbereiche, bevor Sie neue anlegen.",
+    "too-many-workspaces-warning-small": "In dieser Arbeitsbereichsgruppe sind mehr als {{maxWorkspaceCount}} Arbeitsbereiche vorhanden. Bitte löschen Sie Arbeitsbereiche, bevor Sie neue anlegen.",
+    "units-count-info": "In dieser Arbeitsbereichsgruppe sind insgesamt {{unitsCount}} Aufgaben vorhanden.",
+    "backup-workspace-group-limit-reached": "Die maximale Anzahl von Arbeitsbereichen ist erreicht.",
+    "backup-workspace-group-limit-reached-hint": "Die maximale Anzahl von Arbeitsbereichen ist auf {{maxWorkspaceCount}} begrenzt. Bitte löschen Sie Arbeitsbereiche, bevor Sie neue anlegen."
   },
   "workspace-settings": {
     "modules": "Verona Module",
@@ -688,9 +690,9 @@
     "no-player": "Kein gültiger Player zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "player-send-page-navigation-request": "Player sendet PageNavigationRequest: \"{{target}}\"",
     "player-send-unit-navigation-request": "Player sendet UnitNavigationRequest: \"{{target}}\"",
-    "page-selection": "Seitenauswahl",
+    "page-selection": "Seite auswählen",
     "validate": "Validieren",
-    "send-navigation-denied": "Sende die Nachricht \"Verweigerte Navigation\"",
+    "send-navigation-denied": "Pflichtfelder prüfen",
     "save-unit-data-changes-warning": "Formularfelder sind ungültig ausgefüllt. Bitte korrigieren Sie diese vorher.",
     "vocabs-not-loaded":  "Vokabulare für das Metadatenprofil \"{{profileUrl}}\" können aktuell nicht geladen werden",
     "profile-not-loaded":  "Metadatenprofil \"{{profileUrl}}\" kann aktuell nicht geladen werden"
@@ -709,17 +711,24 @@
     "deprecated": "Veraltet",
     "settings": "Einstellungen"
   },
+  "status": {
+    "true": "Ja",
+    "false": "Nein",
+    "complete": "Vollständig",
+    "some": "Teilweise",
+    "none": "Keine"
+  },
   "presentation-progress": {
     "label": "P",
-    "description": "Status: Vollständigkeit der Präsentation"
+    "description": "Vollständigkeit der Präsentation: {{status}}"
   },
   "response-progress": {
     "label": "R",
-    "description": "Status: Vollständigkeit der Antworten"
+    "description": "Vollständigkeit der verpflichtenden Antworten: {{status}}"
   },
   "player-has-focus": {
     "label": "F",
-    "description": "Status: Player hat Fenster-Fokus"
+    "description": "Player-Fokus: {{status}}"
   },
   "search-filter": {
     "filter-users": "Suche nach Nutzer:innen",
@@ -867,7 +876,9 @@
     "no-metadata": "Keine Metadaten",
     "connected-items": "Verbundene Items"
   },
+
   "review": {
+    "info": "Arbeitsbereich {{workspace}} (Bereichsgruppe {{workspaceGroup}})",
     "header": "Review",
     "end": "Ende der Aufgabenfolge",
     "end-page": "Endseite",
@@ -888,5 +899,11 @@
     "unit": "Aufgabe {{index}}",
     "block": "Review \"{{name}}\" (Block)",
     "booklet": "Review \"{{name}}\" (Testheft)"
+  },
+  "paginator": {
+    "items-per-page": "Einträge pro Seite",
+    "next-page": "Nächste Seite",
+    "previous-page": "Vorherige Seite",
+    "range": "{{start}} - {{end}} von {{total}}"
   }
 }

@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { MatPaginator } from '@angular/material/paginator';
 import { BackendService } from '../../services/backend.service';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 import { I18nService } from '../../../../services/i18n.service';
@@ -25,7 +26,7 @@ import { I18nService } from '../../../../services/i18n.service';
   templateUrl: './units.component.html',
   styleUrls: ['./units.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, DatePipe]
+  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, DatePipe, MatPaginator]
 })
 
 export class UnitsComponent implements OnInit, AfterViewInit {
@@ -45,6 +46,7 @@ export class UnitsComponent implements OnInit, AfterViewInit {
   ];
 
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(private backendService: BackendService,
               public i18nService: I18nService) {
@@ -61,5 +63,6 @@ export class UnitsComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.paginator;
   }
 }

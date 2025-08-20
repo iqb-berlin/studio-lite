@@ -15,6 +15,12 @@ export class ReviewFullDto {
     workspaceName?: string;
 
   @ApiProperty()
+    workspaceGroupId?: number;
+
+  @ApiProperty()
+    workspaceGroupName?: string;
+
+  @ApiProperty()
     link?: string;
 
   @ApiProperty()

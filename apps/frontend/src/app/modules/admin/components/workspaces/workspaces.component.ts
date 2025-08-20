@@ -15,6 +15,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
+import { MatPaginator } from '@angular/material/paginator';
 import { BackendService } from '../../services/backend.service';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 
@@ -23,7 +24,7 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
   templateUrl: './workspaces.component.html',
   styleUrls: ['./workspaces.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink]
+  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, MatPaginator]
 })
 
 export class WorkspacesComponent implements OnInit, AfterViewInit {
@@ -31,6 +32,7 @@ export class WorkspacesComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['id', 'name', 'groupId'];
 
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(private backendService: BackendService) {
   }
@@ -46,5 +48,6 @@ export class WorkspacesComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.paginator;
   }
 }

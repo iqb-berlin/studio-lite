@@ -3,18 +3,17 @@ import { WorkspaceGroupDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
-import { MatAnchor } from '@angular/material/button';
-
+import { MatAnchor, MatButton } from '@angular/material/button';
 import { WrappedIconComponent } from '../../modules/shared/components/wrapped-icon/wrapped-icon.component';
 import { UserIssuesComponent } from '../user-issues/user-issues.component';
-import { UserIssuesPipe } from '../../pipes/issues-pipe.pipe';
+import { UserIssuesPipe } from '../../pipes/user-issues.pipe';
 
 @Component({
   selector: 'studio-lite-user-workspaces-groups',
   templateUrl: './user-workspaces-groups.component.html',
   styleUrls: ['./user-workspaces-groups.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatAnchor, RouterLink, MatTooltip, WrappedIconComponent, UserIssuesComponent, TranslateModule, UserIssuesPipe]
+  imports: [MatAnchor, RouterLink, MatTooltip, WrappedIconComponent, UserIssuesComponent, TranslateModule, UserIssuesPipe, MatButton]
 })
 
 export class UserWorkspacesGroupsComponent {

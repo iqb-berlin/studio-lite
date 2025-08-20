@@ -17,7 +17,8 @@ class Unit {
     name: string;
 
   @Column({
-    name: 'group_name'
+    name: 'group_name',
+    nullable: true
   })
     groupName: string;
 
@@ -61,13 +62,15 @@ class Unit {
     variables = [];
 
   @Column({
-    name: 'last_changed_definition_user'
+    name: 'last_changed_definition_user',
+    nullable: true
   })
     lastChangedDefinitionUser: string;
 
   @Column({
     type: 'timestamp with time zone',
-    name: 'last_changed_definition'
+    name: 'last_changed_definition',
+    nullable: true
   })
     lastChangedDefinition: Date;
 
@@ -83,13 +86,15 @@ class Unit {
     schemeType: string;
 
   @Column({
-    name: 'last_changed_scheme_user'
+    name: 'last_changed_scheme_user',
+    nullable: true
   })
     lastChangedSchemeUser: string;
 
   @Column({
     type: 'timestamp with time zone',
-    name: 'last_changed_scheme'
+    name: 'last_changed_scheme',
+    nullable: true
   })
     lastChangedScheme: Date;
 
@@ -100,7 +105,8 @@ class Unit {
     lastChangedMetadata: Date;
 
   @Column({
-    name: 'last_changed_metadata_user'
+    name: 'last_changed_metadata_user',
+    nullable: true
   })
     lastChangedMetadataUser: string;
 }

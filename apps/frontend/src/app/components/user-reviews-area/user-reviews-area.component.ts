@@ -9,8 +9,8 @@ import { MatButton } from '@angular/material/button';
 
 import { LogoutDirective } from '../../directives/logout.directive';
 import { UserIssuesComponent } from '../user-issues/user-issues.component';
-import { UserIssuesPipe } from '../../pipes/issues-pipe.pipe';
 import { AreaTitleComponent } from '../area-title/area-title.component';
+import { UserIssuesPipe } from '../../pipes/user-issues.pipe';
 
 @Component({
   selector: 'studio-lite-user-reviews-area',

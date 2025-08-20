@@ -1,23 +1,37 @@
-.label {
-  padding: 2px 10px;
+.led {
+  height: 22px;
+  width: 25px;
+  border-bottom-width: 6px;
+  border-bottom-style: solid;
 }
 
 .complete {
-  @extend .label;
-  background-color: LimeGreen;
+  @extend .led;
+  border-color: #006064;
+  background-color: white;
+}
+
+.label {
+  position: absolute;
+  margin-left: 8px;
+  margin-top: 2px;
+  color: #333;
 }
 
 .some {
-  @extend .label;
-  background-color: LightCoral;
+  @extend .led;
+  border-color: #b71c1c;
+  background-color: white
 }
 
 .none {
-  @extend .label;
-  background-color: DarkGray;
+  @extend .led;
+  background-color: white;
+  border-color: #999;
 }
 
 .yes {
+  background-color: white;
   @extend .complete;
 }
 

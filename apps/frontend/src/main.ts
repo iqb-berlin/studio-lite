@@ -2,7 +2,11 @@ import { enableProdMode, ApplicationModule, importProvidersFrom } from '@angular
 
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import {
+  TranslateModule,
+  TranslateLoader,
+  TranslateService, TranslateParser
+} from '@ngx-translate/core';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
 import { RouterModule } from '@angular/router';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -18,16 +22,15 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { MatPaginatorModule, MatPaginatorIntl } from '@angular/material/paginator';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
-import {
-  HTTP_INTERCEPTORS, withInterceptorsFromDi, provideHttpClient, HttpClient
-} from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { DateFnsAdapter } from '@angular/material-date-fns-adapter';
 import { MAT_DATE_LOCALE, DateAdapter } from '@angular/material/core';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { PaginatorIntlService } from './app/services/paginator-intl.service';
 import { AuthInterceptor } from './app/interceptors/auth.interceptor';
 import { AppRoutingModule } from './app/app-routing.module';
 import { AppComponent } from './app/app.component';
@@ -38,7 +41,8 @@ import { BackendService } from './app/services/backend.service';
 const hash = (str: string) => str.split('').reduce((prev, curr) => Math.imul(31, prev) + curr.charCodeAt(0) | 0, 0);
 
 export function createTranslateLoader(http: HttpClient) {
-  return new TranslateHttpLoader(http, './assets/i18n/', `.json?v=${Math.abs(hash(new Date().toISOString()))}`);
+  return new TranslateHttpLoader(http, './assets/i18n/', `.json?v=${Math
+    .abs(hash(new Date().toISOString()))}`);
 }
 if (environment.production) {
   enableProdMode();
@@ -46,17 +50,48 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
   providers: [
-    // eslint-disable-next-line max-len
-    importProvidersFrom(ApplicationModule, BrowserModule, MatButtonModule, MatFormFieldModule, MatMenuModule, MatToolbarModule, MatIconModule, MatInputModule, MatTooltipModule, MatDialogModule, MatCardModule, MatIconModule, MatTabsModule, MatTableModule, ReactiveFormsModule, MatProgressSpinnerModule, MatSnackBarModule, RouterModule, ReactiveFormsModule, AppRoutingModule, IqbComponentsModule.forRoot(), TranslateModule.forRoot({
-      defaultLanguage: 'de',
-      loader: {
-        provide: TranslateLoader,
-        useFactory: createTranslateLoader,
-        deps: [HttpClient]
-      }
-    }), MatCheckboxModule, MatSelectModule, FormsModule),
+    importProvidersFrom(
+      ApplicationModule,
+      BrowserModule,
+      MatButtonModule,
+      MatFormFieldModule,
+      MatMenuModule,
+      MatToolbarModule,
+      MatIconModule,
+      MatInputModule,
+      MatTooltipModule,
+      MatDialogModule,
+      MatCardModule,
+      MatIconModule,
+      MatTabsModule,
+      MatTableModule,
+      ReactiveFormsModule,
+      MatProgressSpinnerModule,
+      MatSnackBarModule,
+      MatPaginatorModule,
+      RouterModule,
+      ReactiveFormsModule,
+      AppRoutingModule,
+      IqbComponentsModule.forRoot(),
+      TranslateModule.forRoot({
+        defaultLanguage: 'de',
+        loader: {
+          provide: TranslateLoader,
+          useFactory: createTranslateLoader,
+          deps: [HttpClient]
+        }
+      }),
+      MatCheckboxModule,
+      MatSelectModule,
+      FormsModule
+    ),
     BackendService,
     MatDialog,
+    {
+      provide: MatPaginatorIntl,
+      useClass: PaginatorIntlService,
+      deps: [TranslateService, TranslateParser]
+    },
     {
       provide: LocationStrategy,
       useClass: HashLocationStrategy
@@ -89,11 +124,7 @@ bootstrapApplication(AppComponent, {
     },
     {
       provide: 'APP_VERSION',
-      useValue: '13.1.0'
-    },
-    provideAnimations(),
-    provideHttpClient(withInterceptorsFromDi())
+      useValue: '13.2.0'
+    }
   ]
-})
-  // eslint-disable-next-line no-console
-  .catch(err => console.log(err));
+});

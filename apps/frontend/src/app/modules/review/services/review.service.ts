@@ -86,7 +86,11 @@ export class ReviewService {
           true);
         if (reviewData) {
           this.reviewName = reviewData.name ? reviewData.name : '?';
-          this.workspaceName = reviewData.workspaceName ? reviewData.workspaceName : '?';
+          this.workspaceName = reviewData.workspaceName && reviewData.workspaceGroupName ?
+            this.translateService
+              .instant('review.info', {
+                workspace: reviewData.workspaceName, workspaceGroup: reviewData.workspaceGroupName
+              }) : '';
           this.workspaceId = reviewData.workspaceId ? reviewData.workspaceId : 0;
           this.units = [];
           if (reviewData.units) {

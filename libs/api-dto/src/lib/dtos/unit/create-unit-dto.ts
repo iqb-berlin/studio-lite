@@ -16,6 +16,9 @@ export class CreateUnitDto {
     createFrom?: number;
 
   @ApiProperty()
+    createFromKey?: string;
+
+  @ApiProperty()
     player?: string;
 
   @ApiProperty()

@@ -29,9 +29,7 @@ export { VeronaModuleInListDto } from './lib/dtos/verona-module/verona-module-in
 export { GroupNameDto } from './lib/dtos/workspace/group-name-dto';
 export { NameDto } from './lib/dtos/workspace/name-dto';
 export { RenameGroupNameDto } from './lib/dtos/workspace/rename-group-name-dto';
-export {
-  AuthDataDto, WorkspaceDto, WorkspaceGroupDto, ReviewDto
-} from './lib/dtos/auth-data-dto';
+export { AuthDataDto } from './lib/dtos/auth-data-dto';
 export { ChangePasswordDto } from './lib/dtos/change-password-dto';
 export { WorkspaceGroupInListDto } from './lib/dtos/workspace-group/workspace-group-in-list-dto';
 export { WorkspaceGroupFullDto } from './lib/dtos/workspace-group/workspace-group-full-dto';
@@ -75,3 +73,6 @@ export { UnitItemWithMetadataDto } from './lib/dtos/unit-item/unit-item-with-met
 export { UnitFullMetadataDto } from './lib/dtos/unit/unit-full-metadata-dto';
 export { UnitCommentUnitItemDto } from './lib/dtos/unit-comment-unit-items/unit-comment-unit-item-dto';
 export { UpdateUnitCommentUnitItemsDto } from './lib/dtos/unit-comment-unit-items/update-unit-comment-unit-items-dto';
+export { ReviewDto } from './lib/dtos/review/review-dto';
+export { WorkspaceDto } from './lib/dtos/workspace/workspace-dto';
+export { WorkspaceGroupDto } from './lib/dtos/workspace-group/workspace-group-dto';
