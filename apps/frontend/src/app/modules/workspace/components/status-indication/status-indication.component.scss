@@ -1,32 +1,37 @@
 .led {
-  height: 30px;
-  width: 30px;
-  border-radius: 50%;
+  height: 22px;
+  width: 25px;
+  border-bottom-width: 6px;
+  border-bottom-style: solid;
 }
 
 .complete {
   @extend .led;
-  background-color: #b2ff59;
+  border-color: #006064;
+  background-color: white;
 }
 
 .label {
   position: absolute;
-  margin-left: 10px;
-  margin-top: 6px;
+  margin-left: 8px;
+  margin-top: 2px;
   color: #333;
 }
 
 .some {
   @extend .led;
-  background-color: #ff9800;
+  border-color: #b71c1c;
+  background-color: white
 }
 
 .none {
   @extend .led;
-  background-color: #999;
+  background-color: white;
+  border-color: #999;
 }
 
 .yes {
+  background-color: white;
   @extend .complete;
 }
 

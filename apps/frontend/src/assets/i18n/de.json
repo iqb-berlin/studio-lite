@@ -711,17 +711,24 @@
     "deprecated": "Veraltet",
     "settings": "Einstellungen"
   },
+  "status": {
+    "true": "Ja",
+    "false": "Nein",
+    "complete": "Vollständig",
+    "some": "Teilweise",
+    "none": "Keine"
+  },
   "presentation-progress": {
     "label": "P",
-    "description": "Vollständigkeit der Präsentation"
+    "description": "Vollständigkeit der Präsentation: {{status}}"
   },
   "response-progress": {
     "label": "R",
-    "description": "Vollständigkeit der verpflichtenden Antworten"
+    "description": "Vollständigkeit der verpflichtenden Antworten: {{status}}"
   },
   "player-has-focus": {
     "label": "F",
-    "description": "Status des Player-Fokus"
+    "description": "Player-Fokus: {{status}}"
   },
   "search-filter": {
     "filter-users": "Suche nach Nutzer:innen",
