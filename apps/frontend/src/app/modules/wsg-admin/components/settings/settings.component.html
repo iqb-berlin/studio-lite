@@ -1,11 +1,13 @@
 <div class="scroll-area">
     <div class="fx-row-end-end ">
-        <button mat-raised-button
+        <button mat-fab
+                class="save-button"
                 [matTooltip]="'save' | translate"
                 matTooltipPosition="above"
+                [color]="'primary'"
                 [disabled]="!this.wsgAdminService.settingsChanged"
                 (click)="saveGroupSettings()">
-            <studio-lite-wrapped-icon icon="save"></studio-lite-wrapped-icon>
+          <mat-icon>save></mat-icon>
         </button>
     </div>
     <div class="fx-row-start-stretch container">

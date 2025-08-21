@@ -113,12 +113,14 @@
           {{'access-rights.for-user' | translate: {user:  tableSelectionRow.selected[0].name } }}
         </div>
       }
-      <button mat-raised-button
-        [matTooltip]="'save' | translate"
-        matTooltipPosition="above"
-        [disabled]="!userWorkspaceGroups.hasChanged"
-        (click)="saveWorkspaces()">
-        <studio-lite-wrapped-icon icon="save"></studio-lite-wrapped-icon>
+      <button mat-fab
+              class="save-button"
+              [matTooltip]="'save' | translate"
+              matTooltipPosition="above"
+              [color]="'primary'"
+              [disabled]="!userWorkspaceGroups.hasChanged"
+              (click)="saveWorkspaces()">
+        <mat-icon>save></mat-icon>
       </button>
     </div>
 

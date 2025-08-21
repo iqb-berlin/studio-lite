@@ -6,18 +6,18 @@ import {
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
+import { MatFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { State } from '../../../admin/models/state.type';
 import { CoreProfile, ProfilesComponent } from '../../../shared/components/profiles/profiles.component';
 import { StatesComponent } from '../states/states.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
   selector: 'studio-lite-settings',
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
-  imports: [MatButton, MatTooltip, WrappedIconComponent, ProfilesComponent, StatesComponent, TranslateModule]
+  imports: [MatTooltip, ProfilesComponent, StatesComponent, TranslateModule, MatFabButton, MatIcon]
 })
 export class WorkspaceSettingsComponent implements OnInit {
   settings!: WorkspaceGroupSettingsDto;
