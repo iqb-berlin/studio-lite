@@ -2,6 +2,7 @@
   background-color: #eee;
   height: 100%;
   margin: 0;
+  overflow: hidden;
 }
 
 .no-access-level-hint {
@@ -22,6 +23,10 @@
 
 .unit-list {
   overflow: auto;
+}
+
+.unit-menu {
+  overflow: hidden;
 }
 
 .unit-crud-button {
