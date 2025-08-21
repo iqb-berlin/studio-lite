@@ -2,6 +2,10 @@
   padding: 2px 2px 2px 0;
 }
 
+::ng-deep studio-lite-select-unit-list .selected-units-hint p {
+  margin-left: 20px;
+}
+
 .selected {
   background-color: #006064BB;
   > .mat-mdc-cell {
@@ -18,7 +22,7 @@
 
 .review-changed {
   height: 65vh;
-  background-color: darkorange;
+  background-color: #00606430;
   padding: 2px
 }
 
