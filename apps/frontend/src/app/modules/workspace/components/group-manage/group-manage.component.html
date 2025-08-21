@@ -84,8 +84,9 @@
   <mat-dialog-actions align="end">
     <div class="fx-row-start-stretch">
       <button mat-raised-button
-        color="primary"
-        [mat-dialog-close]="false">
+              color="primary"
+              [disabled]="changed"
+              [mat-dialog-close]="false">
         {{'close' | translate}}
       </button>
     </div>
