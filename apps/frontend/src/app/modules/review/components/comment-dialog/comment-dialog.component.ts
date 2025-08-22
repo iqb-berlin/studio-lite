@@ -55,11 +55,6 @@ export class CommentDialogComponent implements OnInit, OnDestroy {
         .sortAscending(a, b, 'id'));
   }
 
-  parametersValid() {
-    return (this.appService.authData.userLongName || this.appService.authData.userName || this.userName) &&
-      this.reviewService.unitDbId;
-  }
-
   close() {
     if (!this.reviewService.reviewConfig.showOthersComments) this.dialogRef.close();
   }
