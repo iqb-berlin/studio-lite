@@ -774,7 +774,8 @@
     "comments-delete-question": "Soll der Kommentar einschließlich aller Antworten gelöscht werden?",
     "write-comment": "Kommentar verfassen ...",
     "send-comment": "Kommentar senden",
-    "filter-items": "Kommentare nach Items filtern"
+    "filter-items": "Kommentare nach Items filtern",
+    "comment": "Kommentieren"
   },
   "delete-dialog": {
     "cancel": "Abbrechen",

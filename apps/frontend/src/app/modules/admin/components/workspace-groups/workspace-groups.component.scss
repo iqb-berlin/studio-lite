@@ -5,6 +5,10 @@
 
 .object-list {
   height: calc(100% - 5px);
+  .object-header-container {
+    margin-top: 5px;
+    margin-bottom: 20px;
+  }
 }
 
 .fx-flex-row-fix-70 {
@@ -35,4 +39,11 @@
   border-radius: 5px;
   border: 1px solid #000000;
 }
+
+.save-button{
+  position: absolute;
+  top: 25px;
+  right: 40px;
+}
+
 

@@ -72,7 +72,7 @@
   </div>
 
   <div class="object-list fx-column-start-stretch fx-flex-row-40">
-    <div class="fx-row-space-between-center">
+    <div class="object-header-container fx-row-space-between-center">
       @if (!selectedWorkspaceGroupId) {
         <div>
           {{'admin.select-group' | translate}}
@@ -83,12 +83,14 @@
           {{'admin.selected-group' | translate: { group: tableSelectionRow.selected[0].name } }}
         </div>
       }
-      <button mat-raised-button
-        [matTooltip]="'save' | translate"
-        matTooltipPosition="above"
-        [disabled]="!workspaceUsers.hasChanged"
-        (click)="saveUsers()">
-        <studio-lite-wrapped-icon icon="save"></studio-lite-wrapped-icon>
+      <button mat-fab
+              class="save-button"
+              [matTooltip]="'save' | translate"
+              matTooltipPosition="above"
+              [color]="'primary'"
+              [disabled]="!workspaceUsers.hasChanged"
+              (click)="saveUsers()">
+        <mat-icon>save></mat-icon>
       </button>
     </div>
 

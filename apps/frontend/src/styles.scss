@@ -91,6 +91,16 @@ body {
   width: 100px;
 }
 
+.review-dialog {
+  .mat-mdc-dialog-content {
+    max-height: 100vh;
+    padding-bottom: 0 !important;
+    .filter-button {
+      right: 20px
+    }
+  }
+}
+
 .mat-progress-spinner circle, .mat-spinner circle {
   stroke: blueviolet!important;
 }

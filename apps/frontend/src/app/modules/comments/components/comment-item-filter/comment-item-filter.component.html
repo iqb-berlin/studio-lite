@@ -1,10 +1,13 @@
-<button class="filter-button" matFab
+<button class="filter-button"
+        matMiniFab
+        [color]="'default'"
         [disabled]="!unitItems || (unitItems && !unitItems.length)"
         [matMenuTriggerFor]="filterMenu"
         [matTooltip]="'comments.filter-items' | translate"
         [matTooltipPosition]="'above'">
   <mat-icon matBadgeOverlap="false"
             [matBadgeHidden]="!filteredItems.length"
+            [matBadgeColor]="'accent'"
             [matBadge]="filteredItems.length">filter_alt</mat-icon>
 </button>
 <mat-menu #filterMenu="matMenu"

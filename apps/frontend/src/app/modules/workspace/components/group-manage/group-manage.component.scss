@@ -8,6 +8,10 @@
   }
 }
 
+::ng-deep studio-lite-select-unit-list .selected-units-hint p {
+  margin-left: 20px;
+}
+
 .units {
   overflow: auto;
   background-color: white;
@@ -22,7 +26,7 @@
 }
 
 .group-changed {
-  background-color: darkorange;
+  background-color: #00606430;
   padding: 2px
 }
 
