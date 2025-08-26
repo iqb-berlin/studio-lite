@@ -144,7 +144,7 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
             { duration: 1000 });
         } else {
           this.snackBar.open(
-            this.translateService.instant('workspace.review-saved'),
+            this.translateService.instant('workspace.review-not-saved'),
             this.translateService.instant('workspace.error'),
             { duration: 3000 }
           );

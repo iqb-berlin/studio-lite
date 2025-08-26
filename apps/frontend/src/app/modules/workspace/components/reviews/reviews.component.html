@@ -81,8 +81,9 @@
         </studio-lite-review-config>
       </div>
       <studio-lite-save-changes [changed]="changed"
-        (discardChanges)="discardChanges()"
-        (saveChanges)="saveChanges()">
+                                [disabled]="!reviewDataToChange.name"
+                                (discardChanges)="discardChanges()"
+                                (saveChanges)="saveChanges()">
       </studio-lite-save-changes>
     </div>
   </div>
