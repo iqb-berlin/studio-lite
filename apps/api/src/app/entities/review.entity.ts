@@ -34,6 +34,20 @@ class Review {
 
   @OneToMany(() => ReviewUnit, unit => unit.review)
     units: ReviewUnit[];
+
+  @Column({
+    type: 'timestamp with time zone',
+    nullable: true,
+    name: 'created_at'
+  })
+    createdAt: Date;
+
+  @Column({
+    type: 'timestamp with time zone',
+    nullable: true,
+    name: 'changed_at'
+  })
+    changedAt: Date;
 }
 
 export default Review;

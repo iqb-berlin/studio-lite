@@ -15,7 +15,7 @@ import {
 } from '@angular/material/table';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatButton } from '@angular/material/button';
-
+import { DatePipe } from '@angular/common';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { AppService } from '../../../../services/app.service';
@@ -25,13 +25,14 @@ import { ReviewConfigComponent } from '../review-config/review-config.component'
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { ReviewMenuComponent } from '../review-menu/review-menu.component';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { I18nService } from '../../../../services/i18n.service';
 
 @Component({
   selector: 'studio-lite-reviews',
   templateUrl: './reviews.component.html',
   styleUrls: ['./reviews.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, ReviewMenuComponent, SelectUnitListComponent, ReviewConfigComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, ReviewMenuComponent, SelectUnitListComponent, ReviewConfigComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, DatePipe]
 })
 
 export class ReviewsComponent extends CheckForChangesDirective implements OnInit {
@@ -44,10 +45,11 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   reviewDataToChange: ReviewFullDto = { id: 0 };
 
   objectsDatasource = new MatTableDataSource<ReviewInListDto>();
-  displayedColumns = ['name'];
+  displayedColumns = ['name', 'createdAt', 'changedAt'];
 
   constructor(
     public workspaceService: WorkspaceService,
+    public i18nService: I18nService,
     public appService: AppService,
     private backendService: WorkspaceBackendService,
     private snackBar: MatSnackBar,
@@ -142,7 +144,7 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
             { duration: 1000 });
         } else {
           this.snackBar.open(
-            this.translateService.instant('workspace.review-saved'),
+            this.translateService.instant('workspace.review-not-saved'),
             this.translateService.instant('workspace.error'),
             { duration: 3000 }
           );

@@ -879,6 +879,11 @@
   },
 
   "review": {
+    "name": "Name",
+    "createdAt": "Erstellt",
+    "changedAt": "Geändert",
+    "creation-date": "Erstellungsdatum",
+    "change-date": "Änderungsdatum",
     "info": "Arbeitsbereich {{workspace}} (Bereichsgruppe {{workspaceGroup}})",
     "header": "Review",
     "end": "Ende der Aufgabenfolge",
