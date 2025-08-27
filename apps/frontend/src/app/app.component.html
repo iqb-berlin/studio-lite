@@ -51,11 +51,28 @@
       {{ appService.appConfig.appTitle }}
     </div>
   }
+
+  <div class="fx-row-end-center fx-gap-10">
   @if (appService.appConfig.pageTitle && !appService.appConfig.hideTitlesOnPage) {
     <div>
       {{ appService.appConfig.pageTitle }}
     </div>
   }
+  @if (currentRoutePath !== 'review' && currentRoutePath !== 'print') {
+    @if (appService.authData.isAdmin) {
+      <button mat-button
+              class="white-color"
+              [routerLink]="currentRoutePath === 'admin' ? ['/'] : ['/admin']"
+              [matTooltip]="'home.goto-admin' | translate"
+              matTooltipPosition="above"
+              data-cy="goto-admin">
+        <studio-lite-wrapped-icon icon="construction"></studio-lite-wrapped-icon>
+      </button>
+    }
+    @if (appService.authData.userId) {
+      <studio-lite-user-menu></studio-lite-user-menu>
+    }
+  }
+  </div>
 </div>
-
 <router-outlet></router-outlet>
