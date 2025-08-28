@@ -5,7 +5,7 @@ import {
   createWs,
   deleteFirstUser,
   deleteGroup, deleteModule, focusOnMenu, goToItem,
-  grantRemovePrivilegeAtWs, importExercise, selectListUnits, selectUnit, setVeronaWs
+  grantRemovePrivilegeAtWs, importExercise, selectUnit, setVeronaWs
 } from '../../../support/util';
 import {
   selectProfileForArea,
@@ -90,9 +90,8 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  it.skip('checks that drop-list_1 is not present at Menu -> Berichte -> Metadaten', () => {
+  it('checks that drop-list_1 is not present at Menu -> Berichte -> Metadaten', () => {
     focusOnMenu('Berichte', 'Metadaten');
-    selectListUnits(['MA_01']);
     cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
     cy.get('.mdc-tab__text-label:contains("Metadaten Items")').click();
     cy.get('mat-dialog-container:contains("drop-list_1")').should('have.length', 0);

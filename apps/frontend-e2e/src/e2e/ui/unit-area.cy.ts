@@ -132,7 +132,7 @@ describe('UI check: workspace', () => {
 
   it('should export selected units', () => {
     cy.visitWs(ws1);
-    cy.wait(500);
+    cy.wait(1000);
     cy.get('mat-icon:contains("menu")')
       .click();
     cy.get('span:contains("Export")')
@@ -143,7 +143,7 @@ describe('UI check: workspace', () => {
 
   it('should show metadata', () => {
     cy.visitWs(ws1);
-    cy.wait(500);
+    cy.wait(1000);
     focusOnMenu('Berichte', 'Metadaten');
     selectListUnits([unit3.shortname, newUnit.shortname]);
     cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
@@ -152,7 +152,7 @@ describe('UI check: workspace', () => {
 
   it('should export the codebook', () => {
     cy.visitWs(ws1);
-    cy.wait(500);
+    cy.wait(1000);
     focusOnMenu('Berichte', 'Codebook');
     selectListUnits([newUnit.shortname]);
     cy.buttonToContinue('Exportieren', [200, 304], '/api/workspaces/*/units/coding-book*', 'GET', 'codebook');
