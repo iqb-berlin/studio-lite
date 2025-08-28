@@ -59,6 +59,16 @@
     </div>
   }
   @if (currentRoutePath !== 'review' && currentRoutePath !== 'print') {
+    @if (appService.authData.userId) {
+      <button mat-button
+              class="white-color"
+              [routerLink]="['/about']"
+              [matTooltip]="'home.imprint' | translate"
+              matTooltipPosition="above"
+              data-cy="app-info">
+        <studio-lite-wrapped-icon icon="info_outline"></studio-lite-wrapped-icon>
+      </button>
+    }
     @if (appService.authData.isAdmin) {
       <button mat-button
               class="white-color"
