@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
-import { MatAnchor } from '@angular/material/button';
+import { MatAnchor, MatButton } from '@angular/material/button';
 import {
   MatCard, MatCardTitle, MatCardContent, MatCardActions
 } from '@angular/material/card';
@@ -11,7 +11,7 @@ import { AppService } from '../../services/app.service';
   selector: 'studio-lite-about',
   templateUrl: './about.component.html',
   styleUrls: ['about.component.scss'],
-  imports: [MatCard, MatCardTitle, MatCardContent, MatCardActions, MatAnchor, RouterLink, TranslateModule]
+  imports: [MatCard, MatCardTitle, MatCardContent, MatCardActions, MatAnchor, RouterLink, TranslateModule, MatButton]
 })
 
 export class AboutComponent implements OnInit {

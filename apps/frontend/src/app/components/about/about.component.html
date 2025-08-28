@@ -5,8 +5,9 @@
       <mat-card-content>
         <div [innerHTML]="appService.appConfig.imprintHtml"></div>
       </mat-card-content>
-      <mat-card-actions>
-        <a mat-raised-button [routerLink]="['/']">{{'home.home-page' | translate}}</a>
+      <mat-card-actions align="end">
+        <a mat-raised-button [color]="'primary'"
+           [routerLink]="['/']">{{'home.home-page' | translate}}</a>
       </mat-card-actions>
     </mat-card>
   </div>
