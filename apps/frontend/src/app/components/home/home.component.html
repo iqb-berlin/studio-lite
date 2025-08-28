@@ -22,6 +22,7 @@
     </studio-lite-user-reviews-area>
   }
 
+  @if (!appService.authData.userId  || !appService.authData.reviews.length) {
     <studio-lite-app-info class="mat-elevation-z8 box box-right"
       [appTitle]="appService.appConfig.appTitle"
       [introHtml]="appService.appConfig.introHtml"
@@ -31,4 +32,5 @@
       [isUserLoggedIn]="appService.authData.userId > 0"
       [isAdmin]="appService.authData.isAdmin">
     </studio-lite-app-info>
+  }
 </div>
