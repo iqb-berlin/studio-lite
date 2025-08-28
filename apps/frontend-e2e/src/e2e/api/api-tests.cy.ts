@@ -749,14 +749,14 @@ describe('Studio API tests', () => {
               });
           });
         });
-        it.skip('401 negative test: should not add a module a false user', () => {
-          // It results in [vite] http proxy error: /api/admin/verona-modules also in local
-          // But the result the test pass.
-          cy.addModuleAPI(modules[0], noId)
-            .then(resp => {
-              expect(resp.status).to.be.oneOf([401, 500]);
-            });
-        });
+        // it.skip('401 negative test: should not add a module a false user', () => {
+        //   // It results in [vite] http proxy error: /api/admin/verona-modules also in local
+        //   // But the result the test pass.
+        //   cy.addModuleAPI(modules[0], noId)
+        //     .then(resp => {
+        //       expect(resp.status).to.be.oneOf([401, 500]);
+        //     });
+        // });
       });
 
       describe('23. GET /api/verona-modules', () => {
