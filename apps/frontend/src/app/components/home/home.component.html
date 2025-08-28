@@ -23,7 +23,7 @@
   }
 
   @if (!appService.authData.userId  || !appService.authData.reviews.length) {
-    <studio-lite-app-info class="mat-elevation-z8 box box-right"
+    <studio-lite-app-info class="fx-column-start-stretch mat-elevation-z8 box box-right"
       [appTitle]="appService.appConfig.appTitle"
       [introHtml]="appService.appConfig.introHtml"
       [hasReviews]="appService.authData.reviews.length > 0"
