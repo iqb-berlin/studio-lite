@@ -4,27 +4,20 @@
 <div class="scroll-area"
   [innerHTML]="introHtml">
 </div>
-<div>
-  <ul>
-    <li>{{'home.appName' | translate: {name: appName} }}</li>
-    <li>{{'home.appVersion' | translate: {version: appVersion} }}</li>
-    @if (!isUserLoggedIn) {
-      <li>
-        {{(hasReviews ? 'home.logged-in-for-review' : 'home.not-logged-in') | translate}}
-      </li>
-    }
-    @if (isUserLoggedIn) {
-      <li>
-        {{'home.logged-in-as' | translate: {name: (userLongName ? userName + ' - ' + userLongName: userName) } }}
-      </li>
-    }
-    @if (isAdmin) {
-      <li>{{'home.isAdminMessage' | translate}}</li>
-    }
-  </ul>
-</div>
-<a mat-raised-button color="primary"
-  class="full-width"
-  [routerLink]="['/about']">
-  {{'home.imprint' | translate}}
+<studio-lite-app-info-content [isUserLoggedIn]="isUserLoggedIn"
+                              [userName]="userName"
+                              [userLongName]="userLongName"
+                              [isAdmin]="isAdmin"
+                              [hasReviews]="hasReviews">
+</studio-lite-app-info-content>
+
+<div class="fx-row-center-center">
+  <a mat-fab
+     class="white-color"
+     extended="true"
+     type="button"
+     [color]="'primary'"
+     [routerLink]="['/about']">
+    {{'home.imprint' | translate}}
 </a>
+</div>

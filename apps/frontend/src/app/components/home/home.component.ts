@@ -1,6 +1,4 @@
-import {
-  Component, Inject, OnInit
-} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -20,8 +18,6 @@ import { LoginComponent } from '../login/login.component';
 })
 export class HomeComponent implements OnInit {
   constructor(
-    @Inject('APP_VERSION') readonly appVersion: string,
-    @Inject('APP_NAME') readonly appName: string,
     public appService: AppService,
     private backendService: BackendService,
     private titleService: Title,
