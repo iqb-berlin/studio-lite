@@ -56,28 +56,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.loginForm.setValue({ name: this.loginNamePreset, pw: '' });
       }
     });
-
-    // disable keycloak
-    // if (await this.authService.isLoggedIn()) {
-    //   this.loggedInKeycloak = true;
-    //   this.appService.isLoggedInKeycloak = true;
-    //   this.loggedUser = this.authService.getLoggedUser();
-    //   this.userProfile = await this.authService.loadUserProfile();
-    //   if (this.userProfile.id && this.userProfile.username) {
-    //     const keycloakUser: CreateUserDto = {
-    //       issuer: this.loggedUser?.iss || '',
-    //       identity: this.userProfile.id,
-    //       name: this.userProfile.username,
-    //       lastName: this.userProfile.lastName || '',
-    //       firstName: this.userProfile.firstName || '',
-    //       email: this.userProfile.email || '',
-    //       password: '',
-    //       description: '',
-    //       isAdmin: false
-    //     };
-    //     this.keycloakLogin(keycloakUser);
-    //   }
-    // }
   }
 
   login(): void {
@@ -95,18 +73,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
   }
 
-  // disable keycloak
-  // keycloakLogin(user: CreateUserDto): void {
-  //   this.errorMessage = '';
-  //   this.appService.clearErrorMessages();
-  //   this.appService.dataLoading = true;
-  //   this.appService.errorMessagesDisabled = true;
-  //   const initLoginMode = !this.appService.appConfig.hasUsers;
-  //   this.backendService.keycloakLogin(user).subscribe(async ok => {
-  //     await this.validLoginCheck(ok, initLoginMode);
-  //   });
-  // }
-
   async validLoginCheck(ok: boolean, initLoginMode: boolean) {
     this.appService.dataLoading = false;
     if (ok) {
@@ -122,16 +88,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         { duration: 3000 });
     }
   }
-  // disable keycloak
-  // async loginKeycloak(): Promise<void> {
-  //   this.dialog
-  //     .open(LoginAlternativeWarningComponent, { width: '800px' }).afterClosed()
-  //     .subscribe(async (res: UnitDownloadSettingsDto | boolean) => {
-  //       if (res) {
-  //         await this.authService.login();
-  //       }
-  //     });
-  // }
 
   ngOnDestroy(): void {
     if (this.routingSubscription !== null) {

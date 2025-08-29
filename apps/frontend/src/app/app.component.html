@@ -1,6 +1,5 @@
 @if (appService.dataLoading) {
-  <div
-    class="spinner-container fx-column-start-center">
+  <div class="spinner-container fx-column-start-center">
     <mat-spinner class="fx-flex-fix-100"></mat-spinner>
     @if (appService.dataLoading | dataLoadingIsNumber) {
       <button
@@ -36,26 +35,57 @@
     }
   </div>
 }
-<div class="logo hide-on-print">
-  <a [routerLink]="['/']"
-    [attr.aria-label]="'home.go-home' | translate">
-    <img [src]="appService.appLogo?.data"
-      [matTooltip]="appService.appLogo ? appService.appLogo.alt : 'home.home-page' | translate"
-      [alt]="appService.appLogo ? appService.appLogo.alt : 'home.home-page' | translate"/>
-  </a>
-</div>
+<div class="header">
+  <div class="logo hide-on-print">
+    <a [routerLink]="['/']"
+      [attr.aria-label]="'home.go-home' | translate">
+      <img [src]="appService.appLogo?.data"
+        [matTooltip]="appService.appLogo ? appService.appLogo.alt : 'home.home-page' | translate"
+        [alt]="appService.appLogo ? appService.appLogo.alt : 'home.home-page' | translate"/>
+    </a>
+  </div>
 
-<div class="page-title hide-on-print fx-row-space-between-center">
-  @if (!appService.appConfig.hideTitlesOnPage) {
-    <div>
-      {{ appService.appConfig.appTitle }}
-    </div>
-  }
-  @if (appService.appConfig.pageTitle && !appService.appConfig.hideTitlesOnPage) {
-    <div>
-      {{ appService.appConfig.pageTitle }}
-    </div>
-  }
-</div>
+  <div class="page-title hide-on-print fx-row-space-between-center">
+    @if (!appService.appConfig.hideTitlesOnPage) {
+      <div class="app-title">
+        {{ appService.appConfig.appTitle }}
+      </div>
+    }
 
+    <div class="fx-row-end-center fx-gap-10">
+    @if (appService.appConfig.pageTitle && !appService.appConfig.hideTitlesOnPage) {
+      <div>
+        {{ appService.appConfig.pageTitle }}
+      </div>
+    }
+    @if (currentRoutePath !== 'review' && currentRoutePath !== 'print') {
+      @if (appService.authData.userId) {
+        <button mat-button
+                [class.white-color] = "currentRoutePath !== 'about'"
+                [color]="'primary'"
+                [routerLink]="currentRoutePath === 'about' ? ['/'] : ['/about']"
+                [matTooltip]="'home.imprint' | translate"
+                matTooltipPosition="above"
+                data-cy="app-info">
+          <studio-lite-wrapped-icon icon="info_outline"></studio-lite-wrapped-icon>
+        </button>
+      }
+      @if (appService.authData.isAdmin) {
+        <button mat-button
+                [class.white-color] = "currentRoutePath !== 'admin'"
+                [color]="'primary'"
+                [routerLink]="currentRoutePath === 'admin' ? ['/'] : ['/admin']"
+                [matTooltip]="'home.goto-admin' | translate"
+                matTooltipPosition="above"
+                data-cy="goto-admin">
+          <studio-lite-wrapped-icon icon="construction"></studio-lite-wrapped-icon>
+        </button>
+      }
+      @if (appService.authData.userId) {
+        <studio-lite-user-menu></studio-lite-user-menu>
+      }
+    }
+    </div>
+  </div>
+</div>
 <router-outlet></router-outlet>

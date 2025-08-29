@@ -5,9 +5,27 @@
   flex-basis: 500px;
 }
 
+.about-title {
+  color: #006064;
+  margin-left: 14px;
+  margin-top: 20px;
+}
+
+.about-content{
+  margin-top: 40px;
+}
+
+.area-container {
+  max-height: calc(100vh - 190px);
+  overflow: auto;
+}
+
 .card-dimensions {
-  padding: 10px;
+  border-radius: 20px;
+  padding: 20px;
   flex-grow: 0;
   flex-shrink: 2;
-  flex-basis: 500px;
+  flex-basis: 70%;
+  min-width: 400px;
+  max-width: 800px;
 }
