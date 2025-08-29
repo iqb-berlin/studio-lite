@@ -1,6 +1,8 @@
 <button mat-button
-        class="white-color"
+        [class.white-color]="!trigger.menuOpen"
+        [color]="'primary'"
         [matMenuTriggerFor]="menuUser"
+        #trigger="matMenuTrigger"
         [matTooltip]="'home.user-menu' | translate"
         matTooltipPosition="above"
         data-cy = "goto-user-menu" >

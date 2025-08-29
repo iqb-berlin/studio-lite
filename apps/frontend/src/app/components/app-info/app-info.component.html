@@ -1,23 +1,22 @@
 <studio-lite-area-title
   [title]="appTitle">
 </studio-lite-area-title>
-<div class="scroll-area"
-  [innerHTML]="introHtml">
+<div class="area-container">
+  <div class="mat-body-1"
+    [innerHTML]="introHtml">
+  </div>
+  <studio-lite-app-info-content [isUserLoggedIn]="isUserLoggedIn"
+                                [userName]="userName"
+                                [userLongName]="userLongName"
+                                [isAdmin]="isAdmin"
+                                [hasReviews]="hasReviews">
+  </studio-lite-app-info-content>
+  <div class="fx-row-end-center">
+    <a mat-raised-button
+       type="button"
+       [color]="'primary'"
+       [routerLink]="['/about']">
+      {{'home.imprint' | translate}}
+  </a>
 </div>
-<studio-lite-app-info-content [isUserLoggedIn]="isUserLoggedIn"
-                              [userName]="userName"
-                              [userLongName]="userLongName"
-                              [isAdmin]="isAdmin"
-                              [hasReviews]="hasReviews">
-</studio-lite-app-info-content>
-
-<div class="fx-row-center-center">
-  <a mat-fab
-     class="about-button"
-     extended="true"
-     type="button"
-     [color]="'primary'"
-     [routerLink]="['/about']">
-    {{'home.imprint' | translate}}
-</a>
 </div>
