@@ -9,6 +9,28 @@
   <studio-lite-wrapped-icon icon="account_box"></studio-lite-wrapped-icon>
 </button>
 <mat-menu #menuUser="matMenu">
+
+  <div class="user-info" (click)="$event.stopPropagation()">
+    @if (!isUserLoggedIn) {
+      <div class="info-header">
+        <div class="info-value">{{(hasReviews ? 'home.logged-in-for-review' : 'home.not-logged-in') | translate}}</div>
+      </div>
+    }
+    @if (isUserLoggedIn) {
+      <div class="info-header">
+        <div class="info-title">{{'home.logged-in-as' | translate}}</div>
+        <div class="info-value">{{(userLongName ? userName + ' - ' + userLongName: userName)}}</div>
+      </div>
+    }
+    @if (isAdmin) {
+      <div class="info-header">
+        <div class="info-value">{{'home.isAdminMessage' | translate}}</div>
+      </div>
+    }
+  </div>
+
+
+
   <studio-lite-account-action
     [type]="'changePassword'"
     [iconName]="'lock'"
