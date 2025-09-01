@@ -25,7 +25,7 @@
 
 .release_rules:
   rules:
-    - if: $CI_COMMIT_TAG =~ /^(?<MAJOR>(?:0|(?:[1-9]\d*)))\.(?<MINOR>(?:0|(?:[1-9]\d*)))\.(?<PATCH>(?:0|(?:[1-9]\d*)))$/
+    - if: "$CI_COMMIT_TAG =~ $RELEASE_RULES_REGEX"
 
 
 check-main-pr-rules:
@@ -97,11 +97,9 @@ check-release-rules:
   allow_failure: true
   rules:
     - !reference [ .release_rules, rules ]
-  before_script:
-    - RELEASE_REGEX="^((0|([1-9][0-9]*)))\.((0|([1-9][0-9]*)))\.((0|([1-9][0-9]*)))$"
   script:
-    - echo ${RELEASE_REGEX}
-    - if [[ ${CI_COMMIT_TAG} =~ ${RELEASE_REGEX} ]];
+    - echo ${RELEASE_SCRIPT_REGEX}
+    - if [[ ${CI_COMMIT_TAG} =~ ${RELEASE_SCRIPT_REGEX} ]];
       then echo "${CI_COMMIT_TAG} is a valid release tag.";
       else echo "${CI_COMMIT_TAG} is not a valid release tag!"; fi
 
@@ -450,6 +448,7 @@ test-main-pr-db:
     - docker network inspect bridge | grep mtu
     - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
     - docker network create app-net
     - docker compose
           --env-file .env.studio-lite.template
@@ -523,6 +522,8 @@ test-main-pr-db:
               --password=${POSTGRES_PASSWORD}
               --classpath=changelog
             history
+  after_script:
+    - docker logout ${CI_REGISTRY}
 
 test-main-pr-backend:
   stage: test-units
@@ -546,9 +547,12 @@ test-main-pr-backend:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
     - docker pull --quiet ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
     - docker run ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test test api
+  after_script:
+    - docker logout ${CI_REGISTRY}
 
 test-main-pr-frontend:
   stage: test-units
@@ -572,9 +576,12 @@ test-main-pr-frontend:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
     - docker pull --quiet ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
     - docker run ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test test frontend
+  after_script:
+    - docker logout ${CI_REGISTRY}
 
 #test-main-pr-e2e:
 #  stage: test-e2e
@@ -603,6 +610,7 @@ test-main-pr-frontend:
 #    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
 #    - export $(grep -v '^#' .env.studio-lite.template | xargs)
 #    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+#    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
 #  script:
 #    - docker network create app-net
 #    - docker compose
@@ -623,6 +631,8 @@ test-main-pr-frontend:
 #              --classpath=changelog
 #            history
 #    - docker compose --file docker-compose.e2e.yaml up --quiet-pull --exit-code-from test-e2e test-e2e
+#  after_script:
+#    - docker logout ${CI_REGISTRY}
 #  artifacts:
 #    paths:
 #      - dist/cypress/apps/*
@@ -655,6 +665,7 @@ test-main-pr-e2e-api:
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker network create app-net
     - docker compose
@@ -676,6 +687,8 @@ test-main-pr-e2e-api:
     - docker compose --file docker-compose.e2e.yaml
         up --quiet-pull --exit-code-from test-e2e-api
           test-e2e-api
+  after_script:
+    - docker logout ${CI_REGISTRY}
   artifacts:
     paths:
       - dist/cypress/apps/*
@@ -708,6 +721,7 @@ test-main-pr-e2e-ui-chrome:
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker network create app-net
     - docker compose
@@ -730,6 +744,8 @@ test-main-pr-e2e-ui-chrome:
     - docker compose --file docker-compose.e2e.yaml
         up --quiet-pull --exit-code-from test-e2e-ui-chrome
           test-e2e-ui-chrome
+  after_script:
+    - docker logout ${CI_REGISTRY}
   artifacts:
     paths:
       - dist/cypress/apps/*
@@ -762,6 +778,7 @@ test-main-pr-e2e-ui-chrome-mobile:
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker network create app-net
     - docker compose
@@ -784,6 +801,8 @@ test-main-pr-e2e-ui-chrome-mobile:
     - docker compose --file docker-compose.e2e.yaml
         up --quiet-pull --exit-code-from test-e2e-ui-chrome-mobile
           test-e2e-ui-chrome-mobile
+  after_script:
+    - docker logout ${CI_REGISTRY}
   artifacts:
     paths:
       - dist/cypress/apps/*
@@ -816,6 +835,7 @@ test-main-pr-e2e-ui-firefox:
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker network create app-net
     - docker compose
@@ -838,6 +858,8 @@ test-main-pr-e2e-ui-firefox:
     - docker compose --file docker-compose.e2e.yaml
         up --quiet-pull --exit-code-from test-e2e-ui-firefox
           test-e2e-ui-firefox
+  after_script:
+    - docker logout ${CI_REGISTRY}
   artifacts:
     paths:
       - dist/cypress/apps/*
@@ -870,6 +892,7 @@ test-main-pr-e2e-ui-firefox-mobile:
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker network create app-net
     - docker compose
@@ -892,6 +915,8 @@ test-main-pr-e2e-ui-firefox-mobile:
     - docker compose --file docker-compose.e2e.yaml
         up --quiet-pull --exit-code-from test-e2e-ui-firefox-mobile
           test-e2e-ui-firefox-mobile
+  after_script:
+    - docker logout ${CI_REGISTRY}
   artifacts:
     paths:
       - dist/cypress/apps/*
@@ -924,6 +949,7 @@ test-main-pr-e2e-ui-edge:
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker network create app-net
     - docker compose
@@ -946,6 +972,8 @@ test-main-pr-e2e-ui-edge:
     - docker compose --file docker-compose.e2e.yaml
         up --quiet-pull --exit-code-from test-e2e-ui-edge
           test-e2e-ui-edge
+  after_script:
+    - docker logout ${CI_REGISTRY}
   artifacts:
     paths:
       - dist/cypress/apps/*
@@ -978,6 +1006,7 @@ test-main-pr-e2e-ui-edge-mobile:
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
   script:
     - docker network create app-net
     - docker compose
@@ -1000,6 +1029,8 @@ test-main-pr-e2e-ui-edge-mobile:
     - docker compose --file docker-compose.e2e.yaml
         up --quiet-pull --exit-code-from test-e2e-ui-edge-mobile
           test-e2e-ui-edge-mobile
+  after_script:
+    - docker logout ${CI_REGISTRY}
 
 lint-main-pr-backend:
   stage: lint
@@ -1023,9 +1054,12 @@ lint-main-pr-backend:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
     - docker pull -q ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
     - docker run ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test lint api
+  after_script:
+    - docker logout ${CI_REGISTRY}
   artifacts:
     paths:
       - dist/cypress/apps/*
@@ -1053,9 +1087,12 @@ lint-main-pr-frontend:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
     - docker pull --quiet ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
     - docker run ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test lint frontend
+  after_script:
+    - docker logout ${CI_REGISTRY}
 
 lint-main-pr-frontend-e2e:
   stage: lint
@@ -1079,9 +1116,12 @@ lint-main-pr-frontend-e2e:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
     - docker pull --quiet ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA}
   script:
     - docker run ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA} lint frontend-e2e
+  after_script:
+    - docker logout ${CI_REGISTRY}
 
 audit-main-pr-backend:
   stage: audit
@@ -1104,9 +1144,12 @@ audit-main-pr-backend:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
     - docker pull --quiet ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
     - docker run --entrypoint npm ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test audit --audit-level critical
+  after_script:
+    - docker logout ${CI_REGISTRY}
 
 audit-main-pr-frontend:
   stage: audit
@@ -1129,9 +1172,12 @@ audit-main-pr-frontend:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
     - docker pull -q ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
     - docker run --entrypoint npm ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test audit --audit-level critical
+  after_script:
+    - docker logout ${CI_REGISTRY}
 
 build-main-commit-db-image:
   stage: build-images
@@ -1630,6 +1676,7 @@ build-release:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
     - echo "${DOCKERHUB_PASSWORD}" | docker login -u ${DOCKERHUB_USER} --password-stdin
     - docker pull -q ${DB_IMAGE_NAME}:${CI_COMMIT_SHA}
     - docker pull -q ${LIQUIBASE_IMAGE_NAME}:${CI_COMMIT_SHA}
@@ -1649,4 +1696,5 @@ build-release:
     - docker push -a -q iqbberlin/studio-lite-backend
     - docker push -a -q iqbberlin/studio-lite-frontend
   after_script:
+    - docker logout ${CI_REGISTRY}
     - docker logout
