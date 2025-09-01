@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 migrate_legacy_versions() {
   if [ -d backup/database_dump ]; then
