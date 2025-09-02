@@ -9,7 +9,6 @@ export function addFirstUser() {
 }
 
 export function createNewUser(newUser: UserData):void {
-  cy.visit('/');
   findAdminSettings().click();
   cy.get('mat-icon').contains('add').click();
   cy.get('input[placeholder="Login-Name"]')
@@ -74,6 +73,7 @@ export function findAdminSettings(): Chainable {
 
 export function createWs(ws:string, group:string):void {
   findWorkspaceGroupSettings(group).click();
+  cy.wait(100);
   cy.get('span:contains("Arbeitsbereiche")')
     .eq(0)
     .click();
@@ -329,7 +329,7 @@ export function updatePersonalData():void {
   // cy.get('[data-cy="goto-user-menu"]').click();
   cy.get('studio-lite-user-menu')
     .click();
-  cy.get('span:contains("Nutzerdaten ändern")')
+  cy.get('span:contains("Nutzer:innen-Daten ändern")')
     .should('exist')
     .click();
   cy.get('input[placeholder="Nachname"]')

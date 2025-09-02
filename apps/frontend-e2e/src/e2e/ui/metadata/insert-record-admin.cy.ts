@@ -1,10 +1,9 @@
-/// <reference types="cypress" />
 import {
   addFirstUser,
   createGroup,
   createWs,
   deleteFirstUser,
-  deleteGroup,
+  deleteGroup, findAdminSettings,
   grantRemovePrivilegeAtWs
 } from '../../../support/util';
 import { selectProfileForGroupFromAdmin } from '../../../support/metadata/metadata-util';
@@ -15,9 +14,6 @@ describe('UI Metadata Management from administration', () => {
   const area = 'Deutsch II';
   const mathArea = 'Mathematik II';
   const group = 'Bista II';
-  beforeEach(() => {
-    cy.visit('/');
-  });
   before(() => {
     addFirstUser();
   });
@@ -26,6 +22,8 @@ describe('UI Metadata Management from administration', () => {
   });
 
   it('prepares context', () => {
+    findAdminSettings().click();
+    cy.visit('/');
     createGroup(group);
     cy.visit('/');
     createWs(area, group);
@@ -41,6 +39,7 @@ describe('UI Metadata Management from administration', () => {
   });
 
   it('deletes the data', () => {
+    cy.visit('/');
     deleteGroup(group);
   });
 });

@@ -31,7 +31,7 @@ describe('UI check: initial page', () => {
 
   it('should have submit bottom', () => {
     cy.get('button')
-      .contains('Weiter')
+      .contains('Anmelden')
       .should('exist');
   });
 

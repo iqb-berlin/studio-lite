@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import {
   addFirstUser,
   changePassword,
@@ -22,9 +21,6 @@ describe('UI User Management', () => {
   after(() => {
     deleteFirstUser();
   });
-  beforeEach(() => {
-    cy.visit('/');
-  });
 
   it('prepares the context', () => {
     createNewUser(newUser);
@@ -37,6 +33,7 @@ describe('UI User Management', () => {
   });
 
   it('should not be able to find admin user setting button', () => {
+    cy.visit('/');
     findAdminSettings().should('not.exist');
   });
 
@@ -58,7 +55,7 @@ describe('UI User Management', () => {
 
   it('should not be able to login with incorrect credentials', () => {
     cy.login(newUser.username, 'nopass');
-    cy.buttonToContinue('Weiter', [401], '/api/login', 'POST', 'loginFail');
+    cy.buttonToContinue('Anmelden', [401], '/api/login', 'POST', 'loginFail');
   });
 
   it('deletes the user', () => {

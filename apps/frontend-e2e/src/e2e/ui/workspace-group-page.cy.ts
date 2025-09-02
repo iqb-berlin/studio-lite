@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import {
   addFirstUser,
   createNewUser,
@@ -11,7 +10,7 @@ import {
   deleteGroup,
   logout,
   makeAdminOfGroup,
-  findWorkspaceGroupSettings, grantRemovePrivilegeAtUser
+  findWorkspaceGroupSettings, grantRemovePrivilegeAtUser, findAdminSettings
 } from '../../support/util';
 import { AccessLevel, UserData } from '../../support/testData';
 
@@ -33,16 +32,16 @@ describe('UI Group admin workspace check', () => {
   after(() => {
     deleteFirstUser();
   });
-  beforeEach(() => {
-    cy.visit('/');
-  });
 
   it('prepares the context', () => {
+    findAdminSettings().click();
+    cy.visit('/');
     createNewUser(newUser);
     cy.visit('/');
     createNewUser(groupAdminUser);
     cy.visit('/');
     createGroup(group1);
+    cy.pause();
     cy.visit('/');
     createWs(ws1, group1);
     grantRemovePrivilegeAtWs([newUser.username, Cypress.env('username')],
@@ -53,10 +52,12 @@ describe('UI Group admin workspace check', () => {
   });
 
   it('should make user as admin of a workspace group ', () => {
+    cy.visit('/');
     makeAdminOfGroup(group1, [Cypress.env('username'), groupAdminUser.username]);
   });
 
   it('checks that tabs (Nutzer:innen, Arbeitsbereiche and Einstellungen) are present ', () => {
+    cy.visit('/');
     findWorkspaceGroupSettings(group1).click();
     cy.get('span:contains("Nutzer:innen")')
       .should('exist');
@@ -73,6 +74,7 @@ describe('UI Group admin workspace check', () => {
   });
 
   it('checks that workspace is only read ', () => {
+    cy.visit('/');
     cy.contains(ws1).click();
     cy.get('studio-lite-units-area')
       .find('div>div>div:contains("Schreibgeschützt")')
@@ -83,6 +85,7 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that workspace admin has setting button for the workspace ', () => {
     logout();
+    cy.visit('/');
     login(groupAdminUser.username, groupAdminUser.password);
     findWorkspaceGroupSettings(group1).should('exist');
   });
@@ -98,6 +101,7 @@ describe('UI Group admin workspace check', () => {
   });
 
   it('checks that workspace admin can remove privileges in workspace from tab-index user ', () => {
+    cy.visit('/');
     findWorkspaceGroupSettings(group1).click();
     cy.get('span:contains("Nutzer:innen")')
       .eq(0)
@@ -106,6 +110,7 @@ describe('UI Group admin workspace check', () => {
   });
 
   it('checks that workspace is editable for the group admin user ', () => {
+    cy.visit('/');
     cy.contains(ws1).click();
     cy.get('studio-lite-units-area')
       .find('div>div>div:contains("Schreibgeschützt")')
