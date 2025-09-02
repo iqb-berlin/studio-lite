@@ -4,7 +4,8 @@ import Chainable = Cypress.Chainable;
 export function addFirstUser() {
   cy.visit('/');
   cy.login(Cypress.env('username'), Cypress.env('password'));
-  cy.buttonToContinue('Weiter', [201], '/api/init-login', 'POST', 'responseLogin');
+  cy.clickButton('Anmelden');
+  // cy.buttonToContinue('Anmelden', [201], '/api/init-login', 'POST', 'responseLogin');
 }
 
 export function createNewUser(newUser: UserData):void {
@@ -199,7 +200,7 @@ export function deleteFirstUser() {
 
 export function login(username: string, password = '') {
   cy.login(username, password);
-  cy.buttonToContinue('Weiter', [201], '/api/login', 'POST', 'responseLogin');
+  cy.buttonToContinue('Anmelden', [201], '/api/login', 'POST', 'responseLogin');
 }
 
 export function addModules(filenames:string[]):void {
