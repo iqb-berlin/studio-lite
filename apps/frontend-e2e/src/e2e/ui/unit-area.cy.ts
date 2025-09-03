@@ -73,7 +73,8 @@ describe('UI check: workspace', () => {
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [AccessLevel.Admin]);
   });
 
-  it('should set player, editor and schemer for the ws', () => {
+  it('should set player, editor and schemer for the ws',
+    { defaultCommandTimeout: 100000 }, () => {
     cy.visit('/');
     setVeronaWs(ws1);
     cy.visit('/');

@@ -80,6 +80,12 @@ export interface DefinitionUnit {
   variables?: string[];
 }
 
+export interface UnitExport {
+  unitXsdUrl: string;
+  bookletXsdUrl: string;
+  testTakersXsdUrl: string;
+}
+
 export enum AccessLevel {Basic = 1, Developer = 2, Admin = 4}
 
 export interface AccessUser {

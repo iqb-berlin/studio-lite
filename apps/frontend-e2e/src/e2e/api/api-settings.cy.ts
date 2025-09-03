@@ -1,10 +1,6 @@
-import { UserData } from '../../support/testData';
+import { UserData, UnitExport } from '../../support/testData';
 
-export interface UnitExport {
-  unitXsdUrl: string;
-  bookletXsdUrl: string;
-  testTakersXsdUrl: string;
-}
+
 describe('Admin settings API tests', () => {
   const noId: string = '9988';
   const user2: UserData = {
@@ -126,7 +122,7 @@ describe('Admin settings API tests', () => {
 
   describe('103. UPDATE /api/admin/settings/app-logo', () => {
     it('200 positive test: should update the configuration logo-color settings the admin', () => {
-      // Set the background to colour red
+      // Set the background to the color red
       cy.updateSettingLogoAPI(Cypress.env(`token_${Cypress.env('username')}`), 'Red')
         .then(resp => {
           expect(resp.status).to.equal(200);
