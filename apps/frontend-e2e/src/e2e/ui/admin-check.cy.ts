@@ -23,7 +23,7 @@ describe('UI Administration Management', () => {
   after(() => deleteFirstUser());
 
   it('user with admin credentials has admin setting button', () => {
-    findAdminSettings()
+    findAdminSettings();
   });
 
   it('user with admin credentials can add new user', () => {

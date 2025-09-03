@@ -1,6 +1,5 @@
 import { UserData, UnitExport } from '../../support/testData';
 
-
 describe('Admin settings API tests', () => {
   const noId: string = '9988';
   const user2: UserData = {
