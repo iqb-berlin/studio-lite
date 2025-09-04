@@ -41,7 +41,6 @@ describe('UI Group admin workspace check', () => {
     createNewUser(groupAdminUser);
     cy.visit('/');
     createGroup(group1);
-    cy.pause();
     cy.visit('/');
     createWs(ws1, group1);
     grantRemovePrivilegeAtWs([newUser.username, Cypress.env('username')],
@@ -85,7 +84,6 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that workspace admin has setting button for the workspace ', () => {
     logout();
-    cy.visit('/');
     login(groupAdminUser.username, groupAdminUser.password);
     findWorkspaceGroupSettings(group1).should('exist');
   });
