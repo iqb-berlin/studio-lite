@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import {
   addFirstUser, addUnit,
   createGroup,
@@ -26,9 +25,6 @@ describe('Metadata Management', () => {
   });
   after(() => {
     deleteFirstUser();
-  });
-  beforeEach(() => {
-    cy.visit('/');
   });
 
   it('prepares context', () => {
@@ -81,6 +77,7 @@ describe('Metadata Management', () => {
   });
 
   it('adds metadata', () => {
+    cy.visit('/');
     cy.visitWs(ws2);
     cy.contains('M1_001').should('exist').click();
     getStructure('uMA', false);
@@ -89,6 +86,7 @@ describe('Metadata Management', () => {
   });
 
   it('adds metadata with more than one element', () => {
+    cy.visit('/');
     cy.visitWs(ws1);
     cy.contains('D1_001').should('exist').click();
     getStructure('uDE', false);

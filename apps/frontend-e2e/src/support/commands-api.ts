@@ -11,9 +11,9 @@ import {
   CommentData,
   ReviewData,
   MyData,
-  DefinitionUnit, CopyUnit, WsSettings
+  DefinitionUnit, CopyUnit, WsSettings,
+  UnitExport
 } from './testData';
-import { UnitExport } from '../e2e/api/api-settings.cy';
 import { buildQueryParameters, buildQueryParametersComplex } from './utilAPI';
 
 // 1
@@ -578,7 +578,7 @@ Cypress.Commands.add('getUnitsByWsAPI', (wsId:string, token:string) => {
 
 // 38
 Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitId:string, token:string) => {
-  // TO DO replace the unitId by an ids array
+  // TO DO replace the unitId by an array of Ids
   const authorization = `bearer ${token}`;
   const nu = parseInt(`${wsDestinyId}`, 10);
   const unitIdNumber = parseInt(`${unitId}`, 10);
