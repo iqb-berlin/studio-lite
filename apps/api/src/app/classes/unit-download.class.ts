@@ -126,12 +126,12 @@ export class UnitDownloadClass {
   private static addUnitDefinition(
     definitionData: UnitDefinitionDto, unitXml: XMLBuilder, unitMetadata: UnitPropertiesDto, zip: AdmZip
   ): void {
-    if (definitionData && definitionData.definition && definitionData.definition.length > 0) {
+    if (definitionData?.definition?.length > 0) {
       unitXml.root().ele({
         DefinitionRef: {
           '@player': unitMetadata.player || '',
           '@editor': unitMetadata.editor || '',
-          '@lastChange': unitMetadata.lastChangedDefinition ? unitMetadata.lastChangedDefinition.toISOString() : '',
+          ...(unitMetadata.lastChangedDefinition && { '@lastChange': unitMetadata.lastChangedDefinition.toISOString() }),
           '#': `${unitMetadata.key}.voud`
         }
       });
@@ -141,7 +141,8 @@ export class UnitDownloadClass {
         Definition: {
           '@player': unitMetadata.player || '',
           '@editor': unitMetadata.editor || '',
-          '@lastChange': unitMetadata.lastChangedDefinition ? unitMetadata.lastChangedDefinition.toISOString() : ''
+          ...(unitMetadata.lastChangedDefinition && { '@lastChange': unitMetadata.lastChangedDefinition.toISOString() }),
+
         }
       });
     }
