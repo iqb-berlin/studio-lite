@@ -126,12 +126,12 @@ export class UnitDownloadClass {
   private static addUnitDefinition(
     definitionData: UnitDefinitionDto, unitXml: XMLBuilder, unitMetadata: UnitPropertiesDto, zip: AdmZip
   ): void {
-    if (definitionData && definitionData.definition && definitionData.definition.length > 0) {
+    if (definitionData?.definition?.length > 0) {
       unitXml.root().ele({
         DefinitionRef: {
           '@player': unitMetadata.player || '',
           '@editor': unitMetadata.editor || '',
-          '@lastChange': unitMetadata.lastChangedDefinition ? unitMetadata.lastChangedDefinition.toISOString() : '',
+          ...(unitMetadata.lastChangedDefinition && { '@lastChange': unitMetadata.lastChangedDefinition.toISOString() }),
           '#': `${unitMetadata.key}.voud`
         }
       });
@@ -141,7 +141,8 @@ export class UnitDownloadClass {
         Definition: {
           '@player': unitMetadata.player || '',
           '@editor': unitMetadata.editor || '',
-          '@lastChange': unitMetadata.lastChangedDefinition ? unitMetadata.lastChangedDefinition.toISOString() : ''
+          ...(unitMetadata.lastChangedDefinition && { '@lastChange': unitMetadata.lastChangedDefinition.toISOString() }),
+
         }
       });
     }
@@ -198,21 +199,17 @@ export class UnitDownloadClass {
   private static addScheme(
     schemeData: UnitSchemeDto, unitXml: XMLBuilder, unitMetadata: UnitPropertiesDto, zip: AdmZip
   ): void {
-    if (schemeData && schemeData.scheme) {
-      unitXml.root().ele({
-        CodingSchemeRef: {
-          '@schemer': unitMetadata.schemer || '',
-          '@schemeType': unitMetadata.schemeType || '',
-          '@lastChange': unitMetadata.lastChangedScheme ? unitMetadata.lastChangedScheme.toISOString() : '',
-          '#': `${unitMetadata.key}.vocs`
-        }
-      });
+    if (schemeData?.scheme) {
       zip.addFile(`${unitMetadata.key}.vocs`, Buffer.from(schemeData.scheme));
-    } else {
+    }
+
+    if (unitMetadata?.schemer) {
       unitXml.root().ele({
         CodingSchemeRef: {
-          '@schemer': unitMetadata.schemer || '',
-          '@lastChange': unitMetadata.lastChangedScheme ? unitMetadata.lastChangedScheme.toISOString() : ''
+          '@schemer': unitMetadata.schemer,
+          ...(unitMetadata.schemeType && { '@schemeType': unitMetadata.schemeType }),
+          ...(unitMetadata.lastChangedScheme && { '@lastChange': unitMetadata.lastChangedScheme.toISOString() }),
+          ...(schemeData?.scheme && { '#': `${unitMetadata.key}.vocs` })
         }
       });
     }
