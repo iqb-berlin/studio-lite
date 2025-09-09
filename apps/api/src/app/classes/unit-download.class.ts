@@ -131,7 +131,8 @@ export class UnitDownloadClass {
         DefinitionRef: {
           '@player': unitMetadata.player || '',
           '@editor': unitMetadata.editor || '',
-          ...(unitMetadata.lastChangedDefinition && { '@lastChange': unitMetadata.lastChangedDefinition.toISOString() }),
+          ...(unitMetadata.lastChangedDefinition &&
+            { '@lastChange': unitMetadata.lastChangedDefinition.toISOString() }),
           '#': `${unitMetadata.key}.voud`
         }
       });
@@ -141,8 +142,7 @@ export class UnitDownloadClass {
         Definition: {
           '@player': unitMetadata.player || '',
           '@editor': unitMetadata.editor || '',
-          ...(unitMetadata.lastChangedDefinition && { '@lastChange': unitMetadata.lastChangedDefinition.toISOString() }),
-
+          ...(unitMetadata.lastChangedDefinition && { '@lastChange': unitMetadata.lastChangedDefinition.toISOString() })
         }
       });
     }
