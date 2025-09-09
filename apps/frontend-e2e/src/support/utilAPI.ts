@@ -115,7 +115,8 @@ export function deleteTextField(wsId:string, unitId: string) {
                       lineHeight: 135
                     },
                     type: 'text',
-                    text: '<p style="padding-left: 0px; text-indent: 0px; margin-bottom: 0px; margin-top: 0" indentsize="20">Wie viel ist 4 plus 2?</p>',
+                    text: '<p style="padding-left: 0px; text-indent: 0px; margin-bottom: 0px; margin-top: 0" ' +
+                      'indentsize="20">Wie viel ist 4 plus 2?</p>',
                     markingMode: 'selection',
                     markingPanels: [],
                     highlightableOrange: false,
@@ -201,7 +202,8 @@ export function deleteTextField(wsId:string, unitId: string) {
                       lineHeight: 135
                     },
                     type: 'text',
-                    text: '<p style="padding-left: 0px; text-indent: 0px; margin-bottom: 0px; margin-top: 0" indentsize="20">Wie viele Monde hat die Erde?</p>',
+                    text: '<p style="padding-left: 0px; text-indent: 0px; margin-bottom: 0px; margin-top: 0" ' +
+                      'indentsize="20">Wie viele Monde hat die Erde?</p>',
                     markingMode: 'selection',
                     markingPanels: [],
                     highlightableOrange: false,
@@ -353,7 +355,8 @@ export function deleteTextField(wsId:string, unitId: string) {
                       lineHeight: 135
                     },
                     type: 'text',
-                    text: '<p style="padding-left: 0px; text-indent: 0px; margin-bottom: 0px; margin-top: 0" indentsize="20">Sortieren sie die Farben alphabetisch ein.</p>',
+                    text: '<p style="padding-left: 0px; text-indent: 0px; margin-bottom: 0px; margin-top: 0" ' +
+                      'indentsize="20">Sortieren sie die Farben alphabetisch ein.</p>',
                     markingMode: 'selection',
                     markingPanels: [],
                     highlightableOrange: false,
