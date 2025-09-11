@@ -17,7 +17,7 @@ services:
     ports:
       - "${HTTP_PORT}:8080"
     volumes:
-      - "./apps/frontend/src:/usr/src/studio-lite-base/apps/frontend/src"
+      - "./apps/frontend/src:/usr/src/studio-lite/apps/frontend/src"
     command:
       - "serve"
       - "frontend"
@@ -43,7 +43,7 @@ services:
       - "${API_PORT}:3333"  # api
       - "9229:9229"         # default debug port
     volumes:
-      - "./apps/api/src:/usr/src/studio-lite-base/apps/api/src"
+      - "./apps/api/src:/usr/src/studio-lite/apps/api/src"
       - "backend_vol:/usr/src/studio-lite/packages"
     command:
       - "serve"
