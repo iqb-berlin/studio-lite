@@ -15,11 +15,11 @@ dev-test-app: dev-test-backend dev-test-frontend
 
 # Run backend tests (only in combination with 'make dev-up')
 dev-test-backend:
-	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev exec -it backend bash -c "nx test api"
+	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev exec -it backend bash -c "npx nx test api"
 
 # Run frontend tests (only in combination with 'make dev-up')
 dev-test-frontend:
-	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev exec -it frontend bash -c "nx test frontend"
+	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev exec -it frontend bash -c "npx nx test frontend"
 
 # disables printing the recipe of a make target before executing it
 .SILENT: dev-test-registry-login dev-test-registry-logout

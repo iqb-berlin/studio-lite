@@ -25,7 +25,7 @@ WORKDIR /usr/src/studio-lite-${PROJECT}
 RUN mkdir packages
 
 # Install dependencies
-COPY --chown=node:node --from=base /usr/src/studio-lite-base/dist/apps/${PROJECT}/package.json .
+COPY --chown=node:node --from=base /usr/src/studio-lite/dist/apps/${PROJECT}/package.json .
 RUN --mount=type=cache,target=~/.npm \
     npm install --omit=dev --no-fund
 
@@ -40,7 +40,7 @@ FROM build AS source
 ARG PROJECT
 
 # Copy the build artifacts from the previous stage
-COPY --chown=node:node --from=base /usr/src/studio-lite-base/dist/apps/${PROJECT} .
+COPY --chown=node:node --from=base /usr/src/studio-lite/dist/apps/${PROJECT} .
 
 
 FROM source AS prod

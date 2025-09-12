@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=~/.npm \
     npm install -g --no-fund npm
 RUN npm --version
 
-WORKDIR /usr/src/studio-lite-base
+WORKDIR /usr/src/studio-lite
 COPY . .
 
 # Install dependencies

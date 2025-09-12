@@ -1320,8 +1320,7 @@ scan-develop-commit-traefik-image:
   allow_failure: true
   rules:
     - !reference [ .develop_commit_rules, rules ]
-  needs:
-    - build-develop-commit-frontend-image
+  needs: []
   image:
     name: ${TRIVY_IMAGE}
     entrypoint: [ "" ]
