@@ -1,10 +1,11 @@
 .workspace-group-header {
   padding: 4px 0 4px 10px;
-  //border-radius: 4px;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   background-color: #eee;
+  border-bottom: 1px solid #ddd;
   div {
+    line-height: 2.0em;
     font-size: larger;
     font-weight: normal;
   }
@@ -14,11 +15,7 @@
   border-radius: 5px;
 }
 
-.workspaces {
-  padding-top: 5px;
-  padding-bottom: 5px;
-}
-
 .admin-button {
   line-height: 24px;
+  color: #006064;
 }
