@@ -12,11 +12,12 @@
   }
 </div>
 
-<div class="area-container"
+<div class="area-container fx-column-start-stretch fx-gap-10"
   [style.overflow-y]="'auto'">
-  <studio-lite-user-issues
-    class="fx-column-start-stretch"
-    layout="big"
-    [issues]="reviews | userIssues: 'review'">
-  </studio-lite-user-issues>
+  @for (group of groupedReviews; track group) {
+    <studio-lite-review-table
+      [groupName]="group.groupName"
+      [reviews]="group.reviews">
+    </studio-lite-review-table>
+  }
 </div>

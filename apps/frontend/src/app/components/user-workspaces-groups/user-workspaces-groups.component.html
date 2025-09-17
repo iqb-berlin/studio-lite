@@ -21,13 +21,10 @@
           </div>
         }
         @if (wsg.workspaces.length) {
-          <div class="fx-row-start-stretch workspaces">
-            <studio-lite-user-issues
-              class="fx-column-start-start"
-              layout="small"
-              [issues]="wsg.workspaces | userIssues: 'a'">
-            </studio-lite-user-issues>
-          </div>
+          <studio-lite-user-issues
+            layout="small"
+            [issues]="wsg.workspaces | userIssues: 'a'">
+          </studio-lite-user-issues>
         }
       </div>
     }

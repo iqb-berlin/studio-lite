@@ -43,6 +43,7 @@ describe('UserReviewsAreaComponent', () => {
 
     fixture = TestBed.createComponent(UserReviewsAreaComponent);
     component = fixture.componentInstance;
+    component.reviews = [];
     fixture.detectChanges();
   });
 

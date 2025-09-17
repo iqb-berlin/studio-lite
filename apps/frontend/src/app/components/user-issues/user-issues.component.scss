@@ -1,8 +1,9 @@
 .issue-item {
-  color: black;
+  display: block;
+  color: #006064;
   text-decoration: none;
   &:hover {
-    background-color: #eee;
+    background-color: #00606410;
   }
 }
 
@@ -17,7 +18,7 @@
 
 .small {
   border-radius: 4px;
-  padding: 4px 15px;
+  padding: 11px 15px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
 }

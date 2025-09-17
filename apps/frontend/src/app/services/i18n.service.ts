@@ -14,6 +14,7 @@ export class I18nService {
   fullLocale = 'de-DE';
   language = 'de';
   dateTimeFormat = 'dd.MM.yyyy HH:mm';
+  dateFormat = 'dd.MM.yyyy';
 
   constructor(private translateService: TranslateService) {}
 
