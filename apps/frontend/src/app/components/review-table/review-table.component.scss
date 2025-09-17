@@ -8,6 +8,11 @@
   border-bottom: 1px solid #ddd;
 }
 
+.new-review {
+  font-size: 12px;
+  position: absolute;
+}
+
 .review-group {
   border-radius: 6px;
   overflow: hidden;
@@ -18,6 +23,7 @@
 }
 
 .review-link {
+  position: relative;
   color: #666;
   text-decoration: none;
 }

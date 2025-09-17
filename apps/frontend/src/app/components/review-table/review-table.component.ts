@@ -7,7 +7,10 @@ import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
 import { ReviewDto } from '@studio-lite-lib/api-dto';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 import { I18nService } from '../../services/i18n.service';
+import { IsNewReviewPipe } from '../../pipes/is-new-review.pipe';
 
 @Component({
   selector: 'studio-lite-review-table',
@@ -16,7 +19,10 @@ import { I18nService } from '../../services/i18n.service';
     MatTableModule,
     MatSortModule,
     TranslateModule,
-    RouterModule
+    RouterModule,
+    MatIcon,
+    IsNewReviewPipe,
+    MatTooltip
   ],
   templateUrl: './review-table.component.html',
   styleUrls: ['./review-table.component.scss']

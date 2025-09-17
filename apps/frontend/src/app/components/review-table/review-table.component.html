@@ -18,11 +18,16 @@
           </mat-header-cell>
         }
         <mat-cell *matCellDef="let review">
+          @let isNew = review.changedAt | isNewReview;
           <a class="review-link"
+             [matTooltip]="isNew? ('review.is-new' | translate) : ''"
              [class.review-name]="column === 'name'"
              [routerLink]="`/review/${ review.id }`">
             @if (column === 'name') {
               {{ review.name }}
+              @if (isNew) {
+                <mat-icon class="new-review">star</mat-icon>
+              }
             } @else if (column === 'changedAt') {
               {{ review[column] | date : i18nService.dateFormat : i18nService.timeZone }}
             } @else {
