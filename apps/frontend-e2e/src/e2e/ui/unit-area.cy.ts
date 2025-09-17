@@ -73,9 +73,12 @@ describe('UI check: workspace', () => {
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [AccessLevel.Admin]);
   });
 
-  it('should set player, editor and schemer for the ws', { defaultCommandTimeout: 100000 }, () => {
+  it('should set player, editor and schemer for the ws', () => {
     cy.visit('/');
     setVeronaWs(ws1);
+  });
+
+  it('should select the profile for the group and select one profile for an area from group settings', () => {
     cy.visit('/');
     selectProfileForGroup(group1, IqbProfile.DE);
     cy.visit('/');
