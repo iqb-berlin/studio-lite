@@ -87,6 +87,7 @@ export function createWs(ws:string, group:string):void {
 }
 
 export function clickIndexTab(name:string):void {
+  cy.wait(100);
   cy.get(`span:contains(${name})`).eq(0).click();
 }
 
