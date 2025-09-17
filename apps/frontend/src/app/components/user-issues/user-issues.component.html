@@ -1,8 +1,6 @@
 @for (issue of issues; track issue) {
-  <a [class]="'issue-item ' + layout"
-     [routerLink]="issue.link"
-     [matTooltip]="issue.toolTip"
-     matTooltipPosition="right">
+  <a class="issue-item"
+     [routerLink]="issue.link">
     {{issue.name}}
   </a>
 }
