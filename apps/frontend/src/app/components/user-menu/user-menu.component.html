@@ -17,8 +17,7 @@
       </div>
     }
     @if (isUserLoggedIn) {
-      <div class="info-header">
-        <div class="info-title">{{'home.logged-in-as' | translate}}</div>
+      <div class="info-header user-name">
         <div class="info-value">{{(userLongName ? userName + ' - ' + userLongName: userName)}}</div>
       </div>
     }
