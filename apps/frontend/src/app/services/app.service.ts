@@ -7,7 +7,6 @@ import { AppConfig } from '../models/app-config.class';
 
 export const standardLogo: AppLogoDto = {
   data: 'assets/studio-logo-144.png',
-  alt: 'Zur Startseite',
   bodyBackground: '#7fafb1',
   boxBackground: '#eeeeee'
 };
