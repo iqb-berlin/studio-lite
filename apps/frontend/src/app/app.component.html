@@ -40,8 +40,8 @@
     <a [routerLink]="['/']"
       [attr.aria-label]="'home.go-home' | translate">
       <img [src]="appService.appLogo?.data"
-        [matTooltip]="appService.appLogo ? appService.appLogo.alt : 'home.home-page' | translate"
-        [alt]="appService.appLogo ? appService.appLogo.alt : 'home.home-page' | translate"/>
+        [matTooltip]="'home.home-page' | translate"
+        [alt]="'home.home-page' | translate"/>
     </a>
   </div>
 

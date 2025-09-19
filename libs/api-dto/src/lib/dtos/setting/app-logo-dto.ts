@@ -5,9 +5,6 @@ export class AppLogoDto {
     data!: string;
 
   @ApiProperty()
-    alt = '';
-
-  @ApiProperty()
     bodyBackground?: string;
 
   @ApiProperty()

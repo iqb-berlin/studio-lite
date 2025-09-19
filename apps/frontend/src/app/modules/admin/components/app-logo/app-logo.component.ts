@@ -37,7 +37,6 @@ export class AppLogoComponent implements OnInit, OnDestroy {
     private translateService: TranslateService
   ) {
     this.configForm = this.fb.group({
-      alt: this.fb.control(''),
       bodyBackground: this.fb.control(''),
       boxBackground: this.fb.control('')
     });
@@ -58,7 +57,6 @@ export class AppLogoComponent implements OnInit, OnDestroy {
       if (appLogo) {
         if (appLogo.data && appLogo.data.length > 0) this.logoImageBase64 = appLogo.data;
         this.configForm.setValue({
-          alt: appLogo.alt,
           bodyBackground: appLogo.bodyBackground ? appLogo.bodyBackground : '',
           boxBackground: appLogo.boxBackground ? appLogo.boxBackground : ''
         });
@@ -78,7 +76,6 @@ export class AppLogoComponent implements OnInit, OnDestroy {
     if (this.configForm) {
       this.writeBackendService.setAppLogo({
         data: this.logoImageBase64,
-        alt: this.configForm.get('alt')?.value,
         bodyBackground: this.configForm.get('bodyBackground')?.value,
         boxBackground: this.configForm.get('boxBackground')?.value
       }).subscribe(isOk => {
