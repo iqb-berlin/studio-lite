@@ -353,9 +353,9 @@
     "not-valid-json": "Kein gültiges JSON Format"
   },
   "logo": {
-    "upload-info": "Klick rechts auf den Schalter zum Hochladen",
-    "upload": "Logo hochladen/aktualisieren",
-    "reset": "Logo auf Standard setzen",
+    "upload-info": "Kein alternatives Logo hochgeladen",
+    "upload": "Logo hochladen",
+    "reset": "Logo zurücksetzen",
     "alt-text": "Alternativtext des Logos",
     "alt-text-placeholder": "Alternativ",
     "app-background-color": "Hintergrundfarbe der Anwendung",
