@@ -120,7 +120,7 @@ bootstrapApplication(AppComponent, {
     },
     {
       provide: 'APP_NAME',
-      useValue: 'Studio'
+      useValue: 'IQB-Studio'
     },
     {
       provide: 'APP_VERSION',
