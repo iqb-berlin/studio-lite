@@ -6,9 +6,10 @@
     <div class="fx-column-start-stretch">
       <mat-form-field>
         <mat-label>Text</mat-label>
-        <input matInput
+        <textarea matInput
           formControlName="globalWarningText"
           [placeholder]="'config.warning-placeholder' | translate">
+        </textarea>
       </mat-form-field>
       <div class="fx-row-start-center fx-wrap fx-gap-20">
         <p>{{'config.show-warning-until' | translate}}</p>
