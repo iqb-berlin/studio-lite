@@ -4,7 +4,7 @@
     <button mat-button
             class="admin-button"
             [color] = "'primary'"
-            [matTooltip]="`home.reviews-${reviewsView}-view` | translate"
+            [matTooltip]="`home.reviews-${(reviewsView === 'list') ? 'details' : 'list'}-view`  | translate"
             (click)="toggleView()">
       <studio-lite-wrapped-icon
         [icon]="reviewsView === 'list' ? 'table_chart' : 'table_rows'">
