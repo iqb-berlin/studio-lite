@@ -131,7 +131,9 @@
     "not-logged-in": "Nicht angemeldet",
     "logged-in-for-review": "Für Aufgabenfolge angemeldet",
     "logged-in-as": "Angemeldet als",
-    "isAdminMessage": "Berechtigung zum Ändern von Nutzer:innen-Rechten und Arbeitsbereichen"
+    "isAdminMessage": "Berechtigung zum Ändern von Nutzer:innen-Rechten und Arbeitsbereichen",
+    "reviews-details-view": "Detailansicht",
+    "reviews-list-view": "Listensicht"
   },
   "dialogs": {
     "close": "Schließen",
@@ -880,6 +882,7 @@
   },
 
   "review": {
+    "is-new": "Neu",
     "name": "Name",
     "createdAt": "Erstellt",
     "changedAt": "Geändert",
