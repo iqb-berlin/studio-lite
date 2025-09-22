@@ -4,7 +4,7 @@
       <div class="fx-row-start-stretch fx-gap-10">
         <div class="fx-column-start-stretch fx-flex-row-50 fx-gap-10">
           <mat-card>
-            <mat-card-header>
+            <mat-card-header class="properties-card-header">
               <mat-card-title>
                 {{ 'unit-properties.title' | translate }}
               </mat-card-title>
@@ -266,7 +266,7 @@
           ((workspaceSettings.unitMDProfile && metadata && unitProfile) ||
             !workspaceSettings.unitMDProfile)) {
             <mat-card>
-              <mat-card-header>
+              <mat-card-header class="properties-card-header">
                 <mat-card-title>
                   {{ 'metadata.unit-title' | translate }}
                 </mat-card-title>

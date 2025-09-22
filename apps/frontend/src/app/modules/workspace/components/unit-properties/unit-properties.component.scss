@@ -35,8 +35,12 @@
 
 .wait-animation {
   align-self: center;
-
 }
+
+.properties-card-header {
+  margin-bottom: 8px;
+}
+
 
 .wait-animation-center {
   @extend .wait-animation;
