@@ -1,42 +1,50 @@
-<div class="fx-column-start-stretch admin-tab-content">
-  <div class="div-row fx-row-start-stretch">
-    <div class="fx-flex-row-10">
-      <mat-label>{{'settings.texts' | translate}}</mat-label>
-    </div>
-    <div class="fx-flex-row-90 right-container">
+<div class="fx-column-start-stretch fx-gap-20 admin-tab-content">
+  <mat-card>
+    <mat-card-header class="card-header">
+      <mat-card-title>{{'settings.texts' | translate}}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
       <studio-lite-app-config></studio-lite-app-config>
-    </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="fx-row-start-stretch fx-gap-20">
+    <mat-card class="fx-flex-fill">
+      <mat-card-header>
+        <mat-card-title>{{'settings.logo-and-colors' | translate}}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <studio-lite-app-logo></studio-lite-app-logo>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="fx-flex-fill">
+      <mat-card-header class="card-header">
+        <mat-card-title>{{'settings.unit-export-params' | translate}}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <studio-lite-unit-export-config></studio-lite-unit-export-config>
+      </mat-card-content>
+    </mat-card>
   </div>
-  <div class="div-row fx-row-start-stretch">
-    <div class="fx-flex-row-10">
-      <mat-label>{{'settings.logo-and-colors' | translate}}</mat-label>
-    </div>
-    <div class="fx-flex-row-90 right-container">
-      <studio-lite-app-logo></studio-lite-app-logo>
-    </div>
-  </div>
-  <div class="div-row fx-row-start-stretch">
-    <div class="fx-flex-row-10">
-      <mat-label>{{'settings.unit-export-params' | translate}}</mat-label>
-    </div>
-    <div class="fx-flex-row-90 right-container">
-      <studio-lite-unit-export-config></studio-lite-unit-export-config>
-    </div>
-  </div>
-  <div class="div-row fx-row-start-stretch">
-    <div class="fx-flex-row-10">
-      <mat-label>{{'settings.profiles-registry' | translate}}</mat-label>
-    </div>
-    <div class="fx-flex-row-90 right-container">
-      <studio-lite-profiles-registry></studio-lite-profiles-registry>
-    </div>
-  </div>
-  <div class="div-row fx-row-start-stretch">
-    <div class="fx-flex-row-10">
-      <mat-label>{{'settings.missings-profiles' | translate}}</mat-label>
-    </div>
-    <div class="fx-flex-row-90 right-container">
-      <studio-lite-missings-profiles-config></studio-lite-missings-profiles-config>
-    </div>
+
+  <div class="fx-row-start-stretch fx-gap-20">
+    <mat-card class="fx-flex-fill">
+      <mat-card-header class="card-header">
+        <mat-card-title>{{'settings.profiles-registry' | translate}}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <studio-lite-profiles-registry></studio-lite-profiles-registry>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="fx-flex-fill">
+      <mat-card-header class="card-header">
+        <mat-card-title>{{'settings.missings-profiles' | translate}}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <studio-lite-missings-profiles-config></studio-lite-missings-profiles-config>
+      </mat-card-content>
+    </mat-card>
   </div>
 </div>
