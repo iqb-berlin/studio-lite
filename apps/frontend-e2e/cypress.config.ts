@@ -15,7 +15,7 @@ export default defineConfig({
   env: {
     username: 'fadmin',
     password: '4445',
-    version: '13.2.1'
+    version: '13.3.0'
   },
   e2e: {
     ...nxE2EPreset(__dirname),
