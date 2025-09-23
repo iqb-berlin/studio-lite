@@ -2,6 +2,7 @@ import { Directive, HostListener } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 
@@ -14,7 +15,8 @@ export class LogoutDirective {
     public appService: AppService,
     public confirmDialog: MatDialog,
     private backendService: BackendService,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private router: Router
   ) {
   }
 
@@ -30,8 +32,9 @@ export class LogoutDirective {
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        // this.authService.logout();
-        this.backendService.logout();
+        this.router.navigate(['/']).then(done => {
+          if (done) this.backendService.logout();
+        });
       }
     });
   }

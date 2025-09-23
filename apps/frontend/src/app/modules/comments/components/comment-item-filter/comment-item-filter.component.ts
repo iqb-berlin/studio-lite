@@ -4,7 +4,7 @@ import {
 import { MatListOption, MatSelectionList } from '@angular/material/list';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { TranslateModule } from '@ngx-translate/core';
-import { MatFabButton } from '@angular/material/button';
+import { MatMiniFabButton } from '@angular/material/button';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { MatIcon } from '@angular/material/icon';
 import { MatBadge } from '@angular/material/badge';
@@ -18,13 +18,12 @@ import { MatTooltip } from '@angular/material/tooltip';
     MatMenu,
     MatSelectionList,
     TranslateModule,
-    MatFabButton,
     MatIcon,
-    MatFabButton,
     MatBadge,
     MatMenuTrigger,
     FormsModule,
-    MatTooltip
+    MatTooltip,
+    MatMiniFabButton
   ],
   templateUrl: './comment-item-filter.component.html',
   styleUrl: './comment-item-filter.component.scss'

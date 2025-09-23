@@ -5,6 +5,10 @@
 
 .object-list {
   height: calc(100% - 5px);
+  .object-header-container {
+    margin-top: 5px;
+    margin-bottom: 20px;
+  }
 }
 
 .fx-flex-row-fix-70 {
@@ -29,4 +33,10 @@
   background: #006064;
   background-clip: text;
   -webkit-background-clip: text;
+}
+
+.save-button{
+  position: absolute;
+  top: 65px;
+  right: 60px;
 }

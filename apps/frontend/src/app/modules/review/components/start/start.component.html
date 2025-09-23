@@ -4,6 +4,19 @@
       <h4>{{'review.title' | translate}}</h4>
       <h1>{{reviewService.reviewName}}</h1>
       <h2>{{reviewService.workspaceName }}</h2>
+      @if (reviewService.reviewCreatedAt || reviewService.reviewChangedAt) {
+        <p>
+          @if (reviewService.reviewCreatedAt) {
+            <span>{{'review.creation-date' | translate}}: {{reviewService.reviewCreatedAt}}</span>
+          }
+          @if (reviewService.reviewCreatedAt && reviewService.reviewChangedAt) {
+            <span> | </span>
+          }
+          @if (reviewService.reviewChangedAt) {
+            <span>{{'review.change-date' | translate}}: {{reviewService.reviewChangedAt}}</span>
+          }
+        </p>
+      }
       <p>{{'review.pages-count-info' | translate: {count: reviewService.units.length} }}</p>
     </div>
     <mat-expansion-panel>

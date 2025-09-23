@@ -48,6 +48,7 @@ body {
   top: 70px;
   bottom: 0;
   overflow-y: auto;
+  background-color: #ffffff20;
 }
 
 .page-title {
@@ -89,6 +90,16 @@ body {
 .spinner-container .mat-progress-spinner {
   height: 100px;
   width: 100px;
+}
+
+.review-dialog {
+  .mat-mdc-dialog-content {
+    max-height: 100vh;
+    padding-bottom: 0 !important;
+    .filter-button {
+      right: 20px
+    }
+  }
 }
 
 .mat-progress-spinner circle, .mat-spinner circle {

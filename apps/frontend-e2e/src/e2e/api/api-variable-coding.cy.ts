@@ -3,7 +3,7 @@ import {
 } from '../../support/testData';
 import { deleteTextField } from '../../support/utilAPI';
 import {
-  deleteGroup, deleteModule, focusOnMenu, goToItem, login, logout, selectListUnits, selectUnit
+  deleteGroup, deleteModule, focusOnMenu, goToItem, login, logout, selectUnit
 } from '../../support/util';
 
 describe('API variable coherence in Scheme, Aspect and Metadata', () => {
@@ -136,9 +136,8 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  it.skip('checks that text-field_1 is not present at Menu > Berichte > Metadaten does not exist', () => {
+  it('checks that text-field_1 is not present at Menu > Berichte > Metadaten does not exist', () => {
     focusOnMenu('Berichte', 'Metadaten');
-    selectListUnits(['MA_01']);
     cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
     cy.get('.mdc-tab__text-label:contains("Metadaten Items")').click();
     cy.get('mat-dialog-container:contains("text-field_1")').should('have.length', 0);

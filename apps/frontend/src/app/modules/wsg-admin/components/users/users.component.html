@@ -63,19 +63,21 @@
   </div>
 
   <div class="object-list fx-column-start-stretch fx-flex-row-40">
-    <div class="fx-row-space-between-center">
+    <div class="object-header-container fx-row-space-between-center">
       @if (!selectedUser) {
         <div>{{'access-rights.hint' | translate}}</div>
       }
       @if (selectedUser) {
         <div>{{'access-rights.for-user' | translate: {user: tableSelectionRow.selected[0].name } }}</div>
       }
-      <button mat-raised-button
-        [matTooltip]="'save' | translate"
-        matTooltipPosition="above"
-        [disabled]="!userWorkspaces.hasChanged"
-        (click)="saveWorkspaces()">
-        <studio-lite-wrapped-icon icon="save"></studio-lite-wrapped-icon>
+      <button mat-fab
+              class="save-button"
+              [matTooltip]="'save' | translate"
+              matTooltipPosition="above"
+              [color]="'primary'"
+              [disabled]="!userWorkspaces.hasChanged"
+              (click)="saveWorkspaces()">
+        <mat-icon>save"</mat-icon>
       </button>
     </div>
 

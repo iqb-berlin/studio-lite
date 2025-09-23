@@ -1,26 +1,14 @@
-<div class="fx-row-space-between-center">
-  <studio-lite-area-title
-    [title]="'home.select-workspace' | translate">
-  </studio-lite-area-title>
-  <div>
-    @if (isAdmin) {
-      <button mat-button
-              [routerLink]="['/admin']"
-              [matTooltip]="'home.goto-admin' | translate"
-              matTooltipPosition="above"
-              data-cy="goto-admin">
-        <studio-lite-wrapped-icon icon="construction"></studio-lite-wrapped-icon>
-      </button>
-    }
-    <studio-lite-user-menu></studio-lite-user-menu>
-  </div>
-</div>
-@if (warning) {
-  <studio-lite-warning
-    [warnMessage]="warning">
-  </studio-lite-warning>
-}
 
-<studio-lite-user-workspaces-groups
-  [workspaceGroups]="workspaceGroups">
-</studio-lite-user-workspaces-groups>
+<studio-lite-area-title
+  [title]="'home.select-workspace' | translate">
+</studio-lite-area-title>
+<div class="area-container">
+  @if (warning) {
+    <studio-lite-warning
+      [warnMessage]="warning">
+    </studio-lite-warning>
+  }
+  <studio-lite-user-workspaces-groups
+    [workspaceGroups]="workspaceGroups">
+  </studio-lite-user-workspaces-groups>
+</div>

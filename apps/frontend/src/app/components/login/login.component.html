@@ -1,55 +1,56 @@
-<div class="fx-row-space-between-stretch">
-  <studio-lite-area-title
-    [title]="(appService.appConfig.hasUsers ? 'home.login' : 'home.first-login') | translate">
-  </studio-lite-area-title>
-</div>
+<studio-lite-area-title
+  [title]="(appService.appConfig.hasUsers ? 'home.registration' : 'home.first-login') | translate">
+</studio-lite-area-title>
 
-@if (appService.globalWarning) {
-  <studio-lite-warning
-    [warnMessage]="appService.globalWarning">
-  </studio-lite-warning>
-}
-@if (!appService.appConfig.hasUsers) {
-  <studio-lite-warning
-    [warnMessage]="'home.no-user' | translate">
-  </studio-lite-warning>
-}
+<div class="area-container">
+  @if (appService.globalWarning) {
+    <studio-lite-warning
+      [warnMessage]="appService.globalWarning">
+    </studio-lite-warning>
+  }
+  @if (!appService.appConfig.hasUsers) {
+    <studio-lite-warning
+      [warnMessage]="'home.no-user' | translate">
+    </studio-lite-warning>
+  }
 
-<form class="fx-column-start-stretch"
-  [formGroup]="loginForm"
-  (ngSubmit)="login()">
-  <div class="fx-column-start-stretch">
-    <mat-form-field [class.invisible]="loginNamePreset">
-      <input matInput formControlName="name"
-        [placeholder]="'home.user-name' | translate"
-        (keyup.enter)="pw.focus()"
-        data-cy="home-user-name">
-    </mat-form-field>
-    @if (loginNamePreset) {
-      <p>
-        {{ 'home.login-with-preset' | translate }}
+  <form class="fx-column-start-stretch"
+    [formGroup]="loginForm"
+    (ngSubmit)="login()">
+    <div class="fx-column-start-stretch">
+      <mat-form-field [class.invisible]="loginNamePreset">
+        <input matInput formControlName="name"
+          [placeholder]="'home.user-name' | translate"
+          (keyup.enter)="pw.focus()"
+          data-cy="home-user-name">
+      </mat-form-field>
+      @if (loginNamePreset) {
+        <p>
+          {{ 'home.login-with-preset' | translate }}
+        </p>
+      }
+      <mat-form-field>
+        <input matInput #pw
+          type="password"
+          formControlName="pw"
+          [placeholder]="'home.password' | translate"
+          (keyup.enter)="login()"
+          data-cy="home-password">
+      </mat-form-field>
+    </div>
+    @if (errorMessage) {
+      <p
+        class="error-message">
+        {{ errorMessage }}
       </p>
     }
-    <mat-form-field>
-      <input matInput #pw
-        type="password"
-        formControlName="pw"
-        [placeholder]="'home.password' | translate"
-        (keyup.enter)="login()"
-        data-cy="home-password">
-    </mat-form-field>
-  </div>
-  @if (errorMessage) {
-    <p
-      class="error-message">
-      {{ errorMessage }}
-    </p>
-  }
-  <button mat-raised-button
-    type="submit"
-    [disabled]="loginForm.invalid"
-    color="primary"
-    data-cy="home-submit">{{ 'next' | translate }}
-  </button>
-</form>
+    <button class="submit-button"
+            mat-raised-button
+            type="submit"
+            [disabled]="loginForm.invalid"
+            color="primary"
+            data-cy="home-submit">{{ 'home.login' | translate }}
+    </button>
+  </form>
+</div>
 

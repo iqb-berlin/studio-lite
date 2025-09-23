@@ -1,7 +1,8 @@
 <div class="fx-row-end-end fx-gap-5 changes-container">
   <button mat-raised-button
+          [color]="'primary'"
           [matTooltip]="'workspace.save-changes' | translate"
-          [disabled]="!changed"
+          [disabled]="!changed || disabled"
           matTooltipPosition="below"
           (click)="saveChanges.emit()">
     {{'workspace.save' | translate}}

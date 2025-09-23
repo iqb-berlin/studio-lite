@@ -18,15 +18,22 @@
           matSortDirection="asc"
           matSort
           [dataSource]="objectsDatasource">
-          <ng-container matColumnDef="name">
-            <mat-header-cell *matHeaderCellDef
-              mat-sort-header="name">
-              {{'workspace.review' | translate}}
-            </mat-header-cell>
-            <mat-cell *matCellDef="let element">
-              {{element.name}}
-            </mat-cell>
-          </ng-container>
+
+          @for (column of displayedColumns; track column) {
+            <ng-container [matColumnDef]="column">
+              <mat-header-cell *matHeaderCellDef
+                mat-sort-header>
+                {{`review.${column}` | translate}}
+              </mat-header-cell>
+              <mat-cell *matCellDef="let review">
+                @if (column === 'changedAt' || column === 'createdAt') {
+                  {{ review[column] | date : i18nService.dateTimeFormat : i18nService.timeZone }}
+                } @else {
+                  {{ review[column] }}
+                }
+              </mat-cell>
+            </ng-container>
+          }
           <mat-header-row class='review-sort'
             *matHeaderRowDef="displayedColumns; sticky: true">
           </mat-header-row>
@@ -74,8 +81,9 @@
         </studio-lite-review-config>
       </div>
       <studio-lite-save-changes [changed]="changed"
-        (discardChanges)="discardChanges()"
-        (saveChanges)="saveChanges()">
+                                [disabled]="!reviewDataToChange.name"
+                                (discardChanges)="discardChanges()"
+                                (saveChanges)="saveChanges()">
       </studio-lite-save-changes>
     </div>
   </div>

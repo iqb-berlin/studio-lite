@@ -8,7 +8,7 @@ import {
   ApiOkResponse,
   ApiParam,
   ApiTags,
-  ApiUnauthorizedResponse
+  ApiUnauthorizedResponse, ApiUnprocessableEntityResponse
 } from '@nestjs/swagger';
 import {
   ReviewInListDto,
@@ -57,9 +57,10 @@ export class WorkspaceReviewController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Review data changed' })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiUnprocessableEntityResponse({ description: 'Saving of review is forbidden.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
-  async patchOnesUnits(
+  async patchReview(
     @Param('id', ParseIntPipe) reviewId: number,
       @Body() updateReview: ReviewFullDto
   ): Promise<void> {
@@ -74,6 +75,7 @@ export class WorkspaceReviewController {
     description: 'Sends back the id of the new review in database',
     type: Number
   })
+  @ApiUnprocessableEntityResponse({ description: 'Saving of review is forbidden.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')

@@ -3,6 +3,11 @@
   padding: 5px;
 }
 
+.submit-button {
+  display: flex;
+  align-self: end;
+}
+
 .invisible {
   display: block;
   visibility: hidden;
@@ -10,6 +15,9 @@
   width: 0;
 }
 
-form {
-  margin-bottom: 20px;
+.area-container {
+  max-height: calc(100vh - 270px);
+  overflow: auto;
+  padding: 0 5px 10px 5px;
 }
+

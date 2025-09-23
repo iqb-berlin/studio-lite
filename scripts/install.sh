@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
 declare APP_DIR
@@ -25,11 +25,11 @@ declare TRAEFIK_REPO_API="https://api.github.com/repos/iqb-berlin/traefik"
 
 get_release_version() {
   declare latest_release
-  latest_release=$(curl --silent "${REPO_API}/releases/latest" | \
-    grep tag_name | \
-    cut -d : -f 2,3 | \
-    tr -d \" | \
-    tr -d , | \
+  latest_release=$(curl --silent "${REPO_API}/releases/latest" |
+    grep tag_name |
+    cut -d : -f 2,3 |
+    tr -d \" |
+    tr -d , |
     tr -d " ")
 
   while read -p '1. Please name the desired release tag: ' -er -i "${latest_release}" TARGET_VERSION; do
@@ -168,11 +168,11 @@ check_prerequisites() {
 
 install_application_infrastructure() {
   if [ -z "${TRAEFIK_DIR}" ]; then
-    LATEST_TRAEFIK_RELEASE=$(curl --silent "${TRAEFIK_REPO_API}/releases/latest" | \
+    LATEST_TRAEFIK_RELEASE=$(curl --silent "${TRAEFIK_REPO_API}/releases/latest" |
       grep tag_name |
-      cut -d : -f 2,3 | \
-      tr -d \" | \
-      tr -d , | \
+      cut -d : -f 2,3 |
+      tr -d \" |
+      tr -d , |
       tr -d " ")
 
     printf "2.4 Installing missing application infrastructure software:\n"
@@ -298,6 +298,7 @@ customize_settings() {
   sed -i.bak "s|^TRAEFIK_DIR.*|TRAEFIK_DIR=${TRAEFIK_DIR}|" ".env.${APP_NAME}" && rm ".env.${APP_NAME}.bak"
 
   # Load defaults
+  # shellcheck source=.env.studio-lite
   source ".env.${APP_NAME}"
 
   # Setup environment variables

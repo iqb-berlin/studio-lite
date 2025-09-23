@@ -13,6 +13,7 @@ import ReviewUnit from '../entities/review-unit.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import Workspace from '../entities/workspace.entity';
 import { UnitService } from './unit.service';
+import { ReviewUnprocessableException } from '../exceptions/review-unprocessable.exception';
 
 @Injectable()
 export class ReviewService {
@@ -38,14 +39,24 @@ export class ReviewService {
       select: {
         id: true,
         name: true,
-        link: true
+        link: true,
+        changedAt: true,
+        createdAt: true
       }
     });
   }
 
   async create(createReview: CreateReviewDto): Promise<number> {
-    const newReview = await this.reviewRepository.create(createReview);
-    newReview.link = uuIdv4();
+    if (!createReview.name) {
+      throw new ReviewUnprocessableException(0, 'POST');
+    }
+    const timeStamp = new Date();
+    const newReview = this.reviewRepository.create({
+      ...createReview,
+      link: uuIdv4(),
+      createdAt: timeStamp,
+      changedAt: timeStamp
+    });
     await this.reviewRepository.save(newReview);
     return newReview.id;
   }
@@ -67,15 +78,10 @@ export class ReviewService {
       ]
     });
     return {
-      id: review.id,
-      name: review.name,
-      workspaceId: review.workspaceId,
+      ...review,
       workspaceName: workspaceData.name,
       workspaceGroupId: workspaceData.workspaceGroup.id,
       workspaceGroupName: workspaceData.workspaceGroup.name,
-      link: review.link,
-      password: review.password,
-      settings: review.settings,
       units: units.map(u => u.unitId)
     };
   }
@@ -92,7 +98,9 @@ export class ReviewService {
     return {
       id: review.id,
       name: review.name,
-      workspaceId: review.workspaceId
+      workspaceId: review.workspaceId,
+      changedAt: review.changedAt,
+      createdAt: review.createdAt
     };
   }
 
@@ -131,13 +139,13 @@ export class ReviewService {
       select: {
         id: true,
         name: true,
-        workspaceId: true
+        workspaceId: true,
+        changedAt: true,
+        createdAt: true
       }
     });
     return reviews.map(r => <ReviewDto>{
-      id: r.id,
-      name: r.name,
-      workspaceId: r.workspaceId,
+      ...r,
       workspaceName: workspaceInfo[r.workspaceId].name,
       workspaceGroupId: workspaceInfo[r.workspaceId].groupId,
       workspaceGroupName: workspaceInfo[r.workspaceId].groupName
@@ -146,30 +154,23 @@ export class ReviewService {
 
   async patch(reviewId: number, newData: ReviewFullDto): Promise<void> {
     this.logger.log(`Patching data for review with id: ${reviewId}`);
+    if (!newData.name) {
+      throw new ReviewUnprocessableException(newData.id, 'PATCH');
+    }
+    const timeStamp = new Date();
     const reviewToUpdate = await this.reviewRepository.findOne({ where: { id: reviewId } });
-    let changed = false;
-    // eslint-disable-next-line no-prototype-builtins
-    if (newData.hasOwnProperty('name')) {
-      reviewToUpdate.name = newData.name;
-      changed = true;
-    }
-    // eslint-disable-next-line no-prototype-builtins
-    if (newData.hasOwnProperty('password')) {
-      reviewToUpdate.password = newData.password;
-      changed = true;
-    }
-    // eslint-disable-next-line no-prototype-builtins
-    if (newData.hasOwnProperty('settings')) {
-      reviewToUpdate.settings = newData.settings;
-      changed = true;
-    }
-    if (changed) await this.reviewRepository.save(reviewToUpdate);
-    // eslint-disable-next-line no-prototype-builtins
-    if (newData.hasOwnProperty('units')) {
+    const propsToUpdate = ['name', 'password', 'settings'];
+    propsToUpdate.forEach(prop => {
+      if (Object.prototype.hasOwnProperty.call(newData, prop)) {
+        reviewToUpdate[prop] = newData[prop];
+      }
+    });
+    await this.reviewRepository.save({ ...reviewToUpdate, changedAt: timeStamp });
+    if (Object.prototype.hasOwnProperty.call(newData, 'units')) {
       await this.reviewUnitRepository.delete({ reviewId: reviewId });
       this.logger.log(`Set units for review with id: ${reviewId}`);
       newData.units.forEach(unitId => {
-        const newReviewUnit = this.reviewUnitRepository.create(<ReviewUnit>{
+        const newReviewUnit = this.reviewUnitRepository.create({
           reviewId: reviewId,
           unitId: unitId,
           order: newData.units.indexOf(unitId)

@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import {
   addFirstUser,
   addUnitFromExisting,
@@ -64,12 +63,8 @@ describe('UI check: workspace', () => {
   after(() => {
     deleteFirstUser();
   });
-  beforeEach(() => {
-    cy.visit('/');
-  });
 
   it('prepares the context for unit test', () => {
-    cy.visit('/');
     addModules(modules);
     cy.visit('/');
     createGroup(group1);
@@ -81,6 +76,9 @@ describe('UI check: workspace', () => {
   it('should set player, editor and schemer for the ws', () => {
     cy.visit('/');
     setVeronaWs(ws1);
+  });
+
+  it('should select the profile for the group and select one profile for an area from group settings', () => {
     cy.visit('/');
     selectProfileForGroup(group1, IqbProfile.DE);
     cy.visit('/');
@@ -97,6 +95,7 @@ describe('UI check: workspace', () => {
   });
 
   it('should the add button be present and we could add new exercises', () => {
+    cy.visit('/');
     cy.visitWs(ws1);
     addUnitPred(unit1);
     cy.visit('/');
@@ -108,11 +107,13 @@ describe('UI check: workspace', () => {
   });
 
   it('should the add button be present and we could add an exercise from existing exercises', () => {
+    cy.visit('/');
     cy.visitWs(ws1);
     addUnitFromExisting(`${group1}: ${ws1}`, unit1, newUnit);
   });
 
   it('should the add button, and the button to import file be present', () => {
+    cy.visit('/');
     cy.visitWs(ws1);
     importExercise('test_studio_units_download.zip');
     cy.contains('M6_AK0011')
@@ -120,19 +121,22 @@ describe('UI check: workspace', () => {
   });
 
   it('should be able to delete Unit', () => {
+    cy.visit('/');
     cy.visitWs(ws1);
     deleteUnit(unit1.shortname);
   });
 
   it('should be able to assign group to the units', () => {
+    cy.visit('/');
     createWs(ws2, group1);
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws2, [AccessLevel.Admin]);
     moveUnit(ws1, ws2, unit2);
   });
 
   it('should export selected units', () => {
+    cy.visit('/');
     cy.visitWs(ws1);
-    cy.wait(500);
+    cy.wait(1000);
     cy.get('mat-icon:contains("menu")')
       .click();
     cy.get('span:contains("Export")')
@@ -142,8 +146,9 @@ describe('UI check: workspace', () => {
   });
 
   it('should show metadata', () => {
+    cy.visit('/');
     cy.visitWs(ws1);
-    cy.wait(500);
+    cy.wait(1000);
     focusOnMenu('Berichte', 'Metadaten');
     selectListUnits([unit3.shortname, newUnit.shortname]);
     cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
@@ -151,8 +156,9 @@ describe('UI check: workspace', () => {
   });
 
   it('should export the codebook', () => {
+    cy.visit('/');
     cy.visitWs(ws1);
-    cy.wait(500);
+    cy.wait(1000);
     focusOnMenu('Berichte', 'Codebook');
     selectListUnits([newUnit.shortname]);
     cy.buttonToContinue('Exportieren', [200, 304], '/api/workspaces/*/units/coding-book*', 'GET', 'codebook');
@@ -178,6 +184,7 @@ describe('UI check: workspace', () => {
   });
 
   it('should reply to a comment, and delete a comment', () => {
+    cy.visit('/');
     cy.visitWs(ws1);
     selectUnit(unit3.shortname);
     clickIndexTab('Kommentare');
@@ -192,6 +199,7 @@ describe('UI check: workspace', () => {
   });
 
   it('deletes the context ', () => {
+    cy.visit('/');
     deleteGroup(group1);
     cy.visit('/');
     deleteUser(newUser.username);

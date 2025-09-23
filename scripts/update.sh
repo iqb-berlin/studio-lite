@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 declare UPDATE_OPTION
 declare SOURCE_VERSION
@@ -473,7 +473,7 @@ get_modified_file() {
     # no source file exists anymore
     if [ ! -f "${APP_DIR}/${source_file}" ]; then
       if [ "${file_type}" == "env-file" ]; then
-        printf -- "- Environment template file '%s' does not exist anymore.\n\n" "${source_file}"
+        printf -- "- Environment template file '%s' does not exist anymore.\n" "${source_file}"
         printf "  A version %s environment template file will be downloaded now ...\n" "${TARGET_VERSION}"
         printf "  Please compare your current environment file with the new template file and update it "
         printf "with new environment variables, or delete obsolete variables, if necessary.\n"
@@ -481,7 +481,7 @@ get_modified_file() {
       fi
 
       if [ "${file_type}" == "conf-file" ]; then
-        printf -- "- Configuration template file '%s' does not exist (anymore).\n\n" "${source_file}"
+        printf -- "- Configuration template file '%s' does not exist (anymore).\n" "${source_file}"
         printf "  A version %s configuration template file will be downloaded now ...\n" "${TARGET_VERSION}"
         printf "  Please compare your current '%s' file with the new template file and " "${current_config_file}"
         printf "update it, if necessary!\n"
@@ -490,7 +490,7 @@ get_modified_file() {
     # source file and target file differ
     elif ! curl --stderr /dev/null "${target_file}" | diff -q - "${APP_DIR}/${source_file}" &>/dev/null; then
       if [ "${file_type}" == "env-file" ]; then
-        printf -- "- The current environment template file '%s' is outdated.\n\n" "${source_file}"
+        printf -- "- The current environment template file '%s' is outdated.\n" "${source_file}"
         printf "  A version %s environment template file will be downloaded now ...\n" "${TARGET_VERSION}"
         printf "  Please compare your current environment file with the new template file and update it "
         printf "with new environment variables, or delete obsolete variables, if necessary.\n"
@@ -500,7 +500,7 @@ get_modified_file() {
       if [ "${file_type}" == "conf-file" ]; then
         mv "${APP_DIR}/${source_file}" "${APP_DIR}/${source_file}.old" 2>/dev/null
         cp "${APP_DIR}/${current_config_file}" "${APP_DIR}/${current_config_file}.old"
-        printf -- "- The current configuration template file '%s' is outdated.\n\n" "${source_file}"
+        printf -- "- The current configuration template file '%s' is outdated.\n" "${source_file}"
         printf "  A version %s configuration template file will be downloaded now ...\n" "${TARGET_VERSION}"
         printf "  Please compare your current configuration file with the new template file and update it, "
         printf "if necessary!\n"
@@ -600,6 +600,7 @@ finalize_update() {
     if [[ $(docker compose --project-name "${PWD##*/}" ps -q) ]]; then
       printf "'%s' application will now shut down ...\n" "${APP_NAME}"
       docker compose --project-name "${PWD##*/}" down
+      printf "\n"
     fi
 
     printf "When your files are checked for modification, you could restart the application with "
@@ -628,13 +629,14 @@ application_reload() {
       docker network create app-net
     fi
     docker compose \
-      --env-file "${APP_DIR}/.env.${APP_NAME}" \
-      --file "${APP_DIR}/docker-compose.${APP_NAME}.yaml" \
-      --file "${APP_DIR}/docker-compose.${APP_NAME}.prod.yaml" \
+        --env-file "${APP_DIR}/.env.${APP_NAME}" \
+        --file "${APP_DIR}/docker-compose.${APP_NAME}.yaml" \
+        --file "${APP_DIR}/docker-compose.${APP_NAME}.prod.yaml" \
       pull
-    docker compose --env-file "${APP_DIR}/.env.${APP_NAME}" \
-      --file "${APP_DIR}/docker-compose.${APP_NAME}.yaml" \
-      --file "${APP_DIR}/docker-compose.${APP_NAME}.prod.yaml" \
+    docker compose \
+        --env-file "${APP_DIR}/.env.${APP_NAME}" \
+        --file "${APP_DIR}/docker-compose.${APP_NAME}.yaml" \
+        --file "${APP_DIR}/docker-compose.${APP_NAME}.prod.yaml" \
       up -d
   else
     printf "'%s' update script finished.\n\n" "${APP_NAME}"
@@ -649,21 +651,22 @@ application_restart() {
 
   if [[ ! ${restart} =~ [nN] ]]; then
     docker compose \
-      --env-file "${APP_DIR}/.env.${APP_NAME}" \
-      --file "${APP_DIR}/docker-compose.${APP_NAME}.yaml" \
-      --file "${APP_DIR}/docker-compose.${APP_NAME}.prod.yaml" \
+        --env-file "${APP_DIR}/.env.${APP_NAME}" \
+        --file "${APP_DIR}/docker-compose.${APP_NAME}.yaml" \
+        --file "${APP_DIR}/docker-compose.${APP_NAME}.prod.yaml" \
       down
     if ! test "$(docker network ls -q --filter name=app-net)"; then
       docker network create app-net
     fi
     docker compose \
-      --env-file "${APP_DIR}/.env.${APP_NAME}" \
-      --file "${APP_DIR}/docker-compose.${APP_NAME}.yaml" \
-      --file "${APP_DIR}/docker-compose.${APP_NAME}.prod.yaml" \
+        --env-file "${APP_DIR}/.env.${APP_NAME}" \
+        --file "${APP_DIR}/docker-compose.${APP_NAME}.yaml" \
+        --file "${APP_DIR}/docker-compose.${APP_NAME}.prod.yaml" \
       pull
-    docker compose --env-file "${APP_DIR}/.env.${APP_NAME}" \
-      --file "${APP_DIR}/docker-compose.${APP_NAME}.yaml" \
-      --file "${APP_DIR}/docker-compose.${APP_NAME}.prod.yaml" \
+    docker compose \
+        --env-file "${APP_DIR}/.env.${APP_NAME}" \
+        --file "${APP_DIR}/docker-compose.${APP_NAME}.yaml" \
+        --file "${APP_DIR}/docker-compose.${APP_NAME}.prod.yaml" \
       up -d
   else
     printf "'%s' update script finished.\n\n" "${APP_NAME}"

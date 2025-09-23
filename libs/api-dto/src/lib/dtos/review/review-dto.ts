@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ReviewBaseDto } from './review-base-dto';
 
-export class ReviewDto {
-  @ApiProperty()
-    id!: number;
-
-  @ApiProperty()
-    name!: string;
-
+export class ReviewDto extends ReviewBaseDto {
   @ApiProperty()
     workspaceId!: number;
 

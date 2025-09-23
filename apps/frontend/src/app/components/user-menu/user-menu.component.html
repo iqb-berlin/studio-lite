@@ -1,11 +1,35 @@
 <button mat-button
+        [class.white-color]="!trigger.menuOpen"
+        [color]="'primary'"
         [matMenuTriggerFor]="menuUser"
+        #trigger="matMenuTrigger"
         [matTooltip]="'home.user-menu' | translate"
         matTooltipPosition="above"
         data-cy = "goto-user-menu" >
   <studio-lite-wrapped-icon icon="account_box"></studio-lite-wrapped-icon>
 </button>
 <mat-menu #menuUser="matMenu">
+
+  <div class="user-info" (click)="$event.stopPropagation()">
+    @if (!isUserLoggedIn) {
+      <div class="info-header">
+        <div class="info-value">{{(hasReviews ? 'home.logged-in-for-review' : 'home.not-logged-in') | translate}}</div>
+      </div>
+    }
+    @if (isUserLoggedIn) {
+      <div class="info-header user-name">
+        <div class="info-value">{{(userLongName ? userName + ' - ' + userLongName: userName)}}</div>
+      </div>
+    }
+    @if (isAdmin) {
+      <div class="info-header is-admin">
+        <div class="info-value">{{'home.isAdminMessage' | translate}}</div>
+      </div>
+    }
+  </div>
+
+
+
   <studio-lite-account-action
     [type]="'changePassword'"
     [iconName]="'lock'"

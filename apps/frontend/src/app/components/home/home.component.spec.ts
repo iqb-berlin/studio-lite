@@ -50,14 +50,6 @@ describe('HomeComponent', () => {
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl
-        },
-        {
-          provide: 'APP_VERSION',
-          useValue: '0.0.0'
-        },
-        {
-          provide: 'APP_NAME',
-          useValue: 'Studio-Lite'
         }
       ]
     }).overrideComponent(HomeComponent, {

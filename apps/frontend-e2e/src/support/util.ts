@@ -4,11 +4,11 @@ import Chainable = Cypress.Chainable;
 export function addFirstUser() {
   cy.visit('/');
   cy.login(Cypress.env('username'), Cypress.env('password'));
-  cy.buttonToContinue('Weiter', [201], '/api/init-login', 'POST', 'responseLogin');
+  cy.clickButton('Anmelden');
+  // cy.buttonToContinue('Anmelden', [201], '/api/init-login', 'POST', 'responseLogin');
 }
 
 export function createNewUser(newUser: UserData):void {
-  cy.visit('/');
   findAdminSettings().click();
   cy.get('mat-icon').contains('add').click();
   cy.get('input[placeholder="Login-Name"]')
@@ -73,6 +73,7 @@ export function findAdminSettings(): Chainable {
 
 export function createWs(ws:string, group:string):void {
   findWorkspaceGroupSettings(group).click();
+  cy.wait(100);
   cy.get('span:contains("Arbeitsbereiche")')
     .eq(0)
     .click();
@@ -86,6 +87,7 @@ export function createWs(ws:string, group:string):void {
 }
 
 export function clickIndexTab(name:string):void {
+  cy.wait(100);
   cy.get(`span:contains(${name})`).eq(0).click();
 }
 
@@ -199,7 +201,7 @@ export function deleteFirstUser() {
 
 export function login(username: string, password = '') {
   cy.login(username, password);
-  cy.buttonToContinue('Weiter', [201], '/api/login', 'POST', 'responseLogin');
+  cy.buttonToContinue('Anmelden', [201], '/api/login', 'POST', 'responseLogin');
 }
 
 export function addModules(filenames:string[]):void {
@@ -328,7 +330,7 @@ export function updatePersonalData():void {
   // cy.get('[data-cy="goto-user-menu"]').click();
   cy.get('studio-lite-user-menu')
     .click();
-  cy.get('span:contains("Nutzerdaten ändern")')
+  cy.get('span:contains("Nutzer:innen-Daten ändern")')
     .should('exist')
     .click();
   cy.get('input[placeholder="Nachname"]')

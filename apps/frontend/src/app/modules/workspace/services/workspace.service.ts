@@ -117,6 +117,12 @@ export class WorkspaceService {
     return this.unitMetadataStore;
   }
 
+  restoreUnitStores(): void {
+    if (this.getUnitMetadataStore()) this.getUnitMetadataStore()?.restore();
+    if (this.getUnitDefinitionStore()) this.getUnitDefinitionStore()?.restore();
+    if (this.getUnitSchemeStore()) this.getUnitSchemeStore()?.restore();
+  }
+
   isChanged(): boolean {
     return !!((this.unitMetadataStore && this.unitMetadataStore.isChanged()) ||
       (this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) ||

@@ -1,13 +1,16 @@
 <div class="page-body">
-  <div class="fx-row-center-start">
+  <div class="about-content fx-row-center-start">
     <mat-card class="card-dimensions single-box">
-      <mat-card-title>{{appService.appConfig.appTitle}} - {{appService.appConfig.pageTitle}}</mat-card-title>
-      <mat-card-content>
-        <div [innerHTML]="appService.appConfig.imprintHtml"></div>
-      </mat-card-content>
-      <mat-card-actions>
-        <a mat-raised-button [routerLink]="['/']">{{'home.home-page' | translate}}</a>
-      </mat-card-actions>
+      <div class="area-container">
+        <mat-card-title class="mat-h1 about-title">{{appService.appConfig.appTitle}}</mat-card-title>
+        <mat-card-content>
+          <div class="mat-body-1" [innerHTML]="appService.appConfig.imprintHtml"></div>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <a mat-raised-button [color]="'primary'"
+             [routerLink]="['/']">{{'home.home-page' | translate}}</a>
+        </mat-card-actions>
+      </div>
     </mat-card>
   </div>
 </div>

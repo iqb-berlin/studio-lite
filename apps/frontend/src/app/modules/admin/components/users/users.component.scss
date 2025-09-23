@@ -5,6 +5,10 @@
 
 .object-list {
   height: calc(100% - 5px);
+  .object-header-container {
+    margin-top: 5px;
+    margin-bottom: 20px;
+  }
 }
 
 .secondary-cell {
@@ -26,9 +30,15 @@
 }
 
 .info {
-  margin: 20px;
+  margin: 20px 0;
   padding: 20px 15px;
   border-radius: 5px;
   border: 1px solid #000000;
+}
+
+.save-button{
+  position: absolute;
+  top: 65px;
+  right: 60px;
 }
 

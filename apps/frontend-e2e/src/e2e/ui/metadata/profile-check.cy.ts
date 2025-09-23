@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import {
   addFirstUser,
   createGroup,
@@ -22,9 +21,6 @@ describe('Load metadata profile', () => {
   });
   after(() => {
     deleteFirstUser();
-  });
-  beforeEach(() => {
-    cy.visit('/');
   });
 
   it('user admin prepares the Context', () => {
@@ -57,6 +53,7 @@ describe('Load metadata profile', () => {
 
   it('should be possible load a metadata profile from workspace', () => {
     const searchProfile:string = 'Deutsch';
+    cy.visit('/');
     cy.get(`div>div>div:contains("${searchProfile}")`)
       .next()
       .click();
@@ -84,6 +81,7 @@ describe('Load metadata profile', () => {
   });
 
   it('removes the Context', () => {
+    cy.visit('/');
     deleteUser(newUser.username);
     cy.visit('/');
     groups.forEach(group => {

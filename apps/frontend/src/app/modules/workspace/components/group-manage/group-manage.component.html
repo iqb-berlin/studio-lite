@@ -71,8 +71,8 @@
           </div>
 
           <studio-lite-save-changes [changed]="changed"
-            (discardChanges)="discardChanges()"
-            (saveChanges)="saveChanged()">
+                                    (discardChanges)="discardChanges()"
+                                    (saveChanges)="saveChanged()">
           </studio-lite-save-changes>
 
         </div>
@@ -84,8 +84,9 @@
   <mat-dialog-actions align="end">
     <div class="fx-row-start-stretch">
       <button mat-raised-button
-        color="primary"
-        [mat-dialog-close]="false">
+              color="primary"
+              [disabled]="changed"
+              [mat-dialog-close]="false">
         {{'close' | translate}}
       </button>
     </div>

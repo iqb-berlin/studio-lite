@@ -1,0 +1,58 @@
+.header {
+  font-size: larger;
+  font-weight: normal;
+  text-align: left;
+  padding: 4px 0 4px 10px;
+  line-height: 2.0em;
+  background-color: #eee;
+  border-bottom: 1px solid #ddd;
+}
+
+.hidden {
+  display: none;
+}
+
+.new-review {
+  font-size: 12px;
+  position: absolute;
+}
+
+.review-group {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.sort-header {
+  color: #666;
+}
+
+.review-link {
+  position: relative;
+  color: #666;
+  text-decoration: none;
+}
+
+.header-row {
+  min-height: 28px;
+}
+
+
+.review-name {
+  color: #006064;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+
+.mat-mdc-row .mat-mdc-cell {
+  border-bottom: 1px solid transparent;
+  border-top: 1px solid transparent;
+  min-height: 20px;
+}
+
+.mat-mdc-row{
+  min-height: 38px;
+  &:hover {
+    background-color: #00606406;
+  }
+}

@@ -4,11 +4,13 @@ import { Router } from '@angular/router';
 import { lastValueFrom, tap } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
+import { DatePipe } from '@angular/common';
 import { ModuleService } from '../../shared/services/module.service';
 import { UnitData } from '../models/unit-data.class';
 import { ReviewBackendService } from './review-backend.service';
 import { AppService } from '../../../services/app.service';
 import { Comment } from '../../comments/models/comment.interface';
+import { I18nService } from '../../../services/i18n.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +18,8 @@ import { Comment } from '../../comments/models/comment.interface';
 export class ReviewService {
   reviewId = 0;
   reviewName = '';
+  reviewCreatedAt: string = '';
+  reviewChangedAt: string = '';
   workspaceId = 0;
   workspaceName = '';
   units: UnitData[] = [];
@@ -38,7 +42,8 @@ export class ReviewService {
     private moduleService: ModuleService,
     private backendService: ReviewBackendService,
     public appService: AppService,
-    private router: Router
+    private router: Router,
+    private i18nService: I18nService
   ) {}
 
   setUnitNavigationRequest(targetUnitId: number) {
@@ -78,6 +83,11 @@ export class ReviewService {
     });
   }
 
+  toDateTimeString(date: Date): string {
+    const datePipe = new DatePipe(this.i18nService.fullLocale);
+    return datePipe.transform(new Date(date), this.i18nService.dateTimeFormat) || '';
+  }
+
   async loadReviewData(): Promise<void> {
     return lastValueFrom(this.backendService.getReview(this.reviewId).pipe(
       tap(reviewData => {
@@ -92,7 +102,8 @@ export class ReviewService {
                 workspace: reviewData.workspaceName, workspaceGroup: reviewData.workspaceGroupName
               }) : '';
           this.workspaceId = reviewData.workspaceId ? reviewData.workspaceId : 0;
-          this.units = [];
+          this.reviewCreatedAt = reviewData.createdAt ? this.toDateTimeString(reviewData.createdAt) : '';
+          this.reviewChangedAt = reviewData.changedAt ? this.toDateTimeString(reviewData.changedAt) : '';
           if (reviewData.units) {
             let counter = 0;
             reviewData.units.forEach(u => {

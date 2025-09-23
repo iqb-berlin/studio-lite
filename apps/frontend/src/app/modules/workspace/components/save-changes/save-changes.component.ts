@@ -13,6 +13,7 @@ import { MatButton } from '@angular/material/button';
   imports: [MatButton, MatTooltip, MatIcon, TranslateModule]
 })
 export class SaveChangesComponent {
+  @Input() disabled!: boolean;
   @Input() changed!: boolean;
   @Output() discardChanges: EventEmitter<null> = new EventEmitter<null>();
   @Output() saveChanges: EventEmitter<null> = new EventEmitter<null>();

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { from, Observable, of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { switchMap, map, tap } from 'rxjs/operators';
+import { switchMap, map } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { SaveOrDiscardComponent } from '../components/save-or-discard/save-or-discard.component';
@@ -19,21 +19,12 @@ export class UnitRoutingCanDeactivateGuard {
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
     if (this.workspaceService.isChanged() && this.workspaceService.userAccessLevel > 1) {
-      let content = '';
-      let isWarning = true;
+      const isValid = this.workspaceService.isValidFormKey.value;
+      const hasWarning = !isValid;
+      const content = isValid ?
+        this.translateService.instant('workspace.save-unit-data-changes') :
+        this.translateService.instant('workspace.save-unit-data-changes-warning');
 
-      this.workspaceService.isValidFormKey.pipe(
-        map(isValid => ({
-          isWarning: !isValid,
-          content: isValid ?
-            this.translateService.instant('workspace.save-unit-data-changes') :
-            this.translateService.instant('workspace.save-unit-data-changes-warning')
-        })),
-        tap(({ isWarning: warning, content: message }) => {
-          isWarning = warning;
-          content = message;
-        })
-      ).subscribe();
       const dialogRef = this.confirmDialog.open(SaveOrDiscardComponent, {
         width: '500px',
         data: <ConfirmDialogData> {
@@ -43,7 +34,7 @@ export class UnitRoutingCanDeactivateGuard {
           confirmButtonReturn: 'YES',
           confirmButton2Label: this.translateService.instant('workspace.reject-changes-label'),
           confirmButton2Return: 'NO',
-          warning: isWarning
+          warning: hasWarning
         }
       });
       return dialogRef.afterClosed().pipe(

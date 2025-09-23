@@ -1,13 +1,13 @@
-<div class="home-body fx-row-center-stretch fx-wrap">
+<div class="home-body fx-row-center-start fx-wrap">
   @if (appService.authData.userId === 0 && appService.authData.reviews.length === 0) {
     <studio-lite-login
-      class="fx-column-start-stretch mat-elevation-z8 box box-left">
+      class="mat-elevation-z8 box box-left">
     </studio-lite-login>
   }
 
   @if (appService.authData.userId > 0) {
     <studio-lite-user-workspaces-area
-      class="fx-column-start-stretch mat-elevation-z8 box box-left"
+      class="mat-elevation-z8 box box-left"
       [workspaceGroups]="appService.authData.workspaces"
       [warning]="appService.globalWarning"
       [isAdmin]="appService.authData.isAdmin">
@@ -16,21 +16,21 @@
 
   @if (appService.authData.reviews.length > 0) {
     <studio-lite-user-reviews-area
-      class="fx-column-start-stretch mat-elevation-z8 box box-left"
+      class="mat-elevation-z8 box box-left"
       [reviews]="appService.authData.reviews"
       [isReviewUser]="appService.authData.userId === 0">
     </studio-lite-user-reviews-area>
   }
 
-  <studio-lite-app-info class="fx-column-start-stretch mat-elevation-z8 box box-right"
-    [appTitle]="appService.appConfig.appTitle"
-    [introHtml]="appService.appConfig.introHtml"
-    [hasReviews]="appService.authData.reviews.length > 0"
-    [appName]="appName"
-    [appVersion]="appVersion"
-    [userName]="appService.authData.userName"
-    [userLongName]="appService.authData.userLongName "
-    [isUserLoggedIn]="appService.authData.userId > 0"
-    [isAdmin]="appService.authData.isAdmin">
-  </studio-lite-app-info>
+  @if (!appService.authData.userId  || !appService.authData.reviews.length) {
+    <studio-lite-app-info class="mat-elevation-z8 box box-right"
+      [appTitle]="appService.appConfig.appTitle"
+      [introHtml]="appService.appConfig.introHtml"
+      [hasReviews]="appService.authData.reviews.length > 0"
+      [userName]="appService.authData.userName"
+      [userLongName]="appService.authData.userLongName "
+      [isUserLoggedIn]="appService.authData.userId > 0"
+      [isAdmin]="appService.authData.isAdmin">
+    </studio-lite-app-info>
+  }
 </div>

@@ -7,8 +7,10 @@
         {{'workspace.review-settings' | translate}}
       </mat-panel-title>
     </mat-expansion-panel-header>
-    <mat-form-field>
+    <mat-form-field class="full-width">
+      <mat-label>{{ 'workspace.review-name' | translate }}</mat-label>
       <input matInput
+             required
              [placeholder]="'workspace.review-name' | translate"
              [(ngModel)]="name"
              [disabled]="!selectedReviewId"

@@ -96,6 +96,7 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
     .eq(0)
     .next()
     .click();
+  cy.wait(300);
   cy.get('span:contains("Arbeitsbereiche")')
     .eq(0)
     .click();

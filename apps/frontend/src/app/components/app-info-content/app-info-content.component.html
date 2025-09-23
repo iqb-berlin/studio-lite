@@ -1,0 +1,22 @@
+<div class="system-info mat-elevation-z3">
+    <mat-list>
+      <span class="info-title" matListItemTitle>{{'home.appVersion' | translate}}</span>
+      <span matListItemLine>{{appVersion}}</span>
+    </mat-list>
+    @if (!isUserLoggedIn) {
+      <mat-list>
+        <span class="info-title" matListItemTitle>{{(hasReviews ? 'home.logged-in-for-review' : 'home.not-logged-in') | translate}}</span>
+      </mat-list>
+    }
+    @if (isUserLoggedIn) {
+      <mat-list>
+        <span class="info-title" matListItemTitle>{{'home.logged-in-as' | translate}}</span>
+        <span matListItemLine>{{(userLongName ? userName + ' - ' + userLongName: userName)}}</span>
+      </mat-list>
+    }
+    @if (isAdmin) {
+      <mat-list>
+        <span class="info-title" matListItemTitle>{{'home.isAdminMessage' | translate}}</span>
+      </mat-list>
+    }
+</div>

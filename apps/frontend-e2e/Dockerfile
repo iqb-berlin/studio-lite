@@ -15,7 +15,7 @@ WORKDIR /usr/src/studio-lite
 COPY . .
 
 # Copy pre-installed dependencies
-COPY --from=base /usr/src/studio-lite-base/node_modules ./node_modules
+COPY --from=base /usr/src/studio-lite/node_modules ./node_modules
 
 # Check nx workspace version
 RUN npx nx --version

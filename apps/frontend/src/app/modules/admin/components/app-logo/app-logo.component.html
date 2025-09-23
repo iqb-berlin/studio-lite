@@ -21,43 +21,36 @@
       <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
     </button>
     @if (imageError) {
-      <p
-        class="warning-warning">
+      <div class="warning-warning">
         {{imageError}}
-      </p>
+      </div>
     }
   </div>
-  <mat-form-field
-    class="fx-column-start-stretch">
-    <mat-label>{{'logo.alt-text' | translate}}</mat-label>
-    <input matInput
-      formControlName="alt"
-      [placeholder]="'logo.alt-text-placeholder' | translate">
-  </mat-form-field>
-  <mat-form-field class="fx-column-start-stretch">
-    <mat-label>{{'logo.app-background-color' | translate}}</mat-label>
-    <input matInput
-      formControlName="bodyBackground"
-      [placeholder]="'logo.app-background-color-placeholder' | translate">
-  </mat-form-field>
-  <mat-form-field class="fx-column-start-stretch">
-    <mat-label>{{'logo.boxes-background-color' | translate}}</mat-label>
-    <input matInput
-      formControlName="boxBackground"
-      [placeholder]="'logo.boxes-background-color-placeholder' | translate">
-  </mat-form-field>
-  <div class="fx-row-start-start fx-gap-30 save-button">
-    <button mat-raised-button
-      color="primary"
-      [disabled]="!dataChanged"
-      (click)="saveData()">
-      {{'save' | translate}}
-    </button>
+  <div class="fx-row-start-start fx-gap-20">
+    <mat-form-field class="fx-flex-fill">
+      <mat-label>{{'logo.app-background-color' | translate}}</mat-label>
+      <input matInput
+        formControlName="bodyBackground"
+        [placeholder]="'logo.app-background-color-placeholder' | translate">
+    </mat-form-field>
+    <mat-form-field class="fx-flex-fill">
+      <mat-label>{{'logo.boxes-background-color' | translate}}</mat-label>
+      <input matInput
+        formControlName="boxBackground"
+        [placeholder]="'logo.boxes-background-color-placeholder' | translate">
+    </mat-form-field>
+  </div>
+  <div class="fx-row-end-center fx-gap-30">
     @if (dataChanged) {
-      <div
-        class="fx-flex-fill">
+      <div class="fx-flex-fill">
         {{'admin.reload-page' | translate}}
       </div>
     }
+    <button mat-raised-button
+            color="primary"
+            [disabled]="!dataChanged"
+            (click)="saveData()">
+      {{'save' | translate}}
+    </button>
   </div>
 </form>

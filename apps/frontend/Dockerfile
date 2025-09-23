@@ -26,7 +26,7 @@ RUN chown -R nginx:root /usr/share/nginx/html
 USER nginx
 
 COPY --chown=nginx:root config/frontend/default.conf.http-template /etc/nginx/templates/default.conf.template
-COPY --chown=nginx:root --from=base /usr/src/studio-lite-base/dist/apps/${PROJECT} /usr/share/nginx/html
+COPY --chown=nginx:root --from=base /usr/src/studio-lite/dist/apps/${PROJECT} /usr/share/nginx/html
 
 EXPOSE 8080 8443
 

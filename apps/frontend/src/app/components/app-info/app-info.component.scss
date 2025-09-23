@@ -1,7 +1,6 @@
-.scroll-area {
-  overflow-y: auto;
+.area-container {
+  max-height: calc(100vh - 270px);
+  overflow: auto;
+  padding: 0 5px 10px 5px;
 }
 
-.full-width {
-  min-width: 100%;
-}

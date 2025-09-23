@@ -8,6 +8,7 @@ import { EditMyDataDirective } from '../../directives/edit-my-data.directive';
 import { ChangePasswordDirective } from '../../directives/change-password.directive';
 import { AccountActionComponent } from '../account-action/account-action.component';
 import { WrappedIconComponent } from '../../modules/shared/components/wrapped-icon/wrapped-icon.component';
+import { AppService } from '../../services/app.service';
 
 @Component({
   selector: 'studio-lite-user-menu',
@@ -17,4 +18,17 @@ import { WrappedIconComponent } from '../../modules/shared/components/wrapped-ic
   imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, AccountActionComponent, ChangePasswordDirective, EditMyDataDirective, LogoutDirective, TranslateModule]
 })
 export class UserMenuComponent {
+  userName: string;
+  userLongName: string;
+  isUserLoggedIn: boolean;
+  isAdmin: boolean;
+  hasReviews: boolean;
+
+  constructor(public appService: AppService) {
+    this.userName = appService.authData.userName;
+    this.userLongName = appService.authData.userLongName;
+    this.isUserLoggedIn = appService.authData.userId > 0;
+    this.isAdmin = appService.authData.isAdmin;
+    this.hasReviews = appService.authData.reviews.length > 0;
+  }
 }

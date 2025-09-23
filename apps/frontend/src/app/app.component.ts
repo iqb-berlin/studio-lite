@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
-import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import {
-  Router, RouterState, RouterLink, RouterOutlet
+  Router, RouterState, RouterLink, RouterOutlet, NavigationEnd
 } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -15,21 +15,24 @@ import { IsInArrayPipe } from './pipes/is-in-array.pipe';
 import { DataLoadingAsTextPipe } from './pipes/data-loading-as-text.pipe';
 import { DataLoadingIsNumberPipe } from './pipes/data-loading-is-number.pipe';
 import { I18nService } from './services/i18n.service';
+import { UserMenuComponent } from './components/user-menu/user-menu.component';
+import { WrappedIconComponent } from './modules/shared/components/wrapped-icon/wrapped-icon.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatProgressSpinner, MatButton, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule, DataLoadingIsNumberPipe, DataLoadingAsTextPipe, IsInArrayPipe]
+  imports: [MatProgressSpinner, MatButton, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule, DataLoadingIsNumberPipe, DataLoadingAsTextPipe, IsInArrayPipe, UserMenuComponent, WrappedIconComponent]
 })
 
 export class AppComponent implements OnInit {
+  currentRoutePath = ''; // home, about, print, admin, a , wsg-admin, review
+
   constructor(
     public appService: AppService,
     private backendService: BackendService,
     private sanitizer: DomSanitizer,
-    private translateService: TranslateService,
     private titleService: Title,
     private router: Router,
     private i18nService: I18nService
@@ -38,6 +41,12 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        const urlParts = event.urlAfterRedirects.split(/[/?]/);
+        this.currentRoutePath = (urlParts.length > 1) ? urlParts[1] : '';
+      }
+    });
     setTimeout(() => {
       this.appService.dataLoading = true;
       this.backendService.getConfig().subscribe(newConfig => {

@@ -1,0 +1,62 @@
+<div class="review-group mat-elevation-z3">
+  <div class="header fx-row-space-between-center">
+    <span>{{groupName}}</span>
+    <button mat-button
+            class="admin-button"
+            [color] = "'primary'"
+            [matTooltip]="`home.reviews-${(reviewsView === 'list') ? 'details' : 'list'}-view`  | translate"
+            (click)="toggleView()">
+      <studio-lite-wrapped-icon
+        [icon]="reviewsView === 'list' ? 'table_chart' : 'table_rows'">
+      </studio-lite-wrapped-icon>
+    </button>
+  </div>
+  <mat-table [dataSource]="dataSource"
+             matSort
+             matSortActive="name"
+             matSortDirection="asc"
+             matSortDisableClear>
+    @for (column of displayedColumns; track column) {
+      <ng-container [matColumnDef]="column">
+        @if (reviews.length > 1) {
+          <mat-header-cell class="sort-header" *matHeaderCellDef
+                           [class.hidden]="reviewsView === 'list'"
+                           mat-sort-header>
+            @if (column === 'changedAt') {
+              {{ 'review.change-date' | translate }}
+            } @else {
+              {{ `review.${column}` | translate }}
+            }
+          </mat-header-cell>
+        }
+        <mat-cell *matCellDef="let review">
+          @let isNew = review.changedAt | isNewReview;
+          <a class="review-link"
+             [matTooltip]="isNew? ('review.is-new' | translate) : ''"
+             [class.review-name]="column === 'name'"
+             [routerLink]="`/review/${ review.id }`">
+            @if (column === 'name') {
+              {{ review.name }}
+              @if (isNew) {
+                <mat-icon class="new-review">star</mat-icon>
+              }
+            } @else if (column === 'changedAt') {
+              {{ review[column] | date : i18nService.dateFormat : i18nService.timeZone }}
+            } @else {
+              {{ review[column] }}
+            }
+          </a>
+        </mat-cell>
+      </ng-container>
+    }
+    @if (reviews.length > 1) {
+      <mat-header-row class="header-row"
+                      [class.hidden]="reviewsView === 'list'"
+                      *matHeaderRowDef="displayedColumns">
+      </mat-header-row>
+    }
+    <mat-row class="review-row"
+             *matRowDef="let row; columns: displayedColumns;">
+    </mat-row>
+  </mat-table>
+</div>
