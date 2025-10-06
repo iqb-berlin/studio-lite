@@ -35,8 +35,8 @@ describe('UI check: initial page', () => {
   });
 
   it('should have submit bottom not clickable if the username and pass if not filled', () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     isButtonClickable(submitBottom).then(isClickable => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(isClickable).to.be.false;
     });
   });
@@ -44,8 +44,8 @@ describe('UI check: initial page', () => {
   it('should have submit bottom clickable', () => {
     cy.get(homeUserName).type('fuser');
     cy.get(homePassword).type('pass');
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     isButtonClickable(submitBottom).then(isClickable => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(isClickable).to.be.true;
     });
     cy.get(homeUserName).should('exist');
@@ -56,8 +56,8 @@ describe('UI check: initial page', () => {
 
   it('should have legal notice and privacy policy bottom, and it should be clickable', () => {
     cy.get(homeImprintBottom).should('exist');
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     isButtonClickable(homeImprintBottom).then(isClickable => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(isClickable).to.be.true;
     });
 
@@ -66,8 +66,8 @@ describe('UI check: initial page', () => {
 
   it('should click the legacy bottom, and click the return bottom', () => {
     cy.get(homeImprintBottom).click();
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     isButtonClickable(homeBottom).then(isClickable => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(isClickable).to.be.true;
     });
 
