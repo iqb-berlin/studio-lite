@@ -70,7 +70,7 @@ export class UnitsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.updateUnits();
+    setTimeout(() => this.updateUnits());
   }
 
   private updateUnits(): void {
