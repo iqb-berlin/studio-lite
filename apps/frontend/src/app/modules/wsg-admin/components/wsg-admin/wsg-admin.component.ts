@@ -16,7 +16,7 @@ import { AppService } from '../../../../services/app.service';
   imports: [MatTabNav, MatTabLink, RouterLinkActive, RouterLink, MatTabNavPanel, RouterOutlet, TranslateModule]
 })
 export class WsgAdminComponent implements OnInit {
-  navLinks: string[] = ['users', 'workspaces', 'settings'];
+  navLinks: string[] = ['users', 'workspaces', 'units', 'settings'];
   constructor(
     private wsgAdminService: WsgAdminService,
     private backendService: BackendService,

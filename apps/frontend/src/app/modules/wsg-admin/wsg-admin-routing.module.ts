@@ -4,6 +4,7 @@ import { WorkspacesComponent } from './components/workspaces/workspaces.componen
 import { UsersComponent } from './components/users/users.component';
 import { WsgAdminComponent } from './components/wsg-admin/wsg-admin.component';
 import { WorkspaceSettingsComponent } from './components/settings/settings.component';
+import { UnitsComponent } from './components/units/units.component';
 
 const routes: Routes = [
   {
@@ -13,6 +14,7 @@ const routes: Routes = [
       { path: '', redirectTo: 'users', pathMatch: 'full' },
       { path: 'users', component: UsersComponent },
       { path: 'workspaces', component: WorkspacesComponent },
+      { path: 'units', component: UnitsComponent },
       { path: 'settings', component: WorkspaceSettingsComponent },
       { path: '**', component: UsersComponent }
     ]

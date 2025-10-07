@@ -1,0 +1,54 @@
+<div class="admin-tab-content fx-column-start-stretch">
+
+  @if (dataSource.data.length) {
+
+    <div class="info">
+      {{'wsg-admin.issue-count-info' | translate :
+          { count: dataSource.data.length, issue: ('admin.units' | translate)}
+      }}
+    </div>
+
+    <studio-lite-search-filter
+      [title]="'search-filter.filter-units' | translate"
+      (valueChange)="dataSource.filter = $event.trim().toLowerCase()">
+    </studio-lite-search-filter>
+  }
+
+  <div class="admin-tab-content">
+    <table mat-table [dataSource]="dataSource" matSort>
+
+      @for (column of displayedColumns; track column) {
+        <ng-container [matColumnDef]="column">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <span class="capitalized">{{ `unit.${column}` | translate}}</span>
+          </th>
+          <td mat-cell *matCellDef="let unit">
+            @if (column === 'id') {
+              <a [routerLink]="`/a/${unit.workspaceId}/${unit.id}`">{{ unit.id }}</a>
+            } @else if (column === 'lastChangedDefinition' || column === 'lastChangedMetadata' || column === 'lastChangedScheme') {
+              {{ unit[column] | date : i18nService.dateTimeFormat : i18nService.timeZone }}
+            } @else if (column !== 'delete') {
+              {{ unit[column] }}
+            } @else {
+              <button mat-icon-button
+                      [matTooltip]="'wsg-admin.delete-unit-by-key' | translate : {unitKey: unit.key}"
+                      [color]="'warn'"
+                      matTooltipPosition="above"
+                      (click)="openDeleteDialog(unit)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+      }
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+  <mat-paginator [length]="dataSource.data.length"
+                 [pageSize]="10"
+                 [pageSizeOptions]="[10, 50, 100]"
+                 aria-label="Select page">
+  </mat-paginator>
+</div>

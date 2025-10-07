@@ -369,8 +369,15 @@
     "not-allowed-image-size": "Unzulässige Größe (maximal erlaubt: {{maxHeight}}*{{maxWidth}}px)"
   },
   "wsg-admin": {
+    "delete-unit": "Aufgabe löschen",
+    "delete-unit-question": "Soll Aufgabe \"{{unitKey}}\" gelöscht werden?",
+    "delete-unit-by-key": "Aufgabe \"{{unitKey}}\" löschen",
+    "unit-deleted": "Aufgabe gelöscht",
+    "unit-not-deleted": "Konnte Aufgabe nicht löschen",
+    "units": "Aufgaben",
     "name": "Name",
     "hint": "Zugriffsrechte: Bitte links Arbeitsbereich wählen",
+    "issue-count-info": "Die Arbeitsbereichsgruppe enthält insgesamt {{count}} {{issue}}.",
     "access-for-workspace": "Zugriffsrechte für \"{{workspace}}\"",
     "new-workspace": "Neuer Arbeitsbereich",
     "enter-name": "Bitte Namen eingeben",
@@ -916,5 +923,20 @@
     "next-page": "Nächste Seite",
     "previous-page": "Vorherige Seite",
     "range": "{{start}} - {{end}} von {{total}}"
+  },
+  "unit": {
+    "id" : "ID",
+    "key" : "Kurzname",
+    "name": "Name",
+    "workspaceId": "Arbeitsbereichs-ID",
+    "workspaceName": "Arbeitsbereichs-Name",
+    "definitionId": "Definitons-ID",
+    "lastChangedDefinition": "Definitions-Änderung",
+    "lastChangedDefinitionUser": "Definitions-Berarbeiter:in",
+    "lastChangedMetadata": "Eigenschafts-Änderung",
+    "lastChangedMetadataUser": "Eigenschafts-Bearbeiter:in",
+    "lastChangedScheme": "Kodierschema-änderung",
+    "lastChangedSchemeUser": "Kodierschema-Bearbeiter:in"
+
   }
 }
