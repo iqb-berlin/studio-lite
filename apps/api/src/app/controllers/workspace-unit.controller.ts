@@ -54,6 +54,7 @@ import { ManageAccessGuard } from '../guards/manage-access.guard';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import { WorkspaceService } from '../services/workspace.service';
 import { SettingService } from '../services/setting.service';
+import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 
 @Controller('workspaces/:workspace_id/units')
 export class WorkspaceUnitController {
@@ -264,6 +265,7 @@ export class WorkspaceUnitController {
   @Patch(':id/properties')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -322,6 +324,7 @@ export class WorkspaceUnitController {
   @Patch(':id/definition')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
@@ -340,6 +343,7 @@ export class WorkspaceUnitController {
   @Patch(':id/scheme')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
@@ -377,6 +381,7 @@ export class WorkspaceUnitController {
   @Delete()
   @UseGuards(JwtAuthGuard, WorkspaceGuard, DeleteAccessGuard)
   @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   @ApiOkResponse()
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
@@ -391,5 +396,19 @@ export class WorkspaceUnitController {
     @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[]
   ): Promise<void> {
     return this.unitService.remove(ids);
+  }
+
+  @Delete(':unitId')
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiTags('workspace unit')
+  @ApiOkResponse()
+  @ApiUnauthorizedResponse({ description: 'No admin privileges in the workspace.' })
+  @ApiInternalServerErrorResponse({ description: 'Internal error.' })
+  async removeUnit(
+    @Param('unitId', ParseIntPipe) unitId: number
+  ): Promise<void> {
+    return this.unitService.remove(unitId);
   }
 }

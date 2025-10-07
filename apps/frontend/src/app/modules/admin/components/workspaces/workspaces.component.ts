@@ -18,6 +18,7 @@ import { RouterLink } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
 import { BackendService } from '../../services/backend.service';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { AppService } from '../../../../services/app.service';
 
 @Component({
   selector: 'studio-lite-workspaces',
@@ -34,15 +35,23 @@ export class WorkspacesComponent implements OnInit, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private backendService: BackendService) {
+  constructor(
+    private backendService: BackendService,
+    private appService: AppService) {
   }
 
   ngOnInit(): void {
+    setTimeout(() => this.getAllWorkspaces());
+  }
+
+  private getAllWorkspaces(): void {
+    this.appService.dataLoading = true;
     this.backendService.getAllWorkspaces()
       .subscribe(workspaces => {
         if (Array.isArray(workspaces)) {
           this.dataSource.data = workspaces;
         }
+        this.appService.dataLoading = false;
       });
   }
 
