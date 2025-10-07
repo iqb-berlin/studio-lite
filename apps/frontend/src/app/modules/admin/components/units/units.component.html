@@ -20,7 +20,7 @@
       @for (column of displayedColumns; track column) {
         <ng-container [matColumnDef]="column">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            <span class="capitalized">{{ column }}</span>
+            <span>{{ `unit.${column}` | translate }}</span>
           </th>
           <td mat-cell *matCellDef="let unit">
             @if (column === 'id') {

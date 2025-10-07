@@ -11,7 +11,8 @@ import {
   WorkspaceGroupFullDto,
   WorkspaceUserInListDto,
   UserWorkspaceAccessForGroupDto,
-  UnitByDefinitionIdDto } from '@studio-lite-lib/api-dto';
+  UnitByDefinitionIdDto
+} from '@studio-lite-lib/api-dto';
 
 @Injectable({
   providedIn: 'root'
