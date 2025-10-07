@@ -20,6 +20,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { BackendService } from '../../services/backend.service';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 import { I18nService } from '../../../../services/i18n.service';
+import { AppService } from '../../../../services/app.service';
 
 @Component({
   selector: 'studio-lite-units',
@@ -49,15 +50,22 @@ export class UnitsComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(private backendService: BackendService,
+              private appService: AppService,
               public i18nService: I18nService) {
   }
 
   ngOnInit(): void {
+    setTimeout(() => this.getAllUnits());
+  }
+
+  private getAllUnits(): void {
+    this.appService.dataLoading = true;
     this.backendService.getAllUnits()
       .subscribe(units => {
         if (Array.isArray(units)) {
           this.dataSource.data = units;
         }
+        this.appService.dataLoading = false;
       });
   }
 
