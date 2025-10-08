@@ -8,7 +8,132 @@ Mit dieser Web-Anwendung werden Aufgaben und einzelne Seiten für die Verwendung
 Testsystem erstellt.
 Die Dokumentation dazu finden Sie [hier](https://iqb-berlin.github.io/tba-info/).
 
-# Installation
+
+
+## Development
+
+### Prerequisites
+
+Make sure the following tools are installed on your system:
+
+* Node.js
+* npm
+* Docker
+* Docker Compose
+* Make
+
+---
+
+### Project Setup
+
+1. Copy the development environment file template and rename it:
+
+   ```
+   cp .env.dev.template .env.dev
+   ```
+
+2. Install dependencies:
+
+   ```
+   npm install
+   ```
+
+---
+
+### Running the Project
+
+Two development options are available:
+
+#### **Option 1: Docker (Recommended)**
+
+Build all Docker images (database, backend, frontend):
+
+```
+make dev-build
+```
+
+Run all Docker containers:
+
+```
+make dev-up
+```
+
+#### **Option 2: Docker (Database Only) + npm (Frontend/Backend)**
+
+Build the Docker image for the database:
+
+```
+make dev-db-build
+```
+
+Run the Docker container for the database:
+
+```
+make dev-db-up
+```
+
+Run the frontend locally:
+
+```
+npm run start-frontend
+```
+
+Run the backend locally:
+
+```
+npm run start-backend
+```
+
+---
+
+### Accessing the Application
+
+* Frontend: [http://localhost:4200](http://localhost:4200)
+* Backend Swagger UI: [http://localhost:3333/api](http://localhost:3333/api)
+
+---
+
+### Stopping the Project
+
+Stop and remove all running containers:
+
+```
+make dev-down
+```
+
+Delete all project data (volumes):
+
+```
+make dev-volumes-clean
+```
+
+---
+
+### Running E2E Tests
+
+> **Note:** Start a fresh project instance with an empty database before running tests.
+
+Build the test images:
+
+```
+make dev-test-build-e2e
+```
+
+Run the tests:
+
+```
+make dev-test-e2e
+```
+
+---
+
+### Additional Commands
+
+* The `scripts/make` directory contains extra Makefile commands.
+* The `package.json` file includes additional npm scripts.
+
+
+## Installation (Produktivumgebung)
 Um dieses Autorensystem zu verwenden, muss es auf einem Server installiert sein.
 Die technische Basis hierfür ist [Docker](https://www.docker.com/).
 Die Installation, Aktualisierung und Bedienung des Servers kann durch die Ansteuerung sogenannter Make-Targets erfolgen,
@@ -16,10 +141,10 @@ die die dazu notwendigen Docker-Befehle kapseln.
 Dies setzt das Programm `Make` voraus, das zuvor ebenfalls installiert sein sollte.
 Sie können aber auch alle Befehle für Docker manuell aufrufen.
 
-## Account
+### Account
 Sie benötigen auf dem Server einen Account mit dem Recht, Docker auszuführen.
 
-## Automatische Installation
+### Automatische Installation
 Laden Sie bitte die Skript-Datei `install.sh` in der gewünschten Version herunter
 (zu finden beim jeweiligen Release bzw. im Projektverzeichnis `scripts/`) und
 starten Sie sie mit dem Befehl `bash install.sh` auf der Kommandozeile.
@@ -47,13 +172,13 @@ Sollte ein Zertifikat ungültig (geworden) sein, stellt Traefik automatisch ein 
 Bitte beachten Sie hierbei, dass selbst-signierte Zertifikate nur eine Notlösung sind und höchstwahrscheinlich zu einer
 **Sicherheitswarnung** in Ihrem Browser führen werden.
 
-## Automatische Updates
+### Automatische Updates
 Um weiterentwickelte Software-Versionen von Studio-Lite oder der IQB-Infrastruktur zu installieren,
 ein abgelaufenes selbst-signiertes TLS-Zertifikat zu erneuern
 oder die Login-Daten für die Infrastruktur zu ändern,
 rufen Sie bitte das Update-Skript aus dem Installationsverzeichnis mit `make studio-lite-update` auf.
 
-## Starten und Stoppen der Anwendung mit  `make`
+### Starten und Stoppen der Anwendung mit  `make`
 Zur Steuerung der Anwendungslandschaft existieren eine Reihe von Make-Targets,
 die das Arbeiten mit Docker auf dem Server angenehmer machen.
 Sie befinden sich im Verzeichnis `scripts` in Dateien mit dem Typ 'mk' und
@@ -94,7 +219,7 @@ Anwendungen außer dem Studio-Lite verwendet werden._
 Nun haben Sie die drei wichtigsten Befehle der Anwendungssteuerung kennengelernt.
 Alle weiteren Befehle, mit kurzen Erläuterungen finden Sie in den im `Makefile` inkludierten 'MK'-Dateien.
 
-# Erste Schritte
+## Erste Schritte
 Nach der Installation ist kein User-Account angelegt. Sie bekommen beim Aufruf der Webanwendung die Aufforderung,
 einen solchen Account anzulegen.
 Bitte notieren Sie sich die Daten, da dieser Account über besondere Rechte verfügt.
@@ -114,7 +239,7 @@ rufen Sie die Admin-Funktion einer Arbeitsbereichsgruppe auf (Zahnrad-Symbol neb
 
 Jetzt (zurück zur Startseite) ist man in der Lage, einen Arbeitsbereich aufzurufen und Aufgaben zu definieren.
 
-# Update/Anpassen
+## Update/Anpassen
 Achtung: Sorgen Sie vor einem Update stets für ein Backup (z. B. Snapshot-Funktion des Servers).
 Sie sollten das Zurückspielen eines Backups (sog. Restore) zumindest einmal erprobt haben,
 um auf diese Situation vorbereitet zu sein.
