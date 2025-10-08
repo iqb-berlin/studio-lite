@@ -16,7 +16,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { DatePipe } from '@angular/common';
 import { BytesPipe } from '@studio-lite-lib/iqb-components';
 import { BackendService } from '../../services/backend.service';
-import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
+import { FlattenedVeronaModuleClass, VeronaModuleClass } from '../../../shared/models/verona-module.class';
 import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
 import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
@@ -34,16 +34,19 @@ export class VeronaModulesTableComponent implements OnInit, OnDestroy {
   @Input()
   set modules(value: { [key: string]: VeronaModuleClass }) {
     this.objectsDatasource = new MatTableDataSource(
-      Object.keys(value).map(m => value[m])
+      VeronaModulesTableComponent.getFlattenedVeronaModuleClasses(Object.keys(value).map(m => value[m]))
     );
-    this.objectsDatasource.sort = this.sort;
-    setTimeout(() => this.tableSelectionCheckboxes.clear());
+    setTimeout(() => {
+      this.objectsDatasource.sort = this.sort;
+      this.tableSelectionCheckboxes.clear();
+    });
   }
 
   @Output() selectionChanged = new EventEmitter();
   @ViewChild(MatSort) sort = new MatSort();
-  objectsDatasource = new MatTableDataSource<VeronaModuleClass>();
-  tableSelectionCheckboxes = new SelectionModel <VeronaModuleClass>(true, []);
+
+  objectsDatasource = new MatTableDataSource<FlattenedVeronaModuleClass>();
+  tableSelectionCheckboxes = new SelectionModel<FlattenedVeronaModuleClass>(true, []);
   displayedColumns = ['selectCheckbox', 'name', 'id', 'version', 'veronaVersion', 'fileDateTime', 'filesize'];
   private selectionChangedSubscription: Subscription | undefined;
 
@@ -53,9 +56,13 @@ export class VeronaModulesTableComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.selectionChangedSubscription = this.tableSelectionCheckboxes.changed.subscribe(() => {
-      this.selectionChanged.emit({ type: this.type, selectedModules: this.tableSelectionCheckboxes.selected });
-    });
+    this.selectionChangedSubscription = this.tableSelectionCheckboxes.changed
+      .subscribe(() => {
+        this.selectionChanged.emit({
+          type: this.type,
+          selectedModules: VeronaModulesTableComponent.toVeronaModuleClasses(this.tableSelectionCheckboxes.selected)
+        });
+      });
   }
 
   private isAllSelected(): boolean {
@@ -70,15 +77,33 @@ export class VeronaModulesTableComponent implements OnInit, OnDestroy {
       this.objectsDatasource.data.forEach(row => this.tableSelectionCheckboxes.select(row));
   }
 
+  private static getFlattenedVeronaModuleClasses(
+    veronaModuleClasses: VeronaModuleClass[]): FlattenedVeronaModuleClass[] {
+    return veronaModuleClasses
+      .map(({ metadata, ...rest }) => ({ ...rest, ...metadata }));
+  }
+
+  private static toVeronaModuleClasses(modules: FlattenedVeronaModuleClass[]): VeronaModuleClass[] {
+    return modules.map(module => {
+      const {
+        key, sortKey, fileSize, fileDateTime, html, ...rest
+      } = module;
+      return new VeronaModuleClass({
+        key, sortKey, fileSize, fileDateTime, metadata: { ...rest }
+      });
+    });
+  }
+
+  downloadModule(key: string, id: string, version: string) {
+    this.backendService.downloadModule(key)
+      .subscribe(b => {
+        saveAs(b, `${id}-${version}.html`);
+      });
+  }
+
   ngOnDestroy(): void {
     if (this.selectionChangedSubscription) {
       this.selectionChangedSubscription.unsubscribe();
     }
-  }
-
-  downloadModule(key: string, id: string, version: string) {
-    this.backendService.downloadModule(key).subscribe(b => {
-      saveAs(b, `${id}-${version}.html`);
-    });
   }
 }

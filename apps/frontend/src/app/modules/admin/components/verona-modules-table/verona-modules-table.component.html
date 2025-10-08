@@ -28,14 +28,14 @@
     <ng-container matColumnDef="name">
       <mat-header-cell *matHeaderCellDef
         class="cell-name"
-        mat-sort-header="metadata.name">
+        mat-sort-header="name">
         {{'admin.module-name' | translate}}
       </mat-header-cell>
       <mat-cell *matCellDef="let element" >
         <a mat-button
-          (click)="downloadModule(element.key, element.metadata.id, element.metadata.version)"
-          [matTooltip]="element.metadata.description">
-          {{element.metadata.name}}
+          (click)="downloadModule(element.key, element.id, element.version)"
+          [matTooltip]="element.name">
+          {{element.name}}
         </a>
       </mat-cell>
     </ng-container>
@@ -47,11 +47,12 @@
       <mat-cell *matCellDef="let element" >{{element.key}}</mat-cell>
     </ng-container>
     <ng-container matColumnDef="version">
-      <mat-header-cell *matHeaderCellDef>
+      <mat-header-cell *matHeaderCellDef
+                       mat-sort-header="version">
         {{'admin.module-version' | translate}}
       </mat-header-cell>
       <mat-cell *matCellDef="let element">
-        {{element.metadata.version}}
+        {{element.version}}
       </mat-cell>
     </ng-container>
     <ng-container matColumnDef="fileDateTime">
@@ -73,11 +74,12 @@
       </mat-cell>
     </ng-container>
     <ng-container matColumnDef="veronaVersion">
-      <mat-header-cell *matHeaderCellDef>
+      <mat-header-cell *matHeaderCellDef
+        mat-sort-header="specVersion">
         {{'admin.module-api-version' | translate}}
       </mat-header-cell>
       <mat-cell *matCellDef="let element">
-        {{element.metadata.specVersion}}
+        {{element.specVersion}}
       </mat-cell>
     </ng-container>
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
