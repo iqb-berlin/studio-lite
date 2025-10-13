@@ -12,6 +12,28 @@ Die Dokumentation dazu finden Sie [hier](https://iqb-berlin.github.io/tba-info/)
 
 ## Development
 
+
+### Workflow
+
+This repository follows the Git Flow branching model:
+
+- development
+  - All active development is performed on this branch
+
+- main
+  - Represents the state of the most recent release
+
+- Release tags 
+  - Created on the main branch to mark published versions
+
+- Feature branches 
+  - Created from development to implement new features or enhancements 
+  - Merged back into development after completion and review
+
+- Hotfix branches 
+  - Created from main to resolve critical production issues
+  - Merged into both main and development after verification to maintain consistency
+
 ### Prerequisites
 
 Make sure the following tools are installed on your system:
