@@ -5,11 +5,15 @@ ARG REGISTRY_PATH=""
 
 FROM ${REGISTRY_PATH}node:lts-bookworm AS builder
 
+# Check node and npm version - sometimes they do not match
+RUN node --version
+RUN npm --version
+
 # Update npm to latest version
-RUN npm --version
-RUN --mount=type=cache,target=~/.npm \
-    npm install -g --no-fund npm
-RUN npm --version
+# Optional, sometimes latest npm is not supported by node lts !!!
+#RUN --mount=type=cache,target=~/.npm \
+#    npm install -g --no-fund npm
+#RUN npm --version
 
 WORKDIR /usr/src/studio-lite
 COPY . .
