@@ -8,13 +8,17 @@ import {
   deleteUser, findAdminSettings,
   grantRemovePrivilegeAtWs
 } from '../../support/util';
-import { AccessLevel, modules, UserData } from '../../support/testData';
+import {
+  AccessLevel,
+  modules,
+  resource,
+  UserData
+} from '../../support/testData';
 
 describe('UI Administration Management', () => {
   // eslint-disable-next-line max-len
   const group1:string = 'Mathematik Primär Bereichsgruppe';
   const ws1:string = 'Mathematik I';
-  const resource = 'GeoGebra.itcr.zip';
   const newUser: UserData = {
     username: 'normaluser',
     password: '5678'

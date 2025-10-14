@@ -15,6 +15,7 @@ import {
 import {
   AccessLevel,
   modules,
+  resource,
   UserData
 } from '../../../support/testData';
 
@@ -22,13 +23,11 @@ export function createBasicSpecCy() {
   describe('Create test base:', () => {
     const group1:string = 'Grundgruppe';
     const ws1:string = 'Grundarbeitsbereich';
-    const resource = 'GeoGebra.itcr.zip';
     const newUser: UserData = {
       username: 'normaluser',
       password: '5678'
     };
     it('a. Create the first user', () => {
-      cy.log('dentro');
       addFirstUser();
     });
 

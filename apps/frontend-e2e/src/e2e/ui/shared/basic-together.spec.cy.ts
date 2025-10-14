@@ -16,6 +16,7 @@ import {
 import {
   AccessLevel,
   modules,
+  resource,
   UserData
 } from '../../../support/testData';
 
@@ -23,7 +24,6 @@ export function createBasicSpecCytog() {
   describe('Create test base:', () => {
     const group1:string = 'Mathematik Primär Bereichsgruppe';
     const ws1:string = 'Mathematik I';
-    const resource = 'GeoGebra.itcr.zip';
     const newUser: UserData = {
       username: 'normaluser',
       password: '5678'

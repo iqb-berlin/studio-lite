@@ -93,6 +93,7 @@ export interface AccessUser {
   access: AccessLevel;
 }
 
+export const resource = 'GeoGebra.itcr.zip';
 export const modules:string[] = [
   'iqb-schemer-2.5.3.html',
   'iqb-editor-aspect-2.9.4.html',

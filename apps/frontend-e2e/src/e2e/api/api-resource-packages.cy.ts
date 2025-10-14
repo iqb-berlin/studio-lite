@@ -1,4 +1,4 @@
-import { UserData } from '../../support/testData';
+import { resource, UserData } from '../../support/testData';
 
 describe('Admin settings API tests', () => {
   const noId: string = '9988';
@@ -31,7 +31,6 @@ describe('Admin settings API tests', () => {
   });
 
   describe('108. POST /api/admin/resource-packages', () => {
-    const filename = 'GeoGebra.itcr.zip';
     // It is skipped because it results in [vite] http proxy error: /api/admin/resource-packages
     // it.skip('500 negative test: should not add a resource package a false user', () => {
     //   cy.addPackageAPI(filename, 'noId')
@@ -40,7 +39,7 @@ describe('Admin settings API tests', () => {
     //     });
     // });
     it('201 positive test: should add a resource package the admin', () => {
-      cy.addPackageAPI(filename, Cypress.env(`token_${Cypress.env('username')}`))
+      cy.addPackageAPI(resource, Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(201);
         });
