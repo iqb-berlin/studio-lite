@@ -6,12 +6,11 @@ mat-dialog-content{
 
 table {
   width: 80%;
-  height:500px;
   overflow: scroll;
 }
 
-tr{
-  padding: 10px;
+td{
+  padding: 10px !important;
 }
 
 .filter{
