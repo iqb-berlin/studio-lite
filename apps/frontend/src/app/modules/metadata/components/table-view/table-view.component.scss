@@ -1,17 +1,14 @@
 mat-dialog-content{
   padding:0!important;
-
 }
-
 
 table {
   width: 80%;
-  height:500px;
   overflow: scroll;
 }
 
-tr{
-  padding: 10px;
+td{
+  padding: 10px !important;
 }
 
 .filter{
@@ -19,6 +16,7 @@ tr{
   width: 100%;
 }
 
-.mat-mdc-tab-group{
-  height: 800px;
+.mat-mdc-cell {
+  vertical-align: top;
 }
+
