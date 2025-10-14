@@ -1,15 +1,14 @@
-import { createBasicSpecCytog } from './shared/basic-together.spec.cy';
+import { createBasicSpecCy } from './shared/basic.spec.cy';
 
 describe('Review:', () => {
   before(() => {
     cy.runUntracked(() => {
-      cy.log('Hago 11');
-      createBasicSpecCytog();
-      cy.log('Hago 1');
+      createBasicSpecCy();
     });
   });
 
   it('create a review', () => {
 
   });
+
 });

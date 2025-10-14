@@ -49,7 +49,7 @@ export function createBasicSpecCy() {
     it('e. Admin can create a workspace (Arbeitsbereich) within its Bereichsgruppe', () => {
       cy.visit('/');
       createWs(ws1, group1);
-      grantRemovePrivilegeAtWs([Cypress.env('username')], 'Mathematik I', [AccessLevel.Basic]);
+      grantRemovePrivilegeAtWs([Cypress.env('username')], 'Grundarbeitsbereich', [AccessLevel.Admin]);
     });
 
     it('f. Admin can upload modules as editor, player and schema',
