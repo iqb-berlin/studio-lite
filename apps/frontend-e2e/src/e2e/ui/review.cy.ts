@@ -1,14 +1,24 @@
-import { createBasicSpecCy } from './shared/basic.spec.cy';
+import {
+  createBasicSpecCy,
+  createExercisesSpec,
+  deleteBasicSpecCy
+} from './shared/basic.spec.cy';
 
 describe('Review:', () => {
   before(() => {
-    cy.runUntracked(() => {
-      createBasicSpecCy();
-    });
+    Cypress._.noop(createBasicSpecCy());
+  });
+
+  after(() => {
+    Cypress._.noop(deleteBasicSpecCy());
   });
 
   it('create a review', () => {
-
+    cy.log('Hi');
+    createExercisesSpec();
   });
 
+  it('', () => {
+
+  });
 });

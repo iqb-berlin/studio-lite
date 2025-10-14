@@ -5,10 +5,11 @@ import {
   createGroup,
   createNewUser,
   createWs,
+  deleteFirstUser,
   deleteGroup,
   deleteModule,
   deleteResource,
-  deleteUser,
+  deleteUser, goToWsMenu,
   grantRemovePrivilegeAtWs,
   importExercise
 } from '../../../support/util';
@@ -27,40 +28,32 @@ export function createBasicSpecCy() {
       username: 'normaluser',
       password: '5678'
     };
-    it('a. Create the first user', () => {
+    it('creates the first user', () => {
       addFirstUser();
     });
 
-    it('b. Admin can add new user', () => {
-      cy.visit('/');
+    it('admin can add new user', () => {
       createNewUser(newUser);
     });
 
-    it('c. Admin can delete a user', () => {
-      cy.visit('/');
-      deleteUser(newUser.username);
-    });
-
-    it('d. Admin can create a group (Bereichsgruppe)', () => {
+    it('admin can create a group (Bereichsgruppe)', () => {
       cy.visit('/');
       createGroup(group1);
     });
 
-    it('e. Admin can create a workspace (Arbeitsbereich) within its Bereichsgruppe', () => {
+    it('admin can create a workspace (Arbeitsbereich) within its Bereichsgruppe', () => {
       cy.visit('/');
       createWs(ws1, group1);
       grantRemovePrivilegeAtWs([Cypress.env('username')], 'Grundarbeitsbereich', [AccessLevel.Admin]);
     });
 
-    it('f. Admin can upload modules as editor, player and schema',
-      { defaultCommandTimeout: 100000 },
+    it('admin can Modules upload',
       () => {
         cy.visit('/');
         addModules(modules);
       });
 
-    it('g. Admin can upload the resource package',
-      { defaultCommandTimeout: 200000 },
+    it('admin can upload the resource package',
       () => {
         cy.visit('/');
         addResourcePackage(resource);
@@ -71,30 +64,57 @@ export function createBasicSpecCy() {
 export function createExercisesSpec() {
   describe('Creates exercises:', () => {
     const ws1:string = 'Grundarbeitsbereich';
-    it('h. Admin add exercises', () => {
+    it('admin add exercises', () => {
       cy.visit('/');
       cy.visitWs(ws1);
+      cy.pause();
       importExercise('test_studio_units_download.zip');
+      cy.pause();
+    });
+    it('admin add review', () => {
+      goToWsMenu();
+      cy.get('span:contains("Aufgabenfolgen")').click();
+      cy.get('studio-lite-add-review-buttom').within(() => {
+        cy.contains('button', 'add').click();
+        cy.pause();
+        cy.find('mat-form-field').type('Review1');
+        cy.pause();
+        cy.clickButton('Speichern');
+      });
+      cy.get('');
     });
   });
 }
 
 export function deleteBasicSpecCy() {
-  describe('Deletes test base:', () => {
+  describe('Delete test base:', () => {
     const group1:string = 'Grundgruppe';
-    it('h. Admin can delete modules', () => {
+    const newUser: UserData = {
+      username: 'normaluser',
+      password: '5678'
+    };
+    it('admin can deletes groups', () => {
+      cy.visit('/');
+      deleteGroup(group1);
+    });
+
+    it('admin can delete a user', () => {
+      cy.visit('/');
+      deleteUser(newUser.username);
+    });
+
+    it('admin deletes Modules', () => {
       cy.visit('/');
       deleteModule();
     });
 
-    it('i. Admin can delete package resource', () => {
+    it('admin deletes package resource', () => {
       cy.visit('/');
       deleteResource();
     });
 
-    it('j. user with admin credentials can deletes groups', () => {
-      cy.visit('/');
-      deleteGroup(group1);
+    it('deletes first user', () => {
+      deleteFirstUser();
     });
   });
 }
