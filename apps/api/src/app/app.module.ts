@@ -91,7 +91,7 @@ import { AdminController } from './controllers/admin.controller';
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: '24h' }
+        signOptions: { expiresIn: '12h' }
       }),
       inject: [ConfigService]
     }),
