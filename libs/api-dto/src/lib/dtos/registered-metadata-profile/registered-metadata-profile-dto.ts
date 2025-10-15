@@ -15,7 +15,7 @@ export class RegisteredMetadataProfileDto {
     creator!: string;
 
   @ApiProperty()
-    maintainer!: string;
+    maintainer?: string;
 
   @ApiProperty()
     profiles!: string[];
