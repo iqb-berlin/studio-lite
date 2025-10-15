@@ -494,6 +494,13 @@ export function importExercise(filename: string): void {
     });
 }
 
+export function getUnitNames():string[] {
+  const unitList: string[] = [];
+  cy.get('span.unit-key').each($el => {
+    unitList.push($el.text().trim());
+  });
+  return unitList;
+}
 // workspace menu options
 export function selectFromMenu(option: string): void {
   cy.get('mat-icon:contains("menu")')

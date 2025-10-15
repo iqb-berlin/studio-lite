@@ -74,11 +74,9 @@ export function createExercisesSpec() {
     it('admin add review', () => {
       goToWsMenu();
       cy.get('span:contains("Aufgabenfolgen")').click();
-      cy.get('studio-lite-add-review-buttom').within(() => {
+      cy.get('studio-lite-add-review-button').within(() => {
         cy.contains('button', 'add').click();
-        cy.pause();
-        cy.find('mat-form-field').type('Review1');
-        cy.pause();
+        cy.contains('input[placeholder="Name der Aufgabenfolge"]').type('Review1');
         cy.clickButton('Speichern');
       });
       cy.get('');
