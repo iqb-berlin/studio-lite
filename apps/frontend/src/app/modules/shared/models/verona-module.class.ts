@@ -1,4 +1,4 @@
-import { VeronaModuleInListDto, VeronaModuleMetadataDto } from '@studio-lite-lib/api-dto';
+import { VeronaModuleInListDto, VeronaModuleMetadataDto, VeronaModuleType } from '@studio-lite-lib/api-dto';
 
 export class VeronaModuleClass {
   key: string;
@@ -19,4 +19,18 @@ export class VeronaModuleClass {
     this.fileSize = modulData.fileSize || 0;
     this.fileDateTime = modulData.fileDateTime || 0;
   }
+}
+
+export interface FlattenedVeronaModuleClass {
+  key: string;
+  sortKey: string;
+  fileSize: number;
+  fileDateTime: number;
+  html: string;
+  id: string;
+  type: VeronaModuleType;
+  name: string;
+  version: string;
+  specVersion: string;
+  isStable: boolean;
 }

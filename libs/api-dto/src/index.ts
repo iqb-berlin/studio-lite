@@ -76,3 +76,4 @@ export { UpdateUnitCommentUnitItemsDto } from './lib/dtos/unit-comment-unit-item
 export { ReviewDto } from './lib/dtos/review/review-dto';
 export { WorkspaceDto } from './lib/dtos/workspace/workspace-dto';
 export { WorkspaceGroupDto } from './lib/dtos/workspace-group/workspace-group-dto';
+export { VeronaModuleType } from './lib/dtos/verona-module/verona-module-metadata-dto';

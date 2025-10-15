@@ -121,6 +121,17 @@ export class AdminWorkspaceGroupController {
     return this.workspaceGroupService.remove(ids);
   }
 
+  @Get(':workspace_group_id/units')
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_group_id', type: Number })
+  @ApiOkResponse({ description: 'Units of workspace-group retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiTags('admin workspace-group')
+  async findWorkspaceGroupUnits(@WorkspaceGroupId() id: number): Promise<UnitByDefinitionIdDto[]> {
+    return this.unitService.findAllForGroup(id);
+  }
+
   @Patch(':workspace_group_id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()

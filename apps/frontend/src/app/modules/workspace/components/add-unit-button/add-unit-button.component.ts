@@ -78,7 +78,7 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
                   this.updateUnitList(respOk);
                 } else {
                   this.snackBar.open(
-                    this.translateService.instant('workspace.unit-added'),
+                    this.translateService.instant('workspace.unit-not-added'),
                     this.translateService.instant('workspace.error'),
                     { duration: 3000 }
                   );
@@ -118,7 +118,7 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
               this.updateUnitList(respOk);
             } else {
               this.snackBar.open(
-                this.translateService.instant('workspace.unit-added'),
+                this.translateService.instant('workspace.unit-not-added'),
                 this.translateService.instant('workspace.error'),
                 { duration: 3000 }
               );

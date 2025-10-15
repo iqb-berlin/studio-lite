@@ -116,6 +116,37 @@ export class UnitService {
     }));
   }
 
+  async findAllForGroup(workspaceGroupId: number): Promise<UnitByDefinitionIdDto[]> {
+    const workspaces = await this.workspaceRepository.find({
+      where: { groupId: workspaceGroupId },
+      select: ['id', 'name']
+    });
+    const workspaceIds = workspaces.map(w => w.id);
+    if (workspaceIds.length === 0) return [];
+    const units = await this.unitsRepository.find({
+      where: { workspaceId: In(workspaceIds) },
+      order: { key: 'ASC' },
+      select: {
+        definitionId: true,
+        key: true,
+        name: true,
+        id: true,
+        workspaceId: true,
+        lastChangedMetadata: true,
+        lastChangedDefinition: true,
+        lastChangedScheme: true,
+        lastChangedMetadataUser: true,
+        lastChangedDefinitionUser: true,
+        lastChangedSchemeUser: true
+      }
+    }) as UnitByDefinitionIdDto[];
+    // add workspace name to units
+    return units.map(unit => ({
+      ...unit,
+      workspaceName: workspaces.find(w => w.id === unit.workspaceId)?.name || ''
+    }));
+  }
+
   async findAllForWorkspace(workspaceId: number,
                             userId: number = null,
                             withLastSeenCommentTimeStamp: boolean = false,
