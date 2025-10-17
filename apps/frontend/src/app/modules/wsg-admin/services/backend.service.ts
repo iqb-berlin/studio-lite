@@ -11,7 +11,7 @@ import {
   WorkspaceGroupFullDto,
   WorkspaceUserInListDto,
   UserWorkspaceAccessForGroupDto,
-  UnitByDefinitionIdDto
+  UnitInViewDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -31,8 +31,8 @@ export class BackendService {
       );
   }
 
-  getAllUnitsForGroup(groupId: number): Observable<UnitByDefinitionIdDto[] | boolean> {
-    return this.http.get<UnitByDefinitionIdDto[]>(`${this.serverUrl}admin/workspace-groups/${groupId}/units`)
+  getAllUnitsForGroup(groupId: number): Observable<UnitInViewDto[] | boolean> {
+    return this.http.get<UnitInViewDto[]>(`${this.serverUrl}admin/workspace-groups/${groupId}/units`)
       .pipe(
         catchError(() => of(false))
       );

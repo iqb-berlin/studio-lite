@@ -18,7 +18,7 @@ import { FormsModule, UntypedFormGroup } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
   CreateWorkspaceGroupDto,
-  UnitByDefinitionIdDto,
+  UnitInViewDto,
   UserInListDto,
   WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
@@ -286,9 +286,8 @@ export class WorkspaceGroupsComponent implements OnInit {
     this.tableSelectionRow.toggle(row);
   }
 
-  private static cleanUnitsData(units: UnitByDefinitionIdDto[]): UnitByDefinitionIdDto[] {
+  private static cleanUnitsData(units: UnitInViewDto[]): UnitInViewDto[] {
     return units.map(unit => ({
-      definitionId: unit.definitionId,
       key: unit.key,
       name: unit.name,
       groupName: unit.groupName,
@@ -304,13 +303,13 @@ export class WorkspaceGroupsComponent implements OnInit {
     }));
   }
 
-  private static toCSV(units: UnitByDefinitionIdDto[]): string {
+  private static toCSV(units: UnitInViewDto[]): string {
     const replacer = (key: string, value: unknown) => (value === null ? '' : value);
     const header = Object.keys(units[0]);
     return [
       header.join(','), // header row first
       ...units.map(row => header
-        .map(fieldName => JSON.stringify(row[fieldName as keyof UnitByDefinitionIdDto], replacer))
+        .map(fieldName => JSON.stringify(row[fieldName as keyof UnitInViewDto], replacer))
         .join(','))
     ].join('\r\n');
   }
