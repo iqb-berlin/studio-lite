@@ -7,6 +7,7 @@ import {
   RequestReportDto,
   UnitByDefinitionIdDto,
   UnitDefinitionDto,
+  UnitDefinitionFullDto,
   UnitFullMetadataDto,
   UnitInListDto,
   UnitItemMetadataDto,
@@ -68,7 +69,6 @@ export class UnitService {
     return this.unitsRepository.find({
       order: { id: 'ASC' },
       select: {
-        definitionId: true,
         key: true,
         name: true,
         groupName: true,
@@ -89,9 +89,7 @@ export class UnitService {
   async findAll(): Promise<UnitByDefinitionIdDto[]> {
     this.logger.log('Retrieving units for workspaceId');
     const units = await this.unitsRepository.find({
-      order: { definitionId: 'ASC' },
       select: {
-        definitionId: true,
         key: true,
         name: true,
         groupName: true,
@@ -127,7 +125,6 @@ export class UnitService {
       where: { workspaceId: In(workspaceIds) },
       order: { key: 'ASC' },
       select: {
-        definitionId: true,
         key: true,
         name: true,
         id: true,
@@ -584,7 +581,7 @@ export class UnitService {
       const unitToCopy = await this.unitsRepository.findOne({
         where: { id: unitId }
       });
-      const keysToIgnore = ['id', 'groupName', 'key', 'definitionId', 'state'];
+      const keysToIgnore = ['id', 'groupName', 'key', 'state'];
       const keysToCopy = Object.keys(unitToCopy)
         .filter(key => !keysToIgnore.includes(key))
         .reduce((obj, key) => {
@@ -618,6 +615,12 @@ export class UnitService {
     await this.unitsRepository.delete(id);
   }
 
+  async findUnitDefinitionByUnitId(unitId: number): Promise<UnitDefinitionFullDto> {
+    return this.unitDefinitionsRepository.findOne({
+      where: { unitId: unitId }
+    });
+  }
+
   async findOnesDefinition(unitId: number): Promise<UnitDefinitionDto> {
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId }
@@ -626,11 +629,9 @@ export class UnitService {
     const returnUnit: UnitDefinitionDto = {
       variables: unit.variables, definition: ''
     };
-    if (unit.definitionId) {
-      const unitDefinition = await this.unitDefinitionsRepository.findOne({
-        where: { id: unit.definitionId }
-      });
-      if (unitDefinition) returnUnit.definition = unitDefinition.data;
+    const unitDefinition = await this.findUnitDefinitionByUnitId(unitId);
+    if (unitDefinition) {
+      returnUnit.definition = unitDefinition.data;
     }
     return returnUnit;
   }
@@ -682,16 +683,15 @@ export class UnitService {
     unitToUpdate.lastChangedDefinition = definitionDate;
     unitToUpdate.lastChangedDefinitionUser = userName;
 
-    if (unitToUpdate.definitionId) {
-      const unitDefinitionToUpdate = await this.unitDefinitionsRepository.findOne({
-        where: { id: unitToUpdate.definitionId }
-      });
+    const unitDefinitionToUpdate = await this.findUnitDefinitionByUnitId(unitId);
+
+    if (unitDefinitionToUpdate) {
       unitDefinitionToUpdate.data = unitDefinitionDto.definition;
       await this.unitDefinitionsRepository.save(unitDefinitionToUpdate);
     } else {
-      const newUnitDefinition = this.unitDefinitionsRepository.create({ data: unitDefinitionDto.definition });
+      const newUnitDefinition = this.unitDefinitionsRepository
+        .create({ data: unitDefinitionDto.definition, unitId });
       await this.unitDefinitionsRepository.save(newUnitDefinition);
-      unitToUpdate.definitionId = newUnitDefinition.id;
     }
     if (unitDefinitionDto.variables) {
       unitToUpdate.variables = unitDefinitionDto.variables;

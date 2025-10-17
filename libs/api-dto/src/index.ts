@@ -77,3 +77,4 @@ export { ReviewDto } from './lib/dtos/review/review-dto';
 export { WorkspaceDto } from './lib/dtos/workspace/workspace-dto';
 export { WorkspaceGroupDto } from './lib/dtos/workspace-group/workspace-group-dto';
 export { VeronaModuleType } from './lib/dtos/verona-module/verona-module-metadata-dto';
+export { UnitDefinitionFullDto } from './lib/dtos/unit-definition/unit-definition-full-dto';

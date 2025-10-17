@@ -288,7 +288,6 @@ export class WorkspaceGroupsComponent implements OnInit {
 
   private static cleanUnitsData(units: UnitByDefinitionIdDto[]): UnitByDefinitionIdDto[] {
     return units.map(unit => ({
-      definitionId: unit.definitionId,
       key: unit.key,
       name: unit.name,
       groupName: unit.groupName,

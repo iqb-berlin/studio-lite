@@ -47,7 +47,6 @@ export class UnitsComponent implements OnInit, AfterViewInit, OnDestroy {
     'name',
     'workspaceId',
     'workspaceName',
-    'definitionId',
     'lastChangedDefinition',
     'lastChangedDefinitionUser',
     'lastChangedMetadata',

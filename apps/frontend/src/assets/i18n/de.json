@@ -930,13 +930,11 @@
     "name": "Name",
     "workspaceId": "Arbeitsbereichs-ID",
     "workspaceName": "Arbeitsbereichs-Name",
-    "definitionId": "Definitons-ID",
     "lastChangedDefinition": "Definitions-Änderung",
-    "lastChangedDefinitionUser": "Definitions-Berarbeiter:in",
+    "lastChangedDefinitionUser": "Definitions-Bearbeiter:in",
     "lastChangedMetadata": "Eigenschafts-Änderung",
     "lastChangedMetadataUser": "Eigenschafts-Bearbeiter:in",
     "lastChangedScheme": "Kodierschema-änderung",
     "lastChangedSchemeUser": "Kodierschema-Bearbeiter:in"
-
   }
 }

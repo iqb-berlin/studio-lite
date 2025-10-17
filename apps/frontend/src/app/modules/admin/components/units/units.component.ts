@@ -37,7 +37,6 @@ export class UnitsComponent implements OnInit, AfterViewInit {
     'key',
     'name',
     'workspaceId',
-    'definitionId',
     'lastChangedDefinition',
     'lastChangedDefinitionUser',
     'lastChangedMetadata',
