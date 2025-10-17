@@ -4,8 +4,8 @@ describe('UI check: initial page', () => {
   const homeUserName = '[data-cy="home-user-name"]';
   const homePassword = '[data-cy="home-password"]';
   const submitBottom = '[data-cy="home-submit"]';
-  const homeImprintBottom = '[data-cy="home-imprint"]';
-  const homeBottom = '[data-cy="home-home-page"]';
+  const homeImprintBottom = '[data-cy="home-imprint-link"]';
+  const homeBottom = '[data-cy="about-home-page-link"]';
 
   beforeEach(() => cy.visit('/'));
 
