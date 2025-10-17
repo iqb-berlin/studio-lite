@@ -19,7 +19,7 @@ import {
   ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
-  CreateWorkspaceGroupDto, UnitByDefinitionIdDto, UserInListDto,
+  CreateWorkspaceGroupDto, UnitInViewDto, UserInListDto,
   WorkspaceGroupFullDto,
   WorkspaceGroupInListDto, WorkspaceInListDto
 } from '@studio-lite-lib/api-dto';
@@ -77,7 +77,7 @@ export class AdminWorkspaceGroupController {
   @ApiOkResponse({ description: 'Units retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
   @ApiTags('admin workspace-group')
-  async findAllUnits(): Promise<UnitByDefinitionIdDto[]> {
+  async findAllUnits(): Promise<UnitInViewDto[]> {
     return this.unitService.findAll();
   }
 
@@ -128,7 +128,7 @@ export class AdminWorkspaceGroupController {
   @ApiOkResponse({ description: 'Units of workspace-group retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
   @ApiTags('admin workspace-group')
-  async findWorkspaceGroupUnits(@WorkspaceGroupId() id: number): Promise<UnitByDefinitionIdDto[]> {
+  async findWorkspaceGroupUnits(@WorkspaceGroupId() id: number): Promise<UnitInViewDto[]> {
     return this.unitService.findAllForGroup(id);
   }
 

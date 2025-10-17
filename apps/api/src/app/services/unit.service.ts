@@ -5,7 +5,7 @@ import {
   CreateUnitDto,
   MetadataDto,
   RequestReportDto,
-  UnitByDefinitionIdDto,
+  UnitInViewDto,
   UnitDefinitionDto,
   UnitDefinitionFullDto,
   UnitFullMetadataDto,
@@ -64,7 +64,7 @@ export class UnitService {
     return units.map(unit => unit.id);
   }
 
-  async getAllUnits(): Promise<UnitByDefinitionIdDto[]> {
+  async getAllUnits(): Promise<UnitInViewDto[]> {
     this.logger.log('Retrieving all units');
     return this.unitsRepository.find({
       order: { id: 'ASC' },
@@ -86,7 +86,7 @@ export class UnitService {
     });
   }
 
-  async findAll(): Promise<UnitByDefinitionIdDto[]> {
+  async findAll(): Promise<UnitInViewDto[]> {
     this.logger.log('Retrieving units for workspaceId');
     const units = await this.unitsRepository.find({
       select: {
@@ -103,7 +103,7 @@ export class UnitService {
       }
     });
     const workspaces = await this.workspaceRepository.find();
-    const newUnits = units.map(unit => unit as UnitByDefinitionIdDto);
+    const newUnits = units.map(unit => unit as UnitInViewDto);
     return Promise.all(newUnits.map(async unit => {
       const workspace = workspaces
         .find(w => w.id === unit.workspaceId);
@@ -114,7 +114,7 @@ export class UnitService {
     }));
   }
 
-  async findAllForGroup(workspaceGroupId: number): Promise<UnitByDefinitionIdDto[]> {
+  async findAllForGroup(workspaceGroupId: number): Promise<UnitInViewDto[]> {
     const workspaces = await this.workspaceRepository.find({
       where: { groupId: workspaceGroupId },
       select: ['id', 'name']
@@ -136,7 +136,7 @@ export class UnitService {
         lastChangedDefinitionUser: true,
         lastChangedSchemeUser: true
       }
-    }) as UnitByDefinitionIdDto[];
+    }) as UnitInViewDto[];
     // add workspace name to units
     return units.map(unit => ({
       ...unit,

@@ -23,7 +23,7 @@ export { UnitPropertiesDto } from './lib/dtos/unit/unit-properties-dto';
 export { WorkspaceSettingsDto } from './lib/dtos/workspace/workspace-settings-dto';
 export { CreateUnitDto } from './lib/dtos/unit/create-unit-dto';
 export { UnitInListDto } from './lib/dtos/unit/unit-in-list-dto';
-export { UnitByDefinitionIdDto } from './lib/dtos/unit/unit-by-definition-id-dto';
+export { UnitInViewDto } from './lib/dtos/unit/unit-in-view-dto';
 export { VeronaModuleMetadataDto } from './lib/dtos/verona-module/verona-module-metadata-dto';
 export { VeronaModuleInListDto } from './lib/dtos/verona-module/verona-module-in-list-dto';
 export { GroupNameDto } from './lib/dtos/workspace/group-name-dto';

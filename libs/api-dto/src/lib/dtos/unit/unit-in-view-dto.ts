@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UnitByDefinitionIdDto {
+export class UnitInViewDto {
   @ApiProperty()
     key!: string;
 
