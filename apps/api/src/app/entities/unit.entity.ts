@@ -49,11 +49,6 @@ class Unit {
     editor: string;
 
   @Column({
-    name: 'definition_id'
-  })
-    definitionId: number;
-
-  @Column({
     type: 'jsonb',
     array: false,
     default: () => "'[]'",
