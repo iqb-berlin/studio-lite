@@ -224,6 +224,7 @@ export class WorkspaceGroupsComponent implements OnInit {
                 '',
                 { duration: 1000 });
               this.workspaceUsers.setHasChangedFalse();
+              this.workspaceUsers.sortEntries();
             } else {
               this.snackBar.open(
                 this.translateService.instant('access-rights.not-changed'),
