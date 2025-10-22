@@ -147,6 +147,7 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
                 '',
                 { duration: 1000 }
               );
+              this.workspaceUsers.sortEntries();
               this.workspaceUsers.setHasChangedFalse();
             } else {
               this.snackBar.open(
