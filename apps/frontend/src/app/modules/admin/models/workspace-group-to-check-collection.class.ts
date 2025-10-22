@@ -16,7 +16,18 @@ export class WorkspaceGroupToCheckCollection {
     this.entries.forEach(workspaceGroup => {
       workspaceGroup.isChecked = this.userWorkspacesIds.indexOf(workspaceGroup.id) > -1;
     });
+    this.sortEntries();
     this.hasChanged = false;
+  }
+
+  sortEntries(): void {
+    this.entries
+      .sort((a, b) => {
+        if (a.isChecked === b.isChecked) {
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        }
+        return a.isChecked ? -1 : 1;
+      });
   }
 
   getChecks(): number[] {

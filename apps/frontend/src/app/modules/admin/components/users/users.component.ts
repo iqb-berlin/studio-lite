@@ -189,6 +189,7 @@ export class UsersComponent implements OnInit {
             if (respOk) {
               this.snackBar.open('Zugriffsrechte geändert', '', { duration: 1000 });
               this.userWorkspaceGroups.setHasChangedFalse();
+              this.userWorkspaceGroups.sortEntries();
             } else {
               this.snackBar.open('Konnte Zugriffsrechte nicht ändern', 'Fehler', { duration: 3000 });
             }
