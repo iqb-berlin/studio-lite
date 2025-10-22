@@ -20,6 +20,17 @@ export class UserToCheckCollection {
       user.isChecked = this.workspacesUsersIds.indexOf(user.id) > -1;
     });
     this.hasChanged = false;
+    this.sortEntries();
+  }
+
+  sortEntries(): void {
+    this.entries
+      .sort((a, b) => {
+        if (a.isChecked === b.isChecked) {
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        }
+        return a.isChecked ? -1 : 1;
+      });
   }
 
   getChecks(): number[] {

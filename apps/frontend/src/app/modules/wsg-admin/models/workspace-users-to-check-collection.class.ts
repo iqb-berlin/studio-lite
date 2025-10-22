@@ -33,7 +33,18 @@ export class WorkspaceUserToCheckCollection {
         user.accessLevel = 0;
       }
     });
+    this.sortEntries();
     this.hasChanged = false;
+  }
+
+  sortEntries(): void {
+    this.entries
+      .sort((a, b) => {
+        if (a.isChecked === b.isChecked) {
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        }
+        return a.isChecked ? -1 : 1;
+      });
   }
 
   getChecks(): UserWorkspaceAccessDto[] {

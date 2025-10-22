@@ -124,6 +124,7 @@ export class UsersComponent implements OnInit {
                 this.translateService.instant('access-rights.changed'),
                 '',
                 { duration: 1000 });
+              this.userWorkspaces.sortEntries();
               this.userWorkspaces.setHasChangedFalse();
             } else {
               this.snackBar.open(
