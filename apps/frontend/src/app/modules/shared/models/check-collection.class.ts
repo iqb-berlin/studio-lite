@@ -5,6 +5,7 @@ interface CheckableEntry {
 
 export abstract class CheckCollection<T extends CheckableEntry> {
   abstract entries: T[];
+  checkedCount: number = 0;
 
   sortEntries(): void {
     this.entries
@@ -14,5 +15,6 @@ export abstract class CheckCollection<T extends CheckableEntry> {
         }
         return a.isChecked ? -1 : 1;
       });
+    this.checkedCount = this.entries.filter(e => e.isChecked).length;
   }
 }
