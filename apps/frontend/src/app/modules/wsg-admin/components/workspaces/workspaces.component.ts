@@ -37,6 +37,7 @@ import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class'
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
 import { I18nService } from '../../../../services/i18n.service';
+import { EntriesDividerComponent } from '../../../shared/components/entries-divider/entries-divider.component';
 
 @Component({
   selector: 'studio-lite-workspaces',
@@ -44,7 +45,7 @@ import { I18nService } from '../../../../services/i18n.service';
   styleUrls: ['./workspaces.component.scss'],
   imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
     MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
-    MatTooltip, FormsModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe,
+    MatTooltip, FormsModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, EntriesDividerComponent,
     IsSelectedIdPipe, TranslateModule, MatIcon, RolesHeaderComponent, WorkspaceNamePipe, MatFabButton]
 })
 export class WorkspacesComponent implements OnInit, OnDestroy {

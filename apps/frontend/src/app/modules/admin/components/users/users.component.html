@@ -125,7 +125,10 @@
     </div>
 
     <div class="scroll-area fx-column-start-stretch">
-      @for (wsg of userWorkspaceGroups.entries; track wsg) {
+      @for (wsg of userWorkspaceGroups.entries; track wsg; let index = $index;) {
+        @if (userWorkspaceGroups.checkedCount > 0 && index === userWorkspaceGroups.checkedCount) {
+          <studio-lite-entries-divider></studio-lite-entries-divider>
+        }
         <mat-checkbox
           [(ngModel)]="wsg.isChecked"
           [disabled]="!selectedUser"

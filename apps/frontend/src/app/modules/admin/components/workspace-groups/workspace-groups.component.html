@@ -95,7 +95,10 @@
     </div>
 
     <div class="scroll-area fx-column-start-stretch">
-      @for (entry of workspaceUsers.entries; track entry) {
+      @for (entry of workspaceUsers.entries; track entry; let index = $index;) {
+        @if (workspaceUsers.checkedCount > 0 && index === workspaceUsers.checkedCount) {
+          <studio-lite-entries-divider></studio-lite-entries-divider>
+        }
         <div
           class="fx-row-start-start" >
           <mat-checkbox class="fx-flex-fill"
