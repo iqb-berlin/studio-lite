@@ -4,13 +4,15 @@ import {
   UserWorkspaceAccessForGroupDto
 } from '@studio-lite-lib/api-dto';
 import { WorkspaceChecked } from './workspace-checked.class';
+import { CheckCollection } from '../../shared/models/check-collection.class';
 
-export class WorkspaceToCheckCollection {
+export class WorkspaceToCheckCollection extends CheckCollection<WorkspaceChecked> {
   entries: WorkspaceChecked[];
   private userWorkspacesIds: UserWorkspaceAccessDto[] = [];
   hasChanged = false;
 
   constructor(workspaces: UsersWorkspaceInListDto[]) {
+    super();
     this.entries = [];
     workspaces.forEach(workspace => {
       this.entries.push(new WorkspaceChecked(workspace));
@@ -39,16 +41,6 @@ export class WorkspaceToCheckCollection {
     });
     this.sortEntries();
     this.hasChanged = false;
-  }
-
-  sortEntries(): void {
-    this.entries
-      .sort((a, b) => {
-        if (a.isChecked === b.isChecked) {
-          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-        }
-        return a.isChecked ? -1 : 1;
-      });
   }
 
   getChecks(groupId: number): UserWorkspaceAccessForGroupDto {

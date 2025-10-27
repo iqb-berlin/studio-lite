@@ -1,12 +1,14 @@
 import { WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceGroupToCheck } from './workspace-group-to-check.class';
+import { CheckCollection } from '../../shared/models/check-collection.class';
 
-export class WorkspaceGroupToCheckCollection {
+export class WorkspaceGroupToCheckCollection extends CheckCollection<WorkspaceGroupToCheck> {
   entries: WorkspaceGroupToCheck[];
   hasChanged = false;
   private userWorkspacesIds: number[] = [];
 
   constructor(workspaceGroups: WorkspaceGroupInListDto[]) {
+    super();
     this.entries = workspaceGroups.map(wsg => new WorkspaceGroupToCheck(wsg));
   }
 
@@ -18,16 +20,6 @@ export class WorkspaceGroupToCheckCollection {
     });
     this.sortEntries();
     this.hasChanged = false;
-  }
-
-  sortEntries(): void {
-    this.entries
-      .sort((a, b) => {
-        if (a.isChecked === b.isChecked) {
-          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-        }
-        return a.isChecked ? -1 : 1;
-      });
   }
 
   getChecks(): number[] {

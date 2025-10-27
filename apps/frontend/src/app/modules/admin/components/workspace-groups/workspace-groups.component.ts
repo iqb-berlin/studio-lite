@@ -31,7 +31,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
-import { UserToCheckCollection } from '../../../shared/models/users-to-check-collection.class';
+import { UserToCheckCollection } from '../../models/users-to-check-collection.class';
 import { State } from '../../models/state.type';
 import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
 import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
@@ -41,13 +41,14 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
 import { Profile } from '../../../shared/models/profile.type';
 import { I18nService } from '../../../../services/i18n.service';
+import { EntriesDividerComponent } from '../../../shared/components/entries-divider/entries-divider.component';
 
 @Component({
   selector: 'studio-lite-workspace-groups',
   templateUrl: './workspace-groups.component.html',
   styleUrls: ['./workspace-groups.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe, MatFabButton, MatIcon]
+  imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe, MatFabButton, MatIcon, EntriesDividerComponent]
 })
 export class WorkspaceGroupsComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();
