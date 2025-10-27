@@ -1,9 +1,9 @@
 -- liquibase formatted sql
 
 -- changeset jojohoch:1
-DELETE FROM unit_definition
-WHERE id NOT IN (
-  SELECT definition_id FROM unit WHERE definition_id IS NOT NULL
+DELETE FROM unit_definition ud
+WHERE NOT EXISTS (
+  SELECT 1 FROM unit u WHERE u.definition_id = ud.id
 );
 -- rollback /* no-op: cannot restore deleted rows without backup */
 
