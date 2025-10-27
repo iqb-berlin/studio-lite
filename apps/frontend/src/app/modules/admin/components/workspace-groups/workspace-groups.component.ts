@@ -31,7 +31,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
-import { UserToCheckCollection } from '../../../shared/models/users-to-check-collection.class';
+import { UserToCheckCollection } from '../../models/users-to-check-collection.class';
 import { State } from '../../models/state.type';
 import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
 import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
