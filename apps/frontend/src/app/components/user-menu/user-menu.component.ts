@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
@@ -24,7 +24,8 @@ export class UserMenuComponent {
   isAdmin: boolean;
   hasReviews: boolean;
 
-  constructor(public appService: AppService) {
+  constructor(public appService: AppService,
+              @Inject('APP_VERSION') readonly appVersion: string) {
     this.userName = appService.authData.userName;
     this.userLongName = appService.authData.userLongName;
     this.isUserLoggedIn = appService.authData.userId > 0;
