@@ -1,12 +1,13 @@
 <button mat-button
-        [class.white-color]="!trigger.menuOpen"
-        [color]="'primary'"
         [matMenuTriggerFor]="menuUser"
         #trigger="matMenuTrigger"
         [matTooltip]="'home.user-menu' | translate"
         matTooltipPosition="above"
         data-cy = "goto-user-menu" >
-  <studio-lite-wrapped-icon icon="account_box"></studio-lite-wrapped-icon>
+  <studio-lite-wrapped-icon class="white-color"
+                            [class.underlined-icon]="trigger.menuOpen"
+                            icon="account_box">
+  </studio-lite-wrapped-icon>
 </button>
 <mat-menu #menuUser="matMenu">
 

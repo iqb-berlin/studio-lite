@@ -10,7 +10,15 @@
 }
 
 .white-color {
-  color: white !important;
+  color: white;
+}
+
+:host::ng-deep .underlined-icon {
+  mat-icon {
+    border-bottom: 2px solid white;
+    padding-bottom: 3px;
+    margin-bottom: -5px;
+  }
 }
 
 
