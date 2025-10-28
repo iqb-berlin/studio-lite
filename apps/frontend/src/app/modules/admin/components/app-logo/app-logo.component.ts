@@ -62,7 +62,7 @@ export class AppLogoComponent implements OnInit, OnDestroy {
         });
       } else {
         this.logoImageBase64 = '';
-        this.configForm.setValue({ alt: '', bodyBackground: '', boxBackground: '' });
+        this.configForm.setValue({ bodyBackground: '', boxBackground: '' });
       }
       this.configDataChangedSubscription = this.configForm.valueChanges.subscribe(() => {
         if (this.configForm) {

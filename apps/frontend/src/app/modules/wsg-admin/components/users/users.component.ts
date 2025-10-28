@@ -23,6 +23,7 @@ import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 import { WorkspaceChecked } from '../../models/workspace-checked.class';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
+import { EntriesDividerComponent } from '../../../shared/components/entries-divider/entries-divider.component';
 
 @Component({
   selector: 'studio-lite-users',
@@ -30,7 +31,7 @@ import { RolesHeaderComponent } from '../roles-header/roles-header.component';
   styleUrls: ['./users.component.scss'],
   // eslint-disable-next-line max-len
   imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
-    MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip,
+    MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, EntriesDividerComponent,
     MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule, RolesHeaderComponent, MatFabButton, MatIcon]
 })
 export class UsersComponent implements OnInit {
@@ -124,6 +125,7 @@ export class UsersComponent implements OnInit {
                 this.translateService.instant('access-rights.changed'),
                 '',
                 { duration: 1000 });
+              this.userWorkspaces.sortEntries();
               this.userWorkspaces.setHasChangedFalse();
             } else {
               this.snackBar.open(

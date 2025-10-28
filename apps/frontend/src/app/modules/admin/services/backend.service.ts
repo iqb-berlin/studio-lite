@@ -15,7 +15,7 @@ import {
   UnitExportConfigDto,
   WorkspaceGroupSettingsDto,
   WorkspaceFullDto,
-  UnitByDefinitionIdDto, ProfilesRegistryDto
+  UnitInViewDto, ProfilesRegistryDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -34,8 +34,8 @@ export class BackendService {
       );
   }
 
-  getAllUnits(): Observable<UnitByDefinitionIdDto[] | boolean> {
-    return this.http.get<UnitByDefinitionIdDto[]>(`${this.serverUrl}admin/units`)
+  getAllUnits(): Observable<UnitInViewDto[] | boolean> {
+    return this.http.get<UnitInViewDto[]>(`${this.serverUrl}admin/units`)
       .pipe(
         catchError(() => of(false))
       );
@@ -284,9 +284,9 @@ export class BackendService {
     );
   }
 
-  getUnits(): Observable<UnitByDefinitionIdDto[]> {
+  getUnits(): Observable<UnitInViewDto[]> {
     return this.http
-      .get<UnitByDefinitionIdDto[]>(`${this.serverUrl}admin/workspace-groups/units`)
+      .get<UnitInViewDto[]>(`${this.serverUrl}admin/workspace-groups/units`)
       .pipe(
         catchError(() => of([]))
       );

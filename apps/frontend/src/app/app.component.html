@@ -61,24 +61,26 @@
     @if (currentRoutePath !== 'review' && currentRoutePath !== 'print') {
       @if (appService.authData.userId) {
         <button mat-button
-                [class.white-color] = "currentRoutePath !== 'about'"
-                [color]="'primary'"
                 [routerLink]="currentRoutePath === 'about' ? ['/'] : ['/about']"
                 [matTooltip]="'home.imprint' | translate"
                 matTooltipPosition="above"
                 data-cy="app-info">
-          <studio-lite-wrapped-icon icon="info_outline"></studio-lite-wrapped-icon>
+          <studio-lite-wrapped-icon
+            class="white-color"
+            [class.underlined-icon]="currentRoutePath === 'about'"
+            icon="info_outline"></studio-lite-wrapped-icon>
         </button>
       }
       @if (appService.authData.isAdmin) {
         <button mat-button
-                [class.white-color] = "currentRoutePath !== 'admin'"
-                [color]="'primary'"
                 [routerLink]="currentRoutePath === 'admin' ? ['/'] : ['/admin']"
                 [matTooltip]="'home.goto-admin' | translate"
                 matTooltipPosition="above"
                 data-cy="goto-admin">
-          <studio-lite-wrapped-icon icon="construction"></studio-lite-wrapped-icon>
+          <studio-lite-wrapped-icon
+            class="white-color"
+            [class.underlined-icon]="currentRoutePath === 'admin'"
+            icon="construction"></studio-lite-wrapped-icon>
         </button>
       }
       @if (appService.authData.userId) {

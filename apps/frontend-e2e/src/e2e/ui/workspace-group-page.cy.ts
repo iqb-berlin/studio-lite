@@ -68,6 +68,7 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that normal user has no workspace group admin setting button ', () => {
     logout();
+    cy.wait(100);
     login(newUser.username, newUser.password);
     findWorkspaceGroupSettings(group1).should('not.exist');
   });
@@ -84,6 +85,7 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that workspace admin has setting button for the workspace ', () => {
     logout();
+    cy.wait(100);
     login(groupAdminUser.username, groupAdminUser.password);
     findWorkspaceGroupSettings(group1).should('exist');
   });

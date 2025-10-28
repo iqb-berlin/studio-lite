@@ -1,12 +1,14 @@
 import { UserInListDto } from '@studio-lite-lib/api-dto';
 import { UserChecked } from './users-checked.class';
+import { CheckCollection } from '../../shared/models/check-collection.class';
 
-export class UserToCheckCollection {
+export class UserToCheckCollection extends CheckCollection<UserChecked> {
   entries: UserChecked[];
   private workspacesUsersIds: number[] = [];
   hasChanged = false;
 
   constructor(users: UserInListDto[]) {
+    super();
     this.entries = [];
     users.forEach(user => {
       this.entries.push(new UserChecked(user));
@@ -20,6 +22,7 @@ export class UserToCheckCollection {
       user.isChecked = this.workspacesUsersIds.indexOf(user.id) > -1;
     });
     this.hasChanged = false;
+    this.sortEntries();
   }
 
   getChecks(): number[] {

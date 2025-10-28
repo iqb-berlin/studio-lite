@@ -18,7 +18,7 @@ import { FormsModule, UntypedFormGroup } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
   CreateWorkspaceGroupDto,
-  UnitByDefinitionIdDto,
+  UnitInViewDto,
   UserInListDto,
   WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
@@ -31,7 +31,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
-import { UserToCheckCollection } from '../../../shared/models/users-to-check-collection.class';
+import { UserToCheckCollection } from '../../models/users-to-check-collection.class';
 import { State } from '../../models/state.type';
 import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
 import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
@@ -41,13 +41,14 @@ import { SearchFilterComponent } from '../../../shared/components/search-filter/
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
 import { Profile } from '../../../shared/models/profile.type';
 import { I18nService } from '../../../../services/i18n.service';
+import { EntriesDividerComponent } from '../../../shared/components/entries-divider/entries-divider.component';
 
 @Component({
   selector: 'studio-lite-workspace-groups',
   templateUrl: './workspace-groups.component.html',
   styleUrls: ['./workspace-groups.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe, MatFabButton, MatIcon]
+  imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe, MatFabButton, MatIcon, EntriesDividerComponent]
 })
 export class WorkspaceGroupsComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();
@@ -224,6 +225,7 @@ export class WorkspaceGroupsComponent implements OnInit {
                 '',
                 { duration: 1000 });
               this.workspaceUsers.setHasChangedFalse();
+              this.workspaceUsers.sortEntries();
             } else {
               this.snackBar.open(
                 this.translateService.instant('access-rights.not-changed'),
@@ -286,9 +288,8 @@ export class WorkspaceGroupsComponent implements OnInit {
     this.tableSelectionRow.toggle(row);
   }
 
-  private static cleanUnitsData(units: UnitByDefinitionIdDto[]): UnitByDefinitionIdDto[] {
+  private static cleanUnitsData(units: UnitInViewDto[]): UnitInViewDto[] {
     return units.map(unit => ({
-      definitionId: unit.definitionId,
       key: unit.key,
       name: unit.name,
       groupName: unit.groupName,
@@ -304,13 +305,13 @@ export class WorkspaceGroupsComponent implements OnInit {
     }));
   }
 
-  private static toCSV(units: UnitByDefinitionIdDto[]): string {
+  private static toCSV(units: UnitInViewDto[]): string {
     const replacer = (key: string, value: unknown) => (value === null ? '' : value);
     const header = Object.keys(units[0]);
     return [
       header.join(','), // header row first
       ...units.map(row => header
-        .map(fieldName => JSON.stringify(row[fieldName as keyof UnitByDefinitionIdDto], replacer))
+        .map(fieldName => JSON.stringify(row[fieldName as keyof UnitInViewDto], replacer))
         .join(','))
     ].join('\r\n');
   }

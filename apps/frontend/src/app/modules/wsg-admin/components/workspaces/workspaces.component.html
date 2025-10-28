@@ -133,7 +133,10 @@
     }
 
     <div class="scroll-area fx-column-start-stretch">
-      @for (u of workspaceUsers.entries; track u) {
+      @for (u of workspaceUsers.entries; track u; let index = $index;) {
+        @if (workspaceUsers.checkedCount > 0 && index === workspaceUsers.checkedCount) {
+          <studio-lite-entries-divider class="divider"></studio-lite-entries-divider>
+        }
         <div class="fx-row-start-center">
           <div class="fx-row-start-center fx-flex-fill fx-gap-15">
             <div class="fx-row-start-center">

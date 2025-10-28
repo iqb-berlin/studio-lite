@@ -7,6 +7,11 @@ class UnitDefinition {
 
   @Column()
     data: string;
+
+  @Column({
+    name: 'unit_id'
+  })
+    unitId: number;
 }
 
 export default UnitDefinition;

@@ -2,7 +2,7 @@ import {
   AfterViewInit, Component, OnInit, ViewChild
 } from '@angular/core';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
-import { UnitByDefinitionIdDto } from '@studio-lite-lib/api-dto';
+import { UnitInViewDto } from '@studio-lite-lib/api-dto';
 import {
   MatCell,
   MatCellDef,
@@ -31,13 +31,12 @@ import { AppService } from '../../../../services/app.service';
 })
 
 export class UnitsComponent implements OnInit, AfterViewInit {
-  dataSource = new MatTableDataSource<UnitByDefinitionIdDto>([]);
+  dataSource = new MatTableDataSource<UnitInViewDto>([]);
   displayedColumns: string[] = [
     'id',
     'key',
     'name',
     'workspaceId',
-    'definitionId',
     'lastChangedDefinition',
     'lastChangedDefinitionUser',
     'lastChangedMetadata',

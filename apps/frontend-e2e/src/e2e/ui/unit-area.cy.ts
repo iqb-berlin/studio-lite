@@ -78,9 +78,12 @@ describe('UI check: workspace', () => {
     setVeronaWs(ws1);
   });
 
-  it('should select the profile for the group and select one profile for an area from group settings', () => {
+  it('should select the profile for the group from group settings', () => {
     cy.visit('/');
     selectProfileForGroup(group1, IqbProfile.DE);
+  });
+
+  it('should select profile for an area from group settings', () => {
     cy.visit('/');
     selectProfileForAreaFromGroup(IqbProfile.DE, ws1, group1);
   });
