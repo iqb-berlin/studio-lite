@@ -29,6 +29,12 @@ describe('UserMenuComponent', () => {
       imports: [
         UserMenuComponent,
         TranslateModule.forRoot()
+      ],
+      providers: [
+        {
+          provide: 'APP_VERSION',
+          useValue: '0.0.0'
+        }
       ]
     }).overrideComponent(UserMenuComponent, {
       remove: {
