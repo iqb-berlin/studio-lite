@@ -58,7 +58,7 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   workspaceUsers = new WorkspaceUserToCheckCollection([]);
   isWorkspaceGroupAdmin = false;
   isBackUpWorkspaceGroup = false;
-  maxWorkspaceCount = 10;
+  maxWorkspaceCount = 5;
   unitsCount = 0;
 
   private ngUnsubscribe = new Subject<void>();
