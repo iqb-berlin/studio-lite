@@ -13,7 +13,7 @@ import { PreviewService } from '../../services/preview.service';
   imports: [FormsModule, TranslateModule, MatTooltip]
 })
 export class PagingModeSelectionComponent {
-  pagingModes: PagingMode[] = ['separate', 'buttons', 'concat-scroll', 'concat-scroll-snap'];
+  pagingModes: PagingMode[] = ['buttons', 'separate', 'concat-scroll', 'concat-scroll-snap'];
 
   constructor(public previewService: PreviewService) {}
 }
