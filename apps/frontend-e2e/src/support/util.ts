@@ -278,10 +278,19 @@ export function deleteResource():void {
 }
 
 export function selectCheckBox(name: string) {
+  // only for review
   cy.get('studio-lite-select-unit-list').within(() => {
     cy.get(`mat-cell:contains("${name}")`)
       .prev()
       .click();
+  });
+}
+
+export function getButtonReview(reviewName: string, operation: string) {
+  cy.get('span:contains("Aufgabenfolgen")').click();
+  cy.contains('mat-row', reviewName).click();
+  cy.get('studio-lite-review-menu').within(() => {
+    cy.contains('mat-icon', operation).click();
   });
 }
 

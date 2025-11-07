@@ -7,7 +7,13 @@ import {
   addResourcePackage,
   createGroup,
   createNewUser,
-  createWs, deleteFirstUser, deleteGroup, deleteModule, deleteResource, deleteUser,
+  createWs,
+  deleteFirstUser,
+  deleteGroup,
+  deleteModule,
+  deleteResource,
+  deleteUser,
+  getButtonReview,
   goToWsMenu,
   grantRemovePrivilegeAtWs,
   importExercise,
@@ -125,24 +131,34 @@ describe('Review:', () => {
     });
   });
 
-  it('admin exports the reviw', () => {
+  it('admin exports the review', () => {
+    cy.visit('/');
+    cy.visitWs(ws1);
+    goToWsMenu();
+    getButtonReview(review, 'get_app');
+    cy.clickButton('Herunterladen');
+    cy.clickButton('Schließen');
+  });
 
+  it('admin prints the review', () => {
+    cy.visit('/');
+    cy.visitWs(ws1);
+    goToWsMenu();
+    getButtonReview(review, 'print');
+    cy.clickButton('Drucken');
+    cy.clickButton('Schließen');
   });
 
   it('admin deletes the review', () => {
     cy.visit('/');
     cy.visitWs(ws1);
     goToWsMenu();
-    cy.get('span:contains("Aufgabenfolgen")').click();
-    cy.contains('mat-row', review).click();
-    cy.get('studio-lite-review-menu').within(() => {
-      cy.contains('mat-icon', 'delete').click();
-    });
+    getButtonReview(review, 'delete');
     cy.clickButton('Löschen');
     cy.clickButton('Schließen');
   });
 
-  it('admin can deletes groups', () => {
+  it('admin deletes the group', () => {
     cy.visit('/');
     deleteGroup(group1);
   });
