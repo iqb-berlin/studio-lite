@@ -260,7 +260,7 @@
     "delete-many-packages-confirmation" : "Sollen {{count}} Pakete gelöscht werden?",
     "package-deleted": "Paket(e) gelöscht",
     "package-not-deleted": "Konnte Paket(e) nicht löschen",
-    "issue-count-info": "Das System enthält insgesamt {{count}} {{issue}}."
+    "issue-count-info": "Das System verfügt über {{count}} {{issue}}."
   },
   "metadata": {
     "metadata": "Metadaten",
