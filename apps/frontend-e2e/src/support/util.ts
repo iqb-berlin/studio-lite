@@ -277,6 +277,14 @@ export function deleteResource():void {
     .click();
 }
 
+export function selectCheckBox(name: string) {
+  cy.get('studio-lite-select-unit-list').within(() => {
+    cy.get(`mat-cell:contains("${name}")`)
+      .prev()
+      .click();
+  });
+}
+
 export function deleteGroup(group: string):void {
   // cy.get('[data-cy="goto-admin"]').click();
   findAdminSettings().click();

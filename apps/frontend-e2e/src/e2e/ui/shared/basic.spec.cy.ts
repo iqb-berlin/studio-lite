@@ -9,9 +9,11 @@ import {
   deleteGroup,
   deleteModule,
   deleteResource,
-  deleteUser, goToWsMenu,
+  deleteUser,
+  goToWsMenu,
   grantRemovePrivilegeAtWs,
-  importExercise
+  importExercise,
+  selectCheckBox
 } from '../../../support/util';
 import {
   AccessLevel,
@@ -67,20 +69,33 @@ export function createExercisesSpec() {
     it('admin add exercises', () => {
       cy.visit('/');
       cy.visitWs(ws1);
-      cy.pause();
       importExercise('test_studio_units_download.zip');
-      cy.pause();
     });
+
     it('admin add review', () => {
       goToWsMenu();
       cy.get('span:contains("Aufgabenfolgen")').click();
       cy.get('studio-lite-add-review-button').within(() => {
         cy.contains('button', 'add').click();
-        cy.contains('input[placeholder="Name der Aufgabenfolge"]').type('Review1');
+      });
+      cy.get('input[placeholder="Name der Aufgabenfolge"]')
+        .should('exist')
+        .clear()
+        .type('Review1');
+
+      cy.get('.mat-mdc-dialog-component-host > .mat-mdc-dialog-actions').within(() => {
         cy.clickButton('Speichern');
       });
-      cy.get('');
+
+      selectCheckBox('M6_AK0011');
+      selectCheckBox('M6_AK0012');
+
+      cy.get('studio-lite-save-changes').within(() => {
+        cy.clickButton('Speichern');
+      });
+      cy.clickButton('Schließen');
     });
+
   });
 }
 

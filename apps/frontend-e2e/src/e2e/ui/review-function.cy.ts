@@ -9,9 +9,9 @@ describe('Review:', () => {
     Cypress._.noop(createBasicSpecCy());
   });
 
-  after(() => {
-    Cypress._.noop(deleteBasicSpecCy());
-  });
+  // after(() => {
+  //   Cypress._.noop(deleteBasicSpecCy());
+  // });
 
   it('create a review', () => {
     createExercisesSpec();
