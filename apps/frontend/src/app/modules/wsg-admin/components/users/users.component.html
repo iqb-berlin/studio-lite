@@ -1,6 +1,14 @@
 <div class="fx-row-space-between-start admin-tab-content">
   <div class="fx-flex-row-50 fx-column-start-stretch object-list">
     @if (objectsDatasource.data.length) {
+
+      <div class="info">
+        {{'admin.issue-count-info' | translate :
+        { count: objectsDatasource.data.length, issue: ('admin.users' | translate)}
+        }}
+      </div>
+
+
       <studio-lite-search-filter
         [title]="'search-filter.filter-users' | translate"
         (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
