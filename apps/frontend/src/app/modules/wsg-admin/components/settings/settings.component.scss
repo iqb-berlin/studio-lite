@@ -3,17 +3,21 @@
   overflow: hidden;
 }
 
-.states{
-  min-width:50%;
-  min-height:90%;
+.card-scroll-area {
+  overflow: auto;
 }
-.profiles{
-  min-width:50%;
-  min-height:90%
+
+.profiles-container {
+  padding: 20px
 }
 
 .container{
-  height:90%
+  height: 100%
+}
+
+.card-header {
+  margin-left: 10px !important;
+  margin-bottom: 20px;
 }
 
 .save-button{

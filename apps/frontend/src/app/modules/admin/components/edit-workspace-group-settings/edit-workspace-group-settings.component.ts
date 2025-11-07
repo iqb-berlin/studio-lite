@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import {
-  MAT_DIALOG_DATA, MatDialogTitle, MatDialogActions, MatDialogClose
+  MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle
 } from '@angular/material/dialog';
 import { WorkspaceGroupFullDto, WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
@@ -16,7 +16,8 @@ import { Profile } from '../../../shared/models/profile.type';
   selector: 'studio-lite-edit-workspace-group',
   templateUrl: './edit-workspace-group-settings.component.html',
   styleUrls: ['./edit-workspace-group-settings.component.scss'],
-  imports: [MatDialogTitle, ProfilesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [ProfilesComponent, MatDialogActions, MatButton, MatDialogClose,
+    TranslateModule, MatDialogContent, MatDialogTitle]
 })
 
 export class EditWorkspaceGroupSettingsComponent implements OnInit {

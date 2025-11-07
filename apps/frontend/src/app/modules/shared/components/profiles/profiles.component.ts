@@ -7,7 +7,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatError } from '@angular/material/form-field';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { FormsModule } from '@angular/forms';
-import { MatDialogTitle } from '@angular/material/dialog';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ProfileStoreWithProfiles, WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
 import { Profile } from '../../models/profile.type';
@@ -19,7 +18,7 @@ export type CoreProfile = Omit<MDProfile, 'groups'>;
   selector: 'studio-lite-profiles',
   templateUrl: './profiles.component.html',
   styleUrls: ['./profiles.component.scss'],
-  imports: [MatProgressSpinner, MatDialogTitle, FormsModule, MatExpansionPanel,
+  imports: [MatProgressSpinner, FormsModule, MatExpansionPanel,
     MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule]
 })
 export class ProfilesComponent implements OnInit {
@@ -32,6 +31,7 @@ export class ProfilesComponent implements OnInit {
 
   @Output() hasChanged = new EventEmitter<Array<CoreProfile>>();
   @Input() profiles!: Profile[];
+
   constructor(
     private wsgAdminService: WsgAdminService,
     private backendService: MetadataBackendService

@@ -1,6 +1,5 @@
-.scroll-area {
-  height: 700px;
-  overflow-y: auto;
+.state-container {
+  padding: 15px;
 }
 
 .color-form-field {
@@ -22,16 +21,16 @@
   flex-direction: row;
   justify-content: start;
   align-content: center;
-  margin-right: 20px;
+}
+
+.add-state {
+  position: sticky;
+  bottom: 0;
 }
 
 .delete-button{
   margin-left:20px;
   margin-top :5px;
-}
-
-.add-state{
-  margin-bottom:20px;
 }
 
 .spinner{

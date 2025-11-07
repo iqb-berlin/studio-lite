@@ -8,6 +8,9 @@ import { Subject, takeUntil } from 'rxjs';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import {
+  MatCard, MatCardContent, MatCardHeader, MatCardTitle
+} from '@angular/material/card';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { State } from '../../../admin/models/state.type';
 import { CoreProfile, ProfilesComponent } from '../../../shared/components/profiles/profiles.component';
@@ -17,7 +20,8 @@ import { StatesComponent } from '../states/states.component';
   selector: 'studio-lite-settings',
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
-  imports: [MatTooltip, ProfilesComponent, StatesComponent, TranslateModule, MatFabButton, MatIcon]
+  imports: [MatTooltip, ProfilesComponent, StatesComponent, TranslateModule, MatFabButton,
+    MatIcon, MatCard, MatCardHeader, MatCardTitle, MatCardContent]
 })
 export class WorkspaceSettingsComponent implements OnInit {
   settings!: WorkspaceGroupSettingsDto;
