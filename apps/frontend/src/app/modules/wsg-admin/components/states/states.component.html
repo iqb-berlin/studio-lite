@@ -5,7 +5,11 @@
   <div class="state-container">
     <h4>{{'wsg-settings.state-configs' | translate}}</h4>
     <div class="add-state">
-      <button (click)="addState()" mat-raised-button>
+      <button mat-fab extended="true"
+              color="primary"
+              type="button"
+              (click)="addState()">
+        <mat-icon>add</mat-icon>
         {{'wsg-settings.add-state' | translate}}
       </button>
     </div>
@@ -13,29 +17,27 @@
       @for (state of states ; track state) {
         <div class="state" >
           <mat-form-field class="color-form-field">
-            <input matInput
-              #colorInput
-              [id]="state.id.toString()"
-              class="color-input-field"
-              type="color"
-              [value]="state.color"
-              (input)="stateSelectionChange(colorInput.value,colorInput.type,colorInput.id)"
-              />
+            <input matInput #colorInput
+                   [id]="state.id.toString()"
+                   class="color-input-field"
+                   type="color"
+                   [value]="state.color"
+                   (input)="stateSelectionChange(colorInput.value,colorInput.type,colorInput.id)"/>
           </mat-form-field>
           <mat-form-field class="text-form-field">
             <input matInput
-              #textInput
-              [id]="state.id.toString()"
-              type="text"
-              [value]="state.label"
-              (input)="stateSelectionChange(textInput.value,textInput.type,textInput.id)"
-              />
+                   #textInput
+                   [id]="state.id.toString()"
+                   type="text"
+                   [value]="state.label"
+                   (input)="stateSelectionChange(textInput.value,textInput.type,textInput.id)"/>
           </mat-form-field>
           <button class="delete-button"
-            [matTooltip]="'delete' | translate"
-            mat-icon-button
-            matTooltipPosition="above"
-            (click)="deleteState(state)">
+                  [matTooltip]="'delete' | translate"
+                  color="primary"
+                  mat-icon-button
+                  matTooltipPosition="above"
+                  (click)="deleteState(state)">
             <mat-icon>delete</mat-icon>
           </button>
         </div>
