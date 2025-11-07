@@ -66,6 +66,7 @@ export function createBasicSpecCy() {
 export function createExercisesSpec() {
   describe('Creates exercises:', () => {
     const ws1:string = 'Grundarbeitsbereich';
+    const review:string = 'Review1';
     it('admin add exercises', () => {
       cy.visit('/');
       cy.visitWs(ws1);
@@ -81,7 +82,7 @@ export function createExercisesSpec() {
       cy.get('input[placeholder="Name der Aufgabenfolge"]')
         .should('exist')
         .clear()
-        .type('Review1');
+        .type(review);
 
       cy.get('.mat-mdc-dialog-component-host > .mat-mdc-dialog-actions').within(() => {
         cy.clickButton('Speichern');
@@ -96,6 +97,27 @@ export function createExercisesSpec() {
       cy.clickButton('Schließen');
     });
 
+    it('admin checks the review exist', () => {
+      cy.visit('/');
+      cy.get('studio-lite-user-reviews-area').within(() => {
+        cy.get(review).should('exist');
+      });
+    });
+
+    it('admin opens the review', () => {
+      cy.visit('/');
+      cy.get('studio-lite-user-reviews-area').within(() => {
+        cy.get(review).click();
+      });
+      cy.pause();
+      // Headers should exit
+      cy.get('.start-data').should('exist');
+      cy.pause();
+      // unit nav bar should exit
+      cy.get('studio-lite-unit-nav').within(() => {
+        cy.get('i:contains("chevron_left")').should('exist');
+      });
+    });
   });
 }
 
