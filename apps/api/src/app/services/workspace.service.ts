@@ -692,8 +692,12 @@ export class WorkspaceService {
   }
 
   private async checkForProfileUpdate(workspace: Workspace, newSettings: WorkspaceSettingsDto) {
-    if ((workspace.settings?.itemMDProfile && workspace.settings?.itemMDProfile !== newSettings?.itemMDProfile) ||
-    (workspace.settings?.unitMDProfile && workspace.settings?.unitMDProfile !== newSettings?.unitMDProfile)) {
+    if (
+      (workspace.settings?.itemMDProfile && workspace.settings?.itemMDProfile !== newSettings?.itemMDProfile) ||
+      (workspace.settings?.unitMDProfile && workspace.settings?.unitMDProfile !== newSettings?.unitMDProfile) ||
+      (!workspace.settings?.itemMDProfile && newSettings?.itemMDProfile) ||
+      (!workspace.settings?.unitMDProfile && newSettings?.unitMDProfile)
+    ) {
       const unitIds = await this.unitService.getUnitIdsByWorkspaceId(workspace.id);
       unitIds.map(async unitId => this.unitService
         .patchMetadataCurrentProfile(unitId, newSettings.unitMDProfile, newSettings.itemMDProfile));
