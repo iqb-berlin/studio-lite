@@ -93,15 +93,16 @@ export class WorkspaceGroupsMenuComponent {
       selectedRows = this.checkedRows;
     }
     if (selectedRows.length) {
-      const dialogRef = this.editWorkspaceDialog.open(EditWorkspaceGroupSettingsComponent, {
-        width: '600px',
-        data: {
-          wsg: selectedRows[0],
-          title: this.translateService.instant('admin.edit-group-settings'),
-          saveButtonLabel: this.translateService.instant('save')
-
-        }
-      });
+      const dialogRef = this.editWorkspaceDialog
+        .open(EditWorkspaceGroupSettingsComponent, {
+          width: '600px',
+          height: '80%',
+          data: {
+            wsg: selectedRows[0],
+            title: this.translateService.instant('admin.edit-group-settings'),
+            saveButtonLabel: this.translateService.instant('save')
+          }
+        });
       dialogRef.afterClosed().subscribe(data => {
         if (typeof data !== 'undefined') {
           if (data !== false) {

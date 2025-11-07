@@ -2,11 +2,10 @@
   <mat-spinner class="spinner"></mat-spinner>
 }
 @if (!isLoading && !isError) {
-  <div class="container">
-    <h4 mat-dialog-title>{{'metadata.assign-metadata-profiles' | translate}}</h4>
-    <form class="fx-column-start-stretch scroll-area" >
+  <div>
+    <form class="fx-column-start-stretch" >
       @for (collection of ProfileStoreWithProfilesCollection; track collection) {
-        <div class="profile-stores">
+        <div>
           <mat-expansion-panel class="profile-store mat-elevation-z0">
             <mat-expansion-panel-header>
               <mat-panel-title>
