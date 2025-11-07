@@ -1,5 +1,5 @@
 <div class="fx-row-space-between-start admin-tab-content">
-  <div class="object-list fx-column-start-stretch fx-flex-row-50">
+  <div class="object-list fx-column-start-stretch fx-flex-row-55">
     <studio-lite-users-menu [selectedUser]="selectedUser"
       [selectedRows]="tableSelectionRow.selected"
       [checkedRows]="tableSelectionCheckboxes.selected"
@@ -104,12 +104,12 @@
   <div class="object-list fx-column-start-stretch fx-flex-row-40">
     <div class="object-header-container fx-row-space-between-center">
       @if (!selectedUser) {
-        <div>
+        <div class="object-header">
           {{'access-rights.hint' | translate}}
         </div>
       }
       @if (selectedUser) {
-        <div>
+        <div class="object-header">
           {{'access-rights.for-user' | translate: {user:  tableSelectionRow.selected[0].name } }}
         </div>
       }
