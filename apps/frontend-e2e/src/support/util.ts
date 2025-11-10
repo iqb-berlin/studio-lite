@@ -277,6 +277,23 @@ export function deleteResource():void {
     .click();
 }
 
+export function selectCheckBox(name: string) {
+  // only for review
+  cy.get('studio-lite-select-unit-list').within(() => {
+    cy.get(`mat-cell:contains("${name}")`)
+      .prev()
+      .click();
+  });
+}
+
+export function getButtonReview(reviewName: string, operation: string) {
+  cy.get('span:contains("Aufgabenfolgen")').click();
+  cy.contains('mat-row', reviewName).click();
+  cy.get('studio-lite-review-menu').within(() => {
+    cy.contains('mat-icon', operation).click();
+  });
+}
+
 export function deleteGroup(group: string):void {
   // cy.get('[data-cy="goto-admin"]').click();
   findAdminSettings().click();
@@ -494,6 +511,13 @@ export function importExercise(filename: string): void {
     });
 }
 
+export function getUnitNames():string[] {
+  const unitList: string[] = [];
+  cy.get('span.unit-key').each($el => {
+    unitList.push($el.text().trim());
+  });
+  return unitList;
+}
 // workspace menu options
 export function selectFromMenu(option: string): void {
   cy.get('mat-icon:contains("menu")')

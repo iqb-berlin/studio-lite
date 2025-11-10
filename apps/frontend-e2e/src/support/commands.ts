@@ -65,6 +65,11 @@ Cypress.Commands.add('visitWs', (ws:string) => {
   cy.get(`a:contains("${ws}")`).click();
 });
 
+Cypress.Commands.add('runUntracked', fn => {
+  cy.then(() => {
+    fn();
+  });
+});
 //
 // -- This is a child command --
 // Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })

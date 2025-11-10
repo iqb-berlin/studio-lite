@@ -17,6 +17,7 @@ declare namespace Cypress {
     loadModule(filename: string, name: string): void;
     selectModule(name: string): void;
     visitWs(ws: string): void;
+    runUntracked(fn);
     // Commands API
     // commands-metadata.ts
     getRegistryAPI(token: string): Chainable<Response>; // 30
