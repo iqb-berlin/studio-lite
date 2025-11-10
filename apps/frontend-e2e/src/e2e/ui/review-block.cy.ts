@@ -27,13 +27,13 @@ describe('Review:', () => {
   });
 
   const review:string = 'Review1';
-  it('admin imports units', () => {
+  it('should import units', () => {
     cy.visit('/');
     cy.visitWs(ws1);
     importExercise('test_studio_units_download.zip');
   });
 
-  it('admin adds review', () => {
+  it('should add a review', () => {
     goToWsMenu();
     cy.get('span:contains("Aufgabenfolgen")').click();
     cy.get('studio-lite-add-review-button').within(() => {
@@ -57,7 +57,7 @@ describe('Review:', () => {
     cy.clickButton('Schließen');
   });
 
-  it('admin checks review exists', () => {
+  it('should check that review exists', () => {
     cy.visit('/');
 
     cy.get('studio-lite-user-reviews-area').within(() => {
@@ -65,7 +65,7 @@ describe('Review:', () => {
     });
   });
 
-  it('admin opens review', () => {
+  it('should open a review and assert that nav bar exists', () => {
     cy.visit('/');
     cy.get('studio-lite-user-reviews-area').within(() => {
       cy.get(`a:contains("${review}")`).click();
@@ -84,7 +84,7 @@ describe('Review:', () => {
     });
   });
 
-  it('checks that review is available for other user', () => {
+  it('should other user access to the review', () => {
     cy.visit('/');
     findWorkspaceGroupSettings(group1).click();
     clickIndexTab('Arbeitsbereiche');
@@ -99,7 +99,7 @@ describe('Review:', () => {
     login(Cypress.env('username'), Cypress.env('password'));
   });
 
-  it('admin exports review', () => {
+  it('should export a review', () => {
     cy.visit('/');
     cy.visitWs(ws1);
     goToWsMenu();
@@ -108,7 +108,7 @@ describe('Review:', () => {
     cy.clickButton('Schließen');
   });
 
-  it('admin prints review', () => {
+  it('should print a review', () => {
     cy.visit('/');
     cy.visitWs(ws1);
     goToWsMenu();
@@ -117,7 +117,7 @@ describe('Review:', () => {
     cy.clickButton('Schließen');
   });
 
-  it('admin modifies review', () => {
+  it('should modify a review', () => {
     cy.visit('/');
     cy.visitWs(ws1);
     goToWsMenu();
@@ -130,7 +130,7 @@ describe('Review:', () => {
     cy.clickButton('Schließen');
   });
 
-  it('admin checks the modified review', () => {
+  it('should check that the review was modified', () => {
     cy.visit('/');
     cy.get('studio-lite-user-reviews-area').within(() => {
       cy.get(`a:contains("${review}")`).click();
@@ -145,7 +145,7 @@ describe('Review:', () => {
     });
   });
 
-  it('admin deletes the review', () => {
+  it('should delete the review', () => {
     cy.visit('/');
     cy.visitWs(ws1);
     goToWsMenu();

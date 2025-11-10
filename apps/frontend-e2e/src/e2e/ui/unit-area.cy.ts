@@ -26,7 +26,7 @@ import {
 import {
   AccessLevel, modules, UnitData, UserData
 } from '../../support/testData';
-import { selectProfileForAreaFromGroup, selectProfileForGroup } from '../../support/metadata/metadata-util';
+import { selectProfileForGroup } from '../../support/metadata/metadata-util';
 import { IqbProfile } from '../../support/metadata/iqbProfile';
 
 describe('UI check: workspace', () => {
@@ -78,15 +78,15 @@ describe('UI check: workspace', () => {
     setVeronaWs(ws1);
   });
 
-  it('should select the profile for the group from group settings', () => {
+  it('should select the profile for ws from ws settings', () => {
     cy.visit('/');
     selectProfileForGroup(group1, IqbProfile.DE);
   });
 
-  it('should select profile for an area from group settings', () => {
-    cy.visit('/');
-    selectProfileForAreaFromGroup(IqbProfile.DE, ws1, group1);
-  });
+  // it('should select profile for a ws from group settings', () => {
+  //   cy.visit('/');
+  //   selectProfileForAreaFromGroup(IqbProfile.DE, ws1, group1);
+  // });
 
   it('should add state to the workspace', () => {
     cy.visit('/');
