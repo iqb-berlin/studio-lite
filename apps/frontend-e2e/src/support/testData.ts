@@ -98,3 +98,10 @@ export const modules:string[] = [
   'iqb-schemer-2.5.3.html',
   'iqb-editor-aspect-2.10.1.html',
   'iqb-player-aspect-2.10.1.html'];
+
+export const group1:string = 'Grundgruppe';
+export const ws1:string = 'Grundarbeitsbereich';
+export const newUser: UserData = {
+  username: 'normaluser',
+  password: '5678'
+};
