@@ -58,7 +58,8 @@
 
 .warning {
   @extend .info;
-  font-weight: bold;
+  color: black !important;
+  background: white !important;
   border: 2px solid #b71c1c !important;
 }
 
@@ -72,6 +73,7 @@
   margin: 20px 0;
   padding: 20px 15px;
   border-radius: 5px;
-  border: 1px solid #bbb;
+  color: #006064;
+  background: #00606410;
 }
 
