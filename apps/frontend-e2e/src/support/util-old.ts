@@ -323,23 +323,30 @@ export function logout() {
     .click();
 }
 
-export function editInput(data: string, content:string) {
-  cy.get(`[data-cy="${data}"]`)
-    .should('exist')
-    .type(content, { force: true });
-}
 export function changePassword(newPass:string, oldPass:string):void {
-  cy.get('[data-cy="goto-user-menu"]').click();
-  cy.get('[data-cy="user-menu-change-password"]').click();
-  editInput('change-password-password', oldPass);
-  editInput('change-password-new-password', newPass);
-  editInput('change-password-new2-password', newPass);
+  // cy.get('[data-cy="goto-user-menu"]').click();
+  cy.get('studio-lite-user-menu')
+    .click();
+  cy.get('span:contains("Kennwort ändern")')
+    .should('exist')
+    .click();
+  cy.get('mat-label:contains("Altes Kennwort")')
+    .should('exist')
+    .type(oldPass);
+  cy.get('mat-label:contains("Neues Kennwort")')
+    .eq(0)
+    .should('exist')
+    .type(newPass);
+  cy.get('mat-label:contains("Neues Kennwort (Wiederholung)")')
+    .should('exist')
+    .type(newPass);
   cy.buttonToContinue('Speichern', [200], '/api/password', 'PATCH', 'updatePass');
 }
 
 export function updatePersonalData():void {
-  cy.get('[data-cy="goto-user-menu"]').click();
-  // cy.get('studio-lite-user-menu').click();
+  // cy.get('[data-cy="goto-user-menu"]').click();
+  cy.get('studio-lite-user-menu')
+    .click();
   cy.get('span:contains("Nutzer:innen-Daten ändern")')
     .should('exist')
     .click();
