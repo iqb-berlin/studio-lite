@@ -7,15 +7,11 @@ import {
   deleteUser, findAdminSettings
 } from '../../../support/util';
 import { checkMultipleProfiles, checkProfile } from '../../../support/metadata/metadata-util';
-import { UserData } from '../../../support/testData';
+import { newUser } from '../../../support/testData';
 
 describe('Load metadata profile', () => {
   const groups = ['Mathematik Primär und Sek I',
     'Deutsch Primär und Sek I'];
-  const newUser: UserData = {
-    username: 'normaluser',
-    password: '5678'
-  };
   before(() => {
     addFirstUser();
   });

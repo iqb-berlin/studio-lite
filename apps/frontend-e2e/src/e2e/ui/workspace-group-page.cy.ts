@@ -12,7 +12,7 @@ import {
   makeAdminOfGroup,
   findWorkspaceGroupSettings, grantRemovePrivilegeAtUser, findAdminSettings
 } from '../../support/util';
-import { AccessLevel, UserData } from '../../support/testData';
+import { AccessLevel, newUser, UserData } from '../../support/testData';
 
 describe('UI Group admin workspace check', () => {
   const group1:string = 'Mathematik Primär Bereichsgruppe';
@@ -21,10 +21,6 @@ describe('UI Group admin workspace check', () => {
   const groupAdminUser: UserData = {
     username: 'groupadminuser',
     password: '1111'
-  };
-  const newUser: UserData = {
-    username: 'normaluser',
-    password: '5678'
   };
   before(() => {
     addFirstUser();

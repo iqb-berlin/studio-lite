@@ -11,18 +11,14 @@ import {
 import {
   AccessLevel,
   modules,
-  resource,
-  UserData
+  newUser,
+  resource
 } from '../../support/testData';
 
 describe('UI Administration Management', () => {
   // eslint-disable-next-line max-len
   const group1:string = 'Mathematik Primär Bereichsgruppe';
   const ws1:string = 'Mathematik I';
-  const newUser: UserData = {
-    username: 'normaluser',
-    password: '5678'
-  };
   before(() => addFirstUser());
   after(() => deleteFirstUser());
 

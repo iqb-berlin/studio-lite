@@ -8,13 +8,9 @@ import {
   login,
   logout, findAdminSettings
 } from '../../support/util';
-import { UserData } from '../../support/testData';
+import { newUser } from '../../support/testData';
 
 describe('UI User Management', () => {
-  const newUser: UserData = {
-    username: 'normaluser',
-    password: '5678'
-  };
   before(() => {
     addFirstUser();
   });
