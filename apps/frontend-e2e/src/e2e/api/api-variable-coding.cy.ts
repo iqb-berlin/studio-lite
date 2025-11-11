@@ -16,8 +16,8 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
     name: 'Bista III'
   };
   const newSettings: WsSettings = {
-    defaultEditor: 'iqb-editor-aspect@2.9',
-    defaultPlayer: 'iqb-player-aspect@2.9',
+    defaultEditor: 'iqb-editor-aspect@2.10',
+    defaultPlayer: 'iqb-player-aspect@2.10',
     defaultSchemer: 'iqb-schemer@2.5',
     unitGroups: [],
     stableModulesOnly: false,
