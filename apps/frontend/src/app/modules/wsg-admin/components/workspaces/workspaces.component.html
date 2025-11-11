@@ -1,5 +1,5 @@
 <div class="fx-row-space-between-start admin-tab-content">
-  <div class="fx-flex-row-50 fx-column-start-stretch object-list">
+  <div class="fx-flex-row-55 fx-column-start-stretch object-list">
     <studio-lite-workspace-menu
       [isBackUpWorkspaceGroup]="isBackUpWorkspaceGroup"
       [maxWorkspaceCount]="maxWorkspaceCount"
@@ -108,12 +108,12 @@
   <div class="object-list fx-column-start-stretch fx-flex-row-40">
     <div class="object-header-container fx-row-space-between-center">
       @if (!selectedWorkspaceId) {
-        <div>
+        <div class="object-header">
           {{'wsg-admin.hint' | translate}}
         </div>
       }
       @if (selectedWorkspaceId) {
-        <div>
+        <div class="object-header">
           {{'wsg-admin.access-for-workspace' | translate: { workspace: tableSelectionRow.selected[0].name } }}
         </div>
       }

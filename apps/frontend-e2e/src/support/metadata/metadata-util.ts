@@ -107,7 +107,7 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
     .contains('settings')
     .click();
   cy.get('mat-select').eq(0).click();
-  cy.wait(100);
+  cy.wait(200);
   cy.get(`span:contains(${profile})`)
     .contains('Aufgabe')
     .click();

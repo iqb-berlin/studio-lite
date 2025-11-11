@@ -6,7 +6,7 @@ import { PagingMode } from '../models/types';
   providedIn: 'root'
 })
 export class PreviewService {
-  pagingMode = new BehaviorSubject<PagingMode>('separate');
+  pagingMode = new BehaviorSubject<PagingMode>('buttons');
 
   setPagingMode(pagingMode: PagingMode): void {
     this.pagingMode.next(pagingMode);

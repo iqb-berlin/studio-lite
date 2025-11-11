@@ -6,8 +6,11 @@
 .object-list {
   height: calc(100% - 5px);
   .object-header-container {
-    margin-top: 5px;
-    margin-bottom: 20px;
+    margin-top: 35px;
+    .object-header {
+      @extend .info;
+      width: 100%;
+    }
   }
 }
 
@@ -55,7 +58,8 @@
 
 .warning {
   @extend .info;
-  font-weight: bold;
+  color: black !important;
+  background: white !important;
   border: 2px solid #b71c1c !important;
 }
 
@@ -69,6 +73,7 @@
   margin: 20px 0;
   padding: 20px 15px;
   border-radius: 5px;
-  border: 1px solid #000000;
+  color: #006064;
+  background: #00606410;
 }
 

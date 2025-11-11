@@ -1,5 +1,9 @@
-<h3 mat-dialog-title>{{data.title}}</h3>
-<studio-lite-profiles [profiles] ="formData.profilesSelected" (hasChanged) ="hasChanged($event)"/>
+<h3 mat-dialog-title>{{'metadata.assign-metadata-profiles' | translate}}</h3>
+<mat-dialog-content class="profiles">
+  <studio-lite-profiles [profiles] ="formData.profilesSelected"
+                        [title]="'metadata.assign-metadata-profiles' | translate"
+                        (hasChanged) ="hasChanged($event)"/>
+</mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-raised-button
           color="primary"

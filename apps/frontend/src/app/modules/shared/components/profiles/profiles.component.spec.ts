@@ -18,7 +18,11 @@ describe('ProfilesComponent', () => {
   let component: ProfilesComponent;
   let fixture: ComponentFixture<ProfilesComponent>;
 
-  @Component({ selector: 'studio-lite-search-filter', template: '', standalone: false })
+  @Component({
+    selector: 'studio-lite-search-filter',
+    template: '',
+    standalone: false
+  })
   class MockSearchFilterComponent {
     @Input() title!: string;
   }

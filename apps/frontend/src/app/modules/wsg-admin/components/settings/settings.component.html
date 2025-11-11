@@ -1,24 +1,43 @@
 <div class="scroll-area">
-    <div class="fx-row-end-end ">
-        <button mat-fab
-                class="save-button"
-                [matTooltip]="'save' | translate"
-                matTooltipPosition="above"
-                [color]="'primary'"
-                [disabled]="!this.wsgAdminService.settingsChanged"
-                (click)="saveGroupSettings()">
-          <mat-icon>save></mat-icon>
-        </button>
+    <div class="fx-row-space-between-stretch container">
+      <div class="fx-flex-row-50 profiles-container">
+        <mat-card class="container">
+          <mat-card-header>
+            <mat-card-title class="card-header">{{'metadata.assign-metadata-profiles' | translate}}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="card-scroll-area">
+            <studio-lite-profiles class="profiles"
+                                  (hasChanged) = profileSettingsChange($event) >
+            </studio-lite-profiles>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="fx-flex-row-50 profiles-container">
+        <mat-card class="container">
+          <mat-card-header>
+            <mat-card-title>{{'wsg-settings.state-configs' | translate}}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="card-scroll-area">
+            <studio-lite-states class="states"
+                                (hasChanged) = stateSettingsChange($event)
+                                (stateDeleted)=saveGroupSettings()>
+            </studio-lite-states>
+          </mat-card-content>
+        </mat-card>
+      </div>
     </div>
-    <div class="fx-row-start-stretch container">
-        <studio-lite-profiles class="profiles"
-                              (hasChanged) = profileSettingsChange($event) >
-        </studio-lite-profiles>
-        <studio-lite-states class="states"
-                            (hasChanged) = stateSettingsChange($event)
-                            (stateDeleted)=saveGroupSettings()
-        ></studio-lite-states>
-    </div>
+  <div class="fx-row-end-end ">
+    <button mat-fab
+            class="save-button"
+            [matTooltip]="'save' | translate"
+            matTooltipPosition="above"
+            [color]="'primary'"
+            [disabled]="!this.wsgAdminService.settingsChanged"
+            (click)="saveGroupSettings()">
+      <mat-icon>save></mat-icon>
+    </button>
+  </div>
 </div>
 
 
