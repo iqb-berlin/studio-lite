@@ -7,7 +7,7 @@ import {
   deleteUser,
   login,
   logout, findAdminSettings
-} from '../../support/util';
+} from '../../support/util-old';
 import { newUser } from '../../support/testData';
 
 describe('UI User Management', () => {
@@ -55,7 +55,6 @@ describe('UI User Management', () => {
   });
 
   it('deletes the user', () => {
-    // TODO test with a username as user: check mat-cell
     login(Cypress.env('username'), Cypress.env('password'));
     deleteUser('normaluser');
   });

@@ -64,9 +64,6 @@ export function findWorkspaceGroupSettings(group:string): Chainable {
 }
 
 export function findAdminSettings(): Chainable {
-  // return cy.get('div>studio-lite-area-little>div:contains("Arbeitsbereich wählen")')
-  //   .parent().parent()
-  //   .contains('studio-lite-wrapped-icon', 'settings');
   return cy.get('div')
     .contains('studio-lite-wrapped-icon', 'construction');
 }
@@ -311,22 +308,24 @@ export function deleteGroup(group: string):void {
 }
 
 export function logout() {
-  // cy.get('[data-cy="goto-user-menu"]').click();
-  cy.get('studio-lite-user-menu')
-    .click();
-  cy.get('span:contains("Abmelden")')
-    .should('exist')
-    .click();
+  cy.get('[data-cy="goto-user-menu"]').click();
+  cy.get('[data-cy="user-menu-logout"]').click();
+  clickDialogButton('Abmelden');
+}
+
+export function clickDialogButton(buttonName: string) {
   cy.get('mat-dialog-actions button')
-    .contains('Abmelden')
+    .contains(buttonName)
     .should('exist')
     .click();
 }
 
-export function editInput(data: string, content:string) {
-  cy.get(`[data-cy="${data}"]`)
-    .should('exist')
-    .type(content, { force: true });
+export function editInput(data: string, content: string) {
+  if (content != null) {
+    cy.get(`[data-cy="${data}"]`)
+      .should('exist')
+      .type(content, { force: true });
+  }
 }
 export function changePassword(newPass:string, oldPass:string):void {
   cy.get('[data-cy="goto-user-menu"]').click();
@@ -337,24 +336,12 @@ export function changePassword(newPass:string, oldPass:string):void {
   cy.buttonToContinue('Speichern', [200], '/api/password', 'PATCH', 'updatePass');
 }
 
-export function updatePersonalData():void {
+export function updatePersonalData(newData: UserData):void {
   cy.get('[data-cy="goto-user-menu"]').click();
-  // cy.get('studio-lite-user-menu').click();
-  cy.get('span:contains("Nutzer:innen-Daten ändern")')
-    .should('exist')
-    .click();
-  cy.get('input[placeholder="Nachname"]')
-    .should('exist')
-    .clear()
-    .type('Müller');
-  cy.get('input[placeholder="Vorname"]')
-    .should('exist')
-    .clear()
-    .type('Adam');
-  cy.get('input[placeholder="E-Mail"]')
-    .should('exist')
-    .clear()
-    .type('adam.muller@iqb.hu-berlin.de');
+  cy.get('[data-cy="user-menu-edit-my-data"]').click();
+  editInput('edit-my-data-lastname', <string>newData.lastName);
+  editInput('edit-my-data-firstname', <string>newData.firstName);
+  editInput('edit-my-data-email', <string>newData.email);
   cy.buttonToContinue('Speichern', [200], '/api/my-data', 'PATCH', 'updateData');
 }
 

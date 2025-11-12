@@ -7,7 +7,7 @@ import {
   deleteGroup, deleteModule, deleteResource,
   deleteUser, findAdminSettings,
   grantRemovePrivilegeAtWs
-} from '../../support/util-old';
+} from '../../support/util';
 import {
   AccessLevel,
   modules,
