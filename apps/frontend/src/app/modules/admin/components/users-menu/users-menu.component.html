@@ -1,7 +1,8 @@
 <div class="fx-row-start-stretch">
   <button mat-button
           [matTooltip]="'admin.add-user' | translate"
-          (click)="addUser()">
+          (click)="addUser()"
+          data-cy="admin-users-menu-add-user">
     <studio-lite-wrapped-icon icon="add"></studio-lite-wrapped-icon>
   </button>
   <button mat-button

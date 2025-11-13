@@ -10,7 +10,13 @@ export function addFirstUser() {
 
 export function createNewUser(newUser: UserData):void {
   findAdminSettings().click();
-  cy.get('mat-icon').contains('add').click();
+  cy.get('[data-cy="admin-users-menu-add-user"]').click();
+  // cy.get('mat-icon').contains('add').click();
+  editInput('admin-edit-user-username', newUser.username);
+  editInput('admin-edit-user-lastname', newUser.lastName);
+  editInput('admin-edit-user-firstname', newUser.firstName);
+  editInput('admin-edit-user-email', newUser.email);
+  editInput('admin-edit-user-password', newUser.password);
   cy.get('input[placeholder="Login-Name"]')
     .should('exist')
     .clear()
@@ -64,8 +70,7 @@ export function findWorkspaceGroupSettings(group:string): Chainable {
 }
 
 export function findAdminSettings(): Chainable {
-  return cy.get('div')
-    .contains('studio-lite-wrapped-icon', 'construction');
+  return cy.get('[data-cy="goto-admin"]');
 }
 
 export function createWs(ws:string, group:string):void {
@@ -320,7 +325,7 @@ export function clickDialogButton(buttonName: string) {
     .click();
 }
 
-export function editInput(data: string, content: string) {
+export function editInput(data: string, content: string | undefined) {
   if (content != null) {
     cy.get(`[data-cy="${data}"]`)
       .should('exist')

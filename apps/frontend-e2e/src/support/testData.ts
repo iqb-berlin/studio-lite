@@ -103,5 +103,8 @@ export const group1:string = 'Grundgruppe';
 export const ws1:string = 'Grundarbeitsbereich';
 export const newUser: UserData = {
   username: 'normaluser',
-  password: '5678'
+  password: '5678',
+  lastName: '',
+  firstName: '',
+  email: 'no-mail'
 };
