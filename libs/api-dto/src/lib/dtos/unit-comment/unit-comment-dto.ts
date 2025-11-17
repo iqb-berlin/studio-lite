@@ -23,6 +23,9 @@ export class UnitCommentDto {
     unitId?: number;
 
   @ApiProperty()
+    hidden!: boolean;
+
+  @ApiProperty()
     createdAt?: Date;
 
   @ApiProperty()
