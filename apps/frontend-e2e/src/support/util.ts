@@ -74,7 +74,7 @@ export function findAdminSettings(): Chainable {
 }
 
 export function createWs(ws:string, group:string):void {
-  findWorkspaceGroupSettings(group).click();
+  cy.findWorkspaceGroupSettings(group).click();
   cy.wait(100);
   cy.get('span:contains("Arbeitsbereiche")')
     .eq(0)
@@ -326,7 +326,7 @@ export function clickDialogButton(buttonName: string) {
 }
 
 export function editInput(data: string, content: string | undefined) {
-  if (content != null) {
+  if (content != null && content !== '') {
     cy.get(`[data-cy="${data}"]`)
       .should('exist')
       .type(content, { force: true });

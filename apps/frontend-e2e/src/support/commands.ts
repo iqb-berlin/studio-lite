@@ -1,4 +1,5 @@
 // -- This is a parent command --
+
 Cypress.Commands.add('login', (username:string, password:string) => {
   cy.get('[data-cy="home-user-name"]')
     .should('exist')
@@ -70,6 +71,14 @@ Cypress.Commands.add('runUntracked', fn => {
     fn();
   });
 });
+
+Cypress.Commands.add('findWorkspaceGroupSettings', (group:string) => {
+  cy.get('studio-lite-user-workspaces-groups')
+    .get(`div>div>div>div:contains("${group}")`)
+    .parent()
+    .contains('mat-icon', 'settings');
+});
+
 //
 // -- This is a child command --
 // Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })

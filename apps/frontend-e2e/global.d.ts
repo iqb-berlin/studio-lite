@@ -18,6 +18,7 @@ declare namespace Cypress {
     selectModule(name: string): void;
     visitWs(ws: string): void;
     runUntracked(fn);
+    findWorkspaceGroupSettings(group: string): Chainable<JQuery<HTMLElement>>;
     // Commands API
     // commands-metadata.ts
     getRegistryAPI(token: string): Chainable<Response>; // 30

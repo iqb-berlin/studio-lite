@@ -13,7 +13,6 @@ import {
   addModules,
   createNewUser,
   setVeronaWs,
-  findWorkspaceGroupSettings,
   clickIndexTab,
   addStatus,
   clickSaveButtonRight,
@@ -89,7 +88,7 @@ describe('UI check: workspace', () => {
 
   it('should add state to the workspace', () => {
     cy.visit('/');
-    findWorkspaceGroupSettings(group1).click();
+    cy.findWorkspaceGroupSettings(group1).click();
     clickIndexTab('Einstellungen');
     addStatus('In Bearbeitung', 0);
     addStatus('Finale', 1);
@@ -169,7 +168,7 @@ describe('UI check: workspace', () => {
   it('should add an user to the ws1 with basic credentials', () => {
     createNewUser(newUser);
     cy.visit('/');
-    findWorkspaceGroupSettings(group1).click();
+    cy.findWorkspaceGroupSettings(group1).click();
     clickIndexTab('Arbeitsbereiche');
     grantRemovePrivilegeAtWs([newUser.username], ws1, [AccessLevel.Basic]);
     cy.visit('/');

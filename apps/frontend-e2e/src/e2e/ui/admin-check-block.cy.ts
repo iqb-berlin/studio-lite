@@ -16,7 +16,6 @@ import {
 } from '../../support/testData';
 
 describe('UI Administration Management', () => {
-  // eslint-disable-next-line max-len
   const group1:string = 'Mathematik Primär Bereichsgruppe';
   const ws1:string = 'Mathematik I';
   before(() => addFirstUser());
