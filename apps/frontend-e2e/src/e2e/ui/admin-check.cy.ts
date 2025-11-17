@@ -5,7 +5,7 @@ import {
   createWs,
   deleteFirstUser,
   deleteGroup, deleteModule, deleteResource,
-  deleteUser, findAdminSettings,
+  deleteUser,
   grantRemovePrivilegeAtWs
 } from '../../support/util-old';
 import {
@@ -22,7 +22,7 @@ describe('UI Administration Management', () => {
   after(() => deleteFirstUser());
 
   it('user with admin credentials has admin setting button', () => {
-    findAdminSettings();
+    cy.findAdminSettings();
   });
 
   it('user with admin credentials can add new user', () => {

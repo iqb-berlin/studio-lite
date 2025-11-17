@@ -14,7 +14,7 @@ import {
   DefinitionUnit, CopyUnit, WsSettings,
   UnitExport
 } from './testData';
-import { buildQueryParameters, buildQueryParametersComplex } from './utilAPI';
+import { buildQueryParameters, buildQueryParametersComplex } from './util-api';
 
 // 1
 Cypress.Commands.add('addFirstUserAPI', (username: string, password: string) => {

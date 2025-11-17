@@ -1,7 +1,7 @@
 import {
   AccessLevel, GroupData, modules, WsData, WsSettings
 } from '../../support/testData';
-import { deleteTextField } from '../../support/utilAPI';
+import { deleteTextField } from '../../support/util-api';
 import {
   deleteGroup, deleteModule, focusOnMenu, goToItem, login, logout, selectUnit
 } from '../../support/util';

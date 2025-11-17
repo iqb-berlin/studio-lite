@@ -79,6 +79,10 @@ Cypress.Commands.add('findWorkspaceGroupSettings', (group:string) => {
     .contains('mat-icon', 'settings');
 });
 
+Cypress.Commands.add('findAdminSettings', () => {
+  cy.get('[data-cy="goto-admin"]');
+});
+
 //
 // -- This is a child command --
 // Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })

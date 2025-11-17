@@ -9,7 +9,7 @@ export function addFirstUser() {
 }
 
 export function createNewUser(newUser: UserData):void {
-  findAdminSettings().click();
+  cy.findAdminSettings().click();
   cy.get('[data-cy="admin-users-menu-add-user"]').click();
   // cy.get('mat-icon').contains('add').click();
   editInput('admin-edit-user-username', newUser.username);
@@ -38,7 +38,7 @@ export function createNewUser(newUser: UserData):void {
 
 export function deleteUser(user: string):void {
   // cy.get('[data-cy="goto-admin"]').click();
-  findAdminSettings().click();
+  cy.findAdminSettings().click();
   cy.get('mat-cell')
     .contains(`${user}`)
     .should('exist')
@@ -52,7 +52,7 @@ export function deleteUser(user: string):void {
 
 export function createGroup(group:string):void {
   // cy.get('[data-cy="goto-admin"]').click();
-  findAdminSettings().click();
+  cy.findAdminSettings().click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
@@ -170,7 +170,7 @@ export function grantRemovePrivilegeAtUser(user:string, wss: string[], rights:Ac
 }
 
 export function makeAdminOfGroup(group:string, admins: string[]):void {
-  findAdminSettings().click();
+  cy.findAdminSettings().click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();
@@ -207,7 +207,7 @@ export function login(username: string, password = '') {
 }
 
 export function addModules(filenames:string[]):void {
-  findAdminSettings().click();
+  cy.findAdminSettings().click();
   cy.get('span:contains("Module")')
     .eq(0)
     .click();
@@ -218,7 +218,7 @@ export function addModules(filenames:string[]):void {
 
 export function addResourcePackage(resource: string):void {
   const path:string = `../frontend-e2e/src/fixtures/${resource}`;
-  findAdminSettings().click();
+  cy.findAdminSettings().click();
   cy.get('span:contains("Pakete")')
     .eq(0)
     .click();
@@ -250,7 +250,7 @@ export function clickButton(name:string):void {
 }
 
 export function deleteModule():void {
-  findAdminSettings().click();
+  cy.findAdminSettings().click();
   cy.get('span:contains("Module")')
     .eq(0)
     .click();
@@ -265,7 +265,7 @@ export function deleteModule():void {
 
 export function deleteResource():void {
   // cy.get('[data-cy="goto-admin"]').click();
-  findAdminSettings().click();
+  cy.findAdminSettings().click();
   cy.get('span:contains("Pakete")')
     .eq(0)
     .click();
@@ -298,7 +298,7 @@ export function getButtonReview(reviewName: string, operation: string) {
 
 export function deleteGroup(group: string):void {
   // cy.get('[data-cy="goto-admin"]').click();
-  findAdminSettings().click();
+  cy.findAdminSettings().click();
   cy.get('span:contains("Bereichsgruppen")')
     .eq(0)
     .click();

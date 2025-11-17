@@ -6,7 +6,7 @@ import {
   deleteFirstUser,
   deleteUser,
   login,
-  logout, findAdminSettings
+  logout
 } from '../../support/util';
 import { newUser, UserData } from '../../support/testData';
 
@@ -29,7 +29,7 @@ describe('UI User Management', () => {
 
   it('should not be able to find admin user setting button', () => {
     cy.visit('/');
-    findAdminSettings().should('not.exist');
+    cy.findAdminSettings().should('not.exist');
   });
 
   it('should be able to modify personal data', () => {

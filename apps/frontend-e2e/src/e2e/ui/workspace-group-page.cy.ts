@@ -10,7 +10,7 @@ import {
   deleteGroup,
   logout,
   makeAdminOfGroup,
-  grantRemovePrivilegeAtUser, findAdminSettings
+  grantRemovePrivilegeAtUser
 } from '../../support/util';
 import { AccessLevel, newUser, UserData } from '../../support/testData';
 
@@ -30,7 +30,7 @@ describe('UI Group admin workspace check', () => {
   });
 
   it('prepares the context', () => {
-    findAdminSettings().click();
+    cy.findAdminSettings().click();
     cy.visit('/');
     createNewUser(newUser);
     cy.visit('/');

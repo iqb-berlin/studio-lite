@@ -32,7 +32,7 @@ describe('Load metadata profile', () => {
   it('should be possible load a metadata profile from administration settings', () => {
     const searchProfile:string = 'Deutsch';
     // cy.get('[data-cy="goto-admin"]').click();
-    findAdminSettings().click();
+    cy.findAdminSettings().click();
     cy.get('span:contains("Bereichsgruppen")')
       .eq(0)
       .click();
