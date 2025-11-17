@@ -12,7 +12,7 @@ import {
 import {
   CreateUnitCommentDto,
   UnitCommentDto,
-  UpdateUnitCommentDto, UpdateUnitCommentUnitItemsDto,
+  UpdateUnitCommentDto, UpdateUnitCommentUnitItemsDto, UpdateUnitCommentVisibilityDto,
   UpdateUnitUserDto
 } from '@studio-lite-lib/api-dto';
 import { UnitCommentService } from '../services/unit-comment.service';
@@ -128,5 +128,17 @@ export class WorkspaceUnitCommentController {
   @ApiTags('workspace unit comment')
   async removeComment(@Param('id', ParseIntPipe) id: number) {
     return this.unitCommentService.removeComment(id);
+  }
+
+  @Patch(':comment_id/hidden')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Comment body for successfully updated.' })
+  @ApiNotFoundResponse({ description: 'Comment not found.' })
+  @ApiUnauthorizedResponse({ description: 'Not authorized to update comment.' })
+  @ApiTags('review unit comment')
+  async patchCommentVisibility(@Param('comment_id', ParseIntPipe) id: number,
+    @Body() comment: UpdateUnitCommentVisibilityDto) {
+    return this.unitCommentService.patchCommentVisibility(id, comment);
   }
 }

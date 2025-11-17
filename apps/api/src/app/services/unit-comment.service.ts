@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto
+  UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto, UpdateUnitCommentVisibilityDto
 } from '@studio-lite-lib/api-dto';
 import UnitComment from '../entities/unit-comment.entity';
 import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-found.exception';
@@ -128,6 +128,17 @@ export class UnitCommentService {
     if (commentToUpdate) {
       commentToUpdate.body = comment.body;
       commentToUpdate.changedAt = new Date();
+      await this.unitCommentsRepository.save(commentToUpdate);
+    } else {
+      throw new UnitCommentNotFoundException(id, 'PATCH');
+    }
+  }
+
+  async patchCommentVisibility(id: number, comment: UpdateUnitCommentVisibilityDto): Promise<void> {
+    this.logger.log(`Updating visibility of comment with id: ${id}`);
+    const commentToUpdate = await this.unitCommentsRepository.findOne({ where: { id: id } });
+    if (commentToUpdate) {
+      commentToUpdate.hidden = comment.hidden;
       await this.unitCommentsRepository.save(commentToUpdate);
     } else {
       throw new UnitCommentNotFoundException(id, 'PATCH');
