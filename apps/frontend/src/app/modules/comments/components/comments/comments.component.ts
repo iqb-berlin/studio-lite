@@ -69,6 +69,31 @@ export class CommentsComponent implements OnInit, OnDestroy {
       });
   }
 
+  updateCommentVisibility(commentId: number, hidden: boolean): void {
+    const updateComment = { hidden: hidden, userId: this.userId };
+    this.backendService
+      .updateCommentVisibility(commentId, updateComment, this.workspaceId, this.unitId, this.reviewId)
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        tap(result => {
+          if (!result) {
+            this.snackBar.open(
+              this.translateService.instant('comment.visibility-not-updated'),
+              this.translateService.instant('error'),
+              { duration: 3000 }
+            );
+          }
+          this.snackBar.open(
+            this.translateService.instant('comment.visibility-updated'),
+            '',
+            { duration: 1000 }
+          );
+        }),
+        switchMap(() => this.getUpdatedComments())
+      )
+      .subscribe(() => {});
+  }
+
   updateComment({ text, commentId, items }: { text: string; commentId: number; items: string[] }): void {
     this.isCommentProcessing = true;
     if (!this.newCommentOnly) {
@@ -211,7 +236,8 @@ export class CommentsComponent implements OnInit, OnDestroy {
   }
 
   private setRootCommentsWithReplies(): void {
-    this.rootCommentsWithReplies = this.comments.filter(c => c.parentId === null)
+    this.rootCommentsWithReplies = this.comments
+      .filter(c => c.parentId === null)
       .map(comment => (
         {
           rootComment: comment,
@@ -246,5 +272,9 @@ export class CommentsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
+  }
+
+  toggleVisibility(comment : Comment): void {
+    this.updateCommentVisibility(comment.id, !comment.hidden);
   }
 }

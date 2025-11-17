@@ -775,7 +775,9 @@
     "sent": "Kommentar gesendet",
     "not-sent": "Kommentar konnte nicht gesendet werden",
     "updated": "Kommentar aktualisiert",
-    "not-updated": "Kommentar konnte nicht aktualisiert werden"
+    "not-updated": "Kommentar konnte nicht aktualisiert werden",
+    "visibility-updated": "Sichtbarkeit des Kommentars aktualisiert",
+    "visibility-not-updated": "Sichtbarkeit des Kommentars konnte nicht aktualisiert werden"
   },
   "comments": {
     "comment-delete-title": "Kommentar löschen",

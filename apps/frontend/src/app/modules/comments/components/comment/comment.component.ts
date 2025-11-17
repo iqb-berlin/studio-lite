@@ -42,6 +42,7 @@ export class CommentComponent implements OnInit {
   @Output() deleteComment = new EventEmitter<{ commentId: number; numberOfReplies: number }>();
   @Output() addComment = new EventEmitter<{ text: string; parentId: number | null, items: string[] }>();
   @Output() updateComment = new EventEmitter<{ text: string; commentId: number, items: string[] }>();
+  @Output() toggleVisibility = new EventEmitter<Comment>();
 
   ownComment: boolean = false;
   activeCommentType = ActiveCommentType;
