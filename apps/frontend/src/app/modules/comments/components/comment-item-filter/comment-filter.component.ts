@@ -29,10 +29,10 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
     MatDivider,
     MatSlideToggle
   ],
-  templateUrl: './comment-item-filter.component.html',
-  styleUrl: './comment-item-filter.component.scss'
+  templateUrl: './comment-filter.component.html',
+  styleUrl: './comment-filter.component.scss'
 })
-export class CommentItemFilterComponent {
+export class CommentFilterComponent {
   @Input() showHiddenComments!: BehaviorSubject<boolean>;
   @Input() filteredItems: string[] = [];
   @Input() unitItems: UnitItemDto[] = [];
