@@ -21,7 +21,6 @@ export function createNewUser(newUser: UserData):void {
 
 export function deleteUser(user: string):void {
   cy.findAdminSettings().click();
-  cy.get('[data-cy="admin-users-delete-users"]').click();
   cy.get('mat-cell')
     .contains(`${user}`)
     .should('exist')
@@ -37,7 +36,7 @@ export function deleteUsers(users: string[]):void {
   users.forEach(user => {
     selectCheckboxUser(user);
   });
-  cy.get('[data-cy="admin-users-delete-users"]').click();
+  cy.get('[data-cy="admin-users-menu-delete-users"]').click();
   cy.clickButtonWithResponseCheck('Löschen', [200], '/api/admin/users*', 'DELETE', 'deleteUser');
 }
 
@@ -312,13 +311,10 @@ export function editInput(data: string, content: string | undefined) {
   }
 }
 
-export function selectCheckboxUser(checkName: string) {
+function selectCheckboxUser(checkName: string) {
   cy.get('[data-cy="admin-users-checkbox-login-name"]')
-    .find(checkName)
-    .parent()
-    .parent()
-    .find('[data-cy="admin-users-checkbox-user-box"]')
-    .click();
+    .contains(checkName)
+    .parent();
 }
 
 export function changePassword(newPass:string, oldPass:string):void {

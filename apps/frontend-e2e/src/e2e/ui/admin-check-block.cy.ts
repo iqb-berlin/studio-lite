@@ -5,7 +5,6 @@ import {
   createGroup,
   createNewUser,
   createWs,
-  deleteFirstUser,
   deleteGroup,
   deleteModule,
   deleteResource,
@@ -24,7 +23,7 @@ describe('UI Administration Management', () => {
   const group1:string = 'Mathematik Primär Bereichsgruppe';
   const ws1:string = 'Mathematik I';
   before(() => addFirstUser());
-  after(() => deleteFirstUser());
+  // after(() => deleteFirstUser());
 
   it('user with admin credentials has admin setting button', () => {
     cy.findAdminSettings();

@@ -57,6 +57,6 @@ describe('UI User Management', () => {
 
   it('should not be able to login with incorrect credentials', () => {
     cy.login(newUser.username, 'nopass');
-    cy.buttonToContinue('Anmelden', [401], '/api/login', 'POST', 'loginFail');
+    cy.clickButtonWithResponseCheck('Anmelden', [401], '/api/login', 'POST', 'loginFail');
   });
 });
