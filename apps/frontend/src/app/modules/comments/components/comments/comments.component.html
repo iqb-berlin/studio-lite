@@ -8,6 +8,7 @@
     <studio-lite-comment-item-filter class="filter-button"
                                      [(filteredItems)]="filteredItems"
                                      [unitItems]="unitItems"
+                                     [disabled] ="!rootCommentsWithReplies || !rootCommentsWithReplies.length"
                                      [showHiddenComments]="showHiddenComments">
     </studio-lite-comment-item-filter>
 

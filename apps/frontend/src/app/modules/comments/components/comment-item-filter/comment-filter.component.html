@@ -1,7 +1,7 @@
 <button class="filter-button"
         matMiniFab
         [color]="'default'"
-        [disabled]="!unitItems || (unitItems && !unitItems.length)"
+        [disabled]="disabled"
         [matMenuTriggerFor]="filters"
         [matTooltip]="'comments.filter' | translate"
         [matTooltipPosition]="'above'">
