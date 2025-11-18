@@ -4,7 +4,7 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import {
-  switchMap, Subject, takeUntil, of, Observable, tap
+  switchMap, Subject, takeUntil, of, Observable, tap, BehaviorSubject
 } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
@@ -39,6 +39,8 @@ export class CommentsComponent implements OnInit, OnDestroy {
   @Input() newCommentOnly = false;
   @Input() adminMode = false;
   @Output() onCommentsUpdated = new EventEmitter<void>();
+
+  showHiddenComments: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   comments: Comment[] = [];
   rootCommentsWithReplies: RootCommentWithReplies[] = [];

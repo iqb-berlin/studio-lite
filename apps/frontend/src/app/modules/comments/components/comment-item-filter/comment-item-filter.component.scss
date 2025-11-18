@@ -1,3 +1,19 @@
 ::ng-deep .filter-menu {
   min-width: 200px !important;
 }
+
+.filter-items {
+  font-size: 18px;
+  padding: 10px 10px 10px 20px;
+  background-color: #00606410;
+  color: #006064;
+  margin-bottom: -8px;
+}
+
+.show-hidden-comments {
+  padding: 20px;
+  ::ng-deep .mdc-label {
+    font-size: 16px;
+    padding-left: 16px;
+  }
+}

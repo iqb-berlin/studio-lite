@@ -7,28 +7,32 @@
   @if (!newCommentOnly) {
     <studio-lite-comment-item-filter class="filter-button"
                                      [(filteredItems)]="filteredItems"
-                                     [unitItems]="unitItems">
+                                     [unitItems]="unitItems"
+                                     [showHiddenComments]="showHiddenComments">
     </studio-lite-comment-item-filter>
 
     <div class="comments fx-flex-fill">
       @for (rootComment of rootCommentsWithReplies | filteredRootComments : filteredItems; track rootComment) {
-        <studio-lite-comment
-          [comment]="rootComment.rootComment"
-          [userId]="userId"
-          [unitItems]="unitItems"
-          [replies]="(rootComment.replies | filteredComments : filteredItems)"
-          [activeComment]="activeComment"
-          [latestCommentId]="latestCommentId"
-          [adminMode]="adminMode"
-          (setActiveComment)="setActiveComment($event)"
-          (addComment)="addComment($event)"
-          (deleteComment)="deleteComment($event)"
-          (updateComment)="updateComment($event)"
-          (toggleVisibility)="toggleVisibility($event)"
-          studioLiteScrollCommentIntoView
-          [id]="rootComment.rootComment.id"
-          [scrollTargetId]="latestCommentId">
-        </studio-lite-comment>
+        @if (!rootComment.rootComment.hidden || (rootComment.rootComment.hidden && showHiddenComments.value)) {
+          <studio-lite-comment
+            [showHiddenComments]="showHiddenComments"
+            [comment]="rootComment.rootComment"
+            [userId]="userId"
+            [unitItems]="unitItems"
+            [replies]="(rootComment.replies | filteredComments : filteredItems)"
+            [activeComment]="activeComment"
+            [latestCommentId]="latestCommentId"
+            [adminMode]="adminMode"
+            (setActiveComment)="setActiveComment($event)"
+            (addComment)="addComment($event)"
+            (deleteComment)="deleteComment($event)"
+            (updateComment)="updateComment($event)"
+            (toggleVisibility)="toggleVisibility($event)"
+            studioLiteScrollCommentIntoView
+            [id]="rootComment.rootComment.id"
+            [scrollTargetId]="latestCommentId">
+          </studio-lite-comment>
+        }
       }
     </div>
   }

@@ -1,7 +1,7 @@
 import {
   Component, EventEmitter, Input, OnInit, Output
 } from '@angular/core';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
@@ -37,6 +37,7 @@ export class CommentComponent implements OnInit {
   @Input() parentId!: number | null;
   @Input() latestCommentId!: Subject<number>;
   @Input() adminMode = false;
+  @Input() showHiddenComments!: BehaviorSubject<boolean>;
 
   @Output() setActiveComment = new EventEmitter<ActiveComment | null>();
   @Output() deleteComment = new EventEmitter<{ commentId: number; numberOfReplies: number }>();

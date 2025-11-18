@@ -55,7 +55,7 @@
 
           <button mat-icon-button
                   class="comment-action"
-                  matTooltip = "{{'comment.visibility' | translate}}"
+                  matTooltip = "{{(comment.hidden ? 'comment.show' :'comment.hide' )| translate}}"
                   (click)="toggleVisibility.emit(comment)">
             <studio-lite-wrapped-icon
               [icon]="comment.hidden ? 'visibility' : 'visibility_off'">
@@ -92,24 +92,26 @@
 
     @if (replies.length) {
       @for (reply of replies; track reply) {
-        <studio-lite-comment
-          [comment]="reply"
-          [activeComment]="activeComment"
-          [parentId]="comment.id"
-          [replies]="[]"
-          [userId]="userId"
-          [unitItems]="unitItems"
-          [adminMode]="adminMode"
-          [latestCommentId]="latestCommentId"
-          (setActiveComment)="setActiveComment.emit($event)"
-          (updateComment)="updateComment.emit($event)"
-          (deleteComment)="deleteComment.emit($event)"
-          (addComment)="addComment.emit($event)"
-          (toggleVisibility)="toggleVisibility.emit($event)"
-          studioLiteScrollCommentIntoView
-          [id]="reply.id"
-          [scrollTargetId]="latestCommentId">
-        </studio-lite-comment>
+        @if (!reply.hidden || (reply.hidden && showHiddenComments.value)) {
+          <studio-lite-comment
+            [comment]="reply"
+            [activeComment]="activeComment"
+            [parentId]="comment.id"
+            [replies]="[]"
+            [userId]="userId"
+            [unitItems]="unitItems"
+            [adminMode]="adminMode"
+            [latestCommentId]="latestCommentId"
+            (setActiveComment)="setActiveComment.emit($event)"
+            (updateComment)="updateComment.emit($event)"
+            (deleteComment)="deleteComment.emit($event)"
+            (addComment)="addComment.emit($event)"
+            (toggleVisibility)="toggleVisibility.emit($event)"
+            studioLiteScrollCommentIntoView
+            [id]="reply.id"
+            [scrollTargetId]="latestCommentId">
+          </studio-lite-comment>
+        }
       }
     }
   </div>

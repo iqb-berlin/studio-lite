@@ -2,18 +2,32 @@
         matMiniFab
         [color]="'default'"
         [disabled]="!unitItems || (unitItems && !unitItems.length)"
-        [matMenuTriggerFor]="filterMenu"
-        [matTooltip]="'comments.filter-items' | translate"
+        [matMenuTriggerFor]="filters"
+        [matTooltip]="'comments.filter' | translate"
         [matTooltipPosition]="'above'">
   <mat-icon matBadgeOverlap="false"
-            [matBadgeHidden]="!filteredItems.length"
+            [matBadgeHidden]="!filteredItems.length && !showHiddenComments.value"
             [matBadgeColor]="'accent'"
-            [matBadge]="filteredItems.length">filter_alt</mat-icon>
+            [matBadge]="filteredItems.length + (showHiddenComments.value ? 1: 0)">filter_alt</mat-icon>
 </button>
-<mat-menu #filterMenu="matMenu"
+
+
+<mat-menu #filters="matMenu"
           [class]="'filter-menu'"
           [xPosition] = "'before'"
           [yPosition] = "'below'">
+
+  <mat-slide-toggle class="show-hidden-comments"
+    [ngModel]="showHiddenComments.value"
+    (ngModelChange)="showHiddenComments.next(!showHiddenComments.value)"
+    (click)="$event.stopPropagation()">
+    {{'comments.showHidden' | translate}}
+  </mat-slide-toggle>
+
+
+  <mat-divider></mat-divider>
+  <div class="filter-items">{{'comments.filter-items' | translate}}</div>
+
   <mat-selection-list [(ngModel)]="filteredItems"
                       (ngModelChange)="filteredItemsChange.emit($event)">
     @for (item of unitItems; track item) {
