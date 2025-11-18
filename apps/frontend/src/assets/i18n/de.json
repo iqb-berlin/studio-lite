@@ -791,7 +791,8 @@
     "filter-items": "Item-Filter anwenden",
     "filter": "Kommentare filtern",
     "comment": "Kommentieren",
-    "showHidden": "Sichtbarkeitseinstellungen ignorieren"
+    "showHidden": "Sichtbarkeitseinstellungen ignorieren",
+    "filter-no-items": "Keine Item Verbindung"
   },
   "delete-dialog": {
     "cancel": "Abbrechen",

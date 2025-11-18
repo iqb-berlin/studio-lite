@@ -29,17 +29,23 @@
   </mat-slide-toggle>
 
 
-  <mat-divider></mat-divider>
-  <div class="filter-items">{{'comments.filter-items' | translate}}</div>
+  @if (unitItems && unitItems.length) {
+    <div class="filter-items">{{'comments.filter-items' | translate}}</div>
 
-  <mat-selection-list [(ngModel)]="filteredItems"
-                      (ngModelChange)="filteredItemsChange.emit($event)">
-    @for (item of unitItems; track item) {
-      <mat-list-option togglePosition="before"
-                       [value]="item.uuid"
-                       (click)="$event.stopPropagation()">
-        {{item.id ? item.id : ('metadata.without-id' | translate)}}
-      </mat-list-option>
-    }
-  </mat-selection-list>
+    <mat-selection-list [(ngModel)]="filteredItems"
+                        (ngModelChange)="filteredItemsChange.emit($event)">
+        <mat-list-option togglePosition="before"
+                         [value]="'no-items'"
+                         (click)="$event.stopPropagation()">
+          {{'comments.filter-no-items' | translate}}
+        </mat-list-option>
+      @for (item of unitItems; track item) {
+        <mat-list-option togglePosition="before"
+                         [value]="item.uuid"
+                         (click)="$event.stopPropagation()">
+          {{item.id ? item.id : ('metadata.without-id' | translate)}}
+        </mat-list-option>
+      }
+    </mat-selection-list>
+  }
 </mat-menu>

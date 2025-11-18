@@ -1,7 +1,7 @@
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
-import { MatDivider, MatListOption, MatSelectionList } from '@angular/material/list';
+import { MatListOption, MatSelectionList } from '@angular/material/list';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
@@ -26,7 +26,6 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
     FormsModule,
     MatTooltip,
     MatMiniFabButton,
-    MatDivider,
     MatSlideToggle,
     MatIconButton
   ],
