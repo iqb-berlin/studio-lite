@@ -108,3 +108,11 @@ export const newUser: UserData = {
   firstName: '',
   email: 'no-mail'
 };
+
+export const anotherUser: UserData = {
+  username: 'anotheruser',
+  password: '5678',
+  lastName: '',
+  firstName: '',
+  email: 'no-mail-2'
+};

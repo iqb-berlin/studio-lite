@@ -18,7 +18,7 @@ Cypress.Commands.add('clickButton', (text: string) => {
     .click();
 });
 
-Cypress.Commands.add('buttonToContinue',
+Cypress.Commands.add('clickButtonWithResponseCheck',
   (text: string, code: number[], url: string, rest: string, alias:string) => {
     cy.intercept(rest, url).as(alias);
     cy.get('button')
@@ -29,7 +29,7 @@ Cypress.Commands.add('buttonToContinue',
       .its('response.statusCode').should('be.oneOf', code);
   });
 
-Cypress.Commands.add('dialogButtonToContinue',
+Cypress.Commands.add('clickDialogButtonWithResponseCheck',
   (text: string, code: number[], url: string, rest: string, alias:string) => {
     cy.intercept(rest, url)
       .as(alias);
@@ -72,7 +72,7 @@ Cypress.Commands.add('runUntracked', fn => {
   });
 });
 
-Cypress.Commands.add('findWorkspaceGroupSettings', (group:string) => {
+Cypress.Commands.add('findAdminGroupSettings', (group:string) => {
   cy.get('studio-lite-user-workspaces-groups')
     .get(`div>div>div>div:contains("${group}")`)
     .parent()

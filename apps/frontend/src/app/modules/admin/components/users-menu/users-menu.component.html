@@ -8,7 +8,8 @@
   <button mat-button
           [disabled]="!selectedUser && (!checkedRows || !checkedRows.length)"
           [matTooltip]="'admin.delete-selected-users' | translate"
-          (click)="deleteUsers()">
+          (click)="deleteUsers()"
+          data-cy="admin-users-menu-delete-users">
     <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
   </button>
   <button mat-button

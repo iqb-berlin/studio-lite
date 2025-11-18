@@ -12,13 +12,13 @@ declare namespace Cypress {
     // Commands UI
     login(username: string, password: string): void;
     clickButton(text: string): void;
-    buttonToContinue(text: string, code: number[], url: string, rest: string, alias: string): void;
-    dialogButtonToContinue(text: string, code: number[], url: string, rest: string, alias: string): void;
+    clickButtonWithResponseCheck(text: string, code: number[], url: string, rest: string, alias: string): void;
+    clickDialogButtonWithResponseCheck(text: string, code: number[], url: string, rest: string, alias: string): void;
     loadModule(filename: string, name: string): void;
     selectModule(name: string): void;
     visitWs(ws: string): void;
     runUntracked(fn);
-    findWorkspaceGroupSettings(group: string): Chainable<JQuery<HTMLElement>>;
+    findAdminGroupSettings(group: string): Chainable<JQuery<HTMLElement>>;
     findAdminSettings(): Chainable<JQuery<HTMLElement>>;
     // Commands API
     // commands-metadata.ts
@@ -33,7 +33,7 @@ declare namespace Cypress {
     loginAPI(username: string, password: string): Chainable<Response>; // 2
     getUserIdAPI(token: string): Chainable<Response>; // 3
     updatePasswordAPI(token: string, oldPass: string, newPass: string): Chainable<Response>; // 4
-    keycloakAPI(user: UserData): Chainable<Response>; // 5
+    loginWithKeycloakAPI(user: UserData): Chainable<Response>; // 5
     createUserAPI(userData: UserData, token: string): Chainable<Response>; // 6
     getUsersAPI(token: string): Chainable<Response>; // 7
     getUsersFullAPI(full: boolean, token: string): Chainable<Response>; // 8
@@ -51,7 +51,7 @@ declare namespace Cypress {
     updateUsersOfWsAPI(wsId: string, level: AccessLevel, userId: string, token: string): Chainable<Response>; // 19
     updateUserListOfWsAPI(wsId: string, list: AccessUser[], token: string): Chainable<Response>; // 19a
     getUsersOfWsAPI(wsId: string, token: string): Chainable<Response>; // 20
-    getWsByGroupAPI(groupKey: string, token: string): Chainable<Response>; // 21
+    getWsByGroupAPI(groupId: string, token: string): Chainable<Response>; // 21
     addModuleAPI(module:string, token:string): Chainable<Response>; // 22
     getModulesAPI(token: string): Chainable<Response>; // 23
     getModuleAPI(module: string, token: string): Chainable<Response>; // 24

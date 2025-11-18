@@ -5,7 +5,7 @@ export function addFirstUser() {
   cy.visit('/');
   cy.login(Cypress.env('username'), Cypress.env('password'));
   cy.clickButton('Anmelden');
-  // cy.buttonToContinue('Anmelden', [201], '/api/init-login', 'POST', 'responseLogin');
+  // cy.clickButtonWithResponseCheck('Anmelden', [201], '/api/init-login', 'POST', 'responseLogin');
 }
 
 export function createNewUser(newUser: UserData):void {
@@ -27,7 +27,7 @@ export function createNewUser(newUser: UserData):void {
     .should('exist')
     .clear()
     .type(`${newUser.password}`);
-  cy.buttonToContinue('Anlegen', [201], '/api/admin/users', 'POST', 'addUser');
+  cy.clickButtonWithResponseCheck('Anlegen', [201], '/api/admin/users', 'POST', 'addUser');
 }
 
 export function deleteUser(user: string):void {
@@ -40,7 +40,7 @@ export function deleteUser(user: string):void {
   cy.get('mat-icon')
     .contains('delete')
     .click();
-  cy.buttonToContinue('Löschen', [200], '/api/admin/users*', 'DELETE', 'deleteUser');
+  cy.clickButtonWithResponseCheck('Löschen', [200], '/api/admin/users*', 'DELETE', 'deleteUser');
   // cy.clickButton('Löschen');
 }
 
@@ -53,7 +53,7 @@ export function createGroup(group:string):void {
   cy.get('mat-icon').contains('add').click();
   cy.get('input[placeholder="Name"]')
     .type(group);
-  cy.buttonToContinue('Anlegen', [201], '/api/admin/workspace-groups', 'POST', 'createWsGroup');
+  cy.clickButtonWithResponseCheck('Anlegen', [201], '/api/admin/workspace-groups', 'POST', 'createWsGroup');
 }
 
 export function findWorkspaceGroupSettings(group:string): Chainable {
@@ -82,7 +82,7 @@ export function createWs(ws:string, group:string):void {
     .click();
   cy.get('input[placeholder="Bitte Namen eingeben"]')
     .type(ws);
-  cy.buttonToContinue('Anlegen', [201], '/api/group-admin/workspaces*', 'POST', 'createWs');
+  cy.clickButtonWithResponseCheck('Anlegen', [201], '/api/group-admin/workspaces*', 'POST', 'createWs');
   // cy.clickButton('Anlegen');
 }
 
@@ -201,7 +201,7 @@ export function deleteFirstUser() {
 
 export function login(username: string, password = '') {
   cy.login(username, password);
-  cy.buttonToContinue('Anmelden', [201], '/api/login', 'POST', 'responseLogin');
+  cy.clickButtonWithResponseCheck('Anmelden', [201], '/api/login', 'POST', 'responseLogin');
 }
 
 export function addModules(filenames:string[]):void {
@@ -258,7 +258,7 @@ export function deleteModule():void {
   cy.get('div > mat-icon')
     .contains('delete')
     .click();
-  cy.buttonToContinue('Löschen', [200], '/api/verona-modules', 'GET', 'deleteModule');
+  cy.clickButtonWithResponseCheck('Löschen', [200], '/api/verona-modules', 'GET', 'deleteModule');
 }
 
 export function deleteResource():void {
@@ -306,7 +306,7 @@ export function deleteGroup(group: string):void {
   cy.get('mat-icon')
     .contains('delete')
     .click();
-  cy.buttonToContinue('Löschen', [200], '/api/admin/workspace-groups*', 'DELETE', 'deleteGroup');
+  cy.clickButtonWithResponseCheck('Löschen', [200], '/api/admin/workspace-groups*', 'DELETE', 'deleteGroup');
   // cy.clickButton('Löschen');
 }
 
@@ -340,7 +340,7 @@ export function changePassword(newPass:string, oldPass:string):void {
   cy.get('mat-label:contains("Neues Kennwort (Wiederholung)")')
     .should('exist')
     .type(newPass);
-  cy.buttonToContinue('Speichern', [200], '/api/password', 'PATCH', 'updatePass');
+  cy.clickButtonWithResponseCheck('Speichern', [200], '/api/password', 'PATCH', 'updatePass');
 }
 
 export function updatePersonalData():void {
@@ -362,7 +362,7 @@ export function updatePersonalData():void {
     .should('exist')
     .clear()
     .type('adam.muller@iqb.hu-berlin.de');
-  cy.buttonToContinue('Speichern', [200], '/api/my-data', 'PATCH', 'updateData');
+  cy.clickButtonWithResponseCheck('Speichern', [200], '/api/my-data', 'PATCH', 'updateData');
 }
 
 export function selectUnit(unitName:string) {
@@ -392,7 +392,7 @@ export function addUnit(kurzname: string):void {
   cy.get('input[placeholder="Kurzname"]')
     .should('exist')
     .type(kurzname);
-  cy.dialogButtonToContinue('Speichern', [201], '/api/workspaces/*/units', 'POST', 'addUnit');
+  cy.clickDialogButtonWithResponseCheck('Speichern', [201], '/api/workspaces/*/units', 'POST', 'addUnit');
 }
 
 export function addUnitPred(unit:UnitData):void {
@@ -432,7 +432,7 @@ export function addUnitPred(unit:UnitData):void {
       });
     }
   });
-  cy.dialogButtonToContinue('Speichern', [201], '/api/workspaces/*/units', 'POST', 'addUnit');
+  cy.clickDialogButtonWithResponseCheck('Speichern', [201], '/api/workspaces/*/units', 'POST', 'addUnit');
 }
 
 export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData):void {
@@ -477,7 +477,8 @@ export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData)
       });
     }
   });
-  cy.dialogButtonToContinue('Speichern', [201], '/api/workspaces/*/units', 'POST', 'createUnitFromExisting');
+  // eslint-disable-next-line max-len
+  cy.clickDialogButtonWithResponseCheck('Speichern', [201], '/api/workspaces/*/units', 'POST', 'createUnitFromExisting');
 }
 
 export function goToWsMenu():void {
@@ -496,7 +497,8 @@ export function moveUnit(wsorigin:string, wsdestination:string, unit:UnitData):v
     .click();
   cy.get(`mat-option:contains("${wsdestination}")`).click();
   cy.get(`mat-cell:contains("${unit.shortname}")`).prev().click();
-  cy.buttonToContinue('Verschieben', [200], '/api/workspaces/*/units/workspace-id', 'PATCH', 'createUnitFromExisting');
+  // eslint-disable-next-line max-len
+  cy.clickButtonWithResponseCheck('Verschieben', [200], '/api/workspaces/*/units/workspace-id', 'PATCH', 'createUnitFromExisting');
   // cy.clickButton('Verschieben');
 }
 

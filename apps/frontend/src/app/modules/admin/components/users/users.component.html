@@ -29,7 +29,8 @@
         <mat-header-cell *matHeaderCellDef class="fx-flex-row-fix-70">
           <mat-checkbox [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
             [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-            (change)="$event ? masterToggle() : null">
+            (change)="$event ? masterToggle() : null"
+            data-cy="admin-users-checkbox-user-box">
           </mat-checkbox>
         </mat-header-cell>
         <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">
@@ -45,7 +46,8 @@
           mat-sort-header="name">
           {{'user.login-name' | translate}}
         </mat-header-cell>
-        <mat-cell *matCellDef="let element">
+        <mat-cell *matCellDef="let element"
+                  data-cy="admin-users-checkbox-login-name">
           {{element.name}} {{element.isAdmin ? '*' : ''}}
         </mat-cell>
       </ng-container>

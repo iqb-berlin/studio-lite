@@ -80,7 +80,7 @@ Cypress.Commands.add('updatePasswordAPI', (token: string, oldPass: string, newPa
   });
 });
 // 5
-Cypress.Commands.add('keycloakAPI', (user:UserData) => {
+Cypress.Commands.add('loginWithKeycloakAPI', (user:UserData) => {
   cy.request({
     method: 'POST',
     url: '/api/keycloak-login',
