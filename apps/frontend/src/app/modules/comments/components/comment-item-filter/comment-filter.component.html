@@ -11,11 +11,15 @@
             [matBadge]="filteredItems.length + (showHiddenComments.value ? 1: 0)">filter_alt</mat-icon>
 </button>
 
-
 <mat-menu #filters="matMenu"
           [class]="'filter-menu'"
           [xPosition] = "'before'"
           [yPosition] = "'below'">
+
+  <button class="close-button"
+          matIconButton>
+    <mat-icon>close</mat-icon>
+  </button>
 
   <mat-slide-toggle class="show-hidden-comments"
     [ngModel]="showHiddenComments.value"
