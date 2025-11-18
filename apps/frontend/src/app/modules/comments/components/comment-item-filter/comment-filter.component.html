@@ -30,7 +30,10 @@
 
 
   @if (unitItems && unitItems.length) {
-    <div class="filter-items">{{'comments.filter-items' | translate}}</div>
+    <div class="filter-items"
+         (click)="$event.stopPropagation()">
+      {{'comments.filter-items' | translate}}
+    </div>
 
     <mat-selection-list [(ngModel)]="filteredItems"
                         (ngModelChange)="filteredItemsChange.emit($event)">
