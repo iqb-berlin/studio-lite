@@ -61,7 +61,7 @@
                   matTooltip = "{{(comment.hidden ? 'comment.show' :'comment.hide' )| translate}}"
                   (click)="toggleVisibility.emit(comment)">
             <studio-lite-wrapped-icon
-              [icon]="comment.hidden ? 'visibility' : 'visibility_off'">
+              [icon]="comment.hidden ? 'visibility_off' : 'visibility'">
             </studio-lite-wrapped-icon>
           </button>
 
