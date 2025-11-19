@@ -53,7 +53,7 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that tabs (Nutzer:innen, Arbeitsbereiche and Einstellungen) are present ', () => {
     cy.visit('/');
-    cy.findWorkspaceGroupSettings(group1).click();
+    cy.findAdminGroupSettings(group1).click();
     cy.get('span:contains("Nutzer:innen")')
       .should('exist');
     cy.get('span:contains("Arbeitsbereiche")')
@@ -66,7 +66,7 @@ describe('UI Group admin workspace check', () => {
     logout();
     cy.wait(100);
     login(newUser.username, newUser.password);
-    cy.findWorkspaceGroupSettings(group1).should('not.exist');
+    cy.findAdminGroupSettings(group1).should('not.exist');
   });
 
   it('checks that workspace is only read ', () => {
@@ -83,11 +83,11 @@ describe('UI Group admin workspace check', () => {
     logout();
     cy.wait(100);
     login(groupAdminUser.username, groupAdminUser.password);
-    cy.findWorkspaceGroupSettings(group1).should('exist');
+    cy.findAdminGroupSettings(group1).should('exist');
   });
 
   it('checks that workspace admin can remove privileges in workspace within the group ', () => {
-    cy.findWorkspaceGroupSettings(group1).click();
+    cy.findAdminGroupSettings(group1).click();
     cy.get('span:contains("Arbeitsbereiche")')
       .eq(0)
       .click();
@@ -98,7 +98,7 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that workspace admin can remove privileges in workspace from tab-index user ', () => {
     cy.visit('/');
-    cy.findWorkspaceGroupSettings(group1).click();
+    cy.findAdminGroupSettings(group1).click();
     cy.get('span:contains("Nutzer:innen")')
       .eq(0)
       .click();
@@ -118,7 +118,7 @@ describe('UI Group admin workspace check', () => {
   it('deletes the group, and users', () => {
     logout();
     login(Cypress.env('username'), Cypress.env('password'));
-    cy.findWorkspaceGroupSettings(group1).should('exist');
+    cy.findAdminGroupSettings(group1).should('exist');
     deleteGroup(group1);
     cy.visit('/');
     deleteUser('normaluser');

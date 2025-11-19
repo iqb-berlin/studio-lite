@@ -14,7 +14,7 @@ declare namespace Cypress {
     clickButton(text: string): void;
     clickButtonWithResponseCheck(text: string, code: number[], url: string, rest: string, alias: string): void;
     clickDialogButtonWithResponseCheck(text: string, code: number[], url: string, rest: string, alias: string): void;
-    loadModule(filename: string, name: string): void;
+    loadModule(filename: string): void;
     selectModule(name: string): void;
     visitWs(ws: string): void;
     runUntracked(fn);

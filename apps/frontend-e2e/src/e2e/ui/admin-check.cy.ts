@@ -1,15 +1,20 @@
 import {
-  addFirstUser, addModules, addResourcePackage,
+  addFirstUser,
+  addModules,
+  addResourcePackage,
   createGroup,
   createNewUser,
   createWs,
   deleteFirstUser,
-  deleteGroup, deleteModule, deleteResource,
+  deleteGroup,
+  deleteModule,
+  deleteResource,
   deleteUser,
+  deleteUsers,
   grantRemovePrivilegeAtWs
-} from '../../support/util-old';
+} from '../../support/util';
 import {
-  AccessLevel,
+  AccessLevel, anotherUser,
   modules,
   newUser,
   resource
@@ -33,6 +38,15 @@ describe('UI Administration Management', () => {
   it('user with admin credentials can delete a user', () => {
     cy.visit('/');
     deleteUser(newUser.username);
+  });
+
+  it('user admin creates two users and select them to delete together', () => {
+    cy.visit('/');
+    createNewUser(newUser);
+    cy.visit('/');
+    createNewUser(anotherUser);
+    cy.visit('/');
+    deleteUsers([newUser.username, anotherUser.username]);
   });
 
   it('user with admin credentials can create a group (Bereichsgruppe)', () => {

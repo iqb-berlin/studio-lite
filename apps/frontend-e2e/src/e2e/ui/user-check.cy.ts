@@ -7,21 +7,20 @@ import {
   deleteUser,
   login,
   logout
-} from '../../support/util-old';
-import { newUser } from '../../support/testData';
+} from '../../support/util';
+import { newUser, UserData } from '../../support/testData';
 
 describe('UI User Management', () => {
   before(() => {
     addFirstUser();
-  });
-  after(() => {
-    deleteFirstUser();
-  });
-
-  it('prepares the context', () => {
     createNewUser(newUser);
     cy.visit('/');
     logout();
+  });
+  after(() => {
+    login(Cypress.env('username'), Cypress.env('password'));
+    deleteUser('normaluser');
+    deleteFirstUser();
   });
 
   it('should be possible login with credentials', () => {
@@ -34,7 +33,14 @@ describe('UI User Management', () => {
   });
 
   it('should be able to modify personal data', () => {
-    updatePersonalData();
+    const newData:UserData = {
+      username: newUser.username,
+      password: newUser.password,
+      lastName: 'Muller',
+      firstName: 'Adam',
+      email: 'adam.muller@iqb.hu-berlin.de'
+    };
+    updatePersonalData(newData);
   });
 
   it('should be possible to change the password', () => {
@@ -52,10 +58,5 @@ describe('UI User Management', () => {
   it('should not be able to login with incorrect credentials', () => {
     cy.login(newUser.username, 'nopass');
     cy.clickButtonWithResponseCheck('Anmelden', [401], '/api/login', 'POST', 'loginFail');
-  });
-
-  it('deletes the user', () => {
-    login(Cypress.env('username'), Cypress.env('password'));
-    deleteUser('normaluser');
   });
 });

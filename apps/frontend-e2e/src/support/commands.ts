@@ -42,6 +42,17 @@ Cypress.Commands.add('clickDialogButtonWithResponseCheck',
       .should('be.oneOf', code);
   });
 
+Cypress.Commands.add('findAdminGroupSettings', (group:string) => {
+  cy.get('studio-lite-user-workspaces-groups')
+    .get(`div>div>div>div:contains("${group}")`)
+    .parent()
+    .contains('mat-icon', 'settings');
+});
+
+Cypress.Commands.add('findAdminSettings', () => {
+  cy.get('[data-cy="goto-admin"]');
+});
+
 Cypress.Commands.add('loadModule', (filename:string) => {
   const path:string = `../frontend-e2e/src/fixtures/${filename}`;
   const name = filename.replace(/-+(?=[^-\d]*\d)/, '@').replace(/...html$/, '');
@@ -70,17 +81,6 @@ Cypress.Commands.add('runUntracked', fn => {
   cy.then(() => {
     fn();
   });
-});
-
-Cypress.Commands.add('findAdminGroupSettings', (group:string) => {
-  cy.get('studio-lite-user-workspaces-groups')
-    .get(`div>div>div>div:contains("${group}")`)
-    .parent()
-    .contains('mat-icon', 'settings');
-});
-
-Cypress.Commands.add('findAdminSettings', () => {
-  cy.get('[data-cy="goto-admin"]');
 });
 
 //

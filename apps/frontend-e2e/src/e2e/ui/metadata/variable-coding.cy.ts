@@ -92,7 +92,8 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
 
   it('checks that drop-list_1 is not present at Menu -> Berichte -> Metadaten', () => {
     focusOnMenu('Berichte', 'Metadaten');
-    cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
+    // eslint-disable-next-line max-len
+    cy.clickButtonWithResponseCheck('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
     cy.get('.mdc-tab__text-label:contains("Metadaten Items")').click();
     cy.get('mat-dialog-container:contains("drop-list_1")').should('have.length', 0);
     cy.clickButton('Schließen');

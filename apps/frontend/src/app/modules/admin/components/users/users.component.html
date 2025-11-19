@@ -29,8 +29,7 @@
         <mat-header-cell *matHeaderCellDef class="fx-flex-row-fix-70">
           <mat-checkbox [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
             [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-            (change)="$event ? masterToggle() : null"
-            data-cy="admin-users-checkbox-user-box">
+            (change)="$event ? masterToggle() : null">
           </mat-checkbox>
         </mat-header-cell>
         <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">

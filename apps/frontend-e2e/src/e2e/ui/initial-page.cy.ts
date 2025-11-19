@@ -3,9 +3,9 @@ import { isButtonClickable } from '../../support/app.po';
 describe('UI check: initial page', () => {
   const homeUserName = '[data-cy="home-user-name"]';
   const homePassword = '[data-cy="home-password"]';
-  const submitBottom = '[data-cy="home-submit"]';
-  const homeImprintBottom = '[data-cy="home-imprint-link"]';
-  const homeBottom = '[data-cy="about-home-page-link"]';
+  const submitButton = '[data-cy="home-submit-button"]';
+  const homeImprintButton = '[data-cy="home-imprint-button"]';
+  const homeButton = '[data-cy="home-button"]';
 
   beforeEach(() => cy.visit('/'));
 
@@ -31,11 +31,11 @@ describe('UI check: initial page', () => {
   });
 
   it('should have submit bottom', () => {
-    cy.get(submitBottom).should('exist');
+    cy.get(submitButton).should('exist');
   });
 
   it('should have submit bottom not clickable if the username and pass if not filled', () => {
-    isButtonClickable(submitBottom).then(isClickable => {
+    isButtonClickable(submitButton).then(isClickable => {
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(isClickable).to.be.false;
     });
@@ -44,7 +44,7 @@ describe('UI check: initial page', () => {
   it('should have submit bottom clickable', () => {
     cy.get(homeUserName).type('fuser');
     cy.get(homePassword).type('pass');
-    isButtonClickable(submitBottom).then(isClickable => {
+    isButtonClickable(submitButton).then(isClickable => {
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(isClickable).to.be.true;
     });
@@ -55,8 +55,8 @@ describe('UI check: initial page', () => {
   });
 
   it('should have legal notice and privacy policy bottom, and it should be clickable', () => {
-    cy.get(homeImprintBottom).should('exist');
-    isButtonClickable(homeImprintBottom).then(isClickable => {
+    cy.get(homeImprintButton).should('exist');
+    isButtonClickable(homeImprintButton).then(isClickable => {
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(isClickable).to.be.true;
     });
@@ -65,12 +65,12 @@ describe('UI check: initial page', () => {
   });
 
   it('should click the legacy bottom, and click the return bottom', () => {
-    cy.get(homeImprintBottom).click();
-    isButtonClickable(homeBottom).then(isClickable => {
+    cy.get(homeImprintButton).click();
+    isButtonClickable(homeButton).then(isClickable => {
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(isClickable).to.be.true;
     });
 
-    cy.get(homeBottom).click();
+    cy.get(homeButton).click();
   });
 });
