@@ -6,7 +6,7 @@
         [matTooltip]="'comments.filter' | translate"
         [matTooltipPosition]="'above'">
   <mat-icon matBadgeOverlap="false"
-            [matBadgeHidden]="!filteredItems.length && !showHiddenComments.value"
+            [matBadgeHidden]="disabled || (!filteredItems.length && !showHiddenComments.value)"
             [matBadgeColor]="'accent'"
             [matBadge]="filteredItems.length + (showHiddenComments.value ? 1: 0)">filter_alt</mat-icon>
 </button>

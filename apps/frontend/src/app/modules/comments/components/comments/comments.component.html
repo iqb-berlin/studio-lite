@@ -9,7 +9,7 @@
                                      [(filteredItems)]="filteredItems"
                                      [unitItems]="unitItems"
                                      [disabled] ="!rootCommentsWithReplies || !rootCommentsWithReplies.length"
-                                     [showHiddenComments]="showHiddenComments">
+                                     [showHiddenComments]="commentService.showHiddenComments">
     </studio-lite-comment-filter>
 
     <div class="comments fx-flex-fill">
@@ -22,9 +22,9 @@
       </div>
 
       @for (rootComment of rootCommentsWithReplies | filteredRootComments : filteredItems; track rootComment) {
-        @if (!rootComment.rootComment.hidden || (rootComment.rootComment.hidden && showHiddenComments.value)) {
+        @if (!rootComment.rootComment.hidden || (rootComment.rootComment.hidden && commentService.showHiddenComments.value)) {
           <studio-lite-comment
-            [showHiddenComments]="showHiddenComments"
+            [showHiddenComments]="commentService.showHiddenComments"
             [comment]="rootComment.rootComment"
             [userId]="userId"
             [unitItems]="unitItems"

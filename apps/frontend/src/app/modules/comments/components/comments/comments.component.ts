@@ -4,7 +4,7 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import {
-  switchMap, Subject, takeUntil, of, Observable, tap, BehaviorSubject
+  switchMap, Subject, takeUntil, of, Observable, tap
 } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
@@ -22,6 +22,7 @@ import { FilteredRootCommentsPipe } from '../../pipes/filtered-root-comments.pip
 import { RootCommentWithReplies } from '../../models/root-comment-with-replies.interface';
 import { CommentFilterComponent } from '../comment-filter/comment-filter.component';
 import { HiddenCommentsCountPipe } from '../../pipes/hidden-comments-count.pipe';
+import { CommentService } from '../../services/comment.service';
 
 @Component({
   selector: 'studio-lite-comments',
@@ -41,8 +42,6 @@ export class CommentsComponent implements OnInit, OnDestroy {
   @Input() adminMode = false;
   @Output() onCommentsUpdated = new EventEmitter<void>();
 
-  showHiddenComments: BehaviorSubject<boolean> = new BehaviorSubject(false);
-
   comments: Comment[] = [];
   rootCommentsWithReplies: RootCommentWithReplies[] = [];
   activeComment: ActiveComment | null = null;
@@ -57,7 +56,8 @@ export class CommentsComponent implements OnInit, OnDestroy {
     private translateService: TranslateService,
     private backendService: BackendService,
     public dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    public commentService: CommentService
   ) {
     this.latestCommentId.subscribe(() => this.onCommentsUpdated.emit());
   }
