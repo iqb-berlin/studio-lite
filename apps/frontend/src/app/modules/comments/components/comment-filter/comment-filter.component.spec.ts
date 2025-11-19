@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
+import { BehaviorSubject } from 'rxjs';
 import { CommentFilterComponent } from './comment-filter.component';
 
 describe('CommentFilterComponent', () => {
@@ -17,6 +18,7 @@ describe('CommentFilterComponent', () => {
 
     fixture = TestBed.createComponent(CommentFilterComponent);
     component = fixture.componentInstance;
+    component.showHiddenComments = new BehaviorSubject(false);
     fixture.detectChanges();
   });
 
