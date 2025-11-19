@@ -16,9 +16,13 @@
 
       <div class="info">
         {{'comments.info' | translate : {
-            hidden: rootCommentsWithReplies | hiddenCommentsCount,
             total: comments.length }
         }}
+        @if (!commentService.showHiddenComments.value) {
+          {{'comments.hidden-info' | translate : {
+            hidden: rootCommentsWithReplies | hiddenCommentsCount }
+          }}
+        }
       </div>
 
       @for (rootComment of rootCommentsWithReplies | filteredRootComments : filteredItems; track rootComment) {
