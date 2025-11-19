@@ -14,7 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 
 @Component({
-  selector: 'studio-lite-comment-item-filter',
+  selector: 'studio-lite-comment-filter',
   imports: [
     MatListOption,
     MatMenu,

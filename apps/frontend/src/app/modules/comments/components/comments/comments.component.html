@@ -5,12 +5,12 @@
     </div>
   }
   @if (!newCommentOnly) {
-    <studio-lite-comment-item-filter class="filter-button"
+    <studio-lite-comment-filter class="filter-button"
                                      [(filteredItems)]="filteredItems"
                                      [unitItems]="unitItems"
                                      [disabled] ="!rootCommentsWithReplies || !rootCommentsWithReplies.length"
                                      [showHiddenComments]="showHiddenComments">
-    </studio-lite-comment-item-filter>
+    </studio-lite-comment-filter>
 
     <div class="comments fx-flex-fill">
 

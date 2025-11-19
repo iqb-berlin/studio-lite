@@ -20,7 +20,7 @@ import { CommentComponent } from '../comment/comment.component';
 import { FilteredCommentsPipe } from '../../pipes/filtered-comments.pipe';
 import { FilteredRootCommentsPipe } from '../../pipes/filtered-root-comments.pipe';
 import { RootCommentWithReplies } from '../../models/root-comment-with-replies.interface';
-import { CommentFilterComponent } from '../comment-item-filter/comment-filter.component';
+import { CommentFilterComponent } from '../comment-filter/comment-filter.component';
 import { HiddenCommentsCountPipe } from '../../pipes/hidden-comments-count.pipe';
 
 @Component({
