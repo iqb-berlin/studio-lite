@@ -23,6 +23,19 @@
             hidden: rootCommentsWithReplies | hiddenCommentsCount }
           }}
         }
+        @if (filteredItems.length) {
+          @if (commentService.showHiddenComments.value) {
+            {{'comments.filter-info' | translate : {
+              filter: filteredItems.length }
+            }}
+          } @else {
+            {{'comments.additional-filter-info' | translate : {
+              filter: filteredItems.length }
+            }}
+          }
+        }
+
+
       </div>
 
       @for (rootComment of rootCommentsWithReplies | filteredRootComments : filteredItems; track rootComment) {

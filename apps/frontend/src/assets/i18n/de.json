@@ -793,8 +793,10 @@
     "comment": "Kommentieren",
     "showHidden": "Sichtbarkeitseinstellungen ignorieren",
     "filter-no-items": "Keine Item Verbindung",
-    "info": "Anzahl der Kommentare: {{total}}.",
-    "hidden-info": " Davon durch Sichtbarkeitseinstellungen verborgen: {{hidden}}."
+    "info": "Anzahl der Kommentare insgesamt: {{total}}.",
+    "hidden-info": " Davon durch Sichtbarkeitseinstellungen verborgen: {{hidden}}.",
+    "additional-filter-info": " Zusätzlich angewendete Item-Filter: {{filter}}.",
+    "filter-info": " Angewendete Item-Filter: {{filter}}."
   },
   "delete-dialog": {
     "cancel": "Abbrechen",
