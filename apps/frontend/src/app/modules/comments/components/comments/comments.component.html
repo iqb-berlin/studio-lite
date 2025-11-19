@@ -13,6 +13,14 @@
     </studio-lite-comment-item-filter>
 
     <div class="comments fx-flex-fill">
+
+      <div class="info">
+        {{'comments.info' | translate : {
+            hidden: rootCommentsWithReplies | hiddenCommentsCount,
+            total: comments.length }
+        }}
+      </div>
+
       @for (rootComment of rootCommentsWithReplies | filteredRootComments : filteredItems; track rootComment) {
         @if (!rootComment.rootComment.hidden || (rootComment.rootComment.hidden && showHiddenComments.value)) {
           <studio-lite-comment

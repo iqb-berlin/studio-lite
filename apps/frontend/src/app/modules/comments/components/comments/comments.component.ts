@@ -21,13 +21,14 @@ import { FilteredCommentsPipe } from '../../pipes/filtered-comments.pipe';
 import { FilteredRootCommentsPipe } from '../../pipes/filtered-root-comments.pipe';
 import { RootCommentWithReplies } from '../../models/root-comment-with-replies.interface';
 import { CommentFilterComponent } from '../comment-item-filter/comment-filter.component';
+import { HiddenCommentsCountPipe } from '../../pipes/hidden-comments-count.pipe';
 
 @Component({
   selector: 'studio-lite-comments',
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, FilteredCommentsPipe, FormsModule, FilteredRootCommentsPipe, CommentFilterComponent]
+  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, FilteredCommentsPipe, FormsModule, FilteredRootCommentsPipe, CommentFilterComponent, HiddenCommentsCountPipe]
 })
 export class CommentsComponent implements OnInit, OnDestroy {
   @Input() userId!: number;

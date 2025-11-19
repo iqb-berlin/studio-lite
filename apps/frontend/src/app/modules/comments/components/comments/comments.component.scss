@@ -22,6 +22,15 @@
 .filter-button {
   position: absolute;
   top: 65px;
-  right: 20px;
+  right: 30px;
   z-index: 1000;
 }
+
+.info {
+  margin: 20px 0;
+  padding: 20px 15px;
+  border-radius: 5px;
+  color: #006064;
+  background: #00606410;
+}
+

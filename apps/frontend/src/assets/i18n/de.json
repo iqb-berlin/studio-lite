@@ -792,7 +792,8 @@
     "filter": "Kommentare filtern",
     "comment": "Kommentieren",
     "showHidden": "Sichtbarkeitseinstellungen ignorieren",
-    "filter-no-items": "Keine Item Verbindung"
+    "filter-no-items": "Keine Item Verbindung",
+    "info": "Anzahl der Kommentare: {{total}}. Davon versteckt: {{hidden}}."
   },
   "delete-dialog": {
     "cancel": "Abbrechen",
