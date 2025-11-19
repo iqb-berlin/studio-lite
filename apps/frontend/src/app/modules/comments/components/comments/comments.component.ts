@@ -20,14 +20,16 @@ import { CommentComponent } from '../comment/comment.component';
 import { FilteredCommentsPipe } from '../../pipes/filtered-comments.pipe';
 import { FilteredRootCommentsPipe } from '../../pipes/filtered-root-comments.pipe';
 import { RootCommentWithReplies } from '../../models/root-comment-with-replies.interface';
-import { CommentItemFilterComponent } from '../comment-item-filter/comment-item-filter.component';
+import { CommentFilterComponent } from '../comment-filter/comment-filter.component';
+import { HiddenCommentsCountPipe } from '../../pipes/hidden-comments-count.pipe';
+import { CommentService } from '../../services/comment.service';
 
 @Component({
   selector: 'studio-lite-comments',
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, FilteredCommentsPipe, FormsModule, FilteredRootCommentsPipe, CommentItemFilterComponent]
+  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, FilteredCommentsPipe, FormsModule, FilteredRootCommentsPipe, CommentFilterComponent, HiddenCommentsCountPipe]
 })
 export class CommentsComponent implements OnInit, OnDestroy {
   @Input() userId!: number;
@@ -54,7 +56,8 @@ export class CommentsComponent implements OnInit, OnDestroy {
     private translateService: TranslateService,
     private backendService: BackendService,
     public dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    public commentService: CommentService
   ) {
     this.latestCommentId.subscribe(() => this.onCommentsUpdated.emit());
   }
@@ -67,6 +70,31 @@ export class CommentsComponent implements OnInit, OnDestroy {
           this.setLatestCommentId();
         });
       });
+  }
+
+  updateCommentVisibility(commentId: number, hidden: boolean): void {
+    const updateComment = { hidden: hidden, userId: this.userId };
+    this.backendService
+      .updateCommentVisibility(commentId, updateComment, this.workspaceId, this.unitId, this.reviewId)
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        tap(result => {
+          if (!result) {
+            this.snackBar.open(
+              this.translateService.instant('comment.visibility-not-updated'),
+              this.translateService.instant('error'),
+              { duration: 3000 }
+            );
+          }
+          this.snackBar.open(
+            this.translateService.instant('comment.visibility-updated'),
+            '',
+            { duration: 1000 }
+          );
+        }),
+        switchMap(() => this.getUpdatedComments())
+      )
+      .subscribe(() => {});
   }
 
   updateComment({ text, commentId, items }: { text: string; commentId: number; items: string[] }): void {
@@ -211,7 +239,8 @@ export class CommentsComponent implements OnInit, OnDestroy {
   }
 
   private setRootCommentsWithReplies(): void {
-    this.rootCommentsWithReplies = this.comments.filter(c => c.parentId === null)
+    this.rootCommentsWithReplies = this.comments
+      .filter(c => c.parentId === null)
       .map(comment => (
         {
           rootComment: comment,
@@ -246,5 +275,9 @@ export class CommentsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
+  }
+
+  toggleVisibility(comment : Comment): void {
+    this.updateCommentVisibility(comment.id, !comment.hidden);
   }
 }

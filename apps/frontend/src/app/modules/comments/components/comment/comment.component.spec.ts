@@ -91,6 +91,7 @@ describe('CommentComponent', () => {
       userId: 1,
       unitId: 1,
       parentId: null,
+      hidden: false,
       createdAt: new Date(),
       changedAt: new Date()
     };

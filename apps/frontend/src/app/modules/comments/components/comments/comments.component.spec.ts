@@ -12,6 +12,7 @@ import { CommentsComponent } from './comments.component';
 import { BackendService } from '../../services/backend.service';
 import { Comment } from '../../models/comment.interface';
 import { ActiveComment } from '../../models/active-comment.interface';
+import { CommentService } from '../../services/comment.service';
 
 describe('UnitCommentsComponent', () => {
   let component: CommentsComponent;
@@ -59,6 +60,7 @@ describe('UnitCommentsComponent', () => {
         MatDialogModule
       ],
       providers: [
+        CommentService,
         provideHttpClient(),
         BackendService,
         {

@@ -61,6 +61,20 @@ export class BackendService {
       );
   }
 
+  updateCommentVisibility(
+    id: number, body: Partial<Comment>, workspaceId: number, unitId: number, reviewId: number
+  ): Observable<boolean> {
+    const url = reviewId > 0 ?
+      `${this.serverUrl}reviews/${reviewId}/units/${unitId}/comments/${id}/hidden` :
+      `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments/${id}/hidden`;
+    return this.httpClient
+      .patch(url, body)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
   deleteComment(id: number, workspaceId: number, unitId: number, reviewId: number): Observable<unknown> {
     const url = reviewId > 0 ?
       `${this.serverUrl}reviews/${reviewId}/units/${unitId}/comments/${id}` :

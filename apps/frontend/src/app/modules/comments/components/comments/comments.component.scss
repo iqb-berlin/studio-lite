@@ -12,10 +12,25 @@
   padding: 0 10px 20px 10px;
 }
 
+.hidden-comment {
+  background-color: blue;
+  height: 10px;
+  margin-bottom: 2px;
+}
+
 
 .filter-button {
   position: absolute;
   top: 65px;
-  right: 20px;
+  right: 30px;
   z-index: 1000;
 }
+
+.info {
+  margin: 20px 0;
+  padding: 20px 15px;
+  border-radius: 5px;
+  color: #006064;
+  background: #00606410;
+}
+

@@ -29,6 +29,7 @@ import { FromNowPipe } from './pipes/from-now.pipe';
 import { Comment } from './models/comment.interface';
 import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
 import { CommentItemSelectionComponent } from './components/comment-item-selection/comment-item-selection.component';
+import { CommentService } from './services/comment.service';
 
 @NgModule({
   imports: [
@@ -61,6 +62,7 @@ import { CommentItemSelectionComponent } from './components/comment-item-selecti
   ],
   exports: [CommentsComponent],
   providers: [
+    CommentService,
     BackendService,
     [
       { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },

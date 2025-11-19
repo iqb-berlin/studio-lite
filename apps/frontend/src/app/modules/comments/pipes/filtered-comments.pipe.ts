@@ -8,10 +8,11 @@ import { Comment } from '../models/comment.interface';
 })
 export class FilteredCommentsPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
-  transform(comments: Comment[], uuids: string[]): Comment[] {
-    if (uuids.length === 0) return comments;
-    return comments.filter(comment => uuids
-      .some(uuid => comment.itemUuids.includes(uuid))
+  transform(comments: Comment[], itemFilters: string[]): Comment[] {
+    if (itemFilters.length === 0) return comments;
+    return comments.filter(comment => itemFilters
+      .some(uuid => comment.itemUuids.includes(uuid) ||
+        (!comment.itemUuids.length && itemFilters.includes('no-items')))
     );
   }
 }
