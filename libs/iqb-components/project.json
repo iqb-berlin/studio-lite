@@ -10,7 +10,8 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/iqb-components"],
       "options": {
-        "jestConfig": "libs/iqb-components/jest.config.ts"
+        "jestConfig": "libs/iqb-components/jest.config.ts",
+        "tsConfig": "libs/iqb-components/tsconfig.spec.json"
       }
     },
     "lint": {
