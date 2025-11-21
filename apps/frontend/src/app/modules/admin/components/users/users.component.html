@@ -45,7 +45,8 @@
           mat-sort-header="name">
           {{'user.login-name' | translate}}
         </mat-header-cell>
-        <mat-cell *matCellDef="let element">
+        <mat-cell *matCellDef="let element"
+                  data-cy="admin-users-checkbox-login-name">
           {{element.name}} {{element.isAdmin ? '*' : ''}}
         </mat-cell>
       </ng-container>

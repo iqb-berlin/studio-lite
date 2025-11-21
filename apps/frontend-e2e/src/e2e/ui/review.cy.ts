@@ -6,7 +6,6 @@ import {
 } from '../../support/testData';
 import {
   clickIndexTab,
-  findWorkspaceGroupSettings,
   getButtonReview,
   goToWsMenu,
   grantRemovePrivilegeAtWs,
@@ -86,7 +85,7 @@ describe('Review:', () => {
 
   it('should other user access to the review', () => {
     cy.visit('/');
-    findWorkspaceGroupSettings(group1).click();
+    cy.findAdminGroupSettings(group1).click();
     clickIndexTab('Arbeitsbereiche');
     grantRemovePrivilegeAtWs([newUser.username], ws1, [AccessLevel.Basic]);
     cy.visit('/');

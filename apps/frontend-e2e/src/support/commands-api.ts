@@ -14,7 +14,7 @@ import {
   DefinitionUnit, CopyUnit, WsSettings,
   UnitExport
 } from './testData';
-import { buildQueryParameters, buildQueryParametersComplex } from './utilAPI';
+import { buildQueryParameters, buildQueryParametersComplex } from './util-api';
 
 // 1
 Cypress.Commands.add('addFirstUserAPI', (username: string, password: string) => {
@@ -80,7 +80,7 @@ Cypress.Commands.add('updatePasswordAPI', (token: string, oldPass: string, newPa
   });
 });
 // 5
-Cypress.Commands.add('keycloakAPI', (user:UserData) => {
+Cypress.Commands.add('loginWithKeycloakAPI', (user:UserData) => {
   cy.request({
     method: 'POST',
     url: '/api/keycloak-login',

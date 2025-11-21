@@ -13,7 +13,6 @@ import {
   addModules,
   createNewUser,
   setVeronaWs,
-  findWorkspaceGroupSettings,
   clickIndexTab,
   addStatus,
   clickSaveButtonRight,
@@ -24,7 +23,10 @@ import {
   deleteModule, selectListUnits, focusOnMenu
 } from '../../support/util';
 import {
-  AccessLevel, modules, UnitData, UserData
+  AccessLevel,
+  modules,
+  newUser,
+  UnitData
 } from '../../support/testData';
 import { selectProfileForGroup } from '../../support/metadata/metadata-util';
 import { IqbProfile } from '../../support/metadata/iqbProfile';
@@ -33,10 +35,6 @@ describe('UI check: workspace', () => {
   const group1:string = 'UI_BG';
   const ws1:string = '01Vorlage';
   const ws2:string = '07Final';
-  const newUser: UserData = {
-    username: 'normaluser',
-    password: '5678'
-  };
   const unit1: UnitData = {
     shortname: 'AUF_D1',
     name: 'Name Auf 1',
@@ -90,7 +88,7 @@ describe('UI check: workspace', () => {
 
   it('should add state to the workspace', () => {
     cy.visit('/');
-    findWorkspaceGroupSettings(group1).click();
+    cy.findAdminGroupSettings(group1).click();
     clickIndexTab('Einstellungen');
     addStatus('In Bearbeitung', 0);
     addStatus('Finale', 1);
@@ -145,7 +143,7 @@ describe('UI check: workspace', () => {
     cy.get('span:contains("Export")')
       .click();
     selectListUnits([unit3.shortname, newUnit.shortname]);
-    cy.buttonToContinue('Herunterladen', [200, 304], '/api/workspaces/*', 'GET', 'export');
+    cy.clickButtonWithResponseCheck('Herunterladen', [200, 304], '/api/workspaces/*', 'GET', 'export');
   });
 
   it('should show metadata', () => {
@@ -154,7 +152,8 @@ describe('UI check: workspace', () => {
     cy.wait(1000);
     focusOnMenu('Berichte', 'Metadaten');
     selectListUnits([unit3.shortname, newUnit.shortname]);
-    cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
+    // eslint-disable-next-line max-len
+    cy.clickButtonWithResponseCheck('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
     cy.clickButton('Herunterladen');
   });
 
@@ -164,13 +163,14 @@ describe('UI check: workspace', () => {
     cy.wait(1000);
     focusOnMenu('Berichte', 'Codebook');
     selectListUnits([newUnit.shortname]);
-    cy.buttonToContinue('Exportieren', [200, 304], '/api/workspaces/*/units/coding-book*', 'GET', 'codebook');
+    // eslint-disable-next-line max-len
+    cy.clickButtonWithResponseCheck('Exportieren', [200, 304], '/api/workspaces/*/units/coding-book*', 'GET', 'codebook');
   });
 
   it('should add an user to the ws1 with basic credentials', () => {
     createNewUser(newUser);
     cy.visit('/');
-    findWorkspaceGroupSettings(group1).click();
+    cy.findAdminGroupSettings(group1).click();
     clickIndexTab('Arbeitsbereiche');
     grantRemovePrivilegeAtWs([newUser.username], ws1, [AccessLevel.Basic]);
     cy.visit('/');
