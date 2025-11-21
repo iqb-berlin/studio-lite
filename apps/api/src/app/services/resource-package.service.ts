@@ -91,7 +91,7 @@ export class ResourcePackageService {
   private storeZippedResourcePackage(packageName: string, zippedResourcePackage: Express.Multer.File): void {
     fs.writeFileSync(
       `${this.resourcePackagesPath}/${packageName}/${zippedResourcePackage.originalname}`,
-      zippedResourcePackage.buffer
+      zippedResourcePackage.buffer as never
     );
   }
 

@@ -32,7 +32,7 @@ export class VeronaModulesService {
       'Content-Type': 'text/html',
       'Content-Disposition': `attachment; filename="${fileData.fileName}"`
     });
-    return new StreamableFile(Buffer.from(fileData.file, 'utf8'));
+    return new StreamableFile(Buffer.from(fileData.file, 'utf8') as unknown as Uint8Array);
   }
 
   async findFileById(key: string): Promise<VeronaModuleFileDto> {
@@ -85,7 +85,7 @@ export class VeronaModulesService {
         });
         if (existingModule) {
           existingModule.metadata = veronaModuleMetadata;
-          existingModule.file = fileData;
+          existingModule.file = fileData as never;
           existingModule.fileDateTime = new Date();
           existingModule.fileSize = fileAsString.length;
           await this.veronaModulesRepository.save(existingModule);
@@ -93,7 +93,7 @@ export class VeronaModulesService {
           const newFile = this.veronaModulesRepository.create({
             key: moduleKey,
             metadata: veronaModuleMetadata,
-            file: fileData,
+            file: fileData as never,
             fileSize: fileAsString.length
           });
           await this.veronaModulesRepository.save(newFile);

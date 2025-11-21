@@ -96,7 +96,7 @@ export class WorkspaceController {
         'Content-Type': 'text/html',
         'Content-Disposition': 'attachment; filename="studio-export-units.zip"'
       });
-      return new StreamableFile(file);
+      return new StreamableFile(file as unknown as Uint8Array);
     }
     return this.workspaceService.findOne(workspaceId);
   }

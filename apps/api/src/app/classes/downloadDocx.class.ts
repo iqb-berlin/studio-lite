@@ -340,7 +340,7 @@ export class DownloadDocx {
   }
 
   private static getImageSize(imageBuffer: Buffer): ISizeCalculationResult {
-    return imageSize(imageBuffer);
+    return imageSize(imageBuffer as never);
   }
 
   private static getTransformation(actualSize: ISizeCalculationResult, max: number): ISizeCalculationResult {

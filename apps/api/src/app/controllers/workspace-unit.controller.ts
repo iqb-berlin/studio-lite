@@ -157,7 +157,7 @@ export class WorkspaceUnitController {
         this.settingsService,
         options,
         ids);
-    return new StreamableFile(file as Buffer);
+    return new StreamableFile(file as unknown as Uint8Array);
   }
 
   @Get('properties')
@@ -200,7 +200,7 @@ export class WorkspaceUnitController {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `attachment; filename="${filename}"`
       });
-      return new StreamableFile(file as Buffer);
+      return new StreamableFile(file as unknown as Uint8Array);
     }
     return this.unitService.findAllWithProperties(workspaceId);
   }
