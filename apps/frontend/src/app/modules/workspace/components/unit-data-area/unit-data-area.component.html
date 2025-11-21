@@ -14,7 +14,8 @@
                         (routingOutlet | namedRouterLink: link.name)"
         #rla="routerLinkActive"
         [active]="rla.isActive"
-        (isActiveChange)="onActiveRouterLinkChange($event)">
+        (isActiveChange)="onActiveRouterLinkChange($event)"
+        [attr.data-cy]="`workspace-routes-${link.name}`">
         <span>{{'workspace.routes.' + link.name | translate}}</span>
         @if (link.duplicable) {
           <a

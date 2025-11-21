@@ -20,7 +20,10 @@ import {
   logout,
   login,
   selectUnit,
-  deleteModule, selectListUnits, focusOnMenu
+  deleteModule,
+  selectListUnits,
+  focusOnMenu,
+  clickIndexTabWorkspaceRoutes
 } from '../../support/util';
 import {
   AccessLevel,
@@ -181,7 +184,8 @@ describe('UI check: workspace', () => {
     login(newUser.username, newUser.password);
     cy.visitWs(ws1);
     selectUnit(unit3.shortname);
-    clickIndexTab('Kommentare');
+    // clickIndexTab('Kommentare');
+    clickIndexTabWorkspaceRoutes('comments');
     cy.get('tiptap-editor').type('Neue Kommentar zu unit2');
     cy.contains('button', 'send').click();
   });
@@ -190,7 +194,8 @@ describe('UI check: workspace', () => {
     cy.visit('/');
     cy.visitWs(ws1);
     selectUnit(unit3.shortname);
-    clickIndexTab('Kommentare');
+    // clickIndexTab('Kommentare');
+    clickIndexTabWorkspaceRoutes('comments');
     cy.contains('button', 'reply').click();
     cy.get('tiptap-editor').eq(0).type('Antworten zu Neue Kommentar zu unit2');
     cy.contains('button', 'send').click();

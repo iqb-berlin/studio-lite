@@ -15,6 +15,11 @@ export function clickIndexTab(name:string):void {
   cy.get(`span:contains(${name})`).eq(0).click();
 }
 
+export function clickIndexTabWorkspaceRoutes(tabName:string):void {
+  cy.wait(100);
+  cy.get(`[data-cy="workspace-routes-${tabName}"]`).click();
+}
+
 export function clickSaveButtonRight() {
   cy.get('mat-icon:contains("save")').then($elements => {
     if ($elements.length === 1) {
@@ -348,7 +353,7 @@ export function updatePersonalData(newData: UserData):void {
 }
 
 export function selectUnit(unitName:string) {
-  cy.contains(unitName).should('exist').click();
+  cy.contains(unitName).should('exist').click({ force: true });
 }
 
 export function deleteUnit(shortname:string):void {
