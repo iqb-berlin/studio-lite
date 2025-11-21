@@ -4,6 +4,7 @@
   "projectType": "library",
   "sourceRoot": "libs/iqb-components/src",
   "prefix": "studio-lite",
+  "tags": [],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",
@@ -15,6 +16,5 @@
     "lint": {
       "executor": "@nx/eslint:lint"
     }
-  },
-  "tags": []
+  }
 }
