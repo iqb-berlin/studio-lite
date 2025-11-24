@@ -6,7 +6,8 @@
       [(selectedItems)]="selectedItems"
       [label]="'comment-editor.link-to-item' | translate"
       [disabled]="(!(editorHTML | isCommentCommittable) && !(initialHTML | isCommentCommittable)) && !selectedItems.length"
-      (selectedItemsChange)="onSelectedItemChange()">
+      (selectedItemsChange)="onSelectedItemChange()"
+      data-cy="comment-editor-link-to-item">
     </studio-lite-comment-item-selection>
 
     <div class="editor-menubar fx-row-end-stretch fx-wrap">

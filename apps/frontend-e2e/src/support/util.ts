@@ -69,6 +69,12 @@ export function addFirstUser() {
   // cy.clickButtonWithResponseCheck('Anmelden', [201], '/api/init-login', 'POST', 'responseLogin');
 }
 
+export function loginWithUser(username: string, pass: string) {
+  cy.visit('/');
+  logout();
+  login(username, pass);
+}
+
 export function addStatus(statusName:string, position:number) {
   cy.contains('button', 'Status hinzufügen').click();
   cy.get('div.state').eq(position).find('input[type="text"]').click()
