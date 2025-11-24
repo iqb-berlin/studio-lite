@@ -3,7 +3,7 @@ import {
   addFirstUser,
   addModules,
   assignVariableToItem,
-  clickIndexTabWorkspaceRoutes,
+  clickIndexTabWorkspace,
   createGroup,
   createItem,
   createWs,
@@ -132,8 +132,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('creates a comment to items ', () => {
-    // clickIndexTab('Kommentare');
-    clickIndexTabWorkspaceRoutes('comments');
+    clickIndexTabWorkspace('comments');
     cy.get('tiptap-editor').type('Neue Kommentar zu item1');
     cy.get('.fx-row-space-between-end').find('svg').eq(0).click();
     cy.get('.mat-pseudo-checkbox').next().contains('01').click();

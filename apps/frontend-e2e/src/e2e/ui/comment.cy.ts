@@ -3,7 +3,7 @@ import {
   ws1
 } from '../../support/testData';
 import {
-  clickIndexTabWorkspaceRoutes,
+  clickIndexTabWorkspace,
   importExercise,
   loginWithUser,
   selectUnit
@@ -27,7 +27,7 @@ describe('Comment:', () => {
 
   it('should add a comment', () => {
     selectUnit(importedUnit.shortname);
-    clickIndexTabWorkspaceRoutes('comments');
+    clickIndexTabWorkspace('comments');
     cy.get('tiptap-editor').type('Neue allgemein Kommentar 1');
     cy.contains('button', 'send').click();
     cy.get('tiptap-editor').type('Neue allgemein Kommentar 2');
@@ -60,7 +60,7 @@ describe('Comment:', () => {
     loginWithUser(newUser.username, newUser.password);
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
-    clickIndexTabWorkspaceRoutes('comments');
+    clickIndexTabWorkspace('comments');
     cy.get('studio-lite-comment').should('have.length', '1');
     cy.contains('mat-icon', 'filter_alt').click();
     cy.get('mat-slide-toggle').click();
@@ -71,7 +71,7 @@ describe('Comment:', () => {
     loginWithUser(Cypress.env('username'), Cypress.env('password'));
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
-    clickIndexTabWorkspaceRoutes('comments');
+    clickIndexTabWorkspace('comments');
     cy.get('studio-lite-comment').eq(0).contains('button', 'delete').click();
     cy.get('studio-lite-comment').should('have.length', '1');
     cy.clickButtonWithResponseCheck(
@@ -90,7 +90,7 @@ describe('Comment:', () => {
     cy.visit('/');
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
-    clickIndexTabWorkspaceRoutes('comments');
+    clickIndexTabWorkspace('comments');
     cy.get('tiptap-editor').type('Neues Kommentar zur Item 01');
     cy.get('[data-cy="comment-editor-link-to-item"]').click();
     cy.contains('mat-option', '01').click();
@@ -101,7 +101,7 @@ describe('Comment:', () => {
     cy.visit('/');
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
-    clickIndexTabWorkspaceRoutes('comments');
+    clickIndexTabWorkspace('comments');
     cy.get('studio-lite-comment').should('have.length', '3');
     cy.contains('mat-icon', 'filter_alt').click();
     cy.contains('mat-list-option', '01').click();
