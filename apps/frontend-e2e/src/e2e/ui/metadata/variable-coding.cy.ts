@@ -1,11 +1,21 @@
 /// <reference types="cypress" />
 import {
-  addFirstUser, addModules, assignVariableToItem, clickIndexTab,
-  createGroup, createItem,
+  addFirstUser,
+  addModules,
+  assignVariableToItem,
+  clickIndexTabWorkspace,
+  createGroup,
+  createItem,
   createWs,
   deleteFirstUser,
-  deleteGroup, deleteModule, focusOnMenu, goToItem,
-  grantRemovePrivilegeAtWs, importExercise, selectUnit, setVeronaWs
+  deleteGroup,
+  deleteModule,
+  focusOnMenu,
+  goToItem,
+  grantRemovePrivilegeAtWs,
+  importExercise,
+  selectUnit,
+  setVeronaWs
 } from '../../../support/util';
 import {
   selectProfileForArea,
@@ -122,7 +132,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('creates a comment to items ', () => {
-    clickIndexTab('Kommentare');
+    clickIndexTabWorkspace('comments');
     cy.get('tiptap-editor').type('Neue Kommentar zu item1');
     cy.get('.fx-row-space-between-end').find('svg').eq(0).click();
     cy.get('.mat-pseudo-checkbox').next().contains('01').click();

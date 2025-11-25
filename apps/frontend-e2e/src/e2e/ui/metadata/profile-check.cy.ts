@@ -1,5 +1,6 @@
 import {
   addFirstUser,
+  clickIndexTabAdmin,
   createGroup,
   createNewUser,
   deleteFirstUser,
@@ -32,9 +33,7 @@ describe('Load metadata profile', () => {
   it('should be possible load a metadata profile from administration settings', () => {
     const searchProfile:string = 'Deutsch';
     cy.findAdminSettings().click();
-    cy.get('span:contains("Bereichsgruppen")')
-      .eq(0)
-      .click();
+    clickIndexTabAdmin('workspace-groups');
     cy.get('mat-table')
       .contains(groups[0])
       .click();
@@ -61,9 +60,7 @@ describe('Load metadata profile', () => {
   it('should be possible load more metadata profile', () => {
     const searchProfiles:string[] = ['Englisch', 'Mathematik'];
     cy.findAdminSettings().click();
-    cy.get('span:contains("Bereichsgruppen")')
-      .eq(0)
-      .click();
+    clickIndexTabAdmin('workspace-groups');
     cy.get('mat-table')
       .contains(groups[0])
       .click();

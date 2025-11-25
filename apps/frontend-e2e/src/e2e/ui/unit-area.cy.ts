@@ -13,14 +13,17 @@ import {
   addModules,
   createNewUser,
   setVeronaWs,
-  clickIndexTab,
   addStatus,
   clickSaveButtonRight,
   deleteUser,
   logout,
   login,
   selectUnit,
-  deleteModule, selectListUnits, focusOnMenu
+  deleteModule,
+  selectListUnits,
+  focusOnMenu,
+  clickIndexTabWorkspace,
+  clickIndexTabWsgAdmin
 } from '../../support/util';
 import {
   AccessLevel,
@@ -89,7 +92,7 @@ describe('UI check: workspace', () => {
   it('should add state to the workspace', () => {
     cy.visit('/');
     cy.findAdminGroupSettings(group1).click();
-    clickIndexTab('Einstellungen');
+    clickIndexTabWsgAdmin('settings');
     addStatus('In Bearbeitung', 0);
     addStatus('Finale', 1);
     clickSaveButtonRight();
@@ -171,7 +174,9 @@ describe('UI check: workspace', () => {
     createNewUser(newUser);
     cy.visit('/');
     cy.findAdminGroupSettings(group1).click();
-    clickIndexTab('Arbeitsbereiche');
+    cy.pause();
+    // clickIndexTab('Arbeitsbereiche');
+    clickIndexTabWsgAdmin('workspaces');
     grantRemovePrivilegeAtWs([newUser.username], ws1, [AccessLevel.Basic]);
     cy.visit('/');
     logout();
@@ -181,7 +186,7 @@ describe('UI check: workspace', () => {
     login(newUser.username, newUser.password);
     cy.visitWs(ws1);
     selectUnit(unit3.shortname);
-    clickIndexTab('Kommentare');
+    clickIndexTabWorkspace('comments');
     cy.get('tiptap-editor').type('Neue Kommentar zu unit2');
     cy.contains('button', 'send').click();
   });
@@ -190,7 +195,7 @@ describe('UI check: workspace', () => {
     cy.visit('/');
     cy.visitWs(ws1);
     selectUnit(unit3.shortname);
-    clickIndexTab('Kommentare');
+    clickIndexTabWorkspace('comments');
     cy.contains('button', 'reply').click();
     cy.get('tiptap-editor').eq(0).type('Antworten zu Neue Kommentar zu unit2');
     cy.contains('button', 'send').click();

@@ -35,7 +35,9 @@ export function createBasicSpecCy() {
     // admin can create a workspace (Arbeitsbereich) within its Bereichsgruppe
     cy.visit('/');
     createWs(ws1, group1);
-    grantRemovePrivilegeAtWs([Cypress.env('username')], 'Grundarbeitsbereich', [AccessLevel.Admin]);
+    grantRemovePrivilegeAtWs([Cypress.env('username'), newUser.username],
+      'Grundarbeitsbereich',
+      [AccessLevel.Admin, AccessLevel.Developer]);
 
     // admin can Modules upload',
     cy.visit('/');

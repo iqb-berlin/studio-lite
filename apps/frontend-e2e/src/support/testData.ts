@@ -116,3 +116,9 @@ export const anotherUser: UserData = {
   firstName: '',
   email: 'no-mail-2'
 };
+
+export const importedUnit: UnitData = {
+  shortname: 'M6_AK0011',
+  name: '',
+  group: ''
+};

@@ -1,6 +1,6 @@
 // -- This is a parent command --
 
-Cypress.Commands.add('login', (username:string, password:string) => {
+Cypress.Commands.add('login', (username: string, password: string) => {
   cy.get('[data-cy="home-user-name"]')
     .should('exist')
     .clear()
@@ -11,9 +11,16 @@ Cypress.Commands.add('login', (username:string, password:string) => {
     .type(password);
 });
 
-Cypress.Commands.add('clickButton', (text: string) => {
+Cypress.Commands.add('clickButton', (buttonName: string) => {
   cy.get('button')
-    .contains(text)
+    .contains(buttonName)
+    .should('exist')
+    .click();
+});
+
+Cypress.Commands.add('clickDialogButton', (buttonName: string) => {
+  cy.get('mat-dialog-actions button')
+    .contains(buttonName)
     .should('exist')
     .click();
 });

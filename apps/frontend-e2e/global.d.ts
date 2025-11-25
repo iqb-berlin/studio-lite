@@ -11,7 +11,8 @@ declare namespace Cypress {
   interface Chainable {
     // Commands UI
     login(username: string, password: string): void;
-    clickButton(text: string): void;
+    clickButton(buttonName: string): void;
+    clickDialogButton(buttonName: string): void;
     clickButtonWithResponseCheck(text: string, code: number[], url: string, rest: string, alias: string): void;
     clickDialogButtonWithResponseCheck(text: string, code: number[], url: string, rest: string, alias: string): void;
     loadModule(filename: string): void;

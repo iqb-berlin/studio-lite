@@ -1,18 +1,23 @@
 import { AccessLevel, UnitData, UserData } from './testData';
 
-// export function clickButton(name:string):void {
-//   cy.contains('button', name).click();
-// }
-
-export function clickDialogButton(buttonName: string) {
-  cy.get('mat-dialog-actions button')
-    .contains(buttonName)
-    .should('exist')
-    .click();
-}
 export function clickIndexTab(name:string):void {
   cy.wait(100);
   cy.get(`span:contains(${name})`).eq(0).click();
+}
+
+// tabName options: wsg-admin.component,tes
+export function clickIndexTabWsgAdmin(tabName: string) {
+  cy.get(`[data-cy="wsg-admin-routes-${tabName}"]`).click();
+}
+export function clickIndexTabWorkspace(tabName:string):void {
+  cy.wait(100);
+  cy.get(`[data-cy="workspace-routes-${tabName}"]`).click();
+}
+
+// tabName options: admin.component.ts
+export function clickIndexTabAdmin(tabName: string) {
+  cy.wait(100);
+  cy.get(`[data-cy="admin-tab-${tabName}"]`).click();
 }
 
 export function clickSaveButtonRight() {
@@ -64,6 +69,12 @@ export function addFirstUser() {
   // cy.clickButtonWithResponseCheck('Anmelden', [201], '/api/init-login', 'POST', 'responseLogin');
 }
 
+export function loginWithUser(username: string, pass: string) {
+  cy.visit('/');
+  logout();
+  login(username, pass);
+}
+
 export function addStatus(statusName:string, position:number) {
   cy.contains('button', 'Status hinzufügen').click();
   cy.get('div.state').eq(position).find('input[type="text"]').click()
@@ -72,9 +83,7 @@ export function addStatus(statusName:string, position:number) {
 
 export function addModules(filenames:string[]):void {
   cy.findAdminSettings().click();
-  cy.get('span:contains("Module")')
-    .eq(0)
-    .click();
+  clickIndexTabAdmin('v-modules');
   filenames.forEach(filename => {
     cy.loadModule(filename);
   });
@@ -83,9 +92,7 @@ export function addModules(filenames:string[]):void {
 export function addResourcePackage(resource: string):void {
   const path:string = `../frontend-e2e/src/fixtures/${resource}`;
   cy.findAdminSettings().click();
-  cy.get('span:contains("Pakete")')
-    .eq(0)
-    .click();
+  clickIndexTabAdmin('packages');
   const name = resource.replace(/.itcr.zip/, '');
   cy.get('input[type=file]')
     .selectFile(path, {
@@ -130,9 +137,7 @@ export function deleteUsers(users: string[]):void {
 
 export function createGroup(group:string):void {
   cy.findAdminSettings().click();
-  cy.get('span:contains("Bereichsgruppen")')
-    .eq(0)
-    .click();
+  clickIndexTabAdmin('workspace-groups');
   cy.get('mat-icon').contains('add').click();
   cy.get('input[placeholder="Name"]')
     .type(group);
@@ -142,9 +147,7 @@ export function createGroup(group:string):void {
 export function createWs(ws:string, group:string):void {
   cy.findAdminGroupSettings(group).click();
   cy.wait(100);
-  cy.get('span:contains("Arbeitsbereiche")')
-    .eq(0)
-    .click();
+  clickIndexTabWsgAdmin('workspaces');
   cy.get('mat-icon')
     .contains('add')
     .click();
@@ -226,9 +229,7 @@ export function grantRemovePrivilegeAtUser(user:string, wss: string[], rights:Ac
 
 export function makeAdminOfGroup(group:string, admins: string[]):void {
   cy.findAdminSettings().click();
-  cy.get('span:contains("Bereichsgruppen")')
-    .eq(0)
-    .click();
+  clickIndexTabAdmin('workspace-groups');
   cy.get(`mat-row:contains("${group}")`)
     .click();
   admins.forEach(user => {
@@ -266,9 +267,7 @@ export function setVeronaWs(ws:string):void {
 
 export function deleteModule():void {
   cy.findAdminSettings().click();
-  cy.get('span:contains("Module")')
-    .eq(0)
-    .click();
+  clickIndexTabAdmin('v-modules');
   cy.selectModule('IQB-Schemer');
   cy.selectModule('IQB-Player');
   cy.selectModule('IQB-Editor');
@@ -280,9 +279,7 @@ export function deleteModule():void {
 
 export function deleteResource():void {
   cy.findAdminSettings().click();
-  cy.get('span:contains("Pakete")')
-    .eq(0)
-    .click();
+  clickIndexTabAdmin('packages');
   cy.get('mat-cell:contains("GeoGebra")')
     .parent()
     .prev()
@@ -303,9 +300,7 @@ export function getButtonReview(reviewName: string, operation: string) {
 
 export function deleteGroup(group: string):void {
   cy.findAdminSettings().click();
-  cy.get('span:contains("Bereichsgruppen")')
-    .eq(0)
-    .click();
+  clickIndexTabAdmin('workspace-groups');
   cy.get('mat-table')
     .contains(group)
     .click();
@@ -318,7 +313,7 @@ export function deleteGroup(group: string):void {
 export function logout() {
   cy.get('[data-cy="goto-user-menu"]').click();
   cy.get('[data-cy="user-menu-logout"]').click();
-  clickDialogButton('Abmelden');
+  cy.clickDialogButton('Abmelden');
 }
 
 export function editInput(data: string, content: string | undefined) {
@@ -348,7 +343,7 @@ export function updatePersonalData(newData: UserData):void {
 }
 
 export function selectUnit(unitName:string) {
-  cy.contains(unitName).should('exist').click();
+  cy.contains(unitName).should('exist').click({ force: true });
 }
 
 export function deleteUnit(shortname:string):void {
