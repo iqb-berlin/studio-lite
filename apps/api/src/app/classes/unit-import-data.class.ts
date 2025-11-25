@@ -1,3 +1,4 @@
+import type { Element } from 'domhandler';
 import * as cheerio from 'cheerio';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { FileIo } from '../interfaces/file-io.interface';
@@ -31,8 +32,7 @@ export class UnitImportData {
   constructor(fileIo: FileIo) {
     this.fileName = fileIo.originalname;
     const xmlDocument = cheerio.load(fileIo.buffer.toString(), {
-      xmlMode: true,
-      recognizeSelfClosing: true
+      xml: true
     });
     this.setMetaData(xmlDocument);
     this.setDefinitionRef(xmlDocument);
@@ -118,8 +118,7 @@ export class UnitImportData {
       baseVariablesElement.find('Variable')
         .each((i, variableElement) => {
           const varDocument = cheerio.load(variableElement, {
-            xmlMode: true,
-            recognizeSelfClosing: true
+            xml: true
           });
           const variableRecord = variableElement as unknown as Record<string, unknown>;
           const valuesElement = varDocument('Values').first();
@@ -149,14 +148,13 @@ export class UnitImportData {
   }
 
   private static getValuesForVariable(
-    valuesElement: cheerio.Cheerio<cheerio.Element>
+    valuesElement: cheerio.Cheerio<Element>
   ):{ label: string, value: string }[] {
     const values: { label: string, value: string }[] = [];
     valuesElement.find('Value')
       .each((j, valueElement) => {
         const valueDocument = cheerio.load(valueElement, {
-          xmlMode: true,
-          recognizeSelfClosing: true
+          xml: true
         });
         values.push({
           label: valueDocument('label').first().text(),
@@ -167,14 +165,13 @@ export class UnitImportData {
   }
 
   private static getValuePositionLabelsForVariable(
-    valuePositionLabelsElement: cheerio.Cheerio<cheerio.Element>
+    valuePositionLabelsElement: cheerio.Cheerio<Element>
   ): string[] {
     const values: string[] = [];
     valuePositionLabelsElement.find('ValuePositionLabel')
       .each((j, element) => {
         const valueDocument = cheerio.load(element, {
-          xmlMode: true,
-          recognizeSelfClosing: true
+          xml: true
         });
         values.push(valueDocument.text());
       });
