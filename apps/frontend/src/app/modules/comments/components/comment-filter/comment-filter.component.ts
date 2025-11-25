@@ -4,15 +4,17 @@ import {
 import { MatListOption, MatSelectionList } from '@angular/material/list';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { TranslateModule } from '@ngx-translate/core';
-import { MatMiniFabButton } from '@angular/material/button';
+import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { MatIcon } from '@angular/material/icon';
 import { MatBadge } from '@angular/material/badge';
 import { FormsModule } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
+import { BehaviorSubject } from 'rxjs';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
 
 @Component({
-  selector: 'studio-lite-comment-item-filter',
+  selector: 'studio-lite-comment-filter',
   imports: [
     MatListOption,
     MatMenu,
@@ -23,14 +25,19 @@ import { MatTooltip } from '@angular/material/tooltip';
     MatMenuTrigger,
     FormsModule,
     MatTooltip,
-    MatMiniFabButton
+    MatMiniFabButton,
+    MatSlideToggle,
+    MatIconButton
   ],
-  templateUrl: './comment-item-filter.component.html',
-  styleUrl: './comment-item-filter.component.scss'
+  templateUrl: './comment-filter.component.html',
+  styleUrl: './comment-filter.component.scss'
 })
-export class CommentItemFilterComponent {
+export class CommentFilterComponent {
+  @Input() showHiddenComments!: BehaviorSubject<boolean>;
   @Input() filteredItems: string[] = [];
   @Input() unitItems: UnitItemDto[] = [];
+  @Input() disabled!: boolean;
 
   @Output() filteredItemsChange = new EventEmitter<string[]>();
+  @Output() showHiddenCommentsChange = new EventEmitter<boolean>();
 }

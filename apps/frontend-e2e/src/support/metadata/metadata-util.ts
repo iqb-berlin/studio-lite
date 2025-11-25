@@ -1,4 +1,5 @@
 import { IqbProfile, IqbProfileExamples, RegistryProfile } from './iqbProfile';
+import { clickIndexTabAdmin, clickIndexTabWsgAdmin } from '../util';
 
 function getCheckBoxByName(name: string) {
   cy.log(typeof name);
@@ -52,9 +53,10 @@ export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile)
   cy.get('div')
     .contains('studio-lite-wrapped-icon', 'construction')
     .click();
-  cy.get('span:contains("Bereichsgruppen")')
-    .eq(0)
-    .click();
+  // cy.get('span:contains("Bereichsgruppen")')
+  //  .eq(0)
+  //  .click();
+  clickIndexTabAdmin('workspace-groups');
   cy.get('mat-table')
     .contains(group)
     .click();
@@ -72,9 +74,10 @@ export function selectProfileForGroup(group:string, profile:IqbProfile) {
     .eq(0)
     .next()
     .click();
-  cy.get('span:contains("Einstellungen")')
-    .eq(0)
-    .click();
+  // cy.get('span:contains("Einstellungen")')
+  //  .eq(0)
+  //  .click();
+  clickIndexTabWsgAdmin('settings');
   checkProfile(profile);
   cy.get('mat-icon:contains("save")').click();
 }
@@ -97,9 +100,10 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
     .next()
     .click();
   cy.wait(300);
-  cy.get('span:contains("Arbeitsbereiche")')
-    .eq(0)
-    .click();
+  // cy.get('span:contains("Arbeitsbereiche")')
+  //  .eq(0)
+  //  .click();
+  clickIndexTabWsgAdmin('workspaces');
   cy.get('mat-table')
     .contains(area)
     .click();
@@ -116,7 +120,7 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
   cy.get(`span:contains(${profile})`)
     .contains('Item')
     .click();
-  cy.buttonToContinue('Speichern', [200], '/api/workspaces/*/settings', 'PATCH', 'setProfileArea');
+  cy.clickButtonWithResponseCheck('Speichern', [200], '/api/workspaces/*/settings', 'PATCH', 'setProfileArea');
 }
 
 export function checkProfile(profile: string):void {

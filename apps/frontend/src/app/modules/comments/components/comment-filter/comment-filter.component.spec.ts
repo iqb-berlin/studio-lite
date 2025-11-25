@@ -1,22 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import { CommentItemFilterComponent } from './comment-item-filter.component';
+import { BehaviorSubject } from 'rxjs';
+import { CommentFilterComponent } from './comment-filter.component';
 
-describe('CommentItemFilterComponent', () => {
-  let component: CommentItemFilterComponent;
-  let fixture: ComponentFixture<CommentItemFilterComponent>;
+describe('CommentFilterComponent', () => {
+  let component: CommentFilterComponent;
+  let fixture: ComponentFixture<CommentFilterComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslateModule.forRoot({}),
-        CommentItemFilterComponent
+        CommentFilterComponent
       ]
     })
       .compileComponents();
 
-    fixture = TestBed.createComponent(CommentItemFilterComponent);
+    fixture = TestBed.createComponent(CommentFilterComponent);
     component = fixture.componentInstance;
+    component.showHiddenComments = new BehaviorSubject(false);
     fixture.detectChanges();
   });
 

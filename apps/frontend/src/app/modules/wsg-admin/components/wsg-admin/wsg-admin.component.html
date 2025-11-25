@@ -7,7 +7,8 @@
           [routerLink]="link"
           routerLinkActive="active-link"
           #rla="routerLinkActive"
-          [active]="rla.isActive">
+          [active]="rla.isActive"
+          [attr.data-cy]="`wsg-admin-routes-${link}`">
           {{'wsg-admin.' + link | translate}}
         </a>
       }

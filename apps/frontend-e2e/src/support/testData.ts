@@ -103,5 +103,22 @@ export const group1:string = 'Grundgruppe';
 export const ws1:string = 'Grundarbeitsbereich';
 export const newUser: UserData = {
   username: 'normaluser',
-  password: '5678'
+  password: '5678',
+  lastName: '',
+  firstName: '',
+  email: 'no-mail'
+};
+
+export const anotherUser: UserData = {
+  username: 'anotheruser',
+  password: '5678',
+  lastName: '',
+  firstName: '',
+  email: 'no-mail-2'
+};
+
+export const importedUnit: UnitData = {
+  shortname: 'M6_AK0011',
+  name: '',
+  group: ''
 };

@@ -47,6 +47,7 @@ export { CopyUnitDto } from './lib/dtos/unit/copy-unit-dto';
 export { UnitCommentDto } from './lib/dtos/unit-comment/unit-comment-dto';
 export { CreateUnitCommentDto } from './lib/dtos/unit-comment/create-unit-comment-dto';
 export { UpdateUnitCommentDto } from './lib/dtos/unit-comment/update-unit-comment-dto';
+export { UpdateUnitCommentVisibilityDto } from './lib/dtos/unit-comment/update-unit-comment-visibility-dto';
 export { UpdateUnitUserDto } from './lib/dtos/unit-user/update-unit-user-dto';
 export { ProfileMetadataValues } from './lib/dtos/unit/profile-metadata-values.class';
 export { MetadataValues } from './lib/dtos/unit/profile-metadata-values.class';

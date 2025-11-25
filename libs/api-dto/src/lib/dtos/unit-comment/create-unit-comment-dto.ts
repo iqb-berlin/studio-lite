@@ -15,4 +15,7 @@ export class CreateUnitCommentDto {
 
   @ApiProperty()
     unitId?: number;
+
+  @ApiProperty()
+    hidden!: boolean;
 }

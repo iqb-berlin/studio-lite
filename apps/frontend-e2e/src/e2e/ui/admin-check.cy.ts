@@ -1,33 +1,33 @@
 import {
-  addFirstUser, addModules, addResourcePackage,
+  addFirstUser,
+  addModules,
+  addResourcePackage,
   createGroup,
   createNewUser,
   createWs,
   deleteFirstUser,
-  deleteGroup, deleteModule, deleteResource,
-  deleteUser, findAdminSettings,
+  deleteGroup,
+  deleteModule,
+  deleteResource,
+  deleteUser,
+  deleteUsers,
   grantRemovePrivilegeAtWs
 } from '../../support/util';
 import {
-  AccessLevel,
+  AccessLevel, anotherUser,
   modules,
-  resource,
-  UserData
+  newUser,
+  resource
 } from '../../support/testData';
 
 describe('UI Administration Management', () => {
-  // eslint-disable-next-line max-len
   const group1:string = 'Mathematik Primär Bereichsgruppe';
   const ws1:string = 'Mathematik I';
-  const newUser: UserData = {
-    username: 'normaluser',
-    password: '5678'
-  };
   before(() => addFirstUser());
   after(() => deleteFirstUser());
 
   it('user with admin credentials has admin setting button', () => {
-    findAdminSettings();
+    cy.findAdminSettings();
   });
 
   it('user with admin credentials can add new user', () => {
@@ -38,6 +38,15 @@ describe('UI Administration Management', () => {
   it('user with admin credentials can delete a user', () => {
     cy.visit('/');
     deleteUser(newUser.username);
+  });
+
+  it('user admin creates two users and select them to delete together', () => {
+    cy.visit('/');
+    createNewUser(newUser);
+    cy.visit('/');
+    createNewUser(anotherUser);
+    cy.visit('/');
+    deleteUsers([newUser.username, anotherUser.username]);
   });
 
   it('user with admin credentials can create a group (Bereichsgruppe)', () => {

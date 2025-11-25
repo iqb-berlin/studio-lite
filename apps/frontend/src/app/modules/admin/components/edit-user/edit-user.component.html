@@ -11,7 +11,8 @@
         formControlName="name"
         type="text"
         [placeholder]="'user.login-name' | translate"
-        [value]="data.name"/>
+        [value]="data.name"
+        data-cy="admin-edit-user-username"/>
     </mat-form-field>
     <mat-form-field>
       <input
@@ -19,21 +20,24 @@
         formControlName="lastName"
         type="text"
         [placeholder]="'user.last-name' | translate"
-        [value]="data.lastName"/>
+        [value]="data.lastName"
+        data-cy="admin-edit-user-lastname"/>
     </mat-form-field>
     <mat-form-field>
       <input matInput
         formControlName="firstName"
         type="text"
         [placeholder]="'user.first-name' | translate"
-        [value]="data.firstName"/>
+        [value]="data.firstName"
+        data-cy="admin-edit-user-firstname"/>
     </mat-form-field>
     <mat-form-field>
       <input matInput
         formControlName="email"
         type="text"
         [placeholder]="'user.email' | translate"
-        [value]="data.email"/>
+        [value]="data.email"
+        data-cy="admin-edit-user-email"/>
     </mat-form-field>
     @if (data.emailApproved) {
       <div
@@ -70,7 +74,8 @@
         formControlName="password"
         type="password"
         autocomplete="new-password"
-        [placeholder]="(data.newUser ? 'admin.password' : 'admin.new-password') | translate"/>
+        [placeholder]="(data.newUser ? 'admin.password' : 'admin.new-password') | translate"
+        data-cy="admin-edit-user-password"/>
     </mat-form-field>
   </form>
 </mat-dialog-content>

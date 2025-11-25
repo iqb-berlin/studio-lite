@@ -1,7 +1,7 @@
 import {
   AccessLevel, GroupData, modules, WsData, WsSettings
 } from '../../support/testData';
-import { deleteTextField } from '../../support/utilAPI';
+import { deleteTextField } from '../../support/util-api';
 import {
   deleteGroup, deleteModule, focusOnMenu, goToItem, login, logout, selectUnit
 } from '../../support/util';
@@ -16,8 +16,8 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
     name: 'Bista III'
   };
   const newSettings: WsSettings = {
-    defaultEditor: 'iqb-editor-aspect@2.9',
-    defaultPlayer: 'iqb-player-aspect@2.9',
+    defaultEditor: 'iqb-editor-aspect@2.10',
+    defaultPlayer: 'iqb-player-aspect@2.10',
     defaultSchemer: 'iqb-schemer@2.5',
     unitGroups: [],
     stableModulesOnly: false,
@@ -138,7 +138,8 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
 
   it('checks that text-field_1 is not present at Menu > Berichte > Metadaten does not exist', () => {
     focusOnMenu('Berichte', 'Metadaten');
-    cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
+    // eslint-disable-next-line max-len
+    cy.clickButtonWithResponseCheck('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
     cy.get('.mdc-tab__text-label:contains("Metadaten Items")').click();
     cy.get('mat-dialog-container:contains("text-field_1")').should('have.length', 0);
     cy.clickButton('Schließen');

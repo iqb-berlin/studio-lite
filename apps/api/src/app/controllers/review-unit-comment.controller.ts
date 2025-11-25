@@ -13,7 +13,8 @@ import {
   ApiInternalServerErrorResponse
 } from '@nestjs/swagger';
 import {
-  CreateUnitCommentDto, UnitCommentDto, UpdateUnitCommentDto, UpdateUnitCommentUnitItemsDto
+  CreateUnitCommentDto, UnitCommentDto, UpdateUnitCommentDto, UpdateUnitCommentUnitItemsDto,
+  UpdateUnitCommentVisibilityDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { UnitCommentService } from '../services/unit-comment.service';
@@ -57,8 +58,21 @@ export class ReviewUnitCommentController {
   @ApiNotFoundResponse({ description: 'Comment not found.' })
   @ApiUnauthorizedResponse({ description: 'Not authorized to update comment.' })
   @ApiTags('review unit comment')
-  async patchCommentBody(@Param('comment_id', ParseIntPipe) id: number, @Body() comment: UpdateUnitCommentDto) {
+  async patchCommentBody(@Param('comment_id', ParseIntPipe) id: number,
+    @Body() comment: UpdateUnitCommentDto) {
     return this.unitCommentService.patchCommentBody(id, comment);
+  }
+
+  @Patch(':comment_id/hidden')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Comment body for successfully updated.' })
+  @ApiNotFoundResponse({ description: 'Comment not found.' })
+  @ApiUnauthorizedResponse({ description: 'Not authorized to update comment.' })
+  @ApiTags('review unit comment')
+  async patchCommentVisibility(@Param('comment_id', ParseIntPipe) id: number,
+    @Body() comment: UpdateUnitCommentVisibilityDto) {
+    return this.unitCommentService.patchCommentVisibility(id, comment);
   }
 
   @Delete(':comment_id')

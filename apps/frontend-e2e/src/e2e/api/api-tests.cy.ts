@@ -8,7 +8,7 @@ import {
   WsData,
   WsSettings
 } from '../../support/testData';
-import { buildDownloadQuery } from '../../support/utilAPI';
+import { buildDownloadQuery } from '../../support/util-api';
 
 function getNameAt(initialName: string): string {
   return initialName.replace(/-+(?=[^-\d]*\d)/, '@').replace(/.\d.html$/, '');
@@ -73,8 +73,8 @@ describe('Studio API tests', () => {
     group: 'Group1'
   };
   const setEditor: WsSettings = {
-    defaultEditor: 'iqb-editor-aspect@2.9',
-    defaultPlayer: 'iqb-player-aspect@2.9',
+    defaultEditor: 'iqb-editor-aspect@2.10',
+    defaultPlayer: 'iqb-player-aspect@2.10',
     defaultSchemer: 'iqb-schemer@2.5',
     unitGroups: ['Bista1', 'Bista2'],
     stableModulesOnly: false,

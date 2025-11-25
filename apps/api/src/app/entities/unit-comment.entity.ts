@@ -28,6 +28,9 @@ class UnitComment {
   })
     unitId: number;
 
+  @Column()
+    hidden: boolean;
+
   @Column({
     type: 'timestamp with time zone',
     name: 'created_at'

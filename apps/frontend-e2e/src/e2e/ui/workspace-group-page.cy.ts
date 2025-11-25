@@ -10,9 +10,9 @@ import {
   deleteGroup,
   logout,
   makeAdminOfGroup,
-  findWorkspaceGroupSettings, grantRemovePrivilegeAtUser, findAdminSettings
+  grantRemovePrivilegeAtUser
 } from '../../support/util';
-import { AccessLevel, UserData } from '../../support/testData';
+import { AccessLevel, newUser, UserData } from '../../support/testData';
 
 describe('UI Group admin workspace check', () => {
   const group1:string = 'Mathematik Primär Bereichsgruppe';
@@ -22,10 +22,6 @@ describe('UI Group admin workspace check', () => {
     username: 'groupadminuser',
     password: '1111'
   };
-  const newUser: UserData = {
-    username: 'normaluser',
-    password: '5678'
-  };
   before(() => {
     addFirstUser();
   });
@@ -34,7 +30,7 @@ describe('UI Group admin workspace check', () => {
   });
 
   it('prepares the context', () => {
-    findAdminSettings().click();
+    cy.findAdminSettings().click();
     cy.visit('/');
     createNewUser(newUser);
     cy.visit('/');
@@ -57,7 +53,7 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that tabs (Nutzer:innen, Arbeitsbereiche and Einstellungen) are present ', () => {
     cy.visit('/');
-    findWorkspaceGroupSettings(group1).click();
+    cy.findAdminGroupSettings(group1).click();
     cy.get('span:contains("Nutzer:innen")')
       .should('exist');
     cy.get('span:contains("Arbeitsbereiche")')
@@ -70,7 +66,7 @@ describe('UI Group admin workspace check', () => {
     logout();
     cy.wait(100);
     login(newUser.username, newUser.password);
-    findWorkspaceGroupSettings(group1).should('not.exist');
+    cy.findAdminGroupSettings(group1).should('not.exist');
   });
 
   it('checks that workspace is only read ', () => {
@@ -87,11 +83,11 @@ describe('UI Group admin workspace check', () => {
     logout();
     cy.wait(100);
     login(groupAdminUser.username, groupAdminUser.password);
-    findWorkspaceGroupSettings(group1).should('exist');
+    cy.findAdminGroupSettings(group1).should('exist');
   });
 
   it('checks that workspace admin can remove privileges in workspace within the group ', () => {
-    findWorkspaceGroupSettings(group1).click();
+    cy.findAdminGroupSettings(group1).click();
     cy.get('span:contains("Arbeitsbereiche")')
       .eq(0)
       .click();
@@ -102,7 +98,7 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that workspace admin can remove privileges in workspace from tab-index user ', () => {
     cy.visit('/');
-    findWorkspaceGroupSettings(group1).click();
+    cy.findAdminGroupSettings(group1).click();
     cy.get('span:contains("Nutzer:innen")')
       .eq(0)
       .click();
@@ -122,7 +118,7 @@ describe('UI Group admin workspace check', () => {
   it('deletes the group, and users', () => {
     logout();
     login(Cypress.env('username'), Cypress.env('password'));
-    findWorkspaceGroupSettings(group1).should('exist');
+    cy.findAdminGroupSettings(group1).should('exist');
     deleteGroup(group1);
     cy.visit('/');
     deleteUser('normaluser');

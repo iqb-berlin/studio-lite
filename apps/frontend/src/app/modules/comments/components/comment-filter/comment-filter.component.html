@@ -1,0 +1,54 @@
+<button class="filter-button"
+        matMiniFab
+        [color]="'default'"
+        [disabled]="disabled"
+        [matMenuTriggerFor]="filters"
+        [matTooltip]="'comments.filter' | translate"
+        [matTooltipPosition]="'above'">
+  <mat-icon matBadgeOverlap="false"
+            [matBadgeHidden]="disabled || (!filteredItems.length && !showHiddenComments.value)"
+            [matBadgeColor]="'accent'"
+            [matBadge]="filteredItems.length + (showHiddenComments.value ? 1: 0)">filter_alt</mat-icon>
+</button>
+
+<mat-menu #filters="matMenu"
+          [class]="'filter-menu'"
+          [xPosition] = "'before'"
+          [yPosition] = "'below'">
+
+  <button class="close-button"
+          matIconButton>
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <mat-slide-toggle class="show-hidden-comments"
+    [ngModel]="showHiddenComments.value"
+    (ngModelChange)="showHiddenComments.next(!showHiddenComments.value)"
+    (click)="$event.stopPropagation()">
+    {{'comments.showHidden' | translate}}
+  </mat-slide-toggle>
+
+
+  @if (unitItems && unitItems.length) {
+    <div class="filter-items"
+         (click)="$event.stopPropagation()">
+      {{'comments.filter-items' | translate}}
+    </div>
+
+    <mat-selection-list [(ngModel)]="filteredItems"
+                        (ngModelChange)="filteredItemsChange.emit($event)">
+        <mat-list-option togglePosition="before"
+                         [value]="'no-items'"
+                         (click)="$event.stopPropagation()">
+          {{'comments.filter-no-items' | translate}}
+        </mat-list-option>
+      @for (item of unitItems; track item) {
+        <mat-list-option togglePosition="before"
+                         [value]="item.uuid"
+                         (click)="$event.stopPropagation()">
+          {{item.id ? item.id : ('metadata.without-id' | translate)}}
+        </mat-list-option>
+      }
+    </mat-selection-list>
+  }
+</mat-menu>

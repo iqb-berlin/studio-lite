@@ -1,21 +1,18 @@
 import {
   addFirstUser,
+  clickIndexTabAdmin,
   createGroup,
   createNewUser,
   deleteFirstUser,
   deleteGroup,
-  deleteUser, findAdminSettings
+  deleteUser
 } from '../../../support/util';
 import { checkMultipleProfiles, checkProfile } from '../../../support/metadata/metadata-util';
-import { UserData } from '../../../support/testData';
+import { newUser } from '../../../support/testData';
 
 describe('Load metadata profile', () => {
   const groups = ['Mathematik Primär und Sek I',
     'Deutsch Primär und Sek I'];
-  const newUser: UserData = {
-    username: 'normaluser',
-    password: '5678'
-  };
   before(() => {
     addFirstUser();
   });
@@ -35,11 +32,8 @@ describe('Load metadata profile', () => {
 
   it('should be possible load a metadata profile from administration settings', () => {
     const searchProfile:string = 'Deutsch';
-    // cy.get('[data-cy="goto-admin"]').click();
-    findAdminSettings().click();
-    cy.get('span:contains("Bereichsgruppen")')
-      .eq(0)
-      .click();
+    cy.findAdminSettings().click();
+    clickIndexTabAdmin('workspace-groups');
     cy.get('mat-table')
       .contains(groups[0])
       .click();
@@ -47,7 +41,7 @@ describe('Load metadata profile', () => {
       .contains('settings')
       .click();
     checkProfile(searchProfile);
-    // cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
+    // cy.clickButtonWithResponseCheck('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
     cy.clickButton('Speichern');
   });
 
@@ -65,10 +59,8 @@ describe('Load metadata profile', () => {
 
   it('should be possible load more metadata profile', () => {
     const searchProfiles:string[] = ['Englisch', 'Mathematik'];
-    findAdminSettings().click();
-    cy.get('span:contains("Bereichsgruppen")')
-      .eq(0)
-      .click();
+    cy.findAdminSettings().click();
+    clickIndexTabAdmin('workspace-groups');
     cy.get('mat-table')
       .contains(groups[0])
       .click();
@@ -76,7 +68,7 @@ describe('Load metadata profile', () => {
       .contains('settings')
       .click();
     checkMultipleProfiles(searchProfiles);
-    // cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
+    // cy.clickButtonWithResponseCheck('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
     cy.clickButton('Speichern');
   });
 

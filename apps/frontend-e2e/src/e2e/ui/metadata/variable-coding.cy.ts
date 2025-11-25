@@ -1,11 +1,21 @@
 /// <reference types="cypress" />
 import {
-  addFirstUser, addModules, assignVariableToItem, clickIndexTab,
-  createGroup, createItem,
+  addFirstUser,
+  addModules,
+  assignVariableToItem,
+  clickIndexTabWorkspace,
+  createGroup,
+  createItem,
   createWs,
   deleteFirstUser,
-  deleteGroup, deleteModule, focusOnMenu, goToItem,
-  grantRemovePrivilegeAtWs, importExercise, selectUnit, setVeronaWs
+  deleteGroup,
+  deleteModule,
+  focusOnMenu,
+  goToItem,
+  grantRemovePrivilegeAtWs,
+  importExercise,
+  selectUnit,
+  setVeronaWs
 } from '../../../support/util';
 import {
   selectProfileForArea,
@@ -92,7 +102,8 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
 
   it('checks that drop-list_1 is not present at Menu -> Berichte -> Metadaten', () => {
     focusOnMenu('Berichte', 'Metadaten');
-    cy.buttonToContinue('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
+    // eslint-disable-next-line max-len
+    cy.clickButtonWithResponseCheck('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
     cy.get('.mdc-tab__text-label:contains("Metadaten Items")').click();
     cy.get('mat-dialog-container:contains("drop-list_1")').should('have.length', 0);
     cy.clickButton('Schließen');
@@ -121,7 +132,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('creates a comment to items ', () => {
-    clickIndexTab('Kommentare');
+    clickIndexTabWorkspace('comments');
     cy.get('tiptap-editor').type('Neue Kommentar zu item1');
     cy.get('.fx-row-space-between-end').find('svg').eq(0).click();
     cy.get('.mat-pseudo-checkbox').next().contains('01').click();

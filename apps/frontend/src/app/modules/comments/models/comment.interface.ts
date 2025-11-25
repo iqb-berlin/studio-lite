@@ -5,6 +5,7 @@ export interface Comment {
   itemUuids: string[];
   userId: number;
   unitId: number;
+  hidden: boolean;
   parentId: number | null;
   createdAt: Date;
   changedAt: Date;

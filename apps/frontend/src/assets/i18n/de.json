@@ -775,7 +775,11 @@
     "sent": "Kommentar gesendet",
     "not-sent": "Kommentar konnte nicht gesendet werden",
     "updated": "Kommentar aktualisiert",
-    "not-updated": "Kommentar konnte nicht aktualisiert werden"
+    "not-updated": "Kommentar konnte nicht aktualisiert werden",
+    "visibility-updated": "Sichtbarkeit des Kommentars aktualisiert",
+    "visibility-not-updated": "Sichtbarkeit des Kommentars konnte nicht aktualisiert werden",
+    "hide": "Verbergen",
+    "show": "Anzeigen"
   },
   "comments": {
     "comment-delete-title": "Kommentar löschen",
@@ -784,8 +788,15 @@
     "comments-delete-question": "Soll der Kommentar einschließlich aller Antworten gelöscht werden?",
     "write-comment": "Kommentar verfassen ...",
     "send-comment": "Kommentar senden",
-    "filter-items": "Kommentare nach Items filtern",
-    "comment": "Kommentieren"
+    "filter-items": "Item-Filter anwenden",
+    "filter": "Kommentare filtern",
+    "comment": "Kommentieren",
+    "showHidden": "Sichtbarkeitseinstellungen ignorieren",
+    "filter-no-items": "Keine Item Verbindung",
+    "info": "Anzahl der Kommentare insgesamt: {{total}}.",
+    "hidden-info": " Davon durch Sichtbarkeitseinstellungen verborgen: {{hidden}}.",
+    "additional-filter-info": " Zusätzlich angewendete Item-Filter: {{filter}}.",
+    "filter-info": " Angewendete Item-Filter: {{filter}}."
   },
   "delete-dialog": {
     "cancel": "Abbrechen",

@@ -3,7 +3,7 @@ import {
   createGroup,
   createWs,
   deleteFirstUser,
-  deleteGroup, findAdminSettings,
+  deleteGroup,
   grantRemovePrivilegeAtWs
 } from '../../../support/util';
 import { selectProfileForGroupFromAdmin } from '../../../support/metadata/metadata-util';
@@ -22,7 +22,7 @@ describe('UI Metadata Management from administration', () => {
   });
 
   it('prepares context', () => {
-    findAdminSettings().click();
+    cy.findAdminSettings().click();
     cy.visit('/');
     createGroup(group);
     cy.visit('/');
