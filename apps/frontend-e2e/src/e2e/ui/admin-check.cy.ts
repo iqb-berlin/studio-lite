@@ -46,7 +46,9 @@ describe('UI Administration Management', () => {
     cy.visit('/');
     createNewUser(anotherUser);
     cy.visit('/');
+    cy.pause();
     deleteUsers([newUser.username, anotherUser.username]);
+    cy.pause();
   });
 
   it('user with admin credentials can create a group (Bereichsgruppe)', () => {

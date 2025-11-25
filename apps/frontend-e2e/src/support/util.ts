@@ -1,14 +1,11 @@
 import { AccessLevel, UnitData, UserData } from './testData';
 
-export function clickIndexTab(name:string):void {
-  cy.wait(100);
-  cy.get(`span:contains(${name})`).eq(0).click();
-}
-
-// tabName options: wsg-admin.component,tes
+// tabName options: wsg-admin.component.ts
 export function clickIndexTabWsgAdmin(tabName: string) {
   cy.get(`[data-cy="wsg-admin-routes-${tabName}"]`).click();
 }
+
+// tabName options: workspace.routes de,json or unit-data-area
 export function clickIndexTabWorkspace(tabName:string):void {
   cy.wait(100);
   cy.get(`[data-cy="workspace-routes-${tabName}"]`).click();
@@ -29,10 +26,9 @@ export function clickSaveButtonRight() {
     }
   });
 }
-
+// TODO review
 export function focusOnMenu(hoverString: string, option: string): void {
-  cy.get('mat-icon:contains("menu")')
-    .click({ force: true });
+  goToWsMenu();
   cy.get(`span:contains("${hoverString}")`)
     .click();
   cy.contains('button', option)
@@ -50,12 +46,13 @@ export function selectCheckBox(name: string) {
 }
 
 function selectCheckboxUser(checkName: string) {
-  cy.get('[data-cy="admin-users-checkbox-login-name"]')
-    .contains(checkName)
-    .parent()
-    .within(() => {
-      cy.get('mat-checkbox').click();
-    });
+  // cy.get('[data-cy="admin-users-checkbox-login-name"]')
+  //   .contains(checkName)
+  //   .parent()
+  //   .within(() => {
+  //     cy.get('mat-checkbox').click();
+  //   });
+  cy.get(`[data-cy="admin-users-checkbox-user-box-${checkName}"]`).click();
 }
 
 export function goToItem(itemId: string) {

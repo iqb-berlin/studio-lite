@@ -25,7 +25,7 @@ describe('Comment:', () => {
     importExercise('test_studio_units_download.zip');
   });
 
-  it('should add a comment', () => {
+  it('should add comments', () => {
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.get('tiptap-editor').type('Neue allgemein Kommentar 1');
@@ -40,7 +40,6 @@ describe('Comment:', () => {
       .eq(0).contains('button', 'reply').click();
     cy.get('tiptap-editor').eq(0).type('Antworten zu Neue Kommentar 1');
     cy.contains('button', 'send').click();
-    //
   });
 
   it('should edit the last comment', () => {
