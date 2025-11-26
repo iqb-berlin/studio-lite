@@ -11,7 +11,14 @@ export function clickIndexTabWorkspace(tabName:string):void {
   cy.get(`[data-cy="workspace-routes-${tabName}"]`).click();
 }
 
-// tabName options: admin.component.ts
+// tabName options: admin.component.ts. Current options;
+//     'users',
+//     'workspace-groups',
+//     'workspaces',
+//     'units',
+//     'v-modules',
+//     'settings',
+//     'packages'
 export function clickIndexTabAdmin(tabName: string) {
   cy.wait(100);
   cy.get(`[data-cy="admin-tab-${tabName}"]`).click();
@@ -113,18 +120,15 @@ export function createNewUser(newUser: UserData):void {
 
 export function deleteUser(user: string):void {
   cy.findAdminSettings().click();
-  cy.get('mat-cell')
-    .contains(`${user}`)
-    .should('exist')
-    .click();
-  cy.get('mat-icon')
-    .contains('delete')
-    .click();
+  clickIndexTabAdmin('users');
+  selectCheckboxUser(user);
+  cy.get('[data-cy="admin-users-menu-delete-users"]').click();
   cy.clickButtonWithResponseCheck('Löschen', [200], '/api/admin/users*', 'DELETE', 'deleteUser');
 }
 
 export function deleteUsers(users: string[]):void {
   cy.findAdminSettings().click();
+  clickIndexTabAdmin('users');
   users.forEach(user => {
     selectCheckboxUser(user);
   });
