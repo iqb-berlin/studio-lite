@@ -49,13 +49,11 @@ function getTimeNumber(time: string, propName:string, profile:string, moreThanOn
 }
 
 export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile) {
-  // cy.get('[data-cy="goto-admin"]').click();
-  cy.get('div')
-    .contains('studio-lite-wrapped-icon', 'construction')
-    .click();
-  // cy.get('span:contains("Bereichsgruppen")')
-  //  .eq(0)
-  //  .click();
+  cy.visit('/');
+  cy.get('[data-cy="goto-admin"]').click();
+  // cy.get('div')
+  //   .contains('studio-lite-wrapped-icon', 'construction')
+  //   .click();
   clickIndexTabAdmin('workspace-groups');
   cy.get('mat-table')
     .contains(group)
@@ -64,12 +62,12 @@ export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile)
     .contains('settings')
     .click();
   checkProfile(profile);
-
   // cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
   cy.clickButton('Speichern');
 }
 
 export function selectProfileForGroup(group:string, profile:IqbProfile) {
+  cy.visit('/');
   cy.get(`div>div>div>div:contains("${group}")`)
     .eq(0)
     .next()
@@ -95,6 +93,7 @@ export function selectProfileForArea(profile:IqbProfile) {
 }
 
 export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, group:string) {
+  cy.visit('/');
   cy.get(`div>div>div>div:contains("${group}")`)
     .eq(0)
     .next()

@@ -1,4 +1,17 @@
 import { AccessLevel, UnitData, UserData } from './testData';
+// import Chainable = Cypress.Chainable;
+
+// export function cy.findAdminSettings().click(); {
+//   cy.get('[data-cy="goto-admin"]').click();
+// }
+//
+// export function findAdminGroupSettings(group: string): Chainable {
+//   cy.visit('/');
+//   return cy.get('studio-lite-user-workspaces-groups')
+//     .get(`div>div>div>div:contains("${group}")`)
+//     .parent()
+//     .contains('mat-icon', 'settings');
+// }
 
 // tabName options: wsg-admin.component.ts
 export function clickIndexTabWsgAdmin(tabName: string) {
@@ -20,7 +33,6 @@ export function clickIndexTabWorkspace(tabName:string):void {
 //     'settings',
 //     'packages'
 export function clickIndexTabAdmin(tabName: string) {
-  cy.wait(100);
   cy.get(`[data-cy="admin-tab-${tabName}"]`).click();
 }
 
@@ -95,6 +107,7 @@ export function addModules(filenames:string[]):void {
 
 export function addResourcePackage(resource: string):void {
   const path:string = `../frontend-e2e/src/fixtures/${resource}`;
+  cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('packages');
   const name = resource.replace(/.itcr.zip/, '');
@@ -108,7 +121,7 @@ export function addResourcePackage(resource: string):void {
 }
 
 export function createNewUser(newUser: UserData):void {
-  cy.findAdminSettings().click();
+  clickIndexTabAdmin('users');
   cy.get('[data-cy="admin-users-menu-add-user"]').click();
   editInput('admin-edit-user-username', newUser.username);
   editInput('admin-edit-user-lastname', newUser.lastName);
@@ -119,6 +132,7 @@ export function createNewUser(newUser: UserData):void {
 }
 
 export function deleteUser(user: string):void {
+  cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('users');
   selectCheckboxUser(user);
@@ -127,7 +141,6 @@ export function deleteUser(user: string):void {
 }
 
 export function deleteUsers(users: string[]):void {
-  cy.findAdminSettings().click();
   clickIndexTabAdmin('users');
   users.forEach(user => {
     selectCheckboxUser(user);
@@ -137,7 +150,6 @@ export function deleteUsers(users: string[]):void {
 }
 
 export function createGroup(group:string):void {
-  cy.findAdminSettings().click();
   clickIndexTabAdmin('workspace-groups');
   cy.get('mat-icon').contains('add').click();
   cy.get('input[placeholder="Name"]')
@@ -146,6 +158,7 @@ export function createGroup(group:string):void {
 }
 
 export function createWs(ws:string, group:string):void {
+  cy.visit('/');
   cy.findAdminGroupSettings(group).click();
   cy.wait(100);
   clickIndexTabWsgAdmin('workspaces');
@@ -229,6 +242,7 @@ export function grantRemovePrivilegeAtUser(user:string, wss: string[], rights:Ac
 }
 
 export function makeAdminOfGroup(group:string, admins: string[]):void {
+  cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('workspace-groups');
   cy.get(`mat-row:contains("${group}")`)
@@ -249,11 +263,13 @@ export function deleteFirstUser() {
 }
 
 export function login(username: string, password = '') {
+  cy.visit('/');
   cy.login(username, password);
   cy.clickButtonWithResponseCheck('Anmelden', [201], '/api/login', 'POST', 'responseLogin');
 }
 
 export function setVeronaWs(ws:string):void {
+  cy.visit('/');
   cy.visitWs(ws);
   goToWsMenu();
   cy.clickButton('Einstellungen');
@@ -267,6 +283,7 @@ export function setVeronaWs(ws:string):void {
 }
 
 export function deleteModule():void {
+  cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('v-modules');
   cy.selectModule('IQB-Schemer');
@@ -279,6 +296,7 @@ export function deleteModule():void {
 }
 
 export function deleteResource():void {
+  cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('packages');
   cy.get('mat-cell:contains("GeoGebra")')
@@ -300,6 +318,7 @@ export function getButtonReview(reviewName: string, operation: string) {
 }
 
 export function deleteGroup(group: string):void {
+  cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('workspace-groups');
   cy.get('mat-table')
@@ -312,6 +331,7 @@ export function deleteGroup(group: string):void {
 }
 
 export function logout() {
+  cy.visit('/');
   cy.get('[data-cy="goto-user-menu"]').click();
   cy.get('[data-cy="user-menu-logout"]').click();
   cy.clickDialogButton('Abmelden');

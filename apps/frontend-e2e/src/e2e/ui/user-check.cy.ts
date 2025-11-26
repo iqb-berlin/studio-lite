@@ -14,7 +14,6 @@ describe('UI User Management', () => {
   before(() => {
     addFirstUser();
     createNewUser(newUser);
-    cy.visit('/');
     logout();
   });
   after(() => {
@@ -28,7 +27,6 @@ describe('UI User Management', () => {
   });
 
   it('should not be able to find admin user setting button', () => {
-    cy.visit('/');
     cy.findAdminSettings().should('not.exist');
   });
 
@@ -45,7 +43,6 @@ describe('UI User Management', () => {
 
   it('should be possible to change the password', () => {
     changePassword('newpass', newUser.password);
-    cy.visit('/');
     logout();
     login(newUser.username, 'newpass');
     changePassword(newUser.password, 'newpass');

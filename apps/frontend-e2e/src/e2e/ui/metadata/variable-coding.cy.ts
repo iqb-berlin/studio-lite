@@ -38,21 +38,16 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
 
   it('prepares the context', () => {
     addModules(modules);
-    cy.visit('/');
     createGroup(group);
-    cy.visit('/');
     createWs(mathArea, group);
     grantRemovePrivilegeAtWs([Cypress.env('username')], mathArea, [AccessLevel.Admin]);
-    cy.visit('/');
     selectProfileForGroup(group, IqbProfile.MA);
-    cy.visit('/');
     setVeronaWs(mathArea);
     selectProfileForArea(IqbProfile.MA);
     importExercise('variable_metadata.zip');
   });
 
   it('adds a new item 01, and select the corresponding variable text-field_1', () => {
-    cy.visit('/');
     cy.visitWs(mathArea);
     selectUnit('MA_01');
     goToItem('01');
@@ -80,7 +75,6 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('ends the connection the variable drop_list_1 with item 03', () => {
-    cy.visit('/');
     cy.visitWs(mathArea);
     selectUnit('MA_01');
     goToItem('03');
@@ -89,7 +83,6 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('checks the connection the variable drop-list_1 with item 03 is not active at properties', () => {
-    cy.visit('/');
     cy.visitWs(mathArea);
     selectUnit('MA_01');
     goToItem('03');
@@ -122,7 +115,6 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('checks that drop-list_1 is not present at eye view', () => {
-    cy.visit('/');
     cy.visitWs(mathArea);
     selectUnit('MA_01');
     goToItem('03');
@@ -141,9 +133,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('deletes the data', () => {
-    cy.visit('/');
     deleteGroup(group);
-    cy.visit('/');
     deleteModule();
   });
 });

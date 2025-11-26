@@ -20,7 +20,6 @@ describe('Comment:', () => {
   });
 
   it('should import units', () => {
-    cy.visit('/');
     cy.visitWs(ws1);
     importExercise('test_studio_units_download.zip');
   });
@@ -86,7 +85,6 @@ describe('Comment:', () => {
   });
 
   it('should able to write a comment related to a item', () => {
-    cy.visit('/');
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
@@ -97,7 +95,6 @@ describe('Comment:', () => {
   });
 
   it('should show only comments related to Item 01', () => {
-    cy.visit('/');
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');

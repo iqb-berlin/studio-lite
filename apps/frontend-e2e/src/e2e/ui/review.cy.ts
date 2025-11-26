@@ -27,7 +27,6 @@ describe('Review:', () => {
 
   const review:string = 'Review1';
   it('should import units', () => {
-    cy.visit('/');
     cy.visitWs(ws1);
     importExercise('test_studio_units_download.zip');
   });
@@ -84,11 +83,9 @@ describe('Review:', () => {
   });
 
   it('should other user access to the review', () => {
-    cy.visit('/');
     cy.findAdminGroupSettings(group1).click();
     clickIndexTabWsgAdmin('workspaces');
     grantRemovePrivilegeAtWs([newUser.username], ws1, [AccessLevel.Basic]);
-    cy.visit('/');
     logout();
     login(newUser.username, newUser.password);
     cy.get('studio-lite-user-reviews-area').within(() => {
@@ -99,7 +96,6 @@ describe('Review:', () => {
   });
 
   it('should export a review', () => {
-    cy.visit('/');
     cy.visitWs(ws1);
     goToWsMenu();
     getButtonReview(review, 'get_app');
@@ -108,7 +104,6 @@ describe('Review:', () => {
   });
 
   it('should print a review', () => {
-    cy.visit('/');
     cy.visitWs(ws1);
     goToWsMenu();
     getButtonReview(review, 'print');
@@ -117,7 +112,6 @@ describe('Review:', () => {
   });
 
   it('should modify a review', () => {
-    cy.visit('/');
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('span:contains("Aufgabenfolgen")').click();
@@ -146,7 +140,6 @@ describe('Review:', () => {
   });
 
   it('should delete the review', () => {
-    cy.visit('/');
     cy.visitWs(ws1);
     goToWsMenu();
     getButtonReview(review, 'delete');

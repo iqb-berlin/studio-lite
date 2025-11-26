@@ -30,29 +30,21 @@ describe('UI Group admin workspace check', () => {
   });
 
   it('prepares the context', () => {
-    cy.findAdminSettings().click();
-    cy.visit('/');
     createNewUser(newUser);
-    cy.visit('/');
     createNewUser(groupAdminUser);
-    cy.visit('/');
     createGroup(group1);
-    cy.visit('/');
     createWs(ws1, group1);
     grantRemovePrivilegeAtWs([newUser.username, Cypress.env('username')],
       ws1,
       [AccessLevel.Basic, AccessLevel.Admin]);
-    cy.visit('/');
     createWs(ws2, group1);
   });
 
   it('should make user as admin of a workspace group ', () => {
-    cy.visit('/');
     makeAdminOfGroup(group1, [Cypress.env('username'), groupAdminUser.username]);
   });
 
   it('checks that tabs (Nutzer:innen, Arbeitsbereiche and Einstellungen) are present ', () => {
-    cy.visit('/');
     cy.findAdminGroupSettings(group1).click();
     cy.get('span:contains("Nutzer:innen")')
       .should('exist');
@@ -70,7 +62,6 @@ describe('UI Group admin workspace check', () => {
   });
 
   it('checks that workspace is only read ', () => {
-    cy.visit('/');
     cy.contains(ws1).click();
     cy.get('studio-lite-units-area')
       .find('div>div>div:contains("Schreibgeschützt")')
@@ -97,7 +88,6 @@ describe('UI Group admin workspace check', () => {
   });
 
   it('checks that workspace admin can remove privileges in workspace from tab-index user ', () => {
-    cy.visit('/');
     cy.findAdminGroupSettings(group1).click();
     cy.get('span:contains("Nutzer:innen")')
       .eq(0)
@@ -106,8 +96,7 @@ describe('UI Group admin workspace check', () => {
   });
 
   it('checks that workspace is editable for the group admin user ', () => {
-    cy.visit('/');
-    cy.contains(ws1).click();
+    cy.visitWs(ws1);
     cy.get('studio-lite-units-area')
       .find('div>div>div:contains("Schreibgeschützt")')
       .should('not.exist');
@@ -120,9 +109,7 @@ describe('UI Group admin workspace check', () => {
     login(Cypress.env('username'), Cypress.env('password'));
     cy.findAdminGroupSettings(group1).should('exist');
     deleteGroup(group1);
-    cy.visit('/');
     deleteUser('normaluser');
-    cy.visit('/');
     deleteUser('groupadminuser');
   });
 });

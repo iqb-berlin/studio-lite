@@ -23,23 +23,18 @@ describe('UI Metadata Management from administration', () => {
 
   it('prepares context', () => {
     cy.findAdminSettings().click();
-    cy.visit('/');
     createGroup(group);
-    cy.visit('/');
     createWs(area, group);
     grantRemovePrivilegeAtWs([Cypress.env('username')], area, [AccessLevel.Admin]);
-    cy.visit('/');
     createWs(mathArea, group);
     grantRemovePrivilegeAtWs([Cypress.env('username')], mathArea, [AccessLevel.Admin]);
   });
   it('chooses profiles for a Group from the administration settings ', () => {
     selectProfileForGroupFromAdmin(group, IqbProfile.DE);
-    cy.visit('/');
     selectProfileForGroupFromAdmin(group, IqbProfile.MA);
   });
 
   it('deletes the data', () => {
-    cy.visit('/');
     deleteGroup(group);
   });
 });

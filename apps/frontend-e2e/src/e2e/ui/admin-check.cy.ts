@@ -27,37 +27,28 @@ describe('UI Administration Management', () => {
   after(() => deleteFirstUser());
 
   it('user with admin credentials has admin setting button', () => {
-    cy.findAdminSettings();
+    cy.findAdminSettings().click();
   });
 
   it('user with admin credentials can add new user', () => {
-    cy.visit('/');
     createNewUser(newUser);
   });
 
   it('user with admin credentials can delete a user', () => {
-    cy.visit('/');
     deleteUser(newUser.username);
   });
 
   it('user admin creates two users and select them to delete together', () => {
-    cy.visit('/');
     createNewUser(newUser);
-    cy.visit('/');
     createNewUser(anotherUser);
-    cy.visit('/');
-    cy.pause();
     deleteUsers([newUser.username, anotherUser.username]);
-    cy.pause();
   });
 
   it('user with admin credentials can create a group (Bereichsgruppe)', () => {
-    cy.visit('/');
     createGroup(group1);
   });
 
   it('user with admin credentials can create a workspace(Arbeitsbereich) within its Bereichsgruppe', () => {
-    cy.visit('/');
     createWs(ws1, group1);
     grantRemovePrivilegeAtWs([Cypress.env('username')], 'Mathematik I', [AccessLevel.Basic]);
   });
@@ -65,29 +56,24 @@ describe('UI Administration Management', () => {
   it('user with admin credentials can Modules upload',
     { defaultCommandTimeout: 100000 },
     () => {
-      cy.visit('/');
       addModules(modules);
     });
 
   it('user with admin credentials can upload the resource package',
     { defaultCommandTimeout: 200000 },
     () => {
-      cy.visit('/');
       addResourcePackage(resource);
     });
 
   it('user with admin credentials deletes Modules', () => {
-    cy.visit('/');
     deleteModule();
   });
 
   it('user with admin credentials deletes package resource', () => {
-    cy.visit('/');
     deleteResource();
   });
 
   it('user with admin credentials can deletes groups', () => {
-    cy.visit('/');
     deleteGroup(group1);
   });
 });

@@ -22,17 +22,14 @@ describe('Load metadata profile', () => {
 
   it('user admin prepares the Context', () => {
     createNewUser(newUser);
-    cy.visit('/');
     groups.forEach(area => {
       createGroup(area);
-      cy.visit('/');
     });
     cy.wait(100);
   });
 
   it('should be possible load a metadata profile from administration settings', () => {
     const searchProfile:string = 'Deutsch';
-    cy.findAdminSettings().click();
     clickIndexTabAdmin('workspace-groups');
     cy.get('mat-table')
       .contains(groups[0])
@@ -73,12 +70,9 @@ describe('Load metadata profile', () => {
   });
 
   it('removes the Context', () => {
-    cy.visit('/');
     deleteUser(newUser.username);
-    cy.visit('/');
     groups.forEach(group => {
       deleteGroup(group);
-      cy.visit('/');
     });
   });
 });
