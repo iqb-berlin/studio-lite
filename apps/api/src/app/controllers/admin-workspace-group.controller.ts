@@ -66,7 +66,7 @@ export class AdminWorkspaceGroupController {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': 'attachment; filename="iqb-studio-workspace-report.xlsx"'
       });
-      return new StreamableFile(file as Buffer);
+      return new StreamableFile(file as unknown as Uint8Array);
     }
     return this.workspaceGroupService.findAll();
   }

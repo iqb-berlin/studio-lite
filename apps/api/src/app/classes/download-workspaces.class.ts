@@ -176,7 +176,7 @@ export class DownloadWorkspacesClass {
       }));
     ws.getRow(1).font = { bold: true };
     ws.addRows(rows);
-    return (await wb.xlsx.writeBuffer()) as Buffer;
+    return (await wb.xlsx.writeBuffer()) as unknown as Buffer;
   }
 
   static async getWorkspaceCodingBook(
@@ -517,6 +517,6 @@ export class DownloadWorkspacesClass {
       });
       ws.addRows([data]);
     });
-    return (await wb.xlsx.writeBuffer()) as Buffer;
+    return (await wb.xlsx.writeBuffer()) as unknown as Buffer;
   }
 }

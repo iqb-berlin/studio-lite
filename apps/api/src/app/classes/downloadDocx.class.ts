@@ -24,7 +24,8 @@ import {
 } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
 import { FileChild } from 'docx/build/file/file-child';
-import { AnyNode, BasicAcceptedElems, Element } from 'cheerio';
+import type { Element, AnyNode } from 'domhandler';
+import { BasicAcceptedElems } from 'cheerio';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { imageSize } from 'image-size';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -340,7 +341,7 @@ export class DownloadDocx {
   }
 
   private static getImageSize(imageBuffer: Buffer): ISizeCalculationResult {
-    return imageSize(imageBuffer);
+    return imageSize(imageBuffer as unknown as Uint8Array);
   }
 
   private static getTransformation(actualSize: ISizeCalculationResult, max: number): ISizeCalculationResult {
@@ -381,14 +382,14 @@ export class DownloadDocx {
     );
   }
 
-  private static getBackgroundColor(cheerioAPI: cheerio.CheerioAPI, elem: cheerio.Element): string {
+  private static getBackgroundColor(cheerioAPI: cheerio.CheerioAPI, elem: Element): string {
     const mark = cheerioAPI(elem)
       .find('mark');
     return cheerioAPI(mark)
       .css('background-color') || '#FFFFFF';
   }
 
-  private static getColor(cheerioAPI: cheerio.CheerioAPI, tag: cheerio.Cheerio<cheerio.Element>): string {
+  private static getColor(cheerioAPI: cheerio.CheerioAPI, tag: cheerio.Cheerio<Element>): string {
     const color = cheerioAPI(tag)
       .css('color');
     // const name = elem.name;
@@ -406,12 +407,12 @@ export class DownloadDocx {
     return colorParsed;
   }
 
-  private static getSize(cheerioAPI: cheerio.CheerioAPI, tag: cheerio.Cheerio<cheerio.Element>): string {
+  private static getSize(cheerioAPI: cheerio.CheerioAPI, tag: cheerio.Cheerio<Element>): string {
     return cheerioAPI(tag)
       .css('font-size') || '20pt';
   }
 
-  private static getTextAlignment(cheerioAPI: cheerio.CheerioAPI, elem: cheerio.Element): string {
+  private static getTextAlignment(cheerioAPI: cheerio.CheerioAPI, elem: Element): string {
     return cheerioAPI(elem)
       .css('text-align') || 'left';
   }
@@ -430,7 +431,7 @@ export class DownloadDocx {
     );
   }
 
-  private static isListParagraph(elem: cheerio.Element): boolean {
+  private static isListParagraph(elem: Element): boolean {
     return elem.parent && (elem.parent as Element).name === 'li';
   }
 
