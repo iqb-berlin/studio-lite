@@ -6,11 +6,11 @@ export enum IqbProfile {
 }
 // eslint-disable-next-line
 export const IqbProfileExamples = new Map <string, any>([
-  ['uMA', new Map<string, string>([['Entwickler:in', 'Elsa Mignon'], ['Für SPF geeignet', '1'],
+  ['uMA', new Map<string, string>([['Entwickler:in', 'Elsa Mignon'], ['Für SPF geeignet', 'true'],
     ['Kopfhörereinsatz', 'nein'], ['Leitidee', 'Größen und Messen'], ['Aufgabenzeit', '1:30'],
     ['Stimuluszeit', '1:00'], ['Quellenangaben', 'Es war einmal Mathe'], ['Unverträgliche Aufgaben', 'Ja'],
     ['Techinische Besonderheiten der Antwortoptionen', 'Bild']])],
-  ['uDE', new Map<string, string>([['Entwickler:in', 'Elsa Magna'], ['Für SPF geeignet', '1'],
+  ['uDE', new Map<string, string>([['Entwickler:in', 'Elsa Magna'], ['Für SPF geeignet', 'true'],
     ['Kopfhörereinsatz', 'optional'],
     ['Kompetenzbereich', 'Schreiben'], ['Aufgabenzeit', '2:30'], ['Quellenangaben', 'Es war einmal Deutsch'],
     ['Textsorte', 'expositorisch'], ['Wortanzahl', '100'], ['Stimuluszeit', '2:00'],

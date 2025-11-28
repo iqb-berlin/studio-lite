@@ -182,6 +182,7 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
       .set(entry.label[0].value, entry.type)));
     unitMap.forEach((type:string, fieldName:string) => {
       cy.log(IqbProfileExamples.get(profile).get(fieldName));
+      cy.log(`Ich habe den Type ${type}`);
       if (IqbProfileExamples.get(profile).get(fieldName) !== ('')) {
         switch (type) {
           case 'number': {
@@ -192,6 +193,12 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
             if (moreThanOne) cy.get(`mat-label:contains("${fieldName}")`).eq(-1).click();
             else cy.get(`mat-label:contains("${fieldName}")`).click();
             getCheckBoxByName(IqbProfileExamples.get(profile).get(fieldName));
+            break;
+          }
+          case 'boolean': {
+            if (IqbProfileExamples.get(profile).get(fieldName) === 'true') {
+              cy.get('mat-slide-toggle button').click();
+            }
             break;
           }
           default: {

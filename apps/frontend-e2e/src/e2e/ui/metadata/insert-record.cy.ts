@@ -45,14 +45,14 @@ describe('Metadata Management', () => {
     selectProfileForGroup(group, IqbProfile.MA);
   });
 
-  it('chooses profile for an area from a group', () => {
+  it('chooses profile for a ws from a group', () => {
     cy.visit('/');
     selectProfileForAreaFromGroup(IqbProfile.DE, ws1, group);
     cy.visit('/');
     selectProfileForAreaFromGroup(IqbProfile.MA, ws2, group);
   });
 
-  it('chooses a profile for an area from workspace', () => {
+  it('chooses a profile for an workspace', () => {
     cy.visit('/');
     cy.contains(ws1).click();
     selectProfileForArea(IqbProfile.DE);
@@ -61,13 +61,13 @@ describe('Metadata Management', () => {
     selectProfileForArea(IqbProfile.MA);
   });
 
-  it('creates a new Unit in an area', () => {
+  it('creates a new Unit in a ws', () => {
     cy.visit('/');
     cy.visitWs(ws2);
     addUnit('M1_001');
   });
 
-  it('creates more than one Unit in an area', () => {
+  it('creates more than one Unit in a ws', () => {
     cy.visit('/');
     cy.visitWs(ws1);
     addUnit('D1_001');
@@ -76,7 +76,7 @@ describe('Metadata Management', () => {
     addUnit('D1_002');
   });
 
-  it('adds metadata', () => {
+  it('adds metadata values for the unit M1_001', () => {
     cy.visit('/');
     cy.visitWs(ws2);
     cy.contains('M1_001').should('exist').click();
@@ -85,7 +85,7 @@ describe('Metadata Management', () => {
     cy.contains('Speichern').click();
   });
 
-  it('adds metadata with more than one element', () => {
+  it('adds metadata values for the unit D1_001, that has several items', () => {
     cy.visit('/');
     cy.visitWs(ws1);
     cy.contains('D1_001').should('exist').click();
