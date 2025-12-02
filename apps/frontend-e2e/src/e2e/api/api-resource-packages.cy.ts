@@ -29,7 +29,9 @@ describe('Admin settings API tests', () => {
           });
       });
   });
-
+  after(() => {
+    cy.resetDb();
+  });
   describe('108. POST /api/admin/resource-packages', () => {
     // It is skipped because it results in [vite] http proxy error: /api/admin/resource-packages
     // it.skip('500 negative test: should not add a resource package a false user', () => {
