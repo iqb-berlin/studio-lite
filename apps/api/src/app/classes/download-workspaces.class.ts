@@ -84,7 +84,7 @@ export class DownloadWorkspacesClass {
               'Item-Id': item.id || '–',
               Variable: item.variableId,
               Wichtung: item.weighting?.toString(),
-              Beschreibung: item.description
+              Notiz: item.description
             });
           }
         });
@@ -129,7 +129,7 @@ export class DownloadWorkspacesClass {
         return 'Aufgabe';
       }
       if (column === 'description') {
-        return 'Beschreibung';
+        return 'Notiz';
       }
       if (column === 'variableId') {
         return 'Variable';
