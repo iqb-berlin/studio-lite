@@ -282,7 +282,8 @@ export class WorkspaceService {
     unitListWithMetadata.forEach((unit: UnitPropertiesDto) => {
       if (WorkspaceService.isValidScheme(unit.scheme, unit.schemer)) {
         const parsedUnitScheme = WorkspaceService.parseScheme(unit.scheme);
-        if (parsedUnitScheme) {
+        const version = 'version';
+        if (parsedUnitScheme && parsedUnitScheme[version]) {
           const validationResults = CodingSchemeFactory
             .validate(unit.variables, parsedUnitScheme.variableCodings);
           WorkspaceService
@@ -297,7 +298,7 @@ export class WorkspaceService {
   }
 
   private static isValidScheme(scheme: string | undefined, schemer: string): boolean {
-    return scheme && scheme !== 'undefined' && schemer.split('@')[1] >= '1.5';
+    return !!scheme && !!schemer && schemer.split('@')[1] >= '1.5';
   }
 
   private static parseScheme(scheme: string): CodingScheme | null {
