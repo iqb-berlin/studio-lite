@@ -90,6 +90,7 @@ Cypress.Commands.add('runUntracked', fn => {
   });
 });
 
+Cypress.Commands.add('resetDb', () => cy.task('resetDatabase') as Cypress.Chainable<void>);
 //
 // -- This is a child command --
 // Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
