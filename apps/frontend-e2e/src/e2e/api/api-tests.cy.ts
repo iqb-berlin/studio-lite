@@ -81,9 +81,6 @@ describe('Studio API tests', () => {
     unitMDProfile: '',
     itemMDProfile: ''
   };
-  after(() => {
-    cy.resetDb();
-  });
 
   describe('Auth API tests', () => {
     describe('1. POST /api/init-login', () => {
