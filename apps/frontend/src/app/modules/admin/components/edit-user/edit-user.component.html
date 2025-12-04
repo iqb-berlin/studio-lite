@@ -68,14 +68,21 @@
     </mat-checkbox>
     <div>
       {{'admin.password-hint' | translate}}
+      <button mat-raised-button type="button" (click)="generatePassword()">Generiere</button>
     </div>
+
     <mat-form-field>
-      <input matInput
-        formControlName="password"
-        type="password"
-        autocomplete="new-password"
-        [placeholder]="(data.newUser ? 'admin.password' : 'admin.new-password') | translate"
-        data-cy="admin-edit-user-password"/>
+      <input #passwordInput
+             matInput
+             formControlName="password"
+             type="password"
+             autocomplete="new-password"
+             [placeholder]="(data.newUser ? 'admin.password' : 'admin.new-password') | translate"
+             data-cy="admin-edit-user-password"/>
+      <mat-icon matSuffix
+                (click)="setPasswordInputType(passwordInput)">
+        {{ passwordInput.type === 'text' ? 'visibility_off' : 'visibility' }}
+      </mat-icon>
     </mat-form-field>
   </form>
 </mat-dialog-content>

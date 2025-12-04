@@ -11,15 +11,16 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 
 import { MatInput } from '@angular/material/input';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { EditUserComponentData } from '../../models/edit-user-component-data.type';
 
 @Component({
   selector: 'studio-lite-edit-user',
   templateUrl: './edit-user.component.html',
   styleUrls: ['./edit-user.component.scss'],
-  // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatIcon, MatLabel, MatCheckbox, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, MatDialogContent, FormsModule, ReactiveFormsModule,
+    MatFormField, MatInput, MatIcon, MatLabel, MatCheckbox, MatDialogActions, MatSuffix,
+    MatButton, MatDialogClose, TranslateModule]
 })
 
 export class EditUserComponent {
@@ -39,5 +40,10 @@ export class EditUserComponent {
           [Validators.pattern(/^\S{3,}$/), Validators.required] :
           [Validators.pattern(/^\S{3,}$/)])
     });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  setPasswordInputType(input: HTMLInputElement): void {
+    input.type = input.type === 'text' ? 'password' : 'text';
   }
 }
