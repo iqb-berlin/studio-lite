@@ -25,6 +25,7 @@ describe('Metadata Management', () => {
   });
   after(() => {
     deleteFirstUser();
+    // cy.resetDb();
   });
 
   it('prepares context', () => {

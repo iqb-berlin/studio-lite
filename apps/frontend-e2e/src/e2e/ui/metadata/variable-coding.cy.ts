@@ -34,6 +34,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
 
   after(() => {
     deleteFirstUser();
+    // cy.resetDb();
   });
 
   it('prepares the context', () => {

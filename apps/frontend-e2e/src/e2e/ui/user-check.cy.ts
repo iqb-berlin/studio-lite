@@ -20,6 +20,7 @@ describe('UI User Management', () => {
     login(Cypress.env('username'), Cypress.env('password'));
     deleteUser('normaluser');
     deleteFirstUser();
+    // cy.resetDb();
   });
 
   it('should be possible login with credentials', () => {

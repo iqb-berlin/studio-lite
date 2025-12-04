@@ -20,7 +20,7 @@ export function clickIndexTabWsgAdmin(tabName: string) {
 
 // tabName options: workspace.routes de,json or unit-data-area
 export function clickIndexTabWorkspace(tabName:string):void {
-  cy.wait(100);
+  cy.wait(200);
   cy.get(`[data-cy="workspace-routes-${tabName}"]`).click();
 }
 
@@ -160,7 +160,7 @@ export function createGroup(group:string):void {
 export function createWs(ws:string, group:string):void {
   cy.visit('/');
   cy.findAdminGroupSettings(group).click();
-  cy.wait(100);
+  cy.wait(200);
   clickIndexTabWsgAdmin('workspaces');
   cy.get('mat-icon')
     .contains('add')
@@ -307,6 +307,7 @@ export function deleteResource():void {
   cy.get('div > mat-icon')
     .contains('delete')
     .click();
+  cy.clickButtonWithResponseCheck('Löschen', [200], '/api/resource-packages', 'GET', 'deleteResource');
 }
 
 export function getButtonReview(reviewName: string, operation: string) {
@@ -335,6 +336,7 @@ export function logout() {
   cy.get('[data-cy="goto-user-menu"]').click();
   cy.get('[data-cy="user-menu-logout"]').click();
   cy.clickDialogButton('Abmelden');
+  cy.wait(200);
 }
 
 export function editInput(data: string, content: string | undefined) {

@@ -18,6 +18,7 @@ describe('Load metadata profile', () => {
   });
   after(() => {
     deleteFirstUser();
+    // cy.resetDb();
   });
 
   it('user admin prepares the Context', () => {
@@ -25,7 +26,7 @@ describe('Load metadata profile', () => {
     groups.forEach(area => {
       createGroup(area);
     });
-    cy.wait(100);
+    cy.wait(200);
   });
 
   it('should be possible load a metadata profile from administration settings', () => {

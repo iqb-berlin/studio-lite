@@ -63,6 +63,7 @@ describe('UI check: workspace', () => {
   });
   after(() => {
     deleteFirstUser();
+    // cy.resetDb();
   });
 
   it('prepares the context for unit test', () => {

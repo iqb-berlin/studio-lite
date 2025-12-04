@@ -17,6 +17,7 @@ describe('Comment:', () => {
 
   after(() => {
     deleteBasicSpecCy();
+    // cy.resetDb();
   });
 
   it('should import units', () => {

@@ -45,6 +45,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
         expect(resp.status).to.equal(200);
       });
     cy.visit('/');
+    // cy.resetDb();
   });
 
   it('prepares api context', () => {

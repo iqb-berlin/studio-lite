@@ -27,6 +27,7 @@ describe('UI Group admin workspace check', () => {
   });
   after(() => {
     deleteFirstUser();
+    // cy.resetDb();
   });
 
   it('prepares the context', () => {
@@ -56,7 +57,6 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that normal user has no workspace group admin setting button ', () => {
     logout();
-    cy.wait(100);
     login(newUser.username, newUser.password);
     cy.findAdminGroupSettings(group1).should('not.exist');
   });
@@ -72,7 +72,6 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that workspace admin has setting button for the workspace ', () => {
     logout();
-    cy.wait(100);
     login(groupAdminUser.username, groupAdminUser.password);
     cy.findAdminGroupSettings(group1).should('exist');
   });
@@ -106,6 +105,7 @@ describe('UI Group admin workspace check', () => {
 
   it('deletes the group, and users', () => {
     logout();
+    cy.wait(200);
     login(Cypress.env('username'), Cypress.env('password'));
     cy.findAdminGroupSettings(group1).should('exist');
     deleteGroup(group1);

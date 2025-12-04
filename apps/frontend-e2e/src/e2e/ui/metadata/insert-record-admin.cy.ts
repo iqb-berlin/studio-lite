@@ -19,6 +19,7 @@ describe('UI Metadata Management from administration', () => {
   });
   after(() => {
     deleteFirstUser();
+    // cy.resetDb();
   });
 
   it('prepares context', () => {

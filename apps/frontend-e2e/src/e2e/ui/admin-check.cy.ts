@@ -24,7 +24,10 @@ describe('UI Administration Management', () => {
   const group1:string = 'Mathematik Primär Bereichsgruppe';
   const ws1:string = 'Mathematik I';
   before(() => addFirstUser());
-  after(() => deleteFirstUser());
+  after(() => {
+    deleteFirstUser();
+    // cy.resetDb();
+  });
 
   it('user with admin credentials has admin setting button', () => {
     cy.findAdminSettings().click();
