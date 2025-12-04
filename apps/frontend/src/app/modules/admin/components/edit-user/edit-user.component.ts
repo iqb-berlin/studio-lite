@@ -46,4 +46,41 @@ export class EditUserComponent {
   setPasswordInputType(input: HTMLInputElement): void {
     input.type = input.type === 'text' ? 'password' : 'text';
   }
+
+  setGeneratePassword(input: HTMLInputElement): void {
+    this.editUserForm
+      .get('password')?.setValue(EditUserComponent.generatePassword());
+    input.type = 'text';
+  }
+
+  private static generatePassword(length = 8): string {
+    const CHARSET =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&*-_+=;:,.<>?`';
+
+    let cryptoObj: Crypto | undefined;
+
+    if (typeof crypto !== 'undefined') {
+      cryptoObj = crypto;
+    } else if (typeof globalThis !== 'undefined') {
+      const maybeCrypto = (globalThis as unknown as { crypto?: unknown }).crypto;
+      if (maybeCrypto instanceof Crypto) {
+        cryptoObj = maybeCrypto;
+      }
+    }
+
+    if (!cryptoObj || typeof cryptoObj.getRandomValues !== 'function') {
+      return Array.from({ length }, () => CHARSET.charAt(Math.floor(Math.random() * CHARSET.length))
+      ).join('');
+    }
+    return Array.from({ length }, () => {
+      const buf = new Uint8Array(1);
+      const maxValid = 256 - (256 % CHARSET.length);
+      let rnd = 0;
+      do {
+        cryptoObj.getRandomValues(buf);
+        rnd = buf[0];
+      } while (rnd >= maxValid);
+      return CHARSET.charAt(rnd % CHARSET.length);
+    }).join('');
+  }
 }
