@@ -65,6 +65,13 @@
         cdkTextareaAutosize
       cdkAutosizeMinRows="6"></textarea>
     </mat-form-field>
+    <mat-form-field class="fx-column-start-stretch">
+      <mat-label>{{'config.email-content' | translate}}</mat-label>
+      <textarea matInput
+                formControlName="emailText"
+                cdkTextareaAutosize
+                cdkAutosizeMinRows="8"></textarea>
+    </mat-form-field>
     <div class="fx-row-end-center fx-gap-30">
       @if (dataChanged) {
         <div class="fx-flex-fill">

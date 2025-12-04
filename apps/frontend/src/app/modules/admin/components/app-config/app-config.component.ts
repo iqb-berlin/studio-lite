@@ -47,6 +47,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
       appTitle: this.fb.control(''),
       introHtml: this.fb.control(''),
       imprintHtml: this.fb.control(''),
+      emailText: this.fb.control(''),
       globalWarningText: this.fb.control(''),
       globalWarningExpiredDay: this.fb.control(new Date()),
       globalWarningExpiredHour: this.fb.control('')
@@ -76,6 +77,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
         if (appConfig.appTitle) this.appConfig.appTitle = appConfig.appTitle;
         if (appConfig.introHtml) this.appConfig.introHtml = appConfig.introHtml;
         if (appConfig.imprintHtml) this.appConfig.imprintHtml = appConfig.imprintHtml;
+        if (appConfig.emailText) this.appConfig.emailText = appConfig.emailText;
         if (appConfig.globalWarningText) this.appConfig.globalWarningText = appConfig.globalWarningText;
         if (appConfig.globalWarningExpiredDay) {
           this.appConfig.globalWarningExpiredDay = appConfig.globalWarningExpiredDay;
@@ -88,6 +90,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
             appTitle: this.appConfig.appTitle,
             introHtml: this.appConfig.introHtml,
             imprintHtml: this.appConfig.imprintHtml,
+            emailText: this.appConfig.emailText,
             globalWarningText: this.appConfig.globalWarningText,
             globalWarningExpiredDay: this.appConfig.globalWarningExpiredDay,
             globalWarningExpiredHour: this.appConfig.globalWarningExpiredHour
@@ -119,6 +122,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
       this.appConfig.appTitle = this.configForm.get('appTitle')?.value;
       this.appConfig.introHtml = this.configForm.get('introHtml')?.value;
       this.appConfig.imprintHtml = this.configForm.get('imprintHtml')?.value;
+      this.appConfig.emailText = this.configForm.get('emailText')?.value;
       this.appConfig.globalWarningText = this.configForm.get('globalWarningText')?.value;
       this.appConfig.globalWarningExpiredDay = this.configForm.get('globalWarningExpiredDay')?.value;
       this.appConfig.globalWarningExpiredHour = this.configForm.get('globalWarningExpiredHour')?.value;
