@@ -1,24 +1,16 @@
 import { AccessLevel, UnitData, UserData } from './testData';
-// import Chainable = Cypress.Chainable;
-
-// export function cy.findAdminSettings().click(); {
-//   cy.get('[data-cy="goto-admin"]').click();
-// }
-//
-// export function findAdminGroupSettings(group: string): Chainable {
-//   cy.visit('/');
-//   return cy.get('studio-lite-user-workspaces-groups')
-//     .get(`div>div>div>div:contains("${group}")`)
-//     .parent()
-//     .contains('mat-icon', 'settings');
-// }
 
 // tabName options: wsg-admin.component.ts
 export function clickIndexTabWsgAdmin(tabName: string) {
   cy.get(`[data-cy="wsg-admin-routes-${tabName}"]`).click();
 }
 
-// tabName options: workspace.routes de,json or unit-data-area
+// tabName options: workspace.routes de,json or unit-data-area  workspace.component.ts
+// { name: 'properties', duplicable: false },
+// { name: 'editor', duplicable: true },
+// { name: 'preview', duplicable: true },
+// { name: 'schemer', duplicable: true },
+// { name: 'comments', duplicable: true }
 export function clickIndexTabWorkspace(tabName:string):void {
   cy.wait(200);
   cy.get(`[data-cy="workspace-routes-${tabName}"]`).click();
@@ -482,6 +474,7 @@ export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData)
 }
 
 export function goToWsMenu():void {
+  // TODO check data-cy="workspace-edit-unit-menu"
   cy.get('mat-icon:contains("menu")')
     .click({ force: true });
 }

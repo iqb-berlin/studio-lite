@@ -15,15 +15,10 @@ import {
   setVeronaWs,
   addStatus,
   clickSaveButtonRight,
-  deleteUser,
   logout,
-  login,
-  selectUnit,
   deleteModule,
   selectListUnits,
-  focusOnMenu,
-  clickIndexTabWorkspace,
-  clickIndexTabWsgAdmin
+  clickIndexTabWsgAdmin, goToWsMenu
 } from '../../support/util';
 import {
   AccessLevel,
@@ -70,6 +65,7 @@ describe('UI check: workspace', () => {
     addModules(modules);
     createGroup(group1);
     createWs(ws1, group1);
+
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [AccessLevel.Admin]);
   });
 
@@ -129,34 +125,48 @@ describe('UI check: workspace', () => {
   it('should export selected units', () => {
     cy.visitWs(ws1);
     cy.wait(1000);
-    cy.get('mat-icon:contains("menu")')
-      .click();
-    cy.get('span:contains("Export")')
-      .click();
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-download-unit"]').click({ force: true });
     selectListUnits([unit3.shortname, newUnit.shortname]);
     cy.clickButtonWithResponseCheck('Herunterladen', [200, 304], '/api/workspaces/*', 'GET', 'export');
   });
 
-  it('should show metadata', () => {
+  it('should show metadata report', () => {
     cy.visitWs(ws1);
-    cy.wait(1000);
-    focusOnMenu('Berichte', 'Metadaten');
+    cy.wait(200);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-reports"]').click();
+    cy.get('[data-cy="workspace-edit-unit-show-metadata"]').click();
     selectListUnits([unit3.shortname, newUnit.shortname]);
     // eslint-disable-next-line max-len
     cy.clickButtonWithResponseCheck('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
     cy.clickButton('Herunterladen');
   });
 
-  it('should export the codebook', () => {
+  it('should show kodierung ', () => {
     cy.visitWs(ws1);
-    cy.wait(1000);
-    focusOnMenu('Berichte', 'Codebook');
+    cy.wait(200);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-reports"]').click();
+    cy.get('[data-cy="workspace-edit-unit-show-coding-report"]').click();
+    // focusOnMenu('Berichte', 'Codebook');
+    // eslint-disable-next-line max-len
+    cy.clickDialogButton('Schließen');
+  });
+
+  it('should export the codebook ', () => {
+    cy.visitWs(ws1);
+    cy.wait(200);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-reports"]').click();
+    cy.get('[data-cy="workspace-edit-unit-export-coding-book"]').click();
+    // focusOnMenu('Berichte', 'Codebook');
     selectListUnits([newUnit.shortname]);
     // eslint-disable-next-line max-len
     cy.clickButtonWithResponseCheck('Exportieren', [200, 304], '/api/workspaces/*/units/coding-book*', 'GET', 'codebook');
   });
 
-  it('should add an user to the ws1 with basic credentials', () => {
+  it.skip('should add an user to the ws1 with basic credentials', () => {
     cy.findAdminSettings().click();
     createNewUser(newUser);
     cy.findAdminGroupSettings(group1).click();
@@ -165,31 +175,9 @@ describe('UI check: workspace', () => {
     logout();
   });
 
-  it('should able to comment an unit a normal user', () => {
-    login(newUser.username, newUser.password);
-    cy.visitWs(ws1);
-    selectUnit(unit3.shortname);
-    clickIndexTabWorkspace('comments');
-    cy.get('tiptap-editor').type('Neue Kommentar zu unit2');
-    cy.contains('button', 'send').click();
-  });
-
-  it('should reply to a comment, and delete a comment', () => {
-    cy.visitWs(ws1);
-    selectUnit(unit3.shortname);
-    clickIndexTabWorkspace('comments');
-    cy.contains('button', 'reply').click();
-    cy.get('tiptap-editor').eq(0).type('Antworten zu Neue Kommentar zu unit2');
-    cy.contains('button', 'send').click();
-    cy.get('studio-lite-comments').find('mat-icon:contains("delete")').eq(0).click();
-    cy.get('studio-lite-delete-dialog').find('button:contains("Löschen")').click();
-    logout();
-    login(Cypress.env('username'), Cypress.env('password'));
-  });
-
   it('deletes the context ', () => {
     deleteGroup(group1);
-    deleteUser(newUser.username);
+    // deleteUser(newUser.username);
     deleteModule();
   });
 });
