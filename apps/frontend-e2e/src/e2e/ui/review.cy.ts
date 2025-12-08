@@ -135,7 +135,7 @@ describe('Review:', () => {
       cy.get('i:contains("chevron_right")').should('exist');
       // checks that the review is updated
       cy.reload();
-      cy.wait(200);
+      cy.wait(1000);
       cy.get('.mat-mdc-list-item:contains("3")').should('exist');
     });
   });

@@ -1,6 +1,7 @@
 import { AccessLevel, UnitData, UserData } from './testData';
 
 // tabName options: wsg-admin.component.ts
+//   navLinks: string[] = ['users', 'workspaces', 'units', 'settings']
 export function clickIndexTabWsgAdmin(tabName: string) {
   cy.get(`[data-cy="wsg-admin-routes-${tabName}"]`).click();
 }

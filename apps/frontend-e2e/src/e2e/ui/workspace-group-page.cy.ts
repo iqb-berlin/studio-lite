@@ -45,14 +45,12 @@ describe('UI Group admin workspace check', () => {
     makeAdminOfGroup(group1, [Cypress.env('username'), groupAdminUser.username]);
   });
 
-  it('checks that tabs (Nutzer:innen, Arbeitsbereiche and Einstellungen) are present ', () => {
+  it('checks that tabs (Nutzer:innen, Arbeitsbereiche, Augaben and Einstellungen) are present ', () => {
     cy.findAdminGroupSettings(group1).click();
-    cy.get('span:contains("Nutzer:innen")')
-      .should('exist');
-    cy.get('span:contains("Arbeitsbereiche")')
-      .should('exist');
-    cy.get('span:contains("Einstellungen")')
-      .should('exist');
+    cy.get('[data-cy="wsg-admin-routes-users"]').should('exist');
+    cy.get('[data-cy="wsg-admin-routes-workspaces"]').should('exist');
+    cy.get('[data-cy="wsg-admin-routes-units"]').should('exist');
+    cy.get('[data-cy="wsg-admin-routes-settings"]').should('exist');
   });
 
   it('checks that normal user has no workspace group admin setting button ', () => {
@@ -63,9 +61,8 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that workspace is only read ', () => {
     cy.contains(ws1).click();
-    cy.get('studio-lite-units-area')
-      .find('div>div>div:contains("Schreibgeschützt")')
-      .should('exist');
+    // Schreibgeschützt
+    cy.get('[data-cy="units-area-no-access-level"]').should('exist');
     cy.get('studio-lite-add-unit-button>button')
       .should('have.attr', 'disabled');
   });
@@ -78,9 +75,7 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that workspace admin can remove privileges in workspace within the group ', () => {
     cy.findAdminGroupSettings(group1).click();
-    cy.get('span:contains("Arbeitsbereiche")')
-      .eq(0)
-      .click();
+    cy.get('[data-cy="wsg-admin-routes-workspaces"]').click();
     grantRemovePrivilegeAtWs([newUser.username, groupAdminUser.username],
       ws1,
       [AccessLevel.Basic, AccessLevel.Admin]);
@@ -88,17 +83,13 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that workspace admin can remove privileges in workspace from tab-index user ', () => {
     cy.findAdminGroupSettings(group1).click();
-    cy.get('span:contains("Nutzer:innen")')
-      .eq(0)
-      .click();
+    cy.get('[data-cy="wsg-admin-routes-users"]').click();
     grantRemovePrivilegeAtUser(newUser.username, [ws1, ws2], [AccessLevel.Basic, AccessLevel.Developer]);
   });
 
   it('checks that workspace is editable for the group admin user ', () => {
     cy.visitWs(ws1);
-    cy.get('studio-lite-units-area')
-      .find('div>div>div:contains("Schreibgeschützt")')
-      .should('not.exist');
+    cy.get('[data-cy="units-area-no-access-level"]').should('not.exist');
     cy.get('studio-lite-add-unit-button>button')
       .should('not.have.attr', 'disabled');
   });

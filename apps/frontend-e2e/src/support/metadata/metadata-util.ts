@@ -94,10 +94,7 @@ export function selectProfileForArea(profile:IqbProfile) {
 
 export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, group:string) {
   cy.visit('/');
-  cy.get(`div>div>div>div:contains("${group}")`)
-    .eq(0)
-    .next()
-    .click();
+  cy.findAdminGroupSettings(group).click();
   cy.wait(200);
   // cy.get('span:contains("Arbeitsbereiche")')
   //  .eq(0)

@@ -1,6 +1,7 @@
 import {
   addFirstUser,
   clickIndexTabAdmin,
+  clickIndexTabWsgAdmin,
   createGroup,
   createNewUser,
   deleteFirstUser,
@@ -35,9 +36,10 @@ describe('Load metadata profile', () => {
     cy.get('mat-table')
       .contains(groups[0])
       .click();
-    cy.get('mat-icon')
-      .contains('settings')
-      .click();
+    // cy.get('mat-icon')
+    //   .contains('settings')
+    //   .click();
+    cy.get('[data-cy="workspaces-groups-menu-edit"]').click();
     checkProfile(searchProfile);
     // cy.clickButtonWithResponseCheck('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
     cy.clickButton('Speichern');
@@ -49,9 +51,7 @@ describe('Load metadata profile', () => {
     cy.get(`div>div>div:contains("${searchProfile}")`)
       .next()
       .click();
-    cy.get('span:contains("Einstellungen")')
-      .eq(0)
-      .click();
+    clickIndexTabWsgAdmin('settings');
     checkProfile(searchProfile);
   });
 

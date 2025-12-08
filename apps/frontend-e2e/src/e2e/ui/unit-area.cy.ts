@@ -26,7 +26,10 @@ import {
   newUser,
   UnitData
 } from '../../support/testData';
-import { selectProfileForGroup } from '../../support/metadata/metadata-util';
+import {
+  selectProfileForAreaFromGroup,
+  selectProfileForGroup
+} from '../../support/metadata/metadata-util';
 import { IqbProfile } from '../../support/metadata/iqbProfile';
 
 describe('UI check: workspace', () => {
@@ -77,12 +80,11 @@ describe('UI check: workspace', () => {
     selectProfileForGroup(group1, IqbProfile.DE);
   });
 
-  // it('should select profile for a ws from group settings', () => {
-  //   cy.visit('/');
-  //   selectProfileForAreaFromGroup(IqbProfile.DE, ws1, group1);
-  // });
+  it('should select profile for a ws from group settings', () => {
+    selectProfileForAreaFromGroup(IqbProfile.DE, ws1, group1);
+  });
 
-  it('should add state to the workspace', () => {
+  it('should add states to the workspace', () => {
     cy.findAdminGroupSettings(group1).click();
     clickIndexTabWsgAdmin('settings');
     addStatus('In Bearbeitung', 0);
@@ -124,7 +126,7 @@ describe('UI check: workspace', () => {
 
   it('should export selected units', () => {
     cy.visitWs(ws1);
-    cy.wait(1000);
+    cy.wait(200);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').click({ force: true });
     selectListUnits([unit3.shortname, newUnit.shortname]);
@@ -149,7 +151,6 @@ describe('UI check: workspace', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-coding-report"]').click();
-    // focusOnMenu('Berichte', 'Codebook');
     // eslint-disable-next-line max-len
     cy.clickDialogButton('Schließen');
   });
@@ -157,10 +158,10 @@ describe('UI check: workspace', () => {
   it('should export the codebook ', () => {
     cy.visitWs(ws1);
     cy.wait(200);
+    cy.pause();
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-export-coding-book"]').click();
-    // focusOnMenu('Berichte', 'Codebook');
     selectListUnits([newUnit.shortname]);
     // eslint-disable-next-line max-len
     cy.clickButtonWithResponseCheck('Exportieren', [200, 304], '/api/workspaces/*/units/coding-book*', 'GET', 'codebook');
@@ -174,7 +175,7 @@ describe('UI check: workspace', () => {
     grantRemovePrivilegeAtWs([newUser.username], ws1, [AccessLevel.Basic]);
     logout();
   });
-
+  // TODO add test for a user with comment privileges
   it('deletes the context ', () => {
     deleteGroup(group1);
     // deleteUser(newUser.username);
