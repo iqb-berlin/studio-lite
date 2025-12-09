@@ -35,7 +35,8 @@
         <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">
           <mat-checkbox [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length"
             (click)="$event.stopPropagation()"
-            (change)="$event ? tableSelectionCheckboxes.toggle(row) : null">
+            (change)="$event ? tableSelectionCheckboxes.toggle(row) : null"
+            [attr.data-cy]="'admin-users-checkbox-user-box-'+row.name">
           </mat-checkbox>
         </mat-cell>
       </ng-container>

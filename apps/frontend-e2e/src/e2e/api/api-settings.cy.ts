@@ -44,6 +44,7 @@ describe('Admin settings API tests', () => {
         Cypress.env('token_admin', '');
         expect(resp.status).to.equal(200);
       });
+    // cy.resetDb();
   });
 
   describe('100. GET /api/admin/settings/config', () => {

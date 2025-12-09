@@ -25,59 +25,47 @@ describe('Metadata Management', () => {
   });
   after(() => {
     deleteFirstUser();
+    // cy.resetDb();
   });
 
   it('prepares context', () => {
     createGroup(group);
-    cy.visit('/');
     createWs(ws1, group);
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [AccessLevel.Admin]);
-
-    cy.visit('/');
     createWs(ws2, group);
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws2, [AccessLevel.Admin]);
   });
 
   it('chooses profiles from the group ', () => {
-    cy.visit('/');
     selectProfileForGroup(group, IqbProfile.DE);
-    cy.visit('/');
     selectProfileForGroup(group, IqbProfile.MA);
   });
 
   it('chooses profile for a ws from a group', () => {
-    cy.visit('/');
     selectProfileForAreaFromGroup(IqbProfile.DE, ws1, group);
-    cy.visit('/');
     selectProfileForAreaFromGroup(IqbProfile.MA, ws2, group);
   });
 
-  it('chooses a profile for an workspace', () => {
-    cy.visit('/');
-    cy.contains(ws1).click();
+  it('chooses a profile for a workspace', () => {
+    cy.visitWs(ws1);
     selectProfileForArea(IqbProfile.DE);
-    cy.visit('/');
-    cy.contains(ws2).click();
+    cy.visitWs(ws2);
     selectProfileForArea(IqbProfile.MA);
   });
 
   it('creates a new Unit in a ws', () => {
-    cy.visit('/');
     cy.visitWs(ws2);
     addUnit('M1_001');
   });
 
   it('creates more than one Unit in a ws', () => {
-    cy.visit('/');
     cy.visitWs(ws1);
     addUnit('D1_001');
-    cy.visit('/');
     cy.visitWs(ws1);
     addUnit('D1_002');
   });
 
   it('adds metadata values for the unit M1_001', () => {
-    cy.visit('/');
     cy.visitWs(ws2);
     cy.contains('M1_001').should('exist').click();
     getStructure('uMA', false);
@@ -86,7 +74,6 @@ describe('Metadata Management', () => {
   });
 
   it('adds metadata values for the unit D1_001, that has several items', () => {
-    cy.visit('/');
     cy.visitWs(ws1);
     cy.contains('D1_001').should('exist').click();
     getStructure('uDE', false);
@@ -98,6 +85,5 @@ describe('Metadata Management', () => {
 
   it('deletes the data', () => {
     deleteGroup(group);
-    cy.visit('/');
   });
 });

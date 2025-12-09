@@ -3,7 +3,9 @@
   [matMenuTriggerFor]="menuOther"
   [matTooltip]="'workspace.more-unit-tasks' | translate"
   matTooltipPosition="above">
-  <studio-lite-wrapped-icon icon="menu"></studio-lite-wrapped-icon>
+  <studio-lite-wrapped-icon
+    icon="menu"
+    data-cy="workspace-edit-unit-menu"></studio-lite-wrapped-icon>
 </button>
 
 <mat-menu #menuOther>
@@ -13,7 +15,8 @@
         [matTooltip]="'workspace-settings.title' | translate"
         matTooltipPosition="right"
         mat-menu-item
-        (click)="settings()">
+        (click)="settings()"
+        data-cy="workspace-edit-unit-settings">
         <mat-icon>settings</mat-icon>
         {{ 'workspace.unit-settings' | translate }}
       </button>
@@ -22,14 +25,16 @@
     <button mat-menu-item
       [matTooltip]="'workspace.manage-unit-groups' | translate"
       matTooltipPosition="right"
-      (click)="manageGroups()">
+      (click)="manageGroups()"
+      data-cy="workspace-edit-unit-manage-unit-groups">
       <mat-icon>format_align_right</mat-icon>
       {{ 'workspace.manage-groups' | translate }}
     </button>
     <button mat-menu-item
       [matTooltip]="'workspace.review-admin' | translate"
       matTooltipPosition="right"
-      (click)="reviews()">
+      (click)="reviews()"
+      data-cy="workspace-edit-unit-review-admin">
       <mat-icon>slideshow</mat-icon>
       {{ 'workspace.reviews' | translate }}
     </button>
@@ -37,7 +42,8 @@
   <button mat-menu-item
     [matTooltip]="'workspace.user-list' | translate"
     matTooltipPosition="right"
-    (click)="userList()">
+    (click)="userList()"
+    data-cy="workspace-edit-unit-user-list">
     <mat-icon>people_alt</mat-icon>
     {{ 'workspace.unit-users' | translate }}
   </button>
@@ -45,18 +51,21 @@
   <button mat-menu-item
     [matTooltip]="'workspace.download-unit' | translate"
     matTooltipPosition="right"
-    (click)="exportUnit()">
+    (click)="exportUnit()"
+    data-cy="workspace-edit-unit-download-unit">
     <mat-icon>get_app</mat-icon>
     {{ 'workspace.export' | translate }}
   </button>
-  <button mat-menu-item [matMenuTriggerFor]="reports">
+  <button mat-menu-item [matMenuTriggerFor]="reports"
+    data-cy="workspace-edit-unit-reports">
     <mat-icon>description</mat-icon>
     {{ 'workspace.reports' | translate }}
   </button>
   <button mat-menu-item
     [matTooltip]="'workspace.print-preview-units' | translate"
     matTooltipPosition="right"
-    (click)="printUnits()">
+    (click)="printUnits()"
+    data-cy="workspace-edit-unit-preview-units">
     <mat-icon>print</mat-icon>
     {{ 'workspace.print-preview' | translate }}
   </button>
@@ -65,7 +74,8 @@
     <button mat-menu-item
       [matTooltip]="'workspace.move-unit' | translate"
       matTooltipPosition="right"
-      (click)="moveOrCopyUnit(true)">
+      (click)="moveOrCopyUnit(true)"
+      data-cy="workspace-edit-unit-move-unit">
       <mat-icon>swap_horiz</mat-icon>
       {{ 'workspace.move-to' | translate }}
     </button>
@@ -73,7 +83,8 @@
   <button mat-menu-item
     [matTooltip]="'workspace.copy-unit' | translate"
     matTooltipPosition="right"
-    (click)="moveOrCopyUnit(false)">
+    (click)="moveOrCopyUnit(false)"
+    data-cy="workspace-edit-unit-copy-unit">
     <mat-icon>content_copy</mat-icon>
     {{ 'workspace.copy-to' | translate }}
   </button>
@@ -82,7 +93,8 @@
             [disabled]="!workspaceService.dropBoxId"
             [matTooltip]="'workspace.show-submit-units' | translate"
             matTooltipPosition="right"
-            (click)="submitUnits()">
+            (click)="submitUnits()"
+            data-cy="workspace-edit-unit-submit-units">
       <mat-icon>assignment_turned_in</mat-icon>
       {{ 'workspace.submit-units' | translate }}
     </button>
@@ -92,7 +104,8 @@
             [disabled]="!workspaceService.hasDroppedUnits"
             [matTooltip]="'workspace.show-return-submitted-units' | translate"
             matTooltipPosition="right"
-            (click)="returnSubmittedUnits()">
+            (click)="returnSubmittedUnits()"
+            data-cy="workspace-edit-unit-return-submitted-units">
       <mat-icon>assignment_return</mat-icon>
       {{ 'workspace.return-submitted-units' | translate }}
     </button>
@@ -103,21 +116,24 @@
   <button mat-menu-item
     [matTooltip]="'workspace.show-metadata' | translate"
     matTooltipPosition="right"
-    (click)="showMetadata()">
+    (click)="showMetadata()"
+    data-cy="workspace-edit-unit-show-metadata">
     <mat-icon>description</mat-icon>
     {{ 'workspace.metadata' | translate }}
   </button>
   <button mat-menu-item
     [matTooltip]="'workspace.show-coding-report' | translate"
     matTooltipPosition="right"
-    (click)="showCodingReport()">
+    (click)="showCodingReport()"
+    data-cy="workspace-edit-unit-show-coding-report">
     <mat-icon>description</mat-icon>
     {{ 'workspace.coding' | translate }}
   </button>
   <button mat-menu-item
     [matTooltip]="'workspace.export-coding-book' | translate"
     matTooltipPosition="right"
-    (click)="exportCodingBook()">
+    (click)="exportCodingBook()"
+    data-cy="workspace-edit-unit-export-coding-book">
     <mat-icon>description</mat-icon>
     {{ 'workspace.coding-book' | translate }}
   </button>
