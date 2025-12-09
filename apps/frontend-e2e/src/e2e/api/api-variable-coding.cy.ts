@@ -45,6 +45,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
         expect(resp.status).to.equal(200);
       });
     cy.visit('/');
+    // cy.resetDb();
   });
 
   it('prepares api context', () => {
@@ -124,7 +125,6 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('checks text-field_1 is not present at properties', () => {
-    cy.visit('/');
     login(Cypress.env('username'), Cypress.env('password'));
     cy.visitWs(ws1.name);
     selectUnit('MA_01');
@@ -146,11 +146,8 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('deletes the data', () => {
-    cy.visit('/');
     deleteGroup(group1.name);
-    cy.visit('/');
     deleteModule();
-    cy.visit('/');
     logout();
   });
 });

@@ -17,15 +17,15 @@ describe('Comment:', () => {
 
   after(() => {
     deleteBasicSpecCy();
+    // cy.resetDb();
   });
 
   it('should import units', () => {
-    cy.visit('/');
     cy.visitWs(ws1);
     importExercise('test_studio_units_download.zip');
   });
 
-  it('should add a comment', () => {
+  it('should add comments', () => {
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.get('tiptap-editor').type('Neue allgemein Kommentar 1');
@@ -40,7 +40,6 @@ describe('Comment:', () => {
       .eq(0).contains('button', 'reply').click();
     cy.get('tiptap-editor').eq(0).type('Antworten zu Neue Kommentar 1');
     cy.contains('button', 'send').click();
-    //
   });
 
   it('should edit the last comment', () => {
@@ -87,7 +86,6 @@ describe('Comment:', () => {
   });
 
   it('should able to write a comment related to a item', () => {
-    cy.visit('/');
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
@@ -98,7 +96,6 @@ describe('Comment:', () => {
   });
 
   it('should show only comments related to Item 01', () => {
-    cy.visit('/');
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');

@@ -1,22 +1,31 @@
 import { AccessLevel, UnitData, UserData } from './testData';
 
-export function clickIndexTab(name:string):void {
-  cy.wait(100);
-  cy.get(`span:contains(${name})`).eq(0).click();
-}
-
-// tabName options: wsg-admin.component,tes
+// tabName options: wsg-admin.component.ts
+//   navLinks: string[] = ['users', 'workspaces', 'units', 'settings']
 export function clickIndexTabWsgAdmin(tabName: string) {
   cy.get(`[data-cy="wsg-admin-routes-${tabName}"]`).click();
 }
+
+// tabName options: workspace.routes de,json or unit-data-area  workspace.component.ts
+// { name: 'properties', duplicable: false },
+// { name: 'editor', duplicable: true },
+// { name: 'preview', duplicable: true },
+// { name: 'schemer', duplicable: true },
+// { name: 'comments', duplicable: true }
 export function clickIndexTabWorkspace(tabName:string):void {
-  cy.wait(100);
+  cy.wait(200);
   cy.get(`[data-cy="workspace-routes-${tabName}"]`).click();
 }
 
-// tabName options: admin.component.ts
+// tabName options: admin.component.ts. Current options;
+//     'users',
+//     'workspace-groups',
+//     'workspaces',
+//     'units',
+//     'v-modules',
+//     'settings',
+//     'packages'
 export function clickIndexTabAdmin(tabName: string) {
-  cy.wait(100);
   cy.get(`[data-cy="admin-tab-${tabName}"]`).click();
 }
 
@@ -29,10 +38,9 @@ export function clickSaveButtonRight() {
     }
   });
 }
-
+// TODO review
 export function focusOnMenu(hoverString: string, option: string): void {
-  cy.get('mat-icon:contains("menu")')
-    .click({ force: true });
+  goToWsMenu();
   cy.get(`span:contains("${hoverString}")`)
     .click();
   cy.contains('button', option)
@@ -50,12 +58,13 @@ export function selectCheckBox(name: string) {
 }
 
 function selectCheckboxUser(checkName: string) {
-  cy.get('[data-cy="admin-users-checkbox-login-name"]')
-    .contains(checkName)
-    .parent()
-    .within(() => {
-      cy.get('mat-checkbox').click();
-    });
+  // cy.get('[data-cy="admin-users-checkbox-login-name"]')
+  //   .contains(checkName)
+  //   .parent()
+  //   .within(() => {
+  //     cy.get('mat-checkbox').click();
+  //   });
+  cy.get(`[data-cy="admin-users-checkbox-user-box-${checkName}"]`).click();
 }
 
 export function goToItem(itemId: string) {
@@ -91,6 +100,7 @@ export function addModules(filenames:string[]):void {
 
 export function addResourcePackage(resource: string):void {
   const path:string = `../frontend-e2e/src/fixtures/${resource}`;
+  cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('packages');
   const name = resource.replace(/.itcr.zip/, '');
@@ -104,7 +114,7 @@ export function addResourcePackage(resource: string):void {
 }
 
 export function createNewUser(newUser: UserData):void {
-  cy.findAdminSettings().click();
+  clickIndexTabAdmin('users');
   cy.get('[data-cy="admin-users-menu-add-user"]').click();
   editInput('admin-edit-user-username', newUser.username);
   editInput('admin-edit-user-lastname', newUser.lastName);
@@ -115,19 +125,16 @@ export function createNewUser(newUser: UserData):void {
 }
 
 export function deleteUser(user: string):void {
+  cy.visit('/');
   cy.findAdminSettings().click();
-  cy.get('mat-cell')
-    .contains(`${user}`)
-    .should('exist')
-    .click();
-  cy.get('mat-icon')
-    .contains('delete')
-    .click();
+  clickIndexTabAdmin('users');
+  selectCheckboxUser(user);
+  cy.get('[data-cy="admin-users-menu-delete-users"]').click();
   cy.clickButtonWithResponseCheck('Löschen', [200], '/api/admin/users*', 'DELETE', 'deleteUser');
 }
 
 export function deleteUsers(users: string[]):void {
-  cy.findAdminSettings().click();
+  clickIndexTabAdmin('users');
   users.forEach(user => {
     selectCheckboxUser(user);
   });
@@ -136,7 +143,6 @@ export function deleteUsers(users: string[]):void {
 }
 
 export function createGroup(group:string):void {
-  cy.findAdminSettings().click();
   clickIndexTabAdmin('workspace-groups');
   cy.get('mat-icon').contains('add').click();
   cy.get('input[placeholder="Name"]')
@@ -145,8 +151,9 @@ export function createGroup(group:string):void {
 }
 
 export function createWs(ws:string, group:string):void {
+  cy.visit('/');
   cy.findAdminGroupSettings(group).click();
-  cy.wait(100);
+  cy.wait(200);
   clickIndexTabWsgAdmin('workspaces');
   cy.get('mat-icon')
     .contains('add')
@@ -228,6 +235,7 @@ export function grantRemovePrivilegeAtUser(user:string, wss: string[], rights:Ac
 }
 
 export function makeAdminOfGroup(group:string, admins: string[]):void {
+  cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('workspace-groups');
   cy.get(`mat-row:contains("${group}")`)
@@ -248,11 +256,13 @@ export function deleteFirstUser() {
 }
 
 export function login(username: string, password = '') {
+  cy.visit('/');
   cy.login(username, password);
   cy.clickButtonWithResponseCheck('Anmelden', [201], '/api/login', 'POST', 'responseLogin');
 }
 
 export function setVeronaWs(ws:string):void {
+  cy.visit('/');
   cy.visitWs(ws);
   goToWsMenu();
   cy.clickButton('Einstellungen');
@@ -266,6 +276,7 @@ export function setVeronaWs(ws:string):void {
 }
 
 export function deleteModule():void {
+  cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('v-modules');
   cy.selectModule('IQB-Schemer');
@@ -278,6 +289,7 @@ export function deleteModule():void {
 }
 
 export function deleteResource():void {
+  cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('packages');
   cy.get('mat-cell:contains("GeoGebra")')
@@ -288,6 +300,7 @@ export function deleteResource():void {
   cy.get('div > mat-icon')
     .contains('delete')
     .click();
+  cy.clickButtonWithResponseCheck('Löschen', [200], '/api/resource-packages', 'GET', 'deleteResource');
 }
 
 export function getButtonReview(reviewName: string, operation: string) {
@@ -299,6 +312,7 @@ export function getButtonReview(reviewName: string, operation: string) {
 }
 
 export function deleteGroup(group: string):void {
+  cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('workspace-groups');
   cy.get('mat-table')
@@ -311,9 +325,11 @@ export function deleteGroup(group: string):void {
 }
 
 export function logout() {
+  cy.visit('/');
   cy.get('[data-cy="goto-user-menu"]').click();
   cy.get('[data-cy="user-menu-logout"]').click();
   cy.clickDialogButton('Abmelden');
+  cy.wait(200);
 }
 
 export function editInput(data: string, content: string | undefined) {
@@ -459,6 +475,7 @@ export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData)
 }
 
 export function goToWsMenu():void {
+  // TODO check data-cy="workspace-edit-unit-menu"
   cy.get('mat-icon:contains("menu")')
     .click({ force: true });
 }

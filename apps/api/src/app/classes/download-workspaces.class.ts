@@ -84,7 +84,7 @@ export class DownloadWorkspacesClass {
               'Item-Id': item.id || '–',
               Variable: item.variableId,
               Wichtung: item.weighting?.toString(),
-              Beschreibung: item.description
+              Notiz: item.description
             });
           }
         });
@@ -129,7 +129,7 @@ export class DownloadWorkspacesClass {
         return 'Aufgabe';
       }
       if (column === 'description') {
-        return 'Beschreibung';
+        return 'Notiz';
       }
       if (column === 'variableId') {
         return 'Variable';
@@ -176,7 +176,7 @@ export class DownloadWorkspacesClass {
       }));
     ws.getRow(1).font = { bold: true };
     ws.addRows(rows);
-    return (await wb.xlsx.writeBuffer()) as Buffer;
+    return (await wb.xlsx.writeBuffer()) as unknown as Buffer;
   }
 
   static async getWorkspaceCodingBook(
@@ -517,6 +517,6 @@ export class DownloadWorkspacesClass {
       });
       ws.addRows([data]);
     });
-    return (await wb.xlsx.writeBuffer()) as Buffer;
+    return (await wb.xlsx.writeBuffer()) as unknown as Buffer;
   }
 }

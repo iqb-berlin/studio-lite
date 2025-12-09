@@ -49,13 +49,11 @@ function getTimeNumber(time: string, propName:string, profile:string, moreThanOn
 }
 
 export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile) {
-  // cy.get('[data-cy="goto-admin"]').click();
-  cy.get('div')
-    .contains('studio-lite-wrapped-icon', 'construction')
-    .click();
-  // cy.get('span:contains("Bereichsgruppen")')
-  //  .eq(0)
-  //  .click();
+  cy.visit('/');
+  cy.get('[data-cy="goto-admin"]').click();
+  // cy.get('div')
+  //   .contains('studio-lite-wrapped-icon', 'construction')
+  //   .click();
   clickIndexTabAdmin('workspace-groups');
   cy.get('mat-table')
     .contains(group)
@@ -64,12 +62,12 @@ export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile)
     .contains('settings')
     .click();
   checkProfile(profile);
-
   // cy.dialogButtonToContinue('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
   cy.clickButton('Speichern');
 }
 
 export function selectProfileForGroup(group:string, profile:IqbProfile) {
+  cy.visit('/');
   cy.get(`div>div>div>div:contains("${group}")`)
     .eq(0)
     .next()
@@ -95,11 +93,9 @@ export function selectProfileForArea(profile:IqbProfile) {
 }
 
 export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, group:string) {
-  cy.get(`div>div>div>div:contains("${group}")`)
-    .eq(0)
-    .next()
-    .click();
-  cy.wait(300);
+  cy.visit('/');
+  cy.findAdminGroupSettings(group).click();
+  cy.wait(200);
   // cy.get('span:contains("Arbeitsbereiche")')
   //  .eq(0)
   //  .click();
@@ -116,7 +112,7 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
     .contains('Aufgabe')
     .click();
   cy.get('mat-select').eq(1).click();
-  cy.wait(100);
+  cy.wait(200);
   cy.get(`span:contains(${profile})`)
     .contains('Item')
     .click();
@@ -182,6 +178,7 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
       .set(entry.label[0].value, entry.type)));
     unitMap.forEach((type:string, fieldName:string) => {
       cy.log(IqbProfileExamples.get(profile).get(fieldName));
+      cy.log(`Ich habe den Type ${type}`);
       if (IqbProfileExamples.get(profile).get(fieldName) !== ('')) {
         switch (type) {
           case 'number': {
@@ -192,6 +189,12 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
             if (moreThanOne) cy.get(`mat-label:contains("${fieldName}")`).eq(-1).click();
             else cy.get(`mat-label:contains("${fieldName}")`).click();
             getCheckBoxByName(IqbProfileExamples.get(profile).get(fieldName));
+            break;
+          }
+          case 'boolean': {
+            if (IqbProfileExamples.get(profile).get(fieldName) === 'true') {
+              cy.get('mat-slide-toggle button').click();
+            }
             break;
           }
           default: {

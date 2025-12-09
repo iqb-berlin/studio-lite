@@ -1,4 +1,5 @@
 // -- This is a parent command --
+import Chainable = Cypress.Chainable;
 
 Cypress.Commands.add('login', (username: string, password: string) => {
   cy.get('[data-cy="home-user-name"]')
@@ -49,16 +50,15 @@ Cypress.Commands.add('clickDialogButtonWithResponseCheck',
       .should('be.oneOf', code);
   });
 
-Cypress.Commands.add('findAdminGroupSettings', (group:string) => {
-  cy.get('studio-lite-user-workspaces-groups')
+Cypress.Commands.add('findAdminGroupSettings', (group:string): Chainable<JQuery<HTMLElement>> => {
+  cy.visit('/');
+  return cy.get('studio-lite-user-workspaces-groups')
     .get(`div>div>div>div:contains("${group}")`)
     .parent()
     .contains('mat-icon', 'settings');
 });
 
-Cypress.Commands.add('findAdminSettings', () => {
-  cy.get('[data-cy="goto-admin"]');
-});
+Cypress.Commands.add('findAdminSettings', (): Chainable<JQuery<HTMLElement>> => cy.get('[data-cy="goto-admin"]'));
 
 Cypress.Commands.add('loadModule', (filename:string) => {
   const path:string = `../frontend-e2e/src/fixtures/${filename}`;
@@ -81,6 +81,7 @@ Cypress.Commands.add('selectModule', (name:string) => {
 });
 
 Cypress.Commands.add('visitWs', (ws:string) => {
+  cy.visit('/');
   cy.get(`a:contains("${ws}")`).click();
 });
 
@@ -90,6 +91,7 @@ Cypress.Commands.add('runUntracked', fn => {
   });
 });
 
+Cypress.Commands.add('resetDb', () => cy.task('resetDatabase') as Cypress.Chainable<void>);
 //
 // -- This is a child command --
 // Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })

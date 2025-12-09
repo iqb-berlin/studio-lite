@@ -30,6 +30,8 @@
           [disabled]="!selectedWorkspaceGroupId  && checkedRows && checkedRows.length !== 1"
           [matTooltip]="'admin.settings' | translate"
           (click)="editGroupSettings()">
-    <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>
+    <studio-lite-wrapped-icon
+      data-cy="workspaces-groups-menu-edit"
+      icon="settings"></studio-lite-wrapped-icon>
   </button>
 </div>

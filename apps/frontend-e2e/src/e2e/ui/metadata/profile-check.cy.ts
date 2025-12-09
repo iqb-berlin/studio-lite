@@ -1,6 +1,7 @@
 import {
   addFirstUser,
   clickIndexTabAdmin,
+  clickIndexTabWsgAdmin,
   createGroup,
   createNewUser,
   deleteFirstUser,
@@ -18,28 +19,27 @@ describe('Load metadata profile', () => {
   });
   after(() => {
     deleteFirstUser();
+    // cy.resetDb();
   });
 
   it('user admin prepares the Context', () => {
     createNewUser(newUser);
-    cy.visit('/');
     groups.forEach(area => {
       createGroup(area);
-      cy.visit('/');
     });
-    cy.wait(100);
+    cy.wait(200);
   });
 
   it('should be possible load a metadata profile from administration settings', () => {
     const searchProfile:string = 'Deutsch';
-    cy.findAdminSettings().click();
     clickIndexTabAdmin('workspace-groups');
     cy.get('mat-table')
       .contains(groups[0])
       .click();
-    cy.get('mat-icon')
-      .contains('settings')
-      .click();
+    // cy.get('mat-icon')
+    //   .contains('settings')
+    //   .click();
+    cy.get('[data-cy="workspaces-groups-menu-edit"]').click();
     checkProfile(searchProfile);
     // cy.clickButtonWithResponseCheck('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
     cy.clickButton('Speichern');
@@ -51,9 +51,7 @@ describe('Load metadata profile', () => {
     cy.get(`div>div>div:contains("${searchProfile}")`)
       .next()
       .click();
-    cy.get('span:contains("Einstellungen")')
-      .eq(0)
-      .click();
+    clickIndexTabWsgAdmin('settings');
     checkProfile(searchProfile);
   });
 
@@ -73,12 +71,9 @@ describe('Load metadata profile', () => {
   });
 
   it('removes the Context', () => {
-    cy.visit('/');
     deleteUser(newUser.username);
-    cy.visit('/');
     groups.forEach(group => {
       deleteGroup(group);
-      cy.visit('/');
     });
   });
 });
