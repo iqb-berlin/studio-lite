@@ -47,7 +47,7 @@
     "@iqbspecs/coding-scheme": "3.2.0",
     "@nestjs/axios": "4.0.0",
     "@nestjs/cli": "11.0.12",
-    "@nestjs/common": "11.0.12",
+    "@nestjs/common": "11.1.9",
     "@nestjs/config": "4.0.2",
     "@nestjs/core": "11.0.12",
     "@nestjs/jwt": "11.0.0",
