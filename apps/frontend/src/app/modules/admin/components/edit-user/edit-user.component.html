@@ -70,7 +70,7 @@
       {{'admin.password-hint' | translate}}
     </div>
 
-    <div class="fx-row-start-baseline fx-gap-20">
+    <div class="fx-row-start-start fx-gap-20">
       <mat-form-field class="fx-flex-fill">
         <input #passwordInput
                matInput
@@ -84,11 +84,13 @@
           {{ passwordInput.type === 'text' ? 'visibility_off' : 'visibility' }}
         </mat-icon>
       </mat-form-field>
-      <button matButton="filled"
+      <button mat-mini-fab
+              class="generate-password-button"
+              color="default"
               type="button"
+              [matTooltip]="'admin.generate_password' | translate"
               (click)="setGeneratePassword(passwordInput)">
-        <mat-icon>password</mat-icon>
-        {{'admin.generate_password' | translate}}
+        <mat-icon>lock_reset</mat-icon>
       </button>
     </div>
   </form>
@@ -101,6 +103,15 @@
     [disabled]="editUserForm.invalid">
     {{(data.newUser ? 'create' : 'save') | translate}}
   </button>
+
+  <button mat-raised-button
+          type="submit"
+          [mat-dialog-close]="editUserForm"
+          [disabled]="editUserForm.invalid"
+          (click)="mailTo()">
+    {{(data.newUser ? 'create' : 'save') | translate}} {{ 'admin.and-send-mail' | translate}}
+  </button>
+
   <button mat-raised-button
     [mat-dialog-close]="false">
     {{'cancel' | translate}}

@@ -261,7 +261,8 @@
     "package-deleted": "Paket(e) gelöscht",
     "package-not-deleted": "Konnte Paket(e) nicht löschen",
     "issue-count-info": "Das System verfügt über {{count}} {{issue}}.",
-    "generate_password": "Kennwort generieren"
+    "generate_password": "Kennwort generieren",
+    "and-send-mail": "und E-Mail senden"
   },
   "metadata": {
     "metadata": "Metadaten",
@@ -338,7 +339,9 @@
     "start-page-content-right": "Html-Inhalt für die Startseite rechts",
     "imprint-content": "Html-Inhalt für die Impressum-/Datenschutzseite",
     "config-data-saved": "Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!",
-    "config-data-not-saved": "Konnte Konfigurationsdaten der Anwendung nicht speichern"
+    "config-data-not-saved": "Konnte Konfigurationsdaten der Anwendung nicht speichern",
+    "email-template": "E-Mail-Template zum Anlegen neuer Nutzer:innen",
+    "email-replace-values": "Folgende Platzhalter werden im E-Mail-Template durch die Angaben des Users übersetzt: {{frontend}}, {{backend}}, {{email}}, {{password}}"
   },
   "unit-export-config": {
     "test-taker-xml-path": "Xsd-Pfad für Testtaker.Xml",

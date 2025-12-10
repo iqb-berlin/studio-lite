@@ -65,8 +65,9 @@
         cdkTextareaAutosize
       cdkAutosizeMinRows="6"></textarea>
     </mat-form-field>
+    <div class="info">{{'config.email-replace-values' | translate }}</div>
     <mat-form-field class="fx-column-start-stretch">
-      <mat-label>{{'config.email-content' | translate}}</mat-label>
+      <mat-label>{{'config.email-template' | translate}}</mat-label>
       <textarea matInput
                 formControlName="emailText"
                 cdkTextareaAutosize
@@ -74,7 +75,7 @@
     </mat-form-field>
     <div class="fx-row-end-center fx-gap-30">
       @if (dataChanged) {
-        <div class="fx-flex-fill">
+        <div class="fx-flex-fill info ">
           {{'admin.reload-page' | translate}}
         </div>
       }
