@@ -341,7 +341,7 @@
     "config-data-saved": "Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!",
     "config-data-not-saved": "Konnte Konfigurationsdaten der Anwendung nicht speichern",
     "email-template": "E-Mail-Template zum Anlegen neuer Nutzer:innen",
-    "email-replace-values": "Folgende Platzhalter werden im E-Mail-Template durch die Angaben des Users übersetzt: {{frontend}}, {{backend}}, {{email}}, {{password}}",
+    "email-replace-values": "Folgende Platzhalter werden im E-Mail-Template durch die Nutzer:innen-Angaben ersetzt: {{frontend}}, {{backend}}, {{user}}, {{password}}",
     "email-subject": "Betreff für E-Mail zum Anlegen neuer Nutzer:innen"
   },
   "unit-export-config": {
