@@ -34,10 +34,11 @@ describe('Review:', () => {
 
   it('should add a review', () => {
     goToWsMenu();
-    cy.get('span:contains("Aufgabenfolgen")').click();
+    cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
     cy.get('studio-lite-add-review-button').within(() => {
       cy.contains('button', 'add').click();
     });
+    cy.pause();
     cy.get('input[placeholder="Name der Aufgabenfolge"]')
       .should('exist')
       .clear()
@@ -129,13 +130,12 @@ describe('Review:', () => {
     cy.get('studio-lite-user-reviews-area').within(() => {
       cy.get(`a:contains("${review}")`).click();
     });
+    cy.reload();
     // unit nav bar should exit
     cy.get('studio-lite-unit-nav').within(() => {
       cy.get('i:contains("chevron_left")').should('exist');
       cy.get('i:contains("chevron_right")').should('exist');
       // checks that the review is updated
-      cy.reload();
-      cy.wait(1000);
       cy.get('.mat-mdc-list-item:contains("3")').should('exist');
     });
   });

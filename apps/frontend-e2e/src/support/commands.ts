@@ -92,6 +92,12 @@ Cypress.Commands.add('runUntracked', fn => {
 });
 
 Cypress.Commands.add('resetDb', () => cy.task('resetDatabase') as Cypress.Chainable<void>);
+
+Cypress.Commands.add('translate', (language: string): Chainable => {
+  const path: string = `../../../frontend/src/assets/i18n/${language}`;
+  return cy.fixture(path);
+});
+
 //
 // -- This is a child command --
 // Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
