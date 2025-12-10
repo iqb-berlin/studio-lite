@@ -21,6 +21,7 @@ declare namespace Cypress {
     runUntracked(fn);
     findAdminGroupSettings(group: string): Chainable<JQuery<HTMLElement>>;
     findAdminSettings(): Chainable<JQuery<HTMLElement>>;
+    translate(language: string): Chainable;
     resetDb(): Chainable<void>;
     // Commands API
     // commands-metadata.ts

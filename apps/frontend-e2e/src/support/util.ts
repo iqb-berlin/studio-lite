@@ -49,7 +49,6 @@ export function focusOnMenu(hoverString: string, option: string): void {
 }
 
 export function selectCheckBox(name: string) {
-  // only for review
   cy.get('studio-lite-select-unit-list').within(() => {
     cy.get(`mat-cell:contains("${name}")`)
       .prev()
@@ -325,11 +324,12 @@ export function deleteGroup(group: string):void {
 }
 
 export function logout() {
-  cy.visit('/');
   cy.get('[data-cy="goto-user-menu"]').click();
   cy.get('[data-cy="user-menu-logout"]').click();
-  cy.clickDialogButton('Abmelden');
-  cy.wait(200);
+  cy.translate('de').then(json => {
+    cy.clickDialogButton(json.home.logout);
+  });
+  cy.get('[data-cy="home-imprint-button"]').should('exist');
 }
 
 export function editInput(data: string, content: string | undefined) {
