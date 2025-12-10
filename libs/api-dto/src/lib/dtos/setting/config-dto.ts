@@ -11,6 +11,9 @@ export class ConfigDto {
     imprintHtml = '';
 
   @ApiProperty()
+    emailSubject = '';
+
+  @ApiProperty()
     emailBody = '';
 
   @ApiProperty()

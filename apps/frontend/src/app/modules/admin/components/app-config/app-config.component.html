@@ -66,6 +66,12 @@
       cdkAutosizeMinRows="6"></textarea>
     </mat-form-field>
     <div class="info">{{'config.email-replace-values' | translate }}</div>
+    <mat-form-field>
+      <mat-label>{{'config.email-subject' | translate}}</mat-label>
+      <input matInput
+             formControlName="emailSubject"
+             [placeholder]="'config.email-subject' | translate">
+    </mat-form-field>
     <mat-form-field class="fx-column-start-stretch">
       <mat-label>{{'config.email-template' | translate}}</mat-label>
       <textarea matInput

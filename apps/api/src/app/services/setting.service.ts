@@ -32,6 +32,7 @@ export class SettingService {
       appTitle: 'IQB-Studio',
       introHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
       imprintHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
+      emailSubject: '',
       emailBody: '',
       hasUsers: hasUsers
     };

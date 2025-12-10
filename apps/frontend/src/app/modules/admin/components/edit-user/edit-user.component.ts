@@ -72,7 +72,7 @@ export class EditUserComponent {
 
   mailTo(): void {
     const email: string = this.editUserForm.get('email')?.value || '';
-    const subject: string = 'Zugang';
+    const subject: string = this.appService.appConfig.emailSubject;
     window.location.href = `mailto:${email}?subject=${subject}&body=${this.getEmailBody()}`;
   }
 
