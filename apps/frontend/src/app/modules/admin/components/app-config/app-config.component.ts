@@ -78,8 +78,8 @@ export class AppConfigComponent implements OnInit, OnDestroy {
         if (appConfig.appTitle) this.appConfig.appTitle = appConfig.appTitle;
         if (appConfig.introHtml) this.appConfig.introHtml = appConfig.introHtml;
         if (appConfig.imprintHtml) this.appConfig.imprintHtml = appConfig.imprintHtml;
-        this.appConfig.emailSubject = appConfig.emailSubject;
-        this.appConfig.emailBody = appConfig.emailBody;
+        this.appConfig.emailSubject = appConfig.emailSubject || '';
+        this.appConfig.emailBody = appConfig.emailBody || '';
         if (appConfig.globalWarningText) this.appConfig.globalWarningText = appConfig.globalWarningText;
         if (appConfig.globalWarningExpiredDay) {
           this.appConfig.globalWarningExpiredDay = appConfig.globalWarningExpiredDay;
