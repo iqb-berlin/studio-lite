@@ -73,12 +73,11 @@ export class EditUserComponent {
   mailTo(): void {
     const email: string = this.editUserForm.get('email')?.value || '';
     const subject: string = 'Zugang';
-    // console.log(this.appService.appConfig.emailText);
     window.location.href = `mailto:${email}?subject=${subject}&body=${this.getEmailBody()}`;
   }
 
   private getEmailBody(): string {
-    const template = this.appService.appConfig.emailText;
+    const template = this.appService.appConfig.emailBody;
     const firstName = this.editUserForm.get('firstName')?.value || '';
     const lastName = this.editUserForm.get('lastName')?.value || '';
     const name = this.editUserForm.get('name')?.value || '';

@@ -32,7 +32,7 @@ export class SettingService {
       appTitle: 'IQB-Studio',
       introHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
       imprintHtml: '<p>Bitte ändern Sie diesen Text über die Admin-Funktion.</p>',
-      emailText: 'Bitte ändern Sie diesen Text über die Admin-Funktion.',
+      emailBody: '',
       hasUsers: hasUsers
     };
     // TODO: Exception anstatt des Templates

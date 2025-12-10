@@ -11,7 +11,7 @@ export class ConfigDto {
     imprintHtml = '';
 
   @ApiProperty()
-    emailText = '';
+    emailBody = '';
 
   @ApiProperty()
     globalWarningText = '';
