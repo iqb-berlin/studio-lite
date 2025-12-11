@@ -79,14 +79,14 @@ export class EmailTemplateComponent implements OnInit, OnDestroy {
         .subscribe(isOk => {
           if (isOk) {
             this.snackBar.open(
-              this.translateService.instant('config.config-data-saved'),
+              this.translateService.instant('email-template.template-saved'),
               '',
               { duration: 3000 }
             );
             this.dataChanged = false;
           } else {
             this.snackBar.open(
-              this.translateService.instant('config.config-data-not-saved'),
+              this.translateService.instant('email-template.template-not-saved'),
               this.translateService.instant('error'),
               { duration: 3000 }
             );

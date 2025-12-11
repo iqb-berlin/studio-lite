@@ -345,6 +345,10 @@
     "config-data-saved": "Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!",
     "config-data-not-saved": "Konnte Konfigurationsdaten der Anwendung nicht speichern"
   },
+  "email-template": {
+    "template-saved": "E-Mail-Template gespeichert",
+    "template-not-saved": "Konnte E-Mail-Template nicht speichern"
+  },
   "unit-export-config": {
     "test-taker-xml-path": "Xsd-Pfad für Testtaker.Xml",
     "booklet-xml-path": "Xsd-Pfad für Booklet.Xml",
