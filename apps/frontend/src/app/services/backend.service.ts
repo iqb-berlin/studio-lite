@@ -10,7 +10,9 @@ import {
   MyDataDto,
   WorkspaceFullDto,
   WorkspaceSettingsDto,
-  ResourcePackageDto, CreateUserDto, UserWorkspaceFullDto
+  ResourcePackageDto,
+  UserWorkspaceFullDto,
+  EmailTemplateDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
 
@@ -32,27 +34,6 @@ export class BackendService {
         password: password
       }
     )
-      .pipe(
-        catchError(() => of(false)),
-        switchMap(loginToken => {
-          if (typeof loginToken === 'string') {
-            localStorage.setItem('id_token', loginToken);
-            return this.getAuthData()
-              .pipe(
-                map(authData => {
-                  this.appService.authData = authData;
-                  return true;
-                }),
-                catchError(() => of(false))
-              );
-          }
-          return of(loginToken);
-        })
-      );
-  }
-
-  keycloakLogin(user: CreateUserDto): Observable<boolean> {
-    return this.http.post<string>(`${this.serverUrl}keycloak-login`, user)
       .pipe(
         catchError(() => of(false)),
         switchMap(loginToken => {
@@ -157,6 +138,20 @@ export class BackendService {
       .pipe(
         map(() => true),
         catchError(() => of(false))
+      );
+  }
+
+  getEmailTemplate(): Observable<EmailTemplateDto> {
+    return this.http
+      .get<EmailTemplateDto>(`${this.serverUrl}admin/settings/email-template`);
+  }
+
+  setEmailTemplate(emailTemplateDto: EmailTemplateDto): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}admin/settings/email-template`, emailTemplateDto)
+      .pipe(
+        catchError(() => of(false)),
+        map(() => true)
       );
   }
 }

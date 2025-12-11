@@ -2,18 +2,18 @@
   <form [formGroup]="configForm"
         class="fx-column-start-stretch">
     <div class="fx-column-start-stretch">
-      <div class="fx-row-start-start fx-gap-20">
-        <mat-form-field class="fx-flex-fill">
-          <mat-label>{{'config.start-page-warning' | translate}}</mat-label>
-          <textarea matInput
-                    rows="4"
-                    formControlName="globalWarningText"
-                    [placeholder]="'config.warning-placeholder' | translate">
+      <mat-form-field class="fx-flex-fill">
+        <mat-label>{{'config.start-page-warning' | translate}}</mat-label>
+        <textarea matInput
+                  rows="4"
+                  formControlName="globalWarningText"
+                  [placeholder]="'config.warning-placeholder' | translate">
           </textarea>
-        </mat-form-field>
-        <div class="fx-column-start-start">
-          <div class="fx-row-start-start fx-gap-20">
-            <mat-form-field>
+      </mat-form-field>
+      <div class="fx-row-start-start fx-gap-20">
+        <div class="fx-column-start-stretch fx-flex-fill">
+          <div class="fx-row-space-between-stretch fx-gap-20">
+            <mat-form-field class="fx-flex-fill">
               <mat-label>{{'config.show-warning-until' | translate}}</mat-label>
               <input matInput
                 formControlName="globalWarningExpiredDay"
@@ -24,7 +24,7 @@
               </mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
             </mat-form-field>
-            <mat-form-field>
+            <mat-form-field class="fx-flex-fill">
               <mat-select [placeholder]="'config.hour' | translate"
                 formControlName="globalWarningExpiredHour">
                 @for (m of expiredHours; track m) {
@@ -64,20 +64,6 @@
         formControlName="imprintHtml"
         cdkTextareaAutosize
       cdkAutosizeMinRows="6"></textarea>
-    </mat-form-field>
-    <div class="info">{{'config.email-replace-values' | translate }}</div>
-    <mat-form-field>
-      <mat-label>{{'config.email-subject' | translate}}</mat-label>
-      <input matInput
-             formControlName="emailSubject"
-             [placeholder]="'config.email-subject' | translate">
-    </mat-form-field>
-    <mat-form-field class="fx-column-start-stretch">
-      <mat-label>{{'config.email-template' | translate}}</mat-label>
-      <textarea matInput
-                formControlName="emailBody"
-                cdkTextareaAutosize
-                cdkAutosizeMinRows="8"></textarea>
     </mat-form-field>
     <div class="fx-row-end-center fx-gap-30">
       @if (dataChanged) {

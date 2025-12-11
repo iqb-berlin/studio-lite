@@ -1,0 +1,26 @@
+<form [formGroup]="configForm"
+      class="fx-column-start-stretch">
+  <div class="info">{{'settings.email-replace-values' | translate }}</div>
+  <mat-form-field>
+    <mat-label>{{'config.email-subject' | translate}}</mat-label>
+    <input matInput
+           formControlName="emailSubject"
+           [placeholder]="'settings.email-subject' | translate">
+  </mat-form-field>
+  <mat-form-field class="fx-column-start-stretch">
+    <mat-label>{{'settings.email-body' | translate}}</mat-label>
+    <textarea matInput
+              formControlName="emailBody"
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="8"></textarea>
+  </mat-form-field>
+  <div class="fx-row-end-center">
+    <button mat-raised-button
+            color="primary"
+            [disabled]="!dataChanged"
+            (click)="saveData()">
+      {{'save' | translate}}
+    </button>
+  </div>
+</form>
+

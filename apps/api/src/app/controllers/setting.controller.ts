@@ -5,7 +5,7 @@ import {
   ApiBearerAuth, ApiHeader, ApiOkResponse, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
-  MissingsProfilesDto, ConfigDto, AppLogoDto, UnitExportConfigDto, ProfilesRegistryDto
+  MissingsProfilesDto, ConfigDto, AppLogoDto, UnitExportConfigDto, ProfilesRegistryDto, EmailTemplateDto
 } from '@studio-lite-lib/api-dto';
 import { ApiNotAcceptableResponse } from '@nestjs/swagger/dist/decorators/api-response.decorator';
 import { SettingService } from '../services/setting.service';
@@ -97,6 +97,25 @@ export class SettingController {
   @ApiTags('admin settings')
   async patchProfilesRegistry(@Body() newProfilesRegistry: ProfilesRegistryDto) {
     return this.settingService.patchProfilesRegistry(newProfilesRegistry);
+  }
+
+  @Get('email-template')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiOkResponse({ description: 'Email template retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiTags('admin settings')
+  async findEmailTemplate(): Promise<EmailTemplateDto> {
+    return this.settingService.findEmailTemplate();
+  }
+
+  @Patch('email-template')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiOkResponse({ description: 'Email template updated successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiBearerAuth()
+  @ApiTags('admin settings')
+  async patchEmailTemplate(@Body() newEmailTemplate: EmailTemplateDto) {
+    return this.settingService.patchEmailTemplate(newEmailTemplate);
   }
 
   @Get('missings-profiles')

@@ -99,13 +99,15 @@
     {{ (data.newUser ? 'create' : 'save') | translate }}
   </button>
 
-  <button mat-raised-button
-          type="submit"
-          [mat-dialog-close]="editUserForm"
-          [disabled]="editUserForm.invalid"
-          (click)="mailTo()">
-    {{ (data.newUser ? 'create' : 'save') | translate }} {{ 'admin.and-send-mail' | translate }}
-  </button>
+  @if (emailTemplate) {
+    <button mat-raised-button
+            type="submit"
+            [mat-dialog-close]="editUserForm"
+            [disabled]="editUserForm.invalid"
+            (click)="mailTo()">
+      {{ (data.newUser ? 'create' : 'save') | translate }} {{ 'admin.and-send-mail' | translate }}
+    </button>
+  }
 
   <button mat-raised-button
           [mat-dialog-close]="false">

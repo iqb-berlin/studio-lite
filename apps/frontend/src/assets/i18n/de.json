@@ -320,7 +320,11 @@
     "logo-and-colors": "Logo und Farben",
     "unit-export-params": "Parameter für den Unit-Export",
     "missings-profiles": "Kodierung: Missings Profile",
-    "profiles-registry": "Profilregistrierung"
+    "profiles-registry": "Profilregistrierung",
+    "email-template": "E-Mail-Template zum Anlegen neuer Nutzer:innen",
+    "email-replace-values": "Folgende Platzhalter werden im Body der E-Mail durch die Nutzer:innen-Angaben ersetzt: {{firstname}}, {{lastname}}, {{user}}, {{password}}",
+    "email-subject": "Betreff der E-Mail",
+    "email-body": "Body der E-Mail"
   },
   "profiles-registry": {
     "csv-url": "URL der CSV-Datei",
@@ -339,10 +343,7 @@
     "start-page-content-right": "Html-Inhalt für die Startseite rechts",
     "imprint-content": "Html-Inhalt für die Impressum-/Datenschutzseite",
     "config-data-saved": "Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!",
-    "config-data-not-saved": "Konnte Konfigurationsdaten der Anwendung nicht speichern",
-    "email-template": "E-Mail-Template zum Anlegen neuer Nutzer:innen",
-    "email-replace-values": "Folgende Platzhalter werden im E-Mail-Template durch die Nutzer:innen-Angaben ersetzt: {{frontend}}, {{backend}}, {{user}}, {{password}}",
-    "email-subject": "Betreff für E-Mail zum Anlegen neuer Nutzer:innen"
+    "config-data-not-saved": "Konnte Konfigurationsdaten der Anwendung nicht speichern"
   },
   "unit-export-config": {
     "test-taker-xml-path": "Xsd-Pfad für Testtaker.Xml",

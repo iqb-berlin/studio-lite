@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  ConfigDto, AppLogoDto, UnitExportConfigDto, MissingsProfilesDto, ProfilesRegistryDto
+  ConfigDto, AppLogoDto, UnitExportConfigDto, MissingsProfilesDto, ProfilesRegistryDto, EmailTemplateDto
 } from '@studio-lite-lib/api-dto';
 
 import Setting from '../entities/setting.entity';
@@ -136,6 +136,27 @@ export class SettingService {
       const newSetting = this.settingsRepository.create({
         key: 'profiles-registry',
         content: JSON.stringify(newProfilesRegistry)
+      });
+      await this.settingsRepository.save(newSetting);
+    }
+  }
+
+  async findEmailTemplate(): Promise<EmailTemplateDto> {
+    this.logger.log('Returning email template settings');
+    const profilesRegistry = await this.settingsRepository.findOne({ where: { key: 'email-template' } });
+    return profilesRegistry ? JSON.parse(profilesRegistry.content) : new EmailTemplateDto();
+  }
+
+  async patchEmailTemplate(emailTemplateDto: EmailTemplateDto) {
+    this.logger.log('Updating email template settings.');
+    const settingToUpdate = await this.settingsRepository.findOne({ where: { key: 'email-template' } });
+    if (settingToUpdate) {
+      settingToUpdate.content = JSON.stringify(emailTemplateDto);
+      await this.settingsRepository.save(settingToUpdate);
+    } else {
+      const newSetting = this.settingsRepository.create({
+        key: 'email-template',
+        content: JSON.stringify(emailTemplateDto)
       });
       await this.settingsRepository.save(newSetting);
     }

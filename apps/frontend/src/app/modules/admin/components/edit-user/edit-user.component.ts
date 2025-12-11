@@ -1,7 +1,7 @@
 import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import {
   UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
@@ -13,8 +13,10 @@ import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatTooltip } from '@angular/material/tooltip';
+import { EmailTemplateDto } from '@studio-lite-lib/api-dto';
 import { EditUserComponentData } from '../../models/edit-user-component-data.type';
 import { AppService } from '../../../../services/app.service';
+import { BackendService } from '../../../../services/backend.service';
 
 @Component({
   selector: 'studio-lite-edit-user',
@@ -25,11 +27,14 @@ import { AppService } from '../../../../services/app.service';
     MatButton, MatDialogClose, TranslateModule, MatTooltip, MatMiniFabButton]
 })
 
-export class EditUserComponent {
+export class EditUserComponent implements OnInit {
   editUserForm: UntypedFormGroup;
+  emailTemplate!: EmailTemplateDto;
+
   constructor(private fb: UntypedFormBuilder,
               @Inject(MAT_DIALOG_DATA) public data: EditUserComponentData,
-              private appService: AppService) {
+              private appService: AppService,
+              private backendService: BackendService) {
     this.editUserForm = this.fb.group({
       name: this.fb.control(this.data.name,
         [Validators.required, Validators.pattern(/^[a-zäöüß]{3,}$/)]),
@@ -43,6 +48,13 @@ export class EditUserComponent {
           [Validators.pattern(/^\S{3,}$/), Validators.required] :
           [Validators.pattern(/^\S{3,}$/)])
     });
+  }
+
+  ngOnInit() {
+    this.backendService.getEmailTemplate()
+      .subscribe(emailTemplate => {
+        this.emailTemplate = emailTemplate;
+      });
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -72,12 +84,12 @@ export class EditUserComponent {
 
   mailTo(): void {
     const email: string = this.editUserForm.get('email')?.value || '';
-    const subject: string = this.appService.appConfig.emailSubject;
+    const subject: string = this.emailTemplate.emailSubject;
     window.location.href = `mailto:${email}?subject=${subject}&body=${this.getEmailBody()}`;
   }
 
   private getEmailBody(): string {
-    const template = this.appService.appConfig.emailBody;
+    const template = this.emailTemplate.emailBody;
     const firstName = this.editUserForm.get('firstName')?.value || '';
     const lastName = this.editUserForm.get('lastName')?.value || '';
     const name = this.editUserForm.get('name')?.value || '';
