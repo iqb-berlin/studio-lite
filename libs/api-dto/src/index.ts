@@ -11,6 +11,7 @@ export { WorkspaceGroupSettingsDto } from './lib/dtos/workspace-group/workspace-
 export { MyDataDto } from './lib/dtos/user/my-data-dto';
 export { UnitExportConfigDto } from './lib/dtos/setting/unit-export-config-dto';
 export { ProfilesRegistryDto } from './lib/dtos/setting/profiles-registry-dto';
+export { EmailTemplateDto } from './lib/dtos/setting/email-template-dto';
 export { UnitDownloadSettingsDto } from './lib/dtos/unit/unit-download-settings-dto';
 export { RequestReportDto } from './lib/dtos/request-report-dto';
 export { UnitSchemeDto } from './lib/dtos/unit/unit-scheme-dto';
