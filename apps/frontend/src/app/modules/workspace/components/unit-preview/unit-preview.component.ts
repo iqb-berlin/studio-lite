@@ -281,11 +281,11 @@ export class UnitPreviewComponent
                 this.workspaceService.selectedWorkspaceId,
                 this.unitId
               )
-              .subscribe(ued => {
-                if (ued) {
+              .subscribe(unitDefinitionDto => {
+                if (unitDefinitionDto) {
                   unitDefinitionStore = new UnitDefinitionStore(
                     this.unitId,
-                    ued
+                    unitDefinitionDto
                   );
                   this.workspaceService.setUnitDefinitionStore(
                     unitDefinitionStore
