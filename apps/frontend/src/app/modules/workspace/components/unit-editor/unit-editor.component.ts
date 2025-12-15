@@ -159,6 +159,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
                 this.workspaceService.selectedWorkspaceId,
                 unitId
               )
+              .pipe(takeUntil(this.ngUnsubscribe))
               .subscribe(unitDefinitionDto => {
                 if (unitDefinitionDto) {
                   unitDefinitionStore = new UnitDefinitionStore(
