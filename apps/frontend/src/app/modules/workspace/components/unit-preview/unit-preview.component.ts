@@ -281,6 +281,7 @@ export class UnitPreviewComponent
                 this.workspaceService.selectedWorkspaceId,
                 this.unitId
               )
+              .pipe(takeUntil(this.ngUnsubscribe))
               .subscribe(unitDefinitionDto => {
                 if (unitDefinitionDto) {
                   unitDefinitionStore = new UnitDefinitionStore(
@@ -546,6 +547,7 @@ export class UnitPreviewComponent
     } else {
       this.backendService
         .getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
+        .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(schemeData => {
           this.checkCoding(schemeData);
         });
@@ -562,7 +564,9 @@ export class UnitPreviewComponent
     } else {
       const dialogRef = this.dialog
         .open(PrintOptionsDialogComponent);
-      dialogRef.afterClosed()
+      dialogRef
+        .afterClosed()
+        .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(result => {
           if (result) {
             this.openPrintView(result);
