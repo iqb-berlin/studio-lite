@@ -6,6 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ModuleService } from '../../../shared/services/module.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
@@ -18,17 +19,20 @@ import { RolePipe } from '../../pipes/role.pipe';
   templateUrl: './unit-editor.component.html',
   styleUrls: ['./unit-editor.component.scss'],
   host: { class: 'unit-editor' },
-  imports: []
+  imports: [
+    MatProgressSpinner
+  ]
 })
 export class UnitEditorComponent implements AfterViewInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
-  private iFrameElement: HTMLIFrameElement | undefined;
+  protected iFrameElement: HTMLIFrameElement | undefined;
   private postMessageTarget: Window | undefined;
   private sessionId = '';
   private lastEditorId = '';
   private ngUnsubscribe = new Subject<void>();
   editorApiVersion = 1;
   message = '';
+  unitLoaded = true;
 
   constructor(
     private backendService: WorkspaceBackendService,
@@ -46,11 +50,14 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     this.workspaceService.selectedUnit$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        this.message = '';
-        this.workspaceService
-          .loadUnitProperties()
-          .pipe(takeUntil(this.ngUnsubscribe))
-          .subscribe(() => this.sendUnitDataToEditor());
+        if (this.unitLoaded) {
+          this.unitLoaded = false;
+          this.message = '';
+          this.workspaceService
+            .loadUnitProperties()
+            .pipe(takeUntil(this.ngUnsubscribe))
+            .subscribe(() => this.sendUnitDataToEditor());
+        }
       });
   }
 
@@ -226,6 +233,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
         );
       }
     }
+    this.unitLoaded = true;
   }
 
   private buildEditor(editorId?: string) {
