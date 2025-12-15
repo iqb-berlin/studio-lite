@@ -249,7 +249,8 @@ export class UnitPreviewComponent
         this.message = '';
         this.workspaceService
           .loadUnitProperties()
-          .then(() => this.sendUnitData());
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(() => this.sendUnitData());
       });
     this.addSubscriptionForUnitDefinitionChanges();
   }

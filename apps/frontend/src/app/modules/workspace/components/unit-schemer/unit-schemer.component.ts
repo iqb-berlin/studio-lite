@@ -1,7 +1,7 @@
 import {
   AfterViewInit, Component, ElementRef, OnDestroy, ViewChild
 } from '@angular/core';
-import { Subject, Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
@@ -80,7 +80,10 @@ export class UnitSchemerComponent extends SubscribeUnitDefinitionChangesDirectiv
     this.iFrameElement = this.hostingIframe.nativeElement;
     this.unitIdChangedSubscription = this.workspaceService.selectedUnit$.subscribe(() => {
       this.message = '';
-      this.workspaceService.loadUnitProperties().then(() => this.sendUnitData());
+      this.workspaceService
+        .loadUnitProperties()
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(() => this.sendUnitData());
     });
     this.addSubscriptionForUnitDefinitionChanges();
   }

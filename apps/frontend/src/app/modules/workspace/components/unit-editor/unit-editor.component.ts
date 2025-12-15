@@ -49,7 +49,8 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
         this.message = '';
         this.workspaceService
           .loadUnitProperties()
-          .then(() => this.sendUnitDataToEditor());
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(() => this.sendUnitDataToEditor());
       });
   }
 

@@ -28,7 +28,10 @@ export abstract class SubscribeUnitDefinitionChangesDirective {
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.message = '';
-        this.workspaceService.loadUnitProperties().then(() => this.sendUnitData());
+        this.workspaceService
+          .loadUnitProperties()
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(() => this.sendUnitData());
       });
   }
 
