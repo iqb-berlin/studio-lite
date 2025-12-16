@@ -2,33 +2,39 @@
   <studio-lite-add-review-button [selectedReviewId]="selectedReviewId"
                                  [workspaceId]="workspaceId"
                                  [(changed)]="changed"
-                                 (added)="reviewListChange.emit($event)">
+                                 (added)="reviewListChange.emit($event)"
+                                 data-cy="workspace-review-menu-add-review-button">
   </studio-lite-add-review-button>
 
   <studio-lite-delete-review-button [selectedReviewId]="selectedReviewId"
                                     [workspaceId]="workspaceId"
                                     (changedChange)="changed = $event"
-                                    (deleted)="reviewListChange.emit()">
+                                    (deleted)="reviewListChange.emit()"
+                                    data-cy="workspace-review-menu-delete-review-button">
   </studio-lite-delete-review-button>
 
   <studio-lite-start-review-button [selectedReviewId]="selectedReviewId"
-                                   [unitCount]="units.length">
+                                   [unitCount]="units.length"
+                                   data-cy="workspace-review-menu-start-review-button">
   </studio-lite-start-review-button>
 
   <studio-lite-export-review-button [bookletConfigSettings]="bookletConfigSettings"
                                     [selectedReviewId]="selectedReviewId"
                                     [units]="units"
-                                    [workspaceId]="workspaceId">
+                                    [workspaceId]="workspaceId"
+                                    data-cy="workspace-review-menu-export-review-button">
   </studio-lite-export-review-button>
 
   <studio-lite-print-review-button [selectedReviewId]="selectedReviewId"
                                    [units]="units"
                                    [workspaceGroupId]="workspaceGroupId"
-                                   [workspaceId]="workspaceId">
+                                   [workspaceId]="workspaceId"
+                                   data-cy="workspace-review-menu-print-review-button">
   </studio-lite-print-review-button>
 
   <studio-lite-copy-review-link-button [link]="link"
                                        [unitCount]="units.length"
-                                       [passwordLength]="passwordLength">
+                                       [passwordLength]="passwordLength"
+                                       data-cy="workspace-review-menu-copy-review-link-button">
   </studio-lite-copy-review-link-button>
 </div>

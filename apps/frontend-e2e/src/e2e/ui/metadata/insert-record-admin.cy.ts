@@ -15,15 +15,14 @@ describe('UI Metadata Management from administration', () => {
   const mathArea = 'Mathematik II';
   const group = 'Bista II';
   before(() => {
+    // cy.resetDb();
     addFirstUser();
   });
   after(() => {
     deleteFirstUser();
-    // cy.resetDb();
   });
 
   it('prepares context', () => {
-    cy.findAdminSettings().click();
     createGroup(group);
     createWs(area, group);
     grantRemovePrivilegeAtWs([Cypress.env('username')], area, [AccessLevel.Admin]);

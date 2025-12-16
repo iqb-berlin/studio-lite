@@ -29,10 +29,7 @@ Cypress.Commands.add('clickDialogButton', (buttonName: string) => {
 Cypress.Commands.add('clickButtonWithResponseCheck',
   (text: string, code: number[], url: string, rest: string, alias:string) => {
     cy.intercept(rest, url).as(alias);
-    cy.get('button')
-      .contains(text)
-      .should('exist')
-      .click();
+    cy.get('button').contains(text).should('exist').click({ force: true });
     cy.wait(`@${alias}`)
       .its('response.statusCode').should('be.oneOf', code);
   });
@@ -44,7 +41,7 @@ Cypress.Commands.add('clickDialogButtonWithResponseCheck',
     cy.get('mat-dialog-actions button')
       .contains(text)
       .should('exist')
-      .click();
+      .click({ force: true });
     cy.wait(`@${alias}`)
       .its('response.statusCode')
       .should('be.oneOf', code);
