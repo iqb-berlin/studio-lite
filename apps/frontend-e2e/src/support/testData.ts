@@ -1,5 +1,3 @@
-import { TranslateService } from '@ngx-translate/core';
-
 export interface WsData {
   id: string;
   name: string;
