@@ -67,7 +67,7 @@ describe('Load metadata profile', () => {
       .click();
     checkMultipleProfiles(searchProfiles);
     // cy.clickButtonWithResponseCheck('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
-    cy.clickButton('Speichern');
+    cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
   });
 
   it('removes the Context', () => {

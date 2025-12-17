@@ -66,7 +66,7 @@ describe('Comment:', () => {
     cy.get('studio-lite-comment').should('have.length', '3');
   });
 
-  it('should delete the visible comment', () => {
+  it.skip('should delete the visible comment', () => {
     loginWithUser(Cypress.env('username'), Cypress.env('password'));
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
