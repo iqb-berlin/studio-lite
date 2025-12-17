@@ -12,7 +12,8 @@
           [matTooltip]="'workspace.save-unit' | translate"
           [color]="'primary'"
           matTooltipPosition="above"
-          (click)="saveUnitData()">
+          (click)="saveUnitData()"
+          data-cy="workspace-save-unit">
     {{'workspace.save' | translate }}
     <mat-icon class="big-icon">save</mat-icon>
   </button>

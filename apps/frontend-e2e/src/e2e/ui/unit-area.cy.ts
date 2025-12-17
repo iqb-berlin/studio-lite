@@ -135,7 +135,6 @@ describe('UI check: workspace', () => {
 
   it('should show metadata report', () => {
     cy.visitWs(ws1);
-    cy.wait(200);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-metadata"]').click();
@@ -147,7 +146,6 @@ describe('UI check: workspace', () => {
 
   it('should show kodierung ', () => {
     cy.visitWs(ws1);
-    cy.wait(200);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-coding-report"]').click();
@@ -157,8 +155,6 @@ describe('UI check: workspace', () => {
 
   it('should export the codebook ', () => {
     cy.visitWs(ws1);
-    cy.wait(200);
-    cy.pause();
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-export-coding-book"]').click();
