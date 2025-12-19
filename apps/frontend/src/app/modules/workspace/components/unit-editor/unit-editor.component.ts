@@ -42,11 +42,16 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     private appService: AppService,
     private translateService: TranslateService
   ) {
-    this.subscribeForMessages();
+
   }
 
   ngAfterViewInit(): void {
     this.iFrameElement = this.hostingIframe.nativeElement;
+    this.subscribeForMessages();
+    this.subscribeForWorkspaceChange();
+  }
+
+  subscribeForWorkspaceChange(): void {
     this.workspaceService.selectedUnit$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
@@ -57,6 +62,13 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
             .loadUnitProperties()
             .pipe(takeUntil(this.ngUnsubscribe))
             .subscribe(() => this.sendUnitDataToEditor());
+        } else {
+          this.ngUnsubscribe.next();
+          this.ngUnsubscribe.complete();
+          this.ngUnsubscribe = new Subject<void>();
+          this.unitLoaded = true;
+          this.subscribeForMessages();
+          this.subscribeForWorkspaceChange();
         }
       });
   }
@@ -67,7 +79,6 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
       .subscribe((m: MessageEvent) => {
         const msgData = m.data;
         const msgType = msgData.type;
-
         if (
           msgType !== undefined &&
           msgType !== null &&
