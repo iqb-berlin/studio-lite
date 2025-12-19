@@ -36,22 +36,25 @@ describe('Comment:', () => {
   });
 
   it('should reply the first comment', () => {
-    cy.get('studio-lite-comment')
-      .eq(0).contains('button', 'reply').click();
+    cy.get('studio-lite-comment').eq(0).contains('button', 'reply').click();
     cy.get('tiptap-editor').eq(0).type('Antworten zu Neue Kommentar 1');
     cy.contains('button', 'send').click();
   });
 
   it('should edit the last comment', () => {
     cy.get('studio-lite-comment')
-      .eq(-1).contains('button', 'edit').type('Verändert ');
+      .eq(-1)
+      .contains('button', 'edit')
+      .type('Verändert ');
     cy.contains('button', 'send').click();
   });
 
   it('should hide the first comment', () => {
     cy.get('studio-lite-comment').should('have.length', '3');
     cy.get('studio-lite-comment')
-      .eq(0).contains('mat-icon', 'visibility_off').click();
+      .eq(0)
+      .contains('mat-icon', 'visibility_off')
+      .click();
     cy.get('studio-lite-comment').should('have.length', '1');
   });
 
@@ -74,7 +77,12 @@ describe('Comment:', () => {
     cy.get('studio-lite-comment').eq(0).contains('button', 'delete').click();
     cy.get('studio-lite-comment').should('have.length', '1');
     cy.clickButtonWithResponseCheck(
-      'Löschen', [200], '/api/workspaces/*/units/*/comments/*', 'DELETE', 'deleteComment');
+      'Löschen',
+      [200],
+      '/api/workspaces/*/units/*/comments/*',
+      'DELETE',
+      'deleteComment'
+    );
     cy.get('studio-lite-comment').should('have.length', '0');
   });
 
@@ -82,7 +90,9 @@ describe('Comment:', () => {
     cy.contains('mat-icon', 'filter_alt').click();
     cy.get('mat-slide-toggle').click();
     cy.get('studio-lite-comment')
-      .eq(0).contains('mat-icon', 'visibility').click({ force: true });
+      .eq(0)
+      .contains('mat-icon', 'visibility')
+      .click({ force: true });
   });
 
   it.skip('should able to write a comment related to a item', () => {
