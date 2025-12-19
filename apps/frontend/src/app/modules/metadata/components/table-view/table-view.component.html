@@ -45,11 +45,16 @@
       </mat-tab-group>
     </mat-dialog-content>
     <mat-dialog-actions align="end" >
-      <button mat-raised-button  (click)="downloadMetadata()">{{'download' | translate}}</button>
+      <button mat-raised-button
+              (click)="downloadMetadata()"
+              data-cy="metadata-download">
+        {{'download' | translate}}
+      </button>
       <button mat-raised-button
               color="primary"
               type="submit"
-              [mat-dialog-close]="">
+              [mat-dialog-close]=""
+              data-cy="metadata-close">
         {{ 'close' | translate }}
       </button>
     </mat-dialog-actions>

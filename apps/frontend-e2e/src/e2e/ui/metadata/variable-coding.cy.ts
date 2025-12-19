@@ -58,7 +58,11 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
 
   it('creates the item 02 and checks that text-field_1 is not available', () => {
     createItem('02');
-    cy.get('mat-select[placeholder="Variable auswählen"]').eq(-1).find('svg').click();
+    cy.translate('de').then(json => {
+      cy.get(`mat-select[placeholder="${json.metadata['choose-item-variable']}"]`)
+        .eq(-1).find('svg').click();
+    });
+    // cy.get('mat-select[placeholder="Variable auswählen"]').eq(-1).find('svg').click();
     cy.get('mat-option:contains("text-field_1")').should('not.exist');
     cy.get('mat-option:contains("radio_1")').eq(0).click();
     cy.get('[data-cy="workspace-save-unit"]').click();
@@ -87,28 +91,36 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.visitWs(mathArea);
     selectUnit('MA_01');
     goToItem('03');
-    cy.get('mat-select[placeholder="Variable auswählen"]')
-      .eq(-1).find('svg').click()
-      .then(() => {
-        cy.get('mat-select:contains("drop-list_1")').should('have.length', 0);
-      });
+    cy.translate('de').then(json => {
+      cy.get(`mat-select[placeholder="${json.metadata['choose-item-variable']}"]`)
+        .eq(-1).find('svg').click()
+        .then(() => {
+          cy.get('mat-select:contains("drop-list_1")').should('have.length', 0);
+        });
+    });
   });
 
   it('checks that drop-list_1 is not present at Menu -> Berichte -> Metadaten', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-metadata"]').click();
-    // eslint-disable-next-line max-len
-    cy.clickButtonWithResponseCheck('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
-    cy.get('.mdc-tab__text-label:contains("Metadaten Items")').click();
+    cy.get('[data-cy="workspace-show-metadata-display"]').click();
+    cy.translate('de').then(json => {
+      cy.get(`.mdc-tab__text-label:contains("${json.metadata.items}")`).click();
+    });
     cy.get('mat-dialog-container:contains("drop-list_1")').should('have.length', 0);
-    cy.clickButton('Schließen');
+    cy.get('[data-cy="metadata-close"]').click();
+    // cy.clickButton('Schließen');
   });
 
   it('checks the order of items before and after clicking Nach Variable ID Sortieren is not the same', () => {
     cy.get('studio-lite-item').eq(1).find('span:contains("02")').should('exist');
     cy.get('studio-lite-item').eq(0).find('span:contains("01")').should('exist');
-    cy.get('select.sort-items').select('Nach Variablen ID sortieren', { force: true });
+    cy.translate('de').then(json => {
+      cy.get('select.sort-items').select(`${json.metadata['sort-by-variableId']}`,
+        { force: true });
+    });
+    // cy.get('select.sort-items').select('Nach Variablen ID sortieren', { force: true });
     cy.get('studio-lite-item').eq(0).find('span:contains("02")').should('exist');
     cy.get('studio-lite-item').eq(1).find('span:contains("01")').should('exist');
   });
