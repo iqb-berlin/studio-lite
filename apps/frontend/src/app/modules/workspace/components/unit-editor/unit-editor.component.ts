@@ -48,7 +48,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     this.subscribeForWorkspaceChange();
   }
 
-  subscribeForWorkspaceChange(): void {
+  private subscribeForWorkspaceChange(): void {
     this.workspaceService.selectedUnit$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
@@ -151,7 +151,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
       });
   }
 
-  sendUnitDefinition(
+  private sendUnitDefinition(
     unitId: number,
     unitDefinitionStore: UnitDefinitionStore | undefined
   ): void {
@@ -189,7 +189,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  getEditorId(): Observable<string> {
+  private getEditorId(): Observable<string> {
     const unitId = this.workspaceService.selectedUnit$.getValue();
     const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
 
@@ -207,13 +207,14 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
             unitMetadata.editor,
             Object.keys(this.moduleService.editors)
           ) :
-          ''))
+          '')
+        )
       );
     }
     return of('');
   }
 
-  initUnitAndEditor() {
+  private initUnitAndEditor() {
     this.getEditorId()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(editorId => {
@@ -272,7 +273,9 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     if (this.iFrameElement) {
       this.iFrameElement.srcdoc = '';
       if (editorId) {
-        from(this.moduleService.getModuleHtml(this.moduleService.editors[editorId]))
+        from(
+          this.moduleService.getModuleHtml(this.moduleService.editors[editorId])
+        )
           .pipe(takeUntil(this.ngUnsubscribe))
           .subscribe(editorData => {
             if (editorData) {
