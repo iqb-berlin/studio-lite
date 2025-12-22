@@ -2,6 +2,7 @@ import {
   AfterViewInit, Component, ElementRef, OnDestroy, ViewChild
 } from '@angular/core';
 import {
+  BehaviorSubject,
   from, map, Observable, of, Subject, takeUntil
 } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -32,7 +33,8 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
   editorApiVersion = 1;
   message = '';
-  unitLoaded = true;
+  unitLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+  loading = false;
 
   constructor(
     private backendService: WorkspaceBackendService,
@@ -41,7 +43,10 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     private moduleService: ModuleService,
     private appService: AppService,
     private translateService: TranslateService
-  ) {}
+  ) {
+    this.unitLoaded.subscribe(
+      loaded => setTimeout(() => { this.loading = !loaded; }));
+  }
 
   ngAfterViewInit(): void {
     this.iFrameElement = this.hostingIframe.nativeElement;
@@ -53,18 +58,20 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     this.workspaceService.selectedUnit$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        if (this.unitLoaded) {
-          this.unitLoaded = false;
+        if (this.unitLoaded.getValue()) {
+          this.unitLoaded.next(false);
           this.message = '';
           this.workspaceService
             .loadUnitProperties()
             .pipe(takeUntil(this.ngUnsubscribe))
-            .subscribe(() => this.initUnitAndEditor());
+            .subscribe(() => {
+              this.initUnitAndEditor();
+            });
         } else {
           this.ngUnsubscribe.next();
           this.ngUnsubscribe.complete();
           this.ngUnsubscribe = new Subject<void>();
-          this.unitLoaded = true;
+          this.unitLoaded.next(true);
           this.subscribeForMessages();
           this.subscribeForWorkspaceChange();
         }
@@ -263,8 +270,8 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
           '*'
         );
       }
+      this.unitLoaded.next(true);
     }
-    this.unitLoaded = true;
   }
 
   private buildEditor(editorId?: string) {
@@ -302,5 +309,6 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
+    this.unitLoaded.complete();
   }
 }
