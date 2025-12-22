@@ -5,7 +5,6 @@ import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
-
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ModuleService } from '../../../shared/services/module.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
@@ -105,8 +104,10 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
               this.sessionId = Math.floor(
                 Math.random() * 20000000 + 10000000
               ).toString();
-              this.postMessageTarget = m.source as Window;
-              this.sendUnitDataToEditor();
+              this.sendUnitDefinition(
+                this.workspaceService.selectedUnit$.getValue(),
+                this.workspaceService.getUnitDefinitionStore()
+              );
               break;
 
             case 'voeDefinitionChangedNotification':
@@ -152,10 +153,48 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
       });
   }
 
-  async sendUnitDataToEditor() {
+  sendUnitDefinition(unitId: number, unitDefinitionStore: UnitDefinitionStore | undefined): void {
+    if (!unitId) {
+      this.message = this.translateService.instant('workspace.unit-not-found');
+      this.postMessageTarget = undefined;
+      return;
+    }
+    if (unitId && unitDefinitionStore) {
+      this.postUnitDef(unitDefinitionStore);
+    } else {
+      this.backendService
+        .getUnitDefinition(
+          this.workspaceService.selectedWorkspaceId,
+          unitId
+        )
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(unitDefinitionDto => {
+          if (unitDefinitionDto) {
+            const newUnitDefinitionStore = new UnitDefinitionStore(
+              unitId,
+              unitDefinitionDto
+            );
+            this.workspaceService.setUnitDefinitionStore(
+              newUnitDefinitionStore
+            );
+            this.postUnitDef(newUnitDefinitionStore);
+          } else {
+            this.snackBar.open(
+              this.translateService.instant(
+                'workspace.unit-definition-not-loaded'
+              ),
+              this.translateService.instant('workspace.error'),
+              { duration: 3000 }
+            );
+          }
+        });
+    }
+  }
+
+  async getEditorId(): Promise<string> {
     const unitId = this.workspaceService.selectedUnit$.getValue();
     const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
-    if (unitId && unitId > 0 && unitMetadataStore) {
+    if (unitId && unitMetadataStore) {
       const unitMetadata = unitMetadataStore.getData();
       if (Object.keys(this.moduleService.editors).length === 0) {
         await this.moduleService.loadList();
@@ -166,51 +205,27 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
           Object.keys(this.moduleService.editors)
         ) :
         '';
-      if (editorId) {
-        if (editorId === this.lastEditorId && this.postMessageTarget) {
-          let unitDefinitionStore =
-            this.workspaceService.getUnitDefinitionStore();
-          if (unitDefinitionStore) {
-            this.postUnitDef(unitDefinitionStore);
-          } else {
-            this.backendService
-              .getUnitDefinition(
-                this.workspaceService.selectedWorkspaceId,
-                unitId
-              )
-              .pipe(takeUntil(this.ngUnsubscribe))
-              .subscribe(unitDefinitionDto => {
-                if (unitDefinitionDto) {
-                  unitDefinitionStore = new UnitDefinitionStore(
-                    unitId,
-                    unitDefinitionDto
-                  );
-                  this.workspaceService.setUnitDefinitionStore(
-                    unitDefinitionStore
-                  );
-                  this.postUnitDef(unitDefinitionStore);
-                } else {
-                  this.snackBar.open(
-                    this.translateService.instant(
-                      'workspace.unit-definition-not-loaded'
-                    ),
-                    this.translateService.instant('workspace.error'),
-                    { duration: 3000 }
-                  );
-                }
-              });
-          }
-        } else {
-          this.buildEditor(editorId);
-          // editor gets unit data via ReadyNotification
-        }
+      return Promise.resolve(editorId);
+    }
+    return Promise.resolve('');
+  }
+
+  async sendUnitDataToEditor() {
+    const editorId = await this.getEditorId();
+    if (editorId) {
+      if (editorId === this.lastEditorId && this.postMessageTarget) {
+        this.sendUnitDefinition(
+          this.workspaceService.selectedUnit$.getValue(),
+          this.workspaceService.getUnitDefinitionStore()
+        );
       } else {
-        this.message = this.translateService.instant('workspace.no-editor');
-        this.buildEditor();
+        this.postMessageTarget = undefined;
+        this.buildEditor(editorId);
+        // editor gets unit data via ReadyNotification
       }
     } else {
-      this.message = this.translateService.instant('workspace.unit-not-found');
-      this.buildEditor();
+      this.message = this.translateService.instant('workspace.no-editor');
+      this.postMessageTarget = undefined;
     }
   }
 
@@ -248,7 +263,6 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   private buildEditor(editorId?: string) {
-    this.postMessageTarget = undefined;
     if (this.iFrameElement) {
       this.iFrameElement.srcdoc = '';
       if (editorId) {
