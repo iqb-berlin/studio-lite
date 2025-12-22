@@ -50,11 +50,11 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.iFrameElement = this.hostingIframe.nativeElement;
-    this.subscribeForMessages();
-    this.subscribeForWorkspaceChange();
+    this.subscribeForPostMessages();
+    this.subscribeForSelectedUnitChange();
   }
 
-  private subscribeForWorkspaceChange(): void {
+  private subscribeForSelectedUnitChange(): void {
     this.workspaceService.selectedUnit$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
@@ -65,20 +65,20 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
             .loadUnitProperties()
             .pipe(takeUntil(this.ngUnsubscribe))
             .subscribe(() => {
-              this.initUnitAndEditor();
+              this.onSelectedUnitChange();
             });
         } else {
           this.ngUnsubscribe.next();
           this.ngUnsubscribe.complete();
           this.ngUnsubscribe = new Subject<void>();
           this.unitLoaded.next(true);
-          this.subscribeForMessages();
-          this.subscribeForWorkspaceChange();
+          this.subscribeForPostMessages();
+          this.subscribeForSelectedUnitChange();
         }
       });
   }
 
-  private subscribeForMessages(): void {
+  private subscribeForPostMessages(): void {
     this.appService.postMessage$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((m: MessageEvent) => {
@@ -219,7 +219,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     return of('');
   }
 
-  private initUnitAndEditor() {
+  private onSelectedUnitChange() {
     this.getEditorId(this.workspaceService.getUnitMetadataStore())
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(editorId => {
@@ -280,8 +280,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
       if (editorId) {
         from(
           this.moduleService.getModuleHtml(this.moduleService.editors[editorId])
-        )
-          .pipe(takeUntil(this.ngUnsubscribe))
+        ).pipe(takeUntil(this.ngUnsubscribe))
           .subscribe(editorData => {
             if (editorData) {
               this.setupEditorIFrame(editorData);
