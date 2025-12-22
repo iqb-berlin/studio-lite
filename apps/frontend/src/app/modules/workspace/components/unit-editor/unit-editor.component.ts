@@ -65,7 +65,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
             .loadUnitProperties()
             .pipe(takeUntil(this.ngUnsubscribe))
             .subscribe(() => {
-              this.onSelectedUnitChange();
+              this.onLoadUnitProperties();
             });
         } else {
           this.ngUnsubscribe.next();
@@ -219,7 +219,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     return of('');
   }
 
-  private onSelectedUnitChange() {
+  private onLoadUnitProperties() {
     this.getEditorId(this.workspaceService.getUnitMetadataStore())
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(editorId => {
