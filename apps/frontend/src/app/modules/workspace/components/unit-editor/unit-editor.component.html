@@ -6,11 +6,11 @@
       {{message}}
     </div>
   }
-  @if (!unitLoaded) {
+  @if (loading) {
     <mat-spinner class="wait-animation"></mat-spinner>
   }
   <div class="host-editor-container fx-flex-fill"
-    [hidden]="!unitLoaded">
+    [hidden]="loading">
     <iframe #hostingIframe
       class="unitHost">
     </iframe>
