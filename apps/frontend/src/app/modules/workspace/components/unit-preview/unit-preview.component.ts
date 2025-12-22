@@ -69,8 +69,8 @@ export class UnitPreviewComponent
     private router: Router
   ) {
     super();
-    this.subscribeForMessages();
-    this.subscribeForUnitChange();
+    this.subscribeForPostMessages();
+    this.subscribeForSelectedUnitChange();
   }
 
   ngAfterViewInit(): void {
@@ -96,7 +96,7 @@ export class UnitPreviewComponent
     return null;
   }
 
-  private subscribeForUnitChange(): void {
+  private subscribeForSelectedUnitChange(): void {
     this.workspaceService.selectedUnit$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
@@ -105,7 +105,7 @@ export class UnitPreviewComponent
       });
   }
 
-  private subscribeForMessages(): void {
+  private subscribeForPostMessages(): void {
     this.appService.postMessage$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((m: MessageEvent) => {
