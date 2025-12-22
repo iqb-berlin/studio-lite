@@ -14,6 +14,7 @@ import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { RolePipe } from '../../pipes/role.pipe';
+import { UnitMetadataStore } from '../../classes/unit-metadata-store';
 
 @Component({
   selector: 'studio-lite-unit-editor',
@@ -189,11 +190,8 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private getEditorId(): Observable<string> {
-    const unitId = this.workspaceService.selectedUnit$.getValue();
-    const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
-
-    if (unitId && unitMetadataStore) {
+  private getEditorId(unitMetadataStore: UnitMetadataStore | undefined): Observable<string> {
+    if (unitMetadataStore) {
       const unitMetadata = unitMetadataStore.getData();
 
       const loadList$ =
@@ -215,7 +213,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   private initUnitAndEditor() {
-    this.getEditorId()
+    this.getEditorId(this.workspaceService.getUnitMetadataStore())
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(editorId => {
         if (editorId) {
