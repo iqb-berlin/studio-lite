@@ -1,7 +1,9 @@
 import {
   AfterViewInit, Component, ElementRef, OnDestroy, ViewChild
 } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import {
+  from, map, Observable, of, Subject, takeUntil
+} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
@@ -18,9 +20,7 @@ import { RolePipe } from '../../pipes/role.pipe';
   templateUrl: './unit-editor.component.html',
   styleUrls: ['./unit-editor.component.scss'],
   host: { class: 'unit-editor' },
-  imports: [
-    MatProgressSpinner
-  ]
+  imports: [MatProgressSpinner]
 })
 export class UnitEditorComponent implements AfterViewInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
@@ -40,9 +40,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     private moduleService: ModuleService,
     private appService: AppService,
     private translateService: TranslateService
-  ) {
-
-  }
+  ) {}
 
   ngAfterViewInit(): void {
     this.iFrameElement = this.hostingIframe.nativeElement;
@@ -153,7 +151,10 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
       });
   }
 
-  sendUnitDefinition(unitId: number, unitDefinitionStore: UnitDefinitionStore | undefined): void {
+  sendUnitDefinition(
+    unitId: number,
+    unitDefinitionStore: UnitDefinitionStore | undefined
+  ): void {
     if (!unitId) {
       this.message = this.translateService.instant('workspace.unit-not-found');
       this.postMessageTarget = undefined;
@@ -163,10 +164,7 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
       this.postUnitDef(unitDefinitionStore);
     } else {
       this.backendService
-        .getUnitDefinition(
-          this.workspaceService.selectedWorkspaceId,
-          unitId
-        )
+        .getUnitDefinition(this.workspaceService.selectedWorkspaceId, unitId)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(unitDefinitionDto => {
           if (unitDefinitionDto) {
@@ -191,42 +189,50 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  async getEditorId(): Promise<string> {
+  getEditorId(): Observable<string> {
     const unitId = this.workspaceService.selectedUnit$.getValue();
     const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
+
     if (unitId && unitMetadataStore) {
       const unitMetadata = unitMetadataStore.getData();
-      if (Object.keys(this.moduleService.editors).length === 0) {
-        await this.moduleService.loadList();
-      }
-      const editorId = unitMetadata.editor ?
-        VeronaModuleFactory.getBestMatch(
-          unitMetadata.editor,
-          Object.keys(this.moduleService.editors)
-        ) :
-        '';
-      return Promise.resolve(editorId);
+
+      const loadList$ =
+        Object.keys(this.moduleService.editors).length === 0 ?
+          from(this.moduleService.loadList()) :
+          of(undefined);
+
+      return loadList$.pipe(
+        map(() => (unitMetadata.editor ?
+          VeronaModuleFactory.getBestMatch(
+            unitMetadata.editor,
+            Object.keys(this.moduleService.editors)
+          ) :
+          ''))
+      );
     }
-    return Promise.resolve('');
+    return of('');
   }
 
-  async sendUnitDataToEditor() {
-    const editorId = await this.getEditorId();
-    if (editorId) {
-      if (editorId === this.lastEditorId && this.postMessageTarget) {
-        this.sendUnitDefinition(
-          this.workspaceService.selectedUnit$.getValue(),
-          this.workspaceService.getUnitDefinitionStore()
-        );
-      } else {
-        this.postMessageTarget = undefined;
-        this.buildEditor(editorId);
-        // editor gets unit data via ReadyNotification
-      }
-    } else {
-      this.message = this.translateService.instant('workspace.no-editor');
-      this.postMessageTarget = undefined;
-    }
+  sendUnitDataToEditor() {
+    this.getEditorId()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(editorId => {
+        if (editorId) {
+          if (editorId === this.lastEditorId && this.postMessageTarget) {
+            this.sendUnitDefinition(
+              this.workspaceService.selectedUnit$.getValue(),
+              this.workspaceService.getUnitDefinitionStore()
+            );
+          } else {
+            this.postMessageTarget = undefined;
+            this.buildEditor(editorId);
+            // editor gets unit data via ReadyNotification
+          }
+        } else {
+          this.message = this.translateService.instant('workspace.no-editor');
+          this.postMessageTarget = undefined;
+        }
+      });
   }
 
   private postUnitDef(unitDefinitionStore: UnitDefinitionStore): void {
