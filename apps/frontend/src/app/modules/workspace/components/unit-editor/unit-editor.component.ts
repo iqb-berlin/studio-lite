@@ -272,9 +272,9 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     if (this.iFrameElement) {
       this.iFrameElement.srcdoc = '';
       if (editorId) {
-        this.moduleService
-          .getModuleHtml(this.moduleService.editors[editorId])
-          .then(editorData => {
+        from(this.moduleService.getModuleHtml(this.moduleService.editors[editorId]))
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(editorData => {
             if (editorData) {
               this.setupEditorIFrame(editorData);
               this.lastEditorId = editorId;
