@@ -7,6 +7,7 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
@@ -15,16 +16,13 @@ import { ModuleService } from '../../../shared/services/module.service';
 import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
 import { RolePipe } from '../../pipes/role.pipe';
 import { UnitMetadataStore } from '../../classes/unit-metadata-store';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'studio-lite-unit-schemer',
   templateUrl: './unit-schemer.component.html',
   styleUrls: ['./unit-schemer.component.scss'],
   host: { class: 'unit-schemer' },
-  imports: [
-    MatProgressSpinner
-  ]
+  imports: [MatProgressSpinner]
 })
 export class UnitSchemerComponent
   extends SubscribeUnitDefinitionChangesDirective
@@ -159,6 +157,13 @@ export class UnitSchemerComponent
     return of('');
   }
 
+  sendChangeData(): void {
+    this.sendScheme(
+      this.workspaceService.selectedUnit$.getValue(),
+      this.workspaceService.getUnitSchemeStore()
+    );
+  }
+
   private sendScheme(
     unitId: number,
     unitSchemeStore: UnitSchemeStore | undefined
@@ -208,9 +213,7 @@ export class UnitSchemerComponent
           }
         } else {
           this.postMessageTarget = undefined;
-          this.message = this.translateService.instant(
-            'workspace.no-schemer'
-          );
+          this.message = this.translateService.instant('workspace.no-schemer');
         }
       });
   }

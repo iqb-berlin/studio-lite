@@ -334,6 +334,13 @@ export class UnitPreviewComponent
     return of('');
   }
 
+  sendChangeData(): void {
+    this.sendUnitDefinition(
+      this.workspaceService.selectedUnit$.getValue(),
+      this.workspaceService.getUnitDefinitionStore()
+    );
+  }
+
   sendUnitData() {
     this.setPresentationStatus('none');
     this.setResponsesStatus('none');

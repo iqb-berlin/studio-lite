@@ -24,16 +24,13 @@ export abstract class SubscribeUnitDefinitionChangesDirective {
   }
 
   private subscribeUnitDefinitionChanges() {
-    this.workspaceService.getUnitDefinitionStore()?.dataChange
-      .pipe(takeUntil(this.ngUnsubscribe))
+    this.workspaceService
+      .getUnitDefinitionStore()
+      ?.dataChange.pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        this.message = '';
-        this.workspaceService
-          .loadUnitProperties()
-          .pipe(takeUntil(this.ngUnsubscribe))
-          .subscribe(() => this.sendUnitData());
+        this.sendChangeData();
       });
   }
 
-  abstract sendUnitData(): void;
+  abstract sendChangeData(): void;
 }
