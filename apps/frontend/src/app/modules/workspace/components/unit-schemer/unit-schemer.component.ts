@@ -1,9 +1,7 @@
 import {
-  AfterViewInit, Component, ElementRef, OnDestroy, ViewChild
+  AfterViewInit, Component, ElementRef, ViewChild
 } from '@angular/core';
-import {
-  BehaviorSubject, from, Subject, takeUntil
-} from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -24,30 +22,18 @@ import { RolePipe } from '../../pipes/role.pipe';
 })
 export class UnitSchemerComponent
   extends SubscribeUnitDefinitionChangesDirective
-  implements AfterViewInit, OnDestroy {
+  implements AfterViewInit {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
-  private iFrameElement: HTMLIFrameElement | undefined;
-  private postMessageTarget: Window | undefined;
-  private sessionId = '';
-  private lastSchemerId = '';
-  ngUnsubscribe = new Subject<void>();
-  message = '';
-  unitLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
-  loading = false;
 
   constructor(
-    private backendService: WorkspaceBackendService,
+    public backendService: WorkspaceBackendService,
     public workspaceService: WorkspaceService,
-    private snackBar: MatSnackBar,
+    public snackBar: MatSnackBar,
     public moduleService: ModuleService,
     private appService: AppService,
-    private translateService: TranslateService
+    public translateService: TranslateService
   ) {
     super();
-    this.unitLoaded.subscribe(loaded => setTimeout(() => {
-      this.loading = !loaded;
-    })
-    );
   }
 
   ngAfterViewInit(): void {
@@ -149,7 +135,7 @@ export class UnitSchemerComponent
       return;
     }
     if (unitSchemeStore) {
-      this.postUnitScheme(unitSchemeStore);
+      this.postStore(unitSchemeStore);
     } else {
       this.backendService
         .getUnitScheme(this.workspaceService.selectedWorkspaceId, unitId)
@@ -157,7 +143,7 @@ export class UnitSchemerComponent
           if (ues) {
             const newUnitSchemeStore = new UnitSchemeStore(unitId, ues);
             this.workspaceService.setUnitSchemeStore(newUnitSchemeStore);
-            this.postUnitScheme(newUnitSchemeStore);
+            this.postStore(newUnitSchemeStore);
           } else {
             this.snackBar.open(
               this.translateService.instant(
@@ -172,18 +158,21 @@ export class UnitSchemerComponent
   }
 
   onLoadUnitProperties() {
-    this.getSchemerId(this.workspaceService.getUnitMetadataStore())
+    this.getVeronaModuleId(
+      this.workspaceService.getUnitMetadataStore(),
+      'schemer'
+    )
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(schemerId => {
         if (schemerId) {
-          if (schemerId === this.lastSchemerId && this.postMessageTarget) {
+          if (schemerId === this.lastVeronaModulId && this.postMessageTarget) {
             this.sendScheme(
               this.workspaceService.selectedUnit$.getValue(),
               this.workspaceService.getUnitSchemeStore()
             );
           } else {
             this.postMessageTarget = undefined;
-            this.buildSchemer(schemerId);
+            this.buildVeronaModule(schemerId, 'schemer');
             // schemer gets unit data via ReadyNotification
           }
         } else {
@@ -193,7 +182,7 @@ export class UnitSchemerComponent
       });
   }
 
-  private postUnitScheme(unitSchemeStore: UnitSchemeStore): void {
+  postStore(unitSchemeStore: UnitSchemeStore): void {
     const unitScheme = unitSchemeStore.getData();
     const variables =
       this.workspaceService.getUnitDefinitionStore()?.getData().variables ||
@@ -217,45 +206,5 @@ export class UnitSchemerComponent
       );
       this.unitLoaded.next(true);
     }
-  }
-
-  private buildSchemer(schemerId?: string) {
-    if (this.iFrameElement) {
-      this.iFrameElement.srcdoc = '';
-      if (schemerId) {
-        from(
-          this.moduleService.getModuleHtml(
-            this.moduleService.schemers[schemerId]
-          )
-        )
-          .pipe(takeUntil(this.ngUnsubscribe))
-          .subscribe(schemerData => {
-            if (schemerData) {
-              this.setupSchemerIFrame(schemerData);
-              this.lastSchemerId = schemerId;
-            } else {
-              this.message = this.translateService.instant(
-                'workspace.schemer-not-loaded',
-                { id: schemerId }
-              );
-              this.lastSchemerId = '';
-            }
-          });
-      } else {
-        this.lastSchemerId = '';
-      }
-    }
-  }
-
-  private setupSchemerIFrame(schemerHtml: string): void {
-    if (this.iFrameElement && this.iFrameElement.parentElement) {
-      this.iFrameElement.srcdoc = schemerHtml;
-    }
-  }
-
-  ngOnDestroy(): void {
-    this.ngUnsubscribe.next();
-    this.ngUnsubscribe.complete();
-    this.unitLoaded.complete();
   }
 }

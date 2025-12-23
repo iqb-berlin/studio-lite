@@ -1,9 +1,8 @@
 import {
-  AfterViewInit, Component, ElementRef, OnDestroy, ViewChild
+  AfterViewInit, Component, ElementRef, ViewChild
 } from '@angular/core';
 import {
-  BehaviorSubject, from, skip,
-  Subject, takeUntil
+  skip, Subject, takeUntil
 } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
@@ -36,21 +35,11 @@ import {
   host: { class: 'unit-preview' },
   imports: [PreviewBarComponent, MatProgressSpinner]
 })
-export class UnitPreviewComponent
-  extends SubscribeUnitDefinitionChangesDirective
-  implements AfterViewInit, OnDestroy {
+export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirective
+  implements AfterViewInit {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
-
-  private iFrameElement: HTMLIFrameElement | undefined;
-  private sessionId = '';
-  private lastPlayerId = '';
-  ngUnsubscribe = new Subject<void>();
-  postMessageTarget: Window | undefined;
   playerName = '';
   playerApiVersion = 3;
-  unitLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
-  loading = false;
-  message = '';
   pageList: PageData[] = [];
   presentationProgress: Progress = 'none';
   responseProgress: Progress = 'none';
@@ -60,20 +49,16 @@ export class UnitPreviewComponent
 
   constructor(
     private appService: AppService,
-    private snackBar: MatSnackBar,
-    private backendService: WorkspaceBackendService,
+    public snackBar: MatSnackBar,
+    public backendService: WorkspaceBackendService,
     public workspaceService: WorkspaceService,
     public moduleService: ModuleService,
     public previewService: PreviewService,
-    private translateService: TranslateService,
+    public translateService: TranslateService,
     private dialog: MatDialog,
     private router: Router
   ) {
     super();
-    this.unitLoaded.subscribe(loaded => setTimeout(() => {
-      this.loading = !loaded;
-    })
-    );
   }
 
   ngAfterViewInit(): void {
@@ -270,44 +255,6 @@ export class UnitPreviewComponent
       });
   }
 
-  private sendUnitDefinition(
-    unitId: number,
-    unitDefinitionStore: UnitDefinitionStore | undefined
-  ): void {
-    if (!unitId) {
-      this.message = this.translateService.instant('workspace.unit-not-found');
-      this.postMessageTarget = undefined;
-      return;
-    }
-    if (unitId && unitDefinitionStore) {
-      this.postUnitDef(unitDefinitionStore);
-    } else {
-      this.backendService
-        .getUnitDefinition(this.workspaceService.selectedWorkspaceId, unitId)
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(unitDefinitionDto => {
-          if (unitDefinitionDto) {
-            const newUnitDefinitionStore = new UnitDefinitionStore(
-              unitId,
-              unitDefinitionDto
-            );
-            this.workspaceService.setUnitDefinitionStore(
-              newUnitDefinitionStore
-            );
-            this.postUnitDef(newUnitDefinitionStore);
-          } else {
-            this.snackBar.open(
-              this.translateService.instant(
-                'workspace.unit-definition-not-loaded'
-              ),
-              this.translateService.instant('workspace.error'),
-              { duration: 3000 }
-            );
-          }
-        });
-    }
-  }
-
   sendChangeData(): void {
     this.sendUnitDefinition(
       this.workspaceService.selectedUnit$.getValue(),
@@ -319,18 +266,19 @@ export class UnitPreviewComponent
     this.setPresentationStatus('none');
     this.setResponsesStatus('none');
     this.setPageList([], '');
-    this.getPlayerId(this.workspaceService.getUnitMetadataStore())
+    this.getVeronaModuleId(this.workspaceService.getUnitMetadataStore(), 'player')
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(playerId => {
         if (playerId) {
-          if (playerId === this.lastPlayerId && this.postMessageTarget) {
+          if (playerId === this.lastVeronaModulId && this.postMessageTarget) {
             this.sendUnitDefinition(
               this.workspaceService.selectedUnit$.getValue(),
               this.workspaceService.getUnitDefinitionStore()
             );
           } else {
             this.postMessageTarget = undefined;
-            this.buildPlayer(playerId);
+            this.buildVeronaModule(playerId, 'player');
+            this.playerName = playerId;
             // player gets unit data via ReadyNotification
           }
         } else {
@@ -340,7 +288,7 @@ export class UnitPreviewComponent
       });
   }
 
-  private postUnitDef(unitDefinitionStore: UnitDefinitionStore): void {
+  postStore(unitDefinitionStore: UnitDefinitionStore): void {
     const unitDef = unitDefinitionStore.getData();
     if (this.postMessageTarget) {
       if (this.playerApiVersion === 1) {
@@ -399,39 +347,6 @@ export class UnitPreviewComponent
         },
         '*'
       );
-    }
-  }
-
-  private buildPlayer(playerId: string) {
-    if (this.iFrameElement) {
-      this.iFrameElement.srcdoc = '';
-      if (playerId) {
-        from(
-          this.moduleService.getModuleHtml(this.moduleService.players[playerId])
-        )
-          .pipe(takeUntil(this.ngUnsubscribe))
-          .subscribe(playerData => {
-            this.playerName = playerId;
-            if (playerData) {
-              this.setupPlayerIFrame(playerData);
-              this.lastPlayerId = playerId;
-            } else {
-              this.message = this.translateService.instant(
-                'workspace.player-not-loaded',
-                { id: playerId }
-              );
-              this.lastPlayerId = '';
-            }
-          });
-      } else {
-        this.lastPlayerId = '';
-      }
-    }
-  }
-
-  private setupPlayerIFrame(playerHtml: string): void {
-    if (this.iFrameElement && this.iFrameElement.parentElement) {
-      this.iFrameElement.srcdoc = playerHtml;
     }
   }
 
@@ -704,10 +619,5 @@ export class UnitPreviewComponent
         range) +
       min
     ).toString();
-  }
-
-  ngOnDestroy(): void {
-    this.ngUnsubscribe.next();
-    this.ngUnsubscribe.complete();
   }
 }

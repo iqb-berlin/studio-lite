@@ -1,6 +1,5 @@
 import { Directive } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
-import { WorkspaceService } from '../services/workspace.service';
+import { takeUntil } from 'rxjs';
 import { VeronaModuleDirective } from './verona-module.directive';
 
 @Directive({
@@ -8,10 +7,6 @@ import { VeronaModuleDirective } from './verona-module.directive';
   standalone: false
 })
 export abstract class SubscribeUnitDefinitionChangesDirective extends VeronaModuleDirective {
-  abstract workspaceService: WorkspaceService;
-  abstract ngUnsubscribe: Subject<void>;
-  abstract message: string;
-
   addSubscriptionForUnitDefinitionChanges(): void {
     if (this.workspaceService.getUnitDefinitionStore()) {
       this.subscribeUnitDefinitionChanges();
