@@ -1,12 +1,13 @@
 import { Directive } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { WorkspaceService } from '../services/workspace.service';
+import { VeronaModuleDirective } from './verona-module.directive';
 
 @Directive({
   selector: '[studioLiteSubscribeUnitDefinitionChanges]',
   standalone: false
 })
-export abstract class SubscribeUnitDefinitionChangesDirective {
+export abstract class SubscribeUnitDefinitionChangesDirective extends VeronaModuleDirective {
   abstract workspaceService: WorkspaceService;
   abstract ngUnsubscribe: Subject<void>;
   abstract message: string;

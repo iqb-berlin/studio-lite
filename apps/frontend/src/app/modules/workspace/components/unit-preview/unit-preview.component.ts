@@ -2,11 +2,10 @@ import {
   AfterViewInit, Component, ElementRef, OnDestroy, ViewChild
 } from '@angular/core';
 import {
-  BehaviorSubject, from, map, Observable, of, skip,
+  BehaviorSubject, from, skip,
   Subject, takeUntil
 } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
@@ -30,7 +29,6 @@ import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
 import {
   PrintOptionsDialogComponent
 } from '../../../print/components/print-options-dialog/print-options-dialog.component';
-import { UnitMetadataStore } from '../../classes/unit-metadata-store';
 
 @Component({
   templateUrl: './unit-preview.component.html',
@@ -65,7 +63,7 @@ export class UnitPreviewComponent
     private snackBar: MatSnackBar,
     private backendService: WorkspaceBackendService,
     public workspaceService: WorkspaceService,
-    private moduleService: ModuleService,
+    public moduleService: ModuleService,
     public previewService: PreviewService,
     private translateService: TranslateService,
     private dialog: MatDialog,
@@ -308,30 +306,6 @@ export class UnitPreviewComponent
           }
         });
     }
-  }
-
-  private getPlayerId(
-    unitMetadataStore: UnitMetadataStore | undefined
-  ): Observable<string> {
-    if (unitMetadataStore) {
-      const unitMetadata = unitMetadataStore.getData();
-
-      const loadList$ =
-        Object.keys(this.moduleService.players).length === 0 ?
-          from(this.moduleService.loadList()) :
-          of(undefined);
-
-      return loadList$.pipe(
-        map(() => (unitMetadata.player ?
-          VeronaModuleFactory.getBestMatch(
-            unitMetadata.player,
-            Object.keys(this.moduleService.players)
-          ) :
-          '')
-        )
-      );
-    }
-    return of('');
   }
 
   sendChangeData(): void {
