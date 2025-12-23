@@ -356,7 +356,10 @@ export function updatePersonalData(newData: UserData):void {
 }
 
 export function selectUnit(unitName:string) {
-  cy.contains(unitName).should('exist').click({ force: true });
+  cy.contains(unitName)
+    .should('exist').click();
+  // cy.get(`mat-cell:contains("${unitName}")`).click();
+  // cy.get(`.unit-key:contains("${unitName}")`).click();
 }
 
 export function deleteUnit(shortname:string):void {
