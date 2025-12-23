@@ -35,5 +35,5 @@ export abstract class SubscribeUnitDefinitionChangesDirective {
       });
   }
 
-  abstract sendUnitData(): Promise<void>;
+  abstract sendUnitData(): void;
 }
