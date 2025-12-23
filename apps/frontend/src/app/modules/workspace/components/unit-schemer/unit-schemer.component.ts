@@ -2,10 +2,9 @@ import {
   AfterViewInit, Component, ElementRef, OnDestroy, ViewChild
 } from '@angular/core';
 import {
-  BehaviorSubject, from, map, Observable, of, Subject, takeUntil
+  BehaviorSubject, from, Subject, takeUntil
 } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -15,7 +14,6 @@ import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { ModuleService } from '../../../shared/services/module.service';
 import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
 import { RolePipe } from '../../pipes/role.pipe';
-import { UnitMetadataStore } from '../../classes/unit-metadata-store';
 
 @Component({
   selector: 'studio-lite-unit-schemer',
@@ -41,7 +39,7 @@ export class UnitSchemerComponent
     private backendService: WorkspaceBackendService,
     public workspaceService: WorkspaceService,
     private snackBar: MatSnackBar,
-    private moduleService: ModuleService,
+    public moduleService: ModuleService,
     private appService: AppService,
     private translateService: TranslateService
   ) {
@@ -132,30 +130,6 @@ export class UnitSchemerComponent
           }
         }
       });
-  }
-
-  private getSchemerId(
-    unitMetadataStore: UnitMetadataStore | undefined
-  ): Observable<string> {
-    if (unitMetadataStore) {
-      const unitMetadata = unitMetadataStore.getData();
-
-      const loadList$ =
-        Object.keys(this.moduleService.schemers).length === 0 ?
-          from(this.moduleService.loadList()) :
-          of(undefined);
-
-      return loadList$.pipe(
-        map(() => (unitMetadata.schemer ?
-          VeronaModuleFactory.getBestMatch(
-            unitMetadata.schemer,
-            Object.keys(this.moduleService.schemers)
-          ) :
-          '')
-        )
-      );
-    }
-    return of('');
   }
 
   sendChangeData(): void {

@@ -3,10 +3,9 @@ import {
 } from '@angular/core';
 import {
   BehaviorSubject,
-  from, map, Observable, of, Subject, takeUntil
+  from, Subject, takeUntil
 } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ModuleService } from '../../../shared/services/module.service';
@@ -15,7 +14,7 @@ import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { RolePipe } from '../../pipes/role.pipe';
-import { UnitMetadataStore } from '../../classes/unit-metadata-store';
+import { VeronaModuleDirective } from '../../directives/verona-module.directive';
 
 @Component({
   selector: 'studio-lite-unit-editor',
@@ -24,7 +23,7 @@ import { UnitMetadataStore } from '../../classes/unit-metadata-store';
   host: { class: 'unit-editor' },
   imports: [MatProgressSpinner]
 })
-export class UnitEditorComponent implements AfterViewInit, OnDestroy {
+export class UnitEditorComponent extends VeronaModuleDirective implements AfterViewInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
   protected iFrameElement: HTMLIFrameElement | undefined;
   private postMessageTarget: Window | undefined;
@@ -40,10 +39,11 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
     private backendService: WorkspaceBackendService,
     private workspaceService: WorkspaceService,
     private snackBar: MatSnackBar,
-    private moduleService: ModuleService,
+    public moduleService: ModuleService,
     private appService: AppService,
     private translateService: TranslateService
   ) {
+    super();
     this.unitLoaded.subscribe(
       loaded => setTimeout(() => { this.loading = !loaded; }));
   }
@@ -195,28 +195,6 @@ export class UnitEditorComponent implements AfterViewInit, OnDestroy {
           }
         });
     }
-  }
-
-  private getEditorId(unitMetadataStore: UnitMetadataStore | undefined): Observable<string> {
-    if (unitMetadataStore) {
-      const unitMetadata = unitMetadataStore.getData();
-
-      const loadList$ =
-        Object.keys(this.moduleService.editors).length === 0 ?
-          from(this.moduleService.loadList()) :
-          of(undefined);
-
-      return loadList$.pipe(
-        map(() => (unitMetadata.editor ?
-          VeronaModuleFactory.getBestMatch(
-            unitMetadata.editor,
-            Object.keys(this.moduleService.editors)
-          ) :
-          '')
-        )
-      );
-    }
-    return of('');
   }
 
   private onLoadUnitProperties() {
