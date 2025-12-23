@@ -89,9 +89,7 @@ export class UnitPreviewComponent
   private subscribeForPagingModeChanges(): void {
     this.previewService.pagingMode
       .pipe(takeUntil(this.ngUnsubscribe), skip(1))
-      .subscribe(() => {
-        // TODO: Send paging  mode changes');
-      });
+      .subscribe(() => this.postPlayerConfigChangedNotificationMessage());
   }
 
   private isIqbStandardResponse(): boolean {
@@ -395,6 +393,19 @@ export class UnitPreviewComponent
       }
       this.unitLoaded.next(true);
     }
+  }
+
+  private postPlayerConfigChangedNotificationMessage(): void {
+    this.postMessageTarget?.postMessage(
+      {
+        type: 'vopPlayerConfigChangedNotification',
+        sessionId: this.sessionId,
+        playerConfig: {
+          pagingMode: this.previewService.pagingMode.value
+        }
+      },
+      '*'
+    );
   }
 
   postNavigationDenied(): void {
