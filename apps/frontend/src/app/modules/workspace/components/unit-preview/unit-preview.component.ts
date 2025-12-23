@@ -2,6 +2,7 @@ import {
   AfterViewInit, Component, ElementRef, OnDestroy, ViewChild
 } from '@angular/core';
 import {
+  BehaviorSubject, from, map, Observable, of, skip,
   Subject, takeUntil
 } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -14,6 +15,7 @@ import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { CodingSchemeFactory } from '@iqb/responses';
 import { Response } from '@iqbspecs/response/response.interface';
 import { Router } from '@angular/router';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
@@ -28,12 +30,13 @@ import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
 import {
   PrintOptionsDialogComponent
 } from '../../../print/components/print-options-dialog/print-options-dialog.component';
+import { UnitMetadataStore } from '../../classes/unit-metadata-store';
 
 @Component({
   templateUrl: './unit-preview.component.html',
   styleUrls: ['./unit-preview.component.scss'],
   host: { class: 'unit-preview' },
-  imports: [PreviewBarComponent]
+  imports: [PreviewBarComponent, MatProgressSpinner]
 })
 export class UnitPreviewComponent
   extends SubscribeUnitDefinitionChangesDirective
@@ -47,7 +50,8 @@ export class UnitPreviewComponent
   postMessageTarget: Window | undefined;
   playerName = '';
   playerApiVersion = 3;
-
+  unitLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+  loading = false;
   message = '';
   unitId: number = 0;
   pageList: PageData[] = [];
@@ -69,14 +73,26 @@ export class UnitPreviewComponent
     private router: Router
   ) {
     super();
-    this.subscribeForPostMessages();
-    this.subscribeForSelectedUnitChange();
+    this.unitLoaded.subscribe(loaded => setTimeout(() => {
+      this.loading = !loaded;
+    })
+    );
   }
 
   ngAfterViewInit(): void {
+    this.iFrameElement = this.hostingIframe.nativeElement;
+    this.subscribeForPostMessages();
+    this.subscribeForSelectedUnitChange();
+    this.addSubscriptionForUnitDefinitionChanges();
+    this.subscribeForPagingModeChanges();
+  }
+
+  private subscribeForPagingModeChanges(): void {
     this.previewService.pagingMode
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(() => this.initPlayer());
+      .pipe(takeUntil(this.ngUnsubscribe), skip(1))
+      .subscribe(() => {
+        // TODO: Send paging  mode changes');
+      });
   }
 
   private isIqbStandardResponse(): boolean {
@@ -100,8 +116,25 @@ export class UnitPreviewComponent
     this.workspaceService.selectedUnit$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        this.dataParts = null;
-        this.unitStateDataType = null;
+        if (this.unitLoaded.getValue()) {
+          this.unitLoaded.next(false);
+          this.dataParts = null;
+          this.unitStateDataType = null;
+          this.message = '';
+          this.workspaceService
+            .loadUnitProperties()
+            .pipe(takeUntil(this.ngUnsubscribe))
+            .subscribe(() => this.sendUnitData());
+        } else {
+          this.ngUnsubscribe.next();
+          this.ngUnsubscribe.complete();
+          this.ngUnsubscribe = new Subject<void>();
+          this.unitLoaded.next(true);
+          this.subscribeForPostMessages();
+          this.subscribeForSelectedUnitChange();
+          this.addSubscriptionForUnitDefinitionChanges();
+          this.subscribeForPagingModeChanges();
+        }
       });
   }
 
@@ -139,7 +172,7 @@ export class UnitPreviewComponent
               }
               this.sessionId = UnitPreviewComponent.getSessionId();
               this.postMessageTarget = m.source as Window;
-              this.sendUnitData();
+              this.sendUnitDefinition(this.unitId, this.workspaceService.getUnitDefinitionStore());
               break;
 
             case 'vo.FromPlayer.StartedNotification':
@@ -151,12 +184,10 @@ export class UnitPreviewComponent
             case 'vopStateChangedNotification':
               if (msgData.playerState) {
                 const pages = msgData.playerState.validPages;
-                const targets = (Array.isArray(pages)) ? pages
-                  .map((p: { id: string, label: string }) => p.id) : Object.keys(pages);
-                this.setPageList(
-                  targets,
-                  msgData.playerState.currentPage
-                );
+                const targets = Array.isArray(pages) ?
+                  pages.map((p: { id: string; label: string }) => p.id) :
+                  Object.keys(pages);
+                this.setPageList(targets, msgData.playerState.currentPage);
               }
               if (msgData.unitState) {
                 this.setPresentationStatus(
@@ -241,81 +272,96 @@ export class UnitPreviewComponent
       });
   }
 
-  private initPlayer(): void {
-    this.iFrameElement = this.hostingIframe.nativeElement;
-    this.workspaceService.selectedUnit$
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(() => {
-        this.message = '';
-        this.workspaceService
-          .loadUnitProperties()
-          .pipe(takeUntil(this.ngUnsubscribe))
-          .subscribe(() => this.sendUnitData());
-      });
-    this.addSubscriptionForUnitDefinitionChanges();
+  private sendUnitDefinition(
+    unitId: number,
+    unitDefinitionStore: UnitDefinitionStore | undefined
+  ): void {
+    if (!unitId) {
+      this.message = this.translateService.instant('workspace.unit-not-found');
+      this.postMessageTarget = undefined;
+      return;
+    }
+    if (unitId && unitDefinitionStore) {
+      this.postUnitDef(unitDefinitionStore);
+    } else {
+      this.backendService
+        .getUnitDefinition(this.workspaceService.selectedWorkspaceId, unitId)
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(unitDefinitionDto => {
+          if (unitDefinitionDto) {
+            const newUnitDefinitionStore = new UnitDefinitionStore(
+              unitId,
+              unitDefinitionDto
+            );
+            this.workspaceService.setUnitDefinitionStore(
+              newUnitDefinitionStore
+            );
+            this.postUnitDef(newUnitDefinitionStore);
+          } else {
+            this.snackBar.open(
+              this.translateService.instant(
+                'workspace.unit-definition-not-loaded'
+              ),
+              this.translateService.instant('workspace.error'),
+              { duration: 3000 }
+            );
+          }
+        });
+    }
   }
 
-  async sendUnitData() {
+  private getPlayerId(
+    unitMetadataStore: UnitMetadataStore | undefined
+  ): Observable<string> {
+    if (unitMetadataStore) {
+      const unitMetadata = unitMetadataStore.getData();
+
+      const loadList$ =
+        Object.keys(this.moduleService.players).length === 0 ?
+          from(this.moduleService.loadList()) :
+          of(undefined);
+
+      return loadList$.pipe(
+        map(() => (unitMetadata.player ?
+          VeronaModuleFactory.getBestMatch(
+            unitMetadata.player,
+            Object.keys(this.moduleService.players)
+          ) :
+          '')
+        )
+      );
+    }
+    return of('');
+  }
+
+  sendUnitData() {
     this.setPresentationStatus('none');
     this.setResponsesStatus('none');
     this.setPageList([], '');
     this.unitId = this.workspaceService.selectedUnit$.getValue();
     const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
     if (this.unitId && unitMetadataStore) {
-      const unitMetadata = unitMetadataStore.getData();
-      if (Object.keys(this.moduleService.players).length === 0) await this.moduleService.loadList();
-      const playerId = unitMetadata.player ?
-        VeronaModuleFactory.getBestMatch(
-          unitMetadata.player,
-          Object.keys(this.moduleService.players)
-        ) :
-        '';
-      if (playerId) {
-        if (playerId === this.lastPlayerId && this.postMessageTarget) {
-          let unitDefinitionStore =
-            this.workspaceService.getUnitDefinitionStore();
-          if (unitDefinitionStore) {
-            this.postUnitDef(unitDefinitionStore);
+      this.getPlayerId(this.workspaceService.getUnitMetadataStore())
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(playerId => {
+          if (playerId) {
+            if (playerId === this.lastPlayerId && this.postMessageTarget) {
+              this.sendUnitDefinition(
+                this.unitId,
+                this.workspaceService.getUnitDefinitionStore()
+              );
+            } else {
+              this.postMessageTarget = undefined;
+              this.buildPlayer(playerId);
+              // player gets unit data via ReadyNotification
+            }
           } else {
-            this.backendService
-              .getUnitDefinition(
-                this.workspaceService.selectedWorkspaceId,
-                this.unitId
-              )
-              .pipe(takeUntil(this.ngUnsubscribe))
-              .subscribe(unitDefinitionDto => {
-                if (unitDefinitionDto) {
-                  unitDefinitionStore = new UnitDefinitionStore(
-                    this.unitId,
-                    unitDefinitionDto
-                  );
-                  this.workspaceService.setUnitDefinitionStore(
-                    unitDefinitionStore
-                  );
-                  this.postUnitDef(unitDefinitionStore);
-                } else {
-                  this.snackBar.open(
-                    this.translateService.instant(
-                      'workspace.unit-definition-not-loaded'
-                    ),
-                    this.translateService.instant('workspace.error'),
-                    { duration: 3000 }
-                  );
-                }
-              });
+            this.message = this.translateService.instant('workspace.no-player');
+            this.postMessageTarget = undefined;
           }
-        } else {
-          this.message = '';
-          this.buildPlayer(playerId);
-          // player gets unit data via ReadyNotification
-        }
-      } else {
-        this.message = this.translateService.instant('workspace.no-player');
-        this.buildPlayer();
-      }
+        });
     } else {
-      this.message = this.translateService.instant('workspace.unit-not-found');
-      this.buildPlayer();
+      this.postMessageTarget = undefined;
     }
   }
 
@@ -351,6 +397,7 @@ export class UnitPreviewComponent
           '*'
         );
       }
+      this.unitLoaded.next(true);
     }
   }
 
@@ -367,14 +414,15 @@ export class UnitPreviewComponent
     }
   }
 
-  private buildPlayer(playerId?: string) {
-    this.postMessageTarget = undefined;
+  private buildPlayer(playerId: string) {
     if (this.iFrameElement) {
       this.iFrameElement.srcdoc = '';
       if (playerId) {
-        this.moduleService
-          .getModuleHtml(this.moduleService.players[playerId])
-          .then(playerData => {
+        from(
+          this.moduleService.getModuleHtml(this.moduleService.players[playerId])
+        )
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(playerData => {
             this.playerName = playerId;
             if (playerData) {
               this.setupPlayerIFrame(playerData);
@@ -563,8 +611,7 @@ export class UnitPreviewComponent
         { duration: 3000 }
       );
     } else {
-      const dialogRef = this.dialog
-        .open(PrintOptionsDialogComponent);
+      const dialogRef = this.dialog.open(PrintOptionsDialogComponent);
       dialogRef
         .afterClosed()
         .pipe(takeUntil(this.ngUnsubscribe))
@@ -578,21 +625,23 @@ export class UnitPreviewComponent
 
   openPrintView(options: { key: string; value: boolean | number }[]): void {
     const printOptions = options
-      .filter((option: { key: string; value: boolean | number }) => option.value === true)
+      .filter(
+        (option: { key: string; value: boolean | number }) => option.value === true
+      )
       .map((option: { key: string; value: boolean | number }) => option.key);
-    const printPreviewHeight = options
-      .find(option => option.key === 'printPreviewHeight')?.value || 0;
-    const url = this.router
-      .serializeUrl(this.router
-        .createUrlTree(['/print'], {
-          queryParams: {
-            printPreviewHeight: printPreviewHeight,
-            printOptions: printOptions,
-            unitIds: [this.unitId],
-            workspaceId: this.workspaceService.selectedWorkspaceId,
-            workspaceGroupId: this.workspaceService.groupId
-          }
-        }));
+    const printPreviewHeight =
+      options.find(option => option.key === 'printPreviewHeight')?.value || 0;
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/print'], {
+        queryParams: {
+          printPreviewHeight: printPreviewHeight,
+          printOptions: printOptions,
+          unitIds: [this.unitId],
+          workspaceId: this.workspaceService.selectedWorkspaceId,
+          workspaceGroupId: this.workspaceService.groupId
+        }
+      })
+    );
     window.open(`#${url}`, '_blank');
   }
 
@@ -629,7 +678,8 @@ export class UnitPreviewComponent
         .filter(vc => vc.codes.length > 0)
         .map(vc => (vc.alias ? vc.alias : vc.id));
       const newResponses = CodingSchemeFactory.code(
-        responses!, this.workspaceService.codingScheme.variableCodings
+        responses!,
+        this.workspaceService.codingScheme.variableCodings
       );
       this.showCodingResults(newResponses, varsWithCodes);
     }
@@ -656,8 +706,13 @@ export class UnitPreviewComponent
     const range = max - min + 1; // Anzahl möglicher Werte
     const maxValid = Math.floor(2 ** 32 / range) * range; // Bias vermeiden
 
-    return ((Array.from(window.crypto.getRandomValues(new Uint32Array(1)))
-      .find(rand => rand < maxValid)! % range) + min).toString();
+    return (
+      (Array.from(window.crypto.getRandomValues(new Uint32Array(1))).find(
+        rand => rand < maxValid
+      )! %
+        range) +
+      min
+    ).toString();
   }
 
   ngOnDestroy(): void {
