@@ -53,7 +53,6 @@ export class UnitPreviewComponent
   unitLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
   loading = false;
   message = '';
-  unitId: number = 0;
   pageList: PageData[] = [];
   presentationProgress: Progress = 'none';
   responseProgress: Progress = 'none';
@@ -172,7 +171,10 @@ export class UnitPreviewComponent
               }
               this.sessionId = UnitPreviewComponent.getSessionId();
               this.postMessageTarget = m.source as Window;
-              this.sendUnitDefinition(this.unitId, this.workspaceService.getUnitDefinitionStore());
+              this.sendUnitDefinition(
+                this.workspaceService.selectedUnit$.getValue(),
+                this.workspaceService.getUnitDefinitionStore()
+              );
               break;
 
             case 'vo.FromPlayer.StartedNotification':
@@ -338,31 +340,25 @@ export class UnitPreviewComponent
     this.setPresentationStatus('none');
     this.setResponsesStatus('none');
     this.setPageList([], '');
-    this.unitId = this.workspaceService.selectedUnit$.getValue();
-    const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
-    if (this.unitId && unitMetadataStore) {
-      this.getPlayerId(this.workspaceService.getUnitMetadataStore())
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(playerId => {
-          if (playerId) {
-            if (playerId === this.lastPlayerId && this.postMessageTarget) {
-              this.sendUnitDefinition(
-                this.unitId,
-                this.workspaceService.getUnitDefinitionStore()
-              );
-            } else {
-              this.postMessageTarget = undefined;
-              this.buildPlayer(playerId);
-              // player gets unit data via ReadyNotification
-            }
+    this.getPlayerId(this.workspaceService.getUnitMetadataStore())
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(playerId => {
+        if (playerId) {
+          if (playerId === this.lastPlayerId && this.postMessageTarget) {
+            this.sendUnitDefinition(
+              this.workspaceService.selectedUnit$.getValue(),
+              this.workspaceService.getUnitDefinitionStore()
+            );
           } else {
-            this.message = this.translateService.instant('workspace.no-player');
             this.postMessageTarget = undefined;
+            this.buildPlayer(playerId);
+            // player gets unit data via ReadyNotification
           }
-        });
-    } else {
-      this.postMessageTarget = undefined;
-    }
+        } else {
+          this.message = this.translateService.instant('workspace.no-player');
+          this.postMessageTarget = undefined;
+        }
+      });
   }
 
   private postUnitDef(unitDefinitionStore: UnitDefinitionStore): void {
@@ -595,7 +591,10 @@ export class UnitPreviewComponent
       );
     } else {
       this.backendService
-        .getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
+        .getUnitScheme(
+          this.workspaceService.selectedWorkspaceId,
+          this.workspaceService.selectedUnit$.getValue()
+        )
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(schemeData => {
           this.checkCoding(schemeData);
@@ -636,7 +635,7 @@ export class UnitPreviewComponent
         queryParams: {
           printPreviewHeight: printPreviewHeight,
           printOptions: printOptions,
-          unitIds: [this.unitId],
+          unitIds: [this.workspaceService.selectedUnit$.getValue()],
           workspaceId: this.workspaceService.selectedWorkspaceId,
           workspaceGroupId: this.workspaceService.groupId
         }
