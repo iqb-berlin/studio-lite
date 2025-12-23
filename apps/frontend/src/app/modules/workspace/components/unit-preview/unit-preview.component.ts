@@ -121,7 +121,7 @@ export class UnitPreviewComponent
           this.workspaceService
             .loadUnitProperties()
             .pipe(takeUntil(this.ngUnsubscribe))
-            .subscribe(() => this.sendUnitData());
+            .subscribe(() => this.onLoadUnitProperties());
         } else {
           this.ngUnsubscribe.next();
           this.ngUnsubscribe.complete();
@@ -341,7 +341,7 @@ export class UnitPreviewComponent
     );
   }
 
-  sendUnitData() {
+  onLoadUnitProperties() {
     this.setPresentationStatus('none');
     this.setResponsesStatus('none');
     this.setPageList([], '');

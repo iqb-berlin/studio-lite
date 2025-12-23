@@ -48,7 +48,8 @@ export class UnitSchemerComponent
     super();
     this.unitLoaded.subscribe(loaded => setTimeout(() => {
       this.loading = !loaded;
-    }));
+    })
+    );
   }
 
   ngAfterViewInit(): void {
@@ -68,7 +69,7 @@ export class UnitSchemerComponent
           this.workspaceService
             .loadUnitProperties()
             .pipe(takeUntil(this.ngUnsubscribe))
-            .subscribe(() => this.sendUnitData());
+            .subscribe(() => this.onLoadUnitProperties());
         } else {
           this.ngUnsubscribe.next();
           this.ngUnsubscribe.complete();
@@ -196,7 +197,7 @@ export class UnitSchemerComponent
     }
   }
 
-  sendUnitData() {
+  onLoadUnitProperties() {
     this.getSchemerId(this.workspaceService.getUnitMetadataStore())
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(schemerId => {
