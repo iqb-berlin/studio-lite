@@ -1,19 +1,96 @@
-import { Directive } from '@angular/core';
+import { Directive, OnDestroy } from '@angular/core';
 import {
-  from, map, Observable, of
+  BehaviorSubject, from, map, Observable, of, Subject, takeUntil
 } from 'rxjs';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
+import { TranslateService } from '@ngx-translate/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { UnitMetadataStore } from '../classes/unit-metadata-store';
 import { ModuleService } from '../../shared/services/module.service';
+import { VeronaModuleClass } from '../../shared/models/verona-module.class';
+import { UnitDefinitionStore } from '../classes/unit-definition-store';
+import { WorkspaceBackendService } from '../services/workspace-backend.service';
+import { WorkspaceService } from '../services/workspace.service';
 
 @Directive({
   selector: '[veronaModule]',
   standalone: false
 })
-export abstract class VeronaModuleDirective {
+export abstract class VeronaModuleDirective implements OnDestroy {
   abstract moduleService: ModuleService;
+  abstract translateService: TranslateService;
+  abstract snackBar: MatSnackBar;
+  abstract backendService: WorkspaceBackendService;
+  abstract workspaceService: WorkspaceService;
 
-  private getVeronaModuleId(
+  postMessageTarget: Window | undefined;
+  sessionId = '';
+  message = '';
+  iFrameElement: HTMLIFrameElement | undefined;
+  lastVeronaModulId = '';
+  ngUnsubscribe = new Subject<void>();
+  unitLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+  loading = false;
+
+  constructor() {
+    this.unitLoaded.subscribe(loaded => setTimeout(() => {
+      this.loading = !loaded;
+    })
+    );
+  }
+
+  abstract postStore(store: unknown): void;
+
+  sendUnitDefinition(
+    unitId: number,
+    unitDefinitionStore: UnitDefinitionStore | undefined
+  ): void {
+    if (!unitId) {
+      this.message = this.translateService.instant('workspace.unit-not-found');
+      this.postMessageTarget = undefined;
+      return;
+    }
+    if (unitId && unitDefinitionStore) {
+      this.postStore(unitDefinitionStore);
+    } else {
+      this.backendService
+        .getUnitDefinition(this.workspaceService.selectedWorkspaceId, unitId)
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(unitDefinitionDto => {
+          if (unitDefinitionDto) {
+            const newUnitDefinitionStore = new UnitDefinitionStore(
+              unitId,
+              unitDefinitionDto
+            );
+            this.workspaceService.setUnitDefinitionStore(
+              newUnitDefinitionStore
+            );
+            this.postStore(newUnitDefinitionStore);
+          } else {
+            this.snackBar.open(
+              this.translateService.instant(
+                'workspace.unit-definition-not-loaded'
+              ),
+              this.translateService.instant('workspace.error'),
+              { duration: 3000 }
+            );
+          }
+        });
+    }
+  }
+
+  private getModulesByType(
+    moduleType: 'player' | 'editor' | 'schemer'
+  ): Record<string, VeronaModuleClass> {
+    const serviceProperties: Record<string, keyof ModuleService> = {
+      player: 'players',
+      editor: 'editors',
+      schemer: 'schemers'
+    };
+    return this.moduleService[serviceProperties[moduleType]] as Record<string, VeronaModuleClass>;
+  }
+
+  getVeronaModuleId(
     unitMetadataStore: UnitMetadataStore | undefined,
     moduleType: 'player' | 'editor' | 'schemer'
   ): Observable<string> {
@@ -23,15 +100,7 @@ export abstract class VeronaModuleDirective {
 
     const unitMetadata = unitMetadataStore.getData();
     const metadataKey = unitMetadata[moduleType];
-
-    const serviceProperties: Record<string, keyof ModuleService> = {
-      player: 'players',
-      editor: 'editors',
-      schemer: 'schemers'
-    };
-
-    const serviceProperty = serviceProperties[moduleType];
-    const modules = this.moduleService[serviceProperty] as object;
+    const modules = this.getModulesByType(moduleType);
 
     const loadList$ =
       Object.keys(modules).length === 0 ?
@@ -40,7 +109,7 @@ export abstract class VeronaModuleDirective {
 
     return loadList$.pipe(
       map(() => {
-        const updatedModules = this.moduleService[serviceProperty] as object;
+        const updatedModules = this.getModulesByType(moduleType);
         return metadataKey ?
           VeronaModuleFactory.getBestMatch(
             metadataKey,
@@ -51,21 +120,50 @@ export abstract class VeronaModuleDirective {
     );
   }
 
-  getSchemerId(
-    unitMetadataStore: UnitMetadataStore | undefined
-  ): Observable<string> {
-    return this.getVeronaModuleId(unitMetadataStore, 'schemer');
+  protected buildVeronaModule(
+    moduleId: string | undefined,
+    moduleType: 'player' | 'editor' | 'schemer'
+  ): void {
+    if (!this.iFrameElement) {
+      return;
+    }
+
+    this.iFrameElement.srcdoc = '';
+
+    if (!moduleId) {
+      this.lastVeronaModulId = '';
+      return;
+    }
+
+    const modules = this.getModulesByType(moduleType);
+    const moduleFile = modules[moduleId];
+
+    from(this.moduleService.getModuleHtml(moduleFile))
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(moduleData => {
+        if (moduleData) {
+          this.setupIFrame(moduleData);
+          this.lastVeronaModulId = moduleId;
+          this.message = '';
+        } else {
+          this.message = this.translateService.instant(
+            `workspace.${moduleType}-not-loaded`,
+            { id: moduleId }
+          );
+          this.lastVeronaModulId = '';
+        }
+      });
   }
 
-  getPlayerId(
-    unitMetadataStore: UnitMetadataStore | undefined
-  ): Observable<string> {
-    return this.getVeronaModuleId(unitMetadataStore, 'player');
+  private setupIFrame(editorHtml: string): void {
+    if (this.iFrameElement && this.iFrameElement.parentElement) {
+      this.iFrameElement.srcdoc = editorHtml;
+    }
   }
 
-  getEditorId(
-    unitMetadataStore: UnitMetadataStore | undefined
-  ): Observable<string> {
-    return this.getVeronaModuleId(unitMetadataStore, 'editor');
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
+    this.unitLoaded.complete();
   }
 }

@@ -1,10 +1,7 @@
 import {
-  AfterViewInit, Component, ElementRef, OnDestroy, ViewChild
+  AfterViewInit, Component, ElementRef, ViewChild
 } from '@angular/core';
-import {
-  BehaviorSubject,
-  from, Subject, takeUntil
-} from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -23,29 +20,19 @@ import { VeronaModuleDirective } from '../../directives/verona-module.directive'
   host: { class: 'unit-editor' },
   imports: [MatProgressSpinner]
 })
-export class UnitEditorComponent extends VeronaModuleDirective implements AfterViewInit, OnDestroy {
+export class UnitEditorComponent extends VeronaModuleDirective implements AfterViewInit {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
-  protected iFrameElement: HTMLIFrameElement | undefined;
-  private postMessageTarget: Window | undefined;
-  private sessionId = '';
-  private lastEditorId = '';
-  private ngUnsubscribe = new Subject<void>();
   editorApiVersion = 1;
-  message = '';
-  unitLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
-  loading = false;
 
   constructor(
-    private backendService: WorkspaceBackendService,
-    private workspaceService: WorkspaceService,
-    private snackBar: MatSnackBar,
+    public backendService: WorkspaceBackendService,
+    public workspaceService: WorkspaceService,
+    public snackBar: MatSnackBar,
     public moduleService: ModuleService,
     private appService: AppService,
-    private translateService: TranslateService
+    public translateService: TranslateService
   ) {
     super();
-    this.unitLoaded.subscribe(
-      loaded => setTimeout(() => { this.loading = !loaded; }));
   }
 
   ngAfterViewInit(): void {
@@ -159,57 +146,19 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
       });
   }
 
-  private sendUnitDefinition(
-    unitId: number,
-    unitDefinitionStore: UnitDefinitionStore | undefined
-  ): void {
-    if (!unitId) {
-      this.message = this.translateService.instant('workspace.unit-not-found');
-      this.postMessageTarget = undefined;
-      return;
-    }
-    if (unitId && unitDefinitionStore) {
-      this.postUnitDef(unitDefinitionStore);
-    } else {
-      this.backendService
-        .getUnitDefinition(this.workspaceService.selectedWorkspaceId, unitId)
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(unitDefinitionDto => {
-          if (unitDefinitionDto) {
-            const newUnitDefinitionStore = new UnitDefinitionStore(
-              unitId,
-              unitDefinitionDto
-            );
-            this.workspaceService.setUnitDefinitionStore(
-              newUnitDefinitionStore
-            );
-            this.postUnitDef(newUnitDefinitionStore);
-          } else {
-            this.snackBar.open(
-              this.translateService.instant(
-                'workspace.unit-definition-not-loaded'
-              ),
-              this.translateService.instant('workspace.error'),
-              { duration: 3000 }
-            );
-          }
-        });
-    }
-  }
-
   private onLoadUnitProperties() {
-    this.getEditorId(this.workspaceService.getUnitMetadataStore())
+    this.getVeronaModuleId(this.workspaceService.getUnitMetadataStore(), 'editor')
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(editorId => {
         if (editorId) {
-          if (editorId === this.lastEditorId && this.postMessageTarget) {
+          if (editorId === this.lastVeronaModulId && this.postMessageTarget) {
             this.sendUnitDefinition(
               this.workspaceService.selectedUnit$.getValue(),
               this.workspaceService.getUnitDefinitionStore()
             );
           } else {
             this.postMessageTarget = undefined;
-            this.buildEditor(editorId);
+            this.buildVeronaModule(editorId, 'editor');
             // editor gets unit data via ReadyNotification
           }
         } else {
@@ -219,7 +168,7 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
       });
   }
 
-  private postUnitDef(unitDefinitionStore: UnitDefinitionStore): void {
+  postStore(unitDefinitionStore: UnitDefinitionStore): void {
     const unitDef = unitDefinitionStore.getData();
     if (this.postMessageTarget) {
       if (this.editorApiVersion === 1) {
@@ -250,42 +199,5 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
       }
       this.unitLoaded.next(true);
     }
-  }
-
-  private buildEditor(editorId?: string) {
-    if (this.iFrameElement) {
-      this.iFrameElement.srcdoc = '';
-      if (editorId) {
-        from(
-          this.moduleService.getModuleHtml(this.moduleService.editors[editorId])
-        ).pipe(takeUntil(this.ngUnsubscribe))
-          .subscribe(editorData => {
-            if (editorData) {
-              this.setupEditorIFrame(editorData);
-              this.lastEditorId = editorId;
-            } else {
-              this.message = this.translateService.instant(
-                'workspace.editor-not-loaded',
-                { id: editorId }
-              );
-              this.lastEditorId = '';
-            }
-          });
-      } else {
-        this.lastEditorId = '';
-      }
-    }
-  }
-
-  private setupEditorIFrame(editorHtml: string): void {
-    if (this.iFrameElement && this.iFrameElement.parentElement) {
-      this.iFrameElement.srcdoc = editorHtml;
-    }
-  }
-
-  ngOnDestroy(): void {
-    this.ngUnsubscribe.next();
-    this.ngUnsubscribe.complete();
-    this.unitLoaded.complete();
   }
 }
