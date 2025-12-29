@@ -2,7 +2,6 @@ import {
   addFirstUser,
   createNewUser,
   deleteFirstUser,
-  deleteUser,
   login,
   createGroup,
   createWs,
@@ -10,7 +9,8 @@ import {
   deleteGroup,
   logout,
   makeAdminOfGroup,
-  grantRemovePrivilegeAtUser
+  grantRemovePrivilegeAtUser,
+  deleteUsers
 } from '../../support/util';
 import { AccessLevel, newUser, UserData } from '../../support/testData';
 
@@ -27,7 +27,7 @@ describe('UI Group admin workspace check', () => {
   });
   after(() => {
     deleteFirstUser();
-    // cy.resetDb();
+    cy.pause();
   });
 
   it('prepares the context', () => {
@@ -96,11 +96,8 @@ describe('UI Group admin workspace check', () => {
 
   it('deletes the group, and users', () => {
     logout();
-    cy.wait(200);
     login(Cypress.env('username'), Cypress.env('password'));
-    cy.findAdminGroupSettings(group1).should('exist');
     deleteGroup(group1);
-    deleteUser('normaluser');
-    deleteUser('groupadminuser');
+    deleteUsers(['normaluser', 'groupadminuser']);
   });
 });

@@ -6,7 +6,6 @@ import {
 } from '../../support/testData';
 import {
   clickIndexTabWsgAdmin,
-  getButtonReview,
   goToWsMenu,
   grantRemovePrivilegeAtWs,
   importExercise,
@@ -33,32 +32,32 @@ describe('Review:', () => {
   });
 
   it('should add a review', () => {
+    cy.visit('/');
+    cy.visitWs(ws1);
     goToWsMenu();
-    cy.get('span:contains("Aufgabenfolgen")').click();
-    cy.get('studio-lite-add-review-button').within(() => {
-      cy.contains('button', 'add').click();
+    cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
+    cy.get('[data-cy="workspace-review-menu-add-review-button"]').click();
+    cy.translate('de').then(json => {
+      cy.get(`input[placeholder="${json.workspace['new-review-name']}"]`)
+        .should('exist')
+        .clear()
+        .type(review);
+      cy.get('.mat-mdc-dialog-component-host > .mat-mdc-dialog-actions').within(
+        () => {
+          cy.clickButton(json.workspace.save);
+        }
+      );
+      selectCheckBox('M6_AK0011');
+      selectCheckBox('M6_AK0012');
+      cy.get('studio-lite-save-changes').within(() => {
+        cy.clickButton(json.workspace.save);
+      });
+      cy.get('[data-cy="workspace-review-close"]').click();
     });
-    cy.get('input[placeholder="Name der Aufgabenfolge"]')
-      .should('exist')
-      .clear()
-      .type(review);
-
-    cy.get('.mat-mdc-dialog-component-host > .mat-mdc-dialog-actions').within(() => {
-      cy.clickButton('Speichern');
-    });
-
-    selectCheckBox('M6_AK0011');
-    selectCheckBox('M6_AK0012');
-
-    cy.get('studio-lite-save-changes').within(() => {
-      cy.clickButton('Speichern');
-    });
-    cy.clickButton('Schließen');
   });
 
   it('should check that review exists', () => {
     cy.visit('/');
-
     cy.get('studio-lite-user-reviews-area').within(() => {
       cy.get(`a:contains("${review}")`).should('exist');
     });
@@ -69,17 +68,11 @@ describe('Review:', () => {
     cy.get('studio-lite-user-reviews-area').within(() => {
       cy.get(`a:contains("${review}")`).click();
     });
-
-    // Headers should exit
     cy.get('.start-data').should('exist');
-
-    // unit nav bar should exit
     cy.get('studio-lite-unit-nav').within(() => {
       cy.get('i:contains("chevron_left")').should('exist');
       cy.get('i:contains("chevron_right")').should('exist');
-      // go to the next page
       cy.get('.mat-mdc-list-item:contains("1")').should('exist');
-      // cy.contains('.mat-mdc-list-item', '1').click();
     });
   });
 
@@ -99,29 +92,39 @@ describe('Review:', () => {
   it('should export a review', () => {
     cy.visitWs(ws1);
     goToWsMenu();
-    getButtonReview(review, 'get_app');
-    cy.clickButton('Herunterladen');
-    cy.clickButton('Schließen');
+    cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
+    cy.contains('mat-row', review).click();
+    cy.get('[data-cy="workspace-review-menu-export-review-button"]').click();
+    cy.translate('de').then(json => {
+      cy.clickButton(json['unit-download'].dialog['ok-button-label']);
+    });
+    cy.get('[data-cy="workspace-review-close"]').click();
   });
 
   it('should print a review', () => {
     cy.visitWs(ws1);
     goToWsMenu();
-    getButtonReview(review, 'print');
-    cy.clickButton('Drucken');
-    cy.clickButton('Schließen');
+    cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
+    cy.contains('mat-row', review).click();
+    cy.get('[data-cy="workspace-review-menu-print-review-button"]').click();
+    cy.translate('de').then(json => {
+      cy.clickButton(json.workspace.print);
+    });
+    cy.get('[data-cy="workspace-review-close"]').click();
   });
 
   it('should modify a review', () => {
     cy.visitWs(ws1);
     goToWsMenu();
-    cy.get('span:contains("Aufgabenfolgen")').click();
+    cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
     cy.contains('mat-row', review).click();
     selectCheckBox('M6_AK0013');
-    cy.get('studio-lite-save-changes').within(() => {
-      cy.clickButton('Speichern');
+    cy.translate('de').then(json => {
+      cy.get('studio-lite-save-changes').within(() => {
+        cy.clickButton(json.workspace.save);
+      });
     });
-    cy.clickButton('Schließen');
+    cy.get('[data-cy="workspace-review-close"]').click();
   });
 
   it('should check that the review was modified', () => {
@@ -129,13 +132,11 @@ describe('Review:', () => {
     cy.get('studio-lite-user-reviews-area').within(() => {
       cy.get(`a:contains("${review}")`).click();
     });
-    // unit nav bar should exit
+    cy.reload();
+    cy.wait(1000);
     cy.get('studio-lite-unit-nav').within(() => {
       cy.get('i:contains("chevron_left")').should('exist');
       cy.get('i:contains("chevron_right")').should('exist');
-      // checks that the review is updated
-      cy.reload();
-      cy.wait(1000);
       cy.get('.mat-mdc-list-item:contains("3")').should('exist');
     });
   });
@@ -143,8 +144,12 @@ describe('Review:', () => {
   it('should delete the review', () => {
     cy.visitWs(ws1);
     goToWsMenu();
-    getButtonReview(review, 'delete');
-    cy.clickButton('Löschen');
-    cy.clickButton('Schließen');
+    cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
+    cy.contains('mat-row', review).click();
+    cy.get('[data-cy="workspace-review-menu-delete-review-button"]').click();
+    cy.translate('de').then(json => {
+      cy.clickButton(json.workspace.delete);
+    });
+    cy.get('[data-cy="workspace-review-close"]').click();
   });
 });
