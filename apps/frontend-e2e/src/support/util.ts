@@ -117,11 +117,11 @@ export function addResourcePackage(resource: string):void {
 export function createNewUser(newUser: UserData):void {
   clickIndexTabAdmin('users');
   cy.get('[data-cy="admin-users-menu-add-user"]').click();
-  editInput('admin-edit-user-username', newUser.username);
-  editInput('admin-edit-user-lastname', newUser.lastName);
-  editInput('admin-edit-user-firstname', newUser.firstName);
-  editInput('admin-edit-user-email', newUser.email);
-  editInput('admin-edit-user-password', newUser.password);
+  editInput('admin-edit-user-username', newUser.username, false);
+  editInput('admin-edit-user-lastname', newUser.lastName, false);
+  editInput('admin-edit-user-firstname', newUser.firstName, false);
+  editInput('admin-edit-user-email', newUser.email, false);
+  editInput('admin-edit-user-password', newUser.password, false);
   cy.clickButtonWithResponseCheck('Anlegen', [201], '/api/admin/users', 'POST', 'addUser');
 }
 
@@ -329,29 +329,36 @@ export function logout() {
   cy.get('[data-cy="home-imprint-button"]').should('exist');
 }
 
-export function editInput(data: string, content: string | undefined) {
+export function editInput(data: string, content: string | undefined, force: boolean) {
   if (content != null && content !== '') {
-    cy.get(`[data-cy="${data}"]`)
-      .should('exist')
-      .type(content, { force: true });
+    if (force) {
+      cy.get(`[data-cy="${data}"]`)
+        .should('exist')
+        .type(content, { force: true });
+    } else {
+      cy.get(`[data-cy="${data}"]`)
+        .should('exist')
+        .type(content);
+    }
   }
 }
 
 export function changePassword(newPass:string, oldPass:string):void {
   cy.get('[data-cy="goto-user-menu"]').click();
   cy.get('[data-cy="user-menu-change-password"]').click();
-  editInput('change-password-password', oldPass);
-  editInput('change-password-new-password', newPass);
-  editInput('change-password-new2-password', newPass);
+  editInput('change-password-password', oldPass, false);
+  editInput('change-password-new-password', newPass, false);
+  cy.wait(50);
+  editInput('change-password-new2-password', newPass, true);
   cy.clickButtonWithResponseCheck('Speichern', [200], '/api/password', 'PATCH', 'updatePass');
 }
 
 export function updatePersonalData(newData: UserData):void {
   cy.get('[data-cy="goto-user-menu"]').click();
   cy.get('[data-cy="user-menu-edit-my-data"]').click();
-  editInput('edit-my-data-lastname', <string>newData.lastName);
-  editInput('edit-my-data-firstname', <string>newData.firstName);
-  editInput('edit-my-data-email', <string>newData.email);
+  editInput('edit-my-data-lastname', <string>newData.lastName, false);
+  editInput('edit-my-data-firstname', <string>newData.firstName, false);
+  editInput('edit-my-data-email', <string>newData.email, false);
   cy.clickButtonWithResponseCheck('Speichern', [200], '/api/my-data', 'PATCH', 'updateData');
 }
 

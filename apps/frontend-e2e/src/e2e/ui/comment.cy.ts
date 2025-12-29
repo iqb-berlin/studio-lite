@@ -26,6 +26,7 @@ describe('Comment:', () => {
   });
 
   it('should add comments', () => {
+    cy.get('.cdk-overlay-backdrop').eq(0).click();
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.get('tiptap-editor').type('Neue allgemein Kommentar 1');
