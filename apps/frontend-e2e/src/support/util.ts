@@ -122,7 +122,7 @@ export function createNewUser(newUser: UserData):void {
   editInput('admin-edit-user-firstname', newUser.firstName);
   editInput('admin-edit-user-email', newUser.email);
   editInput('admin-edit-user-password', newUser.password);
-  cy.clickButtonWithResponseCheck('Anlegen', [201], '/api/admin/users', 'POST', 'addUser');
+  cy.clickDataCyWithResponseCheck('[data-cy="admin-edit-user-button"]', [201], '/api/admin/users', 'POST', 'addUser');
 }
 
 export function deleteUser(user: string):void {
@@ -131,7 +131,10 @@ export function deleteUser(user: string):void {
   clickIndexTabAdmin('users');
   selectCheckboxUser(user);
   cy.get('[data-cy="admin-users-menu-delete-users"]').click();
-  cy.clickButtonWithResponseCheck('Löschen', [200], '/api/admin/users*', 'DELETE', 'deleteUser');
+  // cy.clickButtonWithResponseCheck('Löschen', [200], '/api/admin/users*', 'DELETE', 'deleteUser');
+  cy.translate('de').then(json => {
+    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/users*', 'DELETE', 'deleteUser');
+  });
 }
 
 export function deleteUsers(users: string[]):void {
@@ -140,15 +143,18 @@ export function deleteUsers(users: string[]):void {
     selectCheckboxUser(user);
   });
   cy.get('[data-cy="admin-users-menu-delete-users"]').click();
-  cy.clickButtonWithResponseCheck('Löschen', [200], '/api/admin/users*', 'DELETE', 'deleteUser');
+  cy.translate('de').then(json => {
+    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/users*', 'DELETE', 'deleteUser');
+  });
 }
 
 export function createGroup(group:string):void {
   clickIndexTabAdmin('workspace-groups');
   cy.get('mat-icon').contains('add').click();
-  cy.get('input[placeholder="Name"]')
-    .type(group);
-  cy.clickButtonWithResponseCheck('Anlegen', [201], '/api/admin/workspace-groups', 'POST', 'createWsGroup');
+  cy.translate('de').then(json => {
+    cy.get(`input[placeholder="${json.admin['group-name']}"]`).type(group);
+    cy.clickButtonWithResponseCheck(json.create, [201], '/api/admin/workspace-groups', 'POST', 'createWsGroup');
+  });
 }
 
 export function createWs(ws:string, group:string):void {
@@ -159,9 +165,10 @@ export function createWs(ws:string, group:string):void {
   cy.get('mat-icon')
     .contains('add')
     .click();
-  cy.get('input[placeholder="Bitte Namen eingeben"]')
-    .type(ws);
-  cy.clickButtonWithResponseCheck('Anlegen', [201], '/api/group-admin/workspaces*', 'POST', 'createWs');
+  cy.translate('de').then(json => {
+    cy.get(`input[placeholder="${json['wsg-admin']['enter-name']}"]`).type(ws);
+    cy.clickButtonWithResponseCheck(json.create, [201], '/api/group-admin/workspaces*', 'POST', 'createWs');
+  });
 }
 
 export function grantRemovePrivilegeAtWs(users:string[], ws: string, rights:AccessLevel[]):void {
@@ -436,7 +443,10 @@ export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData)
   cy.get(`mat-option:contains("${ws}")`).click();
   cy.get(`mat-cell:contains("${unit1.shortname}")`).prev().click();
   cy.pause();
-  cy.clickButton('Fortsetzen');
+  cy.translate('de').then(json => {
+    cy.clickDialogButton(json.continue);
+    // cy.clickButton('Fortsetzen');
+  });
   cy.get('input[placeholder="Kurzname"]')
     .should('exist')
     .clear()

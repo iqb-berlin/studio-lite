@@ -139,6 +139,7 @@ describe('UI check: workspace', () => {
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-metadata"]').click();
     selectListUnits([unit3.shortname, newUnit.shortname]);
+    cy.pause();
     // eslint-disable-next-line max-len
     cy.clickButtonWithResponseCheck('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
     cy.clickButton('Herunterladen');
