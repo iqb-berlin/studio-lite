@@ -15,19 +15,19 @@ describe('Definition:', () => {
     deleteBasicSpecCy();
   });
 
-  it('should import the units to test', () => {
+  it('imports the units', () => {
     cy.visitWs(ws1);
     importExercise('test_studio_units_download.zip');
   });
 
-  it('should click definition of a unit', () => {
+  it('selects the definition of a unit', () => {
     cy.get('.cdk-overlay-backdrop').eq(0).click();
     selectUnit('M6_AK0012');
     clickIndexTabWorkspace('editor');
     cy.wait(100);
   });
 
-  it('should edit and overwrite the unit', () => {
+  it('should edit the M6_AK0011', () => {
     selectUnit('M6_AK0011');
     cy.wait(15);
     selectUnit('M6_AK0012');
@@ -43,24 +43,15 @@ describe('Definition:', () => {
     cy.get('[data-cy="workspace-save-unit"]').click();
   });
 
-  it('checks that both units have title', () => {
-    selectUnit('M6_AK0012');
-    cy.wait(100);
-    cy.getIFrameBody('iframe.unitHost').within(() => {
-      cy.get('aspect-editor-dynamic-overlay')
-        .find('aspect-math-table td:contains("2")')
-        .should('exist');
-    });
+  it('checks that the M6_AK0011 was not overwritten', () => {
     selectUnit('M6_AK0011');
     cy.wait(100);
     cy.getIFrameBody('iframe.unitHost').within(() => {
-      if (
-        cy.get('aspect-editor-dynamic-overlay')
-          .find('aspect-math-table td:contains("2")')
-      ) {
-        cy.log('overwritten unit');
-      }
+      cy.get('aspect-editor-dynamic-overlay')
+        .eq(2)
+        .within(() => {
+          cy.get('aspect-math-table td:contains("2")').should('not.exist');
+        });
     });
-    cy.pause();
   });
 });
