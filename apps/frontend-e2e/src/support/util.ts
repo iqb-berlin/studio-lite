@@ -278,12 +278,9 @@ export function setVeronaWs(ws:string):void {
   goToWsMenu();
   cy.get('[data-cy="workspace-edit-unit-settings"]').click();
   cy.get('[data-cy="edit-workspace-settings-editor"]').click();
-  // cy.contains('div', 'Voreingestellter Editor').find('svg').click();
   cy.get('mat-option>span').contains('Aspect').click();
-  // cy.contains('div', 'Voreingestellter Player').find('svg').click();
   cy.get('[data-cy="edit-workspace-settings-player"]').click();
   cy.get('mat-option>span').contains('Aspect').click();
-  // cy.contains('div', 'Voreingestellter Schemer').find('svg').click();
   cy.get('[data-cy="edit-workspace-settings-schemer"]').click();
   cy.get('mat-option>span').contains('Schemer').click();
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
@@ -299,7 +296,9 @@ export function deleteModule():void {
   cy.get('div > mat-icon')
     .contains('delete')
     .click();
-  cy.clickButtonWithResponseCheck('Löschen', [200], '/api/verona-modules', 'GET', 'deleteModule');
+  cy.translate('de').then(json => {
+    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/verona-modules', 'GET', 'deleteModule');
+  });
 }
 
 export function deleteResource():void {
@@ -314,7 +313,9 @@ export function deleteResource():void {
   cy.get('div > mat-icon')
     .contains('delete')
     .click();
-  cy.clickButtonWithResponseCheck('Löschen', [200], '/api/resource-packages', 'GET', 'deleteResource');
+  cy.translate('de').then(json => {
+    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/resource-packages', 'GET', 'deleteResource');
+  });
 }
 
 export function deleteGroup(group: string):void {
@@ -327,7 +328,9 @@ export function deleteGroup(group: string):void {
   cy.get('mat-icon')
     .contains('delete')
     .click();
-  cy.clickButtonWithResponseCheck('Löschen', [200], '/api/admin/workspace-groups*', 'DELETE', 'deleteGroup');
+  cy.translate('de').then(json => {
+    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/workspace-groups*', 'DELETE', 'deleteGroup');
+  });
 }
 
 export function logout() {
@@ -353,7 +356,12 @@ export function changePassword(newPass:string, oldPass:string):void {
   editInput('change-password-password', oldPass);
   editInput('change-password-new-password', newPass);
   editInput('change-password-new2-password', newPass);
-  cy.clickButtonWithResponseCheck('Speichern', [200], '/api/password', 'PATCH', 'updatePass');
+  cy.clickDataCyWithResponseCheck('[data-cy="change-password-save"]',
+    [200],
+    '/api/password',
+    'PATCH',
+    'updatePass'
+  );
 }
 
 export function updatePersonalData(newData: UserData):void {
@@ -362,7 +370,7 @@ export function updatePersonalData(newData: UserData):void {
   editInput('edit-my-data-lastname', <string>newData.lastName);
   editInput('edit-my-data-firstname', <string>newData.firstName);
   editInput('edit-my-data-email', <string>newData.email);
-  cy.clickButtonWithResponseCheck('Speichern', [200], '/api/my-data', 'PATCH', 'updateData');
+  cy.clickDataCyWithResponseCheck('[data-cy="edit-my-data-save"]', [200], '/api/my-data', 'PATCH', 'updateData');
 }
 
 export function selectUnit(unitName:string) {
@@ -380,6 +388,10 @@ export function deleteUnit(shortname:string):void {
   cy.get('mat-dialog-container').within(() => {
     cy.contains('button', 'Löschen').click();
   });
+  // cy.get('[data-cy="workspace-delete-unit-button"]').click();
+  // cy.translate('de').then(json => {
+  //   cy.clickDialogButton(json.delete);
+  // });
   cy.contains('button', 'Löschen').click();
 }
 
@@ -445,7 +457,6 @@ export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData)
     .click();
   cy.get(`mat-option:contains("${ws}")`).click();
   cy.get(`mat-cell:contains("${unit1.shortname}")`).prev().click();
-  cy.pause();
   cy.translate('de').then(json => {
     cy.clickDialogButton(json.continue);
     // cy.clickButton('Fortsetzen');

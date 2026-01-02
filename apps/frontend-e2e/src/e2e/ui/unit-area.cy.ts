@@ -130,7 +130,13 @@ describe('UI check: workspace', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').click({ force: true });
     selectListUnits([unit3.shortname, newUnit.shortname]);
-    cy.clickButtonWithResponseCheck('Herunterladen', [200, 304], '/api/workspaces/*', 'GET', 'export');
+    cy.clickDataCyWithResponseCheck(
+      '[data-cy="workspace-export-unit-button"]',
+      [200, 304],
+      '/api/workspaces/*',
+      'GET',
+      'export'
+    );
   });
 
   it('should show metadata report', () => {
@@ -139,10 +145,12 @@ describe('UI check: workspace', () => {
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-metadata"]').click();
     selectListUnits([unit3.shortname, newUnit.shortname]);
-    cy.pause();
     // eslint-disable-next-line max-len
-    cy.clickButtonWithResponseCheck('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
-    cy.clickButton('Herunterladen');
+    cy.clickDataCyWithResponseCheck('[data-cy="workspace-show-metadata-display"]', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
+    cy.pause();
+    cy.translate('de').then(json => {
+      cy.clickDialogButton(json.download);
+    });
   });
 
   it('should show kodierung ', () => {
@@ -151,7 +159,9 @@ describe('UI check: workspace', () => {
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-coding-report"]').click();
     // eslint-disable-next-line max-len
-    cy.clickDialogButton('Schließen');
+    cy.translate('de').then(json => {
+      cy.clickDialogButton(json.close);
+    });
   });
 
   it('should export the codebook ', () => {
@@ -160,8 +170,15 @@ describe('UI check: workspace', () => {
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-export-coding-book"]').click();
     selectListUnits([newUnit.shortname]);
-    // eslint-disable-next-line max-len
-    cy.clickButtonWithResponseCheck('Exportieren', [200, 304], '/api/workspaces/*/units/coding-book*', 'GET', 'codebook');
+    cy.translate('de').then(json => {
+      cy.clickButtonWithResponseCheck(
+        json.export,
+        [200, 304],
+        '/api/workspaces/*/units/coding-book*',
+        'GET',
+        'codebook'
+      );
+    });
   });
 
   it.skip('should add an user to the ws1 with basic credentials', () => {

@@ -47,7 +47,8 @@
           color="primary"
           type="submit"
           [mat-dialog-close]="editUserForm"
-          [disabled]="editUserForm.invalid">
+          [disabled]="editUserForm.invalid"
+          data-cy="edit-my-data-save">
     {{'save' | translate}}
   </button>
   <button mat-raised-button
