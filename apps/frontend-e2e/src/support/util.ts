@@ -276,12 +276,15 @@ export function setVeronaWs(ws:string):void {
   cy.visit('/');
   cy.visitWs(ws);
   goToWsMenu();
-  cy.clickButton('Einstellungen');
-  cy.contains('div', 'Voreingestellter Editor').find('svg').click();
+  cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+  cy.get('[data-cy="edit-workspace-settings-editor"]').click();
+  // cy.contains('div', 'Voreingestellter Editor').find('svg').click();
   cy.get('mat-option>span').contains('Aspect').click();
-  cy.contains('div', 'Voreingestellter Player').find('svg').click();
+  // cy.contains('div', 'Voreingestellter Player').find('svg').click();
+  cy.get('[data-cy="edit-workspace-settings-player"]').click();
   cy.get('mat-option>span').contains('Aspect').click();
-  cy.contains('div', 'Voreingestellter Schemer').find('svg').click();
+  // cy.contains('div', 'Voreingestellter Schemer').find('svg').click();
+  cy.get('[data-cy="edit-workspace-settings-schemer"]').click();
   cy.get('mat-option>span').contains('Schemer').click();
   cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
 }

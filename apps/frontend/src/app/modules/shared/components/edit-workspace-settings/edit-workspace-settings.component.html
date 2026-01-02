@@ -14,7 +14,8 @@
                                    [modules]="this.moduleService.editors"
                                    [value]="dialogData.defaultEditor"
                                    [stableOnly]="false"
-                                   (selectionChanged)="selectModule('editor', $event)">
+                                   (selectionChanged)="selectModule('editor', $event)"
+                                   data-cy="edit-workspace-settings-editor">
         </studio-lite-select-module>
       </div>
       <div class="fx-row-space-between-start fx-gap-10">
@@ -26,7 +27,8 @@
                                    [modules]="this.moduleService.players"
                                    [value]="dialogData.defaultPlayer"
                                    [stableOnly]="false"
-                                   (selectionChanged)="selectModule('player', $event)">
+                                   (selectionChanged)="selectModule('player', $event)"
+                                   data-cy="edit-workspace-settings-player">
         </studio-lite-select-module>
       </div>
       <div class="fx-row-space-between-start fx-gap-10">
@@ -38,7 +40,8 @@
                                    [modules]="this.moduleService.schemers"
                                    [value]="dialogData.defaultSchemer"
                                    [stableOnly]="false"
-                                   (selectionChanged)="selectModule('schemer', $event)">
+                                   (selectionChanged)="selectModule('schemer', $event)"
+                                   data-cy="edit-workspace-settings-schemer">
         </studio-lite-select-module>
       </div>
       <div class="fx-row-start-stretch fx-gap-15 margin-bottom">
