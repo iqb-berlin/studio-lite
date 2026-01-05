@@ -392,104 +392,87 @@ export function deleteUnit(shortname:string):void {
 }
 
 export function addUnit(kurzname: string):void {
-  cy.get('mat-icon:contains("add")')
-    .click();
-  cy.get('button > span:contains("Neue Aufgabe")')
-    .should('exist')
-    .click();
-  cy.get('input[placeholder="Kurzname"]')
-    .should('exist')
-    .type(kurzname);
-  cy.clickDialogButtonWithResponseCheck('Speichern', [201], '/api/workspaces/*/units', 'POST', 'addUnit');
+  cy.get('[data-cy="workspace-add-units"]').click();
+  cy.get('[data-cy="workspace-add-unit-new-empty-unit"]').click();
+  cy.get('[data-cy="workspace-new-unit-unit-key"]').type(kurzname);
+  cy.clickDataCyWithResponseCheck(
+    '[data-cy="workspace-new-unit-submit-button"]',
+    [201],
+    '/api/workspaces/*/units',
+    'POST',
+    'addUnit'
+  );
 }
 
 export function addUnitPred(unit:UnitData):void {
-  cy.get('[data-cy="workspace-add-units"]')
-    .click();
-  cy.get('button > span:contains("Neue Aufgabe")')
-    .should('exist')
-    .click();
-  cy.get('input[placeholder="Kurzname"]')
-    .should('exist')
-    .clear()
-    .type(unit.shortname);
-  cy.get('input[placeholder="Name"]')
-    .should('exist')
-    .clear()
-    .type(unit.name);
+  cy.get('[data-cy="workspace-add-units"]').click();
+  cy.get('[data-cy="workspace-add-unit-new-empty-unit"]').click();
+  cy.get('[data-cy="workspace-new-unit-unit-key"]').type(unit.shortname);
+  cy.get('[data-cy="workspace-new-unit-unit-name"]').type(unit.name);
   cy.get('body').then($body => {
-    if ($body.find('input[placeholder="Neue Gruppe"]').length > 0) {
-      cy.get('input[placeholder="Neue Gruppe"]')
+    if ($body.find('[data-cy="workspace-new-unit-new-group"]').length > 0) {
+      cy.get('[data-cy="workspace-new-unit-new-group"]')
         .clear()
         .type(unit.group);
     } else {
-      cy.get('mat-dialog-content').find('svg')
-        .click();
+      cy.get('mat-dialog-content').find('svg').click();
       cy.get('body').then($body1 => {
         if ($body1.find(`mat-option:contains("${unit.group}")`).length > 0) {
-          cy.get(`mat-option:contains("${unit.group}")`)
-            .click();
+          cy.get(`mat-option:contains("${unit.group}")`).click();
         } else {
           cy.get('.cdk-overlay-transparent-backdrop').click();
-          cy.get('[data-cy="workspace-add-new-group"]')
-            .click();
-          cy.get('input[placeholder="Neue Gruppe"]')
+          cy.get('[data-cy="workspace-new-unit-add-new-group"]').click();
+          cy.get('[data-cy="workspace-new-unit-new-group"]')
             .clear()
             .type(unit.group);
         }
       });
     }
   });
-  cy.clickDialogButtonWithResponseCheck('Speichern', [201], '/api/workspaces/*/units', 'POST', 'addUnit');
+  cy.clickDataCyWithResponseCheck('[data-cy="workspace-new-unit-submit-button"]',
+    [201],
+    '/api/workspaces/*/units',
+    'POST',
+    'addUnit');
 }
 
 export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData):void {
   // select the group and the ws
-  cy.get('[data-cy="workspace-add-units"]')
-    .click();
-  cy.get('button > span:contains("Neu von vorhandener Aufgabe")')
-    .click();
-  cy.get('mat-select')
-    .click();
+  cy.get('[data-cy="workspace-add-units"]').click();
+  cy.get('[data-cy="workspace-add-unit-from-existing"]').click();
+  cy.get('mat-select').click();
   cy.get(`mat-option:contains("${ws}")`).click();
   cy.get(`mat-cell:contains("${unit1.shortname}")`).prev().click();
   cy.translate('de').then(json => {
     cy.clickDialogButton(json.continue);
-    // cy.clickButton('Fortsetzen');
   });
-  cy.get('input[placeholder="Kurzname"]')
-    .should('exist')
-    .clear()
-    .type(newUnit.shortname);
-  cy.get('input[placeholder="Name"]')
-    .should('exist')
-    .clear()
-    .type(newUnit.name);
+  cy.get('[data-cy="workspace-new-unit-unit-key"]').type(newUnit.shortname);
+  cy.get('[data-cy="workspace-new-unit-unit-name"]').type(newUnit.name);
   cy.get('body').then($body => {
-    if ($body.find('input[placeholder="Neue Gruppe"]').length > 0) {
-      cy.get('input[placeholder="Neue Gruppe"]')
+    if ($body.find('[data-cy="workspace-new-unit-new-group"]').length > 0) {
+      cy.get('[data-cy="workspace-new-unit-new-group"]')
         .clear()
         .type(newUnit.group);
     } else {
-      cy.get('mat-dialog-content').find('svg')
-        .click();
+      cy.get('mat-dialog-content').find('svg').click();
       cy.get('body').then($body1 => {
         if ($body1.find(`mat-option:contains("${unit1.group}")`).length > 0) {
-          cy.get(`mat-option:contains("${unit1.group}")`)
-            .click();
+          cy.get(`mat-option:contains("${unit1.group}")`).click();
         } else {
           cy.get('.cdk-overlay-transparent-backdrop').click();
-          cy.get('[data-cy="workspace-add-new-group"]')
-            .click();
-          cy.get('input[placeholder="Neue Gruppe"]')
+          cy.get('[data-cy="workspace-add-new-group"]').click();
+          cy.get('[data-cy="workspace-new-unit-new-group"]')
             .clear()
             .type(newUnit.group);
         }
       });
     }
   });
-  // eslint-disable-next-line max-len
-  cy.clickDialogButtonWithResponseCheck('Speichern', [201], '/api/workspaces/*/units', 'POST', 'createUnitFromExisting');
+  cy.clickDataCyWithResponseCheck('[data-cy="workspace-new-unit-submit-button"]',
+    [201],
+    '/api/workspaces/*/units',
+    'POST',
+    'createUnitFromExisting');
 }
 
 export function goToWsMenu():void {
@@ -499,22 +482,23 @@ export function goToWsMenu():void {
 export function moveUnit(wsorigin:string, wsdestination:string, unit:UnitData):void {
   cy.visit('/');
   cy.visitWs(wsorigin);
-  cy.get('mat-icon:contains("menu")')
-    .click();
-  cy.get('span:contains("Verschieben")')
-    .click();
-  cy.get('mat-select')
-    .click();
+  goToWsMenu();
+  cy.get('[data-cy="workspace-edit-unit-move-unit"]').click();
+  cy.get('mat-select').click();
   cy.get(`mat-option:contains("${wsdestination}")`).click();
   cy.get(`mat-cell:contains("${unit.shortname}")`).prev().click();
-  // eslint-disable-next-line max-len
-  cy.clickButtonWithResponseCheck('Verschieben', [200], '/api/workspaces/*/units/workspace-id', 'PATCH', 'createUnitFromExisting');
+  cy.clickDataCyWithResponseCheck(
+    '[data-cy="workspace-move-unit-button"]',
+    [200],
+    '/api/workspaces/*/units/workspace-id',
+    'PATCH',
+    'createUnitFromExisting'
+  );
 }
 
 export function importExercise(filename: string): void {
   const path:string = `../frontend-e2e/src/fixtures/${filename}`;
-  cy.get('[data-cy="workspace-add-units"]')
-    .click();
+  cy.get('[data-cy="workspace-add-units"]').click();
   cy.get('input[type=file]')
     .selectFile(path, {
       action: 'select',
@@ -530,12 +514,20 @@ export function selectListUnits(unitNames: string[]): void {
 
 export function createItem(itemId: string) {
   cy.get('.add-button > .mdc-button__label').click();
-  cy.clickButton('Bestätigen');
-  cy.get('mat-expansion-panel:contains("ohne ID")').click();
-  cy.get('mat-label:contains("Item ID")').eq(-1).type(itemId);
+  cy.pause();
+  cy.get('[data-cy="metadata-new-item-button"]').click();
+  cy.translate('de').then(json => {
+    cy.get(`mat-expansion-panel:contains("${json.metadata['without-id']}")`).click();
+    cy.get('mat-label:contains("Item ID")').eq(-1).type(itemId);
+  });
 }
 
 export function assignVariableToItem(variableName: string) {
-  cy.get('mat-select[placeholder="Variable auswählen"]').eq(-1).find('svg').click();
+  cy.translate('de').then(json => {
+    cy.get(`mat-select[placeholder="${json.metadata['choose-item-variable']}"]`)
+      .eq(-1)
+      .find('svg')
+      .click();
+  });
   cy.get(`mat-option:contains("${variableName}")`).eq(0).click();
 }
