@@ -82,6 +82,7 @@ export function addFirstUser() {
 export function loginWithUser(username: string, pass: string) {
   cy.visit('/');
   logout();
+  cy.wait(100);
   login(username, pass);
 }
 

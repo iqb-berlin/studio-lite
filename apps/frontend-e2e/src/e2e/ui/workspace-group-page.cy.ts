@@ -61,7 +61,6 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that workspace is only read ', () => {
     cy.contains(ws1).click();
-    // Schreibgeschützt
     cy.get('[data-cy="units-area-no-access-level"]').should('exist');
     cy.get('studio-lite-add-unit-button>button')
       .should('have.attr', 'disabled');

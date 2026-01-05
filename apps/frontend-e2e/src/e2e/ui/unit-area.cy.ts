@@ -11,19 +11,17 @@ import {
   deleteUnit,
   moveUnit,
   addModules,
-  createNewUser,
   setVeronaWs,
   addStatus,
   clickSaveButtonRight,
-  logout,
   deleteModule,
   selectListUnits,
-  clickIndexTabWsgAdmin, goToWsMenu
+  clickIndexTabWsgAdmin,
+  goToWsMenu
 } from '../../support/util';
 import {
   AccessLevel,
   modules,
-  newUser,
   UnitData
 } from '../../support/testData';
 import {
@@ -68,7 +66,6 @@ describe('UI check: workspace', () => {
     addModules(modules);
     createGroup(group1);
     createWs(ws1, group1);
-
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [AccessLevel.Admin]);
   });
 
@@ -181,15 +178,6 @@ describe('UI check: workspace', () => {
     });
   });
 
-  it.skip('should add an user to the ws1 with basic credentials', () => {
-    cy.findAdminSettings().click();
-    createNewUser(newUser);
-    cy.findAdminGroupSettings(group1).click();
-    clickIndexTabWsgAdmin('workspaces');
-    grantRemovePrivilegeAtWs([newUser.username], ws1, [AccessLevel.Basic]);
-    logout();
-  });
-  // TODO add test for a user with comment privileges
   it('deletes the context ', () => {
     deleteGroup(group1);
     // deleteUser(newUser.username);

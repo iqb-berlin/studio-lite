@@ -110,7 +110,6 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     });
     cy.get('mat-dialog-container:contains("drop-list_1")').should('have.length', 0);
     cy.get('[data-cy="metadata-close"]').click();
-    // cy.clickButton('Schließen');
   });
 
   it('checks the order of items before and after clicking Nach Variable ID Sortieren is not the same', () => {
@@ -126,7 +125,9 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('checks that the select order by Id exists', () => {
-    cy.get('select.sort-items').select('Nach Item ID sortieren', { force: true });
+    cy.translate('de').then(json => {
+      cy.get('select.sort-items').select(`${json.metadata['sort-by-id']}`, { force: true });
+    });
   });
 
   it('checks that drop-list_1 is not present at eye view', () => {

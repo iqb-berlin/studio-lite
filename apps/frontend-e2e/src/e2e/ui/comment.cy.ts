@@ -55,7 +55,7 @@ describe('Comment:', () => {
     cy.get('studio-lite-comment').should('have.length', '1');
   });
 
-  it.skip('should other user able to see the hidden comments by ignoring the visibility setting ', () => {
+  it('should other user able to see the hidden comments by ignoring the visibility setting ', () => {
     loginWithUser(newUser.username, newUser.password);
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
@@ -66,7 +66,7 @@ describe('Comment:', () => {
     cy.get('studio-lite-comment').should('have.length', '3');
   });
 
-  it.skip('should delete the visible comment', () => {
+  it('should delete the visible comment', () => {
     loginWithUser(Cypress.env('username'), Cypress.env('password'));
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
@@ -78,14 +78,14 @@ describe('Comment:', () => {
     cy.get('studio-lite-comment').should('have.length', '0');
   });
 
-  it.skip('should set visibility on ', () => {
+  it('should set visibility on ', () => {
     cy.contains('mat-icon', 'filter_alt').click();
     cy.get('mat-slide-toggle').click();
     cy.get('studio-lite-comment')
       .eq(0).contains('mat-icon', 'visibility').click({ force: true });
   });
 
-  it.skip('should able to write a comment related to a item', () => {
+  it('should able to write a comment related to a item', () => {
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
@@ -95,7 +95,7 @@ describe('Comment:', () => {
     cy.contains('button', 'send').click({ force: true });
   });
 
-  it.skip('should show only comments related to Item 01', () => {
+  it('should show only comments related to Item 01', () => {
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');

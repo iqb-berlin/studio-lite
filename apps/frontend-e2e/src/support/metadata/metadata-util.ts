@@ -72,9 +72,6 @@ export function selectProfileForGroup(group:string, profile:IqbProfile) {
     .eq(0)
     .next()
     .click();
-  // cy.get('span:contains("Einstellungen")')
-  //  .eq(0)
-  //  .click();
   clickIndexTabWsgAdmin('settings');
   checkProfile(profile);
   cy.get('mat-icon:contains("save")').click();
