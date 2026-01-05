@@ -3,6 +3,7 @@
         [disabled]="disabled"
         [matTooltip]="'workspace.delete-units' | translate"
         matTooltipPosition="above"
-        (click)="deleteUnit()">
+        (click)="deleteUnit()"
+        data-cy="workspace-delete-unit-button">
   <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
 </button>

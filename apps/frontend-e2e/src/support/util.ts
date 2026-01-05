@@ -379,21 +379,16 @@ export function selectUnit(unitName:string) {
 }
 
 export function deleteUnit(shortname:string):void {
-  cy.get('mat-icon:contains("delete")')
-    .click();
-  cy.get('mat-dialog-container input[placeholder="Suchbegriff"]')
+  cy.get('[data-cy="workspace-delete-unit-button"]').click();
+  cy.get('[data-cy="workspace-select-unit-list-filter-units"]')
     .should('exist')
     .click()
     .type(shortname);
   cy.get(`mat-cell:contains("${shortname}")`).prev().click();
-  cy.get('mat-dialog-container').within(() => {
-    cy.contains('button', 'Löschen').click();
+  cy.get('[data-cy="workspace-select-unit-button"]').click();
+  cy.translate('de').then(json => {
+    cy.contains('button', json.delete).click();
   });
-  // cy.get('[data-cy="workspace-delete-unit-button"]').click();
-  // cy.translate('de').then(json => {
-  //   cy.clickDialogButton(json.delete);
-  // });
-  cy.contains('button', 'Löschen').click();
 }
 
 export function addUnit(kurzname: string):void {

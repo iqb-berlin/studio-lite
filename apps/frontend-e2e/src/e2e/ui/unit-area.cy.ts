@@ -144,7 +144,6 @@ describe('UI check: workspace', () => {
     selectListUnits([unit3.shortname, newUnit.shortname]);
     // eslint-disable-next-line max-len
     cy.clickDataCyWithResponseCheck('[data-cy="workspace-show-metadata-display"]', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
-    cy.pause();
     cy.translate('de').then(json => {
       cy.clickDialogButton(json.download);
     });
