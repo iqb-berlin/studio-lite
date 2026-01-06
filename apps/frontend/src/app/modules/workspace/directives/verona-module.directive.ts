@@ -167,13 +167,15 @@ export abstract class VeronaModuleDirective implements OnDestroy {
     const range = max - min + 1; // Anzahl möglicher Werte
     const maxValid = Math.floor(2 ** 32 / range) * range; // Bias vermeiden
 
-    return (
-      (Array.from(window.crypto.getRandomValues(new Uint32Array(1))).find(
-        rand => rand < maxValid
-      )! %
-        range) +
-      min
-    ).toString();
+    let rand: number;
+    const uint32 = new Uint32Array(1);
+
+    do {
+      window.crypto.getRandomValues(uint32);
+      [rand] = uint32;
+    } while (rand >= maxValid);
+
+    return ((rand % range) + min).toString();
   }
 
   ngOnDestroy(): void {
