@@ -141,11 +141,14 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     if (this.playerSelectionChangedSubscription) this.playerSelectionChangedSubscription.unsubscribe();
     if (this.schemerSelectionChangedSubscription) this.schemerSelectionChangedSubscription.unsubscribe();
     if (this.statesChangedSubscription) this.statesChangedSubscription.unsubscribe();
-    await this.workspaceService.loadUnitProperties().then(() => {
-      this.setupForm();
-      this.updateVariables();
-      this.loadMetaData();
-    });
+    this.workspaceService
+      .loadUnitProperties()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {
+        this.setupForm();
+        this.updateVariables();
+        this.loadMetaData();
+      });
   }
 
   private setupForm() {

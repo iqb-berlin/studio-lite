@@ -15,7 +15,6 @@ describe('UnitPreviewComponent', () => {
   @Component({ selector: 'studio-lite-preview-bar', template: '', standalone: false })
   class MockPreviewBarComponent {
     @Input() pageList!: PageData[];
-    @Input() unitId!: number;
     @Input() playerApiVersion!: number;
     @Input() postMessageTarget!: Window | undefined;
     @Input() playerName!: string;

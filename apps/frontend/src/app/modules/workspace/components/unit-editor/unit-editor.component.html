@@ -1,11 +1,16 @@
-<div class="fx-column-start-stretch fx-flex-row-100">
+
+  <div class="fx-column-start-stretch fx-flex-row-100">
   @if (message) {
     <div
       class="message">
       {{message}}
     </div>
   }
-  <div class="host-editor-container fx-flex-fill">
+  @if (loading) {
+    <mat-spinner class="wait-animation"></mat-spinner>
+  }
+  <div class="host-editor-container fx-flex-fill"
+    [hidden]="loading">
     <iframe #hostingIframe
       class="unitHost">
     </iframe>

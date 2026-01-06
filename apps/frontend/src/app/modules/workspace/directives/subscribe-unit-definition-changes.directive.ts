@@ -1,16 +1,12 @@
 import { Directive } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
-import { WorkspaceService } from '../services/workspace.service';
+import { takeUntil } from 'rxjs';
+import { VeronaModuleDirective } from './verona-module.directive';
 
 @Directive({
   selector: '[studioLiteSubscribeUnitDefinitionChanges]',
   standalone: false
 })
-export abstract class SubscribeUnitDefinitionChangesDirective {
-  abstract workspaceService: WorkspaceService;
-  abstract ngUnsubscribe: Subject<void>;
-  abstract message: string;
-
+export abstract class SubscribeUnitDefinitionChangesDirective extends VeronaModuleDirective {
   addSubscriptionForUnitDefinitionChanges(): void {
     if (this.workspaceService.getUnitDefinitionStore()) {
       this.subscribeUnitDefinitionChanges();
@@ -24,13 +20,13 @@ export abstract class SubscribeUnitDefinitionChangesDirective {
   }
 
   private subscribeUnitDefinitionChanges() {
-    this.workspaceService.getUnitDefinitionStore()?.dataChange
-      .pipe(takeUntil(this.ngUnsubscribe))
+    this.workspaceService
+      .getUnitDefinitionStore()
+      ?.dataChange.pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        this.message = '';
-        this.workspaceService.loadUnitProperties().then(() => this.sendUnitData());
+        this.sendChangeData();
       });
   }
 
-  abstract sendUnitData(): Promise<void>;
+  abstract sendChangeData(): void;
 }

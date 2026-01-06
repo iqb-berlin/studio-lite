@@ -5,13 +5,15 @@
       {{message}}
     </div>
   }
+  @if (loading) {
+    <mat-spinner class="wait-animation fx-flex-fill"></mat-spinner>
+  }
   <div class="preview-body fx-flex-fill">
     <iframe #hostingIframe
       class="unitHost">
     </iframe>
   </div>
   <studio-lite-preview-bar [pageList]="pageList"
-    [unitId]="unitId"
     [playerApiVersion]="playerApiVersion"
     [postMessageTarget]="postMessageTarget"
     [playerName]="playerName"

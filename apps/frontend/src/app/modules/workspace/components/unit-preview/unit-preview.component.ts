@@ -1,11 +1,10 @@
 import {
-  AfterViewInit, Component, ElementRef, OnDestroy, ViewChild
+  AfterViewInit, Component, ElementRef, ViewChild
 } from '@angular/core';
 import {
-  Subject, takeUntil
+  skip, Subject, takeUntil
 } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
@@ -14,6 +13,7 @@ import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { CodingSchemeFactory } from '@iqb/responses';
 import { Response } from '@iqbspecs/response/response.interface';
 import { Router } from '@angular/router';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ModuleService } from '../../../shared/services/module.service';
 import { PageData } from '../../models/page-data.interface';
 import { AppService } from '../../../../services/app.service';
@@ -33,23 +33,13 @@ import {
   templateUrl: './unit-preview.component.html',
   styleUrls: ['./unit-preview.component.scss'],
   host: { class: 'unit-preview' },
-  imports: [PreviewBarComponent]
+  imports: [PreviewBarComponent, MatProgressSpinner]
 })
-export class UnitPreviewComponent
-  extends SubscribeUnitDefinitionChangesDirective
-  implements AfterViewInit, OnDestroy {
+export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirective
+  implements AfterViewInit {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
-
-  private iFrameElement: HTMLIFrameElement | undefined;
-  private sessionId = '';
-  private lastPlayerId = '';
-  ngUnsubscribe = new Subject<void>();
-  postMessageTarget: Window | undefined;
   playerName = '';
   playerApiVersion = 3;
-
-  message = '';
-  unitId: number = 0;
   pageList: PageData[] = [];
   presentationProgress: Progress = 'none';
   responseProgress: Progress = 'none';
@@ -59,24 +49,30 @@ export class UnitPreviewComponent
 
   constructor(
     private appService: AppService,
-    private snackBar: MatSnackBar,
-    private backendService: WorkspaceBackendService,
+    public snackBar: MatSnackBar,
+    public backendService: WorkspaceBackendService,
     public workspaceService: WorkspaceService,
-    private moduleService: ModuleService,
+    public moduleService: ModuleService,
     public previewService: PreviewService,
-    private translateService: TranslateService,
+    public translateService: TranslateService,
     private dialog: MatDialog,
     private router: Router
   ) {
     super();
-    this.subscribeForMessages();
-    this.subscribeForUnitChange();
   }
 
   ngAfterViewInit(): void {
+    this.iFrameElement = this.hostingIframe.nativeElement;
+    this.subscribeForPostMessages();
+    this.subscribeForSelectedUnitChange();
+    this.addSubscriptionForUnitDefinitionChanges();
+    this.subscribeForPagingModeChanges();
+  }
+
+  private subscribeForPagingModeChanges(): void {
     this.previewService.pagingMode
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(() => this.initPlayer());
+      .pipe(takeUntil(this.ngUnsubscribe), skip(1))
+      .subscribe(() => this.postPlayerConfigChangedNotificationMessage());
   }
 
   private isIqbStandardResponse(): boolean {
@@ -96,16 +92,33 @@ export class UnitPreviewComponent
     return null;
   }
 
-  private subscribeForUnitChange(): void {
+  private subscribeForSelectedUnitChange(): void {
     this.workspaceService.selectedUnit$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
-        this.dataParts = null;
-        this.unitStateDataType = null;
+        if (this.unitLoaded.getValue()) {
+          this.unitLoaded.next(false);
+          this.dataParts = null;
+          this.unitStateDataType = null;
+          this.message = '';
+          this.workspaceService
+            .loadUnitProperties()
+            .pipe(takeUntil(this.ngUnsubscribe))
+            .subscribe(() => this.onLoadUnitProperties());
+        } else {
+          this.ngUnsubscribe.next();
+          this.ngUnsubscribe.complete();
+          this.ngUnsubscribe = new Subject<void>();
+          this.unitLoaded.next(true);
+          this.subscribeForPostMessages();
+          this.subscribeForSelectedUnitChange();
+          this.addSubscriptionForUnitDefinitionChanges();
+          this.subscribeForPagingModeChanges();
+        }
       });
   }
 
-  private subscribeForMessages(): void {
+  private subscribeForPostMessages(): void {
     this.appService.postMessage$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((m: MessageEvent) => {
@@ -139,7 +152,10 @@ export class UnitPreviewComponent
               }
               this.sessionId = UnitPreviewComponent.getSessionId();
               this.postMessageTarget = m.source as Window;
-              this.sendUnitData();
+              this.sendUnitDefinition(
+                this.workspaceService.selectedUnit$.getValue(),
+                this.workspaceService.getUnitDefinitionStore()
+              );
               break;
 
             case 'vo.FromPlayer.StartedNotification':
@@ -151,12 +167,10 @@ export class UnitPreviewComponent
             case 'vopStateChangedNotification':
               if (msgData.playerState) {
                 const pages = msgData.playerState.validPages;
-                const targets = (Array.isArray(pages)) ? pages
-                  .map((p: { id: string, label: string }) => p.id) : Object.keys(pages);
-                this.setPageList(
-                  targets,
-                  msgData.playerState.currentPage
-                );
+                const targets = Array.isArray(pages) ?
+                  pages.map((p: { id: string; label: string }) => p.id) :
+                  Object.keys(pages);
+                this.setPageList(targets, msgData.playerState.currentPage);
               }
               if (msgData.unitState) {
                 this.setPresentationStatus(
@@ -241,83 +255,40 @@ export class UnitPreviewComponent
       });
   }
 
-  private initPlayer(): void {
-    this.iFrameElement = this.hostingIframe.nativeElement;
-    this.workspaceService.selectedUnit$
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(() => {
-        this.message = '';
-        this.workspaceService
-          .loadUnitProperties()
-          .then(() => this.sendUnitData());
-      });
-    this.addSubscriptionForUnitDefinitionChanges();
+  sendChangeData(): void {
+    this.sendUnitDefinition(
+      this.workspaceService.selectedUnit$.getValue(),
+      this.workspaceService.getUnitDefinitionStore()
+    );
   }
 
-  async sendUnitData() {
+  onLoadUnitProperties() {
     this.setPresentationStatus('none');
     this.setResponsesStatus('none');
     this.setPageList([], '');
-    this.unitId = this.workspaceService.selectedUnit$.getValue();
-    const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
-    if (this.unitId && unitMetadataStore) {
-      const unitMetadata = unitMetadataStore.getData();
-      if (Object.keys(this.moduleService.players).length === 0) await this.moduleService.loadList();
-      const playerId = unitMetadata.player ?
-        VeronaModuleFactory.getBestMatch(
-          unitMetadata.player,
-          Object.keys(this.moduleService.players)
-        ) :
-        '';
-      if (playerId) {
-        if (playerId === this.lastPlayerId && this.postMessageTarget) {
-          let unitDefinitionStore =
-            this.workspaceService.getUnitDefinitionStore();
-          if (unitDefinitionStore) {
-            this.postUnitDef(unitDefinitionStore);
+    this.getVeronaModuleId(this.workspaceService.getUnitMetadataStore(), 'player')
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(playerId => {
+        if (playerId) {
+          if (playerId === this.lastVeronaModulId && this.postMessageTarget) {
+            this.sendUnitDefinition(
+              this.workspaceService.selectedUnit$.getValue(),
+              this.workspaceService.getUnitDefinitionStore()
+            );
           } else {
-            this.backendService
-              .getUnitDefinition(
-                this.workspaceService.selectedWorkspaceId,
-                this.unitId
-              )
-              .subscribe(ued => {
-                if (ued) {
-                  unitDefinitionStore = new UnitDefinitionStore(
-                    this.unitId,
-                    ued
-                  );
-                  this.workspaceService.setUnitDefinitionStore(
-                    unitDefinitionStore
-                  );
-                  this.postUnitDef(unitDefinitionStore);
-                } else {
-                  this.snackBar.open(
-                    this.translateService.instant(
-                      'workspace.unit-definition-not-loaded'
-                    ),
-                    this.translateService.instant('workspace.error'),
-                    { duration: 3000 }
-                  );
-                }
-              });
+            this.postMessageTarget = undefined;
+            this.buildVeronaModule(playerId, 'player');
+            this.playerName = playerId;
+            // player gets unit data via ReadyNotification
           }
         } else {
-          this.message = '';
-          this.buildPlayer(playerId);
-          // player gets unit data via ReadyNotification
+          this.message = this.translateService.instant('workspace.no-player');
+          this.postMessageTarget = undefined;
         }
-      } else {
-        this.message = this.translateService.instant('workspace.no-player');
-        this.buildPlayer();
-      }
-    } else {
-      this.message = this.translateService.instant('workspace.unit-not-found');
-      this.buildPlayer();
-    }
+      });
   }
 
-  private postUnitDef(unitDefinitionStore: UnitDefinitionStore): void {
+  postStore(unitDefinitionStore: UnitDefinitionStore): void {
     const unitDef = unitDefinitionStore.getData();
     if (this.postMessageTarget) {
       if (this.playerApiVersion === 1) {
@@ -349,7 +320,21 @@ export class UnitPreviewComponent
           '*'
         );
       }
+      this.unitLoaded.next(true);
     }
+  }
+
+  private postPlayerConfigChangedNotificationMessage(): void {
+    this.postMessageTarget?.postMessage(
+      {
+        type: 'vopPlayerConfigChangedNotification',
+        sessionId: this.sessionId,
+        playerConfig: {
+          pagingMode: this.previewService.pagingMode.value
+        }
+      },
+      '*'
+    );
   }
 
   postNavigationDenied(): void {
@@ -362,38 +347,6 @@ export class UnitPreviewComponent
         },
         '*'
       );
-    }
-  }
-
-  private buildPlayer(playerId?: string) {
-    this.postMessageTarget = undefined;
-    if (this.iFrameElement) {
-      this.iFrameElement.srcdoc = '';
-      if (playerId) {
-        this.moduleService
-          .getModuleHtml(this.moduleService.players[playerId])
-          .then(playerData => {
-            this.playerName = playerId;
-            if (playerData) {
-              this.setupPlayerIFrame(playerData);
-              this.lastPlayerId = playerId;
-            } else {
-              this.message = this.translateService.instant(
-                'workspace.player-not-loaded',
-                { id: playerId }
-              );
-              this.lastPlayerId = '';
-            }
-          });
-      } else {
-        this.lastPlayerId = '';
-      }
-    }
-  }
-
-  private setupPlayerIFrame(playerHtml: string): void {
-    if (this.iFrameElement && this.iFrameElement.parentElement) {
-      this.iFrameElement.srcdoc = playerHtml;
     }
   }
 
@@ -545,7 +498,11 @@ export class UnitPreviewComponent
       );
     } else {
       this.backendService
-        .getUnitScheme(this.workspaceService.selectedWorkspaceId, this.unitId)
+        .getUnitScheme(
+          this.workspaceService.selectedWorkspaceId,
+          this.workspaceService.selectedUnit$.getValue()
+        )
+        .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(schemeData => {
           this.checkCoding(schemeData);
         });
@@ -560,9 +517,10 @@ export class UnitPreviewComponent
         { duration: 3000 }
       );
     } else {
-      const dialogRef = this.dialog
-        .open(PrintOptionsDialogComponent);
-      dialogRef.afterClosed()
+      const dialogRef = this.dialog.open(PrintOptionsDialogComponent);
+      dialogRef
+        .afterClosed()
+        .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(result => {
           if (result) {
             this.openPrintView(result);
@@ -573,21 +531,23 @@ export class UnitPreviewComponent
 
   openPrintView(options: { key: string; value: boolean | number }[]): void {
     const printOptions = options
-      .filter((option: { key: string; value: boolean | number }) => option.value === true)
+      .filter(
+        (option: { key: string; value: boolean | number }) => option.value === true
+      )
       .map((option: { key: string; value: boolean | number }) => option.key);
-    const printPreviewHeight = options
-      .find(option => option.key === 'printPreviewHeight')?.value || 0;
-    const url = this.router
-      .serializeUrl(this.router
-        .createUrlTree(['/print'], {
-          queryParams: {
-            printPreviewHeight: printPreviewHeight,
-            printOptions: printOptions,
-            unitIds: [this.unitId],
-            workspaceId: this.workspaceService.selectedWorkspaceId,
-            workspaceGroupId: this.workspaceService.groupId
-          }
-        }));
+    const printPreviewHeight =
+      options.find(option => option.key === 'printPreviewHeight')?.value || 0;
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/print'], {
+        queryParams: {
+          printPreviewHeight: printPreviewHeight,
+          printOptions: printOptions,
+          unitIds: [this.workspaceService.selectedUnit$.getValue()],
+          workspaceId: this.workspaceService.selectedWorkspaceId,
+          workspaceGroupId: this.workspaceService.groupId
+        }
+      })
+    );
     window.open(`#${url}`, '_blank');
   }
 
@@ -624,7 +584,8 @@ export class UnitPreviewComponent
         .filter(vc => vc.codes.length > 0)
         .map(vc => (vc.alias ? vc.alias : vc.id));
       const newResponses = CodingSchemeFactory.code(
-        responses!, this.workspaceService.codingScheme.variableCodings
+        responses!,
+        this.workspaceService.codingScheme.variableCodings
       );
       this.showCodingResults(newResponses, varsWithCodes);
     }
@@ -643,20 +604,5 @@ export class UnitPreviewComponent
       .afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {});
-  }
-
-  private static getSessionId(): string {
-    const min = 10_000_000; // Kleinste 8-stellige Zahl
-    const max = 99_999_999; // Größte 8-stellige Zahl
-    const range = max - min + 1; // Anzahl möglicher Werte
-    const maxValid = Math.floor(2 ** 32 / range) * range; // Bias vermeiden
-
-    return ((Array.from(window.crypto.getRandomValues(new Uint32Array(1)))
-      .find(rand => rand < maxValid)! % range) + min).toString();
-  }
-
-  ngOnDestroy(): void {
-    this.ngUnsubscribe.next();
-    this.ngUnsubscribe.complete();
   }
 }
