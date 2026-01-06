@@ -94,9 +94,7 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
               } else {
                 this.editorApiVersion = 1;
               }
-              this.sessionId = Math.floor(
-                Math.random() * 20000000 + 10000000
-              ).toString();
+              this.sessionId = UnitEditorComponent.getSessionId();
               this.sendUnitDefinition(
                 this.workspaceService.selectedUnit$.getValue(),
                 this.workspaceService.getUnitDefinitionStore()

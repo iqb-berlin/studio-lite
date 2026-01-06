@@ -161,6 +161,21 @@ export abstract class VeronaModuleDirective implements OnDestroy {
     }
   }
 
+  static getSessionId(): string {
+    const min = 10_000_000; // Kleinste 8-stellige Zahl
+    const max = 99_999_999; // Größte 8-stellige Zahl
+    const range = max - min + 1; // Anzahl möglicher Werte
+    const maxValid = Math.floor(2 ** 32 / range) * range; // Bias vermeiden
+
+    return (
+      (Array.from(window.crypto.getRandomValues(new Uint32Array(1))).find(
+        rand => rand < maxValid
+      )! %
+        range) +
+      min
+    ).toString();
+  }
+
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();

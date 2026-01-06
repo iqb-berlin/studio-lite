@@ -81,9 +81,7 @@ export class UnitSchemerComponent
           this.postMessageTarget = m.source as Window;
           switch (msgType) {
             case 'vosReadyNotification':
-              this.sessionId = Math.floor(
-                Math.random() * 20000000 + 10000000
-              ).toString();
+              this.sessionId = UnitSchemerComponent.getSessionId();
               this.postMessageTarget = m.source as Window;
               this.sendScheme(
                 this.workspaceService.selectedUnit$.getValue(),
