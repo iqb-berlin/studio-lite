@@ -66,6 +66,10 @@ export class WorkspaceService {
     };
   }
 
+  static unitKeyPatternString(): string {
+    return '[a-zA-Z][a-zA-Z0-9_-]*';
+  }
+
   static unitKeyUniquenessValidator(unitId: number, unitList: { [key: string]: UnitInListDto[] }): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const newKeyNormalised = control.value.toUpperCase().trim();
