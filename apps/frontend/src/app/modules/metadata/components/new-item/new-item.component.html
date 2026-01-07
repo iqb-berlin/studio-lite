@@ -2,7 +2,8 @@
 <mat-dialog-content>
   {{'metadata.create-item-description' | translate}}
   <mat-form-field class="select-item">
-    <mat-label>{{'metadata.item-content' | translate}}</mat-label>
+    <mat-label
+      data-cy="metadata-create-item-content">{{'metadata.item-content' | translate}}</mat-label>
     <mat-select [(value)]="selectedIndex">
       @for (option of options; track option;  let  i = $index) {
         <mat-option [value]="i">

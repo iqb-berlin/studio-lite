@@ -110,15 +110,15 @@ describe('UI check: workspace', () => {
       .should('exist');
   });
 
-  it('should be able to delete Unit', () => {
-    cy.visitWs(ws1);
-    deleteUnit(unit2.shortname);
-  });
-
   it('should be able to assign group to the units', () => {
     createWs(ws2, group1);
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws2, [AccessLevel.Admin]);
     moveUnit(ws1, ws2, unit2);
+  });
+
+  it('should be able to delete Unit', () => {
+    cy.visitWs(ws2);
+    deleteUnit(unit2.shortname);
   });
 
   it('should export selected units', () => {

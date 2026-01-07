@@ -6,7 +6,7 @@ import {
   deleteFirstUser,
   deleteUser,
   login,
-  logout
+  logout, loginWithUser
 } from '../../support/util';
 import { newUser, UserData } from '../../support/testData';
 
@@ -44,8 +44,7 @@ describe('UI User Management', () => {
 
   it('should be possible to change the password', () => {
     changePassword('newpass', newUser.password);
-    logout();
-    login(newUser.username, 'newpass');
+    loginWithUser(newUser.username, 'newpass');
     changePassword(newUser.password, 'newpass');
   });
 

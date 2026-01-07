@@ -38,15 +38,15 @@ export function clickSaveButtonRight() {
     }
   });
 }
-// TODO review
-export function focusOnMenu(hoverString: string, option: string): void {
-  goToWsMenu();
-  cy.get(`span:contains("${hoverString}")`)
-    .click();
-  cy.contains('button', option)
-    .find('mat-icon')
-    .click();
-}
+
+// export function focusOnMenu(hoverString: string, option: string): void {
+//   goToWsMenu();
+//   cy.get(`span:contains("${hoverString}")`)
+//     .click();
+//   cy.contains('button', option)
+//     .find('mat-icon')
+//     .click();
+// }
 
 export function selectCheckBox(name: string) {
   cy.get('studio-lite-select-unit-list').within(() => {
@@ -57,12 +57,6 @@ export function selectCheckBox(name: string) {
 }
 
 function selectCheckboxUser(checkName: string) {
-  // cy.get('[data-cy="admin-users-checkbox-login-name"]')
-  //   .contains(checkName)
-  //   .parent()
-  //   .within(() => {
-  //     cy.get('mat-checkbox').click();
-  //   });
   cy.get(`[data-cy="admin-users-checkbox-user-box-${checkName}"]`).click();
 }
 
@@ -132,7 +126,6 @@ export function deleteUser(user: string):void {
   clickIndexTabAdmin('users');
   selectCheckboxUser(user);
   cy.get('[data-cy="admin-users-menu-delete-users"]').click();
-  // cy.clickButtonWithResponseCheck('Löschen', [200], '/api/admin/users*', 'DELETE', 'deleteUser');
   cy.translate('de').then(json => {
     cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/users*', 'DELETE', 'deleteUser');
   });
@@ -284,7 +277,7 @@ export function setVeronaWs(ws:string):void {
   cy.get('mat-option>span').contains('Aspect').click();
   cy.get('[data-cy="edit-workspace-settings-schemer"]').click();
   cy.get('mat-option>span').contains('Schemer').click();
-  cy.get('mat-dialog-actions > button > span.mdc-button__label:contains("Speichern")').click();
+  cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
 }
 
 export function deleteModule():void {
@@ -294,9 +287,7 @@ export function deleteModule():void {
   cy.selectModule('IQB-Schemer');
   cy.selectModule('IQB-Player');
   cy.selectModule('IQB-Editor');
-  cy.get('div > mat-icon')
-    .contains('delete')
-    .click();
+  cy.get('div > mat-icon').contains('delete').click();
   cy.translate('de').then(json => {
     cy.clickButtonWithResponseCheck(json.delete, [200], '/api/verona-modules', 'GET', 'deleteModule');
   });
@@ -514,7 +505,6 @@ export function selectListUnits(unitNames: string[]): void {
 
 export function createItem(itemId: string) {
   cy.get('.add-button > .mdc-button__label').click();
-  cy.pause();
   cy.get('[data-cy="metadata-new-item-button"]').click();
   cy.translate('de').then(json => {
     cy.get(`mat-expansion-panel:contains("${json.metadata['without-id']}")`).click();

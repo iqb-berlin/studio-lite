@@ -108,6 +108,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.translate('de').then(json => {
       cy.get(`.mdc-tab__text-label:contains("${json.metadata.items}")`).click();
     });
+    cy.pause();
     cy.get('mat-dialog-container:contains("drop-list_1")').should('have.length', 0);
     cy.get('[data-cy="metadata-close"]').click();
   });
