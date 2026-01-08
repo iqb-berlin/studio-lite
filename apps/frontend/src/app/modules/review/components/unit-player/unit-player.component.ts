@@ -1,20 +1,28 @@
 import {
-  Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild
+  Component,
+  ElementRef,
+  OnDestroy,
+  ViewChild,
+  AfterViewInit
 } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { takeUntil } from 'rxjs';
+import { ActivatedRoute, Params } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 
+import { TranslateService } from '@ngx-translate/core';
 import { ModuleService } from '../../../shared/services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { ReviewService } from '../../services/review.service';
-import { UnitPage } from '../../models/unit-page.interface';
 import { PageData } from '../../../workspace/models/page-data.interface';
 import { UnitData } from '../../models/unit-data.class';
 import { ReviewBackendService } from '../../services/review-backend.service';
 import { PageNavigationComponent } from '../../../shared/components/page-navigation/page-navigation.component';
 import { UnitInfoComponent } from '../unit-info/unit-info.component';
+import { VeronaModuleDirective } from '../../../workspace/directives/verona-module.directive';
+import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
+import { WorkspaceService } from '../../../workspace/services/workspace.service';
+import { Progress } from '../../../workspace/models/types';
 
 @Component({
   selector: 'studio-lite-unit-player',
@@ -22,18 +30,18 @@ import { UnitInfoComponent } from '../unit-info/unit-info.component';
   styleUrls: ['./unit-player.component.scss'],
   imports: [UnitInfoComponent, PageNavigationComponent]
 })
-export class UnitPlayerComponent implements OnInit, OnDestroy {
+export class UnitPlayerComponent
+  extends VeronaModuleDirective
+  implements AfterViewInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
 
-  routingSubscription: Subscription | null = null;
-  postMessageSubscription: Subscription | null = null;
-  private iFrameElement: HTMLIFrameElement | undefined;
-  message = '';
-  pageList: UnitPage[] = [];
-  postMessageTarget: Window | undefined;
+  playerName = '';
   playerApiVersion = 3;
-  private sessionId = '';
-  private lastPlayerId = '';
+  pageList: PageData[] = [];
+  presentationProgress: Progress = 'none';
+  responseProgress: Progress = 'none';
+  hasFocus = false;
+
   unitData: UnitData = {
     databaseId: 0,
     sequenceId: 0,
@@ -45,358 +53,350 @@ export class UnitPlayerComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar,
-    private backendService: ReviewBackendService,
+    public snackBar: MatSnackBar,
+    public backendService: WorkspaceBackendService,
+    private reviewBackendService: ReviewBackendService,
     public appService: AppService,
-    private moduleService: ModuleService,
-    public reviewService: ReviewService
-  ) {}
+    public moduleService: ModuleService,
+    public workspaceService: WorkspaceService,
+    public reviewService: ReviewService,
+    public translateService: TranslateService
+  ) {
+    super();
+  }
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
+    this.iFrameElement = this.hostingIframe.nativeElement;
+    this.subscribeForPostMessages();
+    this.subscribeForRouteChanges();
+  }
+
+  private subscribeForRouteChanges(): void {
     setTimeout(() => {
-      this.iFrameElement = this.hostingIframe.nativeElement;
-      this.postMessageSubscription = this.appService.postMessage$
-        .subscribe(messageEvent => this.handleIncomingMessage(messageEvent));
-      this.routingSubscription = this.route.params.subscribe(params => {
-        const unitKey = 'u';
-        this.reviewService.currentUnitSequenceId = parseInt(params[unitKey], 10);
-        if (this.reviewService.units.length === 0) {
-          this.reviewService.loadReviewData().then(() => {
-            const unitData = this.reviewService.units.filter(
-              u => u.sequenceId === this.reviewService.currentUnitSequenceId
-            );
-            this.unitData = unitData[0];
-            this.sendUnitDataToPlayer();
-          });
-        } else {
-          const unitData = this.reviewService.units.filter(
-            u => u.sequenceId === this.reviewService.currentUnitSequenceId
-          );
-          this.unitData = unitData[0];
-          this.sendUnitDataToPlayer();
+      this.route.params
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(params => this.onRouteChange(params));
+    });
+  }
+
+  private onRouteChange(params: Params): void {
+    const unitKey = 'u';
+    this.reviewService.currentUnitSequenceId = parseInt(params[unitKey], 10);
+    if (this.reviewService.units.length === 0) {
+      this.reviewService
+        .loadReviewData()
+        .then(() => this.onSelectedUnitChange());
+    } else {
+      this.onSelectedUnitChange();
+    }
+  }
+
+  // Wird aufgerufen, wenn die Unit im Review gewechselt wird
+  onSelectedUnitChange(): void {
+    const unitData = this.reviewService.units.find(
+      u => u.sequenceId === this.reviewService.currentUnitSequenceId
+    );
+    if (unitData) {
+      this.unitData = unitData;
+      this.onLoadUnitProperties();
+    }
+  }
+
+  // Entspricht UnitPreview: Lädt Player-Metadaten und triggert Player-Build
+  onLoadUnitProperties(): void {
+    this.setPageList([], '');
+    this.setPresentationStatus('none');
+    this.setResponsesStatus('none');
+
+    this.reviewBackendService
+      .getUnitProperties(this.reviewService.reviewId, this.unitData.databaseId)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(umd => {
+        if (umd) {
+          this.unitData.dbMetadata = umd;
+          const playerId = umd.player ?
+            VeronaModuleFactory.getBestMatch(
+              umd.player,
+              Object.keys(this.moduleService.players)
+            ) :
+            '';
+          this.playerName = playerId;
+          this.unitData.name = `${this.unitData.sequenceId + 1}: ${umd.key}${
+            umd.name ? ` - ${umd.name}` : ''
+          }`;
+          this.reviewService.setHeaderText(this.unitData.name);
+
+          if (playerId) {
+            if (playerId === this.lastVeronaModulId && this.postMessageTarget) {
+              this.loadAndSendUnitDefinition();
+            } else {
+              this.postMessageTarget = undefined;
+              this.buildVeronaModule(playerId, 'player');
+            }
+          } else {
+            this.message = this.translateService.instant('workspace.no-player');
+            this.postMessageTarget = undefined;
+          }
         }
       });
-    });
   }
 
-  gotoPage(target: { action: string, index?: number }): void {
-    const action = target.action;
-    const index = target.index || 0;
-    let nextPageId = '';
-    // currentpage is detected by disabled-attribute of page
-    if (action === '#next') {
-      let currentPageIndex = 0;
-      for (let i = 0; i < this.pageList.length; i++) {
-        if ((this.pageList[i].index > 0) && (this.pageList[i].disabled)) {
-          currentPageIndex = i;
-          break;
-        }
-      }
-      if ((currentPageIndex > 0) && (currentPageIndex < this.pageList.length - 2)) {
-        nextPageId = this.pageList[currentPageIndex + 1].id;
-      }
-    } else if (action === '#previous') {
-      let currentPageIndex = 0;
-      for (let i = 0; i < this.pageList.length; i++) {
-        if ((this.pageList[i].index > 0) && (this.pageList[i].disabled)) {
-          currentPageIndex = i;
-          break;
-        }
-      }
-      if (currentPageIndex > 1) {
-        nextPageId = this.pageList[currentPageIndex - 1].id;
-      }
-    } else if (action === '#goto') {
-      if ((index > 0) && (index < this.pageList.length - 1)) {
-        nextPageId = this.pageList[index].id;
-      }
-    } else if (index === 0) {
-      // call from player
-      nextPageId = action;
-    }
-
-    if (nextPageId.length > 0 && this.postMessageTarget) {
-      if (this.playerApiVersion === 1) {
-        this.postMessageTarget.postMessage({
-          type: 'vo.ToPlayer.NavigateToPage',
-          sessionId: this.sessionId,
-          newPage: nextPageId
-        }, '*');
-      } else {
-        this.postMessageTarget.postMessage({
-          type: 'vopPageNavigationCommand',
-          sessionId: this.sessionId,
-          target: nextPageId
-        }, '*');
-      }
-    }
-  }
-
-  // TODO: remove duplicate code (units-preview.component.ts)
-  private handleIncomingMessage(m: MessageEvent) {
-    const msgData = m.data;
-    const msgType = msgData.type;
-    if ((msgType !== undefined) && (msgType !== null)) {
-      switch (msgType) {
-        case 'vopReadyNotification':
-        case 'player':
-        case 'vo.FromPlayer.ReadyNotification':
-          if ((msgType !== undefined) && (msgType !== null) && (m.source === this.iFrameElement?.contentWindow)) {
-            let majorVersion;
-            if (msgData.metadata) {
-              majorVersion = msgData.metadata.specVersion.match(/\d+/);
-            } else {
-              majorVersion = msgData.apiVersion ?
-                msgData.apiVersion.match(/\d+/) : msgData.specVersion.match(/\d+/);
-            }
-            if (majorVersion.length > 0) {
-              this.playerApiVersion = Number(majorVersion[0]);
-            } else {
-              this.playerApiVersion = 2;
-            }
-          } else {
-            this.playerApiVersion = 1;
-          }
-          this.sessionId = Math.floor(Math.random() * 20000000 + 10000000)
-            .toString();
-          this.postMessageTarget = m.source as Window;
-          this.sendUnitDataToPlayer();
-          break;
-
-        case 'vo.FromPlayer.StartedNotification':
-          this.setPageList(msgData.validPages, msgData.currentPage);
-          this.unitData.responses = msgData.responsesGiven;
-          break;
-
-        case 'vopStateChangedNotification':
-          if (msgData.playerState) {
-            const pages = msgData.playerState.validPages;
-            const targets = (Array.isArray(pages)) ? pages
-              .map((p: { id: string, label: string }) => p.id) : Object.keys(pages);
-            this.setPageList(
-              targets,
-              msgData.playerState.currentPage
-            );
-            this.setPageList(Object.keys(pages), msgData.playerState.currentPage);
-          }
-          if (msgData.unitState) {
-            this.unitData.responses = msgData.unitState.dataParts;
-          }
-          break;
-
-        case 'vo.FromPlayer.ChangedDataTransfer':
-          this.setPageList(msgData.validPages, msgData.currentPage);
-          this.unitData.responses = msgData.responsesGiven;
-          break;
-
-        case 'vo.FromPlayer.PageNavigationRequest':
-          this.snackBar.open(`Player sendet PageNavigationRequest: "${
-            msgData.newPage}"`, '', { duration: 3000 });
-          this.gotoPage(msgData.newPage);
-          break;
-
-        case 'vopPageNavigationCommand':
-          this.snackBar.open(`Player sendet PageNavigationRequest: "${
-            msgData.target}"`, '', { duration: 3000 });
-          this.gotoPage(msgData.target);
-          break;
-
-        case 'vo.FromPlayer.UnitNavigationRequest':
-        case 'vopUnitNavigationRequestedNotification':
-          this.gotoUnit(msgData.target);
-          break;
-
-        case 'vopWindowFocusChangedNotification':
-          // ignore
-          break;
-
-        default:
-          // eslint-disable-next-line no-console
-          console.warn(`processMessagePost ignored message: ${msgType}`);
-          break;
-      }
-    }
-  }
-
-  private gotoUnit(target: string) {
-    if (target === 'next') {
-      this.reviewService.setUnitNavigationRequest(this.reviewService.currentUnitSequenceId + 1);
-    } else if (target === 'last' || target === 'end') {
-      this.reviewService.setUnitNavigationRequest(this.reviewService.units.length);
-    } else if (target === 'first') {
-      this.reviewService.setUnitNavigationRequest(-1);
-    } else if (target === 'previous') {
-      this.reviewService.setUnitNavigationRequest(this.reviewService.currentUnitSequenceId - 1);
+  // Kombiniert das Laden der Definition und das Senden an den Player
+  private loadAndSendUnitDefinition(): void {
+    if (this.unitData.definition) {
+      this.postStore(this.unitData.definition);
     } else {
-      this.snackBar.open(`Player sendet unbekannten UnitNavigationRequest: "${
-        target}"`, '', { duration: 3000 });
+      this.reviewBackendService
+        .getUnitDefinition(
+          this.reviewService.reviewId,
+          this.unitData.databaseId
+        )
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(ued => {
+          if (ued) {
+            this.unitData.definition = ued.definition || '';
+            this.postStore(this.unitData.definition);
+          } else {
+            this.snackBar.open(
+              this.translateService.instant(
+                'workspace.unit-definition-not-loaded'
+              ),
+              '',
+              { duration: 3000 }
+            );
+          }
+        });
     }
   }
 
-  sendUnitDataToPlayer(): void {
-    this.setPageList([], '');
-    this.backendService.getUnitProperties(this.reviewService.reviewId, this.unitData.databaseId).subscribe(umd => {
-      if (umd) {
-        this.unitData.dbMetadata = umd;
-        this.unitData.playerId = umd.player ? umd.player : '';
-        const playerId = this.unitData.playerId ?
-          VeronaModuleFactory.getBestMatch(this.unitData.playerId, Object.keys(this.moduleService.players)) : '';
-        this.unitData.name = `${this.unitData.sequenceId + 1}: ${umd.key}${umd.name ? ` - ${umd.name}` : ''}`;
-        this.reviewService.setHeaderText(this.unitData.name);
-        if (playerId) {
-          if ((playerId === this.lastPlayerId) && this.postMessageTarget) {
-            if (this.unitData.definition) {
-              this.postUnitDef(this.unitData.definition);
-            } else {
-              this.backendService.getUnitDefinition(this.reviewService.reviewId, this.unitData.databaseId)
-                .subscribe(
-                  ued => {
-                    if (ued) {
-                      this.unitData.definition = ued.definition || '';
-                      this.postUnitDef(this.unitData.definition);
-                    } else {
-                      this.snackBar.open(
-                        'Konnte Aufgabendefinition nicht laden', 'Fehler', { duration: 3000 }
-                      );
-                    }
-                  }
-                );
-            }
-          } else {
-            this.message = '';
-            this.buildPlayer(playerId);
-            // player gets unit data via ReadyNotification
-          }
-        } else {
-          this.message = 'Kein gültiger Player zugewiesen. Bitte gehen Sie zu "Eigenschaften".';
-          this.buildPlayer();
-        }
-      }
-    });
-  }
+  // Implementation der abstrakten Methode aus VeronaModuleDirective
+  // Hier wird der String direkt gesendet, da wir im Review keinen UnitDefinitionStore verwalten
+  postStore(definition: string): void {
+    if (!this.postMessageTarget) return;
 
-  private postUnitDef(unitDef: string): void {
-    if (this.postMessageTarget) {
-      if (this.playerApiVersion === 1) {
-        this.postMessageTarget.postMessage({
+    if (this.playerApiVersion === 1) {
+      this.postMessageTarget.postMessage(
+        {
           type: 'vo.ToPlayer.DataTransfer',
           sessionId: this.sessionId,
-          unitDefinition: unitDef || ''
-        }, '*');
-      } else {
-        this.postMessageTarget.postMessage({
+          unitDefinition: definition || ''
+        },
+        '*'
+      );
+    } else {
+      this.postMessageTarget.postMessage(
+        {
           type: 'vopStartCommand',
           sessionId: this.sessionId,
           unitState: {
-            dataParts: this.unitData.responses,
+            dataParts: this.unitData.responses || {},
             presentationProgress: 'none',
             responseProgress: 'none'
           },
           playerConfig: {
             stateReportPolicy: 'eager',
             pagingMode: this.reviewService.bookletConfig?.pagingMode,
-            enabledNavigationTargets: ['next', 'previous', 'first', 'last', 'end'],
+            enabledNavigationTargets: [
+              'next',
+              'previous',
+              'first',
+              'last',
+              'end'
+            ],
             directDownloadUrl: this.backendService.getDirectDownloadLink()
           },
-          unitDefinition: unitDef || ''
-        }, '*');
+          unitDefinition: definition || ''
+        },
+        '*'
+      );
+    }
+    this.unitLoaded.next(true);
+  }
+
+  handleIncomingMessage(m: MessageEvent): void {
+    const msgData = m.data;
+    const msgType = msgData.type;
+    if (msgType && m.source === this.iFrameElement?.contentWindow) {
+      switch (msgType) {
+        case 'vopReadyNotification':
+        case 'player':
+        case 'vo.FromPlayer.ReadyNotification':
+          this.playerApiVersion = this.detectApiVersion(msgData);
+          this.sessionId = VeronaModuleDirective.getSessionId();
+          this.postMessageTarget = m.source as Window;
+          this.loadAndSendUnitDefinition();
+          break;
+
+        case 'vo.FromPlayer.StartedNotification':
+        case 'vo.FromPlayer.ChangedDataTransfer':
+          this.setPageList(msgData.validPages, msgData.currentPage);
+          this.setPresentationStatus(msgData.presentationComplete);
+          this.setResponsesStatus(msgData.responsesGiven);
+          break;
+
+        case 'vopStateChangedNotification':
+          if (msgData.playerState) {
+            const pages = msgData.playerState.validPages;
+            const targets = Array.isArray(pages) ?
+              pages.map((p: any) => p.id) :
+              Object.keys(pages);
+            this.setPageList(targets, msgData.playerState.currentPage);
+          }
+          if (msgData.unitState) {
+            this.setPresentationStatus(msgData.unitState.presentationProgress);
+            this.setResponsesStatus(msgData.unitState.responseProgress);
+            if (msgData.unitState.dataParts) this.unitData.responses = msgData.unitState.dataParts;
+          }
+          break;
+
+        case 'vo.FromPlayer.PageNavigationRequest':
+        case 'vopPageNavigationCommand':
+          const targetPage = msgData.newPage || msgData.target;
+          this.gotoPage({ action: targetPage });
+          break;
+
+        case 'vo.FromPlayer.UnitNavigationRequest':
+        case 'vopUnitNavigationRequestedNotification':
+          this.gotoUnit(msgData.target || msgData.navigationTarget);
+          break;
+
+        case 'vopWindowFocusChangedNotification':
+          this.hasFocus = msgData.hasFocus;
+          break;
+
+        default:
+          console.warn(`Message ignored: ${msgType}`);
       }
     }
   }
 
-  private buildPlayer(playerId?: string) {
-    this.postMessageTarget = undefined;
-    if (this.iFrameElement) {
-      this.iFrameElement.srcdoc = '';
-      if (playerId) {
-        this.moduleService.getModuleHtml(this.moduleService.players[playerId])
-          .then(playerData => {
-            if (playerData) {
-              this.setupPlayerIFrame(playerData);
-              this.lastPlayerId = playerId;
-            } else {
-              this.message = `Der Player "${playerId}" konnte nicht geladen werden.`;
-              this.lastPlayerId = '';
-            }
-          });
-      } else {
-        this.lastPlayerId = '';
-      }
+  private detectApiVersion(msgData: any): number {
+    if (msgData.type === 'vo.FromPlayer.ReadyNotification') return 1;
+    const versionSource =
+      msgData.metadata?.specVersion ||
+      msgData.apiVersion ||
+      msgData.specVersion;
+    const major = versionSource?.match(/\d+/);
+    return major ? Number(major[0]) : 2;
+  }
+
+  private gotoUnit(target: string): void {
+    const sequenceId = this.reviewService.currentUnitSequenceId;
+    switch (target) {
+      case 'next':
+        this.reviewService.setUnitNavigationRequest(sequenceId + 1);
+        break;
+      case 'previous':
+        this.reviewService.setUnitNavigationRequest(sequenceId - 1);
+        break;
+      case 'first':
+        this.reviewService.setUnitNavigationRequest(-1);
+        break;
+      case 'last':
+      case 'end':
+        this.reviewService.setUnitNavigationRequest(
+          this.reviewService.units.length
+        );
+        break;
+      default:
+        this.snackBar.open(
+          this.translateService.instant(
+            'workspace.player-send-unit-navigation-request',
+            { target }
+          ),
+          '',
+          { duration: 3000 }
+        );
     }
   }
 
-  private setupPlayerIFrame(playerHtml: string): void {
-    if (this.iFrameElement && this.iFrameElement.parentElement) {
-      const divHeight = this.iFrameElement.parentElement.clientHeight;
-      this.iFrameElement.height = `${String(divHeight - 5)}px`;
-      this.iFrameElement.srcdoc = playerHtml;
-    }
-  }
-
-  @HostListener('window:resize')
-  onResize(): void {
-    if (this.iFrameElement && this.iFrameElement.parentElement) {
-      const divHeight = this.iFrameElement.parentElement.clientHeight;
-      this.iFrameElement.height = `${String(divHeight - 5)}px`;
-    }
-  }
-
+  // ++++++++++++ Page Navigation (Identisch zu UnitPreview) +++++++++++++++++++
   setPageList(validPages?: string[], currentPage?: string): void {
-    if ((validPages instanceof Array)) {
+    if (Array.isArray(validPages) && validPages.length > 1) {
       const newPageList: PageData[] = [];
-      if (validPages.length > 1) {
-        for (let i = 0; i < validPages.length; i++) {
-          if (i === 0) {
-            newPageList.push({
-              index: -1,
-              id: '#previous',
-              disabled: validPages[i] === currentPage,
-              type: '#previous'
-            });
-          }
-
+      validPages.forEach((id, i) => {
+        if (i === 0) {
           newPageList.push({
-            index: i + 1,
-            id: validPages[i],
-            disabled: validPages[i] === currentPage,
-            type: '#goto'
+            index: -1,
+            id: '#previous',
+            disabled: id === currentPage,
+            type: '#previous'
           });
-
-          if (i === validPages.length - 1) {
-            newPageList.push({
-              index: -1,
-              id: '#next',
-              disabled: validPages[i] === currentPage,
-              type: '#next'
-            });
-          }
         }
-      }
+        newPageList.push({
+          index: i + 1,
+          id,
+          disabled: id === currentPage,
+          type: '#goto'
+        });
+        if (i === validPages.length - 1) {
+          newPageList.push({
+            index: -1,
+            id: '#next',
+            disabled: id === currentPage,
+            type: '#next'
+          });
+        }
+      });
       this.pageList = newPageList;
-    } else if ((this.pageList.length > 1) && (currentPage !== undefined)) {
-      let currentPageIndex = 0;
-      for (let i = 0; i < this.pageList.length; i++) {
-        if (this.pageList[i].type === '#goto') {
-          if (this.pageList[i].id === currentPage) {
-            this.pageList[i].disabled = true;
-            currentPageIndex = i;
-          } else {
-            this.pageList[i].disabled = false;
-          }
-        }
-      }
-      if (currentPageIndex === 1) {
-        this.pageList[0].disabled = true;
-        this.pageList[this.pageList.length - 1].disabled = false;
-      } else {
-        this.pageList[0].disabled = false;
-        this.pageList[this.pageList.length - 1].disabled = currentPageIndex === this.pageList.length - 2;
-      }
+    } else if (this.pageList.length > 1 && currentPage !== undefined) {
+      const idx = this.pageList.findIndex(
+        p => p.type === '#goto' && p.id === currentPage
+      );
+      this.pageList.forEach(p => {
+        if (p.type === '#goto') p.disabled = p.id === currentPage;
+      });
+      this.pageList[0].disabled = idx === 1;
+      this.pageList[this.pageList.length - 1].disabled =
+        idx === this.pageList.length - 2;
     }
   }
 
-  ngOnDestroy() {
-    if (this.routingSubscription) this.routingSubscription.unsubscribe();
-    if (this.postMessageSubscription) this.postMessageSubscription.unsubscribe();
+  gotoPage(target: { action: string; index?: number }): void {
+    const { action, index = 0 } = target;
+    let nextPageId = '';
+    const currentIdx = this.pageList.findIndex(
+      p => p.index > 0 && p.disabled
+    );
+
+    if (action === '#next' && currentIdx < this.pageList.length - 2) nextPageId = this.pageList[currentIdx + 1].id;
+    else if (action === '#previous' && currentIdx > 1) nextPageId = this.pageList[currentIdx - 1].id;
+    else if (action === '#goto' && index > 0) { nextPageId = this.pageList[index].id; } else if (index === 0) nextPageId = action;
+
+    if (nextPageId && this.postMessageTarget) {
+      const isV1 = this.playerApiVersion === 1;
+      this.postMessageTarget.postMessage(
+        {
+          type: isV1 ?
+            'vo.ToPlayer.NavigateToPage' :
+            'vopPageNavigationCommand',
+          sessionId: this.sessionId,
+          [isV1 ? 'newPage' : 'target']: nextPageId
+        },
+        '*'
+      );
+    }
+  }
+
+  setPresentationStatus(s: string): void {
+    this.presentationProgress =
+      s === 'yes' || s === 'complete' || s === 'some' ?
+        s === 'some' ?
+          'some' :
+          'complete' :
+        'none';
+  }
+
+  setResponsesStatus(s: string): void {
+    this.responseProgress =
+      s === 'all' || s === 'complete' || s === 'yes' || s === 'some' ?
+        s === 'all' || s === 'complete' ?
+          'complete' :
+          'some' :
+        'none';
+  }
+
+  setFocusStatus(status: boolean): void {
+    this.hasFocus = status;
   }
 }
