@@ -30,7 +30,7 @@ export class UnitSchemerComponent
     public workspaceService: WorkspaceService,
     public snackBar: MatSnackBar,
     public moduleService: ModuleService,
-    private appService: AppService,
+    public appService: AppService,
     public translateService: TranslateService
   ) {
     super();
@@ -66,54 +66,49 @@ export class UnitSchemerComponent
       });
   }
 
-  private subscribeForPostMessages(): void {
-    this.appService.postMessage$
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((m: MessageEvent) => {
-        const msgData = m.data;
-        const msgType = msgData.type;
-
-        if (
-          msgType !== undefined &&
-          msgType !== null &&
-          m.source === this.iFrameElement?.contentWindow
-        ) {
+  handleIncomingMessage(m: MessageEvent) {
+    const msgData = m.data;
+    const msgType = msgData.type;
+    if (
+      msgType !== undefined &&
+      msgType !== null &&
+      m.source === this.iFrameElement?.contentWindow
+    ) {
+      this.postMessageTarget = m.source as Window;
+      switch (msgType) {
+        case 'vosReadyNotification':
+          this.sessionId = UnitSchemerComponent.getSessionId();
           this.postMessageTarget = m.source as Window;
-          switch (msgType) {
-            case 'vosReadyNotification':
-              this.sessionId = UnitSchemerComponent.getSessionId();
-              this.postMessageTarget = m.source as Window;
-              this.sendScheme(
-                this.workspaceService.selectedUnit$.getValue(),
-                this.workspaceService.getUnitSchemeStore()
+          this.sendScheme(
+            this.workspaceService.selectedUnit$.getValue(),
+            this.workspaceService.getUnitSchemeStore()
+          );
+          break;
+
+        case 'vosSchemeChangedNotification':
+          if (msgData.sessionId === this.sessionId) {
+            if (msgData.codingScheme) {
+              this.workspaceService.codingScheme = JSON.parse(
+                msgData.codingScheme
               );
-              break;
-
-            case 'vosSchemeChangedNotification':
-              if (msgData.sessionId === this.sessionId) {
-                if (msgData.codingScheme) {
-                  this.workspaceService.codingScheme = JSON.parse(
-                    msgData.codingScheme
-                  );
-                  this.workspaceService
-                    .getUnitSchemeStore()
-                    ?.setData(msgData.codingScheme, msgData.codingSchemeType);
-                  // } else { TODO: find solution for vosGetSchemeRequest
-                  //   this.postMessageTarget.postMessage({
-                  //     type: 'vosGetSchemeRequest',
-                  //     sessionId: this.sessionId
-                  //   }, '*');
-                }
-              }
-              break;
-
-            default:
-              // eslint-disable-next-line no-console
-              console.warn(`processMessagePost ignored message: ${msgType}`);
-              break;
+              this.workspaceService
+                .getUnitSchemeStore()
+                ?.setData(msgData.codingScheme, msgData.codingSchemeType);
+              // } else { TODO: find solution for vosGetSchemeRequest
+              //   this.postMessageTarget.postMessage({
+              //     type: 'vosGetSchemeRequest',
+              //     sessionId: this.sessionId
+              //   }, '*');
+            }
           }
-        }
-      });
+          break;
+
+        default:
+          // eslint-disable-next-line no-console
+          console.warn(`processMessagePost ignored message: ${msgType}`);
+          break;
+      }
+    }
   }
 
   sendChangeData(): void {

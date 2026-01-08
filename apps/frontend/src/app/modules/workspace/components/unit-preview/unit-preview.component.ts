@@ -48,7 +48,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
   private unitStateDataType: string | null = null;
 
   constructor(
-    private appService: AppService,
+    public appService: AppService,
     public snackBar: MatSnackBar,
     public backendService: WorkspaceBackendService,
     public workspaceService: WorkspaceService,
@@ -118,141 +118,137 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
       });
   }
 
-  private subscribeForPostMessages(): void {
-    this.appService.postMessage$
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((m: MessageEvent) => {
-        const msgData = m.data;
-        const msgType = msgData.type;
-        if (
-          msgType !== undefined &&
-          msgType !== null &&
-          m.source === this.iFrameElement?.contentWindow
-        ) {
-          switch (msgType) {
-            case 'vopReadyNotification':
-            case 'player':
-            case 'vo.FromPlayer.ReadyNotification':
-              if (msgType === 'vopReadyNotification' || msgType === 'player') {
-                let majorVersion;
-                if (msgData.metadata) {
-                  majorVersion = msgData.metadata.specVersion.match(/\d+/);
-                } else {
-                  majorVersion = msgData.apiVersion ?
-                    msgData.apiVersion.match(/\d+/) :
-                    msgData.specVersion.match(/\d+/);
-                }
-                if (majorVersion.length > 0) {
-                  this.playerApiVersion = Number(majorVersion[0]);
-                } else {
-                  this.playerApiVersion = 2;
-                }
-              } else {
-                this.playerApiVersion = 1;
-              }
-              this.sessionId = UnitPreviewComponent.getSessionId();
-              this.postMessageTarget = m.source as Window;
-              this.sendUnitDefinition(
-                this.workspaceService.selectedUnit$.getValue(),
-                this.workspaceService.getUnitDefinitionStore()
-              );
-              break;
-
-            case 'vo.FromPlayer.StartedNotification':
-              this.setPageList(msgData.validPages, msgData.currentPage);
-              this.setPresentationStatus(msgData.presentationComplete);
-              this.setResponsesStatus(msgData.responsesGiven);
-              break;
-
-            case 'vopStateChangedNotification':
-              if (msgData.playerState) {
-                const pages = msgData.playerState.validPages;
-                const targets = Array.isArray(pages) ?
-                  pages.map((p: { id: string; label: string }) => p.id) :
-                  Object.keys(pages);
-                this.setPageList(targets, msgData.playerState.currentPage);
-              }
-              if (msgData.unitState) {
-                this.setPresentationStatus(
-                  msgData.unitState.presentationProgress
-                );
-                this.setResponsesStatus(msgData.unitState.responseProgress);
-                if (msgData.unitState.dataParts) {
-                  const dataParts: Record<string, string> =
-                    msgData.unitState.dataParts;
-                  this.dataParts = {
-                    ...(this.dataParts ? this.dataParts : {}),
-                    ...dataParts
-                  };
-                  this.unitStateDataType =
-                    msgData.unitState.unitStateDataType || null;
-                }
-              }
-              break;
-
-            case 'vo.FromPlayer.ChangedDataTransfer':
-              this.setPageList(msgData.validPages, msgData.currentPage);
-              this.setPresentationStatus(msgData.presentationComplete);
-              this.setResponsesStatus(msgData.responsesGiven);
-              break;
-
-            case 'vo.FromPlayer.PageNavigationRequest':
-              this.snackBar.open(
-                this.translateService.instant(
-                  'workspace.player-send-page-navigation-request',
-                  { target: msgData.newPage }
-                ),
-                '',
-                { duration: 3000 }
-              );
-              this.gotoPage({ action: msgData.newPage });
-              break;
-
-            case 'vopPageNavigationCommand':
-              this.snackBar.open(
-                this.translateService.instant(
-                  'workspace.player-send-page-navigation-request',
-                  { target: msgData.target }
-                ),
-                '',
-                { duration: 3000 }
-              );
-              this.gotoPage({ action: msgData.target });
-              break;
-
-            case 'vo.FromPlayer.UnitNavigationRequest':
-              this.snackBar.open(
-                this.translateService.instant(
-                  'workspace.player-send-unit-navigation-request',
-                  { target: msgData.navigationTarget }
-                ),
-                '',
-                { duration: 3000 }
-              );
-              break;
-
-            case 'vopUnitNavigationRequestedNotification':
-              this.snackBar.open(
-                this.translateService.instant(
-                  'workspace.player-send-unit-navigation-request',
-                  { target: msgData.target }
-                ),
-                '',
-                { duration: 3000 }
-              );
-              break;
-
-            case 'vopWindowFocusChangedNotification':
-              this.setFocusStatus(msgData.hasFocus);
-              break;
-
-            default:
-              // eslint-disable-next-line no-console
-              console.warn(`processMessagePost ignored message: ${msgType}`);
-              break;
+  handleIncomingMessage(m: MessageEvent) {
+    const msgData = m.data;
+    const msgType = msgData.type;
+    if (
+      msgType !== undefined &&
+      msgType !== null &&
+      m.source === this.iFrameElement?.contentWindow
+    ) {
+      switch (msgType) {
+        case 'vopReadyNotification':
+        case 'player':
+        case 'vo.FromPlayer.ReadyNotification':
+          if (msgType === 'vopReadyNotification' || msgType === 'player') {
+            let majorVersion;
+            if (msgData.metadata) {
+              majorVersion = msgData.metadata.specVersion.match(/\d+/);
+            } else {
+              majorVersion = msgData.apiVersion ?
+                msgData.apiVersion.match(/\d+/) :
+                msgData.specVersion.match(/\d+/);
+            }
+            if (majorVersion.length > 0) {
+              this.playerApiVersion = Number(majorVersion[0]);
+            } else {
+              this.playerApiVersion = 2;
+            }
+          } else {
+            this.playerApiVersion = 1;
           }
-        }
-      });
+          this.sessionId = UnitPreviewComponent.getSessionId();
+          this.postMessageTarget = m.source as Window;
+          this.sendUnitDefinition(
+            this.workspaceService.selectedUnit$.getValue(),
+            this.workspaceService.getUnitDefinitionStore()
+          );
+          break;
+
+        case 'vo.FromPlayer.StartedNotification':
+          this.setPageList(msgData.validPages, msgData.currentPage);
+          this.setPresentationStatus(msgData.presentationComplete);
+          this.setResponsesStatus(msgData.responsesGiven);
+          break;
+
+        case 'vopStateChangedNotification':
+          if (msgData.playerState) {
+            const pages = msgData.playerState.validPages;
+            const targets = Array.isArray(pages) ?
+              pages.map((p: { id: string; label: string }) => p.id) :
+              Object.keys(pages);
+            this.setPageList(targets, msgData.playerState.currentPage);
+          }
+          if (msgData.unitState) {
+            this.setPresentationStatus(
+              msgData.unitState.presentationProgress
+            );
+            this.setResponsesStatus(msgData.unitState.responseProgress);
+            if (msgData.unitState.dataParts) {
+              const dataParts: Record<string, string> =
+                msgData.unitState.dataParts;
+              this.dataParts = {
+                ...(this.dataParts ? this.dataParts : {}),
+                ...dataParts
+              };
+              this.unitStateDataType =
+                msgData.unitState.unitStateDataType || null;
+            }
+          }
+          break;
+
+        case 'vo.FromPlayer.ChangedDataTransfer':
+          this.setPageList(msgData.validPages, msgData.currentPage);
+          this.setPresentationStatus(msgData.presentationComplete);
+          this.setResponsesStatus(msgData.responsesGiven);
+          break;
+
+        case 'vo.FromPlayer.PageNavigationRequest':
+          this.snackBar.open(
+            this.translateService.instant(
+              'workspace.player-send-page-navigation-request',
+              { target: msgData.newPage }
+            ),
+            '',
+            { duration: 3000 }
+          );
+          this.gotoPage({ action: msgData.newPage });
+          break;
+
+        case 'vopPageNavigationCommand':
+          this.snackBar.open(
+            this.translateService.instant(
+              'workspace.player-send-page-navigation-request',
+              { target: msgData.target }
+            ),
+            '',
+            { duration: 3000 }
+          );
+          this.gotoPage({ action: msgData.target });
+          break;
+
+        case 'vo.FromPlayer.UnitNavigationRequest':
+          this.snackBar.open(
+            this.translateService.instant(
+              'workspace.player-send-unit-navigation-request',
+              { target: msgData.navigationTarget }
+            ),
+            '',
+            { duration: 3000 }
+          );
+          break;
+
+        case 'vopUnitNavigationRequestedNotification':
+          this.snackBar.open(
+            this.translateService.instant(
+              'workspace.player-send-unit-navigation-request',
+              { target: msgData.target }
+            ),
+            '',
+            { duration: 3000 }
+          );
+          break;
+
+        case 'vopWindowFocusChangedNotification':
+          this.setFocusStatus(msgData.hasFocus);
+          break;
+
+        default:
+          // eslint-disable-next-line no-console
+          console.warn(`processMessagePost ignored message: ${msgType}`);
+          break;
+      }
+    }
   }
 
   sendChangeData(): void {
