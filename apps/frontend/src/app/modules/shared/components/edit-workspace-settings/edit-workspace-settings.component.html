@@ -58,7 +58,10 @@
           @if (unitMDProfiles.length === 0) {
             <mat-error>{{'metadata.no-unit-profiles-hint' | translate }}</mat-error>
           }
-          <mat-select  class="select-profile" placeholder="{{'metadata.select-profile' | translate }}" [(value)]="selectedUnitMDProfile" (click)="$event.stopPropagation()" (selectionChange)="selectUnitMDProfile($event)"
+          <mat-select  class="select-profile"
+                       placeholder="{{'metadata.select-profile' | translate }}"
+                       [(value)]="selectedUnitMDProfile"
+                       (click)="$event.stopPropagation()" (selectionChange)="selectUnitMDProfile($event)"
                        data-cy="edit-workspace-settings-select-unit-profile">
             <mat-option [value]="undefined"></mat-option>
             @for (unitMDProfile of unitMDProfiles; track unitMDProfile) {

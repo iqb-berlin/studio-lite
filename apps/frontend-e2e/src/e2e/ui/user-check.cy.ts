@@ -6,7 +6,8 @@ import {
   deleteFirstUser,
   deleteUser,
   login,
-  logout, loginWithUser
+  logout,
+  loginWithUser
 } from '../../support/util';
 import { newUser, UserData } from '../../support/testData';
 
@@ -54,7 +55,6 @@ describe('UI User Management', () => {
 
   it('should not be able to login with incorrect credentials', () => {
     cy.login(newUser.username, 'nopass');
-    // Anmelden
     cy.translate('de').then(json => {
       cy.clickButtonWithResponseCheck(json.home.login, [401], '/api/login', 'POST', 'loginFail');
     });

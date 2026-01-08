@@ -70,7 +70,7 @@ describe('Metadata Management', () => {
     cy.contains('M1_001').should('exist').click();
     getStructure('uMA', false);
     getItem('iMA', false);
-    cy.get('[data-cy="workspace-save-unit"]').click();
+    cy.get('[data-cy="workspace-unit-save-button"]').click();
   });
 
   it('adds metadata values for the unit D1_001, that has several items', () => {
@@ -80,7 +80,7 @@ describe('Metadata Management', () => {
     getItem('iDE', false);
     getItem('iDE', true);
     getItem('iDE', true, 'iDE');
-    cy.get('[data-cy="workspace-save-unit"]').click();
+    cy.get('[data-cy="workspace-unit-save-button"]').click();
   });
 
   it('deletes the data', () => {

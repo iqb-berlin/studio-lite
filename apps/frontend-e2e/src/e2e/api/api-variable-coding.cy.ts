@@ -153,7 +153,6 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
       'GET',
       'summaryMetadata'
     );
-    cy.pause();
     cy.translate('de').then(json => {
       cy.get(`.mdc-tab__text-label:contains("${json.metadata.items}")`).click();
     });

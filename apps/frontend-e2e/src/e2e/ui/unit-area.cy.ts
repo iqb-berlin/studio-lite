@@ -110,22 +110,21 @@ describe('UI check: workspace', () => {
       .should('exist');
   });
 
+  it('should be able to delete Unit', () => {
+    cy.visitWs(ws1);
+    deleteUnit(unit1.shortname);
+  });
+
   it('should be able to assign group to the units', () => {
     createWs(ws2, group1);
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws2, [AccessLevel.Admin]);
     moveUnit(ws1, ws2, unit2);
   });
 
-  it('should be able to delete Unit', () => {
-    cy.visitWs(ws2);
-    deleteUnit(unit2.shortname);
-  });
-
   it('should export selected units', () => {
     cy.visitWs(ws1);
-    cy.wait(200);
     goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-download-unit"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-download-unit"]').click();
     selectListUnits([unit3.shortname, newUnit.shortname]);
     cy.clickDataCyWithResponseCheck(
       '[data-cy="workspace-export-unit-button"]',
@@ -141,26 +140,26 @@ describe('UI check: workspace', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-metadata"]').click();
-    selectListUnits([unit3.shortname, newUnit.shortname]);
-    // eslint-disable-next-line max-len
-    cy.clickDataCyWithResponseCheck('[data-cy="workspace-show-metadata-display"]', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
-    cy.translate('de').then(json => {
-      cy.clickDialogButton(json.download);
-    });
+    cy.clickDataCyWithResponseCheck(
+      '[data-cy="workspace-show-metadata-display"]',
+      [200, 304],
+      '/api/workspaces/*/units/properties',
+      'GET',
+      'summaryMetadata');
+    cy.get('[data-cy="metadata-table-view-download"]');
   });
 
-  it('should show kodierung ', () => {
+  it('should show Kodierung', () => {
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-coding-report"]').click();
-    // eslint-disable-next-line max-len
     cy.translate('de').then(json => {
       cy.clickDialogButton(json.close);
     });
   });
 
-  it('should export the codebook ', () => {
+  it('should export the codebook', () => {
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
@@ -179,7 +178,6 @@ describe('UI check: workspace', () => {
 
   it('deletes the context ', () => {
     deleteGroup(group1);
-    // deleteUser(newUser.username);
     deleteModule();
   });
 });

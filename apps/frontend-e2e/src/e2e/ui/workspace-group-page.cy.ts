@@ -27,7 +27,6 @@ describe('UI Group admin workspace check', () => {
   });
   after(() => {
     deleteFirstUser();
-    cy.pause();
   });
 
   it('prepares the context', () => {

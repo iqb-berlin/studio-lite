@@ -437,8 +437,8 @@ export function addUnitFromExisting(ws:string, unit1:UnitData, newUnit:UnitData)
   cy.translate('de').then(json => {
     cy.clickDialogButton(json.continue);
   });
-  cy.get('[data-cy="workspace-new-unit-unit-key"]').type(newUnit.shortname);
-  cy.get('[data-cy="workspace-new-unit-unit-name"]').type(newUnit.name);
+  cy.get('[data-cy="workspace-new-unit-unit-key"]').clear().type(newUnit.shortname);
+  cy.get('[data-cy="workspace-new-unit-unit-name"]').clear().type(newUnit.name);
   cy.get('body').then($body => {
     if ($body.find('[data-cy="workspace-new-unit-new-group"]').length > 0) {
       cy.get('[data-cy="workspace-new-unit-new-group"]')
@@ -499,7 +499,7 @@ export function importExercise(filename: string): void {
 
 export function selectListUnits(unitNames: string[]): void {
   unitNames.forEach(name => {
-    cy.get(`mat-cell:contains("${name}")`).prev().click();
+    cy.get(`mat-cell:contains("${name}")`).parent().find('mat-checkbox').click();
   });
 }
 
