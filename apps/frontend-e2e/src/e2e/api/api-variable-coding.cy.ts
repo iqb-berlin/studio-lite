@@ -153,11 +153,11 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
       'GET',
       'summaryMetadata'
     );
-    cy.translate('de').then(json => {
+    cy.translate(Cypress.env('locale')).then(json => {
       cy.get(`.mdc-tab__text-label:contains("${json.metadata.items}")`).click();
     });
     cy.get('mat-dialog-container:contains("text-field_1")').should('have.length', 0);
-    cy.translate('de').then(json => {
+    cy.translate(Cypress.env('locale')).then(json => {
       cy.clickDialogButton(json.close);
     });
   });

@@ -37,7 +37,7 @@ describe('Review:', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
     cy.get('[data-cy="workspace-review-menu-add-review-button"]').click();
-    cy.translate('de').then(json => {
+    cy.translate(Cypress.env('locale')).then(json => {
       cy.get(`input[placeholder="${json.workspace['new-review-name']}"]`)
         .should('exist')
         .clear()
@@ -95,7 +95,7 @@ describe('Review:', () => {
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
     cy.contains('mat-row', review).click();
     cy.get('[data-cy="workspace-review-menu-export-review-button"]').click();
-    cy.translate('de').then(json => {
+    cy.translate(Cypress.env('locale')).then(json => {
       cy.clickButton(json['unit-download'].dialog['ok-button-label']);
     });
     cy.get('[data-cy="workspace-review-close"]').click();
@@ -107,7 +107,7 @@ describe('Review:', () => {
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
     cy.contains('mat-row', review).click();
     cy.get('[data-cy="workspace-review-menu-print-review-button"]').click();
-    cy.translate('de').then(json => {
+    cy.translate(Cypress.env('locale')).then(json => {
       cy.clickButton(json.workspace.print);
     });
     cy.get('[data-cy="workspace-review-close"]').click();
@@ -119,7 +119,7 @@ describe('Review:', () => {
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
     cy.contains('mat-row', review).click();
     selectCheckBox('M6_AK0013');
-    cy.translate('de').then(json => {
+    cy.translate(Cypress.env('locale')).then(json => {
       cy.get('studio-lite-save-changes').within(() => {
         cy.clickButton(json.workspace.save);
       });
@@ -147,7 +147,7 @@ describe('Review:', () => {
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
     cy.contains('mat-row', review).click();
     cy.get('[data-cy="workspace-review-menu-delete-review-button"]').click();
-    cy.translate('de').then(json => {
+    cy.translate(Cypress.env('locale')).then(json => {
       cy.clickButton(json.workspace.delete);
     });
     cy.get('[data-cy="workspace-review-close"]').click();

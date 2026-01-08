@@ -154,7 +154,7 @@ describe('UI check: workspace', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-coding-report"]').click();
-    cy.translate('de').then(json => {
+    cy.translate(Cypress.env('locale')).then(json => {
       cy.clickDialogButton(json.close);
     });
   });
@@ -165,7 +165,7 @@ describe('UI check: workspace', () => {
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-export-coding-book"]').click();
     selectListUnits([newUnit.shortname]);
-    cy.translate('de').then(json => {
+    cy.translate(Cypress.env('locale')).then(json => {
       cy.clickButtonWithResponseCheck(
         json.export,
         [200, 304],

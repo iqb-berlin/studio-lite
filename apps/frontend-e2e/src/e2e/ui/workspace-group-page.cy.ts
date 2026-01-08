@@ -40,11 +40,11 @@ describe('UI Group admin workspace check', () => {
     createWs(ws2, group1);
   });
 
-  it('should make user as admin of a workspace group ', () => {
+  it('makes an user as admin of a workspace group ', () => {
     makeAdminOfGroup(group1, [Cypress.env('username'), groupAdminUser.username]);
   });
 
-  it('checks that tabs (Nutzer:innen, Arbeitsbereiche, Augaben and Einstellungen) are present ', () => {
+  it('checks that tabs (Nutzer:innen, Arbeitsbereiche, Aufgaben and Einstellungen) are present ', () => {
     cy.findAdminGroupSettings(group1).click();
     cy.get('[data-cy="wsg-admin-routes-users"]').should('exist');
     cy.get('[data-cy="wsg-admin-routes-workspaces"]').should('exist');

@@ -58,7 +58,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
 
   it('creates the item 02 and checks that text-field_1 is not available', () => {
     createItem('02');
-    cy.translate('de').then(json => {
+    cy.translate(Cypress.env('locale')).then(json => {
       cy.get(`mat-select[placeholder="${json.metadata['choose-item-variable']}"]`)
         .eq(-1).find('svg').click();
     });
@@ -91,7 +91,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.visitWs(mathArea);
     selectUnit('MA_01');
     goToItem('03');
-    cy.translate('de').then(json => {
+    cy.translate(Cypress.env('locale')).then(json => {
       cy.get(`mat-select[placeholder="${json.metadata['choose-item-variable']}"]`)
         .eq(-1).find('svg').click()
         .then(() => {
@@ -105,7 +105,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-metadata"]').click();
     cy.get('[data-cy="workspace-show-metadata-display"]').click();
-    cy.translate('de').then(json => {
+    cy.translate(Cypress.env('locale')).then(json => {
       cy.get(`.mdc-tab__text-label:contains("${json.metadata.items}")`).click();
     });
     cy.get('mat-dialog-container:contains("drop-list_1")').should('have.length', 0);
@@ -115,7 +115,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
   it('checks the order of items before and after clicking Nach Variable ID Sortieren is not the same', () => {
     cy.get('studio-lite-item').eq(1).find('span:contains("02")').should('exist');
     cy.get('studio-lite-item').eq(0).find('span:contains("01")').should('exist');
-    cy.translate('de').then(json => {
+    cy.translate(Cypress.env('locale')).then(json => {
       cy.get('select.sort-items').select(`${json.metadata['sort-by-variableId']}`,
         { force: true });
     });
@@ -124,7 +124,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('checks that the select order by Id exists', () => {
-    cy.translate('de').then(json => {
+    cy.translate(Cypress.env('locale')).then(json => {
       cy.get('select.sort-items').select(`${json.metadata['sort-by-id']}`, { force: true });
     });
   });

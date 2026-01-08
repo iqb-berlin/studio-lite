@@ -34,18 +34,14 @@ describe('Load metadata profile', () => {
     const searchProfile:string = 'Deutsch';
     clickIndexTabAdmin('workspace-groups');
     cy.get('mat-table')
-      .contains(groups[0])
+      .contains(groups[1])
       .click();
-    // cy.get('mat-icon')
-    //   .contains('settings')
-    //   .click();
     cy.get('[data-cy="workspaces-groups-menu-edit"]').click();
     checkProfile(searchProfile);
-    // cy.clickButtonWithResponseCheck('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
-    cy.clickButton('Speichern');
+    cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
   });
 
-  it('should be possible load a metadata profile from workspace', () => {
+  it('should be possible load a metadata profile from wsg-admin and revert it', () => {
     const searchProfile:string = 'Deutsch';
     cy.visit('/');
     cy.get(`div>div>div:contains("${searchProfile}")`)
@@ -53,6 +49,7 @@ describe('Load metadata profile', () => {
       .click();
     clickIndexTabWsgAdmin('settings');
     checkProfile(searchProfile);
+    cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
   });
 
   it('should be possible load more metadata profile', () => {
@@ -66,7 +63,6 @@ describe('Load metadata profile', () => {
       .contains('settings')
       .click();
     checkMultipleProfiles(searchProfiles);
-    // cy.clickButtonWithResponseCheck('Speichern', 200, '/api/admin/workspace-groups/', 'PATCH', 'setProfile');
     cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
   });
 
