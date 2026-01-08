@@ -9,7 +9,8 @@
       <input matInput
         formControlName="key"
         [placeholder]="'workspace.unit-key' | translate"
-        [value]="data.key" >
+        [value]="data.key"
+        data-cy="workspace-new-unit-unit-key">
       @if (newUnitForm.controls['key'].invalid) {
         <mat-error>
           {{'workspace.invalid-unit-key' | translate}}
@@ -20,7 +21,8 @@
       <input matInput
         formControlName="label"
         [placeholder]="'workspace.unit-name' | translate"
-        [value]="data.label">
+        [value]="data.label"
+        data-cy="workspace-new-unit-unit-name">
     </mat-form-field>
     @if (!groupDirectMode) {
       <div
@@ -28,7 +30,8 @@
         <mat-form-field class="fx-flex-fill">
           <mat-select
             [placeholder]="'workspace.group' | translate"
-            formControlName="groupSelect">
+            formControlName="groupSelect"
+            data-cy="workspace-new-unit-group">
             @for (group of data.groups; track group) {
               <mat-option
                 [value]="group">
@@ -40,7 +43,7 @@
         <button mat-icon-button
           [matTooltip]="'workspace.add-new-group' | translate"
           (click)="setGroupDirectMode(true)"
-                data-cy="workspace-add-new-group">
+          data-cy="workspace-new-unit-add-new-group">
           <mat-icon>add_circle</mat-icon>
         </button>
       </div>
@@ -52,7 +55,8 @@
           <input matInput
             #newGroupInput
             formControlName="groupDirect"
-            [placeholder]="'workspace.new-group' | translate">
+            [placeholder]="'workspace.new-group' | translate"
+            data-cy="workspace-new-unit-new-group">
         </mat-form-field>
         @if (data.groups.length > 0) {
           <button mat-icon-button
@@ -72,7 +76,8 @@
     color="primary"
     type="submit"
     [mat-dialog-close]="newUnitForm"
-    [disabled]="newUnitForm.invalid">
+    [disabled]="newUnitForm.invalid"
+    data-cy="workspace-new-unit-submit-button">
     {{'save' | translate}}
   </button>
   <button mat-raised-button

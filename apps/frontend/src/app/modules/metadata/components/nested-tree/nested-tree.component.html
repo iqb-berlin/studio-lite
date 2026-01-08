@@ -57,12 +57,14 @@
   <button mat-raised-button
     color="primary"
     type="submit"
-    [mat-dialog-close]="{nodes: selectedNodesList, hideNumbering: dialogData.props.hideNumbering}">
+    [mat-dialog-close]="{nodes: selectedNodesList, hideNumbering: dialogData.props.hideNumbering}"
+    data-cy="metadata-nested-tree-confirm-button">
     {{'confirm' | translate}}
   </button>
   <button mat-raised-button
     type="submit"
-    [mat-dialog-close]="">
+    [mat-dialog-close]=""
+    data-cy="metadata-nested-tree-cancel-button">
     {{'cancel' | translate}}
   </button>
 </mat-dialog-actions>

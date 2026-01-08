@@ -146,11 +146,20 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-metadata"]').click();
-    // eslint-disable-next-line max-len
-    cy.clickButtonWithResponseCheck('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
-    cy.get('.mdc-tab__text-label:contains("Metadaten Items")').click();
+    cy.clickDataCyWithResponseCheck(
+      '[data-cy="workspace-show-metadata-display"]',
+      [200, 304],
+      '/api/workspaces/*/units/properties',
+      'GET',
+      'summaryMetadata'
+    );
+    cy.translate(Cypress.env('locale')).then(json => {
+      cy.get(`.mdc-tab__text-label:contains("${json.metadata.items}")`).click();
+    });
     cy.get('mat-dialog-container:contains("text-field_1")').should('have.length', 0);
-    cy.clickButton('Schließen');
+    cy.translate(Cypress.env('locale')).then(json => {
+      cy.clickDialogButton(json.close);
+    });
   });
 
   it('deletes the data', () => {

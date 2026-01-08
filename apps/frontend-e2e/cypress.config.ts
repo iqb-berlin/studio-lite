@@ -16,6 +16,7 @@ export default defineConfig({
   env: {
     username: 'fadmin',
     password: '4445',
+    locale: 'de',
     version: '13.8.0'
   },
   e2e: {

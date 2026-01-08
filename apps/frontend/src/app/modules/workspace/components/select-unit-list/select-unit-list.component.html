@@ -16,7 +16,8 @@
   <ng-content></ng-content>
 
   <studio-lite-search-filter [title]="'search-filter.filter-units' | translate"
-                             (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
+                             (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()"
+                              data-cy="workspace-select-unit-list-filter-units">
   </studio-lite-search-filter>
 
   <mat-table class="unit-list"

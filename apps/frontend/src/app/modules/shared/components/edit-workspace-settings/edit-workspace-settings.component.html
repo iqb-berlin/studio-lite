@@ -14,7 +14,8 @@
                                    [modules]="this.moduleService.editors"
                                    [value]="dialogData.defaultEditor"
                                    [stableOnly]="false"
-                                   (selectionChanged)="selectModule('editor', $event)">
+                                   (selectionChanged)="selectModule('editor', $event)"
+                                   data-cy="edit-workspace-settings-editor">
         </studio-lite-select-module>
       </div>
       <div class="fx-row-space-between-start fx-gap-10">
@@ -26,7 +27,8 @@
                                    [modules]="this.moduleService.players"
                                    [value]="dialogData.defaultPlayer"
                                    [stableOnly]="false"
-                                   (selectionChanged)="selectModule('player', $event)">
+                                   (selectionChanged)="selectModule('player', $event)"
+                                   data-cy="edit-workspace-settings-player">
         </studio-lite-select-module>
       </div>
       <div class="fx-row-space-between-start fx-gap-10">
@@ -38,7 +40,8 @@
                                    [modules]="this.moduleService.schemers"
                                    [value]="dialogData.defaultSchemer"
                                    [stableOnly]="false"
-                                   (selectionChanged)="selectModule('schemer', $event)">
+                                   (selectionChanged)="selectModule('schemer', $event)"
+                                   data-cy="edit-workspace-settings-schemer">
         </studio-lite-select-module>
       </div>
       <div class="fx-row-start-stretch fx-gap-15 margin-bottom">
@@ -55,10 +58,15 @@
           @if (unitMDProfiles.length === 0) {
             <mat-error>{{'metadata.no-unit-profiles-hint' | translate }}</mat-error>
           }
-          <mat-select  class="select-profile" placeholder="{{'metadata.select-profile' | translate }}" [(value)]="selectedUnitMDProfile" (click)="$event.stopPropagation()" (selectionChange)="selectUnitMDProfile($event)" >
+          <mat-select  class="select-profile"
+                       placeholder="{{'metadata.select-profile' | translate }}"
+                       [(value)]="selectedUnitMDProfile"
+                       (click)="$event.stopPropagation()" (selectionChange)="selectUnitMDProfile($event)"
+                       data-cy="edit-workspace-settings-select-unit-profile">
             <mat-option [value]="undefined"></mat-option>
             @for (unitMDProfile of unitMDProfiles; track unitMDProfile) {
-              <mat-option [value]="unitMDProfile.id">
+              <mat-option [value]="unitMDProfile.id"
+                          data-cy="edit-workspace-settings-unit-profile">
                 {{unitMDProfile.label }}
               </mat-option>
             }
@@ -73,10 +81,12 @@
                       placeholder="{{'metadata.select-profile' | translate }}"
                       [(value)]="selectedItemMDProfile"
                       (click)="$event.stopPropagation()"
-                      (selectionChange)="selectItemMDProfile($event)" >
+                      (selectionChange)="selectItemMDProfile($event)"
+                      data-cy="edit-workspace-settings-select-item-profile">
             <mat-option [value]="undefined"></mat-option>
             @for (itemMDProfile of itemMDProfiles; track itemMDProfile) {
-              <mat-option [value]="itemMDProfile.id">
+              <mat-option [value]="itemMDProfile.id"
+                data-cy="edit-workspace-settings-item-profile">
                 {{itemMDProfile.label}}
               </mat-option>
             }
@@ -90,7 +100,8 @@
             color="primary"
             type="submit"
             [mat-dialog-close]="dialogData"
-            (click)="addData()">
+            (click)="addData()"
+            data-cy="edit-workspace-settings-submit-button">
       {{'save' | translate}}
     </button>
     <button mat-raised-button

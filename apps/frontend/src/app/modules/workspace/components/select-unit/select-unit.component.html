@@ -32,7 +32,8 @@
             color="primary"
             type="submit"
             [mat-dialog-close]="true"
-            [disabled]="!unitSelectionTable.selectionCount">
+            [disabled]="!unitSelectionTable.selectionCount"
+            data-cy="workspace-select-unit-button">
       {{data.buttonLabel}}
     </button>
     <button mat-raised-button

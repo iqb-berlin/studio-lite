@@ -53,7 +53,8 @@
       <button mat-raised-button color="primary"
               type="submit"
               [mat-dialog-close]="unitExportSettings"
-              [disabled]="!unitExportSettings.unitIdList.length">
+              [disabled]="!unitExportSettings.unitIdList.length"
+              data-cy="workspace-export-unit-button">
         {{'unit-download.dialog.ok-button-label' | translate}}</button>
       <button mat-raised-button [mat-dialog-close]="false">
         {{'dialogs.cancel' | translate}}

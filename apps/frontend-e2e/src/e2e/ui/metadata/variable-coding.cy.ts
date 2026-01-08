@@ -10,8 +10,8 @@ import {
   deleteFirstUser,
   deleteGroup,
   deleteModule,
-  focusOnMenu,
   goToItem,
+  goToWsMenu,
   grantRemovePrivilegeAtWs,
   importExercise,
   selectUnit,
@@ -53,15 +53,19 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     selectUnit('MA_01');
     goToItem('01');
     assignVariableToItem('text-field_1');
-    cy.contains('Speichern').click();
+    cy.get('[data-cy="workspace-unit-save-button"]').click();
   });
 
   it('creates the item 02 and checks that text-field_1 is not available', () => {
     createItem('02');
-    cy.get('mat-select[placeholder="Variable auswählen"]').eq(-1).find('svg').click();
+    cy.translate(Cypress.env('locale')).then(json => {
+      cy.get(`mat-select[placeholder="${json.metadata['choose-item-variable']}"]`)
+        .eq(-1).find('svg').click();
+    });
+    // cy.get('mat-select[placeholder="Variable auswählen"]').eq(-1).find('svg').click();
     cy.get('mat-option:contains("text-field_1")').should('not.exist');
     cy.get('mat-option:contains("radio_1")').eq(0).click();
-    cy.contains('Speichern').click();
+    cy.get('[data-cy="workspace-unit-save-button"]').click();
   });
 
   it('checks that it shows a warning when we try to create an item with same name as an existent item', () => {
@@ -72,7 +76,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
   it('replaces the name of the third item', () => {
     cy.get('mat-label:contains("Item ID")').eq(-1).type('{backspace}{backspace}03');
     assignVariableToItem('drop-list_1');
-    cy.contains('Speichern').click();
+    cy.get('[data-cy="workspace-unit-save-button"]').click();
   });
 
   it('ends the connection the variable drop_list_1 with item 03', () => {
@@ -80,39 +84,49 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     selectUnit('MA_01');
     goToItem('03');
     assignVariableToItem('');
-    cy.contains('Speichern').click();
+    cy.get('[data-cy="workspace-unit-save-button"]').click();
   });
 
   it('checks the connection the variable drop-list_1 with item 03 is not active at properties', () => {
     cy.visitWs(mathArea);
     selectUnit('MA_01');
     goToItem('03');
-    cy.get('mat-select[placeholder="Variable auswählen"]')
-      .eq(-1).find('svg').click()
-      .then(() => {
-        cy.get('mat-select:contains("drop-list_1")').should('have.length', 0);
-      });
+    cy.translate(Cypress.env('locale')).then(json => {
+      cy.get(`mat-select[placeholder="${json.metadata['choose-item-variable']}"]`)
+        .eq(-1).find('svg').click()
+        .then(() => {
+          cy.get('mat-select:contains("drop-list_1")').should('have.length', 0);
+        });
+    });
   });
 
   it('checks that drop-list_1 is not present at Menu -> Berichte -> Metadaten', () => {
-    focusOnMenu('Berichte', 'Metadaten');
-    // eslint-disable-next-line max-len
-    cy.clickButtonWithResponseCheck('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
-    cy.get('.mdc-tab__text-label:contains("Metadaten Items")').click();
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-reports"]').click();
+    cy.get('[data-cy="workspace-edit-unit-show-metadata"]').click();
+    cy.get('[data-cy="workspace-show-metadata-display"]').click();
+    cy.translate(Cypress.env('locale')).then(json => {
+      cy.get(`.mdc-tab__text-label:contains("${json.metadata.items}")`).click();
+    });
     cy.get('mat-dialog-container:contains("drop-list_1")').should('have.length', 0);
-    cy.clickButton('Schließen');
+    cy.get('[data-cy="metadata-table-view-close"]').click();
   });
 
   it('checks the order of items before and after clicking Nach Variable ID Sortieren is not the same', () => {
     cy.get('studio-lite-item').eq(1).find('span:contains("02")').should('exist');
     cy.get('studio-lite-item').eq(0).find('span:contains("01")').should('exist');
-    cy.get('select.sort-items').select('Nach Variablen ID sortieren', { force: true });
+    cy.translate(Cypress.env('locale')).then(json => {
+      cy.get('select.sort-items').select(`${json.metadata['sort-by-variableId']}`,
+        { force: true });
+    });
     cy.get('studio-lite-item').eq(0).find('span:contains("02")').should('exist');
     cy.get('studio-lite-item').eq(1).find('span:contains("01")').should('exist');
   });
 
   it('checks that the select order by Id exists', () => {
-    cy.get('select.sort-items').select('Nach Item ID sortieren', { force: true });
+    cy.translate(Cypress.env('locale')).then(json => {
+      cy.get('select.sort-items').select(`${json.metadata['sort-by-id']}`, { force: true });
+    });
   });
 
   it('checks that drop-list_1 is not present at eye view', () => {

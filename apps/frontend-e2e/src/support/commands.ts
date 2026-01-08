@@ -34,6 +34,13 @@ Cypress.Commands.add('clickButtonWithResponseCheck',
       .its('response.statusCode').should('be.oneOf', code);
   });
 
+Cypress.Commands.add('clickDataCyWithResponseCheck',
+  (data_cy: string, code: number[], url: string, rest: string, alias: string) => {
+    cy.intercept(rest, url).as(alias);
+    cy.get(data_cy).should('exist').click({ force: true });
+    cy.wait(`@${alias}`).its('response.statusCode').should('be.oneOf', code);
+  });
+
 Cypress.Commands.add('clickDialogButtonWithResponseCheck',
   (text: string, code: number[], url: string, rest: string, alias:string) => {
     cy.intercept(rest, url)

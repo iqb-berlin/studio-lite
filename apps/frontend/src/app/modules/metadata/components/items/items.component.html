@@ -4,7 +4,8 @@
           [ngModel]="itemSortService.currenItemSorting"
           (ngModelChange)="sortItems($event)">
     @for (sorting of itemSortService.itemSortings; track sorting) {
-      <option [value]="sorting">
+      <option [value]="sorting"
+        [attr.data-cy]="`metadata-sort-by-${{sorting}}`">
         {{'metadata.sort-by-'+sorting | translate}}
       </option>
     }
