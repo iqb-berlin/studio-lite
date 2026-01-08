@@ -41,9 +41,17 @@ export abstract class VeronaModuleDirective implements OnDestroy {
     );
   }
 
+  abstract onSelectedUnitChange(): void;
+
   abstract postStore(store: unknown): void;
 
   abstract handleIncomingMessage(m: MessageEvent): void;
+
+  subscribeForSelectedUnitChange(): void {
+    this.workspaceService.selectedUnit$
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => this.onSelectedUnitChange());
+  }
 
   subscribeForPostMessages(): void {
     this.appService.postMessage$

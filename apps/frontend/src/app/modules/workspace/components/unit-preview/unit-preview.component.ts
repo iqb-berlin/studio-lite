@@ -92,30 +92,26 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     return null;
   }
 
-  private subscribeForSelectedUnitChange(): void {
-    this.workspaceService.selectedUnit$
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(() => {
-        if (this.unitLoaded.getValue()) {
-          this.unitLoaded.next(false);
-          this.dataParts = null;
-          this.unitStateDataType = null;
-          this.message = '';
-          this.workspaceService
-            .loadUnitProperties()
-            .pipe(takeUntil(this.ngUnsubscribe))
-            .subscribe(() => this.onLoadUnitProperties());
-        } else {
-          this.ngUnsubscribe.next();
-          this.ngUnsubscribe.complete();
-          this.ngUnsubscribe = new Subject<void>();
-          this.unitLoaded.next(true);
-          this.subscribeForPostMessages();
-          this.subscribeForSelectedUnitChange();
-          this.addSubscriptionForUnitDefinitionChanges();
-          this.subscribeForPagingModeChanges();
-        }
-      });
+  onSelectedUnitChange() {
+    if (this.unitLoaded.getValue()) {
+      this.unitLoaded.next(false);
+      this.dataParts = null;
+      this.unitStateDataType = null;
+      this.message = '';
+      this.workspaceService
+        .loadUnitProperties()
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(() => this.onLoadUnitProperties());
+    } else {
+      this.ngUnsubscribe.next();
+      this.ngUnsubscribe.complete();
+      this.ngUnsubscribe = new Subject<void>();
+      this.unitLoaded.next(true);
+      this.subscribeForPostMessages();
+      this.subscribeForSelectedUnitChange();
+      this.addSubscriptionForUnitDefinitionChanges();
+      this.subscribeForPagingModeChanges();
+    }
   }
 
   handleIncomingMessage(m: MessageEvent) {
@@ -170,9 +166,7 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
             this.setPageList(targets, msgData.playerState.currentPage);
           }
           if (msgData.unitState) {
-            this.setPresentationStatus(
-              msgData.unitState.presentationProgress
-            );
+            this.setPresentationStatus(msgData.unitState.presentationProgress);
             this.setResponsesStatus(msgData.unitState.responseProgress);
             if (msgData.unitState.dataParts) {
               const dataParts: Record<string, string> =
@@ -262,7 +256,10 @@ export class UnitPreviewComponent extends SubscribeUnitDefinitionChangesDirectiv
     this.setPresentationStatus('none');
     this.setResponsesStatus('none');
     this.setPageList([], '');
-    this.getVeronaModuleId(this.workspaceService.getUnitMetadataStore(), 'player')
+    this.getVeronaModuleId(
+      this.workspaceService.getUnitMetadataStore(),
+      'player'
+    )
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(playerId => {
         if (playerId) {

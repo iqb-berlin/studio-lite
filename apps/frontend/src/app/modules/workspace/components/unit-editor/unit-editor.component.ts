@@ -41,28 +41,24 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
     this.subscribeForSelectedUnitChange();
   }
 
-  private subscribeForSelectedUnitChange(): void {
-    this.workspaceService.selectedUnit$
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(() => {
-        if (this.unitLoaded.getValue()) {
-          this.unitLoaded.next(false);
-          this.message = '';
-          this.workspaceService
-            .loadUnitProperties()
-            .pipe(takeUntil(this.ngUnsubscribe))
-            .subscribe(() => {
-              this.onLoadUnitProperties();
-            });
-        } else {
-          this.ngUnsubscribe.next();
-          this.ngUnsubscribe.complete();
-          this.ngUnsubscribe = new Subject<void>();
-          this.unitLoaded.next(true);
-          this.subscribeForPostMessages();
-          this.subscribeForSelectedUnitChange();
-        }
-      });
+  onSelectedUnitChange(): void {
+    if (this.unitLoaded.getValue()) {
+      this.unitLoaded.next(false);
+      this.message = '';
+      this.workspaceService
+        .loadUnitProperties()
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(() => {
+          this.onLoadUnitProperties();
+        });
+    } else {
+      this.ngUnsubscribe.next();
+      this.ngUnsubscribe.complete();
+      this.ngUnsubscribe = new Subject<void>();
+      this.unitLoaded.next(true);
+      this.subscribeForPostMessages();
+      this.subscribeForSelectedUnitChange();
+    }
   }
 
   handleIncomingMessage(m: MessageEvent) {
