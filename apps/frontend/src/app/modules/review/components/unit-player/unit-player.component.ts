@@ -17,12 +17,12 @@ import { PageNavigationComponent } from '../../../shared/components/page-navigat
 import { UnitInfoComponent } from '../unit-info/unit-info.component';
 
 @Component({
-  selector: 'studio-lite-units',
-  templateUrl: './units.component.html',
-  styleUrls: ['./units.component.scss'],
+  selector: 'studio-lite-unit-player',
+  templateUrl: './unit-player.component.html',
+  styleUrls: ['./unit-player.component.scss'],
   imports: [UnitInfoComponent, PageNavigationComponent]
 })
-export class UnitsComponent implements OnInit, OnDestroy {
+export class UnitPlayerComponent implements OnInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
 
   routingSubscription: Subscription | null = null;
