@@ -37,7 +37,7 @@ export class UnitSchemerComponent
   }
 
   ngAfterViewInit(): void {
-    this.iFrameElement = this.hostingIframe.nativeElement;
+    this.setHostingIframe();
     this.subscribeForPostMessages();
     this.subscribeForSelectedUnitChange();
     this.addSubscriptionForUnitDefinitionChanges();

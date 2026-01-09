@@ -1,4 +1,4 @@
-import { Directive, OnDestroy } from '@angular/core';
+import { Directive, ElementRef, OnDestroy } from '@angular/core';
 import {
   BehaviorSubject, from, map, Observable, of, Subject, takeUntil
 } from 'rxjs';
@@ -24,6 +24,7 @@ export abstract class VeronaModuleDirective implements OnDestroy {
   abstract backendService: WorkspaceBackendService;
   abstract workspaceService: WorkspaceService;
   abstract appService: AppService;
+  abstract hostingIframe: ElementRef;
 
   postMessageTarget: Window | undefined;
   sessionId = '';
@@ -46,6 +47,10 @@ export abstract class VeronaModuleDirective implements OnDestroy {
   abstract postStore(store: unknown): void;
 
   abstract handleIncomingMessage(m: MessageEvent): void;
+
+  setHostingIframe(): void {
+    this.iFrameElement = this.hostingIframe.nativeElement;
+  }
 
   subscribeForSelectedUnitChange(): void {
     this.workspaceService.selectedUnit$

@@ -36,7 +36,7 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
   }
 
   ngAfterViewInit(): void {
-    this.iFrameElement = this.hostingIframe.nativeElement;
+    this.setHostingIframe();
     this.subscribeForPostMessages();
     this.subscribeForSelectedUnitChange();
   }

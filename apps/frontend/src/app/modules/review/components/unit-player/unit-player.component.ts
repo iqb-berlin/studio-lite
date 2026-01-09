@@ -1,9 +1,5 @@
 import {
-  Component,
-  ElementRef,
-  OnDestroy,
-  ViewChild,
-  AfterViewInit
+  Component, ElementRef, ViewChild, AfterViewInit
 } from '@angular/core';
 import { takeUntil, Subject } from 'rxjs';
 import { ActivatedRoute, Params } from '@angular/router';
@@ -28,9 +24,7 @@ import { UnitState } from '../../../shared/models/verona.interface';
   styleUrls: ['./unit-player.component.scss'],
   imports: [UnitInfoComponent, PageNavigationComponent]
 })
-export class UnitPlayerComponent
-  extends PreviewDirective
-  implements AfterViewInit, OnDestroy {
+export class UnitPlayerComponent extends PreviewDirective implements AfterViewInit {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
   unitData: UnitData = {
     databaseId: 0,
@@ -56,7 +50,7 @@ export class UnitPlayerComponent
   }
 
   ngAfterViewInit(): void {
-    this.iFrameElement = this.hostingIframe.nativeElement;
+    this.setHostingIframe();
     this.subscribeForPostMessages();
     this.subscribeForRouteChanges();
   }
@@ -160,7 +154,7 @@ export class UnitPlayerComponent
               this.translateService.instant(
                 'workspace.unit-definition-not-loaded'
               ),
-              '',
+              this.translateService.instant('workspace.error'),
               { duration: 3000 }
             );
           }

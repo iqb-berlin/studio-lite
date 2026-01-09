@@ -32,22 +32,10 @@ import { UnitState } from '../../../shared/models/verona.interface';
   host: { class: 'unit-preview' },
   imports: [PreviewBarComponent, MatProgressSpinner]
 })
-export class UnitPreviewComponent
-  extends PreviewDirective
-  implements AfterViewInit {
+export class UnitPreviewComponent extends PreviewDirective implements AfterViewInit {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
   private dataParts!: Record<string, string> | null;
   private unitStateDataType: string | null = null;
-
-  protected handleUnitStateData(unitState: UnitState): void {
-    if (unitState.dataParts) {
-      this.dataParts = {
-        ...(this.dataParts || {}),
-        ...unitState.dataParts
-      };
-      this.unitStateDataType = unitState.unitStateDataType || null;
-    }
-  }
 
   constructor(
     public appService: AppService,
@@ -64,7 +52,7 @@ export class UnitPreviewComponent
   }
 
   ngAfterViewInit(): void {
-    this.iFrameElement = this.hostingIframe.nativeElement;
+    this.setHostingIframe();
     this.subscribeForPostMessages();
     this.subscribeForSelectedUnitChange();
     this.addSubscriptionForUnitDefinitionChanges();
@@ -145,6 +133,16 @@ export class UnitPreviewComponent
           this.postMessageTarget = undefined;
         }
       });
+  }
+
+  protected handleUnitStateData(unitState: UnitState): void {
+    if (unitState.dataParts) {
+      this.dataParts = {
+        ...(this.dataParts || {}),
+        ...unitState.dataParts
+      };
+      this.unitStateDataType = unitState.unitStateDataType || null;
+    }
   }
 
   postStore(unitDefinitionStore: UnitDefinitionStore): void {
