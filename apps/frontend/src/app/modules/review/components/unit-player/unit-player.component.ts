@@ -5,7 +5,7 @@ import {
   ViewChild,
   AfterViewInit
 } from '@angular/core';
-import { takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute, Params } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
@@ -85,20 +85,31 @@ export class UnitPlayerComponent
     if (this.reviewService.units.length === 0) {
       this.reviewService
         .loadReviewData()
-        .then(() => this.onSelectedUnitChange());
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(() => this.onSelectedUnitChange());
     } else {
       this.onSelectedUnitChange();
     }
   }
 
-  // Wird aufgerufen, wenn die Unit im Review gewechselt wird
   onSelectedUnitChange(): void {
-    const unitData = this.reviewService.units.find(
-      u => u.sequenceId === this.reviewService.currentUnitSequenceId
-    );
-    if (unitData) {
-      this.unitData = unitData;
-      this.onLoadUnitProperties();
+    if (this.unitLoaded.getValue()) {
+      this.unitLoaded.next(false);
+      this.message = '';
+      const unitData = this.reviewService.units.find(
+        u => u.sequenceId === this.reviewService.currentUnitSequenceId
+      );
+      if (unitData) {
+        this.unitData = unitData;
+        this.onLoadUnitProperties();
+      }
+    } else {
+      this.ngUnsubscribe.next();
+      this.ngUnsubscribe.complete();
+      this.ngUnsubscribe = new Subject<void>();
+      this.unitLoaded.next(true);
+      this.subscribeForPostMessages();
+      this.subscribeForRouteChanges();
     }
   }
 
@@ -221,7 +232,7 @@ export class UnitPlayerComponent
         case 'vopReadyNotification':
         case 'player':
         case 'vo.FromPlayer.ReadyNotification':
-          this.playerApiVersion = this.detectApiVersion(msgData);
+          this.playerApiVersion = UnitPlayerComponent.detectApiVersion(msgData);
           this.sessionId = VeronaModuleDirective.getSessionId();
           this.postMessageTarget = m.source as Window;
           this.loadAndSendUnitDefinition();
@@ -234,28 +245,24 @@ export class UnitPlayerComponent
           this.setResponsesStatus(msgData.responsesGiven);
           break;
 
-        case 'vopStateChangedNotification':
+        case 'vopStateChangedNotification': {
           if (msgData.playerState) {
             const pages = msgData.playerState.validPages;
             const targets = Array.isArray(pages) ?
-              pages.map((p: any) => p.id) :
+              pages.map((p: { id: string }) => p.id) :
               Object.keys(pages);
             this.setPageList(targets, msgData.playerState.currentPage);
           }
           if (msgData.unitState) {
             this.setPresentationStatus(msgData.unitState.presentationProgress);
             this.setResponsesStatus(msgData.unitState.responseProgress);
-            if (msgData.unitState.dataParts) this.unitData.responses = msgData.unitState.dataParts;
+            if (msgData.unitState.dataParts) {
+              this.unitData.responses = msgData.unitState.dataParts;
+            }
           }
           break;
-
+        }
         case 'vo.FromPlayer.PageNavigationRequest':
-        case 'vopPageNavigationCommand':
-          const targetPage = msgData.newPage || msgData.target;
-          this.gotoPage({ action: targetPage });
-          break;
-
-        case 'vo.FromPlayer.UnitNavigationRequest':
         case 'vopUnitNavigationRequestedNotification':
           this.gotoUnit(msgData.target || msgData.navigationTarget);
           break;
@@ -263,14 +270,18 @@ export class UnitPlayerComponent
         case 'vopWindowFocusChangedNotification':
           this.hasFocus = msgData.hasFocus;
           break;
-
         default:
           console.warn(`Message ignored: ${msgType}`);
       }
     }
   }
 
-  private detectApiVersion(msgData: any): number {
+  private static detectApiVersion(msgData: {
+    type: string;
+    metadata?: { specVersion: string };
+    apiVersion?: string;
+    specVersion?: string;
+  }): number {
     if (msgData.type === 'vo.FromPlayer.ReadyNotification') return 1;
     const versionSource =
       msgData.metadata?.specVersion ||
@@ -361,7 +372,9 @@ export class UnitPlayerComponent
 
     if (action === '#next' && currentIdx < this.pageList.length - 2) nextPageId = this.pageList[currentIdx + 1].id;
     else if (action === '#previous' && currentIdx > 1) nextPageId = this.pageList[currentIdx - 1].id;
-    else if (action === '#goto' && index > 0) { nextPageId = this.pageList[index].id; } else if (index === 0) nextPageId = action;
+    else if (action === '#goto' && index > 0) {
+      nextPageId = this.pageList[index].id;
+    } else if (index === 0) nextPageId = action;
 
     if (nextPageId && this.postMessageTarget) {
       const isV1 = this.playerApiVersion === 1;
@@ -379,21 +392,23 @@ export class UnitPlayerComponent
   }
 
   setPresentationStatus(s: string): void {
-    this.presentationProgress =
-      s === 'yes' || s === 'complete' || s === 'some' ?
-        s === 'some' ?
-          'some' :
-          'complete' :
-        'none';
+    if (s === 'yes' || s === 'complete') {
+      this.presentationProgress = 'complete';
+    } else if (s === 'some') {
+      this.presentationProgress = 'some';
+    } else {
+      this.presentationProgress = 'none';
+    }
   }
 
   setResponsesStatus(s: string): void {
-    this.responseProgress =
-      s === 'all' || s === 'complete' || s === 'yes' || s === 'some' ?
-        s === 'all' || s === 'complete' ?
-          'complete' :
-          'some' :
-        'none';
+    if (s === 'all' || s === 'complete') {
+      this.responseProgress = 'complete';
+    } else if (s === 'yes' || s === 'some') {
+      this.responseProgress = 'some';
+    } else {
+      this.responseProgress = 'none';
+    }
   }
 
   setFocusStatus(status: boolean): void {
