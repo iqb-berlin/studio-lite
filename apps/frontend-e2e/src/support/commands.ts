@@ -102,6 +102,11 @@ Cypress.Commands.add('translate', (language: string): Chainable => {
   return cy.fixture(path);
 });
 
+Cypress.Commands.add('getIFrameBody', selector => cy.get(selector)
+  .its('0.contentDocument.body')
+  .should('not.be.empty')
+  .then(cy.wrap)
+);
 //
 // -- This is a child command --
 // Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
