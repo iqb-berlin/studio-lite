@@ -27,18 +27,21 @@ describe('Definition:', () => {
     cy.wait(100);
   });
 
-  it('should edit the M6_AK0011', () => {
+  it('should click between two units and save the unit M6_AK0011', () => {
     selectUnit('M6_AK0011');
     cy.wait(30);
     selectUnit('M6_AK0012');
     cy.wait(30);
     selectUnit('M6_AK0011');
-    cy.wait(100);
+    cy.wait(30);
     cy.getIFrameBody('iframe.unitHost').within(() => {
-      cy.contains('mat-form-field', 'Beschriftung')
-        .find('textarea')
-        .clear()
-        .type('Neue Text');
+      cy.get('aspect-element-model-properties-component').within(() => {
+        cy.contains('mat-form-field', 'Beschriftung')
+          .find('textarea')
+          .click()
+          .clear()
+          .type('Neue Text');
+      });
     });
     cy.get('[data-cy="workspace-unit-save-button"]').click();
   });
