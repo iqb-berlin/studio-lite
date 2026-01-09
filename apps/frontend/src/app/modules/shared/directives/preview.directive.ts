@@ -1,9 +1,9 @@
 import { Directive } from '@angular/core';
 import { SubscribeUnitDefinitionChangesDirective } from './subscribe-unit-definition-changes.directive';
-import { PageData } from '../models/page-data.interface';
-import { Progress } from '../models/types';
+import { PageData } from '../../workspace/models/page-data.interface';
+import { Progress } from '../../workspace/models/types';
 import { VeronaModuleDirective } from './verona-module.directive';
-import { UnitState } from '../../shared/models/verona.interface';
+import { UnitState } from '../models/verona.interface';
 
 @Directive({
   selector: '[preview]',

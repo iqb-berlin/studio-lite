@@ -10,7 +10,9 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { AppService } from '../../../../services/app.service';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { ModuleService } from '../../../shared/services/module.service';
-import { SubscribeUnitDefinitionChangesDirective } from '../../directives/subscribe-unit-definition-changes.directive';
+import {
+  SubscribeUnitDefinitionChangesDirective
+} from '../../../shared/directives/subscribe-unit-definition-changes.directive';
 import { RolePipe } from '../../pipes/role.pipe';
 
 @Component({

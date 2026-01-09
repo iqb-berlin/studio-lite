@@ -23,7 +23,7 @@ import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
 import {
   PrintOptionsDialogComponent
 } from '../../../print/components/print-options-dialog/print-options-dialog.component';
-import { PreviewDirective } from '../../directives/preview.directive';
+import { PreviewDirective } from '../../../shared/directives/preview.directive';
 import { UnitState } from '../../../shared/models/verona.interface';
 
 @Component({

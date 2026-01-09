@@ -5,12 +5,12 @@ import {
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UnitMetadataStore } from '../classes/unit-metadata-store';
-import { ModuleService } from '../../shared/services/module.service';
-import { VeronaModuleClass } from '../../shared/models/verona-module.class';
-import { UnitDefinitionStore } from '../classes/unit-definition-store';
-import { WorkspaceBackendService } from '../services/workspace-backend.service';
-import { WorkspaceService } from '../services/workspace.service';
+import { UnitMetadataStore } from '../../workspace/classes/unit-metadata-store';
+import { ModuleService } from '../services/module.service';
+import { VeronaModuleClass } from '../models/verona-module.class';
+import { UnitDefinitionStore } from '../../workspace/classes/unit-definition-store';
+import { WorkspaceBackendService } from '../../workspace/services/workspace-backend.service';
+import { WorkspaceService } from '../../workspace/services/workspace.service';
 import { AppService } from '../../../services/app.service';
 
 @Directive({

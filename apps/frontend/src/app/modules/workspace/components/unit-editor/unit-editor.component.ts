@@ -11,7 +11,7 @@ import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { RolePipe } from '../../pipes/role.pipe';
-import { VeronaModuleDirective } from '../../directives/verona-module.directive';
+import { VeronaModuleDirective } from '../../../shared/directives/verona-module.directive';
 
 @Component({
   selector: 'studio-lite-unit-editor',
