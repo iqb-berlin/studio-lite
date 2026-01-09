@@ -33,7 +33,7 @@ describe('Definition:', () => {
     selectUnit('M6_AK0012');
     cy.wait(30);
     selectUnit('M6_AK0011');
-    cy.wait(30);
+    cy.wait(100);
     cy.getIFrameBody('iframe.unitHost').within(() => {
       cy.contains('mat-form-field', 'Beschriftung')
         .find('textarea')

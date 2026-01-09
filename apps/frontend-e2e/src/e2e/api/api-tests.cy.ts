@@ -780,7 +780,7 @@ describe('Studio API tests', () => {
 
       describe('24. GET /api/verona-modules/{key}', () => {
         it('200 positive test: should retrieve a specific verona module using key', () => {
-          cy.getModuleAPI('iqb-schemer%402.5', Cypress.env(`token_${Cypress.env('username')}`))
+          cy.getModuleAPI('iqb-schemer%402.6', Cypress.env(`token_${Cypress.env('username')}`))
             .then(resp => {
               expect(resp.status).to.equal(200);
               // const parser = new DOMParser();
