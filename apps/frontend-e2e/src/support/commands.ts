@@ -87,6 +87,7 @@ Cypress.Commands.add('selectModule', (name:string) => {
 Cypress.Commands.add('visitWs', (ws:string) => {
   cy.visit('/');
   cy.get(`a:contains("${ws}")`).click();
+  cy.wait(100);
 });
 
 Cypress.Commands.add('runUntracked', fn => {
