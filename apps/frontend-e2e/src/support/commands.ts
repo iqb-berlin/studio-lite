@@ -87,6 +87,7 @@ Cypress.Commands.add('selectModule', (name:string) => {
 Cypress.Commands.add('visitWs', (ws:string) => {
   cy.visit('/');
   cy.get(`a:contains("${ws}")`).click();
+  cy.wait(100);
 });
 
 Cypress.Commands.add('runUntracked', fn => {
@@ -102,6 +103,11 @@ Cypress.Commands.add('translate', (language: string): Chainable => {
   return cy.fixture(path);
 });
 
+Cypress.Commands.add('getIFrameBody', selector => cy.get(selector)
+  .its('0.contentDocument.body')
+  .should('not.be.empty')
+  .then(cy.wrap)
+);
 //
 // -- This is a child command --
 // Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })

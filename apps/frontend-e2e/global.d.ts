@@ -24,6 +24,7 @@ declare namespace Cypress {
     findAdminSettings(): Chainable<JQuery<HTMLElement>>;
     translate(language: string): Chainable;
     resetDb(): Chainable<void>;
+    getIFrameBody(selector): Chainable;
     // Commands API
     // commands-metadata.ts
     getRegistryAPI(token: string): Chainable<Response>; // 30
