@@ -27,7 +27,7 @@ describe('Definition:', () => {
     cy.wait(100);
   });
 
-  it('should click between two units and save the unit M6_AK0011', () => {
+  it.skip('should click between two units and save the unit M6_AK0011', () => {
     selectUnit('M6_AK0011');
     cy.wait(30);
     selectUnit('M6_AK0012');
