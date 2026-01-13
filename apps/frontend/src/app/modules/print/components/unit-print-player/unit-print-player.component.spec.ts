@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { TranslateModule } from '@ngx-translate/core';
 import { UnitPrintPlayerComponent } from './unit-print-player.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -9,6 +10,9 @@ describe('UnitPrintPlayerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [
+        TranslateModule.forRoot()
+      ],
       providers: [
         provideHttpClient(),
         {

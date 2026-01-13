@@ -7,12 +7,12 @@ import { TranslateModule } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { UnitsComponent } from './units.component';
+import { UnitPlayerComponent } from './unit-player.component';
 import { PageData } from '../../../workspace/models/page-data.interface';
 
-describe('UnitsComponent', () => {
-  let component: UnitsComponent;
-  let fixture: ComponentFixture<UnitsComponent>;
+describe('UnitPlayerComponent', () => {
+  let component: UnitPlayerComponent;
+  let fixture: ComponentFixture<UnitPlayerComponent>;
 
   @Component({ selector: 'studio-lite-page-navigation', template: '', standalone: false })
   class MockPageNavigationComponent {
@@ -37,7 +37,7 @@ describe('UnitsComponent', () => {
         }]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UnitsComponent);
+    fixture = TestBed.createComponent(UnitPlayerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,16 +1,17 @@
-import { Directive, OnDestroy } from '@angular/core';
+import { Directive, ElementRef, OnDestroy } from '@angular/core';
 import {
   BehaviorSubject, from, map, Observable, of, Subject, takeUntil
 } from 'rxjs';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UnitMetadataStore } from '../classes/unit-metadata-store';
-import { ModuleService } from '../../shared/services/module.service';
-import { VeronaModuleClass } from '../../shared/models/verona-module.class';
-import { UnitDefinitionStore } from '../classes/unit-definition-store';
-import { WorkspaceBackendService } from '../services/workspace-backend.service';
-import { WorkspaceService } from '../services/workspace.service';
+import { UnitMetadataStore } from '../../workspace/classes/unit-metadata-store';
+import { ModuleService } from '../services/module.service';
+import { VeronaModuleClass } from '../models/verona-module.class';
+import { UnitDefinitionStore } from '../../workspace/classes/unit-definition-store';
+import { WorkspaceBackendService } from '../../workspace/services/workspace-backend.service';
+import { WorkspaceService } from '../../workspace/services/workspace.service';
+import { AppService } from '../../../services/app.service';
 
 @Directive({
   selector: '[veronaModule]',
@@ -22,6 +23,8 @@ export abstract class VeronaModuleDirective implements OnDestroy {
   abstract snackBar: MatSnackBar;
   abstract backendService: WorkspaceBackendService;
   abstract workspaceService: WorkspaceService;
+  abstract appService: AppService;
+  abstract hostingIframe: ElementRef;
 
   postMessageTarget: Window | undefined;
   sessionId = '';
@@ -39,7 +42,27 @@ export abstract class VeronaModuleDirective implements OnDestroy {
     );
   }
 
+  abstract onSelectedUnitChange(): void;
+
   abstract postStore(store: unknown): void;
+
+  abstract handleIncomingMessage(m: MessageEvent): void;
+
+  setHostingIframe(): void {
+    this.iFrameElement = this.hostingIframe.nativeElement;
+  }
+
+  subscribeForSelectedUnitChange(): void {
+    this.workspaceService.selectedUnit$
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => this.onSelectedUnitChange());
+  }
+
+  subscribeForPostMessages(): void {
+    this.appService.postMessage$
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((m: MessageEvent) => this.handleIncomingMessage(m));
+  }
 
   sendUnitDefinition(
     unitId: number,
@@ -87,7 +110,10 @@ export abstract class VeronaModuleDirective implements OnDestroy {
       editor: 'editors',
       schemer: 'schemers'
     };
-    return this.moduleService[serviceProperties[moduleType]] as Record<string, VeronaModuleClass>;
+    return this.moduleService[serviceProperties[moduleType]] as Record<
+    string,
+    VeronaModuleClass
+    >;
   }
 
   getVeronaModuleId(

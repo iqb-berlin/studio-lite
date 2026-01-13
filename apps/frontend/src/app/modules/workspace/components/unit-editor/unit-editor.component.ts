@@ -11,7 +11,7 @@ import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { RolePipe } from '../../pipes/role.pipe';
-import { VeronaModuleDirective } from '../../directives/verona-module.directive';
+import { VeronaModuleDirective } from '../../../shared/directives/verona-module.directive';
 
 @Component({
   selector: 'studio-lite-unit-editor',
@@ -29,119 +29,111 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
     public workspaceService: WorkspaceService,
     public snackBar: MatSnackBar,
     public moduleService: ModuleService,
-    private appService: AppService,
+    public appService: AppService,
     public translateService: TranslateService
   ) {
     super();
   }
 
   ngAfterViewInit(): void {
-    this.iFrameElement = this.hostingIframe.nativeElement;
+    this.setHostingIframe();
     this.subscribeForPostMessages();
     this.subscribeForSelectedUnitChange();
   }
 
-  private subscribeForSelectedUnitChange(): void {
-    this.workspaceService.selectedUnit$
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(() => {
-        if (this.unitLoaded.getValue()) {
-          this.unitLoaded.next(false);
-          this.message = '';
-          this.workspaceService
-            .loadUnitProperties()
-            .pipe(takeUntil(this.ngUnsubscribe))
-            .subscribe(() => {
-              this.onLoadUnitProperties();
-            });
-        } else {
-          this.ngUnsubscribe.next();
-          this.ngUnsubscribe.complete();
-          this.ngUnsubscribe = new Subject<void>();
-          this.unitLoaded.next(true);
-          this.subscribeForPostMessages();
-          this.subscribeForSelectedUnitChange();
-        }
-      });
+  onSelectedUnitChange(): void {
+    if (this.unitLoaded.getValue()) {
+      this.unitLoaded.next(false);
+      this.message = '';
+      this.workspaceService
+        .loadUnitProperties()
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(() => {
+          this.onLoadUnitProperties();
+        });
+    } else {
+      this.ngUnsubscribe.next();
+      this.ngUnsubscribe.complete();
+      this.ngUnsubscribe = new Subject<void>();
+      this.unitLoaded.next(true);
+      this.subscribeForPostMessages();
+      this.subscribeForSelectedUnitChange();
+    }
   }
 
-  private subscribeForPostMessages(): void {
-    this.appService.postMessage$
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((m: MessageEvent) => {
-        const msgData = m.data;
-        const msgType = msgData.type;
-        if (
-          msgType !== undefined &&
-          msgType !== null &&
-          m.source === this.iFrameElement?.contentWindow
-        ) {
-          this.postMessageTarget = m.source as Window;
-          switch (msgType) {
-            case 'voeReadyNotification':
-            case 'vo.FromAuthoringModule.ReadyNotification':
-              if (msgType === 'voeReadyNotification') {
-                const majorVersion = msgData.metadata ?
-                  msgData.metadata.specVersion.match(/\d+/) :
-                  msgData.apiVersion.match(/\d+/);
-                if (majorVersion.length > 0) {
-                  const majorVersionNumber = Number(majorVersion[0]);
-                  this.editorApiVersion =
-                    majorVersionNumber < 3 ? 2 : majorVersionNumber;
-                } else {
-                  this.editorApiVersion = 2;
-                }
-              } else {
-                this.editorApiVersion = 1;
-              }
-              this.sessionId = UnitEditorComponent.getSessionId();
-              this.sendUnitDefinition(
-                this.workspaceService.selectedUnit$.getValue(),
-                this.workspaceService.getUnitDefinitionStore()
-              );
-              break;
+  handleIncomingMessage(m: MessageEvent) {
+    const msgData = m.data;
+    const msgType = msgData.type;
+    if (
+      msgType !== undefined &&
+      msgType !== null &&
+      m.source === this.iFrameElement?.contentWindow
+    ) {
+      this.postMessageTarget = m.source as Window;
+      switch (msgType) {
+        case 'voeReadyNotification':
+        case 'vo.FromAuthoringModule.ReadyNotification':
+          if (msgType === 'voeReadyNotification') {
+            const majorVersion = msgData.metadata ?
+              msgData.metadata.specVersion.match(/\d+/) :
+              msgData.apiVersion.match(/\d+/);
+            if (majorVersion.length > 0) {
+              const majorVersionNumber = Number(majorVersion[0]);
+              this.editorApiVersion =
+                majorVersionNumber < 3 ? 2 : majorVersionNumber;
+            } else {
+              this.editorApiVersion = 2;
+            }
+          } else {
+            this.editorApiVersion = 1;
+          }
+          this.sessionId = UnitEditorComponent.getSessionId();
+          this.sendUnitDefinition(
+            this.workspaceService.selectedUnit$.getValue(),
+            this.workspaceService.getUnitDefinitionStore()
+          );
+          break;
 
-            case 'voeDefinitionChangedNotification':
-            case 'vo.FromAuthoringModule.ChangedNotification':
-              if (msgData.sessionId === this.sessionId) {
-                if (this.editorApiVersion > 1) {
-                  if (msgData.unitDefinition) {
-                    this.workspaceService
-                      .getUnitDefinitionStore()
-                      ?.setData(msgData.variables, msgData.unitDefinition);
-                    // } else { TODO: find solution for voeGetDefinitionRequest
-                    //   this.postMessageTarget.postMessage({
-                    //     type: 'voeGetDefinitionRequest',
-                    //     sessionId: this.sessionId
-                    //   }, '*');
-                  }
-                } else {
-                  this.postMessageTarget.postMessage(
-                    {
-                      type: 'vo.ToAuthoringModule.DataRequest',
-                      sessionId: this.sessionId
-                    },
-                    '*'
-                  );
-                }
-              }
-              break;
-
-            case 'vo.FromAuthoringModule.DataTransfer':
-              if (msgData.sessionId === this.sessionId) {
+        case 'voeDefinitionChangedNotification':
+        case 'vo.FromAuthoringModule.ChangedNotification':
+          if (msgData.sessionId === this.sessionId) {
+            if (this.editorApiVersion > 1) {
+              if (msgData.unitDefinition) {
                 this.workspaceService
                   .getUnitDefinitionStore()
                   ?.setData(msgData.variables, msgData.unitDefinition);
+                // } else { TODO: find solution for voeGetDefinitionRequest
+                //   this.postMessageTarget.postMessage({
+                //     type: 'voeGetDefinitionRequest',
+                //     sessionId: this.sessionId
+                //   }, '*');
               }
-              break;
-
-            default:
-              // eslint-disable-next-line no-console
-              console.warn(`processMessagePost ignored message: ${msgType}`);
-              break;
+            } else {
+              this.postMessageTarget.postMessage(
+                {
+                  type: 'vo.ToAuthoringModule.DataRequest',
+                  sessionId: this.sessionId
+                },
+                '*'
+              );
+            }
           }
-        }
-      });
+          break;
+
+        case 'vo.FromAuthoringModule.DataTransfer':
+          if (msgData.sessionId === this.sessionId) {
+            this.workspaceService
+              .getUnitDefinitionStore()
+              ?.setData(msgData.variables, msgData.unitDefinition);
+          }
+          break;
+
+        default:
+          // eslint-disable-next-line no-console
+          console.warn(`processMessagePost ignored message: ${msgType}`);
+          break;
+      }
+    }
   }
 
   private onLoadUnitProperties() {
