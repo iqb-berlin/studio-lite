@@ -3,6 +3,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatFabAnchor, MatFabButton } from '@angular/material/button';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { take } from 'rxjs';
 import { ReviewService } from '../../services/review.service';
 import { AppService } from '../../../../services/app.service';
 import { BookletConfigShowComponent } from '../booklet-config-show/booklet-config-show.component';
@@ -25,7 +26,9 @@ export class StartComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       if (this.reviewService.units.length === 0) {
-        this.reviewService.loadReviewData();
+        this.reviewService.loadReviewData()
+          .pipe(take(1))
+          .subscribe();
       }
       this.appService.appConfig.hideTitlesOnPage = true;
       this.reviewService.setHeaderText(this.translate.instant('home.home-page'));

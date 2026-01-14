@@ -1,0 +1,28 @@
+<div class="unit-host"
+  [class.with-footer]="reviewService.bookletConfig.pageNaviButtons === 'SEPARATE_BOTTOM'">
+  <div class="fx-row-start-stretch full-height">
+    @if (message) {
+      <div class="message">
+        {{message}}
+      </div>
+    }
+    <iframe #hostingIframe
+    class="unitHost fx-flex-fill"></iframe>
+    @if (reviewService.reviewConfig.showMetadata ||
+      reviewService.reviewConfig.showCoding ||
+      reviewService.reviewConfig.showOthersComments) {
+      <studio-lite-unit-info
+        [unitId]="reviewService.currentUnitSequenceId"
+        [unitProperties]="unitData.dbMetadata">
+      </studio-lite-unit-info>
+    }
+  </div>
+
+  @if (reviewService.bookletConfig.pageNaviButtons === 'SEPARATE_BOTTOM') {
+    <div class="page-navigation fx-row-end-center">
+      <studio-lite-page-navigation [pageList]="pageList"
+                                   (gotoPage)="gotoPage($event)">
+      </studio-lite-page-navigation>
+    </div>
+  }
+</div>

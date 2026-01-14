@@ -124,7 +124,7 @@ bootstrapApplication(AppComponent, {
     },
     {
       provide: 'APP_VERSION',
-      useValue: '13.8.0'
+      useValue: '13.9.0'
     }
   ]
 });

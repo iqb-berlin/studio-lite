@@ -23,7 +23,6 @@ describe('UI Metadata Management from administration', () => {
   });
 
   it('prepares context', () => {
-    cy.findAdminSettings().click();
     createGroup(group);
     createWs(area, group);
     grantRemovePrivilegeAtWs([Cypress.env('username')], area, [AccessLevel.Admin]);

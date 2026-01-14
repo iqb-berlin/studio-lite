@@ -29,12 +29,16 @@ Cypress.Commands.add('clickDialogButton', (buttonName: string) => {
 Cypress.Commands.add('clickButtonWithResponseCheck',
   (text: string, code: number[], url: string, rest: string, alias:string) => {
     cy.intercept(rest, url).as(alias);
-    cy.get('button')
-      .contains(text)
-      .should('exist')
-      .click();
+    cy.get('button').contains(text).should('exist').click({ force: true });
     cy.wait(`@${alias}`)
       .its('response.statusCode').should('be.oneOf', code);
+  });
+
+Cypress.Commands.add('clickDataCyWithResponseCheck',
+  (data_cy: string, code: number[], url: string, rest: string, alias: string) => {
+    cy.intercept(rest, url).as(alias);
+    cy.get(data_cy).should('exist').click({ force: true });
+    cy.wait(`@${alias}`).its('response.statusCode').should('be.oneOf', code);
   });
 
 Cypress.Commands.add('clickDialogButtonWithResponseCheck',
@@ -44,7 +48,7 @@ Cypress.Commands.add('clickDialogButtonWithResponseCheck',
     cy.get('mat-dialog-actions button')
       .contains(text)
       .should('exist')
-      .click();
+      .click({ force: true });
     cy.wait(`@${alias}`)
       .its('response.statusCode')
       .should('be.oneOf', code);
@@ -83,6 +87,7 @@ Cypress.Commands.add('selectModule', (name:string) => {
 Cypress.Commands.add('visitWs', (ws:string) => {
   cy.visit('/');
   cy.get(`a:contains("${ws}")`).click();
+  cy.wait(100);
 });
 
 Cypress.Commands.add('runUntracked', fn => {
@@ -92,6 +97,17 @@ Cypress.Commands.add('runUntracked', fn => {
 });
 
 Cypress.Commands.add('resetDb', () => cy.task('resetDatabase') as Cypress.Chainable<void>);
+
+Cypress.Commands.add('translate', (language: string): Chainable => {
+  const path: string = `../../../frontend/src/assets/i18n/${language}`;
+  return cy.fixture(path);
+});
+
+Cypress.Commands.add('getIFrameBody', selector => cy.get(selector)
+  .its('0.contentDocument.body')
+  .should('not.be.empty')
+  .then(cy.wrap)
+);
 //
 // -- This is a child command --
 // Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })

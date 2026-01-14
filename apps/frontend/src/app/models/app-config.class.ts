@@ -7,6 +7,8 @@ export class AppConfig {
   hideTitlesOnPage = false;
   readonly introHtml: SafeUrl | undefined;
   readonly imprintHtml: SafeUrl | undefined;
+  readonly emailSubject: string;
+  readonly emailBody: string;
   private readonly _globalWarningText: string;
   private readonly _globalWarningExpiredDay: Date | undefined;
   private readonly _globalWarningExpiredHour: number | undefined;
@@ -22,6 +24,8 @@ export class AppConfig {
     if (appConfig && appConfig.imprintHtml && sanitizer) {
       this.imprintHtml = sanitizer.bypassSecurityTrustHtml(appConfig.imprintHtml);
     }
+    this.emailSubject = appConfig ? appConfig.emailSubject : '';
+    this.emailBody = appConfig ? appConfig.emailBody : '';
     this._globalWarningText = appConfig ? appConfig.globalWarningText : '';
     this._globalWarningExpiredDay = appConfig ? appConfig.globalWarningExpiredDay : undefined;
     this._globalWarningExpiredHour = appConfig ? appConfig.globalWarningExpiredHour : undefined;

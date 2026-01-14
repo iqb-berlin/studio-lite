@@ -12,12 +12,12 @@ import { createBasicSpecCy, deleteBasicSpecCy } from './shared/basic.spec.cy';
 
 describe('Comment:', () => {
   before(() => {
+    // cy.resetDb();
     createBasicSpecCy();
   });
 
   after(() => {
     deleteBasicSpecCy();
-    // cy.resetDb();
   });
 
   it('should import units', () => {
@@ -61,8 +61,8 @@ describe('Comment:', () => {
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.get('studio-lite-comment').should('have.length', '1');
-    cy.contains('mat-icon', 'filter_alt').click();
-    cy.get('mat-slide-toggle').click();
+    cy.contains('mat-icon', 'filter_alt').should('exist').click();
+    cy.get('mat-slide-toggle').should('exist').click();
     cy.get('studio-lite-comment').should('have.length', '3');
   });
 

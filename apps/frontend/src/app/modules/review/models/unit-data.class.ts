@@ -6,7 +6,7 @@ export class UnitData {
   databaseId = 0;
   sequenceId = 0;
   name = '';
-  responses = '';
+  responses = {};
   playerId = '';
   definition = '';
   dbMetadata?: UnitPropertiesDto;

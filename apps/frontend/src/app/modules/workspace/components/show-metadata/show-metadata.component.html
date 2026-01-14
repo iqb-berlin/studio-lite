@@ -13,7 +13,8 @@
     <button mat-raised-button color="primary"
             type="submit"
             [disabled]="!unitList.length"
-            [mat-dialog-close]="{selectedUnits: unitList}">
+            [mat-dialog-close]="{selectedUnits: unitList}"
+            data-cy="workspace-show-metadata-display">
       {{ 'display' | translate }}
     </button>
     <button mat-raised-button [mat-dialog-close]="false">

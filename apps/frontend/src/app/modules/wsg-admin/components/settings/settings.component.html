@@ -34,8 +34,9 @@
             matTooltipPosition="above"
             [color]="'primary'"
             [disabled]="!this.wsgAdminService.settingsChanged"
-            (click)="saveGroupSettings()">
-      <mat-icon>save></mat-icon>
+            (click)="saveGroupSettings()"
+            data-cy="wsg-admin-settings-save-button">
+      <mat-icon>save</mat-icon>
     </button>
   </div>
 </div>

@@ -260,7 +260,9 @@
     "delete-many-packages-confirmation" : "Sollen {{count}} Pakete gelöscht werden?",
     "package-deleted": "Paket(e) gelöscht",
     "package-not-deleted": "Konnte Paket(e) nicht löschen",
-    "issue-count-info": "Das System verfügt über {{count}} {{issue}}."
+    "issue-count-info": "Das System verfügt über {{count}} {{issue}}.",
+    "generate_password": "Kennwort generieren",
+    "and-send-mail": "und E-Mail senden"
   },
   "metadata": {
     "metadata": "Metadaten",
@@ -318,7 +320,11 @@
     "logo-and-colors": "Logo und Farben",
     "unit-export-params": "Parameter für den Unit-Export",
     "missings-profiles": "Kodierung: Missings Profile",
-    "profiles-registry": "Profilregistrierung"
+    "profiles-registry": "Profilregistrierung",
+    "email-template": "E-Mail-Template zum Anlegen neuer Nutzer:innen",
+    "email-replace-values": "Folgende Platzhalter werden im Body der E-Mail durch die Nutzer:innen-Angaben ersetzt: {{firstname}}, {{lastname}}, {{user}}, {{password}}",
+    "email-subject": "Betreff der E-Mail",
+    "email-body": "Body der E-Mail"
   },
   "profiles-registry": {
     "csv-url": "URL der CSV-Datei",
@@ -338,6 +344,10 @@
     "imprint-content": "Html-Inhalt für die Impressum-/Datenschutzseite",
     "config-data-saved": "Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!",
     "config-data-not-saved": "Konnte Konfigurationsdaten der Anwendung nicht speichern"
+  },
+  "email-template": {
+    "template-saved": "E-Mail-Template gespeichert",
+    "template-not-saved": "Konnte E-Mail-Template nicht speichern"
   },
   "unit-export-config": {
     "test-taker-xml-path": "Xsd-Pfad für Testtaker.Xml",

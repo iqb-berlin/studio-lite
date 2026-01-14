@@ -35,7 +35,8 @@
       color="primary"
       type="submit"
       [mat-dialog-close]="true"
-      [disabled]="!unitSelectionTable.selectionCount || selectForm.invalid">
+      [disabled]="!unitSelectionTable.selectionCount || selectForm.invalid"
+      data-cy="workspace-move-unit-button">
       {{data.buttonLabel}}
     </button>
     <button mat-raised-button

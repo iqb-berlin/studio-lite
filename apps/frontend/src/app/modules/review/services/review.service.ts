@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BookletConfigDto, ReviewConfigDto } from '@studio-lite-lib/api-dto';
 import { Router } from '@angular/router';
-import { lastValueFrom, tap } from 'rxjs';
+import {
+  from, Observable, switchMap, tap
+} from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
@@ -33,7 +35,9 @@ export class ReviewService {
   allComments: Comment[] = [];
 
   get unitDbId(): number {
-    const unitData = this.units.filter(u => u.sequenceId === this.currentUnitSequenceId);
+    const unitData = this.units.filter(
+      u => u.sequenceId === this.currentUnitSequenceId
+    );
     return unitData && unitData.length > 0 ? unitData[0].databaseId : 0;
   }
 
@@ -62,11 +66,14 @@ export class ReviewService {
       if (this.bookletConfig.unitScreenHeader === 'WITH_UNIT_TITLE') {
         this.screenHeaderText = pageName;
       } else if (this.bookletConfig.unitScreenHeader === 'WITH_BOOKLET_TITLE') {
-        this.screenHeaderText = this.translateService
-          .instant('review.booklet', { name: this.reviewName });
+        this.screenHeaderText = this.translateService.instant(
+          'review.booklet',
+          { name: this.reviewName }
+        );
       } else if (this.bookletConfig.unitScreenHeader === 'WITH_BLOCK_TITLE') {
-        this.screenHeaderText = this.translateService
-          .instant('review.block', { name: this.reviewName });
+        this.screenHeaderText = this.translateService.instant('review.block', {
+          name: this.reviewName
+        });
       } else {
         this.screenHeaderText = '';
       }
@@ -75,42 +82,56 @@ export class ReviewService {
     }
   }
 
-  updateCommentsUnitInfo(unitId:number) {
-    this.backendService.getUnitComments(
-      this.reviewId, unitId
-    ).subscribe(unitComments => {
-      this.allComments = unitComments;
-    });
+  updateCommentsUnitInfo(unitId: number) {
+    this.backendService
+      .getUnitComments(this.reviewId, unitId)
+      .subscribe(unitComments => {
+        this.allComments = unitComments;
+      });
   }
 
   toDateTimeString(date: Date): string {
     const datePipe = new DatePipe(this.i18nService.fullLocale);
-    return datePipe.transform(new Date(date), this.i18nService.dateTimeFormat) || '';
+    return (
+      datePipe.transform(new Date(date), this.i18nService.dateTimeFormat) || ''
+    );
   }
 
-  async loadReviewData(): Promise<void> {
-    return lastValueFrom(this.backendService.getReview(this.reviewId).pipe(
+  loadReviewData(): Observable<void> {
+    return this.backendService.getReview(this.reviewId).pipe(
       tap(reviewData => {
         this.appService.appConfig.setPageTitle(
           this.translateService.instant('review.header'),
-          true);
+          true
+        );
         if (reviewData) {
+          this.units = []; // Liste leeren vor dem Befüllen
           this.reviewName = reviewData.name ? reviewData.name : '?';
-          this.workspaceName = reviewData.workspaceName && reviewData.workspaceGroupName ?
-            this.translateService
-              .instant('review.info', {
-                workspace: reviewData.workspaceName, workspaceGroup: reviewData.workspaceGroupName
-              }) : '';
-          this.workspaceId = reviewData.workspaceId ? reviewData.workspaceId : 0;
-          this.reviewCreatedAt = reviewData.createdAt ? this.toDateTimeString(reviewData.createdAt) : '';
-          this.reviewChangedAt = reviewData.changedAt ? this.toDateTimeString(reviewData.changedAt) : '';
+          this.workspaceName =
+            reviewData.workspaceName && reviewData.workspaceGroupName ?
+              this.translateService.instant('review.info', {
+                workspace: reviewData.workspaceName,
+                workspaceGroup: reviewData.workspaceGroupName
+              }) :
+              '';
+          this.workspaceId = reviewData.workspaceId ?
+            reviewData.workspaceId :
+            0;
+          this.reviewCreatedAt = reviewData.createdAt ?
+            this.toDateTimeString(reviewData.createdAt) :
+            '';
+          this.reviewChangedAt = reviewData.changedAt ?
+            this.toDateTimeString(reviewData.changedAt) :
+            '';
           if (reviewData.units) {
             let counter = 0;
             reviewData.units.forEach(u => {
               this.units.push({
                 databaseId: u,
                 sequenceId: counter,
-                name: this.translateService.instant('review.unit', { index: counter + 1 }),
+                name: this.translateService.instant('review.unit', {
+                  index: counter + 1
+                }),
                 definition: '',
                 playerId: '',
                 responses: ''
@@ -118,14 +139,18 @@ export class ReviewService {
               counter += 1;
             });
           }
-          this.reviewConfig = reviewData.settings && reviewData.settings.reviewConfig ?
-            reviewData.settings.reviewConfig : {};
-          this.bookletConfig = reviewData.settings && reviewData.settings.bookletConfig ?
-            reviewData.settings.bookletConfig : {};
+          this.reviewConfig =
+            reviewData.settings && reviewData.settings.reviewConfig ?
+              reviewData.settings.reviewConfig :
+              {};
+          this.bookletConfig =
+            reviewData.settings && reviewData.settings.bookletConfig ?
+              reviewData.settings.bookletConfig :
+              {};
         }
       }),
-      tap(() => this.moduleService.loadList()),
-      map(() => {}))
+      switchMap(() => from(this.moduleService.loadList())),
+      map(() => undefined)
     );
   }
 }

@@ -1,5 +1,5 @@
 import {
-  BehaviorSubject, lastValueFrom
+  BehaviorSubject, lastValueFrom, Observable, of
 } from 'rxjs';
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
@@ -64,6 +64,10 @@ export class WorkspaceService {
       itemMDProfile: '',
       unitMDProfile: ''
     };
+  }
+
+  static unitKeyPatternString(): string {
+    return '[a-zA-Z][a-zA-Z0-9_-]*';
   }
 
   static unitKeyUniquenessValidator(unitId: number, unitList: { [key: string]: UnitInListDto[] }): ValidatorFn {
@@ -166,10 +170,11 @@ export class WorkspaceService {
     }
   }
 
-  async loadUnitProperties(): Promise<UnitMetadataStore | undefined> {
-    if (this.unitMetadataStore) return this.unitMetadataStore;
+  loadUnitProperties(): Observable<UnitMetadataStore | undefined> {
+    if (this.unitMetadataStore) return of(this.unitMetadataStore);
     const selectedUnitId = this.selectedUnit$.getValue();
-    return lastValueFrom(this.backendService.getUnitProperties(this.selectedWorkspaceId, selectedUnitId)
+    return this.backendService
+      .getUnitProperties(this.selectedWorkspaceId, selectedUnitId)
       .pipe(
         map(unitData => {
           this.lastChangedMetadata = undefined;
@@ -200,7 +205,7 @@ export class WorkspaceService {
           }
           return this.unitMetadataStore;
         })
-      ));
+      );
   }
 
   private getDisplayUserName(): string {

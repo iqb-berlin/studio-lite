@@ -2,7 +2,6 @@ import {
   addFirstUser,
   createNewUser,
   deleteFirstUser,
-  deleteUser,
   login,
   createGroup,
   createWs,
@@ -10,7 +9,8 @@ import {
   deleteGroup,
   logout,
   makeAdminOfGroup,
-  grantRemovePrivilegeAtUser
+  grantRemovePrivilegeAtUser,
+  deleteUsers
 } from '../../support/util';
 import { AccessLevel, newUser, UserData } from '../../support/testData';
 
@@ -27,7 +27,6 @@ describe('UI Group admin workspace check', () => {
   });
   after(() => {
     deleteFirstUser();
-    // cy.resetDb();
   });
 
   it('prepares the context', () => {
@@ -41,11 +40,11 @@ describe('UI Group admin workspace check', () => {
     createWs(ws2, group1);
   });
 
-  it('should make user as admin of a workspace group ', () => {
+  it('makes an user as admin of a workspace group ', () => {
     makeAdminOfGroup(group1, [Cypress.env('username'), groupAdminUser.username]);
   });
 
-  it('checks that tabs (Nutzer:innen, Arbeitsbereiche, Augaben and Einstellungen) are present ', () => {
+  it('checks that tabs (Nutzer:innen, Arbeitsbereiche, Aufgaben and Einstellungen) are present ', () => {
     cy.findAdminGroupSettings(group1).click();
     cy.get('[data-cy="wsg-admin-routes-users"]').should('exist');
     cy.get('[data-cy="wsg-admin-routes-workspaces"]').should('exist');
@@ -61,7 +60,6 @@ describe('UI Group admin workspace check', () => {
 
   it('checks that workspace is only read ', () => {
     cy.contains(ws1).click();
-    // Schreibgeschützt
     cy.get('[data-cy="units-area-no-access-level"]').should('exist');
     cy.get('studio-lite-add-unit-button>button')
       .should('have.attr', 'disabled');
@@ -96,11 +94,8 @@ describe('UI Group admin workspace check', () => {
 
   it('deletes the group, and users', () => {
     logout();
-    cy.wait(200);
     login(Cypress.env('username'), Cypress.env('password'));
-    cy.findAdminGroupSettings(group1).should('exist');
     deleteGroup(group1);
-    deleteUser('normaluser');
-    deleteUser('groupadminuser');
+    deleteUsers(['normaluser', 'groupadminuser']);
   });
 });

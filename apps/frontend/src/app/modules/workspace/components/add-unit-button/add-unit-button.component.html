@@ -22,12 +22,14 @@
 
 <mat-menu #menuNew>
   <button mat-menu-item
-          (click)="addUnit()">
+          (click)="addUnit()"
+          data-cy="workspace-add-unit-new-empty-unit">
     <mat-icon>add</mat-icon>
     {{'workspace.new-empty-unit' | translate}}
   </button>
   <button mat-menu-item
-          (click)="addUnitFromExisting()">
+          (click)="addUnitFromExisting()"
+          data-cy="workspace-add-unit-from-existing">
     <mat-icon>content_copy</mat-icon>
     {{'workspace.from-existing' | translate}}
   </button>

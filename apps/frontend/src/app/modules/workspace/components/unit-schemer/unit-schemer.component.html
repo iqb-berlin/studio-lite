@@ -5,8 +5,12 @@
       {{message}}
     </div>
   }
+  @if (loading) {
+    <mat-spinner class="wait-animation"></mat-spinner>
+  }
   <div class="host-schemer-container fx-flex-fill">
     <iframe #hostingIframe
+            [hidden]="loading"
       class="unitHost">
     </iframe>
   </div>

@@ -1,12 +1,24 @@
 <div class="fx-column-start-stretch fx-gap-20 admin-tab-content">
-  <mat-card>
-    <mat-card-header class="card-header">
-      <mat-card-title>{{'settings.texts' | translate}}</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <studio-lite-app-config></studio-lite-app-config>
-    </mat-card-content>
-  </mat-card>
+
+  <div class="fx-row-start-stretch fx-gap-20">
+    <mat-card class="fx-flex-fill">
+      <mat-card-header class="card-header">
+        <mat-card-title>{{'settings.texts' | translate}}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <studio-lite-app-config></studio-lite-app-config>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="fx-flex-fill">
+      <mat-card-header class="card-header">
+        <mat-card-title>{{'settings.email-template' | translate}}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <studio-lite-email-template></studio-lite-email-template>
+      </mat-card-content>
+    </mat-card>
+  </div>
 
   <div class="fx-row-start-stretch fx-gap-20">
     <mat-card class="fx-flex-fill">

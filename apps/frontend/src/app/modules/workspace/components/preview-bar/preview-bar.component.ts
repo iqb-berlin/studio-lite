@@ -21,7 +21,6 @@ import { StatusIndicationComponent } from '../status-indication/status-indicatio
 })
 export class PreviewBarComponent {
   @Input() pageList!: PageData[];
-  @Input() unitId!: number;
   @Input() playerApiVersion!: number;
   @Input() postMessageTarget!: Window | undefined;
   @Input() playerName!: string;

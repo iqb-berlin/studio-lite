@@ -11,19 +11,17 @@ import {
   deleteUnit,
   moveUnit,
   addModules,
-  createNewUser,
   setVeronaWs,
   addStatus,
   clickSaveButtonRight,
-  logout,
   deleteModule,
   selectListUnits,
-  clickIndexTabWsgAdmin, goToWsMenu
+  clickIndexTabWsgAdmin,
+  goToWsMenu
 } from '../../support/util';
 import {
   AccessLevel,
   modules,
-  newUser,
   UnitData
 } from '../../support/testData';
 import {
@@ -68,7 +66,6 @@ describe('UI check: workspace', () => {
     addModules(modules);
     createGroup(group1);
     createWs(ws1, group1);
-
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [AccessLevel.Admin]);
   });
 
@@ -126,59 +123,61 @@ describe('UI check: workspace', () => {
 
   it('should export selected units', () => {
     cy.visitWs(ws1);
-    cy.wait(200);
     goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-download-unit"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-download-unit"]').click();
     selectListUnits([unit3.shortname, newUnit.shortname]);
-    cy.clickButtonWithResponseCheck('Herunterladen', [200, 304], '/api/workspaces/*', 'GET', 'export');
+    cy.clickDataCyWithResponseCheck(
+      '[data-cy="workspace-export-unit-button"]',
+      [200, 304],
+      '/api/workspaces/*',
+      'GET',
+      'export'
+    );
   });
 
   it('should show metadata report', () => {
     cy.visitWs(ws1);
-    cy.wait(200);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-metadata"]').click();
-    selectListUnits([unit3.shortname, newUnit.shortname]);
-    // eslint-disable-next-line max-len
-    cy.clickButtonWithResponseCheck('Anzeigen', [200, 304], '/api/workspaces/*/units/properties', 'GET', 'summaryMetadata');
-    cy.clickButton('Herunterladen');
+    cy.clickDataCyWithResponseCheck(
+      '[data-cy="workspace-show-metadata-display"]',
+      [200, 304],
+      '/api/workspaces/*/units/properties',
+      'GET',
+      'summaryMetadata');
+    cy.get('[data-cy="metadata-table-view-download"]');
   });
 
-  it('should show kodierung ', () => {
+  it('should show Kodierung', () => {
     cy.visitWs(ws1);
-    cy.wait(200);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-coding-report"]').click();
-    // eslint-disable-next-line max-len
-    cy.clickDialogButton('Schließen');
+    cy.translate(Cypress.env('locale')).then(json => {
+      cy.clickDialogButton(json.close);
+    });
   });
 
-  it('should export the codebook ', () => {
+  it('should export the codebook', () => {
     cy.visitWs(ws1);
-    cy.wait(200);
-    cy.pause();
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-export-coding-book"]').click();
     selectListUnits([newUnit.shortname]);
-    // eslint-disable-next-line max-len
-    cy.clickButtonWithResponseCheck('Exportieren', [200, 304], '/api/workspaces/*/units/coding-book*', 'GET', 'codebook');
+    cy.translate(Cypress.env('locale')).then(json => {
+      cy.clickButtonWithResponseCheck(
+        json.export,
+        [200, 304],
+        '/api/workspaces/*/units/coding-book*',
+        'GET',
+        'codebook'
+      );
+    });
   });
 
-  it.skip('should add an user to the ws1 with basic credentials', () => {
-    cy.findAdminSettings().click();
-    createNewUser(newUser);
-    cy.findAdminGroupSettings(group1).click();
-    clickIndexTabWsgAdmin('workspaces');
-    grantRemovePrivilegeAtWs([newUser.username], ws1, [AccessLevel.Basic]);
-    logout();
-  });
-  // TODO add test for a user with comment privileges
   it('deletes the context ', () => {
     deleteGroup(group1);
-    // deleteUser(newUser.username);
     deleteModule();
   });
 });

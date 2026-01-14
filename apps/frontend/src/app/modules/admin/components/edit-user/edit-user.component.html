@@ -1,94 +1,117 @@
-<h1 mat-dialog-title>{{(data.newUser ? 'admin.new-user' : 'admin.edit-user') | translate}}</h1>
-
+<h1 mat-dialog-title>
+  {{ (data.newUser ? 'admin.new-user' : 'admin.edit-user') | translate }}
+</h1>
 <mat-dialog-content class="fx-column-start-stretch">
   <form [formGroup]="editUserForm"
-    class="fx-column-start-stretch">
-    <p>
-      {{'admin.user-name-hint' | translate}}
-    </p>
+        class="fx-column-start-stretch">
+    <p>{{ 'admin.user-name-hint' | translate }}</p>
     <mat-form-field>
       <input matInput
-        formControlName="name"
-        type="text"
-        [placeholder]="'user.login-name' | translate"
-        [value]="data.name"
-        data-cy="admin-edit-user-username"/>
-    </mat-form-field>
-    <mat-form-field>
-      <input
-        matInput
-        formControlName="lastName"
-        type="text"
-        [placeholder]="'user.last-name' | translate"
-        [value]="data.lastName"
-        data-cy="admin-edit-user-lastname"/>
+             formControlName="name"
+             type="text"
+             [placeholder]="'user.login-name' | translate"
+             [value]="data.name"
+             data-cy="admin-edit-user-username" />
     </mat-form-field>
     <mat-form-field>
       <input matInput
-        formControlName="firstName"
-        type="text"
-        [placeholder]="'user.first-name' | translate"
-        [value]="data.firstName"
-        data-cy="admin-edit-user-firstname"/>
+             formControlName="lastName"
+             type="text"
+             [placeholder]="'user.last-name' | translate"
+             [value]="data.lastName"
+             data-cy="admin-edit-user-lastname" />
     </mat-form-field>
     <mat-form-field>
       <input matInput
-        formControlName="email"
-        type="text"
-        [placeholder]="'user.email' | translate"
-        [value]="data.email"
-        data-cy="admin-edit-user-email"/>
+             formControlName="firstName"
+             type="text"
+             [placeholder]="'user.first-name' | translate"
+             [value]="data.firstName"
+             data-cy="admin-edit-user-firstname" />
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput
+             formControlName="email"
+             type="text"
+             [placeholder]="'user.email' | translate"
+             [value]="data.email"
+             [email]="true"
+             data-cy="admin-edit-user-email" />
     </mat-form-field>
     @if (data.emailApproved) {
-      <div
-        class="consent fx-row-start-center">
+      <div class="consent fx-row-start-center">
         <mat-icon>check_circle_outline</mat-icon>
-        {{'admin.email-approved' | translate}}
+        {{ 'admin.email-approved' | translate }}
       </div>
     }
     @if (!data.emailApproved) {
-      <div
-        class="consent fx-row-start-center">
+      <div class="consent fx-row-start-center">
         <mat-icon>highlight_off</mat-icon>
-        {{'admin.email-not-approved' | translate}}
+        {{ 'admin.email-not-approved' | translate }}
       </div>
     }
     <mat-form-field>
       <mat-label>Notiz</mat-label>
       <input matInput
-        formControlName="description"
-        type="text"
-        [placeholder]="'user.note' | translate"
-        [value]="data.description"/>
+             formControlName="description"
+             type="text"
+             [placeholder]="'user.note' | translate"
+             [value]="data.description" />
     </mat-form-field>
     <mat-checkbox formControlName="isAdmin"
-      [value]="data.isAdmin ? 'true' : 'false'"
-      class="consent">
-      {{'user.admin' | translate}}
+                  [value]="data.isAdmin ? 'true' : 'false'"
+                  class="consent">
+      {{ 'user.admin' | translate }}
     </mat-checkbox>
-    <div>
-      {{'admin.password-hint' | translate}}
+    <div>{{ 'admin.password-hint' | translate }}</div>
+
+    <div class="fx-row-start-start fx-gap-20">
+      <mat-form-field class="fx-flex-fill">
+        <input #passwordInput
+               matInput
+               formControlName="password"
+               type="password"
+               autocomplete="new-password"
+               [placeholder]="(data.newUser ? 'admin.password' : 'admin.new-password') | translate"
+               data-cy="admin-edit-user-password" />
+        <mat-icon matSuffix
+                  (click)="setPasswordInputType(passwordInput)">
+          {{ passwordInput.type === 'text' ? 'visibility_off' : 'visibility' }}
+        </mat-icon>
+      </mat-form-field>
+      <button mat-mini-fab
+              class="generate-password-button"
+              color="default"
+              type="button"
+              [matTooltip]="'admin.generate_password' | translate"
+              (click)="setGeneratePassword(passwordInput)">
+        <mat-icon>lock_reset</mat-icon>
+      </button>
     </div>
-    <mat-form-field>
-      <input matInput
-        formControlName="password"
-        type="password"
-        autocomplete="new-password"
-        [placeholder]="(data.newUser ? 'admin.password' : 'admin.new-password') | translate"
-        data-cy="admin-edit-user-password"/>
-    </mat-form-field>
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-raised-button color="primary"
-    type="submit"
-    [mat-dialog-close]="editUserForm"
-    [disabled]="editUserForm.invalid">
-    {{(data.newUser ? 'create' : 'save') | translate}}
+          type="submit"
+          [mat-dialog-close]="editUserForm"
+          [disabled]="editUserForm.invalid"
+          data-cy="admin-edit-user-button">
+    {{ (data.newUser ? 'create' : 'save') | translate }}
   </button>
+
+  @if (emailTemplate) {
+    <button mat-raised-button
+            type="submit"
+            [mat-dialog-close]="editUserForm"
+            [disabled]="editUserForm.invalid"
+            (click)="mailTo()">
+      {{ (data.newUser ? 'create' : 'save') | translate }} {{ 'admin.and-send-mail' | translate }}
+    </button>
+  }
+
   <button mat-raised-button
-    [mat-dialog-close]="false">
-    {{'cancel' | translate}}
+          [mat-dialog-close]="false">
+    {{ 'cancel' | translate }}
   </button>
 </mat-dialog-actions>

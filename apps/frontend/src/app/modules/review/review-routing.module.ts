@@ -3,7 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { ReviewComponent } from './components/review/review.component';
 import { StartComponent } from './components/start/start.component';
 import { FinishComponent } from './components/finish/finish.component';
-import { UnitsComponent } from './components/units/units.component';
+import { UnitPlayerComponent } from './components/unit-player/unit-player.component';
 
 const routes: Routes = [
   {
@@ -21,7 +21,7 @@ const routes: Routes = [
       },
       {
         path: 'u/:u',
-        component: UnitsComponent
+        component: UnitPlayerComponent
       },
       {
         path: 'end',

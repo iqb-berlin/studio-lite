@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { UnitsComponent } from './components/units/units.component';
+import { UnitPlayerComponent } from './components/unit-player/unit-player.component';
 import { FinishComponent } from './components/finish/finish.component';
 import { StartComponent } from './components/start/start.component';
 import { ReviewRoutingModule } from './review-routing.module';
@@ -48,7 +48,7 @@ import { AddCommentButtonComponent } from './components/add-comment-button/add-c
     ReviewComponent,
     StartComponent,
     FinishComponent,
-    UnitsComponent,
+    UnitPlayerComponent,
     UnitInfoComponent,
     UnitInfoLoaderComponent,
     CommentDialogComponent,

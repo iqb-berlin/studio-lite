@@ -15,7 +15,8 @@ import {
   UnitExportConfigDto,
   WorkspaceGroupSettingsDto,
   WorkspaceFullDto,
-  UnitInViewDto, ProfilesRegistryDto
+  UnitInViewDto,
+  ProfilesRegistryDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
