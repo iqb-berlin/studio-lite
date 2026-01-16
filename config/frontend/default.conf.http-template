@@ -10,6 +10,16 @@ server {
     location / {
         root   /usr/share/nginx/html;
         index  index.html index.htm;
+        try_files $uri $uri/ /index.html;
+
+        location ~* \.html$ {
+           add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
+        }
+    }
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {
+        root   /usr/share/nginx/html;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
     }
 
     #error_page  404              /404.html;
