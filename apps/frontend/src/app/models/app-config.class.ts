@@ -48,8 +48,8 @@ export class AppConfig {
     AppConfig.isExpired(this._globalWarningExpiredDay, this._globalWarningExpiredHour) ? '' : this._globalWarningText;
   }
 
-  setPageTitle(newPageTitel: string, hide = false): void {
-    this.pageTitle = newPageTitel;
+  setPageTitle(newPageTitle: string, hide = false): void {
+    this.pageTitle = newPageTitle;
     this.hideTitlesOnPage = hide;
     this.titleService.setTitle(`${this.appTitle} | ${this.pageTitle}`);
   }

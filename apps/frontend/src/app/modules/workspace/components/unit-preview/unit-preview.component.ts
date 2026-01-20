@@ -32,7 +32,9 @@ import { UnitState } from '../../../shared/models/verona.interface';
   host: { class: 'unit-preview' },
   imports: [PreviewBarComponent, MatProgressSpinner]
 })
-export class UnitPreviewComponent extends PreviewDirective implements AfterViewInit {
+export class UnitPreviewComponent
+  extends PreviewDirective
+  implements AfterViewInit {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
   private dataParts!: Record<string, string> | null;
   private unitStateDataType: string | null = null;
@@ -110,10 +112,7 @@ export class UnitPreviewComponent extends PreviewDirective implements AfterViewI
     );
   }
 
-  onLoadUnitProperties(): void {
-    this.setPresentationStatus('none');
-    this.setResponsesStatus('none');
-    this.setPageList([], '');
+  private subscribeForVeronaModuleLoaded(): void {
     this.getVeronaModuleId(
       this.workspaceService.getUnitMetadataStore(),
       'player'
@@ -121,7 +120,7 @@ export class UnitPreviewComponent extends PreviewDirective implements AfterViewI
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(playerId => {
         if (playerId) {
-          if (playerId === this.lastVeronaModulId && this.postMessageTarget) {
+          if (playerId === this.lastVeronaModuleId && this.postMessageTarget) {
             this.sendChangeData();
           } else {
             this.postMessageTarget = undefined;
@@ -133,6 +132,13 @@ export class UnitPreviewComponent extends PreviewDirective implements AfterViewI
           this.postMessageTarget = undefined;
         }
       });
+  }
+
+  onLoadUnitProperties(): void {
+    this.setPresentationStatus('none');
+    this.setResponsesStatus('none');
+    this.setPageList([], '');
+    this.subscribeForVeronaModuleLoaded();
   }
 
   protected handleUnitStateData(unitState: UnitState): void {

@@ -148,7 +148,7 @@ export class UnitSchemerComponent
     }
   }
 
-  onLoadUnitProperties() {
+  private subscribeForVeronaModuleLoaded(): void {
     this.getVeronaModuleId(
       this.workspaceService.getUnitMetadataStore(),
       'schemer'
@@ -156,7 +156,7 @@ export class UnitSchemerComponent
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(schemerId => {
         if (schemerId) {
-          if (schemerId === this.lastVeronaModulId && this.postMessageTarget) {
+          if (schemerId === this.lastVeronaModuleId && this.postMessageTarget) {
             this.sendScheme(
               this.workspaceService.selectedUnit$.getValue(),
               this.workspaceService.getUnitSchemeStore()
@@ -171,6 +171,10 @@ export class UnitSchemerComponent
           this.message = this.translateService.instant('workspace.no-schemer');
         }
       });
+  }
+
+  onLoadUnitProperties() {
+    this.subscribeForVeronaModuleLoaded();
   }
 
   postStore(unitSchemeStore: UnitSchemeStore): void {
