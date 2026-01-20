@@ -11,8 +11,8 @@ import { AppService } from '../../../../services/app.service';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { ModuleService } from '../../../shared/services/module.service';
 import {
-  SubscribeUnitDefinitionChangesDirective
-} from '../../../shared/directives/subscribe-unit-definition-changes.directive';
+  UnitDefinitionDirective
+} from '../../../shared/directives/unit-definition.directive';
 import { RolePipe } from '../../pipes/role.pipe';
 
 @Component({
@@ -23,7 +23,7 @@ import { RolePipe } from '../../pipes/role.pipe';
   imports: [MatProgressSpinner]
 })
 export class UnitSchemerComponent
-  extends SubscribeUnitDefinitionChangesDirective
+  extends UnitDefinitionDirective
   implements AfterViewInit {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
 

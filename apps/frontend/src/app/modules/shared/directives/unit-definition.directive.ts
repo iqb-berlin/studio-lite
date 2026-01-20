@@ -3,10 +3,10 @@ import { takeUntil } from 'rxjs';
 import { VeronaModuleDirective } from './verona-module.directive';
 
 @Directive({
-  selector: '[studioLiteSubscribeUnitDefinitionChanges]',
+  selector: '[studioLiteUnitDefinition]',
   standalone: false
 })
-export abstract class SubscribeUnitDefinitionChangesDirective extends VeronaModuleDirective {
+export abstract class UnitDefinitionDirective extends VeronaModuleDirective {
   addSubscriptionForUnitDefinitionChanges(): void {
     if (this.workspaceService.getUnitDefinitionStore()) {
       this.subscribeUnitDefinitionChanges();

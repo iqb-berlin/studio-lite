@@ -1,5 +1,5 @@
 import { Directive } from '@angular/core';
-import { SubscribeUnitDefinitionChangesDirective } from './subscribe-unit-definition-changes.directive';
+import { UnitDefinitionDirective } from './unit-definition.directive';
 import { PageData } from '../../workspace/models/page-data.interface';
 import { Progress } from '../../workspace/models/types';
 import { VeronaModuleDirective } from './verona-module.directive';
@@ -9,7 +9,7 @@ import { UnitState } from '../models/verona.interface';
   selector: '[preview]',
   standalone: false
 })
-export abstract class PreviewDirective extends SubscribeUnitDefinitionChangesDirective {
+export abstract class PreviewDirective extends UnitDefinitionDirective {
   playerName = '';
   playerApiVersion = 3;
   pageList: PageData[] = [];
