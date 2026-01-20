@@ -150,7 +150,7 @@
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
     "@typescript-eslint/utils": "^7.16.0",
-    "cypress": "15.7.0",
+    "cypress": "15.9.0",
     "esbuild-plugin-tsc": "^0.4.0",
     "eslint": "8.57.1",
     "eslint-config-airbnb-typescript": "^18.0.0",
