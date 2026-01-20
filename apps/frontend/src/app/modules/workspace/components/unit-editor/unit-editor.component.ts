@@ -136,8 +136,11 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
     }
   }
 
-  private onLoadUnitProperties() {
-    this.getVeronaModuleId(this.workspaceService.getUnitMetadataStore(), 'editor')
+  private subscribeForVeronaModuleLoaded(): void {
+    this.getVeronaModuleId(
+      this.workspaceService.getUnitMetadataStore(),
+      'editor'
+    )
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(editorId => {
         if (editorId) {
@@ -156,6 +159,10 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
           this.postMessageTarget = undefined;
         }
       });
+  }
+
+  private onLoadUnitProperties() {
+    this.subscribeForVeronaModuleLoaded();
   }
 
   postStore(unitDefinitionStore: UnitDefinitionStore): void {
