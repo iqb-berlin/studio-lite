@@ -156,7 +156,7 @@ export class UnitSchemerComponent
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(schemerId => {
         if (schemerId) {
-          if (schemerId === this.lastVeronaModulId && this.postMessageTarget) {
+          if (schemerId === this.lastVeronaModuleId && this.postMessageTarget) {
             this.sendScheme(
               this.workspaceService.selectedUnit$.getValue(),
               this.workspaceService.getUnitSchemeStore()

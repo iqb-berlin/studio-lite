@@ -144,7 +144,7 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(editorId => {
         if (editorId) {
-          if (editorId === this.lastVeronaModulId && this.postMessageTarget) {
+          if (editorId === this.lastVeronaModuleId && this.postMessageTarget) {
             this.sendUnitDefinition(
               this.workspaceService.selectedUnit$.getValue(),
               this.workspaceService.getUnitDefinitionStore()

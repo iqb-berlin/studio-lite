@@ -120,7 +120,7 @@ export class UnitPreviewComponent
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(playerId => {
         if (playerId) {
-          if (playerId === this.lastVeronaModulId && this.postMessageTarget) {
+          if (playerId === this.lastVeronaModuleId && this.postMessageTarget) {
             this.sendChangeData();
           } else {
             this.postMessageTarget = undefined;

@@ -117,7 +117,7 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
           this.reviewService.setHeaderText(this.unitData.name);
 
           if (playerId) {
-            if (playerId === this.lastVeronaModulId && this.postMessageTarget) {
+            if (playerId === this.lastVeronaModuleId && this.postMessageTarget) {
               this.sendChangeData();
             } else {
               this.postMessageTarget = undefined;
