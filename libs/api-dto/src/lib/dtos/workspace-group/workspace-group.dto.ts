@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { WorkspaceDto } from '../workspace/workspace-dto';
+import { WorkspaceDto } from '../workspace/workspace.dto';
 
 export class WorkspaceGroupDto {
   @ApiProperty()
