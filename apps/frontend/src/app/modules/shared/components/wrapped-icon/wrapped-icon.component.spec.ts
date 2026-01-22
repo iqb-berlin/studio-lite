@@ -9,7 +9,8 @@ describe('WrappedIconComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        MatIconModule
+        MatIconModule,
+        WrappedIconComponent
       ]
     }).compileComponents();
 
@@ -20,5 +21,12 @@ describe('WrappedIconComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should render the icon name in mat-icon', () => {
+    component.icon = 'home';
+    fixture.detectChanges();
+    const iconElement = fixture.nativeElement.querySelector('mat-icon');
+    expect(iconElement.textContent.trim()).toBe('home');
   });
 });
