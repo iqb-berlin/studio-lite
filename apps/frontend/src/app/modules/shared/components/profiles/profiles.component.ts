@@ -44,30 +44,31 @@ export class ProfilesComponent implements OnInit {
   private loadProfiles(): void {
     this.isLoading = true;
     this.backendService.getRegisteredProfiles()
-      .subscribe(registeredProfiles => {
-        if (registeredProfiles && registeredProfiles !== true) {
-          registeredProfiles.forEach(async registeredProfile => {
-            const ProfilesStore = new MDProfileStore(registeredProfile);
-            const profiles: (MDProfile | null)[] = await Promise.all(ProfilesStore.profiles.map(profile => {
-              const afterWith = (registeredProfile.url.slice(0, registeredProfile.url.lastIndexOf('/')));
-              return this.getProfile(`${afterWith}/${profile}`);
-            }));
-            this.ProfileStoreWithProfilesCollection.push({
-              profileStore: ProfilesStore,
-              profiles: profiles
-                .filter(profile => !!profile)
-                .map(profile => profile as MDProfile)
-            });
-          });
+      .subscribe(async registeredProfiles => {
+        if (Array.isArray(registeredProfiles)) {
+          this.ProfileStoreWithProfilesCollection = await Promise.all(
+            registeredProfiles.map(async registeredProfile => {
+              const ProfilesStore = new MDProfileStore(registeredProfile);
+              const profiles = await Promise.all(
+                ProfilesStore.profiles.map(profile => {
+                  const afterWith = registeredProfile.url.slice(0, registeredProfile.url.lastIndexOf('/'));
+                  return this.getProfile(`${afterWith}/${profile}`);
+                })
+              );
+              return {
+                profileStore: ProfilesStore,
+                profiles: profiles.filter(p => !!p) as MDProfile[]
+              };
+            })
+          );
           this.wsgAdminService.profileStores = this.ProfileStoreWithProfilesCollection;
           this.fetchedProfiles = this.wsgAdminService.selectedWorkspaceGroupSettings.profiles || this.profiles;
           this.profilesSelected = this.fetchedProfiles || [];
-          this.isLoading = false;
           this.isError = false;
         } else {
-          this.isLoading = false;
           this.isError = true;
         }
+        this.isLoading = false;
       });
   }
 
