@@ -18,4 +18,9 @@ describe('EntriesDividerComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should render a div with class "entries-divider"', () => {
+    const divider = fixture.nativeElement.querySelector('div.entries-divider');
+    expect(divider).toBeTruthy();
+  });
 });
