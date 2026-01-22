@@ -1,5 +1,9 @@
 import { IqbProfile, IqbProfileExamples, RegistryProfile } from './iqbProfile';
-import { clickIndexTabAdmin, clickIndexTabWsgAdmin, goToWsMenu } from '../util';
+import {
+  clickIndexTabAdmin,
+  clickIndexTabWsgAdmin,
+  goToWsMenu
+} from '../helpers';
 
 function getCheckBoxByName(name: string) {
   cy.log(typeof name);

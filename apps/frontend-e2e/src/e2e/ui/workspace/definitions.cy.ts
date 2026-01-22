@@ -4,7 +4,7 @@ import {
   clickIndexTabWorkspace,
   importExercise,
   selectUnit
-} from '../../../support/util';
+} from '../../../support/helpers';
 
 describe('Unit Definitions', () => {
   before(() => {

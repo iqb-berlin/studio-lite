@@ -4,6 +4,8 @@ import {
   newUser,
   ws1
 } from '../../../support/testData';
+
+import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 import {
   clickIndexTabWsgAdmin,
   goToWsMenu,
@@ -12,8 +14,7 @@ import {
   login,
   logout,
   selectCheckBox
-} from '../../../support/util';
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
+} from '../../../support/helpers';
 
 describe('Unit Reviews', () => {
   before(() => {

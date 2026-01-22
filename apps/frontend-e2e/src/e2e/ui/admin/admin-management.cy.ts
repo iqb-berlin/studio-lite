@@ -1,4 +1,13 @@
 import {
+  AccessLevel,
+  anotherUser,
+  modules,
+  newUser,
+  resource,
+  testGroups,
+  testWorkspaces
+} from '../../../support/testData';
+import {
   addFirstUser,
   addModules,
   addResourcePackage,
@@ -12,16 +21,7 @@ import {
   deleteUser,
   deleteUsers,
   grantRemovePrivilegeAtWs
-} from '../../../support/util';
-import {
-  AccessLevel,
-  anotherUser,
-  modules,
-  newUser,
-  resource,
-  testGroups,
-  testWorkspaces
-} from '../../../support/testData';
+} from '../../../support/helpers';
 
 describe('UI Administration Management', () => {
   const group1 = testGroups.admin;

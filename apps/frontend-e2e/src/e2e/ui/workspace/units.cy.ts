@@ -1,25 +1,4 @@
 import {
-  addFirstUser,
-  addUnitFromExisting,
-  addUnitPred,
-  createWs,
-  createGroup,
-  deleteFirstUser,
-  deleteGroup,
-  grantRemovePrivilegeAtWs,
-  importExercise,
-  deleteUnit,
-  moveUnit,
-  addModules,
-  setVeronaWs,
-  addStatus,
-  clickSaveButtonRight,
-  deleteModule,
-  selectListUnits,
-  clickIndexTabWsgAdmin,
-  goToWsMenu
-} from '../../../support/util';
-import {
   AccessLevel,
   modules,
   testGroups,
@@ -31,6 +10,27 @@ import {
   selectProfileForGroup
 } from '../../../support/metadata/metadata-util';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
+import {
+  addFirstUser,
+  addModules,
+  addStatus,
+  addUnitFromExisting,
+  addUnitPred,
+  clickIndexTabWsgAdmin,
+  clickSaveButtonRight,
+  createGroup,
+  createWs,
+  deleteFirstUser,
+  deleteGroup,
+  deleteModule,
+  deleteUnit,
+  goToWsMenu,
+  grantRemovePrivilegeAtWs,
+  importExercise,
+  moveUnit,
+  selectListUnits,
+  setVeronaWs
+} from '../../../support/helpers';
 
 describe('Workspace Unit Management', () => {
   const group1 = testGroups.ui;

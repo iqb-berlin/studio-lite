@@ -1,24 +1,24 @@
 import {
-  addFirstUser,
-  createNewUser,
-  deleteFirstUser,
-  login,
-  createGroup,
-  createWs,
-  grantRemovePrivilegeAtWs,
-  deleteGroup,
-  logout,
-  makeAdminOfGroup,
-  grantRemovePrivilegeAtUser,
-  deleteUsers
-} from '../../../support/util';
-import {
   AccessLevel,
   newUser,
   testGroups,
   testUsers,
   testWorkspaces
 } from '../../../support/testData';
+import {
+  addFirstUser,
+  createGroup,
+  createNewUser,
+  createWs,
+  deleteFirstUser,
+  deleteGroup,
+  deleteUsers,
+  grantRemovePrivilegeAtUser,
+  grantRemovePrivilegeAtWs,
+  login,
+  logout,
+  makeAdminOfGroup
+} from '../../../support/helpers';
 
 describe('Workspace Group Administration', () => {
   const group1 = testGroups.admin;

@@ -1,5 +1,13 @@
 /// <reference types="cypress" />
 import {
+  selectProfileForArea,
+  selectProfileForGroup
+} from '../../../support/metadata/metadata-util';
+import { IqbProfile } from '../../../support/metadata/iqbProfile';
+import {
+  AccessLevel, modules, testGroups, testWorkspaces
+} from '../../../support/testData';
+import {
   addFirstUser,
   addModules,
   assignVariableToItem,
@@ -16,15 +24,7 @@ import {
   importExercise,
   selectUnit,
   setVeronaWs
-} from '../../../support/util';
-import {
-  selectProfileForArea,
-  selectProfileForGroup
-} from '../../../support/metadata/metadata-util';
-import { IqbProfile } from '../../../support/metadata/iqbProfile';
-import {
-  AccessLevel, modules, testGroups, testWorkspaces
-} from '../../../support/testData';
+} from '../../../support/helpers';
 
 describe('Variable and Item Metadata Coherence', () => {
   const mathArea = testWorkspaces.metadata.mathPrimar1;

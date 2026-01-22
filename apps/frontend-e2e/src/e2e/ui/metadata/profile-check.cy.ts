@@ -1,3 +1,5 @@
+import { checkMultipleProfiles, checkProfile } from '../../../support/metadata/metadata-util';
+import { newUser, testGroups } from '../../../support/testData';
 import {
   addFirstUser,
   clickIndexTabAdmin,
@@ -7,9 +9,7 @@ import {
   deleteFirstUser,
   deleteGroup,
   deleteUser
-} from '../../../support/util';
-import { checkMultipleProfiles, checkProfile } from '../../../support/metadata/metadata-util';
-import { newUser, testGroups } from '../../../support/testData';
+} from '../../../support/helpers';
 
 describe('Metadata Profile Management', () => {
   const groups = [testGroups.metadata.math, testGroups.metadata.german];

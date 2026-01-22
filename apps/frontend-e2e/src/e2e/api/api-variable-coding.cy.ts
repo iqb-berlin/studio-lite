@@ -3,14 +3,8 @@ import {
 } from '../../support/testData';
 import { deleteTextField } from '../../support/util-api';
 import {
-  deleteGroup,
-  deleteModule,
-  goToItem,
-  goToWsMenu,
-  login,
-  logout,
-  selectUnit
-} from '../../support/util';
+  deleteGroup, deleteModule, goToItem, goToWsMenu, login, logout, selectUnit
+} from '../../support/helpers';
 
 describe('API variable coherence in Scheme, Aspect and Metadata', () => {
   const ws1: WsData = {

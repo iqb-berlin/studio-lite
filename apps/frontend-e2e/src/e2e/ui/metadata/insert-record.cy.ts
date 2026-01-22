@@ -1,12 +1,4 @@
 import {
-  addFirstUser, addUnit,
-  createGroup,
-  createWs,
-  deleteFirstUser,
-  deleteGroup,
-  grantRemovePrivilegeAtWs
-} from '../../../support/util';
-import {
   getItem,
   getStructure,
   selectProfileForArea,
@@ -15,6 +7,15 @@ import {
 } from '../../../support/metadata/metadata-util';
 import { AccessLevel, testGroups, testWorkspaces } from '../../../support/testData';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
+import {
+  addFirstUser,
+  addUnit,
+  createGroup,
+  createWs,
+  deleteFirstUser,
+  deleteGroup,
+  grantRemovePrivilegeAtWs
+} from '../../../support/helpers';
 
 describe('Metadata Management', () => {
   const ws1 = testWorkspaces.metadata.german1;

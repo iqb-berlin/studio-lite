@@ -1,15 +1,15 @@
+import { newUser, UserData } from '../../../support/testData';
 import {
   addFirstUser,
   changePassword,
-  updatePersonalData,
   createNewUser,
   deleteFirstUser,
   deleteUser,
   login,
+  loginWithUser,
   logout,
-  loginWithUser
-} from '../../../support/util';
-import { newUser, UserData } from '../../../support/testData';
+  updatePersonalData
+} from '../../../support/helpers';
 
 describe('UI User Management', () => {
   before(() => {

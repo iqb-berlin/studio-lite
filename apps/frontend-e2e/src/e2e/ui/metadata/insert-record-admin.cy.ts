@@ -1,3 +1,6 @@
+import { selectProfileForGroupFromAdmin } from '../../../support/metadata/metadata-util';
+import { IqbProfile } from '../../../support/metadata/iqbProfile';
+import { AccessLevel, testWorkspaces } from '../../../support/testData';
 import {
   addFirstUser,
   createGroup,
@@ -5,10 +8,7 @@ import {
   deleteFirstUser,
   deleteGroup,
   grantRemovePrivilegeAtWs
-} from '../../../support/util';
-import { selectProfileForGroupFromAdmin } from '../../../support/metadata/metadata-util';
-import { IqbProfile } from '../../../support/metadata/iqbProfile';
-import { AccessLevel, testWorkspaces } from '../../../support/testData';
+} from '../../../support/helpers';
 
 describe('Metadata Profile Management from Admin', () => {
   const area = 'Deutsch II';
