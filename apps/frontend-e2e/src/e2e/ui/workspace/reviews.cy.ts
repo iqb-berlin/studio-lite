@@ -3,7 +3,7 @@ import {
   group1,
   newUser,
   ws1
-} from '../../support/testData';
+} from '../../../support/testData';
 import {
   clickIndexTabWsgAdmin,
   goToWsMenu,
@@ -12,8 +12,8 @@ import {
   login,
   logout,
   selectCheckBox
-} from '../../support/util';
-import { createBasicSpecCy, deleteBasicSpecCy } from './shared/basic.spec.cy';
+} from '../../../support/util';
+import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 
 describe('Review:', () => {
   before(() => {
@@ -25,7 +25,7 @@ describe('Review:', () => {
     // cy.resetDb();
   });
 
-  const review:string = 'Review1';
+  const review: string = 'Review1';
   it('should import units', () => {
     cy.visitWs(ws1);
     importExercise('test_studio_units_download.zip');

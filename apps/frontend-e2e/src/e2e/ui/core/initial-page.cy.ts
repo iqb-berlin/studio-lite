@@ -1,4 +1,4 @@
-import { isButtonClickable } from '../../support/app.po';
+import { isButtonClickable } from '../../../support/app.po';
 
 describe('UI check: initial page', () => {
   const homeUserName = '[data-cy="home-user-name"]';

@@ -8,8 +8,8 @@ import {
   login,
   logout,
   loginWithUser
-} from '../../support/util';
-import { newUser, UserData } from '../../support/testData';
+} from '../../../support/util';
+import { newUser, UserData } from '../../../support/testData';
 
 describe('UI User Management', () => {
   before(() => {
@@ -33,7 +33,7 @@ describe('UI User Management', () => {
   });
 
   it('should be able to modify personal data', () => {
-    const newData:UserData = {
+    const newData: UserData = {
       username: newUser.username,
       password: newUser.password,
       lastName: 'Muller',

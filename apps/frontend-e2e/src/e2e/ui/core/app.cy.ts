@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { getAppTitle } from '../../support/app.po';
+import { getAppTitle } from '../../../support/app.po';
 
 describe('frontend', () => {
   beforeEach(() => cy.visit('/'));

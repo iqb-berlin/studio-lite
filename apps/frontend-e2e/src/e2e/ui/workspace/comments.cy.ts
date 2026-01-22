@@ -1,14 +1,14 @@
 import {
   importedUnit, newUser,
   ws1
-} from '../../support/testData';
+} from '../../../support/testData';
 import {
   clickIndexTabWorkspace,
   importExercise,
   loginWithUser,
   selectUnit
-} from '../../support/util';
-import { createBasicSpecCy, deleteBasicSpecCy } from './shared/basic.spec.cy';
+} from '../../../support/util';
+import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 
 describe('Comment:', () => {
   before(() => {

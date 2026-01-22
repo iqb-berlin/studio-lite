@@ -11,13 +11,13 @@ import {
   makeAdminOfGroup,
   grantRemovePrivilegeAtUser,
   deleteUsers
-} from '../../support/util';
-import { AccessLevel, newUser, UserData } from '../../support/testData';
+} from '../../../support/util';
+import { AccessLevel, newUser, UserData } from '../../../support/testData';
 
 describe('UI Group admin workspace check', () => {
-  const group1:string = 'Mathematik Primär Bereichsgruppe';
-  const ws1:string = 'Mathematik I';
-  const ws2:string = 'Deutsch I';
+  const group1: string = 'Mathematik Primär Bereichsgruppe';
+  const ws1: string = 'Mathematik I';
+  const ws2: string = 'Deutsch I';
   const groupAdminUser: UserData = {
     username: 'groupadminuser',
     password: '1111'

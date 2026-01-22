@@ -12,17 +12,17 @@ import {
   deleteUser,
   deleteUsers,
   grantRemovePrivilegeAtWs
-} from '../../support/util';
+} from '../../../support/util';
 import {
   AccessLevel, anotherUser,
   modules,
   newUser,
   resource
-} from '../../support/testData';
+} from '../../../support/testData';
 
 describe('UI Administration Management', () => {
-  const group1:string = 'Mathematik Primär Bereichsgruppe';
-  const ws1:string = 'Mathematik I';
+  const group1: string = 'Mathematik Primär Bereichsgruppe';
+  const ws1: string = 'Mathematik I';
   before(() => addFirstUser());
   after(() => {
     deleteFirstUser();

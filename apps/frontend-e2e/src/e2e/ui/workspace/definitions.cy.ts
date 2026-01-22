@@ -1,10 +1,10 @@
-import { createBasicSpecCy, deleteBasicSpecCy } from './shared/basic.spec.cy';
-import { ws1 } from '../../support/testData';
+import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
+import { ws1 } from '../../../support/testData';
 import {
   clickIndexTabWorkspace,
   importExercise,
   selectUnit
-} from '../../support/util';
+} from '../../../support/util';
 
 describe('Definition:', () => {
   before(() => {
