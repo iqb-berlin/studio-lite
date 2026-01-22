@@ -12,16 +12,19 @@ import {
   grantRemovePrivilegeAtUser,
   deleteUsers
 } from '../../../support/util';
-import { AccessLevel, newUser, UserData } from '../../../support/testData';
+import {
+  AccessLevel,
+  newUser,
+  testGroups,
+  testUsers,
+  testWorkspaces
+} from '../../../support/testData';
 
-describe('UI Group admin workspace check', () => {
-  const group1: string = 'Mathematik Primär Bereichsgruppe';
-  const ws1: string = 'Mathematik I';
-  const ws2: string = 'Deutsch I';
-  const groupAdminUser: UserData = {
-    username: 'groupadminuser',
-    password: '1111'
-  };
+describe('Workspace Group Administration', () => {
+  const group1 = testGroups.admin;
+  const ws1 = testWorkspaces.admin.math1;
+  const ws2 = testWorkspaces.admin.german1;
+  const groupAdminUser = testUsers.groupAdmin;
   before(() => {
     addFirstUser();
   });
@@ -29,7 +32,7 @@ describe('UI Group admin workspace check', () => {
     deleteFirstUser();
   });
 
-  it('prepares the context', () => {
+  it('sets up test workspace and users', () => {
     createNewUser(newUser);
     createNewUser(groupAdminUser);
     createGroup(group1);
@@ -40,11 +43,11 @@ describe('UI Group admin workspace check', () => {
     createWs(ws2, group1);
   });
 
-  it('makes an user as admin of a workspace group ', () => {
+  it('assigns group admin role to user', () => {
     makeAdminOfGroup(group1, [Cypress.env('username'), groupAdminUser.username]);
   });
 
-  it('checks that tabs (Nutzer:innen, Arbeitsbereiche, Aufgaben and Einstellungen) are present ', () => {
+  it('displays all admin tabs (users, workspaces, units, settings)', () => {
     cy.findAdminGroupSettings(group1).click();
     cy.get('[data-cy="wsg-admin-routes-users"]').should('exist');
     cy.get('[data-cy="wsg-admin-routes-workspaces"]').should('exist');
@@ -52,26 +55,26 @@ describe('UI Group admin workspace check', () => {
     cy.get('[data-cy="wsg-admin-routes-settings"]').should('exist');
   });
 
-  it('checks that normal user has no workspace group admin setting button ', () => {
+  it('hides group admin settings for normal users', () => {
     logout();
     login(newUser.username, newUser.password);
     cy.findAdminGroupSettings(group1).should('not.exist');
   });
 
-  it('checks that workspace is only read ', () => {
+  it('restricts workspace to read-only for users without access', () => {
     cy.contains(ws1).click();
     cy.get('[data-cy="units-area-no-access-level"]').should('exist');
     cy.get('studio-lite-add-unit-button>button')
       .should('have.attr', 'disabled');
   });
 
-  it('checks that workspace admin has setting button for the workspace ', () => {
+  it('displays group settings button for group admins', () => {
     logout();
     login(groupAdminUser.username, groupAdminUser.password);
     cy.findAdminGroupSettings(group1).should('exist');
   });
 
-  it('checks that workspace admin can remove privileges in workspace within the group ', () => {
+  it('allows group admin to manage workspace privileges', () => {
     cy.findAdminGroupSettings(group1).click();
     cy.get('[data-cy="wsg-admin-routes-workspaces"]').click();
     grantRemovePrivilegeAtWs([newUser.username, groupAdminUser.username],
@@ -79,20 +82,20 @@ describe('UI Group admin workspace check', () => {
       [AccessLevel.Basic, AccessLevel.Admin]);
   });
 
-  it('checks that workspace admin can remove privileges in workspace from tab-index user ', () => {
+  it('allows group admin to manage user privileges from users tab', () => {
     cy.findAdminGroupSettings(group1).click();
     cy.get('[data-cy="wsg-admin-routes-users"]').click();
     grantRemovePrivilegeAtUser(newUser.username, [ws1, ws2], [AccessLevel.Basic, AccessLevel.Developer]);
   });
 
-  it('checks that workspace is editable for the group admin user ', () => {
+  it('enables workspace editing for group admins', () => {
     cy.visitWs(ws1);
     cy.get('[data-cy="units-area-no-access-level"]').should('not.exist');
     cy.get('studio-lite-add-unit-button>button')
       .should('not.have.attr', 'disabled');
   });
 
-  it('deletes the group, and users', () => {
+  it('cleans up test data', () => {
     logout();
     login(Cypress.env('username'), Cypress.env('password'));
     deleteGroup(group1);

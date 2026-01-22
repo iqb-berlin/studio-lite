@@ -9,11 +9,10 @@ import {
   deleteUser
 } from '../../../support/util';
 import { checkMultipleProfiles, checkProfile } from '../../../support/metadata/metadata-util';
-import { newUser } from '../../../support/testData';
+import { newUser, testGroups } from '../../../support/testData';
 
-describe('Load metadata profile', () => {
-  const groups = ['Mathematik Primär und Sek I',
-    'Deutsch Primär und Sek I'];
+describe('Metadata Profile Management', () => {
+  const groups = [testGroups.metadata.math, testGroups.metadata.german];
   before(() => {
     addFirstUser();
   });
@@ -22,7 +21,7 @@ describe('Load metadata profile', () => {
     // cy.resetDb();
   });
 
-  it('user admin prepares the Context', () => {
+  it('sets up groups and users', () => {
     createNewUser(newUser);
     groups.forEach(area => {
       createGroup(area);
@@ -30,8 +29,8 @@ describe('Load metadata profile', () => {
     cy.wait(200);
   });
 
-  it('should be possible load a metadata profile from administration settings', () => {
-    const searchProfile:string = 'Deutsch';
+  it('loads metadata profile from admin settings', () => {
+    const searchProfile: string = 'Deutsch';
     clickIndexTabAdmin('workspace-groups');
     cy.get('mat-table')
       .contains(groups[1])
@@ -41,8 +40,8 @@ describe('Load metadata profile', () => {
     cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
   });
 
-  it('should be possible load a metadata profile from wsg-admin and revert it', () => {
-    const searchProfile:string = 'Deutsch';
+  it('loads and reverts metadata profile from group admin', () => {
+    const searchProfile: string = 'Deutsch';
     cy.visit('/');
     cy.get(`div>div>div:contains("${searchProfile}")`)
       .next()
@@ -52,8 +51,8 @@ describe('Load metadata profile', () => {
     cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
   });
 
-  it('should be possible load more metadata profile', () => {
-    const searchProfiles:string[] = ['Englisch', 'Mathematik'];
+  it('loads multiple metadata profiles', () => {
+    const searchProfiles: string[] = ['Englisch', 'Mathematik'];
     cy.findAdminSettings().click();
     clickIndexTabAdmin('workspace-groups');
     cy.get('mat-table')
@@ -66,7 +65,7 @@ describe('Load metadata profile', () => {
     cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
   });
 
-  it('removes the Context', () => {
+  it('cleans up test data', () => {
     deleteUser(newUser.username);
     groups.forEach(group => {
       deleteGroup(group);

@@ -6,7 +6,7 @@ import {
   selectUnit
 } from '../../../support/util';
 
-describe('Definition:', () => {
+describe('Unit Definitions', () => {
   before(() => {
     createBasicSpecCy();
   });
@@ -15,12 +15,12 @@ describe('Definition:', () => {
     deleteBasicSpecCy();
   });
 
-  it('imports the units', () => {
+  it('imports test units', () => {
     cy.visitWs(ws1);
     importExercise('test_studio_units_download.zip');
   });
 
-  it('selects the definition of a unit', () => {
+  it('opens unit definition editor', () => {
     cy.get('.cdk-overlay-backdrop').eq(0).click();
     selectUnit('M6_AK0012');
     clickIndexTabWorkspace('editor');
@@ -46,7 +46,7 @@ describe('Definition:', () => {
     cy.get('[data-cy="workspace-unit-save-button"]').click();
   });
 
-  it('checks that the M6_AK0011 was not overwritten', () => {
+  it('preserves unit definition when switching between units', () => {
     selectUnit('M6_AK0011');
     cy.wait(100);
     cy.getIFrameBody('iframe.unitHost').within(() => {

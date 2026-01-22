@@ -14,69 +14,72 @@ import {
   grantRemovePrivilegeAtWs
 } from '../../../support/util';
 import {
-  AccessLevel, anotherUser,
+  AccessLevel,
+  anotherUser,
   modules,
   newUser,
-  resource
+  resource,
+  testGroups,
+  testWorkspaces
 } from '../../../support/testData';
 
 describe('UI Administration Management', () => {
-  const group1: string = 'Mathematik Primär Bereichsgruppe';
-  const ws1: string = 'Mathematik I';
+  const group1 = testGroups.admin;
+  const ws1 = testWorkspaces.admin.math1;
   before(() => addFirstUser());
   after(() => {
     deleteFirstUser();
     // cy.resetDb();
   });
 
-  it('user with admin credentials has admin setting button', () => {
+  it('displays admin settings button for admin users', () => {
     cy.findAdminSettings().click();
   });
 
-  it('user with admin credentials can add new user', () => {
+  it('creates a new user', () => {
     createNewUser(newUser);
   });
 
-  it('user with admin credentials can delete a user', () => {
+  it('deletes a user', () => {
     deleteUser(newUser.username);
   });
 
-  it('user admin creates two users and select them to delete together', () => {
+  it('deletes multiple users at once', () => {
     createNewUser(newUser);
     createNewUser(anotherUser);
     deleteUsers([newUser.username, anotherUser.username]);
   });
 
-  it('user with admin credentials can create a group (Bereichsgruppe)', () => {
+  it('creates a workspace group', () => {
     createGroup(group1);
   });
 
-  it('user with admin credentials can create a workspace(Arbeitsbereich) within its Bereichsgruppe', () => {
+  it('creates a workspace within a group', () => {
     createWs(ws1, group1);
     grantRemovePrivilegeAtWs([Cypress.env('username')], 'Mathematik I', [AccessLevel.Basic]);
   });
 
-  it('user with admin credentials can Modules upload',
+  it('uploads Verona modules',
     { defaultCommandTimeout: 100000 },
     () => {
       addModules(modules);
     });
 
-  it('user with admin credentials can upload the resource package',
+  it('uploads a resource package',
     { defaultCommandTimeout: 200000 },
     () => {
       addResourcePackage(resource);
     });
 
-  it('user with admin credentials deletes Modules', () => {
+  it('deletes Verona modules', () => {
     deleteModule();
   });
 
-  it('user with admin credentials deletes package resource', () => {
+  it('deletes a resource package', () => {
     deleteResource();
   });
 
-  it('user with admin credentials can deletes groups', () => {
+  it('deletes a workspace group', () => {
     deleteGroup(group1);
   });
 });

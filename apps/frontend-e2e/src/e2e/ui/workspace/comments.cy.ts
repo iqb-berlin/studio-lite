@@ -10,7 +10,7 @@ import {
 } from '../../../support/util';
 import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 
-describe('Comment:', () => {
+describe('Unit Comments', () => {
   before(() => {
     // cy.resetDb();
     createBasicSpecCy();
@@ -20,12 +20,12 @@ describe('Comment:', () => {
     deleteBasicSpecCy();
   });
 
-  it('should import units', () => {
+  it('imports test units', () => {
     cy.visitWs(ws1);
     importExercise('test_studio_units_download.zip');
   });
 
-  it('should add comments', () => {
+  it('creates multiple general comments', () => {
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.get('tiptap-editor').type('Neue allgemein Kommentar 1');
@@ -35,27 +35,27 @@ describe('Comment:', () => {
     cy.get('studio-lite-comment').should('have.length', '2');
   });
 
-  it('should reply the first comment', () => {
+  it('replies to a comment', () => {
     cy.get('studio-lite-comment')
       .eq(0).contains('button', 'reply').click();
     cy.get('tiptap-editor').eq(0).type('Antworten zu Neue Kommentar 1');
     cy.contains('button', 'send').click();
   });
 
-  it('should edit the last comment', () => {
+  it('edits a comment', () => {
     cy.get('studio-lite-comment')
       .eq(-1).contains('button', 'edit').type('Verändert ');
     cy.contains('button', 'send').click();
   });
 
-  it('should hide the first comment', () => {
+  it('hides a comment', () => {
     cy.get('studio-lite-comment').should('have.length', '3');
     cy.get('studio-lite-comment')
       .eq(0).contains('mat-icon', 'visibility_off').click();
     cy.get('studio-lite-comment').should('have.length', '1');
   });
 
-  it('should other user able to see the hidden comments by ignoring the visibility setting ', () => {
+  it('allows other users to view hidden comments with filter enabled', () => {
     loginWithUser(newUser.username, newUser.password);
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
@@ -66,7 +66,7 @@ describe('Comment:', () => {
     cy.get('studio-lite-comment').should('have.length', '3');
   });
 
-  it('should delete the visible comment', () => {
+  it('deletes a comment', () => {
     loginWithUser(Cypress.env('username'), Cypress.env('password'));
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
@@ -78,14 +78,14 @@ describe('Comment:', () => {
     cy.get('studio-lite-comment').should('have.length', '0');
   });
 
-  it('should set visibility on ', () => {
+  it('makes hidden comment visible again', () => {
     cy.contains('mat-icon', 'filter_alt').click();
     cy.get('mat-slide-toggle').click();
     cy.get('studio-lite-comment')
       .eq(0).contains('mat-icon', 'visibility').click({ force: true });
   });
 
-  it('should able to write a comment related to a item', () => {
+  it('creates comment linked to specific item', () => {
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
@@ -95,7 +95,7 @@ describe('Comment:', () => {
     cy.contains('button', 'send').click({ force: true });
   });
 
-  it('should show only comments related to Item 01', () => {
+  it('filters comments by item', () => {
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');

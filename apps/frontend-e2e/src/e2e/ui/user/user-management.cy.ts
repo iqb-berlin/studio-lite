@@ -24,15 +24,15 @@ describe('UI User Management', () => {
     // cy.resetDb();
   });
 
-  it('should be possible login with credentials', () => {
+  it('logs in with valid credentials', () => {
     login(newUser.username, newUser.password);
   });
 
-  it('should not be able to find admin user setting button', () => {
+  it('hides admin settings for normal users', () => {
     cy.findAdminSettings().should('not.exist');
   });
 
-  it('should be able to modify personal data', () => {
+  it('updates personal data (name, email)', () => {
     const newData: UserData = {
       username: newUser.username,
       password: newUser.password,
@@ -43,17 +43,17 @@ describe('UI User Management', () => {
     updatePersonalData(newData);
   });
 
-  it('should be possible to change the password', () => {
+  it('changes password successfully', () => {
     changePassword('newpass', newUser.password);
     loginWithUser(newUser.username, 'newpass');
     changePassword(newUser.password, 'newpass');
   });
 
-  it('should be able to log out', () => {
+  it('logs out successfully', () => {
     logout();
   });
 
-  it('should not be able to login with incorrect credentials', () => {
+  it('rejects login with invalid credentials', () => {
     cy.login(newUser.username, 'nopass');
     cy.translate(Cypress.env('locale')).then(json => {
       cy.clickButtonWithResponseCheck(json.home.login, [401], '/api/login', 'POST', 'loginFail');

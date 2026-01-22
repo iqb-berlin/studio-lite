@@ -22,6 +22,8 @@ import {
 import {
   AccessLevel,
   modules,
+  testGroups,
+  testWorkspaces,
   UnitData
 } from '../../../support/testData';
 import {
@@ -30,10 +32,10 @@ import {
 } from '../../../support/metadata/metadata-util';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
 
-describe('UI check: workspace', () => {
-  const group1: string = 'UI_BG';
-  const ws1: string = '01Vorlage';
-  const ws2: string = '07Final';
+describe('Workspace Unit Management', () => {
+  const group1 = testGroups.ui;
+  const ws1 = testWorkspaces.ui.template;
+  const ws2 = testWorkspaces.ui.final;
   const unit1: UnitData = {
     shortname: 'AUF_D1',
     name: 'Name Auf 1',
@@ -62,26 +64,26 @@ describe('UI check: workspace', () => {
     // cy.resetDb();
   });
 
-  it('prepares the context for unit test', () => {
+  it('sets up workspace with modules and profiles', () => {
     addModules(modules);
     createGroup(group1);
     createWs(ws1, group1);
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [AccessLevel.Admin]);
   });
 
-  it('should set player, editor and schemer for the ws', () => {
+  it('configures Verona modules for workspace', () => {
     setVeronaWs(ws1);
   });
 
-  it('should select the profile for ws from ws settings', () => {
+  it('selects metadata profile from workspace settings', () => {
     selectProfileForGroup(group1, IqbProfile.DE);
   });
 
-  it('should select profile for a ws from group settings', () => {
+  it('selects metadata profile from group settings', () => {
     selectProfileForAreaFromGroup(IqbProfile.DE, ws1, group1);
   });
 
-  it('should add states to the workspace', () => {
+  it('adds custom states to workspace', () => {
     cy.findAdminGroupSettings(group1).click();
     clickIndexTabWsgAdmin('settings');
     addStatus('In Bearbeitung', 0);
@@ -89,7 +91,7 @@ describe('UI check: workspace', () => {
     clickSaveButtonRight();
   });
 
-  it('should the add button be present and we could add new exercises', () => {
+  it('creates new units', () => {
     cy.visitWs(ws1);
     addUnitPred(unit1);
     cy.visitWs(ws1);
@@ -98,30 +100,30 @@ describe('UI check: workspace', () => {
     addUnitPred(unit3);
   });
 
-  it('should the add button be present and we could add an exercise from existing exercises', () => {
+  it('creates unit from existing unit', () => {
     cy.visitWs(ws1);
     addUnitFromExisting(`${group1}: ${ws1}`, unit1, newUnit);
   });
 
-  it('should the add button, and the button to import file be present', () => {
+  it('imports units from zip file', () => {
     cy.visitWs(ws1);
     importExercise('test_studio_units_download.zip');
     cy.contains('M6_AK0011')
       .should('exist');
   });
 
-  it('should be able to delete Unit', () => {
+  it('deletes a unit', () => {
     cy.visitWs(ws1);
     deleteUnit(unit1.shortname);
   });
 
-  it('should be able to assign group to the units', () => {
+  it('moves unit to another workspace', () => {
     createWs(ws2, group1);
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws2, [AccessLevel.Admin]);
     moveUnit(ws1, ws2, unit2);
   });
 
-  it('should export selected units', () => {
+  it('exports selected units', () => {
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').click();
@@ -135,7 +137,7 @@ describe('UI check: workspace', () => {
     );
   });
 
-  it('should show metadata report', () => {
+  it('displays metadata report', () => {
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
@@ -149,7 +151,7 @@ describe('UI check: workspace', () => {
     cy.get('[data-cy="metadata-table-view-download"]');
   });
 
-  it('should show Kodierung', () => {
+  it('displays coding report', () => {
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
@@ -159,7 +161,7 @@ describe('UI check: workspace', () => {
     });
   });
 
-  it('should export the codebook', () => {
+  it('exports codebook for selected units', () => {
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
@@ -176,7 +178,7 @@ describe('UI check: workspace', () => {
     });
   });
 
-  it('deletes the context ', () => {
+  it('cleans up test data', () => {
     deleteGroup(group1);
     deleteModule();
   });
