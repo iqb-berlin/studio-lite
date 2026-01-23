@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { TiptapEditorDirective } from 'ngx-tiptap';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { CommentEditorComponent } from './comment-editor.component';
 
 const mockEditor = {
@@ -62,7 +63,7 @@ class MockWrappedIconComponent {
   standalone: true
 })
 class MockCommentItemSelectionComponent {
-  @Input() unitItems!: unknown[];
+  @Input() unitItems: UnitItemDto[] = [];
   @Input() selectedItems: string[] = [];
   @Output() selectedItemsChange = new EventEmitter<string[]>();
 }
