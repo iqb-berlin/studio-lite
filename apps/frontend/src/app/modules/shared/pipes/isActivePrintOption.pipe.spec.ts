@@ -1,7 +1,25 @@
 import { IsActivePrintOption } from './isActivePrintOption.pipe';
+import { PrintOptions } from '../../print/models/print-options.interface';
 
-describe('Pipe', () => {
+describe('IsActivePrintOption', () => {
+  const pipe = new IsActivePrintOption();
+
   it('should be defined', () => {
-    expect(new IsActivePrintOption()).toBeDefined();
+    expect(pipe).toBeDefined();
+  });
+
+  it('should return true if option is active', () => {
+    const options: PrintOptions[] = [{ key: 'printComments', value: true }];
+    expect(pipe.transform(options, 'printComments')).toBe(true);
+  });
+
+  it('should return false if option is inactive', () => {
+    const options: PrintOptions[] = [{ key: 'printComments', value: false }];
+    expect(pipe.transform(options, 'printComments')).toBe(false);
+  });
+
+  it('should return false if option is not found', () => {
+    const options: PrintOptions[] = [{ key: 'printMetadata', value: true }];
+    expect(pipe.transform(options, 'printComments')).toBe(false);
   });
 });
