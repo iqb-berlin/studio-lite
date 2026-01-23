@@ -8,7 +8,7 @@ import {
   WsData,
   WsSettings
 } from '../../support/testData';
-import { buildDownloadQuery } from '../../support/util-api';
+import { buildDownloadQuery } from '../../support/api';
 
 function getNameAt(initialName: string): string {
   return initialName.replace(/-+(?=[^-\d]*\d)/, '@').replace(/.\d.html$/, '');
@@ -3527,7 +3527,7 @@ describe('Studio API tests', () => {
         cy.deleteWsAPI([noId], Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
-          // expect(resp.status).to.equal(500); should
+            // expect(resp.status).to.equal(500); should
           });
       });
 
@@ -3549,7 +3549,7 @@ describe('Studio API tests', () => {
         cy.deleteWsAPI([Cypress.env(ws2.id)], Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
-          // expect(resp.status).to.equal(500); should
+            // expect(resp.status).to.equal(500); should
           });
       });
     });
@@ -3567,11 +3567,11 @@ describe('Studio API tests', () => {
       });
 
       it('404/200 negative test: should fail with a non-existent group', () => {
-      // This test should have 404 response, but we get 200
+        // This test should have 404 response, but we get 200
         cy.deleteGroupsAPI([noId], Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
-          // expect(resp.status).to.equal(404); // should
+            // expect(resp.status).to.equal(404); // should
           });
       });
 
@@ -3603,7 +3603,7 @@ describe('Studio API tests', () => {
         cy.deleteModulesAPI([noId], Cypress.env(`token_${Cypress.env('username')}`))
           .then(resp => {
             expect(resp.status).to.equal(200);
-          // expect(resp.status).to.equal(500); should
+            // expect(resp.status).to.equal(500); should
           });
       });
       it('200 positive test: should delete the list of modules', () => {

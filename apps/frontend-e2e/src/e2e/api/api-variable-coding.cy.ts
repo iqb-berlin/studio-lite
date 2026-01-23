@@ -1,10 +1,10 @@
 import {
   AccessLevel, GroupData, modules, WsData, WsSettings
 } from '../../support/testData';
-import { deleteTextField } from '../../support/util-api';
 import {
   deleteGroup, deleteModule, goToItem, goToWsMenu, login, logout, selectUnit
 } from '../../support/helpers';
+import { deleteTextField } from '../../support/api';
 
 describe('API variable coherence in Scheme, Aspect and Metadata', () => {
   const ws1: WsData = {
