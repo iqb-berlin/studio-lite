@@ -24,7 +24,7 @@ export type CoreProfile = Omit<MDProfile, 'groups'>;
 export class ProfilesComponent implements OnInit {
   isLoading: boolean = false;
   isError: boolean = false;
-  ProfileStoreWithProfilesCollection : ProfileStoreWithProfiles[] = [];
+  profileStoresWithProfiles : ProfileStoreWithProfiles[] = [];
   fetchedProfiles: CoreProfile[] = [];
   profilesSelected : CoreProfile[] = [];
   profile!:Profile;
@@ -46,7 +46,7 @@ export class ProfilesComponent implements OnInit {
     this.backendService.getRegisteredProfiles()
       .subscribe(async registeredProfiles => {
         if (Array.isArray(registeredProfiles)) {
-          this.ProfileStoreWithProfilesCollection = await Promise.all(
+          this.profileStoresWithProfiles = await Promise.all(
             registeredProfiles.map(async registeredProfile => {
               const ProfilesStore = new MDProfileStore(registeredProfile);
               const profiles = await Promise.all(
@@ -61,7 +61,7 @@ export class ProfilesComponent implements OnInit {
               };
             })
           );
-          this.wsgAdminService.profileStores = this.ProfileStoreWithProfilesCollection;
+          this.wsgAdminService.profileStores = this.profileStoresWithProfiles;
           this.fetchedProfiles = this.wsgAdminService.selectedWorkspaceGroupSettings.profiles || this.profiles;
           this.profilesSelected = this.fetchedProfiles || [];
           this.isError = false;
