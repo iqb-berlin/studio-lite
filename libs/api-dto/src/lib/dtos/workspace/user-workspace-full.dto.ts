@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { WorkspaceSettingsDto } from './workspace-settings-dto';
+import { WorkspaceSettingsDto } from './workspace-settings.dto';
 
-export class WorkspaceFullDto {
+export class UserWorkspaceFullDto {
   @ApiProperty()
     id!: number;
 
@@ -13,6 +13,9 @@ export class WorkspaceFullDto {
 
   @ApiProperty({ example: 'Hörverstehen' })
     groupName?: string;
+
+  @ApiProperty()
+    userAccessLevel!: number;
 
   @ApiProperty()
     dropBoxId!: number;
