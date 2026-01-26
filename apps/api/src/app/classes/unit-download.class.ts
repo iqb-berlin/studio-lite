@@ -10,6 +10,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
+import * as sharp from 'sharp';
 import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
 import { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
 import { UnitService } from '../services/unit.service';
@@ -18,6 +19,10 @@ import { SettingService } from '../services/setting.service';
 import { UnitCommentService } from '../services/unit-comment.service';
 
 export class UnitDownloadClass {
+  private static readonly MAX_IMAGE_WIDTH = 750;
+  private static readonly IMAGE_COMPRESSION_QUALITY = 80;
+  private static readonly MIN_IMAGE_SIZE_TO_COMPRESS = 100; // bytes
+
   static async get(
     workspaceId: number,
     unitService: UnitService,
@@ -88,7 +93,7 @@ export class UnitDownloadClass {
     const unitXml = UnitDownloadClass.createUnitXML(unitExportConfig, unitMetadata);
     UnitDownloadClass.addMetadata(unitMetadata, zip);
     const definitionData = await unitService.findOnesDefinition(unitId);
-    UnitDownloadClass.addUnitDefinition(definitionData, unitXml, unitMetadata, zip);
+    await UnitDownloadClass.addUnitDefinition(definitionData, unitXml, unitMetadata, zip);
     UnitDownloadClass.addVariables(definitionData, unitXml);
     if (unitDownloadSettings.addComments) {
       const comments = await unitCommentService.findOnesComments(unitId);
@@ -123,9 +128,9 @@ export class UnitDownloadClass {
     }
   }
 
-  private static addUnitDefinition(
+  private static async addUnitDefinition(
     definitionData: UnitDefinitionDto, unitXml: XMLBuilder, unitMetadata: UnitPropertiesDto, zip: AdmZip
-  ): void {
+  ): Promise<void> {
     if (definitionData?.definition?.length > 0) {
       unitXml.root().ele({
         DefinitionRef: {
@@ -136,7 +141,8 @@ export class UnitDownloadClass {
           '#': `${unitMetadata.key}.voud`
         }
       });
-      zip.addFile(`${unitMetadata.key}.voud`, Buffer.from(definitionData.definition));
+      const compressedDefinition = await UnitDownloadClass.compressImagesInDefinition(definitionData.definition);
+      zip.addFile(`${unitMetadata.key}.voud`, Buffer.from(compressedDefinition));
     } else {
       unitXml.root().ele({
         Definition: {
@@ -148,6 +154,85 @@ export class UnitDownloadClass {
     }
   }
 
+  private static async compressImagesInDefinition(definition: string): Promise<string> {
+    if (!definition) return definition;
+    try {
+      const parsed = JSON.parse(definition);
+      await UnitDownloadClass.compressImagesInObject(parsed);
+      return JSON.stringify(parsed);
+    } catch (error) {
+      // If parsing fails, return original
+      console.warn('Failed to parse definition for image compression:', error);
+      return definition;
+    }
+  }
+
+  private static async compressImagesInObject(obj: any): Promise<void> {
+    if (Array.isArray(obj)) {
+      for (const item of obj) {
+        await UnitDownloadClass.compressImagesInObject(item);
+      }
+    } else if (typeof obj === 'object' && obj !== null) {
+      for (const key in obj) {
+        if (typeof obj[key] === 'string' && obj[key].length > UnitDownloadClass.MIN_IMAGE_SIZE_TO_COMPRESS) {
+          const match = obj[key].match(/^data:image\/(png|jpeg|jpg|gif|webp);base64,(.+)$/);
+          if (match) {
+            try {
+              const format = match[1].toLowerCase();
+              const base64Data = match[2];
+              const buffer = Buffer.from(base64Data, 'base64');
+              const compressedBuffer = await UnitDownloadClass.compressImage(buffer, format);
+
+              // Only use compressed version if it's actually smaller
+              if (compressedBuffer.length < buffer.length) {
+                const outputFormat = format === 'jpg' ? 'jpeg' : format;
+                obj[key] = `data:image/${outputFormat};base64,${compressedBuffer.toString('base64')}`;
+              }
+            } catch (error) {
+              // If compression fails, keep original
+              console.warn(`Image compression failed for key "${key}":`, error);
+            }
+          }
+        } else if (typeof obj[key] === 'object') {
+          await UnitDownloadClass.compressImagesInObject(obj[key]);
+        }
+      }
+    }
+  }
+
+  private static async compressImage(buffer: Buffer, format: string): Promise<Buffer> {
+    // Skip GIF entirely – sharp cannot preserve animation anyway
+    if (format === 'gif') {
+      console.info('Skipping compression for animated GIF (animation would be lost)');
+      return buffer;
+    }
+
+    let image = sharp(buffer);
+    const metadata = await image.metadata();
+
+    if (metadata.width && metadata.width > UnitDownloadClass.MAX_IMAGE_WIDTH) {
+      image = image.resize({
+        width: UnitDownloadClass.MAX_IMAGE_WIDTH,
+        height: undefined,       // keep aspect ratio
+        fit: 'inside',           // never blow up smaller images
+        withoutEnlargement: true // safety – never enlarge
+      });
+    }
+
+    switch (format) {
+      case 'png':
+        return image.png({ compressionLevel: 9 }).toBuffer();
+      case 'jpeg':
+      case 'jpg':
+        return image.jpeg({ quality: UnitDownloadClass.IMAGE_COMPRESSION_QUALITY, mozjpeg: true }).toBuffer();
+      case 'webp':
+        return image.webp({ quality: UnitDownloadClass.IMAGE_COMPRESSION_QUALITY }).toBuffer();
+      default:
+        // Unsupported → return original untouched
+        return buffer;
+    }
+  }
+  
   private static addVariables(definitionData: UnitDefinitionDto, unitXml: XMLBuilder): void {
     if (definitionData.variables && definitionData.variables.length > 0) {
       const variablesElement = unitXml.root().ele('BaseVariables');
