@@ -2,10 +2,14 @@
   z-index: 100;
   height: 100%;
   position: absolute;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .draggable {
   cursor: col-resize;
+  touch-action: pan-y;
 }
 
 .line {

@@ -18,7 +18,7 @@ export class SplitterGutterComponent {
   @Output() startDragging = new EventEmitter<number>();
   @Output() stopDragging = new EventEmitter<number>();
 
-  onPointerDown(event: MouseEvent) {
+  onPointerDown(event: MouseEvent | TouchEvent) {
     if (!this.isFixed) {
       this.pointerPressed = true;
       this.startDragging.emit(this.index);
@@ -33,8 +33,21 @@ export class SplitterGutterComponent {
     }
   }
 
+  @HostListener('window:touchmove', ['$event'])
+  onGlobalTouchMove(event: TouchEvent) {
+    if (this.pointerPressed && event.touches.length > 0) {
+      this.dragging.emit({ index: this.index, position: event.touches[0].clientX });
+    }
+  }
+
   @HostListener('window:mouseup')
   onGlobalPointerUp(): void {
+    this.pointerPressed = false;
+    this.stopDragging.emit(this.index);
+  }
+
+  @HostListener('window:touchend')
+  onGlobalTouchEnd(): void {
     this.pointerPressed = false;
     this.stopDragging.emit(this.index);
   }
