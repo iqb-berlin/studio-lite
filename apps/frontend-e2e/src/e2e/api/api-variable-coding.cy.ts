@@ -48,7 +48,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
     // cy.resetDb();
   });
 
-  it('prepares api context', () => {
+  it('should initialize the API testing context by adding required Verona modules', () => {
     modules.forEach(m => {
       cy.addModuleAPI(m, Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
@@ -57,7 +57,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
     });
   });
 
-  it('creates group', () => {
+  it('should successfully create a new workspace group with administrator credentials', () => {
     cy.createGroupAPI(group1, Cypress.env(`token_${Cypress.env('username')}`))
       .then(resp => {
         Cypress.env(group1.id, resp.body);
@@ -65,7 +65,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  it('creates ws', () => {
+  it('should successfully create a new workspace within the newly created group', () => {
     cy.createWsAPI(Cypress.env(group1.id), ws1, Cypress.env(`token_${Cypress.env('username')}`))
       .then(resp => {
         Cypress.env(ws1.id, resp.body);
@@ -73,7 +73,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  it('sets admin as admin at ws', () => {
+  it('should authorize the current administrator to manage the new workspace', () => {
     cy.updateUsersOfWsAPI(Cypress.env(ws1.id),
       AccessLevel.Admin,
       Cypress.env(`id_${Cypress.env('username')}`),
@@ -83,7 +83,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  it('selects profile for the group', () => {
+  it('should successfully assign metadata profiles to the specified workspace group', () => {
     Cypress.env('profile1', 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json');
     Cypress.env('label1', 'IQB Mathematik Primar - Aufgabe');
     Cypress.env('profile2', 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/item.json');
@@ -96,7 +96,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  it('sets verona in the ws', () => {
+  it('should successfully update workspace settings to include Verona module references', () => {
     cy.updateWsMetadataAPI(
       Cypress.env(ws1.id),
       newSettings,
@@ -106,7 +106,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  it('imports exercise', () => {
+  it('should successfully import a unit package and retrieve the assigned unit ID', () => {
     cy.uploadUnitsAPI(Cypress.env(ws1.id),
       'variable_metadata.zip',
       Cypress.env(`token_${Cypress.env('username')}`))
@@ -120,11 +120,11 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  it('deletes a text-field_1 in aspect', () => {
+  it('should allow deleting a specific text field variable using the API', () => {
     deleteTextField(Cypress.env(ws1.id), Cypress.env('unit1'));
   });
 
-  it('checks text-field_1 is not present at properties', () => {
+  it('should verify that the deleted variable is no longer listed in unit properties', () => {
     login(Cypress.env('username'), Cypress.env('password'));
     cy.visitWs(ws1.name);
     selectUnit('MA_01');
@@ -136,7 +136,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  it('checks that text-field_1 is not present at Menu > Berichte > Metadaten does not exist', () => {
+  it('should verify that the deleted variable is correctly excluded from the metadata report', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-metadata"]').click();
@@ -156,7 +156,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
     });
   });
 
-  it('deletes the data', () => {
+  it('should successfully cleanup all created test data from the system', () => {
     deleteGroup(group1.name);
     deleteModule();
     logout();

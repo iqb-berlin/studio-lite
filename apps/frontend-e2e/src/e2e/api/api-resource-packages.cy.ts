@@ -38,7 +38,7 @@ describe('Admin settings API tests', () => {
     //       expect(resp.status).to.equal(500);
     //     });
     // });
-    it('201 positive test: should add a resource package the admin', () => {
+    it('201 positive test: should allow an authorized administrator to successfully add a resource package', () => {
       cy.addPackageAPI(resource, Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(201);
@@ -47,21 +47,22 @@ describe('Admin settings API tests', () => {
   });
 
   describe('109. GET /api/resource-packages', () => {
-    it('200 positive test: should get resource package the admin', () => {
+    it('200 positive test: should allow an authorized administrator to successfully ' +
+      'retrieve a resource package', () => {
       cy.getPackageAPI(Cypress.env(`token_${Cypress.env('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
     });
 
-    it('200 positive test: should not get resource package a normal user', () => {
+    it('200 positive test: should allow a regular user to successfully retrieve a resource package', () => {
       cy.getPackageAPI(Cypress.env(`token_${user2.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
     });
 
-    it('401 negative test: should not get resource package without token', () => {
+    it('401 negative test: should deny resource package retrieval when no authentication token is provided', () => {
       cy.getPackageAPI(noId)
         .then(resp => {
           expect(resp.status).to.equal(401);
@@ -70,21 +71,21 @@ describe('Admin settings API tests', () => {
   });
 
   describe('110. DELETE /api/admin/resource-packages', () => {
-    it('401 negative test: should not delete the resource package a normal user', () => {
+    it('401 negative test: should deny resource package deletion to a user with regular permissions', () => {
       cy.deletePackageAPI(Cypress.env(`token_${user2.username}`), '1')
         .then(resp => {
           expect(resp.status).to.equal(401);
         });
     });
 
-    it('401 negative test: should not delete the resource package a non user', () => {
+    it('401 negative test: should deny resource package deletion when providing an invalid user identifier', () => {
       cy.deletePackageAPI(noId, '1')
         .then(resp => {
           expect(resp.status).to.equal(401);
         });
     });
 
-    it('200 positive test: should delete the package the admin ', () => {
+    it('200 positive test: should allow an authorized administrator to successfully delete a resource package', () => {
       cy.deletePackageAPI(Cypress.env(`token_${Cypress.env('username')}`), '1')
         .then(resp => {
           expect(resp.status).to.equal(200);
