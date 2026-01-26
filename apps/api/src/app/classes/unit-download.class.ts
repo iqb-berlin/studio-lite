@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import {
   UnitCommentDto,
   UnitDefinitionDto,
@@ -19,6 +20,8 @@ import { SettingService } from '../services/setting.service';
 import { UnitCommentService } from '../services/unit-comment.service';
 
 export class UnitDownloadClass {
+  private static readonly logger = new Logger(UnitDownloadClass.name);
+
   private static readonly MAX_IMAGE_WIDTH = 750;
   private static readonly IMAGE_COMPRESSION_QUALITY = 80;
   private static readonly MIN_IMAGE_SIZE_TO_COMPRESS = 100; // bytes
@@ -162,20 +165,19 @@ export class UnitDownloadClass {
       return JSON.stringify(parsed);
     } catch (error) {
       // If parsing fails, return original
-      console.warn('Failed to parse definition for image compression:', error);
+      this.logger.warn('Failed to parse definition for image compression');
       return definition;
     }
   }
 
-  private static async compressImagesInObject(obj: any): Promise<void> {
+  private static async compressImagesInObject(obj: unknown): Promise<void> {
     if (Array.isArray(obj)) {
-      for (const item of obj) {
-        await UnitDownloadClass.compressImagesInObject(item);
-      }
+      await Promise.all(obj.map(item => UnitDownloadClass.compressImagesInObject(item)));
     } else if (typeof obj === 'object' && obj !== null) {
-      for (const key in obj) {
-        if (typeof obj[key] === 'string' && obj[key].length > UnitDownloadClass.MIN_IMAGE_SIZE_TO_COMPRESS) {
-          const match = obj[key].match(/^data:image\/(png|jpeg|jpg|gif|webp);base64,(.+)$/);
+      const record = obj as Record<string, unknown>;
+      await Promise.all(Object.entries(record).map(async ([key, value]) => {
+        if (typeof value === 'string' && value.length > UnitDownloadClass.MIN_IMAGE_SIZE_TO_COMPRESS) {
+          const match = value.match(/^data:image\/(png|jpeg|jpg|gif|webp);base64,(.+)$/);
           if (match) {
             try {
               const format = match[1].toLowerCase();
@@ -186,24 +188,24 @@ export class UnitDownloadClass {
               // Only use compressed version if it's actually smaller
               if (compressedBuffer.length < buffer.length) {
                 const outputFormat = format === 'jpg' ? 'jpeg' : format;
-                obj[key] = `data:image/${outputFormat};base64,${compressedBuffer.toString('base64')}`;
+                record[key] = `data:image/${outputFormat};base64,${compressedBuffer.toString('base64')}`;
               }
             } catch (error) {
               // If compression fails, keep original
-              console.warn(`Image compression failed for key "${key}":`, error);
+              this.logger.warn(`Image compression failed for key "${key}"`);
             }
           }
-        } else if (typeof obj[key] === 'object') {
-          await UnitDownloadClass.compressImagesInObject(obj[key]);
+        } else if (typeof value === 'object') {
+          await UnitDownloadClass.compressImagesInObject(value);
         }
-      }
+      }));
     }
   }
 
   private static async compressImage(buffer: Buffer, format: string): Promise<Buffer> {
     // Skip GIF entirely – sharp cannot preserve animation anyway
     if (format === 'gif') {
-      console.info('Skipping compression for animated GIF (animation would be lost)');
+      this.logger.log('Skipping compression for animated GIF (animation would be lost)');
       return buffer;
     }
 
@@ -213,8 +215,8 @@ export class UnitDownloadClass {
     if (metadata.width && metadata.width > UnitDownloadClass.MAX_IMAGE_WIDTH) {
       image = image.resize({
         width: UnitDownloadClass.MAX_IMAGE_WIDTH,
-        height: undefined,       // keep aspect ratio
-        fit: 'inside',           // never blow up smaller images
+        height: undefined, // keep aspect ratio
+        fit: 'inside', // never blow up smaller images
         withoutEnlargement: true // safety – never enlarge
       });
     }
@@ -232,7 +234,7 @@ export class UnitDownloadClass {
         return buffer;
     }
   }
-  
+
   private static addVariables(definitionData: UnitDefinitionDto, unitXml: XMLBuilder): void {
     if (definitionData.variables && definitionData.variables.length > 0) {
       const variablesElement = unitXml.root().ele('BaseVariables');
