@@ -91,7 +91,7 @@ describe('ProfilesComponent', () => {
     expect(mockMetadataBackendService.getMetadataProfile).toHaveBeenCalled();
     expect(component.isLoading).toBe(false);
     expect(component.isError).toBe(false);
-    expect(component.ProfileStoreWithProfilesCollection.length).toBe(1);
+    expect(component.profileStoresWithProfiles.length).toBe(1);
     expect(component.profilesSelected.length).toBeGreaterThan(0);
     expect(component.profilesSelected[0].id).toBe('test-profile');
   });
@@ -168,7 +168,7 @@ describe('ProfilesComponent', () => {
       fixture.detectChanges();
 
       expect(component.isLoading).toBe(false);
-      expect(component.ProfileStoreWithProfilesCollection.length).toBe(1);
+      expect(component.profileStoresWithProfiles.length).toBe(1);
 
       const panel = fixture.debugElement.query(By.css('mat-expansion-panel'));
       expect(panel).toBeTruthy();
