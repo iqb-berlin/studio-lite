@@ -75,7 +75,7 @@
         <input matInput
                type="color"
                #textColorInput hidden
-               (input)="selectedFontColor = $any($event.target).value; applyFontColor()">
+               (input)="onFontColorInput($event)">
       </div>
       <div class="fx-row-start-stretch"
            matTooltip="{{'comment-editor.text-background' | translate}}"
@@ -92,7 +92,7 @@
         <input matInput
                type="color"
                #textHighlightColorInput hidden
-               (input)="selectedHighlightColor = $any($event.target).value; applyHighlightColor()">
+               (input)="onHighlightColorInput($event)">
       </div>
       <button type="button"
               mat-icon-button
