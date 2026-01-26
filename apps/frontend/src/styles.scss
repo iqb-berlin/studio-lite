@@ -54,8 +54,6 @@ body {
 .page-title {
   color: white;
   font-size: large;
-  padding-right: 20px;
-  padding-left: 150px;
   height: 70px;
 }
 
@@ -73,7 +71,7 @@ body {
 }
 
 .error-container {
-  width: 700px;
+  max-width: 800px;
   max-height: 800px;
   overflow-y: auto;
   top: 50px;
@@ -121,14 +119,9 @@ iframe.unitHost {
 }
 
 .logo {
-  position: absolute;
-  left: 5px;
-  top: 5px;
-  z-index: 999;
-}
-
-div.logo img {
-  width: 100px;
+  img {
+    width: 100px;
+  }
 }
 
 .mat-tooltip-linebreaks {
@@ -436,6 +429,11 @@ div.logo img {
 
 .fx-gap-30 {
   gap: 30px;
+  display: flex;
+}
+
+.fx-gap-40 {
+  gap: 40px;
   display: flex;
 }
 

@@ -21,16 +21,60 @@
   }
 }
 
-
 .header {
   border-bottom: 1px solid #ffffff50;
+}
+
+.page-title {
+  overflow: hidden;
 }
 
 .app-title {
   font-size: 24px;
   letter-spacing: 1.2px;
   font-weight: 400;
-  margin-left: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 450px) {
+  .app-title {
+    display: none;
+  }
+}
+
+.page-title-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .page-title-text {
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 992px) {
+  .page-title-text {
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-title-text {
+    max-width: 150px;
+  }
+}
+
+@media (max-width: 576px) {
+  .page-title-text {
+    display: none;
+  }
 }
 
 
