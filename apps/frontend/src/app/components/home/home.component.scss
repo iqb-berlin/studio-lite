@@ -15,9 +15,9 @@
 
 .box-right, .box-left {
   padding: 20px;
-  margin: 40px 20px 40px 20px;
+  margin-top: 40px;
   flex-grow: 0;
-  min-width: 400px;
+  min-width: 300px;
   flex-basis: 40%;
   max-width: 600px;
 }

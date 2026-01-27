@@ -13,19 +13,19 @@
 @if (appService.errorMessages.length) {
   <div class="error-container fx-column-start-stretch mat-elevation-z8">
     @for (e of appService.errorMessages; track e) {
-      <div class="fx-row-space-between-center fx-gap-10">
-        <div class="x-flex-fill fx-row-start-center fx-gap-10"
+      <div class="fx-row-space-between-start fx-gap-10">
+        <div class="fx-row-start-center fx-gap-10 fx-wrap"
              [matTooltip]="e.message">
           <mat-icon class="error-icon" [color]="'warn'">error_outline</mat-icon>
           <span>{{('app-http-error.' + e.status) | translate}}</span>
+          @if (e.status | isInArray: [401, 403, 410]) {
+            <button mat-raised-button
+                    [color]="'primary'"
+                    (click)="logout_from_error()">
+              {{'app-http-error.login' | translate}}
+            </button>
+          }
         </div>
-        @if (e.status | isInArray: [401, 403, 410]) {
-          <button mat-raised-button
-                  [color]="'primary'"
-                  (click)="logout_from_error()">
-                {{'app-http-error.login' | translate}}
-          </button>
-        }
         <button mat-button
           [matTooltip]="'app-http-error.close' | translate"
           (click)="appService.removeErrorMessage(e)" >
@@ -35,7 +35,7 @@
     }
   </div>
 }
-<div class="header">
+<header class="header fx-row-start-center fx-flex-fill fx-gap-20">
   <div class="logo hide-on-print">
     <a [routerLink]="['/']"
       [attr.aria-label]="'home.go-home' | translate">
@@ -45,16 +45,16 @@
     </a>
   </div>
 
-  <div class="page-title hide-on-print fx-row-space-between-center">
+  <div class="page-title hide-on-print fx-row-space-between-center fx-flex-fill fx-gap-10">
     @if (!appService.appConfig.hideTitlesOnPage) {
       <div class="app-title">
         {{ appService.appConfig.appTitle }}
       </div>
     }
 
-    <div class="fx-row-end-center fx-gap-10">
+    <div class="fx-row-end-center fx-gap-10 fx-flex-fill">
     @if (appService.appConfig.pageTitle && !appService.appConfig.hideTitlesOnPage) {
-      <div>
+      <div class="page-title-text">
         {{ appService.appConfig.pageTitle }}
       </div>
     }
@@ -89,5 +89,5 @@
     }
     </div>
   </div>
-</div>
+</header>
 <router-outlet></router-outlet>
