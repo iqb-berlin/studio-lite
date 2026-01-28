@@ -143,7 +143,7 @@ export function deleteGroup(group: string): void {
 export function createWs(ws: string, group: string): void {
   cy.visit('/');
   cy.findAdminGroupSettings(group).click();
-  cy.wait(200);
+  cy.get('[data-cy="wsg-admin-routes-workspaces"]').should('be.visible');
   clickIndexTabWsgAdmin('workspaces');
   cy.get('mat-icon')
     .contains('add')

@@ -21,7 +21,7 @@ function getCheckBoxByName(name: string) {
   }
 }
 
-function getTimeNumber(time: string, propName:string, profile:string, moreThanOne:boolean) {
+function getTimeNumber(time: string, propName: string, profile: string, moreThanOne: boolean) {
   if (time.split(':').length !== 1) {
     const minAuf = time.split(':')[0];
     const secAuf = time.split(':')[1];
@@ -52,7 +52,7 @@ function getTimeNumber(time: string, propName:string, profile:string, moreThanOn
   }
 }
 
-export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile) {
+export function selectProfileForGroupFromAdmin(group: string, profile: IqbProfile) {
   cy.visit('/');
   cy.get('[data-cy="goto-admin"]').click();
   clickIndexTabAdmin('workspace-groups');
@@ -66,7 +66,7 @@ export function selectProfileForGroupFromAdmin(group:string, profile:IqbProfile)
   cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
 }
 
-export function selectProfileForGroup(group:string, profile:IqbProfile) {
+export function selectProfileForGroup(group: string, profile: IqbProfile) {
   cy.visit('/');
   cy.findAdminGroupSettings(group).click();
   clickIndexTabWsgAdmin('settings');
@@ -74,7 +74,7 @@ export function selectProfileForGroup(group:string, profile:IqbProfile) {
   cy.get('mat-icon:contains("save")').click();
 }
 
-export function selectProfileForArea(profile:IqbProfile) {
+export function selectProfileForArea(profile: IqbProfile) {
   goToWsMenu();
   cy.get('[data-cy="workspace-edit-unit-settings"]').click();
   cy.get('[data-cy="edit-workspace-settings-select-unit-profile"]').click();
@@ -84,18 +84,16 @@ export function selectProfileForArea(profile:IqbProfile) {
   cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
 }
 
-export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, group:string) {
+export function selectProfileForAreaFromGroup(profile: IqbProfile, area: string, group: string) {
   cy.visit('/');
   cy.findAdminGroupSettings(group).click();
-  cy.wait(200);
+  cy.get('[data-cy="wsg-admin-routes-workspaces"]').should('be.visible');
   clickIndexTabWsgAdmin('workspaces');
   cy.get('mat-table').contains(area).click();
   cy.get('mat-icon').contains('settings').click();
-  cy.get('mat-select').eq(0).click();
-  cy.wait(200);
+  cy.get('mat-select').eq(0).should('be.visible').click();
   cy.get('[data-cy="edit-workspace-settings-unit-profile"]').contains(profile).click();
-  cy.get('mat-select').eq(1).click();
-  cy.wait(200);
+  cy.get('mat-select').eq(1).should('be.visible').click();
   cy.get('[data-cy="edit-workspace-settings-item-profile"]').contains(profile).click();
   cy.clickDataCyWithResponseCheck(
     '[data-cy="edit-workspace-settings-submit-button"]',
@@ -106,7 +104,7 @@ export function selectProfileForAreaFromGroup(profile:IqbProfile, area:string, g
   );
 }
 
-export function checkProfile(profile: string):void {
+export function checkProfile(profile: string): void {
   const alias = `load${profile}`;
   cy.intercept(
     'GET',
@@ -124,7 +122,7 @@ export function checkProfile(profile: string):void {
     .click();
 }
 
-export function checkMultipleProfiles(profiles: string[]):void {
+export function checkMultipleProfiles(profiles: string[]): void {
   cy.intercept(
     'GET',
     '/api/metadata/profiles?url=https://raw.githubusercontent.com/iqb-vocabs/p99/master/item.json'
@@ -155,9 +153,9 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
     expect(response).property('status').to.equal(200);
     const body = JSON.parse(response.body);
     // eslint-disable-next-line
-    body.groups.forEach((group: any) => group.entries.forEach((entry:any) => unitMap
+    body.groups.forEach((group: any) => group.entries.forEach((entry: any) => unitMap
       .set(entry.label[0].value, entry.type)));
-    unitMap.forEach((type:string, fieldName:string) => {
+    unitMap.forEach((type: string, fieldName: string) => {
       if (IqbProfileExamples.get(profile).get(fieldName) !== ('')) {
         switch (type) {
           case 'number': {
@@ -188,7 +186,7 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
   });
 }
 
-export function getItem(profile:string, moreThanOne: boolean, copyItem?: string) {
+export function getItem(profile: string, moreThanOne: boolean, copyItem?: string) {
   cy.get('.add-button > .mdc-button__label').click();
   if (copyItem) {
     cy.get('[data-cy="metadata-new-item-content"]').click();

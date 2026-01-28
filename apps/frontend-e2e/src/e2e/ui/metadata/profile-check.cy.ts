@@ -26,7 +26,7 @@ describe('Metadata Profile Management', () => {
     groups.forEach(area => {
       createGroup(area);
     });
-    cy.wait(200);
+    // cy.wait(200);
   });
 
   it('loads metadata profile from admin settings', () => {

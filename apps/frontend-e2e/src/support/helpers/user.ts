@@ -32,7 +32,7 @@ export function login(username: string, password = ''): void {
 export function loginWithUser(username: string, pass: string): void {
   cy.visit('/');
   logout();
-  cy.wait(100);
+  cy.get('[data-cy="home-user-name"]').should('be.visible');
   login(username, pass);
 }
 

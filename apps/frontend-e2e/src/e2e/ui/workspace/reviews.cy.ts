@@ -129,12 +129,14 @@ describe('Unit Reviews', () => {
   });
 
   it('reflects updated units in review', () => {
+    cy.intercept('GET', '/api/reviews/*').as('getReview');
     cy.visit('/');
     cy.get('studio-lite-user-reviews-area').within(() => {
       cy.get(`a:contains("${review}")`).click();
     });
+    cy.wait('@getReview');
     cy.reload();
-    cy.wait(1000);
+    cy.wait('@getReview');
     cy.get('studio-lite-unit-nav').within(() => {
       cy.get('i:contains("chevron_left")').should('exist');
       cy.get('i:contains("chevron_right")').should('exist');

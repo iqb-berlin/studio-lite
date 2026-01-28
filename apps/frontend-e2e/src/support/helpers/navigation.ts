@@ -20,7 +20,6 @@ export function clickIndexTabWsgAdmin(tabName: string): void {
  * clickIndexTabWorkspace('comments');
  */
 export function clickIndexTabWorkspace(tabName: string): void {
-  cy.wait(200);
   cy.get(`[data-cy="workspace-routes-${tabName}"]`).click();
 }
 
