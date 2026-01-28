@@ -190,6 +190,7 @@ export function importExercise(filename: string): void {
  * selectListUnits(['Unit 1', 'Unit 2']);
  */
 export function selectListUnits(unitNames: string[]): void {
+  cy.get('[data-cy="workspace-select-unit-list-filter-units"]').should('be.visible');
   unitNames.forEach(name => {
     cy.get(`mat-cell:contains("${name}")`).parent().find('mat-checkbox').click();
   });

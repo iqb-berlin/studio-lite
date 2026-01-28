@@ -16,6 +16,10 @@ describe('Unit Comments', () => {
     createBasicSpecCy();
   });
 
+  beforeEach(() => {
+    cy.intercept('GET', '/api/workspaces/*/units/*/comments').as('getComments');
+  });
+
   after(() => {
     deleteBasicSpecCy();
   });
@@ -28,6 +32,7 @@ describe('Unit Comments', () => {
   it('creates multiple general comments', () => {
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
+    cy.wait('@getComments');
     cy.get('tiptap-editor').type('Neue allgemein Kommentar 1');
     cy.contains('button', 'send').click();
     cy.get('tiptap-editor').type('Neue allgemein Kommentar 2');
@@ -60,9 +65,14 @@ describe('Unit Comments', () => {
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
+    cy.wait('@getComments');
     cy.get('studio-lite-comment').should('have.length', '1');
-    cy.contains('mat-icon', 'filter_alt').should('exist').click();
-    cy.get('mat-slide-toggle').should('exist').click();
+    cy.contains('mat-icon', 'filter_alt').should('be.visible').click();
+    cy.get('mat-slide-toggle').should('be.visible')
+      .should('not.have.class', 'mat-mdc-slide-toggle-checked')
+      .find('button')
+      .click({ force: true });
+    cy.get('mat-slide-toggle').should('have.class', 'mat-mdc-slide-toggle-checked');
     cy.get('studio-lite-comment').should('have.length', '3');
   });
 
@@ -71,6 +81,7 @@ describe('Unit Comments', () => {
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
+    cy.wait('@getComments');
     cy.get('studio-lite-comment').eq(0).contains('button', 'delete').click();
     cy.get('studio-lite-comment').should('have.length', '1');
     cy.clickButtonWithResponseCheck(
@@ -79,8 +90,16 @@ describe('Unit Comments', () => {
   });
 
   it('makes hidden comment visible again', () => {
-    cy.contains('mat-icon', 'filter_alt').click();
-    cy.get('mat-slide-toggle').click();
+    cy.visitWs(ws1);
+    selectUnit(importedUnit.shortname);
+    clickIndexTabWorkspace('comments');
+    cy.wait('@getComments');
+    cy.contains('mat-icon', 'filter_alt').should('be.visible').click();
+    cy.get('mat-slide-toggle').should('be.visible')
+      .should('not.have.class', 'mat-mdc-slide-toggle-checked')
+      .find('button')
+      .click({ force: true });
+    cy.get('mat-slide-toggle').should('have.class', 'mat-mdc-slide-toggle-checked');
     cy.get('studio-lite-comment')
       .eq(0).contains('mat-icon', 'visibility').click({ force: true });
   });
@@ -89,6 +108,7 @@ describe('Unit Comments', () => {
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
+    cy.wait('@getComments');
     cy.get('tiptap-editor').type('Neues Kommentar zur Item 01');
     cy.get('[data-cy="comment-editor-link-to-item"]').click();
     cy.contains('mat-option', '01').click();
@@ -99,6 +119,7 @@ describe('Unit Comments', () => {
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
+    cy.wait('@getComments');
     cy.get('studio-lite-comment').should('have.length', '3');
     cy.contains('mat-icon', 'filter_alt').click();
     cy.contains('mat-list-option', '01').click();

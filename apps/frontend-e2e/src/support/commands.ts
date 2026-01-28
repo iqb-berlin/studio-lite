@@ -87,7 +87,7 @@ Cypress.Commands.add('selectModule', (name: string) => {
 Cypress.Commands.add('visitWs', (ws: string) => {
   cy.visit('/');
   cy.get(`a:contains("${ws}")`).click();
-  cy.get('[data-cy="workspace-add-units"]').should('be.visible');
+  cy.get('[data-cy="workspace-unit-selection-filter-units"]').should('be.visible');
 });
 
 Cypress.Commands.add('runUntracked', fn => {

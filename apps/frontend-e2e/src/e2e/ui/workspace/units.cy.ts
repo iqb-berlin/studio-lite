@@ -126,7 +126,7 @@ describe('Workspace Unit Management', () => {
   it('exports selected units', () => {
     cy.visitWs(ws1);
     goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-download-unit"]').click();
+    cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
     selectListUnits([unit3.shortname, newUnit.shortname]);
     cy.clickDataCyWithResponseCheck(
       '[data-cy="workspace-export-unit-button"]',
