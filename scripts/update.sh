@@ -156,8 +156,8 @@ export_backend_volume() {
   declare volume_name
   declare container_name
 
-  volume_name="$(basename "${APP_DIR}")_${BACKEND_VOLUME_NAME}"
-  container_name="$(basename "${APP_DIR}")-${BACKEND_SERVICE_NAME}-1"
+  volume_name="$(basename "${APP_DIR}" | tr '[:upper:]' '[:lower:]')_${BACKEND_VOLUME_NAME}"
+  container_name="$(basename "${APP_DIR}" | tr '[:upper:]' '[:lower:]')-${BACKEND_SERVICE_NAME}-1"
 
   docker run \
     --rm \
