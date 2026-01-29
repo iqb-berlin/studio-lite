@@ -119,12 +119,14 @@ describe('Unit Reviews', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
     cy.contains('mat-row', review).click();
+    cy.intercept('PATCH', '/api/workspaces/*/reviews/*').as('updateReview');
     selectCheckBox('M6_AK0013');
     cy.translate(Cypress.env('locale')).then(json => {
       cy.get('studio-lite-save-changes').within(() => {
         cy.clickButton(json.workspace.save);
       });
     });
+    cy.wait('@updateReview');
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 
@@ -134,12 +136,13 @@ describe('Unit Reviews', () => {
     cy.get('studio-lite-user-reviews-area').within(() => {
       cy.get(`a:contains("${review}")`).click();
     });
+    cy.wait('@getReview');
     cy.reload();
     cy.wait('@getReview');
     cy.get('studio-lite-unit-nav').within(() => {
       cy.get('i:contains("chevron_left")').should('exist');
       cy.get('i:contains("chevron_right")').should('exist');
-      cy.get('.mat-mdc-list-item:contains("3")').should('exist');
+      cy.contains('.mat-mdc-list-item', '3').should('exist');
     });
   });
 

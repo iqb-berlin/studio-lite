@@ -193,7 +193,6 @@ export function selectListUnits(unitNames: string[]): void {
   cy.get('mat-row').should('exist');
   unitNames.forEach(name => {
     cy.get(`mat-cell:contains("${name}")`)
-      .should('be.visible')
       .parent()
       .find('mat-checkbox')
       .click();
