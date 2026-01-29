@@ -134,7 +134,6 @@ describe('Unit Reviews', () => {
     cy.get('studio-lite-user-reviews-area').within(() => {
       cy.get(`a:contains("${review}")`).click();
     });
-    cy.wait('@getReview');
     cy.reload();
     cy.wait('@getReview');
     cy.get('studio-lite-unit-nav').within(() => {
