@@ -1,5 +1,13 @@
 /// <reference types="cypress" />
 import {
+  selectProfileForArea,
+  selectProfileForGroup
+} from '../../../support/metadata/metadata-util';
+import { IqbProfile } from '../../../support/metadata/iqbProfile';
+import {
+  AccessLevel, modules, testGroups, testWorkspaces
+} from '../../../support/testData';
+import {
   addFirstUser,
   addModules,
   assignVariableToItem,
@@ -16,17 +24,11 @@ import {
   importExercise,
   selectUnit,
   setVeronaWs
-} from '../../../support/util';
-import {
-  selectProfileForArea,
-  selectProfileForGroup
-} from '../../../support/metadata/metadata-util';
-import { IqbProfile } from '../../../support/metadata/iqbProfile';
-import { AccessLevel, modules } from '../../../support/testData';
+} from '../../../support/helpers';
 
-describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
-  const mathArea = 'Mathematik Primar I';
-  const group = 'Bista III';
+describe('Variable and Item Metadata Coherence', () => {
+  const mathArea = testWorkspaces.metadata.mathPrimar1;
+  const group = testGroups.metadata.bista3;
 
   before(() => {
     addFirstUser();
@@ -37,7 +39,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     // cy.resetDb();
   });
 
-  it('prepares the context', () => {
+  it('sets up workspace with modules and profile', () => {
     addModules(modules);
     createGroup(group);
     createWs(mathArea, group);
@@ -48,7 +50,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     importExercise('variable_metadata.zip');
   });
 
-  it('adds a new item 01, and select the corresponding variable text-field_1', () => {
+  it('creates item 01 and assigns variable text-field_1', () => {
     cy.visitWs(mathArea);
     selectUnit('MA_01');
     goToItem('01');
@@ -56,7 +58,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.get('[data-cy="workspace-unit-save-button"]').click();
   });
 
-  it('creates the item 02 and checks that text-field_1 is not available', () => {
+  it('prevents reusing assigned variable in new item', () => {
     createItem('02');
     cy.translate(Cypress.env('locale')).then(json => {
       cy.get(`mat-select[placeholder="${json.metadata['choose-item-variable']}"]`)
@@ -68,18 +70,18 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.get('[data-cy="workspace-unit-save-button"]').click();
   });
 
-  it('checks that it shows a warning when we try to create an item with same name as an existent item', () => {
+  it('displays error for duplicate item names', () => {
     createItem('02');
     cy.get('mat-form-field').find('mat-error').should('exist');
   });
 
-  it('replaces the name of the third item', () => {
+  it('renames item and assigns variable', () => {
     cy.get('mat-label:contains("Item ID")').eq(-1).type('{backspace}{backspace}03');
     assignVariableToItem('drop-list_1');
     cy.get('[data-cy="workspace-unit-save-button"]').click();
   });
 
-  it('ends the connection the variable drop_list_1 with item 03', () => {
+  it('unassigns variable from item', () => {
     cy.visitWs(mathArea);
     selectUnit('MA_01');
     goToItem('03');
@@ -87,7 +89,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.get('[data-cy="workspace-unit-save-button"]').click();
   });
 
-  it('checks the connection the variable drop-list_1 with item 03 is not active at properties', () => {
+  it('removes variable from item properties', () => {
     cy.visitWs(mathArea);
     selectUnit('MA_01');
     goToItem('03');
@@ -100,7 +102,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     });
   });
 
-  it('checks that drop-list_1 is not present at Menu -> Berichte -> Metadaten', () => {
+  it('excludes unassigned variable from metadata report', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-metadata"]').click();
@@ -112,7 +114,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.get('[data-cy="metadata-table-view-close"]').click();
   });
 
-  it('checks the order of items before and after clicking Nach Variable ID Sortieren is not the same', () => {
+  it('sorts items by variable ID', () => {
     cy.get('studio-lite-item').eq(1).find('span:contains("02")').should('exist');
     cy.get('studio-lite-item').eq(0).find('span:contains("01")').should('exist');
     cy.translate(Cypress.env('locale')).then(json => {
@@ -123,13 +125,13 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.get('studio-lite-item').eq(1).find('span:contains("01")').should('exist');
   });
 
-  it('checks that the select order by Id exists', () => {
+  it('provides sort by item ID option', () => {
     cy.translate(Cypress.env('locale')).then(json => {
       cy.get('select.sort-items').select(`${json.metadata['sort-by-id']}`, { force: true });
     });
   });
 
-  it('checks that drop-list_1 is not present at eye view', () => {
+  it('excludes unassigned variable from preview', () => {
     cy.visitWs(mathArea);
     selectUnit('MA_01');
     goToItem('03');
@@ -138,7 +140,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.contains('span.item_value', 'drop-list_1').should('not.exist');
   });
 
-  it('creates a comment to items ', () => {
+  it('creates comment linked to multiple items', () => {
     clickIndexTabWorkspace('comments');
     cy.get('tiptap-editor').type('Neue Kommentar zu item1');
     cy.get('.fx-row-space-between-end').find('svg').eq(0).click();
@@ -147,7 +149,7 @@ describe('UI variable coherence in Scheme, Aspect and Metadata', () => {
     cy.contains('button', 'send').click({ force: true });
   });
 
-  it('deletes the data', () => {
+  it('cleans up test data', () => {
     deleteGroup(group);
     deleteModule();
   });

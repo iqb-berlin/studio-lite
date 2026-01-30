@@ -48,7 +48,8 @@
                 [class.disabled-element]="disabledUnits | include : element.id"
                 studioLiteScrollIntoView
                 [rowId]="element.id"
-                [selectedUnitId]="selectedUnitId">
+                [selectedUnitId]="selectedUnitId"
+                data-cy="workspace-select-unit-list-key">
                 {{element.key}}
       </mat-cell>
     </ng-container>

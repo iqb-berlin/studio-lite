@@ -1,4 +1,12 @@
 import {
+  AccessLevel,
+  group1,
+  modules,
+  newUser,
+  resource,
+  ws1
+} from '../../../support/testData';
+import {
   addFirstUser,
   addModules,
   addResourcePackage,
@@ -11,15 +19,7 @@ import {
   deleteResource,
   deleteUser,
   grantRemovePrivilegeAtWs
-} from '../../../support/util';
-import {
-  AccessLevel,
-  group1,
-  modules,
-  newUser,
-  resource,
-  ws1
-} from '../../../support/testData';
+} from '../../../support/helpers';
 
 export function createBasicSpecCy() {
   describe('Create test base:', () => {

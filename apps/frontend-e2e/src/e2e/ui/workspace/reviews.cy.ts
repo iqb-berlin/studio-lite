@@ -3,7 +3,9 @@ import {
   group1,
   newUser,
   ws1
-} from '../../support/testData';
+} from '../../../support/testData';
+
+import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 import {
   clickIndexTabWsgAdmin,
   goToWsMenu,
@@ -12,10 +14,9 @@ import {
   login,
   logout,
   selectCheckBox
-} from '../../support/util';
-import { createBasicSpecCy, deleteBasicSpecCy } from './shared/basic.spec.cy';
+} from '../../../support/helpers';
 
-describe('Review:', () => {
+describe('Unit Reviews', () => {
   before(() => {
     createBasicSpecCy();
   });
@@ -25,13 +26,13 @@ describe('Review:', () => {
     // cy.resetDb();
   });
 
-  const review:string = 'Review1';
-  it('should import units', () => {
+  const review: string = 'Review1';
+  it('imports test units', () => {
     cy.visitWs(ws1);
     importExercise('test_studio_units_download.zip');
   });
 
-  it('should add a review', () => {
+  it('creates a review with selected units', () => {
     cy.visit('/');
     cy.visitWs(ws1);
     goToWsMenu();
@@ -56,14 +57,14 @@ describe('Review:', () => {
     });
   });
 
-  it('should check that review exists', () => {
+  it('displays review in user reviews area', () => {
     cy.visit('/');
     cy.get('studio-lite-user-reviews-area').within(() => {
       cy.get(`a:contains("${review}")`).should('exist');
     });
   });
 
-  it('should open a review and assert that nav bar exists', () => {
+  it('opens review and displays navigation', () => {
     cy.visit('/');
     cy.get('studio-lite-user-reviews-area').within(() => {
       cy.get(`a:contains("${review}")`).click();
@@ -76,7 +77,7 @@ describe('Review:', () => {
     });
   });
 
-  it('should other user access to the review', () => {
+  it('allows other users to access review', () => {
     cy.findAdminGroupSettings(group1).click();
     clickIndexTabWsgAdmin('workspaces');
     grantRemovePrivilegeAtWs([newUser.username], ws1, [AccessLevel.Basic]);
@@ -89,7 +90,7 @@ describe('Review:', () => {
     login(Cypress.env('username'), Cypress.env('password'));
   });
 
-  it('should export a review', () => {
+  it('exports a review', () => {
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
@@ -101,7 +102,7 @@ describe('Review:', () => {
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 
-  it('should print a review', () => {
+  it('prints a review', () => {
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
@@ -113,35 +114,39 @@ describe('Review:', () => {
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 
-  it('should modify a review', () => {
+  it('updates review unit selection', () => {
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
     cy.contains('mat-row', review).click();
+    cy.intercept('PATCH', '/api/workspaces/*/reviews/*').as('updateReview');
     selectCheckBox('M6_AK0013');
     cy.translate(Cypress.env('locale')).then(json => {
       cy.get('studio-lite-save-changes').within(() => {
         cy.clickButton(json.workspace.save);
       });
     });
+    cy.wait('@updateReview');
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 
-  it('should check that the review was modified', () => {
+  it('reflects updated units in review', () => {
+    cy.intercept('GET', '/api/reviews/*').as('getReview');
     cy.visit('/');
     cy.get('studio-lite-user-reviews-area').within(() => {
       cy.get(`a:contains("${review}")`).click();
     });
+    cy.wait('@getReview');
     cy.reload();
-    cy.wait(1000);
+    cy.wait('@getReview');
     cy.get('studio-lite-unit-nav').within(() => {
       cy.get('i:contains("chevron_left")').should('exist');
       cy.get('i:contains("chevron_right")').should('exist');
-      cy.get('.mat-mdc-list-item:contains("3")').should('exist');
+      cy.contains('.mat-mdc-list-item', '3').should('exist');
     });
   });
 
-  it('should delete the review', () => {
+  it('deletes a review', () => {
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();

@@ -1,10 +1,10 @@
 /// <reference types="cypress" />
-import { getAppTitle } from '../../support/app.po';
+import { getAppTitle } from '../../../support/app.po';
 
-describe('frontend', () => {
+describe('Application', () => {
   beforeEach(() => cy.visit('/'));
 
-  it('should display application title', () => {
+  it('displays IQB-Studio title', () => {
     // Custom command example, see `../support/commands.ts` file
     // cy.login('my-email@something.com', 'myPassword');
 
