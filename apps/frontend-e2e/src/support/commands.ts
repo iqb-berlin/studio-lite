@@ -85,8 +85,10 @@ Cypress.Commands.add('selectModule', (name: string) => {
 });
 
 Cypress.Commands.add('visitWs', (ws: string) => {
+  cy.intercept('GET', '**/workspaces/*/units*').as('getUnits');
   cy.visit('/');
   cy.get(`a:contains("${ws}")`).click();
+  cy.wait('@getUnits');
   cy.get('[data-cy="workspace-unit-selection-filter-units"]').should('be.visible');
 });
 

@@ -28,7 +28,7 @@ import {
   grantRemovePrivilegeAtWs,
   importExercise,
   moveUnit,
-  selectUnit,
+  selectListUnits,
   setVeronaWs
 } from '../../../support/helpers';
 
@@ -127,10 +127,7 @@ describe('Workspace Unit Management', () => {
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
-    cy.get('mat-dialog-container').should('be.visible');
-    // selectListUnits([unit3.shortname, newUnit.shortname]);
-    selectUnit(unit3.shortname);
-    selectUnit(newUnit.shortname);
+    selectListUnits([unit3.shortname, newUnit.shortname]);
     cy.clickDataCyWithResponseCheck(
       '[data-cy="workspace-export-unit-button"]',
       [200, 304],
@@ -169,8 +166,7 @@ describe('Workspace Unit Management', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-export-coding-book"]').click();
-    selectUnit(newUnit.shortname);
-    // selectListUnits([newUnit.shortname]);
+    selectListUnits([newUnit.shortname]);
     cy.translate(Cypress.env('locale')).then(json => {
       cy.clickButtonWithResponseCheck(
         json.export,

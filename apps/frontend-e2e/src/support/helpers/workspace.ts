@@ -190,7 +190,7 @@ export function importExercise(filename: string): void {
  * selectListUnits(['Unit 1', 'Unit 2']);
  */
 export function selectListUnits(unitNames: string[]): void {
-  cy.get('mat-row').should('exist');
+  cy.get('[data-cy="workspace-select-unit-list-key"]').should('exist');
   unitNames.forEach(name => {
     cy.get(`mat-cell:contains("${name}")`)
       .parent()
