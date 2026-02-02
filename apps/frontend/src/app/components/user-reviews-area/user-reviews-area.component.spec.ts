@@ -2,8 +2,11 @@
 import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { ReviewDto } from '@studio-lite-lib/api-dto';
 import { UserReviewsAreaComponent } from './user-reviews-area.component';
+import { environment } from '../../../environments/environment';
 
 describe('UserReviewsAreaComponent', () => {
   let component: UserReviewsAreaComponent;
@@ -26,6 +29,14 @@ describe('UserReviewsAreaComponent', () => {
         TranslateModule.forRoot(),
         MockAreaTitleComponent,
         MockReviewTableComponent
+      ],
+      providers: [
+        provideHttpClient(),
+        provideRouter([]),
+        {
+          provide: 'SERVER_URL',
+          useValue: environment.backendUrl
+        }
       ]
     }).compileComponents();
 
