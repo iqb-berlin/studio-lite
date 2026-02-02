@@ -1,10 +1,11 @@
 import {
-  Component, Input, OnChanges, SimpleChanges
+  Component, Input, OnChanges, OnDestroy, SimpleChanges
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { DatePipe } from '@angular/common';
 import { ItemsMetadataValues } from '@studio-lite-lib/api-dto';
+import { Subject, takeUntil } from 'rxjs';
 import { Comment } from '../../../comments/models/comment.interface';
 import { BackendService } from '../../../comments/services/backend.service';
 import { SortAscendingPipe } from '../../../comments/pipes/sort-ascending.pipe';
@@ -16,12 +17,14 @@ import { CommentItemUuidsIdsPipe } from '../../../comments/pipes/comment-item-uu
   styleUrls: ['./unit-print-comments.component.scss'],
   imports: [MatIcon, DatePipe, TranslateModule, SortAscendingPipe, CommentItemUuidsIdsPipe]
 })
-export class UnitPrintCommentsComponent implements OnChanges {
+export class UnitPrintCommentsComponent implements OnChanges, OnDestroy {
   @Input() unitId!: number;
   @Input() workspaceId!: number;
   @Input() reviewId: number = 0;
   @Input() comments: Comment[] = [];
   @Input() metadata!: ItemsMetadataValues[] | null;
+
+  private ngUnsubscribe = new Subject<void>();
 
   constructor(
     private backendService: BackendService
@@ -38,10 +41,16 @@ export class UnitPrintCommentsComponent implements OnChanges {
     this.backendService
       .getComments(this.workspaceId, this.unitId, this.reviewId)
       // eslint-disable-next-line no-return-assign
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(comments => this.setComments(comments));
   }
 
   private setComments(comments: Comment[]): void {
     this.comments = comments;
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

@@ -9,6 +9,7 @@ import { PrintOptions } from '../../models/print-options.interface';
 describe('PrintOptionsDialogComponent', () => {
   let component: PrintOptionsDialogComponent;
   let fixture: ComponentFixture<PrintOptionsDialogComponent>;
+  let mockDialogRef: { close: jest.Mock };
 
   @Component({ selector: 'studio-lite-print-options', template: '', standalone: false })
   class MockPrintOptionsComponent {
@@ -16,10 +17,14 @@ describe('PrintOptionsDialogComponent', () => {
   }
 
   beforeEach(async () => {
+    mockDialogRef = {
+      close: jest.fn()
+    };
+
     await TestBed.configureTestingModule({
-      declarations: [MockPrintOptionsComponent
-      ],
+      declarations: [MockPrintOptionsComponent],
       imports: [
+        PrintOptionsDialogComponent,
         MatDialogModule,
         NoopAnimationsModule,
         TranslateModule.forRoot()
@@ -27,7 +32,7 @@ describe('PrintOptionsDialogComponent', () => {
       providers: [
         {
           provide: MatDialogRef,
-          useValue: {}
+          useValue: mockDialogRef
         },
         {
           provide: MAT_DIALOG_DATA,
@@ -43,5 +48,40 @@ describe('PrintOptionsDialogComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('constructor', () => {
+    it('should initialize with dialogRef', () => {
+      expect(component.dialogRef).toBeDefined();
+      expect(component.dialogRef).toBe(mockDialogRef);
+    });
+  });
+
+  describe('cancel', () => {
+    it('should close the dialog without data', () => {
+      component.cancel();
+
+      expect(mockDialogRef.close).toHaveBeenCalledTimes(1);
+      expect(mockDialogRef.close).toHaveBeenCalledWith();
+    });
+
+    it('should close the dialog when called multiple times', () => {
+      component.cancel();
+      component.cancel();
+
+      expect(mockDialogRef.close).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('dialogRef property', () => {
+    it('should be publicly accessible', () => {
+      expect(component.dialogRef).toBe(mockDialogRef);
+    });
+
+    it('should allow calling close directly', () => {
+      component.dialogRef.close('test-data');
+
+      expect(mockDialogRef.close).toHaveBeenCalledWith('test-data');
+    });
   });
 });

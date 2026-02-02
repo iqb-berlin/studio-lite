@@ -26,7 +26,7 @@ export class UnitPrintCodeComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     const codeData = 'codeData';
-    const updatedCodeData = changes[codeData].currentValue;
+    const updatedCodeData = changes[codeData]?.currentValue;
 
     if (updatedCodeData) {
       this.codeAsText = this.mapCodeDataToCodeInfo(updatedCodeData);
