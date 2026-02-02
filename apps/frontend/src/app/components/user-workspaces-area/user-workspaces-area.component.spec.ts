@@ -2,6 +2,7 @@
 import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
+import { provideRouter } from '@angular/router';
 import { WorkspaceGroupDto } from '@studio-lite-lib/api-dto';
 import { UserWorkspacesAreaComponent } from './user-workspaces-area.component';
 
@@ -31,6 +32,9 @@ describe('UserWorkspacesAreaComponent', () => {
         MockUserWorkspacesGroupsComponent,
         MockWarningComponent,
         MockAreaTitleComponent
+      ],
+      providers: [
+        provideRouter([])
       ]
     }).compileComponents();
 
