@@ -53,18 +53,17 @@ export class EditMyDataDirective {
               if (newEmail !== myData.email) changedData.email = newEmail;
               // eslint-disable-next-line max-len
               if (newEmailApproval !== myData.emailPublishApproved) changedData.emailPublishApproved = newEmailApproval;
-              this.appService.dataLoading = true;
               this.backendService.setMyData(changedData).subscribe(
                 respOk => {
                   this.appService.dataLoading = false;
                   if (respOk) {
                     this.snackBar.open(
-                      this.translateService.instant(this.translateService.instant('user-profile.data-edited')),
+                      this.translateService.instant('user-profile.data-edited'),
                       '',
                       { duration: 1000 });
                   } else {
                     this.snackBar.open(
-                      this.translateService.instant(this.translateService.instant('user-profile.new-password')),
+                      this.translateService.instant('user-profile.new-password'),
                       this.translateService.instant('user-profile.error'),
                       { duration: 3000 });
                   }
