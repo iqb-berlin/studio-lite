@@ -1,23 +1,30 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { SelectDropBoxComponent } from './select-drop-box.component';
 
 describe('SelectDropBoxComponent', () => {
   let component: SelectDropBoxComponent;
   let fixture: ComponentFixture<SelectDropBoxComponent>;
 
+  const mockDialogData = {
+    workspaces: [{ id: 1, name: 'ws1', groupId: 1 }] as WorkspaceInListDto[],
+    dropBoxId: 10,
+    selectedWorkspaceName: 'ws1'
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        BrowserAnimationsModule,
+        NoopAnimationsModule,
         SelectDropBoxComponent,
         MatDialogModule,
         TranslateModule.forRoot()
       ],
       providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} }
+        { provide: MAT_DIALOG_DATA, useValue: mockDialogData }
       ]
     }).compileComponents();
 
@@ -26,7 +33,10 @@ describe('SelectDropBoxComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it('should create and initialize with data', () => {
     expect(component).toBeTruthy();
+    expect(component.workspaces).toEqual(mockDialogData.workspaces);
+    expect(component.dropBoxId).toBe(mockDialogData.dropBoxId);
+    expect(component.selectedWorkspaceName).toBe(mockDialogData.selectedWorkspaceName);
   });
 });
