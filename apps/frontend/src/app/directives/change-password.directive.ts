@@ -19,7 +19,7 @@ export class ChangePasswordDirective {
   }
 
   @HostListener('click')
-  async changePassword() {
+  changePassword() {
     const dialogRef = this.changePasswordDialog.open(ChangePasswordComponent, {
       width: '400px'
     });

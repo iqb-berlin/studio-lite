@@ -23,7 +23,7 @@ export class EditMyDataDirective {
   }
 
   @HostListener('click')
-  async editMyData() {
+  editMyData() {
     this.backendService.getMyData().subscribe(myData => {
       if (myData) {
         const dialogRef = this.editMyDataDialog.open(EditMyDataComponent, {
