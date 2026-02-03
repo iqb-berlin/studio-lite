@@ -2,14 +2,25 @@
   z-index: 100;
   height: 100%;
   position: absolute;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .draggable {
   cursor: col-resize;
+  touch-action: pan-y;
 }
 
 .line {
   position: relative;
   height: 100%;
   background-color: #00606450;
+
+  &:hover {
+    border-right: 1px solid #00606450;
+    border-left: 1px solid #00606450;
+    margin-right: -1px;
+    margin-left: -1px;
+  }
 }

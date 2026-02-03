@@ -322,9 +322,9 @@
     "missings-profiles": "Kodierung: Missings Profile",
     "profiles-registry": "Profilregistrierung",
     "email-template": "E-Mail-Template zum Anlegen neuer Nutzer:innen",
-    "email-replace-values": "Folgende Platzhalter werden im Body der E-Mail durch die Nutzer:innen-Angaben ersetzt: {{firstname}}, {{lastname}}, {{user}}, {{password}}",
-    "email-subject": "Betreff der E-Mail",
-    "email-body": "Body der E-Mail"
+    "email-replace-values": "Folgende Platzhalter werden im E-Mail-Body durch die Nutzer:innen-Angaben ersetzt: {{firstname}}, {{lastname}}, {{user}}, {{password}}",
+    "email-subject": "E-Mail-Betreff",
+    "email-body": "E-Mail-Body"
   },
   "profiles-registry": {
     "csv-url": "URL der CSV-Datei",

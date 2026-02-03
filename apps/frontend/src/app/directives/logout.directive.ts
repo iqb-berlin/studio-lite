@@ -1,8 +1,9 @@
-import { Directive, HostListener } from '@angular/core';
+import { Directive, HostListener, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 
@@ -10,7 +11,9 @@ import { BackendService } from '../services/backend.service';
   selector: '[studioLiteLogout]',
   standalone: true
 })
-export class LogoutDirective {
+export class LogoutDirective implements OnDestroy {
+  private ngUnsubscribe = new Subject<void>();
+
   constructor(
     public appService: AppService,
     public confirmDialog: MatDialog,
@@ -18,6 +21,11 @@ export class LogoutDirective {
     private translateService: TranslateService,
     private router: Router
   ) {
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 
   @HostListener('click') logout(): void {
@@ -30,12 +38,14 @@ export class LogoutDirective {
         showCancel: true
       }
     });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.router.navigate(['/']).then(done => {
-          if (done) this.backendService.logout();
-        });
-      }
-    });
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(result => {
+        if (result) {
+          this.router.navigate(['/']).then(done => {
+            if (done) this.backendService.logout();
+          });
+        }
+      });
   }
 }

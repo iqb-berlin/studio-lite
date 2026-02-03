@@ -17,4 +17,30 @@ describe('AreaTitleComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should accept title input', () => {
+    component.title = 'Test Title';
+    fixture.detectChanges();
+
+    expect(component.title).toBe('Test Title');
+  });
+
+  it('should have undefined title initially', () => {
+    expect(component.title).toBeUndefined();
+  });
+
+  it('should accept empty string as title', () => {
+    component.title = '';
+    fixture.detectChanges();
+
+    expect(component.title).toBe('');
+  });
+
+  it('should accept long title', () => {
+    const longTitle = 'This is a very long title for testing purposes';
+    component.title = longTitle;
+    fixture.detectChanges();
+
+    expect(component.title).toBe(longTitle);
+  });
 });

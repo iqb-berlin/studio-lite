@@ -97,31 +97,27 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
     }
   }
 
-  onLoadUnitProperties(): void {
-    this.setPresentationStatus('none');
-    this.setResponsesStatus('none');
-    this.setPageList([], '');
-
+  private subscribeForUnitPropertiesChanges(): void {
     this.reviewBackendService
       .getUnitProperties(this.reviewService.reviewId, this.unitData.databaseId)
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(umd => {
-        if (umd) {
-          this.unitData.dbMetadata = umd;
-          const playerId = umd.player ?
+      .subscribe(unitProperties => {
+        if (unitProperties) {
+          this.unitData.dbMetadata = unitProperties;
+          const playerId = unitProperties.player ?
             VeronaModuleFactory.getBestMatch(
-              umd.player,
+              unitProperties.player,
               Object.keys(this.moduleService.players)
             ) :
             '';
           this.playerName = playerId;
-          this.unitData.name = `${this.unitData.sequenceId + 1}: ${umd.key}${
-            umd.name ? ` - ${umd.name}` : ''
+          this.unitData.name = `${this.unitData.sequenceId + 1}: ${unitProperties.key}${
+            unitProperties.name ? ` - ${unitProperties.name}` : ''
           }`;
           this.reviewService.setHeaderText(this.unitData.name);
 
           if (playerId) {
-            if (playerId === this.lastVeronaModulId && this.postMessageTarget) {
+            if (playerId === this.lastVeronaModuleId && this.postMessageTarget) {
               this.sendChangeData();
             } else {
               this.postMessageTarget = undefined;
@@ -133,6 +129,13 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
           }
         }
       });
+  }
+
+  onLoadUnitProperties(): void {
+    this.setPresentationStatus('none');
+    this.setResponsesStatus('none');
+    this.setPageList([], '');
+    this.subscribeForUnitPropertiesChanges();
   }
 
   sendChangeData(): void {

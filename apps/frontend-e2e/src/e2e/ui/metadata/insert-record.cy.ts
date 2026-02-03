@@ -1,25 +1,26 @@
 import {
-  addFirstUser, addUnit,
-  createGroup,
-  createWs,
-  deleteFirstUser,
-  deleteGroup,
-  grantRemovePrivilegeAtWs
-} from '../../../support/util';
-import {
   getItem,
   getStructure,
   selectProfileForArea,
   selectProfileForAreaFromGroup,
   selectProfileForGroup
 } from '../../../support/metadata/metadata-util';
-import { AccessLevel } from '../../../support/testData';
+import { AccessLevel, testGroups, testWorkspaces } from '../../../support/testData';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
+import {
+  addFirstUser,
+  addUnit,
+  createGroup,
+  createWs,
+  deleteFirstUser,
+  deleteGroup,
+  grantRemovePrivilegeAtWs
+} from '../../../support/helpers';
 
 describe('Metadata Management', () => {
-  const ws1 = 'Deutsch I';
-  const ws2 = 'Mathematik I';
-  const group = 'Bista I';
+  const ws1 = testWorkspaces.metadata.german1;
+  const ws2 = testWorkspaces.metadata.math1;
+  const group = testGroups.metadata.bista1;
   before(() => {
     addFirstUser();
   });
@@ -28,7 +29,7 @@ describe('Metadata Management', () => {
     // cy.resetDb();
   });
 
-  it('prepares context', () => {
+  it('sets up workspaces with metadata profiles', () => {
     createGroup(group);
     createWs(ws1, group);
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [AccessLevel.Admin]);
@@ -36,36 +37,36 @@ describe('Metadata Management', () => {
     grantRemovePrivilegeAtWs([Cypress.env('username')], ws2, [AccessLevel.Admin]);
   });
 
-  it('chooses profiles from the group ', () => {
+  it('selects metadata profiles for group', () => {
     selectProfileForGroup(group, IqbProfile.DE);
     selectProfileForGroup(group, IqbProfile.MA);
   });
 
-  it('chooses profile for a ws from a group', () => {
+  it('assigns profiles to workspaces from group settings', () => {
     selectProfileForAreaFromGroup(IqbProfile.DE, ws1, group);
     selectProfileForAreaFromGroup(IqbProfile.MA, ws2, group);
   });
 
-  it('chooses a profile for a workspace', () => {
+  it('assigns profile from workspace settings', () => {
     cy.visitWs(ws1);
     selectProfileForArea(IqbProfile.DE);
     cy.visitWs(ws2);
     selectProfileForArea(IqbProfile.MA);
   });
 
-  it('creates a new Unit in a ws', () => {
+  it('creates unit in workspace', () => {
     cy.visitWs(ws2);
     addUnit('M1_001');
   });
 
-  it('creates more than one Unit in a ws', () => {
+  it('creates multiple units in workspace', () => {
     cy.visitWs(ws1);
     addUnit('D1_001');
     cy.visitWs(ws1);
     addUnit('D1_002');
   });
 
-  it('adds metadata values for the unit M1_001', () => {
+  it('adds metadata to math unit', () => {
     cy.visitWs(ws2);
     cy.contains('M1_001').should('exist').click();
     getStructure('uMA', false);
@@ -73,7 +74,7 @@ describe('Metadata Management', () => {
     cy.get('[data-cy="workspace-unit-save-button"]').click();
   });
 
-  it('adds metadata values for the unit D1_001, that has several items', () => {
+  it('adds metadata with multiple items to German unit', () => {
     cy.visitWs(ws1);
     cy.contains('D1_001').should('exist').click();
     getStructure('uDE', false);
@@ -83,7 +84,7 @@ describe('Metadata Management', () => {
     cy.get('[data-cy="workspace-unit-save-button"]').click();
   });
 
-  it('deletes the data', () => {
+  it('cleans up test data', () => {
     deleteGroup(group);
   });
 });

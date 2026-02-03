@@ -55,8 +55,7 @@ export class ReviewBackendService {
     return this.http
       .get<Comment[]>(`${this.serverUrl}reviews/${reviewId}/units/${unitId}/comments`)
       .pipe(
-        catchError(() => of([])),
-        map(comments => comments)
+        catchError(() => of([]))
       );
   }
 
@@ -65,7 +64,7 @@ export class ReviewBackendService {
     return this.http
       .get<UnitItemDto[]>(`${this.serverUrl}reviews/${reviewId}/units/${unitId}/items`, { params: queryParams })
       .pipe(
-        catchError(() => [])
+        catchError(() => of([]))
       );
   }
 

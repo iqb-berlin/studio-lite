@@ -30,7 +30,7 @@ export abstract class VeronaModuleDirective implements OnDestroy {
   sessionId = '';
   message = '';
   iFrameElement: HTMLIFrameElement | undefined;
-  lastVeronaModulId = '';
+  lastVeronaModuleId = '';
   ngUnsubscribe = new Subject<void>();
   unitLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
   loading = false;
@@ -157,7 +157,7 @@ export abstract class VeronaModuleDirective implements OnDestroy {
     this.iFrameElement.srcdoc = '';
 
     if (!moduleId) {
-      this.lastVeronaModulId = '';
+      this.lastVeronaModuleId = '';
       return;
     }
 
@@ -169,14 +169,14 @@ export abstract class VeronaModuleDirective implements OnDestroy {
       .subscribe(moduleData => {
         if (moduleData) {
           this.setupIFrame(moduleData);
-          this.lastVeronaModulId = moduleId;
+          this.lastVeronaModuleId = moduleId;
           this.message = '';
         } else {
           this.message = this.translateService.instant(
             `workspace.${moduleType}-not-loaded`,
             { id: moduleId }
           );
-          this.lastVeronaModulId = '';
+          this.lastVeronaModuleId = '';
         }
       });
   }

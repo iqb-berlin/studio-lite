@@ -159,4 +159,14 @@ export class CommentEditorComponent implements OnInit {
       this.updateEditorHtml(); // triggers submit button state update
     }
   }
+
+  onFontColorInput(event: Event): void {
+    this.selectedFontColor = (event.target as HTMLInputElement).value;
+    this.applyFontColor();
+  }
+
+  onHighlightColorInput(event: Event): void {
+    this.selectedHighlightColor = (event.target as HTMLInputElement).value;
+    this.applyHighlightColor();
+  }
 }

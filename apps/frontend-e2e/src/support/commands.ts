@@ -27,7 +27,7 @@ Cypress.Commands.add('clickDialogButton', (buttonName: string) => {
 });
 
 Cypress.Commands.add('clickButtonWithResponseCheck',
-  (text: string, code: number[], url: string, rest: string, alias:string) => {
+  (text: string, code: number[], url: string, rest: string, alias: string) => {
     cy.intercept(rest, url).as(alias);
     cy.get('button').contains(text).should('exist').click({ force: true });
     cy.wait(`@${alias}`)
@@ -42,7 +42,7 @@ Cypress.Commands.add('clickDataCyWithResponseCheck',
   });
 
 Cypress.Commands.add('clickDialogButtonWithResponseCheck',
-  (text: string, code: number[], url: string, rest: string, alias:string) => {
+  (text: string, code: number[], url: string, rest: string, alias: string) => {
     cy.intercept(rest, url)
       .as(alias);
     cy.get('mat-dialog-actions button')
@@ -54,7 +54,7 @@ Cypress.Commands.add('clickDialogButtonWithResponseCheck',
       .should('be.oneOf', code);
   });
 
-Cypress.Commands.add('findAdminGroupSettings', (group:string): Chainable<JQuery<HTMLElement>> => {
+Cypress.Commands.add('findAdminGroupSettings', (group: string): Chainable<JQuery<HTMLElement>> => {
   cy.visit('/');
   return cy.get('studio-lite-user-workspaces-groups')
     .get(`div>div>div>div:contains("${group}")`)
@@ -64,8 +64,8 @@ Cypress.Commands.add('findAdminGroupSettings', (group:string): Chainable<JQuery<
 
 Cypress.Commands.add('findAdminSettings', (): Chainable<JQuery<HTMLElement>> => cy.get('[data-cy="goto-admin"]'));
 
-Cypress.Commands.add('loadModule', (filename:string) => {
-  const path:string = `../frontend-e2e/src/fixtures/${filename}`;
+Cypress.Commands.add('loadModule', (filename: string) => {
+  const path: string = `../frontend-e2e/src/fixtures/${filename}`;
   const name = filename.replace(/-+(?=[^-\d]*\d)/, '@').replace(/...html$/, '');
   cy.get('input[type=file]')
     .selectFile(path, {
@@ -76,7 +76,7 @@ Cypress.Commands.add('loadModule', (filename:string) => {
     .should('exist');
 });
 
-Cypress.Commands.add('selectModule', (name:string) => {
+Cypress.Commands.add('selectModule', (name: string) => {
   cy.get(`span:contains("${name}")`)
     .parent()
     .parent()
@@ -84,10 +84,12 @@ Cypress.Commands.add('selectModule', (name:string) => {
     .click();
 });
 
-Cypress.Commands.add('visitWs', (ws:string) => {
+Cypress.Commands.add('visitWs', (ws: string) => {
+  cy.intercept('GET', '**/workspaces/*/units*').as('getUnits');
   cy.visit('/');
   cy.get(`a:contains("${ws}")`).click();
-  cy.wait(100);
+  cy.wait('@getUnits');
+  cy.get('[data-cy="workspace-unit-selection-filter-units"]').should('be.visible');
 });
 
 Cypress.Commands.add('runUntracked', fn => {

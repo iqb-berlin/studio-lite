@@ -150,8 +150,8 @@ export class BackendService {
     return this.http
       .patch(`${this.serverUrl}admin/settings/email-template`, emailTemplateDto)
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 }

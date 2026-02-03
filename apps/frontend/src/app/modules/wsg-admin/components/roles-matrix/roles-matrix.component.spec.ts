@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RolesMatrixComponent } from './roles-matrix.component';
 
 describe('RolesMatrixComponent', () => {
@@ -10,7 +11,8 @@ describe('RolesMatrixComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         RolesMatrixComponent,
-        TranslateModule.forRoot()
+        TranslateModule.forRoot(),
+        NoopAnimationsModule
       ]
     }).compileComponents();
 
@@ -21,5 +23,11 @@ describe('RolesMatrixComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should have correct number of rows in dataSource', () => {
+    expect(component.dataSource.length).toBeGreaterThan(0);
+    // Based on the code seen: 15 items
+    expect(component.dataSource.length).toBe(15);
   });
 });
