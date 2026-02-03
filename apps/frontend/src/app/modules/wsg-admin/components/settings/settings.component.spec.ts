@@ -1,57 +1,85 @@
+/* eslint-disable max-classes-per-file */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {
+  Component, Input, Output, EventEmitter
+} from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
-import { MatListModule } from '@angular/material/list';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatTableModule } from '@angular/material/table';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { Component, Input } from '@angular/core';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { provideHttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
+import { BehaviorSubject, of } from 'rxjs';
+import { State } from '../../../admin/models/state.type';
+import { CoreProfile, ProfilesComponent } from '../../../shared/components/profiles/profiles.component';
+import { WsgAdminService } from '../../services/wsg-admin.service';
+import { StatesComponent } from '../states/states.component';
 import { WorkspaceSettingsComponent } from './settings.component';
 
-describe('SettingsComponent', () => {
+@Component({
+  selector: 'studio-lite-profiles',
+  template: '',
+  standalone: true
+})
+class MockProfilesComponent {
+  @Input() profiles: CoreProfile[] = [];
+  @Output() profilesChange = new EventEmitter<CoreProfile[]>();
+}
+
+@Component({
+  selector: 'studio-lite-states',
+  template: '',
+  standalone: true
+})
+class MockStatesComponent {
+  @Input() states: State[] = [];
+  @Output() statesChange = new EventEmitter<State[]>();
+}
+
+describe('WorkspaceSettingsComponent', () => {
   let component: WorkspaceSettingsComponent;
   let fixture: ComponentFixture<WorkspaceSettingsComponent>;
-
-  @Component({ selector: 'studio-lite-search-filter', template: '', standalone: false })
-  class MockSearchFilterComponent {
-    @Input() title!: string;
-  }
+  let mockWsgAdminService: {
+    selectedWorkspaceGroupSettings: WorkspaceGroupSettingsDto;
+    selectedWorkspaceGroupId: BehaviorSubject<number>;
+    setWorkspaceGroupSettings: jest.Mock;
+    settingsChanged: boolean;
+  };
+  let mockSnackBar: { open: jest.Mock };
 
   beforeEach(async () => {
+    mockWsgAdminService = {
+      selectedWorkspaceGroupSettings: {
+        profiles: [],
+        states: [],
+        defaultEditor: '',
+        defaultPlayer: '',
+        defaultSchemer: ''
+      },
+      selectedWorkspaceGroupId: new BehaviorSubject<number>(1),
+      setWorkspaceGroupSettings: jest.fn().mockReturnValue(of(true)),
+      settingsChanged: false
+    };
+
+    mockSnackBar = {
+      open: jest.fn()
+    };
+
     await TestBed.configureTestingModule({
-      declarations: [
-        MockSearchFilterComponent
-      ],
-      imports: [
-        MatDialogModule,
-        MatTableModule,
-        MatCheckboxModule,
-        MatSnackBarModule,
-        MatListModule,
-        MatIconModule,
-        MatTooltipModule,
-        MatFormFieldModule,
-        MatProgressSpinnerModule,
-        TranslateModule.forRoot()
-      ],
+      imports: [WorkspaceSettingsComponent, NoopAnimationsModule, TranslateModule.forRoot()],
       providers: [
-        provideHttpClient(),
-        {
-          provide: 'SERVER_URL',
-          useValue: environment.backendUrl
-        }
+        { provide: WsgAdminService, useValue: mockWsgAdminService },
+        { provide: MatSnackBar, useValue: mockSnackBar }
       ]
     })
+      .overrideComponent(WorkspaceSettingsComponent, {
+        remove: {
+          imports: [ProfilesComponent, StatesComponent]
+        },
+        add: {
+          imports: [MockProfilesComponent, MockStatesComponent]
+        }
+      })
       .compileComponents();
-  });
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(WorkspaceSettingsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -59,5 +87,38 @@ describe('SettingsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should initialize settings from service', () => {
+    expect(component.settings).toEqual(mockWsgAdminService.selectedWorkspaceGroupSettings);
+  });
+
+  it('should save group settings successfully', () => {
+    mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(of(true));
+    component.saveGroupSettings();
+    expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledWith(1, component.settings);
+    expect(mockWsgAdminService.settingsChanged).toBe(false);
+    expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-settings.changed', '', { duration: 1000 });
+  });
+
+  it('should handle save error', () => {
+    mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(of(false));
+    component.saveGroupSettings();
+    expect(mockWsgAdminService.settingsChanged).toBe(true);
+    expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-settings.changed', 'error', { duration: 3000 });
+  });
+
+  it('should update profiles settings', () => {
+    const newProfiles = [{ id: 'p1', label: 'Profile 1' }] as unknown as CoreProfile[];
+    component.profileSettingsChange(newProfiles);
+    expect(component.settings.profiles).toEqual(newProfiles);
+    expect(mockWsgAdminService.settingsChanged).toBe(true);
+  });
+
+  it('should update states settings', () => {
+    const newStates: State[] = [{ id: 1, label: 'State 1', color: '#ffffff' }];
+    component.stateSettingsChange(newStates);
+    expect(component.settings.states).toEqual(newStates);
+    expect(mockWsgAdminService.settingsChanged).toBe(true);
   });
 });
