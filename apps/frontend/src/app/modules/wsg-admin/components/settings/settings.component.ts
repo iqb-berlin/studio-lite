@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   WorkspaceGroupSettingsDto
@@ -23,7 +23,7 @@ import { StatesComponent } from '../states/states.component';
   imports: [MatTooltip, ProfilesComponent, StatesComponent, TranslateModule, MatFabButton,
     MatIcon, MatCard, MatCardHeader, MatCardTitle, MatCardContent]
 })
-export class WorkspaceSettingsComponent implements OnInit {
+export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   settings!: WorkspaceGroupSettingsDto;
   private ngUnsubscribe = new Subject<void>();
 
