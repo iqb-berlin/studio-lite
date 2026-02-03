@@ -63,9 +63,10 @@ export class EditMyDataDirective {
                       { duration: 1000 });
                   } else {
                     this.snackBar.open(
-                      this.translateService.instant('user-profile.new-password'),
+                      this.translateService.instant('user-profile.data-edit-error'),
                       this.translateService.instant('user-profile.error'),
-                      { duration: 3000 });
+                      { duration: 3000 }
+                    );
                   }
                 }
               );
