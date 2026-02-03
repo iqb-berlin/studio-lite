@@ -21,23 +21,36 @@ describe('LogoutDirective', () => {
 
   beforeEach(async () => {
     mockAppService = {
-      authData: { userId: 1, userName: 'testUser' } as never
+      // appService is injected but not used in the logout method based on current code
+      authData: {
+        userId: 1,
+        userName: 'testUser',
+        userLongName: 'Test User',
+        isAdmin: false,
+        workspaces: [],
+        reviews: []
+      }
     };
-    mockDialog = {
-      open: jest.fn()
-    } as never;
-    mockBackendService = {
-      logout: jest.fn()
-    } as never;
-    mockTranslateService = {
-      instant: jest.fn()
-    } as never;
-    mockRouter = {
-      navigate: jest.fn()
-    } as never;
+
     mockDialogRef = {
       afterClosed: jest.fn()
-    } as never;
+    } as unknown as jest.Mocked<MatDialogRef<ConfirmDialogComponent>>;
+
+    mockDialog = {
+      open: jest.fn().mockReturnValue(mockDialogRef)
+    } as unknown as jest.Mocked<MatDialog>;
+
+    mockBackendService = {
+      logout: jest.fn()
+    } as unknown as jest.Mocked<BackendService>;
+
+    mockTranslateService = {
+      instant: jest.fn()
+    } as unknown as jest.Mocked<TranslateService>;
+
+    mockRouter = {
+      navigate: jest.fn()
+    } as unknown as jest.Mocked<Router>;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -74,7 +87,6 @@ describe('LogoutDirective', () => {
   it('should open confirmation dialog when logout is called', () => {
     mockTranslateService.instant.mockReturnValue('Translated Text');
     mockDialogRef.afterClosed.mockReturnValue(of(false));
-    mockDialog.open.mockReturnValue(mockDialogRef);
 
     directive.logout();
 
@@ -94,13 +106,13 @@ describe('LogoutDirective', () => {
   it('should logout when user confirms the dialog', done => {
     mockTranslateService.instant.mockReturnValue('Logout');
     mockDialogRef.afterClosed.mockReturnValue(of(true));
-    mockDialog.open.mockReturnValue(mockDialogRef);
     mockRouter.navigate.mockReturnValue(Promise.resolve(true));
 
     directive.logout();
 
     mockDialogRef.afterClosed().subscribe(() => {
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
+      // navigate promise resolution needs a tick
       setTimeout(() => {
         expect(mockBackendService.logout).toHaveBeenCalled();
         done();
@@ -111,7 +123,6 @@ describe('LogoutDirective', () => {
   it('should not logout when user cancels the dialog', done => {
     mockTranslateService.instant.mockReturnValue('Logout');
     mockDialogRef.afterClosed.mockReturnValue(of(false));
-    mockDialog.open.mockReturnValue(mockDialogRef);
 
     directive.logout();
 
@@ -125,7 +136,6 @@ describe('LogoutDirective', () => {
   it('should not logout when navigation fails', done => {
     mockTranslateService.instant.mockReturnValue('Logout');
     mockDialogRef.afterClosed.mockReturnValue(of(true));
-    mockDialog.open.mockReturnValue(mockDialogRef);
     mockRouter.navigate.mockReturnValue(Promise.resolve(false));
 
     directive.logout();
@@ -137,5 +147,9 @@ describe('LogoutDirective', () => {
         done();
       }, 0);
     });
+  });
+
+  it('should cleanup subscriptions on destroy', () => {
+    directive.ngOnDestroy();
   });
 });
