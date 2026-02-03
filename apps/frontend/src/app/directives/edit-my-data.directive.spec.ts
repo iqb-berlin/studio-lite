@@ -32,25 +32,37 @@ describe('EditMyDataDirective', () => {
 
   beforeEach(async () => {
     mockAppService = {
-      authData: { userId: 1, userName: 'testUser' } as never,
+      authData: {
+        userId: 1,
+        userName: 'testUser',
+        userLongName: 'Test User',
+        isAdmin: false,
+        workspaces: [],
+        reviews: []
+      },
       dataLoading: false
     };
+
+    mockDialogRef = {
+      afterClosed: jest.fn()
+    } as unknown as jest.Mocked<MatDialogRef<EditMyDataComponent>>;
+
     mockDialog = {
-      open: jest.fn()
-    } as never;
+      open: jest.fn().mockReturnValue(mockDialogRef)
+    } as unknown as jest.Mocked<MatDialog>;
+
     mockBackendService = {
       getMyData: jest.fn(),
       setMyData: jest.fn()
-    } as never;
+    } as unknown as jest.Mocked<BackendService>;
+
     mockSnackBar = {
       open: jest.fn()
-    } as never;
+    } as unknown as jest.Mocked<MatSnackBar>;
+
     mockTranslateService = {
       instant: jest.fn()
-    } as never;
-    mockDialogRef = {
-      afterClosed: jest.fn()
-    } as never;
+    } as unknown as jest.Mocked<TranslateService>;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -85,30 +97,26 @@ describe('EditMyDataDirective', () => {
     expect(directive).toBeTruthy();
   });
 
-  it('should fetch user data and open dialog when editMyData is called', done => {
+  it('should fetch user data and open dialog when editMyData is called', () => {
     mockBackendService.getMyData.mockReturnValue(of(mockMyData));
     mockDialogRef.afterClosed.mockReturnValue(of(undefined));
-    mockDialog.open.mockReturnValue(mockDialogRef);
 
-    directive.editMyData().then(() => {
-      mockBackendService.getMyData().subscribe(() => {
-        expect(mockBackendService.getMyData).toHaveBeenCalled();
-        expect(mockDialog.open).toHaveBeenCalledWith(EditMyDataComponent, {
-          width: '600px',
-          data: {
-            description: 'Test description',
-            firstName: 'John',
-            lastName: 'Doe',
-            email: 'john.doe@example.com',
-            emailPublishApproved: false
-          }
-        });
-        done();
-      });
+    directive.editMyData();
+
+    expect(mockBackendService.getMyData).toHaveBeenCalled();
+    expect(mockDialog.open).toHaveBeenCalledWith(EditMyDataComponent, {
+      width: '600px',
+      data: {
+        description: 'Test description',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john.doe@example.com',
+        emailPublishApproved: false
+      }
     });
   });
 
-  it('should update user data and show success message when changes are saved', done => {
+  it('should update user data and show success message when changes are saved', () => {
     const mockFormGroup = new UntypedFormGroup({
       firstName: new UntypedFormControl('Jane'),
       lastName: new UntypedFormControl('Smith'),
@@ -119,33 +127,27 @@ describe('EditMyDataDirective', () => {
 
     mockBackendService.getMyData.mockReturnValue(of(mockMyData));
     mockDialogRef.afterClosed.mockReturnValue(of(mockFormGroup));
-    mockDialog.open.mockReturnValue(mockDialogRef);
     mockBackendService.setMyData.mockReturnValue(of(true));
     mockTranslateService.instant.mockReturnValue('Data updated');
 
-    directive.editMyData().then(() => {
-      mockDialogRef.afterClosed().subscribe(() => {
-        setTimeout(() => {
-          expect(mockBackendService.setMyData).toHaveBeenCalledWith({
-            id: 1,
-            description: 'New description',
-            firstName: 'Jane',
-            lastName: 'Smith',
-            email: 'jane.smith@example.com',
-            emailPublishApproved: true
-          });
-          expect(mockSnackBar.open).toHaveBeenCalledWith(
-            'Data updated',
-            '',
-            { duration: 1000 }
-          );
-          done();
-        }, 0);
-      });
+    directive.editMyData();
+
+    expect(mockBackendService.setMyData).toHaveBeenCalledWith({
+      id: 1,
+      description: 'New description',
+      firstName: 'Jane',
+      lastName: 'Smith',
+      email: 'jane.smith@example.com',
+      emailPublishApproved: true
     });
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      'Data updated',
+      '',
+      { duration: 1000 }
+    );
   });
 
-  it('should only send changed fields when updating user data', done => {
+  it('should only send changed fields when updating user data', () => {
     const mockFormGroup = new UntypedFormGroup({
       firstName: new UntypedFormControl('Jane'),
       lastName: new UntypedFormControl('Doe'),
@@ -156,24 +158,18 @@ describe('EditMyDataDirective', () => {
 
     mockBackendService.getMyData.mockReturnValue(of(mockMyData));
     mockDialogRef.afterClosed.mockReturnValue(of(mockFormGroup));
-    mockDialog.open.mockReturnValue(mockDialogRef);
     mockBackendService.setMyData.mockReturnValue(of(true));
     mockTranslateService.instant.mockReturnValue('Data updated');
 
-    directive.editMyData().then(() => {
-      mockDialogRef.afterClosed().subscribe(() => {
-        setTimeout(() => {
-          expect(mockBackendService.setMyData).toHaveBeenCalledWith({
-            id: 1,
-            firstName: 'Jane'
-          });
-          done();
-        }, 0);
-      });
+    directive.editMyData();
+
+    expect(mockBackendService.setMyData).toHaveBeenCalledWith({
+      id: 1,
+      firstName: 'Jane'
     });
   });
 
-  it('should show error message when data update fails', done => {
+  it('should show error message when data update fails', () => {
     const mockFormGroup = new UntypedFormGroup({
       firstName: new UntypedFormControl('Jane'),
       lastName: new UntypedFormControl('Doe'),
@@ -184,63 +180,48 @@ describe('EditMyDataDirective', () => {
 
     mockBackendService.getMyData.mockReturnValue(of(mockMyData));
     mockDialogRef.afterClosed.mockReturnValue(of(mockFormGroup));
-    mockDialog.open.mockReturnValue(mockDialogRef);
     mockBackendService.setMyData.mockReturnValue(of(false));
-    // Note: The actual implementation has nested instant() calls which is likely a bug
     mockTranslateService.instant.mockReturnValue('Error Message');
 
-    directive.editMyData().then(() => {
-      // Wait for the dialog to close and backend call to complete
-      setTimeout(() => {
-        expect(mockBackendService.setMyData).toHaveBeenCalled();
-        expect(mockSnackBar.open).toHaveBeenCalled();
-        expect(mockSnackBar.open).toHaveBeenCalledWith(
-          'Error Message',
-          'Error Message',
-          { duration: 3000 }
-        );
-        done();
-      }, 100);
-    });
+    directive.editMyData();
+
+    expect(mockBackendService.setMyData).toHaveBeenCalled();
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      'Error Message',
+      'Error Message',
+      { duration: 3000 }
+    );
   });
 
-  it('should not update data when dialog is cancelled', done => {
+  it('should not update data when dialog is cancelled', () => {
     mockBackendService.getMyData.mockReturnValue(of(mockMyData));
     mockDialogRef.afterClosed.mockReturnValue(of(false));
-    mockDialog.open.mockReturnValue(mockDialogRef);
 
-    directive.editMyData().then(() => {
-      mockDialogRef.afterClosed().subscribe(() => {
-        expect(mockBackendService.setMyData).not.toHaveBeenCalled();
-        expect(mockSnackBar.open).not.toHaveBeenCalled();
-        done();
-      });
-    });
+    directive.editMyData();
+
+    expect(mockBackendService.setMyData).not.toHaveBeenCalled();
+    expect(mockSnackBar.open).not.toHaveBeenCalled();
   });
 
-  it('should not update data when result is undefined', done => {
+  it('should not update data when result is undefined', () => {
     mockBackendService.getMyData.mockReturnValue(of(mockMyData));
     mockDialogRef.afterClosed.mockReturnValue(of(undefined));
-    mockDialog.open.mockReturnValue(mockDialogRef);
 
-    directive.editMyData().then(() => {
-      mockDialogRef.afterClosed().subscribe(() => {
-        expect(mockBackendService.setMyData).not.toHaveBeenCalled();
-        expect(mockSnackBar.open).not.toHaveBeenCalled();
-        done();
-      });
-    });
+    directive.editMyData();
+
+    expect(mockBackendService.setMyData).not.toHaveBeenCalled();
+    expect(mockSnackBar.open).not.toHaveBeenCalled();
   });
 
-  it('should not open dialog when getMyData returns null', async () => {
+  it('should not open dialog when getMyData returns null', () => {
     mockBackendService.getMyData.mockReturnValue(of(null));
 
-    await directive.editMyData();
+    directive.editMyData();
 
     expect(mockDialog.open).not.toHaveBeenCalled();
   });
 
-  it('should set dataLoading flags correctly during update', done => {
+  it('should set dataLoading flags correctly during update', () => {
     const mockFormGroup = new UntypedFormGroup({
       firstName: new UntypedFormControl('Jane'),
       lastName: new UntypedFormControl('Doe'),
@@ -251,17 +232,15 @@ describe('EditMyDataDirective', () => {
 
     mockBackendService.getMyData.mockReturnValue(of(mockMyData));
     mockDialogRef.afterClosed.mockReturnValue(of(mockFormGroup));
-    mockDialog.open.mockReturnValue(mockDialogRef);
     mockBackendService.setMyData.mockReturnValue(of(true));
     mockTranslateService.instant.mockReturnValue('Data updated');
 
-    directive.editMyData().then(() => {
-      mockDialogRef.afterClosed().subscribe(() => {
-        setTimeout(() => {
-          expect(mockAppService.dataLoading).toBe(false);
-          done();
-        }, 0);
-      });
-    });
+    directive.editMyData();
+
+    expect(mockAppService.dataLoading).toBe(false);
+  });
+
+  it('should cleanup subscriptions on destroy', () => {
+    directive.ngOnDestroy();
   });
 });

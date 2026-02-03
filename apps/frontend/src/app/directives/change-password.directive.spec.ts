@@ -19,21 +19,25 @@ describe('ChangePasswordDirective', () => {
   let mockDialogRef: jest.Mocked<MatDialogRef<ChangePasswordComponent>>;
 
   beforeEach(async () => {
-    mockDialog = {
-      open: jest.fn()
-    } as never;
-    mockBackendService = {
-      setUserPassword: jest.fn()
-    } as never;
-    mockSnackBar = {
-      open: jest.fn()
-    } as never;
-    mockTranslateService = {
-      instant: jest.fn()
-    } as never;
     mockDialogRef = {
       afterClosed: jest.fn()
-    } as never;
+    } as unknown as jest.Mocked<MatDialogRef<ChangePasswordComponent>>;
+
+    mockDialog = {
+      open: jest.fn().mockReturnValue(mockDialogRef)
+    } as unknown as jest.Mocked<MatDialog>;
+
+    mockBackendService = {
+      setUserPassword: jest.fn()
+    } as unknown as jest.Mocked<BackendService>;
+
+    mockSnackBar = {
+      open: jest.fn()
+    } as unknown as jest.Mocked<MatSnackBar>;
+
+    mockTranslateService = {
+      instant: jest.fn()
+    } as unknown as jest.Mocked<TranslateService>;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -66,80 +70,73 @@ describe('ChangePasswordDirective', () => {
     expect(directive).toBeTruthy();
   });
 
-  it('should open change password dialog when changePassword is called', async () => {
+  it('should open change password dialog when changePassword is called', () => {
     mockDialogRef.afterClosed.mockReturnValue(of(false));
-    mockDialog.open.mockReturnValue(mockDialogRef);
 
-    await directive.changePassword();
+    directive.changePassword();
 
     expect(mockDialog.open).toHaveBeenCalledWith(ChangePasswordComponent, {
       width: '400px'
     });
   });
 
-  it('should call backend service and show success message when password change succeeds', done => {
+  it('should call backend service and show success message when password change succeeds', () => {
     const mockFormGroup = new UntypedFormGroup({
       pw_old: new UntypedFormControl('oldPassword'),
       pw_new1: new UntypedFormControl('newPassword')
     });
 
     mockDialogRef.afterClosed.mockReturnValue(of(mockFormGroup));
-    mockDialog.open.mockReturnValue(mockDialogRef);
     mockBackendService.setUserPassword.mockReturnValue(of(true));
-    mockTranslateService.instant.mockReturnValueOnce('Password changed')
+    mockTranslateService.instant
+      .mockReturnValueOnce('Password changed')
       .mockReturnValueOnce('OK');
 
-    directive.changePassword().then(() => {
-      mockDialogRef.afterClosed().subscribe(() => {
-        expect(mockBackendService.setUserPassword).toHaveBeenCalledWith('oldPassword', 'newPassword');
-        setTimeout(() => {
-          expect(mockSnackBar.open).toHaveBeenCalledWith(
-            'Password changed',
-            'OK',
-            { duration: 3000 }
-          );
-          done();
-        }, 0);
-      });
-    });
+    directive.changePassword();
+
+    expect(mockBackendService.setUserPassword).toHaveBeenCalledWith('oldPassword', 'newPassword');
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      'Password changed',
+      'OK',
+      { duration: 3000 }
+    );
   });
 
-  it('should show error message when password change fails', done => {
+  it('should show error message when password change fails', () => {
     const mockFormGroup = new UntypedFormGroup({
       pw_old: new UntypedFormControl('wrongPassword'),
       pw_new1: new UntypedFormControl('newPassword')
     });
 
     mockDialogRef.afterClosed.mockReturnValue(of(mockFormGroup));
-    mockDialog.open.mockReturnValue(mockDialogRef);
     mockBackendService.setUserPassword.mockReturnValue(of(false));
-    mockTranslateService.instant.mockReturnValueOnce('Password change failed')
+    mockTranslateService.instant
+      .mockReturnValueOnce('Password change failed')
       .mockReturnValueOnce('Error');
 
-    directive.changePassword().then(() => {
-      mockDialogRef.afterClosed().subscribe(() => {
-        setTimeout(() => {
-          expect(mockSnackBar.open).toHaveBeenCalledWith(
-            'Password change failed',
-            'Error',
-            { duration: 3000 }
-          );
-          done();
-        }, 0);
-      });
-    });
+    directive.changePassword();
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      'Password change failed',
+      'Error',
+      { duration: 3000 }
+    );
   });
 
-  it('should not call backend service when dialog is cancelled', done => {
+  it('should not call backend service when dialog is cancelled', () => {
     mockDialogRef.afterClosed.mockReturnValue(of(false));
-    mockDialog.open.mockReturnValue(mockDialogRef);
 
-    directive.changePassword().then(() => {
-      mockDialogRef.afterClosed().subscribe(() => {
-        expect(mockBackendService.setUserPassword).not.toHaveBeenCalled();
-        expect(mockSnackBar.open).not.toHaveBeenCalled();
-        done();
-      });
-    });
+    directive.changePassword();
+
+    expect(mockBackendService.setUserPassword).not.toHaveBeenCalled();
+    expect(mockSnackBar.open).not.toHaveBeenCalled();
+  });
+
+  it('should cleanup subscriptions on destroy', () => {
+    // This mostly tests that ngOnDestroy exists and runs without error
+    directive.ngOnDestroy();
+    // Since ngUnsubscribe is private, we can't easily check if it emitted/completed
+    // without using 'any' or changing visibility.
+    // But we can ensure the method is callable.
   });
 });
