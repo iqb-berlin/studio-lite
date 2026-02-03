@@ -21,8 +21,8 @@ export class ReviewComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       // eslint-disable-next-line @typescript-eslint/dot-notation
-      const newReviewId = this.route.snapshot.params['review'];
-      if (this.reviewService.reviewId !== newReviewId) {
+      const newReviewId = parseInt(this.route.snapshot.params['review'], 10);
+      if (this.reviewService.reviewId !== newReviewId && newReviewId > 0) {
         this.reviewService.reviewId = newReviewId;
         this.reviewService.units = [];
       }
