@@ -50,8 +50,12 @@ export class UnitRoutingCanDeactivateGuard {
               return from(this.workspaceService.saveUnitData()).pipe(
                 map(saveResult => {
                   const message = saveResult ?
-                    'Änderungen an Aufgabedaten gespeichert' :
-                    'Problem: Konnte Aufgabendaten nicht speichern';
+                    this.translateService.instant(
+                      'workspace.unit-saved'
+                    ) :
+                    this.translateService.instant(
+                      'workspace.unit-not-saved'
+                    );
                   this.snackBar.open(message, '', { duration: 1000 });
                   return saveResult;
                 })
