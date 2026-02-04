@@ -2,6 +2,7 @@ import { Directive, Input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
 import { switchMap } from 'rxjs/operators';
+import { Subject, takeUntil } from 'rxjs';
 import { WorkspaceService } from '../services/workspace.service';
 import { WorkspaceBackendService } from '../services/workspace-backend.service';
 import { RoutingHelperService } from '../services/routing-helper.service';
@@ -15,6 +16,8 @@ export abstract class SelectUnitDirective {
   abstract router: Router;
   abstract route: ActivatedRoute;
 
+  abstract ngUnsubscribe: Subject<void>;
+
   abstract backendService: WorkspaceBackendService;
 
   secondaryRoutingOutlet: string = 'secondary';
@@ -23,6 +26,7 @@ export abstract class SelectUnitDirective {
   updateUnitList(unitToSelect?: number): void {
     this.backendService.getUnitGroups(this.workspaceService.selectedWorkspaceId)
       .pipe(
+        takeUntil(this.ngUnsubscribe),
         switchMap(groups => {
           this.workspaceService.workspaceSettings.unitGroups = groups;
           let queryParams = new HttpParams();

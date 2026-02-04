@@ -26,7 +26,7 @@ export class DeleteUnitButtonComponent extends SelectUnitDirective implements On
   @Input() selectedUnitId!: number;
   @Input() disabled!: boolean;
 
-  private ngUnsubscribe = new Subject<void>();
+  ngUnsubscribe = new Subject<void>();
 
   constructor(
     public workspaceService: WorkspaceService,
