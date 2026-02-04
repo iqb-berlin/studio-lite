@@ -4,10 +4,13 @@ import { TranslateModule } from '@ngx-translate/core';
 import { SaveOrDiscardComponent } from './save-or-discard.component';
 import { environment } from '../../../../../environments/environment';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
+import { WorkspaceService } from '../../services/workspace.service';
 
 describe('SaveOrDiscardComponent', () => {
   let component: SaveOrDiscardComponent;
   let fixture: ComponentFixture<SaveOrDiscardComponent>;
+
+  const confirmData = { title: 't', content: 'c', confirmButtonLabel: 'ok' };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -18,7 +21,7 @@ describe('SaveOrDiscardComponent', () => {
       providers: [
         {
           provide: MAT_DIALOG_DATA,
-          useValue: {}
+          useValue: confirmData
         },
         {
           provide: WorkspaceBackendService,
@@ -27,6 +30,10 @@ describe('SaveOrDiscardComponent', () => {
         {
           provide: MatDialogRef,
           useValue: {}
+        },
+        {
+          provide: WorkspaceService,
+          useValue: { selectedWorkspaceId: 1 }
         },
         {
           provide: 'SERVER_URL',
@@ -46,5 +53,9 @@ describe('SaveOrDiscardComponent', () => {
   it('should create', () => {
     expect(component)
       .toBeTruthy();
+  });
+
+  it('should expose injected data', () => {
+    expect(component.confirmData).toEqual(confirmData);
   });
 });

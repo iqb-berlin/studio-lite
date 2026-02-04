@@ -27,4 +27,16 @@ describe('StartReviewButtonComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should set locationOrigin from window', () => {
+    expect(component.locationOrigin).toBe(window.location.origin);
+  });
+
+  it('should accept inputs', () => {
+    component.selectedReviewId = 5;
+    component.unitCount = 12;
+
+    expect(component.selectedReviewId).toBe(5);
+    expect(component.unitCount).toBe(12);
+  });
 });

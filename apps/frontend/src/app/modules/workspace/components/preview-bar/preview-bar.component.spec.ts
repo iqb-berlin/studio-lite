@@ -1,63 +1,76 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import { Component, Input } from '@angular/core';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
-import { FormsModule } from '@angular/forms';
-import { provideHttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
-import { PageData } from '../../models/page-data.interface';
-import { Progress } from '../../models/types';
+import {
+  Component, Input, Output, EventEmitter
+} from '@angular/core';
 import { PreviewBarComponent } from './preview-bar.component';
+import { WorkspaceService } from '../../services/workspace.service';
+import { PageNavigationComponent } from '../../../shared/components/page-navigation/page-navigation.component';
+import { PagingModeSelectionComponent } from '../paging-mode-selection/paging-mode-selection.component';
+import { StatusIndicationComponent } from '../status-indication/status-indication.component';
+
+@Component({ selector: 'studio-lite-page-navigation', template: '', standalone: true })
+class MockPageNavigationComponent {
+  @Input() pageList: unknown;
+  @Output() gotoPage = new EventEmitter();
+}
+
+@Component({ selector: 'studio-lite-paging-mode-selection', template: '', standalone: true })
+class MockPagingModeSelectionComponent {}
+
+@Component({ selector: 'studio-lite-status-indication', template: '', standalone: true })
+class MockStatusIndicationComponent {
+  @Input() presentationProgress: unknown;
+  @Input() responseProgress: unknown;
+  @Input() hasFocus: unknown;
+}
 
 describe('PreviewBarComponent', () => {
   let component: PreviewBarComponent;
   let fixture: ComponentFixture<PreviewBarComponent>;
 
-  @Component({ selector: 'studio-lite-status-indication', template: '', standalone: false })
-  class MockStatusIndicationComponent {
-    @Input() presentationProgress!: Progress;
-    @Input() responseProgress!: Progress;
-    @Input() hasFocus!: boolean;
-  }
-
-  @Component({ selector: 'studio-lite-page-navigation', template: '', standalone: false })
-  class MockPageNavigationComponent {
-    @Input() pageList!: PageData[];
-  }
+  const mockWorkspaceService = {};
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        MockStatusIndicationComponent,
-        MockPageNavigationComponent
-      ],
-      imports: [
-        MatButtonModule,
-        MatIconModule,
-        MatSelectModule,
-        FormsModule,
-        MatTooltipModule,
-        TranslateModule.forRoot()
-      ],
+      imports: [PreviewBarComponent, TranslateModule.forRoot()],
       providers: [
-        provideHttpClient(),
-        {
-          provide: 'SERVER_URL',
-          useValue: environment.backendUrl
-        }]
-    }).compileComponents();
+        { provide: WorkspaceService, useValue: mockWorkspaceService }
+      ]
+    })
+      .overrideComponent(PreviewBarComponent, {
+        remove: {
+          imports: [
+            PageNavigationComponent,
+            PagingModeSelectionComponent,
+            StatusIndicationComponent
+          ]
+        },
+        add: {
+          imports: [
+            MockPageNavigationComponent,
+            MockPagingModeSelectionComponent,
+            MockStatusIndicationComponent
+          ]
+        }
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(PreviewBarComponent);
     component = fixture.componentInstance;
-    component.pageList = [];
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should take inputs', () => {
+    component.pageList = [];
+    component.playerApiVersion = 1;
+    component.playerName = 'player';
+    component.hasFocus = true;
+    expect(component.playerName).toBe('player');
   });
 });

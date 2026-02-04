@@ -23,4 +23,14 @@ describe('StatusIndicationComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should accept progress inputs', () => {
+    component.presentationProgress = 'some';
+    component.responseProgress = 'complete';
+    component.hasFocus = true;
+
+    expect(component.presentationProgress).toBe('some');
+    expect(component.responseProgress).toBe('complete');
+    expect(component.hasFocus).toBe(true);
+  });
 });

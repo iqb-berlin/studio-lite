@@ -25,4 +25,26 @@ describe('UnitGroupComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('updates expanded when expandAll emits', () => {
+    component.expanded = false;
+    component.expandAll.next(true);
+
+    expect(component.expanded).toBe(true);
+  });
+
+  it('emits expandedChange when toggling via button', () => {
+    component.expanded = false;
+    component.count = 3;
+    fixture.detectChanges();
+
+    jest.spyOn(component.expandedChange, 'emit');
+
+    const button: HTMLButtonElement | null = fixture.nativeElement.querySelector('button');
+    expect(button).not.toBeNull();
+    button?.click();
+
+    expect(component.expanded).toBe(true);
+    expect(component.expandedChange.emit).toHaveBeenCalledWith(true);
+  });
 });
