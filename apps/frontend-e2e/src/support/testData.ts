@@ -226,8 +226,6 @@ export const testGroups = {
   basic: 'Grundgruppe',
   /** Admin test group */
   admin: 'Mathematik Primär Bereichsgruppe',
-  /** UI test group */
-  ui: 'UI_BG',
   /** Metadata test groups */
   metadata: {
     bista1: 'Bista I',
@@ -242,16 +240,14 @@ export const testGroups = {
  */
 export const testWorkspaces = {
   /** Basic workspace used in shared test setup */
-  basic: 'Grundarbeitsbereich',
+  basic: {
+    initial: 'Grundarbeitsbereich',
+    final: 'Endgültiger Arbeitsbereich'
+  },
   /** Admin test workspaces */
   admin: {
     math1: 'Mathematik I',
     german1: 'Deutsch I'
-  },
-  /** UI test workspaces */
-  ui: {
-    template: '01Vorlage',
-    final: '07Final'
   },
   /** Metadata test workspaces */
   metadata: {
@@ -296,7 +292,8 @@ export const testUsers = {
 
 // Legacy exports for backward compatibility
 export const group1: string = testGroups.basic;
-export const ws1: string = testWorkspaces.basic;
+export const ws1: string = testWorkspaces.basic.initial;
+export const ws2: string = testWorkspaces.basic.final;
 export const newUser: UserData = testUsers.normal;
 export const anotherUser: UserData = testUsers.another;
 

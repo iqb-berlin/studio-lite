@@ -1,9 +1,8 @@
 import {
-  AccessLevel,
-  modules,
-  testGroups,
-  testWorkspaces,
-  UnitData
+  group1,
+  UnitData,
+  ws1,
+  ws2
 } from '../../../support/testData';
 import {
   selectProfileForAreaFromGroup,
@@ -11,31 +10,20 @@ import {
 } from '../../../support/metadata/metadata-util';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
 import {
-  addFirstUser,
-  addModules,
   addStatus,
   addUnitFromExisting,
   addUnitPred,
   clickIndexTabWsgAdmin,
   clickSaveButtonRight,
-  createGroup,
-  createWs,
-  deleteFirstUser,
-  deleteGroup,
-  deleteModule,
   deleteUnit,
   goToWsMenu,
-  grantRemovePrivilegeAtWs,
   importExercise,
   moveUnit,
-  selectListUnits,
-  setVeronaWs
+  selectListUnits
 } from '../../../support/helpers';
+import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 
 describe('Workspace Unit Management', () => {
-  const group1 = testGroups.ui;
-  const ws1 = testWorkspaces.ui.template;
-  const ws2 = testWorkspaces.ui.final;
   const unit1: UnitData = {
     shortname: 'AUF_D1',
     name: 'Name Auf 1',
@@ -57,22 +45,11 @@ describe('Workspace Unit Management', () => {
     group: 'Group D'
   };
   before(() => {
-    addFirstUser();
+    createBasicSpecCy();
   });
   after(() => {
-    deleteFirstUser();
+    deleteBasicSpecCy();
     // cy.resetDb();
-  });
-
-  it('sets up workspace with modules and profiles', () => {
-    addModules(modules);
-    createGroup(group1);
-    createWs(ws1, group1);
-    grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [AccessLevel.Admin]);
-  });
-
-  it('configures Verona modules for workspace', () => {
-    setVeronaWs(ws1);
   });
 
   it('selects metadata profile from workspace settings', () => {
@@ -118,8 +95,6 @@ describe('Workspace Unit Management', () => {
   });
 
   it('moves unit to another workspace', () => {
-    createWs(ws2, group1);
-    grantRemovePrivilegeAtWs([Cypress.env('username')], ws2, [AccessLevel.Admin]);
     moveUnit(ws1, ws2, unit2);
   });
 
@@ -176,10 +151,5 @@ describe('Workspace Unit Management', () => {
         'codebook'
       );
     });
-  });
-
-  it('cleans up test data', () => {
-    deleteGroup(group1);
-    deleteModule();
   });
 });
