@@ -17,7 +17,7 @@ import {
   createWs,
   deleteFirstUser,
   deleteGroup,
-  deleteModule,
+  deleteAllModules,
   goToItem,
   goToWsMenu,
   grantRemovePrivilegeAtWs,
@@ -151,6 +151,6 @@ describe('Variable and Item Metadata Coherence', () => {
 
   it('cleans up test data', () => {
     deleteGroup(group);
-    deleteModule();
+    deleteAllModules();
   });
 });

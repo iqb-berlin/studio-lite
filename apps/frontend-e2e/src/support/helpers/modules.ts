@@ -24,7 +24,7 @@ export function addModules(filenames: string[]): void {
  * @example
  * deleteModule();
  */
-export function deleteModule(): void {
+export function deleteAllModules(): void {
   cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('v-modules');
@@ -98,4 +98,116 @@ export function setVeronaWs(ws: string): void {
   cy.get('[data-cy="edit-workspace-settings-schemer"]').click();
   cy.get('mat-option>span').contains('Schemer').click();
   cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+}
+
+/**
+ * Verifies that Verona modules are correctly configured for a workspace
+ * @param ws - Workspace name
+ * @param expectedEditor - Expected editor module name
+ * @param expectedPlayer - Expected player module name
+ * @param expectedSchemer - Expected schemer module name
+ * @example
+ * verifyModuleConfiguration('My Workspace', 'Aspect', 'Aspect', 'Schemer');
+ */
+export function verifyModuleConfiguration(
+  ws: string,
+  expectedEditor: string,
+  expectedPlayer: string,
+  expectedSchemer: string
+): void {
+  cy.visitWs(ws);
+  cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+  cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+
+  // Verify editor selection
+  cy.get('[data-cy="edit-workspace-settings-editor"]')
+    .should('contain', expectedEditor);
+
+  // Verify player selection
+  cy.get('[data-cy="edit-workspace-settings-player"]')
+    .should('contain', expectedPlayer);
+
+  // Verify schemer selection
+  cy.get('[data-cy="edit-workspace-settings-schemer"]')
+    .should('contain', expectedSchemer);
+
+  // Close dialog
+  cy.translate(Cypress.env('locale')).then(json => {
+    cy.clickDialogButton(json.cancel || json.close);
+  });
+}
+
+/**
+ * Sets Verona modules for a workspace with API verification
+ * @param ws - Workspace name
+ * @param editor - Editor module name
+ * @param player - Player module name
+ * @param schemer - Schemer module name
+ * @example
+ * setModuleWithVerification('My Workspace', 'Aspect', 'Aspect', 'Schemer');
+ */
+export function setModuleWithVerification(
+  ws: string,
+  editor: string,
+  player: string,
+  schemer: string
+): void {
+  cy.visitWs(ws);
+  cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+  cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+
+  // Set editor
+  cy.get('[data-cy="edit-workspace-settings-editor"]').click();
+  cy.get('mat-option>span').contains(editor).click();
+
+  // Set player
+  cy.get('[data-cy="edit-workspace-settings-player"]').click();
+  cy.get('mat-option>span').contains(player).click();
+
+  // Set schemer
+  cy.get('[data-cy="edit-workspace-settings-schemer"]').click();
+  cy.get('mat-option>span').contains(schemer).click();
+
+  // Save with API verification
+  cy.intercept('PATCH', '/api/workspaces/*').as('updateWorkspace');
+  cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+  cy.wait('@updateWorkspace').its('response.statusCode').should('eq', 200);
+
+  // Verify configuration persisted
+  verifyModuleConfiguration(ws, editor, player, schemer);
+}
+
+/**
+ * Gets list of available modules of a specific type
+ * @param ws - Workspace name
+ * @param moduleType - Type of module ('editor', 'player', or 'schemer')
+ * @returns Chainable with array of module names
+ * @example
+ * getAvailableModules('My Workspace', 'editor').then(modules => {
+ *   expect(modules).to.include('Aspect');
+ * });
+ */
+export function getAvailableModules(
+  ws: string,
+  moduleType: 'editor' | 'player' | 'schemer'
+): Cypress.Chainable<string[]> {
+  cy.visitWs(ws);
+  cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+  cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+
+  const selector = `[data-cy="edit-workspace-settings-${moduleType}"]`;
+  cy.get(selector).click();
+
+  return cy.get('mat-option>span').then($options => {
+    const modules: string[] = [];
+    $options.each((_, el) => {
+      const text = el.textContent?.trim();
+      if (text) {
+        modules.push(text);
+      }
+    });
+    // Close the dropdown
+    cy.get('.cdk-overlay-backdrop').click({ force: true });
+    return modules;
+  });
 }

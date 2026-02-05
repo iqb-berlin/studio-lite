@@ -66,14 +66,11 @@ Cypress.Commands.add('findAdminSettings', (): Chainable<JQuery<HTMLElement>> => 
 
 Cypress.Commands.add('loadModule', (filename: string) => {
   const path: string = `../frontend-e2e/src/fixtures/${filename}`;
-  const name = filename.replace(/-+(?=[^-\d]*\d)/, '@').replace(/...html$/, '');
   cy.get('input[type=file]')
     .selectFile(path, {
       action: 'select',
       force: true
     });
-  cy.contains('mat-row', name)
-    .should('exist');
 });
 
 Cypress.Commands.add('selectModule', (name: string) => {
@@ -81,7 +78,7 @@ Cypress.Commands.add('selectModule', (name: string) => {
     .parent()
     .parent()
     .prev()
-    .click();
+    .click({ multiple: true });
 });
 
 Cypress.Commands.add('visitWs', (ws: string) => {

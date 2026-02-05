@@ -16,7 +16,7 @@ import {
   createWs,
   deleteFirstUser,
   deleteGroup,
-  deleteModule,
+  deleteAllModules,
   deleteResource,
   deleteUser,
   grantRemovePrivilegeAtWs
@@ -63,7 +63,7 @@ export function deleteBasicSpecCy() {
     deleteUser(newUser.username);
 
     // admin deletes Modules
-    deleteModule();
+    deleteAllModules();
 
     // admin deletes package resource
     deleteResource();
