@@ -65,7 +65,7 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   private playerSelectionChangedSubscription: Subscription | undefined;
   private schemerSelectionChangedSubscription: Subscription | undefined;
   private statesChangedSubscription: Subscription | undefined;
-  private ngUnsubscribe = new Subject<void>();
+  ngUnsubscribe = new Subject<void>();
   metadata!: UnitMetadataValues;
   workspaceSettings!: WorkspaceSettingsDto;
   metadataLoader: BehaviorSubject<UnitMetadataValues> = new BehaviorSubject({});

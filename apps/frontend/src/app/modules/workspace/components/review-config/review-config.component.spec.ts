@@ -1,46 +1,46 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { Component, Input } from '@angular/core';
+import {
+  Component, Input, Output, EventEmitter
+} from '@angular/core';
 import { BookletConfigDto, ReviewConfigDto } from '@studio-lite-lib/api-dto';
 import { FormsModule } from '@angular/forms';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { TranslateModule } from '@ngx-translate/core';
 import { ReviewConfigComponent } from './review-config.component';
+import { ReviewConfigEditComponent } from '../review-config-edit/review-config-edit.component';
+import { BookletConfigEditComponent } from '../booklet-config-edit/booklet-config-edit.component';
+
+@Component({ selector: 'studio-lite-review-config-edit', template: '', standalone: true })
+class MockReviewConfigEditComponent {
+  @Input() config!: ReviewConfigDto;
+  @Input() disabled: boolean = false;
+  @Output() configChanged = new EventEmitter<ReviewConfigDto>();
+}
+
+@Component({ selector: 'studio-lite-booklet-config-edit', template: '', standalone: true })
+class MockBookletConfigEditComponent {
+  @Input() config!: BookletConfigDto;
+  @Input() disabled: boolean = false;
+  @Output() configChanged = new EventEmitter<BookletConfigDto>();
+}
 
 describe('ReviewConfigComponent', () => {
   let component: ReviewConfigComponent;
   let fixture: ComponentFixture<ReviewConfigComponent>;
 
-  @Component({ selector: 'studio-lite-booklet-config-edit', template: '', standalone: false })
-  class MockBookletConfigEditComponent {
-    @Input() disabled!: boolean;
-    @Input() config!: BookletConfigDto | undefined;
-  }
-
-  @Component({ selector: 'studio-lite-review-config-edit', template: '', standalone: false })
-  class MockReviewConfigEditComponent {
-    @Input() disabled!: boolean;
-    @Input() config!: ReviewConfigDto | undefined;
-  }
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        MockBookletConfigEditComponent,
-        MockReviewConfigEditComponent
-      ],
       imports: [
-        FormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        NoopAnimationsModule,
-        MatExpansionModule,
-        TranslateModule.forRoot()
+        ReviewConfigComponent,
+        TranslateModule.forRoot(),
+        FormsModule
       ]
-    }).compileComponents();
+    })
+      .overrideComponent(ReviewConfigComponent, {
+        remove: { imports: [ReviewConfigEditComponent, BookletConfigEditComponent] },
+        add: { imports: [MockReviewConfigEditComponent, MockBookletConfigEditComponent] }
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(ReviewConfigComponent);
     component = fixture.componentInstance;
@@ -49,5 +49,12 @@ describe('ReviewConfigComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should handle name change', () => {
+    const emitSpy = jest.spyOn(component.nameChange, 'emit');
+    component.name = 'new name';
+    component.nameChange.emit('new name');
+    expect(emitSpy).toHaveBeenCalledWith('new name');
   });
 });

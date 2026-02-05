@@ -27,4 +27,20 @@ describe('ReviewSaveChangesComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should emit discardChanges', () => {
+    const emitSpy = jest.spyOn(component.discardChanges, 'emit');
+
+    component.discardChanges.emit(null);
+
+    expect(emitSpy).toHaveBeenCalledWith(null);
+  });
+
+  it('should emit saveChanges', () => {
+    const emitSpy = jest.spyOn(component.saveChanges, 'emit');
+
+    component.saveChanges.emit(null);
+
+    expect(emitSpy).toHaveBeenCalledWith(null);
+  });
 });

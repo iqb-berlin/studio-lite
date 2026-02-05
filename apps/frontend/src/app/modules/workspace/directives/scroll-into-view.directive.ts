@@ -10,11 +10,16 @@ export class ScrollIntoViewDirective implements OnChanges {
   @Input() selectedUnitId!: number;
   @Input() rowId!: number;
 
-  constructor(private elementRef: ElementRef) {}
+  constructor(private elementRef: ElementRef<HTMLElement>) {}
 
   scrollIntoView(): void {
+    const nativeElement = this.elementRef.nativeElement;
+    if (!nativeElement || typeof nativeElement.scrollIntoView !== 'function') {
+      return;
+    }
+
     setTimeout(() => {
-      this.elementRef.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 0);
   }
 

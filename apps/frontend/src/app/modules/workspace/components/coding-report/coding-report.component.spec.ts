@@ -1,35 +1,59 @@
-// eslint-disable-next-line max-classes-per-file
+import { CodingReportDto } from '@studio-lite-lib/api-dto';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { provideHttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { of, Observable } from 'rxjs';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatTableDataSource } from '@angular/material/table';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
+import { WorkspaceService } from '../../services/workspace.service';
 import { CodingReportComponent } from './coding-report.component';
 
 describe('CodingReportComponent', () => {
   let component: CodingReportComponent;
   let fixture: ComponentFixture<CodingReportComponent>;
 
+  let backendService: {
+    getCodingReport: jest.Mock<Observable<CodingReportDto[]>, [number]>;
+  };
+  let workspaceService: { selectedWorkspaceId: number };
+
+  const rows: CodingReportDto[] = [
+    {
+      unit: 'U1',
+      variable: 'V1',
+      item: 'I1',
+      validation: 'ok',
+      codingType: 'keine Regeln'
+    } as CodingReportDto,
+    {
+      unit: 'U1',
+      variable: 'V2',
+      item: 'I2',
+      validation: 'ok',
+      codingType: 'REGEL'
+    } as CodingReportDto
+  ];
+
   beforeEach(async () => {
+    backendService = {
+      getCodingReport: jest.fn<
+      Observable<CodingReportDto[]>,
+      [number]
+      >(() => of(rows))
+    };
+    workspaceService = {
+      selectedWorkspaceId: 10
+    };
+
     await TestBed.configureTestingModule({
       imports: [
-        MatDialogModule,
-        MatExpansionModule,
-        NoopAnimationsModule,
+        CodingReportComponent,
         TranslateModule.forRoot()
       ],
       providers: [
-        provideHttpClient(),
-        {
-          provide: 'SERVER_URL',
-          useValue: environment.backendUrl
-        },
-        {
-          provide: MAT_DIALOG_DATA,
-          useValue: {}
-        }
+        { provide: MAT_DIALOG_DATA, useValue: { units: [] } },
+        { provide: WorkspaceBackendService, useValue: backendService },
+        { provide: WorkspaceService, useValue: workspaceService }
       ]
     }).compileComponents();
 
@@ -40,5 +64,30 @@ describe('CodingReportComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('loads coding report and filters coded variables by default', () => {
+    expect(backendService.getCodingReport).toHaveBeenCalledWith(10);
+    expect(component.unitDataRows).toEqual(rows);
+    expect(component.dataSource.data).toEqual([rows[1]]);
+  });
+
+  it('toggleChange includes all rows', () => {
+    component.toggleChange();
+
+    expect(component.codedVariablesOnly).toBe(false);
+    expect(component.dataSource.data).toEqual(rows);
+  });
+
+  it('applyFilter updates the table filter', () => {
+    component.dataSource = new MatTableDataSource(rows);
+
+    const input = document.createElement('input');
+    input.value = 'v2';
+
+    const event = { target: input } as unknown as Event;
+    component.applyFilter(event);
+
+    expect(component.dataSource.filter).toBe('v2');
   });
 });

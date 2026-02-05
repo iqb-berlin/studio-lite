@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -6,6 +7,20 @@ import { MatIconModule } from '@angular/material/icon';
 import { provideHttpClient } from '@angular/common/http';
 import { ExportReviewButtonComponent } from './export-review-button.component';
 import { environment } from '../../../../../environments/environment';
+import { WorkspaceService } from '../../services/workspace.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
+import { AppService } from '../../../../services/app.service';
+
+class MockWorkspaceService {
+  selectedWorkspaceId = 1;
+}
+
+class MockWorkspaceBackendService {
+}
+
+class MockAppService {
+  dataLoading = false;
+}
 
 describe('ExportReviewButtonComponent', () => {
   let component: ExportReviewButtonComponent;
@@ -24,7 +39,11 @@ describe('ExportReviewButtonComponent', () => {
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl
-        }]
+        },
+        { provide: WorkspaceService, useClass: MockWorkspaceService },
+        { provide: WorkspaceBackendService, useClass: MockWorkspaceBackendService },
+        { provide: AppService, useClass: MockAppService }
+      ]
 
     }).compileComponents();
 

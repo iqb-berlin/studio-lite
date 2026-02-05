@@ -24,6 +24,8 @@ describe('ShowMetadataComponent', () => {
     @Input() selectedUnitId!: number;
   }
 
+  const dialogData = { units: [1, 2, 3] };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
@@ -43,7 +45,7 @@ describe('ShowMetadataComponent', () => {
         },
         {
           provide: MAT_DIALOG_DATA,
-          useValue: {}
+          useValue: dialogData
         }
       ]
     }).compileComponents();
@@ -55,5 +57,13 @@ describe('ShowMetadataComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should expose dialog data', () => {
+    expect(component.data).toEqual(dialogData);
+  });
+
+  it('should initialize unitList as empty', () => {
+    expect(component.unitList).toEqual([]);
   });
 });

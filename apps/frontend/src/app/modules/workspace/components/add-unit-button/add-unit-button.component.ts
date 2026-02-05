@@ -1,6 +1,8 @@
 import { Component, OnDestroy, Input } from '@angular/core';
 import { CreateUnitDto, UnitInListDto } from '@studio-lite-lib/api-dto';
-import { lastValueFrom, map, Subscription } from 'rxjs';
+import {
+  lastValueFrom, map, Subject, Subscription
+} from 'rxjs';
 import { UntypedFormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -27,10 +29,21 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   selector: 'studio-lite-add-unit-button',
   templateUrl: './add-unit-button.component.html',
   styleUrls: ['./add-unit-button.component.scss'],
-  imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, MatMenuItem, MatIcon, TranslateModule]
+  imports: [
+    MatButton,
+    MatMenuTrigger,
+    MatTooltip,
+    WrappedIconComponent,
+    MatMenu,
+    MatMenuItem,
+    MatIcon,
+    TranslateModule
+  ]
 })
 export class AddUnitButtonComponent extends SelectUnitDirective implements OnDestroy {
+  ngUnsubscribe = new Subject<void>();
   private uploadSubscription: Subscription | null = null;
+
   @Input() selectedUnitId!: number;
   @Input() disabled!: boolean;
   constructor(
@@ -50,46 +63,52 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
   }
 
   addUnitFromExisting(): void {
-    this.addUnitFromExistingDialog().then((unitSource: UnitInListDto | boolean) => {
-      if (typeof unitSource !== 'boolean') {
-        this.addUnitDialog({
-          title: this.translateService.instant('workspace.copy-new-unit'),
-          subTitle: `${this.translateService
-            .instant('workspace.copy-from')} ${unitSource.key}${unitSource.name ? ` - ${unitSource.name}` : ''}`,
-          key: unitSource.key,
-          label: unitSource.name || '',
-          groups: this.workspaceService.workspaceSettings.unitGroups || []
-        }).then((createUnitDto: CreateUnitDto | boolean) => {
-          if (typeof createUnitDto !== 'boolean') {
-            this.appService.dataLoading = true;
-            createUnitDto.createFrom = unitSource.id;
-            createUnitDto.createFromKey = unitSource.key;
-            this.backendService.addUnit(
-              this.workspaceService.selectedWorkspaceId, createUnitDto
-            ).subscribe(
-              respOk => {
-                if (respOk) {
-                  this.snackBar.open(
-                    this.translateService.instant('workspace.unit-added'),
-                    '',
-                    { duration: 1000 }
-                  );
-                  this.addUnitGroup(createUnitDto.groupName);
-                  this.updateUnitList(respOk);
-                } else {
-                  this.snackBar.open(
-                    this.translateService.instant('workspace.unit-not-added'),
-                    this.translateService.instant('workspace.error'),
-                    { duration: 3000 }
-                  );
-                }
-                this.appService.dataLoading = false;
-              }
-            );
-          }
-        });
+    this.addUnitFromExistingDialog().then(
+      (unitSource: UnitInListDto | boolean) => {
+        if (typeof unitSource !== 'boolean') {
+          this.addUnitDialog({
+            title: this.translateService.instant('workspace.copy-new-unit'),
+            subTitle: `${this.translateService.instant(
+              'workspace.copy-from'
+            )} ${unitSource.key}${
+              unitSource.name ? ` - ${unitSource.name}` : ''
+            }`,
+            key: unitSource.key,
+            label: unitSource.name || '',
+            groups: this.workspaceService.workspaceSettings.unitGroups || []
+          }).then((createUnitDto: CreateUnitDto | boolean) => {
+            if (typeof createUnitDto !== 'boolean') {
+              this.appService.dataLoading = true;
+              createUnitDto.createFrom = unitSource.id;
+              createUnitDto.createFromKey = unitSource.key;
+              this.backendService
+                .addUnit(
+                  this.workspaceService.selectedWorkspaceId,
+                  createUnitDto
+                )
+                .subscribe(respOk => {
+                  if (respOk) {
+                    this.snackBar.open(
+                      this.translateService.instant('workspace.unit-added'),
+                      '',
+                      { duration: 1000 }
+                    );
+                    this.addUnitGroup(createUnitDto.groupName);
+                    this.updateUnitList(respOk);
+                  } else {
+                    this.snackBar.open(
+                      this.translateService.instant('workspace.unit-not-added'),
+                      this.translateService.instant('workspace.error'),
+                      { duration: 3000 }
+                    );
+                  }
+                  this.appService.dataLoading = false;
+                });
+            }
+          });
+        }
       }
-    });
+    );
   }
 
   addUnit() {
@@ -102,18 +121,21 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
     }).then((createUnitDto: CreateUnitDto | boolean) => {
       if (typeof createUnitDto !== 'boolean') {
         this.appService.dataLoading = true;
-        createUnitDto.player = this.workspaceService.workspaceSettings.defaultPlayer;
-        createUnitDto.editor = this.workspaceService.workspaceSettings.defaultEditor;
-        createUnitDto.schemer = this.workspaceService.workspaceSettings.defaultSchemer;
-        this.backendService.addUnit(
-          this.workspaceService.selectedWorkspaceId, createUnitDto
-        ).subscribe(
-          respOk => {
+        createUnitDto.player =
+          this.workspaceService.workspaceSettings.defaultPlayer;
+        createUnitDto.editor =
+          this.workspaceService.workspaceSettings.defaultEditor;
+        createUnitDto.schemer =
+          this.workspaceService.workspaceSettings.defaultSchemer;
+        this.backendService
+          .addUnit(this.workspaceService.selectedWorkspaceId, createUnitDto)
+          .subscribe(respOk => {
             if (respOk) {
               this.snackBar.open(
                 this.translateService.instant('workspace.unit-added'),
                 '',
-                { duration: 1000 });
+                { duration: 1000 }
+              );
               this.addUnitGroup(createUnitDto.groupName);
               this.updateUnitList(respOk);
             } else {
@@ -124,25 +146,32 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
               );
             }
             this.appService.dataLoading = false;
-          }
-        );
+          });
       }
     });
   }
 
   private addUnitGroup(newGroup: string | undefined) {
-    if (newGroup && this.workspaceService.workspaceSettings.unitGroups &&
-      this.workspaceService.workspaceSettings.unitGroups.indexOf(newGroup) < 0) {
+    if (
+      newGroup &&
+      this.workspaceService.workspaceSettings.unitGroups &&
+      this.workspaceService.workspaceSettings.unitGroups.indexOf(newGroup) < 0
+    ) {
       this.workspaceService.workspaceSettings.unitGroups.push(newGroup);
-      this.appBackendService.setWorkspaceSettings(
-        this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings
-      ).subscribe(isOK => {
-        this.snackBar.open(isOK ?
-          this.translateService.instant('workspace.group-saved') :
-          this.translateService.instant('workspace.group-not-saved'),
-        isOK ? '' : this.translateService.instant('workspace.error'),
-        { duration: 3000 });
-      });
+      this.appBackendService
+        .setWorkspaceSettings(
+          this.workspaceService.selectedWorkspaceId,
+          this.workspaceService.workspaceSettings
+        )
+        .subscribe(isOK => {
+          this.snackBar.open(
+            isOK ?
+              this.translateService.instant('workspace.group-saved') :
+              this.translateService.instant('workspace.group-not-saved'),
+            isOK ? '' : this.translateService.instant('workspace.error'),
+            { duration: 3000 }
+          );
+        });
     }
   }
 
@@ -160,47 +189,62 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
           selectedUnitId: this.selectedUnitId
         }
       });
-      return lastValueFrom(dialogRef.afterClosed().pipe(
-        map(dialogResult => {
-          if (typeof dialogResult !== 'undefined') {
-            const dialogComponent = dialogRef.componentInstance;
-            if (dialogResult !== false && dialogComponent.selectedUnitIds.length === 1) {
-              return <UnitInListDto>{
-                id: dialogComponent.selectedUnitIds[0],
-                key: dialogComponent.selectedUnitKey,
-                name: dialogComponent.selectedUnitName
-              };
+      return lastValueFrom(
+        dialogRef.afterClosed().pipe(
+          map(dialogResult => {
+            if (typeof dialogResult !== 'undefined') {
+              const dialogComponent = dialogRef.componentInstance;
+              if (
+                dialogResult !== false &&
+                dialogComponent.selectedUnitIds.length === 1
+              ) {
+                return <UnitInListDto>{
+                  id: dialogComponent.selectedUnitIds[0],
+                  key: dialogComponent.selectedUnitKey,
+                  name: dialogComponent.selectedUnitName
+                };
+              }
             }
-          }
-          return false;
-        })
-      ));
+            return false;
+          })
+        )
+      );
     }
     return false;
   }
 
-  private async addUnitDialog(newUnitData: NewUnitData): Promise<CreateUnitDto | boolean> {
+  private async addUnitDialog(
+    newUnitData: NewUnitData
+  ): Promise<CreateUnitDto | boolean> {
     const routingOk = await this.selectUnit(0);
     if (routingOk) {
       const dialogRef = this.newUnitDialog.open(NewUnitComponent, {
         width: '500px',
         data: newUnitData
       });
-      return lastValueFrom(dialogRef.afterClosed().pipe(
-        map(dialogResult => {
-          if (typeof dialogResult !== 'undefined') {
-            if (dialogResult !== false) {
-              return <CreateUnitDto>{
-                key: (<UntypedFormGroup>dialogResult).get('key')?.value.trim(),
-                name: (<UntypedFormGroup>dialogResult).get('label')?.value,
-                groupName: (<UntypedFormGroup>dialogResult).get('groupDirect')?.value ||
-                  (<UntypedFormGroup>dialogResult).get('groupSelect')?.value || ''
-              };
+      return lastValueFrom(
+        dialogRef.afterClosed().pipe(
+          map(dialogResult => {
+            if (typeof dialogResult !== 'undefined') {
+              if (dialogResult !== false) {
+                return <CreateUnitDto>{
+                  key: (<UntypedFormGroup>dialogResult)
+                    .get('key')
+                    ?.value.trim(),
+                  name: (<UntypedFormGroup>dialogResult).get('label')?.value,
+                  groupName:
+                    (<UntypedFormGroup>dialogResult).get('groupDirect')
+                      ?.value ||
+                    (<UntypedFormGroup>dialogResult).get('groupSelect')
+                      ?.value ||
+                    ''
+                };
+              }
             }
-          }
-          return false;
-        })
-      ));
+            return false;
+          })
+        )
+      );
     }
     return false;
   }
@@ -210,33 +254,38 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
       const inputElement = targetElement as HTMLInputElement;
       if (inputElement.files && inputElement.files.length > 0) {
         this.appService.dataLoading = true;
-        this.uploadSubscription = this.backendService.uploadUnits(
-          this.workspaceService.selectedWorkspaceId,
-          inputElement.files
-        ).subscribe(uploadStatus => {
-          if (typeof uploadStatus === 'number') {
-            if (uploadStatus < 0) {
-              this.appService.dataLoading = false;
+        this.uploadSubscription = this.backendService
+          .uploadUnits(
+            this.workspaceService.selectedWorkspaceId,
+            inputElement.files
+          )
+          .subscribe(uploadStatus => {
+            if (typeof uploadStatus === 'number') {
+              if (uploadStatus < 0) {
+                this.appService.dataLoading = false;
+              } else {
+                this.appService.dataLoading = uploadStatus;
+              }
             } else {
-              this.appService.dataLoading = uploadStatus;
-            }
-          } else {
-            this.appService.dataLoading = false;
-            if (uploadStatus.messages && uploadStatus.messages.length > 0) {
-              const dialogRef = this.uploadReportDialog.open(RequestMessageComponent, {
-                width: '500px',
-                data: uploadStatus
-              });
-              dialogRef.afterClosed().subscribe(() => {
+              this.appService.dataLoading = false;
+              if (uploadStatus.messages && uploadStatus.messages.length > 0) {
+                const dialogRef = this.uploadReportDialog.open(
+                  RequestMessageComponent,
+                  {
+                    width: '500px',
+                    data: uploadStatus
+                  }
+                );
+                dialogRef.afterClosed().subscribe(() => {
+                  this.resetUpload();
+                  this.updateUnitList();
+                });
+              } else {
                 this.resetUpload();
                 this.updateUnitList();
-              });
-            } else {
-              this.resetUpload();
-              this.updateUnitList();
+              }
             }
-          }
-        });
+          });
       }
     }
   }

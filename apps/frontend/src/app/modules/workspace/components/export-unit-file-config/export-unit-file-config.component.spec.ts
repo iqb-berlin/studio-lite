@@ -1,5 +1,5 @@
+/* eslint-disable max-classes-per-file */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
@@ -8,8 +8,27 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
+import { of } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { ExportUnitFileConfigComponent } from './export-unit-file-config.component';
+import { WorkspaceService } from '../../services/workspace.service';
+import { ModuleService } from '../../../shared/services/module.service';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
+
+class MockWorkspaceService {
+  selectedWorkspaceId = 1;
+}
+
+class MockModuleService {
+  players = {};
+}
+
+class MockWorkspaceBackendService {
+  // eslint-disable-next-line class-methods-use-this
+  getUnitListWithProperties() {
+    return of([]);
+  }
+}
 
 describe('ExportUnitFileConfigComponent', () => {
   let component: ExportUnitFileConfigComponent;
@@ -18,7 +37,6 @@ describe('ExportUnitFileConfigComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        NoopAnimationsModule,
         MatSelectModule,
         MatInputModule,
         FormsModule,
@@ -32,7 +50,11 @@ describe('ExportUnitFileConfigComponent', () => {
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl
-        }]
+        },
+        { provide: WorkspaceService, useClass: MockWorkspaceService },
+        { provide: ModuleService, useClass: MockModuleService },
+        { provide: WorkspaceBackendService, useClass: MockWorkspaceBackendService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ExportUnitFileConfigComponent);
