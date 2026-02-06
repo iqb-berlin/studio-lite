@@ -7,7 +7,7 @@ describe('SafeUrlPipe', () => {
   let sanitizer: DomSanitizer;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
+    TestBed.configureTestingModule({
       imports: []
     });
     sanitizer = TestBed.inject(DomSanitizer);
