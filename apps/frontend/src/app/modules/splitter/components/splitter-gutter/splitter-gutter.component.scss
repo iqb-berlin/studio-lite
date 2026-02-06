@@ -16,10 +16,11 @@
   position: relative;
   height: 100%;
   background-color: #00606450;
-
+  z-index: 1;
   &:hover {
-    border-right: 1px solid #00606450;
-    border-left: 1px solid #00606450;
+    background-color: #006064;
+    border-right: 1px solid #006064;
+    border-left: 1px solid #006064;
     margin-right: -1px;
     margin-left: -1px;
   }
