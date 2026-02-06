@@ -2,9 +2,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TranslateModule } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCheckboxChange, MatCheckboxModule, MatCheckbox } from '@angular/material/checkbox';
 import { MatSortModule } from '@angular/material/sort';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { QueryList } from '@angular/core';
+import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { ResourcePackagesTableComponent } from './resource-packages-table.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -18,8 +19,7 @@ describe('ResourcePackagesTableComponent', () => {
         TranslateModule.forRoot(),
         MatTableModule,
         MatCheckboxModule,
-        MatSortModule,
-        NoopAnimationsModule
+        MatSortModule
       ],
       providers: [{
         provide: 'SERVER_URL',
@@ -29,12 +29,56 @@ describe('ResourcePackagesTableComponent', () => {
 
     fixture = TestBed.createComponent(ResourcePackagesTableComponent);
     component = fixture.componentInstance;
-    component.dataSource = new MatTableDataSource();
+    const resourcePackages: ResourcePackageDto[] = [
+      {
+        id: 1,
+        name: 'One',
+        elements: ['one.png'],
+        createdAt: new Date('2024-01-01')
+      },
+      {
+        id: 2,
+        name: 'Two',
+        elements: ['two.png'],
+        createdAt: new Date('2024-01-02')
+      }
+    ];
+    component.dataSource = new MatTableDataSource(resourcePackages);
     component.selectedResourcePackages = new BehaviorSubject<number[]>([]);
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('updates selectedResourcePackages from checked rows', () => {
+    const checkBoxes = [
+      { checked: true } as MatCheckbox,
+      { checked: true } as MatCheckbox,
+      { checked: false } as MatCheckbox
+    ];
+    const queryList = new QueryList<MatCheckbox>();
+    queryList.reset(checkBoxes);
+    component.checkBoxes = queryList;
+
+    component.updateSelectedResourcePackages();
+
+    expect(component.selectedResourcePackages.value).toEqual([1]);
+  });
+
+  it('toggles all checkboxes', () => {
+    const checkBoxes = [
+      { checked: false } as MatCheckbox,
+      { checked: false } as MatCheckbox
+    ];
+    const queryList = new QueryList<MatCheckbox>();
+    queryList.reset(checkBoxes);
+    component.checkBoxes = queryList;
+
+    component.toggleCheckBoxes({ checked: true } as MatCheckboxChange);
+
+    expect(checkBoxes[0].checked).toBe(true);
+    expect(checkBoxes[1].checked).toBe(true);
   });
 });
