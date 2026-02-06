@@ -36,6 +36,7 @@ describe('Unit Definitions', () => {
     cy.wait(30);
     cy.getIFrameBody('iframe.unitHost').within(() => {
       cy.get('aspect-element-model-properties-component').within(() => {
+        cy.wait(2000);
         cy.contains('mat-form-field', 'Beschriftung')
           .find('textarea')
           .click()

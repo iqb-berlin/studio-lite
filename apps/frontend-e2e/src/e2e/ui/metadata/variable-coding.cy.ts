@@ -23,7 +23,7 @@ import {
   grantRemovePrivilegeAtWs,
   importExercise,
   selectUnit,
-  setVeronaWs
+  setModuleWithVerification
 } from '../../../support/helpers';
 
 describe('Variable and Item Metadata Coherence', () => {
@@ -45,7 +45,7 @@ describe('Variable and Item Metadata Coherence', () => {
     createWs(mathArea, group);
     grantRemovePrivilegeAtWs([Cypress.env('username')], mathArea, [AccessLevel.Admin]);
     selectProfileForGroup(group, IqbProfile.MA);
-    setVeronaWs(mathArea);
+    setModuleWithVerification(mathArea, 'Aspect', 'Aspect', 'Schemer');
     selectProfileForArea(IqbProfile.MA);
     importExercise('variable_metadata.zip');
   });

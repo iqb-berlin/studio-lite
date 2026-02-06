@@ -314,9 +314,9 @@ describe('Unit API tests', () => {
       let newSettings: WsSettings;
       before(() => {
         newSettings = {
-          defaultEditor: 'iqb-editor-aspect@2.9',
-          defaultPlayer: 'iqb-player-aspect@2.9',
-          defaultSchemer: 'iqb-schemer@2.5',
+          defaultEditor: 'iqb-editor-aspect@2.12',
+          defaultPlayer: 'iqb-player-aspect@2.12',
+          defaultSchemer: 'iqb-schemer@2.6',
           stableModulesOnly: false,
           unitMDProfile: Cypress.env('profile1'),
           itemMDProfile: Cypress.env('profile2')

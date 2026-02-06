@@ -82,17 +82,17 @@ describe('Verona Module Management', () => {
   });
 
   it('allows selecting modules in the admin interface', () => {
+    const selectedModule = 'IQB-Schemer';
     cy.visit('/');
     cy.findAdminSettings().click();
     clickIndexTabAdmin('v-modules');
 
     // Select a module
-    cy.selectModule('IQB-Schemer');
-
+    cy.selectModule(selectedModule);
     // Verify checkbox is checked by checking the aria-checked attribute
-    cy.contains('mat-row', 'Schemer')
-      .find('mat-checkbox input')
-      .should('be.checked');
+    cy.contains('mat-row', selectedModule)
+      .find('mat-checkbox')
+      .should('have.class', 'mat-mdc-checkbox-checked');
   });
 
   it('verifies all module types are available', () => {

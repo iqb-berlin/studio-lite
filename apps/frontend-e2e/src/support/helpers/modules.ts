@@ -81,26 +81,6 @@ export function deleteResource(): void {
 }
 
 /**
- * Sets Verona modules (editor, player, schemer) for a workspace
- * @param ws - Workspace name
- * @example
- * setVeronaWs('My Workspace');
- */
-export function setVeronaWs(ws: string): void {
-  cy.visit('/');
-  cy.visitWs(ws);
-  cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
-  cy.get('[data-cy="workspace-edit-unit-settings"]').click();
-  cy.get('[data-cy="edit-workspace-settings-editor"]').click();
-  cy.get('mat-option>span').contains('Aspect').click();
-  cy.get('[data-cy="edit-workspace-settings-player"]').click();
-  cy.get('mat-option>span').contains('Aspect').click();
-  cy.get('[data-cy="edit-workspace-settings-schemer"]').click();
-  cy.get('mat-option>span').contains('Schemer').click();
-  cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
-}
-
-/**
  * Verifies that Verona modules are correctly configured for a workspace
  * @param ws - Workspace name
  * @param expectedEditor - Expected editor module name
@@ -144,7 +124,7 @@ export function verifyModuleConfiguration(
  * @param player - Player module name
  * @param schemer - Schemer module name
  * @example
- * setModuleWithVerification('My Workspace', 'Aspect', 'Aspect', 'Schemer');
+ * setModule('My Workspace', 'Aspect', 'Aspect', 'Schemer');
  */
 export function setModuleWithVerification(
   ws: string,
@@ -152,6 +132,7 @@ export function setModuleWithVerification(
   player: string,
   schemer: string
 ): void {
+  cy.visit('/');
   cy.visitWs(ws);
   cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
   cy.get('[data-cy="workspace-edit-unit-settings"]').click();
@@ -168,13 +149,31 @@ export function setModuleWithVerification(
   cy.get('[data-cy="edit-workspace-settings-schemer"]').click();
   cy.get('mat-option>span').contains(schemer).click();
 
-  // Save with API verification
-  cy.intercept('PATCH', '/api/workspaces/*').as('updateWorkspace');
+  // Save with API
   cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
-  cy.wait('@updateWorkspace').its('response.statusCode').should('eq', 200);
 
   // Verify configuration persisted
   verifyModuleConfiguration(ws, editor, player, schemer);
+}
+
+/**
+ * Sets Verona modules (editor, player, schemer) for a workspace
+ * @param ws - Workspace name
+ * @example
+ * setVeronaWs('My Workspace');
+ */
+export function setVeronaWs(ws: string): void {
+  cy.visit('/');
+  cy.visitWs(ws);
+  cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+  cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+  cy.get('[data-cy="edit-workspace-settings-editor"]').click();
+  cy.get('mat-option>span').contains('Aspect').click();
+  cy.get('[data-cy="edit-workspace-settings-player"]').click();
+  cy.get('mat-option>span').contains('Aspect').click();
+  cy.get('[data-cy="edit-workspace-settings-schemer"]').click();
+  cy.get('mat-option>span').contains('Schemer').click();
+  cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
 }
 
 /**

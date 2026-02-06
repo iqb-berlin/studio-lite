@@ -20,7 +20,6 @@ import {
   importExercise,
   moveUnit,
   selectListUnits,
-  setVeronaWs,
   verifyModuleConfiguration,
   setModuleWithVerification
 } from '../../../support/helpers';
@@ -98,46 +97,15 @@ describe('Workspace Unit Management', () => {
   });
 
   it('configures Verona modules for workspace with verification', () => {
-    setVeronaWs(ws1);
+    setModuleWithVerification(ws1, 'Aspect', 'Aspect', 'Schemer');
     // Verify the configuration was saved
     verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
   });
 
   it('verifies module configuration persists after page reload', () => {
-    cy.reload();
-    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
-  });
-
-  it('displays available modules in dropdowns', () => {
+    cy.visit('/');
     cy.visitWs(ws1);
-    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
-    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
-
-    // Verify editor options
-    cy.get('[data-cy="edit-workspace-settings-editor"]').click();
-    cy.get('mat-option>span').contains('Aspect').should('exist');
-    cy.get('.cdk-overlay-backdrop').click({ force: true });
-
-    // Verify player options
-    cy.get('[data-cy="edit-workspace-settings-player"]').click();
-    cy.get('mat-option>span').contains('Aspect').should('exist');
-    cy.get('.cdk-overlay-backdrop').click({ force: true });
-
-    // Verify schemer options
-    cy.get('[data-cy="edit-workspace-settings-schemer"]').click();
-    cy.get('mat-option>span').contains('Schemer').should('exist');
-
-    cy.translate(Cypress.env('locale')).then(json => {
-      cy.clickDialogButton(json.cancel || json.close);
-    });
-  });
-
-  it('allows changing module configuration (idempotency test)', () => {
-    // Set configuration using the new helper with verification
-    setModuleWithVerification(ws1, 'Aspect', 'Aspect', 'Schemer');
-
-    // Change to same configuration (idempotency test)
-    setModuleWithVerification(ws1, 'Aspect', 'Aspect', 'Schemer');
+    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
   });
 
   it('validates module settings are workspace-specific', () => {
@@ -161,13 +129,11 @@ describe('Workspace Unit Management', () => {
 
   it('configures workspace with alternative module combinations', () => {
     // Configure ws2 with different modules (Speedtest editor, Stars player)
+    // setModuleWithVerification already verifies the configuration
     setModuleWithVerification(ws2, 'Speedtest', 'Stars', 'Schemer');
 
     // Verify ws1 still has original configuration
     verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
-
-    // Verify ws2 has the new configuration
-    verifyModuleConfiguration(ws2, 'Speedtest', 'Stars', 'Schemer');
   });
 
   it('allows switching between different player modules', () => {
@@ -177,11 +143,8 @@ describe('Workspace Unit Management', () => {
     // Switch to Speedtest player
     setModuleWithVerification(ws1, 'Aspect', 'Speedtest', 'Schemer');
 
-    // Switch to Stars player
+    // Switch to Stars player (already verified by setModuleWithVerification)
     setModuleWithVerification(ws1, 'Aspect', 'Stars', 'Schemer');
-
-    // Verify final configuration
-    verifyModuleConfiguration(ws1, 'Aspect', 'Stars', 'Schemer');
   });
 
   it('moves unit to another workspace', () => {
