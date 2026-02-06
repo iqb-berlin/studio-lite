@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -23,6 +22,7 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
   let component: EditWorkspaceGroupSettingsComponent;
   let fixture: ComponentFixture<EditWorkspaceGroupSettingsComponent>;
   let backendService: jest.Mocked<BackendService>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let wsgAdminService: jest.Mocked<WsgAdminService>;
 
   const mockDialogData: EditWorkspaceGroupComponentData = {
@@ -67,7 +67,6 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
         EditWorkspaceGroupSettingsComponent,
         MatInputModule,
         ReactiveFormsModule,
-        NoopAnimationsModule,
         MatDialogModule,
         MatSnackBarModule,
         TranslateModule.forRoot()
