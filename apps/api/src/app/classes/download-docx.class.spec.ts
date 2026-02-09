@@ -4,7 +4,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { Packer } from 'docx';
 import * as imageSizeModule from 'image-size';
-import { DownloadDocx } from './downloadDocx.class';
+import { DownloadDocx } from './download-docx.class';
 
 jest.mock('docx', () => ({
   Packer: {
