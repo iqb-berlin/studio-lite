@@ -1,4 +1,4 @@
-import { UserWorkspaceGroupNotAdminException } from './user-workspace-group-not-admin';
+import { UserWorkspaceGroupNotAdminException } from './user-workspace-group-not-admin.exception';
 
 describe('UserWorkspaceGroupNotAdminException', () => {
   it('should be defined', () => {

@@ -37,7 +37,7 @@ import { WorkspaceUserService } from './workspace-user.service';
 import { UnitUserService } from './unit-user.service';
 import {
   UserWorkspaceGroupNotAdminException
-} from '../exceptions/user-workspace-group-not-admin';
+} from '../exceptions/user-workspace-group-not-admin.exception';
 import { UnitCommentService } from './unit-comment.service';
 import User from '../entities/user.entity';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
