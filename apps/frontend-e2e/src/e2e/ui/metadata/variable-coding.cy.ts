@@ -15,15 +15,15 @@ import {
   createGroup,
   createItem,
   createWs,
+  deleteAllModules,
   deleteFirstUser,
   deleteGroup,
-  deleteAllModules,
   goToItem,
   goToWsMenu,
   grantRemovePrivilegeAtWs,
   importExercise,
   selectUnit,
-  setModuleWithVerification
+  setVeronaWs
 } from '../../../support/helpers';
 
 describe('Variable and Item Metadata Coherence', () => {
@@ -45,7 +45,7 @@ describe('Variable and Item Metadata Coherence', () => {
     createWs(mathArea, group);
     grantRemovePrivilegeAtWs([Cypress.env('username')], mathArea, [AccessLevel.Admin]);
     selectProfileForGroup(group, IqbProfile.MA);
-    setModuleWithVerification(mathArea, 'Aspect', 'Aspect', 'Schemer');
+    setVeronaWs(mathArea);
     selectProfileForArea(IqbProfile.MA);
     importExercise('variable_metadata.zip');
   });

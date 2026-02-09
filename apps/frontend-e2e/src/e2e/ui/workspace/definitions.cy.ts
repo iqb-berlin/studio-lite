@@ -35,14 +35,17 @@ describe('Unit Definitions', () => {
     selectUnit('M6_AK0011');
     cy.wait(30);
     cy.getIFrameBody('iframe.unitHost').within(() => {
-      cy.get('aspect-element-model-properties-component').within(() => {
-        cy.wait(2000);
-        cy.contains('mat-form-field', 'Beschriftung')
-          .find('textarea')
-          .click()
-          .clear()
-          .type('Neue Text');
-      });
+      cy.get('aspect-element-model-properties-component', { timeout: 10000 })
+        .should('be.visible')
+        .within(() => {
+          cy.contains('mat-form-field', 'Beschriftung')
+            .should('be.visible')
+            .find('textarea')
+            .should('be.visible')
+            .click()
+            .clear()
+            .type('Neue Text');
+        });
     });
     cy.get('[data-cy="workspace-unit-save-button"]').click();
   });

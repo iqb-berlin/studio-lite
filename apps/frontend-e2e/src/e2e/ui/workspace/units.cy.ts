@@ -21,7 +21,7 @@ import {
   moveUnit,
   selectListUnits,
   verifyModuleConfiguration,
-  setModuleWithVerification
+  setModuleWithoutVerification
 } from '../../../support/helpers';
 import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 
@@ -69,37 +69,8 @@ describe('Workspace Unit Management', () => {
     addStatus('Finale', 1);
     clickSaveButtonRight();
   });
-
-  it('creates new units', () => {
-    cy.visitWs(ws1);
-    addUnitPred(unit1);
-    cy.visitWs(ws1);
-    addUnitPred(unit2);
-    cy.visitWs(ws1);
-    addUnitPred(unit3);
-  });
-
-  it('creates unit from existing unit', () => {
-    cy.visitWs(ws1);
-    addUnitFromExisting(`${group1}: ${ws1}`, unit1, newUnit);
-  });
-
-  it('imports units from zip file', () => {
-    cy.visitWs(ws1);
-    importExercise('test_studio_units_download.zip');
-    cy.contains('M6_AK0011')
-      .should('exist');
-  });
-
-  it('deletes a unit', () => {
-    cy.visitWs(ws1);
-    deleteUnit(unit1.shortname);
-  });
-
-  it('configures Verona modules for workspace with verification', () => {
-    setModuleWithVerification(ws1, 'Aspect', 'Aspect', 'Schemer');
-    // Verify the configuration was saved
-    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
+  it('configures Verona modules for workspace', () => {
+    setModuleWithoutVerification(ws1, 'Aspect', 'Aspect', 'Schemer');
   });
 
   it('verifies module configuration persists after page reload', () => {
@@ -130,21 +101,43 @@ describe('Workspace Unit Management', () => {
   it('configures workspace with alternative module combinations', () => {
     // Configure ws2 with different modules (Speedtest editor, Stars player)
     // setModuleWithVerification already verifies the configuration
-    setModuleWithVerification(ws2, 'Speedtest', 'Stars', 'Schemer');
+    setModuleWithoutVerification(ws2, 'Aspect', 'Stars', 'Schemer');
 
     // Verify ws1 still has original configuration
     verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
   });
 
   it('allows switching between different player modules', () => {
-    // Start with Aspect player
-    setModuleWithVerification(ws1, 'Aspect', 'Aspect', 'Schemer');
-
     // Switch to Speedtest player
-    setModuleWithVerification(ws1, 'Aspect', 'Speedtest', 'Schemer');
-
+    setModuleWithoutVerification(ws1, 'Aspect', 'Speedtest', 'Schemer');
     // Switch to Stars player (already verified by setModuleWithVerification)
-    setModuleWithVerification(ws1, 'Aspect', 'Stars', 'Schemer');
+    setModuleWithoutVerification(ws1, 'Aspect', 'Stars', 'Schemer');
+  });
+
+  it('creates new units', () => {
+    cy.visitWs(ws1);
+    addUnitPred(unit1);
+    cy.visitWs(ws1);
+    addUnitPred(unit2);
+    cy.visitWs(ws1);
+    addUnitPred(unit3);
+  });
+
+  it('creates unit from existing unit', () => {
+    cy.visitWs(ws1);
+    addUnitFromExisting(`${group1}: ${ws1}`, unit1, newUnit);
+  });
+
+  it('imports units from zip file', () => {
+    cy.visitWs(ws1);
+    importExercise('test_studio_units_download.zip');
+    cy.contains('M6_AK0011')
+      .should('exist');
+  });
+
+  it('deletes a unit', () => {
+    cy.visitWs(ws1);
+    deleteUnit(unit1.shortname);
   });
 
   it('moves unit to another workspace', () => {

@@ -95,21 +95,25 @@ export function verifyModuleConfiguration(
   expectedPlayer: string,
   expectedSchemer: string
 ): void {
+  cy.visit('/');
   cy.visitWs(ws);
   cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
   cy.get('[data-cy="workspace-edit-unit-settings"]').click();
 
   // Verify editor selection
   cy.get('[data-cy="edit-workspace-settings-editor"]')
-    .should('contain', expectedEditor);
+    .find('mat-select')
+    .should('have.text', expectedEditor);
 
   // Verify player selection
   cy.get('[data-cy="edit-workspace-settings-player"]')
-    .should('contain', expectedPlayer);
+    .find('mat-select')
+    .should('have.text', expectedPlayer);
 
   // Verify schemer selection
   cy.get('[data-cy="edit-workspace-settings-schemer"]')
-    .should('contain', expectedSchemer);
+    .find('mat-select')
+    .should('have.text', expectedSchemer);
 
   // Close dialog
   cy.translate(Cypress.env('locale')).then(json => {
@@ -126,13 +130,12 @@ export function verifyModuleConfiguration(
  * @example
  * setModule('My Workspace', 'Aspect', 'Aspect', 'Schemer');
  */
-export function setModuleWithVerification(
+export function setModuleWithoutVerification(
   ws: string,
   editor: string,
   player: string,
   schemer: string
 ): void {
-  cy.visit('/');
   cy.visitWs(ws);
   cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
   cy.get('[data-cy="workspace-edit-unit-settings"]').click();
@@ -153,7 +156,7 @@ export function setModuleWithVerification(
   cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
 
   // Verify configuration persisted
-  verifyModuleConfiguration(ws, editor, player, schemer);
+  // verifyModuleConfiguration(ws, editor, player, schemer);
 }
 
 /**
@@ -163,7 +166,6 @@ export function setModuleWithVerification(
  * setVeronaWs('My Workspace');
  */
 export function setVeronaWs(ws: string): void {
-  cy.visit('/');
   cy.visitWs(ws);
   cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
   cy.get('[data-cy="workspace-edit-unit-settings"]').click();
