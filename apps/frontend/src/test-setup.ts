@@ -79,3 +79,8 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: jest.fn()
   }))
 });
+
+// Polyfill structuredClone if missing (e.g. in some JSDOM versions)
+if (typeof structuredClone === 'undefined') {
+  global.structuredClone = (val: unknown) => JSON.parse(JSON.stringify(val));
+}
