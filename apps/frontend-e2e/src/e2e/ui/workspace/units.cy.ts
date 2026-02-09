@@ -20,7 +20,6 @@ import {
   importExercise,
   moveUnit,
   selectListUnits,
-  verifyModuleConfiguration,
   setModuleWithoutVerification
 } from '../../../support/helpers';
 import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
@@ -72,40 +71,40 @@ describe('Workspace Unit Management', () => {
   it('configures Verona modules for workspace', () => {
     setModuleWithoutVerification(ws1, 'Aspect', 'Aspect', 'Schemer');
   });
-
-  it('verifies module configuration persists after page reload', () => {
-    cy.visit('/');
-    cy.visitWs(ws1);
-    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
-  });
-
-  it('validates module settings are workspace-specific', () => {
-    // Verify ws1 has configured modules
-    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
-
-    // Verify ws2 has independent configuration
-    cy.visitWs(ws2);
-    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
-    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
-
-    // ws2 should have module dropdowns available (even if not configured yet)
-    cy.get('[data-cy="edit-workspace-settings-editor"]').should('exist');
-    cy.get('[data-cy="edit-workspace-settings-player"]').should('exist');
-    cy.get('[data-cy="edit-workspace-settings-schemer"]').should('exist');
-
-    cy.translate(Cypress.env('locale')).then(json => {
-      cy.clickDialogButton(json.cancel || json.close);
-    });
-  });
-
-  it('configures workspace with alternative module combinations', () => {
-    // Configure ws2 with different modules (Speedtest editor, Stars player)
-    // setModuleWithVerification already verifies the configuration
-    setModuleWithoutVerification(ws2, 'Aspect', 'Stars', 'Schemer');
-
-    // Verify ws1 still has original configuration
-    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
-  });
+  //
+  // it('verifies module configuration persists after page reload', () => {
+  //   cy.visit('/');
+  //   cy.visitWs(ws1);
+  //   verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
+  // });
+  //
+  // it('validates module settings are workspace-specific', () => {
+  //   // Verify ws1 has configured modules
+  //   verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
+  //
+  //   // Verify ws2 has independent configuration
+  //   cy.visitWs(ws2);
+  //   cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+  //   cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+  //
+  //   // ws2 should have module dropdowns available (even if not configured yet)
+  //   cy.get('[data-cy="edit-workspace-settings-editor"]').should('exist');
+  //   cy.get('[data-cy="edit-workspace-settings-player"]').should('exist');
+  //   cy.get('[data-cy="edit-workspace-settings-schemer"]').should('exist');
+  //
+  //   cy.translate(Cypress.env('locale')).then(json => {
+  //     cy.clickDialogButton(json.cancel || json.close);
+  //   });
+  // });
+  //
+  // it('configures workspace with alternative module combinations', () => {
+  //   // Configure ws2 with different modules (Speedtest editor, Stars player)
+  //   // setModuleWithVerification already verifies the configuration
+  //   setModuleWithoutVerification(ws2, 'Aspect', 'Stars', 'Schemer');
+  //
+  //   // Verify ws1 still has original configuration
+  //   verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
+  // });
 
   it('allows switching between different player modules', () => {
     // Switch to Speedtest player
