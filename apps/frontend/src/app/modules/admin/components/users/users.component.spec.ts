@@ -13,7 +13,7 @@ import { FormControl, FormGroup, UntypedFormGroup } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
-import { AppConfig } from '../../../../models/app-config.class';
+import { AppConfig } from '../../../../classes/app-config.class';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
 import { environment } from '../../../../../environments/environment';
 import { UsersComponent } from './users.component';
