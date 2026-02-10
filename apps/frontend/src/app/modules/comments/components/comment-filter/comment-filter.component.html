@@ -9,7 +9,8 @@
             [matBadgeHidden]="disabled || (!filteredItems.length && !showHiddenComments.value)"
             [matBadgeColor]="'accent'"
             [matBadge]="filteredItems.length + (showHiddenComments.value ? 1: 0)"
-            [attr.aria-hidden]="false">filter_alt</mat-icon>
+            [attr.aria-label]="'comments.filter' | translate"
+            aria-hidden="false">filter_alt</mat-icon>
 </button>
 
 <mat-menu #filters="matMenu"
