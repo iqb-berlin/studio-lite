@@ -1,5 +1,5 @@
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
-import { ParseFile } from './parse-file-pipe';
+import { ParseFile } from './parse-file.pipe';
 
 describe('ParseFile', () => {
   let pipe: ParseFile;
