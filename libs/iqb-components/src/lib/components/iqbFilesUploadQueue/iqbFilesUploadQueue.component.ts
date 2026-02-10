@@ -4,7 +4,7 @@ import {
 import { HttpHeaders, HttpParams } from '@angular/common/http';
 import { MatButton } from '@angular/material/button';
 import { IqbFilesUploadComponent } from '../iqbFilesUpload/iqbFilesUpload.component';
-import { UploadStatus } from '../iqb-files-classes';
+import { UploadStatus } from '../../iqb-files/iqb-files-classes';
 
 /**
  * A material design file upload queue component.
