@@ -1,5 +1,5 @@
 import { UnsupportedMediaTypeException } from '@nestjs/common';
-import { fileMimetypeFilter } from './file-mimetype-filter';
+import { fileMimetypeFilter } from './file-mimetype.filter';
 
 describe('fileMimetypeFilter', () => {
   const makeFile = (mimetype: string): Express.Multer.File => ({

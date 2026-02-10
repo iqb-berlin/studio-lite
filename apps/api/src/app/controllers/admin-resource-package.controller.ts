@@ -16,7 +16,7 @@ import { ResourcePackageService } from '../services/resource-package.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { ApiFile } from '../decorators/api-file.decorator';
-import { fileMimetypeFilter } from '../utils/file-mimetype-filter';
+import { fileMimetypeFilter } from '../filters/file-mimetype.filter';
 import { ParseFilePipe } from '../pipes/parse-file.pipe';
 
 @Controller('admin/resource-packages')
