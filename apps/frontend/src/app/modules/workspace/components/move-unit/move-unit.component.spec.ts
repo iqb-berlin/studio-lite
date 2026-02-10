@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { UntypedFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
@@ -62,7 +61,6 @@ describe('MoveUnitComponent', () => {
       imports: [
         MatSelectModule,
         ReactiveFormsModule,
-        NoopAnimationsModule,
         MatDialogModule,
         MatTableModule,
         MatCheckboxModule,

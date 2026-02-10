@@ -11,7 +11,6 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { ReviewsComponent } from './reviews.component';
@@ -146,7 +145,6 @@ describe('ReviewsComponent', () => {
         MatSortModule,
         MatDialogModule,
         MatSnackBarModule,
-        NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [

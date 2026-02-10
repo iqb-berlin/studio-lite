@@ -3,7 +3,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTab, MatTabChangeEvent, MatTabsModule } from '@angular/material/tabs';
 import { MatSortModule } from '@angular/material/sort';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { MDProfileGroup } from '@iqb/metadata';
@@ -49,7 +49,7 @@ describe('TableViewComponent', () => {
         MatTableModule,
         MatTabsModule,
         MatSortModule,
-        NoopAnimationsModule,
+        MatSnackBarModule,
         TranslateModule.forRoot(),
         TableViewComponent
       ],

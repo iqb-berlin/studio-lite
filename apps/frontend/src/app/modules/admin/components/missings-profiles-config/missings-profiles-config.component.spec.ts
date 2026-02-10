@@ -2,8 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatInputModule } from '@angular/material/input';
 import { BackendService } from '../../services/backend.service';
 import { MissingsProfilesConfigComponent } from './missings-profiles-config.component';
 
@@ -26,7 +27,8 @@ describe('MissingsProfilesConfigComponent', () => {
       imports: [
         TranslateModule.forRoot(),
         ReactiveFormsModule,
-        NoopAnimationsModule
+        MatSlideToggleModule,
+        MatInputModule
       ],
       providers: [
         { provide: BackendService, useValue: backendService },

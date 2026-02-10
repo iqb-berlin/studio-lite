@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyToggleComponent } from './formly-toggle.component';
@@ -15,7 +14,6 @@ describe('FormlyToggleComponent', () => {
         ReactiveFormsModule,
         FormsModule,
         MatSlideToggleModule,
-        NoopAnimationsModule,
         FormlyModule.forRoot(),
         FormlyToggleComponent
       ]

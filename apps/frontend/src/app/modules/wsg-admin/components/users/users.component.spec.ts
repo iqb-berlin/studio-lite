@@ -4,7 +4,6 @@ import {
   Component, Input, Output, EventEmitter
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { of, BehaviorSubject } from 'rxjs';
 import { UserFullDto } from '@studio-lite-lib/api-dto';
@@ -68,7 +67,7 @@ describe('UsersComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [UsersComponent, NoopAnimationsModule, TranslateModule.forRoot()],
+      imports: [UsersComponent, TranslateModule.forRoot()],
       providers: [
         { provide: BackendService, useValue: mockBackendService },
         { provide: AppService, useValue: mockAppService },

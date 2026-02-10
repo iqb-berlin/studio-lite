@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { FormlyModule } from '@ngx-formly/core';
 import { FormlyDurationComponent } from './formly-duration.component';
 
 describe('FormlyDurationComponent', () => {
@@ -16,7 +16,7 @@ describe('FormlyDurationComponent', () => {
         FormsModule,
         MatFormFieldModule,
         MatInputModule,
-        NoopAnimationsModule,
+        FormlyModule.forRoot(),
         FormlyDurationComponent
       ]
     }).compileComponents();

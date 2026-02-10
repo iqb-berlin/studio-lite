@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { UserInListDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { UserListComponent } from './user-list.component';
 
 describe('UserListComponent', () => {
@@ -14,9 +15,11 @@ describe('UserListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslateModule.forRoot(),
-        NoopAnimationsModule,
         MatTableModule,
-        MatSortModule]
+        MatSortModule,
+        MatFormFieldModule,
+        MatInputModule
+      ]
     }).compileComponents();
   });
 

@@ -4,7 +4,6 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { UnitInViewDto } from '@studio-lite-lib/api-dto';
@@ -67,8 +66,7 @@ describe('UnitsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         UnitsComponent,
-        TranslateModule.forRoot(),
-        NoopAnimationsModule
+        TranslateModule.forRoot()
       ],
       providers: [
         provideRouter([]),

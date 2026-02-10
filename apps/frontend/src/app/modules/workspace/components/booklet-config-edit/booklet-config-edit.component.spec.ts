@@ -6,7 +6,8 @@ import {
 } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
 import { BookletConfigEditComponent } from './booklet-config-edit.component';
@@ -20,8 +21,9 @@ describe('BookletConfigEditComponent', () => {
       imports: [
         FormsModule,
         MatSelectModule,
+        MatCheckboxModule,
+        MatIconModule,
         MatSlideToggleModule,
-        NoopAnimationsModule,
         TranslateModule.forRoot({
           loader: { provide: TranslateLoader, useClass: TranslateFakeLoader }
         }),

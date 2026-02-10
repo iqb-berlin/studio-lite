@@ -5,7 +5,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
@@ -43,8 +42,7 @@ describe('AppLogoComponent', () => {
         MatIconModule,
         MatFormFieldModule,
         MatInputModule,
-        MatTooltipModule,
-        NoopAnimationsModule
+        MatTooltipModule
       ],
       providers: [
         provideHttpClient(),

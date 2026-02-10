@@ -2,12 +2,12 @@ import {
   ComponentFixture, TestBed, fakeAsync, tick
 } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MDProfile, MDProfileGroup } from '@iqb/metadata';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MetadataBackendService } from '../../services/metadata-backend.service';
 import { MetadataService } from '../../services/metadata.service';
 import { ProfileFormComponent } from './profile-form.component';
@@ -37,7 +37,7 @@ describe('ProfileFormComponent', () => {
         }),
         FormlyMaterialModule,
         TranslateModule.forRoot(),
-        NoopAnimationsModule,
+        MatSnackBarModule,
         ProfileFormComponent
       ],
       providers: [
