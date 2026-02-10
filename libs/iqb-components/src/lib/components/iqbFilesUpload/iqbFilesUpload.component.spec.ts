@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpEventType, HttpProgressEvent, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { IqbFilesUploadComponent } from './iqbFilesUpload.component';
-import { UploadStatus } from '../../iqb-files/iqb-files-classes';
+import { UploadStatus } from '../../enums/upload-status.enum';
 
 describe('IqbFilesUploadComponent', () => {
   let fixture: ComponentFixture<IqbFilesUploadComponent>;

@@ -1,7 +1,7 @@
 import { QueryList } from '@angular/core';
 import { IqbFilesUploadQueueComponent } from './iqbFilesUploadQueue.component';
 import { IqbFilesUploadComponent } from '../iqbFilesUpload/iqbFilesUpload.component';
-import { UploadStatus } from '../../iqb-files/iqb-files-classes';
+import { UploadStatus } from '../../enums/upload-status.enum';
 
 describe('IqbFilesUploadQueueComponent', () => {
   let component: IqbFilesUploadQueueComponent;
