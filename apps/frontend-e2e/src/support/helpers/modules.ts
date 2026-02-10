@@ -102,18 +102,16 @@ export function verifyModuleConfiguration(
 
   // Verify editor selection
   cy.get('[data-cy="edit-workspace-settings-editor"]')
-    .find('mat-select')
-    .should('have.text', expectedEditor);
-
+    .find('mat-select .mat-mdc-select-value-text')
+    .should('contain', expectedEditor);
   // Verify player selection
   cy.get('[data-cy="edit-workspace-settings-player"]')
-    .find('mat-select')
-    .should('have.text', expectedPlayer);
-
+    .find('mat-select .mat-mdc-select-value-text')
+    .should('contain', expectedPlayer);
   // Verify schemer selection
   cy.get('[data-cy="edit-workspace-settings-schemer"]')
-    .find('mat-select')
-    .should('have.text', expectedSchemer);
+    .find('mat-select .mat-mdc-select-value-text')
+    .should('contain', expectedSchemer);
 
   // Close dialog
   cy.translate(Cypress.env('locale')).then(json => {
@@ -157,25 +155,6 @@ export function setModuleWithoutVerification(
 
   // Verify configuration persisted
   // verifyModuleConfiguration(ws, editor, player, schemer);
-}
-
-/**
- * Sets Verona modules (editor, player, schemer) for a workspace
- * @param ws - Workspace name
- * @example
- * setVeronaWs('My Workspace');
- */
-export function setVeronaWs(ws: string): void {
-  cy.visitWs(ws);
-  cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
-  cy.get('[data-cy="workspace-edit-unit-settings"]').click();
-  cy.get('[data-cy="edit-workspace-settings-editor"]').click();
-  cy.get('mat-option>span').contains('Aspect').click();
-  cy.get('[data-cy="edit-workspace-settings-player"]').click();
-  cy.get('mat-option>span').contains('Aspect').click();
-  cy.get('[data-cy="edit-workspace-settings-schemer"]').click();
-  cy.get('mat-option>span').contains('Schemer').click();
-  cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
 }
 
 /**
