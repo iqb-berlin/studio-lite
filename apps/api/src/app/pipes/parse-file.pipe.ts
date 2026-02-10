@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 
 @Injectable()
-export class ParseFile implements PipeTransform {
+export class ParseFilePipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
   transform(
     files: Express.Multer.File | Express.Multer.File[],

@@ -1,13 +1,13 @@
 import { BadRequestException, ArgumentMetadata } from '@nestjs/common';
-import { ParseFile } from './parse-file.pipe';
+import { ParseFilePipe } from './parse-file.pipe';
 
-describe('ParseFile', () => {
-  let pipe: ParseFile;
+describe('ParseFilePipe', () => {
+  let pipe: ParseFilePipe;
   let metadata: ArgumentMetadata;
-  let parseFileInput: Parameters<ParseFile['transform']>[0];
+  let parseFileInput: Parameters<ParseFilePipe['transform']>[0];
 
   beforeEach(() => {
-    pipe = new ParseFile();
+    pipe = new ParseFilePipe();
     metadata = {
       type: 'body',
       metatype: undefined,
@@ -39,13 +39,17 @@ describe('ParseFile', () => {
   });
 
   it('returns the same file instance', () => {
-    const file = { originalname: 'test.txt' } as unknown as typeof parseFileInput;
+    const file = {
+      originalname: 'test.txt'
+    } as unknown as typeof parseFileInput;
     const result = pipe.transform(file, metadata);
     expect(result).toBe(file);
   });
 
   it('returns the same files array instance', () => {
-    const files = [{ originalname: 'test.txt' }] as unknown as typeof parseFileInput;
+    const files = [
+      { originalname: 'test.txt' }
+    ] as unknown as typeof parseFileInput;
     const result = pipe.transform(files, metadata);
     expect(result).toBe(files);
   });
