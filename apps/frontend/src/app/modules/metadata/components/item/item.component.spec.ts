@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Component, Input } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ItemsMetadataValues } from '@studio-lite-lib/api-dto';
@@ -25,6 +24,7 @@ describe('ItemComponent', () => {
     @Input() metadata!: ItemsMetadataValues[];
     @Input() formlyWrapper!: string;
     @Input() panelExpanded!: boolean;
+    @Input() profile!: unknown;
   }
 
   beforeEach(async () => {
@@ -35,7 +35,6 @@ describe('ItemComponent', () => {
           validators: [{ name: 'id', validation: IdValidator }]
         }),
         FormlyMaterialModule,
-        NoopAnimationsModule,
         TranslateModule.forRoot(),
         ItemComponent,
         MockProfileFormComponent
