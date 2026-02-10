@@ -2,7 +2,7 @@ import { UnsupportedMediaTypeException } from '@nestjs/common';
 
 export function fileMimetypeFilter(...mimetypes: string[]) {
   return (
-    req,
+    req: unknown,
     file: Express.Multer.File,
     callback: (error: Error | null, acceptFile: boolean) => void
   ) => {
