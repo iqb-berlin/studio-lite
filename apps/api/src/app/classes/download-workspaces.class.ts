@@ -10,7 +10,7 @@ import { CodingScheme, VariableCodingData, CodeData } from '@iqbspecs/coding-sch
 import { Logger } from '@nestjs/common';
 import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
-import { DownloadDocx } from './downloadDocx.class';
+import { DownloadDocx } from './download-docx.class';
 import { SettingService } from '../services/setting.service';
 
 interface WorkspaceData {
