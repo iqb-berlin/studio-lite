@@ -5,14 +5,14 @@ import { EventEmitter, Injectable, Output } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import {
-  UnitInListDto, UnitPropertiesDto, WorkspaceSettingsDto
+  UnitInListDto,
+  UnitPropertiesDto,
+  WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { HttpParams } from '@angular/common/http';
-import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodingSchemeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { WorkspaceBackendService } from './workspace-backend.service';
-import {
-  UnitMetadataStore
-} from '../classes/unit-metadata-store';
+import { UnitMetadataStore } from '../classes/unit-metadata-store';
 import { AppService } from '../../../services/app.service';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
@@ -41,15 +41,25 @@ export class WorkspaceService {
   lastChangedSchemeUser?: string;
   isValidFormKey = new BehaviorSubject<boolean>(true);
   states: State[] = [];
-  codingScheme!: CodingScheme;
+  codingScheme!: CodingSchemeData;
   dropBoxId: number | null = null;
   hasDroppedUnits: boolean = false;
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
-  @Output() unitDefinitionStoreChanged = new EventEmitter<UnitDefinitionStore | undefined>();
-  @Output() unitMetadataStoreChanged = new EventEmitter<UnitMetadataStore | undefined>();
-  @Output() unitSchemeStoreChanged = new EventEmitter<UnitSchemeStore | undefined>();
-  @Output() unitPropertiesChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() unitDefinitionStoreChanged = new EventEmitter<
+  UnitDefinitionStore | undefined
+  >();
+
+  @Output() unitMetadataStoreChanged = new EventEmitter<
+  UnitMetadataStore | undefined
+  >();
+
+  @Output() unitSchemeStoreChanged = new EventEmitter<
+  UnitSchemeStore | undefined
+  >();
+
+  @Output() unitPropertiesChange: EventEmitter<boolean> =
+    new EventEmitter<boolean>();
 
   constructor(
     private backendService: WorkspaceBackendService,
@@ -70,16 +80,24 @@ export class WorkspaceService {
     return '[a-zA-Z][a-zA-Z0-9_-]*';
   }
 
-  static unitKeyUniquenessValidator(unitId: number, unitList: { [key: string]: UnitInListDto[] }): ValidatorFn {
+  static unitKeyUniquenessValidator(
+    unitId: number,
+    unitList: { [key: string]: UnitInListDto[] }
+  ): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const newKeyNormalised = control.value.toUpperCase().trim();
       let allUnits: UnitInListDto[] = [];
       Object.values(unitList).forEach(units => {
         allUnits = [...allUnits, ...units];
       });
-      const allreadyIn = allUnits.filter(u => u.key.toUpperCase().trim() === newKeyNormalised && u.id !== unitId);
+      const allreadyIn = allUnits.filter(
+        u => u.key.toUpperCase().trim() === newKeyNormalised && u.id !== unitId
+      );
       if (allreadyIn && allreadyIn.length > 0) {
-        return { keyNotUnique: 'Der Kurzname muss eindeutig innerhalb des Arbeitsbereiches sein.' };
+        return {
+          keyNotUnique:
+            'Der Kurzname muss eindeutig innerhalb des Arbeitsbereiches sein.'
+        };
       }
       return null;
     };
@@ -128,7 +146,8 @@ export class WorkspaceService {
   }
 
   isChanged(): boolean {
-    return !!((this.unitMetadataStore && this.unitMetadataStore.isChanged()) ||
+    return !!(
+      (this.unitMetadataStore && this.unitMetadataStore.isChanged()) ||
       (this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) ||
       (this.unitSchemeStore && this.unitSchemeStore.isChanged())
     );
@@ -161,12 +180,14 @@ export class WorkspaceService {
 
   setWorkspaceGroupStates(): void {
     if (this.groupId) {
-      this.backendService.getWorkspaceGroupStates(this.groupId).subscribe(res => {
-        if (res.settings) {
-          this.workspaceSettings.states = res.settings.states;
-          this.states = res.settings.states || [];
-        }
-      });
+      this.backendService
+        .getWorkspaceGroupStates(this.groupId)
+        .subscribe(res => {
+          if (res.settings) {
+            this.workspaceSettings.states = res.settings.states;
+            this.states = res.settings.states || [];
+          }
+        });
     }
   }
 
@@ -185,14 +206,21 @@ export class WorkspaceService {
           this.lastChangedSchemeUser = undefined;
           if (unitData) {
             if (unitData.lastChangedMetadata) {
-              unitData.lastChangedMetadata = new Date(unitData.lastChangedMetadata);
+              unitData.lastChangedMetadata = new Date(
+                unitData.lastChangedMetadata
+              );
               this.lastChangedMetadata = new Date(unitData.lastChangedMetadata);
               this.lastChangedMetadataUser = unitData.lastChangedMetadataUser;
             }
             if (unitData.lastChangedDefinition) {
-              unitData.lastChangedDefinition = new Date(unitData.lastChangedDefinition);
-              this.lastChangedDefinition = new Date(unitData.lastChangedDefinition);
-              this.lastChangedDefinitionUser = unitData.lastChangedDefinitionUser;
+              unitData.lastChangedDefinition = new Date(
+                unitData.lastChangedDefinition
+              );
+              this.lastChangedDefinition = new Date(
+                unitData.lastChangedDefinition
+              );
+              this.lastChangedDefinitionUser =
+                unitData.lastChangedDefinitionUser;
             }
             if (unitData.lastChangedScheme) {
               unitData.lastChangedScheme = new Date(unitData.lastChangedScheme);
@@ -201,7 +229,9 @@ export class WorkspaceService {
             }
             this.setUnitMetadataStore(new UnitMetadataStore(unitData));
           } else {
-            this.setUnitMetadataStore(new UnitMetadataStore(<UnitPropertiesDto>{ id: selectedUnitId }));
+            this.setUnitMetadataStore(
+              new UnitMetadataStore(<UnitPropertiesDto>{ id: selectedUnitId })
+            );
           }
           return this.unitMetadataStore;
         })
@@ -217,9 +247,12 @@ export class WorkspaceService {
     let saveOk = true;
     this.appService.dataLoading = true;
     if (this.unitMetadataStore && this.unitMetadataStore.isChanged()) {
-      saveOk = await lastValueFrom(this.backendService.setUnitProperties(
-        this.selectedWorkspaceId, this.unitMetadataStore.getChangedData()
-      ));
+      saveOk = await lastValueFrom(
+        this.backendService.setUnitProperties(
+          this.selectedWorkspaceId,
+          this.unitMetadataStore.getChangedData()
+        )
+      );
       if (saveOk) {
         reloadUnitList = this.unitMetadataStore.isKeyOrNameOrGroupOrStateChanged();
         this.unitMetadataStore.applyChanges();
@@ -227,10 +260,18 @@ export class WorkspaceService {
         this.lastChangedMetadataUser = this.getDisplayUserName();
       }
     }
-    if (saveOk && this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) {
-      saveOk = await lastValueFrom(this.backendService.setUnitDefinition(
-        this.selectedWorkspaceId, this.selectedUnit$.getValue(), this.unitDefinitionStore.getChangedData()
-      ));
+    if (
+      saveOk &&
+      this.unitDefinitionStore &&
+      this.unitDefinitionStore.isChanged()
+    ) {
+      saveOk = await lastValueFrom(
+        this.backendService.setUnitDefinition(
+          this.selectedWorkspaceId,
+          this.selectedUnit$.getValue(),
+          this.unitDefinitionStore.getChangedData()
+        )
+      );
       if (saveOk) {
         this.unitDefinitionStore.applyChanges();
         this.lastChangedDefinition = new Date();
@@ -238,9 +279,13 @@ export class WorkspaceService {
       }
     }
     if (saveOk && this.unitSchemeStore && this.unitSchemeStore.isChanged()) {
-      saveOk = await lastValueFrom(this.backendService.setUnitScheme(
-        this.selectedWorkspaceId, this.selectedUnit$.getValue(), this.unitSchemeStore.getChangedData()
-      ));
+      saveOk = await lastValueFrom(
+        this.backendService.setUnitScheme(
+          this.selectedWorkspaceId,
+          this.selectedUnit$.getValue(),
+          this.unitSchemeStore.getChangedData()
+        )
+      );
       if (saveOk) {
         this.unitSchemeStore.applyChanges();
         this.lastChangedScheme = new Date();

@@ -6,7 +6,11 @@ import {
   MissingsProfilesDto
 } from '@studio-lite-lib/api-dto';
 import { ToTextFactory, CodeAsText } from '@iqb/responses';
-import { CodingScheme, VariableCodingData, CodeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import {
+  VariableCodingData,
+  CodeData
+} from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodingScheme } from '@iqbspecs/coding-scheme';
 import { Logger } from '@nestjs/common';
 import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
@@ -29,7 +33,7 @@ type Missing = {
   id: string;
   label: string;
   description: string;
-  code:number;
+  code: number;
 };
 
 interface BookVariable {
@@ -152,9 +156,11 @@ export class DownloadWorkspacesClass {
     units: number[]
   ): Promise<Buffer> {
     const mappedColumnNames = DownloadWorkspacesClass.mapColumnNames(columns);
-    const unitsFromWorkspace = await unitService.findAllWithProperties(workspaceId);
-    const unitsFiltered = unitsFromWorkspace.filter(
-      unit => units.find(su => Number(su) === unit.id));
+    const unitsFromWorkspace = await unitService.findAllWithProperties(
+      workspaceId
+    );
+    const unitsFiltered = unitsFromWorkspace.filter(unit => units.find(su => Number(su) === unit.id)
+    );
     const rows =
       reportType === 'unit' ?
         this.setUnitsDataRows(unitsFiltered) :
@@ -167,13 +173,12 @@ export class DownloadWorkspacesClass {
     wb.title = 'Webanwendung IQB Studio';
     wb.subject =
       reportType === 'unit' ? 'Metadaten der Aufgaben' : 'Metadaten der Items';
-    ws.columns = mappedColumnNames
-      .map((column: string) => ({
-        header: column,
-        key: column,
-        width: 30,
-        style: { alignment: { wrapText: true, vertical: 'top' } }
-      }));
+    ws.columns = mappedColumnNames.map((column: string) => ({
+      header: column,
+      key: column,
+      width: 30,
+      style: { alignment: { wrapText: true, vertical: 'top' } }
+    }));
     ws.getRow(1).font = { bold: true };
     ws.addRows(rows);
     return (await wb.xlsx.writeBuffer()) as unknown as Buffer;
@@ -187,16 +192,23 @@ export class DownloadWorkspacesClass {
     unitList: number[]
   ): Promise<Buffer | []> {
     const units = await unitService.findAllWithProperties(workspaceId);
-    const selectedUnits = units.filter(unit => unitList.includes(unit.id)
-    );
+    const selectedUnits = units.filter(unit => unitList.includes(unit.id));
     const profiles = await settingsService.findMissingsProfiles();
-    const missings = profiles.length ? this.getProfileMissings(profiles, contentSetting.missingsProfile) : [];
-    const codebook: CodebookUnitDto[] = selectedUnits
-      .map((unit: UnitPropertiesDto) => DownloadWorkspacesClass
-        .getCodeBookDataForUnit(unit, contentSetting, missings));
+    const missings = profiles.length ?
+      this.getProfileMissings(profiles, contentSetting.missingsProfile) :
+      [];
+    const codebook: CodebookUnitDto[] = selectedUnits.map(
+      (unit: UnitPropertiesDto) => DownloadWorkspacesClass.getCodeBookDataForUnit(
+        unit,
+        contentSetting,
+        missings
+      )
+    );
     if (codebook.length === 0) {
       const logger = new Logger(DownloadWorkspacesClass.name);
-      logger.warn(`Can not create codebook for units in workspace ${workspaceId} with unit ids ${unitList}`);
+      logger.warn(
+        `Can not create codebook for units in workspace ${workspaceId} with unit ids ${unitList}`
+      );
     }
     if (contentSetting.exportFormat === 'docx') {
       return new Promise(resolve => {
@@ -216,10 +228,15 @@ export class DownloadWorkspacesClass {
     });
   }
 
-  private static getProfileMissings(profiles: MissingsProfilesDto[], missingsProfile: string): Missing[] {
+  private static getProfileMissings(
+    profiles: MissingsProfilesDto[],
+    missingsProfile: string
+  ): Missing[] {
     let missings: Missing[] = [];
     try {
-      const foundProfile = profiles.find(profile => profile.label === missingsProfile);
+      const foundProfile = profiles.find(
+        profile => profile.label === missingsProfile
+      );
       if (foundProfile) {
         missings = JSON.parse(foundProfile.missings);
       }
@@ -230,56 +247,79 @@ export class DownloadWorkspacesClass {
   }
 
   private static isClosed(variableCodingData: VariableCodingData): boolean {
-    return variableCodingData.codes.some(codeData => codeData.type === 'RESIDUAL_AUTO' || 'INTENDED_INCOMPLETE');
+    return variableCodingData.codes.some(
+      codeData => codeData.type === 'RESIDUAL_AUTO' || 'INTENDED_INCOMPLETE'
+    );
   }
 
   private static isManual(variableCodingData: VariableCodingData): boolean {
-    return variableCodingData.codes.some(codeData => codeData.manualInstruction);
+    return variableCodingData.codes.some(
+      codeData => codeData.manualInstruction
+    );
   }
 
-  private static isManualWithoutClosed(variableCodingData: VariableCodingData): boolean {
-    return variableCodingData.codes.some(codeData => codeData.manualInstruction &&
-      (codeData.type !== 'RESIDUAL_AUTO' && codeData.type !== 'INTENDED_INCOMPLETE'));
+  private static isManualWithoutClosed(
+    variableCodingData: VariableCodingData
+  ): boolean {
+    return variableCodingData.codes.some(
+      codeData => codeData.manualInstruction &&
+        codeData.type !== 'RESIDUAL_AUTO' &&
+        codeData.type !== 'INTENDED_INCOMPLETE'
+    );
   }
 
-  private static isClosedWithoutManual(variableCodingData: VariableCodingData): boolean {
-    return variableCodingData.codes
-      .some(codeData => (codeData.type === 'RESIDUAL_AUTO' || 'INTENDED_INCOMPLETE') && !codeData.manualInstruction);
+  private static isClosedWithoutManual(
+    variableCodingData: VariableCodingData
+  ): boolean {
+    return variableCodingData.codes.some(
+      codeData => (codeData.type === 'RESIDUAL_AUTO' || 'INTENDED_INCOMPLETE') &&
+        !codeData.manualInstruction
+    );
   }
 
-  private static getCodeInfo(code: CodeData, contentSetting: CodeBookContentSetting): CodeInfo {
+  private static getCodeInfo(
+    code: CodeData,
+    contentSetting: CodeBookContentSetting
+  ): CodeInfo {
     const codeInfo: CodeInfo = {
       id: `${code.id}`,
       label: '',
-      description:
-        '<p>Kodierschema mit Schemer Version ab 1.5 erzeugen!</p>'
+      description: '<p>Kodierschema mit Schemer Version ab 1.5 erzeugen!</p>'
     };
     if (contentSetting.showScore) codeInfo.score = '';
     return codeInfo;
   }
 
-  private static getCodeInfoFromCodeAsText(code: CodeData, contentSetting: CodeBookContentSetting): CodeInfo {
+  private static getCodeInfoFromCodeAsText(
+    code: CodeData,
+    contentSetting: CodeBookContentSetting
+  ): CodeInfo {
     const codeAsText = ToTextFactory.codeAsText(code, 'SIMPLE');
-    const rulesDescription = contentSetting.hasOnlyManualCoding && !contentSetting.hasClosedVars ? '' :
-      DownloadWorkspacesClass.getRulesDescription(codeAsText, code);
+    const rulesDescription =
+      contentSetting.hasOnlyManualCoding && !contentSetting.hasClosedVars ?
+        '' :
+        DownloadWorkspacesClass.getRulesDescription(codeAsText, code);
     const codeInfo: CodeInfo = {
       id: `${code.id}`,
-      label: contentSetting.codeLabelToUpper ? codeAsText.label.toUpperCase() : codeAsText.label,
+      label: contentSetting.codeLabelToUpper ?
+        codeAsText.label.toUpperCase() :
+        codeAsText.label,
       description: `${rulesDescription}${code.manualInstruction}`
     };
     if (contentSetting.showScore) codeInfo.score = codeAsText.score.toString();
     return codeInfo;
   }
 
-  private static getRulesDescription(codeAsText: CodeAsText, code: CodeData): string {
+  private static getRulesDescription(
+    codeAsText: CodeAsText,
+    code: CodeData
+  ): string {
     let rulesDescription = '';
-    codeAsText.ruleSetDescriptions.forEach(
-      (ruleSetDescription: string) => {
-        if (ruleSetDescription !== 'Keine Regeln definiert.') {
-          rulesDescription += `<p>${ruleSetDescription}</p>`;
-        } else if (code.manualInstruction === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
-      }
-    );
+    codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
+      if (ruleSetDescription !== 'Keine Regeln definiert.') {
+        rulesDescription += `<p>${ruleSetDescription}</p>`;
+      } else if (code.manualInstruction === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
+    });
     return rulesDescription;
   }
 
@@ -287,45 +327,87 @@ export class DownloadWorkspacesClass {
     variableCoding: VariableCodingData,
     contentSetting: CodeBookContentSetting
   ): BookVariable | null {
-    const codes: CodeInfo[] = DownloadWorkspacesClass.getCodes(variableCoding.codes, contentSetting);
-    const isDerived: boolean = (variableCoding.sourceType !== 'BASE' && variableCoding.sourceType !== 'BASE_NO_VALUE');
+    const codes: CodeInfo[] = DownloadWorkspacesClass.getCodes(
+      variableCoding.codes,
+      contentSetting
+    );
+    const isDerived: boolean =
+      variableCoding.sourceType !== 'BASE' &&
+      variableCoding.sourceType !== 'BASE_NO_VALUE';
     if (!isDerived || contentSetting.hasDerivedVars) {
-      return DownloadWorkspacesClass.getManualOrClosedCodedBookVariable(contentSetting, codes, variableCoding);
+      return DownloadWorkspacesClass.getManualOrClosedCodedBookVariable(
+        contentSetting,
+        codes,
+        variableCoding
+      );
     }
     return null;
   }
 
-  private static getCodes(codes: CodeData[], contentSetting: CodeBookContentSetting): CodeInfo[] {
+  private static getCodes(
+    codes: CodeData[],
+    contentSetting: CodeBookContentSetting
+  ): CodeInfo[] {
     return codes.map(code => {
       // Catch schemer version <1.5
       if (!Object.prototype.hasOwnProperty.call(code, 'rules')) {
-        return (DownloadWorkspacesClass.getCodeInfoFromCodeAsText(code, contentSetting));
+        return DownloadWorkspacesClass.getCodeInfoFromCodeAsText(
+          code,
+          contentSetting
+        );
       }
-      return (DownloadWorkspacesClass.getCodeInfo(code, contentSetting));
+      return DownloadWorkspacesClass.getCodeInfo(code, contentSetting);
     });
   }
 
-  private static getManualOrClosedCodedBookVariable(contentSetting: CodeBookContentSetting,
-                                                    codes: CodeInfo[],
-                                                    variableCoding: VariableCodingData
+  private static getManualOrClosedCodedBookVariable(
+    contentSetting: CodeBookContentSetting,
+    codes: CodeInfo[],
+    variableCoding: VariableCodingData
   ): BookVariable | null {
     const codingVar = {
       closed: DownloadWorkspacesClass.isClosed(variableCoding),
       manual: DownloadWorkspacesClass.isManual(variableCoding),
-      isManualWithoutClosed: DownloadWorkspacesClass.isManualWithoutClosed(variableCoding),
-      isClosedWithoutManual: DownloadWorkspacesClass.isClosedWithoutManual(variableCoding)
+      isManualWithoutClosed:
+        DownloadWorkspacesClass.isManualWithoutClosed(variableCoding),
+      isClosedWithoutManual:
+        DownloadWorkspacesClass.isClosedWithoutManual(variableCoding)
     };
     if (codingVar.closed && contentSetting.hasClosedVars) {
-      return DownloadWorkspacesClass.getBookVariable(contentSetting, codes, variableCoding);
+      return DownloadWorkspacesClass.getBookVariable(
+        contentSetting,
+        codes,
+        variableCoding
+      );
     }
-    if (codingVar.isManualWithoutClosed && contentSetting.hasOnlyManualCoding && !contentSetting.hasClosedVars) {
-      return DownloadWorkspacesClass.getBookVariable(contentSetting, codes, variableCoding);
+    if (
+      codingVar.isManualWithoutClosed &&
+      contentSetting.hasOnlyManualCoding &&
+      !contentSetting.hasClosedVars
+    ) {
+      return DownloadWorkspacesClass.getBookVariable(
+        contentSetting,
+        codes,
+        variableCoding
+      );
     }
-    if (codingVar.manual && contentSetting.hasOnlyManualCoding && contentSetting.hasClosedVars) {
-      return DownloadWorkspacesClass.getBookVariable(contentSetting, codes, variableCoding);
+    if (
+      codingVar.manual &&
+      contentSetting.hasOnlyManualCoding &&
+      contentSetting.hasClosedVars
+    ) {
+      return DownloadWorkspacesClass.getBookVariable(
+        contentSetting,
+        codes,
+        variableCoding
+      );
     }
     if (!contentSetting.hasOnlyVarsWithCodes) {
-      return DownloadWorkspacesClass.getBookVariable(contentSetting, codes, variableCoding);
+      return DownloadWorkspacesClass.getBookVariable(
+        contentSetting,
+        codes,
+        variableCoding
+      );
     }
     return null;
   }
@@ -347,17 +429,22 @@ export class DownloadWorkspacesClass {
   }
 
   private static getCodeBookDataForUnit(
-    unit: UnitPropertiesDto, contentSetting: CodeBookContentSetting, missings: Missing[]
+    unit: UnitPropertiesDto,
+    contentSetting: CodeBookContentSetting,
+    missings: Missing[]
   ): CodebookUnitDto {
     const parsedScheme = unit.scheme ? new CodingScheme(unit.scheme) : null;
     const variableCodings = parsedScheme?.variableCodings || [];
-    const bookVariables = DownloadWorkspacesClass
-      .getBookVariables(variableCodings, contentSetting);
+    const bookVariables = DownloadWorkspacesClass.getBookVariables(
+      variableCodings,
+      contentSetting
+    );
     return {
       key: unit.key,
       name: unit.name,
-      variables: DownloadWorkspacesClass
-        .getSortedBookVariables(bookVariables.filter(v => v.sourceType !== 'BASE_NO_VALUE')),
+      variables: DownloadWorkspacesClass.getSortedBookVariables(
+        bookVariables.filter(v => v.sourceType !== 'BASE_NO_VALUE')
+      ),
       missings: missings,
       items: unit.metadata.items
     };
@@ -367,15 +454,23 @@ export class DownloadWorkspacesClass {
     variableCodings: VariableCodingData[],
     contentSetting: CodeBookContentSetting
   ): BookVariable[] {
-    return variableCodings.reduce((bookVariables: BookVariable[], variableCoding) => {
-      const bookVariable = DownloadWorkspacesClass
-        .getBaseOrDerivedBookVariable(variableCoding, contentSetting);
-      if (bookVariable) bookVariables.push(bookVariable);
-      return bookVariables;
-    }, []);
+    return variableCodings.reduce(
+      (bookVariables: BookVariable[], variableCoding) => {
+        const bookVariable =
+          DownloadWorkspacesClass.getBaseOrDerivedBookVariable(
+            variableCoding,
+            contentSetting
+          );
+        if (bookVariable) bookVariables.push(bookVariable);
+        return bookVariables;
+      },
+      []
+    );
   }
 
-  private static getSortedBookVariables(bookVariables: BookVariable[]): BookVariable[] {
+  private static getSortedBookVariables(
+    bookVariables: BookVariable[]
+  ): BookVariable[] {
     return bookVariables.sort((a, b) => {
       if (a.id < b.id) return -1;
       if (a.id > b.id) return 1;
@@ -482,10 +577,9 @@ export class DownloadWorkspacesClass {
     wsDataWithMetadata.forEach(wsData => {
       let date = '';
       if (wsData.latestChange !== null) {
-        date = `${wsData.latestChange
-          .getDate()}.${wsData.latestChange
-          .getMonth() + 1}.${wsData.latestChange
-          .getFullYear()}`;
+        date = `${wsData.latestChange.getDate()}.${
+          wsData.latestChange.getMonth() + 1
+        }.${wsData.latestChange.getFullYear()}`;
       }
       const rowData = [
         wsData.groupName,

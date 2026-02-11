@@ -20,7 +20,10 @@ import {
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import {
-  VariableCodingData, RuleSet, CodeData, CodingScheme
+  VariableCodingData,
+  RuleSet,
+  CodeData,
+  CodingSchemeData
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
@@ -35,9 +38,7 @@ import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import { UsersService } from './users.service';
 import { WorkspaceUserService } from './workspace-user.service';
 import { UnitUserService } from './unit-user.service';
-import {
-  UserWorkspaceGroupNotAdminException
-} from '../exceptions/user-workspace-group-not-admin.exception';
+import { UserWorkspaceGroupNotAdminException } from '../exceptions/user-workspace-group-not-admin.exception';
 import { UnitCommentService } from './unit-comment.service';
 import User from '../entities/user.entity';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
@@ -63,110 +64,153 @@ export class WorkspaceService {
     private unitService: UnitService,
     private unitUserService: UnitUserService,
     private unitCommentService: UnitCommentService
-  ) {
-  }
+  ) {}
 
   async getAllWorkspaces(): Promise<WorkspaceFullDto[]> {
-    return this.workspacesRepository
-      .find({ order: { id: 'ASC' } });
+    return this.workspacesRepository.find({ order: { id: 'ASC' } });
   }
 
   async findAll(userId: number): Promise<UsersWorkspaceInListDto[]> {
-    this.logger.log(`Returning workspaces${userId ? ` for userId: ${userId}` : '.'}`);
+    this.logger.log(
+      `Returning workspaces${userId ? ` for userId: ${userId}` : '.'}`
+    );
     const validWorkspaces: UserWorkspaceAccessDto[] = [];
     if (userId) {
-      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
-        .find({ where: { userId: userId } });
-      workspaceUsers.forEach(wsU => validWorkspaces.push(
-        { id: wsU.workspaceId, accessLevel: wsU.accessLevel }
-      ));
+      const workspaceUsers: WorkspaceUser[] =
+        await this.workspaceUsersRepository.find({ where: { userId: userId } });
+      workspaceUsers.forEach(wsU => validWorkspaces.push({
+        id: wsU.workspaceId,
+        accessLevel: wsU.accessLevel
+      })
+      );
     }
-    const workspaces: Workspace[] = await this.workspacesRepository
-      .find({ order: { name: 'ASC' } });
+    const workspaces: Workspace[] = await this.workspacesRepository.find({
+      order: { name: 'ASC' }
+    });
     return Promise.all(
       workspaces
-        .filter(w => !userId || validWorkspaces
-          .find(validWorkspace => validWorkspace.id === w.id))
-        .map(async workspace => (
-          {
-            id: workspace.id,
-            name: workspace.name,
-            userAccessLevel: validWorkspaces
-              .find(validWorkspace => validWorkspace.id === workspace.id)?.accessLevel || 0,
-            groupId: workspace.groupId,
-            dropBoxId: workspace.dropBoxId,
-            unitsCount: (await this.unitsRepository.find({
+        .filter(
+          w => !userId ||
+            validWorkspaces.find(validWorkspace => validWorkspace.id === w.id)
+        )
+        .map(async workspace => ({
+          id: workspace.id,
+          name: workspace.name,
+          userAccessLevel:
+            validWorkspaces.find(
+              validWorkspace => validWorkspace.id === workspace.id
+            )?.accessLevel || 0,
+          groupId: workspace.groupId,
+          dropBoxId: workspace.dropBoxId,
+          unitsCount: (
+            await this.unitsRepository.find({
               where: { workspaceId: workspace.id }
-            })).length
-          })
-        ));
+            })
+          ).length
+        }))
+    );
   }
 
-  async setWorkspacesByUser(userId: number, workspaceGroupId: number, workspaces: UserWorkspaceAccessDto[]) {
+  async setWorkspacesByUser(
+    userId: number,
+    workspaceGroupId: number,
+    workspaces: UserWorkspaceAccessDto[]
+  ) {
     this.logger.log(`Set workspace for userId: ${userId}.`);
-    return this.workspaceUserService.deleteAllByWorkspaceGroup(workspaceGroupId, userId).then(async () => {
-      await Promise.all(workspaces.map(async workspace => {
-        const newWorkspaceUser = this.workspaceUsersRepository.create(<WorkspaceUser>{
-          userId: userId,
-          workspaceId: workspace.id,
-          accessLevel: workspace.accessLevel
-        });
-        await this.workspaceUsersRepository.save(newWorkspaceUser);
+    return this.workspaceUserService
+      .deleteAllByWorkspaceGroup(workspaceGroupId, userId)
+      .then(async () => {
+        await Promise.all(
+          workspaces.map(async workspace => {
+            const newWorkspaceUser = this.workspaceUsersRepository.create(<
+              WorkspaceUser
+            >{
+              userId: userId,
+              workspaceId: workspace.id,
+              accessLevel: workspace.accessLevel
+            });
+            await this.workspaceUsersRepository.save(newWorkspaceUser);
 
-        const units = await this.unitService.findAllForWorkspace(workspace.id);
-        this.logger.log(`Found units: ${units.length}.`);
-        await Promise.all(units.map(async unit => {
-          await this.unitUserService.createUnitUser(userId, unit.id);
-        }));
-      }));
-    });
+            const units = await this.unitService.findAllForWorkspace(
+              workspace.id
+            );
+            this.logger.log(`Found units: ${units.length}.`);
+            await Promise.all(
+              units.map(async unit => {
+                await this.unitUserService.createUnitUser(userId, unit.id);
+              })
+            );
+          })
+        );
+      });
   }
 
   async findAllGroupwise(userId?: number): Promise<WorkspaceGroupDto[]> {
-    this.logger.log(`Returning groupwise ordered workspaces${userId ? ` for userId: ${userId}` : '.'}`);
+    this.logger.log(
+      `Returning groupwise ordered workspaces${
+        userId ? ` for userId: ${userId}` : '.'
+      }`
+    );
     let workspaceGroupsToAdminList: number[] = [];
     let isSuperAdmin = false;
     if (userId) {
       isSuperAdmin = await this.usersService.getUserIsAdmin(userId);
       if (!isSuperAdmin) {
-        const workspaceGroupsToAdmin = await this.workspaceGroupAdminRepository.find({
-          where: { userId: userId },
-          select: { workspaceGroupId: true }
-        });
-        workspaceGroupsToAdminList = workspaceGroupsToAdmin.map(workspaceGroup => workspaceGroup.workspaceGroupId);
+        const workspaceGroupsToAdmin =
+          await this.workspaceGroupAdminRepository.find({
+            where: { userId: userId },
+            select: { workspaceGroupId: true }
+          });
+        workspaceGroupsToAdminList = workspaceGroupsToAdmin.map(
+          workspaceGroup => workspaceGroup.workspaceGroupId
+        );
       }
     }
-    const workspaceGroups = await this.workspaceGroupRepository.find({ order: { name: 'ASC' } });
+    const workspaceGroups = await this.workspaceGroupRepository.find({
+      order: { name: 'ASC' }
+    });
     const workspaces = await this.findAll(userId);
     const myReturn: WorkspaceGroupDto[] = [];
     workspaceGroups.forEach(workspaceGroup => {
       const localWorkspaceGroup = <WorkspaceGroupDto>{
         id: workspaceGroup.id,
         name: workspaceGroup.name,
-        isAdmin: isSuperAdmin || workspaceGroupsToAdminList.indexOf(workspaceGroup.id) >= 0,
+        isAdmin:
+          isSuperAdmin ||
+          workspaceGroupsToAdminList.indexOf(workspaceGroup.id) >= 0,
         workspaces: workspaces.filter(ws => workspaceGroup.id === ws.groupId)
       };
-      if (!userId || localWorkspaceGroup.isAdmin || localWorkspaceGroup.workspaces.length > 0) {
+      if (
+        !userId ||
+        localWorkspaceGroup.isAdmin ||
+        localWorkspaceGroup.workspaces.length > 0
+      ) {
         myReturn.push(localWorkspaceGroup);
       }
     });
     return myReturn;
   }
 
-  async findAllByGroup(workspaceGroupId: number): Promise<WorkspaceInListDto[]> {
+  async findAllByGroup(
+    workspaceGroupId: number
+  ): Promise<WorkspaceInListDto[]> {
     const workspaces: Workspace[] = await this.workspacesRepository.find({
       order: { name: 'ASC' },
       where: { groupId: workspaceGroupId }
     });
-    return Promise.all(workspaces.map(async workspace => ({
-      id: workspace.id,
-      name: workspace.name,
-      groupId: workspaceGroupId,
-      dropBoxId: workspace.dropBoxId,
-      unitsCount: (await this.unitsRepository.find({
-        where: { workspaceId: workspace.id }
-      })).length
-    })));
+    return Promise.all(
+      workspaces.map(async workspace => ({
+        id: workspace.id,
+        name: workspace.name,
+        groupId: workspaceGroupId,
+        dropBoxId: workspace.dropBoxId,
+        unitsCount: (
+          await this.unitsRepository.find({
+            where: { workspaceId: workspace.id }
+          })
+        ).length
+      }))
+    );
   }
 
   async findOne(id: number): Promise<WorkspaceFullDto> {
@@ -191,7 +235,10 @@ export class WorkspaceService {
     throw new AdminWorkspaceNotFoundException(id, 'GET');
   }
 
-  async findOneByUser(id: number, userId: number): Promise<UserWorkspaceFullDto> {
+  async findOneByUser(
+    id: number,
+    userId: number
+  ): Promise<UserWorkspaceFullDto> {
     this.logger.log(`Returning workspace with id: ${id}`);
     const workspace = await this.workspacesRepository.findOne({
       where: { id: id }
@@ -222,14 +269,18 @@ export class WorkspaceService {
       where: { id: id }
     });
     if (workspace) {
-      const settingsGroups = workspace.settings ? workspace.settings.unitGroups : [];
+      const settingsGroups = workspace.settings ?
+        workspace.settings.unitGroups :
+        [];
       const unitGroups = await this.unitsRepository.find({
         where: { workspaceId: id },
         select: { groupName: true }
       });
-      const groups = unitGroups.map(u => u.groupName).filter(
-        (value, index, self) => (self.indexOf(value) === index) && (settingsGroups.indexOf(value) < 0)
-      );
+      const groups = unitGroups
+        .map(u => u.groupName)
+        .filter(
+          (value, index, self) => self.indexOf(value) === index && settingsGroups.indexOf(value) < 0
+        );
       return [...groups, ...settingsGroups].filter(g => !!g).sort();
     }
     throw new AdminWorkspaceNotFoundException(id, 'GET');
@@ -239,20 +290,28 @@ export class WorkspaceService {
     const workspaceGroup = await this.workspaceGroupRepository.findOne({
       where: { id: workspace.groupId }
     });
-    const isBackupFolder = workspaceGroup.name.toLowerCase()
-      .includes('backup');
+    const isBackupFolder = workspaceGroup.name.toLowerCase().includes('backup');
     if (isBackupFolder) {
-      const workspaces = await this.workspacesRepository
-        .find({ where: { groupId: workspace.groupId } });
-      if (workspaces.length >= 10) { // same maximum used in frontend
-        this.logger.warn(`Cannot create more than 10 workspaces in backup group: ${workspaceGroup.name}`);
-        throw new GroupAdminUnprocessableWorkspaceException(workspace.groupId, 'POST');
+      const workspaces = await this.workspacesRepository.find({
+        where: { groupId: workspace.groupId }
+      });
+      if (workspaces.length >= 10) {
+        // same maximum used in frontend
+        this.logger.warn(
+          `Cannot create more than 10 workspaces in backup group: ${workspaceGroup.name}`
+        );
+        throw new GroupAdminUnprocessableWorkspaceException(
+          workspace.groupId,
+          'POST'
+        );
       }
     }
     this.logger.log(`Creating workspace with name: ${workspace.name}`);
     const newWorkspace = this.workspacesRepository.create(workspace);
     const savedWorkspace = await this.workspacesRepository.save(newWorkspace);
-    this.logger.log(`Workspace created successfully with ID: ${savedWorkspace.id}`);
+    this.logger.log(
+      `Workspace created successfully with ID: ${savedWorkspace.id}`
+    );
     return savedWorkspace.id;
   }
 
@@ -276,7 +335,9 @@ export class WorkspaceService {
 
   async getCodingReport(id: number): Promise<CodingReportDto[]> {
     const unitDataRows: CodingReportDto[] = [];
-    const unitListWithMetadata = await this.unitService.findAllWithProperties(id);
+    const unitListWithMetadata = await this.unitService.findAllWithProperties(
+      id
+    );
     if (!unitListWithMetadata) return [];
 
     unitListWithMetadata.forEach((unit: UnitPropertiesDto) => {
@@ -284,10 +345,17 @@ export class WorkspaceService {
         const parsedUnitScheme = WorkspaceService.parseScheme(unit.scheme);
         const version = 'version';
         if (parsedUnitScheme && parsedUnitScheme[version]) {
-          const validationResults = CodingSchemeFactory
-            .validate(unit.variables, parsedUnitScheme.variableCodings);
-          WorkspaceService
-            .processVariableCodings(parsedUnitScheme, validationResults, unit, id, unitDataRows);
+          const validationResults = CodingSchemeFactory.validate(
+            unit.variables,
+            parsedUnitScheme.variableCodings
+          );
+          WorkspaceService.processVariableCodings(
+            parsedUnitScheme,
+            validationResults,
+            unit,
+            id,
+            unitDataRows
+          );
         }
       } else {
         WorkspaceService.addInvalidSchemeRow(unit, id, unitDataRows);
@@ -297,11 +365,14 @@ export class WorkspaceService {
     return unitDataRows;
   }
 
-  private static isValidScheme(scheme: string | undefined, schemer: string): boolean {
+  private static isValidScheme(
+    scheme: string | undefined,
+    schemer: string
+  ): boolean {
     return !!scheme && !!schemer && schemer.split('@')[1] >= '1.5';
   }
 
-  private static parseScheme(scheme: string): CodingScheme | null {
+  private static parseScheme(scheme: string): CodingSchemeData | null {
     try {
       return JSON.parse(scheme);
     } catch {
@@ -310,17 +381,24 @@ export class WorkspaceService {
   }
 
   static processVariableCodings(
-    parsedUnitScheme: CodingScheme,
+    parsedUnitScheme: CodingSchemeData,
     validationResults: CodingSchemeProblem[],
     unit: UnitPropertiesDto,
     workspaceId: number,
     unitDataRows: CodingReportDto[]
   ): void {
-    parsedUnitScheme.variableCodings?.filter(vc => vc.sourceType !== 'BASE_NO_VALUE')
+    parsedUnitScheme.variableCodings
+      ?.filter(vc => vc.sourceType !== 'BASE_NO_VALUE')
       .forEach((codingVariable: VariableCodingData) => {
-        const validationResultText = WorkspaceService.getValidationResult(validationResults, codingVariable);
+        const validationResultText = WorkspaceService.getValidationResult(
+          validationResults,
+          codingVariable
+        );
         const codingType = WorkspaceService.determineCodingType(codingVariable);
-        const foundItem = WorkspaceService.findMatchingItem(unit, codingVariable);
+        const foundItem = WorkspaceService.findMatchingItem(
+          unit,
+          codingVariable
+        );
 
         unitDataRows.push({
           unit: WorkspaceService.generateUnitLink(workspaceId, unit),
@@ -337,8 +415,9 @@ export class WorkspaceService {
     codingVariable: VariableCodingData
   ): string {
     const codingVariableId = codingVariable.alias || codingVariable.id;
-    const validationResult = validationResults
-      .find(v => v.variableId === codingVariableId);
+    const validationResult = validationResults.find(
+      v => v.variableId === codingVariableId
+    );
 
     if (validationResult) {
       return validationResult.breaking ? 'Fehler' : 'Warnung';
@@ -356,10 +435,13 @@ export class WorkspaceService {
 
       code.ruleSets.forEach((ruleSet: RuleSet) => {
         hasRules ||= ruleSet.rules.length > 0;
-        manualCodingOnly &&= code.manualInstruction.length > 0 && ruleSet.rules.length === 0;
+        manualCodingOnly &&=
+          code.manualInstruction.length > 0 && ruleSet.rules.length === 0;
       });
 
-      closedCoding ||= ['RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(code.type);
+      closedCoding ||= ['RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(
+        code.type
+      );
     });
 
     if (closedCoding) return 'geschlossen';
@@ -368,13 +450,22 @@ export class WorkspaceService {
     return 'keine Regeln';
   }
 
-  static findMatchingItem(unit: UnitPropertiesDto, codingVariable: VariableCodingData): ItemsMetadataValues {
+  static findMatchingItem(
+    unit: UnitPropertiesDto,
+    codingVariable: VariableCodingData
+  ): ItemsMetadataValues {
     const codingVariableId = codingVariable.alias || codingVariable.id;
-    return unit.metadata.items?.find(item => item.variableId === codingVariableId);
+    return unit.metadata.items?.find(
+      item => item.variableId === codingVariableId
+    );
   }
 
   static generateUnitLink(id: number, unit: UnitPropertiesDto): string {
-    return `<a href=#/a/${id}/${unit.id}>${unit.key}${unit.name ? ': ' : ''}${unit.name}</a>` || '-';
+    return (
+      `<a href=#/a/${id}/${unit.id}>${unit.key}${unit.name ? ': ' : ''}${
+        unit.name
+      }</a>` || '-'
+    );
   }
 
   static addInvalidSchemeRow(
@@ -404,27 +495,46 @@ export class WorkspaceService {
     }
   }
 
-  async patchWorkspaceGroups(ids:number[], newWorkspaceGroupId:number, user: User): Promise<void> {
-    await Promise.all(ids.map(async id => {
-      const workspace = await this.findOne(id);
+  async patchWorkspaceGroups(
+    ids: number[],
+    newWorkspaceGroupId: number,
+    user: User
+  ): Promise<void> {
+    await Promise.all(
+      ids.map(async id => {
+        const workspace = await this.findOne(id);
 
-      if (workspace.groupId !== newWorkspaceGroupId) {
-        this.unitService.findAllForWorkspace(workspace.id).then(async units => {
-          await Promise
-            .all(units
-              .map(async unit => this.unitService.removeUnitState(unit.id))
-            );
-        });
-      }
-      if (await this.usersService.isWorkspaceGroupAdmin(user.id, workspace.groupId)) {
-        await this.patch({ id, groupId: newWorkspaceGroupId });
-      } else {
-        throw new UserWorkspaceGroupNotAdminException(newWorkspaceGroupId, 'PATCH');
-      }
-    }));
+        if (workspace.groupId !== newWorkspaceGroupId) {
+          this.unitService
+            .findAllForWorkspace(workspace.id)
+            .then(async units => {
+              await Promise.all(
+                units.map(async unit => this.unitService.removeUnitState(unit.id)
+                )
+              );
+            });
+        }
+        if (
+          await this.usersService.isWorkspaceGroupAdmin(
+            user.id,
+            workspace.groupId
+          )
+        ) {
+          await this.patch({ id, groupId: newWorkspaceGroupId });
+        } else {
+          throw new UserWorkspaceGroupNotAdminException(
+            newWorkspaceGroupId,
+            'PATCH'
+          );
+        }
+      })
+    );
   }
 
-  async patchGroupName(workspaceId: number, dto: GroupNameDto | RenameGroupNameDto): Promise<void> {
+  async patchGroupName(
+    workspaceId: number,
+    dto: GroupNameDto | RenameGroupNameDto
+  ): Promise<void> {
     if (dto.operation === 'remove') {
       return this.removeGroup(workspaceId, dto.groupName);
     }
@@ -434,7 +544,11 @@ export class WorkspaceService {
     return this.createGroup(workspaceId, dto.groupName);
   }
 
-  private async renameGroupName(id: number, oldName: string, newName: string): Promise<void> {
+  private async renameGroupName(
+    id: number,
+    oldName: string,
+    newName: string
+  ): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
@@ -449,13 +563,15 @@ export class WorkspaceService {
     settings.unitGroups.push(newName);
     workspaceToUpdate.settings = settings;
     await this.workspacesRepository.save(workspaceToUpdate);
-    await this.unitsRepository.update({
-      workspaceId: id,
-      groupName: oldName
-    },
-    {
-      groupName: newName
-    });
+    await this.unitsRepository.update(
+      {
+        workspaceId: id,
+        groupName: oldName
+      },
+      {
+        groupName: newName
+      }
+    );
   }
 
   private async removeGroup(id: number, groupName: string): Promise<void> {
@@ -465,17 +581,20 @@ export class WorkspaceService {
     if (workspaceToUpdate.settings) {
       const groupPos = workspaceToUpdate.settings.unitGroups.indexOf(groupName);
       if (groupPos >= 0) {
-        workspaceToUpdate.settings.unitGroups = workspaceToUpdate.settings.unitGroups.filter(g => g !== groupName);
+        workspaceToUpdate.settings.unitGroups =
+          workspaceToUpdate.settings.unitGroups.filter(g => g !== groupName);
       }
       await this.workspacesRepository.save(workspaceToUpdate);
     }
-    await this.unitsRepository.update({
-      workspaceId: id,
-      groupName: groupName
-    },
-    {
-      groupName: ''
-    });
+    await this.unitsRepository.update(
+      {
+        workspaceId: id,
+        groupName: groupName
+      },
+      {
+        groupName: ''
+      }
+    );
   }
 
   async patchName(id: number, newName: string): Promise<void> {
@@ -494,7 +613,10 @@ export class WorkspaceService {
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
-  async patchSettings(id: number, settings: WorkspaceSettingsDto): Promise<void> {
+  async patchSettings(
+    id: number,
+    settings: WorkspaceSettingsDto
+  ): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
@@ -508,34 +630,55 @@ export class WorkspaceService {
     await this.workspacesRepository.delete(id);
   }
 
-  async uploadFiles(workspaceId: number, originalFiles: FileIo[], user: User): Promise<RequestReportDto> {
+  async uploadFiles(
+    workspaceId: number,
+    originalFiles: FileIo[],
+    user: User
+  ): Promise<RequestReportDto> {
     const functionReturn: RequestReportDto = {
       source: 'upload-units',
       messages: []
     };
-    const files = WorkspaceService.getZippedFiles(originalFiles, functionReturn);
+    const files = WorkspaceService.getZippedFiles(
+      originalFiles,
+      functionReturn
+    );
 
-    const { unitData, notXmlFiles, usedFiles } = WorkspaceService.readImportData(files, functionReturn);
+    const { unitData, notXmlFiles, usedFiles } =
+      WorkspaceService.readImportData(files, functionReturn);
 
-    await Promise.all(unitData.map(async u => {
-      await this.uploadFile(usedFiles, u, workspaceId, user, functionReturn, notXmlFiles);
-    }));
+    await Promise.all(
+      unitData.map(async u => {
+        await this.uploadFile(
+          usedFiles,
+          u,
+          workspaceId,
+          user,
+          functionReturn,
+          notXmlFiles
+        );
+      })
+    );
 
     files.forEach(f => {
       if (usedFiles.indexOf(f.originalname) < 0) {
         functionReturn.messages.push({
-          objectKey: f.originalname, messageKey: 'unit-upload.api-warning.ignore-file'
+          objectKey: f.originalname,
+          messageKey: 'unit-upload.api-warning.ignore-file'
         });
       }
     });
     return functionReturn;
   }
 
-  private static readImportData(files: FileIo[], functionReturn: RequestReportDto): {
-    unitData: UnitImportData[],
-    notXmlFiles: { [fName: string]: FileIo },
-    usedFiles: string[]
-  } {
+  private static readImportData(
+    files: FileIo[],
+    functionReturn: RequestReportDto
+  ): {
+      unitData: UnitImportData[];
+      notXmlFiles: { [fName: string]: FileIo };
+      usedFiles: string[];
+    } {
     const unitData: UnitImportData[] = [];
     const notXmlFiles: { [fName: string]: FileIo } = {};
     const usedFiles: string[] = [];
@@ -544,8 +687,10 @@ export class WorkspaceService {
         try {
           unitData.push(new UnitImportData(f));
         } catch (e) {
-          functionReturn.messages
-            .push({ objectKey: f.originalname, messageKey: 'unit-upload.api-warning.xml-parse' });
+          functionReturn.messages.push({
+            objectKey: f.originalname,
+            messageKey: 'unit-upload.api-warning.xml-parse'
+          });
           usedFiles.push(f.originalname);
         }
       } else {
@@ -553,7 +698,9 @@ export class WorkspaceService {
       }
     });
     return {
-      unitData, notXmlFiles, usedFiles
+      unitData,
+      notXmlFiles,
+      usedFiles
     };
   }
 
@@ -573,42 +720,71 @@ export class WorkspaceService {
       true
     );
     if (newUnitId > 0) {
-      if (unitImportData.definitionFileName && notXmlFiles[unitImportData.definitionFileName]) {
-        unitImportData.definition = notXmlFiles[unitImportData.definitionFileName].buffer.toString();
+      if (
+        unitImportData.definitionFileName &&
+        notXmlFiles[unitImportData.definitionFileName]
+      ) {
+        unitImportData.definition =
+          notXmlFiles[unitImportData.definitionFileName].buffer.toString();
         usedFiles.push(unitImportData.definitionFileName);
         if (unitImportData.definition || unitImportData.lastChangedDefinition) {
           await this.importDefinition(newUnitId, unitImportData);
         }
       }
 
-      if (unitImportData.metadataFileName && notXmlFiles[unitImportData.metadataFileName]) {
-        unitImportData.metadata = JSON.parse(notXmlFiles[unitImportData.metadataFileName].buffer.toString());
+      if (
+        unitImportData.metadataFileName &&
+        notXmlFiles[unitImportData.metadataFileName]
+      ) {
+        unitImportData.metadata = JSON.parse(
+          notXmlFiles[unitImportData.metadataFileName].buffer.toString()
+        );
         usedFiles.push(unitImportData.metadataFileName);
       }
 
-      const itemUuidLookups = await this.importUnitProperties(workspaceId, newUnitId, unitImportData);
+      const itemUuidLookups = await this.importUnitProperties(
+        workspaceId,
+        newUnitId,
+        unitImportData
+      );
 
-      if (unitImportData.commentsFileName && notXmlFiles[unitImportData.commentsFileName]) {
-        const comments = notXmlFiles[unitImportData.commentsFileName].buffer.toString();
+      if (
+        unitImportData.commentsFileName &&
+        notXmlFiles[unitImportData.commentsFileName]
+      ) {
+        const comments =
+          notXmlFiles[unitImportData.commentsFileName].buffer.toString();
         usedFiles.push(unitImportData.commentsFileName);
         await this.importComments(newUnitId, comments, itemUuidLookups);
       }
 
-      if (unitImportData.codingSchemeFileName && notXmlFiles[unitImportData.codingSchemeFileName]) {
-        unitImportData.codingScheme = notXmlFiles[unitImportData.codingSchemeFileName].buffer.toString();
+      if (
+        unitImportData.codingSchemeFileName &&
+        notXmlFiles[unitImportData.codingSchemeFileName]
+      ) {
+        unitImportData.codingScheme =
+          notXmlFiles[unitImportData.codingSchemeFileName].buffer.toString();
         usedFiles.push(unitImportData.codingSchemeFileName);
         await this.importScheme(newUnitId, unitImportData);
       }
     } else {
       functionReturn.messages.push({
-        objectKey: unitImportData.fileName, messageKey: 'unit-patch.duplicate-unit-id'
+        objectKey: unitImportData.fileName,
+        messageKey: 'unit-patch.duplicate-unit-id'
       });
     }
   }
 
-  private static getZippedFiles(originalFiles: FileIo[], functionReturn: RequestReportDto): FileIo[] {
+  private static getZippedFiles(
+    originalFiles: FileIo[],
+    functionReturn: RequestReportDto
+  ): FileIo[] {
     const files: FileIo[] = [];
-    const zipMimeTypes = ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip'];
+    const zipMimeTypes = [
+      'application/zip',
+      'application/x-zip-compressed',
+      'multipart/x-zip'
+    ];
     originalFiles.forEach(f => {
       if (zipMimeTypes.indexOf(f.mimetype) >= 0) {
         try {
@@ -627,7 +803,10 @@ export class WorkspaceService {
             });
           });
         } catch {
-          functionReturn.messages.push({ objectKey: f.originalname, messageKey: 'unit-upload.api-error.zip' });
+          functionReturn.messages.push({
+            objectKey: f.originalname,
+            messageKey: 'unit-upload.api-error.zip'
+          });
         }
       } else {
         files.push(f);
@@ -640,30 +819,39 @@ export class WorkspaceService {
     workspaceId: number,
     newUnitId: number,
     unitImportData: UnitImportData
-  ) : Promise<ItemUuidLookup[]> {
+  ): Promise<ItemUuidLookup[]> {
     let itemUuidLookups: ItemUuidLookup[] = [];
-    await this.unitService.patchUnitProperties(newUnitId, {
-      id: newUnitId,
-      editor: unitImportData.editor,
-      player: unitImportData.player,
-      schemer: unitImportData.schemer,
-      description: unitImportData.description,
-      transcript: unitImportData.transcript,
-      lastChangedMetadata: unitImportData.lastChangedMetadata,
-      lastChangedDefinition: unitImportData.lastChangedDefinition,
-      lastChangedScheme: unitImportData.lastChangedScheme,
-      lastChangedMetadataUser: unitImportData.lastChangedMetadataUser,
-      lastChangedDefinitionUser: unitImportData.lastChangedDefinitionUser,
-      lastChangedSchemeUser: unitImportData.lastChangedSchemeUser
-    }, null);
+    await this.unitService.patchUnitProperties(
+      newUnitId,
+      {
+        id: newUnitId,
+        editor: unitImportData.editor,
+        player: unitImportData.player,
+        schemer: unitImportData.schemer,
+        description: unitImportData.description,
+        transcript: unitImportData.transcript,
+        lastChangedMetadata: unitImportData.lastChangedMetadata,
+        lastChangedDefinition: unitImportData.lastChangedDefinition,
+        lastChangedScheme: unitImportData.lastChangedScheme,
+        lastChangedMetadataUser: unitImportData.lastChangedMetadataUser,
+        lastChangedDefinitionUser: unitImportData.lastChangedDefinitionUser,
+        lastChangedSchemeUser: unitImportData.lastChangedSchemeUser
+      },
+      null
+    );
     if (unitImportData.metadata) {
-      const workspace = await this.workspacesRepository.findOne({ where: { id: workspaceId } });
+      const workspace = await this.workspacesRepository.findOne({
+        where: { id: workspaceId }
+      });
       const metadata = UnitService.setCurrentProfiles(
         workspace.settings?.unitMDProfile,
         workspace.settings?.itemMDProfile,
         unitImportData.metadata as UnitFullMetadataDto
       );
-      itemUuidLookups = await this.unitService.copyItemsWithMetadata(newUnitId, metadata);
+      itemUuidLookups = await this.unitService.copyItemsWithMetadata(
+        newUnitId,
+        metadata
+      );
     }
     return itemUuidLookups;
   }
@@ -672,36 +860,65 @@ export class WorkspaceService {
     newUnitId: number,
     unitImportData: UnitImportData
   ) {
-    await this.unitService.patchDefinition(newUnitId, {
-      definition: unitImportData.definition,
-      variables: unitImportData.baseVariables
-    }, null, unitImportData.lastChangedDefinition);
+    await this.unitService.patchDefinition(
+      newUnitId,
+      {
+        definition: unitImportData.definition,
+        variables: unitImportData.baseVariables
+      },
+      null,
+      unitImportData.lastChangedDefinition
+    );
   }
 
   private async importScheme(
     newUnitId: number,
     unitImportData: UnitImportData
   ) {
-    await this.unitService.patchScheme(newUnitId, {
-      scheme: unitImportData.codingScheme,
-      schemeType: unitImportData.schemeType
-    }, null, unitImportData.lastChangedScheme);
+    await this.unitService.patchScheme(
+      newUnitId,
+      {
+        scheme: unitImportData.codingScheme,
+        schemeType: unitImportData.schemeType
+      },
+      null,
+      unitImportData.lastChangedScheme
+    );
   }
 
-  private async importComments(unitId: number, comments: string, itemUuidLookups: ItemUuidLookup[]) {
-    await this.unitCommentService.createComments(JSON.parse(comments), unitId, itemUuidLookups);
+  private async importComments(
+    unitId: number,
+    comments: string,
+    itemUuidLookups: ItemUuidLookup[]
+  ) {
+    await this.unitCommentService.createComments(
+      JSON.parse(comments),
+      unitId,
+      itemUuidLookups
+    );
   }
 
-  private async checkForProfileUpdate(workspace: Workspace, newSettings: WorkspaceSettingsDto) {
+  private async checkForProfileUpdate(
+    workspace: Workspace,
+    newSettings: WorkspaceSettingsDto
+  ) {
     if (
-      (workspace.settings?.itemMDProfile && workspace.settings?.itemMDProfile !== newSettings?.itemMDProfile) ||
-      (workspace.settings?.unitMDProfile && workspace.settings?.unitMDProfile !== newSettings?.unitMDProfile) ||
+      (workspace.settings?.itemMDProfile &&
+        workspace.settings?.itemMDProfile !== newSettings?.itemMDProfile) ||
+      (workspace.settings?.unitMDProfile &&
+        workspace.settings?.unitMDProfile !== newSettings?.unitMDProfile) ||
       (!workspace.settings?.itemMDProfile && newSettings?.itemMDProfile) ||
       (!workspace.settings?.unitMDProfile && newSettings?.unitMDProfile)
     ) {
-      const unitIds = await this.unitService.getUnitIdsByWorkspaceId(workspace.id);
-      unitIds.map(async unitId => this.unitService
-        .patchMetadataCurrentProfile(unitId, newSettings.unitMDProfile, newSettings.itemMDProfile));
+      const unitIds = await this.unitService.getUnitIdsByWorkspaceId(
+        workspace.id
+      );
+      unitIds.map(async unitId => this.unitService.patchMetadataCurrentProfile(
+        unitId,
+        newSettings.unitMDProfile,
+        newSettings.itemMDProfile
+      )
+      );
     }
   }
 }
