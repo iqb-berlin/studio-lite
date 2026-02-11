@@ -1,4 +1,4 @@
-import { WebColors } from './webcolors';
+import { WebColors } from './web-colors';
 
 describe('WebColors', () => {
   beforeEach(() => {
@@ -29,4 +29,3 @@ describe('WebColors', () => {
     expect(hex).toBe('');
   });
 });
-

@@ -30,7 +30,7 @@ import { BasicAcceptedElems } from 'cheerio';
 import { imageSize } from 'image-size';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
-import { WebColors } from '../utils/webcolors';
+import { WebColors } from '../utils/web-colors';
 
 type AnyNodeWithName = AnyNode & { name: string; };
 
