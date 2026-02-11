@@ -111,7 +111,8 @@
     "zone.js": "0.15.0"
   },
   "overrides": {
-    "stylus": "0.0.1-security"
+    "stylus": "0.0.1-security",
+    "@parcel/watcher": "2.5.1"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "20.3.14",
