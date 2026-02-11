@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyWrapperPanel } from './formly-wrapper-panel.component';
@@ -12,7 +11,6 @@ describe('FormlyWrapperPanel', () => {
     await TestBed.configureTestingModule({
       imports: [
         MatExpansionModule,
-        NoopAnimationsModule,
         FormlyModule.forRoot(),
         FormlyWrapperPanel
       ]

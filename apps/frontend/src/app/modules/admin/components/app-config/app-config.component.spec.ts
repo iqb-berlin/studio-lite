@@ -5,7 +5,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -63,8 +62,7 @@ describe('AppConfigComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         MatTooltipModule,
-        MatSelectModule,
-        NoopAnimationsModule
+        MatSelectModule
       ],
       providers: [
         provideHttpClient(),

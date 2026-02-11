@@ -4,7 +4,7 @@ import { TranslateService } from '@ngx-translate/core';
 
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../services/app.service';
-import { AppConfig } from '../../models/app-config.class';
+import { AppConfig } from '../../classes/app-config.class';
 import { AppInfoComponent } from '../app-info/app-info.component';
 import { UserReviewsAreaComponent } from '../user-reviews-area/user-reviews-area.component';
 import { UserWorkspacesAreaComponent } from '../user-workspaces-area/user-workspaces-area.component';

@@ -3,15 +3,15 @@ import {
 } from '@angular/core';
 import { HttpHeaders, HttpParams } from '@angular/common/http';
 import { MatButton } from '@angular/material/button';
-import { IqbFilesUploadComponent } from '../iqbFilesUpload/iqbFilesUpload.component';
-import { UploadStatus } from '../iqb-files-classes';
+import { IqbFilesUploadComponent } from '../iqb-files-upload/iqb-files-upload.component';
+import { UploadStatus } from '../../enums/upload-status.enum';
 
 /**
  * A material design file upload queue component.
  */
 @Component({
   selector: 'iqb-files-upload-queue',
-  templateUrl: 'iqbFilesUploadQueue.component.html',
+  templateUrl: 'iqb-files-upload-queue.component.html',
   exportAs: 'iqbFilesUploadQueue',
   imports: [IqbFilesUploadComponent, MatButton]
 })

@@ -4,7 +4,6 @@ import {
   Component, Input, Pipe, PipeTransform
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of } from 'rxjs';
@@ -98,7 +97,7 @@ describe('WorkspacesComponent', () => {
     mockI18nService = {};
 
     await TestBed.configureTestingModule({
-      imports: [WorkspacesComponent, TranslateModule.forRoot(), NoopAnimationsModule],
+      imports: [WorkspacesComponent, TranslateModule.forRoot()],
       providers: [
         { provide: BackendService, useValue: mockBackendService },
         { provide: AppBackendService, useValue: mockAppBackendService },

@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { AuthDataDto } from '@studio-lite-lib/api-dto';
 import { AppService, standardLogo, defaultAppConfig } from './app.service';
-import { AppHttpError } from '../models/app-http-error.class';
+import { AppHttpError } from '../classes/app-http-error.class';
 
 describe('AppService', () => {
   let service: AppService;

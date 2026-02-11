@@ -11,7 +11,6 @@ import { Component, Input } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { GroupManageComponent } from './group-manage.component';
@@ -75,7 +74,6 @@ describe('GroupManageComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        NoopAnimationsModule,
         MatSnackBarModule,
         MatDialogModule,
         MatTableModule,

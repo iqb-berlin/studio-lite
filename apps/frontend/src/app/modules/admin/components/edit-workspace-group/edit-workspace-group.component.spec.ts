@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { EditWorkspaceGroupComponent } from './edit-workspace-group.component';
 import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-group-component-data.type';
 
@@ -26,8 +26,8 @@ describe('EditWorkspaceGroupComponent', () => {
         EditWorkspaceGroupComponent,
         MatInputModule,
         ReactiveFormsModule,
-        NoopAnimationsModule,
         MatDialogModule,
+        MatSelectModule,
         TranslateModule.forRoot()
       ],
       providers: [

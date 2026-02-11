@@ -10,13 +10,13 @@ import { MatProgressBar } from '@angular/material/progress-bar';
 
 import { MatCard } from '@angular/material/card';
 import { BytesPipe } from '../../pipes/bytes.pipe';
-import { UploadStatus } from '../iqb-files-classes';
+import { UploadStatus } from '../../enums/upload-status.enum';
 
 @Component({
   selector: 'iqb-files-upload',
-  templateUrl: './iqbFilesUpload.component.html',
+  templateUrl: './iqb-files-upload.component.html',
   exportAs: 'iqbFilesUpload',
-  styleUrls: ['../iqb-files.scss'],
+  styleUrls: ['./iqb-files-upload.scss'],
   imports: [MatCard, MatProgressBar, MatIcon, BytesPipe]
 })
 

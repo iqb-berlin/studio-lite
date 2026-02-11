@@ -3,7 +3,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatTreeModule } from '@angular/material/tree';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatIconModule } from '@angular/material/icon';
 import { BehaviorSubject } from 'rxjs';
 import { NestedTreeComponent } from './nested-tree.component';
 import { VocabNodeChangeService } from '../../services/vocab-node-change.service';
@@ -42,7 +42,7 @@ describe('NestedTreeNodeComponent', () => {
         MatCheckboxModule,
         MatDialogModule,
         MatTreeModule,
-        NoopAnimationsModule,
+        MatIconModule,
         TranslateModule.forRoot(),
         NestedTreeComponent
       ],

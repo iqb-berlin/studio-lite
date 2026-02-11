@@ -6,7 +6,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { provideHttpClient } from '@angular/common/http';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { of } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { EditUserComponent } from './edit-user.component';
@@ -49,7 +50,8 @@ describe('EditUserComponent', () => {
         ReactiveFormsModule,
         MatDialogModule,
         MatCheckboxModule,
-        NoopAnimationsModule,
+        MatFormFieldModule,
+        MatProgressSpinnerModule,
         TranslateModule.forRoot()
       ],
       providers: [
@@ -196,7 +198,8 @@ describe('EditUserComponent (new user)', () => {
         ReactiveFormsModule,
         MatDialogModule,
         MatCheckboxModule,
-        NoopAnimationsModule,
+        MatFormFieldModule,
+        MatProgressSpinnerModule,
         TranslateModule.forRoot()
       ],
       providers: [

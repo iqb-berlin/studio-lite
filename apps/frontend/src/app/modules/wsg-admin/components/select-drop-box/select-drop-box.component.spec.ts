@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { SelectDropBoxComponent } from './select-drop-box.component';
 
@@ -18,7 +17,6 @@ describe('SelectDropBoxComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        NoopAnimationsModule,
         SelectDropBoxComponent,
         MatDialogModule,
         TranslateModule.forRoot()

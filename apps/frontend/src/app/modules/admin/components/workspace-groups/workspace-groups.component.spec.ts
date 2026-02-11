@@ -19,7 +19,7 @@ import { of } from 'rxjs';
 import { WorkspaceGroupsComponent } from './workspace-groups.component';
 import { environment } from '../../../../../environments/environment';
 import { AppService } from '../../../../services/app.service';
-import { AppConfig } from '../../../../models/app-config.class';
+import { AppConfig } from '../../../../classes/app-config.class';
 import { BackendService } from '../../services/backend.service';
 import { I18nService } from '../../../../services/i18n.service';
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';

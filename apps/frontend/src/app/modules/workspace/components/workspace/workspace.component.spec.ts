@@ -3,9 +3,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { Component, Input } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { WorkspaceComponent } from './workspace.component';
 import { environment } from '../../../../../environments/environment';
 
@@ -64,7 +64,7 @@ describe('WorkspaceComponent', () => {
       ],
       imports: [
         MatSnackBarModule,
-        NoopAnimationsModule,
+        MatTooltipModule,
         TranslateModule.forRoot()
       ],
       providers: [

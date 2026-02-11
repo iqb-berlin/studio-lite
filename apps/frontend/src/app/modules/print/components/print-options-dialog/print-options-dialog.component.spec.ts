@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { PrintOptionsDialogComponent } from './print-options-dialog.component';
 import { PrintOptions } from '../../models/print-options.interface';
 
@@ -26,7 +25,6 @@ describe('PrintOptionsDialogComponent', () => {
       imports: [
         PrintOptionsDialogComponent,
         MatDialogModule,
-        NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [
