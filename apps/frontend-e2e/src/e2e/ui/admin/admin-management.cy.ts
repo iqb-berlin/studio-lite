@@ -16,7 +16,7 @@ import {
   createWs,
   deleteFirstUser,
   deleteGroup,
-  deleteModule,
+  deleteAllModules,
   deleteResource,
   deleteUser,
   deleteUsers,
@@ -72,7 +72,7 @@ describe('UI Administration Management', () => {
     });
 
   it('deletes Verona modules', () => {
-    deleteModule();
+    deleteAllModules();
   });
 
   it('deletes a resource package', () => {

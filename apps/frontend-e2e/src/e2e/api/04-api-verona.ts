@@ -25,7 +25,7 @@ describe('Admin verona API tests', () => {
       cy.getModulesAPI(Cypress.env(`token_${Cypress.env('username')}`)).then(
         resp => {
           expect(resp.status).to.be.oneOf([200, 304]);
-          expect(resp.body.length).equal(3);
+          expect(resp.body.length).equal(6);
         }
       );
     });
@@ -48,7 +48,7 @@ describe('Admin verona API tests', () => {
     });
 
     it('401 negative test: should deny access to module details when no authentication token is provided', () => {
-      cy.getModuleAPI('iqb-schemer%402.5', noId).then(resp => {
+      cy.getModuleAPI('iqb-schemer%402.6', noId).then(resp => {
         expect(resp.status).to.equal(401);
       });
     });

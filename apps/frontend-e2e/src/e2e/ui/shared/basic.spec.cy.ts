@@ -4,7 +4,8 @@ import {
   modules,
   newUser,
   resource,
-  ws1
+  ws1,
+  ws2
 } from '../../../support/testData';
 import {
   addFirstUser,
@@ -15,7 +16,7 @@ import {
   createWs,
   deleteFirstUser,
   deleteGroup,
-  deleteModule,
+  deleteAllModules,
   deleteResource,
   deleteUser,
   grantRemovePrivilegeAtWs
@@ -34,9 +35,14 @@ export function createBasicSpecCy() {
     // admin can create a workspace (Arbeitsbereich) within its Bereichsgruppe
     createWs(ws1, group1);
     grantRemovePrivilegeAtWs([Cypress.env('username'), newUser.username],
-      'Grundarbeitsbereich',
+      ws1,
       [AccessLevel.Admin, AccessLevel.Developer]);
-
+    createWs(ws2, group1);
+    grantRemovePrivilegeAtWs(
+      [Cypress.env('username'), newUser.username],
+      ws2,
+      [AccessLevel.Admin, AccessLevel.Developer]
+    );
     // admin can Modules upload',
     addModules(modules);
 
@@ -57,7 +63,7 @@ export function deleteBasicSpecCy() {
     deleteUser(newUser.username);
 
     // admin deletes Modules
-    deleteModule();
+    deleteAllModules();
 
     // admin deletes package resource
     deleteResource();

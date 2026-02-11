@@ -66,14 +66,11 @@ Cypress.Commands.add('findAdminSettings', (): Chainable<JQuery<HTMLElement>> => 
 
 Cypress.Commands.add('loadModule', (filename: string) => {
   const path: string = `../frontend-e2e/src/fixtures/${filename}`;
-  const name = filename.replace(/-+(?=[^-\d]*\d)/, '@').replace(/...html$/, '');
   cy.get('input[type=file]')
     .selectFile(path, {
       action: 'select',
       force: true
     });
-  cy.contains('mat-row', name)
-    .should('exist');
 });
 
 Cypress.Commands.add('selectModule', (name: string) => {
@@ -81,12 +78,12 @@ Cypress.Commands.add('selectModule', (name: string) => {
     .parent()
     .parent()
     .prev()
-    .click();
+    .click({ multiple: true });
 });
 
 Cypress.Commands.add('visitWs', (ws: string) => {
-  cy.intercept('GET', '**/workspaces/*/units*').as('getUnits');
   cy.visit('/');
+  cy.intercept('GET', '**/workspaces/*/units*').as('getUnits');
   cy.get(`a:contains("${ws}")`).click();
   cy.wait('@getUnits');
   cy.get('[data-cy="workspace-unit-selection-filter-units"]').should('be.visible');

@@ -37,9 +37,11 @@ describe('Workspace Group Administration', () => {
     createNewUser(groupAdminUser);
     createGroup(group1);
     createWs(ws1, group1);
+    cy.pause();
     grantRemovePrivilegeAtWs([newUser.username, Cypress.env('username')],
       ws1,
       [AccessLevel.Basic, AccessLevel.Admin]);
+    cy.pause();
     createWs(ws2, group1);
   });
 
@@ -61,7 +63,7 @@ describe('Workspace Group Administration', () => {
     cy.findAdminGroupSettings(group1).should('not.exist');
   });
 
-  it('restricts workspace to read-only for users without access', () => {
+  it('restricts workspace to read-only for users with basic access', () => {
     cy.contains(ws1).click();
     cy.get('[data-cy="units-area-no-access-level"]').should('exist');
     cy.get('studio-lite-add-unit-button>button')
