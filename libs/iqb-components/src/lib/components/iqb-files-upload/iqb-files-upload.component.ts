@@ -14,9 +14,9 @@ import { UploadStatus } from '../../enums/upload-status.enum';
 
 @Component({
   selector: 'iqb-files-upload',
-  templateUrl: './iqbFilesUpload.component.html',
+  templateUrl: './iqb-files-upload.component.html',
   exportAs: 'iqbFilesUpload',
-  styleUrls: ['./iqb-files.scss'],
+  styleUrls: ['./iqb-files-upload.scss'],
   imports: [MatCard, MatProgressBar, MatIcon, BytesPipe]
 })
 

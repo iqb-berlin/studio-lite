@@ -17,9 +17,9 @@ import {
 } from './components/message-dialog/message-dialog.component';
 import { BytesPipe } from './pipes/bytes.pipe';
 import { ErrorHandler, IqbComponentsConfig, ServerError } from './iqb-components.classes';
-import { IqbFilesUploadComponent } from './components/iqbFilesUpload/iqbFilesUpload.component';
-import { IqbFilesUploadQueueComponent } from './components/iqbFilesUploadQueue/iqbFilesUploadQueue.component';
-import { IqbFilesUploadInputForDirective } from './directives/iqbFilesUploadInputFor.directive';
+import { IqbFilesUploadComponent } from './components/iqb-files-upload/iqb-files-upload.component';
+import { IqbFilesUploadQueueComponent } from './components/iqb-files-upload-queue/iqb-files-upload-queue.component';
+import { IqbFilesUploadInputForDirective } from './directives/iqb-files-upload-input-for.directive';
 
 @NgModule({
   exports: [

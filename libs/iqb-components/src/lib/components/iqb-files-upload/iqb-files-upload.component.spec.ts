@@ -2,7 +2,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpEventType, HttpProgressEvent, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { IqbFilesUploadComponent } from './iqbFilesUpload.component';
+import { IqbFilesUploadComponent } from './iqb-files-upload.component';
 import { UploadStatus } from '../../enums/upload-status.enum';
 
 describe('IqbFilesUploadComponent', () => {
