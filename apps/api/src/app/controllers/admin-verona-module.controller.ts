@@ -11,7 +11,7 @@ import {
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotAcceptableResponse, ApiOkResponse, ApiQuery, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
-import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
+import { VeronaModuleInListDto, VeronaModuleType } from '@studio-lite-lib/api-dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -33,8 +33,15 @@ export class AdminVeronaModuleController {
   @ApiNotAcceptableResponse({ description: 'Verona module not accepted.' })
   @UseInterceptors(FileInterceptor('file'))
   @ApiTags('admin verona-module')
-  async addModuleFile(@UploadedFile() file) {
-    return this.veronaModulesService.upload(file.buffer);
+  @ApiQuery({
+    name: 'type',
+    type: String,
+    description: 'optional upload type scope: widget or editor/player/schemer',
+    required: false
+  })
+  async addModuleFile(@UploadedFile() file, @Query('type') type?: string) {
+    const allowedTypes: VeronaModuleType[] = type === 'widget' ? ['widget'] : ['editor', 'player', 'schemer'];
+    return this.veronaModulesService.upload(file.buffer, allowedTypes);
   }
 
   @Delete()

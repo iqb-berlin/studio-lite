@@ -30,7 +30,7 @@ import { I18nService } from '../../../../services/i18n.service';
   imports: [MatButton, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe]
 })
 export class VeronaModulesTableComponent implements OnInit, OnDestroy {
-  @Input() type!: 'editor' | 'player' | 'schemer';
+  @Input() type!: 'editor' | 'player' | 'schemer' | 'widget';
   @Input()
   set modules(value: { [key: string]: VeronaModuleClass }) {
     this.objectsDatasource = new MatTableDataSource(

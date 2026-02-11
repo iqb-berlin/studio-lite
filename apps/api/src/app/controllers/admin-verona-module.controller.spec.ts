@@ -37,7 +37,18 @@ describe('AdminVeronaModuleController', () => {
 
       await controller.addModuleFile(mockFile);
 
-      expect(veronaModulesService.upload).toHaveBeenCalledWith(mockFile.buffer);
+      expect(veronaModulesService.upload)
+        .toHaveBeenCalledWith(mockFile.buffer, ['editor', 'player', 'schemer']);
+    });
+
+    it('should upload a widget file when type is widget', async () => {
+      const mockFile = { buffer: Buffer.from('test') };
+      veronaModulesService.upload.mockResolvedValue(undefined);
+
+      await controller.addModuleFile(mockFile, 'widget');
+
+      expect(veronaModulesService.upload)
+        .toHaveBeenCalledWith(mockFile.buffer, ['widget']);
     });
   });
 

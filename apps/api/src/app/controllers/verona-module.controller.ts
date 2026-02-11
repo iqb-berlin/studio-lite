@@ -25,7 +25,7 @@ export class VeronaModuleController {
   @ApiQuery({
     name: 'type',
     type: String,
-    description: 'specify the type of module if needed: schemer, editor, player',
+    description: 'specify the type of module if needed: schemer, editor, player, widget',
     required: false
   })
   @ApiOkResponse({ description: 'Verona modules retrieved successfully.' })
