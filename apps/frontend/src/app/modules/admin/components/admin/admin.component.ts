@@ -17,6 +17,7 @@ export class AdminComponent {
     'workspaces',
     'units',
     'v-modules',
+    'widgets',
     'settings',
     'packages'
   ];

@@ -3,7 +3,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { VeronaModuleFileDto, VeronaModuleInListDto, VeronaModuleMetadataDto } from '@studio-lite-lib/api-dto';
+import {
+  VeronaModuleFileDto, VeronaModuleInListDto, VeronaModuleMetadataDto, VeronaModuleType
+} from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
 import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
 import type { Response } from 'express';
@@ -69,7 +71,7 @@ export class VeronaModulesService {
     ) => (a.metadata.name + a.sortKey).localeCompare(b.metadata.name + b.sortKey));
   }
 
-  async upload(fileData: Buffer) {
+  async upload(fileData: Buffer, allowedTypes?: VeronaModuleType[]) {
     const fileAsString = fileData.toString('utf8');
     const htmlDocument = cheerio.load(fileAsString);
     const firstScriptElement = htmlDocument('script[type="application/ld+json"]').first();
@@ -78,6 +80,9 @@ export class VeronaModulesService {
       const scriptContentAsJson = JSON.parse(scriptContentAsString);
       const veronaModuleMetadata = VeronaModuleMetadataDto.getFromJsonLd(scriptContentAsJson);
       if (veronaModuleMetadata) {
+        if (allowedTypes && !allowedTypes.includes(veronaModuleMetadata.type)) {
+          throw new NotAcceptableException('verona module type not accepted');
+        }
         const moduleKey = VeronaModuleMetadataDto.getKey(veronaModuleMetadata);
         const existingModule = await this.veronaModulesRepository.findOne({
           where: { key: moduleKey },
