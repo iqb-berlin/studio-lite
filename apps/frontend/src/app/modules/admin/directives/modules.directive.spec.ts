@@ -12,7 +12,7 @@ import { ModulesDirective } from './modules.directive';
 class TestModulesDirective extends ModulesDirective {
   loadModuleListSpy = jest.fn();
   protected readonly pageTitleKey = 'modules.title';
-  protected readonly uploadPath = 'admin/verona-modules';
+  protected readonly uploadPath = 'admin/verona-modules?type=editor&type=player&type=schemer';
 
   protected serverUrl: string;
   protected appService: AppService;
@@ -40,14 +40,6 @@ class TestModulesDirective extends ModulesDirective {
     this.snackBar = snackBar;
     this.translateService = translateService;
     this.updateUploadUrl();
-  }
-
-  protected getPageTitleKey(): string {
-    return this.pageTitleKey;
-  }
-
-  protected getUploadPath(): string {
-    return this.uploadPath;
   }
 
   loadModuleList(): void {
@@ -107,7 +99,8 @@ describe('ModulesDirective', () => {
   it('computes upload url from server url and upload path', () => {
     const { directive } = createDirective();
 
-    expect(directive.uploadUrl).toBe('https://server/admin/verona-modules');
+    expect(directive.uploadUrl)
+      .toBe('https://server/admin/verona-modules?type=editor&type=player&type=schemer');
   });
 
   it('sets page title, token, and loads module list on init', () => {
