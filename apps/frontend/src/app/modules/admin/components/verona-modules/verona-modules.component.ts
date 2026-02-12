@@ -25,7 +25,7 @@ import { ModulesDirective } from '../../directives/modules.directive';
 })
 export class VeronaModulesComponent extends ModulesDirective {
   protected readonly pageTitleKey = 'modules.title';
-  protected readonly uploadPath = 'admin/verona-modules';
+  protected readonly uploadPath = 'admin/verona-modules?type=editor&type=player&type=schemer';
 
   protected serverUrl: string;
   protected appService: AppService;
@@ -51,14 +51,6 @@ export class VeronaModulesComponent extends ModulesDirective {
     this.snackBar = snackBar;
     this.translateService = translateService;
     this.updateUploadUrl();
-  }
-
-  protected getPageTitleKey(): string {
-    return this.pageTitleKey;
-  }
-
-  protected getUploadPath(): string {
-    return this.uploadPath;
   }
 
   loadModuleList() {

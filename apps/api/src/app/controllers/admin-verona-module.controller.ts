@@ -1,6 +1,7 @@
 import {
   Controller,
   Delete,
+  NotAcceptableException,
   ParseArrayPipe,
   Post,
   Query,
@@ -36,12 +37,29 @@ export class AdminVeronaModuleController {
   @ApiQuery({
     name: 'type',
     type: String,
-    description: 'optional upload type scope: widget or editor/player/schemer',
-    required: false
+    description: 'required, array of module types: editor, player, schemer, widget',
+    required: true,
+    isArray: true,
+    enum: ['editor', 'player', 'schemer', 'widget']
   })
-  async addModuleFile(@UploadedFile() file, @Query('type') type?: string) {
-    const allowedTypes: VeronaModuleType[] = type === 'widget' ? ['widget'] : ['editor', 'player', 'schemer'];
-    return this.veronaModulesService.upload(file.buffer, allowedTypes);
+  async addModuleFile(
+  @UploadedFile() file,
+    @Query('type', new ParseArrayPipe({ items: String, separator: ',' })) types: string[]
+  ) {
+    const allowedTypes = ['editor', 'player', 'schemer', 'widget'] as const;
+    const normalizedTypes = types.map(type => type.trim()).filter(Boolean);
+
+    if (!normalizedTypes.length) {
+      throw new NotAcceptableException('Module type is required.');
+    }
+
+    const invalidTypes = normalizedTypes.filter(type => !allowedTypes.includes(type as VeronaModuleType));
+    if (invalidTypes.length) {
+      throw new NotAcceptableException(`Unknown module type(s): ${invalidTypes.join(', ')}`);
+    }
+
+    const uniqueTypes = Array.from(new Set(normalizedTypes)) as VeronaModuleType[];
+    return this.veronaModulesService.upload(file.buffer, uniqueTypes);
   }
 
   @Delete()
