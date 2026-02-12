@@ -38,6 +38,7 @@ describe('ModuleService', () => {
             id: 'e1',
             name: 'E1',
             type: 'editor',
+            model: '',
             version: '1.0',
             specVersion: '1.0',
             isStable: true
@@ -50,6 +51,7 @@ describe('ModuleService', () => {
             id: 'p1',
             name: 'P1',
             type: 'player',
+            model: 'speedTest',
             version: '1.0',
             specVersion: '1.0',
             isStable: true
@@ -62,6 +64,7 @@ describe('ModuleService', () => {
             id: 's1',
             name: 'S1',
             type: 'schemer',
+            model: 'iqb',
             version: '1.0',
             specVersion: '1.0',
             isStable: true
@@ -108,6 +111,7 @@ describe('ModuleService', () => {
           id: 'w1',
           name: 'W1',
           type: 'widget',
+          model: 'calculator',
           version: '1.0',
           specVersion: '1.0',
           isStable: true
@@ -140,6 +144,7 @@ describe('ModuleService', () => {
           id: 'm1',
           name: 'M1',
           type: 'player',
+          model: 'aspect',
           version: '1.0',
           specVersion: '1.0',
           isStable: true
@@ -161,6 +166,7 @@ describe('ModuleService', () => {
           id: 'm1',
           name: 'M1',
           type: 'player',
+          model: 'aspect',
           version: '1.0',
           specVersion: '1.0',
           isStable: true
@@ -189,6 +195,7 @@ describe('ModuleService', () => {
           id: 'm1',
           name: 'M1',
           type: 'player',
+          model: 'aspect',
           version: '1.0',
           specVersion: '1.0',
           isStable: true

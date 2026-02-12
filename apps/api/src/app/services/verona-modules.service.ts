@@ -56,19 +56,22 @@ export class VeronaModulesService {
 
   async findAll(type?: string): Promise<VeronaModuleInListDto[]> {
     this.logger.log('Returning verona modules.');
-    const veronaModules = await this.veronaModulesRepository.find({
+    const veronaModules = (await this.veronaModulesRepository.find({
       select: ['key', 'metadata', 'fileSize', 'fileDateTime']
-    });
-    return veronaModules.filter(vm => !type || vm.metadata.type === type).map(vm => <VeronaModuleInListDto>{
-      key: vm.key,
-      sortKey: VeronaModuleKeyCollection.getSortKey(vm.key),
-      metadata: vm.metadata,
-      fileSize: vm.fileSize,
-      fileDateTime: vm.fileDateTime as unknown
-    }).sort((
-      a: VeronaModuleInListDto,
-      b: VeronaModuleInListDto
-    ) => (a.metadata.name + a.sortKey).localeCompare(b.metadata.name + b.sortKey));
+    })) ?? [];
+    return veronaModules
+      .filter(vm => !type || vm.metadata?.type === type)
+      .map(vm => <VeronaModuleInListDto>{
+        key: vm.key,
+        sortKey: VeronaModuleKeyCollection.getSortKey(vm.key),
+        metadata: vm.metadata,
+        fileSize: vm.fileSize,
+        fileDateTime: vm.fileDateTime as unknown
+      })
+      .sort((
+        a: VeronaModuleInListDto,
+        b: VeronaModuleInListDto
+      ) => (a.metadata.name + a.sortKey).localeCompare(b.metadata.name + b.sortKey));
   }
 
   async upload(fileData: Buffer, allowedTypes?: VeronaModuleType[]) {
