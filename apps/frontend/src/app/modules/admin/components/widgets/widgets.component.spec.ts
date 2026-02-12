@@ -186,7 +186,6 @@ describe('WidgetsComponent', () => {
     expect(mockSnackBar.open).toHaveBeenCalledWith('modules.not-deleted', 'error', { duration: 3000 });
   });
 
-
   it('should abort delete if confirmation is rejected', () => {
     component.selectedModules = [{ key: 'w1' } as VeronaModuleClass];
     (mockDialog.open as jest.Mock).mockReturnValue({
@@ -198,4 +197,3 @@ describe('WidgetsComponent', () => {
     expect(mockBackendService.deleteVeronaModules).not.toHaveBeenCalled();
   });
 });
-
