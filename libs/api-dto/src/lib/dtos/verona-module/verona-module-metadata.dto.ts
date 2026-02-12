@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export type VeronaModuleType = 'editor' | 'player' | 'schemer' | 'widget';
 
 export class VeronaModuleMetadataDto {
-  [index: string]: any;
+  [index: string]: unknown;
 
   @ApiProperty()
     type!: VeronaModuleType;
