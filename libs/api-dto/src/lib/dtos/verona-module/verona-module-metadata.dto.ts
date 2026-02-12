@@ -9,6 +9,9 @@ export class VeronaModuleMetadataDto {
     type!: VeronaModuleType;
 
   @ApiProperty()
+    model!: string;
+
+  @ApiProperty()
     id!: string;
 
   @ApiProperty()
@@ -25,6 +28,7 @@ export class VeronaModuleMetadataDto {
 
   static getFromJsonLd(jsonMetadata: {
     type: VeronaModuleType;
+    model: string;
     id: string;
     version: string;
     specVersion: string;
@@ -47,6 +51,7 @@ export class VeronaModuleMetadataDto {
       });
       returnData = {
         type: jsonMetadata.type,
+        model: jsonMetadata.model || '',
         id: jsonMetadata.id,
         name: nameDe || (nameEn || jsonMetadata.id),
         version: jsonMetadata.version,
@@ -57,12 +62,15 @@ export class VeronaModuleMetadataDto {
       const nameList: { [x: string]: string } = jsonMetadata.name as { [x: string]: string };
       returnData = {
         type: jsonMetadata['@type'] as VeronaModuleType,
+        model: jsonMetadata.model || '',
         id: jsonMetadata['@id'],
         // eslint-disable-next-line @typescript-eslint/dot-notation
-        name: nameList['de'] || (nameList['en'] || jsonMetadata['@id']),
+        name: nameList['de'] || nameList['en'] || jsonMetadata['@id'],
         version: jsonMetadata.version,
         specVersion: jsonMetadata.apiVersion,
-        isStable: !VeronaModuleMetadataDto.isPreStableVersion(jsonMetadata.version)
+        isStable: !VeronaModuleMetadataDto.isPreStableVersion(
+          jsonMetadata.version
+        )
       };
     }
     return returnData;
@@ -72,7 +80,9 @@ export class VeronaModuleMetadataDto {
     if (VeronaModuleMetadataDto.isPreStableVersion(metadata.version)) return `${metadata.id}@${metadata.version}`;
     const pattern = /^(\d+\.\d+)/g;
     const matches = pattern.exec(metadata.version);
-    return matches ? `${metadata.id}@${matches[1]}` : `${metadata.id}@${metadata.version}`;
+    return matches ?
+      `${metadata.id}@${matches[1]}` :
+      `${metadata.id}@${metadata.version}`;
   }
 
   static isPreStableVersion(version: string): boolean {
