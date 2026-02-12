@@ -21,6 +21,8 @@ export abstract class ModulesDirective implements OnInit {
   uploadUrl = '';
   token: string | undefined;
 
+  protected abstract readonly pageTitleKey: string;
+  protected abstract readonly uploadPath: string;
   protected abstract serverUrl: string;
   protected abstract appService: AppService;
   abstract moduleService: ModuleService;
@@ -29,18 +31,16 @@ export abstract class ModulesDirective implements OnInit {
   protected abstract snackBar: MatSnackBar;
   protected abstract translateService: TranslateService;
 
-  protected abstract getPageTitleKey(): string;
-  protected abstract getUploadPath(): string;
   abstract loadModuleList(): void;
 
   protected updateUploadUrl(): void {
-    this.uploadUrl = `${this.serverUrl}${this.getUploadPath()}`;
+    this.uploadUrl = `${this.serverUrl}${this.uploadPath}`;
   }
 
   ngOnInit(): void {
     setTimeout(() => {
       this.appService.appConfig
-        .setPageTitle(this.translateService.instant(this.getPageTitleKey()));
+        .setPageTitle(this.translateService.instant(this.pageTitleKey));
       const token = localStorage.getItem('t');
       this.loadModuleList();
       this.token = token || '';

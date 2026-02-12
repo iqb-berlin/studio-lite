@@ -54,14 +54,6 @@ export class WidgetsComponent extends ModulesDirective {
     this.updateUploadUrl();
   }
 
-  protected getPageTitleKey(): string {
-    return this.pageTitleKey;
-  }
-
-  protected getUploadPath(): string {
-    return this.uploadPath;
-  }
-
   loadModuleList() {
     this.appService.dataLoading = true;
     this.moduleService.loadWidgets().then(() => {
