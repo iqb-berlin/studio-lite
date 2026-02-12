@@ -11,8 +11,8 @@ describe('VeronaModulesService', () => {
   let repository: Repository<VeronaModule>;
 
   const mockRepository = {
+    find: jest.fn(),
     findOne: jest.fn(),
-    query: jest.fn(),
     save: jest.fn(),
     create: jest.fn(),
     delete: jest.fn()
@@ -77,9 +77,9 @@ describe('VeronaModulesService', () => {
   describe('findAll', () => {
     it('should return modules', async () => {
       const modules = [{
-        key: 'k', metadata: { type: 'editor', name: 'n' }, file_size: 1, file_datetime: new Date()
+        key: 'k', metadata: { type: 'editor', model: '', name: 'n' }, file_size: 1, file_datetime: new Date()
       }];
-      mockRepository.query.mockResolvedValue(modules);
+      mockRepository.find.mockResolvedValue(modules);
 
       const result = await service.findAll();
       expect(result).toHaveLength(1);
@@ -90,7 +90,7 @@ describe('VeronaModulesService', () => {
         { key: 'e', metadata: { type: 'editor', name: 'e' } },
         { key: 'p', metadata: { type: 'player', name: 'p' } }
       ];
-      mockRepository.query.mockResolvedValue(modules);
+      mockRepository.find.mockResolvedValue(modules);
 
       const result = await service.findAll('editor');
       expect(result).toHaveLength(1);

@@ -29,6 +29,7 @@ export interface FlattenedVeronaModuleClass {
   html: string;
   id: string;
   type: VeronaModuleType;
+  model: string;
   name: string;
   version: string;
   specVersion: string;

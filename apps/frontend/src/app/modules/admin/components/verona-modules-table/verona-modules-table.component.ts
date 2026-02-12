@@ -47,7 +47,9 @@ export class VeronaModulesTableComponent implements OnInit, OnDestroy {
 
   objectsDatasource = new MatTableDataSource<FlattenedVeronaModuleClass>();
   tableSelectionCheckboxes = new SelectionModel<FlattenedVeronaModuleClass>(true, []);
-  displayedColumns = ['selectCheckbox', 'name', 'id', 'version', 'veronaVersion', 'fileDateTime', 'filesize'];
+  displayedColumns = ['selectCheckbox', 'name', 'id', 'model', 'version',
+    'veronaVersion', 'fileDateTime', 'filesize'];
+
   private selectionChangedSubscription: Subscription | undefined;
 
   constructor(
