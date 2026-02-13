@@ -21,6 +21,7 @@ import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
 import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
 import { I18nService } from '../../../../services/i18n.service';
+import { ModuleSelectionChange } from '../../models/module-selection-change';
 
 @Component({
   selector: 'studio-lite-verona-modules-table',
@@ -30,7 +31,7 @@ import { I18nService } from '../../../../services/i18n.service';
   imports: [MatButton, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe]
 })
 export class VeronaModulesTableComponent implements OnInit, OnDestroy {
-  @Input() type!: 'editor' | 'player' | 'schemer' | 'widget';
+  @Input() type!: string;
   @Input()
   set modules(value: { [key: string]: VeronaModuleClass }) {
     this.objectsDatasource = new MatTableDataSource(
@@ -42,7 +43,7 @@ export class VeronaModulesTableComponent implements OnInit, OnDestroy {
     });
   }
 
-  @Output() selectionChanged = new EventEmitter();
+  @Output() selectionChanged = new EventEmitter<ModuleSelectionChange>();
   @ViewChild(MatSort) sort = new MatSort();
 
   objectsDatasource = new MatTableDataSource<FlattenedVeronaModuleClass>();

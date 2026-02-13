@@ -45,6 +45,11 @@ class TestModulesDirective extends ModulesDirective {
   loadModuleList(): void {
     this.loadModuleListSpy();
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  changeSelectedModules(): void {
+    // Selection behavior is tested in derived components.
+  }
 }
 
 describe('ModulesDirective', () => {
@@ -117,22 +122,6 @@ describe('ModulesDirective', () => {
 
     localStorage.removeItem('t');
     jest.useRealTimers();
-  });
-
-  it('changes selected modules by replacing the selected type', () => {
-    const { directive } = createDirective();
-    const module1 = { metadata: { type: 'editor' }, key: 'm1' } as VeronaModuleClass;
-    const module2 = { metadata: { type: 'player' }, key: 'm2' } as VeronaModuleClass;
-    const module3 = { metadata: { type: 'editor' }, key: 'm3' } as VeronaModuleClass;
-
-    directive.selectedModules = [module1, module2];
-
-    directive.changeSelectedModules({ type: 'editor', selectedModules: [module3] });
-
-    expect(directive.selectedModules).toHaveLength(2);
-    expect(directive.selectedModules).toContain(module2);
-    expect(directive.selectedModules).toContain(module3);
-    expect(directive.selectedModules).not.toContain(module1);
   });
 
   it('deletes modules after confirmation', () => {
