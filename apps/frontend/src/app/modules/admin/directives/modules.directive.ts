@@ -32,6 +32,7 @@ export abstract class ModulesDirective implements OnInit {
   protected abstract translateService: TranslateService;
 
   abstract loadModuleList(): void;
+  abstract changeSelectedModules(selection: { type: string; selectedModules: VeronaModuleClass[] }): void;
 
   protected updateUploadUrl(): void {
     this.uploadUrl = `${this.serverUrl}${this.uploadPath}`;
@@ -45,19 +46,6 @@ export abstract class ModulesDirective implements OnInit {
       this.loadModuleList();
       this.token = token || '';
     });
-  }
-
-  changeSelectedModules(selection: { type: string; selectedModules: VeronaModuleClass[] }) {
-    const newSelection: VeronaModuleClass[] = [];
-    this.selectedModules.forEach(m => {
-      if (m.metadata.type !== selection.type) {
-        newSelection.push(m);
-      }
-    });
-    selection.selectedModules.forEach(m => {
-      newSelection.push(m);
-    });
-    this.selectedModules = newSelection;
   }
 
   deleteFiles(): void {

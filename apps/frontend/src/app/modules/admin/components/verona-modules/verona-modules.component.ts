@@ -15,6 +15,7 @@ import { AppService } from '../../../../services/app.service';
 import { VeronaModulesTableComponent } from '../verona-modules-table/verona-modules-table.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { ModulesDirective } from '../../directives/modules.directive';
+import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
 
 @Component({
   selector: 'studio-lite-verona-modules',
@@ -58,5 +59,20 @@ export class VeronaModulesComponent extends ModulesDirective {
     this.moduleService.loadList().then(() => {
       this.appService.dataLoading = false;
     });
+  }
+
+  changeSelectedModules(selection: { type: string; selectedModules: VeronaModuleClass[] }): void {
+    const newSelection: VeronaModuleClass[] = [];
+
+    this.selectedModules.forEach(module => {
+      if (module.metadata?.type !== selection.type) {
+        newSelection.push(module);
+      }
+    });
+    selection.selectedModules.forEach(module => {
+      newSelection.push(module);
+    });
+
+    this.selectedModules = newSelection;
   }
 }
