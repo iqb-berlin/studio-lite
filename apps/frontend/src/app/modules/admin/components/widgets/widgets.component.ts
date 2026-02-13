@@ -16,6 +16,8 @@ import { AppService } from '../../../../services/app.service';
 import { VeronaModulesTableComponent } from '../verona-modules-table/verona-modules-table.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { ModulesDirective } from '../../directives/modules.directive';
+import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
+import { ModuleSelectionChange } from '../../models/module-selection-change';
 
 @Component({
   selector: 'studio-lite-widgets',
@@ -35,6 +37,7 @@ export class WidgetsComponent extends ModulesDirective {
   protected deleteConfirmDialog: MatDialog;
   protected snackBar: MatSnackBar;
   protected translateService: TranslateService;
+  widgetGroups: { model: string; modules: { [key: string]: VeronaModuleClass } }[] = [];
 
   constructor(@Inject('SERVER_URL') serverUrl: string,
                                     appService: AppService,
@@ -57,7 +60,41 @@ export class WidgetsComponent extends ModulesDirective {
   loadModuleList() {
     this.appService.dataLoading = true;
     this.moduleService.loadWidgets().then(() => {
+      this.buildWidgetGroups();
       this.appService.dataLoading = false;
     });
+  }
+
+  changeSelectedModules(selection: ModuleSelectionChange): void {
+    const newSelection: VeronaModuleClass[] = [];
+    const selectionKey = selection.type || '';
+
+    this.selectedModules.forEach(module => {
+      const moduleKey = module.metadata?.model || '';
+      if (moduleKey !== selectionKey) {
+        newSelection.push(module);
+      }
+    });
+    selection.selectedModules.forEach(module => {
+      newSelection.push(module);
+    });
+
+    this.selectedModules = newSelection;
+  }
+
+  private buildWidgetGroups(): void {
+    const groups = new Map<string, { [key: string]: VeronaModuleClass }>();
+    Object.keys(this.moduleService.widgets || {}).forEach(key => {
+      const module = this.moduleService.widgets[key];
+      const model = module?.metadata?.model || '';
+      if (!groups.has(model)) {
+        groups.set(model, {});
+      }
+      groups.get(model)![key] = module;
+    });
+
+    this.widgetGroups = Array.from(groups.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([model, modules]) => ({ model, modules }));
   }
 }

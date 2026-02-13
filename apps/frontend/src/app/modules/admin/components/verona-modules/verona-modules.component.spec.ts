@@ -158,13 +158,12 @@ describe('VeronaModulesComponent', () => {
 
     component.selectedModules = [module1, module2];
 
-    // Select new editor modules (replacing existing editors, keeping players)
     component.changeSelectedModules({ type: 'editor', selectedModules: [module3] });
 
     expect(component.selectedModules).toHaveLength(2);
-    expect(component.selectedModules).toContain(module2); // Player kept
-    expect(component.selectedModules).toContain(module3); // New editor added
-    expect(component.selectedModules).not.toContain(module1); // Old editor removed
+    expect(component.selectedModules).toContain(module2);
+    expect(component.selectedModules).toContain(module3);
+    expect(component.selectedModules).not.toContain(module1);
   });
 
   it('should delete modules successfully', () => {

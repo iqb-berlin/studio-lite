@@ -151,15 +151,17 @@ describe('WidgetsComponent', () => {
   });
 
   it('should change selected modules correctly', () => {
-    const module1 = { metadata: { type: 'widget' }, key: 'w1' } as VeronaModuleClass;
-    const module2 = { metadata: { type: 'widget' }, key: 'w2' } as VeronaModuleClass;
+    const module1 = { metadata: { type: 'widget', model: 'model-a' }, key: 'w1' } as VeronaModuleClass;
+    const module2 = { metadata: { type: 'widget', model: 'model-a' }, key: 'w2' } as VeronaModuleClass;
+    const module3 = { metadata: { type: 'widget', model: 'model-b' }, key: 'w3' } as VeronaModuleClass;
 
-    component.selectedModules = [module1];
+    component.selectedModules = [module1, module3];
 
-    component.changeSelectedModules({ type: 'widget', selectedModules: [module2] });
+    component.changeSelectedModules({ type: 'model-a', selectedModules: [module2] });
 
-    expect(component.selectedModules).toHaveLength(1);
+    expect(component.selectedModules).toHaveLength(2);
     expect(component.selectedModules).toContain(module2);
+    expect(component.selectedModules).toContain(module3);
     expect(component.selectedModules).not.toContain(module1);
   });
 
