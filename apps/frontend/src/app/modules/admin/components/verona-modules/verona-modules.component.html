@@ -33,21 +33,21 @@
                               (uploadCompleteEvent)="loadModuleList()">
       </iqb-files-upload-queue>
       <div class="fx-column-start-stretch">
-        <h1>{{'modules.player-name' | translate}}</h1>
+        <h2>{{'modules.player-name' | translate}}</h2>
         <studio-lite-verona-modules-table type="player"
                                           [modules]="moduleService.players"
                                           (selectionChanged)="changeSelectedModules($event)">
         </studio-lite-verona-modules-table>
       </div>
       <div class="fx-column-start-stretch">
-        <h1>{{'modules.editor-name' | translate}}</h1>
+        <h2>{{'modules.editor-name' | translate}}</h2>
         <studio-lite-verona-modules-table type="editor"
                                           [modules]="moduleService.editors"
                                           (selectionChanged)="changeSelectedModules($event)">
         </studio-lite-verona-modules-table>
       </div>
       <div class="fx-column-start-stretch">
-        <h1>{{'modules.schemer-name' | translate}}</h1>
+        <h2>{{'modules.schemer-name' | translate}}</h2>
         <studio-lite-verona-modules-table type="schemer"
                                           [modules]="moduleService.schemers"
                                           (selectionChanged)="changeSelectedModules($event)">
