@@ -17,7 +17,7 @@ import { VeronaModulesTableComponent } from '../verona-modules-table/verona-modu
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { ModulesDirective } from '../../directives/modules.directive';
 import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
-import { ModuleSelectionChange } from '../../models/module-selection-change';
+import { ModuleSelectionChange } from '../../models/module-selection-change.interface';
 
 @Component({
   selector: 'studio-lite-widgets',
