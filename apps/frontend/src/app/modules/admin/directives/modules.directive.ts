@@ -13,6 +13,7 @@ import { ModuleService } from '../../shared/services/module.service';
 import { BackendService } from '../services/backend.service';
 import { VeronaModulesTableComponent } from '../components/verona-modules-table/verona-modules-table.component';
 import { VeronaModuleClass } from '../../shared/models/verona-module.class';
+import { ModuleSelectionChange } from '../models/module-selection-change';
 
 @Directive()
 export abstract class ModulesDirective implements OnInit {
@@ -32,7 +33,7 @@ export abstract class ModulesDirective implements OnInit {
   protected abstract translateService: TranslateService;
 
   abstract loadModuleList(): void;
-  abstract changeSelectedModules(selection: { type: string; selectedModules: VeronaModuleClass[] }): void;
+  abstract changeSelectedModules(selection: ModuleSelectionChange): void;
 
   protected updateUploadUrl(): void {
     this.uploadUrl = `${this.serverUrl}${this.uploadPath}`;

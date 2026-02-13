@@ -16,6 +16,7 @@ import { VeronaModulesTableComponent } from '../verona-modules-table/verona-modu
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { ModulesDirective } from '../../directives/modules.directive';
 import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
+import { ModuleSelectionChange } from '../../models/module-selection-change';
 
 @Component({
   selector: 'studio-lite-verona-modules',
@@ -61,7 +62,7 @@ export class VeronaModulesComponent extends ModulesDirective {
     });
   }
 
-  changeSelectedModules(selection: { type: string; selectedModules: VeronaModuleClass[] }): void {
+  changeSelectedModules(selection: ModuleSelectionChange): void {
     const newSelection: VeronaModuleClass[] = [];
 
     this.selectedModules.forEach(module => {
