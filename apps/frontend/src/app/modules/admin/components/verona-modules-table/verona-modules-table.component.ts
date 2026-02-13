@@ -21,7 +21,7 @@ import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
 import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
 import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
 import { I18nService } from '../../../../services/i18n.service';
-import { ModuleSelectionChange } from '../../models/module-selection-change';
+import { ModuleSelectionChange } from '../../models/module-selection-change.interface';
 
 @Component({
   selector: 'studio-lite-verona-modules-table',
