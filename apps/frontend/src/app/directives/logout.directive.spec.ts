@@ -6,13 +6,11 @@ import { of } from 'rxjs';
 import { provideHttpClient } from '@angular/common/http';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { LogoutDirective } from './logout.directive';
-import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 import { environment } from '../../environments/environment';
 
 describe('LogoutDirective', () => {
   let directive: LogoutDirective;
-  let mockAppService: Partial<AppService>;
   let mockDialog: jest.Mocked<MatDialog>;
   let mockBackendService: jest.Mocked<BackendService>;
   let mockTranslateService: jest.Mocked<TranslateService>;
@@ -20,18 +18,6 @@ describe('LogoutDirective', () => {
   let mockDialogRef: jest.Mocked<MatDialogRef<ConfirmDialogComponent>>;
 
   beforeEach(async () => {
-    mockAppService = {
-      // appService is injected but not used in the logout method based on current code
-      authData: {
-        userId: 1,
-        userName: 'testUser',
-        userLongName: 'Test User',
-        isAdmin: false,
-        workspaces: [],
-        reviews: []
-      }
-    };
-
     mockDialogRef = {
       afterClosed: jest.fn()
     } as unknown as jest.Mocked<MatDialogRef<ConfirmDialogComponent>>;
@@ -59,7 +45,6 @@ describe('LogoutDirective', () => {
       ],
       providers: [
         provideHttpClient(),
-        { provide: AppService, useValue: mockAppService },
         { provide: MatDialog, useValue: mockDialog },
         { provide: BackendService, useValue: mockBackendService },
         { provide: TranslateService, useValue: mockTranslateService },
@@ -72,7 +57,6 @@ describe('LogoutDirective', () => {
     }).compileComponents();
 
     directive = new LogoutDirective(
-      mockAppService as AppService,
       mockDialog,
       mockBackendService,
       mockTranslateService,

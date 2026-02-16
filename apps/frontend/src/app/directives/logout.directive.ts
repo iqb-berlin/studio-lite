@@ -4,7 +4,6 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-
 import { TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 
 @Directive({
@@ -15,7 +14,6 @@ export class LogoutDirective implements OnDestroy {
   private ngUnsubscribe = new Subject<void>();
 
   constructor(
-    public appService: AppService,
     public confirmDialog: MatDialog,
     private backendService: BackendService,
     private translateService: TranslateService,
