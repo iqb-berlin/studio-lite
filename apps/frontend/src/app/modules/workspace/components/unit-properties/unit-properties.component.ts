@@ -1,13 +1,20 @@
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import {
-  Component, OnDestroy, ViewChild
-} from '@angular/core';
-import {
-  FormGroup, UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule
+  FormGroup,
+  UntypedFormBuilder,
+  UntypedFormGroup,
+  Validators,
+  FormsModule,
+  ReactiveFormsModule
 } from '@angular/forms';
 import {
   BehaviorSubject, Subject, Subscription, takeUntil
 } from 'rxjs';
-import { UnitMetadataValues, UnitPropertiesDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import {
+  UnitMetadataValues,
+  UnitPropertiesDto,
+  WorkspaceSettingsDto
+} from '@studio-lite-lib/api-dto';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -16,11 +23,18 @@ import { MatSelect } from '@angular/material/select';
 import { DatePipe } from '@angular/common';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
-import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import {
-  MatCard, MatCardHeader, MatCardTitle, MatCardContent
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle
+} from '@angular/material/expansion';
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardTitle,
+  MatCardContent
 } from '@angular/material/card';
-import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodingSchemeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -48,14 +62,38 @@ import { I18nService } from '../../../../services/i18n.service';
 @Component({
   templateUrl: './unit-properties.component.html',
   styleUrls: ['unit-properties.component.scss'],
-  imports: [FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent,
-    MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle,
-    MatFormField, MatLabel, MatInput, MatError, MatSelect, MatOption, NewGroupButtonComponent,
-    CdkTextareaAutosize, SelectModuleComponent, MatButton, ProfileFormComponent, ItemsComponent, DatePipe,
-    TranslateModule, MatIcon, CanReturnUnitPipe, MatProgressSpinner]
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardTitle,
+    MatCardContent,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    MatSelect,
+    MatOption,
+    NewGroupButtonComponent,
+    CdkTextareaAutosize,
+    SelectModuleComponent,
+    MatButton,
+    ProfileFormComponent,
+    ItemsComponent,
+    DatePipe,
+    TranslateModule,
+    MatIcon,
+    CanReturnUnitPipe,
+    MatProgressSpinner
+  ]
 })
-
-export class UnitPropertiesComponent extends RequestMessageDirective implements OnDestroy {
+export class UnitPropertiesComponent
+  extends RequestMessageDirective
+  implements OnDestroy {
   @ViewChild('editor') editorSelector: SelectModuleComponent | undefined;
   @ViewChild('player') playerSelector: SelectModuleComponent | undefined;
   @ViewChild('schemer') schemerSelector: SelectModuleComponent | undefined;
@@ -69,7 +107,10 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   metadata!: UnitMetadataValues;
   workspaceSettings!: WorkspaceSettingsDto;
   metadataLoader: BehaviorSubject<UnitMetadataValues> = new BehaviorSubject({});
-  variablesLoader: BehaviorSubject<AliasId[]> = new BehaviorSubject<AliasId[]>([]);
+  variablesLoader: BehaviorSubject<AliasId[]> = new BehaviorSubject<AliasId[]>(
+    []
+  );
+
   unitForm: UntypedFormGroup;
   form = new FormGroup({});
   selectedStateId: string | null = null;
@@ -114,14 +155,12 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
         this.metadata = metadata;
         this.metadataLoaded = true;
       });
-    this.variablesLoader
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(() => {
-        this.variablesLoaded = true;
-      });
+    this.variablesLoader.pipe(takeUntil(this.ngUnsubscribe)).subscribe(() => {
+      this.variablesLoaded = true;
+    });
     this.addSubscriptionForUnitDefinitionChanges();
-    this.unitIdChangedSubscription = this.workspaceService.selectedUnit$
-      .subscribe(id => {
+    this.unitIdChangedSubscription =
+      this.workspaceService.selectedUnit$.subscribe(id => {
         this.readDataForUnitId(id);
       });
   }
@@ -168,15 +207,18 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
           this.workspaceService.unitList
         )
       ]);
-      this.unitForm.setValue({
-        key: unitMetadata.key,
-        name: unitMetadata.name,
-        state: unitMetadata.state,
-        description: unitMetadata.description,
-        reference: unitMetadata.reference,
-        transcript: unitMetadata.transcript,
-        group: unitMetadata.groupName
-      }, { emitEvent: false });
+      this.unitForm.setValue(
+        {
+          key: unitMetadata.key,
+          name: unitMetadata.name,
+          state: unitMetadata.state,
+          description: unitMetadata.description,
+          reference: unitMetadata.reference,
+          transcript: unitMetadata.transcript,
+          group: unitMetadata.groupName
+        },
+        { emitEvent: false }
+      );
       this.selectedStateColor = unitMetadata.state || '';
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
         const filteredState = this.workspaceService.states
@@ -200,20 +242,26 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
       // timeout because we access ViewChildren
       setTimeout(() => this.initVeronaModules(unitMetadata));
       setTimeout(() => {
-        const filteredStates = this.workspaceService.states
-          ?.filter((state:State) => state.id.toString() === unitMetadata.state);
-        filteredStates?.length ? this.selectedStateColor = filteredStates[0].color : this.selectedStateColor = '';
+        const filteredStates = this.workspaceService.states?.filter(
+          (state: State) => state.id.toString() === unitMetadata.state
+        );
+        filteredStates?.length ?
+          (this.selectedStateColor = filteredStates[0].color) :
+          (this.selectedStateColor = '');
       }, 1);
     } else {
-      this.unitForm.setValue({
-        key: '',
-        name: '',
-        description: '',
-        group: '',
-        reference: '',
-        transcript: '',
-        state: ''
-      }, { emitEvent: false });
+      this.unitForm.setValue(
+        {
+          key: '',
+          name: '',
+          description: '',
+          group: '',
+          reference: '',
+          transcript: '',
+          state: ''
+        },
+        { emitEvent: false }
+      );
       this.unitForm.disable();
     }
     this.initialTranscript = this.unitForm.get('transcript')?.value;
@@ -223,21 +271,30 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   private initVeronaModules(unitMetadata: UnitPropertiesDto): void {
     if (this.editorSelector) {
       this.editorSelector.value = unitMetadata.editor || '';
-      this.editorSelectionChangedSubscription = this.editorSelector.selectionChanged.subscribe(selectedValue => {
-        this.workspaceService.getUnitMetadataStore()?.setEditor(selectedValue);
-      });
+      this.editorSelectionChangedSubscription =
+        this.editorSelector.selectionChanged.subscribe(selectedValue => {
+          this.workspaceService
+            .getUnitMetadataStore()
+            ?.setEditor(selectedValue);
+        });
     }
     if (this.playerSelector) {
       this.playerSelector.value = unitMetadata.player || '';
-      this.playerSelectionChangedSubscription = this.playerSelector.selectionChanged.subscribe(selectedValue => {
-        this.workspaceService.getUnitMetadataStore()?.setPlayer(selectedValue);
-      });
+      this.playerSelectionChangedSubscription =
+        this.playerSelector.selectionChanged.subscribe(selectedValue => {
+          this.workspaceService
+            .getUnitMetadataStore()
+            ?.setPlayer(selectedValue);
+        });
     }
     if (this.schemerSelector) {
       this.schemerSelector.value = unitMetadata.schemer || '';
-      this.schemerSelectionChangedSubscription = this.schemerSelector.selectionChanged.subscribe(selectedValue => {
-        this.workspaceService.getUnitMetadataStore()?.setSchemer(selectedValue);
-      });
+      this.schemerSelectionChangedSubscription =
+        this.schemerSelector.selectionChanged.subscribe(selectedValue => {
+          this.workspaceService
+            .getUnitMetadataStore()
+            ?.setSchemer(selectedValue);
+        });
     }
   }
 
@@ -247,37 +304,43 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     if (selectedUnitId > 0 && unitMetadataStore) {
       this.workspaceSettings = this.workspaceService.workspaceSettings;
       const unitMetadata = unitMetadataStore.getData();
-      this.metadataLoader.next(JSON.parse(JSON.stringify(unitMetadata.metadata)));
+      this.metadataLoader.next(
+        JSON.parse(JSON.stringify(unitMetadata.metadata))
+      );
       this.getProfiles();
     }
   }
 
   private getProfiles(): void {
-    if (this.workspaceSettings && this.workspaceSettings.unitMDProfile && !this.unitProfile) {
+    if (
+      this.workspaceSettings &&
+      this.workspaceSettings.unitMDProfile &&
+      !this.unitProfile
+    ) {
       this.metadataBackendService
         .getMetadataProfile(this.workspaceSettings.unitMDProfile)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(profile => {
           const unitProfile = new MDProfile(profile);
-          this.metadataService
-            .loadProfileVocabularies(unitProfile)
-            .then(() => {
-              this.unitProfile = unitProfile;
-            });
+          this.metadataService.loadProfileVocabularies(unitProfile).then(() => {
+            this.unitProfile = unitProfile;
+          });
         });
     }
 
-    if (this.workspaceSettings && this.workspaceSettings.itemMDProfile && !this.itemProfile) {
+    if (
+      this.workspaceSettings &&
+      this.workspaceSettings.itemMDProfile &&
+      !this.itemProfile
+    ) {
       this.metadataBackendService
         .getMetadataProfile(this.workspaceSettings.itemMDProfile)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(profile => {
           const itemProfile = new MDProfile(profile);
-          this.metadataService
-            .loadProfileVocabularies(itemProfile)
-            .then(() => {
-              this.itemProfile = itemProfile;
-            });
+          this.metadataService.loadProfileVocabularies(itemProfile).then(() => {
+            this.itemProfile = itemProfile;
+          });
         });
     }
   }
@@ -285,10 +348,13 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   private updateVariables(): void {
     const unitId = this.workspaceService.selectedUnit$.getValue();
     if (!this.workspaceService.getUnitSchemeStore()) {
-      this.backendService.getUnitScheme(this.workspaceService.selectedWorkspaceId, unitId)
+      this.backendService
+        .getUnitScheme(this.workspaceService.selectedWorkspaceId, unitId)
         .subscribe(ues => {
           if (ues) {
-            this.workspaceService.setUnitSchemeStore(new UnitSchemeStore(unitId, ues));
+            this.workspaceService.setUnitSchemeStore(
+              new UnitSchemeStore(unitId, ues)
+            );
             this.variablesLoader.next(this.getVariableIds());
           }
         });
@@ -310,8 +376,9 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   }
 
   private subscribeUnitDefinitionChanges() {
-    this.workspaceService.getUnitDefinitionStore()?.dataChange
-      .pipe(takeUntil(this.ngUnsubscribe))
+    this.workspaceService
+      .getUnitDefinitionStore()
+      ?.dataChange.pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.variablesLoader.next(this.getVariableIds());
       });
@@ -321,33 +388,46 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
     const data = this.workspaceService.getUnitSchemeStore()?.getData();
     if (data) {
       const unitSchemeVariables = data.variables || [];
-      const defStoreVariables: VariableInfo[] = this.workspaceService
-        .getUnitDefinitionStore()?.getData().variables || unitSchemeVariables;
+      const defStoreVariables: VariableInfo[] =
+        this.workspaceService.getUnitDefinitionStore()?.getData().variables ||
+        unitSchemeVariables;
       if (defStoreVariables) {
-        const variables = defStoreVariables.filter(v => v.type !== 'no-value');
-        const variableAliasIds = variables.map(variable => ({ id: variable.id, alias: variable.alias || variable.id }));
-        const scheme: CodingScheme = JSON.parse(data.scheme);
+        const variables = defStoreVariables.filter(
+          v => v.type !== 'no-value'
+        );
+        const variableAliasIds = variables.map(variable => ({
+          id: variable.id,
+          alias: variable.alias || variable.id
+        }));
+        const scheme: CodingSchemeData = JSON.parse(data.scheme);
         const variableCodings = scheme?.variableCodings || [];
         const variableCodingIds = variableCodings
           .filter(vc => vc.sourceType !== 'BASE_NO_VALUE')
-          .filter(vc => !(vc.sourceType === 'BASE' && !variableAliasIds.find(aliasId => aliasId.id === vc.id)))
+          .filter(
+            vc => !(
+              vc.sourceType === 'BASE' &&
+                !variableAliasIds.find(aliasId => aliasId.id === vc.id)
+            )
+          )
           .map(item => ({ id: item.id, alias: item.alias || item.id }));
         // merge without duplicates
-        return [...variableAliasIds, ...variableCodingIds]
-          .reduce((acc: AliasId[], current: AliasId) => {
-            if (!acc.find(aliasId => aliasId.id === current.id)) {
-              acc.push(current);
-            }
-            return acc;
-          }, [])
-          // sort by alias
-          .sort((a, b) => {
-            const idA = a.alias.toUpperCase();
-            const idB = b.alias.toUpperCase();
-            if (idA < idB) return -1;
-            if (idA > idB) return 1;
-            return 0;
-          });
+        return (
+          [...variableAliasIds, ...variableCodingIds]
+            .reduce((acc: AliasId[], current: AliasId) => {
+              if (!acc.find(aliasId => aliasId.id === current.id)) {
+                acc.push(current);
+              }
+              return acc;
+            }, [])
+            // sort by alias
+            .sort((a, b) => {
+              const idA = a.alias.toUpperCase();
+              const idB = b.alias.toUpperCase();
+              if (idA < idB) return -1;
+              if (idA > idB) return 1;
+              return 0;
+            })
+        );
       }
     }
     return [];
@@ -380,58 +460,77 @@ export class UnitPropertiesComponent extends RequestMessageDirective implements 
   }
 
   async submitUnit(): Promise<void> {
-    this.confirmDialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.translateService.instant('workspace.submit-unit'),
-        content: this.translateService.instant('workspace.submit-unit-confirm'),
-        confirmButtonLabel: this.translateService.instant('workspace.submit-units'),
-        showCancel: true
-      }
-    })
+    this.confirmDialog
+      .open(ConfirmDialogComponent, {
+        width: '400px',
+        data: {
+          title: this.translateService.instant('workspace.submit-unit'),
+          content: this.translateService.instant(
+            'workspace.submit-unit-confirm'
+          ),
+          confirmButtonLabel: this.translateService.instant(
+            'workspace.submit-units'
+          ),
+          showCancel: true
+        }
+      })
       .afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(async confirmed => {
         if (!confirmed) return;
         const routingOk = await this.selectUnit(0);
         if (routingOk) {
-          this.backendService.submitUnits(
-            this.workspaceService.selectedWorkspaceId,
-            this.workspaceService.dropBoxId!,
-            [this.selectedUnitId]
-          )
-            .subscribe(
-              uploadStatus => {
-                this.showRequestMessage(uploadStatus, 'workspace.unit-not-submitted', 'workspace.unit-submitted');
-              });
+          this.backendService
+            .submitUnits(
+              this.workspaceService.selectedWorkspaceId,
+              this.workspaceService.dropBoxId!,
+              [this.selectedUnitId]
+            )
+            .subscribe(uploadStatus => {
+              this.showRequestMessage(
+                uploadStatus,
+                'workspace.unit-not-submitted',
+                'workspace.unit-submitted'
+              );
+            });
         }
       });
   }
 
   async returnSubmittedUnit(): Promise<void> {
-    this.confirmDialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.translateService.instant('workspace.return-submitted-unit'),
-        content: this.translateService.instant('workspace.return-submitted-unit-confirm'),
-        confirmButtonLabel: this.translateService.instant('workspace.return-submitted-unit'),
-        showCancel: true
-      }
-    })
+    this.confirmDialog
+      .open(ConfirmDialogComponent, {
+        width: '400px',
+        data: {
+          title: this.translateService.instant(
+            'workspace.return-submitted-unit'
+          ),
+          content: this.translateService.instant(
+            'workspace.return-submitted-unit-confirm'
+          ),
+          confirmButtonLabel: this.translateService.instant(
+            'workspace.return-submitted-unit'
+          ),
+          showCancel: true
+        }
+      })
       .afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(async confirmed => {
         if (!confirmed) return;
         const routingOk = await this.selectUnit(0);
         if (routingOk) {
-          this.backendService.returnSubmittedUnits(
-            this.workspaceService.selectedWorkspaceId,
-            [this.selectedUnitId]
-          )
-            .subscribe(
-              uploadStatus => {
-                this.showRequestMessage(uploadStatus, 'workspace.unit-not-returned', 'workspace.unit-returned');
-              });
+          this.backendService
+            .returnSubmittedUnits(this.workspaceService.selectedWorkspaceId, [
+              this.selectedUnitId
+            ])
+            .subscribe(uploadStatus => {
+              this.showRequestMessage(
+                uploadStatus,
+                'workspace.unit-not-returned',
+                'workspace.unit-returned'
+              );
+            });
         }
       });
   }

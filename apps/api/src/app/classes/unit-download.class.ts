@@ -12,6 +12,10 @@ import * as AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
 import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
 import { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
+import {
+  CodingSchemeData,
+  VariableCodingData
+} from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { UnitService } from '../services/unit.service';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { SettingService } from '../services/setting.service';
@@ -29,37 +33,54 @@ export class UnitDownloadClass {
     const zip = new AdmZip();
     const unitsMetadata: UnitPropertiesDto[] = [];
     const usedPlayers: string[] = [];
-    const unitExportConfig = await UnitDownloadClass.getUnitExportConfig(settingService);
+    const unitExportConfig = await UnitDownloadClass.getUnitExportConfig(
+      settingService
+    );
 
-    await Promise.all(unitDownloadSettings.unitIdList.map(async unitId => {
-      await UnitDownloadClass.getUnitData(
-        unitService,
-        unitCommentService,
-        unitId,
-        workspaceId,
-        unitDownloadSettings,
-        unitExportConfig,
-        unitsMetadata,
-        usedPlayers,
-        zip
-      );
-    }));
+    await Promise.all(
+      unitDownloadSettings.unitIdList.map(async unitId => {
+        await UnitDownloadClass.getUnitData(
+          unitService,
+          unitCommentService,
+          unitId,
+          workspaceId,
+          unitDownloadSettings,
+          unitExportConfig,
+          unitsMetadata,
+          usedPlayers,
+          zip
+        );
+      })
+    );
 
     if (unitDownloadSettings.addPlayers) {
       await UnitDownloadClass.addPlayers(veronaModuleService, zip, usedPlayers);
     }
 
-    const loginCount = unitDownloadSettings.addTestTakersHot +
+    const loginCount =
+      unitDownloadSettings.addTestTakersHot +
       unitDownloadSettings.addTestTakersMonitor +
       unitDownloadSettings.addTestTakersReview;
     if (loginCount > 0) {
-      UnitDownloadClass.addBooklet(unitExportConfig, unitDownloadSettings, unitsMetadata, zip);
-      UnitDownloadClass.addTestTakers(unitExportConfig, unitDownloadSettings, loginCount, zip);
+      UnitDownloadClass.addBooklet(
+        unitExportConfig,
+        unitDownloadSettings,
+        unitsMetadata,
+        zip
+      );
+      UnitDownloadClass.addTestTakers(
+        unitExportConfig,
+        unitDownloadSettings,
+        loginCount,
+        zip
+      );
     }
     return zip.toBuffer();
   }
 
-  private static async getUnitExportConfig(settingService: SettingService): Promise<UnitExportConfigDto> {
+  private static async getUnitExportConfig(
+    settingService: SettingService
+  ): Promise<UnitExportConfigDto> {
     const unitExportConfig = new UnitExportConfigDto();
     const unitExportConfigFromDB = await settingService.findUnitExportConfig();
 
@@ -67,7 +88,8 @@ export class UnitDownloadClass {
       if (unitExportConfigFromDB.unitXsdUrl) unitExportConfig.unitXsdUrl = unitExportConfigFromDB.unitXsdUrl;
       if (unitExportConfigFromDB.bookletXsdUrl) unitExportConfig.bookletXsdUrl = unitExportConfigFromDB.bookletXsdUrl;
       if (unitExportConfigFromDB.testTakersXsdUrl) {
-        unitExportConfig.testTakersXsdUrl = unitExportConfigFromDB.testTakersXsdUrl;
+        unitExportConfig.testTakersXsdUrl =
+          unitExportConfigFromDB.testTakersXsdUrl;
       }
     }
     return unitExportConfig;
@@ -84,11 +106,22 @@ export class UnitDownloadClass {
     usedPlayers: string[],
     zip: AdmZip
   ): Promise<void> {
-    const unitMetadata = await unitService.findOnesProperties(unitId, workspaceId);
-    const unitXml = UnitDownloadClass.createUnitXML(unitExportConfig, unitMetadata);
+    const unitMetadata = await unitService.findOnesProperties(
+      unitId,
+      workspaceId
+    );
+    const unitXml = UnitDownloadClass.createUnitXML(
+      unitExportConfig,
+      unitMetadata
+    );
     UnitDownloadClass.addMetadata(unitMetadata, zip);
     const definitionData = await unitService.findOnesDefinition(unitId);
-    UnitDownloadClass.addUnitDefinition(definitionData, unitXml, unitMetadata, zip);
+    UnitDownloadClass.addUnitDefinition(
+      definitionData,
+      unitXml,
+      unitMetadata,
+      zip
+    );
     UnitDownloadClass.addVariables(definitionData, unitXml);
     if (unitDownloadSettings.addComments) {
       const comments = await unitCommentService.findOnesComments(unitId);
@@ -96,59 +129,90 @@ export class UnitDownloadClass {
     }
     const schemeData = await unitService.findOnesScheme(unitId);
     UnitDownloadClass.addScheme(schemeData, unitXml, unitMetadata, zip);
-    zip.addFile(`${unitMetadata.key}.xml`, Buffer.from(unitXml.toString({ prettyPrint: true })));
+    UnitDownloadClass.addDerivedVariables(schemeData, unitXml);
+    zip.addFile(
+      `${unitMetadata.key}.xml`,
+      Buffer.from(unitXml.toString({ prettyPrint: true }))
+    );
     unitsMetadata.push(unitMetadata);
     if (usedPlayers.indexOf(unitMetadata.player) < 0) usedPlayers.push(unitMetadata.player);
   }
 
-  private static createUnitXML(unitExportConfig: UnitExportConfigDto, unitMetadata: UnitPropertiesDto): XMLBuilder {
-    return XmlBuilder.create({ version: '1.0' }, {
-      Unit: {
-        '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-        '@xsi:noNamespaceSchemaLocation': unitExportConfig.unitXsdUrl,
-        Metadata: {
-          '@lastChange': unitMetadata.lastChangedMetadata.toISOString(),
-          Id: unitMetadata.key,
-          Label: unitMetadata.name,
-          Description: unitMetadata.description,
-          Reference: Object.keys(unitMetadata.metadata).length !== 0 ? `${unitMetadata.key}.vomd` : ''
+  private static createUnitXML(
+    unitExportConfig: UnitExportConfigDto,
+    unitMetadata: UnitPropertiesDto
+  ): XMLBuilder {
+    return XmlBuilder.create(
+      { version: '1.0' },
+      {
+        Unit: {
+          '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+          '@xsi:noNamespaceSchemaLocation': unitExportConfig.unitXsdUrl,
+          Metadata: {
+            '@lastChange': unitMetadata.lastChangedMetadata.toISOString(),
+            Id: unitMetadata.key,
+            Label: unitMetadata.name,
+            Description: unitMetadata.description,
+            Reference:
+              Object.keys(unitMetadata.metadata).length !== 0 ?
+                `${unitMetadata.key}.vomd` :
+                ''
+          }
         }
       }
-    });
+    );
   }
 
-  private static addMetadata(unitMetadata: UnitPropertiesDto, zip: AdmZip): void {
+  private static addMetadata(
+    unitMetadata: UnitPropertiesDto,
+    zip: AdmZip
+  ): void {
     if (Object.keys(unitMetadata.metadata).length !== 0) {
-      zip.addFile(`${unitMetadata.key}.vomd`, Buffer.from(JSON.stringify(unitMetadata.metadata)));
+      zip.addFile(
+        `${unitMetadata.key}.vomd`,
+        Buffer.from(JSON.stringify(unitMetadata.metadata))
+      );
     }
   }
 
   private static addUnitDefinition(
-    definitionData: UnitDefinitionDto, unitXml: XMLBuilder, unitMetadata: UnitPropertiesDto, zip: AdmZip
+    definitionData: UnitDefinitionDto,
+    unitXml: XMLBuilder,
+    unitMetadata: UnitPropertiesDto,
+    zip: AdmZip
   ): void {
     if (definitionData?.definition?.length > 0) {
       unitXml.root().ele({
         DefinitionRef: {
           '@player': unitMetadata.player || '',
           '@editor': unitMetadata.editor || '',
-          ...(unitMetadata.lastChangedDefinition &&
-            { '@lastChange': unitMetadata.lastChangedDefinition.toISOString() }),
+          ...(unitMetadata.lastChangedDefinition && {
+            '@lastChange': unitMetadata.lastChangedDefinition.toISOString()
+          }),
           '#': `${unitMetadata.key}.voud`
         }
       });
-      zip.addFile(`${unitMetadata.key}.voud`, Buffer.from(definitionData.definition));
+      zip.addFile(
+        `${unitMetadata.key}.voud`,
+        Buffer.from(definitionData.definition)
+      );
     } else {
       unitXml.root().ele({
         Definition: {
           '@player': unitMetadata.player || '',
           '@editor': unitMetadata.editor || '',
-          ...(unitMetadata.lastChangedDefinition && { '@lastChange': unitMetadata.lastChangedDefinition.toISOString() })
+          ...(unitMetadata.lastChangedDefinition && {
+            '@lastChange': unitMetadata.lastChangedDefinition.toISOString()
+          })
         }
       });
     }
   }
 
-  private static addVariables(definitionData: UnitDefinitionDto, unitXml: XMLBuilder): void {
+  private static addVariables(
+    definitionData: UnitDefinitionDto,
+    unitXml: XMLBuilder
+  ): void {
     if (definitionData.variables && definitionData.variables.length > 0) {
       const variablesElement = unitXml.root().ele('BaseVariables');
       definitionData.variables.forEach(transformedVariable => {
@@ -163,10 +227,17 @@ export class UnitDownloadClass {
             '@page': transformedVariable.page
           }
         });
-        if (transformedVariable.valuePositionLabels && transformedVariable.valuePositionLabels.length) {
-          const valuePositionLabelsElement = variableElement.ele('ValuePositionLabels');
+        if (
+          transformedVariable.valuePositionLabels &&
+          transformedVariable.valuePositionLabels.length
+        ) {
+          const valuePositionLabelsElement = variableElement.ele(
+            'ValuePositionLabels'
+          );
           transformedVariable.valuePositionLabels.forEach(label => {
-            valuePositionLabelsElement.ele({ ValuePositionLabel: { '#': label } });
+            valuePositionLabelsElement.ele({
+              ValuePositionLabel: { '#': label }
+            });
           });
         }
         if (transformedVariable.values && transformedVariable.values.length) {
@@ -183,8 +254,59 @@ export class UnitDownloadClass {
     }
   }
 
+  private static getDerivedVariableType(coding: VariableCodingData): string {
+    switch (coding.sourceType) {
+      case 'SUM_CODE':
+      case 'SUM_SCORE':
+      case 'COPY_VALUE':
+        return 'integer';
+      case 'SOLVER':
+        return 'number';
+      case 'UNIQUE_VALUES':
+        return 'boolean';
+      case 'CONCAT_CODE':
+      case 'MANUAL':
+      default:
+        return 'string';
+    }
+  }
+
+  private static addDerivedVariables(
+    schemeData: UnitSchemeDto,
+    unitXml: XMLBuilder
+  ): void {
+    if (!schemeData?.scheme) return;
+    let codingScheme: CodingSchemeData;
+    try {
+      codingScheme = JSON.parse(schemeData.scheme) as CodingSchemeData;
+    } catch {
+      return;
+    }
+    if (!codingScheme?.variableCodings) return;
+    const derivedCodings = codingScheme.variableCodings.filter(
+      vc => vc.sourceType !== 'BASE' && vc.sourceType !== 'BASE_NO_VALUE'
+    );
+    if (derivedCodings.length === 0) return;
+    const derivedVariablesElement = unitXml.root().ele('DerivedVariables');
+    derivedCodings.forEach(coding => {
+      derivedVariablesElement.ele({
+        Variable: {
+          '@id': coding.alias || coding.id,
+          '@type': UnitDownloadClass.getDerivedVariableType(coding),
+          '@format': '',
+          '@nullable': false,
+          '@multiple': false,
+          ...(coding.page && { '@page': coding.page })
+        }
+      });
+    });
+  }
+
   private static addComments(
-    comments: UnitCommentDto[], unitXml: XMLBuilder, unitMetadata: UnitPropertiesDto, zip: AdmZip
+    comments: UnitCommentDto[],
+    unitXml: XMLBuilder,
+    unitMetadata: UnitPropertiesDto,
+    zip: AdmZip
   ): void {
     if (comments && comments.length) {
       unitXml.root().ele({
@@ -192,12 +314,18 @@ export class UnitDownloadClass {
           '#': `${unitMetadata.key}.vouc`
         }
       });
-      zip.addFile(`${unitMetadata.key}.vouc`, Buffer.from(JSON.stringify(comments)));
+      zip.addFile(
+        `${unitMetadata.key}.vouc`,
+        Buffer.from(JSON.stringify(comments))
+      );
     }
   }
 
   private static addScheme(
-    schemeData: UnitSchemeDto, unitXml: XMLBuilder, unitMetadata: UnitPropertiesDto, zip: AdmZip
+    schemeData: UnitSchemeDto,
+    unitXml: XMLBuilder,
+    unitMetadata: UnitPropertiesDto,
+    zip: AdmZip
   ): void {
     if (schemeData?.scheme) {
       zip.addFile(`${unitMetadata.key}.vocs`, Buffer.from(schemeData.scheme));
@@ -207,8 +335,12 @@ export class UnitDownloadClass {
       unitXml.root().ele({
         CodingSchemeRef: {
           '@schemer': unitMetadata.schemer,
-          ...(unitMetadata.schemeType && { '@schemeType': unitMetadata.schemeType }),
-          ...(unitMetadata.lastChangedScheme && { '@lastChange': unitMetadata.lastChangedScheme.toISOString() }),
+          ...(unitMetadata.schemeType && {
+            '@schemeType': unitMetadata.schemeType
+          }),
+          ...(unitMetadata.lastChangedScheme && {
+            '@lastChange': unitMetadata.lastChangedScheme.toISOString()
+          }),
           ...(schemeData?.scheme && { '#': `${unitMetadata.key}.vocs` })
         }
       });
@@ -216,34 +348,47 @@ export class UnitDownloadClass {
   }
 
   private static async addPlayers(
-    veronaModuleService: VeronaModulesService, zip: AdmZip, usedPlayers: string[]
+    veronaModuleService: VeronaModulesService,
+    zip: AdmZip,
+    usedPlayers: string[]
   ): Promise<void> {
-    const allPlayers: VeronaModuleInListDto[] = await veronaModuleService.findAll('player');
-    const veronaKeyList = new VeronaModuleKeyCollection(allPlayers.map(p => p.key));
+    const allPlayers: VeronaModuleInListDto[] =
+      await veronaModuleService.findAll('player');
+    const veronaKeyList = new VeronaModuleKeyCollection(
+      allPlayers.map(p => p.key)
+    );
     const addedPlayers: string[] = [];
-    await Promise.all(usedPlayers.map(async p => {
-      if (addedPlayers.indexOf(p) < 0) {
-        const bestMatch = veronaKeyList.getBestMatch(p);
-        if (bestMatch && addedPlayers.indexOf(bestMatch) < 0) {
-          const playerData: VeronaModuleFileDto = await veronaModuleService.findFileById(bestMatch);
-          zip.addFile(playerData.fileName, Buffer.from(playerData.file));
-          addedPlayers.push(bestMatch);
+    await Promise.all(
+      usedPlayers.map(async p => {
+        if (addedPlayers.indexOf(p) < 0) {
+          const bestMatch = veronaKeyList.getBestMatch(p);
+          if (bestMatch && addedPlayers.indexOf(bestMatch) < 0) {
+            const playerData: VeronaModuleFileDto =
+              await veronaModuleService.findFileById(bestMatch);
+            zip.addFile(playerData.fileName, Buffer.from(playerData.file));
+            addedPlayers.push(bestMatch);
+          }
         }
-      }
-    }));
+      })
+    );
   }
 
-  private static createBookletXml(unitExportConfig: UnitExportConfigDto): XMLBuilder {
-    return XmlBuilder.create({ version: '1.0' }, {
-      Booklet: {
-        '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-        '@xsi:noNamespaceSchemaLocation': unitExportConfig.bookletXsdUrl,
-        Metadata: {
-          Id: 'booklet1',
-          Label: 'Testheft 1'
+  private static createBookletXml(
+    unitExportConfig: UnitExportConfigDto
+  ): XMLBuilder {
+    return XmlBuilder.create(
+      { version: '1.0' },
+      {
+        Booklet: {
+          '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+          '@xsi:noNamespaceSchemaLocation': unitExportConfig.bookletXsdUrl,
+          Metadata: {
+            Id: 'booklet1',
+            Label: 'Testheft 1'
+          }
         }
       }
-    });
+    );
   }
 
   private static addBooklet(
@@ -274,23 +419,31 @@ export class UnitDownloadClass {
       });
       unitCount += 1;
     });
-    zip.addFile('booklet1.xml', Buffer.from(bookletXml.toString({ prettyPrint: true })));
+    zip.addFile(
+      'booklet1.xml',
+      Buffer.from(bookletXml.toString({ prettyPrint: true }))
+    );
   }
 
-  private static createTestTakersXml(unitExportConfig: UnitExportConfigDto): XMLBuilder {
-    return XmlBuilder.create({ version: '1.0' }, {
-      Testtakers: {
-        '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-        '@xsi:noNamespaceSchemaLocation': unitExportConfig.testTakersXsdUrl,
-        Metadata: {},
-        CustomTexts: {
-          CustomText: {
-            '@key': 'login_testEndButtonText',
-            '#': 'Test beenden'
+  private static createTestTakersXml(
+    unitExportConfig: UnitExportConfigDto
+  ): XMLBuilder {
+    return XmlBuilder.create(
+      { version: '1.0' },
+      {
+        Testtakers: {
+          '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+          '@xsi:noNamespaceSchemaLocation': unitExportConfig.testTakersXsdUrl,
+          Metadata: {},
+          CustomTexts: {
+            CustomText: {
+              '@key': 'login_testEndButtonText',
+              '#': 'Test beenden'
+            }
           }
         }
       }
-    });
+    );
   }
 
   private static addTestTakers(
@@ -299,12 +452,20 @@ export class UnitDownloadClass {
     loginCount: number,
     zip: AdmZip
   ): void {
-    const testTakerXml = UnitDownloadClass.createTestTakersXml(unitExportConfig);
+    const testTakerXml =
+      UnitDownloadClass.createTestTakersXml(unitExportConfig);
     let codeLen = loginCount > 1000 ? 8 : 5;
     if (unitDownloadSettings.passwordLess) codeLen += 2;
-    const loginNames = UnitDownloadClass.generateCodeList(codeLen, loginCount + 1);
-    const loginPasswords = unitDownloadSettings.passwordLess ? <string[]>[] :
-      UnitDownloadClass.generateCodeList(loginCount > 1000 ? 5 : 4, loginCount);
+    const loginNames = UnitDownloadClass.generateCodeList(
+      codeLen,
+      loginCount + 1
+    );
+    const loginPasswords = unitDownloadSettings.passwordLess ?
+      <string[]>[] :
+      UnitDownloadClass.generateCodeList(
+        loginCount > 1000 ? 5 : 4,
+        loginCount
+      );
     let loginIndex = 0;
     const groupElement = testTakerXml.root().ele({
       Group: {
@@ -314,8 +475,10 @@ export class UnitDownloadClass {
     });
     for (let i = 0; i < unitDownloadSettings.addTestTakersHot; i++) {
       loginIndex += 1;
-      const prefix = (unitDownloadSettings.addTestTakersMonitor > 0) ?
-        `T${(i + 1).toString().padStart(2, '0')}_` : '';
+      const prefix =
+        unitDownloadSettings.addTestTakersMonitor > 0 ?
+          `T${(i + 1).toString().padStart(2, '0')}_` :
+          '';
       const loginElement = groupElement.ele({
         Login: {
           '@mode': 'run-hot-return',
@@ -346,8 +509,10 @@ export class UnitDownloadClass {
     }
     for (let i = 0; i < unitDownloadSettings.addTestTakersMonitor; i++) {
       loginIndex += 1;
-      const prefix = (unitDownloadSettings.addTestTakersMonitor > 1) ?
-        `TL${(i + 1).toString().padStart(2, '0')}_` : 'TL_';
+      const prefix =
+        unitDownloadSettings.addTestTakersMonitor > 1 ?
+          `TL${(i + 1).toString().padStart(2, '0')}_` :
+          'TL_';
       const loginElement = groupElement.ele({
         Login: {
           '@mode': 'monitor-group',
@@ -356,7 +521,10 @@ export class UnitDownloadClass {
       });
       if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex - 1]);
     }
-    zip.addFile('testtaker1.xml', Buffer.from(testTakerXml.toString({ prettyPrint: true })));
+    zip.addFile(
+      'testtaker1.xml',
+      Buffer.from(testTakerXml.toString({ prettyPrint: true }))
+    );
   }
 
   static generateCodeList(codeLen: number, codeCount: number): string[] {
@@ -370,8 +538,14 @@ export class UnitDownloadClass {
         let isNumber = false;
         do {
           newCode += isNumber ?
-            codeNumbers.substr(Math.floor(codeNumbers.length * Math.random()), 1) :
-            codeCharacters.substr(Math.floor(codeCharacters.length * Math.random()), 1);
+            codeNumbers.substr(
+              Math.floor(codeNumbers.length * Math.random()),
+              1
+            ) :
+            codeCharacters.substr(
+              Math.floor(codeCharacters.length * Math.random()),
+              1
+            );
           isNumber = !isNumber;
         } while (newCode.length < codeLen);
       } while (codeList.indexOf(newCode) >= 0);
