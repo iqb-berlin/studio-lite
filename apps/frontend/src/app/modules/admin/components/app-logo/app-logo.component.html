@@ -26,20 +26,18 @@
       </div>
     }
   </div>
-  <div class="fx-row-start-start fx-gap-20">
-    <mat-form-field class="fx-flex-fill">
-      <mat-label>{{'logo.app-background-color' | translate}}</mat-label>
-      <input matInput
-        formControlName="bodyBackground"
-        [placeholder]="'logo.app-background-color-placeholder' | translate">
-    </mat-form-field>
-    <mat-form-field class="fx-flex-fill">
-      <mat-label>{{'logo.boxes-background-color' | translate}}</mat-label>
-      <input matInput
-        formControlName="boxBackground"
-        [placeholder]="'logo.boxes-background-color-placeholder' | translate">
-    </mat-form-field>
-  </div>
+  <mat-form-field class="fx-flex-fill">
+    <mat-label>{{'logo.app-background-color' | translate}}</mat-label>
+    <input matInput
+      formControlName="bodyBackground"
+      [placeholder]="'logo.app-background-color-placeholder' | translate">
+  </mat-form-field>
+  <mat-form-field class="fx-flex-fill">
+    <mat-label>{{'logo.boxes-background-color' | translate}}</mat-label>
+    <input matInput
+      formControlName="boxBackground"
+      [placeholder]="'logo.boxes-background-color-placeholder' | translate">
+  </mat-form-field>
   <div class="fx-row-end-center fx-gap-30">
     @if (dataChanged) {
       <div class="fx-flex-fill info">
