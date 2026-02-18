@@ -1,10 +1,9 @@
 // eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Component, Input } from '@angular/core';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { TranslateModule } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
 import { ShowMetadataComponent } from './show-metadata.component';
 import { environment } from '../../../../../environments/environment';
@@ -24,6 +23,8 @@ describe('ShowMetadataComponent', () => {
     @Input() selectedUnitId!: number;
   }
 
+  const dialogData = { units: [1, 2, 3] };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
@@ -32,7 +33,6 @@ describe('ShowMetadataComponent', () => {
       imports: [
         MatDialogModule,
         MatExpansionModule,
-        NoopAnimationsModule,
         TranslateModule.forRoot()
       ],
       providers: [
@@ -43,7 +43,7 @@ describe('ShowMetadataComponent', () => {
         },
         {
           provide: MAT_DIALOG_DATA,
-          useValue: {}
+          useValue: dialogData
         }
       ]
     }).compileComponents();
@@ -55,5 +55,13 @@ describe('ShowMetadataComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should expose dialog data', () => {
+    expect(component.data).toEqual(dialogData);
+  });
+
+  it('should initialize unitList as empty', () => {
+    expect(component.unitList).toEqual([]);
   });
 });

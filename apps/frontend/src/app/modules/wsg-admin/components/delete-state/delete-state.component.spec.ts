@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { State } from '../../../admin/models/state.type';
 import { DeleteStateComponent, DeleteStateData } from './delete-state.component';
 
@@ -21,8 +20,7 @@ describe('DeleteStateComponent', () => {
       imports: [
         DeleteStateComponent,
         MatDialogModule,
-        TranslateModule.forRoot(),
-        NoopAnimationsModule
+        TranslateModule.forRoot()
       ],
       providers: [
         {

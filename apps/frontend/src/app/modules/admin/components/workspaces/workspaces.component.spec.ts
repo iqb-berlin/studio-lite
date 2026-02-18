@@ -1,35 +1,76 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { TranslateModule } from '@ngx-translate/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { of } from 'rxjs';
+import { Component, Input } from '@angular/core';
 import { WorkspacesComponent } from './workspaces.component';
+import { BackendService } from '../../services/backend.service';
+import { AppService } from '../../../../services/app.service';
+import { environment } from '../../../../../environments/environment';
+import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 
 describe('WorkspacesComponent', () => {
   let component: WorkspacesComponent;
   let fixture: ComponentFixture<WorkspacesComponent>;
+  let mockBackendService: Partial<BackendService>;
+  let mockAppService: Partial<AppService>;
+
+  @Component({ selector: 'studio-lite-search-filter', template: '', standalone: true })
+  class MockSearchFilterComponent {
+    @Input() title!: string;
+  }
 
   beforeEach(async () => {
+    mockBackendService = {
+      getAllWorkspaces: jest.fn().mockReturnValue(of([{ id: 1, name: 'ws1', groupId: 1 }]))
+    };
+
+    mockAppService = {
+      dataLoading: false
+    };
+
     await TestBed.configureTestingModule({
       imports: [
+        MatTableModule,
+        MatSortModule,
+        MatPaginatorModule,
         TranslateModule.forRoot(),
-        NoopAnimationsModule
+        WorkspacesComponent,
+        MockSearchFilterComponent
       ],
       providers: [
         provideHttpClient(),
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl
-        }
+        },
+        { provide: BackendService, useValue: mockBackendService },
+        { provide: AppService, useValue: mockAppService }
       ]
-    }).compileComponents();
+    })
+      .overrideComponent(WorkspacesComponent, {
+        remove: { imports: [SearchFilterComponent] },
+        add: { imports: [MockSearchFilterComponent] }
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(WorkspacesComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
+    fixture.detectChanges();
     expect(component).toBeTruthy();
+  });
+
+  it('should load workspaces on init', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(mockBackendService.getAllWorkspaces).toHaveBeenCalled();
+    expect(component.dataSource.data.length).toBe(1);
   });
 });

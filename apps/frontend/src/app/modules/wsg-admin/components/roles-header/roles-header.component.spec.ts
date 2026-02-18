@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { RolesMatrixComponent } from '../roles-matrix/roles-matrix.component';
 import { RolesHeaderComponent } from './roles-header.component';
 
@@ -19,7 +19,7 @@ describe('RolesHeaderComponent', () => {
       imports: [
         RolesHeaderComponent,
         TranslateModule.forRoot(),
-        NoopAnimationsModule
+        MatCheckboxModule
       ],
       providers: [
         { provide: MatDialog, useValue: mockMatDialog }

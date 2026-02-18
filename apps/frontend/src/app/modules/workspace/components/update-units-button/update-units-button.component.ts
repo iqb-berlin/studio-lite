@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
+import { Subject } from 'rxjs';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
@@ -15,6 +16,7 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class UpdateUnitsButtonComponent extends SelectUnitDirective {
+  ngUnsubscribe = new Subject<void>();
   constructor(
     public workspaceService: WorkspaceService,
     public router: Router,

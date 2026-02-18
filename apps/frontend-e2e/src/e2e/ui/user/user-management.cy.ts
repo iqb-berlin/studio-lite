@@ -19,7 +19,7 @@ describe('UI User Management', () => {
   });
   after(() => {
     login(Cypress.env('username'), Cypress.env('password'));
-    deleteUser('normaluser');
+    deleteUser(newUser.username);
     deleteFirstUser();
     // cy.resetDb();
   });

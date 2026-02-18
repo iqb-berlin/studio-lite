@@ -6,7 +6,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { SettingsComponent } from './settings.component';
 import { environment } from '../../../../../environments/environment';
@@ -36,8 +35,7 @@ describe('SettingsComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         MatNativeDateModule,
-        MatDatepickerModule,
-        NoopAnimationsModule
+        MatDatepickerModule
       ],
       providers: [
         provideHttpClient(),

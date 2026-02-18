@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RolesMatrixComponent } from './roles-matrix.component';
 
 describe('RolesMatrixComponent', () => {
@@ -11,8 +10,7 @@ describe('RolesMatrixComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         RolesMatrixComponent,
-        TranslateModule.forRoot(),
-        NoopAnimationsModule
+        TranslateModule.forRoot()
       ]
     }).compileComponents();
 

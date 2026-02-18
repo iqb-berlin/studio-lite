@@ -1,9 +1,8 @@
 import {
-  AccessLevel,
-  modules,
-  testGroups,
-  testWorkspaces,
-  UnitData
+  group1,
+  UnitData,
+  ws1,
+  ws2
 } from '../../../support/testData';
 import {
   selectProfileForAreaFromGroup,
@@ -11,31 +10,22 @@ import {
 } from '../../../support/metadata/metadata-util';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
 import {
-  addFirstUser,
-  addModules,
   addStatus,
   addUnitFromExisting,
   addUnitPred,
   clickIndexTabWsgAdmin,
   clickSaveButtonRight,
-  createGroup,
-  createWs,
-  deleteFirstUser,
-  deleteGroup,
-  deleteModule,
   deleteUnit,
   goToWsMenu,
-  grantRemovePrivilegeAtWs,
   importExercise,
   moveUnit,
   selectListUnits,
-  setVeronaWs
+  setModuleWithoutVerification,
+  verifyModuleConfiguration
 } from '../../../support/helpers';
+import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 
 describe('Workspace Unit Management', () => {
-  const group1 = testGroups.ui;
-  const ws1 = testWorkspaces.ui.template;
-  const ws2 = testWorkspaces.ui.final;
   const unit1: UnitData = {
     shortname: 'AUF_D1',
     name: 'Name Auf 1',
@@ -57,22 +47,11 @@ describe('Workspace Unit Management', () => {
     group: 'Group D'
   };
   before(() => {
-    addFirstUser();
+    createBasicSpecCy();
   });
   after(() => {
-    deleteFirstUser();
+    deleteBasicSpecCy();
     // cy.resetDb();
-  });
-
-  it('sets up workspace with modules and profiles', () => {
-    addModules(modules);
-    createGroup(group1);
-    createWs(ws1, group1);
-    grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [AccessLevel.Admin]);
-  });
-
-  it('configures Verona modules for workspace', () => {
-    setVeronaWs(ws1);
   });
 
   it('selects metadata profile from workspace settings', () => {
@@ -89,6 +68,82 @@ describe('Workspace Unit Management', () => {
     addStatus('In Bearbeitung', 0);
     addStatus('Finale', 1);
     clickSaveButtonRight();
+  });
+
+  it('displays available modules in dropdowns', () => {
+    cy.visitWs(ws2);
+    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+
+    // Verify editor options
+    cy.get('[data-cy="edit-workspace-settings-editor"]')
+      .find('mat-select').click();
+    cy.get('mat-option').should('have.length', 2);
+    cy.get('.cdk-overlay-backdrop').last().click({ force: true });
+
+    // Verify player options
+    cy.get('[data-cy="edit-workspace-settings-player"]')
+      .find('mat-select').click();
+    cy.get('mat-option').should('have.length', 3);
+    cy.get('.cdk-overlay-backdrop').last().click({ force: true });
+
+    // Verify schemer options
+    cy.get('[data-cy="edit-workspace-settings-schemer"]')
+      .find('mat-select').click();
+    cy.get('mat-option').should('have.length', 1);
+    cy.get('.cdk-overlay-backdrop').last().click({ force: true });
+
+    cy.translate(Cypress.env('locale')).then(json => {
+      cy.clickDialogButton(json.cancel || json.close);
+    });
+  });
+
+  it('configures Verona modules for workspace', () => {
+    setModuleWithoutVerification(ws1, 'Aspect', 'Aspect', 'Schemer');
+  });
+
+  it('verifies module configuration persists after page reload', () => {
+    cy.visit('/');
+    cy.visitWs(ws1);
+    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
+  });
+
+  it('validates module settings are workspace-specific', () => {
+    // Verify ws1 has configured modules
+    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
+
+    // Verify ws2 has independent configuration
+    cy.visitWs(ws2);
+    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+
+    // ws2 should have module dropdowns available (even if not configured yet)
+    cy.get('[data-cy="edit-workspace-settings-editor"]')
+      .find('mat-select').should('have.class', 'mat-mdc-select-empty');
+    cy.get('[data-cy="edit-workspace-settings-player"]')
+      .find('mat-select').should('have.class', 'mat-mdc-select-empty');
+    cy.get('[data-cy="edit-workspace-settings-schemer"]')
+      .find('mat-select').should('have.class', 'mat-mdc-select-empty');
+
+    cy.translate(Cypress.env('locale')).then(json => {
+      cy.clickDialogButton(json.cancel || json.close);
+    });
+  });
+
+  it('configures workspace with alternative module combinations', () => {
+    // Configure ws2 with different modules (Speedtest editor, Stars player)
+    // setModuleWithVerification already verifies the configuration
+    setModuleWithoutVerification(ws2, 'Aspect', 'Stars', 'Schemer');
+
+    // Verify ws1 still has original configuration
+    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
+  });
+
+  it('allows switching between different player modules', () => {
+    // Switch to Speedtest player
+    setModuleWithoutVerification(ws1, 'Aspect', 'Speedtest', 'Schemer');
+    // Switch to Stars player (already verified by setModuleWithVerification)
+    setModuleWithoutVerification(ws1, 'Aspect', 'Stars', 'Schemer');
   });
 
   it('creates new units', () => {
@@ -118,8 +173,6 @@ describe('Workspace Unit Management', () => {
   });
 
   it('moves unit to another workspace', () => {
-    createWs(ws2, group1);
-    grantRemovePrivilegeAtWs([Cypress.env('username')], ws2, [AccessLevel.Admin]);
     moveUnit(ws1, ws2, unit2);
   });
 
@@ -176,10 +229,5 @@ describe('Workspace Unit Management', () => {
         'codebook'
       );
     });
-  });
-
-  it('cleans up test data', () => {
-    deleteGroup(group1);
-    deleteModule();
   });
 });

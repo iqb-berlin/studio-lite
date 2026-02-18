@@ -14,7 +14,7 @@ import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 
 import { ToTimePipe } from '../../pipes/to-time.pipe';
-import { AppConfig } from '../../../../models/app-config.class';
+import { AppConfig } from '../../../../classes/app-config.class';
 import { defaultAppConfig } from '../../../../services/app.service';
 import { BackendService as ReadBackendService } from '../../../../services/backend.service';
 import { BackendService as WriteBackendService } from '../../services/backend.service';

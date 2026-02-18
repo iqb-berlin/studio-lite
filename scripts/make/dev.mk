@@ -28,7 +28,7 @@ dev-build: dev-registry-login
 
 # Create and start all docker containers
 dev-up:
-	@if ! test $(shell docker network ls -q --filter name=app-net);\
+	@if ! test "$(shell docker network ls -q --filter name=app-net)";\
 		then docker network create app-net;\
 	fi
 	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev up --no-build --pull never -d
@@ -36,7 +36,7 @@ dev-up:
 # Stop and remove all docker containers, preserve data volumes
 dev-down:
 	docker compose --env-file $(STUDIO_BASE_DIR)/.env.dev down
-	@if test $(shell docker network ls -q --filter name=app-net);\
+	@if test "$(shell docker network ls -q --filter name=app-net)";\
 		then docker network rm $(shell docker network ls -q -f name=app-net);\
 	fi
 

@@ -6,7 +6,7 @@ import { provideRouter } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { AboutComponent } from './about.component';
 import { AppService } from '../../services/app.service';
-import { AppConfig } from '../../models/app-config.class';
+import { AppConfig } from '../../classes/app-config.class';
 
 describe('AboutComponent', () => {
   let component: AboutComponent;

@@ -34,7 +34,16 @@ export class WorkspaceBackendService {
     return this.http
       .get<WorkspaceGroupFullDto>(`${this.serverUrl}workspace-groups/${workspaceGroupId}`)
       .pipe(
-        catchError(() => [])
+        catchError(() => of({
+          id: 0,
+          name: '',
+          settings: {
+            states: [],
+            defaultEditor: '',
+            defaultPlayer: '',
+            defaultSchemer: ''
+          }
+        }))
       );
   }
 
@@ -42,7 +51,7 @@ export class WorkspaceBackendService {
     return this.http
       .get<MissingsProfilesDto[]>(`${this.serverUrl}admin/settings/missings-profiles`)
       .pipe(
-        catchError(() => [])
+        catchError(() => of([]))
       );
   }
 
@@ -50,7 +59,7 @@ export class WorkspaceBackendService {
     return this.http
       .get<UnitInListDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units`, { params: params })
       .pipe(
-        catchError(() => [])
+        catchError(() => of([]))
       );
   }
 
@@ -66,7 +75,7 @@ export class WorkspaceBackendService {
     return this.http
       .get<UnitPropertiesDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/properties`)
       .pipe(
-        catchError(() => [])
+        catchError(() => of([]))
       );
   }
 
@@ -74,8 +83,8 @@ export class WorkspaceBackendService {
     return this.http
       .post<number>(`${this.serverUrl}workspaces/${workspaceId}/units`, newUnit)
       .pipe(
-        catchError(() => of(null)),
-        map(returnId => Number(returnId))
+        map(returnId => Number(returnId)),
+        catchError(() => of(null))
       );
   }
 
@@ -283,7 +292,7 @@ export class WorkspaceBackendService {
     return this.http
       .get<ReviewInListDto[]>(`${this.serverUrl}workspaces/${workspaceId}/reviews`)
       .pipe(
-        catchError(() => [])
+        catchError(() => of([]))
       );
   }
 
@@ -309,8 +318,8 @@ export class WorkspaceBackendService {
     return this.http
       .post<number>(`${this.serverUrl}workspaces/${workspaceId}/reviews`, newReview)
       .pipe(
-        catchError(() => of(null)),
-        map(returnId => Number(returnId))
+        map(returnId => Number(returnId)),
+        catchError(() => of(null))
       );
   }
 
@@ -331,19 +340,18 @@ export class WorkspaceBackendService {
     return this.http
       .get<string[]>(`${this.serverUrl}workspaces/${workspaceId}/groups`)
       .pipe(
-        catchError(() => [])
+        catchError(() => of([]))
       );
   }
 
   addUnitGroup(workspaceId: number, newGroup: string): Observable <boolean> {
     return this.http
-      .patch(
-        `${this.serverUrl}workspaces/${workspaceId}/group-name`,
-        { groupName: newGroup }
-      )
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/group-name`, {
+        groupName: newGroup
+      })
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -393,7 +401,7 @@ export class WorkspaceBackendService {
     return this.http
       .get<UnitItemDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/items`, { params: queryParams })
       .pipe(
-        catchError(() => [])
+        catchError(() => of([]))
       );
   }
 }

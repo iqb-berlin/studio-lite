@@ -4,7 +4,6 @@ import {
   Component, Input, Output, EventEmitter
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of } from 'rxjs';
@@ -64,7 +63,7 @@ describe('WorkspaceSettingsComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [WorkspaceSettingsComponent, NoopAnimationsModule, TranslateModule.forRoot()],
+      imports: [WorkspaceSettingsComponent, TranslateModule.forRoot()],
       providers: [
         { provide: WsgAdminService, useValue: mockWsgAdminService },
         { provide: MatSnackBar, useValue: mockSnackBar }

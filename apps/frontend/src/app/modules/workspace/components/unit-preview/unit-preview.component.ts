@@ -7,7 +7,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
 import { UnitSchemeDto } from '@studio-lite-lib/api-dto';
-import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodingSchemeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { CodingSchemeFactory } from '@iqb/responses';
 import { Response } from '@iqbspecs/response/response.interface';
 import { Router } from '@angular/router';
@@ -20,9 +20,7 @@ import { PreviewService } from '../../services/preview.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { ShowResponsesComponent } from '../show-responses/show-responses.component';
 import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
-import {
-  PrintOptionsDialogComponent
-} from '../../../print/components/print-options-dialog/print-options-dialog.component';
+import { PrintOptionsDialogComponent } from '../../../print/components/print-options-dialog/print-options-dialog.component';
 import { PreviewDirective } from '../../../shared/directives/preview.directive';
 import { UnitState } from '../../../shared/models/verona.interface';
 
@@ -279,7 +277,7 @@ export class UnitPreviewComponent
   private checkCoding(schemeData: UnitSchemeDto | null): void {
     const responses = this.getResponses();
     if (schemeData) {
-      const codingScheme: CodingScheme = JSON.parse(schemeData.scheme);
+      const codingScheme: CodingSchemeData = JSON.parse(schemeData.scheme);
       if (!codingScheme) {
         if (responses) {
           this.dialog.open(ShowResponsesComponent, {
@@ -298,7 +296,7 @@ export class UnitPreviewComponent
       }
       this.workspaceService.codingScheme = codingScheme;
       const varsWithCodes = codingScheme.variableCodings
-        .filter(vc => vc.codes.length > 0)
+        .filter(vc => vc.codes && vc.codes.length > 0)
         .map(vc => vc.alias || vc.id);
       const newResponses = CodingSchemeFactory.code(
         responses!,

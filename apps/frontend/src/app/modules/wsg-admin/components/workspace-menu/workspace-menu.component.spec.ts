@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Component, Input } from '@angular/core';
 import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
@@ -41,7 +40,7 @@ describe('WorkspaceMenuComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [WorkspaceMenuComponent, TranslateModule.forRoot(), NoopAnimationsModule],
+      imports: [WorkspaceMenuComponent, TranslateModule.forRoot()],
       providers: [
         { provide: BackendService, useValue: mockBackendService },
         { provide: AppBackendService, useValue: mockAppBackendService },

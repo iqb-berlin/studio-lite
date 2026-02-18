@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { WorkspaceGroupFullDto } from '@studio-lite-lib/api-dto';
@@ -43,7 +42,7 @@ describe('WsgAdminComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [WsgAdminComponent, TranslateModule.forRoot(), NoopAnimationsModule],
+      imports: [WsgAdminComponent, TranslateModule.forRoot()],
       providers: [
         provideRouter([]),
         { provide: WsgAdminService, useValue: mockWsgAdminService },

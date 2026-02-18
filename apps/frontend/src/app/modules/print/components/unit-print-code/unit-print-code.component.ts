@@ -55,14 +55,18 @@ export class UnitPrintCodeComponent implements OnChanges {
    * @returns The rules description in a HTML string format.
    */
   // eslint-disable-next-line class-methods-use-this
-  private generateRulesDescription(codeAsText: CodeAsText, code: CodeData): string {
+  private generateRulesDescription(
+    codeAsText: CodeAsText,
+    code: CodeData
+  ): string {
     let rulesDescription = '';
 
     // Iterate over defined rule set descriptions
     codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
       if (
         ruleSetDescription !== 'Keine Regeln definiert.' ||
-        (ruleSetDescription === 'Keine Regeln definiert.' && !code.manualInstruction)
+        (ruleSetDescription === 'Keine Regeln definiert.' &&
+          !code.manualInstruction)
       ) {
         // Check if the ruleSetDescription contains a semicolon
         if (ruleSetDescription.includes(';')) {
@@ -82,7 +86,7 @@ export class UnitPrintCodeComponent implements OnChanges {
     });
 
     // Add logical operator description if there are multiple rule sets
-    if (code.ruleSets.length > 1) {
+    if (code.ruleSets && code.ruleSets.length > 1) {
       const operator = code.ruleSetOperatorAnd ? 'UND' : 'ODER';
       rulesDescription += `<p class="rule-block">Verknüpfung der Regelsätze: ${operator}</p>`;
     }

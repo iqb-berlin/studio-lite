@@ -1,39 +1,83 @@
-// eslint-disable-next-line max-classes-per-file
+/* eslint-disable @typescript-eslint/lines-between-class-members */
+/* eslint-disable lines-between-class-members */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable max-classes-per-file */
+/* eslint-disable class-methods-use-this */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { Component, Input } from '@angular/core';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { BehaviorSubject, of } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { ExportCodingBookComponent } from './export-coding-book.component';
+import { WorkspaceBackendService } from '../../services/workspace-backend.service';
+import { WorkspaceService } from '../../services/workspace.service';
+import { AppService } from '../../../../services/app.service';
+import { I18nService } from '../../../../services/i18n.service';
+import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 
 describe('ExportCodingBookComponent', () => {
   let component: ExportCodingBookComponent;
   let fixture: ComponentFixture<ExportCodingBookComponent>;
 
-  @Component({ selector: 'studio-lite-select-unit-list', template: '', standalone: false })
+  @Component({ selector: 'studio-lite-select-unit-list', template: '', standalone: true })
   class MockSelectUnitListComponent {
     @Input() disabled!: number[];
+
     @Input() filter!: number[];
+
     @Input() initialSelection!: number[];
+
     @Input() workspace!: unknown;
+
     @Input() showGroups!: boolean;
+
     @Input() selectionCount!: number;
+
     @Input() selectedUnitId!: number;
+  }
+
+  class MockWorkspaceBackendService {
+    getMissingsProfiles() {
+      return of([]);
+    }
+
+    getUnitList() {
+      return of([]);
+    }
+  }
+
+  class MockWorkspaceService {
+    isChanged() {
+      return false;
+    }
+
+    selectedWorkspaceId = 1;
+
+    selectedWorkspaceName = 'ws';
+
+    selectedUnit$ = new BehaviorSubject<number>(0);
+  }
+
+  class MockAppService {
+    dataLoading = false;
+  }
+
+  class MockI18nService {
+    fullLocale = 'de';
+
+    fileDateFormat = 'yyyy-MM-dd';
   }
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        MockSelectUnitListComponent
-      ],
       imports: [
         MatDialogModule,
         MatExpansionModule,
-        NoopAnimationsModule,
-        TranslateModule.forRoot()
+        TranslateModule.forRoot(),
+        MockSelectUnitListComponent // Add directly to imports ensures it is available
       ],
       providers: [
         provideHttpClient(),
@@ -44,9 +88,18 @@ describe('ExportCodingBookComponent', () => {
         {
           provide: MAT_DIALOG_DATA,
           useValue: {}
-        }
+        },
+        { provide: WorkspaceBackendService, useClass: MockWorkspaceBackendService },
+        { provide: WorkspaceService, useClass: MockWorkspaceService },
+        { provide: AppService, useClass: MockAppService },
+        { provide: I18nService, useClass: MockI18nService }
       ]
-    }).compileComponents();
+    })
+      .overrideComponent(ExportCodingBookComponent, {
+        remove: { imports: [SelectUnitListComponent] },
+        add: { imports: [MockSelectUnitListComponent] }
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(ExportCodingBookComponent);
     component = fixture.componentInstance;
