@@ -1,0 +1,9 @@
+<div class="widget-wrapper">
+  <div class="iframe-host">
+    <iframe #widgetIframe class="widget-iframe"></iframe>
+  </div>
+  <div class="button-wrapper">
+    <button mat-button (click)="close()">{{ 'cancel' | translate }}</button>
+    <button mat-flat-button (click)="continue()">{{ 'next' | translate }}</button>
+  </div>
+</div>

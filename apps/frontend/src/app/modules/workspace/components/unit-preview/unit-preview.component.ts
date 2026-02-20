@@ -1,7 +1,9 @@
 import {
   AfterViewInit, Component, ElementRef, ViewChild
 } from '@angular/core';
-import { skip, takeUntil, Subject } from 'rxjs';
+import {
+  skip, takeUntil, Subject
+} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
@@ -20,7 +22,9 @@ import { PreviewService } from '../../services/preview.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { ShowResponsesComponent } from '../show-responses/show-responses.component';
 import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
-import { PrintOptionsDialogComponent } from '../../../print/components/print-options-dialog/print-options-dialog.component';
+import {
+  PrintOptionsDialogComponent
+} from '../../../print/components/print-options-dialog/print-options-dialog.component';
 import { PreviewDirective } from '../../../shared/directives/preview.directive';
 import { UnitState } from '../../../shared/models/verona.interface';
 

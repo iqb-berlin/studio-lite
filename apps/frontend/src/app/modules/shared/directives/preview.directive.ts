@@ -1,9 +1,15 @@
-import { Directive } from '@angular/core';
+import { Directive, inject, ViewContainerRef } from '@angular/core';
+import { from, takeUntil } from 'rxjs';
+import { Overlay } from '@angular/cdk/overlay';
+import { ComponentPortal } from '@angular/cdk/portal';
 import { UnitDefinitionDirective } from './unit-definition.directive';
 import { PageData } from '../../workspace/models/page-data.interface';
 import { Progress } from '../../workspace/models/types';
 import { VeronaModuleDirective } from './verona-module.directive';
 import { UnitState } from '../models/verona.interface';
+import { WidgetCallData } from '../../workspace/models/widget-call-data.interface';
+import { ModuleService } from '../services/module.service';
+import { WidgetOverlayComponent } from '../../workspace/components/widget-overlay/widget-overlay.component';
 
 @Directive({
   selector: '[preview]',
@@ -19,6 +25,10 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
 
   abstract gotoUnit(target: string): void;
   protected abstract handleUnitStateData(unitState: UnitState): void;
+
+  private readonly widgetModuleService = inject(ModuleService);
+  private readonly widgetOverlay = inject(Overlay);
+  private readonly widgetViewContainerRef = inject(ViewContainerRef);
 
   handleIncomingMessage(m: MessageEvent): void {
     const msgData = m.data;
@@ -88,6 +98,10 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
 
         case 'vopWindowFocusChangedNotification':
           this.setFocusStatus(msgData.hasFocus);
+          break;
+
+        case 'vopWidgetCall':
+          this.handleWidgetCall(msgData);
           break;
 
         default:
@@ -194,5 +208,62 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
       msgData.specVersion;
     const major = versionSource?.match(/\d+/);
     return major ? Number(major[0]) : 2;
+  }
+
+  handleWidgetCall(data: WidgetCallData): void {
+    const loadWidgets$ = Object.keys(this.widgetModuleService.widgets).length === 0 ?
+      from(this.widgetModuleService.loadWidgets()) :
+      from(Promise.resolve());
+
+    loadWidgets$
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {
+        const matchingWidget = Object.values(this.widgetModuleService.widgets)
+          .find(w => w.metadata.model === data.widgetType.toLowerCase());
+
+        if (!matchingWidget) {
+          this.snackBar.open(
+            this.translateService.instant(
+              'workspace.no-widget',
+              { widgetType: data.widgetType }
+            ),
+            '',
+            { duration: 3000 }
+          );
+          return;
+        }
+
+        from(this.widgetModuleService.getModuleHtml(matchingWidget))
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(widgetHtml => {
+            if (widgetHtml) {
+              this.openWidgetOverlay(widgetHtml, data);
+            }
+          });
+      });
+  }
+
+  private openWidgetOverlay(widgetHtml: string, callData: WidgetCallData): void {
+    const overlayRef = this.widgetOverlay.create({
+      positionStrategy: this.widgetOverlay.position()
+        .global()
+        .centerHorizontally()
+        .centerVertically(),
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-dark-backdrop',
+      panelClass: 'widget-overlay-panel'
+    });
+
+    const portal = new ComponentPortal(
+      WidgetOverlayComponent,
+      this.widgetViewContainerRef
+    );
+    const componentRef = overlayRef.attach(portal);
+
+    componentRef.instance.widgetHtml = widgetHtml;
+    componentRef.instance.widgetCallData = callData;
+    componentRef.instance.playerPostMessageTarget = this.postMessageTarget;
+    componentRef.instance.playerSessionId = this.sessionId;
+    componentRef.instance.overlayRef = overlayRef;
   }
 }
