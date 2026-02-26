@@ -197,6 +197,8 @@ export class UnitPropertiesComponent
       const unitMetadata = unitMetadataStore.getData();
       this.selectedStateId = unitMetadata.state || null;
       // eslint-disable-next-line @typescript-eslint/dot-notation
+      this.unitForm.controls['key'].markAsUntouched();
+      // eslint-disable-next-line @typescript-eslint/dot-notation
       this.unitForm.controls['key'].setValidators([
         Validators.required,
         Validators.minLength(3),
@@ -219,6 +221,20 @@ export class UnitPropertiesComponent
         },
         { emitEvent: false }
       );
+
+      // eslint-disable-next-line @typescript-eslint/dot-notation
+      this.unitForm.controls['key'].updateValueAndValidity({ emitEvent: false });
+      // eslint-disable-next-line @typescript-eslint/dot-notation
+      if (this.unitForm.controls['key'].invalid) {
+        // eslint-disable-next-line @typescript-eslint/dot-notation
+        this.unitForm.controls['key'].markAsTouched();
+      }
+
+      this.workspaceService.isValidFormKey.next(
+        // eslint-disable-next-line @typescript-eslint/dot-notation
+        this.unitForm.controls['key'].status === 'VALID'
+      );
+
       this.selectedStateColor = unitMetadata.state || '';
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
         const filteredState = this.workspaceService.states
