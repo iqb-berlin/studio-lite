@@ -196,19 +196,20 @@ export class UnitPropertiesComponent
     if (selectedUnitId > 0 && unitMetadataStore) {
       const unitMetadata = unitMetadataStore.getData();
       this.selectedStateId = unitMetadata.state || null;
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      this.unitForm.controls['key'].markAsUntouched();
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      this.unitForm.controls['key'].setValidators([
-        Validators.required,
-        Validators.minLength(3),
-        Validators.maxLength(20),
-        Validators.pattern(WorkspaceService.unitKeyPatternString()),
-        WorkspaceService.unitKeyUniquenessValidator(
-          unitMetadata.id,
-          this.workspaceService.unitList
-        )
-      ]);
+      const keyControl = this.unitForm.get('key');
+      if (keyControl) {
+        keyControl.markAsUntouched();
+        keyControl.setValidators([
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(20),
+          Validators.pattern(WorkspaceService.unitKeyPatternString()),
+          WorkspaceService.unitKeyUniquenessValidator(
+            unitMetadata.id,
+            this.workspaceService.unitList
+          )
+        ]);
+      }
       this.unitForm.setValue(
         {
           key: unitMetadata.key,
@@ -222,27 +223,23 @@ export class UnitPropertiesComponent
         { emitEvent: false }
       );
 
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      this.unitForm.controls['key'].updateValueAndValidity({ emitEvent: false });
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      if (this.unitForm.controls['key'].invalid) {
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        this.unitForm.controls['key'].markAsTouched();
-      }
+      if (keyControl) {
+        keyControl.updateValueAndValidity({ emitEvent: false });
+        if (keyControl.invalid) {
+          keyControl.markAsTouched();
+        }
 
-      this.workspaceService.isValidFormKey.next(
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        this.unitForm.controls['key'].status === 'VALID'
-      );
+        this.workspaceService.isValidFormKey.next(
+          keyControl.status === 'VALID'
+        );
+      }
 
       this.selectedStateColor = unitMetadata.state || '';
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
         const filteredState = this.workspaceService.states
           ?.filter((state:State) => state.id.toString() === this.unitForm.get('state')?.value) || 0;
         filteredState.length ? this.selectedStateColor = filteredState[0].color : this.selectedStateColor = '';
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        const isValidFormKey = this.unitForm.controls?.['key'].status === 'VALID';
-        // eslint-disable-next-line @typescript-eslint/dot-notation
+        const isValidFormKey = this.unitForm.get('key')?.status === 'VALID';
         this.workspaceService.isValidFormKey.next(isValidFormKey);
         this.workspaceService.getUnitMetadataStore()?.setBasicData(
           this.unitForm.get('key')?.value,
