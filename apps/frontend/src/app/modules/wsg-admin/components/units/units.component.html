@@ -19,7 +19,7 @@
 
       @for (column of displayedColumns; track column) {
         <ng-container [matColumnDef]="column">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header [class.header-right]="column === 'delete'">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="column === 'delete'" [class.header-right]="column === 'delete'">
             @if (column !== 'delete') {
               <span>{{ `unit.${column}` | translate}}</span>
             }
