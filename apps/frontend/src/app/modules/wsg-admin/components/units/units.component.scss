@@ -3,5 +3,14 @@
   padding: 20px 15px;
   border-radius: 5px;
   color: #006064;
-  background: #00606410;
+}
+
+.header-right {
+  ::ng-deep .mat-sort-header-container {
+    justify-content: flex-end;
+  }
+}
+
+.cell-right {
+  justify-content: flex-end;
 }

@@ -19,10 +19,12 @@
 
       @for (column of displayedColumns; track column) {
         <ng-container [matColumnDef]="column">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            <span>{{ `unit.${column}` | translate}}</span>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header [class.header-right]="column === 'delete'">
+            @if (column !== 'delete') {
+              <span>{{ `unit.${column}` | translate}}</span>
+            }
           </th>
-          <td mat-cell *matCellDef="let unit">
+          <td mat-cell *matCellDef="let unit" [class.cell-right]="column === 'delete'">
             @if (column === 'id') {
               <a [routerLink]="`/a/${unit.workspaceId}/${unit.id}`">{{ unit.id }}</a>
             } @else if (column === 'lastChangedDefinition' || column === 'lastChangedMetadata' || column === 'lastChangedScheme') {
