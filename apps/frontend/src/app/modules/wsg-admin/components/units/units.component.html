@@ -19,12 +19,16 @@
 
       @for (column of displayedColumns; track column) {
         <ng-container [matColumnDef]="column">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            <span>{{ `unit.${column}` | translate}}</span>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="column === 'delete'" [class.header-right]="column === 'delete'">
+            @if (column !== 'delete') {
+              <span>{{ `unit.${column}` | translate}}</span>
+            }
           </th>
-          <td mat-cell *matCellDef="let unit">
+          <td mat-cell *matCellDef="let unit" [class.cell-right]="column === 'delete'">
             @if (column === 'id') {
               <a [routerLink]="`/a/${unit.workspaceId}/${unit.id}`">{{ unit.id }}</a>
+            } @else if (column === 'workspaceId') {
+              <a [routerLink]="`/a/${unit.workspaceId}`">{{ unit.workspaceId }}</a>
             } @else if (column === 'lastChangedDefinition' || column === 'lastChangedMetadata' || column === 'lastChangedScheme') {
               {{ unit[column] | date : i18nService.dateTimeFormat : i18nService.timeZone }}
             } @else if (column !== 'delete') {
@@ -49,6 +53,6 @@
   <mat-paginator [length]="dataSource.data.length"
                  [pageSize]="10"
                  [pageSizeOptions]="[10, 50, 100]"
-                 aria-label="Select page">
+                 [attr.aria-label]="'paginator.select-page' | translate">
   </mat-paginator>
 </div>

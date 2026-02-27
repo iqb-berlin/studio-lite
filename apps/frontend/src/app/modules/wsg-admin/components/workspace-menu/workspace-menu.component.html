@@ -4,12 +4,7 @@
           (click)="addObject()">
     <studio-lite-wrapped-icon icon="add"></studio-lite-wrapped-icon>
   </button>
-  <button mat-button
-          [disabled]="!selectedWorkspaceId && checkedRows && checkedRows.length === 0"
-          [matTooltip]="'wsg-admin.delete-selected-workspaces' | translate"
-          (click)="deleteObject()">
-    <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
-  </button>
+
   <button mat-button
           [disabled]="!selectedWorkspaceId"
           [matTooltip]="'wsg-admin.rename-workspace' | translate"

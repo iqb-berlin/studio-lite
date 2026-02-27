@@ -57,7 +57,6 @@ describe('WorkspaceMenuComponent', () => {
     component = fixture.componentInstance;
     component.workspaces = [];
     component.selectedRows = [];
-    component.checkedRows = [];
     component.isBackUpWorkspaceGroup = false;
     fixture.detectChanges();
   });
@@ -80,7 +79,6 @@ describe('WorkspaceMenuComponent', () => {
 
   it('should rename workspace', () => {
     const workspace = { id: 1, name: 'ws1' } as WorkspaceInListDto;
-    component.checkedRows = [workspace];
     component.selectedRows = [workspace];
 
     mockMatDialog.open.mockReturnValue({
@@ -95,20 +93,5 @@ describe('WorkspaceMenuComponent', () => {
       selection: [workspace],
       name: 'renamed-workspace'
     });
-  });
-
-  it('should delete workspace', () => {
-    const workspace = { id: 1, name: 'ws1' } as WorkspaceInListDto;
-    component.checkedRows = [workspace];
-
-    mockMatDialog.open.mockReturnValue({
-      afterClosed: () => of(true)
-    });
-    jest.spyOn(component.workspaceDeleted, 'emit');
-
-    component.deleteObject();
-
-    expect(mockMatDialog.open).toHaveBeenCalled();
-    expect(component.workspaceDeleted.emit).toHaveBeenCalledWith([workspace]);
   });
 });
