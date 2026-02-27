@@ -943,7 +943,8 @@
     "items-per-page": "Einträge pro Seite",
     "next-page": "Nächste Seite",
     "previous-page": "Vorherige Seite",
-    "range": "{{start}} - {{end}} von {{total}}"
+    "range": "{{start}} - {{end}} von {{total}}",
+    "select-page": "Seite auswählen"
   },
   "unit": {
     "id" : "ID",
