@@ -19,7 +19,7 @@
       </div>
 
       <studio-lite-search-filter
-        [title]="'search-filter.filter-groups' | translate"
+        [title]="'search-filter.filter-workspace-groups' | translate"
         (valueChange)="objectsDatasource.filter = $event.trim().toLowerCase()">
       </studio-lite-search-filter>
     }
@@ -31,7 +31,7 @@
         <mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="true" class="header-right"></mat-header-cell>
         <mat-cell *matCellDef="let row" class="cell-right">
           <button mat-icon-button
-                  [matTooltip]="'admin.delete-group' | translate: { name: row.name }"
+                  [matTooltip]="'admin.delete-name' | translate: { name: row.name }"
                   [color]="'warn'"
                   matTooltipPosition="above"
                   (click)="$event.stopPropagation(); openDeleteDialog(row)">
