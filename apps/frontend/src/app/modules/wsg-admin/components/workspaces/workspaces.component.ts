@@ -52,7 +52,7 @@ import { EntriesDividerComponent } from '../../../shared/components/entries-divi
 export class WorkspacesComponent implements OnInit, OnDestroy {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
   workspaces: WorkspaceInListDto[] = [];
-  displayedColumns = ['name', 'id', 'unitsCount', 'dropBoxId', 'delete'];
+  displayedColumns = ['id', 'name', 'unitsCount', 'dropBoxId', 'delete'];
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
   selectedWorkspaceId = 0;
   workspaceUsers = new WorkspaceUserToCheckCollection([]);
