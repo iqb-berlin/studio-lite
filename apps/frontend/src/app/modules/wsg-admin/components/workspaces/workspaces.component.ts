@@ -219,7 +219,10 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
 
   deleteWorkspace(workspace: WorkspaceInListDto) {
     const prompt = (workspace.unitsCount) ?
-      this.translateService.instant('wsg-admin.delete-workspace-with-units', { name: workspace.name }) :
+      this.translateService.instant('wsg-admin.delete-workspace-with-units', {
+        name: workspace.name,
+        count: workspace.unitsCount
+      }) :
       this.translateService.instant('wsg-admin.delete-workspace', { name: workspace.name });
 
     const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
