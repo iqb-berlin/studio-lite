@@ -27,6 +27,8 @@
           <td mat-cell *matCellDef="let unit" [class.cell-right]="column === 'delete'">
             @if (column === 'id') {
               <a [routerLink]="`/a/${unit.workspaceId}/${unit.id}`">{{ unit.id }}</a>
+            } @else if (column === 'workspaceId') {
+              <a [routerLink]="`/a/${unit.workspaceId}`">{{ unit.workspaceId }}</a>
             } @else if (column === 'lastChangedDefinition' || column === 'lastChangedMetadata' || column === 'lastChangedScheme') {
               {{ unit[column] | date : i18nService.dateTimeFormat : i18nService.timeZone }}
             } @else if (column !== 'delete') {
