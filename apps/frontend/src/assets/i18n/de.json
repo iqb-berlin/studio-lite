@@ -399,6 +399,7 @@
     "deleting-of-workspaces": "Löschen von Arbeitsbereichen",
     "delete-workspace": "Soll der Arbeitsbereich \"{{name}}\" gelöscht werden?",
     "delete-workspace-with-units": "Soll der Arbeitsbereich \"{{name}}\" mit allen enthaltenen Aufgaben gelöscht werden?",
+    "delete-workspace-by-name": "Arbeitsbereich \"{{workspaceName}}\" löschen",
     "workspaces-deleted": "Arbeitsbereich/e gelöscht",
     "workspaces-not-deleted": "Konnte Arbeitsbereich/e nicht löschen",
     "workspaces-moved": "Arbeitsbereich/e verschoben",

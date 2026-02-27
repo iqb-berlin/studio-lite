@@ -6,7 +6,6 @@
       [isWorkspaceGroupAdmin]="isWorkspaceGroupAdmin"
       [selectedWorkspaceId]="selectedWorkspaceId"
       [selectedRows]="tableSelectionRow.selected"
-      [checkedRows]="tableSelectionCheckboxes.selected"
       [workspaces]="workspaces"
       (workspaceAdded)="addWorkspace($event)"
       (workspaceRenamed)="renameWorkspace($event)"
@@ -14,7 +13,6 @@
       (workspaceChanged)="changeWorkspace($event)"
       (workspaceNotLoaded)="onWorkspaceNotLoaded()"
       (workspaceMoved)="moveWorkspace($event)"
-      (workspaceDeleted)="deleteWorkspace($event)"
       (download)="xlsxDownloadWorkspaceReport()">
     </studio-lite-workspace-menu>
 
@@ -38,22 +36,7 @@
       matSort
       matSortDisableClear
       class="scroll-area">
-      <ng-container matColumnDef="selectCheckbox">
-        <mat-header-cell *matHeaderCellDef
-          class="fx-flex-row-fix-70">
-          <mat-checkbox [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-            [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-            (change)="$event ? masterToggle() : null">
-          </mat-checkbox>
-        </mat-header-cell>
-        <mat-cell *matCellDef="let row"
-          class="fx-flex-row-fix-70">
-          <mat-checkbox [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length"
-            (click)="$event.stopPropagation()"
-            (change)="$event ? tableSelectionCheckboxes.toggle(row) : null">
-          </mat-checkbox>
-        </mat-cell>
-      </ng-container>
+
       <ng-container matColumnDef="name">
         <mat-header-cell *matHeaderCellDef
           mat-sort-header="name">{{'wsg-admin.name' | translate}}
@@ -95,6 +78,18 @@
           } @else {
             <mat-icon class="center">unpublished</mat-icon>
           }
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="delete">
+        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <button mat-icon-button
+                  [matTooltip]="'wsg-admin.delete-workspace-by-name' | translate : {workspaceName: element.name}"
+                  [color]="'warn'"
+                  matTooltipPosition="above"
+                  (click)="$event.stopPropagation(); deleteWorkspace(element)">
+            <mat-icon>delete</mat-icon>
+          </button>
         </mat-cell>
       </ng-container>
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
