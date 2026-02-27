@@ -22,6 +22,7 @@ import { MatIcon } from '@angular/material/icon';
 import { Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
+import { RouterLink } from '@angular/router';
 import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
@@ -45,7 +46,8 @@ import { EntriesDividerComponent } from '../../../shared/components/entries-divi
   imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
     MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
     MatTooltip, FormsModule, EntriesDividerComponent,
-    IsSelectedIdPipe, TranslateModule, MatIcon, RolesHeaderComponent, WorkspaceNamePipe, MatFabButton, MatIconButton]
+    IsSelectedIdPipe, TranslateModule, MatIcon, RolesHeaderComponent, WorkspaceNamePipe, MatFabButton, MatIconButton,
+    RouterLink]
 })
 export class WorkspacesComponent implements OnInit, OnDestroy {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
