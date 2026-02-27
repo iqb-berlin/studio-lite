@@ -42,10 +42,8 @@ describe('WorkspaceGroupsComponent', () => {
   class MockWorkspaceGroupsMenuComponent {
     @Input() selectedWorkspaceGroupId!: number;
     @Input() selectedRows!: WorkspaceGroupInListDto[];
-    @Input() checkedRows!: WorkspaceGroupInListDto[];
 
     @Output() groupAdded: EventEmitter<UntypedFormGroup> = new EventEmitter<UntypedFormGroup>();
-    @Output() groupsDeleted: EventEmitter<WorkspaceGroupInListDto[]> = new EventEmitter<WorkspaceGroupInListDto[]>();
     @Output() groupEdited: EventEmitter<{ selection: WorkspaceGroupInListDto[], group: UntypedFormGroup }> =
       new EventEmitter<{ selection: WorkspaceGroupInListDto[], group: UntypedFormGroup }>();
 

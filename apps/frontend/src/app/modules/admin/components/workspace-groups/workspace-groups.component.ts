@@ -16,6 +16,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { FormsModule, UntypedFormGroup } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import {
   CreateWorkspaceGroupDto,
   UnitInViewDto,
@@ -26,7 +28,7 @@ import { DatePipe } from '@angular/common';
 import { saveAs } from 'file-saver-es';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatFabButton } from '@angular/material/button';
+import { MatFabButton, MatIconButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 import { BackendService } from '../../services/backend.service';
@@ -34,9 +36,6 @@ import { AppService } from '../../../../services/app.service';
 import { UserToCheckCollection } from '../../models/users-to-check-collection.class';
 import { State } from '../../models/state.type';
 import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
-import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
-import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
-import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
 import { Profile } from '../../../shared/models/profile.type';
@@ -48,12 +47,11 @@ import { EntriesDividerComponent } from '../../../shared/components/entries-divi
   templateUrl: './workspace-groups.component.html',
   styleUrls: ['./workspace-groups.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe, MatFabButton, MatIcon, EntriesDividerComponent]
+  imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent]
 })
 export class WorkspaceGroupsComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();
-  displayedColumns = ['selectCheckbox', 'name', 'id'];
-  tableSelectionCheckboxes = new SelectionModel<WorkspaceGroupInListDto>(true, []);
+  displayedColumns = ['id', 'name', 'delete'];
   tableSelectionRow = new SelectionModel<WorkspaceGroupInListDto>(false, []);
   selectedWorkspaceGroupId = 0;
   workspaceUsers = new UserToCheckCollection([]);
@@ -64,6 +62,7 @@ export class WorkspaceGroupsComponent implements OnInit {
     private appService: AppService,
     private backendService: BackendService,
     private snackBar: MatSnackBar,
+    private deleteConfirmDialog: MatDialog,
     private translateService: TranslateService,
     private i18nService: I18nService
   ) {
@@ -167,6 +166,24 @@ export class WorkspaceGroupsComponent implements OnInit {
       );
   }
 
+  openDeleteDialog(group: WorkspaceGroupInListDto): void {
+    const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: <ConfirmDialogData>{
+        title: this.translateService.instant('admin.delete-groups-title'),
+        content: this.translateService.instant('admin.delete-group', { name: group.name }),
+        confirmButtonLabel: this.translateService.instant('delete'),
+        showCancel: true
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.deleteGroups([group]);
+      }
+    });
+  }
+
   deleteGroups(groups: WorkspaceGroupInListDto[]): void {
     this.appService.dataLoading = true;
     const workspaceGroupsToDelete: number[] = [];
@@ -184,8 +201,8 @@ export class WorkspaceGroupsComponent implements OnInit {
             this.translateService.instant('admin.groups-not-deleted'),
             this.translateService.instant('error'),
             { duration: 1000 });
-          this.appService.dataLoading = false;
         }
+        this.appService.dataLoading = false;
       }
     );
   }
@@ -246,7 +263,6 @@ export class WorkspaceGroupsComponent implements OnInit {
     this.appService.dataLoading = true;
     this.backendService.getWorkspaceGroupList().subscribe(groups => {
       this.setObjectsDatasource(groups);
-      this.tableSelectionCheckboxes.clear();
       this.tableSelectionRow.clear();
       this.appService.dataLoading = false;
     });
@@ -270,18 +286,6 @@ export class WorkspaceGroupsComponent implements OnInit {
       this.workspaceUsers = new UserToCheckCollection(users);
       this.updateWorkspaceList();
     });
-  }
-
-  private isAllSelected(): boolean {
-    const numSelected = this.tableSelectionCheckboxes.selected.length;
-    const numRows = this.objectsDatasource ? this.objectsDatasource.data.length : 0;
-    return numSelected === numRows;
-  }
-
-  masterToggle(): void {
-    this.isAllSelected() || !this.objectsDatasource ?
-      this.tableSelectionCheckboxes.clear() :
-      this.objectsDatasource.data.forEach(row => this.tableSelectionCheckboxes.select(row));
   }
 
   toggleRowSelection(row: UserInListDto): void {

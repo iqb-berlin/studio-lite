@@ -4,11 +4,9 @@
     <studio-lite-workspace-groups-menu
       [selectedWorkspaceGroupId]="selectedWorkspaceGroupId"
       [selectedRows]="tableSelectionRow.selected"
-      [checkedRows]="tableSelectionCheckboxes.selected"
       (groupAdded)="addGroup($event)"
       (groupEdited)="editGroup($event)"
       (groupSettingsEdited)="editGroupSettings($event)"
-      (groupsDeleted)="deleteGroups($event)"
       (downloadUnits)="downloadUnits()"
       (downloadWorkspacesReport)="xlsxDownloadWorkspaceReport()">
     </studio-lite-workspace-groups-menu>
@@ -29,18 +27,16 @@
       matSort
       matSortDisableClear
       class="scroll-area">
-      <ng-container matColumnDef="selectCheckbox">
-        <mat-header-cell *matHeaderCellDef class="fx-flex-row-fix-70">
-          <mat-checkbox [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-            [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-            (change)="$event ? masterToggle() : null">
-          </mat-checkbox>
-        </mat-header-cell>
-        <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">
-          <mat-checkbox [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length"
-            (click)="$event.stopPropagation()"
-            (change)="$event ? tableSelectionCheckboxes.toggle(row) : null">
-          </mat-checkbox>
+      <ng-container matColumnDef="delete">
+        <mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="true" class="header-right"></mat-header-cell>
+        <mat-cell *matCellDef="let row" class="cell-right">
+          <button mat-icon-button
+                  [matTooltip]="'admin.delete-group' | translate: { name: row.name }"
+                  [color]="'warn'"
+                  matTooltipPosition="above"
+                  (click)="$event.stopPropagation(); openDeleteDialog(row)">
+            <mat-icon>delete</mat-icon>
+          </button>
         </mat-cell>
       </ng-container>
 
@@ -57,8 +53,7 @@
                          mat-sort-header="id">
           {{'id' | translate}}
         </mat-header-cell>
-        <mat-cell *matCellDef="let element"
-                  class="secondary-cell">
+        <mat-cell *matCellDef="let element">
           {{element.id}}
         </mat-cell>
       </ng-container>
