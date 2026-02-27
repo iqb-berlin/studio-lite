@@ -423,7 +423,7 @@
     "select-workspace-group": "Bereichsgruppe auswählen",
     "unknown": "unbekannt",
     "error": "*Fehler*",
-    "title": "Verwaltung \"{{name}}\"",
+    "title": "Bereichsgruppe: {{name}}",
     "users": "Nutzer:innen",
     "workspaces": "Arbeitsbereiche",
     "settings": "Einstellungen",
