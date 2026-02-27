@@ -414,7 +414,7 @@
     "delete-workspaces": "Sollen {{count}} Arbeitsbereiche mit allen enthaltenen Aufgaben gelöscht werden?",
     "move-workspaces": "Sollen {{count}} Arbeitsbereiche mit allen enthaltenen Aufgaben verschoben werden?",
     "move-workspaces-warning": "Befindet sich der Ziel Arbeitsbereich in einer anderen Bereichsgruppe, werden alle Aufgabenstatus zurückgesetzt!",
-    "add-workspace": "Arbeitsbereich hinzufügen",
+    "add-workspace": "Neuer Arbeitsbereich",
     "move-selected-workspaces": "Arbeitsbereich verschieben",
     "change-workspace-settings": "Einstellungen des Arbeitsbereiches ändern",
     "download-workspaces-excel": "Excel Bericht über Module in Arbeitsbereich(en)",
