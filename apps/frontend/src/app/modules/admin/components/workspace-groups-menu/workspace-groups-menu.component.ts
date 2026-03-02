@@ -24,7 +24,6 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 export class WorkspaceGroupsMenuComponent {
   @Input() selectedWorkspaceGroupId!: number;
   @Input() selectedRows!: WorkspaceGroupInListDto[];
-  @Output() downloadWorkspacesReport: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() groupAdded: EventEmitter<UntypedFormGroup> = new EventEmitter<UntypedFormGroup>();
   @Output() groupSettingsEdited = new EventEmitter();
   @Output() groupEdited: EventEmitter<{ selection: WorkspaceGroupInListDto[], group: UntypedFormGroup }> =

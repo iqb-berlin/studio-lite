@@ -6,8 +6,7 @@
       [selectedRows]="tableSelectionRow.selected"
       (groupAdded)="addGroup($event)"
       (groupEdited)="editGroup($event)"
-      (groupSettingsEdited)="editGroupSettings($event)"
-      (downloadWorkspacesReport)="xlsxDownloadWorkspaceReport()">
+      (groupSettingsEdited)="editGroupSettings($event)">
     </studio-lite-workspace-groups-menu>
 
     @if (objectsDatasource.data.length) {

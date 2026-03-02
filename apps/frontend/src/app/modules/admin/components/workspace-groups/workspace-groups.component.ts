@@ -23,8 +23,6 @@ import {
   UserInListDto,
   WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
-import { DatePipe } from '@angular/common';
-import { saveAs } from 'file-saver-es';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatFabButton, MatIconButton } from '@angular/material/button';
@@ -38,7 +36,6 @@ import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
 import { Profile } from '../../../shared/models/profile.type';
-import { I18nService } from '../../../../services/i18n.service';
 import { EntriesDividerComponent } from '../../../shared/components/entries-divider/entries-divider.component';
 
 @Component({
@@ -62,8 +59,7 @@ export class WorkspaceGroupsComponent implements OnInit {
     private backendService: BackendService,
     private snackBar: MatSnackBar,
     private deleteConfirmDialog: MatDialog,
-    private translateService: TranslateService,
-    private i18nService: I18nService
+    private translateService: TranslateService
   ) {
     this.tableSelectionRow.changed.subscribe(
       r => {
@@ -289,19 +285,5 @@ export class WorkspaceGroupsComponent implements OnInit {
 
   toggleRowSelection(row: UserInListDto): void {
     this.tableSelectionRow.toggle(row);
-  }
-
-  xlsxDownloadWorkspaceReport(): void {
-    this.appService.dataLoading = true;
-    try {
-      this.backendService.getXlsWorkspaces().subscribe(b => {
-        const datePipe = new DatePipe(this.i18nService.fullLocale);
-        const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
-        saveAs(b, `${thisDate} ${this.translateService.instant('wsg-admin.report-workspaces')}.xlsx`);
-        this.appService.dataLoading = false;
-      });
-    } catch (e) {
-      this.appService.dataLoading = false;
-    }
   }
 }
