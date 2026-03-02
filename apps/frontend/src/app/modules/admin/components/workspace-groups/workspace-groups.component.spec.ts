@@ -48,7 +48,6 @@ describe('WorkspaceGroupsComponent', () => {
       new EventEmitter<{ selection: WorkspaceGroupInListDto[], group: UntypedFormGroup }>();
 
     @Output() groupSettingsEdited = new EventEmitter();
-    @Output() downloadUnits = new EventEmitter();
     @Output() downloadWorkspacesReport = new EventEmitter();
   }
 
@@ -206,16 +205,6 @@ describe('WorkspaceGroupsComponent', () => {
     (component as unknown as { updateUserList: () => void }).updateUserList();
 
     expect(mockBackendService.getWorkspaceGroupAdmins).toHaveBeenCalledWith(123);
-  });
-
-  it('should download units', () => {
-    // Mock saveAs? Global mock or window mock needed if we want to verify deeply.
-    // Or just check service call.
-    // window.saveAs = jest.fn() --> need to mock file-saver-es
-    // We will check getUnits call.
-
-    component.downloadUnits();
-    expect(mockBackendService.getUnits).toHaveBeenCalled();
   });
 
   it('should download workspaces report', () => {

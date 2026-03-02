@@ -20,7 +20,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import {
   CreateWorkspaceGroupDto,
-  UnitInViewDto,
   UserInListDto,
   WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
@@ -290,56 +289,6 @@ export class WorkspaceGroupsComponent implements OnInit {
 
   toggleRowSelection(row: UserInListDto): void {
     this.tableSelectionRow.toggle(row);
-  }
-
-  private static cleanUnitsData(units: UnitInViewDto[]): UnitInViewDto[] {
-    return units.map(unit => ({
-      key: unit.key,
-      name: unit.name,
-      groupName: unit.groupName,
-      id: unit.id,
-      workspaceName: unit.workspaceName,
-      workspaceId: unit.workspaceId,
-      lastChangedDefinition: unit.lastChangedDefinition,
-      lastChangedMetadata: unit.lastChangedMetadata,
-      lastChangedScheme: unit.lastChangedScheme,
-      lastChangedDefinitionUser: unit.lastChangedDefinitionUser,
-      lastChangedMetadataUser: unit.lastChangedMetadataUser,
-      lastChangedSchemeUser: unit.lastChangedSchemeUser
-    }));
-  }
-
-  private static toCSV(units: UnitInViewDto[]): string {
-    const replacer = (key: string, value: unknown) => (value === null ? '' : value);
-    const header = Object.keys(units[0]);
-    return [
-      header.join(','), // header row first
-      ...units.map(row => header
-        .map(fieldName => JSON.stringify(row[fieldName as keyof UnitInViewDto], replacer))
-        .join(','))
-    ].join('\r\n');
-  }
-
-  private saveFile(csv: string): void {
-    const blob = new Blob([csv], { type: 'text/plain;charset=utf-8' });
-    const datePipe = new DatePipe(this.i18nService.fullLocale);
-    const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
-    saveAs(blob, `${thisDate} Units.csv`);
-  }
-
-  downloadUnits(): void {
-    this.appService.dataLoading = true;
-    try {
-      this.backendService.getUnits()
-        .subscribe(units => {
-          const items = WorkspaceGroupsComponent.cleanUnitsData(units);
-          const csv = WorkspaceGroupsComponent.toCSV(items);
-          this.saveFile(csv);
-          this.appService.dataLoading = false;
-        });
-    } catch (e) {
-      this.appService.dataLoading = false;
-    }
   }
 
   xlsxDownloadWorkspaceReport(): void {

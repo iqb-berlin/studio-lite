@@ -16,11 +16,6 @@
     <studio-lite-wrapped-icon icon="save_alt"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
-          [matTooltip]="'admin.download-units' | translate"
-          (click)="downloadUnits.emit(true)">
-    <studio-lite-wrapped-icon icon="file_download"></studio-lite-wrapped-icon>
-  </button>
-  <button mat-button
           [disabled]="!selectedWorkspaceGroupId"
           [matTooltip]="'admin.settings' | translate"
           (click)="editGroupSettings()">

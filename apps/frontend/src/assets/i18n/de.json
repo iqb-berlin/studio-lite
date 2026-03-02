@@ -253,7 +253,7 @@
     "groups-not-deleted": "Bereichsgruppe(n) konnten nicht gelöscht werden",
     "groups-title": "Admin: Bereichsgruppen",
     "edit-group-settings": "Bereichsgruppe Einstellungen",
-    "download-units": "Aufgabenliste als CSV-Datei herunterladen",
+    "download-units": "Aufgaben als CSV-Datei herunterladen",
     "error": "Fehler",
     "delete-one-package": "Paket löschen",
     "delete-many-packages": "{{count}} Pakete löschen",
