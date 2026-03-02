@@ -4,7 +4,6 @@ import {
 import { UntypedFormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import {
-  ConfirmDialogComponent, ConfirmDialogData,
   MessageDialogComponent,
   MessageDialogData,
   MessageType
@@ -24,17 +23,14 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 })
 export class UsersMenuComponent {
   @Input() selectedUser!: number;
-  @Input() selectedRows!: UserFullDto[];
-  @Input() checkedRows!: UserFullDto[];
+  @Input() selectedRows: UserFullDto[] = [];
 
   @Output() userAdded: EventEmitter<UntypedFormGroup> = new EventEmitter<UntypedFormGroup>();
-  @Output() usersDeleted: EventEmitter< UserFullDto[]> = new EventEmitter< UserFullDto[]>();
   @Output() userEdited: EventEmitter<{ selection: UserFullDto[], user: UntypedFormGroup }> =
     new EventEmitter<{ selection: UserFullDto[], user: UntypedFormGroup }>();
 
   constructor(private editUserDialog: MatDialog,
               private messsageDialog: MatDialog,
-              private deleteConfirmDialog: MatDialog,
               private translateService: TranslateService) {}
 
   addUser(): void {
@@ -56,10 +52,7 @@ export class UsersMenuComponent {
   }
 
   editUser(): void {
-    let selectedRows = this.selectedRows;
-    if (!selectedRows.length) {
-      selectedRows = this.checkedRows;
-    }
+    const selectedRows = this.selectedRows;
     if (!selectedRows.length) {
       this.messsageDialog.open(MessageDialogComponent, {
         width: '400px',
@@ -89,42 +82,6 @@ export class UsersMenuComponent {
           if (result !== false) {
             this.userEdited.emit({ selection: selectedRows, user: result as UntypedFormGroup });
           }
-        }
-      });
-    }
-  }
-
-  deleteUsers(): void {
-    let selectedRows = this.selectedRows;
-    if (!selectedRows.length) {
-      selectedRows = this.checkedRows;
-    }
-    if (!selectedRows.length) {
-      this.messsageDialog.open(MessageDialogComponent, {
-        width: '400px',
-        data: <MessageDialogData>{
-          title: this.translateService.instant('admin.delete-users-title'),
-          content: this.translateService.instant('admin.select-user'),
-          type: MessageType.error
-        }
-      });
-    } else {
-      const content = (selectedRows.length === 1) ?
-        this.translateService.instant('admin.delete-user', { name: selectedRows[0].name }) :
-        this.translateService.instant('admin.delete-users', { count: selectedRows.length });
-      const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
-        width: '400px',
-        data: <ConfirmDialogData>{
-          title: this.translateService.instant('admin.delete-users-title'),
-          content: content,
-          confirmButtonLabel: this.translateService.instant('delete'),
-          showCancel: true
-        }
-      });
-
-      dialogRef.afterClosed().subscribe((result: boolean) => {
-        if (result) {
-          this.usersDeleted.emit(selectedRows);
         }
       });
     }

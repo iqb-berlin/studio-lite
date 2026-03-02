@@ -6,7 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { UserFullDto } from '@studio-lite-lib/api-dto';
 import { UntypedFormGroup, FormControl } from '@angular/forms';
 import { of } from 'rxjs';
-import { MessageDialogComponent, ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
+import { MessageDialogComponent } from '@studio-lite-lib/iqb-components';
 import { Component, Input } from '@angular/core';
 import { EditUserComponent } from '../edit-user/edit-user.component';
 import { UsersMenuComponent } from './users-menu.component';
@@ -54,6 +54,7 @@ describe('UsersMenuComponent', () => {
 
     fixture = TestBed.createComponent(UsersMenuComponent);
     component = fixture.componentInstance;
+    component.selectedRows = [];
     fixture.detectChanges();
   });
 
@@ -89,7 +90,6 @@ describe('UsersMenuComponent', () => {
 
   it('should show error dialog if no user selected for editing', () => {
     component.selectedRows = [];
-    component.checkedRows = [];
     component.editUser();
     expect(mockDialog.open).toHaveBeenCalledWith(MessageDialogComponent, expect.anything());
   });
@@ -109,74 +109,5 @@ describe('UsersMenuComponent', () => {
       data: expect.objectContaining({ newUser: false, name: 'test' })
     }));
     expect(emitSpy).toHaveBeenCalledWith({ selection: [mockUser], user: mockFormGroup });
-  });
-
-  it('should fallback to checkedRows if selectedRows is empty for editing', () => {
-    const mockUser = { id: 1, name: 'checked' } as UserFullDto;
-    component.selectedRows = [];
-    component.checkedRows = [mockUser];
-
-    (mockDialog.open as jest.Mock).mockReturnValue({
-      afterClosed: jest.fn().mockReturnValue(of(false))
-    });
-
-    component.editUser();
-
-    expect(mockDialog.open).toHaveBeenCalledWith(EditUserComponent, expect.objectContaining({
-      data: expect.objectContaining({ name: 'checked' })
-    }));
-  });
-
-  it('should show error dialog if no user selected for deleting', () => {
-    component.selectedRows = [];
-    component.checkedRows = [];
-    component.deleteUsers();
-    expect(mockDialog.open).toHaveBeenCalledWith(MessageDialogComponent, expect.anything());
-  });
-
-  it('should open confirm dialog for deleting and emit event on confirmation', () => {
-    const mockUser = { id: 1, name: 'test' } as UserFullDto;
-    component.selectedRows = [mockUser];
-    (mockDialog.open as jest.Mock).mockReturnValue({
-      afterClosed: jest.fn().mockReturnValue(of(true))
-    });
-    const emitSpy = jest.spyOn(component.usersDeleted, 'emit');
-
-    component.deleteUsers();
-
-    expect(mockDialog.open).toHaveBeenCalledWith(ConfirmDialogComponent, expect.anything());
-    expect(emitSpy).toHaveBeenCalledWith([mockUser]);
-  });
-
-  it('should fallback to checkedRows if selectedRows is empty for deleting', () => {
-    const mockUser = { id: 1, name: 'checked' } as UserFullDto;
-    component.selectedRows = [];
-    component.checkedRows = [mockUser];
-
-    (mockDialog.open as jest.Mock).mockReturnValue({
-      afterClosed: jest.fn().mockReturnValue(of(true))
-    });
-    const emitSpy = jest.spyOn(component.usersDeleted, 'emit');
-
-    component.deleteUsers();
-
-    expect(mockDialog.open).toHaveBeenCalledWith(ConfirmDialogComponent, expect.anything());
-    expect(emitSpy).toHaveBeenCalledWith([mockUser]);
-  });
-
-  it('should handle single vs multiple user deletion message', () => {
-    const translateService = TestBed.inject(TranslateService);
-
-    // Single
-    const mockUser1 = { id: 1, name: 'test1' } as UserFullDto;
-    component.selectedRows = [mockUser1];
-    component.deleteUsers();
-    expect(translateService.instant).toHaveBeenCalledWith('admin.delete-user', { name: 'test1' });
-
-    // Multiple
-    const mockUser2 = { id: 2, name: 'test2' } as UserFullDto;
-    component.selectedRows = [mockUser1, mockUser2];
-    component.deleteUsers();
-    expect(translateService.instant).toHaveBeenCalledWith('admin.delete-users', { count: 2 });
   });
 });
