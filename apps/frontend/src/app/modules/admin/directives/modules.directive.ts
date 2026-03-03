@@ -35,7 +35,7 @@ export abstract class ModulesDirective implements OnInit {
   abstract loadModuleList(): void;
   abstract changeSelectedModules(selection: ModuleSelectionChange): void;
 
-  protected updateUploadUrl(): void {
+  protected setUpdateUploadUrl(): void {
     this.uploadUrl = `${this.serverUrl}${this.uploadPath}`;
   }
 

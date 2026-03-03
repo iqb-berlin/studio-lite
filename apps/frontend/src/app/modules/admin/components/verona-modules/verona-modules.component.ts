@@ -52,7 +52,7 @@ export class VeronaModulesComponent extends ModulesDirective {
     this.deleteConfirmDialog = deleteConfirmDialog;
     this.snackBar = snackBar;
     this.translateService = translateService;
-    this.updateUploadUrl();
+    this.setUpdateUploadUrl();
   }
 
   loadModuleList() {
