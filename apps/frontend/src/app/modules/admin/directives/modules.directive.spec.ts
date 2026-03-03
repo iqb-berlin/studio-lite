@@ -108,15 +108,14 @@ describe('ModulesDirective', () => {
       .toBe('https://server/admin/verona-modules?type=editor&type=player&type=schemer');
   });
 
-  it('sets page title, token, and loads module list on init', () => {
-    const { directive, appService } = createDirective();
+  it('sets token and loads module list on init', () => {
+    const { directive } = createDirective();
     jest.useFakeTimers();
     localStorage.setItem('t', 'token-123');
 
     directive.ngOnInit();
     jest.runAllTimers();
 
-    expect(appService.appConfig.setPageTitle).toHaveBeenCalledWith('modules.title');
     expect(directive.loadModuleListSpy).toHaveBeenCalled();
     expect(directive.token).toBe('token-123');
 

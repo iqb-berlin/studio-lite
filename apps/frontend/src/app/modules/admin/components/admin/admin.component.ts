@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { Component, OnInit } from '@angular/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { RouterLinkActive, RouterLink, RouterOutlet } from '@angular/router';
 
 import { MatTabNav, MatTabLink, MatTabNavPanel } from '@angular/material/tabs';
+import { AppService } from '../../../../services/app.service';
 
 @Component({
   selector: 'studio-lite-admin',
@@ -10,7 +11,7 @@ import { MatTabNav, MatTabLink, MatTabNavPanel } from '@angular/material/tabs';
   styleUrls: ['./admin.component.scss'],
   imports: [MatTabNav, MatTabLink, RouterLinkActive, RouterLink, MatTabNavPanel, RouterOutlet, TranslateModule]
 })
-export class AdminComponent {
+export class AdminComponent implements OnInit {
   navLinks = [
     'users',
     'workspace-groups',
@@ -21,4 +22,16 @@ export class AdminComponent {
     'settings',
     'packages'
   ];
+
+  constructor(
+    private appService: AppService,
+    private translateService: TranslateService
+  ) {}
+
+  ngOnInit(): void {
+    setTimeout(() => {
+      this.appService.appConfig
+        .setPageTitle(this.translateService.instant('home.admin'));
+    });
+  }
 }

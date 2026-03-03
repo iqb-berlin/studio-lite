@@ -145,7 +145,6 @@ describe('WidgetsComponent', () => {
     component.ngOnInit();
     jest.advanceTimersByTime(100);
 
-    expect(mockAppService.appConfig?.setPageTitle).toHaveBeenCalledWith('modules.widgets-title');
     expect(mockModuleService.loadWidgets).toHaveBeenCalled();
     jest.useRealTimers();
   });

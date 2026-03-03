@@ -41,8 +41,6 @@ export abstract class ModulesDirective implements OnInit {
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.appService.appConfig
-        .setPageTitle(this.translateService.instant(this.pageTitleKey));
       const token = localStorage.getItem('t');
       this.loadModuleList();
       this.token = token || '';

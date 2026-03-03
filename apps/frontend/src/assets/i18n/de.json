@@ -101,6 +101,7 @@
     "select-workspace": "Arbeitsbereich wählen",
     "select-review": "Aufgabenfolge starten",
     "goto-admin": "Systemverwaltung",
+    "admin": "Systemverwaltung",
     "goto-wsg-admin": "Bereichsgruppenverwaltung",
     "imprint": "Impressum/Datenschutz",
     "logout": "Abmelden",

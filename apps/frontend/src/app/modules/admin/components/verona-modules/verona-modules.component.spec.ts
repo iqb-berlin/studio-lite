@@ -146,7 +146,6 @@ describe('VeronaModulesComponent', () => {
     component.ngOnInit();
     jest.advanceTimersByTime(100);
 
-    expect(mockAppService.appConfig?.setPageTitle).toHaveBeenCalledWith('modules.title');
     expect(mockModuleService.loadList).toHaveBeenCalled();
     jest.useRealTimers();
   });
