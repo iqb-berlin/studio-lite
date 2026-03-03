@@ -32,7 +32,8 @@
                   [matTooltip]="'admin.delete-name' | translate: { name: row.name }"
                   [color]="'warn'"
                   matTooltipPosition="above"
-                  (click)="$event.stopPropagation(); openDeleteDialog(row)">
+                  (click)="$event.stopPropagation(); openDeleteDialog(row)"
+                  data-cy="admin-workspace-groups-delete-group">
             <mat-icon>delete</mat-icon>
           </button>
         </mat-cell>

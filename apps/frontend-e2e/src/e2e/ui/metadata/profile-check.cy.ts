@@ -67,8 +67,7 @@ describe('Metadata Profile Management', () => {
 
   it('cleans up test data', () => {
     deleteUser(newUser.username);
-    groups.forEach(group => {
-      deleteGroup(group);
-    });
+    deleteGroup(groups[0]);
+    deleteGroup(groups[1]);
   });
 });

@@ -104,14 +104,18 @@ export function deleteGroup(group: string): void {
   cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('workspace-groups');
-  cy.get('mat-table')
-    .contains(group)
-    .click();
-  cy.get('mat-icon')
-    .contains('delete')
+  cy.contains('mat-cell', group)
+    .parent()
+    .find('[data-cy="admin-workspace-groups-delete-group"]')
     .click();
   cy.translate(Cypress.env('locale')).then(json => {
-    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/workspace-groups*', 'DELETE', 'deleteGroup');
+    cy.clickDialogButtonWithResponseCheck(
+      json.delete,
+      [200],
+      '/api/admin/workspace-groups*',
+      'DELETE',
+      'deleteGroup'
+    );
   });
 }
 
