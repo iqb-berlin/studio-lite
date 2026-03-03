@@ -4,14 +4,14 @@
       <button mat-button
               [matTooltip]="'modules.upload' | translate"
               matTooltipPosition="above"
-              (click)="hiddenFileInput.click()">
+              (click)="fileUploadQueue.removeAll(); hiddenFileInput.click()">
         <studio-lite-wrapped-icon icon="cloud_upload"></studio-lite-wrapped-icon>
       </button>
       <button mat-button
               [disabled]="!selectedModules.length"
               matTooltip="Markierte löschen"
               matTooltipPosition="above"
-              (click)="deleteFiles()">
+              (click)="fileUploadQueue.removeAll(); deleteFiles()">
         <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
       </button>
 
