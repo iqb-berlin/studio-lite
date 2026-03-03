@@ -111,7 +111,7 @@ describe('ModuleService', () => {
           id: 'w1',
           name: 'W1',
           type: 'WIDGET',
-          model: 'calculator',
+          model: 'CALC',
           version: '1.0',
           specVersion: '1.0',
           isStable: true

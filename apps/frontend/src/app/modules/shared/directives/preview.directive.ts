@@ -237,7 +237,7 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         const matchingWidget = Object.values(this.widgetModuleService.widgets)
-          .find(w => w.metadata.model === data.widgetType.toLowerCase());
+          .find(w => w.metadata.model === data.widgetType);
 
         if (!matchingWidget) {
           this.snackBar.open(

@@ -17,7 +17,7 @@ describe('WidgetOverlayComponent', () => {
 
   const callData: WidgetCallData = {
     callId: 'call-42',
-    widgetType: 'calculator',
+    widgetType: 'CALC',
     parameters: { key1: 'val1' },
     state: 'initial-state',
     sharedParameters: { shared1: 'sv1' }

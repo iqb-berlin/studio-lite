@@ -169,7 +169,7 @@ describe('UnitPreviewComponent', () => {
 
       const calcWidget = {
         key: 'calc@1.0',
-        metadata: { model: 'calculator', type: 'WIDGET' }
+        metadata: { model: 'CALC', type: 'WIDGET' }
       } as unknown as VeronaModuleClass;
 
       (moduleServiceStub.loadWidgets as jest.Mock).mockImplementation(
@@ -196,7 +196,7 @@ describe('UnitPreviewComponent', () => {
 
       component.handleWidgetCall({
         callId: 'c1',
-        widgetType: 'CALCULATOR',
+        widgetType: 'CALC',
         parameters: { k: 'v' },
         state: 's'
       });
@@ -214,7 +214,7 @@ describe('UnitPreviewComponent', () => {
     it('skips loadWidgets when widgets are already cached', fakeAsync(() => {
       const calcWidget = {
         key: 'calc@1.0',
-        metadata: { model: 'calculator', type: 'WIDGET' }
+        metadata: { model: 'CALC', type: 'WIDGET' }
       } as unknown as VeronaModuleClass;
       moduleServiceStub.widgets = { 'calc@1.0': calcWidget };
 
@@ -233,7 +233,7 @@ describe('UnitPreviewComponent', () => {
 
       component.handleWidgetCall({
         callId: 'c2',
-        widgetType: 'CALCULATOR'
+        widgetType: 'CALC'
       });
 
       tick();
@@ -260,7 +260,7 @@ describe('UnitPreviewComponent', () => {
     it('opens overlay with correct inputs', fakeAsync(() => {
       const calcWidget = {
         key: 'calc@1.0',
-        metadata: { model: 'calculator', type: 'WIDGET' }
+        metadata: { model: 'CALC', type: 'WIDGET' }
       } as unknown as VeronaModuleClass;
       moduleServiceStub.widgets = { 'calc@1.0': calcWidget };
 
@@ -284,7 +284,7 @@ describe('UnitPreviewComponent', () => {
 
       const callData = {
         callId: 'c4',
-        widgetType: 'CALCULATOR',
+        widgetType: 'CALC',
         parameters: { p: '1' },
         state: 'saved-state'
       };
