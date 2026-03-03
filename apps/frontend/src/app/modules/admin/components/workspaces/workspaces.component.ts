@@ -10,13 +10,12 @@ import {
   MatHeaderCell,
   MatHeaderCellDef, MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef,
   MatTable,
-  MatTableDataSource,
-  MatTableModule
+  MatTableDataSource
 } from '@angular/material/table';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginator } from '@angular/material/paginator';
 import { DatePipe } from '@angular/common';
 import { saveAs } from 'file-saver-es';
 import { BackendService } from '../../services/backend.service';
