@@ -264,7 +264,8 @@
     "package-not-deleted": "Konnte Paket(e) nicht löschen",
     "issue-count-info": "Das System verfügt über {{count}} {{issue}}.",
     "generate_password": "Kennwort generieren",
-    "and-send-mail": "und E-Mail senden"
+    "and-send-mail": "und E-Mail senden",
+    "model": "Model"
   },
   "metadata": {
     "metadata": "Metadaten",
