@@ -28,8 +28,7 @@
           mat-sort-header="name">
           {{'user.login-name' | translate}}
         </mat-header-cell>
-        <mat-cell *matCellDef="let element"
-                  data-cy="admin-users-checkbox-login-name">
+        <mat-cell *matCellDef="let element">
           {{element.name}} {{element.isAdmin ? '*' : ''}}
         </mat-cell>
       </ng-container>
@@ -85,7 +84,8 @@
                   [matTooltip]="'admin.delete-name' | translate: { name: row.name }"
                   [color]="'warn'"
                   matTooltipPosition="above"
-                  (click)="$event.stopPropagation(); deleteUsers([row])">
+                  (click)="$event.stopPropagation(); deleteUsers([row])"
+                  data-cy="admin-users-delete-user">
             <mat-icon>delete</mat-icon>
           </button>
         </mat-cell>
