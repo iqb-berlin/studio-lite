@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
@@ -5,12 +6,16 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { TranslateModule } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
-import { Component, Input } from '@angular/core';
+import {
+  Component, Input, Output, EventEmitter
+} from '@angular/core';
 import { WorkspacesComponent } from './workspaces.component';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { environment } from '../../../../../environments/environment';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { WorkspacesMenuComponent } from '../workspaces-menu/workspaces-menu.component';
+import { I18nService } from '../../../../services/i18n.service';
 
 describe('WorkspacesComponent', () => {
   let component: WorkspacesComponent;
@@ -23,9 +28,15 @@ describe('WorkspacesComponent', () => {
     @Input() title!: string;
   }
 
+  @Component({ selector: 'studio-lite-workspaces-menu', template: '', standalone: true })
+  class MockWorkspacesMenuComponent {
+    @Output() downloadWorkspacesReport = new EventEmitter();
+  }
+
   beforeEach(async () => {
     mockBackendService = {
-      getAllWorkspaces: jest.fn().mockReturnValue(of([{ id: 1, name: 'ws1', groupId: 1 }]))
+      getAllWorkspaces: jest.fn().mockReturnValue(of([{ id: 1, name: 'ws1', groupId: 1 }])),
+      getXlsWorkspaces: jest.fn().mockReturnValue(of(new Blob(['content'])))
     };
 
     mockAppService = {
@@ -39,7 +50,8 @@ describe('WorkspacesComponent', () => {
         MatPaginatorModule,
         TranslateModule.forRoot(),
         WorkspacesComponent,
-        MockSearchFilterComponent
+        MockSearchFilterComponent,
+        MockWorkspacesMenuComponent
       ],
       providers: [
         provideHttpClient(),
@@ -48,12 +60,13 @@ describe('WorkspacesComponent', () => {
           useValue: environment.backendUrl
         },
         { provide: BackendService, useValue: mockBackendService },
-        { provide: AppService, useValue: mockAppService }
+        { provide: AppService, useValue: mockAppService },
+        { provide: I18nService, useValue: { fullLocale: 'en-US', fileDateFormat: 'yyyy-MM-dd' } }
       ]
     })
       .overrideComponent(WorkspacesComponent, {
-        remove: { imports: [SearchFilterComponent] },
-        add: { imports: [MockSearchFilterComponent] }
+        remove: { imports: [SearchFilterComponent, WorkspacesMenuComponent] },
+        add: { imports: [MockSearchFilterComponent, MockWorkspacesMenuComponent] }
       })
       .compileComponents();
 
@@ -72,5 +85,10 @@ describe('WorkspacesComponent', () => {
 
     expect(mockBackendService.getAllWorkspaces).toHaveBeenCalled();
     expect(component.dataSource.data.length).toBe(1);
+  });
+
+  it('should download workspaces report', () => {
+    component.xlsxDownloadWorkspaceReport();
+    expect(mockBackendService.getXlsWorkspaces).toHaveBeenCalled();
   });
 });

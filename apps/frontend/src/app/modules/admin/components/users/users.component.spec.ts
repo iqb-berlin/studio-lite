@@ -11,6 +11,7 @@ import { MatTableModule } from '@angular/material/table';
 import { UserFullDto, UserInListDto } from '@studio-lite-lib/api-dto';
 import { FormControl, FormGroup, UntypedFormGroup } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialog } from '@angular/material/dialog';
 import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { AppConfig } from '../../../../classes/app-config.class';
@@ -28,6 +29,7 @@ describe('UsersComponent', () => {
   let mockBackendService: Partial<BackendService>;
   let mockAppService: Partial<AppService>;
   let mockSnackBar: Partial<MatSnackBar>;
+  let mockDialog: Partial<MatDialog>;
 
   @Component({ selector: 'studio-lite-search-filter', template: '', standalone: true })
   class MockSearchFilterComponent {
@@ -38,10 +40,8 @@ describe('UsersComponent', () => {
   class MockUsersMenuComponent {
     @Input() selectedUser!: number;
     @Input() selectedRows!: UserFullDto[];
-    @Input() checkedRows!: UserFullDto[];
 
     @Output() userAdded: EventEmitter<UntypedFormGroup> = new EventEmitter<UntypedFormGroup>();
-    @Output() usersDeleted: EventEmitter<UserFullDto[]> = new EventEmitter<UserFullDto[]>();
     @Output() userEdited: EventEmitter<{ selection: UserFullDto[], user: UntypedFormGroup }> =
       new EventEmitter<{ selection: UserFullDto[], user: UntypedFormGroup }>();
   }
@@ -68,6 +68,12 @@ describe('UsersComponent', () => {
       open: jest.fn()
     };
 
+    mockDialog = {
+      open: jest.fn().mockReturnValue({
+        afterClosed: jest.fn().mockReturnValue(of(true))
+      })
+    };
+
     await TestBed.configureTestingModule({
       imports: [
         MatSnackBarModule,
@@ -88,7 +94,8 @@ describe('UsersComponent', () => {
         },
         { provide: BackendService, useValue: mockBackendService },
         { provide: AppService, useValue: mockAppService },
-        { provide: MatSnackBar, useValue: mockSnackBar }
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        { provide: MatDialog, useValue: mockDialog }
       ]
     })
       .overrideComponent(UsersComponent, {
@@ -239,18 +246,6 @@ describe('UsersComponent', () => {
     } as unknown as WorkspaceGroupToCheckCollection;
     component.saveWorkspaces();
     expect(mockSnackBar.open).toHaveBeenCalledWith('Konnte Zugriffsrechte nicht ändern', 'Fehler', { duration: 3000 });
-  });
-
-  it('should toggle all selections', () => {
-    component.objectsDatasource.data = [{ id: 1 }, { id: 2 }] as UserFullDto[];
-
-    // Test select all
-    component.masterToggle();
-    expect(component.tableSelectionCheckboxes.selected.length).toBe(2);
-
-    // Test deselect all
-    component.masterToggle();
-    expect(component.tableSelectionCheckboxes.selected.length).toBe(0);
   });
 
   it('should toggle row selection', () => {

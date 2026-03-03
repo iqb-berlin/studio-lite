@@ -5,7 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
-import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { UntypedFormGroup } from '@angular/forms';
 import { WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
 import { of } from 'rxjs';
@@ -94,7 +93,6 @@ describe('WorkspaceGroupsMenuComponent', () => {
 
   it('should show message if edit group called without selection', () => {
     component.selectedRows = [];
-    component.checkedRows = [];
     // Assuming editGroup doesn't show message based on code but actually it seems it does nothing if empty?
     // Checking code: if (selectedRows.length) ... else ... wait, code doesn't have else for message in editGroup.
     // Ah, wait. users-menu has message. workspace-groups-menu:
@@ -133,33 +131,5 @@ describe('WorkspaceGroupsMenuComponent', () => {
 
     expect(mockDialog.open).toHaveBeenCalledWith(EditWorkspaceGroupSettingsComponent, expect.anything());
     expect(emitSpy).toHaveBeenCalledWith({ states: [], profiles: [], selectedRow: 1 });
-  });
-
-  it('should open delete confirm dialog and emit event on confirmation', () => {
-    const group = { id: 1, name: 'g1' } as WorkspaceGroupInListDto;
-    component.selectedRows = [group];
-    (mockDialog.open as jest.Mock).mockReturnValue({
-      afterClosed: jest.fn().mockReturnValue(of(true))
-    });
-    const emitSpy = jest.spyOn(component.groupsDeleted, 'emit');
-
-    component.deleteGroups();
-
-    expect(mockDialog.open).toHaveBeenCalledWith(ConfirmDialogComponent, expect.anything());
-    expect(emitSpy).toHaveBeenCalledWith([group]);
-  });
-
-  it('should handle single vs multiple group deletion message', () => {
-    const translateService = TestBed.inject(TranslateService);
-
-    const group1 = { id: 1, name: 'g1' } as WorkspaceGroupInListDto;
-    component.selectedRows = [group1];
-    component.deleteGroups();
-    expect(translateService.instant).toHaveBeenCalledWith('admin.delete-group', { name: 'g1' });
-
-    const group2 = { id: 2, name: 'g2' } as WorkspaceGroupInListDto;
-    component.selectedRows = [group1, group2];
-    component.deleteGroups();
-    expect(translateService.instant).toHaveBeenCalledWith('admin.delete-groups', { count: 2 });
   });
 });

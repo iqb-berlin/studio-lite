@@ -5,29 +5,13 @@
     <studio-lite-wrapped-icon icon="add"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
-          [disabled]="!selectedWorkspaceGroupId && (!checkedRows || !checkedRows.length)"
-          [matTooltip]="'admin.delete-selected-groups' | translate"
-          (click)="deleteGroups()">
-    <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
-  </button>
-  <button mat-button
-          [disabled]="!selectedWorkspaceGroupId  && checkedRows && checkedRows.length !== 1"
+          [disabled]="!selectedWorkspaceGroupId"
           [matTooltip]="'admin.edit-selected-group' | translate"
           (click)="editGroup()">
     <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
-          [matTooltip]="'admin.download-xlsx' | translate"
-          (click)="downloadWorkspacesReport.emit(true)">
-    <studio-lite-wrapped-icon icon="save_alt"></studio-lite-wrapped-icon>
-  </button>
-  <button mat-button
-          [matTooltip]="'admin.download-units' | translate"
-          (click)="downloadUnits.emit(true)">
-    <studio-lite-wrapped-icon icon="file_download"></studio-lite-wrapped-icon>
-  </button>
-  <button mat-button
-          [disabled]="!selectedWorkspaceGroupId  && checkedRows && checkedRows.length !== 1"
+          [disabled]="!selectedWorkspaceGroupId"
           [matTooltip]="'admin.settings' | translate"
           (click)="editGroupSettings()">
     <studio-lite-wrapped-icon
