@@ -9,14 +9,6 @@ import { clickSaveButtonRight, editInput } from './common';
 import { logout } from './user';
 
 /**
- * Helper function to select a user checkbox
- * @param checkName - Username to select
- */
-function selectCheckboxUser(checkName: string): void {
-  cy.get(`[data-cy="admin-users-checkbox-user-box-${checkName}"]`).click();
-}
-
-/**
  * Adds the first admin user and logs in
  * @example
  * addFirstUser();
@@ -73,27 +65,17 @@ export function deleteUser(user: string): void {
   cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('users');
-  selectCheckboxUser(user);
-  cy.get('[data-cy="admin-users-menu-delete-users"]').click();
+  cy.contains('mat-cell', user)
+    .parent()
+    .find('[data-cy="admin-users-delete-user"]').click();
   cy.translate(Cypress.env('locale')).then(json => {
-    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/users*', 'DELETE', 'deleteUser');
-  });
-}
-
-/**
- * Deletes multiple users at once
- * @param users - Array of usernames to delete
- * @example
- * deleteUsers(['user1', 'user2']);
- */
-export function deleteUsers(users: string[]): void {
-  clickIndexTabAdmin('users');
-  users.forEach(user => {
-    selectCheckboxUser(user);
-  });
-  cy.get('[data-cy="admin-users-menu-delete-users"]').click();
-  cy.translate(Cypress.env('locale')).then(json => {
-    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/users*', 'DELETE', 'deleteUser');
+    cy.clickDialogButtonWithResponseCheck(
+      json.delete,
+      [200],
+      '/api/admin/users*',
+      'DELETE',
+      'deleteUser'
+    );
   });
 }
 

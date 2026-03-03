@@ -12,7 +12,7 @@ import {
   createWs,
   deleteFirstUser,
   deleteGroup,
-  deleteUsers,
+  deleteUser,
   grantRemovePrivilegeAtUser,
   grantRemovePrivilegeAtWs,
   login,
@@ -37,11 +37,9 @@ describe('Workspace Group Administration', () => {
     createNewUser(groupAdminUser);
     createGroup(group1);
     createWs(ws1, group1);
-    cy.pause();
     grantRemovePrivilegeAtWs([newUser.username, Cypress.env('username')],
       ws1,
       [AccessLevel.Basic, AccessLevel.Admin]);
-    cy.pause();
     createWs(ws2, group1);
   });
 
@@ -101,6 +99,7 @@ describe('Workspace Group Administration', () => {
     logout();
     login(Cypress.env('username'), Cypress.env('password'));
     deleteGroup(group1);
-    deleteUsers(['normaluser', 'groupadminuser']);
+    deleteUser('normaluser');
+    deleteUser('groupadminuser');
   });
 });
