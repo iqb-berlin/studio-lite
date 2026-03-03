@@ -467,7 +467,10 @@
     "no-module-type": "Kein {{ module }} in diesem System verfügbar.",
     "not-defined-module-type": "{{ module }} ist nicht definiert.",
     "not-valid-module-type": "{{ module }} ist nicht gültig.",
-    "replaced": "Das Modul mit der Kennung \"{{selectedModuleId}}\" ist nicht in diesem System verfügbar.\nEs wird statt dessen \"{{moduleSubstitute}}\" benutzt."
+    "replaced": "Das Modul mit der Kennung \"{{selectedModuleId}}\" ist nicht in diesem System verfügbar.\nEs wird statt dessen \"{{moduleSubstitute}}\" benutzt.",
+    "calc": "Rechner",
+    "periodic-table": "Periodensystem",
+    "molecule-editor": "Moleküleditor"
   },
   "application": {
     "wait-message": "Bitte warten"

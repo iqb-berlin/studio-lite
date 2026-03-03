@@ -18,13 +18,14 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 import { ModulesDirective } from '../../directives/modules.directive';
 import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
 import { ModuleSelectionChange } from '../../models/module-selection-change.interface';
+import { UpperSnakeCaseToKebabCasePipe } from '../../pipes/upper-snake-case-to-kebab-case.pipe';
 
 @Component({
   selector: 'studio-lite-widgets',
   templateUrl: './widgets.component.html',
   styleUrls: ['./widgets.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, VeronaModulesTableComponent, TranslateModule]
+  imports: [MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, VeronaModulesTableComponent, TranslateModule, UpperSnakeCaseToKebabCasePipe]
 })
 export class WidgetsComponent extends ModulesDirective {
   protected readonly pageTitleKey = 'modules.widgets-title';
