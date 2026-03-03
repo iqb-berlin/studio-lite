@@ -70,11 +70,11 @@ describe('VeronaModuleMetadataDto', () => {
         name: { en: 'English Name' },
         apiVersion: '6.1',
         '@id': 'module-d',
-        '@type': 'widget'
+        '@type': 'WIDGET'
       }));
 
       expect(result).toEqual({
-        type: 'widget',
+        type: 'WIDGET',
         model: 'vendor',
         id: 'module-d',
         name: 'English Name',

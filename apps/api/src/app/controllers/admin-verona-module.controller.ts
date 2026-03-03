@@ -40,13 +40,13 @@ export class AdminVeronaModuleController {
     description: 'required, array of module types: editor, player, schemer, widget',
     required: true,
     isArray: true,
-    enum: ['editor', 'player', 'schemer', 'widget']
+    enum: ['editor', 'player', 'schemer', 'WIDGET']
   })
   async addModuleFile(
   @UploadedFile() file,
     @Query('type', new ParseArrayPipe({ items: String, separator: ',' })) types: string[]
   ) {
-    const allowedTypes = ['editor', 'player', 'schemer', 'widget'] as const;
+    const allowedTypes = ['editor', 'player', 'schemer', 'WIDGET'] as const;
     const normalizedTypes = types.map(type => type.trim()).filter(Boolean);
 
     if (!normalizedTypes.length) {

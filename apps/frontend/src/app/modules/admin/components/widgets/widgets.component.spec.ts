@@ -151,9 +151,9 @@ describe('WidgetsComponent', () => {
   });
 
   it('should change selected modules correctly', () => {
-    const module1 = { metadata: { type: 'widget', model: 'model-a' }, key: 'w1' } as VeronaModuleClass;
-    const module2 = { metadata: { type: 'widget', model: 'model-a' }, key: 'w2' } as VeronaModuleClass;
-    const module3 = { metadata: { type: 'widget', model: 'model-b' }, key: 'w3' } as VeronaModuleClass;
+    const module1 = { metadata: { type: 'WIDGET', model: 'model-a' }, key: 'w1' } as VeronaModuleClass;
+    const module2 = { metadata: { type: 'WIDGET', model: 'model-a' }, key: 'w2' } as VeronaModuleClass;
+    const module3 = { metadata: { type: 'WIDGET', model: 'model-b' }, key: 'w3' } as VeronaModuleClass;
 
     component.selectedModules = [module1, module3];
 

@@ -31,7 +31,7 @@ export class ModuleService {
   }
 
   async loadWidgets() {
-    const widgetModules = await lastValueFrom(this.backendService.getModuleList('widget'));
+    const widgetModules = await lastValueFrom(this.backendService.getModuleList('WIDGET'));
     this.widgets = ModuleService.toModuleMap(widgetModules);
   }
 

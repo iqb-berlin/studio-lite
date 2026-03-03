@@ -46,10 +46,10 @@ describe('AdminVeronaModuleController', () => {
       const mockFile = { buffer: Buffer.from('test') };
       veronaModulesService.upload.mockResolvedValue(undefined);
 
-      await controller.addModuleFile(mockFile, ['widget']);
+      await controller.addModuleFile(mockFile, ['WIDGET']);
 
       expect(veronaModulesService.upload)
-        .toHaveBeenCalledWith(mockFile.buffer, ['widget']);
+        .toHaveBeenCalledWith(mockFile.buffer, ['WIDGET']);
     });
 
     it('should reject unknown types', async () => {

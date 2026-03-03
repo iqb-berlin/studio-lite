@@ -28,7 +28,7 @@ import { ModuleSelectionChange } from '../../models/module-selection-change.inte
 })
 export class WidgetsComponent extends ModulesDirective {
   protected readonly pageTitleKey = 'modules.widgets-title';
-  protected readonly uploadPath = 'admin/verona-modules?type=widget';
+  protected readonly uploadPath = 'admin/verona-modules?type=WIDGET';
 
   protected serverUrl: string;
   protected appService: AppService;

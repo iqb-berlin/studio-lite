@@ -370,7 +370,7 @@ describe('UnitPlayerComponent', () => {
 
       const calcWidget = {
         key: 'calc@1.0',
-        metadata: { model: 'calculator', type: 'widget' }
+        metadata: { model: 'calculator', type: 'WIDGET' }
       } as unknown as VeronaModuleClass;
 
       (mockModuleService.loadWidgets as jest.Mock).mockImplementation(
@@ -409,7 +409,7 @@ describe('UnitPlayerComponent', () => {
     it('skips loadWidgets when widgets are already cached', fakeAsync(() => {
       const calcWidget = {
         key: 'calc@1.0',
-        metadata: { model: 'calculator', type: 'widget' }
+        metadata: { model: 'calculator', type: 'WIDGET' }
       } as unknown as VeronaModuleClass;
       mockModuleService.widgets = { 'calc@1.0': calcWidget } as unknown as ModuleService['widgets'];
 
@@ -455,7 +455,7 @@ describe('UnitPlayerComponent', () => {
     it('opens overlay with correct inputs', fakeAsync(() => {
       const calcWidget = {
         key: 'calc@1.0',
-        metadata: { model: 'calculator', type: 'widget' }
+        metadata: { model: 'calculator', type: 'WIDGET' }
       } as unknown as VeronaModuleClass;
       mockModuleService.widgets = { 'calc@1.0': calcWidget } as unknown as ModuleService['widgets'];
 

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export type VeronaModuleType = 'editor' | 'player' | 'schemer' | 'widget';
+export type VeronaModuleType = 'editor' | 'player' | 'schemer' | 'WIDGET';
 
 export class VeronaModuleMetadataDto {
   [index: string]: unknown;

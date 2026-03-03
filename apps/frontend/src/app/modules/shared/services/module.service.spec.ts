@@ -110,7 +110,7 @@ describe('ModuleService', () => {
         metadata: {
           id: 'w1',
           name: 'W1',
-          type: 'widget',
+          type: 'WIDGET',
           model: 'calculator',
           version: '1.0',
           specVersion: '1.0',
@@ -122,7 +122,7 @@ describe('ModuleService', () => {
 
       await service.loadWidgets();
 
-      expect(mockBackendService.getModuleList).toHaveBeenCalledWith('widget');
+      expect(mockBackendService.getModuleList).toHaveBeenCalledWith('WIDGET');
       expect(Object.keys(service.widgets)).toHaveLength(1);
       // eslint-disable-next-line @typescript-eslint/dot-notation
       expect(service.widgets['w1'].metadata.name).toBe('W1');
