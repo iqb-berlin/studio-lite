@@ -98,6 +98,9 @@ export class UnitSchemerComponent
               //     sessionId: this.sessionId
               //   }, '*');
             }
+            if (msgData.sharedParameters) {
+              this.sharedParameters = this.getMergedSharedParameters(msgData.sharedParameters);
+            }
           }
           break;
 
@@ -191,7 +194,9 @@ export class UnitSchemerComponent
             definitionReportPolicy: 'eager',
             role: new RolePipe().transform(
               this.workspaceService.userAccessLevel
-            )
+            ),
+            directDownloadUrl: this.backendService.getDirectDownloadLink(),
+            sharedParameters: this.sharedParameters
           },
           codingScheme: unitScheme.scheme || '',
           codingSchemeType: unitScheme.schemeType || '',
