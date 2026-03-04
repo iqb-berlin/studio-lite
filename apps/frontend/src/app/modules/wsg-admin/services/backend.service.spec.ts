@@ -103,9 +103,9 @@ describe('WsgAdmin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error', done => {
+    it('returns false on error', done => {
       service.deleteWorkspaceUnit(10, 20).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -180,11 +180,11 @@ describe('WsgAdmin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error', done => {
+    it('returns false on error', done => {
       const access: UserWorkspaceAccessForGroupDto = { groupId: 4, workspaces: [] };
 
       service.setWorkspacesByUser(4, access).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -233,11 +233,11 @@ describe('WsgAdmin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error', done => {
+    it('returns false on error', done => {
       const payload: CreateWorkspaceDto = { name: 'Workspace' } as CreateWorkspaceDto;
 
       service.addWorkspace(payload).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -307,9 +307,9 @@ describe('WsgAdmin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error', done => {
+    it('returns false on error', done => {
       service.deleteWorkspaces([1, 2]).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -331,9 +331,9 @@ describe('WsgAdmin BackendService', () => {
       req.flush({ ok: true });
     });
 
-    it('returns true on error', done => {
+    it('returns false on error', done => {
       service.moveWorkspaces(9, [3, 4]).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -382,11 +382,11 @@ describe('WsgAdmin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error', done => {
+    it('returns false on error', done => {
       const access: UserWorkspaceAccessDto[] = [{ id: 1, accessLevel: 2 }];
 
       service.setUsersByWorkspace(4, access).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 

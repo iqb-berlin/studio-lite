@@ -25,8 +25,8 @@ export class MetadataBackendService {
     return this.http
       .get(`${this.serverUrl}metadata/vocabularies`, { params: queryParams })
       .pipe(
-        catchError(() => of(false)),
-        map(vocab => vocab as MetadataVocabularyDto[])
+        map(vocab => vocab as MetadataVocabularyDto[]),
+        catchError(() => of(false))
       );
   }
 
@@ -37,17 +37,15 @@ export class MetadataBackendService {
     return this.http
       .get(`${this.serverUrl}metadata/profiles`, { params: queryParams })
       .pipe(
-        catchError(() => of(false)),
-        map(profile => profile as MetadataProfileDto)
+        map(profile => profile as MetadataProfileDto),
+        catchError(() => of(false))
       );
   }
 
   getRegisteredProfiles():Observable<RegisteredMetadataProfileDto[] | boolean> {
-    return this.http
-      .get(`${this.serverUrl}metadata/registry`)
-      .pipe(
-        catchError(() => of(false)),
-        map(vocab => vocab as RegisteredMetadataProfileDto[])
-      );
+    return this.http.get(`${this.serverUrl}metadata/registry`).pipe(
+      map(vocab => vocab as RegisteredMetadataProfileDto[]),
+      catchError(() => of(false))
+    );
   }
 }

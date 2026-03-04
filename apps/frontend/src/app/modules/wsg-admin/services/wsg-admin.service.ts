@@ -30,10 +30,13 @@ export class WsgAdminService {
 
   setWorkspaceGroupSettings(workspaceGroupId: number, settings:WorkspaceGroupSettingsDto):Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}workspace-groups/${workspaceGroupId}`, { id: workspaceGroupId, settings: settings })
+      .patch(`${this.serverUrl}workspace-groups/${workspaceGroupId}`, {
+        id: workspaceGroupId,
+        settings: settings
+      })
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 }
