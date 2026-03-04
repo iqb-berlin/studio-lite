@@ -1,0 +1,23 @@
+<h1 mat-dialog-title>
+  {{ 'runtime-error-dialog.title' | translate }}
+</h1>
+<div mat-dialog-content>
+  <p>{{ 'runtime-error-dialog.message' | translate }}</p>
+  @if (code) {
+    <p><strong>{{ 'runtime-error-dialog.code' | translate }}:</strong> <code>{{ code }}</code></p>
+  }
+  @if (message) {
+    <p><strong>{{ message }}</strong></p>
+  }
+  @if (sessionId) {
+    <p><small>{{ 'runtime-error-dialog.session-id' | translate }}: {{ sessionId }}</small></p>
+  }
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-raised-button
+          color="primary"
+          cdkFocusInitial
+          (click)="dialogRef.close()">
+    {{ 'runtime-error-dialog.close' | translate }}
+  </button>
+</div>

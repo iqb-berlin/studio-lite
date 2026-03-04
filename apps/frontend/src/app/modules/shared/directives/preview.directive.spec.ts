@@ -1,5 +1,6 @@
 import { ElementRef } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { AppService } from '../../../services/app.service';
@@ -24,6 +25,7 @@ class TestPreviewDirective extends PreviewDirective {
   workspaceService: WorkspaceService;
   appService: AppService;
   hostingIframe: ElementRef;
+  override errorDialog: MatDialog;
 
   gotoUnit = jest.fn();
   handleUnitStateData = jest.fn();
@@ -40,6 +42,7 @@ class TestPreviewDirective extends PreviewDirective {
     this.workspaceService = { selectedWorkspaceId: 1 } as unknown as WorkspaceService;
     this.appService = { postMessage$: new Subject<MessageEvent>() } as unknown as AppService;
     this.hostingIframe = { nativeElement: document.createElement('iframe') } as ElementRef;
+    this.errorDialog = { open: jest.fn() } as unknown as MatDialog;
   }
 }
 
@@ -144,6 +147,33 @@ describe('PreviewDirective', () => {
     directive.handleIncomingMessage(message);
 
     expect(directive.hasFocus).toBe(true);
+  });
+
+  it('opens error dialog on vopRuntimeErrorNotification', () => {
+    const directive = new TestPreviewDirective();
+    const mockWindow = window;
+    directive.iFrameElement = createIFrameWithWindow(mockWindow);
+
+    const message = createMessageEvent(
+      {
+        type: 'vopRuntimeErrorNotification',
+        sessionId: 'session-1',
+        message: 'Something went wrong'
+      },
+      mockWindow
+    );
+
+    directive.handleIncomingMessage(message);
+
+    expect(directive.errorDialog.open).toHaveBeenCalledWith(
+      expect.anything(),
+      {
+        data: {
+          sessionId: 'session-1',
+          message: 'Something went wrong'
+        }
+      }
+    );
   });
 
   it('builds page list for valid pages and updates current page', () => {

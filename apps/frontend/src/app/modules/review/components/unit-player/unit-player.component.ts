@@ -6,6 +6,7 @@ import { ActivatedRoute, Params } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
+import { MatDialog } from '@angular/material/dialog';
 import { ModuleService } from '../../../shared/services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { ReviewService } from '../../services/review.service';
@@ -44,7 +45,8 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
     public moduleService: ModuleService,
     public workspaceService: WorkspaceService,
     public reviewService: ReviewService,
-    public translateService: TranslateService
+    public translateService: TranslateService,
+    public override errorDialog: MatDialog
   ) {
     super();
   }
