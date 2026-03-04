@@ -108,6 +108,9 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
                 //     sessionId: this.sessionId
                 //   }, '*');
               }
+              if (msgData.sharedParameters) {
+                this.sharedParameters = this.getMergedSharedParameters(msgData.sharedParameters);
+              }
             } else {
               this.postMessageTarget.postMessage(
                 {
@@ -187,7 +190,8 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
               directDownloadUrl: this.backendService.getDirectDownloadLink(),
               role: new RolePipe().transform(
                 this.workspaceService.userAccessLevel
-              )
+              ),
+              sharedParameters: this.sharedParameters
             },
             unitDefinition: unitDef.definition ? unitDef.definition : ''
           },
