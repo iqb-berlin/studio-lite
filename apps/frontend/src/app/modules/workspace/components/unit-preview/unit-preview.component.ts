@@ -47,7 +47,7 @@ export class UnitPreviewComponent
     public moduleService: ModuleService,
     public previewService: PreviewService,
     public translateService: TranslateService,
-    private dialog: MatDialog,
+    public override errorDialog: MatDialog,
     private router: Router
   ) {
     super();
@@ -247,11 +247,11 @@ export class UnitPreviewComponent
         { duration: 3000 }
       );
     } else {
-      this.dialog
+      this.errorDialog
         .open(PrintOptionsDialogComponent)
         .afterClosed()
         .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(result => {
+        .subscribe((result: { key: string; value: boolean | number }[]) => {
           if (result) this.openPrintView(result);
         });
     }
@@ -283,7 +283,7 @@ export class UnitPreviewComponent
       const codingScheme: CodingSchemeData = JSON.parse(schemeData.scheme);
       if (!codingScheme) {
         if (responses) {
-          this.dialog.open(ShowResponsesComponent, {
+          this.errorDialog.open(ShowResponsesComponent, {
             data: { responses, table: this.isIqbStandardResponse() },
             height: '80%',
             width: '60%'
@@ -305,7 +305,7 @@ export class UnitPreviewComponent
         responses!,
         this.workspaceService.codingScheme.variableCodings
       );
-      this.dialog.open(ShowCodingResultsComponent, {
+      this.errorDialog.open(ShowCodingResultsComponent, {
         data: { responses: newResponses, varsWithCodes },
         height: '80%',
         width: '60%'

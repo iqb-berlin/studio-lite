@@ -1,15 +1,20 @@
 import { Directive } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { UnitDefinitionDirective } from './unit-definition.directive';
 import { PageData } from '../../workspace/models/page-data.interface';
 import { Progress } from '../../workspace/models/types';
 import { VeronaModuleDirective } from './verona-module.directive';
 import { UnitState } from '../models/verona.interface';
+import {
+  VopRuntimeErrorNotificationDialogComponent
+} from '../components/vop-runtime-error-notification-dialog/vop-runtime-error-notification-dialog.component';
 
 @Directive({
   selector: '[preview]',
   standalone: false
 })
 export abstract class PreviewDirective extends UnitDefinitionDirective {
+  errorDialog?: MatDialog;
   playerName = '';
   playerApiVersion = 3;
   pageList: PageData[] = [];
@@ -91,6 +96,16 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
 
         case 'vopWindowFocusChangedNotification':
           this.setFocusStatus(msgData.hasFocus);
+          break;
+
+        case 'vopRuntimeErrorNotification':
+          this.errorDialog?.open(VopRuntimeErrorNotificationDialogComponent, {
+            data: {
+              sessionId: msgData.sessionId,
+              code: msgData.code,
+              message: msgData.message
+            }
+          });
           break;
 
         default:

@@ -948,6 +948,13 @@
     "range": "{{start}} - {{end}} von {{total}}",
     "select-page": "Seite auswählen"
   },
+  "runtime-error-dialog": {
+    "title": "Player-Laufzeitfehler",
+    "message": "Der Player hat einen Laufzeitfehler gemeldet.",
+    "code": "Fehlercode",
+    "session-id": "Session-ID",
+    "close": "Schließen"
+  },
   "unit": {
     "id" : "ID",
     "key" : "Kurzname",
