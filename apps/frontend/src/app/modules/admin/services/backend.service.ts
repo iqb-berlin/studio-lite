@@ -44,11 +44,13 @@ export class BackendService {
 
   setWorkspaceGroupProfiles(settings:WorkspaceGroupSettingsDto, workspaceGroupId: number): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`,
-        { id: workspaceGroupId, settings: settings })
+      .patch(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`, {
+        id: workspaceGroupId,
+        settings: settings
+      })
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -90,8 +92,8 @@ export class BackendService {
     return this.http
       .post(`${this.serverUrl}admin/users`, newUser)
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -99,8 +101,8 @@ export class BackendService {
     return this.http
       .patch(`${this.serverUrl}admin/users/${id}`, newData)
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -110,8 +112,8 @@ export class BackendService {
     return this.http
       .delete(`${this.serverUrl}admin/users`, { params: queryParams })
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -127,8 +129,8 @@ export class BackendService {
     return this.http
       .patch(`${this.serverUrl}admin/users/${userId}/workspace-groups`, { ids: accessTo })
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -142,10 +144,13 @@ export class BackendService {
 
   setWorkspaceGroupAdmins(workspaceGroupId: number, accessTo: number[]): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}/admins`, accessTo)
+      .patch(
+        `${this.serverUrl}admin/workspace-groups/${workspaceGroupId}/admins`,
+        accessTo
+      )
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -155,8 +160,8 @@ export class BackendService {
     return this.http
       .delete(`${this.serverUrl}admin/verona-modules`, { params: queryParams })
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -180,19 +185,24 @@ export class BackendService {
     let queryParams = new HttpParams();
     ids.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}admin/workspace-groups`, { params: queryParams })
+      .delete(`${this.serverUrl}admin/workspace-groups`, {
+        params: queryParams
+      })
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
   changeWorkspaceGroup(workspaceGroupData: WorkspaceGroupFullDto): Observable<boolean> {
     return this.http
-      .patch<boolean>(`${this.serverUrl}admin/workspace-groups/${workspaceGroupData.id}`, workspaceGroupData)
+      .patch<boolean>(
+      `${this.serverUrl}admin/workspace-groups/${workspaceGroupData.id}`,
+      workspaceGroupData
+    )
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -200,8 +210,8 @@ export class BackendService {
     return this.http
       .patch(`${this.serverUrl}admin/settings/config`, appConfig)
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -209,8 +219,8 @@ export class BackendService {
     return this.http
       .patch(`${this.serverUrl}admin/settings/app-logo`, appLogo)
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -218,10 +228,12 @@ export class BackendService {
     let queryParams = new HttpParams();
     ids.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
-      .delete(`${this.serverUrl}admin/resource-packages`, { params: queryParams })
+      .delete(`${this.serverUrl}admin/resource-packages`, {
+        params: queryParams
+      })
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -232,10 +244,13 @@ export class BackendService {
 
   setProfilesRegistry(profilesRegistryDto: ProfilesRegistryDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/settings/profiles-registry`, profilesRegistryDto)
+      .patch(
+        `${this.serverUrl}admin/settings/profiles-registry`,
+        profilesRegistryDto
+      )
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -246,19 +261,25 @@ export class BackendService {
 
   setUnitExportConfig(unitExportConfig: UnitExportConfigDto): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/settings/unit-export-config`, unitExportConfig)
+      .patch(
+        `${this.serverUrl}admin/settings/unit-export-config`,
+        unitExportConfig
+      )
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
   setMissingsProfiles(missingsProfiles: MissingsProfilesDto[]): Observable<boolean> {
     return this.http
-      .patch(`${this.serverUrl}admin/settings/missings-profiles`, missingsProfiles)
+      .patch(
+        `${this.serverUrl}admin/settings/missings-profiles`,
+        missingsProfiles
+      )
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 

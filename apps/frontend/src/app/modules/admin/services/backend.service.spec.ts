@@ -111,11 +111,11 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       const settings: WorkspaceGroupSettingsDto = {} as WorkspaceGroupSettingsDto;
 
       service.setWorkspaceGroupProfiles(settings, 3).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -240,11 +240,11 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       const payload: CreateUserDto = { name: 'User' } as CreateUserDto;
 
       service.addUser(payload).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -268,11 +268,11 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       const payload: UserFullDto = { id: 3 } as UserFullDto;
 
       service.changeUserData(3, payload).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -294,9 +294,9 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       service.deleteUsers([1, 2]).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -345,11 +345,11 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       const accessTo = [1, 3];
 
       service.setWorkspaceGroupsByAdmin(6, accessTo).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -398,11 +398,11 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       const accessTo = [2, 4];
 
       service.setWorkspaceGroupAdmins(9, accessTo).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -424,9 +424,9 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       service.deleteVeronaModules(['m1']).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -501,9 +501,9 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       service.deleteWorkspaceGroups([5]).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -527,11 +527,11 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       const payload: WorkspaceGroupFullDto = { id: 12 } as WorkspaceGroupFullDto;
 
       service.changeWorkspaceGroup(payload).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -565,7 +565,7 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       const config: ConfigDto = {
         appTitle: 'Test Studio',
         introHtml: '<p>intro</p>',
@@ -579,7 +579,7 @@ describe('Admin BackendService', () => {
       };
 
       service.setAppConfig(config).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -607,7 +607,7 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       const logo: AppLogoDto = {
         data: 'data:image/png;base64,AAA',
         bodyBackground: '#ffffff',
@@ -615,7 +615,7 @@ describe('Admin BackendService', () => {
       };
 
       service.setAppLogo(logo).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -637,9 +637,9 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       service.deleteResourcePackages([10]).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -682,13 +682,13 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       const registry: ProfilesRegistryDto = {
         csvUrl: 'https://example.com/registry.csv'
       };
 
       service.setProfilesRegistry(registry).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -735,7 +735,7 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       const config: UnitExportConfigDto = {
         unitXsdUrl: 'https://example.com/unit.xsd',
         bookletXsdUrl: 'https://example.com/booklet.xsd',
@@ -743,7 +743,7 @@ describe('Admin BackendService', () => {
       };
 
       service.setUnitExportConfig(config).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 
@@ -767,11 +767,11 @@ describe('Admin BackendService', () => {
       req.flush(false);
     });
 
-    it('returns true on error (catchError then map pattern)', done => {
+    it('returns false on error', done => {
       const missings: MissingsProfilesDto[] = [{ id: 1, label: 'Profile 1', missings: 'p1' }];
 
       service.setMissingsProfiles(missings).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 

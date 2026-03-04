@@ -42,8 +42,8 @@ export class BackendService {
     return this.http
       .delete(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}`)
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -71,8 +71,8 @@ export class BackendService {
     return this.http
       .patch(`${this.serverUrl}group-admin/users/${userId}/workspaces`, accessTo)
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -88,8 +88,8 @@ export class BackendService {
     return this.http
       .post<boolean>(`${this.serverUrl}group-admin/workspaces`, createWorkspaceDto)
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -117,8 +117,8 @@ export class BackendService {
     return this.http
       .delete(`${this.serverUrl}group-admin/workspaces`, { params: queryParams })
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -126,8 +126,8 @@ export class BackendService {
     return this.http
       .patch(`${this.serverUrl}group-admin/workspaces/group-id`, { targetId: workspaceGroupId, ids: workspaces })
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 
@@ -144,8 +144,8 @@ export class BackendService {
     return this.http
       .patch(`${this.serverUrl}group-admin/workspaces/${workspaceId}/users`, accessTo)
       .pipe(
-        catchError(() => of(false)),
-        map(() => true)
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 

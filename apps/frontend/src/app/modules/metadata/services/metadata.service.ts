@@ -106,10 +106,13 @@ export class MetadataService {
 
   createMetadataReport(): Observable<boolean | UnitPropertiesDto[]> {
     // eslint-disable-next-line max-len
-    return this.http.get<UnitPropertiesDto[]>(`${this.serverUrl}workspaces/${this.workspaceService.selectedWorkspaceId}/units/properties`)
+    return this.http
+      .get<UnitPropertiesDto[]>(
+      `${this.serverUrl}workspaces/${this.workspaceService.selectedWorkspaceId}/units/properties`
+    )
       .pipe(
-        catchError(() => of(false)),
-        map(report => report)
+        map(report => report),
+        catchError(() => of(false))
       );
   }
 }
