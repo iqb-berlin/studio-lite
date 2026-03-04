@@ -3,7 +3,7 @@ import { UnitDefinitionDirective } from './unit-definition.directive';
 import { PageData } from '../../workspace/models/page-data.interface';
 import { Progress } from '../../workspace/models/types';
 import { VeronaModuleDirective } from './verona-module.directive';
-import { UnitState } from '../models/verona.interface';
+import { SharedParameter, UnitState } from '../models/verona.interface';
 
 @Directive({
   selector: '[preview]',
@@ -16,6 +16,7 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
   presentationProgress: Progress = 'none';
   responseProgress: Progress = 'none';
   hasFocus = false;
+  sharedParameters: SharedParameter[] = [];
 
   abstract gotoUnit(target: string): void;
   protected abstract handleUnitStateData(unitState: UnitState): void;
@@ -48,6 +49,9 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
               pages.map((p: { id: string }) => p.id) :
               Object.keys(pages);
             this.setPageList(targets, msgData.playerState.currentPage);
+            if (msgData.playerState.sharedParameters) {
+              this.sharedParameters = this.getMergedSharedParameters(msgData.playerState.sharedParameters);
+            }
           }
           if (msgData.unitState) {
             this.setPresentationStatus(msgData.unitState.presentationProgress);
@@ -136,6 +140,14 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
       this.pageList[this.pageList.length - 1].disabled =
         idx === this.pageList.length - 2;
     }
+  }
+
+  protected getMergedSharedParameters(newParameters: SharedParameter[]): SharedParameter[] {
+    const mergedMap = new Map<string, string>([
+      ...this.sharedParameters.map(p => [p.key, p.value] as const),
+      ...newParameters.map(p => [p.key, p.value] as const)
+    ]);
+    return Array.from(mergedMap, ([key, value]) => ({ key, value }));
   }
 
   gotoPage(target: { action: string; index?: number }): void {
