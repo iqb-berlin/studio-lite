@@ -167,7 +167,7 @@ describe('PreviewDirective', () => {
   });
 
   it('opens error dialog on vopRuntimeErrorNotification', () => {
-    const directive = new TestPreviewDirective();
+    const directive = createDirective();
     const mockWindow = window;
     directive.iFrameElement = createIFrameWithWindow(mockWindow);
 
