@@ -5,6 +5,7 @@ import {
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { SharedParameter } from '../models/verona.interface';
 import { UnitMetadataStore } from '../../workspace/classes/unit-metadata-store';
 import { ModuleService } from '../services/module.service';
 import { VeronaModuleClass } from '../models/verona-module.class';
@@ -31,6 +32,7 @@ export abstract class VeronaModuleDirective implements OnDestroy {
   message = '';
   iFrameElement: HTMLIFrameElement | undefined;
   lastVeronaModuleId = '';
+  sharedParameters: SharedParameter[] = [];
   ngUnsubscribe = new Subject<void>();
   unitLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
   loading = false;
@@ -185,6 +187,14 @@ export abstract class VeronaModuleDirective implements OnDestroy {
     if (this.iFrameElement && this.iFrameElement.parentElement) {
       this.iFrameElement.srcdoc = editorHtml;
     }
+  }
+
+  protected getMergedSharedParameters(newParameters: SharedParameter[]): SharedParameter[] {
+    const mergedMap = new Map<string, string>([
+      ...this.sharedParameters.map(p => [p.key, p.value] as const),
+      ...newParameters.map(p => [p.key, p.value] as const)
+    ]);
+    return Array.from(mergedMap, ([key, value]) => ({ key, value }));
   }
 
   static getSessionId(): string {

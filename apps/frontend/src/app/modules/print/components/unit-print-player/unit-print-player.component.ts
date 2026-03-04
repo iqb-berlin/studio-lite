@@ -77,7 +77,8 @@ export class UnitPrintPlayerComponent extends PreviewDirective implements AfterV
           stateReportPolicy: 'eager',
           pagingMode: 'concat-scroll',
           printMode: this.printElementIds ? 'on-with-ids' : 'on',
-          directDownloadUrl: this.backendService.getDirectDownloadLink()
+          directDownloadUrl: this.backendService.getDirectDownloadLink(),
+          sharedParameters: this.sharedParameters
         },
         unitDefinition: definition || ''
       }, '*');

@@ -196,7 +196,8 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
               'last',
               'end'
             ],
-            directDownloadUrl: this.backendService.getDirectDownloadLink()
+            directDownloadUrl: this.backendService.getDirectDownloadLink(),
+            sharedParameters: this.sharedParameters
           },
           unitDefinition: definition || ''
         },

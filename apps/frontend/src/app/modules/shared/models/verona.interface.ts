@@ -7,6 +7,11 @@ export type PagingMode =
   | 'concat-scroll-snap';
 export type PrintMode = 'off' | 'on' | 'on-with-ids';
 
+export interface SharedParameter {
+  key: string;
+  value: string;
+}
+
 export interface PlayerConfig {
   printMode?: PrintMode;
   unitNumber?: number;
@@ -17,6 +22,7 @@ export interface PlayerConfig {
   startPage?: string;
   enabledNavigationTargets?: NavigationTarget[];
   directDownloadUrl?: string;
+  sharedParameters?: SharedParameter[];
 }
 
 export interface UnitState {
@@ -29,6 +35,7 @@ export interface UnitState {
 export interface PlayerState {
   validPages?: ValidPage[];
   currentPage?: string;
+  sharedParameters?: SharedParameter[];
 }
 
 export interface ValidPage {

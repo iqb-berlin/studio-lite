@@ -48,6 +48,9 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
               pages.map((p: { id: string }) => p.id) :
               Object.keys(pages);
             this.setPageList(targets, msgData.playerState.currentPage);
+            if (msgData.playerState.sharedParameters) {
+              this.sharedParameters = this.getMergedSharedParameters(msgData.playerState.sharedParameters);
+            }
           }
           if (msgData.unitState) {
             this.setPresentationStatus(msgData.unitState.presentationProgress);
