@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { IsSelectedPipe } from './isSelected.pipe';
+import { IsSelectedPipe } from './is-selected.pipe';
 
 describe('IsSelectedPipe', () => {
   const pipe = new IsSelectedPipe();

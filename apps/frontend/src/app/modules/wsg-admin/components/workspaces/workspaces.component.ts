@@ -30,7 +30,7 @@ import { AppService } from '../../../../services/app.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { WorkspaceSettings } from '../../models/workspace-settings.interface';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
-import { IsSelectedIdPipe } from '../../../../pipes/isSelectedId.pipe';
+import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
 import { WorkspaceMenuComponent } from '../workspace-menu/workspace-menu.component';
 import { WorkspaceUserToCheckCollection } from '../../models/workspace-users-to-check-collection.class';
 import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class';

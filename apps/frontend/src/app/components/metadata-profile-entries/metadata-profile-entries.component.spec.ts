@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MetadataValues } from '@studio-lite-lib/api-dto';
 import { MetadataProfileEntriesComponent } from './metadata-profile-entries.component';
-import { IsArrayPipe } from '../../pipes/isArray.pipe';
+import { IsArrayPipe } from '../../pipes/is-array.pipe';
 import { CastPipe } from '../../pipes/cast.pipe';
 
 describe('MetadataProfileEntriesComponent', () => {

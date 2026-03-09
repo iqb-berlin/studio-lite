@@ -1,4 +1,4 @@
-import { IsSelectedIdPipe } from './isSelectedId.pipe';
+import { IsSelectedIdPipe } from './is-selected-id.pipe';
 
 describe('IsSelectedIdPipe', () => {
   const pipe = new IsSelectedIdPipe();

@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { HasSelectionValuePipe } from './hasSelectionValue.pipe';
+import { HasSelectionValuePipe } from './has-selection-value.pipe';
 
 describe('HasSelectionValuePipe', () => {
   const pipe = new HasSelectionValuePipe();

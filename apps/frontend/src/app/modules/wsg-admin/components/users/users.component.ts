@@ -19,7 +19,7 @@ import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceToCheckCollection } from '../../models/workspace-to-check-collection.class';
 import { WsgAdminService } from '../../services/wsg-admin.service';
-import { IsSelectedIdPipe } from '../../../../pipes/isSelectedId.pipe';
+import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { WorkspaceChecked } from '../../models/workspace-checked.class';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';

@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { By } from '@angular/platform-browser';
 import { PrintOptionsComponent } from './print-options.component';
-import { IsActivePrintOption } from '../../pipes/isActivePrintOption.pipe';
+import { IsActivePrintOption } from '../../pipes/is-active-print-option.pipe';
 import { PrintOptions } from '../../modules/print/models/print-options.interface';
 
 describe('PrintOptionsComponent', () => {

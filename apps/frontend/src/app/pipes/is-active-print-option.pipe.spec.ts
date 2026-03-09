@@ -1,4 +1,4 @@
-import { IsActivePrintOption } from './isActivePrintOption.pipe';
+import { IsActivePrintOption } from './is-active-print-option.pipe';
 import { PrintOptions } from '../modules/print/models/print-options.interface';
 
 describe('IsActivePrintOption', () => {

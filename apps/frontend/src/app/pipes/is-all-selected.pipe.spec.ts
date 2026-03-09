@@ -1,4 +1,4 @@
-import { IsAllSelectedPipe } from './isAllSelected.pipe';
+import { IsAllSelectedPipe } from './is-all-selected.pipe';
 
 describe('IsAllSelectedPipe', () => {
   const pipe = new IsAllSelectedPipe();

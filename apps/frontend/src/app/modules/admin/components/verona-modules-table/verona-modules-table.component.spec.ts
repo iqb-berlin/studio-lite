@@ -13,9 +13,9 @@ import { environment } from '../../../../../environments/environment';
 import { VeronaModulesTableComponent } from './verona-modules-table.component';
 import { BackendService } from '../../services/backend.service';
 import { I18nService } from '../../../../services/i18n.service';
-import { IsSelectedPipe } from '../../../../pipes/isSelected.pipe';
-import { IsAllSelectedPipe } from '../../../../pipes/isAllSelected.pipe';
-import { HasSelectionValuePipe } from '../../../../pipes/hasSelectionValue.pipe';
+import { IsSelectedPipe } from '../../../../pipes/is-selected.pipe';
+import { IsAllSelectedPipe } from '../../../../pipes/is-all-selected.pipe';
+import { HasSelectionValuePipe } from '../../../../pipes/has-selection-value.pipe';
 import { FlattenedVeronaModuleClass, VeronaModuleClass } from '../../../../models/verona-module.class';
 
 describe('VeronaModulesTableComponent', () => {

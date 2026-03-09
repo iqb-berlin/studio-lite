@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { MetadataValues } from '@studio-lite-lib/api-dto';
 import { TextWithLanguage } from '@iqb/metadata/md-main';
-import { IsArrayPipe } from '../../pipes/isArray.pipe';
+import { IsArrayPipe } from '../../pipes/is-array.pipe';
 import { CastPipe } from '../../pipes/cast.pipe';
 
 @Component({
