@@ -4,7 +4,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { Component, Input } from '@angular/core';
 import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { WorkspaceMenuComponent } from './workspace-menu.component';
 import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';

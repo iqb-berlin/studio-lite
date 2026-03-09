@@ -4,7 +4,7 @@ import { DatePipe } from '@angular/common';
 import { of } from 'rxjs';
 import { SimpleChange } from '@angular/core';
 import { UnitPropertiesComponent } from './unit-properties.component';
-import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
+import { WorkspaceBackendService } from '../../modules/workspace/services/workspace-backend.service';
 
 describe('UnitPropertiesComponent', () => {
   let component: UnitPropertiesComponent;

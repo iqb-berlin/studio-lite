@@ -16,7 +16,7 @@ import { VeronaModuleClass } from '../../../../models/verona-module.class';
 import { UnitPropertiesComponent } from './unit-properties.component';
 import { environment } from '../../../../../environments/environment';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
-import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
+import { SelectModuleComponent } from '../../../../components/select-module/select-module.component';
 
 describe('UnitPropertiesComponent', () => {
   let component: UnitPropertiesComponent;

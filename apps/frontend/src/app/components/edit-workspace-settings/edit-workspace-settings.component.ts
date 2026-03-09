@@ -12,11 +12,11 @@ import { MatButton } from '@angular/material/button';
 import { MatOption } from '@angular/material/core';
 
 import { MatLabel, MatError } from '@angular/material/form-field';
-import { ModuleService } from '../../../../services/module.service';
-import { AppService } from '../../../../services/app.service';
-import { WorkspaceService } from '../../../workspace/services/workspace.service';
-import { BackendService } from '../../../admin/services/backend.service';
-import { State } from '../../../admin/models/state.type';
+import { ModuleService } from '../../services/module.service';
+import { AppService } from '../../services/app.service';
+import { WorkspaceService } from '../../modules/workspace/services/workspace.service';
+import { BackendService } from '../../modules/admin/services/backend.service';
+import { State } from '../../modules/admin/models/state.type';
 import { SelectModuleComponent } from '../select-module/select-module.component';
 
 type Profile = {

@@ -21,7 +21,7 @@ import { UsersComponent } from './users.component';
 import { AppService } from '../../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 import { UsersMenuComponent } from '../users-menu/users-menu.component';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 
 describe('UsersComponent', () => {
   let component: UsersComponent;

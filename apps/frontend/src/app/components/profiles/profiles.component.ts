@@ -8,9 +8,9 @@ import { MatError } from '@angular/material/form-field';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { FormsModule } from '@angular/forms';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { ProfileStoreWithProfiles, WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
-import { Profile } from '../../../../models/profile.type';
-import { MetadataBackendService } from '../../../metadata/services/metadata-backend.service';
+import { ProfileStoreWithProfiles, WsgAdminService } from '../../modules/wsg-admin/services/wsg-admin.service';
+import { Profile } from '../../models/profile.type';
+import { MetadataBackendService } from '../../modules/metadata/services/metadata-backend.service';
 
 export type CoreProfile = Omit<MDProfile, 'groups'>;
 

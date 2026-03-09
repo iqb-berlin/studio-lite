@@ -7,7 +7,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
-import { InputTextComponent } from '../../../shared/components/input-text/input-text.component';
+import { InputTextComponent } from '../../../../components/input-text/input-text.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 

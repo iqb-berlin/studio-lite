@@ -29,7 +29,7 @@ import { WorkspaceBackendService } from '../../../workspace/services/workspace-b
 import { AppService } from '../../../../services/app.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { WorkspaceSettings } from '../../models/workspace-settings.interface';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { IsSelectedIdPipe } from '../../../../pipes/isSelectedId.pipe';
 import { WorkspaceMenuComponent } from '../workspace-menu/workspace-menu.component';
 import { WorkspaceUserToCheckCollection } from '../../models/workspace-users-to-check-collection.class';
@@ -37,7 +37,7 @@ import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class'
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
 import { I18nService } from '../../../../services/i18n.service';
-import { EntriesDividerComponent } from '../../../shared/components/entries-divider/entries-divider.component';
+import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 
 @Component({
   selector: 'studio-lite-workspaces',

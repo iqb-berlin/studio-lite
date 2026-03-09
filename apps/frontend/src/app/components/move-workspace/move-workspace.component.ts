@@ -10,7 +10,7 @@ import { MatSelect } from '@angular/material/select';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
+import { WsgAdminService } from '../../modules/wsg-admin/services/wsg-admin.service';
 
 export interface MoveComponentData {
   title: string,

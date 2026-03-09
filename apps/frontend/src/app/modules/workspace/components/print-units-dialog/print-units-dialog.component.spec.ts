@@ -6,7 +6,7 @@ import { Component, Input } from '@angular/core';
 import { PrintUnitsDialogComponent } from './print-units-dialog.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
-import { PrintOptionsComponent } from '../../../shared/components/print-options/print-options.component';
+import { PrintOptionsComponent } from '../../../../components/print-options/print-options.component';
 import { PrintOptions } from '../../../print/models/print-options.interface';
 
 @Component({ selector: 'studio-lite-select-unit-list', template: '', standalone: true })

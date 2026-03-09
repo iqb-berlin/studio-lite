@@ -49,7 +49,7 @@ import { ItemsComponent } from '../../../metadata/components/items/items.compone
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { State } from '../../../admin/models/state.type';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
-import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
+import { SelectModuleComponent } from '../../../../components/select-module/select-module.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { ModuleService } from '../../../../services/module.service';
 import { RequestMessageDirective } from '../../directives/request-message.directive';

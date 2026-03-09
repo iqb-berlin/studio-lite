@@ -22,7 +22,7 @@ import { AppService } from '../../../../services/app.service';
 import { AppConfig } from '../../../../classes/app-config.class';
 import { BackendService } from '../../services/backend.service';
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 
 describe('WorkspaceGroupsComponent', () => {
   let component: WorkspaceGroupsComponent;

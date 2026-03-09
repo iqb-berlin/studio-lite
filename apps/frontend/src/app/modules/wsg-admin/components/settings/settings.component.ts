@@ -13,7 +13,7 @@ import {
 } from '@angular/material/card';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { State } from '../../../admin/models/state.type';
-import { CoreProfile, ProfilesComponent } from '../../../shared/components/profiles/profiles.component';
+import { CoreProfile, ProfilesComponent } from '../../../../components/profiles/profiles.component';
 import { StatesComponent } from '../states/states.component';
 
 @Component({

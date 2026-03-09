@@ -9,7 +9,7 @@ import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-gro
 import { BackendService } from '../../services/backend.service';
 import { State } from '../../models/state.type';
 import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
-import { ProfilesComponent } from '../../../shared/components/profiles/profiles.component';
+import { ProfilesComponent } from '../../../../components/profiles/profiles.component';
 import { Profile } from '../../../../models/profile.type';
 
 @Component({

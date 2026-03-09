@@ -3,8 +3,8 @@ import {
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
-import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
-import { State } from '../../../admin/models/state.type';
+import { WorkspaceBackendService } from '../../modules/workspace/services/workspace-backend.service';
+import { State } from '../../modules/admin/models/state.type';
 
 @Component({
   selector: 'studio-lite-unit-properties',

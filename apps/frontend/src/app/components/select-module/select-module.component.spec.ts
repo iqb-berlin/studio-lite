@@ -6,7 +6,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { By } from '@angular/platform-browser';
 import { SelectModuleComponent } from './select-module.component';
-import { VeronaModuleClass } from '../../../../models/verona-module.class';
+import { VeronaModuleClass } from '../../models/verona-module.class';
 
 const createModule = (
   id: string, name: string, version: string, isStable: boolean

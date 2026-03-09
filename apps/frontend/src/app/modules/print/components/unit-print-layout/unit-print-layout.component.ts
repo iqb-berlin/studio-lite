@@ -17,7 +17,7 @@ import { UnitPrintPlayerComponent } from '../unit-print-player/unit-print-player
 import { UnitPrintCodingComponent } from '../unit-print-coding/unit-print-coding.component';
 import { UnitPrintCommentsComponent } from '../unit-print-comments/unit-print-comments.component';
 import { PrintMetadataComponent } from '../print-metadata/print-metadata.component';
-import { UnitPropertiesComponent } from '../../../shared/components/unit-properties/unit-properties.component';
+import { UnitPropertiesComponent } from '../../../../components/unit-properties/unit-properties.component';
 
 @Component({
   selector: 'studio-lite-unit-print-layout',

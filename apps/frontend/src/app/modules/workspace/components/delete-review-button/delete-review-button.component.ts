@@ -9,7 +9,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 
 @Component({
   selector: 'studio-lite-delete-review-button',

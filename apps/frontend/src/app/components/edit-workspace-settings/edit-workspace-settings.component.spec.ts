@@ -15,13 +15,13 @@ import {
   WorkspaceGroupFullDto, WorkspaceFullDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { EditWorkspaceSettingsComponent } from './edit-workspace-settings.component';
-import { BackendService } from '../../../admin/services/backend.service';
-import { AppService } from '../../../../services/app.service';
-import { WorkspaceService } from '../../../workspace/services/workspace.service';
-import { ModuleService } from '../../../../services/module.service';
-import { State } from '../../../admin/models/state.type';
+import { BackendService } from '../../modules/admin/services/backend.service';
+import { AppService } from '../../services/app.service';
+import { WorkspaceService } from '../../modules/workspace/services/workspace.service';
+import { ModuleService } from '../../services/module.service';
+import { State } from '../../modules/admin/models/state.type';
 import { SelectModuleComponent } from '../select-module/select-module.component';
-import { VeronaModuleClass } from '../../../../models/verona-module.class';
+import { VeronaModuleClass } from '../../models/verona-module.class';
 
 @Component({
   selector: 'studio-lite-select-module',

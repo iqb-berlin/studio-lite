@@ -11,7 +11,7 @@ import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { MatFormField } from '@angular/material/form-field';
 
-import { VeronaModuleClass } from '../../../../models/verona-module.class';
+import { VeronaModuleClass } from '../../models/verona-module.class';
 
 @Component({
   selector: 'studio-lite-select-module',

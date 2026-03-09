@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { PreviewBarComponent } from './preview-bar.component';
 import { WorkspaceService } from '../../services/workspace.service';
-import { PageNavigationComponent } from '../../../shared/components/page-navigation/page-navigation.component';
+import { PageNavigationComponent } from '../../../../components/page-navigation/page-navigation.component';
 import { PagingModeSelectionComponent } from '../paging-mode-selection/paging-mode-selection.component';
 import { StatusIndicationComponent } from '../status-indication/status-indication.component';
 

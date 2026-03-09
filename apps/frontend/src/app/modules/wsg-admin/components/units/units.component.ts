@@ -24,10 +24,10 @@ import { Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../../services/backend.service';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { I18nService } from '../../../../services/i18n.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
-import { DeleteDialogComponent } from '../../../shared/components/delete-dialog/delete-dialog.component';
+import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
 import { AppService } from '../../../../services/app.service';
 
 @Component({

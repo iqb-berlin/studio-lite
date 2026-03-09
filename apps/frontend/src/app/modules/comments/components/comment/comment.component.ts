@@ -12,7 +12,7 @@ import { IsReplyingPipe } from '../../pipes/is-replying.pipe';
 import { IsEditingPipe } from '../../pipes/is-editing.pipe';
 import { SafeResourceHTMLPipe } from '../../pipes/safe-resource-html.pipe';
 import { ScrollCommentIntoViewDirective } from '../../directives/scroll-comment-into-view.directive';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { ScrollEditorIntoViewDirective } from '../../directives/scroll-editor-into-view.directive';
 import { CommentEditorComponent } from '../comment-editor/comment-editor.component';
 import { CommentBadgeComponent } from '../comment-badge/comment-badge.component';

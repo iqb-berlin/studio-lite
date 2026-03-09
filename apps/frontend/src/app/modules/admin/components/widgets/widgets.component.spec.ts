@@ -18,7 +18,7 @@ import { AppConfig } from '../../../../classes/app-config.class';
 import { ModuleService } from '../../../../services/module.service';
 import { BackendService } from '../../services/backend.service';
 import { VeronaModulesTableComponent } from '../verona-modules-table/verona-modules-table.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { VeronaModuleClass } from '../../../../models/verona-module.class';
 
 describe('WidgetsComponent', () => {

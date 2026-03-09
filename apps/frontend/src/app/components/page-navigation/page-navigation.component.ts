@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { PageData } from '../../../workspace/models/page-data.interface';
+import { PageData } from '../../modules/workspace/models/page-data.interface';
 import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
 
 @Component({

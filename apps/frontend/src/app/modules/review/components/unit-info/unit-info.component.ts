@@ -9,8 +9,8 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { of } from 'rxjs';
 import { ReviewService } from '../../services/review.service';
-import { UnitPropertiesComponent } from '../../../shared/components/unit-properties/unit-properties.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { UnitPropertiesComponent } from '../../../../components/unit-properties/unit-properties.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { PrintMetadataComponent } from '../../../print/components/print-metadata/print-metadata.component';
 import {
   UnitPrintCommentsComponent

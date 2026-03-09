@@ -12,7 +12,7 @@ import { AppService } from '../../../../services/app.service';
 import { ReviewService } from '../../services/review.service';
 import { UnitData } from '../../models/unit-data.class';
 import { ReviewBackendService } from '../../services/review-backend.service';
-import { PageNavigationComponent } from '../../../shared/components/page-navigation/page-navigation.component';
+import { PageNavigationComponent } from '../../../../components/page-navigation/page-navigation.component';
 import { UnitInfoComponent } from '../unit-info/unit-info.component';
 import { PreviewDirective } from '../../../../directives/preview.directive';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';

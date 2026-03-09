@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { UserMenuComponent } from './user-menu.component';
-import { WrappedIconComponent } from '../../modules/shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
 import { AccountActionComponent } from '../account-action/account-action.component';
 import { ChangePasswordDirective } from '../../directives/change-password.directive';
 import { EditMyDataDirective } from '../../directives/edit-my-data.directive';

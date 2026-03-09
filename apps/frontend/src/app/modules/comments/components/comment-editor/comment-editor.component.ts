@@ -21,7 +21,7 @@ import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { FormsModule } from '@angular/forms';
 import { IsCommentCommittablePipe } from '../../pipes/is-comment-commitable.pipe';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { CommentItemSelectionComponent } from '../comment-item-selection/comment-item-selection.component';
 
 @Component({

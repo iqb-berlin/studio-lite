@@ -10,7 +10,7 @@ import { VeronaModuleDirective } from './verona-module.directive';
 import { UnitState } from '../models/verona.interface';
 import {
   VopRuntimeErrorNotificationDialogComponent
-} from '../modules/shared/components/vop-runtime-error-notification-dialog/vop-runtime-error-notification-dialog.component';
+} from '../components/vop-runtime-error-notification-dialog/vop-runtime-error-notification-dialog.component';
 import { WidgetCallData } from '../modules/workspace/models/widget-call-data.interface';
 import { ModuleService } from '../services/module.service';
 import { WidgetOverlayComponent } from '../modules/workspace/components/widget-overlay/widget-overlay.component';

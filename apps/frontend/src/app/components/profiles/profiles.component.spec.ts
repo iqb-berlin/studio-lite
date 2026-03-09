@@ -12,8 +12,8 @@ import {
   WorkspaceGroupSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { ProfilesComponent } from './profiles.component';
-import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
-import { MetadataBackendService } from '../../../metadata/services/metadata-backend.service';
+import { WsgAdminService } from '../../modules/wsg-admin/services/wsg-admin.service';
+import { MetadataBackendService } from '../../modules/metadata/services/metadata-backend.service';
 
 describe('ProfilesComponent', () => {
   let component: ProfilesComponent;

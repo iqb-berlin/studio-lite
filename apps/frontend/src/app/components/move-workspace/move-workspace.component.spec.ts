@@ -8,7 +8,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatSelectModule } from '@angular/material/select';
 import { BehaviorSubject } from 'rxjs';
 import { WorkspaceGroupFullDto } from '@studio-lite-lib/api-dto';
-import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
+import { WsgAdminService } from '../../modules/wsg-admin/services/wsg-admin.service';
 import { MoveWorkspaceComponent, MoveComponentData } from './move-workspace.component';
 
 describe('MoveWorkspaceComponent', () => {

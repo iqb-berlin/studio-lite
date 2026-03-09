@@ -13,7 +13,7 @@ import { WorkspacesComponent } from './workspaces.component';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { environment } from '../../../../../environments/environment';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { WorkspacesMenuComponent } from '../workspaces-menu/workspaces-menu.component';
 import { I18nService } from '../../../../services/i18n.service';
 

@@ -18,7 +18,7 @@ import { HasSelectionValuePipe } from '../../../../pipes/hasSelectionValue.pipe'
 import { IsAllSelectedPipe } from '../../../../pipes/isAllSelected.pipe';
 import { IsSelectedPipe } from '../../../../pipes/isSelected.pipe';
 import { IncludePipe } from '../../../../pipes/include.pipe';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { ScrollIntoViewDirective } from '../../directives/scroll-into-view.directive';
 
 @Component({

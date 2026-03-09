@@ -3,7 +3,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Component, Input } from '@angular/core';
 import { WorkspacesMenuComponent } from './workspaces-menu.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 
 describe('WorkspacesMenuComponent', () => {
   let component: WorkspacesMenuComponent;

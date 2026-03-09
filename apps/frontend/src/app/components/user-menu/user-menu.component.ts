@@ -7,7 +7,7 @@ import { LogoutDirective } from '../../directives/logout.directive';
 import { EditMyDataDirective } from '../../directives/edit-my-data.directive';
 import { ChangePasswordDirective } from '../../directives/change-password.directive';
 import { AccountActionComponent } from '../account-action/account-action.component';
-import { WrappedIconComponent } from '../../modules/shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
 import { AppService } from '../../services/app.service';
 
 @Component({

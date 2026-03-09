@@ -7,8 +7,8 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 
-import { IsActivePrintOption } from '../../../../pipes/isActivePrintOption.pipe';
-import { PrintOptions } from '../../../print/models/print-options.interface';
+import { IsActivePrintOption } from '../../pipes/isActivePrintOption.pipe';
+import { PrintOptions } from '../../modules/print/models/print-options.interface';
 
 @Component({
   selector: 'studio-lite-print-options',
