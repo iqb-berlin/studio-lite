@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { PrintOptions } from '../../print/models/print-options.interface';
+import { PrintOptions } from '../modules/print/models/print-options.interface';
 
 @Pipe({
   name: 'isActivePrintOption',

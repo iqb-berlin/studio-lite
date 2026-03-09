@@ -7,7 +7,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 
-import { IsActivePrintOption } from '../../pipes/isActivePrintOption.pipe';
+import { IsActivePrintOption } from '../../../../pipes/isActivePrintOption.pipe';
 import { PrintOptions } from '../../../print/models/print-options.interface';
 
 @Component({

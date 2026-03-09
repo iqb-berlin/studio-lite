@@ -1,5 +1,5 @@
 import { IsActivePrintOption } from './isActivePrintOption.pipe';
-import { PrintOptions } from '../../print/models/print-options.interface';
+import { PrintOptions } from '../modules/print/models/print-options.interface';
 
 describe('IsActivePrintOption', () => {
   const pipe = new IsActivePrintOption();

@@ -14,10 +14,10 @@ import { MatCheckbox } from '@angular/material/checkbox';
 
 import { HttpParams } from '@angular/common/http';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
-import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
-import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
-import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
-import { IncludePipe } from '../../../shared/pipes/include.pipe';
+import { HasSelectionValuePipe } from '../../../../pipes/hasSelectionValue.pipe';
+import { IsAllSelectedPipe } from '../../../../pipes/isAllSelected.pipe';
+import { IsSelectedPipe } from '../../../../pipes/isSelected.pipe';
+import { IncludePipe } from '../../../../pipes/include.pipe';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 import { ScrollIntoViewDirective } from '../../directives/scroll-into-view.directive';
 

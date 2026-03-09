@@ -7,7 +7,7 @@ import {
 import { ItemsMetadataValues, MetadataValues } from '@studio-lite-lib/api-dto';
 import { MetadataReadonlyItemsComponent } from './metadata-readonly-items.component';
 import { MetadataProfileEntriesComponent } from '../metadata-profile-entries/metadata-profile-entries.component';
-import { VariableIdPipe } from '../../pipes/variable-id.pipe';
+import { VariableIdPipe } from '../../../../pipes/variable-id.pipe';
 import { AliasId } from '../../../metadata/models/alias-id.interface';
 
 describe('MetadataReadonlyItemsComponent', () => {

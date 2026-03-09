@@ -32,7 +32,7 @@ import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { UserToCheckCollection } from '../../models/users-to-check-collection.class';
 import { State } from '../../models/state.type';
-import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
+import { IsSelectedIdPipe } from '../../../../pipes/isSelectedId.pipe';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
 import { Profile } from '../../../shared/models/profile.type';

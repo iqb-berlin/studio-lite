@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { AliasId } from '../../metadata/models/alias-id.interface';
+import { AliasId } from '../modules/metadata/models/alias-id.interface';
 
 @Pipe({
   name: 'variableId',

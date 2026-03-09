@@ -19,7 +19,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MetadataService } from '../../services/metadata.service';
-import { IncludePipe } from '../../../shared/pipes/include.pipe';
+import { IncludePipe } from '../../../../pipes/include.pipe';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { I18nService } from '../../../../services/i18n.service';
 

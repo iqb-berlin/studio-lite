@@ -17,9 +17,9 @@ import { DatePipe } from '@angular/common';
 import { BytesPipe } from '@studio-lite-lib/iqb-components';
 import { BackendService } from '../../services/backend.service';
 import { FlattenedVeronaModuleClass, VeronaModuleClass } from '../../../shared/models/verona-module.class';
-import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
-import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
-import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
+import { IsAllSelectedPipe } from '../../../../pipes/isAllSelected.pipe';
+import { HasSelectionValuePipe } from '../../../../pipes/hasSelectionValue.pipe';
+import { IsSelectedPipe } from '../../../../pipes/isSelected.pipe';
 import { I18nService } from '../../../../services/i18n.service';
 import { ModuleSelectionChange } from '../../models/module-selection-change.interface';
 

@@ -1,5 +1,5 @@
 import { VariableIdPipe } from './variable-id.pipe';
-import { AliasId } from '../../metadata/models/alias-id.interface';
+import { AliasId } from '../modules/metadata/models/alias-id.interface';
 
 describe('VariableIdPipe', () => {
   const pipe = new VariableIdPipe();
