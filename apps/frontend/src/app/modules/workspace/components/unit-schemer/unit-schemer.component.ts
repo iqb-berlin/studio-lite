@@ -12,7 +12,7 @@ import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { ModuleService } from '../../../shared/services/module.service';
 import {
   UnitDefinitionDirective
-} from '../../../shared/directives/unit-definition.directive';
+} from '../../../../directives/unit-definition.directive';
 import { RolePipe } from '../../pipes/role.pipe';
 
 @Component({

@@ -5,14 +5,14 @@ import {
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { SharedParameter } from '../../../models/verona.interface';
-import { UnitMetadataStore } from '../../workspace/classes/unit-metadata-store';
-import { ModuleService } from '../services/module.service';
-import { VeronaModuleClass } from '../../../models/verona-module.class';
-import { UnitDefinitionStore } from '../../workspace/classes/unit-definition-store';
-import { WorkspaceBackendService } from '../../workspace/services/workspace-backend.service';
-import { WorkspaceService } from '../../workspace/services/workspace.service';
-import { AppService } from '../../../services/app.service';
+import { SharedParameter } from '../models/verona.interface';
+import { UnitMetadataStore } from '../modules/workspace/classes/unit-metadata-store';
+import { ModuleService } from '../modules/shared/services/module.service';
+import { VeronaModuleClass } from '../models/verona-module.class';
+import { UnitDefinitionStore } from '../modules/workspace/classes/unit-definition-store';
+import { WorkspaceBackendService } from '../modules/workspace/services/workspace-backend.service';
+import { WorkspaceService } from '../modules/workspace/services/workspace.service';
+import { AppService } from '../services/app.service';
 
 @Directive({
   selector: '[veronaModule]',

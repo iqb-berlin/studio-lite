@@ -4,16 +4,16 @@ import { from, takeUntil } from 'rxjs';
 import { Overlay } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { UnitDefinitionDirective } from './unit-definition.directive';
-import { PageData } from '../../workspace/models/page-data.interface';
-import { Progress } from '../../workspace/models/types';
+import { PageData } from '../modules/workspace/models/page-data.interface';
+import { Progress } from '../modules/workspace/models/types';
 import { VeronaModuleDirective } from './verona-module.directive';
-import { UnitState } from '../../../models/verona.interface';
+import { UnitState } from '../models/verona.interface';
 import {
   VopRuntimeErrorNotificationDialogComponent
-} from '../components/vop-runtime-error-notification-dialog/vop-runtime-error-notification-dialog.component';
-import { WidgetCallData } from '../../workspace/models/widget-call-data.interface';
-import { ModuleService } from '../services/module.service';
-import { WidgetOverlayComponent } from '../../workspace/components/widget-overlay/widget-overlay.component';
+} from '../modules/shared/components/vop-runtime-error-notification-dialog/vop-runtime-error-notification-dialog.component';
+import { WidgetCallData } from '../modules/workspace/models/widget-call-data.interface';
+import { ModuleService } from '../modules/shared/services/module.service';
+import { WidgetOverlayComponent } from '../modules/workspace/components/widget-overlay/widget-overlay.component';
 
 @Directive({
   selector: '[preview]',

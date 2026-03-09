@@ -10,13 +10,13 @@ import {
   VeronaModuleMetadataDto
 } from '@studio-lite-lib/api-dto';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
-import { AppService } from '../../../services/app.service';
-import { WorkspaceBackendService } from '../../workspace/services/workspace-backend.service';
-import { WorkspaceService } from '../../workspace/services/workspace.service';
-import { UnitDefinitionStore } from '../../workspace/classes/unit-definition-store';
-import { UnitMetadataStore } from '../../workspace/classes/unit-metadata-store';
-import { ModuleService } from '../services/module.service';
-import { VeronaModuleClass } from '../../../models/verona-module.class';
+import { AppService } from '../services/app.service';
+import { WorkspaceBackendService } from '../modules/workspace/services/workspace-backend.service';
+import { WorkspaceService } from '../modules/workspace/services/workspace.service';
+import { UnitDefinitionStore } from '../modules/workspace/classes/unit-definition-store';
+import { UnitMetadataStore } from '../modules/workspace/classes/unit-metadata-store';
+import { ModuleService } from '../modules/shared/services/module.service';
+import { VeronaModuleClass } from '../models/verona-module.class';
 import { VeronaModuleDirective } from './verona-module.directive';
 
 const createMessageEvent =

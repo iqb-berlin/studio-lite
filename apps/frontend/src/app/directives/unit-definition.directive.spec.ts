@@ -2,11 +2,11 @@ import { EventEmitter, ElementRef } from '@angular/core';
 import { Subject } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
-import { AppService } from '../../../services/app.service';
-import { ModuleService } from '../services/module.service';
-import { WorkspaceBackendService } from '../../workspace/services/workspace-backend.service';
-import { WorkspaceService } from '../../workspace/services/workspace.service';
-import { UnitDefinitionStore } from '../../workspace/classes/unit-definition-store';
+import { AppService } from '../services/app.service';
+import { ModuleService } from '../modules/shared/services/module.service';
+import { WorkspaceBackendService } from '../modules/workspace/services/workspace-backend.service';
+import { WorkspaceService } from '../modules/workspace/services/workspace.service';
+import { UnitDefinitionStore } from '../modules/workspace/classes/unit-definition-store';
 import { UnitDefinitionDirective } from './unit-definition.directive';
 
 class TestUnitDefinitionDirective extends UnitDefinitionDirective {

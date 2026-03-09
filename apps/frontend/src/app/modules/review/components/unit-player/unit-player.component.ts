@@ -14,7 +14,7 @@ import { UnitData } from '../../models/unit-data.class';
 import { ReviewBackendService } from '../../services/review-backend.service';
 import { PageNavigationComponent } from '../../../shared/components/page-navigation/page-navigation.component';
 import { UnitInfoComponent } from '../unit-info/unit-info.component';
-import { PreviewDirective } from '../../../shared/directives/preview.directive';
+import { PreviewDirective } from '../../../../directives/preview.directive';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { UnitState } from '../../../../models/verona.interface';
