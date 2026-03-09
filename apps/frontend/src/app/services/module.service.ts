@@ -1,7 +1,7 @@
 import { lastValueFrom } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
-import { VeronaModuleClass } from '../../../models/verona-module.class';
+import { VeronaModuleClass } from '../models/verona-module.class';
 import { ModuleBackendService } from './module-backend.service';
 
 @Injectable({

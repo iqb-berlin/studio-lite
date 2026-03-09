@@ -4,7 +4,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { AppService } from '../../../services/app.service';
-import { ModuleService } from '../../shared/services/module.service';
+import { ModuleService } from '../../../services/module.service';
 import { BackendService } from '../services/backend.service';
 import { VeronaModuleClass } from '../../../models/verona-module.class';
 import { ModulesDirective } from './modules.directive';

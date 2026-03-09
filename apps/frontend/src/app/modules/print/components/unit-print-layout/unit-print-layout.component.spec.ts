@@ -10,7 +10,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { UnitPrintLayoutComponent } from './unit-print-layout.component';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { PrintOption } from '../../models/print-options.interface';
 import { environment } from '../../../../../environments/environment';

@@ -15,7 +15,7 @@ import { environment } from '../../../../../environments/environment';
 import { WidgetsComponent } from './widgets.component';
 import { AppService } from '../../../../services/app.service';
 import { AppConfig } from '../../../../classes/app-config.class';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { BackendService } from '../../services/backend.service';
 import { VeronaModulesTableComponent } from '../verona-modules-table/verona-modules-table.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';

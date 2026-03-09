@@ -14,7 +14,7 @@ import { environment } from '../../../../../environments/environment';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { PreviewService } from '../../services/preview.service';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { UnitPreviewComponent } from './unit-preview.component';
 import { PreviewBarComponent } from '../preview-bar/preview-bar.component';

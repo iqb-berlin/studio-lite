@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { ReviewService } from './review.service';
 import { ReviewBackendService } from './review-backend.service';
-import { ModuleService } from '../../shared/services/module.service';
+import { ModuleService } from '../../../services/module.service';
 import { AppService } from '../../../services/app.service';
 import { I18nService } from '../../../services/i18n.service';
 import { environment } from '../../../../environments/environment';

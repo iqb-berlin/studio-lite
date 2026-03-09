@@ -51,7 +51,7 @@ import { State } from '../../../admin/models/state.type';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
 import { WorkspaceService } from '../../services/workspace.service';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { RequestMessageDirective } from '../../directives/request-message.directive';
 import { CanReturnUnitPipe } from '../../pipes/can-return-unit.pipe';
 import { AliasId } from '../../../metadata/models/alias-id.interface';

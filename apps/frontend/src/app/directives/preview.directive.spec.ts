@@ -8,7 +8,7 @@ import { Overlay } from '@angular/cdk/overlay';
 import { AppService } from '../services/app.service';
 import { WorkspaceBackendService } from '../modules/workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../modules/workspace/services/workspace.service';
-import { ModuleService } from '../modules/shared/services/module.service';
+import { ModuleService } from '../services/module.service';
 import { UnitState } from '../models/verona.interface';
 import { PreviewDirective } from './preview.directive';
 import { VeronaModuleDirective } from './verona-module.directive';

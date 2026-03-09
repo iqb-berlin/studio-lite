@@ -12,7 +12,7 @@ import { of } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { ExportUnitFileConfigComponent } from './export-unit-file-config.component';
 import { WorkspaceService } from '../../services/workspace.service';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 
 class MockWorkspaceService {

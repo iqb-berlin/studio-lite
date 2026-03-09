@@ -18,7 +18,7 @@ import { EditWorkspaceSettingsComponent } from './edit-workspace-settings.compon
 import { BackendService } from '../../../admin/services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
-import { ModuleService } from '../../services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { State } from '../../../admin/models/state.type';
 import { SelectModuleComponent } from '../select-module/select-module.component';
 import { VeronaModuleClass } from '../../../../models/verona-module.class';

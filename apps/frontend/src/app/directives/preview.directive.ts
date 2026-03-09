@@ -12,7 +12,7 @@ import {
   VopRuntimeErrorNotificationDialogComponent
 } from '../modules/shared/components/vop-runtime-error-notification-dialog/vop-runtime-error-notification-dialog.component';
 import { WidgetCallData } from '../modules/workspace/models/widget-call-data.interface';
-import { ModuleService } from '../modules/shared/services/module.service';
+import { ModuleService } from '../services/module.service';
 import { WidgetOverlayComponent } from '../modules/workspace/components/widget-overlay/widget-overlay.component';
 
 @Directive({

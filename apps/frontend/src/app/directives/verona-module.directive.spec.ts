@@ -15,7 +15,7 @@ import { WorkspaceBackendService } from '../modules/workspace/services/workspace
 import { WorkspaceService } from '../modules/workspace/services/workspace.service';
 import { UnitDefinitionStore } from '../modules/workspace/classes/unit-definition-store';
 import { UnitMetadataStore } from '../modules/workspace/classes/unit-metadata-store';
-import { ModuleService } from '../modules/shared/services/module.service';
+import { ModuleService } from '../services/module.service';
 import { VeronaModuleClass } from '../models/verona-module.class';
 import { VeronaModuleDirective } from './verona-module.directive';
 

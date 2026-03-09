@@ -12,7 +12,7 @@ import { MatButton } from '@angular/material/button';
 import { MatOption } from '@angular/material/core';
 
 import { MatLabel, MatError } from '@angular/material/form-field';
-import { ModuleService } from '../../services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { BackendService } from '../../../admin/services/backend.service';

@@ -9,7 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { AppService } from '../../../services/app.service';
-import { ModuleService } from '../../shared/services/module.service';
+import { ModuleService } from '../../../services/module.service';
 import { BackendService } from '../services/backend.service';
 import { VeronaModulesTableComponent } from '../components/verona-modules-table/verona-modules-table.component';
 import { VeronaModuleClass } from '../../../models/verona-module.class';

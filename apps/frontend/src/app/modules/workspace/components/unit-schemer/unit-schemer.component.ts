@@ -9,7 +9,7 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import {
   UnitDefinitionDirective
 } from '../../../../directives/unit-definition.directive';

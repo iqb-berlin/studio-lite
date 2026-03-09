@@ -8,7 +8,7 @@ import { environment } from '../../../../../environments/environment';
 import { UnitEditorComponent } from './unit-editor.component';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 

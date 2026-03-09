@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
 import { PrintOption } from '../../models/print-options.interface';

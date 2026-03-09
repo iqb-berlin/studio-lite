@@ -12,7 +12,7 @@ import { UnitPlayerComponent } from './unit-player.component';
 import { ReviewService } from '../../services/review.service';
 import { ReviewBackendService } from '../../services/review-backend.service';
 import { AppService } from '../../../../services/app.service';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { UnitData } from '../../models/unit-data.class';

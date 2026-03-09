@@ -10,7 +10,7 @@ import {
   IqbFilesUploadInputForDirective,
   IqbFilesUploadQueueComponent
 } from '@studio-lite-lib/iqb-components';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { VeronaModulesTableComponent } from '../verona-modules-table/verona-modules-table.component';

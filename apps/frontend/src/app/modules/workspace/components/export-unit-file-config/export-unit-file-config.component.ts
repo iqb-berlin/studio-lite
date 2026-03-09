@@ -8,7 +8,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatCard } from '@angular/material/card';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 
 @Component({
   selector: 'studio-lite-export-unit-file-config',
