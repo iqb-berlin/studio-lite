@@ -4,7 +4,7 @@ import { VeronaModuleDirective } from './verona-module.directive';
 
 @Directive({
   selector: '[studioLiteUnitDefinition]',
-  standalone: false
+  standalone: true
 })
 export abstract class UnitDefinitionDirective extends VeronaModuleDirective {
   addSubscriptionForUnitDefinitionChanges(): void {

@@ -17,7 +17,7 @@ import { WidgetOverlayComponent } from '../../workspace/components/widget-overla
 
 @Directive({
   selector: '[preview]',
-  standalone: false
+  standalone: true
 })
 export abstract class PreviewDirective extends UnitDefinitionDirective {
   errorDialog?: MatDialog;

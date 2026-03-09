@@ -16,7 +16,7 @@ import { AppService } from '../../../services/app.service';
 
 @Directive({
   selector: '[veronaModule]',
-  standalone: false
+  standalone: true
 })
 export abstract class VeronaModuleDirective implements OnDestroy {
   abstract moduleService: ModuleService;
