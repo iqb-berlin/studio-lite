@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { NotAcceptableException } from '@nestjs/common';
 import { AdminVeronaModuleController } from './admin-verona-module.controller';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';
@@ -31,13 +32,31 @@ describe('AdminVeronaModuleController', () => {
   });
 
   describe('addModuleFile', () => {
-    it('should upload a module file', async () => {
+    it('should upload a module file for multiple types', async () => {
       const mockFile = { buffer: Buffer.from('test') };
       veronaModulesService.upload.mockResolvedValue(undefined);
 
-      await controller.addModuleFile(mockFile);
+      await controller.addModuleFile(mockFile, ['editor', 'player', 'schemer']);
 
-      expect(veronaModulesService.upload).toHaveBeenCalledWith(mockFile.buffer);
+      expect(veronaModulesService.upload)
+        .toHaveBeenCalledWith(mockFile.buffer, ['editor', 'player', 'schemer']);
+    });
+
+    it('should upload a widget file when type is widget', async () => {
+      const mockFile = { buffer: Buffer.from('test') };
+      veronaModulesService.upload.mockResolvedValue(undefined);
+
+      await controller.addModuleFile(mockFile, ['WIDGET']);
+
+      expect(veronaModulesService.upload)
+        .toHaveBeenCalledWith(mockFile.buffer, ['WIDGET']);
+    });
+
+    it('should reject unknown types', async () => {
+      const mockFile = { buffer: Buffer.from('test') };
+
+      await expect(controller.addModuleFile(mockFile, ['unknown']))
+        .rejects.toThrow(NotAcceptableException);
     });
   });
 

@@ -42,6 +42,7 @@ describe('BackendService', () => {
             id: 'm1',
             name: 'M1',
             type: 'player',
+            model: 'aspect',
             version: '1.0',
             specVersion: '1.0',
             isStable: true

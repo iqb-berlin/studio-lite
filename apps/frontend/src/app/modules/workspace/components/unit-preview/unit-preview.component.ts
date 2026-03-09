@@ -1,7 +1,9 @@
 import {
   AfterViewInit, Component, ElementRef, ViewChild
 } from '@angular/core';
-import { skip, takeUntil, Subject } from 'rxjs';
+import {
+  skip, takeUntil, Subject
+} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';

@@ -40,6 +40,7 @@ describe('AdminComponent', () => {
       'workspaces',
       'units',
       'v-modules',
+      'widgets',
       'settings',
       'packages'
     ];

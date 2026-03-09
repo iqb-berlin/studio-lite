@@ -1,9 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, fakeAsync, TestBed, tick
+} from '@angular/core/testing';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideRouter, ActivatedRoute } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { of, Subject } from 'rxjs';
+import { Overlay } from '@angular/cdk/overlay';
 import { environment } from '../../../../../environments/environment';
 import { UnitPlayerComponent } from './unit-player.component';
 import { ReviewService } from '../../services/review.service';
@@ -13,6 +16,7 @@ import { ModuleService } from '../../../shared/services/module.service';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { UnitData } from '../../models/unit-data.class';
+import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
 
 describe('UnitPlayerComponent', () => {
   let component: UnitPlayerComponent;
@@ -72,7 +76,10 @@ describe('UnitPlayerComponent', () => {
     } as unknown as jest.Mocked<AppService>;
 
     mockModuleService = {
-      players: { 'player-1': {} }
+      players: { 'player-1': {} },
+      widgets: {},
+      loadWidgets: jest.fn().mockResolvedValue(undefined),
+      getModuleHtml: jest.fn().mockResolvedValue('<html lang="">Widget</html>')
     } as unknown as jest.Mocked<ModuleService>;
 
     mockWorkspaceBackendService = {
@@ -355,5 +362,138 @@ describe('UnitPlayerComponent', () => {
     it('should inject TranslateService', () => {
       expect(component.translateService).toBeDefined();
     });
+  });
+
+  describe('handleWidgetCall', () => {
+    it('loads widgets when none are cached', fakeAsync(() => {
+      mockModuleService.widgets = {} as ModuleService['widgets'];
+
+      const calcWidget = {
+        key: 'calc@1.0',
+        metadata: { model: 'CALC', type: 'WIDGET' }
+      } as unknown as VeronaModuleClass;
+
+      (mockModuleService.loadWidgets as jest.Mock).mockImplementation(
+        () => {
+          mockModuleService.widgets = { 'calc@1.0': calcWidget } as unknown as ModuleService['widgets'];
+          return Promise.resolve();
+        }
+      );
+
+      jest.spyOn(TestBed.inject(Overlay), 'create').mockReturnValue({
+        attach: jest.fn().mockReturnValue({
+          instance: {
+            widgetHtml: '',
+            widgetCallData: undefined,
+            playerPostMessageTarget: undefined,
+            playerSessionId: '',
+            overlayRef: undefined
+          }
+        }),
+        dispose: jest.fn()
+      } as unknown as ReturnType<Overlay['create']>);
+
+      component.handleWidgetCall({
+        callId: 'c1',
+        widgetType: 'CALC',
+        parameters: { k: 'v' },
+        state: 's'
+      });
+
+      tick();
+
+      expect(mockModuleService.loadWidgets).toHaveBeenCalled();
+      expect(mockModuleService.getModuleHtml).toHaveBeenCalledWith(calcWidget);
+    }));
+
+    it('skips loadWidgets when widgets are already cached', fakeAsync(() => {
+      const calcWidget = {
+        key: 'calc@1.0',
+        metadata: { model: 'CALC', type: 'WIDGET' }
+      } as unknown as VeronaModuleClass;
+      mockModuleService.widgets = { 'calc@1.0': calcWidget } as unknown as ModuleService['widgets'];
+
+      jest.spyOn(TestBed.inject(Overlay), 'create').mockReturnValue({
+        attach: jest.fn().mockReturnValue({
+          instance: {
+            widgetHtml: '',
+            widgetCallData: undefined,
+            playerPostMessageTarget: undefined,
+            playerSessionId: '',
+            overlayRef: undefined
+          }
+        }),
+        dispose: jest.fn()
+      } as unknown as ReturnType<Overlay['create']>);
+
+      component.handleWidgetCall({
+        callId: 'c2',
+        widgetType: 'CALC'
+      });
+
+      tick();
+
+      expect(mockModuleService.loadWidgets).not.toHaveBeenCalled();
+      expect(mockModuleService.getModuleHtml).toHaveBeenCalledWith(calcWidget);
+    }));
+
+    it('warns when no matching widget is found', fakeAsync(() => {
+      mockModuleService.widgets = {} as ModuleService['widgets'];
+      (mockModuleService.loadWidgets as jest.Mock).mockResolvedValue(undefined);
+
+      component.handleWidgetCall({
+        callId: 'c3',
+        widgetType: 'NONEXISTENT'
+      });
+
+      tick();
+
+      expect(mockSnackBar.open).toHaveBeenCalled();
+      expect(mockModuleService.getModuleHtml).not.toHaveBeenCalled();
+    }));
+
+    it('opens overlay with correct inputs', fakeAsync(() => {
+      const calcWidget = {
+        key: 'calc@1.0',
+        metadata: { model: 'CALC', type: 'WIDGET' }
+      } as unknown as VeronaModuleClass;
+      mockModuleService.widgets = { 'calc@1.0': calcWidget } as unknown as ModuleService['widgets'];
+
+      const fakeInstance = {
+        widgetHtml: '',
+        widgetCallData: undefined as unknown,
+        playerPostMessageTarget: undefined as Window | undefined,
+        playerSessionId: '',
+        overlayRef: undefined as unknown
+      };
+      const fakeOverlayRef = {
+        attach: jest.fn().mockReturnValue({ instance: fakeInstance }),
+        dispose: jest.fn()
+      };
+      jest.spyOn(TestBed.inject(Overlay), 'create')
+        .mockReturnValue(fakeOverlayRef as unknown as ReturnType<Overlay['create']>);
+
+      const playerTarget = { postMessage: jest.fn() } as unknown as Window;
+      component.postMessageTarget = playerTarget;
+      component.sessionId = 'sess-99';
+
+      const callData = {
+        callId: 'c4',
+        widgetType: 'CALC',
+        parameters: { p: '1' },
+        state: 'saved-state'
+      };
+
+      component.handleWidgetCall(callData);
+
+      tick();
+      tick();
+
+      expect(fakeInstance.widgetHtml).toBe('<html lang="">Widget</html>');
+      expect(fakeInstance.widgetCallData).toEqual(callData);
+      expect(fakeInstance.playerPostMessageTarget).toBe(playerTarget);
+      expect(fakeInstance.playerSessionId).toBe('sess-99');
+      expect(fakeInstance.overlayRef).toBe(fakeOverlayRef);
+    }));
   });
 });

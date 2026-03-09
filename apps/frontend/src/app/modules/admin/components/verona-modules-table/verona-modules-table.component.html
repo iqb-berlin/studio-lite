@@ -46,6 +46,15 @@
       </mat-header-cell>
       <mat-cell *matCellDef="let element" >{{element.key}}</mat-cell>
     </ng-container>
+    <ng-container matColumnDef="model">
+      <mat-header-cell *matHeaderCellDef
+                       mat-sort-header="model">
+        {{'admin.model' | translate}}
+      </mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        {{element.model}}
+      </mat-cell>
+    </ng-container>
     <ng-container matColumnDef="version">
       <mat-header-cell *matHeaderCellDef
                        mat-sort-header="version">

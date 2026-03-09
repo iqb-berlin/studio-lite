@@ -101,6 +101,7 @@
     "select-workspace": "Arbeitsbereich wählen",
     "select-review": "Aufgabenfolge starten",
     "goto-admin": "Systemverwaltung",
+    "admin": "Systemverwaltung",
     "goto-wsg-admin": "Bereichsgruppenverwaltung",
     "imprint": "Impressum/Datenschutz",
     "logout": "Abmelden",
@@ -204,6 +205,7 @@
     "workspace-groups": "Bereichsgruppen",
     "workspaces": "Arbeitsbereiche",
     "v-modules": "Module",
+    "widgets": "Widgets",
     "settings": "Einstellungen",
     "packages": "Pakete",
     "units": "Aufgaben",
@@ -263,7 +265,8 @@
     "package-not-deleted": "Konnte Paket(e) nicht löschen",
     "issue-count-info": "Das System verfügt über {{count}} {{issue}}.",
     "generate_password": "Kennwort generieren",
-    "and-send-mail": "und E-Mail senden"
+    "and-send-mail": "und E-Mail senden",
+    "model": "Model"
   },
   "metadata": {
     "metadata": "Metadaten",
@@ -452,10 +455,12 @@
   },
   "modules": {
     "title": "Admin: Verona-Module",
+    "widgets-title": "Admin: Widgets",
     "upload": "Modul(e) hochladen/aktualisieren",
     "editor-name": "Editor",
-    "player-name": "Vorschau (Player)",
-    "schemer-name": "Kodierung (Schemer)",
+    "player-name": "Player (Vorschau)",
+    "schemer-name": "Schemer (Kodierung)",
+    "widget-name": "Widget",
     "delete-title": "Löschen von Dateien",
     "delete-module": "Sie haben eine Datei ausgewählt. Soll die Datei gelöscht werden?",
     "delete-modules": "Sie haben {{count}} Dateien ausgewählt. Sollen die Dateien gelöscht werden?",
@@ -464,7 +469,10 @@
     "no-module-type": "Kein {{ module }} in diesem System verfügbar.",
     "not-defined-module-type": "{{ module }} ist nicht definiert.",
     "not-valid-module-type": "{{ module }} ist nicht gültig.",
-    "replaced": "Das Modul mit der Kennung \"{{selectedModuleId}}\" ist nicht in diesem System verfügbar.\nEs wird statt dessen \"{{moduleSubstitute}}\" benutzt."
+    "replaced": "Das Modul mit der Kennung \"{{selectedModuleId}}\" ist nicht in diesem System verfügbar.\nEs wird statt dessen \"{{moduleSubstitute}}\" benutzt.",
+    "calc": "Rechner",
+    "periodic-table": "Periodensystem",
+    "molecule-editor": "Moleküleditor"
   },
   "application": {
     "wait-message": "Bitte warten"
@@ -709,6 +717,7 @@
     "no-schemer": "Kein gültiger Editor für das Antwortschema zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-editor": "Kein gültiger Editor zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-player": "Kein gültiger Player zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
+    "no-widget": "Kein passendes Widget für den Typ \"{{widgetType}}\" gefunden.",
     "player-send-page-navigation-request": "Player sendet PageNavigationRequest: \"{{target}}\"",
     "player-send-unit-navigation-request": "Player sendet UnitNavigationRequest: \"{{target}}\"",
     "page-selection": "Seite auswählen",

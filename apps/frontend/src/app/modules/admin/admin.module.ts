@@ -49,6 +49,7 @@ import { WorkspaceGroupsMenuComponent } from './components/workspace-groups-menu
 import {
   EditWorkspaceGroupSettingsComponent
 } from './components/edit-workspace-group-settings/edit-workspace-group-settings.component';
+import { WidgetsComponent } from './components/widgets/widgets.component';
 
 @NgModule({
   exports: [AdminComponent],
@@ -85,6 +86,7 @@ import {
     EditUserComponent,
     VeronaModulesComponent,
     VeronaModulesTableComponent,
+    WidgetsComponent,
     SettingsComponent,
     EditWorkspaceGroupComponent,
     AppConfigComponent,

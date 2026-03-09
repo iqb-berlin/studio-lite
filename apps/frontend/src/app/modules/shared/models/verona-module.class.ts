@@ -12,12 +12,12 @@ export class VeronaModuleClass {
     return `${this.metadata.name} ${this.metadata.version}`;
   }
 
-  constructor(modulData: VeronaModuleInListDto) {
-    this.key = modulData.key;
-    this.sortKey = modulData.sortKey;
-    this.metadata = modulData.metadata;
-    this.fileSize = modulData.fileSize || 0;
-    this.fileDateTime = modulData.fileDateTime || 0;
+  constructor(moduleData: VeronaModuleInListDto) {
+    this.key = moduleData.key;
+    this.sortKey = moduleData.sortKey;
+    this.metadata = moduleData.metadata;
+    this.fileSize = moduleData.fileSize || 0;
+    this.fileDateTime = moduleData.fileDateTime || 0;
   }
 }
 
@@ -29,6 +29,7 @@ export interface FlattenedVeronaModuleClass {
   html: string;
   id: string;
   type: VeronaModuleType;
+  model: string;
   name: string;
   version: string;
   specVersion: string;

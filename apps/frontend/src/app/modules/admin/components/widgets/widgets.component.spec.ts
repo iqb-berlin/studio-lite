@@ -3,16 +3,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Component, Directive, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import {
-  IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, ConfirmDialogComponent
+  IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent
 } from '@studio-lite-lib/iqb-components';
 import { environment } from '../../../../../environments/environment';
-import { VeronaModulesComponent } from './verona-modules.component';
+import { WidgetsComponent } from './widgets.component';
 import { AppService } from '../../../../services/app.service';
 import { AppConfig } from '../../../../classes/app-config.class';
 import { ModuleService } from '../../../shared/services/module.service';
@@ -21,9 +21,9 @@ import { VeronaModulesTableComponent } from '../verona-modules-table/verona-modu
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
 import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
 
-describe('VeronaModulesComponent', () => {
-  let component: VeronaModulesComponent;
-  let fixture: ComponentFixture<VeronaModulesComponent>;
+describe('WidgetsComponent', () => {
+  let component: WidgetsComponent;
+  let fixture: ComponentFixture<WidgetsComponent>;
   let mockBackendService: Partial<BackendService>;
   let mockAppService: Partial<AppService>;
   let mockModuleService: Partial<ModuleService>;
@@ -71,7 +71,7 @@ describe('VeronaModulesComponent', () => {
       } as unknown as AppConfig
     };
     mockModuleService = {
-      loadList: jest.fn().mockResolvedValue(undefined)
+      loadWidgets: jest.fn().mockResolvedValue(undefined)
     };
     mockDialog = {
       open: jest.fn().mockReturnValue({
@@ -89,7 +89,7 @@ describe('VeronaModulesComponent', () => {
         MatSnackBarModule,
         MatIconModule,
         MatDialogModule,
-        VeronaModulesComponent,
+        WidgetsComponent,
         MockIqbFilesUploadQueueComponent,
         MockVeronaModulesTableComponent,
         MockIqbFilesUploadInputForDirective,
@@ -108,7 +108,7 @@ describe('VeronaModulesComponent', () => {
         { provide: MatSnackBar, useValue: mockSnackBar }
       ]
     })
-      .overrideComponent(VeronaModulesComponent, {
+      .overrideComponent(WidgetsComponent, {
         remove: {
           imports: [
             IqbFilesUploadQueueComponent,
@@ -128,11 +128,10 @@ describe('VeronaModulesComponent', () => {
       })
       .compileComponents();
 
-    // Inject and mock TranslateService
     const translateService = TestBed.inject(TranslateService);
     jest.spyOn(translateService, 'instant').mockImplementation((key: string | string[]) => key as string);
 
-    fixture = TestBed.createComponent(VeronaModulesComponent);
+    fixture = TestBed.createComponent(WidgetsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -141,23 +140,23 @@ describe('VeronaModulesComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load module list on init', async () => {
+  it('should load widget list on init', async () => {
     jest.useFakeTimers();
     component.ngOnInit();
     jest.advanceTimersByTime(100);
 
-    expect(mockModuleService.loadList).toHaveBeenCalled();
+    expect(mockModuleService.loadWidgets).toHaveBeenCalled();
     jest.useRealTimers();
   });
 
   it('should change selected modules correctly', () => {
-    const module1 = { metadata: { type: 'editor' }, key: 'm1' } as VeronaModuleClass;
-    const module2 = { metadata: { type: 'player' }, key: 'm2' } as VeronaModuleClass;
-    const module3 = { metadata: { type: 'editor' }, key: 'm3' } as VeronaModuleClass;
+    const module1 = { metadata: { type: 'WIDGET', model: 'model-a' }, key: 'w1' } as VeronaModuleClass;
+    const module2 = { metadata: { type: 'WIDGET', model: 'model-a' }, key: 'w2' } as VeronaModuleClass;
+    const module3 = { metadata: { type: 'WIDGET', model: 'model-b' }, key: 'w3' } as VeronaModuleClass;
 
-    component.selectedModules = [module1, module2];
+    component.selectedModules = [module1, module3];
 
-    component.changeSelectedModules({ type: 'editor', selectedModules: [module3] });
+    component.changeSelectedModules({ type: 'model-a', selectedModules: [module2] });
 
     expect(component.selectedModules).toHaveLength(2);
     expect(component.selectedModules).toContain(module2);
@@ -166,7 +165,7 @@ describe('VeronaModulesComponent', () => {
   });
 
   it('should delete modules successfully', () => {
-    component.selectedModules = [{ key: 'm1' }] as VeronaModuleClass[];
+    component.selectedModules = [{ key: 'w1' }] as VeronaModuleClass[];
 
     (mockDialog.open as jest.Mock).mockReturnValue({
       afterClosed: jest.fn().mockReturnValue(of(true))
@@ -174,13 +173,13 @@ describe('VeronaModulesComponent', () => {
 
     component.deleteFiles();
 
-    expect(mockBackendService.deleteVeronaModules).toHaveBeenCalledWith(['m1']);
+    expect(mockBackendService.deleteVeronaModules).toHaveBeenCalledWith(['w1']);
     expect(mockSnackBar.open).toHaveBeenCalledWith(expect.stringMatching(/modules.deleted/), '', { duration: 1000 });
-    expect(mockModuleService.loadList).toHaveBeenCalled();
+    expect(mockModuleService.loadWidgets).toHaveBeenCalled();
   });
 
   it('should handle delete modules failure', () => {
-    component.selectedModules = [{ key: 'm1' } as VeronaModuleClass];
+    component.selectedModules = [{ key: 'w1' } as VeronaModuleClass];
     (mockBackendService.deleteVeronaModules as jest.Mock).mockReturnValue(of(false));
 
     component.deleteFiles();
@@ -188,15 +187,8 @@ describe('VeronaModulesComponent', () => {
     expect(mockSnackBar.open).toHaveBeenCalledWith('modules.not-deleted', 'error', { duration: 3000 });
   });
 
-  it('should ask for confirmation before deleting', () => {
-    component.selectedModules = [{ key: 'm1' } as VeronaModuleClass];
-    const spy = jest.spyOn(mockDialog, 'open');
-    component.deleteFiles();
-    expect(spy).toHaveBeenCalledWith(ConfirmDialogComponent, expect.anything());
-  });
-
   it('should abort delete if confirmation is rejected', () => {
-    component.selectedModules = [{ key: 'm1' } as VeronaModuleClass];
+    component.selectedModules = [{ key: 'w1' } as VeronaModuleClass];
     (mockDialog.open as jest.Mock).mockReturnValue({
       afterClosed: jest.fn().mockReturnValue(of(false))
     });

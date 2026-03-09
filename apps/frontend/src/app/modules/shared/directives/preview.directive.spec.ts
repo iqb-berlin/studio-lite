@@ -1,8 +1,10 @@
-import { ElementRef } from '@angular/core';
+import { ElementRef, ViewContainerRef } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
+import { Overlay } from '@angular/cdk/overlay';
 import { AppService } from '../../../services/app.service';
 import { WorkspaceBackendService } from '../../workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../../workspace/services/workspace.service';
@@ -29,6 +31,7 @@ class TestPreviewDirective extends PreviewDirective {
 
   gotoUnit = jest.fn();
   handleUnitStateData = jest.fn();
+  override handleWidgetCall = jest.fn();
   sendChangeData = jest.fn();
   onSelectedUnitChange = jest.fn();
   postStore = jest.fn();
@@ -46,9 +49,23 @@ class TestPreviewDirective extends PreviewDirective {
   }
 }
 
+const createDirective = (): TestPreviewDirective => TestBed.runInInjectionContext(
+  () => new TestPreviewDirective()
+);
+
 describe('PreviewDirective', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ModuleService, useValue: { widgets: {}, loadWidgets: jest.fn() } },
+        Overlay,
+        ViewContainerRef
+      ]
+    });
+  });
+
   it('handles ready notification and initializes session', () => {
-    const directive = new TestPreviewDirective();
+    const directive = createDirective();
     const mockWindow = window;
     directive.iFrameElement = createIFrameWithWindow(mockWindow);
 
@@ -65,7 +82,7 @@ describe('PreviewDirective', () => {
   });
 
   it('updates page list and unit state on vopStateChangedNotification', () => {
-    const directive = new TestPreviewDirective();
+    const directive = createDirective();
     const mockWindow = window;
     directive.iFrameElement = createIFrameWithWindow(mockWindow);
 
@@ -93,7 +110,7 @@ describe('PreviewDirective', () => {
   });
 
   it('routes page navigation request and shows notification', () => {
-    const directive = new TestPreviewDirective();
+    const directive = createDirective();
     const mockWindow = window;
     directive.iFrameElement = createIFrameWithWindow(mockWindow);
 
@@ -114,7 +131,7 @@ describe('PreviewDirective', () => {
   });
 
   it('forwards unit navigation requests', () => {
-    const directive = new TestPreviewDirective();
+    const directive = createDirective();
     const mockWindow = window;
     directive.iFrameElement = createIFrameWithWindow(mockWindow);
 
@@ -132,7 +149,7 @@ describe('PreviewDirective', () => {
   });
 
   it('sets focus state when notified', () => {
-    const directive = new TestPreviewDirective();
+    const directive = createDirective();
     const mockWindow = window;
     directive.iFrameElement = createIFrameWithWindow(mockWindow);
 
@@ -150,7 +167,7 @@ describe('PreviewDirective', () => {
   });
 
   it('opens error dialog on vopRuntimeErrorNotification', () => {
-    const directive = new TestPreviewDirective();
+    const directive = createDirective();
     const mockWindow = window;
     directive.iFrameElement = createIFrameWithWindow(mockWindow);
 
@@ -177,7 +194,7 @@ describe('PreviewDirective', () => {
   });
 
   it('builds page list for valid pages and updates current page', () => {
-    const directive = new TestPreviewDirective();
+    const directive = createDirective();
 
     directive.setPageList(['p1', 'p2'], 'p1');
 
@@ -195,7 +212,7 @@ describe('PreviewDirective', () => {
   });
 
   it('sends page navigation commands based on api version', () => {
-    const directive = new TestPreviewDirective();
+    const directive = createDirective();
     const postMessageTarget = { postMessage: jest.fn() } as unknown as Window;
 
     directive.pageList = [

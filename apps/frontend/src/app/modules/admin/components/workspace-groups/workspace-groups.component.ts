@@ -76,7 +76,6 @@ export class WorkspaceGroupsComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.createUserList();
-      this.appService.appConfig.setPageTitle(`Admin: ${this.translateService.instant('wsg-admin.workspaces')}`);
     });
   }
 

@@ -30,48 +30,55 @@ describe('ModuleService', () => {
 
   describe('loadList', () => {
     it('should populate editors, players, and schemers dictionaries', async () => {
-      const mockModules: VeronaModuleInListDto[] = [
-        {
+      const mockModulesByType: Record<string, VeronaModuleInListDto[]> = {
+        editor: [{
           key: 'e1',
           sortKey: 'e1',
           metadata: {
             id: 'e1',
             name: 'E1',
             type: 'editor',
+            model: '',
             version: '1.0',
             specVersion: '1.0',
             isStable: true
           }
-        },
-        {
+        }],
+        player: [{
           key: 'p1',
           sortKey: 'p1',
           metadata: {
             id: 'p1',
             name: 'P1',
             type: 'player',
+            model: 'speedTest',
             version: '1.0',
             specVersion: '1.0',
             isStable: true
           }
-        },
-        {
+        }],
+        schemer: [{
           key: 's1',
           sortKey: 's1',
           metadata: {
             id: 's1',
             name: 'S1',
             type: 'schemer',
+            model: 'iqb',
             version: '1.0',
             specVersion: '1.0',
             isStable: true
           }
-        }
-      ];
+        }]
+      };
 
-      mockBackendService.getModuleList.mockReturnValue(of(mockModules));
+      mockBackendService.getModuleList.mockImplementation((type?: string) => of(mockModulesByType[type || ''] || []));
 
       await service.loadList();
+
+      expect(mockBackendService.getModuleList).toHaveBeenCalledWith('editor');
+      expect(mockBackendService.getModuleList).toHaveBeenCalledWith('player');
+      expect(mockBackendService.getModuleList).toHaveBeenCalledWith('schemer');
 
       expect(Object.keys(service.editors)).toHaveLength(1);
       // eslint-disable-next-line @typescript-eslint/dot-notation
@@ -87,11 +94,44 @@ describe('ModuleService', () => {
     });
 
     it('should handle empty response', async () => {
-      mockBackendService.getModuleList.mockReturnValue(of([]));
+      mockBackendService.getModuleList.mockImplementation(() => of([]));
       await service.loadList();
       expect(Object.keys(service.editors)).toHaveLength(0);
       expect(Object.keys(service.players)).toHaveLength(0);
       expect(Object.keys(service.schemers)).toHaveLength(0);
+    });
+  });
+
+  describe('loadWidgets', () => {
+    it('should populate widgets dictionary', async () => {
+      const mockWidgets: VeronaModuleInListDto[] = [{
+        key: 'w1',
+        sortKey: 'w1',
+        metadata: {
+          id: 'w1',
+          name: 'W1',
+          type: 'WIDGET',
+          model: 'CALC',
+          version: '1.0',
+          specVersion: '1.0',
+          isStable: true
+        }
+      }];
+
+      mockBackendService.getModuleList.mockReturnValue(of(mockWidgets));
+
+      await service.loadWidgets();
+
+      expect(mockBackendService.getModuleList).toHaveBeenCalledWith('WIDGET');
+      expect(Object.keys(service.widgets)).toHaveLength(1);
+      // eslint-disable-next-line @typescript-eslint/dot-notation
+      expect(service.widgets['w1'].metadata.name).toBe('W1');
+    });
+
+    it('should handle empty widget response', async () => {
+      mockBackendService.getModuleList.mockReturnValue(of([]));
+      await service.loadWidgets();
+      expect(Object.keys(service.widgets)).toHaveLength(0);
     });
   });
 
@@ -104,6 +144,7 @@ describe('ModuleService', () => {
           id: 'm1',
           name: 'M1',
           type: 'player',
+          model: 'aspect',
           version: '1.0',
           specVersion: '1.0',
           isStable: true
@@ -125,6 +166,7 @@ describe('ModuleService', () => {
           id: 'm1',
           name: 'M1',
           type: 'player',
+          model: 'aspect',
           version: '1.0',
           specVersion: '1.0',
           isStable: true
@@ -153,6 +195,7 @@ describe('ModuleService', () => {
           id: 'm1',
           name: 'M1',
           type: 'player',
+          model: 'aspect',
           version: '1.0',
           specVersion: '1.0',
           isStable: true

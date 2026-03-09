@@ -33,25 +33,15 @@
                               (uploadCompleteEvent)="loadModuleList()">
       </iqb-files-upload-queue>
       <div class="fx-column-start-stretch">
-        <h2>{{'modules.player-name' | translate}}</h2>
-        <studio-lite-verona-modules-table type="player"
-                                          [modules]="moduleService.players"
-                                          (selectionChanged)="changeSelectedModules($event)">
-        </studio-lite-verona-modules-table>
-      </div>
-      <div class="fx-column-start-stretch">
-        <h2>{{'modules.editor-name' | translate}}</h2>
-        <studio-lite-verona-modules-table type="editor"
-                                          [modules]="moduleService.editors"
-                                          (selectionChanged)="changeSelectedModules($event)">
-        </studio-lite-verona-modules-table>
-      </div>
-      <div class="fx-column-start-stretch">
-        <h2>{{'modules.schemer-name' | translate}}</h2>
-        <studio-lite-verona-modules-table type="schemer"
-                                          [modules]="moduleService.schemers"
-                                          (selectionChanged)="changeSelectedModules($event)">
-        </studio-lite-verona-modules-table>
+        @for (group of widgetGroups; track group.model) {
+          <div>
+            <h2>{{ 'modules.' + (group.model | upperSnakeCaseToKebabCase) | translate }}</h2>
+            <studio-lite-verona-modules-table [type]="group.model"
+                                              [modules]="group.modules"
+                                              (selectionChanged)="changeSelectedModules($event)">
+            </studio-lite-verona-modules-table>
+          </div>
+        }
       </div>
     </div>
   </div>

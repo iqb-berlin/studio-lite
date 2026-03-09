@@ -3,11 +3,12 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import {
-  IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent
+  IqbFilesUploadInputForDirective,
+  IqbFilesUploadQueueComponent
 } from '@studio-lite-lib/iqb-components';
 import { ModuleService } from '../../../shared/services/module.service';
 import { BackendService } from '../../services/backend.service';
@@ -17,17 +18,18 @@ import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wr
 import { ModulesDirective } from '../../directives/modules.directive';
 import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
 import { ModuleSelectionChange } from '../../models/module-selection-change.interface';
+import { UpperSnakeCaseToKebabCasePipe } from '../../pipes/upper-snake-case-to-kebab-case.pipe';
 
 @Component({
-  selector: 'studio-lite-verona-modules',
-  templateUrl: './verona-modules.component.html',
-  styleUrls: ['./verona-modules.component.scss'],
+  selector: 'studio-lite-widgets',
+  templateUrl: './widgets.component.html',
+  styleUrls: ['./widgets.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, VeronaModulesTableComponent, TranslateModule]
+  imports: [MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, VeronaModulesTableComponent, TranslateModule, UpperSnakeCaseToKebabCasePipe]
 })
-export class VeronaModulesComponent extends ModulesDirective {
-  protected readonly pageTitleKey = 'modules.title';
-  protected readonly uploadPath = 'admin/verona-modules?type=editor&type=player&type=schemer';
+export class WidgetsComponent extends ModulesDirective {
+  protected readonly pageTitleKey = 'modules.widgets-title';
+  protected readonly uploadPath = 'admin/verona-modules?type=WIDGET';
 
   protected serverUrl: string;
   protected appService: AppService;
@@ -36,6 +38,7 @@ export class VeronaModulesComponent extends ModulesDirective {
   protected deleteConfirmDialog: MatDialog;
   protected snackBar: MatSnackBar;
   protected translateService: TranslateService;
+  widgetGroups: { model: string; modules: { [key: string]: VeronaModuleClass } }[] = [];
 
   constructor(@Inject('SERVER_URL') serverUrl: string,
                                     appService: AppService,
@@ -57,16 +60,19 @@ export class VeronaModulesComponent extends ModulesDirective {
 
   loadModuleList() {
     this.appService.dataLoading = true;
-    this.moduleService.loadList().then(() => {
+    this.moduleService.loadWidgets().then(() => {
+      this.buildWidgetGroups();
       this.appService.dataLoading = false;
     });
   }
 
   changeSelectedModules(selection: ModuleSelectionChange): void {
     const newSelection: VeronaModuleClass[] = [];
+    const selectionKey = selection.type || '';
 
     this.selectedModules.forEach(module => {
-      if (module.metadata?.type !== selection.type) {
+      const moduleKey = module.metadata?.model || '';
+      if (moduleKey !== selectionKey) {
         newSelection.push(module);
       }
     });
@@ -75,5 +81,21 @@ export class VeronaModulesComponent extends ModulesDirective {
     });
 
     this.selectedModules = newSelection;
+  }
+
+  private buildWidgetGroups(): void {
+    const groups = new Map<string, { [key: string]: VeronaModuleClass }>();
+    Object.keys(this.moduleService.widgets || {}).forEach(key => {
+      const module = this.moduleService.widgets[key];
+      const model = module?.metadata?.model || '';
+      if (!groups.has(model)) {
+        groups.set(model, {});
+      }
+      groups.get(model)![key] = module;
+    });
+
+    this.widgetGroups = Array.from(groups.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([model, modules]) => ({ model, modules }));
   }
 }
