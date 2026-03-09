@@ -61,9 +61,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    setTimeout(() => {
-      this.updateFormFields();
-    });
+    this.updateFormFields();
   }
 
   updateFormFields(): void {
