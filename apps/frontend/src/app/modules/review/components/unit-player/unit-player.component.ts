@@ -7,17 +7,17 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { ReviewService } from '../../services/review.service';
 import { UnitData } from '../../models/unit-data.class';
 import { ReviewBackendService } from '../../services/review-backend.service';
-import { PageNavigationComponent } from '../../../shared/components/page-navigation/page-navigation.component';
+import { PageNavigationComponent } from '../../../../components/page-navigation/page-navigation.component';
 import { UnitInfoComponent } from '../unit-info/unit-info.component';
-import { PreviewDirective } from '../../../shared/directives/preview.directive';
+import { PreviewDirective } from '../../../../directives/preview.directive';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
-import { UnitState } from '../../../shared/models/verona.interface';
+import { UnitState } from '../../../../models/verona.interface';
 
 @Component({
   selector: 'studio-lite-unit-player',

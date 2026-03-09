@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, fakeAsync, TestBed, tick
+} from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -118,78 +120,60 @@ describe('AppConfigComponent', () => {
     expect(component.expiredHours[23]).toBe(23);
   });
 
-  it('should load config data on init', done => {
+  it('should load config data on init', () => {
     fixture.detectChanges();
-    setTimeout(() => {
-      expect(readBackendService.getConfig).toHaveBeenCalled();
-      done();
-    }, 100);
+    expect(readBackendService.getConfig).toHaveBeenCalled();
   });
 
-  it('should update form fields with loaded data', done => {
+  it('should update form fields with loaded data', () => {
     fixture.detectChanges();
-    setTimeout(() => {
-      expect(component.configForm.get('appTitle')?.value).toBe('Test App');
-      expect(component.configForm.get('introHtml')?.value).toBe('<p>Test Intro</p>');
-      expect(component.configForm.get('imprintHtml')?.value).toBe('<p>Test Imprint</p>');
-      expect(component.configForm.get('globalWarningText')?.value).toBe('Test Warning');
-      done();
-    }, 100);
+    expect(component.configForm.get('appTitle')?.value).toBe('Test App');
+    expect(component.configForm.get('introHtml')?.value).toBe('<p>Test Intro</p>');
+    expect(component.configForm.get('imprintHtml')?.value).toBe('<p>Test Imprint</p>');
+    expect(component.configForm.get('globalWarningText')?.value).toBe('Test Warning');
   });
 
-  it('should set dataChanged flag when form values change', done => {
+  it('should set dataChanged flag when form values change', fakeAsync(() => {
     fixture.detectChanges();
-    setTimeout(() => {
-      component.dataChanged = false;
-      component.configForm.get('appTitle')?.setValue('New Title');
-      setTimeout(() => {
-        expect(component.dataChanged).toBe(true);
-        done();
-      }, 50);
-    }, 100);
-  });
+    component.dataChanged = false;
+    component.configForm.get('appTitle')?.setValue('New Title');
+    tick(50);
+    expect(component.dataChanged).toBe(true);
+  }));
 
-  it('should save config data successfully', done => {
+  it('should save config data successfully', fakeAsync(() => {
     writeBackendService.setAppConfig.mockReturnValue(of(true));
     fixture.detectChanges();
 
-    setTimeout(() => {
-      component.dataChanged = true;
-      component.saveData();
+    component.dataChanged = true;
+    component.saveData();
 
-      expect(writeBackendService.setAppConfig).toHaveBeenCalled();
-      setTimeout(() => {
-        expect(snackBar.open).toHaveBeenCalledWith(
-          expect.any(String),
-          '',
-          { duration: 3000 }
-        );
-        expect(component.dataChanged).toBe(false);
-        done();
-      }, 50);
-    }, 100);
-  });
+    expect(writeBackendService.setAppConfig).toHaveBeenCalled();
+    tick(50);
+    expect(snackBar.open).toHaveBeenCalledWith(
+      expect.any(String),
+      '',
+      { duration: 3000 }
+    );
+    expect(component.dataChanged).toBe(false);
+  }));
 
-  it('should show error message when save fails', done => {
+  it('should show error message when save fails', fakeAsync(() => {
     writeBackendService.setAppConfig.mockReturnValue(of(false));
     fixture.detectChanges();
 
-    setTimeout(() => {
-      component.saveData();
+    component.saveData();
 
-      expect(writeBackendService.setAppConfig).toHaveBeenCalled();
-      setTimeout(() => {
-        expect(snackBar.open).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.any(String),
-          { duration: 3000 }
-        );
-        done();
-      }, 50);
-    }, 100);
-  });
+    expect(writeBackendService.setAppConfig).toHaveBeenCalled();
+    tick(50);
+    expect(snackBar.open).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(String),
+      { duration: 3000 }
+    );
+  }));
 
-  it('should check if warning is expired', done => {
+  it('should check if warning is expired', () => {
     const pastDate = new Date('2020-01-01');
     const pastConfig: ConfigDto = {
       appTitle: 'Test',
@@ -208,9 +192,6 @@ describe('AppConfigComponent', () => {
     const newComponent = newFixture.componentInstance;
     newFixture.detectChanges();
 
-    setTimeout(() => {
-      expect(newComponent.warningIsExpired).toBe(true);
-      done();
-    }, 100);
+    expect(newComponent.warningIsExpired).toBe(true);
   });
 });

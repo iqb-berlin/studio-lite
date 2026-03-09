@@ -5,7 +5,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { Component, Input } from '@angular/core';
 import { PrintReviewButtonComponent } from './print-review-button.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 
 @Component({ selector: 'studio-lite-wrapped-icon', template: '', standalone: true })
 class MockWrappedIconComponent {

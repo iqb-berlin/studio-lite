@@ -14,7 +14,7 @@ import { CodingSchemeFactory } from '@iqb/responses';
 import { Response } from '@iqbspecs/response/response.interface';
 import { Router } from '@angular/router';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -25,8 +25,8 @@ import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
 import {
   PrintOptionsDialogComponent
 } from '../../../print/components/print-options-dialog/print-options-dialog.component';
-import { PreviewDirective } from '../../../shared/directives/preview.directive';
-import { UnitState } from '../../../shared/models/verona.interface';
+import { PreviewDirective } from '../../../../directives/preview.directive';
+import { UnitState } from '../../../../models/verona.interface';
 
 @Component({
   templateUrl: './unit-preview.component.html',

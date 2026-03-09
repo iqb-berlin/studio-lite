@@ -5,7 +5,7 @@ import { Subject } from 'rxjs';
 import { OverlayRef } from '@angular/cdk/overlay';
 import { TranslateModule } from '@ngx-translate/core';
 import { AppService } from '../../../../services/app.service';
-import { VeronaModuleDirective } from '../../../shared/directives/verona-module.directive';
+import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
 import { WidgetOverlayComponent } from './widget-overlay.component';
 import { WidgetCallData } from '../../models/widget-call-data.interface';
 

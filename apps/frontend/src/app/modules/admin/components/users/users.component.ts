@@ -19,10 +19,10 @@ import { MatIcon } from '@angular/material/icon';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
-import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { UsersMenuComponent } from '../users-menu/users-menu.component';
-import { EntriesDividerComponent } from '../../../shared/components/entries-divider/entries-divider.component';
+import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 import {
   BackendService
 } from '../../services/backend.service';

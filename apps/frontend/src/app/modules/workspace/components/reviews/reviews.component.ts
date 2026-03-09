@@ -24,7 +24,7 @@ import { SaveChangesComponent } from '../save-changes/save-changes.component';
 import { ReviewConfigComponent } from '../review-config/review-config.component';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { ReviewMenuComponent } from '../review-menu/review-menu.component';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { I18nService } from '../../../../services/i18n.service';
 
 @Component({

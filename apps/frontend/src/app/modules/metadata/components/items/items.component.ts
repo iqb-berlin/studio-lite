@@ -13,16 +13,16 @@ import { ItemsMetadataValues, ProfileMetadataValues, UnitMetadataValues } from '
 import { MatDialog } from '@angular/material/dialog';
 import { MDProfile } from '@iqb/metadata';
 import { FormsModule } from '@angular/forms';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { ItemComponent } from '../item/item.component';
 import {
   MetadataReadonlyItemsComponent
-} from '../../../shared/components/metadata-readonly-items/metadata-readonly-items.component';
+} from '../../../../components/metadata-readonly-items/metadata-readonly-items.component';
 import { AliasId } from '../../models/alias-id.interface';
 import { NewItemComponent } from '../new-item/new-item.component';
 import { ItemSortService } from '../../services/item-sort.service';
 import { SortAscendingPipe } from '../../../comments/pipes/sort-ascending.pipe';
-import { DeleteDialogComponent } from '../../../shared/components/delete-dialog/delete-dialog.component';
+import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
 
 @Component({
   selector: 'studio-lite-items',

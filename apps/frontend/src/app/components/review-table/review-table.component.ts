@@ -12,7 +12,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { I18nService } from '../../services/i18n.service';
 import { IsNewReviewPipe } from '../../pipes/is-new-review.pipe';
-import { WrappedIconComponent } from '../../modules/shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
 
 @Component({
   selector: 'studio-lite-review-table',

@@ -23,7 +23,7 @@ import {
 } from '../../../../components/request-message/request-message.component';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { NewUnitData } from '../../models/new-unit.interface';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 
 @Component({
   selector: 'studio-lite-add-unit-button',

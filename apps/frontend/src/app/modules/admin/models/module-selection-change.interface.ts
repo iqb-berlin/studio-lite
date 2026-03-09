@@ -1,4 +1,4 @@
-import { VeronaModuleClass } from '../../shared/models/verona-module.class';
+import { VeronaModuleClass } from '../../../models/verona-module.class';
 
 export interface ModuleSelectionChange {
   type: string;

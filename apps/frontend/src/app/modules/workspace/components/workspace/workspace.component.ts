@@ -8,7 +8,7 @@ import {
   filter, Subject, takeUntil, takeWhile
 } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { WorkspaceService } from '../../services/workspace.service';

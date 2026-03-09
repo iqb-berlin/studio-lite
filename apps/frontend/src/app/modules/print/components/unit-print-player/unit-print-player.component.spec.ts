@@ -8,7 +8,7 @@ import { of, Subject } from 'rxjs';
 import { UnitPrintPlayerComponent } from './unit-print-player.component';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { environment } from '../../../../../environments/environment';
 

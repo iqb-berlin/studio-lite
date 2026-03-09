@@ -4,7 +4,7 @@ import {
   UserWorkspaceAccessForGroupDto
 } from '@studio-lite-lib/api-dto';
 import { WorkspaceChecked } from './workspace-checked.class';
-import { CheckCollection } from '../../shared/models/check-collection.class';
+import { CheckCollection } from '../../../models/check-collection.class';
 
 export class WorkspaceToCheckCollection extends CheckCollection<WorkspaceChecked> {
   entries: WorkspaceChecked[];

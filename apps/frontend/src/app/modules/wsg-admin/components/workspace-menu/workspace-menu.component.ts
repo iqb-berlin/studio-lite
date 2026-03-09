@@ -8,14 +8,14 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { BackendService } from '../../services/backend.service';
-import { InputTextComponent } from '../../../shared/components/input-text/input-text.component';
+import { InputTextComponent } from '../../../../components/input-text/input-text.component';
 import { WorkspaceSettings } from '../../models/workspace-settings.interface';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
-import { MoveWorkspaceComponent } from '../../../shared/components/move-workspace/move-workspace.component';
+import { MoveWorkspaceComponent } from '../../../../components/move-workspace/move-workspace.component';
 import {
   EditWorkspaceSettingsComponent
-} from '../../../shared/components/edit-workspace-settings/edit-workspace-settings.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+} from '../../../../components/edit-workspace-settings/edit-workspace-settings.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { SelectDropBoxComponent } from '../select-drop-box/select-drop-box.component';
 
 @Component({

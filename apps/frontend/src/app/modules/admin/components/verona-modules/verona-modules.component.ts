@@ -9,13 +9,13 @@ import { MatButton } from '@angular/material/button';
 import {
   IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent
 } from '@studio-lite-lib/iqb-components';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { VeronaModulesTableComponent } from '../verona-modules-table/verona-modules-table.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { ModulesDirective } from '../../directives/modules.directive';
-import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
+import { VeronaModuleClass } from '../../../../models/verona-module.class';
 import { ModuleSelectionChange } from '../../models/module-selection-change.interface';
 
 @Component({

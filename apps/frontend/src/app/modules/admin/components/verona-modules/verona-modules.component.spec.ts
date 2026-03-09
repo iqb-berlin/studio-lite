@@ -15,11 +15,11 @@ import { environment } from '../../../../../environments/environment';
 import { VeronaModulesComponent } from './verona-modules.component';
 import { AppService } from '../../../../services/app.service';
 import { AppConfig } from '../../../../classes/app-config.class';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { BackendService } from '../../services/backend.service';
 import { VeronaModulesTableComponent } from '../verona-modules-table/verona-modules-table.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
+import { VeronaModuleClass } from '../../../../models/verona-module.class';
 
 describe('VeronaModulesComponent', () => {
   let component: VeronaModulesComponent;

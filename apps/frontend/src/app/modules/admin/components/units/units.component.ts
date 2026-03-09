@@ -19,7 +19,7 @@ import { DatePipe } from '@angular/common';
 import { MatPaginator } from '@angular/material/paginator';
 import { saveAs } from 'file-saver-es';
 import { BackendService } from '../../services/backend.service';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { I18nService } from '../../../../services/i18n.service';
 import { AppService } from '../../../../services/app.service';
 import { UnitsMenuComponent } from '../units-menu/units-menu.component';

@@ -8,16 +8,16 @@ import { FormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
 import { PrintOption } from '../../models/print-options.interface';
-import { IncludePipe } from '../../../shared/pipes/include.pipe';
+import { IncludePipe } from '../../../../pipes/include.pipe';
 import { UnitPrintPlayerComponent } from '../unit-print-player/unit-print-player.component';
 import { UnitPrintCodingComponent } from '../unit-print-coding/unit-print-coding.component';
 import { UnitPrintCommentsComponent } from '../unit-print-comments/unit-print-comments.component';
 import { PrintMetadataComponent } from '../print-metadata/print-metadata.component';
-import { UnitPropertiesComponent } from '../../../shared/components/unit-properties/unit-properties.component';
+import { UnitPropertiesComponent } from '../../../../components/unit-properties/unit-properties.component';
 
 @Component({
   selector: 'studio-lite-unit-print-layout',

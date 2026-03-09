@@ -12,7 +12,7 @@ import { environment } from '../../../../../environments/environment';
 import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-group-component-data.type';
 import { BackendService } from '../../services/backend.service';
 import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
-import { Profile } from '../../../shared/models/profile.type';
+import { Profile } from '../../../../models/profile.type';
 
 global.fetch = jest.fn(() => Promise.resolve({
   json: () => Promise.resolve({ test: 100 })

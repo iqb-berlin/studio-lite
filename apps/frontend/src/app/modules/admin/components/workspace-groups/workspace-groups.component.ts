@@ -32,11 +32,11 @@ import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { UserToCheckCollection } from '../../models/users-to-check-collection.class';
 import { State } from '../../models/state.type';
-import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
-import { Profile } from '../../../shared/models/profile.type';
-import { EntriesDividerComponent } from '../../../shared/components/entries-divider/entries-divider.component';
+import { Profile } from '../../../../models/profile.type';
+import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 
 @Component({
   selector: 'studio-lite-workspace-groups',

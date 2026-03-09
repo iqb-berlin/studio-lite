@@ -7,7 +7,7 @@ import { Subject } from 'rxjs';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 
 @Component({
   selector: 'studio-lite-update-units-button',

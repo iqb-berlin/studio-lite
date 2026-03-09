@@ -25,7 +25,7 @@ import {
 } from '../../../../components/request-message/request-message.component';
 import {
   EditWorkspaceSettingsComponent
-} from '../../../shared/components/edit-workspace-settings/edit-workspace-settings.component';
+} from '../../../../components/edit-workspace-settings/edit-workspace-settings.component';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
@@ -36,7 +36,7 @@ import { MetadataService } from '../../../metadata/services/metadata.service';
 import { PrintUnitsDialogComponent } from '../print-units-dialog/print-units-dialog.component';
 import { CodingReportComponent } from '../coding-report/coding-report.component';
 import { ExportCodingBookComponent } from '../export-coding-book/export-coding-book.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { RequestMessageDirective } from '../../directives/request-message.directive';
 import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
 

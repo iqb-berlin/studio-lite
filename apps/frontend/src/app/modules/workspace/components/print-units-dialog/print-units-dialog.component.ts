@@ -6,7 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { WorkspaceService } from '../../services/workspace.service';
 import { PrintOption, PrintOptions } from '../../../print/models/print-options.interface';
-import { PrintOptionsComponent } from '../../../shared/components/print-options/print-options.component';
+import { PrintOptionsComponent } from '../../../../components/print-options/print-options.component';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 
 @Component({

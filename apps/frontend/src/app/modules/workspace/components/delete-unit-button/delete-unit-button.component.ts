@@ -13,8 +13,8 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { DeleteDialogComponent } from '../../../shared/components/delete-dialog/delete-dialog.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
+import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
 
 @Component({
   selector: 'studio-lite-delete-unit-button',

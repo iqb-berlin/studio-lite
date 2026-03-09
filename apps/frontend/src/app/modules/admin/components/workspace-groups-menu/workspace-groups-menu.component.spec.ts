@@ -17,7 +17,7 @@ import { EditWorkspaceGroupComponent } from '../edit-workspace-group/edit-worksp
 import {
   EditWorkspaceGroupSettingsComponent
 } from '../edit-workspace-group-settings/edit-workspace-group-settings.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 
 describe('WorkspaceGroupsMenuComponent', () => {
   let component: WorkspaceGroupsMenuComponent;

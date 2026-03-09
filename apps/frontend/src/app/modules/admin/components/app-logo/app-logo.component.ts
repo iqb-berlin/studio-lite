@@ -10,7 +10,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { BackendService as ReadBackendService } from '../../../../services/backend.service';
 import { BackendService as WriteBackendService } from '../../services/backend.service';
 

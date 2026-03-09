@@ -16,8 +16,8 @@ import { BackendService as ReadBackendService } from '../../../../services/backe
 import { BackendService as WriteBackendService } from '../../services/backend.service';
 import { TableDataSourcePipe } from '../../pipes/table-data-source.pipe';
 import { ResourcePackagesTableComponent } from '../resource-packages-table/resource-packages-table.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { DeleteDialogComponent } from '../../../shared/components/delete-dialog/delete-dialog.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
+import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
 
 @Component({
   selector: 'studio-lite-resource-packages',

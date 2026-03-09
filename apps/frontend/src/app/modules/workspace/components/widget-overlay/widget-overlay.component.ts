@@ -8,7 +8,7 @@ import { OverlayRef } from '@angular/cdk/overlay';
 import { TranslateModule } from '@ngx-translate/core';
 import { AppService } from '../../../../services/app.service';
 import { WidgetCallData } from '../../models/widget-call-data.interface';
-import { VeronaModuleDirective } from '../../../shared/directives/verona-module.directive';
+import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
 
 @Component({
   selector: 'studio-lite-widget-overlay',

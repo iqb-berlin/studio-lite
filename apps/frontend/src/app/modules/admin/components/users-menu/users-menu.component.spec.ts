@@ -10,7 +10,7 @@ import { MessageDialogComponent } from '@studio-lite-lib/iqb-components';
 import { Component, Input } from '@angular/core';
 import { EditUserComponent } from '../edit-user/edit-user.component';
 import { UsersMenuComponent } from './users-menu.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 
 describe('UsersMenuComponent', () => {
   let component: UsersMenuComponent;
