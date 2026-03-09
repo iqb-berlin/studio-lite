@@ -2,10 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { VeronaModuleInListDto, VeronaModuleFileDto } from '@studio-lite-lib/api-dto';
-import { BackendService } from './backend.service';
+import { ModuleBackendService } from './module-backend.service';
 
-describe('BackendService', () => {
-  let service: BackendService;
+describe('ModuleBackendService', () => {
+  let service: ModuleBackendService;
   let httpMock: HttpTestingController;
   const baseUrl = 'http://test-url.com/';
 
@@ -14,11 +14,11 @@ describe('BackendService', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        BackendService,
+        ModuleBackendService,
         { provide: 'SERVER_URL', useValue: baseUrl }
       ]
     });
-    service = TestBed.inject(BackendService);
+    service = TestBed.inject(ModuleBackendService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 

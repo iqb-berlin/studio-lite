@@ -2,23 +2,23 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { VeronaModuleInListDto, VeronaModuleFileDto } from '@studio-lite-lib/api-dto';
 import { ModuleService } from './module.service';
-import { BackendService } from './backend.service';
+import { ModuleBackendService } from './module-backend.service';
 import { VeronaModuleClass } from '../models/verona-module.class';
 
 describe('ModuleService', () => {
   let service: ModuleService;
-  let mockBackendService: jest.Mocked<BackendService>;
+  let mockBackendService: jest.Mocked<ModuleBackendService>;
 
   beforeEach(() => {
     mockBackendService = {
       getModuleList: jest.fn(),
       getModuleHtml: jest.fn()
-    } as unknown as jest.Mocked<BackendService>;
+    } as unknown as jest.Mocked<ModuleBackendService>;
 
     TestBed.configureTestingModule({
       providers: [
         ModuleService,
-        { provide: BackendService, useValue: mockBackendService }
+        { provide: ModuleBackendService, useValue: mockBackendService }
       ]
     });
     service = TestBed.inject(ModuleService);
