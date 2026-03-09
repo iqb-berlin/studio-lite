@@ -26,7 +26,7 @@ import {
   PrintOptionsDialogComponent
 } from '../../../print/components/print-options-dialog/print-options-dialog.component';
 import { PreviewDirective } from '../../../shared/directives/preview.directive';
-import { UnitState } from '../../../shared/models/verona.interface';
+import { UnitState } from '../../../../models/verona.interface';
 
 @Component({
   templateUrl: './unit-preview.component.html',

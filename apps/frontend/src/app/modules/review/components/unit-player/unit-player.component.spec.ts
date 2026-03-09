@@ -16,7 +16,7 @@ import { ModuleService } from '../../../shared/services/module.service';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { UnitData } from '../../models/unit-data.class';
-import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
+import { VeronaModuleClass } from '../../../../models/verona-module.class';
 
 describe('UnitPlayerComponent', () => {
   let component: UnitPlayerComponent;

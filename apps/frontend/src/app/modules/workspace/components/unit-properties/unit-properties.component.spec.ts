@@ -12,7 +12,7 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { MetadataBackendService } from '../../../metadata/services/metadata-backend.service';
 import { MetadataService } from '../../../metadata/services/metadata.service';
 import { I18nService } from '../../../../services/i18n.service';
-import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
+import { VeronaModuleClass } from '../../../../models/verona-module.class';
 import { UnitPropertiesComponent } from './unit-properties.component';
 import { environment } from '../../../../../environments/environment';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';

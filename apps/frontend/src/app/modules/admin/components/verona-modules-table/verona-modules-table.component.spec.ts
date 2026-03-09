@@ -16,7 +16,7 @@ import { I18nService } from '../../../../services/i18n.service';
 import { IsSelectedPipe } from '../../../../pipes/isSelected.pipe';
 import { IsAllSelectedPipe } from '../../../../pipes/isAllSelected.pipe';
 import { HasSelectionValuePipe } from '../../../../pipes/hasSelectionValue.pipe';
-import { FlattenedVeronaModuleClass, VeronaModuleClass } from '../../../shared/models/verona-module.class';
+import { FlattenedVeronaModuleClass, VeronaModuleClass } from '../../../../models/verona-module.class';
 
 describe('VeronaModulesTableComponent', () => {
   let component: VeronaModulesTableComponent;

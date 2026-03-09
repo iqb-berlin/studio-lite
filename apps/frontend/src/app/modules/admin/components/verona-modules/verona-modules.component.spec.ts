@@ -19,7 +19,7 @@ import { ModuleService } from '../../../shared/services/module.service';
 import { BackendService } from '../../services/backend.service';
 import { VeronaModulesTableComponent } from '../verona-modules-table/verona-modules-table.component';
 import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
+import { VeronaModuleClass } from '../../../../models/verona-module.class';
 
 describe('VeronaModulesComponent', () => {
   let component: VeronaModulesComponent;

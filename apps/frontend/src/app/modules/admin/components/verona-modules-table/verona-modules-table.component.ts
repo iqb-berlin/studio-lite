@@ -16,7 +16,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { DatePipe } from '@angular/common';
 import { BytesPipe } from '@studio-lite-lib/iqb-components';
 import { BackendService } from '../../services/backend.service';
-import { FlattenedVeronaModuleClass, VeronaModuleClass } from '../../../shared/models/verona-module.class';
+import { FlattenedVeronaModuleClass, VeronaModuleClass } from '../../../../models/verona-module.class';
 import { IsAllSelectedPipe } from '../../../../pipes/isAllSelected.pipe';
 import { HasSelectionValuePipe } from '../../../../pipes/hasSelectionValue.pipe';
 import { IsSelectedPipe } from '../../../../pipes/isSelected.pipe';

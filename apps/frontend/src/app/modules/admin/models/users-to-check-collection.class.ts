@@ -1,6 +1,6 @@
 import { UserInListDto } from '@studio-lite-lib/api-dto';
 import { UserChecked } from './users-checked.class';
-import { CheckCollection } from '../../shared/models/check-collection.class';
+import { CheckCollection } from '../../../models/check-collection.class';
 
 export class UserToCheckCollection extends CheckCollection<UserChecked> {
   entries: UserChecked[];

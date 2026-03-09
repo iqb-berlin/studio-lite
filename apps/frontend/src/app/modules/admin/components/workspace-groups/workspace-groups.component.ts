@@ -35,7 +35,7 @@ import { State } from '../../models/state.type';
 import { IsSelectedIdPipe } from '../../../../pipes/isSelectedId.pipe';
 import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
-import { Profile } from '../../../shared/models/profile.type';
+import { Profile } from '../../../../models/profile.type';
 import { EntriesDividerComponent } from '../../../shared/components/entries-divider/entries-divider.component';
 
 @Component({

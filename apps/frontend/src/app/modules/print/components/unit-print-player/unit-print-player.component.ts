@@ -9,7 +9,7 @@ import { AppService } from '../../../../services/app.service';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { PreviewDirective } from '../../../shared/directives/preview.directive';
-import { UnitState } from '../../../shared/models/verona.interface';
+import { UnitState } from '../../../../models/verona.interface';
 import { WidgetCallData } from '../../../workspace/models/widget-call-data.interface';
 
 @Component({

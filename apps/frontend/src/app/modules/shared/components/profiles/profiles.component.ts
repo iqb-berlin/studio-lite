@@ -9,7 +9,7 @@ import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } fr
 import { FormsModule } from '@angular/forms';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ProfileStoreWithProfiles, WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
-import { Profile } from '../../models/profile.type';
+import { Profile } from '../../../../models/profile.type';
 import { MetadataBackendService } from '../../../metadata/services/metadata-backend.service';
 
 export type CoreProfile = Omit<MDProfile, 'groups'>;

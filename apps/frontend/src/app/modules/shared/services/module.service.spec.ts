@@ -3,7 +3,7 @@ import { of } from 'rxjs';
 import { VeronaModuleInListDto, VeronaModuleFileDto } from '@studio-lite-lib/api-dto';
 import { ModuleService } from './module.service';
 import { ModuleBackendService } from './module-backend.service';
-import { VeronaModuleClass } from '../models/verona-module.class';
+import { VeronaModuleClass } from '../../../models/verona-module.class';
 
 describe('ModuleService', () => {
   let service: ModuleService;

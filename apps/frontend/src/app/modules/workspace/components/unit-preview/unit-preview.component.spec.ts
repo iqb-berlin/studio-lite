@@ -20,7 +20,7 @@ import { UnitPreviewComponent } from './unit-preview.component';
 import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
 import { PageData } from '../../models/page-data.interface';
 import { Progress } from '../../models/types';
-import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
+import { VeronaModuleClass } from '../../../../models/verona-module.class';
 import { WidgetCallData } from '../../models/widget-call-data.interface';
 
 describe('UnitPreviewComponent', () => {

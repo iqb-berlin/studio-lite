@@ -16,7 +16,7 @@ import { WorkspaceService } from '../../workspace/services/workspace.service';
 import { UnitDefinitionStore } from '../../workspace/classes/unit-definition-store';
 import { UnitMetadataStore } from '../../workspace/classes/unit-metadata-store';
 import { ModuleService } from '../services/module.service';
-import { VeronaModuleClass } from '../models/verona-module.class';
+import { VeronaModuleClass } from '../../../models/verona-module.class';
 import { VeronaModuleDirective } from './verona-module.directive';
 
 const createMessageEvent =

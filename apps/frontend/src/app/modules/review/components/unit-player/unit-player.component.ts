@@ -17,7 +17,7 @@ import { UnitInfoComponent } from '../unit-info/unit-info.component';
 import { PreviewDirective } from '../../../shared/directives/preview.directive';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
-import { UnitState } from '../../../shared/models/verona.interface';
+import { UnitState } from '../../../../models/verona.interface';
 
 @Component({
   selector: 'studio-lite-unit-player',

@@ -7,7 +7,7 @@ import { UnitDefinitionDirective } from './unit-definition.directive';
 import { PageData } from '../../workspace/models/page-data.interface';
 import { Progress } from '../../workspace/models/types';
 import { VeronaModuleDirective } from './verona-module.directive';
-import { UnitState } from '../models/verona.interface';
+import { UnitState } from '../../../models/verona.interface';
 import {
   VopRuntimeErrorNotificationDialogComponent
 } from '../components/vop-runtime-error-notification-dialog/vop-runtime-error-notification-dialog.component';
