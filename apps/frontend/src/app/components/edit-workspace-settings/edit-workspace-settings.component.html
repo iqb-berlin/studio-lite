@@ -52,6 +52,23 @@
         <div>{{'workspace-settings.only-stable-modules' | translate}}</div>
       </div>
       <div>
+        <h4>{{'wsg-settings.route-visibility' | translate}}</h4>
+        <div class="fx-column-start-stretch">
+          <mat-checkbox [checked]="!(dialogData.hiddenRoutes | include:'editor')" (change)="toggleRouteVisibility('editor', $event.checked)">
+            {{'workspace.routes.editor' | translate}}
+          </mat-checkbox>
+          <mat-checkbox [checked]="!(dialogData.hiddenRoutes | include:'preview')" (change)="toggleRouteVisibility('preview', $event.checked)">
+            {{'workspace.routes.preview' | translate}}
+          </mat-checkbox>
+          <mat-checkbox [checked]="!(dialogData.hiddenRoutes | include:'schemer')" (change)="toggleRouteVisibility('schemer', $event.checked)">
+            {{'workspace.routes.schemer' | translate}}
+          </mat-checkbox>
+          <mat-checkbox [checked]="!(dialogData.hiddenRoutes | include:'comments')" (change)="toggleRouteVisibility('comments', $event.checked)">
+            {{'workspace.routes.comments' | translate}}
+          </mat-checkbox>
+        </div>
+      </div>
+      <div>
         <h4>{{'metadata.metadata' | translate }}</h4>
         <div class="fx-column-start-start">
           <mat-label>{{'metadata.unit-profile' | translate }}</mat-label>

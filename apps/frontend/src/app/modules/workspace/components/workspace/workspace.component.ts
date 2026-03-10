@@ -17,12 +17,13 @@ import { UnitsAreaComponent } from '../units-area/units-area.component';
 import { SplitterPaneComponent } from '../../../splitter/components/splitter-pane/splitter-pane.component';
 import { SplitterComponent } from '../../../splitter/components/splitter/splitter.component';
 import { RoutingHelperService } from '../../services/routing-helper.service';
+import { FilterHiddenTabsPipe } from '../../../../pipes/filter-hidden-tabs.pipe';
 
 @Component({
   selector: 'studio-lite-workspace',
   templateUrl: './workspace.component.html',
   styleUrls: ['./workspace.component.scss'],
-  imports: [SplitterComponent, SplitterPaneComponent, UnitsAreaComponent, UnitDataAreaComponent]
+  imports: [SplitterComponent, SplitterPaneComponent, UnitsAreaComponent, UnitDataAreaComponent, FilterHiddenTabsPipe]
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
   uploadProcessId = '';
@@ -36,9 +37,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   navLinks = this.navTabs.map(link => link.name);
   selectedRouterLink = -1;
-  pinnedNavTab: { name: string, duplicable: boolean }[] = [];
-  secondaryRoutingOutlet: string = 'secondary';
-  routingOutlet: string = 'primary';
+  pinnedNavTab: { name: string; duplicable: boolean }[] = [];
+  secondaryRoutingOutlet = 'secondary';
+  routingOutlet = 'primary';
   private ngUnsubscribe = new Subject<void>();
   private userId = 0;
 

@@ -3,7 +3,8 @@ import {
   ActivatedRouteSnapshot,
   RouterStateSnapshot,
   Router,
-  UrlTree
+  UrlTree,
+  PRIMARY_OUTLET
 } from '@angular/router';
 import { WorkspaceService } from '../services/workspace.service';
 
@@ -27,10 +28,13 @@ export class HiddenRouteGuard {
       // redirect to properties if route is hidden
       const tree = this.router.parseUrl(state.url);
       // replace the last segment (the hidden route) with 'properties'
-      const children = tree.root.children as any;
-      const segments = children.primary.segments;
-      if (segments.length > 0) {
-        segments[segments.length - 1].path = 'properties';
+      const children = tree.root.children;
+      const primarySegments = children[PRIMARY_OUTLET];
+      if (primarySegments) {
+        const segments = primarySegments.segments;
+        if (segments.length > 0) {
+          segments[segments.length - 1].path = 'properties';
+        }
       }
       return tree;
     }

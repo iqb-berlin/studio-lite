@@ -56,7 +56,8 @@ describe('HiddenRouteGuard', () => {
     expect(result).toBeTruthy();
     expect(routerMock.parseUrl).toHaveBeenCalledWith('/a/1/ws/1/1/editor');
     // We mock parsed UrlTree to test if path is modified
-    expect((result as unknown as any).root.children.primary.segments[1].path).toBe('properties');
+    const rootNode = (result as unknown as { root: { children: { primary: { segments: { path: string }[] } } } }).root;
+    expect(rootNode.children.primary.segments[1].path).toBe('properties');
   });
 
   it('should return true if route is not hidden', () => {

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { WorkspaceSettingsDto } from './workspace-settings.dto';
 
 export class UsersWorkspaceInListDto {
   @ApiProperty()
@@ -18,4 +19,7 @@ export class UsersWorkspaceInListDto {
 
   @ApiProperty()
     unitsCount!: number;
+
+  @ApiProperty()
+    settings?: WorkspaceSettingsDto;
 }

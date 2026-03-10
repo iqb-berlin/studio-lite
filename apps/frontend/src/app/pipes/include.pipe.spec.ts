@@ -15,7 +15,8 @@ describe('IncludePipe', () => {
     expect(pipe.transform([1, 2, 3], 4)).toBe(false);
   });
 
-  it('should return false if array is null', () => {
+  it('should return false if array is null or undefined', () => {
     expect(pipe.transform(null as unknown as number[], 1)).toBe(false);
+    expect(pipe.transform(undefined, 1)).toBe(false);
   });
 });

@@ -10,8 +10,8 @@ import { MatSelectChange, MatSelect } from '@angular/material/select';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatOption } from '@angular/material/core';
-
 import { MatLabel, MatError } from '@angular/material/form-field';
+import { IncludePipe } from '../../pipes/include.pipe';
 import { ModuleService } from '../../services/module.service';
 import { AppService } from '../../services/app.service';
 import { WorkspaceService } from '../../modules/workspace/services/workspace.service';
@@ -36,7 +36,7 @@ type SelectedRow = {
   templateUrl: './edit-workspace-settings.component.html',
   styleUrls: ['./edit-workspace-settings.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, MatError, MatSelect, MatOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, MatError, MatSelect, MatOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule, IncludePipe]
 })
 export class EditWorkspaceSettingsComponent implements OnInit {
   constructor(
@@ -115,5 +115,22 @@ export class EditWorkspaceSettingsComponent implements OnInit {
   addData() {
     this.dialogData.states = this.selectionChanged;
     this.selectionChanged = this.dialogData.states as State[];
+  }
+
+  toggleRouteVisibility(route: string, isVisible: boolean): void {
+    if (!this.dialogData) {
+      this.dialogData = {
+        defaultEditor: '', defaultPlayer: '', defaultSchemer: '', hiddenRoutes: []
+      } as WorkspaceSettingsDto;
+    }
+    if (!this.dialogData.hiddenRoutes) {
+      this.dialogData.hiddenRoutes = [];
+    }
+
+    if (isVisible) {
+      this.dialogData.hiddenRoutes = this.dialogData.hiddenRoutes.filter((r:string) => r !== route);
+    } else if (!this.dialogData.hiddenRoutes.includes(route)) {
+      this.dialogData.hiddenRoutes.push(route);
+    }
   }
 }
