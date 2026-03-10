@@ -202,4 +202,20 @@ describe('EditWorkspaceSettingsComponent', () => {
 
     expect(mockBackendService.getWorkspaceGroupById).toHaveBeenCalledWith(99);
   });
+
+  describe('Route Visibility Configurations', () => {
+    it('toggleRouteVisibility should filter out route when adding visibility back (isVisible=true)', () => {
+      component.dialogData.hiddenRoutes = ['editor', 'preview'];
+      component.toggleRouteVisibility('editor', true);
+      expect(component.dialogData.hiddenRoutes).not.toContain('editor');
+      expect(component.dialogData.hiddenRoutes).toContain('preview');
+    });
+
+    it('toggleRouteVisibility should push route to hiddenRoutes when hiding (isVisible=false)', () => {
+      component.dialogData.hiddenRoutes = ['preview'];
+      component.toggleRouteVisibility('editor', false);
+      expect(component.dialogData.hiddenRoutes).toContain('editor');
+      expect(component.dialogData.hiddenRoutes).toContain('preview');
+    });
+  });
 });

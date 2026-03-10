@@ -84,7 +84,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
 
   async settings(): Promise<void> {
     const dialogRef = this.editSettingsDialog.open(EditWorkspaceSettingsComponent, {
-      width: '700px',
+      width: '900px',
       data: {
         settings: this.workspaceService.workspaceSettings,
         selectedRow: { id: this.workspaceService.selectedWorkspaceId }

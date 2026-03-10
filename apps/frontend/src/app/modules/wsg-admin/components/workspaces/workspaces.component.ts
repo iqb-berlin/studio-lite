@@ -16,7 +16,7 @@ import { saveAs } from 'file-saver-es';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatFabButton, MatIconButton } from '@angular/material/button';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 import { Subject, takeUntil } from 'rxjs';
@@ -46,13 +46,16 @@ import { EntriesDividerComponent } from '../../../../components/entries-divider/
   imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
     MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
     MatTooltip, FormsModule, EntriesDividerComponent,
-    IsSelectedIdPipe, TranslateModule, MatIcon, RolesHeaderComponent, WorkspaceNamePipe, MatFabButton, MatIconButton,
+    IsSelectedIdPipe, TranslateModule, MatIcon, RolesHeaderComponent, WorkspaceNamePipe, MatIconButton, MatFabButton,
     RouterLink]
 })
 export class WorkspacesComponent implements OnInit, OnDestroy {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
   workspaces: WorkspaceInListDto[] = [];
-  displayedColumns = ['id', 'name', 'unitsCount', 'dropBoxId', 'delete'];
+  displayedColumns = [
+    'id', 'name', 'unitsCount', 'editor', 'preview', 'schemer', 'comments', 'dropBoxId', 'delete'
+  ];
+
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
   selectedWorkspaceId = 0;
   workspaceUsers = new WorkspaceUserToCheckCollection([]);
@@ -370,12 +373,21 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
             this.translateService.instant('error'),
             { duration: 3000 });
         } else {
+          value.selection[0].settings = value.settings;
           this.snackBar.open(
             this.translateService.instant('wsg-admin.workspace-settings-changed'),
             '',
             { duration: 1000 });
         }
       });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  isRouteHidden(workspace: WorkspaceInListDto, route: string): boolean {
+    if (!workspace.settings || !workspace.settings.hiddenRoutes) {
+      return false; // Routes are visible by default
+    }
+    return workspace.settings.hiddenRoutes.includes(route);
   }
 
   onWorkspaceNotLoaded(): void {

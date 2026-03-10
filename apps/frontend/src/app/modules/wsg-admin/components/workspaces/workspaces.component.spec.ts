@@ -59,7 +59,9 @@ describe('WorkspacesComponent', () => {
     getUsersByWorkspace: jest.Mock;
     setUsersByWorkspace: jest.Mock;
   };
-  let mockAppBackendService: Record<string, never>;
+  let mockAppBackendService: {
+    setWorkspaceSettings?: jest.Mock;
+  };
   let mockWorkspaceBackendService: Record<string, never>;
   let mockWsgAdminService: {
     selectedWorkspaceGroupId: BehaviorSubject<number>;
@@ -178,5 +180,31 @@ describe('WorkspacesComponent', () => {
 
     expect(mockBackendService.setUsersByWorkspace).toHaveBeenCalled();
     expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.changed', '', { duration: 1000 });
+  });
+
+  describe('Route Visibility Configurations', () => {
+    let ws: WorkspaceInListDto;
+
+    beforeEach(() => {
+      ws = {
+        id: 1,
+        name: 'ws1',
+        groupId: 1,
+        unitsCount: 0,
+        settings: {
+          defaultEditor: '', defaultPlayer: '', defaultSchemer: '', hiddenRoutes: ['preview']
+        }
+      } as WorkspaceInListDto;
+      mockAppBackendService.setWorkspaceSettings = jest.fn().mockReturnValue(of(true));
+      component.workspaces = [ws];
+    });
+
+    it('isRouteHidden should determine correctly', () => {
+      expect(component.isRouteHidden(ws, 'preview')).toBe(true);
+      expect(component.isRouteHidden(ws, 'editor')).toBe(false);
+
+      ws.settings = undefined;
+      expect(component.isRouteHidden(ws, 'editor')).toBe(false);
+    });
   });
 });

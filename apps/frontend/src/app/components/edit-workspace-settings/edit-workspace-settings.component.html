@@ -3,94 +3,119 @@
     {{'workspace-settings.title' | translate}}
   </h1>
   <mat-dialog-content>
-    <div>
-      <h4>{{'workspace-settings.modules' | translate }}</h4>
-      <div class="fx-row-space-between-start fx-gap-10">
-        <mat-label>
-          {{'workspace-settings.default-editor' | translate}}
-        </mat-label>
-        <studio-lite-select-module class="fx-flex-row-60"
-                                   moduleType="editor"
-                                   [modules]="this.moduleService.editors"
-                                   [value]="dialogData.defaultEditor"
-                                   [stableOnly]="false"
-                                   (selectionChanged)="selectModule('editor', $event)"
-                                   data-cy="edit-workspace-settings-editor">
-        </studio-lite-select-module>
-      </div>
-      <div class="fx-row-space-between-start fx-gap-10">
-        <mat-label>
-          {{'workspace-settings.default-player' | translate}}
-        </mat-label>
-        <studio-lite-select-module class="fx-flex-row-60"
-                                   moduleType="player"
-                                   [modules]="this.moduleService.players"
-                                   [value]="dialogData.defaultPlayer"
-                                   [stableOnly]="false"
-                                   (selectionChanged)="selectModule('player', $event)"
-                                   data-cy="edit-workspace-settings-player">
-        </studio-lite-select-module>
-      </div>
-      <div class="fx-row-space-between-start fx-gap-10">
-        <mat-label>
-          {{'workspace-settings.default-schemer' | translate}}
-        </mat-label>
-        <studio-lite-select-module class="fx-flex-row-60"
-                                   moduleType="schemer"
-                                   [modules]="this.moduleService.schemers"
-                                   [value]="dialogData.defaultSchemer"
-                                   [stableOnly]="false"
-                                   (selectionChanged)="selectModule('schemer', $event)"
-                                   data-cy="edit-workspace-settings-schemer">
-        </studio-lite-select-module>
-      </div>
-      <div class="fx-row-start-stretch fx-gap-15 margin-bottom">
-        <mat-checkbox [checked]="dialogData.stableModulesOnly"
-                      (click)="$event.stopPropagation()"
-                      (change)="$event ? setStableChecked($event) : null">
-        </mat-checkbox>
-        <div>{{'workspace-settings.only-stable-modules' | translate}}</div>
-      </div>
-      <div>
-        <h4>{{'metadata.metadata' | translate }}</h4>
-        <div class="fx-column-start-start">
-          <mat-label>{{'metadata.unit-profile' | translate }}</mat-label>
-          @if (unitMDProfiles.length === 0) {
-            <mat-error>{{'metadata.no-unit-profiles-hint' | translate }}</mat-error>
-          }
-          <mat-select  class="select-profile"
-                       placeholder="{{'metadata.select-profile' | translate }}"
-                       [(value)]="selectedUnitMDProfile"
-                       (click)="$event.stopPropagation()" (selectionChange)="selectUnitMDProfile($event)"
-                       data-cy="edit-workspace-settings-select-unit-profile">
-            <mat-option [value]="undefined"></mat-option>
-            @for (unitMDProfile of unitMDProfiles; track unitMDProfile) {
-              <mat-option [value]="unitMDProfile.id"
-                          data-cy="edit-workspace-settings-unit-profile">
-                {{unitMDProfile.label }}
-              </mat-option>
-            }
-          </mat-select>
+    <div class="column-container">
+      <!-- Left Column: Verona Modules -->
+      <div class="half-column">
+        <h4>{{'workspace-settings.modules' | translate }}</h4>
+        <div class="fx-row-space-between-start fx-gap-10">
+          <mat-label>
+            {{'workspace-settings.default-editor' | translate}}
+          </mat-label>
+          <studio-lite-select-module class="fx-flex-row-60"
+                                     moduleType="editor"
+                                     [modules]="this.moduleService.editors"
+                                     [value]="dialogData.defaultEditor"
+                                     [stableOnly]="false"
+                                     (selectionChanged)="selectModule('editor', $event)"
+                                     data-cy="edit-workspace-settings-editor">
+          </studio-lite-select-module>
         </div>
-        <div class="fx-column-start-start">
-          <mat-label>{{'metadata.item-profile' | translate }}</mat-label>
-          @if (itemMDProfiles.length === 0) {
-            <mat-error>{{'metadata.no-item-profiles-hint' | translate }}</mat-error>
-          }
-          <mat-select class="select-profile"
-                      placeholder="{{'metadata.select-profile' | translate }}"
-                      [(value)]="selectedItemMDProfile"
-                      (click)="$event.stopPropagation()"
-                      (selectionChange)="selectItemMDProfile($event)"
-                      data-cy="edit-workspace-settings-select-item-profile">
-            <mat-option [value]="undefined"></mat-option>
-            @for (itemMDProfile of itemMDProfiles; track itemMDProfile) {
-              <mat-option [value]="itemMDProfile.id"
-                data-cy="edit-workspace-settings-item-profile">
-                {{itemMDProfile.label}}
-              </mat-option>
+        <div class="fx-row-space-between-start fx-gap-10">
+          <mat-label>
+            {{'workspace-settings.default-player' | translate}}
+          </mat-label>
+          <studio-lite-select-module class="fx-flex-row-60"
+                                     moduleType="player"
+                                     [modules]="this.moduleService.players"
+                                     [value]="dialogData.defaultPlayer"
+                                     [stableOnly]="false"
+                                     (selectionChanged)="selectModule('player', $event)"
+                                     data-cy="edit-workspace-settings-player">
+          </studio-lite-select-module>
+        </div>
+        <div class="fx-row-space-between-start fx-gap-10">
+          <mat-label>
+            {{'workspace-settings.default-schemer' | translate}}
+          </mat-label>
+          <studio-lite-select-module class="fx-flex-row-60"
+                                     moduleType="schemer"
+                                     [modules]="this.moduleService.schemers"
+                                     [value]="dialogData.defaultSchemer"
+                                     [stableOnly]="false"
+                                     (selectionChanged)="selectModule('schemer', $event)"
+                                     data-cy="edit-workspace-settings-schemer">
+          </studio-lite-select-module>
+        </div>
+        <div class="fx-row-start-stretch fx-gap-15 margin-bottom">
+          <mat-checkbox [checked]="dialogData.stableModulesOnly"
+                        (click)="$event.stopPropagation()"
+                        (change)="$event ? setStableChecked($event) : null">
+          </mat-checkbox>
+          <div>{{'workspace-settings.only-stable-modules' | translate}}</div>
+        </div>
+      </div>
+
+      <!-- Right Column: Metadata and Visibility -->
+      <div class="half-column">
+        <div>
+          <h4>{{'metadata.metadata' | translate }}</h4>
+          <div class="fx-column-start-start">
+            <mat-label>{{'metadata.unit-profile' | translate }}</mat-label>
+            @if (unitMDProfiles.length === 0) {
+              <mat-error>{{'metadata.no-unit-profiles-hint' | translate }}</mat-error>
             }
-          </mat-select>
+            <mat-select  class="select-profile"
+                         placeholder="{{'metadata.select-profile' | translate }}"
+                         [(value)]="selectedUnitMDProfile"
+                         (click)="$event.stopPropagation()" (selectionChange)="selectUnitMDProfile($event)"
+                         data-cy="edit-workspace-settings-select-unit-profile">
+              <mat-option [value]="undefined"></mat-option>
+              @for (unitMDProfile of unitMDProfiles; track unitMDProfile) {
+                <mat-option [value]="unitMDProfile.id"
+                            data-cy="edit-workspace-settings-unit-profile">
+                  {{unitMDProfile.label }}
+                </mat-option>
+              }
+            </mat-select>
+          </div>
+          <div class="fx-column-start-start">
+            <mat-label>{{'metadata.item-profile' | translate }}</mat-label>
+            @if (itemMDProfiles.length === 0) {
+              <mat-error>{{'metadata.no-item-profiles-hint' | translate }}</mat-error>
+            }
+            <mat-select class="select-profile"
+                        placeholder="{{'metadata.select-profile' | translate }}"
+                        [(value)]="selectedItemMDProfile"
+                        (click)="$event.stopPropagation()"
+                        (selectionChange)="selectItemMDProfile($event)"
+                        data-cy="edit-workspace-settings-select-item-profile">
+              <mat-option [value]="undefined"></mat-option>
+              @for (itemMDProfile of itemMDProfiles; track itemMDProfile) {
+                <mat-option [value]="itemMDProfile.id"
+                            data-cy="edit-workspace-settings-item-profile">
+                  {{itemMDProfile.label}}
+                </mat-option>
+              }
+            </mat-select>
+          </div>
+        </div>
+
+        <div class="margin-top-20">
+          <h4>{{'wsg-settings.route-visibility' | translate}}</h4>
+          <div class="fx-column-start-stretch">
+            <mat-checkbox [checked]="!(dialogData.hiddenRoutes | include:'editor')" (change)="toggleRouteVisibility('editor', $event.checked)">
+              {{'workspace.routes.editor' | translate}}
+            </mat-checkbox>
+            <mat-checkbox [checked]="!(dialogData.hiddenRoutes | include:'preview')" (change)="toggleRouteVisibility('preview', $event.checked)">
+              {{'workspace.routes.preview' | translate}}
+            </mat-checkbox>
+            <mat-checkbox [checked]="!(dialogData.hiddenRoutes | include:'schemer')" (change)="toggleRouteVisibility('schemer', $event.checked)">
+              {{'workspace.routes.schemer' | translate}}
+            </mat-checkbox>
+            <mat-checkbox [checked]="!(dialogData.hiddenRoutes | include:'comments')" (change)="toggleRouteVisibility('comments', $event.checked)">
+              {{'workspace.routes.comments' | translate}}
+            </mat-checkbox>
+          </div>
         </div>
       </div>
     </div>

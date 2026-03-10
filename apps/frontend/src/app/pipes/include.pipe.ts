@@ -6,7 +6,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class IncludePipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
-  transform<T>(array: T[], value: T): boolean {
+  transform<T>(array: T[] | undefined, value: T): boolean {
     return array?.includes(value) || false;
   }
 }

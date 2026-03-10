@@ -1,5 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 import { ApiProperty } from '@nestjs/swagger';
+import { WorkspaceSettingsDto } from './workspace-settings.dto';
 
 export class WorkspaceInListDto {
   @ApiProperty()
@@ -16,4 +17,7 @@ export class WorkspaceInListDto {
 
   @ApiProperty()
     unitsCount!: number;
+
+  @ApiProperty()
+    settings?: WorkspaceSettingsDto;
 }

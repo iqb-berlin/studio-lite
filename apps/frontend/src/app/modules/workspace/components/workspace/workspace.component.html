@@ -7,7 +7,7 @@
   </studio-lite-splitter-pane>
 
   <studio-lite-splitter-pane>
-    <studio-lite-unit-data-area [navTabs]="navTabs"
+    <studio-lite-unit-data-area [navTabs]="navTabs | filterHiddenTabs:workspaceService.workspaceSettings.hiddenRoutes"
       [secondaryRoutingOutlet]="secondaryRoutingOutlet"
       [pinIcon]="'push_pin'"
       [disabledRouterLink]="pinnedNavTab.length ? pinnedNavTab[0].name : ''"
