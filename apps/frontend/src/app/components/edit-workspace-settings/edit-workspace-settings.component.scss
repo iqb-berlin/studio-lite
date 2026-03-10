@@ -27,3 +27,22 @@ h3 {
 h1 {
   margin: 10px 0
 }
+
+.margin-top-20 {
+  margin-top: 20px;
+}
+
+.column-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 30px;
+  width: 100%;
+}
+
+.half-column {
+  flex: 1;
+  min-width: 0;
+  max-width: calc(50% - 15px);
+}

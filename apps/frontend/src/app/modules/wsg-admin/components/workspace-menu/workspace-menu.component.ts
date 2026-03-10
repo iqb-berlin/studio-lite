@@ -183,7 +183,7 @@ export class WorkspaceMenuComponent {
               profile: ''
             };
             const dialogRef = this.editWorkspaceSettingsDialog.open(EditWorkspaceSettingsComponent, {
-              width: '600px',
+              width: '900px',
               data: { settings: wsSettings, selectedRow: selectedRows[0] }
             });
             dialogRef.afterClosed().subscribe(result => {
