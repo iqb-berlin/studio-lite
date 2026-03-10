@@ -11,7 +11,8 @@ import {
   WorkspaceGroupFullDto,
   WorkspaceUserInListDto,
   UserWorkspaceAccessForGroupDto,
-  UnitInViewDto
+  UnitInViewDto,
+  UnitItemInViewDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -38,9 +39,25 @@ export class BackendService {
       );
   }
 
+  getAllUnitItemsForGroup(groupId: number): Observable<UnitItemInViewDto[] | boolean> {
+    return this.http.get<UnitItemInViewDto[]>(`${this.serverUrl}admin/workspace-groups/${groupId}/unit-items`)
+      .pipe(
+        catchError(() => of(false))
+      );
+  }
+
   deleteWorkspaceUnit(workspaceId: number, unitId: number): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}`)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  deleteUnitItem(workspaceId: number, unitId: number, uuid: string): Observable<boolean> {
+    return this.http
+      .delete(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/items/${uuid}`)
       .pipe(
         map(() => true),
         catchError(() => of(false))

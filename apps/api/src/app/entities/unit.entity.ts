@@ -1,4 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn
+} from 'typeorm';
+import Workspace from './workspace.entity';
 
 @Entity()
 class Unit {
@@ -9,6 +12,12 @@ class Unit {
     name: 'workspace_id'
   })
     workspaceId: number;
+
+  @ManyToOne(() => Workspace)
+  @JoinColumn({
+    name: 'workspace_id'
+  })
+    workspace: Workspace;
 
   @Column()
     key: string;

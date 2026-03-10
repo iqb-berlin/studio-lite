@@ -390,6 +390,11 @@
     "delete-unit-by-key": "{{unitKey}} löschen",
     "unit-deleted": "Aufgabe gelöscht",
     "unit-not-deleted": "Konnte Aufgabe nicht löschen",
+    "delete-unit-item": "Item löschen",
+    "delete-unit-item-question": "Soll das Item mit der UUID {{uuid}} gelöscht werden?",
+    "delete-unit-item-by-uuid": "{{uuid}} löschen",
+    "unit-item-deleted": "Item gelöscht",
+    "unit-item-not-deleted": "Konnte Item nicht löschen",
     "units": "Aufgaben",
     "name": "Name",
     "hint": "Zugriffsrechte: Arbeitsbereich auswählen",
@@ -446,7 +451,8 @@
     "backup-workspace-group-limit-reached": "Die maximale Anzahl von Arbeitsbereichen ist erreicht.",
     "backup-workspace-group-limit-reached-hint": "Die maximale Anzahl von Arbeitsbereichen ist auf {{maxWorkspaceCount}} begrenzt. Bitte löschen Sie Arbeitsbereiche, bevor Sie neue anlegen.",
     "route-hidden": "Nicht verfügbar",
-    "route-visible": "Verfügbar"
+    "route-visible": "Verfügbar",
+    "unit-items": "Items"
   },
   "workspace-settings": {
     "modules": "Verona Module",
@@ -988,6 +994,10 @@
     "unitId": "ID (Aufgabe)",
     "variableId": "ID (Variable)",
     "variableReadOnlyId": "ID (Variable schreibgeschützt)",
+    "unitKey": "Kurzname (Aufgabe)",
+    "unitName": "Name (Aufgabe)",
+    "workspaceId": "ID (Arbeitsbereich)",
+    "workspaceName": "Name (Arbeitsbereich)",
     "weighting": "Wichtung",
     "description": "Notiz/Beschreibung",
     "createdAt": "Erstellt am",

@@ -1,4 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn
+} from 'typeorm';
+import Unit from './unit.entity';
 
 @Entity()
 class UnitItem {
@@ -7,6 +10,12 @@ class UnitItem {
 
   @Column()
     id: string;
+
+  @ManyToOne(() => Unit)
+  @JoinColumn({
+    name: 'unit_id'
+  })
+    unit: Unit;
 
   @Column()
     order: number;

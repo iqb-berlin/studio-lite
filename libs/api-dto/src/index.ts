@@ -68,6 +68,7 @@ export { UserWorkspaceAccessForGroupDto } from './lib/dtos/workspace/user-worksp
 export { UsersWorkspaceInListDto } from './lib/dtos/workspace/users-workspace-in-list.dto';
 export { WorkspaceUserInListDto } from './lib/dtos/user/workspace-user-in-list.dto';
 export { UnitItemDto } from './lib/dtos/unit-item/unit-item.dto';
+export { UnitItemInViewDto } from './lib/dtos/unit-item/unit-item-in-view.dto';
 export { MetadataDto } from './lib/dtos/metadata/metadata.dto';
 export { UnitMetadataDto } from './lib/dtos/metadata/unit-metadata.dto';
 export { UnitItemMetadataDto } from './lib/dtos/metadata/unit-item-metadata.dto';

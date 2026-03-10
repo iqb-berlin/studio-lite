@@ -10,7 +10,8 @@ import {
   UserWorkspaceAccessDto,
   UserWorkspaceAccessForGroupDto,
   WorkspaceGroupFullDto,
-  WorkspaceUserInListDto
+  WorkspaceUserInListDto,
+  UnitItemInViewDto
 } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 
@@ -461,6 +462,54 @@ describe('WsgAdmin BackendService', () => {
         .toBe('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       expect(req.request.responseType).toBe('blob');
       req.flush(blob);
+    });
+  });
+
+  describe('getAllUnitItemsForGroup', () => {
+    it('returns unit items on success', done => {
+      const items: UnitItemInViewDto[] = [{ uuid: '1' } as UnitItemInViewDto];
+
+      service.getAllUnitItemsForGroup(5).subscribe(result => {
+        expect(result).toEqual(items);
+        done();
+      });
+
+      const req = httpMock.expectOne(`${serverUrl}admin/workspace-groups/5/unit-items`);
+      expect(req.request.method).toBe('GET');
+      req.flush(items);
+    });
+
+    it('returns empty array on error', done => {
+      service.getAllUnitItemsForGroup(5).subscribe(result => {
+        expect(result).toEqual([]);
+        done();
+      });
+
+      const req = httpMock.expectOne(`${serverUrl}admin/workspace-groups/5/unit-items`);
+      req.error(new ProgressEvent('error'));
+    });
+  });
+
+  describe('deleteUnitItem', () => {
+    it('returns true on success', done => {
+      service.deleteUnitItem(1, 2, 'uuid1').subscribe(result => {
+        expect(result).toBe(true);
+        done();
+      });
+
+      const req = httpMock.expectOne(`${serverUrl}workspaces/1/units/2/items/uuid1`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(true);
+    });
+
+    it('returns false on error', done => {
+      service.deleteUnitItem(1, 2, 'uuid1').subscribe(result => {
+        expect(result).toBe(false);
+        done();
+      });
+
+      const req = httpMock.expectOne(`${serverUrl}workspaces/1/units/2/items/uuid1`);
+      req.error(new ProgressEvent('error'));
     });
   });
 });

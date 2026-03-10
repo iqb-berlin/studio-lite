@@ -38,15 +38,15 @@ import { AppService } from '../../../../services/app.service';
 export class UnitItemsComponent implements OnInit, AfterViewInit {
   dataSource = new MatTableDataSource<UnitItemDto>([]);
   displayedColumns: string[] = [
-    'uuid',
     'id',
+    'uuid',
     'unitId',
     'variableId',
     'variableReadOnlyId',
     'weighting',
     'description',
-    'createdAt',
-    'changedAt'
+    'changedAt',
+    'createdAt'
   ];
 
   @ViewChild(MatSort) sort!: MatSort;
