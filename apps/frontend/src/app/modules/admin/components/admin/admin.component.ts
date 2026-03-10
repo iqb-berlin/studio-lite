@@ -17,6 +17,7 @@ export class AdminComponent implements OnInit {
     'workspace-groups',
     'workspaces',
     'units',
+    'unit-items',
     'v-modules',
     'widgets',
     'settings',

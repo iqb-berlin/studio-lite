@@ -16,6 +16,7 @@ import {
   WorkspaceGroupSettingsDto,
   WorkspaceFullDto,
   UnitInViewDto,
+  UnitItemDto,
   ProfilesRegistryDto
 } from '@studio-lite-lib/api-dto';
 
@@ -37,6 +38,13 @@ export class BackendService {
 
   getAllUnits(): Observable<UnitInViewDto[] | boolean> {
     return this.http.get<UnitInViewDto[]>(`${this.serverUrl}admin/units`)
+      .pipe(
+        catchError(() => of(false))
+      );
+  }
+
+  getAllUnitItems(): Observable<UnitItemDto[] | boolean> {
+    return this.http.get<UnitItemDto[]>(`${this.serverUrl}admin/unit-items`)
       .pipe(
         catchError(() => of(false))
       );

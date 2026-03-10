@@ -206,6 +206,7 @@
     "workspaces": "Arbeitsbereiche",
     "v-modules": "Module",
     "widgets": "Widgets",
+    "unit-items": "Items",
     "settings": "Einstellungen",
     "packages": "Pakete",
     "units": "Aufgaben",
@@ -296,7 +297,7 @@
     "formly-field-pattern-float-number": "Ungültiger Wert",
     "items-read-only-view": "Items nur lesbar anzeigen",
     "items-editable-view": "Items bearbeitbar anzeigen",
-    "items": "Metadaten Items",
+    "items": "Items",
     "units": "Metadaten Aufgaben",
     "unit-title": "Metadaten (Aufgabe)",
     "items-title": "Metadaten (Items)",
@@ -769,6 +770,7 @@
     "filter-packages": "Suche nach Paketen",
     "filter-groups": "Suche nach Gruppen",
     "filter-workspace-groups": "Suche nach Bereichsgruppen",
+    "filter-unit-items": "Suche nach Items",
     "filter-reviews": "Suche nach Aufgabenfolgen",
     "filter-units": "Suche nach Aufgaben",
     "delete-filter": "Suchbegriff zurücksetzen",
@@ -979,5 +981,16 @@
     "lastChangedMetadataUser": "Bearbeiter:in (Eigenschaften)",
     "lastChangedScheme": "Änderungsdatum (Kodierschema)",
     "lastChangedSchemeUser": "Bearbeiter:in (Kodierschema)"
+  },
+  "unit-item": {
+    "uuid": "UUID",
+    "id": "ID",
+    "unitId": "ID (Aufgabe)",
+    "variableId": "ID (Variable)",
+    "variableReadOnlyId": "ID (Variable schreibgeschützt)",
+    "weighting": "Wichtung",
+    "description": "Notiz/Beschreibung",
+    "createdAt": "Erstellt am",
+    "changedAt": "Geändert am"
   }
 }

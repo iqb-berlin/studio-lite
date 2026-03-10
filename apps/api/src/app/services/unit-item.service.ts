@@ -20,6 +20,10 @@ export class UnitItemService {
     private itemCommentService: ItemCommentService
   ) {}
 
+  async getAll(): Promise<UnitItemDto[]> {
+    return this.unitItemRepository.find();
+  }
+
   async getAllByUnitId(unitId: number,
                        orderKey: string = 'id',
                        direction: 'DESC' | 'ASC' = 'ASC'): Promise<UnitItemDto[]> {
