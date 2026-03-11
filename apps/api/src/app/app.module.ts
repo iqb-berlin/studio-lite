@@ -79,7 +79,9 @@ import UnitCommentUnitItem from './entities/unit-comment-unit-item.entity';
 import { ReviewUnitItemController } from './controllers/review-unit-item.controller';
 import { HttpExceptionFilter } from './exceptions/http-exception.filter';
 import { AdminController } from './controllers/admin.controller';
-import { WriteOrAdminAccessGuard } from './guards/write-or-admin-access.guard';
+import { WriteOrGroupAdminAccessGuard } from './guards/write-or-group-admin-access.guard';
+import { ReadOrGroupAdminAccessGuard } from './guards/read-or-group-admin-access.guard';
+import { ManageOrGroupAdminAccessGuard } from './guards/manage-or-group-admin-access.guard';
 
 @Module({
   imports: [
@@ -246,7 +248,9 @@ import { WriteOrAdminAccessGuard } from './guards/write-or-admin-access.guard';
     UnitItemMetadataService,
     UnitMetadataService,
     UnitMetadataToDeleteService,
-    WriteOrAdminAccessGuard
+    WriteOrGroupAdminAccessGuard,
+    ReadOrGroupAdminAccessGuard,
+    ManageOrGroupAdminAccessGuard
   ],
   exports: [AppVersionProvider]
 })

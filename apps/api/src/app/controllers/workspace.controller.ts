@@ -32,19 +32,19 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import { WorkspaceService } from '../services/workspace.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { WorkspaceGuard } from '../guards/workspace.guard';
 import { WorkspaceId } from '../decorators/workspace.decorator';
 import { UnitDownloadClass } from '../classes/unit-download.class';
 import { UnitService } from '../services/unit.service';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { SettingService } from '../services/setting.service';
-import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { UsersService } from '../services/users.service';
-import { ManageAccessGuard } from '../guards/manage-access.guard';
 import UserEntity from '../entities/user.entity';
 import { User } from '../decorators/user.decorator';
 import { UnitCommentService } from '../services/unit-comment.service';
-import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
+import { ReadOrGroupAdminAccessGuard } from '../guards/read-or-group-admin-access.guard';
+import { WorkspaceGuard } from '../guards/workspace.guard';
+import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
+import { ManageOrGroupAdminAccessGuard } from '../guards/manage-or-group-admin-access.guard';
 
 @Controller('workspaces/:workspace_id')
 export class WorkspaceController {
@@ -58,7 +58,7 @@ export class WorkspaceController {
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
+  @UseGuards(JwtAuthGuard, ReadOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
@@ -102,7 +102,7 @@ export class WorkspaceController {
   }
 
   @Get('users/:user_id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
+  @UseGuards(JwtAuthGuard, ReadOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'user_id', type: Number })
@@ -142,7 +142,7 @@ export class WorkspaceController {
   }
 
   @Patch('group-name')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
+  @UseGuards(JwtAuthGuard, ManageOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiOkResponse()
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
@@ -157,7 +157,7 @@ export class WorkspaceController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageAccessGuard)
+  @UseGuards(JwtAuthGuard, ManageOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @UseInterceptors(FilesInterceptor('files'))
