@@ -479,9 +479,9 @@ describe('WsgAdmin BackendService', () => {
       req.flush(items);
     });
 
-    it('returns empty array on error', done => {
+    it('returns false on error', done => {
       service.getAllUnitItemsForGroup(5).subscribe(result => {
-        expect(result).toEqual([]);
+        expect(result).toBe(false);
         done();
       });
 

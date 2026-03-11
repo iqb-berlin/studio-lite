@@ -146,7 +146,7 @@ describe('UnitItemsComponent', () => {
     tick();
 
     expect(deleteSpy).toHaveBeenCalledWith(1, 1, '123');
-    expect(snackBarSpy).toHaveBeenCalledWith('wsg-admin.unit-item-deleted', 'OK', { duration: 3000 });
+    expect(snackBarSpy).toHaveBeenCalledWith('wsg-admin.unit-item-deleted', '', { duration: 3000 });
   }));
 
   it('should show error snackbar if deletion fails', fakeAsync(() => {
@@ -160,6 +160,6 @@ describe('UnitItemsComponent', () => {
     component.openDeleteDialog(item);
     tick();
 
-    expect(snackBarSpy).toHaveBeenCalledWith('wsg-admin.unit-item-not-deleted', 'OK', { duration: 3000 });
+    expect(snackBarSpy).toHaveBeenCalledWith('wsg-admin.unit-item-not-deleted', 'error', { duration: 3000 });
   }));
 });
