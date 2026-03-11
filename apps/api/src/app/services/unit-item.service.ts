@@ -1,10 +1,7 @@
 import { Logger } from '@nestjs/common';
-import {
-  UnitItemDto,
-  UnitItemWithMetadataDto
-} from '@studio-lite-lib/api-dto';
+import { UnitItemDto, UnitItemInViewDto, UnitItemWithMetadataDto } from '@studio-lite-lib/api-dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import UnitItem from '../entities/unit-item.entity';
 import { UnitItemMetadataService } from './unit-item-metadata.service';
 import { ItemCommentService } from './item-comment.service';
@@ -19,6 +16,30 @@ export class UnitItemService {
     private unitItemMetadataService: UnitItemMetadataService,
     private itemCommentService: ItemCommentService
   ) {}
+
+  async getAll(): Promise<UnitItemDto[]> {
+    return this.unitItemRepository.find();
+  }
+
+  async findAllForGroup(workspaceGroupId: number): Promise<UnitItemInViewDto[]> {
+    return this.unitItemRepository.find({
+      relations: ['unit', 'unit.workspace'],
+      where: { unit: { workspaceId: In(await this.getWorkspaceIds(workspaceGroupId)) } }
+    }).then(items => items.map(item => ({
+      ...item,
+      unitKey: item.unit?.key || '',
+      unitName: item.unit?.name || '',
+      workspaceId: item.unit?.workspaceId || 0,
+      workspaceName: item.unit?.workspace?.name || ''
+    })));
+  }
+
+  private async getWorkspaceIds(workspaceGroupId: number): Promise<number[]> {
+    return this.unitItemRepository.manager.getRepository('Workspace').find({
+      where: { groupId: workspaceGroupId },
+      select: ['id']
+    }).then(workspaces => workspaces.map(w => w.id));
+  }
 
   async getAllByUnitId(unitId: number,
                        orderKey: string = 'id',

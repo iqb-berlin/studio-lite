@@ -206,6 +206,7 @@
     "workspaces": "Arbeitsbereiche",
     "v-modules": "Module",
     "widgets": "Widgets",
+    "unit-items": "Items",
     "settings": "Einstellungen",
     "packages": "Pakete",
     "units": "Aufgaben",
@@ -296,7 +297,7 @@
     "formly-field-pattern-float-number": "Ungültiger Wert",
     "items-read-only-view": "Items nur lesbar anzeigen",
     "items-editable-view": "Items bearbeitbar anzeigen",
-    "items": "Metadaten Items",
+    "items": "Items",
     "units": "Metadaten Aufgaben",
     "unit-title": "Metadaten (Aufgabe)",
     "items-title": "Metadaten (Items)",
@@ -389,6 +390,11 @@
     "delete-unit-by-key": "{{unitKey}} löschen",
     "unit-deleted": "Aufgabe gelöscht",
     "unit-not-deleted": "Konnte Aufgabe nicht löschen",
+    "delete-unit-item": "Item löschen",
+    "delete-unit-item-question": "Soll das Item mit der UUID {{uuid}} gelöscht werden?",
+    "delete-unit-item-by-uuid": "{{uuid}} löschen",
+    "unit-item-deleted": "Item gelöscht",
+    "unit-item-not-deleted": "Konnte Item nicht löschen",
     "units": "Aufgaben",
     "name": "Name",
     "hint": "Zugriffsrechte: Arbeitsbereich auswählen",
@@ -445,7 +451,8 @@
     "backup-workspace-group-limit-reached": "Die maximale Anzahl von Arbeitsbereichen ist erreicht.",
     "backup-workspace-group-limit-reached-hint": "Die maximale Anzahl von Arbeitsbereichen ist auf {{maxWorkspaceCount}} begrenzt. Bitte löschen Sie Arbeitsbereiche, bevor Sie neue anlegen.",
     "route-hidden": "Nicht verfügbar",
-    "route-visible": "Verfügbar"
+    "route-visible": "Verfügbar",
+    "unit-items": "Items"
   },
   "workspace-settings": {
     "modules": "Verona Module",
@@ -769,6 +776,7 @@
     "filter-packages": "Suche nach Paketen",
     "filter-groups": "Suche nach Gruppen",
     "filter-workspace-groups": "Suche nach Bereichsgruppen",
+    "filter-unit-items": "Suche nach Items",
     "filter-reviews": "Suche nach Aufgabenfolgen",
     "filter-units": "Suche nach Aufgaben",
     "delete-filter": "Suchbegriff zurücksetzen",
@@ -979,5 +987,20 @@
     "lastChangedMetadataUser": "Bearbeiter:in (Eigenschaften)",
     "lastChangedScheme": "Änderungsdatum (Kodierschema)",
     "lastChangedSchemeUser": "Bearbeiter:in (Kodierschema)"
+  },
+  "unit-item": {
+    "uuid": "UUID",
+    "id": "ID",
+    "unitId": "ID (Aufgabe)",
+    "variableId": "ID (Variable)",
+    "variableReadOnlyId": "ID (Variable schreibgeschützt)",
+    "unitKey": "Kurzname (Aufgabe)",
+    "unitName": "Name (Aufgabe)",
+    "workspaceId": "ID (Arbeitsbereich)",
+    "workspaceName": "Name (Arbeitsbereich)",
+    "weighting": "Wichtung",
+    "description": "Notiz/Beschreibung",
+    "createdAt": "Erstellt am",
+    "changedAt": "Geändert am"
   }
 }

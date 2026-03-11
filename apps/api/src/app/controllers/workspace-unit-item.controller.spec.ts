@@ -8,6 +8,10 @@ import { WorkspaceGuard } from '../guards/workspace.guard';
 import { AppVersionGuard } from '../guards/app-version.guard';
 import { WriteAccessGuard } from '../guards/write-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
+import { WriteOrGroupAdminAccessGuard } from '../guards/write-or-group-admin-access.guard';
+import { AuthService } from '../services/auth.service';
+import { WorkspaceService } from '../services/workspace.service';
+import { WorkspaceUserService } from '../services/workspace-user.service';
 import UnitCommentUnitItem from '../entities/unit-comment-unit-item.entity';
 
 describe('WorkspaceUnitItemController', () => {
@@ -18,7 +22,11 @@ describe('WorkspaceUnitItemController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [WorkspaceUnitItemController],
       providers: [
-        { provide: UnitItemService, useValue: createMock<UnitItemService>() }
+        { provide: UnitItemService, useValue: createMock<UnitItemService>() },
+        { provide: AuthService, useValue: createMock<AuthService>() },
+        { provide: WorkspaceService, useValue: createMock<WorkspaceService>() },
+        { provide: WorkspaceUserService, useValue: createMock<WorkspaceUserService>() },
+        WriteOrGroupAdminAccessGuard
       ]
     })
       .overrideGuard(JwtAuthGuard).useValue({ canActivate: () => true })
@@ -29,6 +37,8 @@ describe('WorkspaceUnitItemController', () => {
       .overrideGuard(WriteAccessGuard)
       .useValue({ canActivate: () => true })
       .overrideGuard(WorkspaceAccessGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(WriteOrGroupAdminAccessGuard)
       .useValue({ canActivate: () => true })
       .compile();
 

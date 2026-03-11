@@ -16,6 +16,7 @@ import { AppVersionGuard } from '../guards/app-version.guard';
 import { WriteAccessGuard } from '../guards/write-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { UnitItemService } from '../services/unit-item.service';
+import { WriteOrGroupAdminAccessGuard } from '../guards/write-or-group-admin-access.guard';
 import { UnitId } from '../decorators/unit-id.decorator';
 import UnitCommentUnitItem from '../entities/unit-comment-unit-item.entity';
 
@@ -56,7 +57,7 @@ export class WorkspaceUnitItemController {
   }
 
   @Delete(':uuid')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WriteOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiTags('workspace unit item')
   @ApiParam({ name: 'workspace_id', type: Number })

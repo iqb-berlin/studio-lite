@@ -21,7 +21,7 @@ import {
 import {
   CreateWorkspaceGroupDto, UnitInViewDto, UserInListDto,
   WorkspaceGroupFullDto,
-  WorkspaceGroupInListDto, WorkspaceInListDto
+  WorkspaceGroupInListDto, WorkspaceInListDto, UnitItemInViewDto
 } from '@studio-lite-lib/api-dto';
 import type { Response } from 'express';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -32,6 +32,7 @@ import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { UsersService } from '../services/users.service';
 import { UnitService } from '../services/unit.service';
+import { UnitItemService } from '../services/unit-item.service';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 
 @Controller('admin/workspace-groups')
@@ -40,7 +41,8 @@ export class AdminWorkspaceGroupController {
     private workspaceGroupService: WorkspaceGroupService,
     private workspaceService: WorkspaceService,
     private unitService: UnitService,
-    private userService: UsersService
+    private userService: UsersService,
+    private unitItemService: UnitItemService
   ) {}
 
   @Get()
@@ -130,6 +132,17 @@ export class AdminWorkspaceGroupController {
   @ApiTags('admin workspace-group')
   async findWorkspaceGroupUnits(@WorkspaceGroupId() id: number): Promise<UnitInViewDto[]> {
     return this.unitService.findAllForGroup(id);
+  }
+
+  @Get(':workspace_group_id/unit-items')
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_group_id', type: Number })
+  @ApiOkResponse({ description: 'Unit items of workspace-group retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiTags('admin workspace-group')
+  async findWorkspaceGroupUnitItems(@WorkspaceGroupId() id: number): Promise<UnitItemInViewDto[]> {
+    return this.unitItemService.findAllForGroup(id);
   }
 
   @Patch(':workspace_group_id')

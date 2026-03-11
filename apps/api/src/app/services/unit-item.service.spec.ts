@@ -67,6 +67,18 @@ describe('UnitItemService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('getAll', () => {
+    it('should return all unit items', async () => {
+      const items = [{ uuid: 'u1' }, { uuid: 'u2' }] as UnitItem[];
+      mockRepository.find.mockResolvedValue(items);
+
+      const result = await service.getAll();
+
+      expect(repository.find).toHaveBeenCalled();
+      expect(result).toEqual(items);
+    });
+  });
+
   describe('getAllByUnitId', () => {
     it('should return items', async () => {
       const unitId = 1;
