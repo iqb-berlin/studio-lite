@@ -30,4 +30,7 @@ export class UserFullDto {
 
   @ApiProperty()
     lastActivity?: Date;
+
+  @ApiProperty()
+    isLoggedIn?: boolean;
 }

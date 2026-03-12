@@ -4,7 +4,7 @@ import {
 } from 'rxjs';
 
 import {
-  switchMap, filter, distinctUntilChanged, startWith, map, throttleTime, scan
+  switchMap, filter, distinctUntilChanged, startWith, map, throttleTime, scan, catchError
 } from 'rxjs/operators';
 import { AppService } from './app.service';
 import { BackendService } from './backend.service';
@@ -14,8 +14,8 @@ import { BackendService } from './backend.service';
 })
 export class HeartbeatService implements OnDestroy {
   private heartbeatSubscription: Subscription | null = null;
-  private readonly intervalMs = 60000; // 1 minute
   private readonly idleTimeoutMs = 300000; // 5 minutes
+  private readonly intervalMs = 60000; // 1 minute
 
   constructor(
     private appService: AppService,
@@ -27,35 +27,32 @@ export class HeartbeatService implements OnDestroy {
       return;
     }
 
-    const visibilityChanged$ = merge(
-      fromEvent(document, 'visibilitychange'),
-      fromEvent(window, 'focus'),
-      fromEvent(window, 'blur')
-    ).pipe(
-      map(() => document.visibilityState === 'visible' && document.hasFocus()),
-      startWith(document.visibilityState === 'visible' && document.hasFocus()),
+    const visibilityChanged$ = fromEvent(document, 'visibilitychange').pipe(
+      map(() => document.visibilityState === 'visible'),
+      startWith(document.visibilityState === 'visible'),
       distinctUntilChanged()
     );
 
-    const mouseActivity$ = fromEvent<MouseEvent>(window, 'mousemove').pipe(
+    const pointerActivity$ = fromEvent<PointerEvent>(window, 'pointermove').pipe(
       throttleTime(2000),
       map(event => ({ x: event.clientX, y: event.clientY })),
       scan((acc, curr) => {
-        const threshold = 10;
+        if (acc.x === -1) return curr; // Initialize baseline with first event
+        const threshold = 15; // Increased threshold for noise reduction
         const moved = Math.abs(acc.x - curr.x) > threshold || Math.abs(acc.y - curr.y) > threshold;
         return moved ? curr : acc;
-      }, { x: 0, y: 0 }),
+      }, { x: -1, y: -1 }),
       distinctUntilChanged((p, q) => p.x === q.x && p.y === q.y)
     );
 
     const activity$ = merge(
-      mouseActivity$,
+      pointerActivity$,
       fromEvent(window, 'keydown'),
+      fromEvent(window, 'pointerdown'),
       fromEvent(window, 'click'),
       fromEvent(window, 'scroll'),
       fromEvent(window, 'wheel'),
-      fromEvent(window, 'touchstart'),
-      fromEvent(window, 'touchmove')
+      fromEvent(window, 'focus')
     ).pipe(
       startWith(null)
     );
@@ -76,7 +73,10 @@ export class HeartbeatService implements OnDestroy {
           return interval(this.intervalMs).pipe(
             startWith(0),
             filter(() => !!this.appService.authData?.userId),
-            switchMap(() => this.backendService.ping().pipe(map(() => null)))
+            switchMap(() => this.backendService.ping().pipe(
+              catchError(() => of(null)),
+              map(() => null)
+            ))
           );
         }
         return of(null);

@@ -164,7 +164,8 @@
     "is-admin": "Admin-Rechte",
     "is-not-admin": "Keine Admin-Rechte",
     "active": "Aktiv",
-    "inactive": "Inaktiv"
+    "inactive": "Inaktiv (Offline)",
+    "passive": "Passiv (Eingeloggt, aber inaktiv)"
   },
   "access-rights": {
     "hint": "Zugriffsrechte: Nutzer:in auswählen",
@@ -208,6 +209,8 @@
     "user-not-edited": "Daten für Nutzer:in konnte nicht geändert werden",
     "users-deleted": "Nutzer:in(en) gelöscht",
     "users-not-deleted": "Nutzer:in(en) konnten nicht gelöscht werden",
+    "users-active": "{{count}} aktiv.",
+    "users-logged-in": "{{count}} angemeldet.",
     "workspace-groups": "Bereichsgruppen",
     "workspaces": "Arbeitsbereiche",
     "v-modules": "Module",

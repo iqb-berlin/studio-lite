@@ -87,6 +87,7 @@ export class BackendService {
   }
 
   logout(): void {
+    this.http.post(`${this.serverUrl}logout`, {}).subscribe();
     localStorage.removeItem('id_token');
     localStorage.removeItem('refresh_token');
     this.appService.authData = AppService.defaultAuthData;
@@ -171,6 +172,6 @@ export class BackendService {
   }
 
   ping(): Observable<void> {
-    return this.http.get<void>(`${this.serverUrl}ping`);
+    return this.http.post<void>(`${this.serverUrl}ping`, {});
   }
 }

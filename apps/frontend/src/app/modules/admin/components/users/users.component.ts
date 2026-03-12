@@ -46,6 +46,8 @@ export class UsersComponent implements OnInit, OnDestroy {
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
   userWorkspaceGroups = new WorkspaceGroupToCheckCollection([]);
+  activeUserCount = 0;
+  loggedInUserCount = 0;
   private pollingSubscription: Subscription | null = null;
 
   @ViewChild(MatSort) sort = new MatSort();
@@ -74,9 +76,11 @@ export class UsersComponent implements OnInit, OnDestroy {
       this.createWorkspaceList();
     });
 
-    this.pollingSubscription = timer(60000, 60000).subscribe(() => {
-      this.updateUserList(false);
-    });
+    // Poll for updates every 60 seconds
+    this.pollingSubscription = timer(60000, 60000)
+      .subscribe(() => {
+        this.updateUserList(false);
+      });
   }
 
   ngOnDestroy(): void {
@@ -265,6 +269,10 @@ export class UsersComponent implements OnInit, OnDestroy {
         .toLowerCase()
         .includes(filter));
     this.objectsDatasource.sort = this.sort;
+
+    const fiveMinutesAgo = new Date(Date.now() - 300000);
+    this.activeUserCount = users.filter(u => u.lastActivity && new Date(u.lastActivity) > fiveMinutesAgo).length;
+    this.loggedInUserCount = users.filter(u => u.isLoggedIn).length;
   }
 
   createWorkspaceList(): void {

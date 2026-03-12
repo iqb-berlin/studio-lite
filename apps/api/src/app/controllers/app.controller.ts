@@ -58,6 +58,15 @@ export class AppController {
     return tokens;
   }
 
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiTags('auth')
+  @ApiOkResponse({ description: 'Logged out successfully.' })
+  async logout(@UserId() userId: number) {
+    await this.authService.logout(userId);
+  }
+
   @Post('init-login')
   @UseGuards(AppVersionGuard)
   @ApiHeader({
@@ -156,7 +165,7 @@ export class AppController {
     return true;
   }
 
-  @Get('ping')
+  @Post('ping')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiTags('auth')
@@ -166,6 +175,4 @@ export class AppController {
       await this.userService.updateLastActivity(userId);
     }
   }
-
 }
-

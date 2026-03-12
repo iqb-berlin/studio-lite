@@ -106,4 +106,20 @@ export class AuthService {
   async canAccessWorkSpace(userId: number, workspaceId: number): Promise<boolean> {
     return this.usersService.canAccessWorkSpace(userId, workspaceId);
   }
+
+  async logout(userId: number): Promise<void> {
+    this.logger.log(`Logging out user with id '${userId}'.`);
+    await this.refreshTokenRepository.update(
+      { userId, isRevoked: false },
+      { isRevoked: true }
+    );
+  }
+
+  async isUserLoggedIn(userId: number): Promise<boolean> {
+    const tokens = await this.refreshTokenRepository.find({
+      where: { userId, isRevoked: false }
+    });
+    const now = new Date();
+    return tokens.some(t => t.expiresAt > now);
+  }
 }

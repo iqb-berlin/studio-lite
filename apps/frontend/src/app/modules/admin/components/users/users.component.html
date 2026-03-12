@@ -11,6 +11,8 @@
         {{'admin.issue-count-info' | translate :
         { count: objectsDatasource.data.length, issue: ('admin.users' | translate)}
         }}
+        {{ 'admin.users-logged-in' | translate: { count: loggedInUserCount } }}
+        <span>{{ 'admin.users-active' | translate: { count: activeUserCount } }}</span>
       </div>
 
       <studio-lite-search-filter
@@ -31,6 +33,8 @@
         <mat-cell *matCellDef="let element">
           @if (element.lastActivity | isActiveUser) {
             <span class="active-dot" [matTooltip]="('user.active' | translate) + (element.lastActivity ? ' (' + (element.lastActivity | date: 'HH:mm:ss') + ')' : '')"></span>
+          } @else if (element.isLoggedIn) {
+            <span class="passive-dot" [matTooltip]="('user.passive' | translate) + (element.lastActivity ? ' (' + (element.lastActivity | date: 'HH:mm:ss') + ')' : '')"></span>
           } @else {
             <span class="inactive-dot" [matTooltip]="('user.inactive' | translate) + (element.lastActivity ? ' (' + (element.lastActivity | date: 'HH:mm:ss') + ')' : '')"></span>
           }

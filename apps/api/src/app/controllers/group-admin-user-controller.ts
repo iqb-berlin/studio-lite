@@ -11,6 +11,7 @@ import {
   WorkspaceUserInListDto
 } from '@studio-lite-lib/api-dto';
 import { UsersService } from '../services/users.service';
+import { AuthService } from '../services/auth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../services/workspace.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
@@ -19,7 +20,8 @@ import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.g
 export class GroupAdminUserController {
   constructor(
     private usersService: UsersService,
-    private workspaceService: WorkspaceService
+    private workspaceService: WorkspaceService,
+    private authService: AuthService
   ) {}
 
   @Get()
@@ -36,7 +38,12 @@ export class GroupAdminUserController {
   async findAll(@Query('full',
     new ParseBoolPipe({ optional: true })) full?: boolean): Promise<WorkspaceUserInListDto[] | UserFullDto[]> {
     if (full) {
-      return this.usersService.findAllFull();
+      const users = await this.usersService.findAllFull();
+      return Promise.all(users.map(async user => {
+        // eslint-disable-next-line no-param-reassign
+        user.isLoggedIn = await this.authService.isUserLoggedIn(user.id);
+        return user;
+      }));
     }
     return this.usersService.findAllUsers();
   }
