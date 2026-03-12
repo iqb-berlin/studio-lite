@@ -1,8 +1,12 @@
 import {
-  // eslint-disable-next-line max-len
-  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef,
+  MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
-import { ViewChild, Component, OnInit } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import {
+  ViewChild, Component, OnInit, OnDestroy
+} from '@angular/core';
+import { timer, Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { UntypedFormGroup, FormsModule } from '@angular/forms';
@@ -23,6 +27,7 @@ import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { UsersMenuComponent } from '../users-menu/users-menu.component';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
+import { IsActiveUserPipe } from '../../../../pipes/is-active-user.pipe';
 import {
   BackendService
 } from '../../services/backend.service';
@@ -33,14 +38,15 @@ import { AppService } from '../../../../services/app.service';
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent]
+  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, IsActiveUserPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent, DatePipe]
 })
-export class UsersComponent implements OnInit {
+export class UsersComponent implements OnInit, OnDestroy {
   objectsDatasource = new MatTableDataSource<UserFullDto>();
-  displayedColumns = ['name', 'displayName', 'isAdmin', 'email', 'id', 'description', 'delete'];
+  displayedColumns = ['active', 'name', 'displayName', 'isAdmin', 'email', 'id', 'description', 'delete'];
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
   userWorkspaceGroups = new WorkspaceGroupToCheckCollection([]);
+  private pollingSubscription: Subscription | null = null;
 
   @ViewChild(MatSort) sort = new MatSort();
 
@@ -67,6 +73,16 @@ export class UsersComponent implements OnInit {
     setTimeout(() => {
       this.createWorkspaceList();
     });
+
+    this.pollingSubscription = timer(60000, 60000).subscribe(() => {
+      this.updateUserList(false);
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollingSubscription) {
+      this.pollingSubscription.unsubscribe();
+    }
   }
 
   addUser(userData: UntypedFormGroup): void {
@@ -215,18 +231,25 @@ export class UsersComponent implements OnInit {
     }
   }
 
-  updateUserList(): void {
-    this.selectedUser = 0;
-    this.appService.dataLoading = true;
+  updateUserList(showLoading = true): void {
+    if (showLoading) {
+      this.selectedUser = 0;
+      this.appService.dataLoading = true;
+    }
     this.backendService.getUsersFull().subscribe(
       (users: UserFullDto[]) => {
-        if (users.length > 0) {
-          this.setObjectsDatasource(users);
+        this.setObjectsDatasource(users);
+        if (showLoading) {
           this.tableSelectionRow.clear();
           this.appService.dataLoading = false;
-        } else {
-          this.tableSelectionRow.clear();
-          this.appService.dataLoading = false;
+        } else if (this.selectedUser) {
+          const selected = users.find(u => u.id === this.selectedUser);
+          if (selected) {
+            this.tableSelectionRow.select(selected);
+          } else {
+            this.selectedUser = 0;
+            this.tableSelectionRow.clear();
+          }
         }
       }
     );

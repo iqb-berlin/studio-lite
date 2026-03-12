@@ -45,8 +45,17 @@ export class AppController {
   @ApiCreatedResponse({ description: 'Logged in successfully.' }) // TODO: Add Exception?
   @ApiUnauthorizedResponse({ description: 'The user is not registered. ' })
   async login(@Request() req) {
-    const token = await this.authService.login(req.user);
-    return `"${token}"`;
+    return this.authService.login(req.user);
+  }
+
+  @Post('refresh')
+  @ApiTags('auth')
+  @ApiCreatedResponse({ description: 'Token successfully refreshed.' })
+  @ApiUnauthorizedResponse({ description: 'Invalid or expired refresh token.' })
+  async refresh(@Body() body: { refreshToken: string }) {
+    const tokens = await this.authService.refreshAccessToken(body.refreshToken);
+    if (!tokens) throw new UnauthorizedException();
+    return tokens;
   }
 
   @Post('init-login')
@@ -146,4 +155,17 @@ export class AppController {
     await this.userService.patchMyData(myNewData);
     return true;
   }
+
+  @Get('ping')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiTags('auth')
+  @ApiOkResponse({ description: 'User activity updated.' })
+  async ping(@UserId() userId: number): Promise<void> {
+    if (userId) {
+      await this.userService.updateLastActivity(userId);
+    }
+  }
+
 }
+

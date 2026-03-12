@@ -1,7 +1,13 @@
-import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import {
+  ForbiddenException, Injectable, Logger
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as crypto from 'crypto';
 import { UsersService } from './users.service';
 import { ReviewService } from './review.service';
+import { RefreshToken } from '../entities/refresh-token.entity';
 
 @Injectable()
 export class AuthService {
@@ -10,7 +16,9 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private reviewService: ReviewService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    @InjectRepository(RefreshToken)
+    private refreshTokenRepository: Repository<RefreshToken>
   ) {
   }
 
@@ -22,12 +30,54 @@ export class AuthService {
     return this.reviewService.getReviewByKeyAndPassword(reviewKey, pass);
   }
 
-  async login(user: { id: number, name: string, reviewId: number }): Promise<string> {
+  async login(user: { id: number, name: string, reviewId: number }): Promise<{
+    accessToken: string,
+    refreshToken: string
+  }> {
     this.logger.log(user.id ?
       `User with id '${user.id}' is logging in.` :
       `Review with id '${user.reviewId}' is logging in.`);
     const payload = { username: user.name, sub: user.id, sub2: user.reviewId };
-    return this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = await this.generateRefreshToken(user.id);
+    return { accessToken, refreshToken };
+  }
+
+  async generateRefreshToken(userId: number): Promise<string> {
+    const token = crypto.randomBytes(64).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const refreshToken = this.refreshTokenRepository.create({
+      tokenHash,
+      userId,
+      expiresAt
+    });
+
+    await this.refreshTokenRepository.save(refreshToken);
+    return token;
+  }
+
+  async refreshAccessToken(token: string): Promise<{ accessToken: string, refreshToken: string } | null> {
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const refreshToken = await this.refreshTokenRepository.findOne({
+      where: { tokenHash, isRevoked: false }
+    });
+
+    if (!refreshToken || refreshToken.expiresAt < new Date()) {
+      return null;
+    }
+
+    const user = await this.usersService.findOne(refreshToken.userId);
+    if (!user) return null;
+
+    // Revoke old token and issue new ones (Token Rotation)
+    refreshToken.isRevoked = true;
+    await this.refreshTokenRepository.save(refreshToken);
+
+    return this.login({ id: user.id, name: user.name, reviewId: 0 });
   }
 
   async initLogin(username: string, password: string) {

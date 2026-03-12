@@ -42,6 +42,13 @@ class User {
     name: 'email_publish_approved'
   })
     emailPublishApproved: boolean;
+
+  @Column({
+    name: 'last_activity',
+    type: 'timestamp',
+    nullable: true
+  })
+    lastActivity: Date | null;
 }
 
 export default User;

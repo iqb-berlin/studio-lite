@@ -36,9 +36,14 @@ export class BackendService {
     )
       .pipe(
         catchError(() => of(false)),
-        switchMap(loginToken => {
-          if (typeof loginToken === 'string') {
-            localStorage.setItem('id_token', loginToken);
+        switchMap(loginData => {
+          if (loginData && typeof loginData === 'object') {
+            const { accessToken, refreshToken } = loginData as {
+              accessToken: string,
+              refreshToken: string
+            };
+            localStorage.setItem('id_token', accessToken);
+            localStorage.setItem('refresh_token', refreshToken);
             return this.getAuthData()
               .pipe(
                 map(authData => {
@@ -48,9 +53,18 @@ export class BackendService {
                 catchError(() => of(false))
               );
           }
-          return of(loginToken);
+          return of(false);
         })
       );
+  }
+
+  refresh(refreshToken: string): Observable<{ accessToken: string, refreshToken: string } | null> {
+    return this.http.post<{ accessToken: string, refreshToken: string }>(
+      `${this.serverUrl}refresh`,
+      { refreshToken }
+    ).pipe(
+      catchError(() => of(null))
+    );
   }
 
   getAuthData(): Observable<AuthDataDto> {
@@ -74,6 +88,7 @@ export class BackendService {
 
   logout(): void {
     localStorage.removeItem('id_token');
+    localStorage.removeItem('refresh_token');
     this.appService.authData = AppService.defaultAuthData;
   }
 
@@ -153,5 +168,9 @@ export class BackendService {
         map(() => true),
         catchError(() => of(false))
       );
+  }
+
+  ping(): Observable<void> {
+    return this.http.get<void>(`${this.serverUrl}ping`);
   }
 }

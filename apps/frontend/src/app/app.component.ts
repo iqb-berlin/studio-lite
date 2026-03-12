@@ -17,6 +17,7 @@ import { DataLoadingIsNumberPipe } from './pipes/data-loading-is-number.pipe';
 import { I18nService } from './services/i18n.service';
 import { UserMenuComponent } from './components/user-menu/user-menu.component';
 import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.component';
+import { HeartbeatService } from './services/heartbeat.service';
 
 @Component({
   selector: 'app-root',
@@ -35,7 +36,8 @@ export class AppComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private titleService: Title,
     private router: Router,
-    private i18nService: I18nService
+    private i18nService: I18nService,
+    private heartbeatService: HeartbeatService
   ) {
     this.i18nService.setLocale();
   }
@@ -79,9 +81,9 @@ export class AppComponent implements OnInit {
       if (token) {
         this.backendService.getAuthData().subscribe(authData => {
           this.appService.authData = authData;
+          if (authData.userId) this.heartbeatService.start();
         });
       }
-
       window.addEventListener('message', event => {
         this.appService.processMessagePost(event);
       }, false);

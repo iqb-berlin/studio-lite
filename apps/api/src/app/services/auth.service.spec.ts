@@ -1,16 +1,22 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { JwtService } from '@nestjs/jwt';
 import { ForbiddenException } from '@nestjs/common';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { Repository } from 'typeorm';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { UsersService } from './users.service';
 import { ReviewService } from './review.service';
+import { RefreshToken } from '../entities/refresh-token.entity';
+import User from '../entities/user.entity';
 
 describe('AuthService', () => {
   let service: AuthService;
   let usersService: DeepMocked<UsersService>;
   let reviewService: DeepMocked<ReviewService>;
   let jwtService: DeepMocked<JwtService>;
+  let refreshTokenRepository: DeepMocked<Repository<RefreshToken>>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -27,6 +33,14 @@ describe('AuthService', () => {
         {
           provide: JwtService,
           useValue: createMock<JwtService>()
+        },
+        {
+          provide: getRepositoryToken(RefreshToken),
+          useValue: createMock<Repository<RefreshToken>>()
+        },
+        {
+          provide: ConfigService,
+          useValue: createMock<ConfigService>()
         }
       ]
     }).compile();
@@ -35,6 +49,7 @@ describe('AuthService', () => {
     usersService = module.get(UsersService);
     reviewService = module.get(ReviewService);
     jwtService = module.get(JwtService);
+    refreshTokenRepository = module.get(getRepositoryToken(RefreshToken));
   });
 
   it('should be defined', () => {
@@ -60,18 +75,50 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should return signed token', async () => {
-      jwtService.sign.mockReturnValue('token');
+    it('should return access and refresh tokens', async () => {
+      jwtService.sign.mockReturnValue('atoken');
+      refreshTokenRepository.create.mockReturnValue({} as RefreshToken);
+      refreshTokenRepository.save.mockResolvedValue({} as RefreshToken);
+
       const result = await service.login({ id: 1, name: 'user', reviewId: 0 });
-      expect(result).toBe('token');
+
+      expect(result.accessToken).toBe('atoken');
+      expect(result.refreshToken).toBeDefined();
       expect(jwtService.sign).toHaveBeenCalledWith({ username: 'user', sub: 1, sub2: 0 });
+      expect(refreshTokenRepository.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('refreshAccessToken', () => {
+    it('should return new tokens if refresh token is valid', async () => {
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+      const mockToken = { userId: 1, expiresAt, isRevoked: false } as RefreshToken;
+
+      refreshTokenRepository.findOne.mockResolvedValue(mockToken);
+      usersService.findOne.mockResolvedValue({ id: 1, name: 'user' } as User);
+      jwtService.sign.mockReturnValue('new-atoken');
+
+      const result = await service.refreshAccessToken('valid-token');
+
+      expect(result.accessToken).toBe('new-atoken');
+      expect(mockToken.isRevoked).toBe(true);
+      expect(refreshTokenRepository.save).toHaveBeenCalledWith(mockToken);
     });
 
-    it('should return signed token for review', async () => {
-      jwtService.sign.mockReturnValue('token');
-      const result = await service.login({ id: 0, name: 'review', reviewId: 10 });
-      expect(result).toBe('token');
-      expect(jwtService.sign).toHaveBeenCalledWith({ username: 'review', sub: 0, sub2: 10 });
+    it('should return null if token not found', async () => {
+      refreshTokenRepository.findOne.mockResolvedValue(null);
+      const result = await service.refreshAccessToken('invalid');
+      expect(result).toBeNull();
+    });
+
+    it('should return null if token is expired', async () => {
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() - 10);
+      refreshTokenRepository.findOne.mockResolvedValue({ expiresAt, isRevoked: false } as RefreshToken);
+
+      const result = await service.refreshAccessToken('expired');
+      expect(result).toBeNull();
     });
   });
 

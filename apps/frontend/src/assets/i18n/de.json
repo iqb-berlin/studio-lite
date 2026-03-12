@@ -162,7 +162,9 @@
     "first-name": "Vorname",
     "admin": "System-Administrator:in",
     "is-admin": "Admin-Rechte",
-    "is-not-admin": "Keine Admin-Rechte"
+    "is-not-admin": "Keine Admin-Rechte",
+    "active": "Aktiv",
+    "inactive": "Inaktiv"
   },
   "access-rights": {
     "hint": "Zugriffsrechte: Nutzer:in auswählen",

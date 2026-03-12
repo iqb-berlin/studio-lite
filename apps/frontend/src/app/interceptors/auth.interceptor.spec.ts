@@ -6,19 +6,30 @@ import {
   withInterceptorsFromDi
 } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { of, throwError } from 'rxjs';
+import { Router } from '@angular/router';
 import { AppService } from '../services/app.service';
+import { BackendService } from '../services/backend.service';
 import { AppHttpError } from '../classes/app-http-error.class';
-
 import { AuthInterceptor } from './auth.interceptor';
 
 describe('AuthInterceptor', () => {
   let httpClient: HttpClient;
   let httpMock: HttpTestingController;
   let appServiceSpy: { addErrorMessage: jest.Mock };
+  let backendServiceSpy: { refresh: jest.Mock, logout: jest.Mock };
+  let routerSpy: { navigate: jest.Mock };
 
   beforeEach(() => {
     appServiceSpy = {
       addErrorMessage: jest.fn()
+    };
+    backendServiceSpy = {
+      refresh: jest.fn(),
+      logout: jest.fn()
+    };
+    routerSpy = {
+      navigate: jest.fn().mockResolvedValue(true)
     };
 
     TestBed.configureTestingModule({
@@ -34,6 +45,14 @@ describe('AuthInterceptor', () => {
           useValue: appServiceSpy as Partial<AppService>
         },
         {
+          provide: BackendService,
+          useValue: backendServiceSpy
+        },
+        {
+          provide: Router,
+          useValue: routerSpy
+        },
+        {
           provide: HTTP_INTERCEPTORS,
           useClass: AuthInterceptor,
           multi: true
@@ -43,6 +62,7 @@ describe('AuthInterceptor', () => {
 
     httpClient = TestBed.inject(HttpClient);
     httpMock = TestBed.inject(HttpTestingController);
+
     localStorage.removeItem('id_token');
   });
 
@@ -92,5 +112,37 @@ describe('AuthInterceptor', () => {
     expect(errorArg).toBeInstanceOf(AppHttpError);
     expect(errorArg.method).toBe('GET');
     expect(errorArg.urlWithParams).toBe('/boom');
+  });
+
+  it('should attempt to refresh token on 401 error', () => {
+    localStorage.setItem('refresh_token', 'old-refresh');
+
+    backendServiceSpy.refresh.mockReturnValue(of({ accessToken: 'new-aceess', refreshToken: 'new-refresh' }));
+
+    httpClient.get('/data').subscribe();
+
+    const req = httpMock.expectOne('/data');
+    req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+    expect(backendServiceSpy.refresh).toHaveBeenCalledWith('old-refresh');
+
+    // Should retry the request with new token
+
+    const retryReq = httpMock.expectOne('/data');
+    expect(retryReq.request.headers.get('Authorization')).toBe('Bearer new-aceess');
+    retryReq.flush({});
+  });
+
+  it('should logout and redirect to login if refresh fails', () => {
+    localStorage.setItem('refresh_token', 'old-refresh');
+    backendServiceSpy.refresh.mockReturnValue(throwError(() => new Error('Refresh expired')));
+
+    httpClient.get('/data').subscribe({ error: () => {} });
+
+    const req = httpMock.expectOne('/data');
+    req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+    expect(backendServiceSpy.logout).toHaveBeenCalled();
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/']);
   });
 });

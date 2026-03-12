@@ -27,4 +27,7 @@ export class UserFullDto {
 
   @ApiProperty()
     emailPublishApproved?: boolean;
+
+  @ApiProperty()
+    lastActivity?: Date;
 }

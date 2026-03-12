@@ -21,4 +21,7 @@ export class WorkspaceUserInListDto {
 
   @ApiProperty()
     email?: string;
+
+  @ApiProperty()
+    lastActivity?: Date;
 }

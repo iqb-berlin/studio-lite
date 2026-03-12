@@ -1,0 +1,18 @@
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'isActiveUser',
+  standalone: true
+})
+export class IsActiveUserPipe implements PipeTransform {
+  // eslint-disable-next-line class-methods-use-this
+  transform(lastActivity: Date | string | undefined | null): boolean {
+    if (!lastActivity) return false;
+    const date = new Date(lastActivity);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    // Allow for 2 minutes future skew (server ahead)
+    // and show as active if less than 5 minutes ago
+    return diff < 300000 && diff > -120000;
+  }
+}

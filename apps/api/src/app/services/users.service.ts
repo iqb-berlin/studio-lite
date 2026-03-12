@@ -142,7 +142,8 @@ export class UsersService {
           isAdmin: user.isAdmin,
           description: user.description,
           displayName: UnitService.getUserDisplayName(user),
-          email: user.emailPublishApproved ? user.email : ''
+          email: user.emailPublishApproved ? user.email : '',
+          lastActivity: user.lastActivity
         };
         if (user.isAdmin) {
           returnUsers.admins.push(newUser);
@@ -175,7 +176,8 @@ export class UsersService {
           lastName: user.lastName,
           firstName: user.firstName,
           email: user.email,
-          emailPublishApproved: user.emailPublishApproved
+          emailPublishApproved: user.emailPublishApproved,
+          lastActivity: user.lastActivity
         });
       }
     });
@@ -196,7 +198,8 @@ export class UsersService {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        emailPublishApproved: user.emailPublishApproved
+        emailPublishApproved: user.emailPublishApproved,
+        lastActivity: user.lastActivity
       };
     }
     throw new AdminUserNotFoundException(id, 'GET');
@@ -424,6 +427,10 @@ export class UsersService {
         await this.workspaceGroupAdminRepository.save(newWorkspaceGroupAdmin);
       }));
     });
+  }
+
+  async updateLastActivity(userId: number): Promise<void> {
+    await this.usersRepository.update(userId, { lastActivity: new Date() });
   }
 
   private static getPasswordHash(stringToHash: string): string {

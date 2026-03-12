@@ -43,6 +43,7 @@ import Setting from './entities/setting.entity';
 import ResourcePackage from './entities/resource-package.entity';
 import Review from './entities/review.entity';
 import ReviewUnit from './entities/review-unit.entity';
+import { RefreshToken } from './entities/refresh-token.entity';
 import { ResourcePackageService } from './services/resource-package.service';
 import { UsersService } from './services/users.service';
 import { WorkspaceService } from './services/workspace.service';
@@ -101,8 +102,9 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: '12h' }
+        signOptions: { expiresIn: '1h' }
       }),
+
       inject: [ConfigService]
     }),
     HttpModule,
@@ -166,6 +168,7 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
           WorkspaceGroupAdmin,
           Review,
           ReviewUnit,
+          RefreshToken,
           UnitItem,
           UnitItemMetadata,
           UnitMetadata,
@@ -199,6 +202,7 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
       WorkspaceGroupAdmin,
       Review,
       ReviewUnit,
+      RefreshToken,
       UnitItem,
       UnitItemMetadata,
       UnitMetadata,
