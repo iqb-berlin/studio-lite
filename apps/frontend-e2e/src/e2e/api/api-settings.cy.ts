@@ -1,5 +1,5 @@
 import { UnitExport } from '../../support/testData';
-import { noId, user2 } from '../../support/util-api';
+import { noId, userGroupAdmin } from '../../support/util-api';
 
 describe('Admin settings API tests', () => {
   const unitExport: UnitExport = {
@@ -17,20 +17,20 @@ describe('Admin settings API tests', () => {
             Cypress.env(`id_${Cypress.env('username')}`, resp2.body.userId);
             expect(resp2.status).to.equal(200);
           });
-        cy.createUserAPI(user2, Cypress.env(`token_${Cypress.env('username')}`))
+        cy.createUserAPI(userGroupAdmin, Cypress.env(`token_${Cypress.env('username')}`))
           .then(res => {
-            Cypress.env(`id_${user2.username}`, res.body);
+            Cypress.env(`id_${userGroupAdmin.username}`, res.body);
             expect(res.status).to.equal(201);
-            cy.loginAPI(user2.username, user2.password)
+            cy.loginAPI(userGroupAdmin.username, userGroupAdmin.password)
               .then(resp3 => {
-                Cypress.env(`token_${user2.username}`, resp3.body);
+                Cypress.env(`token_${userGroupAdmin.username}`, resp3.body);
                 expect(resp3.status).to.equal(201);
               });
           });
       });
   });
   after(() => {
-    cy.deleteUsersAPI([Cypress.env(`id_${user2.username}`)], Cypress.env(`token_${Cypress.env('username')}`))
+    cy.deleteUsersAPI([Cypress.env(`id_${userGroupAdmin.username}`)], Cypress.env(`token_${Cypress.env('username')}`))
       .then(resp => {
         expect(resp.status).to.equal(200);
       });
@@ -53,7 +53,7 @@ describe('Admin settings API tests', () => {
 
     it('200 positive test: should successfully retrieve the configuration ' +
       'text settings for a regular user profile', () => {
-      cy.getSettingConfigAPI(Cypress.env(`id_${user2.username}`))
+      cy.getSettingConfigAPI(Cypress.env(`id_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
@@ -91,7 +91,7 @@ describe('Admin settings API tests', () => {
 
     it('401 negative test: should deny configuration updates to a user ' +
       'without administrator privileges', () => {
-      cy.updateSettingConfigAPI(Cypress.env(`token_${user2.username}`), 17)
+      cy.updateSettingConfigAPI(Cypress.env(`token_${userGroupAdmin.username}`), 17)
         .then(resp => {
           expect(resp.status).to.equal(401);
         });
@@ -109,7 +109,7 @@ describe('Admin settings API tests', () => {
 
     it('200 positive test: should successfully retrieve application logo and ' +
       'color settings for a regular user', () => {
-      cy.getSettingLogoAPI(Cypress.env(`token_${user2.username}`))
+      cy.getSettingLogoAPI(Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
@@ -149,7 +149,7 @@ describe('Admin settings API tests', () => {
 
     it('401 negative test: should deny brand setting updates to a user ' +
       'with regular account permissions', () => {
-      cy.updateSettingLogoAPI(Cypress.env(`token_${user2.username}`), 'Gelb')
+      cy.updateSettingLogoAPI(Cypress.env(`token_${userGroupAdmin.username}`), 'Gelb')
         .then(resp => {
           expect(resp.status).to.equal(401);
         });
@@ -167,7 +167,7 @@ describe('Admin settings API tests', () => {
 
     it('200 positive test: should successfully retrieve unit export ' +
       'configuration for a user with standard profile', () => {
-      cy.getSettingUnitExportAPI(Cypress.env(`token_${user2.username}`))
+      cy.getSettingUnitExportAPI(Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
@@ -199,7 +199,7 @@ describe('Admin settings API tests', () => {
 
     it('401 negative test: should deny unit export configuration updates to a user with regular permissions', () => {
       unitExport.unitXsdUrl = 'https://github.com/iqb-berlin/testcenter/blob/master/vo_Unit.xsd';
-      cy.updateSettingUnitExportAPI(Cypress.env(`token_${user2.username}`), unitExport)
+      cy.updateSettingUnitExportAPI(Cypress.env(`token_${userGroupAdmin.username}`), unitExport)
         .then(resp => {
           expect(resp.status).to.equal(401);
         });
@@ -226,7 +226,7 @@ describe('Admin settings API tests', () => {
 
     it('200 positive test: should successfully retrieve missing value profiles ' +
       'for a user with standard account access', () => {
-      cy.getSettingMissingProfilesAPI(Cypress.env(`token_${user2.username}`))
+      cy.getSettingMissingProfilesAPI(Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
@@ -253,7 +253,7 @@ describe('Admin settings API tests', () => {
     });
 
     it('401 negative test: should deny profile definition updates to a regular user account', () => {
-      cy.updateSettingMissingProfilesAPI(Cypress.env(`token_${user2.username}`), '')
+      cy.updateSettingMissingProfilesAPI(Cypress.env(`token_${userGroupAdmin.username}`), '')
         .then(resp => {
           expect(resp.status).to.equal(401);
         });

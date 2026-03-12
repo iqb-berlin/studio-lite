@@ -4,9 +4,9 @@ import {
 } from '../../support/testData';
 import {
   noId,
-  user2,
+  userGroupAdmin,
   user3,
-  group1,
+  groupVera,
   group2,
   ws1,
   ws2,
@@ -17,7 +17,7 @@ describe('Workspace API tests', () => {
   describe('16. POST /api/group-admin/workspaces', () => {
     it('201 positive test: should allow a group administrator to create a workspace', () => {
       cy.createWsAPI(
-        Cypress.env(group1.id),
+        Cypress.env(groupVera.id),
         ws1,
         Cypress.env(`token_${Cypress.env('username')}`)
       ).then(resp => {
@@ -28,9 +28,9 @@ describe('Workspace API tests', () => {
 
     it('201 positive test: should allow a regular user to create a workspace in their assigned group', () => {
       cy.createWsAPI(
-        Cypress.env(group1.id),
+        Cypress.env(groupVera.id),
         ws2,
-        Cypress.env(`token_${user2.username}`)
+        Cypress.env(`token_${userGroupAdmin.username}`)
       ).then(resp => {
         Cypress.env(ws2.id, resp.body);
         expect(resp.status).to.equal(201);
@@ -42,7 +42,7 @@ describe('Workspace API tests', () => {
       cy.createWsAPI(
         Cypress.env(group2.id),
         ws3,
-        Cypress.env(`token_${user2.username}`)
+        Cypress.env(`token_${userGroupAdmin.username}`)
       ).then(resp => {
         // expect(resp.status).to.equal(401); should
         Cypress.env(ws3.id, resp.body);
@@ -73,7 +73,7 @@ describe('Workspace API tests', () => {
       cy.setAdminsOfGroupAPI(
         [
           Cypress.env(`id_${Cypress.env('username')}`),
-          Cypress.env(`id_${user2.username}`)
+          Cypress.env(`id_${userGroupAdmin.username}`)
         ],
         Cypress.env(group2.id),
         Cypress.env(`token_${Cypress.env('username')}`)
@@ -92,7 +92,7 @@ describe('Workspace API tests', () => {
     it('200 positive test: should allow moving the workspace back to its original group', () => {
       cy.moveWsAPI(
         Cypress.env(ws1.id),
-        Cypress.env(group1.id),
+        Cypress.env(groupVera.id),
         Cypress.env(`token_${Cypress.env('username')}`)
       ).then(resp2 => {
         expect(resp2.status).to.equal(200);
@@ -128,8 +128,8 @@ describe('Workspace API tests', () => {
         expect(resp.status).to.equal(200);
         cy.moveWsAPI(
           Cypress.env(ws3.id),
-          Cypress.env(group1.id),
-          Cypress.env(`token_${user2.username}`)
+          Cypress.env(groupVera.id),
+          Cypress.env(`token_${userGroupAdmin.username}`)
         ).then(resp1 => {
           expect(resp1.status).to.equal(403);
         });
@@ -245,7 +245,7 @@ describe('Workspace API tests', () => {
         access: AccessLevel.Admin
       };
       const ac2: AccessUser = {
-        id: Cypress.env(`id_${user2.username}`),
+        id: Cypress.env(`id_${userGroupAdmin.username}`),
         access: AccessLevel.Admin
       };
       cy.updateUserListOfWsAPI(
@@ -295,7 +295,7 @@ describe('Workspace API tests', () => {
   describe('21. GET /api/admin/workspace-groups/{id}/workspaces', () => {
     it('200 positive test: should retrieve all workspaces within a specified workspace group', () => {
       cy.getWsByGroupAPI(
-        Cypress.env(group1.id),
+        Cypress.env(groupVera.id),
         Cypress.env(`token_${Cypress.env('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
@@ -305,7 +305,7 @@ describe('Workspace API tests', () => {
 
     it('401 negative test: should deny listing workspaces if providing an unauthorized user token', () => {
       cy.getWsByGroupAPI(
-        Cypress.env(group1.id),
+        Cypress.env(groupVera.id),
         Cypress.env(`token_${user3.username}`)
       ).then(resp => {
         expect(resp.status).to.equal(401);
@@ -313,7 +313,7 @@ describe('Workspace API tests', () => {
     });
 
     it('401 negative test: should deny listing workspaces when no token is provided', () => {
-      cy.getWsByGroupAPI(Cypress.env(group1.id), noId).then(resp => {
+      cy.getWsByGroupAPI(Cypress.env(groupVera.id), noId).then(resp => {
         expect(resp.status).to.equal(401);
       });
     });
