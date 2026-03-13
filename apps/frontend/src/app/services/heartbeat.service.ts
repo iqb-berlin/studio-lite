@@ -14,7 +14,7 @@ import { BackendService } from './backend.service';
 })
 export class HeartbeatService implements OnDestroy {
   private heartbeatSubscription: Subscription | null = null;
-  private readonly idleTimeoutMs = 300000; // 5 minutes
+  private readonly idleTimeoutMs = 3600000; // 60 minutes
   private readonly intervalMs = 60000; // 1 minute
 
   constructor(

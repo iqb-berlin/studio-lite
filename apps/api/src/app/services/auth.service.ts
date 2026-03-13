@@ -73,6 +73,9 @@ export class AuthService {
     const user = await this.usersService.findOne(refreshToken.userId);
     if (!user) return null;
 
+    // Update activity timestamp on refresh
+    await this.usersService.updateLastActivity(user.id);
+
     // Revoke old token and issue new ones (Token Rotation)
     refreshToken.isRevoked = true;
     await this.refreshTokenRepository.save(refreshToken);
