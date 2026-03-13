@@ -14,7 +14,7 @@ export const fakeUser: UserData = {
   isAdmin: false
 };
 
-export const user2: UserData = {
+export const userGroupAdmin: UserData = {
   username: 'userzwei',
   password: 'paso',
   isAdmin: false
@@ -26,7 +26,7 @@ export const user3: UserData = {
   isAdmin: false
 };
 
-export const group1: GroupData = {
+export const groupVera: GroupData = {
   id: 'id_group1',
   name: 'VERA2022'
 };

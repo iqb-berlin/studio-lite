@@ -3,7 +3,7 @@ import {
 } from '../../support/testData';
 import {
   noId,
-  user2,
+  userGroupAdmin,
   user3,
   ws1,
   ws2,
@@ -15,8 +15,8 @@ describe('Comments API tests', () => {
   before(() => {
     comment = {
       body: '<p>Kommentare 1 zur Aufgabe 1</p>',
-      userName: `${user2.username}`,
-      userId: parseInt(`${Cypress.env(`id_${user2.username}`)}`, 10),
+      userName: `${userGroupAdmin.username}`,
+      userId: parseInt(`${Cypress.env(`id_${userGroupAdmin.username}`)}`, 10),
       unitId: parseInt(`${Cypress.env(unit1.shortname)}`, 10)
     };
   });
@@ -60,8 +60,8 @@ describe('Comments API tests', () => {
         // Should be 500
         const comment2: CommentData = {
           body: '<p>Kommentare 2 zur Aufgabe 1</p>',
-          userName: `${user2.username}`,
-          userId: parseInt(`${Cypress.env(`id_${user2.username}`)}`, 10),
+          userName: `${userGroupAdmin.username}`,
+          userId: parseInt(`${Cypress.env(`id_${userGroupAdmin.username}`)}`, 10),
           unitId: parseInt(`${Cypress.env(unit1.shortname)}`, 10)
         };
         cy.postCommentAPI(Cypress.env(ws1.id),
@@ -79,8 +79,8 @@ describe('Comments API tests', () => {
         // Passing the wrong workspace doesn't affect to insert comment if we pass a valid unit
         const comment3: CommentData = {
           body: '<p>Kommentare 3 zur Aufgabe 1</p>',
-          userName: `${user2.username}`,
-          userId: parseInt(`${Cypress.env(`id_${user2.username}`)}`, 10),
+          userName: `${userGroupAdmin.username}`,
+          userId: parseInt(`${Cypress.env(`id_${userGroupAdmin.username}`)}`, 10),
           unitId: parseInt(`${Cypress.env(unit1.shortname)}`, 10)
         };
         cy.postCommentAPI(noId,
@@ -233,7 +233,7 @@ describe('Comments API tests', () => {
           Cypress.env(unit1.shortname),
           Cypress.env('comment1'),
           comment,
-          Cypress.env(`token_${user2.username}`))
+          Cypress.env(`token_${userGroupAdmin.username}`))
           .then(resp => {
             expect(resp.status).to.be.equal(500);
           });
@@ -247,7 +247,7 @@ describe('Comments API tests', () => {
           noId,
           Cypress.env('comment1'),
           comment,
-          Cypress.env(`token_${user2.username}`))
+          Cypress.env(`token_${userGroupAdmin.username}`))
           .then(resp => {
             expect(resp.status).to.be.equal(200);
             // expect(resp.status).to.be.equal(500); //should
@@ -261,7 +261,7 @@ describe('Comments API tests', () => {
           Cypress.env(unit1.shortname),
           Cypress.env('comment1'),
           noId,
-          Cypress.env(`token_${user2.username}`))
+          Cypress.env(`token_${userGroupAdmin.username}`))
           .then(resp => {
             expect(resp.status).to.be.equal(401);
           });
@@ -273,7 +273,7 @@ describe('Comments API tests', () => {
           Cypress.env(unit1.shortname),
           Cypress.env('comment1'),
           comment,
-          Cypress.env(`token_${user2.username}`))
+          Cypress.env(`token_${userGroupAdmin.username}`))
           .then(resp => {
             expect(resp.status).to.be.equal(200);
           });
@@ -296,7 +296,7 @@ describe('Comments API tests', () => {
         cy.deleteCommentAPI(noId,
           Cypress.env(unit1.shortname),
           Cypress.env('comment2'),
-          Cypress.env(`token_${user2.username}`))
+          Cypress.env(`token_${userGroupAdmin.username}`))
           .then(resp => {
             expect(resp.status).to.be.equal(500);
           });
@@ -307,7 +307,7 @@ describe('Comments API tests', () => {
         cy.deleteCommentAPI(Cypress.env(ws2.id),
           Cypress.env(unit1.shortname),
           noId,
-          Cypress.env(`token_${user2.username}`))
+          Cypress.env(`token_${userGroupAdmin.username}`))
           .then(resp => {
             expect(resp.status).to.be.equal(200);
             //  expect(resp.status).to.be.equal(404);
@@ -322,7 +322,7 @@ describe('Comments API tests', () => {
         cy.deleteCommentAPI(Cypress.env(ws2.id),
           noId,
           Cypress.env('comment2'),
-          Cypress.env(`token_${user2.username}`))
+          Cypress.env(`token_${userGroupAdmin.username}`))
           .then(resp => {
             expect(resp.status).to.be.equal(200);
             //  expect(resp.status).to.be.equal(404);
@@ -333,7 +333,7 @@ describe('Comments API tests', () => {
         cy.deleteCommentAPI(Cypress.env(ws2.id),
           Cypress.env(unit1.shortname),
           Cypress.env('comment1'),
-          Cypress.env(`token_${user2.username}`))
+          Cypress.env(`token_${userGroupAdmin.username}`))
           .then(resp => {
             expect(resp.status).to.be.equal(200);
           });

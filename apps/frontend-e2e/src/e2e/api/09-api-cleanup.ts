@@ -3,9 +3,9 @@ import {
 } from '../../support/testData';
 import {
   noId,
-  user2,
+  userGroupAdmin,
   user3,
-  group1,
+  groupVera,
   group2,
   ws1,
   ws2,
@@ -55,10 +55,10 @@ describe('Cleanup API tests', () => {
   describe('88. DELETE /api/admin/workspace-groups', () => {
     let qs: string[];
     before(() => {
-      qs = [Cypress.env(group1.id), Cypress.env(group2.id)];
+      qs = [Cypress.env(groupVera.id), Cypress.env(group2.id)];
     });
     it('401 negative test: should deny workspace group deletion for a regular user account', () => {
-      cy.deleteGroupsAPI(qs, Cypress.env(`token_${user2.username}`)).then(
+      cy.deleteGroupsAPI(qs, Cypress.env(`token_${userGroupAdmin.username}`)).then(
         resp => {
           expect(resp.status).to.equal(401);
         }
@@ -83,7 +83,7 @@ describe('Cleanup API tests', () => {
         Cypress.env(`token_${Cypress.env('username')}`)
       ).then(resp => {
         Cypress.env(group2.id, '');
-        Cypress.env(group1.id, '');
+        Cypress.env(groupVera.id, '');
         expect(resp.status).to.equal(200);
       });
     });
@@ -145,7 +145,7 @@ describe('Cleanup API tests', () => {
     it('200 positive test: should allow an authorized administrator to successfully delete user accounts', () => {
       cy.deleteUsersAPI(
         [
-          Cypress.env(`id_${user2.username}`),
+          Cypress.env(`id_${userGroupAdmin.username}`),
           Cypress.env(`id_${user3.username}`)
         ],
         Cypress.env(`token_${Cypress.env('username')}`)
