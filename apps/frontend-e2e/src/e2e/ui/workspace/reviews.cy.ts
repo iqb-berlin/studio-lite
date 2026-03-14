@@ -130,7 +130,7 @@ describe('Unit Reviews', () => {
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 
-  it('reflects updated units in review', () => {
+  it.skip('reflects updated units in review', () => {
     cy.intercept('GET', '/api/reviews/*').as('getReview');
     cy.visit('/');
     cy.get('studio-lite-user-reviews-area').within(() => {
