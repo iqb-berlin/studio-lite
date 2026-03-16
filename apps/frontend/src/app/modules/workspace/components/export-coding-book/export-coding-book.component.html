@@ -14,6 +14,18 @@
                         [(ngModel)]="contentOptions.hasOnlyVarsWithCodes">
             {{'coding.has-only-vars-with-codes' | translate}}
           </mat-checkbox>
+          <div class="fx-column-start-start sub-options">
+            <mat-checkbox class="example-margin"
+                          [disabled]="!contentOptions.hasOnlyVarsWithCodes"
+                          [(ngModel)]="contentOptions.hasOnlyManualCoding">
+              {{'coding.has-only-manual-coding' | translate}}
+            </mat-checkbox>
+            <mat-checkbox class="example-margin"
+                          [disabled]="!contentOptions.hasOnlyVarsWithCodes"
+                          [(ngModel)]="contentOptions.hasClosedVars">
+              {{'coding.has-closed-vars' | translate}}
+            </mat-checkbox>
+          </div>
           <mat-checkbox class="example-margin"
                         [(ngModel)]="contentOptions.hasGeneralInstructions">
             {{'coding.has-general-instructions' | translate}}
@@ -25,14 +37,6 @@
           <mat-checkbox class="example-margin"
                         [(ngModel)]="contentOptions.hasDerivedVars">
             {{'coding.has-derived-vars' | translate}}
-          </mat-checkbox>
-          <mat-checkbox class="example-margin"
-                        [(ngModel)]="contentOptions.hasOnlyManualCoding">
-            {{'coding.has-only-manual-coding' | translate}}
-          </mat-checkbox>
-          <mat-checkbox class="example-margin"
-                        [(ngModel)]="contentOptions.hasClosedVars">
-            {{'coding.has-closed-vars' | translate}}
           </mat-checkbox>
           <mat-checkbox class="example-margin"
                         [(ngModel)]="contentOptions.showScore">
