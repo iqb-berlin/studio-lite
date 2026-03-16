@@ -270,8 +270,8 @@ export class UsersComponent implements OnInit, OnDestroy {
         .includes(filter));
     this.objectsDatasource.sort = this.sort;
 
-    const fifteenMinutesAgo = new Date(Date.now() - 900000); // 15 minutes
-    this.activeUserCount = users.filter(u => u.lastActivity && new Date(u.lastActivity) > fifteenMinutesAgo).length;
+    const thirtyMinutesAgo = new Date(Date.now() - 1800000); // 30 minutes
+    this.activeUserCount = users.filter(u => u.lastActivity && new Date(u.lastActivity) > thirtyMinutesAgo).length;
     this.loggedInUserCount = users.filter(u => u.isLoggedIn).length;
   }
 
