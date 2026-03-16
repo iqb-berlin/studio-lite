@@ -247,3 +247,57 @@ export function makeAdminOfGroup(group: string, admins: string[]): void {
   });
   clickSaveButtonRight();
 }
+
+// ---------------------------------------------------------------------------
+// Helpers edit-workspace-settings
+// ---------------------------------------------------------------------------
+
+/**
+ * Navigate to the wsg-admin workspaces tab, select a workspace row and open
+ * the workspace-settings dialog via the gear icon in the toolbar.
+ */
+export function openWorkspaceSettingsDialog(group: string, ws:string): void {
+  cy.visit('/');
+  cy.findAdminGroupSettings(group).click();
+  clickIndexTabWsgAdmin('workspaces');
+  cy.contains('mat-cell', ws).click();
+  // The gear button has no data-cy; click by its mat-icon label
+  cy.get('studio-lite-workspace-menu')
+    .find('mat-icon')
+    .contains('settings')
+    .click({ force: true });
+}
+
+/**
+ * Toggle a route's visibility checkbox inside the workspace-settings dialog.
+ * @param routeName - one of 'editor' | 'preview' | 'schemer' | 'comments'
+ * @param setVisible - true to check (show), false to uncheck (hide)
+ */
+export function setRouteVisibility(routeName: string, setVisible: boolean): void {
+  cy.translate(Cypress.env('locale')).then(json => {
+    const routeLabel: string = json.workspace.routes[routeName];
+    cy.get('mat-checkbox')
+      .contains(routeLabel)
+      .parent()
+      .as('checkbox');
+
+    cy.get('@checkbox').then($checkbox => {
+      const isChecked = $checkbox.hasClass('mat-mdc-checkbox-checked');
+      if (setVisible && !isChecked) {
+        cy.log('Primero');
+        cy.get('@checkbox').click();
+      }
+      if (!setVisible) {
+        cy.log('segundo');
+        cy.get('@checkbox').click();
+      }
+    });
+  });
+}
+
+/** Save the workspace-settings dialog and wait for the API response. */
+export function saveWorkspaceSettings(): void {
+  cy.intercept('PATCH', '/api/workspaces/*/settings').as('saveWsSettings');
+  cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+  cy.wait('@saveWsSettings').its('response.statusCode').should('eq', 200);
+}
