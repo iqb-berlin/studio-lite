@@ -11,38 +11,46 @@
         <section class="example-section fx-column-start-start">
           <h4>{{'coding.codebook-content' | translate}}</h4>
           <mat-checkbox class="example-margin"
+                        [matTooltip]="'coding.has-only-vars-with-codes-tooltip' | translate"
                         [(ngModel)]="contentOptions.hasOnlyVarsWithCodes">
             {{'coding.has-only-vars-with-codes' | translate}}
           </mat-checkbox>
           <div class="fx-column-start-start sub-options">
             <mat-checkbox class="example-margin"
+                          [matTooltip]="'coding.has-only-manual-coding-tooltip' | translate"
                           [disabled]="!contentOptions.hasOnlyVarsWithCodes"
                           [(ngModel)]="contentOptions.hasOnlyManualCoding">
               {{'coding.has-only-manual-coding' | translate}}
             </mat-checkbox>
             <mat-checkbox class="example-margin"
+                          [matTooltip]="'coding.has-closed-vars-tooltip' | translate"
                           [disabled]="!contentOptions.hasOnlyVarsWithCodes"
                           [(ngModel)]="contentOptions.hasClosedVars">
               {{'coding.has-closed-vars' | translate}}
             </mat-checkbox>
           </div>
           <mat-checkbox class="example-margin"
+                        [matTooltip]="'coding.has-general-instructions-tooltip' | translate"
                         [(ngModel)]="contentOptions.hasGeneralInstructions">
             {{'coding.has-general-instructions' | translate}}
           </mat-checkbox>
           <mat-checkbox class="example-margin"
+                        [matTooltip]="'coding.hide-item-var-relation-tooltip' | translate"
                         [(ngModel)]="contentOptions.hideItemVarRelation">
             {{'coding.hide-item-var-relation' | translate}}
           </mat-checkbox>
           <mat-checkbox class="example-margin"
+                        [matTooltip]="'coding.has-derived-vars-tooltip' | translate"
                         [(ngModel)]="contentOptions.hasDerivedVars">
             {{'coding.has-derived-vars' | translate}}
           </mat-checkbox>
           <mat-checkbox class="example-margin"
+                        [matTooltip]="'coding.show-score-tooltip' | translate"
                         [(ngModel)]="contentOptions.showScore">
             {{'coding.show-score' | translate}}
           </mat-checkbox>
           <mat-checkbox class="example-margin"
+                        [matTooltip]="'coding.code-label-to-upper-tooltip' | translate"
                         [(ngModel)]="contentOptions.codeLabelToUpper">
             {{'coding.code-label-to-upper' | translate}}
           </mat-checkbox>

@@ -510,7 +510,15 @@
     "export-format": "Exportformat",
     "code-label-to-upper": "Code-Label in Großbuchstaben",
     "hide-item-var-relation": "Item-Variable-Relation ausblenden",
-    "error-save-changes": "Änderungen im Arbeitsbereich müssen erst noch gespeichert werden!"
+    "error-save-changes": "Änderungen im Arbeitsbereich müssen erst noch gespeichert werden!",
+    "has-only-vars-with-codes-tooltip": "Nur Variablen, die mindestens einen Code besitzen, werden in das Codebook aufgenommen.",
+    "has-only-manual-coding-tooltip": "Nur Variablen mit manuellen Kodier-Anweisungen exportieren.",
+    "has-closed-vars-tooltip": "Variablen mit automatischer/residuelle Kodierung einschließen.",
+    "has-general-instructions-tooltip": "Den Text der allgemeinen Kodieranweisungen für jede Variable anzeigen.",
+    "has-derived-vars-tooltip": "Variablen, die aus anderen Variablen berechnet werden (Source-Typ nicht 'BASE'), in den Export aufnehmen.",
+    "show-score-tooltip": "Die Punktwerte (Scores) für jeden Code in der Tabelle anzeigen.",
+    "code-label-to-upper-tooltip": "Alle Code-Bezeichnungen im Dokument automatisch in Großbuchstaben umwandeln.",
+    "hide-item-var-relation-tooltip": "Die Zuordnung zwischen Items und Variablen im Dokument ausblenden."
   },
 
   "status-label" : {
