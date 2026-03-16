@@ -70,6 +70,10 @@ export class ExportCodingBookComponent implements OnInit {
     hideItemVarRelation: true
   };
 
+  get selectionCount(): number {
+    return this.unitList.length;
+  }
+
   exportCodingBook() {
     this.appService.dataLoading = true;
     this.backendService
