@@ -248,7 +248,8 @@ export class DownloadWorkspacesClass {
 
   private static isClosed(variableCodingData: VariableCodingData): boolean {
     return variableCodingData.codes.some(
-      codeData => codeData.type === 'RESIDUAL_AUTO' || 'INTENDED_INCOMPLETE'
+      codeData => codeData.type === 'RESIDUAL_AUTO' ||
+        codeData.type === 'INTENDED_INCOMPLETE'
     );
   }
 
@@ -272,7 +273,8 @@ export class DownloadWorkspacesClass {
     variableCodingData: VariableCodingData
   ): boolean {
     return variableCodingData.codes.some(
-      codeData => (codeData.type === 'RESIDUAL_AUTO' || 'INTENDED_INCOMPLETE') &&
+      codeData => (codeData.type === 'RESIDUAL_AUTO' ||
+        codeData.type === 'INTENDED_INCOMPLETE') &&
         !codeData.manualInstruction
     );
   }
@@ -365,50 +367,22 @@ export class DownloadWorkspacesClass {
     codes: CodeInfo[],
     variableCoding: VariableCodingData
   ): BookVariable | null {
-    const codingVar = {
-      closed: DownloadWorkspacesClass.isClosed(variableCoding),
-      manual: DownloadWorkspacesClass.isManual(variableCoding),
-      isManualWithoutClosed:
-        DownloadWorkspacesClass.isManualWithoutClosed(variableCoding),
-      isClosedWithoutManual:
-        DownloadWorkspacesClass.isClosedWithoutManual(variableCoding)
-    };
-    if (codingVar.closed && contentSetting.hasClosedVars) {
+    const isClosed = DownloadWorkspacesClass.isClosed(variableCoding);
+    const isManual = DownloadWorkspacesClass.isManual(variableCoding);
+
+    const matchesManual = !contentSetting.hasOnlyVarsWithCodes || !contentSetting.hasOnlyManualCoding || isManual;
+    const matchesClosed = !contentSetting.hasOnlyVarsWithCodes || !contentSetting.hasClosedVars || isClosed;
+    const hasCodes = isManual || isClosed;
+    const matchesOnlyVarsWithCodes = !contentSetting.hasOnlyVarsWithCodes || hasCodes;
+
+    if (matchesManual && matchesClosed && matchesOnlyVarsWithCodes) {
       return DownloadWorkspacesClass.getBookVariable(
         contentSetting,
         codes,
         variableCoding
       );
     }
-    if (
-      codingVar.isManualWithoutClosed &&
-      contentSetting.hasOnlyManualCoding &&
-      !contentSetting.hasClosedVars
-    ) {
-      return DownloadWorkspacesClass.getBookVariable(
-        contentSetting,
-        codes,
-        variableCoding
-      );
-    }
-    if (
-      codingVar.manual &&
-      contentSetting.hasOnlyManualCoding &&
-      contentSetting.hasClosedVars
-    ) {
-      return DownloadWorkspacesClass.getBookVariable(
-        contentSetting,
-        codes,
-        variableCoding
-      );
-    }
-    if (!contentSetting.hasOnlyVarsWithCodes) {
-      return DownloadWorkspacesClass.getBookVariable(
-        contentSetting,
-        codes,
-        variableCoding
-      );
-    }
+
     return null;
   }
 

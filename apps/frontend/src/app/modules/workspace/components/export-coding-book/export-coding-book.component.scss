@@ -1,7 +1,33 @@
 mat-select {
-  width: 50%;
+  width: 100%;
 }
 
-.settings{
-  margin-left:20px;
+.settings {
+  margin-left: 20px;
+  min-width: 300px;
+}
+
+.settings-group {
+  margin-bottom: 24px;
+  width: 100%;
+
+  h4 {
+    margin-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+    color: #666;
+  }
+}
+
+.sub-options {
+  margin-left: 24px;
+}
+
+.selection-summary {
+  margin-top: 12px;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #555;
 }
