@@ -11,6 +11,7 @@ import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import Workspace from '../entities/workspace.entity';
 import Review from '../entities/review.entity';
+import { RefreshToken } from '../entities/refresh-token.entity';
 import Unit from '../entities/unit.entity';
 import { UnitService } from './unit.service';
 import { UnitUserService } from './unit-user.service';
@@ -48,6 +49,7 @@ describe('UsersService', () => {
         { provide: getRepositoryToken(WorkspaceGroupAdmin), useFactory: mockRepository },
         { provide: getRepositoryToken(Workspace), useFactory: mockRepository },
         { provide: getRepositoryToken(Review), useFactory: mockRepository },
+        { provide: getRepositoryToken(RefreshToken), useFactory: mockRepository },
         { provide: UnitService, useValue: mockUnitService },
         { provide: UnitUserService, useValue: mockUnitUserService }
       ]
@@ -214,6 +216,32 @@ describe('UsersService', () => {
 
       expect(workspaceUsersRepository.delete).toHaveBeenCalledWith({ workspaceId });
       expect(workspaceUsersRepository.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('isUserLoggedIn', () => {
+    it('should return true if there is a valid unrevoked token', async () => {
+      const refreshTokenRepository = (service as unknown as {
+        refreshTokenRepository: Repository<RefreshToken>
+      }).refreshTokenRepository;
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+      jest.spyOn(refreshTokenRepository, 'find').mockResolvedValue([{ expiresAt, isRevoked: false } as RefreshToken]);
+
+      const result = await service.isUserLoggedIn(1);
+      expect(result).toBe(true);
+    });
+
+    it('should return false if tokens are expired or revoked', async () => {
+      const refreshTokenRepository = (service as unknown as {
+        refreshTokenRepository: Repository<RefreshToken>
+      }).refreshTokenRepository;
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() - 10);
+      jest.spyOn(refreshTokenRepository, 'find').mockResolvedValue([{ expiresAt, isRevoked: false } as RefreshToken]);
+
+      const result = await service.isUserLoggedIn(1);
+      expect(result).toBe(false);
     });
   });
 });

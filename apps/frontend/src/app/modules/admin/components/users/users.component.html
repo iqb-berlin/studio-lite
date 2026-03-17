@@ -31,7 +31,7 @@
           {{'user.active' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (element.lastActivity | isActiveUser) {
+          @if (element.isLoggedIn && (element.lastActivity | isActiveUser)) {
             <span class="active-dot" [matTooltip]="('user.active' | translate) + (element.lastActivity ? ' (' + (element.lastActivity | date: 'HH:mm:ss') + ')' : '')"></span>
           } @else if (element.isLoggedIn) {
             <span class="passive-dot" [matTooltip]="('user.passive' | translate) + (element.lastActivity ? ' (' + (element.lastActivity | date: 'HH:mm:ss') + ')' : '')"></span>

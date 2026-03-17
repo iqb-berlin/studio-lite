@@ -165,7 +165,9 @@
     "is-not-admin": "Keine Admin-Rechte",
     "active": "Aktiv",
     "inactive": "Inaktiv (Offline)",
-    "passive": "Passiv (Eingeloggt, aber inaktiv)"
+    "passive": "Passiv (Eingeloggt, aber inaktiv)",
+    "activity-remaining": "Verbleibende aktive Zeit (Session wird durch Arbeit verlängert)",
+    "passive-remaining": "Passiv-Phase (automatischer Logout nach Ablauf)"
   },
   "access-rights": {
     "hint": "Zugriffsrechte: Nutzer:in auswählen",

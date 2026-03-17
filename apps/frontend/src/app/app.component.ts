@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import {
@@ -8,6 +8,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { AsyncPipe } from '@angular/common';
 import { AppService, standardLogo } from './services/app.service';
 import { BackendService } from './services/backend.service';
 import { AppConfig } from './classes/app-config.class';
@@ -24,21 +25,22 @@ import { HeartbeatService } from './services/heartbeat.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatProgressSpinner, MatButton, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule, DataLoadingIsNumberPipe, DataLoadingAsTextPipe, IsInArrayPipe, UserMenuComponent, WrappedIconComponent]
+  imports: [MatProgressSpinner, MatButton, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule, DataLoadingIsNumberPipe, DataLoadingAsTextPipe, IsInArrayPipe, UserMenuComponent, WrappedIconComponent, AsyncPipe]
 })
 
 export class AppComponent implements OnInit {
-  currentRoutePath = ''; // home, about, print, admin, a , wsg-admin, review
+  private heartbeatService = inject(HeartbeatService);
+  appService = inject(AppService);
+  private backendService = inject(BackendService);
+  private sanitizer = inject(DomSanitizer);
+  private titleService = inject(Title);
+  private router = inject(Router);
+  private i18nService = inject(I18nService);
 
-  constructor(
-    public appService: AppService,
-    private backendService: BackendService,
-    private sanitizer: DomSanitizer,
-    private titleService: Title,
-    private router: Router,
-    private i18nService: I18nService,
-    private heartbeatService: HeartbeatService
-  ) {
+  currentRoutePath = ''; // home, about, print, admin, a , wsg-admin, review
+  activityStatus$ = this.heartbeatService.activityStatus$;
+
+  constructor() {
     this.i18nService.setLocale();
   }
 

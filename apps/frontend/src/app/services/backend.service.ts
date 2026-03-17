@@ -28,7 +28,7 @@ export class BackendService {
   }
 
   login(name: string, password: string, initLoginMode: boolean): Observable<boolean> {
-    return this.http.post<string>(
+    return this.http.post<{ accessToken: string, refreshToken: string }>(
       `${this.serverUrl}${initLoginMode ? 'init-login' : 'login'}`, {
         username: name,
         password: password
@@ -87,7 +87,17 @@ export class BackendService {
   }
 
   logout(): void {
-    this.http.post(`${this.serverUrl}logout`, {}).subscribe();
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (refreshToken) {
+      this.http.post(`${this.serverUrl}logout`, { refreshToken }).subscribe({
+        error: () => {
+          // If JWT is expired, try silent logout with refresh token
+          this.http.post(`${this.serverUrl}logout-silent`, { refreshToken }).subscribe();
+        }
+      });
+    } else {
+      this.http.post(`${this.serverUrl}logout`, {}).subscribe();
+    }
     localStorage.removeItem('id_token');
     localStorage.removeItem('refresh_token');
     this.appService.authData = AppService.defaultAuthData;

@@ -89,5 +89,17 @@
     }
     </div>
   </div>
+  <div class="activity-bar hide-on-print">
+    @if (appService.authData.userId) {
+      @if (activityStatus$ | async; as status) {
+        <div class="activity-layer passive-layer"
+             [style.width]="status.passivePercentage + '%'"
+             [matTooltip]="status.activePercentage === 0 ? ('user.passive-remaining' | translate) : null"></div>
+        <div class="activity-layer active-layer"
+             [style.width]="status.activePercentage + '%'"
+             [matTooltip]="'user.activity-remaining' | translate"></div>
+      }
+    }
+  </div>
 </header>
 <router-outlet></router-outlet>

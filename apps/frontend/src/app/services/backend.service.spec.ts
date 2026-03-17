@@ -230,6 +230,9 @@ describe('BackendService', () => {
       localStorage.setItem('id_token', 'test-token');
       localStorage.setItem('refresh_token', 'test-refresh');
       service.logout();
+      const req = httpMock.expectOne(`${serverUrl}logout`);
+      expect(req.request.method).toBe('POST');
+      req.flush(null);
       expect(localStorage.getItem('id_token')).toBeNull();
       expect(localStorage.getItem('refresh_token')).toBeNull();
     });
@@ -245,6 +248,8 @@ describe('BackendService', () => {
       };
 
       service.logout();
+      const req = httpMock.expectOne(`${serverUrl}logout`);
+      req.flush(null);
       expect(appService.authData).toEqual(AppService.defaultAuthData);
     });
   });

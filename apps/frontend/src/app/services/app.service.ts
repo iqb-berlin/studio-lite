@@ -45,6 +45,7 @@ export class AppService {
   globalWarning = '';
   postMessage$ = new Subject<MessageEvent>();
   dataLoading: boolean | number = false;
+  serverTimeOffset = 0; // clock skew compensation in ms (serverTime - clientTime)
   @Output() authDataChanged = new EventEmitter<AuthDataDto>();
 
   set authData(authData: AuthDataDto) {
@@ -60,6 +61,10 @@ export class AppService {
     private titleService: Title
   ) {
     this.appConfig = new AppConfig(this.titleService);
+  }
+
+  getServerTime(): number {
+    return Date.now() + this.serverTimeOffset;
   }
 
   processMessagePost(postData: MessageEvent): void {

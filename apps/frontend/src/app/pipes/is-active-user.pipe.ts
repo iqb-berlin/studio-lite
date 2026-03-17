@@ -1,15 +1,17 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { AppService } from '../services/app.service';
+import { ACTIVE_THRESHOLD_MS } from '../app.constants';
 
 @Pipe({
   name: 'isActiveUser',
   standalone: true
 })
 export class IsActiveUserPipe implements PipeTransform {
-  // eslint-disable-next-line class-methods-use-this
-  transform(lastActivity: string | Date | undefined, thresholdMs = 1800000): boolean {
+  constructor(private appService: AppService) {}
+
+  transform(lastActivity: string | Date | undefined): boolean {
     if (!lastActivity) return false;
-    const lastActivityDate = new Date(lastActivity);
-    const now = new Date();
-    return (now.getTime() - lastActivityDate.getTime()) < thresholdMs;
+    const activeThreshold = this.appService.getServerTime() - ACTIVE_THRESHOLD_MS;
+    return new Date(lastActivity).getTime() > activeThreshold;
   }
 }

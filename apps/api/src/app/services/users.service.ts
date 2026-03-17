@@ -1,4 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable, Logger
+} from '@nestjs/common';
 import { MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -13,6 +15,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import User from '../entities/user.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
+import { RefreshToken } from '../entities/refresh-token.entity';
 import { AdminUserNotFoundException } from '../exceptions/admin-user-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import Workspace from '../entities/workspace.entity';
@@ -36,7 +39,9 @@ export class UsersService {
     @InjectRepository(Review)
     private reviewRepository: Repository<Review>,
     private unitService: UnitService,
-    private unitUserService: UnitUserService
+    private unitUserService: UnitUserService,
+    @InjectRepository(RefreshToken)
+    private refreshTokenRepository: Repository<RefreshToken>
   ) {
   }
 
@@ -165,10 +170,9 @@ export class UsersService {
       workspaceUsers.forEach(wsU => validUsers.push(wsU.userId));
     }
     const users: User[] = await this.usersRepository.find({ order: { name: 'ASC' } });
-    const returnUsers: UserFullDto[] = [];
-    users.forEach(user => {
+    return Promise.all(users.map(async user => {
       if (!workspaceId || (validUsers.indexOf(user.id) > -1)) {
-        returnUsers.push(<UserFullDto>{
+        return <UserFullDto>{
           id: user.id,
           name: user.name,
           isAdmin: user.isAdmin,
@@ -177,11 +181,12 @@ export class UsersService {
           firstName: user.firstName,
           email: user.email,
           emailPublishApproved: user.emailPublishApproved,
-          lastActivity: user.lastActivity
-        });
+          lastActivity: user.lastActivity,
+          isLoggedIn: await this.isUserLoggedIn(user.id)
+        };
       }
-    });
-    return returnUsers;
+      return null;
+    })).then(results => results.filter(u => u !== null) as UserFullDto[]);
   }
 
   async findOne(id: number): Promise<UserFullDto> {
@@ -293,6 +298,14 @@ export class UsersService {
       where: { userId: userId }
     });
     return !!wsgAdmin;
+  }
+
+  async isUserLoggedIn(userId: number): Promise<boolean> {
+    const tokens = await this.refreshTokenRepository.find({
+      where: { userId, isRevoked: false }
+    });
+    const now = Date.now();
+    return tokens.some(t => new Date(t.expiresAt).getTime() > now);
   }
 
   async getLongName(userId: number): Promise<string> {

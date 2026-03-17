@@ -32,6 +32,7 @@ import {
   BackendService
 } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
+import { ADMIN_USER_LIST_POLL_INTERVAL_MS, ACTIVE_THRESHOLD_MS } from '../../../../app.constants';
 
 @Component({
   selector: 'studio-lite-users',
@@ -76,8 +77,8 @@ export class UsersComponent implements OnInit, OnDestroy {
       this.createWorkspaceList();
     });
 
-    // Poll for updates every 60 seconds
-    this.pollingSubscription = timer(60000, 60000)
+    // Poll for updates
+    this.pollingSubscription = timer(ADMIN_USER_LIST_POLL_INTERVAL_MS, ADMIN_USER_LIST_POLL_INTERVAL_MS)
       .subscribe(() => {
         this.updateUserList(false);
       });
@@ -270,8 +271,9 @@ export class UsersComponent implements OnInit, OnDestroy {
         .includes(filter));
     this.objectsDatasource.sort = this.sort;
 
-    const thirtyMinutesAgo = new Date(Date.now() - 1800000); // 30 minutes
-    this.activeUserCount = users.filter(u => u.lastActivity && new Date(u.lastActivity) > thirtyMinutesAgo).length;
+    const oneMinuteAgo = this.appService.getServerTime() - ACTIVE_THRESHOLD_MS;
+    this.activeUserCount = users
+      .filter(u => u.isLoggedIn && u.lastActivity && new Date(u.lastActivity).getTime() > oneMinuteAgo).length;
     this.loggedInUserCount = users.filter(u => u.isLoggedIn).length;
   }
 

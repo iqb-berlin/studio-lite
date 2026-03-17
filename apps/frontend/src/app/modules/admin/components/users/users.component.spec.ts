@@ -61,7 +61,8 @@ describe('UsersComponent', () => {
       dataLoading: false,
       appConfig: {
         setPageTitle: jest.fn()
-      } as unknown as AppConfig
+      } as unknown as AppConfig,
+      getServerTime: jest.fn().mockReturnValue(Date.now())
     };
 
     mockSnackBar = {
@@ -119,7 +120,7 @@ describe('UsersComponent', () => {
   it('should load initial data on init', () => {
     jest.useFakeTimers();
     component.ngOnInit();
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
     expect(mockBackendService.getWorkspaceGroupList).toHaveBeenCalled();
     expect(mockBackendService.getUsersFull).toHaveBeenCalled();
     jest.useRealTimers();
@@ -192,7 +193,7 @@ describe('UsersComponent', () => {
   });
 
   it('should delete users successfully', () => {
-    const users = [{ id: 1 }, { id: 2 }] as UserFullDto[];
+    const users = [{ id: 1, isLoggedIn: true }, { id: 2, isLoggedIn: false }] as UserFullDto[];
     component.deleteUsers(users);
     expect(mockBackendService.deleteUsers).toHaveBeenCalledWith([1, 2]);
     expect(mockBackendService.getUsersFull).toHaveBeenCalled();

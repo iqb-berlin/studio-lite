@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { JWT_EXPIRES_IN } from './app.constants';
 import { AppController } from './controllers/app.controller';
 import { AppVersionProvider } from './guards/app-version.guard';
 import { GroupAdminWorkspaceController } from './controllers/group-admin-workspace.controller';
@@ -103,7 +104,7 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: '30m' }
+        signOptions: { expiresIn: JWT_EXPIRES_IN }
       }),
 
       inject: [ConfigService]

@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 import { AppHttpError } from '../classes/app-http-error.class';
+import { HeartbeatService } from '../services/heartbeat.service';
 import { AuthInterceptor } from './auth.interceptor';
 
 describe('AuthInterceptor', () => {
@@ -19,6 +20,7 @@ describe('AuthInterceptor', () => {
   let appServiceSpy: { addErrorMessage: jest.Mock };
   let backendServiceSpy: { refresh: jest.Mock, logout: jest.Mock };
   let routerSpy: { navigate: jest.Mock };
+  let heartbeatServiceSpy: { refreshActivityPulse: jest.Mock };
 
   beforeEach(() => {
     appServiceSpy = {
@@ -30,6 +32,9 @@ describe('AuthInterceptor', () => {
     };
     routerSpy = {
       navigate: jest.fn().mockResolvedValue(true)
+    };
+    heartbeatServiceSpy = {
+      refreshActivityPulse: jest.fn()
     };
 
     TestBed.configureTestingModule({
@@ -51,6 +56,10 @@ describe('AuthInterceptor', () => {
         {
           provide: Router,
           useValue: routerSpy
+        },
+        {
+          provide: HeartbeatService,
+          useValue: heartbeatServiceSpy
         },
         {
           provide: HTTP_INTERCEPTORS,
@@ -120,17 +129,17 @@ describe('AuthInterceptor', () => {
     backendServiceSpy.refresh.mockReturnValue(of({ accessToken: 'new-aceess', refreshToken: 'new-refresh' }));
 
     httpClient.get('/data').subscribe();
-
-    const req = httpMock.expectOne('/data');
-    req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    const reqs = httpMock.match('/data');
+    expect(reqs.length).toBe(1);
+    reqs[0].flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
     expect(backendServiceSpy.refresh).toHaveBeenCalledWith('old-refresh');
 
     // Should retry the request with new token
-
-    const retryReq = httpMock.expectOne('/data');
-    expect(retryReq.request.headers.get('Authorization')).toBe('Bearer new-aceess');
-    retryReq.flush({});
+    const retryReqs = httpMock.match('/data');
+    expect(retryReqs.length).toBe(1);
+    expect(retryReqs[0].request.headers.get('Authorization')).toBe('Bearer new-aceess');
+    retryReqs[0].flush({});
   });
 
   it('should logout and redirect to login if refresh fails', () => {
@@ -138,11 +147,11 @@ describe('AuthInterceptor', () => {
     backendServiceSpy.refresh.mockReturnValue(throwError(() => new Error('Refresh expired')));
 
     httpClient.get('/data').subscribe({ error: () => {} });
-
-    const req = httpMock.expectOne('/data');
-    req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    const reqs = httpMock.match('/data');
+    expect(reqs.length).toBe(1);
+    reqs[0].flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
     expect(backendServiceSpy.logout).toHaveBeenCalled();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/']);
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
   });
 });

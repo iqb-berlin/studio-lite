@@ -1,23 +1,25 @@
 import {
-  ForbiddenException, Injectable, Logger
+  ForbiddenException, Inject, Injectable, Logger, forwardRef
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import { UsersService } from './users.service';
 import { ReviewService } from './review.service';
 import { RefreshToken } from '../entities/refresh-token.entity';
+import { REFRESH_TOKEN_EXPIRES_IN_SEC, INACTIVITY_THRESHOLD_SEC } from '../app.constants';
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
   constructor(
+    @Inject(forwardRef(() => UsersService))
     private usersService: UsersService,
     private reviewService: ReviewService,
     private jwtService: JwtService,
-    @InjectRepository(RefreshToken)
+    @Inject(getRepositoryToken(RefreshToken))
     private refreshTokenRepository: Repository<RefreshToken>
   ) {
   }
@@ -46,7 +48,7 @@ export class AuthService {
   async generateRefreshToken(userId: number): Promise<string> {
     const token = crypto.randomBytes(64).toString('hex');
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
+    expiresAt.setSeconds(expiresAt.getSeconds() + REFRESH_TOKEN_EXPIRES_IN_SEC);
 
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
@@ -73,8 +75,13 @@ export class AuthService {
     const user = await this.usersService.findOne(refreshToken.userId);
     if (!user) return null;
 
-    // Update activity timestamp on refresh
-    await this.usersService.updateLastActivity(user.id);
+    // Hard inactivity check
+    const inactivityThreshold = INACTIVITY_THRESHOLD_SEC * 1000;
+    if (user.lastActivity && (Date.now() - new Date(user.lastActivity).getTime()) > inactivityThreshold) {
+      this.logger.log(`Denying refresh for user '${user.id}' due to inactivity ` +
+        `(${Date.now() - new Date(user.lastActivity).getTime()}ms).`);
+      return null;
+    }
 
     // Revoke old token and issue new ones (Token Rotation)
     refreshToken.isRevoked = true;
@@ -111,18 +118,23 @@ export class AuthService {
   }
 
   async logout(userId: number): Promise<void> {
-    this.logger.log(`Logging out user with id '${userId}'.`);
-    await this.refreshTokenRepository.update(
-      { userId, isRevoked: false },
-      { isRevoked: true }
-    );
-  }
-
-  async isUserLoggedIn(userId: number): Promise<boolean> {
     const tokens = await this.refreshTokenRepository.find({
       where: { userId, isRevoked: false }
     });
-    const now = new Date();
-    return tokens.some(t => t.expiresAt > now);
+    if (tokens.length > 0) {
+      this.logger.log(`Logging out user ${userId}: revoking ${tokens.length} tokens.`);
+      tokens.forEach(t => { t.isRevoked = true; });
+      await this.refreshTokenRepository.save(tokens);
+    }
+  }
+
+  async logoutByRefreshToken(token: string): Promise<void> {
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const refreshToken = await this.refreshTokenRepository.findOne({
+      where: { tokenHash } // Find even if revoked to identify user
+    });
+    if (refreshToken) {
+      await this.logout(refreshToken.userId);
+    }
   }
 }

@@ -44,11 +44,12 @@ describe('AppController', () => {
   describe('login', () => {
     it('should return a token', async () => {
       const mockUser = { id: 1, name: 'test' } as UserEntity;
-      authService.login.mockResolvedValue('mock-token');
+      const mockTokens = { accessToken: 'mock-atoken', refreshToken: 'mock-rtoken' };
+      authService.login.mockResolvedValue(mockTokens);
 
       const result = await controller.login({ user: mockUser });
 
-      expect(result).toBe('"mock-token"');
+      expect(result).toBe(mockTokens);
       expect(authService.login).toHaveBeenCalledWith(mockUser);
     });
   });
