@@ -100,7 +100,7 @@
               [color]="'primary'"
               [disabled]="!userWorkspaces.hasChanged"
               (click)="saveWorkspaces()">
-        <mat-icon>save"</mat-icon>
+        <mat-icon>save</mat-icon>
       </button>
     </div>
 
@@ -108,7 +108,7 @@
       <studio-lite-roles-header></studio-lite-roles-header>
     }
 
-    <div class="scroll-area fx-column-start-start">
+    <div class="scroll-area fx-column-start-stretch">
       @for (ws of userWorkspaces.entries; track ws; let index = $index;) {
         @if (userWorkspaces.checkedCount > 0 && index === userWorkspaces.checkedCount) {
           <studio-lite-entries-divider class="divider"></studio-lite-entries-divider>

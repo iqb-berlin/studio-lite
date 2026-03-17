@@ -5,6 +5,7 @@
 
 
 .object-list {
+  height: calc(100% - 5px);
   padding-right: 20px;
   .object-header-container {
     .object-header {
