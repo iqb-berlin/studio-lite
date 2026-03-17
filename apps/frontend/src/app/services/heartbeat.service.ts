@@ -1,9 +1,9 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import {
-  interval, Subscription, of, BehaviorSubject, timer, Subject, combineLatest
+  interval, Subscription, of, BehaviorSubject, timer, Subject, combineLatest, asapScheduler
 } from 'rxjs';
 import {
-  switchMap, filter, distinctUntilChanged, startWith, map, catchError, shareReplay, takeUntil
+  switchMap, filter, distinctUntilChanged, startWith, map, catchError, shareReplay, takeUntil, observeOn
 } from 'rxjs/operators';
 import { AuthDataDto } from '@studio-lite-lib/api-dto';
 import { AppService } from './app.service';
@@ -26,7 +26,8 @@ export class HeartbeatService implements OnDestroy {
   private readonly ngUnsubscribe = new Subject<void>();
   private readonly STORAGE_KEY = 'st_activity_pulse';
 
-  readonly activityStatus$ = timer(0, 1000).pipe(
+  readonly activityStatus$ = timer(0, UI_BAR_REFRESH_INTERVAL_MS).pipe(
+    observeOn(asapScheduler),
     switchMap(() => this.lastActivityPulse$),
     map(lastPulse => {
       const now = Date.now();
@@ -37,7 +38,7 @@ export class HeartbeatService implements OnDestroy {
       if (isPhase1Value) {
         const activeP = ((this.activityThresholdMs - diff) / this.activityThresholdMs) * 100;
         return {
-          activePercentage: Math.max(0, activeP),
+          activePercentage: Math.max(0, Math.round(activeP * 100) / 100),
           passivePercentage: 100
         };
       }
@@ -47,7 +48,7 @@ export class HeartbeatService implements OnDestroy {
 
       return {
         activePercentage: 0,
-        passivePercentage: Math.max(0, passiveP)
+        passivePercentage: Math.max(0, Math.round(passiveP * 100) / 100)
       };
     }),
     distinctUntilChanged((prev, curr) => prev.activePercentage === curr.activePercentage &&
