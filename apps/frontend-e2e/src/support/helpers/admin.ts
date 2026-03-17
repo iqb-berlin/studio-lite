@@ -249,6 +249,46 @@ export function makeAdminOfGroup(group: string, admins: string[]): void {
 }
 
 // ---------------------------------------------------------------------------
+// Helper: navigate to the admin Settings tab
+// ---------------------------------------------------------------------------
+export function goToSettings(): void {
+  cy.visit('/');
+  cy.findAdminSettings().click();
+  clickIndexTabAdmin('settings');
+}
+
+// ---------------------------------------------------------------------------
+// Helper: clear + retype a form-control input / textarea
+// ---------------------------------------------------------------------------
+export function setFormControl(formControlName: string, value: string): void {
+  cy.get(`[formcontrolname="${formControlName}"]`)
+    .should('exist')
+    .clear({ force: true })
+    .type(value, { force: true });
+}
+
+export function clearFormControl(formControlName: string): void {
+  cy.get(`[formcontrolname="${formControlName}"]`)
+    .should('exist')
+    .clear({ force: true });
+}
+
+// ---------------------------------------------------------------------------
+// Helper: click the Save button and wait for an API response
+// ---------------------------------------------------------------------------
+export function saveAndExpect(
+  method: string,
+  urlPattern: string,
+  alias: string
+): void {
+  cy.intercept(method, urlPattern).as(alias);
+  cy.translate(Cypress.env('locale')).then(json => {
+    cy.get('button').contains(json.save).click({ force: true });
+  });
+  cy.wait(`@${alias}`).its('response.statusCode').should('eq', 200);
+}
+
+// ---------------------------------------------------------------------------
 // Helpers edit-workspace-settings
 // ---------------------------------------------------------------------------
 
