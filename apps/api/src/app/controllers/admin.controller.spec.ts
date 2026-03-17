@@ -6,21 +6,25 @@ import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { AuthService } from '../services/auth.service';
+import { UnitItemService } from '../services/unit-item.service';
 
 describe('AdminController', () => {
   let controller: AdminController;
   let workspaceService: DeepMocked<WorkspaceService>;
   let unitService: DeepMocked<UnitService>;
+  let unitItemService: DeepMocked<UnitItemService>;
 
   beforeEach(async () => {
     workspaceService = createMock<WorkspaceService>();
     unitService = createMock<UnitService>();
+    unitItemService = createMock<UnitItemService>();
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AdminController],
       providers: [
         { provide: WorkspaceService, useValue: workspaceService },
         { provide: UnitService, useValue: unitService },
+        { provide: UnitItemService, useValue: unitItemService },
         { provide: IsAdminGuard, useValue: { canActivate: jest.fn(() => true) } },
         { provide: AuthService, useValue: createMock<AuthService>() }
       ]
@@ -56,6 +60,18 @@ describe('AdminController', () => {
 
       expect(result).toBe(mockUnits);
       expect(unitService.getAllUnits).toHaveBeenCalled();
+    });
+  });
+
+  describe('getAllUnitItems', () => {
+    it('should return all unit items', async () => {
+      const mockItems = [{ uuid: 'u1', id: 'i1' }];
+      unitItemService.getAll.mockResolvedValue(mockItems);
+
+      const result = await controller.getAllUnitItems();
+
+      expect(result).toBe(mockItems);
+      expect(unitItemService.getAll).toHaveBeenCalled();
     });
   });
 });

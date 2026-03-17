@@ -4,7 +4,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { MatAnchor, MatButton } from '@angular/material/button';
-import { WrappedIconComponent } from '../../modules/shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
 import { UserIssuesComponent } from '../user-issues/user-issues.component';
 import { UserIssuesPipe } from '../../pipes/user-issues.pipe';
 

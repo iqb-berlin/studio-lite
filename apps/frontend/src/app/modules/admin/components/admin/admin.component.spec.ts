@@ -39,7 +39,9 @@ describe('AdminComponent', () => {
       'workspace-groups',
       'workspaces',
       'units',
+      'unit-items',
       'v-modules',
+      'widgets',
       'settings',
       'packages'
     ];

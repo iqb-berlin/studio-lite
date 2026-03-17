@@ -4,6 +4,7 @@ import {
 import { MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { saveAs } from 'file-saver-es';
 import { DatePipe } from '@angular/common';
@@ -23,6 +24,7 @@ import { I18nService } from '../../../../services/i18n.service';
     TranslateModule,
     MatDialogModule,
     MatCheckboxModule,
+    MatTooltipModule,
     FormsModule,
     MatRadioModule,
     MatSelectModule,
@@ -67,6 +69,10 @@ export class ExportCodingBookComponent implements OnInit {
     showScore: true,
     hideItemVarRelation: true
   };
+
+  get selectionCount(): number {
+    return this.unitList.length;
+  }
 
   exportCodingBook() {
     this.appService.dataLoading = true;

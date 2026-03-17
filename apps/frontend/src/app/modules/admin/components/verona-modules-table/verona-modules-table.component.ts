@@ -16,11 +16,12 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { DatePipe } from '@angular/common';
 import { BytesPipe } from '@studio-lite-lib/iqb-components';
 import { BackendService } from '../../services/backend.service';
-import { FlattenedVeronaModuleClass, VeronaModuleClass } from '../../../shared/models/verona-module.class';
-import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
-import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
-import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
+import { FlattenedVeronaModuleClass, VeronaModuleClass } from '../../../../models/verona-module.class';
+import { IsAllSelectedPipe } from '../../../../pipes/is-all-selected.pipe';
+import { HasSelectionValuePipe } from '../../../../pipes/has-selection-value.pipe';
+import { IsSelectedPipe } from '../../../../pipes/is-selected.pipe';
 import { I18nService } from '../../../../services/i18n.service';
+import { ModuleSelectionChange } from '../../models/module-selection-change.interface';
 
 @Component({
   selector: 'studio-lite-verona-modules-table',
@@ -30,7 +31,7 @@ import { I18nService } from '../../../../services/i18n.service';
   imports: [MatButton, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe]
 })
 export class VeronaModulesTableComponent implements OnInit, OnDestroy {
-  @Input() type!: 'editor' | 'player' | 'schemer';
+  @Input() type!: string;
   @Input()
   set modules(value: { [key: string]: VeronaModuleClass }) {
     this.objectsDatasource = new MatTableDataSource(
@@ -42,12 +43,14 @@ export class VeronaModulesTableComponent implements OnInit, OnDestroy {
     });
   }
 
-  @Output() selectionChanged = new EventEmitter();
+  @Output() selectionChanged = new EventEmitter<ModuleSelectionChange>();
   @ViewChild(MatSort) sort = new MatSort();
 
   objectsDatasource = new MatTableDataSource<FlattenedVeronaModuleClass>();
   tableSelectionCheckboxes = new SelectionModel<FlattenedVeronaModuleClass>(true, []);
-  displayedColumns = ['selectCheckbox', 'name', 'id', 'version', 'veronaVersion', 'fileDateTime', 'filesize'];
+  displayedColumns = ['selectCheckbox', 'name', 'id', 'model', 'version',
+    'veronaVersion', 'fileDateTime', 'filesize'];
+
   private selectionChangedSubscription: Subscription | undefined;
 
   constructor(

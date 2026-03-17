@@ -49,9 +49,9 @@ import { ItemsComponent } from '../../../metadata/components/items/items.compone
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { State } from '../../../admin/models/state.type';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
-import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
+import { SelectModuleComponent } from '../../../../components/select-module/select-module.component';
 import { WorkspaceService } from '../../services/workspace.service';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { RequestMessageDirective } from '../../directives/request-message.directive';
 import { CanReturnUnitPipe } from '../../pipes/can-return-unit.pipe';
 import { AliasId } from '../../../metadata/models/alias-id.interface';
@@ -196,17 +196,20 @@ export class UnitPropertiesComponent
     if (selectedUnitId > 0 && unitMetadataStore) {
       const unitMetadata = unitMetadataStore.getData();
       this.selectedStateId = unitMetadata.state || null;
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      this.unitForm.controls['key'].setValidators([
-        Validators.required,
-        Validators.minLength(3),
-        Validators.maxLength(20),
-        Validators.pattern(WorkspaceService.unitKeyPatternString()),
-        WorkspaceService.unitKeyUniquenessValidator(
-          unitMetadata.id,
-          this.workspaceService.unitList
-        )
-      ]);
+      const keyControl = this.unitForm.get('key');
+      if (keyControl) {
+        keyControl.markAsUntouched();
+        keyControl.setValidators([
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(20),
+          Validators.pattern(WorkspaceService.unitKeyPatternString()),
+          WorkspaceService.unitKeyUniquenessValidator(
+            unitMetadata.id,
+            this.workspaceService.unitList
+          )
+        ]);
+      }
       this.unitForm.setValue(
         {
           key: unitMetadata.key,
@@ -219,14 +222,24 @@ export class UnitPropertiesComponent
         },
         { emitEvent: false }
       );
+
+      if (keyControl) {
+        keyControl.updateValueAndValidity({ emitEvent: false });
+        if (keyControl.invalid) {
+          keyControl.markAsTouched();
+        }
+
+        this.workspaceService.isValidFormKey.next(
+          keyControl.status === 'VALID'
+        );
+      }
+
       this.selectedStateColor = unitMetadata.state || '';
       this.unitFormDataChangedSubscription = this.unitForm.valueChanges.subscribe(() => {
         const filteredState = this.workspaceService.states
           ?.filter((state:State) => state.id.toString() === this.unitForm.get('state')?.value) || 0;
         filteredState.length ? this.selectedStateColor = filteredState[0].color : this.selectedStateColor = '';
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        const isValidFormKey = this.unitForm.controls?.['key'].status === 'VALID';
-        // eslint-disable-next-line @typescript-eslint/dot-notation
+        const isValidFormKey = this.unitForm.get('key')?.status === 'VALID';
         this.workspaceService.isValidFormKey.next(isValidFormKey);
         this.workspaceService.getUnitMetadataStore()?.setBasicData(
           this.unitForm.get('key')?.value,

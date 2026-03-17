@@ -47,6 +47,7 @@ export class SplitterGutterComponent {
   }
 
   @HostListener('window:touchend')
+  @HostListener('window:touchcancel')
   onGlobalTouchEnd(): void {
     this.pointerPressed = false;
     this.stopDragging.emit(this.index);

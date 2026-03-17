@@ -16,7 +16,7 @@ import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { UnitTableComponent } from '../unit-table/unit-table.component';
 import { UnitGroupComponent } from '../unit-group/unit-group.component';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { UnitGroupsComponent } from '../unit-groups/unit-groups.component';
 
 @Component({

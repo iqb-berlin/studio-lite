@@ -5,3 +5,17 @@
   color: #006064;
   background: #00606410;
 }
+
+.secondary-cell {
+  color: gray;
+}
+
+.header-right {
+  ::ng-deep .mat-sort-header-container {
+    justify-content: flex-end;
+  }
+}
+
+.cell-right {
+  justify-content: flex-end;
+}

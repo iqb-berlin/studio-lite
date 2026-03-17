@@ -11,7 +11,7 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { UnitMetadataStore } from '../../classes/unit-metadata-store';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 
 @Component({
   selector: 'studio-lite-unit-save-button',

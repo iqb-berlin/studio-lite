@@ -8,14 +8,14 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { BackendService } from '../../services/backend.service';
-import { InputTextComponent } from '../../../shared/components/input-text/input-text.component';
+import { InputTextComponent } from '../../../../components/input-text/input-text.component';
 import { WorkspaceSettings } from '../../models/workspace-settings.interface';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
-import { MoveWorkspaceComponent } from '../../../shared/components/move-workspace/move-workspace.component';
+import { MoveWorkspaceComponent } from '../../../../components/move-workspace/move-workspace.component';
 import {
   EditWorkspaceSettingsComponent
-} from '../../../shared/components/edit-workspace-settings/edit-workspace-settings.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
+} from '../../../../components/edit-workspace-settings/edit-workspace-settings.component';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { SelectDropBoxComponent } from '../select-drop-box/select-drop-box.component';
 
 @Component({
@@ -27,7 +27,6 @@ import { SelectDropBoxComponent } from '../select-drop-box/select-drop-box.compo
 export class WorkspaceMenuComponent {
   @Input() selectedWorkspaceId!: number;
   @Input() selectedRows!: WorkspaceInListDto[];
-  @Input() checkedRows!: WorkspaceInListDto[];
   @Input() workspaces!: WorkspaceInListDto[];
   @Input() isWorkspaceGroupAdmin!: boolean;
   @Input() maxWorkspaceCount!: number;
@@ -44,7 +43,6 @@ export class WorkspaceMenuComponent {
     new EventEmitter<{ selection: WorkspaceInListDto[], settings: WorkspaceSettings }>();
 
   @Output() workspaceNotLoaded: EventEmitter<void> = new EventEmitter<void>();
-  @Output() workspaceDeleted: EventEmitter<WorkspaceInListDto[]> = new EventEmitter<WorkspaceInListDto[]>();
   @Output() download: EventEmitter<void> = new EventEmitter<void>();
   @Output() workspaceMoved: EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }> =
     new EventEmitter<{ selection: WorkspaceInListDto[], workspaceGroupId: number }>();
@@ -53,7 +51,6 @@ export class WorkspaceMenuComponent {
     private moveWorkspaceDialog: MatDialog,
     private editWorkspaceDialog: MatDialog,
     private editWorkspaceSettingsDialog: MatDialog,
-    private deleteConfirmDialog: MatDialog,
     private confirmDialog: MatDialog,
     private selectDropBoxDialog: MatDialog,
     private backendService: BackendService,
@@ -99,10 +96,7 @@ export class WorkspaceMenuComponent {
   }
 
   moveObject() {
-    let selectedRows = this.selectedRows;
-    if (selectedRows.length === 0) {
-      selectedRows = this.checkedRows;
-    }
+    const selectedRows = this.selectedRows;
     this.appBackendService.getAuthData().subscribe(user => {
       this.backendService.getWorkspaceGroupsByUser(user.userId).subscribe(dat => {
         this.workspaceGroupsByUser = dat;
@@ -152,10 +146,7 @@ export class WorkspaceMenuComponent {
   }
 
   renameObject() {
-    let selectedRows = this.selectedRows;
-    if (selectedRows.length === 0) {
-      selectedRows = this.checkedRows;
-    }
+    const selectedRows = this.selectedRows;
     if (selectedRows.length) {
       const dialogRef = this.editWorkspaceDialog.open(InputTextComponent, {
         width: '600px',
@@ -178,10 +169,7 @@ export class WorkspaceMenuComponent {
   }
 
   changeObject(): void {
-    let selectedRows = this.selectedRows;
-    if (selectedRows.length === 0) {
-      selectedRows = this.checkedRows;
-    }
+    const selectedRows = this.selectedRows;
     if (selectedRows.length) {
       this.appBackendService.getWorkspaceData(selectedRows[0].id).subscribe(
         wResponse => {
@@ -195,7 +183,7 @@ export class WorkspaceMenuComponent {
               profile: ''
             };
             const dialogRef = this.editWorkspaceSettingsDialog.open(EditWorkspaceSettingsComponent, {
-              width: '600px',
+              width: '900px',
               data: { settings: wsSettings, selectedRow: selectedRows[0] }
             });
             dialogRef.afterClosed().subscribe(result => {
@@ -208,40 +196,6 @@ export class WorkspaceMenuComponent {
           }
         }
       );
-    }
-  }
-
-  deleteObject(): void {
-    let selectedRows = this.selectedRows;
-    if (selectedRows.length === 0) {
-      selectedRows = this.checkedRows;
-    }
-    if (selectedRows.length) {
-      let prompt;
-      if (selectedRows.length === 1) {
-        prompt = (selectedRows[0].unitsCount) ?
-          this.translateService
-            .instant('wsg-admin.delete-workspace-with-units', { name: selectedRows[0].name }) :
-          this.translateService
-            .instant('wsg-admin.delete-workspace', { name: selectedRows[0].name });
-      } else {
-        prompt = this.translateService
-          .instant('wsg-admin.delete-workspaces', { count: selectedRows.length });
-      }
-      const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
-        width: '400px',
-        data: <ConfirmDialogData>{
-          title: this.translateService.instant('wsg-admin.deleting-of-workspaces'),
-          content: prompt,
-          confirmButtonLabel: this.translateService.instant('delete'),
-          showCancel: true
-        }
-      });
-      dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-          this.workspaceDeleted.emit(selectedRows);
-        }
-      });
     }
   }
 

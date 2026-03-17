@@ -13,19 +13,23 @@ import {
   MatTableDataSource
 } from '@angular/material/table';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
+import { DatePipe } from '@angular/common';
+import { saveAs } from 'file-saver-es';
 import { BackendService } from '../../services/backend.service';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { AppService } from '../../../../services/app.service';
+import { WorkspacesMenuComponent } from '../workspaces-menu/workspaces-menu.component';
+import { I18nService } from '../../../../services/i18n.service';
 
 @Component({
   selector: 'studio-lite-workspaces',
   templateUrl: './workspaces.component.html',
   styleUrls: ['./workspaces.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, MatPaginator]
+  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, MatPaginator, WorkspacesMenuComponent]
 })
 
 export class WorkspacesComponent implements OnInit, AfterViewInit {
@@ -37,7 +41,10 @@ export class WorkspacesComponent implements OnInit, AfterViewInit {
 
   constructor(
     private backendService: BackendService,
-    private appService: AppService) {
+    private appService: AppService,
+    private translateService: TranslateService,
+    private i18nService: I18nService
+  ) {
   }
 
   ngOnInit(): void {
@@ -58,5 +65,19 @@ export class WorkspacesComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
     this.dataSource.paginator = this.paginator;
+  }
+
+  xlsxDownloadWorkspaceReport(): void {
+    this.appService.dataLoading = true;
+    try {
+      this.backendService.getXlsWorkspaces().subscribe(b => {
+        const datePipe = new DatePipe(this.i18nService.fullLocale);
+        const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
+        saveAs(b, `${thisDate} ${this.translateService.instant('wsg-admin.report-workspaces')}.xlsx`);
+        this.appService.dataLoading = false;
+      });
+    } catch (e) {
+      this.appService.dataLoading = false;
+    }
   }
 }

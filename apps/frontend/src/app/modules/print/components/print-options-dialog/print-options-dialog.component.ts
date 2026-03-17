@@ -4,7 +4,7 @@ import {
 } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
-import { PrintOptionsComponent } from '../../../shared/components/print-options/print-options.component';
+import { PrintOptionsComponent } from '../../../../components/print-options/print-options.component';
 
 @Component({
   selector: 'studio-lite-print-options-dialog',

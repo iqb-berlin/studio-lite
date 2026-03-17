@@ -1,6 +1,5 @@
 import {
   AccessLevel,
-  anotherUser,
   modules,
   newUser,
   resource,
@@ -19,7 +18,6 @@ import {
   deleteAllModules,
   deleteResource,
   deleteUser,
-  deleteUsers,
   grantRemovePrivilegeAtWs
 } from '../../../support/helpers';
 
@@ -42,12 +40,6 @@ describe('UI Administration Management', () => {
 
   it('deletes a user', () => {
     deleteUser(newUser.username);
-  });
-
-  it('deletes multiple users at once', () => {
-    createNewUser(newUser);
-    createNewUser(anotherUser);
-    deleteUsers([newUser.username, anotherUser.username]);
   });
 
   it('creates a workspace group', () => {

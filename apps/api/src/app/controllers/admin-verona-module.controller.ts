@@ -1,6 +1,7 @@
 import {
   Controller,
   Delete,
+  NotAcceptableException,
   ParseArrayPipe,
   Post,
   Query,
@@ -11,7 +12,7 @@ import {
 import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotAcceptableResponse, ApiOkResponse, ApiQuery, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
-import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
+import { VeronaModuleInListDto, VeronaModuleType } from '@studio-lite-lib/api-dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -33,8 +34,32 @@ export class AdminVeronaModuleController {
   @ApiNotAcceptableResponse({ description: 'Verona module not accepted.' })
   @UseInterceptors(FileInterceptor('file'))
   @ApiTags('admin verona-module')
-  async addModuleFile(@UploadedFile() file) {
-    return this.veronaModulesService.upload(file.buffer);
+  @ApiQuery({
+    name: 'type',
+    type: String,
+    description: 'required, array of module types: editor, player, schemer, widget',
+    required: true,
+    isArray: true,
+    enum: ['editor', 'player', 'schemer', 'WIDGET']
+  })
+  async addModuleFile(
+  @UploadedFile() file,
+    @Query('type', new ParseArrayPipe({ items: String, separator: ',' })) types: string[]
+  ) {
+    const allowedTypes = ['editor', 'player', 'schemer', 'WIDGET'] as const;
+    const normalizedTypes = types.map(type => type.trim()).filter(Boolean);
+
+    if (!normalizedTypes.length) {
+      throw new NotAcceptableException('Module type is required.');
+    }
+
+    const invalidTypes = normalizedTypes.filter(type => !allowedTypes.includes(type as VeronaModuleType));
+    if (invalidTypes.length) {
+      throw new NotAcceptableException(`Unknown module type(s): ${invalidTypes.join(', ')}`);
+    }
+
+    const uniqueTypes = Array.from(new Set(normalizedTypes)) as VeronaModuleType[];
+    return this.veronaModulesService.upload(file.buffer, uniqueTypes);
   }
 
   @Delete()

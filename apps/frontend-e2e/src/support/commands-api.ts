@@ -402,7 +402,7 @@ Cypress.Commands.add('addModuleAPI', (module:string, token: string) => {
       formData.append('file', new Blob([fileContent], { type: 'html' }), module);
       cy.request({
         method: 'POST',
-        url: '/api/admin/verona-modules',
+        url: '/api/admin/verona-modules?type=editor&type=player&type=schemer',
         headers: {
           'app-version': Cypress.env('version'),
           'Content-Type': 'multipart/form-data',

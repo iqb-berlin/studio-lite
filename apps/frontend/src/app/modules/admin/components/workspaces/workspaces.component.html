@@ -1,4 +1,7 @@
 <div class="admin-tab-content fx-column-start-stretch">
+  <studio-lite-workspaces-menu
+    (downloadWorkspacesReport)="xlsxDownloadWorkspaceReport()">
+  </studio-lite-workspaces-menu>
 
   @if (dataSource.data.length) {
 

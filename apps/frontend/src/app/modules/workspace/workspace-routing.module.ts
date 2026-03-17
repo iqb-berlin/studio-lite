@@ -8,6 +8,7 @@ import { UnitPreviewComponent } from './components/unit-preview/unit-preview.com
 import { UnitSchemerComponent } from './components/unit-schemer/unit-schemer.component';
 import { UnitCommentsComponent } from './components/unit-comments/unit-comments.component';
 import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
+import { HiddenRouteGuard } from './guards/hidden-route.guard';
 
 const routes: Routes = [
   {
@@ -23,15 +24,23 @@ const routes: Routes = [
         path: '', redirectTo: 'properties', pathMatch: 'full'
       },
       { path: 'properties', component: UnitPropertiesComponent },
-      { path: 'editor', component: UnitEditorComponent },
-      { path: 'preview', component: UnitPreviewComponent },
-      { path: 'schemer', component: UnitSchemerComponent },
-      { path: 'comments', component: UnitCommentsComponent },
+      { path: 'editor', component: UnitEditorComponent, canActivate: [HiddenRouteGuard] },
+      { path: 'preview', component: UnitPreviewComponent, canActivate: [HiddenRouteGuard] },
+      { path: 'schemer', component: UnitSchemerComponent, canActivate: [HiddenRouteGuard] },
+      { path: 'comments', component: UnitCommentsComponent, canActivate: [HiddenRouteGuard] },
       { path: '**', component: UnitPropertiesComponent },
-      { path: 'editor', component: UnitEditorComponent, outlet: 'secondary' },
-      { path: 'preview', component: UnitPreviewComponent, outlet: 'secondary' },
-      { path: 'schemer', component: UnitSchemerComponent, outlet: 'secondary' },
-      { path: 'comments', component: UnitCommentsComponent, outlet: 'secondary' }
+      {
+        path: 'editor', component: UnitEditorComponent, outlet: 'secondary', canActivate: [HiddenRouteGuard]
+      },
+      {
+        path: 'preview', component: UnitPreviewComponent, outlet: 'secondary', canActivate: [HiddenRouteGuard]
+      },
+      {
+        path: 'schemer', component: UnitSchemerComponent, outlet: 'secondary', canActivate: [HiddenRouteGuard]
+      },
+      {
+        path: 'comments', component: UnitCommentsComponent, outlet: 'secondary', canActivate: [HiddenRouteGuard]
+      }
     ]
   }
 ];

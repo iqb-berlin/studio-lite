@@ -4,7 +4,7 @@ import {
 } from '../../support/testData';
 import {
   noId,
-  user2,
+  userGroupAdmin,
   ws1,
   ws2,
   unit4
@@ -18,14 +18,14 @@ describe('Review API tests', () => {
     it('201 positive test: should allow an authorized user to create a new review in a workspace', () => {
       cy.addReviewAPI(Cypress.env(ws1.id),
         reviewName1,
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.be.equal(201);
           Cypress.env('id_review1', resp.body);
         });
       cy.addReviewAPI(Cypress.env(ws1.id),
         reviewName2,
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(res => {
           expect(res.status).to.be.equal(201);
           Cypress.env('id_review2', res.body);
@@ -36,7 +36,7 @@ describe('Review API tests', () => {
       'a review without a valid workspace ID', () => {
       cy.addReviewAPI(noId,
         reviewName2,
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.be.equal(500);
         });
@@ -56,14 +56,14 @@ describe('Review API tests', () => {
     it('200 positive test: should successfully retrieve the details of reviews for a specified workspace', () => {
       cy.getReviewAPI(Cypress.env(ws1.id),
         Cypress.env('id_review1'),
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.be.equal(200);
           Cypress.env('link_review1', resp.body.link);
         });
       cy.getReviewAPI(Cypress.env(ws1.id),
         Cypress.env('id_review2'),
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp2 => {
           expect(resp2.status).to.be.equal(200);
           Cypress.env('link_review2', resp2.body.link);
@@ -73,7 +73,7 @@ describe('Review API tests', () => {
     it('500 negative test: should return a server error when requesting reviews without a valid workspace ID', () => {
       cy.getReviewAPI(noId,
         Cypress.env('id_review1'),
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.be.equal(500);
         });
@@ -103,7 +103,7 @@ describe('Review API tests', () => {
     it('200 positive test: should allow an authorized user to update a specific review', () => {
       cy.updateReviewAPI(Cypress.env(ws1.id),
         review1,
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
@@ -113,7 +113,7 @@ describe('Review API tests', () => {
       'a review without a workspace ID', () => {
       cy.updateReviewAPI(noId,
         review1,
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(500);
         });
@@ -132,7 +132,7 @@ describe('Review API tests', () => {
   describe('65. GET /api/workspaces/{workspace_id}/reviews/', () => {
     it('200 positive test: should retrieve a list of all reviews in a workspace for an authorized user', () => {
       cy.getAllReviewAPI(Cypress.env(ws1.id),
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
           expect(resp.body.length).to.equal(2);
@@ -142,7 +142,7 @@ describe('Review API tests', () => {
     it('500 negative test: should return a server error when attempting to list ' +
       'all reviews without a workspace ID', () => {
       cy.getAllReviewAPI(noId,
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(500);
         });
@@ -159,7 +159,7 @@ describe('Review API tests', () => {
 
   describe('66. GET /api/reviews/{review_id}', () => {
     it('200 positive test: should successfully retrieve details for a specific review window', () => {
-      cy.getReviewWindowAPI(Cypress.env('id_review1'), Cypress.env(`token_${user2.username}`))
+      cy.getReviewWindowAPI(Cypress.env('id_review1'), Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
           expect(resp.body.units[0]).equal(parseInt(Cypress.env(unit4.shortname), 10));
@@ -167,7 +167,7 @@ describe('Review API tests', () => {
     });
 
     it('404 negative test: should return error when requesting a review window using an invalid ID', () => {
-      cy.getReviewWindowAPI(noId, Cypress.env(`token_${user2.username}`))
+      cy.getReviewWindowAPI(noId, Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(404);
         });
@@ -185,7 +185,7 @@ describe('Review API tests', () => {
     it('200 positive test: should retrieve the properties of a unit within a specific review context', () => {
       cy.getReviewPropertiesAPI(Cypress.env('id_review1'),
         Cypress.env(unit4.shortname),
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
           expect(resp.body.name).to.equal('Tier4');
@@ -196,7 +196,7 @@ describe('Review API tests', () => {
       ' without a review ID', () => {
       cy.getReviewPropertiesAPI(noId,
         Cypress.env(unit4.shortname),
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(500);
         });
@@ -206,7 +206,7 @@ describe('Review API tests', () => {
       ' for an invalid unit ID', () => {
       cy.getReviewDefinitionAPI(Cypress.env('id_review1'),
         noId,
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(500);
         });
@@ -226,7 +226,7 @@ describe('Review API tests', () => {
     it('200 positive test: should successfully retrieve the full unit definition within a review session', () => {
       cy.getReviewDefinitionAPI(Cypress.env('id_review1'),
         Cypress.env(unit4.shortname),
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
           expect(resp.body.variables[1].id).to.be.oneOf(['text_1', 'text-area_1']);
@@ -237,7 +237,7 @@ describe('Review API tests', () => {
       // it returns 200 instead of 500
       cy.getReviewDefinitionAPI(noId,
         Cypress.env(unit4.shortname),
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
           // expect(resp.status).to.equal(500); // should
@@ -247,7 +247,7 @@ describe('Review API tests', () => {
     it('500 negative test: should return a server error when requesting a unit definition without a unit ID', () => {
       cy.getReviewDefinitionAPI(Cypress.env('id_review1'),
         noId,
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(500);
         });
@@ -268,7 +268,7 @@ describe('Review API tests', () => {
     it('200 positive test: should successfully retrieve the variable coding scheme for a unit in a review', () => {
       cy.getReviewSchemeAPI(Cypress.env('id_review1'),
         Cypress.env(unit4.shortname),
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
           expect(resp.body.schemeType).to.equal('iqb@3.0');
@@ -281,7 +281,7 @@ describe('Review API tests', () => {
       // it returns 200 instead of 500
       cy.getReviewSchemeAPI(noId,
         Cypress.env(unit4.shortname),
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
           // expect(resp.status).to.equal(500);  // should
@@ -292,7 +292,7 @@ describe('Review API tests', () => {
       ' without a unit ID', () => {
       cy.getReviewSchemeAPI(Cypress.env('id_review1'),
         noId,
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(500);
         });
@@ -568,7 +568,7 @@ describe('Review API tests', () => {
     it('200 positive test: should successfully delete an existing review for an authorized user', () => {
       cy.deleteReviewAPI(Cypress.env(ws2.id),
         Cypress.env('id_review1'),
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
@@ -577,7 +577,7 @@ describe('Review API tests', () => {
     it('500 negative test: should return a server error when attempting to delete an already deleted review', () => {
       cy.deleteReviewAPI(noId,
         Cypress.env('id_review2'),
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(500);
         });
@@ -587,7 +587,7 @@ describe('Review API tests', () => {
       ' a review without a workspace ID', () => {
       cy.deleteReviewAPI(noId,
         Cypress.env('id_review2'),
-        Cypress.env(`token_${user2.username}`))
+        Cypress.env(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(500);
         });

@@ -15,6 +15,7 @@ import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { AuthService } from '../services/auth.service';
+import { UnitItemService } from '../services/unit-item.service';
 
 describe('AdminWorkspaceGroupController', () => {
   let controller: AdminWorkspaceGroupController;
@@ -38,7 +39,8 @@ describe('AdminWorkspaceGroupController', () => {
         { provide: UsersService, useValue: usersService },
         { provide: IsAdminGuard, useValue: { canActivate: jest.fn(() => true) } },
         { provide: IsWorkspaceGroupAdminGuard, useValue: { canActivate: jest.fn(() => true) } },
-        { provide: AuthService, useValue: createMock<AuthService>() }
+        { provide: AuthService, useValue: createMock<AuthService>() },
+        { provide: UnitItemService, useValue: createMock<UnitItemService>() }
       ]
     }).compile();
 

@@ -12,34 +12,32 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatFabButton } from '@angular/material/button';
+import { MatFabButton, MatIconButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 import { MatIcon } from '@angular/material/icon';
+import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
+import { MatDialog } from '@angular/material/dialog';
+import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
+import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
+import { UsersMenuComponent } from '../users-menu/users-menu.component';
+import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 import {
   BackendService
 } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
-import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
-import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
-import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
-import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
-import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
-import { UsersMenuComponent } from '../users-menu/users-menu.component';
-import { EntriesDividerComponent } from '../../../shared/components/entries-divider/entries-divider.component';
 
 @Component({
   selector: 'studio-lite-users',
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe, MatFabButton, MatIcon, EntriesDividerComponent]
+  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent]
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>();
-  displayedColumns = ['selectCheckbox', 'name', 'displayName', 'email', 'id', 'description'];
-  tableSelectionCheckboxes = new SelectionModel <UserFullDto>(true, []);
+  displayedColumns = ['name', 'displayName', 'email', 'id', 'description', 'delete'];
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
   userWorkspaceGroups = new WorkspaceGroupToCheckCollection([]);
@@ -50,7 +48,8 @@ export class UsersComponent implements OnInit {
     private appService: AppService,
     private backendService: BackendService,
     private snackBar: MatSnackBar,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private deleteConfirmDialog: MatDialog
   ) {
     this.tableSelectionRow.changed.subscribe(
       r => {
@@ -67,8 +66,6 @@ export class UsersComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.createWorkspaceList();
-      this.appService.appConfig
-        .setPageTitle(this.translateService.instant('admin.users-title'));
     });
   }
 
@@ -140,26 +137,43 @@ export class UsersComponent implements OnInit {
   }
 
   deleteUsers(users: UserFullDto[]): void {
-    this.appService.dataLoading = true;
-    const usersToDelete: number[] = [];
-    users.forEach((r: UserFullDto) => usersToDelete.push(r.id));
-    this.backendService.deleteUsers(usersToDelete).subscribe(
-      respOk => {
-        if (respOk) {
-          this.snackBar.open(
-            this.translateService.instant('admin.users-deleted'),
-            '',
-            { duration: 1000 });
-          this.updateUserList();
-        } else {
-          this.snackBar.open(
-            this.translateService.instant('admin.users-not-deleted'),
-            this.translateService.instant('error'),
-            { duration: 3000 });
-          this.appService.dataLoading = false;
-        }
+    const content = (users.length === 1) ?
+      this.translateService.instant('admin.delete-user', { name: users[0].name }) :
+      this.translateService.instant('admin.delete-users', { count: users.length });
+    const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: <ConfirmDialogData>{
+        title: this.translateService.instant('admin.delete-users-title'),
+        content: content,
+        confirmButtonLabel: this.translateService.instant('delete'),
+        showCancel: true
       }
-    );
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.appService.dataLoading = true;
+        const usersToDelete: number[] = [];
+        users.forEach((r: UserFullDto) => usersToDelete.push(r.id));
+        this.backendService.deleteUsers(usersToDelete).subscribe(
+          respOk => {
+            if (respOk) {
+              this.snackBar.open(
+                this.translateService.instant('admin.users-deleted'),
+                '',
+                { duration: 1000 });
+              this.updateUserList();
+            } else {
+              this.snackBar.open(
+                this.translateService.instant('admin.users-not-deleted'),
+                this.translateService.instant('error'),
+                { duration: 3000 });
+              this.appService.dataLoading = false;
+            }
+          }
+        );
+      }
+    });
   }
 
   updateWorkspaceGroupList(): void {
@@ -208,11 +222,9 @@ export class UsersComponent implements OnInit {
       (users: UserFullDto[]) => {
         if (users.length > 0) {
           this.setObjectsDatasource(users);
-          this.tableSelectionCheckboxes.clear();
           this.tableSelectionRow.clear();
           this.appService.dataLoading = false;
         } else {
-          this.tableSelectionCheckboxes.clear();
           this.tableSelectionRow.clear();
           this.appService.dataLoading = false;
         }
@@ -238,18 +250,6 @@ export class UsersComponent implements OnInit {
       this.userWorkspaceGroups = new WorkspaceGroupToCheckCollection(worksGroups);
       this.updateUserList();
     });
-  }
-
-  private isAllSelected(): boolean {
-    const numSelected = this.tableSelectionCheckboxes.selected.length;
-    const numRows = this.objectsDatasource ? this.objectsDatasource.data.length : 0;
-    return numSelected === numRows;
-  }
-
-  masterToggle(): void {
-    this.isAllSelected() || !this.objectsDatasource ?
-      this.tableSelectionCheckboxes.clear() :
-      this.objectsDatasource.data.forEach(row => this.tableSelectionCheckboxes.select(row));
   }
 
   toggleRowSelection(row: UserInListDto): void {

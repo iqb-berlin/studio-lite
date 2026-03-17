@@ -21,9 +21,8 @@ import { environment } from '../../../../../environments/environment';
 import { AppService } from '../../../../services/app.service';
 import { AppConfig } from '../../../../classes/app-config.class';
 import { BackendService } from '../../services/backend.service';
-import { I18nService } from '../../../../services/i18n.service';
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 
 describe('WorkspaceGroupsComponent', () => {
   let component: WorkspaceGroupsComponent;
@@ -31,7 +30,6 @@ describe('WorkspaceGroupsComponent', () => {
   let mockBackendService: Partial<BackendService>;
   let mockAppService: Partial<AppService>;
   let mockSnackBar: Partial<MatSnackBar>;
-  let mockI18nService: Partial<I18nService>;
 
   @Component({ selector: 'studio-lite-search-filter', template: '', standalone: true })
   class MockSearchFilterComponent {
@@ -42,16 +40,12 @@ describe('WorkspaceGroupsComponent', () => {
   class MockWorkspaceGroupsMenuComponent {
     @Input() selectedWorkspaceGroupId!: number;
     @Input() selectedRows!: WorkspaceGroupInListDto[];
-    @Input() checkedRows!: WorkspaceGroupInListDto[];
 
     @Output() groupAdded: EventEmitter<UntypedFormGroup> = new EventEmitter<UntypedFormGroup>();
-    @Output() groupsDeleted: EventEmitter<WorkspaceGroupInListDto[]> = new EventEmitter<WorkspaceGroupInListDto[]>();
     @Output() groupEdited: EventEmitter<{ selection: WorkspaceGroupInListDto[], group: UntypedFormGroup }> =
       new EventEmitter<{ selection: WorkspaceGroupInListDto[], group: UntypedFormGroup }>();
 
     @Output() groupSettingsEdited = new EventEmitter();
-    @Output() downloadUnits = new EventEmitter();
-    @Output() downloadWorkspacesReport = new EventEmitter();
   }
 
   beforeEach(async () => {
@@ -79,11 +73,6 @@ describe('WorkspaceGroupsComponent', () => {
       open: jest.fn()
     };
 
-    mockI18nService = {
-      fullLocale: 'en-US',
-      fileDateFormat: 'yyyy-MM-dd'
-    };
-
     await TestBed.configureTestingModule({
       imports: [
         MatDialogModule,
@@ -105,8 +94,7 @@ describe('WorkspaceGroupsComponent', () => {
         },
         { provide: BackendService, useValue: mockBackendService },
         { provide: AppService, useValue: mockAppService },
-        { provide: MatSnackBar, useValue: mockSnackBar },
-        { provide: I18nService, useValue: mockI18nService }
+        { provide: MatSnackBar, useValue: mockSnackBar }
       ]
     })
       .overrideComponent(WorkspaceGroupsComponent, {
@@ -208,20 +196,5 @@ describe('WorkspaceGroupsComponent', () => {
     (component as unknown as { updateUserList: () => void }).updateUserList();
 
     expect(mockBackendService.getWorkspaceGroupAdmins).toHaveBeenCalledWith(123);
-  });
-
-  it('should download units', () => {
-    // Mock saveAs? Global mock or window mock needed if we want to verify deeply.
-    // Or just check service call.
-    // window.saveAs = jest.fn() --> need to mock file-saver-es
-    // We will check getUnits call.
-
-    component.downloadUnits();
-    expect(mockBackendService.getUnits).toHaveBeenCalled();
-  });
-
-  it('should download workspaces report', () => {
-    component.xlsxDownloadWorkspaceReport();
-    expect(mockBackendService.getXlsWorkspaces).toHaveBeenCalled();
   });
 });

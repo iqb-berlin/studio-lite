@@ -6,17 +6,17 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { MetadataBackendService } from '../../../metadata/services/metadata-backend.service';
 import { MetadataService } from '../../../metadata/services/metadata.service';
 import { I18nService } from '../../../../services/i18n.service';
-import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
+import { VeronaModuleClass } from '../../../../models/verona-module.class';
 import { UnitPropertiesComponent } from './unit-properties.component';
 import { environment } from '../../../../../environments/environment';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
-import { SelectModuleComponent } from '../../../shared/components/select-module/select-module.component';
+import { SelectModuleComponent } from '../../../../components/select-module/select-module.component';
 
 describe('UnitPropertiesComponent', () => {
   let component: UnitPropertiesComponent;

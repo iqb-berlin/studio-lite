@@ -4,12 +4,13 @@ import {
 import { fromEvent, Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
-import { PreviewDirective } from '../../../shared/directives/preview.directive';
-import { UnitState } from '../../../shared/models/verona.interface';
+import { PreviewDirective } from '../../../../directives/preview.directive';
+import { UnitState } from '../../../../models/verona.interface';
+import { WidgetCallData } from '../../../workspace/models/widget-call-data.interface';
 
 @Component({
   selector: 'studio-lite-unit-print-player',
@@ -77,7 +78,8 @@ export class UnitPrintPlayerComponent extends PreviewDirective implements AfterV
           stateReportPolicy: 'eager',
           pagingMode: 'concat-scroll',
           printMode: this.printElementIds ? 'on-with-ids' : 'on',
-          directDownloadUrl: this.backendService.getDirectDownloadLink()
+          directDownloadUrl: this.backendService.getDirectDownloadLink(),
+          sharedParameters: this.sharedParameters
         },
         unitDefinition: definition || ''
       }, '*');
@@ -90,6 +92,9 @@ export class UnitPrintPlayerComponent extends PreviewDirective implements AfterV
 
   // eslint-disable-next-line class-methods-use-this,@typescript-eslint/no-unused-vars
   gotoUnit(_target: string): void {}
+
+  // eslint-disable-next-line class-methods-use-this,@typescript-eslint/no-unused-vars
+  override handleWidgetCall(_data: WidgetCallData): void {}
 
   // eslint-disable-next-line class-methods-use-this
   onSelectedUnitChange(): void {}

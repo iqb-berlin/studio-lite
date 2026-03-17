@@ -16,44 +16,38 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { FormsModule, UntypedFormGroup } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import {
   CreateWorkspaceGroupDto,
-  UnitInViewDto,
   UserInListDto,
   WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
-import { DatePipe } from '@angular/common';
-import { saveAs } from 'file-saver-es';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatFabButton } from '@angular/material/button';
+import { MatFabButton, MatIconButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { UserToCheckCollection } from '../../models/users-to-check-collection.class';
 import { State } from '../../models/state.type';
-import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
-import { HasSelectionValuePipe } from '../../../shared/pipes/hasSelectionValue.pipe';
-import { IsAllSelectedPipe } from '../../../shared/pipes/isAllSelected.pipe';
-import { IsSelectedPipe } from '../../../shared/pipes/isSelected.pipe';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
-import { Profile } from '../../../shared/models/profile.type';
-import { I18nService } from '../../../../services/i18n.service';
-import { EntriesDividerComponent } from '../../../shared/components/entries-divider/entries-divider.component';
+import { Profile } from '../../../../models/profile.type';
+import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 
 @Component({
   selector: 'studio-lite-workspace-groups',
   templateUrl: './workspace-groups.component.html',
   styleUrls: ['./workspace-groups.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, IsSelectedIdPipe, MatFabButton, MatIcon, EntriesDividerComponent]
+  imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent]
 })
 export class WorkspaceGroupsComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();
-  displayedColumns = ['selectCheckbox', 'name', 'id'];
-  tableSelectionCheckboxes = new SelectionModel<WorkspaceGroupInListDto>(true, []);
+  displayedColumns = ['id', 'name', 'delete'];
   tableSelectionRow = new SelectionModel<WorkspaceGroupInListDto>(false, []);
   selectedWorkspaceGroupId = 0;
   workspaceUsers = new UserToCheckCollection([]);
@@ -64,8 +58,8 @@ export class WorkspaceGroupsComponent implements OnInit {
     private appService: AppService,
     private backendService: BackendService,
     private snackBar: MatSnackBar,
-    private translateService: TranslateService,
-    private i18nService: I18nService
+    private deleteConfirmDialog: MatDialog,
+    private translateService: TranslateService
   ) {
     this.tableSelectionRow.changed.subscribe(
       r => {
@@ -82,7 +76,6 @@ export class WorkspaceGroupsComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.createUserList();
-      this.appService.appConfig.setPageTitle(`Admin: ${this.translateService.instant('wsg-admin.workspaces')}`);
     });
   }
 
@@ -167,6 +160,24 @@ export class WorkspaceGroupsComponent implements OnInit {
       );
   }
 
+  openDeleteDialog(group: WorkspaceGroupInListDto): void {
+    const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: <ConfirmDialogData>{
+        title: this.translateService.instant('admin.delete-groups-title'),
+        content: this.translateService.instant('admin.delete-group', { name: group.name }),
+        confirmButtonLabel: this.translateService.instant('delete'),
+        showCancel: true
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.deleteGroups([group]);
+      }
+    });
+  }
+
   deleteGroups(groups: WorkspaceGroupInListDto[]): void {
     this.appService.dataLoading = true;
     const workspaceGroupsToDelete: number[] = [];
@@ -184,8 +195,8 @@ export class WorkspaceGroupsComponent implements OnInit {
             this.translateService.instant('admin.groups-not-deleted'),
             this.translateService.instant('error'),
             { duration: 1000 });
-          this.appService.dataLoading = false;
         }
+        this.appService.dataLoading = false;
       }
     );
   }
@@ -246,7 +257,6 @@ export class WorkspaceGroupsComponent implements OnInit {
     this.appService.dataLoading = true;
     this.backendService.getWorkspaceGroupList().subscribe(groups => {
       this.setObjectsDatasource(groups);
-      this.tableSelectionCheckboxes.clear();
       this.tableSelectionRow.clear();
       this.appService.dataLoading = false;
     });
@@ -272,83 +282,7 @@ export class WorkspaceGroupsComponent implements OnInit {
     });
   }
 
-  private isAllSelected(): boolean {
-    const numSelected = this.tableSelectionCheckboxes.selected.length;
-    const numRows = this.objectsDatasource ? this.objectsDatasource.data.length : 0;
-    return numSelected === numRows;
-  }
-
-  masterToggle(): void {
-    this.isAllSelected() || !this.objectsDatasource ?
-      this.tableSelectionCheckboxes.clear() :
-      this.objectsDatasource.data.forEach(row => this.tableSelectionCheckboxes.select(row));
-  }
-
   toggleRowSelection(row: UserInListDto): void {
     this.tableSelectionRow.toggle(row);
-  }
-
-  private static cleanUnitsData(units: UnitInViewDto[]): UnitInViewDto[] {
-    return units.map(unit => ({
-      key: unit.key,
-      name: unit.name,
-      groupName: unit.groupName,
-      id: unit.id,
-      workspaceName: unit.workspaceName,
-      workspaceId: unit.workspaceId,
-      lastChangedDefinition: unit.lastChangedDefinition,
-      lastChangedMetadata: unit.lastChangedMetadata,
-      lastChangedScheme: unit.lastChangedScheme,
-      lastChangedDefinitionUser: unit.lastChangedDefinitionUser,
-      lastChangedMetadataUser: unit.lastChangedMetadataUser,
-      lastChangedSchemeUser: unit.lastChangedSchemeUser
-    }));
-  }
-
-  private static toCSV(units: UnitInViewDto[]): string {
-    const replacer = (key: string, value: unknown) => (value === null ? '' : value);
-    const header = Object.keys(units[0]);
-    return [
-      header.join(','), // header row first
-      ...units.map(row => header
-        .map(fieldName => JSON.stringify(row[fieldName as keyof UnitInViewDto], replacer))
-        .join(','))
-    ].join('\r\n');
-  }
-
-  private saveFile(csv: string): void {
-    const blob = new Blob([csv], { type: 'text/plain;charset=utf-8' });
-    const datePipe = new DatePipe(this.i18nService.fullLocale);
-    const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
-    saveAs(blob, `${thisDate} Units.csv`);
-  }
-
-  downloadUnits(): void {
-    this.appService.dataLoading = true;
-    try {
-      this.backendService.getUnits()
-        .subscribe(units => {
-          const items = WorkspaceGroupsComponent.cleanUnitsData(units);
-          const csv = WorkspaceGroupsComponent.toCSV(items);
-          this.saveFile(csv);
-          this.appService.dataLoading = false;
-        });
-    } catch (e) {
-      this.appService.dataLoading = false;
-    }
-  }
-
-  xlsxDownloadWorkspaceReport(): void {
-    this.appService.dataLoading = true;
-    try {
-      this.backendService.getXlsWorkspaces().subscribe(b => {
-        const datePipe = new DatePipe(this.i18nService.fullLocale);
-        const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
-        saveAs(b, `${thisDate} ${this.translateService.instant('wsg-admin.report-workspaces')}.xlsx`);
-        this.appService.dataLoading = false;
-      });
-    } catch (e) {
-      this.appService.dataLoading = false;
-    }
   }
 }

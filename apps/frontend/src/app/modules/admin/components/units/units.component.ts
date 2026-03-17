@@ -17,17 +17,19 @@ import { TranslateModule } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MatPaginator } from '@angular/material/paginator';
+import { saveAs } from 'file-saver-es';
 import { BackendService } from '../../services/backend.service';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { I18nService } from '../../../../services/i18n.service';
 import { AppService } from '../../../../services/app.service';
+import { UnitsMenuComponent } from '../units-menu/units-menu.component';
 
 @Component({
   selector: 'studio-lite-units',
   templateUrl: './units.component.html',
   styleUrls: ['./units.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, DatePipe, MatPaginator]
+  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, DatePipe, MatPaginator, UnitsMenuComponent]
 })
 
 export class UnitsComponent implements OnInit, AfterViewInit {
@@ -71,5 +73,57 @@ export class UnitsComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
     this.dataSource.paginator = this.paginator;
+  }
+
+  private static cleanUnitsData(units: UnitInViewDto[]): UnitInViewDto[] {
+    return units.map(unit => ({
+      key: unit.key,
+      name: unit.name,
+      groupName: unit.groupName,
+      id: unit.id,
+      workspaceName: unit.workspaceName,
+      workspaceId: unit.workspaceId,
+      lastChangedDefinition: unit.lastChangedDefinition,
+      lastChangedMetadata: unit.lastChangedMetadata,
+      lastChangedScheme: unit.lastChangedScheme,
+      lastChangedDefinitionUser: unit.lastChangedDefinitionUser,
+      lastChangedMetadataUser: unit.lastChangedMetadataUser,
+      lastChangedSchemeUser: unit.lastChangedSchemeUser
+    }));
+  }
+
+  private static toCSV(units: UnitInViewDto[]): string {
+    const replacer = (key: string, value: unknown) => (value === null ? '' : value);
+    const header = Object.keys(units[0]);
+    return [
+      header.join(','), // header row first
+      ...units.map(row => header
+        .map(fieldName => JSON.stringify(row[fieldName as keyof UnitInViewDto], replacer))
+        .join(','))
+    ].join('\r\n');
+  }
+
+  private saveFile(csv: string): void {
+    const blob = new Blob([csv], { type: 'text/plain;charset=utf-8' });
+    const datePipe = new DatePipe(this.i18nService.fullLocale);
+    const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
+    saveAs(blob, `${thisDate} Units.csv`);
+  }
+
+  downloadUnits(): void {
+    this.appService.dataLoading = true;
+    try {
+      this.backendService.getAllUnits()
+        .subscribe(units => {
+          if (Array.isArray(units)) {
+            const items = UnitsComponent.cleanUnitsData(units as UnitInViewDto[]);
+            const csv = UnitsComponent.toCSV(items);
+            this.saveFile(csv);
+          }
+          this.appService.dataLoading = false;
+        });
+    } catch (e) {
+      this.appService.dataLoading = false;
+    }
   }
 }

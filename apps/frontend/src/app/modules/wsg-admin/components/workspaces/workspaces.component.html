@@ -1,12 +1,11 @@
 <div class="fx-row-space-between-start admin-tab-content">
-  <div class="fx-flex-row-55 fx-column-start-stretch object-list">
+  <div class="fx-flex-row-60 fx-column-start-stretch object-list">
     <studio-lite-workspace-menu
       [isBackUpWorkspaceGroup]="isBackUpWorkspaceGroup"
       [maxWorkspaceCount]="maxWorkspaceCount"
       [isWorkspaceGroupAdmin]="isWorkspaceGroupAdmin"
       [selectedWorkspaceId]="selectedWorkspaceId"
       [selectedRows]="tableSelectionRow.selected"
-      [checkedRows]="tableSelectionCheckboxes.selected"
       [workspaces]="workspaces"
       (workspaceAdded)="addWorkspace($event)"
       (workspaceRenamed)="renameWorkspace($event)"
@@ -14,7 +13,6 @@
       (workspaceChanged)="changeWorkspace($event)"
       (workspaceNotLoaded)="onWorkspaceNotLoaded()"
       (workspaceMoved)="moveWorkspace($event)"
-      (workspaceDeleted)="deleteWorkspace($event)"
       (download)="xlsxDownloadWorkspaceReport()">
     </studio-lite-workspace-menu>
 
@@ -38,22 +36,7 @@
       matSort
       matSortDisableClear
       class="scroll-area">
-      <ng-container matColumnDef="selectCheckbox">
-        <mat-header-cell *matHeaderCellDef
-          class="fx-flex-row-fix-70">
-          <mat-checkbox [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-            [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-            (change)="$event ? masterToggle() : null">
-          </mat-checkbox>
-        </mat-header-cell>
-        <mat-cell *matCellDef="let row"
-          class="fx-flex-row-fix-70">
-          <mat-checkbox [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length"
-            (click)="$event.stopPropagation()"
-            (change)="$event ? tableSelectionCheckboxes.toggle(row) : null">
-          </mat-checkbox>
-        </mat-cell>
-      </ng-container>
+
       <ng-container matColumnDef="name">
         <mat-header-cell *matHeaderCellDef
           mat-sort-header="name">{{'wsg-admin.name' | translate}}
@@ -69,7 +52,7 @@
         </mat-header-cell>
         <mat-cell *matCellDef="let element"
                   class="secondary-text">
-          {{element.id}}
+          <a [routerLink]="'/a/' + element.id">{{element.id}}</a>
         </mat-cell>
       </ng-container>
       <ng-container matColumnDef="unitsCount">
@@ -78,6 +61,46 @@
         </mat-header-cell>
         <mat-cell *matCellDef="let element">
           <span class="secondary-text">{{element.unitsCount}}</span>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="editor">
+        <mat-header-cell *matHeaderCellDef class="header-center">{{'workspace.routes.editor' | translate}}</mat-header-cell>
+        <mat-cell *matCellDef="let element" class="cell-center">
+          <mat-icon [color]="isRouteHidden(element, 'editor') ? '' : 'primary'"
+                    [matTooltip]="(isRouteHidden(element, 'editor') ? 'wsg-admin.route-hidden' : 'wsg-admin.route-visible') | translate">
+            {{ isRouteHidden(element, 'editor') ? 'directions_off' : 'directions' }}
+          </mat-icon>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="preview">
+        <mat-header-cell *matHeaderCellDef class="header-center">{{'workspace.routes.preview' | translate}}</mat-header-cell>
+        <mat-cell *matCellDef="let element" class="cell-center">
+          <mat-icon [color]="isRouteHidden(element, 'preview') ? '' : 'primary'"
+                    [matTooltip]="(isRouteHidden(element, 'preview') ? 'wsg-admin.route-hidden' : 'wsg-admin.route-visible') | translate">
+            {{ isRouteHidden(element, 'preview') ? 'directions_off' : 'directions' }}
+          </mat-icon>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="schemer">
+        <mat-header-cell *matHeaderCellDef class="header-center">{{'workspace.routes.schemer' | translate}}</mat-header-cell>
+        <mat-cell *matCellDef="let element" class="cell-center">
+          <mat-icon [color]="isRouteHidden(element, 'schemer') ? '' : 'primary'"
+                    [matTooltip]="(isRouteHidden(element, 'schemer') ? 'wsg-admin.route-hidden' : 'wsg-admin.route-visible') | translate">
+            {{ isRouteHidden(element, 'schemer') ? 'directions_off' : 'directions' }}
+          </mat-icon>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="comments">
+        <mat-header-cell *matHeaderCellDef class="header-center">{{'workspace.routes.comments' | translate}}</mat-header-cell>
+        <mat-cell *matCellDef="let element" class="cell-center">
+          <mat-icon [color]="isRouteHidden(element, 'comments') ? '' : 'primary'"
+                    [matTooltip]="(isRouteHidden(element, 'comments') ? 'wsg-admin.route-hidden' : 'wsg-admin.route-visible') | translate">
+            {{ isRouteHidden(element, 'comments') ? 'directions_off' : 'directions' }}
+          </mat-icon>
         </mat-cell>
       </ng-container>
       <ng-container matColumnDef="dropBoxId">
@@ -97,6 +120,18 @@
           }
         </mat-cell>
       </ng-container>
+      <ng-container matColumnDef="delete">
+        <mat-header-cell *matHeaderCellDef class="cell-right"></mat-header-cell>
+        <mat-cell *matCellDef="let element" class="cell-right">
+          <button mat-icon-button
+                  [matTooltip]="'wsg-admin.delete-workspace-by-name' | translate : {workspaceName: element.name}"
+                  [color]="'warn'"
+                  matTooltipPosition="above"
+                  (click)="$event.stopPropagation(); deleteWorkspace(element)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row *matRowDef="let row; columns: displayedColumns;"
         [class.selected] = "row | isSelectedId: selectedWorkspaceId"
@@ -105,7 +140,7 @@
     </mat-table>
   </div>
 
-  <div class="object-list fx-column-start-stretch fx-flex-row-40">
+  <div class="object-list fx-column-start-stretch fx-flex-row-35">
     <div class="object-header-container fx-row-space-between-center">
       @if (!selectedWorkspaceId) {
         <div class="object-header">
@@ -117,15 +152,17 @@
           {{'wsg-admin.access-for-workspace' | translate: { workspace: tableSelectionRow.selected[0].name } }}
         </div>
       }
-      <button mat-fab
-              class="save-button"
-              [matTooltip]="'save' | translate"
-              matTooltipPosition="above"
-              [color]="'primary'"
-              [disabled]="!workspaceUsers.hasChanged"
-              (click)="saveUsers()">
-        <mat-icon>save></mat-icon>
-      </button>
+      <div class="fx-row-start-stretch fx-gap-10">
+        <button mat-fab
+                class="save-button"
+                [matTooltip]="'save' | translate"
+                matTooltipPosition="above"
+                [color]="'primary'"
+                [disabled]="!workspaceUsers.hasChanged"
+                (click)="saveUsers()">
+          <mat-icon>save</mat-icon>
+        </button>
+      </div>
     </div>
 
     @if (workspaceUsers.entries.length) {

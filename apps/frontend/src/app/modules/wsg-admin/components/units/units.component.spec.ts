@@ -10,7 +10,7 @@ import { UnitInViewDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of } from 'rxjs';
 import { AppService } from '../../../../services/app.service';
 import { I18nService } from '../../../../services/i18n.service';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { BackendService } from '../../services/backend.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { UnitsComponent } from './units.component';

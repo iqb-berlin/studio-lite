@@ -33,7 +33,7 @@ export function deleteAllModules(): void {
   cy.selectModule('IQB-Editor');
   cy.get('div > mat-icon').contains('delete').click();
   cy.translate(Cypress.env('locale')).then(json => {
-    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/verona-modules', 'GET', 'deleteModule');
+    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/verona-modules*', 'DELETE', 'deleteModule');
   });
 }
 

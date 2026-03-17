@@ -16,7 +16,7 @@ import { DataLoadingAsTextPipe } from './pipes/data-loading-as-text.pipe';
 import { DataLoadingIsNumberPipe } from './pipes/data-loading-is-number.pipe';
 import { I18nService } from './services/i18n.service';
 import { UserMenuComponent } from './components/user-menu/user-menu.component';
-import { WrappedIconComponent } from './modules/shared/components/wrapped-icon/wrapped-icon.component';
+import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.component';
 
 @Component({
   selector: 'app-root',

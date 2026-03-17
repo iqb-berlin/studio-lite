@@ -15,11 +15,11 @@ import { environment } from '../../../../../environments/environment';
 import { VeronaModulesComponent } from './verona-modules.component';
 import { AppService } from '../../../../services/app.service';
 import { AppConfig } from '../../../../classes/app-config.class';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { BackendService } from '../../services/backend.service';
 import { VeronaModulesTableComponent } from '../verona-modules-table/verona-modules-table.component';
-import { WrappedIconComponent } from '../../../shared/components/wrapped-icon/wrapped-icon.component';
-import { VeronaModuleClass } from '../../../shared/models/verona-module.class';
+import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
+import { VeronaModuleClass } from '../../../../models/verona-module.class';
 
 describe('VeronaModulesComponent', () => {
   let component: VeronaModulesComponent;
@@ -146,7 +146,6 @@ describe('VeronaModulesComponent', () => {
     component.ngOnInit();
     jest.advanceTimersByTime(100);
 
-    expect(mockAppService.appConfig?.setPageTitle).toHaveBeenCalledWith('modules.title');
     expect(mockModuleService.loadList).toHaveBeenCalled();
     jest.useRealTimers();
   });
@@ -158,13 +157,12 @@ describe('VeronaModulesComponent', () => {
 
     component.selectedModules = [module1, module2];
 
-    // Select new editor modules (replacing existing editors, keeping players)
     component.changeSelectedModules({ type: 'editor', selectedModules: [module3] });
 
     expect(component.selectedModules).toHaveLength(2);
-    expect(component.selectedModules).toContain(module2); // Player kept
-    expect(component.selectedModules).toContain(module3); // New editor added
-    expect(component.selectedModules).not.toContain(module1); // Old editor removed
+    expect(component.selectedModules).toContain(module2);
+    expect(component.selectedModules).toContain(module3);
+    expect(component.selectedModules).not.toContain(module1);
   });
 
   it('should delete modules successfully', () => {

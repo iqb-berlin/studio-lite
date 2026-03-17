@@ -16,7 +16,7 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { UnitTableComponent } from '../unit-table/unit-table.component';
 import { UnitGroupsComponent } from '../unit-groups/unit-groups.component';
 import { UnitGroupComponent } from '../unit-group/unit-group.component';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 
 @Component({ selector: 'studio-lite-unit-table', template: '', standalone: true })
 class MockUnitTableComponent {

@@ -23,7 +23,7 @@ import { AppService } from '../../../../services/app.service';
 import { Group } from '../../models/group.interface';
 import { SaveChangesComponent } from '../save-changes/save-changes.component';
 import { GroupMenuComponent } from '../group-menu/group-menu.component';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 
 @Component({
   selector: 'studio-lite-group-manage',

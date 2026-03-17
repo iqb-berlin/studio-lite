@@ -6,14 +6,7 @@
     <studio-lite-wrapped-icon icon="add"></studio-lite-wrapped-icon>
   </button>
   <button mat-button
-          [disabled]="!selectedUser && (!checkedRows || !checkedRows.length)"
-          [matTooltip]="'admin.delete-selected-users' | translate"
-          (click)="deleteUsers()"
-          data-cy="admin-users-menu-delete-users">
-    <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
-  </button>
-  <button mat-button
-          [disabled]="!selectedUser && checkedRows && checkedRows.length !== 1"
+          [disabled]="selectedRows.length !== 1"
           [matTooltip]="'admin.edit-user-data' | translate"
           (click)="editUser()">
     <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>

@@ -25,4 +25,7 @@ export class WorkspaceSettingsDto {
 
   @ApiProperty()
     states?: State[];
+
+  @ApiProperty()
+    hiddenRoutes?: string[];
 }

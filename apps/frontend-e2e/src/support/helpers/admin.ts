@@ -9,14 +9,6 @@ import { clickSaveButtonRight, editInput } from './common';
 import { logout } from './user';
 
 /**
- * Helper function to select a user checkbox
- * @param checkName - Username to select
- */
-function selectCheckboxUser(checkName: string): void {
-  cy.get(`[data-cy="admin-users-checkbox-user-box-${checkName}"]`).click();
-}
-
-/**
  * Adds the first admin user and logs in
  * @example
  * addFirstUser();
@@ -73,27 +65,17 @@ export function deleteUser(user: string): void {
   cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('users');
-  selectCheckboxUser(user);
-  cy.get('[data-cy="admin-users-menu-delete-users"]').click();
+  cy.contains('mat-cell', user)
+    .parent()
+    .find('[data-cy="admin-users-delete-user"]').click();
   cy.translate(Cypress.env('locale')).then(json => {
-    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/users*', 'DELETE', 'deleteUser');
-  });
-}
-
-/**
- * Deletes multiple users at once
- * @param users - Array of usernames to delete
- * @example
- * deleteUsers(['user1', 'user2']);
- */
-export function deleteUsers(users: string[]): void {
-  clickIndexTabAdmin('users');
-  users.forEach(user => {
-    selectCheckboxUser(user);
-  });
-  cy.get('[data-cy="admin-users-menu-delete-users"]').click();
-  cy.translate(Cypress.env('locale')).then(json => {
-    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/users*', 'DELETE', 'deleteUser');
+    cy.clickDialogButtonWithResponseCheck(
+      json.delete,
+      [200],
+      '/api/admin/users*',
+      'DELETE',
+      'deleteUser'
+    );
   });
 }
 
@@ -122,14 +104,18 @@ export function deleteGroup(group: string): void {
   cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('workspace-groups');
-  cy.get('mat-table')
-    .contains(group)
-    .click();
-  cy.get('mat-icon')
-    .contains('delete')
+  cy.contains('mat-cell', group)
+    .parent()
+    .find('[data-cy="admin-workspace-groups-delete-group"]')
     .click();
   cy.translate(Cypress.env('locale')).then(json => {
-    cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/workspace-groups*', 'DELETE', 'deleteGroup');
+    cy.clickDialogButtonWithResponseCheck(
+      json.delete,
+      [200],
+      '/api/admin/workspace-groups*',
+      'DELETE',
+      'deleteGroup'
+    );
   });
 }
 
@@ -260,4 +246,98 @@ export function makeAdminOfGroup(group: string, admins: string[]): void {
       .click();
   });
   clickSaveButtonRight();
+}
+
+// ---------------------------------------------------------------------------
+// Helper: navigate to the admin Settings tab
+// ---------------------------------------------------------------------------
+export function goToSettings(): void {
+  cy.visit('/');
+  cy.findAdminSettings().click();
+  clickIndexTabAdmin('settings');
+}
+
+// ---------------------------------------------------------------------------
+// Helper: clear + retype a form-control input / textarea
+// ---------------------------------------------------------------------------
+export function setFormControl(formControlName: string, value: string): void {
+  cy.get(`[formcontrolname="${formControlName}"]`)
+    .should('exist')
+    .clear({ force: true })
+    .type(value, { force: true });
+}
+
+export function clearFormControl(formControlName: string): void {
+  cy.get(`[formcontrolname="${formControlName}"]`)
+    .should('exist')
+    .clear({ force: true });
+}
+
+// ---------------------------------------------------------------------------
+// Helper: click the Save button and wait for an API response
+// ---------------------------------------------------------------------------
+export function saveAndExpect(
+  method: string,
+  urlPattern: string,
+  alias: string
+): void {
+  cy.intercept(method, urlPattern).as(alias);
+  cy.translate(Cypress.env('locale')).then(json => {
+    cy.get('button').contains(json.save).click({ force: true });
+  });
+  cy.wait(`@${alias}`).its('response.statusCode').should('eq', 200);
+}
+
+// ---------------------------------------------------------------------------
+// Helpers edit-workspace-settings
+// ---------------------------------------------------------------------------
+
+/**
+ * Navigate to the wsg-admin workspaces tab, select a workspace row and open
+ * the workspace-settings dialog via the gear icon in the toolbar.
+ */
+export function openWorkspaceSettingsDialog(group: string, ws:string): void {
+  cy.visit('/');
+  cy.findAdminGroupSettings(group).click();
+  clickIndexTabWsgAdmin('workspaces');
+  cy.contains('mat-cell', ws).click();
+  // The gear button has no data-cy; click by its mat-icon label
+  cy.get('studio-lite-workspace-menu')
+    .find('mat-icon')
+    .contains('settings')
+    .click({ force: true });
+}
+
+/**
+ * Toggle a route's visibility checkbox inside the workspace-settings dialog.
+ * @param routeName - one of 'editor' | 'preview' | 'schemer' | 'comments'
+ * @param setVisible - true to check (show), false to uncheck (hide)
+ */
+export function setRouteVisibility(routeName: string, setVisible: boolean): void {
+  cy.translate(Cypress.env('locale')).then(json => {
+    const routeLabel: string = json.workspace.routes[routeName];
+    cy.get('mat-checkbox')
+      .contains(routeLabel)
+      .parent()
+      .as('checkbox');
+
+    cy.get('@checkbox').then($checkbox => {
+      const isChecked = $checkbox.hasClass('mat-mdc-checkbox-checked');
+      if (setVisible && !isChecked) {
+        cy.log('Primero');
+        cy.get('@checkbox').click();
+      }
+      if (!setVisible) {
+        cy.log('segundo');
+        cy.get('@checkbox').click();
+      }
+    });
+  });
+}
+
+/** Save the workspace-settings dialog and wait for the API response. */
+export function saveWorkspaceSettings(): void {
+  cy.intercept('PATCH', '/api/workspaces/*/settings').as('saveWsSettings');
+  cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+  cy.wait('@saveWsSettings').its('response.statusCode').should('eq', 200);
 }

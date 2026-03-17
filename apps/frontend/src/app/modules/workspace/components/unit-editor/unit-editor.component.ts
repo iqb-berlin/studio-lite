@@ -5,13 +5,13 @@ import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { RolePipe } from '../../pipes/role.pipe';
-import { VeronaModuleDirective } from '../../../shared/directives/verona-module.directive';
+import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
 
 @Component({
   selector: 'studio-lite-unit-editor',
@@ -108,6 +108,9 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
                 //     sessionId: this.sessionId
                 //   }, '*');
               }
+              if (msgData.sharedParameters) {
+                this.sharedParameters = this.getMergedSharedParameters(msgData.sharedParameters);
+              }
             } else {
               this.postMessageTarget.postMessage(
                 {
@@ -187,7 +190,8 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
               directDownloadUrl: this.backendService.getDirectDownloadLink(),
               role: new RolePipe().transform(
                 this.workspaceService.userAccessLevel
-              )
+              ),
+              sharedParameters: this.sharedParameters
             },
             unitDefinition: unitDef.definition ? unitDef.definition : ''
           },

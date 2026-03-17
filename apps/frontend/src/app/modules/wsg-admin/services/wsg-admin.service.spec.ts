@@ -50,7 +50,7 @@ describe('WsgAdminService', () => {
       req.flush(false);
     });
 
-    it('returns true on error', done => {
+    it('returns false on error', done => {
       const settings: WorkspaceGroupSettingsDto = {
         defaultSchemer: 'schemer',
         defaultPlayer: 'player',
@@ -58,7 +58,7 @@ describe('WsgAdminService', () => {
       };
 
       service.setWorkspaceGroupSettings(3, settings).subscribe(result => {
-        expect(result).toBe(true);
+        expect(result).toBe(false);
         done();
       });
 

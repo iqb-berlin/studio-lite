@@ -1,11 +1,9 @@
 <div class="fx-row-space-between-start admin-tab-content">
-  <div class="object-list fx-column-start-stretch fx-flex-row-55">
+  <div class="object-list fx-column-start-stretch fx-flex-row-60">
     <studio-lite-users-menu [selectedUser]="selectedUser"
       [selectedRows]="tableSelectionRow.selected"
-      [checkedRows]="tableSelectionCheckboxes.selected"
       (userAdded)="addUser($event)"
-      (userEdited)="editUser($event)"
-      (usersDeleted)="deleteUsers($event)">
+      (userEdited)="editUser($event)">
     </studio-lite-users-menu>
 
     @if (objectsDatasource.data.length) {
@@ -25,29 +23,12 @@
       matSortDisableClear
       matSort
       class="scroll-area">
-      <ng-container matColumnDef="selectCheckbox">
-        <mat-header-cell *matHeaderCellDef class="fx-flex-row-fix-70">
-          <mat-checkbox [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-            [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
-            (change)="$event ? masterToggle() : null">
-          </mat-checkbox>
-        </mat-header-cell>
-        <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">
-          <mat-checkbox [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length"
-            (click)="$event.stopPropagation()"
-            (change)="$event ? tableSelectionCheckboxes.toggle(row) : null"
-            [attr.data-cy]="'admin-users-checkbox-user-box-'+row.name">
-          </mat-checkbox>
-        </mat-cell>
-      </ng-container>
-
       <ng-container matColumnDef="name">
         <mat-header-cell *matHeaderCellDef
           mat-sort-header="name">
           {{'user.login-name' | translate}}
         </mat-header-cell>
-        <mat-cell *matCellDef="let element"
-                  data-cy="admin-users-checkbox-login-name">
+        <mat-cell *matCellDef="let element">
           {{element.name}} {{element.isAdmin ? '*' : ''}}
         </mat-cell>
       </ng-container>
@@ -96,6 +77,20 @@
         </mat-cell>
       </ng-container>
 
+      <ng-container matColumnDef="delete">
+        <mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="true" class="header-right"></mat-header-cell>
+        <mat-cell *matCellDef="let row" class="cell-right">
+          <button mat-icon-button
+                  [matTooltip]="'admin.delete-name' | translate: { name: row.name }"
+                  [color]="'warn'"
+                  matTooltipPosition="above"
+                  (click)="$event.stopPropagation(); deleteUsers([row])"
+                  data-cy="admin-users-delete-user">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row *matRowDef="let row; columns: displayedColumns;"
         [class.selected] = "row | isSelectedId: selectedUser"
@@ -103,7 +98,7 @@
     </mat-table>
   </div>
 
-  <div class="object-list fx-column-start-stretch fx-flex-row-40">
+  <div class="object-list fx-column-start-stretch fx-flex-row-35">
     <div class="object-header-container fx-row-space-between-center">
       @if (!selectedUser) {
         <div class="object-header">

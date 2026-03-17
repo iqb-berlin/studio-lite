@@ -70,3 +70,7 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
+
+# ai
+/.ai
+rules.md

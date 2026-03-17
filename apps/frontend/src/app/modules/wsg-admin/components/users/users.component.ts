@@ -19,11 +19,11 @@ import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceToCheckCollection } from '../../models/workspace-to-check-collection.class';
 import { WsgAdminService } from '../../services/wsg-admin.service';
-import { IsSelectedIdPipe } from '../../../shared/pipes/isSelectedId.pipe';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { WorkspaceChecked } from '../../models/workspace-checked.class';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
-import { EntriesDividerComponent } from '../../../shared/components/entries-divider/entries-divider.component';
+import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 
 @Component({
   selector: 'studio-lite-users',

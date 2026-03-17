@@ -1,7 +1,9 @@
 import {
   AfterViewInit, Component, ElementRef, ViewChild
 } from '@angular/core';
-import { skip, takeUntil, Subject } from 'rxjs';
+import {
+  skip, takeUntil, Subject
+} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
@@ -12,7 +14,7 @@ import { CodingSchemeFactory } from '@iqb/responses';
 import { Response } from '@iqbspecs/response/response.interface';
 import { Router } from '@angular/router';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { ModuleService } from '../../../shared/services/module.service';
+import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -20,9 +22,11 @@ import { PreviewService } from '../../services/preview.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { ShowResponsesComponent } from '../show-responses/show-responses.component';
 import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
-import { PrintOptionsDialogComponent } from '../../../print/components/print-options-dialog/print-options-dialog.component';
-import { PreviewDirective } from '../../../shared/directives/preview.directive';
-import { UnitState } from '../../../shared/models/verona.interface';
+import {
+  PrintOptionsDialogComponent
+} from '../../../print/components/print-options-dialog/print-options-dialog.component';
+import { PreviewDirective } from '../../../../directives/preview.directive';
+import { UnitState } from '../../../../models/verona.interface';
 
 @Component({
   templateUrl: './unit-preview.component.html',
@@ -45,7 +49,7 @@ export class UnitPreviewComponent
     public moduleService: ModuleService,
     public previewService: PreviewService,
     public translateService: TranslateService,
-    private dialog: MatDialog,
+    public override errorDialog: MatDialog,
     private router: Router
   ) {
     super();
@@ -174,7 +178,8 @@ export class UnitPreviewComponent
             playerConfig: {
               stateReportPolicy: 'eager',
               pagingMode: this.previewService.pagingMode.value,
-              directDownloadUrl: this.backendService.getDirectDownloadLink()
+              directDownloadUrl: this.backendService.getDirectDownloadLink(),
+              sharedParameters: this.sharedParameters
             },
             unitDefinition: unitDef.definition || ''
           },
@@ -244,11 +249,11 @@ export class UnitPreviewComponent
         { duration: 3000 }
       );
     } else {
-      this.dialog
+      this.errorDialog
         .open(PrintOptionsDialogComponent)
         .afterClosed()
         .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(result => {
+        .subscribe((result: { key: string; value: boolean | number }[]) => {
           if (result) this.openPrintView(result);
         });
     }
@@ -280,7 +285,7 @@ export class UnitPreviewComponent
       const codingScheme: CodingSchemeData = JSON.parse(schemeData.scheme);
       if (!codingScheme) {
         if (responses) {
-          this.dialog.open(ShowResponsesComponent, {
+          this.errorDialog.open(ShowResponsesComponent, {
             data: { responses, table: this.isIqbStandardResponse() },
             height: '80%',
             width: '60%'
@@ -302,7 +307,7 @@ export class UnitPreviewComponent
         responses!,
         this.workspaceService.codingScheme.variableCodings
       );
-      this.dialog.open(ShowCodingResultsComponent, {
+      this.errorDialog.open(ShowCodingResultsComponent, {
         data: { responses: newResponses, varsWithCodes },
         height: '80%',
         width: '60%'

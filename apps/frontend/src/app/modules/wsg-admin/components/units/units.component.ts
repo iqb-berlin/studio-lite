@@ -24,18 +24,19 @@ import { Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService } from '../../services/backend.service';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { I18nService } from '../../../../services/i18n.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
-import { DeleteDialogComponent } from '../../../shared/components/delete-dialog/delete-dialog.component';
+import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
 import { AppService } from '../../../../services/app.service';
+import { IncludePipe } from '../../../../pipes/include.pipe';
 
 @Component({
   selector: 'studio-lite-units',
   templateUrl: './units.component.html',
   styleUrls: ['./units.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, DatePipe, MatPaginator, MatTooltip, MatIcon, MatIconButton]
+  imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, DatePipe, MatPaginator, MatTooltip, MatIcon, MatIconButton, IncludePipe]
 })
 
 export class UnitsComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -55,6 +56,8 @@ export class UnitsComponent implements OnInit, AfterViewInit, OnDestroy {
     'lastChangedSchemeUser',
     'delete'
   ];
+
+  restrictedColumns = ['id', 'key', 'delete', 'workspaceId'];
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;

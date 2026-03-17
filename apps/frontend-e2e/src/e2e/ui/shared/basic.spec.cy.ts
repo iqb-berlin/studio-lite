@@ -51,7 +51,18 @@ export function createBasicSpecCy() {
   });
 }
 
-export function createExercisesSpec() {
+export function createBasicData() {
+  describe('Create test base:', () => {
+    // creates the first user
+    addFirstUser();
+    // admin can create a group (Bereichsgruppe)
+    createGroup(group1);
+
+    // admin can create a workspace (Arbeitsbereich) within its Bereichsgruppe
+    createWs(ws1, group1);
+    grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [
+      AccessLevel.Admin]);
+  });
 }
 
 export function deleteBasicSpecCy() {
@@ -68,6 +79,15 @@ export function deleteBasicSpecCy() {
     // admin deletes package resource
     deleteResource();
 
+    // deletes first user
+    deleteFirstUser();
+  });
+}
+
+export function deleteBasicData() {
+  describe('Delete test base:', () => {
+    // admin can deletes groups
+    deleteGroup(group1);
     // deletes first user
     deleteFirstUser();
   });

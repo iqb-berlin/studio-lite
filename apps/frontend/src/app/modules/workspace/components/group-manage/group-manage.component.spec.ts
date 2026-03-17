@@ -21,7 +21,7 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { GroupMenuComponent } from '../group-menu/group-menu.component';
 import { SaveChangesComponent } from '../save-changes/save-changes.component';
-import { SearchFilterComponent } from '../../../shared/components/search-filter/search-filter.component';
+import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 
 class MockWorkspaceService {
   selectedWorkspaceId = 1;

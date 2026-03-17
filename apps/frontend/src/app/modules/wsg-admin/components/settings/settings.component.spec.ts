@@ -8,7 +8,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of } from 'rxjs';
 import { State } from '../../../admin/models/state.type';
-import { CoreProfile, ProfilesComponent } from '../../../shared/components/profiles/profiles.component';
+import { CoreProfile, ProfilesComponent } from '../../../../components/profiles/profiles.component';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { StatesComponent } from '../states/states.component';
 import { WorkspaceSettingsComponent } from './settings.component';

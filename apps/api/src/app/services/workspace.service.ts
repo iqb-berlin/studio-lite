@@ -102,6 +102,7 @@ export class WorkspaceService {
             )?.accessLevel || 0,
           groupId: workspace.groupId,
           dropBoxId: workspace.dropBoxId,
+          settings: workspace.settings,
           unitsCount: (
             await this.unitsRepository.find({
               where: { workspaceId: workspace.id }
@@ -204,6 +205,7 @@ export class WorkspaceService {
         name: workspace.name,
         groupId: workspaceGroupId,
         dropBoxId: workspace.dropBoxId,
+        settings: workspace.settings,
         unitsCount: (
           await this.unitsRepository.find({
             where: { workspaceId: workspace.id }
@@ -269,9 +271,7 @@ export class WorkspaceService {
       where: { id: id }
     });
     if (workspace) {
-      const settingsGroups = workspace.settings ?
-        workspace.settings.unitGroups :
-        [];
+      const settingsGroups = workspace.settings?.unitGroups || [];
       const unitGroups = await this.unitsRepository.find({
         where: { workspaceId: id },
         select: { groupName: true }
@@ -325,6 +325,7 @@ export class WorkspaceService {
       defaultSchemer: '',
       unitGroups: []
     };
+    if (!settings.unitGroups) settings.unitGroups = [];
     const transformedGroups = settings.unitGroups.map(g => g.toUpperCase());
     if (transformedGroups.indexOf(newGroup.toUpperCase()) < 0) {
       settings.unitGroups.push(newGroup);
@@ -558,6 +559,7 @@ export class WorkspaceService {
       defaultSchemer: '',
       unitGroups: []
     };
+    if (!settings.unitGroups) settings.unitGroups = [];
     const groupPos = settings.unitGroups.indexOf(oldName);
     if (groupPos >= 0) settings.unitGroups = settings.unitGroups.filter(g => g !== oldName);
     settings.unitGroups.push(newName);
@@ -578,7 +580,7 @@ export class WorkspaceService {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
-    if (workspaceToUpdate.settings) {
+    if (workspaceToUpdate.settings?.unitGroups) {
       const groupPos = workspaceToUpdate.settings.unitGroups.indexOf(groupName);
       if (groupPos >= 0) {
         workspaceToUpdate.settings.unitGroups =
