@@ -158,7 +158,9 @@
     "no-email": "keine",
     "last-name": "Nachname",
     "first-name": "Vorname",
-    "admin": "System-Administrator:in"
+    "admin": "System-Administrator:in",
+    "is-admin": "Admin-Rechte",
+    "is-not-admin": "Keine Admin-Rechte"
   },
   "access-rights": {
     "hint": "Zugriffsrechte: Nutzer:in auswählen",

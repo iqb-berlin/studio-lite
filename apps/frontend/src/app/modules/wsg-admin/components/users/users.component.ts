@@ -36,7 +36,7 @@ import { EntriesDividerComponent } from '../../../../components/entries-divider/
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>([]);
-  displayedColumns = ['name', 'displayName', 'email', 'description'];
+  displayedColumns = ['name', 'displayName', 'isAdmin', 'email', 'description'];
   tableSelectionCheckbox = new SelectionModel <UserFullDto>(true, []);
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
