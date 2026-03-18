@@ -74,7 +74,7 @@ describe('ExportCodingBookComponent', () => {
   }
 
   class MockI18nService {
-    fullLocale = 'de';
+    fullLocale = 'en-US';
 
     fileDateFormat = 'yyyy-MM-dd';
   }
