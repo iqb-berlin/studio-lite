@@ -41,11 +41,19 @@ describe('ExportCodingBookComponent', () => {
 
   class MockWorkspaceBackendService {
     getMissingsProfiles() {
-      return of([]);
+      return of([
+        { label: 'profile1', missings: '[]' },
+        { label: 'profile2', missings: '[]' }
+      ]);
     }
 
     getUnitList() {
       return of([]);
+    }
+
+    getCodingBook() {
+      // Return a blob/buffer mock
+      return of(new Blob(['test-data'], { type: 'application/json' }));
     }
   }
 
@@ -66,7 +74,7 @@ describe('ExportCodingBookComponent', () => {
   }
 
   class MockI18nService {
-    fullLocale = 'de';
+    fullLocale = 'en-US';
 
     fileDateFormat = 'yyyy-MM-dd';
   }
@@ -108,5 +116,56 @@ describe('ExportCodingBookComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('ngOnInit', () => {
+    it('should fetch missing profiles and set them', () => {
+      // ngOnInit is called during setup (fixture.detectChanges())
+      expect(component.missingsProfiles).toEqual(['profile1', 'profile2']);
+    });
+  });
+
+  describe('selectionCount', () => {
+    it('should return the length of unitList', () => {
+      expect(component.selectionCount).toBe(0);
+      component.unitList = [1, 2, 3];
+      expect(component.selectionCount).toBe(3);
+    });
+  });
+
+  describe('exportCodingBook', () => {
+    it('should fetch coding book data and trigger download', async () => {
+      const backendSvc = TestBed.inject(WorkspaceBackendService);
+      const appSvc = TestBed.inject(AppService);
+      const getCodingBookSpy = jest.spyOn(backendSvc, 'getCodingBook');
+
+      const saveAsSpy = jest.spyOn(await import('file-saver-es'), 'saveAs')
+        .mockImplementation(() => {});
+
+      component.unitList = [1, 2];
+      component.selectedMissingsProfile = 'profile1';
+      component.contentOptions.exportFormat = 'json';
+
+      component.exportCodingBook();
+
+      expect(getCodingBookSpy).toHaveBeenCalledWith(
+        1, // selectedWorkspaceId from MockWorkspaceService
+        'profile1',
+        component.contentOptions,
+        [1, 2]
+      );
+
+      // Because we mock getCodingBook to return `of(new Blob...)`, the subscribe callback
+      // triggers synchronously.
+      expect(appSvc.dataLoading).toBe(false);
+      expect(saveAsSpy).toHaveBeenCalled();
+
+      const saveAsArgs = saveAsSpy.mock.calls[0];
+      expect(saveAsArgs[0]).toBeInstanceOf(Blob);
+      // Date string format depends on the pipe but should end in .json
+      expect(saveAsArgs[1]).toMatch(/ Codebook ws\.json$/);
+
+      saveAsSpy.mockRestore();
+    });
   });
 });
