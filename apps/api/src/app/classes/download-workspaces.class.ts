@@ -259,26 +259,6 @@ export class DownloadWorkspacesClass {
     );
   }
 
-  private static isManualWithoutClosed(
-    variableCodingData: VariableCodingData
-  ): boolean {
-    return variableCodingData.codes.some(
-      codeData => codeData.manualInstruction &&
-        codeData.type !== 'RESIDUAL_AUTO' &&
-        codeData.type !== 'INTENDED_INCOMPLETE'
-    );
-  }
-
-  private static isClosedWithoutManual(
-    variableCodingData: VariableCodingData
-  ): boolean {
-    return variableCodingData.codes.some(
-      codeData => (codeData.type === 'RESIDUAL_AUTO' ||
-        codeData.type === 'INTENDED_INCOMPLETE') &&
-        !codeData.manualInstruction
-    );
-  }
-
   private static getCodeInfo(
     code: CodeData,
     contentSetting: CodeBookContentSetting
@@ -317,11 +297,13 @@ export class DownloadWorkspacesClass {
     code: CodeData
   ): string {
     let rulesDescription = '';
-    codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
-      if (ruleSetDescription !== 'Keine Regeln definiert.') {
-        rulesDescription += `<p>${ruleSetDescription}</p>`;
-      } else if (code.manualInstruction === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
-    });
+    if (codeAsText.ruleSetDescriptions) {
+      codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
+        if (ruleSetDescription !== 'Keine Regeln definiert.') {
+          rulesDescription += `<p>${ruleSetDescription}</p>`;
+        } else if (code.manualInstruction === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
+      });
+    }
     return rulesDescription;
   }
 
@@ -370,20 +352,28 @@ export class DownloadWorkspacesClass {
     const isClosed = DownloadWorkspacesClass.isClosed(variableCoding);
     const isManual = DownloadWorkspacesClass.isManual(variableCoding);
 
-    const matchesManual = !contentSetting.hasOnlyVarsWithCodes || !contentSetting.hasOnlyManualCoding || isManual;
-    const matchesClosed = !contentSetting.hasOnlyVarsWithCodes || !contentSetting.hasClosedVars || isClosed;
-    const hasCodes = isManual || isClosed;
-    const matchesOnlyVarsWithCodes = !contentSetting.hasOnlyVarsWithCodes || hasCodes;
+    const filterManual = contentSetting.hasOnlyManualCoding;
+    const filterClosed = contentSetting.hasClosedVars;
 
-    if (matchesManual && matchesClosed && matchesOnlyVarsWithCodes) {
-      return DownloadWorkspacesClass.getBookVariable(
-        contentSetting,
-        codes,
-        variableCoding
-      );
+    let manualMatches = isManual;
+    const closedMatches = isClosed;
+
+    if (filterManual && !filterClosed) {
+      manualMatches = isManual && !isClosed;
     }
 
-    return null;
+    if (filterManual || filterClosed) {
+      const matches = (filterManual && manualMatches) || (filterClosed && closedMatches);
+      if (!matches) return null;
+    } else if (contentSetting.hasOnlyVarsWithCodes) {
+      if (!isManual && !isClosed) return null;
+    }
+
+    return DownloadWorkspacesClass.getBookVariable(
+      contentSetting,
+      codes,
+      variableCoding
+    );
   }
 
   private static getBookVariable(
