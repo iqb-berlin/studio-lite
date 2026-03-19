@@ -1,0 +1,81 @@
+.editor-container {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.editor-menubar {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.editor-area {
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.tip-tap-editor {
+  outline: none;
+  padding: 8px;
+
+  ::ng-deep {
+    .ProseMirror {
+      min-height: 180px;
+      outline: none;
+
+      p.is-editor-empty:first-child::before {
+        content: attr(data-placeholder);
+        float: left;
+        color: #adb5bd;
+        pointer-events: none;
+        height: 0;
+      }
+    }
+  }
+}
+
+.editor-color-select-button {
+  width: 20px;
+  height: 20px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+}
+
+.fx-column-start-stretch {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.fx-row-space-between-end {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.fx-wrap {
+  flex-wrap: wrap;
+}
+
+.fx-flex-fill {
+  flex: 1 1 auto;
+}
+
+.fx-row-end-stretch {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: stretch;
+}
+
+.fx-row-start-stretch {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: stretch;
+}

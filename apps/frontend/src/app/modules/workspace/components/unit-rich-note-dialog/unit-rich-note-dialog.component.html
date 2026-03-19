@@ -1,0 +1,128 @@
+<h2 mat-dialog-title>{{ (isEditMode ? 'workspace.edit-rich-note' : 'workspace.add-rich-note') | translate }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="noteForm" class="dialog-form">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>{{ 'workspace.tag' | translate }}</mat-label>
+      <mat-select formControlName="tagId" [aria-label]="'workspace.tag' | translate">
+        @for (tag of flattenedTags; track tag.id) {
+          <mat-option [value]="tag.id">
+            <span [style.padding-left.px]="tag.depth * 20">{{ tag.label }}</span>
+          </mat-option>
+        }
+      </mat-select>
+      @if (noteForm.controls['tagId']?.errors?.['required']) {
+        <mat-error>
+          {{ 'workspace.tag-required' | translate }}
+        </mat-error>
+      }
+    </mat-form-field>
+
+    <div class="editor-container">
+      <studio-lite-rich-note-editor
+        [initialHTML]="data.note?.content || ''"
+        [placeholder]="'workspace.enter-note-content' | translate"
+        [unitItems]="data.items"
+        [selectedItems]="initialItemReferences">
+      </studio-lite-rich-note-editor>
+    </div>
+
+    <div class="links-section">
+      <div class="fx-row-space-between-center">
+        <h3>{{ 'workspace.links' | translate }}</h3>
+        <button mat-icon-button color="primary" (click)="addLink()" type="button" [attr.aria-label]="'workspace.add-link' | translate" [title]="'workspace.add-link' | translate">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
+      <mat-accordion formArrayName="links">
+        @for (linkGroup of links.controls; track linkGroup; let i = $index) {
+          <mat-expansion-panel [formGroup]="linkGroup | cast: FormGroup">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{ linkGroup.value?.url || ('workspace.new-link' | translate) }}
+              </mat-panel-title>
+              <mat-panel-description>
+                {{ linkGroup.value?.type }}
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="fx-column-start-stretch fx-gap-10">
+              <mat-form-field appearance="fill">
+                <mat-label>{{ 'workspace.link-url' | translate }}</mat-label>
+                <input matInput formControlName="url" placeholder="https://...">
+              </mat-form-field>
+
+              <mat-form-field appearance="fill">
+                <mat-label>{{ 'workspace.link-type' | translate }}</mat-label>
+                <input matInput formControlName="type" placeholder="e.g. documentation">
+              </mat-form-field>
+
+              <div class="labels-section">
+                <div class="fx-row-space-between-center">
+                  <h4>{{ 'workspace.labels' | translate }}</h4>
+                  <button mat-icon-button (click)="addLabel(i)" type="button" [attr.aria-label]="'workspace.add-label' | translate" [title]="'workspace.add-label' | translate">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+                <div formArrayName="label">
+                  @for (labelGroup of ((linkGroup | cast: FormGroup).controls['label'] | cast: FormArray).controls; track labelGroup; let j = $index) {
+                    <div [formGroup]="labelGroup | cast: FormGroup" class="fx-row-start-center fx-gap-10">
+                      <mat-form-field appearance="fill" class="fx-flex-row-30">
+                        <mat-label>{{ 'workspace.lang' | translate }}</mat-label>
+                        <input matInput formControlName="lang" placeholder="de" [value]="labelGroup.value?.lang">
+                      </mat-form-field>
+                      <mat-form-field appearance="fill" class="fx-flex-fill">
+                        <mat-label>{{ 'workspace.value' | translate }}</mat-label>
+                        <input matInput formControlName="value" placeholder="label..." [value]="labelGroup.value?.value">
+                      </mat-form-field>
+                      <button mat-icon-button color="warn" (click)="removeLabel(i, j)" type="button" [attr.aria-label]="'workspace.remove-label' | translate" [title]="'workspace.remove-label' | translate">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="descriptions-section">
+                <div class="fx-row-space-between-center">
+                  <h4>{{ 'workspace.descriptions' | translate }}</h4>
+                  <button mat-icon-button (click)="addDescription(i)" type="button" [attr.aria-label]="'workspace.add-description' | translate" [title]="'workspace.add-description' | translate">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+                <div formArrayName="description">
+                  @for (descriptionGroup of ((linkGroup | cast: FormGroup).controls['description'] | cast: FormArray).controls; track descriptionGroup; let j = $index) {
+                    <div [formGroup]="descriptionGroup | cast: FormGroup" class="fx-row-start-center fx-gap-10">
+                      <mat-form-field appearance="fill" class="fx-flex-row-30">
+                        <mat-label>{{ 'workspace.lang' | translate }}</mat-label>
+                        <input matInput formControlName="lang" placeholder="de" [value]="descriptionGroup.value?.lang">
+                      </mat-form-field>
+                      <mat-form-field appearance="fill" class="fx-flex-fill">
+                        <mat-label>{{ 'workspace.value' | translate }}</mat-label>
+                        <input matInput formControlName="value" placeholder="description..." [value]="descriptionGroup.value?.value">
+                      </mat-form-field>
+                      <button mat-icon-button color="warn" (click)="removeDescription(i, j)" type="button" [attr.aria-label]="'workspace.remove-description' | translate" [title]="'workspace.remove-description' | translate">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <button mat-flat-button color="warn" (click)="removeLink(i)" type="button">
+                <mat-icon>delete</mat-icon>
+                {{ 'workspace.remove-link' | translate }}
+              </button>
+            </div>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" type="button">{{ 'workspace.cancel' | translate }}</button>
+  <button mat-raised-button color="primary" (click)="onSave()" type="button">{{ (isEditMode ? 'workspace.save' : 'workspace.add') | translate }}</button>
+</mat-dialog-actions>

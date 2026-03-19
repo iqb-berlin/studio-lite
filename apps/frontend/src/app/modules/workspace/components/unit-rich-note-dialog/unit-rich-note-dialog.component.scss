@@ -1,0 +1,35 @@
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  min-width: 400px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.links-section {
+  margin-top: 20px;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+
+  h3 {
+    margin-bottom: 10px;
+  }
+}
+
+.editor-container {
+  margin: 20px 0;
+}
+
+.labels-section, .descriptions-section {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+
+  h4 {
+    margin: 5px 0;
+    font-size: 0.9em;
+  }
+}

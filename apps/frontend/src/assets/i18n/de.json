@@ -747,7 +747,23 @@
     "send-navigation-denied": "Pflichtfelder prüfen",
     "save-unit-data-changes-warning": "Formularfelder sind ungültig ausgefüllt",
     "vocabs-not-loaded":  "Vokabulare für das Metadatenprofil \"{{profileUrl}}\" können aktuell nicht geladen werden",
-    "profile-not-loaded":  "Metadatenprofil \"{{profileUrl}}\" kann aktuell nicht geladen werden"
+    "profile-not-loaded":  "Metadatenprofil \"{{profileUrl}}\" kann aktuell nicht geladen werden",
+    "tag": "Tag",
+    "tag-required": "Tag ist erforderlich",
+    "links": "Links",
+    "link-url": "Link URL",
+    "link-type": "Link Typ",
+    "labels": "Bezeichnungen",
+    "descriptions": "Beschreibungen",
+    "lang": "Sprache",
+    "value": "Wert",
+    "remove-link": "Link entfernen",
+    "new-link": "Neuer Link",
+    "enter-note-content": "Notiz-Inhalt hier eingeben...",
+    "edit-rich-note": "Rich Note bearbeiten",
+    "add-rich-note": "Rich Note hinzufügen",
+    "tagId": "Tag-ID",
+    "delete-rich-note-confirm": "Soll die Notiz wirklich gelöscht werden?"
   },
 
   "coding-report": {

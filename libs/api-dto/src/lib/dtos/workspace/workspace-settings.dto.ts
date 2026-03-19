@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { State } from '../../../../../../apps/frontend/src/app/modules/admin/models/state.type';
+import { UnitRichNoteTagDto } from '../unit-rich-note/unit-rich-note-tag.dto';
 
 export class WorkspaceSettingsDto {
   @ApiProperty()
@@ -28,4 +29,7 @@ export class WorkspaceSettingsDto {
 
   @ApiProperty()
     hiddenRoutes?: string[];
+
+  @ApiProperty()
+    richNoteTags?: UnitRichNoteTagDto[];
 }

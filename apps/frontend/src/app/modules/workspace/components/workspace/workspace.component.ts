@@ -32,7 +32,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     { name: 'editor', duplicable: true },
     { name: 'preview', duplicable: true },
     { name: 'schemer', duplicable: true },
-    { name: 'comments', duplicable: true }
+    { name: 'comments', duplicable: true },
+    { name: 'rich-notes', duplicable: true }
   ];
 
   navLinks = this.navTabs.map(link => link.name);
