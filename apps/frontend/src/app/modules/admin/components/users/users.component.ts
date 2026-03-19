@@ -37,7 +37,7 @@ import { AppService } from '../../../../services/app.service';
 })
 export class UsersComponent implements OnInit {
   objectsDatasource = new MatTableDataSource<UserFullDto>();
-  displayedColumns = ['name', 'displayName', 'email', 'id', 'description', 'delete'];
+  displayedColumns = ['name', 'displayName', 'isAdmin', 'email', 'id', 'description', 'delete'];
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
   userWorkspaceGroups = new WorkspaceGroupToCheckCollection([]);
