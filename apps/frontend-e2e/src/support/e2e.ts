@@ -17,3 +17,4 @@
 import './commands';
 import './commands-api';
 import './metadata/commands-metadata';
+import '@cypress/code-coverage/support';
