@@ -1,4 +1,4 @@
-<div class="rich-notes-container">
+<div class="rich-notes-container fx-column-start-stretch fx-flex-row-100">
   @if (canWrite) {
     <div class="actions">
       <button mat-raised-button color="primary" (click)="openNoteDialog()">
@@ -7,11 +7,11 @@
     </div>
   }
 
-  <div class="notes-list">
+  <div class="notes-list fx-flex-fill">
     @for (note of notes; track note.id) {
       <div class="note-card">
         <div class="note-header">
-          <h3>{{ note.tagId }}</h3>
+          <h3>{{ note.tagId | getRichNoteTagLabel | async | getLocalizedValue }}</h3>
           @if (canWrite) {
             <div class="note-actions">
               <button mat-icon-button (click)="openNoteDialog(note)">
@@ -24,23 +24,33 @@
           }
         </div>
         <div class="note-content" [innerHTML]="note.content"></div>
-        @if (note.links && note.links.length > 0) {
-          <div class="note-links">
-            <h4>{{ 'workspace.links' | translate }}</h4>
-            <ul>
-              @for (link of note.links; track link.url) {
-                <li>
-                  <a [href]="link.url" target="_blank">
-                    {{ link.label[0]?.value || link.url }}
-                  </a>
-                  @if (link.type) {
-                    <span class="link-type">({{ link.type }})</span>
-                  }
-                </li>
+        <div class="note-footer">
+          @if (note.itemReferences && note.itemReferences.length > 0) {
+            <div class="note-items">
+              <mat-icon>link</mat-icon>
+              @for (itemId of note.itemReferences; track itemId) {
+                <span class="item-tag">{{ itemId | getItemLabel: unitItems }}</span>
               }
-            </ul>
-          </div>
-        }
+            </div>
+          }
+          @if (note.links && note.links.length > 0) {
+            <div class="note-links">
+              <h4>{{ 'workspace.links' | translate }}</h4>
+              <ul>
+                @for (link of note.links; track link.url) {
+                  <li>
+                    <a [href]="link.url" target="_blank">
+                      {{ link.label | getLocalizedValue: link.url }}
+                    </a>
+                    @if (link.type) {
+                      <span class="link-type">({{ link.type }})</span>
+                    }
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
       </div>
     }
   </div>

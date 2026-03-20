@@ -17,7 +17,8 @@ import {
   WorkspaceFullDto,
   UnitInViewDto,
   UnitItemDto,
-  ProfilesRegistryDto
+  ProfilesRegistryDto,
+  UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -296,6 +297,23 @@ export class BackendService {
       .get<MissingsProfilesDto[]>(`${this.serverUrl}admin/settings/missings-profiles`)
       .pipe(
         catchError(() => [])
+      );
+  }
+
+  getUnitRichNoteTags(): Observable<UnitRichNoteTagDto[]> {
+    return this.http
+      .get<UnitRichNoteTagDto[]>(`${this.serverUrl}admin/settings/unit-rich-note-tags`)
+      .pipe(
+        catchError(() => of([]))
+      );
+  }
+
+  setUnitRichNoteTags(tags: UnitRichNoteTagDto[]): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}admin/settings/unit-rich-note-tags`, tags)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
       );
   }
 

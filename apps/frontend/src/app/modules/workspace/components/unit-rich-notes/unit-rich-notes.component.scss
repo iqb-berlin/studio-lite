@@ -1,18 +1,26 @@
+:host.unit-rich-notes {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
 .rich-notes-container {
-  padding: 16px;
   height: 100%;
   box-sizing: border-box;
-  overflow-y: auto;
 }
 
 .actions {
-  margin-bottom: 24px;
+  padding: 16px 16px 0 16px;
+  flex-shrink: 0;
 }
 
 .notes-list {
+  overflow-y: auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding: 16px; // This keeps the scrollbar at the edge of .notes-list
 }
 
 .note-card {
@@ -46,37 +54,66 @@
     line-height: 1.5;
   }
 
-  .note-links {
+  .note-footer {
     margin-top: 12px;
     padding-top: 8px;
     border-top: 1px dotted #eee;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 
-    h4 {
-      margin: 0 0 8px 0;
-      font-size: 0.9em;
-      color: #777;
+    .note-items {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      color: #666;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: #999;
+      }
+
+      .item-tag {
+        background: #f0f0f0;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.85em;
+        border: 1px solid #ddd;
+        color: #444;
+      }
     }
 
-    ul {
-      margin: 0;
-      padding-left: 18px;
-      list-style-type: disc;
+    .note-links {
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 0.9em;
+        color: #777;
+      }
 
-      li {
-        margin-bottom: 4px;
+      ul {
+        margin: 0;
+        padding-left: 18px;
+        list-style-type: disc;
 
-        a {
-          color: #007bff;
-          text-decoration: none;
-          &:hover {
-            text-decoration: underline;
+        li {
+          margin-bottom: 4px;
+
+          a {
+            color: #007bff;
+            text-decoration: none;
+            &:hover {
+              text-decoration: underline;
+            }
           }
-        }
 
-        .link-type {
-          font-size: 0.85em;
-          color: #999;
-          margin-left: 4px;
+          .link-type {
+            font-size: 0.85em;
+            color: #999;
+            margin-left: 4px;
+          }
         }
       }
     }

@@ -127,6 +127,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.workspaceService.dropBoxId = workspace.dropBoxId;
     this.appService.appConfig.setPageTitle(this.workspaceService.selectedWorkspaceName);
     this.workspaceService.setWorkspaceGroupStates();
+    this.workspaceService.loadRichNoteTags();
 
     if (workspace.settings) {
       this.workspaceService.workspaceSettings = workspace.settings;

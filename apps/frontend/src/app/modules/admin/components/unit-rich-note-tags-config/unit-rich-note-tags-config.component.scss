@@ -1,0 +1,28 @@
+.full-width {
+  width: 100%;
+}
+
+.json-textarea {
+  font-family: monospace;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}
+
+.fx-column-start-stretch {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-content: stretch;
+}
+
+.fx-row-end-center {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.fx-gap-10 {
+  gap: 10px;
+}

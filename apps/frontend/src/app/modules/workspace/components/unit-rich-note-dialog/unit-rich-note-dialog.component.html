@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>{{ (isEditMode ? 'workspace.edit-rich-note' : 'workspace.add-rich-note') | translate }}</h2>
+<h2 mat-dialog-title>{{ dialogTitle | translate }}</h2>
 
 <mat-dialog-content>
   <form [formGroup]="noteForm" class="dialog-form">
@@ -7,7 +7,7 @@
       <mat-select formControlName="tagId" [aria-label]="'workspace.tag' | translate">
         @for (tag of flattenedTags; track tag.id) {
           <mat-option [value]="tag.id">
-            <span [style.padding-left.px]="tag.depth * 20">{{ tag.label }}</span>
+            <span [style.padding-left.px]="tag.padding">{{ tag.label }}</span>
           </mat-option>
         }
       </mat-select>
@@ -23,7 +23,9 @@
         [initialHTML]="data.note?.content || ''"
         [placeholder]="'workspace.enter-note-content' | translate"
         [unitItems]="data.items"
-        [selectedItems]="initialItemReferences">
+        [selectedItems]="initialItemReferences"
+        (contentChange)="onContentChange($event)"
+        (selectedItemsChange)="onSelectedItemChange($event)">
       </studio-lite-rich-note-editor>
     </div>
 
@@ -36,7 +38,7 @@
       </div>
 
       <mat-accordion formArrayName="links">
-        @for (linkGroup of links.controls; track linkGroup; let i = $index) {
+        @for (linkGroup of linksArray.controls; track linkGroup; let i = $index) {
           <mat-expansion-panel [formGroup]="linkGroup | cast: FormGroup">
             <mat-expansion-panel-header>
               <mat-panel-title>
@@ -124,5 +126,5 @@
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()" type="button">{{ 'workspace.cancel' | translate }}</button>
-  <button mat-raised-button color="primary" (click)="onSave()" type="button">{{ (isEditMode ? 'workspace.save' : 'workspace.add') | translate }}</button>
+  <button mat-raised-button color="primary" (click)="onSave()" type="button" [disabled]="isSaveDisabled">{{ saveButtonLabel | translate }}</button>
 </mat-dialog-actions>

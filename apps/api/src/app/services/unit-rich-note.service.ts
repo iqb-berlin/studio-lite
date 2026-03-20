@@ -8,6 +8,7 @@ import UnitRichNote from '../entities/unit-rich-note.entity';
 import { ItemRichNoteService } from './item-rich-note.service';
 import { WorkspaceService } from './workspace.service';
 import { UnitService } from './unit.service';
+import { SettingService } from './setting.service';
 
 @Injectable()
 export class UnitRichNoteService {
@@ -18,14 +19,13 @@ export class UnitRichNoteService {
     private unitRichNotesRepository: Repository<UnitRichNote>,
     private itemRichNoteService: ItemRichNoteService,
     private workspaceService: WorkspaceService,
-    private unitService: UnitService
+    private unitService: UnitService,
+    private settingService: SettingService
   ) {}
 
   async findNotes(unitId: number): Promise<UnitRichNotesDto> {
     this.logger.log(`Returning rich notes for unit with id: ${unitId}`);
-    const unit = await this.unitService.findOne(unitId);
-    const workspace = await this.workspaceService.findOne(unit.workspaceId);
-    const tags = workspace.settings?.richNoteTags || [];
+    const tags = await this.settingService.findUnitRichNoteTags();
 
     const notes = await this.unitRichNotesRepository
       .find({

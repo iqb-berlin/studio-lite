@@ -1,5 +1,5 @@
 export interface UnitRichNoteTagDto {
   id: string;
-  label: string;
+  label: { lang: string; value: string }[];
   children?: UnitRichNoteTagDto[];
 }

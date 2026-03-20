@@ -1,36 +1,47 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { Subject, switchMap, takeUntil } from 'rxjs';
+import {
+  combineLatest, map, Subject, switchMap, takeUntil
+} from 'rxjs';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
-  UnitItemDto, UnitRichNoteDto, UnitRichNotesDto, UnitRichNoteTagDto
+  UnitItemDto, UnitRichNoteDto, UnitRichNotesDto
 } from '@studio-lite-lib/api-dto';
 
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitRichNoteDialogComponent } from '../unit-rich-note-dialog/unit-rich-note-dialog.component';
+import { GetLocalizedValuePipe } from '../../../../pipes/get-localized-value.pipe';
+import { GetRichNoteTagLabelPipe } from '../../../../pipes/get-rich-note-tag-label.pipe';
+import { GetItemLabelPipe } from '../../../../pipes/get-item-label.pipe';
 
 @Component({
   selector: 'studio-lite-unit-rich-notes',
   templateUrl: './unit-rich-notes.component.html',
   styleUrls: ['./unit-rich-notes.component.scss'],
+  host: { class: 'unit-rich-notes' },
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, TranslateModule]
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    TranslateModule,
+    GetLocalizedValuePipe,
+    GetRichNoteTagLabelPipe,
+    AsyncPipe,
+    GetItemLabelPipe
+  ]
 })
 export class UnitRichNotesComponent implements OnInit, OnDestroy {
   unitId = 0;
   workspaceId = 0;
   notes: UnitRichNoteDto[] = [];
-  tags: UnitRichNoteTagDto[] = [];
   unitItems: UnitItemDto[] = [];
-
-  get canWrite(): boolean {
-    return this.workspaceService.userAccessLevel >= 2 || this.workspaceService.isWorkspaceGroupAdmin;
-  }
+  canWrite = false;
 
   private ngUnsubscribe = new Subject<void>();
 
@@ -43,6 +54,15 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    combineLatest([this.workspaceService.userAccessLevel$, this.workspaceService.isWorkspaceGroupAdmin$])
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        map(([level, isAdmin]) => level >= 2 || isAdmin)
+      )
+      .subscribe(canWrite => {
+        this.canWrite = canWrite;
+      });
+
     this.workspaceService.selectedUnit$
       .pipe(
         takeUntil(this.ngUnsubscribe),
@@ -54,7 +74,6 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
       )
       .subscribe((data: UnitRichNotesDto | null) => {
         if (data) {
-          this.tags = data.tags;
           this.notes = data.notes.sort((a: UnitRichNoteDto, b: UnitRichNoteDto) => a.tagId.localeCompare(b.tagId));
         }
       });
@@ -81,7 +100,7 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
         note,
         workspaceId: this.workspaceId,
         unitId: this.unitId,
-        tags: this.tags,
+        tags: this.workspaceService.richNoteTags,
         items: this.unitItems
       }
     });

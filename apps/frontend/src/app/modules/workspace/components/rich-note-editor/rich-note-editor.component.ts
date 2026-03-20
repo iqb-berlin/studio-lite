@@ -48,10 +48,22 @@ export class RichNoteEditorComponent implements OnInit, OnDestroy {
   @Input() selectedItems: string[] = [];
 
   @Output() selectedItemsChange = new EventEmitter<string[]>();
+  @Output() contentChange = new EventEmitter<string>();
 
   editor!: Editor;
   selectedFontColor = 'black';
   selectedHighlightColor = 'black';
+  fontColorButtonStyle = '';
+  highlightColorButtonStyle = '';
+  editorStates = {
+    bold: false,
+    italic: false,
+    underline: false,
+    superscript: false,
+    subscript: false,
+    strike: false,
+    bulletList: false
+  };
 
   ngOnInit(): void {
     this.editor = new Editor({
@@ -76,9 +88,34 @@ export class RichNoteEditorComponent implements OnInit, OnDestroy {
           multicolor: true
         })
       ],
-      content: this.initialHTML
+      content: this.initialHTML,
+      onTransaction: () => {
+        this.updateEditorStates();
+      },
+      onUpdate: () => {
+        this.contentChange.emit(this.editor.getHTML());
+      }
     });
     this.editor.commands.focus();
+    this.updateEditorStates();
+    this.updateColorButtonStyles();
+  }
+
+  private updateColorButtonStyles(): void {
+    this.fontColorButtonStyle = `linear-gradient(135deg, white 60%, ${this.selectedFontColor} 60%)`;
+    this.highlightColorButtonStyle = `linear-gradient(135deg, white 60%, ${this.selectedHighlightColor} 60%)`;
+  }
+
+  private updateEditorStates(): void {
+    this.editorStates = {
+      bold: this.editor.isActive('bold'),
+      italic: this.editor.isActive('italic'),
+      underline: this.editor.isActive('underline'),
+      superscript: this.editor.isActive('superscript'),
+      subscript: this.editor.isActive('subscript'),
+      strike: this.editor.isActive('strike'),
+      bulletList: this.editor.isActive('bulletList')
+    };
   }
 
   getEditorData(): { text: string, items: string[] } {
@@ -141,10 +178,12 @@ export class RichNoteEditorComponent implements OnInit, OnDestroy {
 
   applyFontColor(): void {
     this.editor.chain().focus().setColor(this.selectedFontColor).run();
+    this.updateColorButtonStyles();
   }
 
   applyHighlightColor(): void {
     this.editor.chain().focus().toggleHighlight({ color: this.selectedHighlightColor }).run();
+    this.updateColorButtonStyles();
   }
 
   onSelectedItemChange(items: string[]): void {

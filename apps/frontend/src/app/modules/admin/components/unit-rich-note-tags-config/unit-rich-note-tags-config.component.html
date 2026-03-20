@@ -1,0 +1,17 @@
+<form [formGroup]="configForm" (ngSubmit)="saveData()" class="fx-column-start-stretch fx-gap-10">
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>{{ 'workspace.units-rich-note-tags-json' | translate }}</mat-label>
+    <textarea matInput formControlName="tagsJson" rows="20" class="json-textarea"></textarea>
+    @if (configForm.controls['tagsJson']?.errors?.['invalidJson']) {
+      <mat-error>
+        {{ 'workspace.invalid-json' | translate }}
+      </mat-error>
+    }
+  </mat-form-field>
+
+  <div class="fx-row-end-center">
+    <button mat-raised-button color="primary" type="submit" [disabled]="!isFormValid || !dataChanged">
+      {{ 'save' | translate }}
+    </button>
+  </div>
+</form>

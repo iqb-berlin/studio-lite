@@ -35,7 +35,8 @@ describe('WorkspaceService', () => {
       getUnitProperties: jest.fn(),
       setUnitProperties: jest.fn(),
       setUnitDefinition: jest.fn(),
-      setUnitScheme: jest.fn()
+      setUnitScheme: jest.fn(),
+      getUnitRichNoteTags: jest.fn()
     };
 
     const appServiceMock = {
@@ -660,6 +661,41 @@ describe('WorkspaceService', () => {
       service.unitPropertiesChange.emit(true);
 
       expect(emitSpy).toHaveBeenCalledWith(true);
+    });
+  });
+
+  describe('loadRichNoteTags', () => {
+    it('should load rich note tags from backend', () => {
+      const mockTags = [{ id: 'tag1', label: [] }];
+      backendService.getUnitRichNoteTags.mockReturnValue(of(mockTags));
+
+      service.loadRichNoteTags();
+
+      expect(backendService.getUnitRichNoteTags).toHaveBeenCalled();
+      expect(service.richNoteTags).toEqual(mockTags);
+    });
+  });
+
+  describe('getRichNoteTagLabel', () => {
+    it('should resolve hierarchical tag path', () => {
+      service.richNoteTags = [
+        {
+          id: 'p1',
+          label: [{ lang: 'de', value: 'Parent' }],
+          children: [
+            { id: 'c1', label: [{ lang: 'de', value: 'Child' }] }
+          ]
+        }
+      ];
+
+      const result = service.getRichNoteTagLabel('p1.c1');
+      expect(result).toEqual([{ lang: 'de', value: 'Child' }]);
+    });
+
+    it('should return empty array if path is invalid', () => {
+      service.richNoteTags = [{ id: 'p1', label: [] }];
+      const result = service.getRichNoteTagLabel('p1.invalid');
+      expect(result).toEqual([]);
     });
   });
 });

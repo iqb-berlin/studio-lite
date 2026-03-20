@@ -22,7 +22,8 @@ import {
   UnitRichNotesDto,
   CreateUnitRichNoteDto,
   UpdateUnitRichNoteDto,
-  UpdateUnitRichNoteUnitItemsDto
+  UpdateUnitRichNoteUnitItemsDto,
+  UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -455,6 +456,14 @@ export class WorkspaceBackendService {
       .pipe(
         map(() => true),
         catchError(() => of(false))
+      );
+  }
+
+  getUnitRichNoteTags(): Observable<UnitRichNoteTagDto[]> {
+    return this.http
+      .get<UnitRichNoteTagDto[]>(`${this.serverUrl}admin/settings/unit-rich-note-tags`)
+      .pipe(
+        catchError(() => of([]))
       );
   }
 }

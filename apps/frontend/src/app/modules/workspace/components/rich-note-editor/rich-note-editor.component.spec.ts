@@ -56,4 +56,10 @@ describe('RichNoteEditorComponent', () => {
     expect(component.selectedItems).toEqual(newItems);
     expect(spy).toHaveBeenCalledWith(newItems);
   });
+
+  it('should emit content change when editor is updated', () => {
+    const spy = jest.spyOn(component.contentChange, 'emit');
+    component.editor.commands.setContent('<p>New content</p>');
+    expect(spy).toHaveBeenCalled();
+  });
 });

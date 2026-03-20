@@ -332,7 +332,8 @@
     "email-template": "E-Mail-Template zum Anlegen neuer Nutzer:innen",
     "email-replace-values": "Folgende Platzhalter werden im E-Mail-Body durch die Nutzer:innen-Angaben ersetzt: {{firstname}}, {{lastname}}, {{user}}, {{password}}",
     "email-subject": "E-Mail-Betreff",
-    "email-body": "E-Mail-Body"
+    "email-body": "E-Mail-Body",
+    "unit-rich-note-tags": "Rich-Note Kategorien"
   },
   "profiles-registry": {
     "csv-url": "URL der CSV-Datei",
@@ -762,6 +763,11 @@
     "enter-note-content": "Notiz-Inhalt hier eingeben...",
     "edit-rich-note": "Rich Note bearbeiten",
     "add-rich-note": "Rich Note hinzufügen",
+    "unit-rich-note-tags": "Rich-Note Kategorien",
+    "units-rich-note-tags-json": "Kategorien (JSON-Format)",
+    "tags-saved-success": "Kategorien erfolgreich gespeichert",
+    "tags-saved-error": "Fehler beim Speichern der Kategorien",
+    "invalid-json": "Ungültiges JSON-Format",
     "tagId": "Tag-ID",
     "delete-rich-note-confirm": "Soll die Notiz wirklich gelöscht werden?"
   },

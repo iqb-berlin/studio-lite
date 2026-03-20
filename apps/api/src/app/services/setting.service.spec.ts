@@ -3,7 +3,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import {
-  ConfigDto, AppLogoDto, UnitExportConfigDto, MissingsProfilesDto, ProfilesRegistryDto, EmailTemplateDto
+  ConfigDto, AppLogoDto, UnitExportConfigDto, MissingsProfilesDto,
+  ProfilesRegistryDto, EmailTemplateDto, UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 import Setting from '../entities/setting.entity';
 import { UsersService } from './users.service';
@@ -171,6 +172,30 @@ describe('SettingService', () => {
     it('should update template', async () => {
       settingsRepository.findOne.mockResolvedValue({} as Setting);
       await service.patchEmailTemplate({} as EmailTemplateDto);
+      expect(settingsRepository.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('findUnitRichNoteTags', () => {
+    it('should return empty array if not found', async () => {
+      settingsRepository.findOne.mockResolvedValue(null);
+      const result = await service.findUnitRichNoteTags();
+      expect(result).toEqual([]);
+    });
+
+    it('should return parsed tags', async () => {
+      const tags = [{ id: 't1', label: [] }];
+      const setting = { key: 'unit-rich-note-tags', content: JSON.stringify(tags) } as Setting;
+      settingsRepository.findOne.mockResolvedValue(setting);
+      const result = await service.findUnitRichNoteTags();
+      expect(result).toEqual(tags);
+    });
+  });
+
+  describe('patchUnitRichNoteTags', () => {
+    it('should update tags', async () => {
+      settingsRepository.findOne.mockResolvedValue({} as Setting);
+      await service.patchUnitRichNoteTags([] as UnitRichNoteTagDto[]);
       expect(settingsRepository.save).toHaveBeenCalled();
     });
   });
