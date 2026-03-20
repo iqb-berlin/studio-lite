@@ -29,7 +29,7 @@ const routes: Routes = [
       { path: 'preview', component: UnitPreviewComponent, canActivate: [HiddenRouteGuard] },
       { path: 'schemer', component: UnitSchemerComponent, canActivate: [HiddenRouteGuard] },
       { path: 'comments', component: UnitCommentsComponent, canActivate: [HiddenRouteGuard] },
-      { path: 'rich-notes', component: UnitRichNotesComponent, canActivate: [HiddenRouteGuard] },
+      { path: 'notes', component: UnitRichNotesComponent, canActivate: [HiddenRouteGuard] },
       { path: '**', component: UnitPropertiesComponent },
       {
         path: 'editor', component: UnitEditorComponent, outlet: 'secondary', canActivate: [HiddenRouteGuard]
@@ -44,7 +44,7 @@ const routes: Routes = [
         path: 'comments', component: UnitCommentsComponent, outlet: 'secondary', canActivate: [HiddenRouteGuard]
       },
       {
-        path: 'rich-notes', component: UnitRichNotesComponent, outlet: 'secondary', canActivate: [HiddenRouteGuard]
+        path: 'notes', component: UnitRichNotesComponent, outlet: 'secondary', canActivate: [HiddenRouteGuard]
       }
     ]
   }

@@ -551,7 +551,7 @@
       "preview": "Vorschau",
       "schemer": "Kodierung",
       "comments": "Kommentare",
-      "rich-notes": "Rückmeldungen"
+      "notes": "Rückmeldungen"
     },
     "title": "Arbeitsbereich",
     "workspace-not-loaded": "Konnte Daten für Arbeitsbereich nicht laden",
