@@ -61,6 +61,8 @@ config/frontend/default.conf.template.bkp
 
 # Frontend-e2e files
 apps/frontend-e2e/cypress/downloads
+apps/frontend-e2e/cypress/coverage
+apps/frontend-e2e/.nyc_output
 
 # misc
 /connect.lock
