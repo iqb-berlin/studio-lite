@@ -9,6 +9,7 @@ import { of } from 'rxjs';
 import {
   Component, Input, Output, EventEmitter
 } from '@angular/core';
+import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import { WorkspacesComponent } from './workspaces.component';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
@@ -85,6 +86,21 @@ describe('WorkspacesComponent', () => {
 
     expect(mockBackendService.getAllWorkspaces).toHaveBeenCalled();
     expect(component.dataSource.data.length).toBe(1);
+    expect(component.displayedColumns).toContain('notes');
+  });
+
+  it('isRouteHidden should determine correctly', () => {
+    const ws = {
+      id: 1,
+      settings: {
+        hiddenRoutes: ['preview']
+      }
+    } as WorkspaceFullDto;
+    expect(component.isRouteHidden(ws, 'preview')).toBe(true);
+    expect(component.isRouteHidden(ws, 'editor')).toBe(false);
+
+    ws.settings = undefined;
+    expect(component.isRouteHidden(ws, 'editor')).toBe(false);
   });
 
   it('should download workspaces report', () => {

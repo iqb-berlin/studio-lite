@@ -36,6 +36,56 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header>GroupId</th>
         <td mat-cell *matCellDef="let workspace">{{ workspace.groupId }}</td>
       </ng-container>
+      
+      <ng-container matColumnDef="editor">
+        <th mat-header-cell *matHeaderCellDef class="header-center">{{'workspace.routes.editor' | translate}}</th>
+        <td mat-cell *matCellDef="let workspace" class="cell-center">
+          <mat-icon [color]="isRouteHidden(workspace, 'editor') ? '' : 'primary'"
+                    [matTooltip]="(isRouteHidden(workspace, 'editor') ? 'wsg-admin.route-hidden' : 'wsg-admin.route-visible') | translate">
+            {{ isRouteHidden(workspace, 'editor') ? 'directions_off' : 'directions' }}
+          </mat-icon>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="preview">
+        <th mat-header-cell *matHeaderCellDef class="header-center">{{'workspace.routes.preview' | translate}}</th>
+        <td mat-cell *matCellDef="let workspace" class="cell-center">
+          <mat-icon [color]="isRouteHidden(workspace, 'preview') ? '' : 'primary'"
+                    [matTooltip]="(isRouteHidden(workspace, 'preview') ? 'wsg-admin.route-hidden' : 'wsg-admin.route-visible') | translate">
+            {{ isRouteHidden(workspace, 'preview') ? 'directions_off' : 'directions' }}
+          </mat-icon>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="schemer">
+        <th mat-header-cell *matHeaderCellDef class="header-center">{{'workspace.routes.schemer' | translate}}</th>
+        <td mat-cell *matCellDef="let workspace" class="cell-center">
+          <mat-icon [color]="isRouteHidden(workspace, 'schemer') ? '' : 'primary'"
+                    [matTooltip]="(isRouteHidden(workspace, 'schemer') ? 'wsg-admin.route-hidden' : 'wsg-admin.route-visible') | translate">
+            {{ isRouteHidden(workspace, 'schemer') ? 'directions_off' : 'directions' }}
+          </mat-icon>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="comments">
+        <th mat-header-cell *matHeaderCellDef class="header-center">{{'workspace.routes.comments' | translate}}</th>
+        <td mat-cell *matCellDef="let workspace" class="cell-center">
+          <mat-icon [color]="isRouteHidden(workspace, 'comments') ? '' : 'primary'"
+                    [matTooltip]="(isRouteHidden(workspace, 'comments') ? 'wsg-admin.route-hidden' : 'wsg-admin.route-visible') | translate">
+            {{ isRouteHidden(workspace, 'comments') ? 'directions_off' : 'directions' }}
+          </mat-icon>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="notes">
+        <th mat-header-cell *matHeaderCellDef class="header-center">{{'workspace.routes.notes' | translate}}</th>
+        <td mat-cell *matCellDef="let workspace" class="cell-center">
+          <mat-icon [color]="isRouteHidden(workspace, 'notes') ? '' : 'primary'"
+                    [matTooltip]="(isRouteHidden(workspace, 'notes') ? 'wsg-admin.route-hidden' : 'wsg-admin.route-visible') | translate">
+            {{ isRouteHidden(workspace, 'notes') ? 'directions_off' : 'directions' }}
+          </mat-icon>
+        </td>
+      </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
