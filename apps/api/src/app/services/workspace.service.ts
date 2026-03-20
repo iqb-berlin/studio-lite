@@ -307,7 +307,13 @@ export class WorkspaceService {
       }
     }
     this.logger.log(`Creating workspace with name: ${workspace.name}`);
-    const newWorkspace = this.workspacesRepository.create(workspace);
+    const newWorkspace = this.workspacesRepository.create({
+      ...workspace,
+      settings: {
+        ...new WorkspaceSettingsDto(),
+        hiddenRoutes: ['notes']
+      }
+    });
     const savedWorkspace = await this.workspacesRepository.save(newWorkspace);
     this.logger.log(
       `Workspace created successfully with ID: ${savedWorkspace.id}`

@@ -217,5 +217,13 @@ describe('EditWorkspaceSettingsComponent', () => {
       expect(component.dialogData.hiddenRoutes).toContain('editor');
       expect(component.dialogData.hiddenRoutes).toContain('preview');
     });
+
+    it('toggleRouteVisibility should handle "notes" route correctly', () => {
+      component.dialogData.hiddenRoutes = [];
+      component.toggleRouteVisibility('notes', false);
+      expect(component.dialogData.hiddenRoutes).toContain('notes');
+      component.toggleRouteVisibility('notes', true);
+      expect(component.dialogData.hiddenRoutes).not.toContain('notes');
+    });
   });
 });

@@ -198,6 +198,11 @@ describe('WorkspaceService', () => {
 
       const result = await service.create(dto as CreateWorkspaceDto);
       expect(result).toBe(1);
+      expect(mockRepository.create).toHaveBeenCalledWith(expect.objectContaining({
+        settings: expect.objectContaining({
+          hiddenRoutes: ['notes']
+        })
+      }));
     });
   });
 

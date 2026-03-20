@@ -44,3 +44,14 @@ CREATE INDEX IF NOT EXISTS idx_unit_rn_ui_uuid ON unit_rich_note_unit_item(unit_
 -- changeset jojohoch:5
 CREATE INDEX IF NOT EXISTS idx_unit_rn_ui_note_id ON unit_rich_note_unit_item(unit_rich_note_id);
 -- rollback DROP INDEX IF EXISTS idx_unit_rn_ui_note_id;
+
+-- changeset jojohoch:6
+UPDATE workspace
+SET settings = jsonb_set(
+  COALESCE(settings, '{}'::jsonb),
+  '{hiddenRoutes}',
+  COALESCE(settings->'hiddenRoutes', '[]'::jsonb) || '["notes"]'::jsonb
+               )
+WHERE settings->'hiddenRoutes' IS NULL OR NOT (settings->'hiddenRoutes' @> '["notes"]'::jsonb);
+-- rollback UPDATE workspace SET settings = CASE WHEN (settings->'hiddenRoutes') - 'notes' = '[]'::jsonb THEN settings - 'hiddenRoutes' ELSE jsonb_set(settings, '{hiddenRoutes}', (settings->'hiddenRoutes') - 'notes') END WHERE settings->'hiddenRoutes' @> '["notes"]'::jsonb;
+

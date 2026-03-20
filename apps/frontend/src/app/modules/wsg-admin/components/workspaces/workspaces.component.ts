@@ -53,7 +53,7 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   objectsDatasource = new MatTableDataSource<WorkspaceInListDto>([]);
   workspaces: WorkspaceInListDto[] = [];
   displayedColumns = [
-    'id', 'name', 'unitsCount', 'editor', 'preview', 'schemer', 'comments', 'dropBoxId', 'delete'
+    'id', 'name', 'unitsCount', 'editor', 'preview', 'schemer', 'comments', 'notes', 'dropBoxId', 'delete'
   ];
 
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
