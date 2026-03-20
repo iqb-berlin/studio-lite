@@ -1,0 +1,84 @@
+<div class="node-card">
+  <div class="node-header">
+    <div class="tag-label">
+      <mat-icon class="tag-icon">{{ node.notes.length > 0 ? 'description' : 'folder' }}</mat-icon>
+      <h3>{{ node.label | getLocalizedValue }}</h3>
+    </div>
+    @if (canWrite) {
+      <button mat-icon-button (click)="addNote.emit(node.tagId)" [title]="'workspace.add-rich-note' | translate">
+        <mat-icon>add</mat-icon>
+      </button>
+    }
+  </div>
+
+  <div class="node-body">
+    @if (node.notes.length > 0) {
+      <div class="node-notes">
+        @for (note of node.notes; track note.id) {
+          <div class="note-item">
+            @if (canWrite) {
+              <div class="note-item-actions">
+                <button mat-icon-button (click)="editNote.emit(note)" [title]="'edit' | translate">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteNote.emit(note.id)" [title]="'delete' | translate">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            }
+            <div class="note-content" [innerHTML]="note.content"></div>
+            
+            @if (note | isNoteFooterVisible) {
+              <div class="note-footer">
+                @if (note.itemReferences && note.itemReferences.length > 0) {
+                  <div class="note-items">
+                    <mat-icon>link</mat-icon>
+                    @for (itemId of note.itemReferences; track itemId) {
+                      <span class="item-tag">{{ itemId | getItemLabel: unitItems }}</span>
+                    }
+                  </div>
+                }
+                @if (note.links && note.links.length > 0) {
+                  <div class="note-links">
+                    <h6>{{ 'workspace.links' | translate }}</h6>
+                    <div class="links-list">
+                      @for (link of note.links; track link.url) {
+                        <div class="link-item">
+                          <div class="link-label">{{ link.label | getLocalizedValue }}</div>
+                          @if (link.description && (link.description | getLocalizedValue)) {
+                            <div class="link-description">{{ link.description | getLocalizedValue }}</div>
+                          }
+                          <div class="link-url-container">
+                            <a [href]="link.url" target="_blank" class="link-url">{{ link.url }}</a>
+                            @if (link.type) {
+                              <span class="link-type">({{ link.type }})</span>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (node.children.length > 0) {
+      <div class="node-children">
+        @for (child of node.children; track child.tagId) {
+          <studio-lite-unit-rich-note-node 
+            [node]="child" 
+            [unitItems]="unitItems" 
+            [canWrite]="canWrite"
+            (addNote)="addNote.emit($event)"
+            (editNote)="editNote.emit($event)"
+            (deleteNote)="deleteNote.emit($event)">
+          </studio-lite-unit-rich-note-node>
+        }
+      </div>
+    }
+  </div>
+</div>

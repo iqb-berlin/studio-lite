@@ -1,24 +1,23 @@
-import { AsyncPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   combineLatest, map, Subject, switchMap, takeUntil
 } from 'rxjs';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
-  UnitItemDto, UnitRichNoteDto, UnitRichNotesDto
+  UnitItemDto, UnitRichNoteDto, UnitRichNotesDto, UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
+import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 
-import { AppService } from '../../../../services/app.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitRichNoteDialogComponent } from '../unit-rich-note-dialog/unit-rich-note-dialog.component';
-import { GetLocalizedValuePipe } from '../../../../pipes/get-localized-value.pipe';
-import { GetRichNoteTagLabelPipe } from '../../../../pipes/get-rich-note-tag-label.pipe';
-import { GetItemLabelPipe } from '../../../../pipes/get-item-label.pipe';
+import { RichNoteNode, UnitRichNoteNodeComponent } from '../unit-rich-note-node/unit-rich-note-node.component';
 
 @Component({
   selector: 'studio-lite-unit-rich-notes',
@@ -27,26 +26,26 @@ import { GetItemLabelPipe } from '../../../../pipes/get-item-label.pipe';
   host: { class: 'unit-rich-notes' },
   standalone: true,
   imports: [
+    CommonModule,
     MatButtonModule,
     MatIconModule,
+    MatProgressSpinnerModule,
     TranslateModule,
-    GetLocalizedValuePipe,
-    GetRichNoteTagLabelPipe,
-    AsyncPipe,
-    GetItemLabelPipe
+    UnitRichNoteNodeComponent
   ]
 })
 export class UnitRichNotesComponent implements OnInit, OnDestroy {
   unitId = 0;
   workspaceId = 0;
   notes: UnitRichNoteDto[] = [];
+  displayNodes: RichNoteNode[] = [];
   unitItems: UnitItemDto[] = [];
   canWrite = false;
+  isLoading = true;
 
   private ngUnsubscribe = new Subject<void>();
 
   constructor(
-    public appService: AppService,
     public workspaceService: WorkspaceService,
     private workspaceBackendService: WorkspaceBackendService,
     private translateService: TranslateService,
@@ -63,20 +62,24 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
         this.canWrite = canWrite;
       });
 
-    this.workspaceService.selectedUnit$
-      .pipe(
-        takeUntil(this.ngUnsubscribe),
-        switchMap(unitId => {
-          this.unitId = Number(unitId);
-          this.workspaceId = this.workspaceService.selectedWorkspaceId;
-          return this.workspaceBackendService.getUnitRichNotes(this.workspaceId, this.unitId);
-        })
-      )
-      .subscribe((data: UnitRichNotesDto | null) => {
-        if (data) {
-          this.notes = data.notes.sort((a: UnitRichNoteDto, b: UnitRichNoteDto) => a.tagId.localeCompare(b.tagId));
-        }
-      });
+    combineLatest([
+      this.workspaceService.selectedUnit$,
+      this.workspaceService.richNoteTags$
+    ]).pipe(
+      takeUntil(this.ngUnsubscribe),
+      switchMap(([unitId]) => {
+        this.unitId = Number(unitId);
+        this.workspaceId = this.workspaceService.selectedWorkspaceId;
+        this.isLoading = true;
+        return this.workspaceBackendService.getUnitRichNotes(this.workspaceId, this.unitId);
+      })
+    ).subscribe((data: UnitRichNotesDto | null) => {
+      this.isLoading = false;
+      if (data) {
+        this.notes = data.notes;
+        this.rebuildDisplayNodes();
+      }
+    });
 
     this.workspaceService.selectedUnit$
       .pipe(
@@ -91,18 +94,51 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
       });
   }
 
-  openNoteDialog(note?: UnitRichNoteDto): void {
+  rebuildDisplayNodes(): void {
+    this.displayNodes = this.buildHierarchy(this.workspaceService.richNoteTags, '', true);
+  }
+
+  private buildHierarchy(tags: UnitRichNoteTagDto[], parentId = '', isRoot = false): RichNoteNode[] {
+    const result: RichNoteNode[] = [];
+    tags.forEach(tag => {
+      const fullId = parentId ? `${parentId}.${tag.id}` : tag.id;
+      const nodeNotes = this.notes.filter(n => n.tagId === fullId);
+      const childrenNodes = tag.children ? this.buildHierarchy(tag.children, fullId) : [];
+      if (isRoot || nodeNotes.length > 0 || childrenNodes.length > 0) {
+        result.push({
+          tagId: fullId,
+          label: tag.label,
+          notes: nodeNotes,
+          children: childrenNodes
+        });
+      }
+    });
+    return result;
+  }
+
+  openNoteDialog(note?: UnitRichNoteDto, preSelectedTagId?: string): void {
     if (!this.canWrite) return;
+
+    let availableTags = this.workspaceService.richNoteTags;
+    if (preSelectedTagId) {
+      const rootId = preSelectedTagId.split('.')[0];
+      const rootTag = this.workspaceService.richNoteTags.find(t => t.id === rootId);
+      if (rootTag) {
+        availableTags = [rootTag];
+      }
+    }
+
+    const dialogData = {
+      note: note || (preSelectedTagId ? { tagId: preSelectedTagId } : undefined),
+      workspaceId: this.workspaceId,
+      unitId: this.unitId,
+      tags: availableTags,
+      items: this.unitItems
+    };
 
     const dialogRef = this.dialog.open(UnitRichNoteDialogComponent, {
       width: '600px',
-      data: {
-        note,
-        workspaceId: this.workspaceId,
-        unitId: this.unitId,
-        tags: this.workspaceService.richNoteTags,
-        items: this.unitItems
-      }
+      data: dialogData
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -114,6 +150,7 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
                 const index = this.notes.findIndex(n => n.id === result.id);
                 if (index > -1) {
                   this.notes[index] = { ...this.notes[index], ...result };
+                  this.rebuildDisplayNodes();
                 }
               }
             });
@@ -128,11 +165,11 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
           this.workspaceBackendService.addUnitRichNote(this.workspaceId, this.unitId, newNote)
             .subscribe(id => {
               if (id) {
-                // Fetch all notes to get proper timestamps and refresh list
                 this.workspaceBackendService.getUnitRichNotes(this.workspaceId, this.unitId)
                   .subscribe(data => {
                     if (data) {
-                      this.notes = data.notes.sort((a, b) => a.tagId.localeCompare(b.tagId));
+                      this.notes = data.notes;
+                      this.rebuildDisplayNodes();
                     }
                   });
               }
@@ -145,15 +182,28 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
   deleteNote(noteId: number): void {
     if (!this.canWrite) return;
 
-    // eslint-disable-next-line no-alert
-    if (window.confirm(this.translateService.instant('workspace.delete-rich-note-confirm') || 'Really delete note?')) {
-      this.workspaceBackendService.deleteUnitRichNote(this.workspaceId, this.unitId, noteId)
-        .subscribe(success => {
-          if (success) {
-            this.notes = this.notes.filter(n => n.id !== noteId);
-          }
-        });
-    }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: <ConfirmDialogData>{
+        title: this.translateService.instant('workspace.delete-rich-note-title'),
+        content: this.translateService
+          .instant('workspace.delete-rich-note-confirm'),
+        confirmButtonLabel: this.translateService.instant('delete'),
+        showCancel: true
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.workspaceBackendService.deleteUnitRichNote(this.workspaceId, this.unitId, noteId)
+          .subscribe(success => {
+            if (success) {
+              this.notes = this.notes.filter(n => n.id !== noteId);
+              this.rebuildDisplayNodes();
+            }
+          });
+      }
+    });
   }
 
   ngOnDestroy(): void {

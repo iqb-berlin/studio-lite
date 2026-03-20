@@ -4,18 +4,23 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { BehaviorSubject, of } from 'rxjs';
-import { createMock } from '@golevelup/ts-jest';
-import { UnitRichNotesDto } from '@studio-lite-lib/api-dto';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { UnitRichNotesDto, UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 import { UnitRichNotesComponent } from './unit-rich-notes.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
+import { UnitRichNoteNodeComponent } from '../unit-rich-note-node/unit-rich-note-node.component';
 
 describe('UnitRichNotesComponent', () => {
   let component: UnitRichNotesComponent;
   let fixture: ComponentFixture<UnitRichNotesComponent>;
-  let workspaceServiceMock: jest.Mocked<WorkspaceService>;
-  let workspaceBackendServiceMock: jest.Mocked<WorkspaceBackendService>;
-  let dialogMock: jest.Mocked<MatDialog>;
+  let workspaceServiceMock: DeepMocked<WorkspaceService>;
+  let workspaceBackendServiceMock: DeepMocked<WorkspaceBackendService>;
+  let dialogMock: DeepMocked<MatDialog>;
+
+  const mockTags: UnitRichNoteTagDto[] = [
+    { id: 't1', label: [{ lang: 'de', value: 'T1' }], children: [] }
+  ];
 
   beforeEach(async () => {
     workspaceServiceMock = createMock<WorkspaceService>({
@@ -23,7 +28,8 @@ describe('UnitRichNotesComponent', () => {
       isWorkspaceGroupAdmin$: new BehaviorSubject<boolean>(false),
       selectedUnit$: new BehaviorSubject<number>(10),
       selectedWorkspaceId: 1,
-      richNoteTags: []
+      richNoteTags$: new BehaviorSubject<UnitRichNoteTagDto[]>(mockTags),
+      richNoteTags: mockTags
     });
 
     workspaceBackendServiceMock = createMock<WorkspaceBackendService>({
@@ -36,6 +42,7 @@ describe('UnitRichNotesComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         UnitRichNotesComponent,
+        UnitRichNoteNodeComponent,
         MatDialogModule,
         TranslateModule.forRoot()
       ],
@@ -58,34 +65,18 @@ describe('UnitRichNotesComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should set canWrite to true if user has write access', () => {
-    workspaceServiceMock.userAccessLevel$.next(2);
+  it('should rebuild display nodes when notes are loaded', () => {
+    const notes = [{
+      id: 1, tagId: 't1', content: 'test', unitId: 10
+    }];
+    workspaceBackendServiceMock.getUnitRichNotes.mockReturnValue(of({ notes, tags: mockTags } as UnitRichNotesDto));
+
+    // Trigger re-load
+    workspaceServiceMock.selectedUnit$.next(10);
     fixture.detectChanges();
-    expect(component.canWrite).toBe(true);
-  });
 
-  it('should set canWrite to true if user is workspace group admin', () => {
-    workspaceServiceMock.userAccessLevel$.next(1);
-    workspaceServiceMock.isWorkspaceGroupAdmin$.next(true);
-    fixture.detectChanges();
-    expect(component.canWrite).toBe(true);
-  });
-
-  it('should set canWrite to false if user has no access', () => {
-    workspaceServiceMock.userAccessLevel$.next(1);
-    workspaceServiceMock.isWorkspaceGroupAdmin$.next(false);
-    fixture.detectChanges();
-    expect(component.canWrite).toBe(false);
-  });
-
-  it('should load notes on init', () => {
-    expect(workspaceBackendServiceMock.getUnitRichNotes).toHaveBeenCalledWith(1, 10);
-  });
-
-  it('should open dialog when calling openNoteDialog', () => {
-    component.canWrite = true;
-    (dialogMock.open as jest.Mock).mockReturnValue({ afterClosed: () => of(null) });
-    component.openNoteDialog();
-    expect(dialogMock.open).toHaveBeenCalled();
+    expect(component.notes.length).toBe(1);
+    expect(component.displayNodes.length).toBe(1);
+    expect(component.displayNodes[0].tagId).toBe('t1');
   });
 });

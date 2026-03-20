@@ -52,12 +52,12 @@
             <div class="fx-column-start-stretch fx-gap-10">
               <mat-form-field appearance="fill">
                 <mat-label>{{ 'workspace.link-url' | translate }}</mat-label>
-                <input matInput formControlName="url" placeholder="https://...">
+                <input matInput formControlName="url" [placeholder]="'workspace.link-url-placeholder' | translate">
               </mat-form-field>
 
               <mat-form-field appearance="fill">
                 <mat-label>{{ 'workspace.link-type' | translate }}</mat-label>
-                <input matInput formControlName="type" placeholder="e.g. documentation">
+                <input matInput formControlName="type" [placeholder]="'workspace.link-type-placeholder' | translate">
               </mat-form-field>
 
               <div class="labels-section">
@@ -72,11 +72,11 @@
                     <div [formGroup]="labelGroup | cast: FormGroup" class="fx-row-start-center fx-gap-10">
                       <mat-form-field appearance="fill" class="fx-flex-row-30">
                         <mat-label>{{ 'workspace.lang' | translate }}</mat-label>
-                        <input matInput formControlName="lang" placeholder="de" [value]="labelGroup.value?.lang">
+                        <input matInput formControlName="lang" [placeholder]="'workspace.lang-placeholder' | translate" [value]="labelGroup.value?.lang">
                       </mat-form-field>
                       <mat-form-field appearance="fill" class="fx-flex-fill">
                         <mat-label>{{ 'workspace.value' | translate }}</mat-label>
-                        <input matInput formControlName="value" placeholder="label..." [value]="labelGroup.value?.value">
+                        <input matInput formControlName="value" [placeholder]="'workspace.label-placeholder' | translate" [value]="labelGroup.value?.value">
                       </mat-form-field>
                       <button mat-icon-button color="warn" (click)="removeLabel(i, j)" type="button" [attr.aria-label]="'workspace.remove-label' | translate" [title]="'workspace.remove-label' | translate">
                         <mat-icon>delete</mat-icon>
@@ -98,11 +98,11 @@
                     <div [formGroup]="descriptionGroup | cast: FormGroup" class="fx-row-start-center fx-gap-10">
                       <mat-form-field appearance="fill" class="fx-flex-row-30">
                         <mat-label>{{ 'workspace.lang' | translate }}</mat-label>
-                        <input matInput formControlName="lang" placeholder="de" [value]="descriptionGroup.value?.lang">
+                        <input matInput formControlName="lang" [placeholder]="'workspace.lang-placeholder' | translate" [value]="descriptionGroup.value?.lang">
                       </mat-form-field>
                       <mat-form-field appearance="fill" class="fx-flex-fill">
                         <mat-label>{{ 'workspace.value' | translate }}</mat-label>
-                        <input matInput formControlName="value" placeholder="description..." [value]="descriptionGroup.value?.value">
+                        <textarea matInput formControlName="value" [placeholder]="'workspace.description-placeholder' | translate" [value]="descriptionGroup.value?.value" cdkTextareaAutosize [cdkAutosizeMinRows]="2"></textarea>
                       </mat-form-field>
                       <button mat-icon-button color="warn" (click)="removeDescription(i, j)" type="button" [attr.aria-label]="'workspace.remove-description' | translate" [title]="'workspace.remove-description' | translate">
                         <mat-icon>delete</mat-icon>

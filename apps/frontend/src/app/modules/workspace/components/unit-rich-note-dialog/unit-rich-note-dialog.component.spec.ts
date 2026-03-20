@@ -1,18 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
-import { BehaviorSubject } from 'rxjs';
-import { createMock } from '@golevelup/ts-jest';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 import { UnitRichNoteDialogComponent } from './unit-rich-note-dialog.component';
-import { WorkspaceService } from '../../services/workspace.service';
 
 describe('UnitRichNoteDialogComponent', () => {
   let component: UnitRichNoteDialogComponent;
   let fixture: ComponentFixture<UnitRichNoteDialogComponent>;
-  let workspaceServiceMock: jest.Mocked<WorkspaceService>;
-  let dialogRefMock: jest.Mocked<MatDialogRef<UnitRichNoteDialogComponent>>;
+  let dialogRefMock: DeepMocked<MatDialogRef<UnitRichNoteDialogComponent>>;
 
   const mockTags: UnitRichNoteTagDto[] = [
     {
@@ -25,10 +22,6 @@ describe('UnitRichNoteDialogComponent', () => {
   ];
 
   beforeEach(async () => {
-    workspaceServiceMock = createMock<WorkspaceService>({
-      richNoteTags$: new BehaviorSubject<UnitRichNoteTagDto[]>(mockTags)
-    });
-
     dialogRefMock = createMock<MatDialogRef<UnitRichNoteDialogComponent>>();
 
     await TestBed.configureTestingModule({
@@ -40,7 +33,6 @@ describe('UnitRichNoteDialogComponent', () => {
       ],
       providers: [
         { provide: MatDialogRef, useValue: dialogRefMock },
-        { provide: WorkspaceService, useValue: workspaceServiceMock },
         {
           provide: MAT_DIALOG_DATA,
           useValue: {
@@ -79,12 +71,7 @@ describe('UnitRichNoteDialogComponent', () => {
       items: []
     };
 
-    const mockService = createMock<WorkspaceService>({
-      richNoteTags$: new BehaviorSubject<UnitRichNoteTagDto[]>(mockTags)
-    });
-
     fixture = TestBed.overrideProvider(MAT_DIALOG_DATA, { useValue: legacyData })
-      .overrideProvider(WorkspaceService, { useValue: mockService })
       .createComponent(UnitRichNoteDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

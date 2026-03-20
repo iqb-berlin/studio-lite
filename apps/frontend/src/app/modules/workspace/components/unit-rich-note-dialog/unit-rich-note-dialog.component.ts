@@ -15,8 +15,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { TextFieldModule } from '@angular/cdk/text-field';
 import { Subject, takeUntil } from 'rxjs';
-import { WorkspaceService } from '../../services/workspace.service';
 import { RichNoteEditorComponent } from '../rich-note-editor/rich-note-editor.component';
 import { CastPipe } from '../../../../pipes/cast.pipe';
 
@@ -44,7 +44,8 @@ export interface UnitRichNoteDialogData {
     MatExpansionModule,
     TranslateModule,
     RichNoteEditorComponent,
-    CastPipe
+    CastPipe,
+    TextFieldModule
   ]
 })
 export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
@@ -68,8 +69,7 @@ export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
     public dialogRef: MatDialogRef<UnitRichNoteDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: UnitRichNoteDialogData,
     private fb: FormBuilder,
-    private translateService: TranslateService,
-    private workspaceService: WorkspaceService
+    private translateService: TranslateService
   ) {
     this.isEditMode = !!data.note;
     this.dialogTitle = this.isEditMode ? 'workspace.edit-rich-note' : 'workspace.add-rich-note';
@@ -88,14 +88,10 @@ export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
     this.currentItems = [...this.initialItemReferences];
     this.updateSaveButtonState();
 
-    this.workspaceService.richNoteTags$
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(tags => {
-        this.flattenedTags = [];
-        this.flattenTags(tags);
-        this.resolveInitialTagId();
-        this.updateSaveButtonState();
-      });
+    this.flattenedTags = [];
+    this.flattenTags(this.data.tags);
+    this.resolveInitialTagId();
+    this.updateSaveButtonState();
 
     this.noteForm.valueChanges
       .pipe(takeUntil(this.ngUnsubscribe))

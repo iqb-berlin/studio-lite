@@ -7,6 +7,7 @@
   "create": "Anlegen",
   "export": "Exportieren",
   "construct": "Erstellen",
+  "edit": "Bearbeiten",
   "delete": "Löschen",
   "excel-download": "Herunterladen als Excel-Datei",
   "download": "Herunterladen",
@@ -549,7 +550,8 @@
       "editor": "Editor",
       "preview": "Vorschau",
       "schemer": "Kodierung",
-      "comments": "Kommentare"
+      "comments": "Kommentare",
+      "rich-notes": "Rückmeldungen"
     },
     "title": "Arbeitsbereich",
     "workspace-not-loaded": "Konnte Daten für Arbeitsbereich nicht laden",
@@ -768,8 +770,13 @@
     "tags-saved-success": "Kategorien erfolgreich gespeichert",
     "tags-saved-error": "Fehler beim Speichern der Kategorien",
     "invalid-json": "Ungültiges JSON-Format",
-    "tagId": "Tag-ID",
-    "delete-rich-note-confirm": "Soll die Notiz wirklich gelöscht werden?"
+    "delete-rich-note-confirm": "Soll diese Rückmeldung wirklich gelöscht werden?",
+    "delete-rich-note-title": "Rückmeldung löschen",
+    "link-url-placeholder": "https://...",
+    "link-type-placeholder": "z.B. Dokumentation",
+    "lang-placeholder": "de",
+    "label-placeholder": "Bezeichnung...",
+    "description-placeholder": "Beschreibung..."
   },
 
   "coding-report": {
