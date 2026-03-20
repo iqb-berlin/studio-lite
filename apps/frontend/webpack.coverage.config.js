@@ -6,7 +6,7 @@ module.exports = {
         loader: '@jsdevtools/coverage-istanbul-loader',
         options: { esModules: true },
         enforce: 'post',
-        include: require('path').join(__dirname, 'src'),
+        include: `${__dirname}/projects`,
         exclude: [
           /\.(e2e|spec)\.ts$/,
           /node_modules/,
