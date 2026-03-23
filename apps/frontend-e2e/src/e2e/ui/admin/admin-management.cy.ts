@@ -27,7 +27,7 @@ describe('UI Administration Management', () => {
   before(() => addFirstUser());
   after(() => {
     deleteFirstUser();
-    // cy.resetDb();
+    cy.resetDb();
   });
 
   it('displays admin settings button for admin users', () => {

@@ -22,6 +22,7 @@ describe('Workspace Settings – hiddenRoutes', () => {
 
   after(() => {
     deleteBasicData();
+    cy.resetDb();
   });
 
   // -------------------------------------------------------------------------

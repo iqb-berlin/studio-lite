@@ -19,7 +19,7 @@ describe('Metadata Profile Management from Admin', () => {
   });
   after(() => {
     deleteFirstUser();
-    // cy.resetDb();
+    cy.resetDb();
   });
 
   it('sets up workspaces in group', () => {

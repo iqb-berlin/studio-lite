@@ -26,7 +26,7 @@ describe('Metadata Management', () => {
   });
   after(() => {
     deleteFirstUser();
-    // cy.resetDb();
+    cy.resetDb();
   });
 
   it('sets up workspaces with metadata profiles', () => {

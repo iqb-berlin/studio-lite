@@ -51,7 +51,7 @@ describe('Workspace Unit Management', () => {
   });
   after(() => {
     deleteBasicSpecCy();
-    // cy.resetDb();
+    cy.resetDb();
   });
 
   it('selects metadata profile from workspace settings', () => {

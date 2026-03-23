@@ -21,7 +21,7 @@ describe('UI User Management', () => {
     login(Cypress.env('username'), Cypress.env('password'));
     deleteUser(newUser.username);
     deleteFirstUser();
-    // cy.resetDb();
+    cy.resetDb();
   });
 
   it('logs in with valid credentials', () => {
