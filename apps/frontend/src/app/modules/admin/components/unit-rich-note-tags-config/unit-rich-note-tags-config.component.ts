@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators
+  AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors
 } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
@@ -38,7 +38,7 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
     private translateService: TranslateService
   ) {
     this.configForm = this.fb.group({
-      tagsJson: ['', [Validators.required, UnitRichNoteTagsConfigComponent.jsonValidator]]
+      tagsJson: ['', [UnitRichNoteTagsConfigComponent.jsonValidator]]
     });
     this.configForm.statusChanges.subscribe(() => {
       this.isFormValid = this.configForm.valid;
@@ -69,7 +69,8 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
 
   saveData(): void {
     if (this.configForm.valid) {
-      const tags: UnitRichNoteTagDto[] = JSON.parse(this.configForm.get('tagsJson')?.value);
+      const jsonValue = this.configForm.get('tagsJson')?.value;
+      const tags: UnitRichNoteTagDto[] = jsonValue?.trim() ? JSON.parse(jsonValue) : [];
       this.backendService.setUnitRichNoteTags(tags).subscribe(success => {
         if (success) {
           this.snackBar.open(
