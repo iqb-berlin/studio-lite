@@ -12,6 +12,9 @@ export class UnitDownloadSettingsDto {
     addComments = false;
 
   @ApiProperty()
+    addRichNotes = false;
+
+  @ApiProperty()
     addTestTakersReview = 0;
 
   @ApiProperty()

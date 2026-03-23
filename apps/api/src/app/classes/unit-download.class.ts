@@ -5,6 +5,7 @@ import {
   UnitExportConfigDto,
   UnitPropertiesDto,
   UnitSchemeDto,
+  UnitRichNoteTagDto,
   VeronaModuleFileDto,
   VeronaModuleInListDto
 } from '@studio-lite-lib/api-dto';
@@ -20,6 +21,7 @@ import { UnitService } from '../services/unit.service';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { SettingService } from '../services/setting.service';
 import { UnitCommentService } from '../services/unit-comment.service';
+import { UnitRichNoteService } from '../services/unit-rich-note.service';
 
 export class UnitDownloadClass {
   static async get(
@@ -28,6 +30,7 @@ export class UnitDownloadClass {
     unitCommentService: UnitCommentService,
     veronaModuleService: VeronaModulesService,
     settingService: SettingService,
+    unitRichNoteService: UnitRichNoteService,
     unitDownloadSettings: UnitDownloadSettingsDto
   ): Promise<Buffer> {
     const zip = new AdmZip();
@@ -46,6 +49,7 @@ export class UnitDownloadClass {
           workspaceId,
           unitDownloadSettings,
           unitExportConfig,
+          unitRichNoteService,
           unitsMetadata,
           usedPlayers,
           zip
@@ -102,6 +106,7 @@ export class UnitDownloadClass {
     workspaceId: number,
     unitDownloadSettings: UnitDownloadSettingsDto,
     unitExportConfig: UnitExportConfigDto,
+    unitRichNoteService: UnitRichNoteService,
     unitsMetadata: UnitPropertiesDto[],
     usedPlayers: string[],
     zip: AdmZip
@@ -130,6 +135,15 @@ export class UnitDownloadClass {
     const schemeData = await unitService.findOnesScheme(unitId);
     UnitDownloadClass.addScheme(schemeData, unitXml, unitMetadata, zip);
     UnitDownloadClass.addDerivedVariables(schemeData, unitXml);
+    if (unitDownloadSettings.addRichNotes) {
+      await UnitDownloadClass.addRichNotes(
+        unitRichNoteService,
+        unitId,
+        unitXml,
+        unitMetadata,
+        zip
+      );
+    }
     zip.addFile(
       `${unitMetadata.key}.xml`,
       Buffer.from(unitXml.toString({ prettyPrint: true }))
@@ -344,6 +358,55 @@ export class UnitDownloadClass {
           ...(schemeData?.scheme && { '#': `${unitMetadata.key}.vocs` })
         }
       });
+    }
+  }
+
+  private static findTagLabel(
+    tags: UnitRichNoteTagDto[],
+    tagId: string
+  ): { lang: string; value: string }[] | null {
+    if (!tagId) return null;
+    return tagId.split('.').reduce<{
+      tags: UnitRichNoteTagDto[],
+      label: { lang: string; value: string }[] | null
+    }>(
+      (acc, segment) => {
+        const found = acc.tags.find(t => t.id === segment);
+        return {
+          tags: found?.children || [],
+          label: found?.label || null
+        };
+      },
+      { tags, label: null }
+    ).label;
+  }
+
+  private static async addRichNotes(
+    unitRichNoteService: UnitRichNoteService,
+    unitId: number,
+    unitXml: XMLBuilder,
+    unitMetadata: UnitPropertiesDto,
+    zip: AdmZip
+  ): Promise<void> {
+    const { notes, tags } = await unitRichNoteService.findNotes(unitId);
+    if (notes && notes.length) {
+      const transformedNotes = notes.map(note => ({
+        tagId: note.tagId,
+        tagLabel: UnitDownloadClass.findTagLabel(tags, note.tagId),
+        content: note.content,
+        links: note.links,
+        itemReferences: note.itemReferences
+      }));
+      const fileName = `${unitMetadata.key}.vorn`;
+      unitXml.root().ele({
+        UnitRichNotesRef: {
+          '#': fileName
+        }
+      });
+      zip.addFile(
+        fileName,
+        Buffer.from(JSON.stringify(transformedNotes, null, 2))
+      );
     }
   }
 

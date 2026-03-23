@@ -33,11 +33,20 @@ export class UnitRichNoteService {
         order: { createdAt: 'ASC' }
       });
 
-    const enrichedNotes = await Promise.all(notes.map(async note => ({
-      ...note,
-      itemReferences: (await this.itemRichNoteService.findUnitItemNotes(unitId, note.id))
-        .map(i => i.unitItemUuid)
-    })));
+    const enrichedNotes = await Promise.all(notes.map(async note => {
+      const itemReferences = (await this.itemRichNoteService.findUnitItemNotes(unitId, note.id))
+        .map(i => i.unitItemUuid);
+      return {
+        id: note.id,
+        unitId: note.unitId,
+        tagId: note.tagId,
+        content: note.content,
+        links: note.links,
+        createdAt: note.createdAt,
+        changedAt: note.changedAt,
+        itemReferences
+      };
+    }));
 
     return { tags, notes: enrichedNotes };
   }
@@ -87,6 +96,10 @@ export class UnitRichNoteService {
       if (note.links !== undefined) noteToUpdate.links = note.links;
       noteToUpdate.changedAt = new Date();
       await this.unitRichNotesRepository.save(noteToUpdate);
+
+      if (note.itemReferences !== undefined) {
+        await this.itemRichNoteService.updateNoteItems(noteToUpdate.unitId, id, note.itemReferences);
+      }
     } else {
       throw new NotFoundException(`Rich note with id ${id} not found`);
     }

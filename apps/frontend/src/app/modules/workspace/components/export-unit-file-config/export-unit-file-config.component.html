@@ -4,6 +4,10 @@
                 (ngModelChange)="addCommentsChange.emit($event)">
     {{'unit-download.add-comments' | translate}}
   </mat-checkbox>
+  <mat-checkbox [ngModel]="addRichNotes"
+                (ngModelChange)="addRichNotesChange.emit($event)">
+    {{'unit-download.add-rich-notes' | translate}}
+  </mat-checkbox>
   <mat-checkbox [disabled]="!enablePlayerOption"
                 [ngModel]="addPlayers" class="margin-bottom"
                 (ngModelChange)="addPlayersChange.emit($event);
