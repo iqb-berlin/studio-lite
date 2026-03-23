@@ -322,7 +322,12 @@
     "delete-state-warning": "Soll dieser Status gelöscht werden? Dadurch verliert dieser seine Gültigkeit und den Aufgaben muss ein neuer Status zugewiesen werden! Alle vorherigen Statusänderungen werden gespeichert.",
     "delete-state": "Status löschen",
     "changed-settings-warning": "Sollen die Änderungen in den Einstellungen gespeichert werden?",
-    "route-visibility": "Arbeitsfläche"
+    "route-visibility": "Arbeitsfläche",
+    "unit-rich-note-tags": "Rich-Note Kategorien",
+    "unit-rich-note-tags-info": "Wenn hier keine Kategorien angegeben werden, werden die allgemeinen Einstellungen des IQB-Studios verwendet.",
+    "use-global-tags": "Aus den allgemeinen Einstellungen kopieren",
+    "unit-rich-note-tags-group": "Bereichsgruppen-Konfiguration",
+    "global-tags-preview": "Allgemeine Einstellungen"
   },
   "settings": {
     "texts": "Texte",

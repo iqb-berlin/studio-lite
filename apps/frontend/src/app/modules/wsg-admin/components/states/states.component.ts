@@ -95,15 +95,17 @@ export class StatesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (!this.wsgAdminService.selectedWorkspaceGroupSettings.states) {
+    const currentSettings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
+    if (!currentSettings.states) {
       this.isLoading = true;
       setTimeout(() => {
-        this.states = this.wsgAdminService.selectedWorkspaceGroupSettings.states || [];
+        const settings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
+        this.states = settings.states || [];
         this.changedStates = this.states;
         this.isLoading = false;
       }, 200);
     }
-    this.states = this.wsgAdminService.selectedWorkspaceGroupSettings.states || [];
+    this.states = currentSettings.states || [];
     this.changedStates = this.states;
   }
 }

@@ -1,0 +1,41 @@
+<div class="info">
+  {{ 'wsg-settings.unit-rich-note-tags-info' | translate }}
+</div>
+
+<form [formGroup]="configForm">
+  <div class="fx-row-start-stretch">
+    <div class="fx-flex-fill">
+      <div class="editor-label">{{ 'wsg-settings.unit-rich-note-tags-group' | translate }}</div>
+      <mat-form-field appearance="fill" class="full-width no-label">
+        <textarea matInput formControlName="tagsJson" rows="15" class="json-textarea"></textarea>
+        @if (tagsJsonControl?.hasError('invalidJson')) {
+          <mat-error>
+            {{ 'workspace.invalid-json' | translate }}
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="button-column fx-column-center-center">
+      <div class="button-spacer"></div>
+      <button mat-icon-button
+              color="primary"
+              type="button"
+              [matTooltip]="'wsg-settings.use-global-tags' | translate"
+              (click)="copyFromGlobal()">
+        <mat-icon class="flipped-icon">mediation</mat-icon>
+      </button>
+    </div>
+
+    <div class="fx-flex-fill">
+      <div class="editor-label">{{ 'wsg-settings.global-tags-preview' | translate }}</div>
+      <mat-form-field appearance="fill" class="full-width no-label global-preview-field">
+        <textarea matInput
+                  [value]="globalTagsJson"
+                  rows="15"
+                  class="json-textarea global-textarea"
+                  readonly></textarea>
+      </mat-form-field>
+    </div>
+  </div>
+</form>

@@ -339,13 +339,15 @@ describe('WorkspaceService', () => {
   });
 
   describe('setWorkspaceGroupStates', () => {
-    it('should fetch and set workspace group states', () => {
+    it('should fetch and set workspace group states and rich note tags', () => {
       const mockStates = [
         {
           id: 1, label: 'Draft', value: 'draft', color: '#cccccc'
-        },
+        }
+      ];
+      const mockTags = [
         {
-          id: 2, label: 'Final', value: 'final', color: '#00ff00'
+          id: 'tag1', label: [{ lang: 'de', value: 'Tag 1' }]
         }
       ];
       const mockResponse: WorkspaceGroupFullDto = {
@@ -355,7 +357,8 @@ describe('WorkspaceService', () => {
           states: mockStates,
           defaultEditor: '',
           defaultPlayer: '',
-          defaultSchemer: ''
+          defaultSchemer: '',
+          richNoteTags: mockTags
         }
       };
 
@@ -366,7 +369,8 @@ describe('WorkspaceService', () => {
 
       expect(backendService.getWorkspaceGroupStates).toHaveBeenCalledWith(1);
       expect(service.workspaceSettings.states).toEqual(mockStates);
-      expect(service.states).toEqual(mockStates);
+      expect(service.workspaceSettings.richNoteTags).toEqual(mockTags);
+      expect(service.richNoteTags).toEqual(mockTags);
     });
 
     it('should not fetch when groupId is not set', () => {
@@ -665,8 +669,20 @@ describe('WorkspaceService', () => {
   });
 
   describe('loadRichNoteTags', () => {
-    it('should load rich note tags from backend', () => {
-      const mockTags = [{ id: 'tag1', label: [] }];
+    it('should prioritize tags from workspaceSettings', () => {
+      const mockTags = [{ id: 'group-tag', label: [] }];
+      service.workspaceSettings.richNoteTags = mockTags;
+
+      service.loadRichNoteTags();
+
+      expect(service.richNoteTags).toEqual(mockTags);
+      expect(backendService.getUnitRichNoteTags).not.toHaveBeenCalled();
+    });
+
+    it('should load rich note tags from backend if no group tags exist', () => {
+      const mockTags = [{ id: 'global-tag', label: [] }];
+      service.workspaceSettings.richNoteTags = undefined;
+      service.richNoteTags = [];
       backendService.getUnitRichNoteTags.mockReturnValue(of(mockTags));
 
       service.loadRichNoteTags();

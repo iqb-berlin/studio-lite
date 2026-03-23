@@ -42,7 +42,7 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    this.settings = this.wsgAdminService.selectedWorkspaceGroupSettings;
+    this.settings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
     this.backendService.getWorkspaceGroupById(this.data.wsg?.id).subscribe(res => {
       this.fetchedProfiles = (
         res && (res as WorkspaceGroupFullDto).settings && (res as WorkspaceGroupFullDto).settings?.profiles

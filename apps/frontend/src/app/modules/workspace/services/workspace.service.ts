@@ -225,6 +225,10 @@ export class WorkspaceService {
           if (res.settings) {
             this.workspaceSettings.states = res.settings.states;
             this.states = res.settings.states || [];
+            if (res.settings.richNoteTags && res.settings.richNoteTags.length > 0) {
+              this.workspaceSettings.richNoteTags = res.settings.richNoteTags;
+              this.richNoteTags = res.settings.richNoteTags;
+            }
           }
         });
     }
@@ -350,10 +354,17 @@ export class WorkspaceService {
   }
 
   loadRichNoteTags(): void {
-    this.backendService.getUnitRichNoteTags()
-      .subscribe(tags => {
-        this.richNoteTags = tags;
-      });
+    if (this.workspaceSettings.richNoteTags && this.workspaceSettings.richNoteTags.length > 0) {
+      this.richNoteTags = this.workspaceSettings.richNoteTags;
+    } else if (this.richNoteTags.length === 0) {
+      this.backendService.getUnitRichNoteTags()
+        .subscribe(tags => {
+          // Double check if tags were loaded in the meantime (e.g. by setWorkspaceGroupStates)
+          if (this.richNoteTags.length === 0) {
+            this.richNoteTags = tags;
+          }
+        });
+    }
   }
 
   getRichNoteTagLabel(tagId: string): { lang: string, value: string }[] {

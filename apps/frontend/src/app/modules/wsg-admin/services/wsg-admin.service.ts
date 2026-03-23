@@ -17,11 +17,11 @@ export class WsgAdminService {
   profileStores: ProfileStoreWithProfiles[] = [];
   selectedWorkspaceGroupId: BehaviorSubject<number> = new BehaviorSubject(0);
   selectedWorkspaceGroupName: BehaviorSubject<string> = new BehaviorSubject('');
-  selectedWorkspaceGroupSettings: WorkspaceGroupSettingsDto = {
+  selectedWorkspaceGroupSettings: BehaviorSubject<WorkspaceGroupSettingsDto> = new BehaviorSubject({
     defaultSchemer: '',
     defaultPlayer: '',
     defaultEditor: ''
-  };
+  });
 
   constructor(
     @Inject('SERVER_URL') private readonly serverUrl: string,

@@ -39,18 +39,18 @@ export class WsgAdminComponent implements OnInit {
               name: this.wsgAdminService.selectedWorkspaceGroupName.value
             })
           );
-          this.wsgAdminService.selectedWorkspaceGroupSettings = wsgData.settings || {
+          this.wsgAdminService.selectedWorkspaceGroupSettings.next(wsgData.settings || {
             defaultSchemer: '',
             defaultPlayer: '',
             defaultEditor: ''
-          };
+          });
         } else {
           this.wsgAdminService.selectedWorkspaceGroupName.next(this.translateService.instant('wsg-admin.error'));
-          this.wsgAdminService.selectedWorkspaceGroupSettings = {
+          this.wsgAdminService.selectedWorkspaceGroupSettings.next({
             defaultSchemer: '',
             defaultPlayer: '',
             defaultEditor: ''
-          };
+          });
         }
       });
   }
