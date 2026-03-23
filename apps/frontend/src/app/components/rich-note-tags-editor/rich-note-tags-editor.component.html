@@ -1,0 +1,37 @@
+<div [class.fx-row-start-stretch]="showGlobalPreview">
+  <div class="fx-flex-fill">
+    <div class="editor-label">{{ label | translate }}</div>
+    <mat-form-field appearance="fill" class="full-width no-label">
+      <textarea matInput [formControl]="control" [rows]="rows" class="json-textarea"></textarea>
+      @if (control.errors?.['invalidJson']) {
+        <mat-error>
+          {{ 'workspace.invalid-json' | translate }}
+        </mat-error>
+      }
+    </mat-form-field>
+  </div>
+
+  @if (showGlobalPreview) {
+    <div class="button-column fx-column-center-center">
+      <div class="button-spacer"></div>
+      <button mat-icon-button
+              color="primary"
+              type="button"
+              [matTooltip]="'wsg-settings.use-global-tags' | translate"
+              (click)="copyFromGlobal()">
+        <mat-icon class="flipped-icon">mediation</mat-icon>
+      </button>
+    </div>
+
+    <div class="fx-flex-fill">
+      <div class="editor-label">{{ globalPreviewLabel | translate }}</div>
+      <mat-form-field appearance="fill" class="full-width no-label global-preview-field">
+        <textarea matInput
+                  [value]="globalTagsJson"
+                  [rows]="rows"
+                  class="json-textarea global-textarea"
+                  readonly></textarea>
+      </mat-form-field>
+    </div>
+  }
+</div>

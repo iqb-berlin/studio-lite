@@ -1,18 +1,19 @@
 import {
   Component, EventEmitter, OnDestroy, OnInit, Output
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import {
-  AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule
+  FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { UnitRichNoteTagDto, WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
+import {
+  RichNoteTagsEditorComponent
+} from '../../../../components/rich-note-tags-editor/rich-note-tags-editor.component';
 import { StudioValidators } from '../../../../validators/studio-validators.validator';
 import { BackendService } from '../../../admin/services/backend.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
@@ -23,15 +24,14 @@ import { WsgAdminService } from '../../services/wsg-admin.service';
   styleUrls: ['./unit-rich-note-tags-config.component.scss'],
   standalone: true,
   imports: [
+    CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatButtonModule,
-    MatIconModule,
-    MatExpansionModule,
     MatTooltipModule,
-    TranslateModule
+    MatExpansionModule,
+    TranslateModule,
+    RichNoteTagsEditorComponent
   ]
 })
 export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
@@ -41,9 +41,7 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
   @Output() hasChanged = new EventEmitter<UnitRichNoteTagDto[]>();
   private ngUnsubscribe = new Subject<void>();
 
-  get tagsJsonControl(): AbstractControl | null {
-    return this.configForm.get('tagsJson');
-  }
+  tagsJsonControl: FormControl;
 
   constructor(
     private fb: FormBuilder,
@@ -53,6 +51,7 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
     this.configForm = this.fb.group({
       tagsJson: ['', [StudioValidators.jsonValidator]]
     });
+    this.tagsJsonControl = this.configForm.get('tagsJson') as FormControl;
   }
 
   ngOnInit(): void {
