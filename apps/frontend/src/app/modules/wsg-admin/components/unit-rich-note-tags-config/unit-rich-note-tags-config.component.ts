@@ -4,7 +4,7 @@ import {
 import {
   AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors
 } from '@angular/forms';
-import { Subject, Subscription, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -36,7 +36,6 @@ import { WsgAdminService } from '../../services/wsg-admin.service';
 export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
   configForm: FormGroup;
   globalTagsJson = '';
-  private configDataChangedSubscription: Subscription | null = null;
 
   @Output() hasChanged = new EventEmitter<UnitRichNoteTagDto[]>();
   private ngUnsubscribe = new Subject<void>();
@@ -65,19 +64,22 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
         }, { emitEvent: false });
       });
 
-    this.configDataChangedSubscription = this.configForm.valueChanges.subscribe(() => {
-      if (this.configForm.valid) {
-        const jsonValue = this.configForm.get('tagsJson')?.value;
-        const tags = jsonValue?.trim() ? JSON.parse(jsonValue) : [];
-        this.hasChanged.emit(tags);
-      }
-    });
+    this.configForm.valueChanges
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {
+        if (this.configForm.valid) {
+          const jsonValue = this.configForm.get('tagsJson')?.value;
+          const tags = jsonValue?.trim() ? JSON.parse(jsonValue) : [];
+          this.hasChanged.emit(tags);
+        }
+      });
 
     this.loadGlobalTags();
   }
 
   loadGlobalTags(): void {
     this.backendService.getUnitRichNoteTags()
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(tags => {
         this.globalTagsJson = JSON.stringify(tags, null, 2);
       });
@@ -103,8 +105,5 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
-    if (this.configDataChangedSubscription !== null) {
-      this.configDataChangedSubscription.unsubscribe();
-    }
   }
 }

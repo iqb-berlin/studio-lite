@@ -3,7 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors
 } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -29,7 +29,7 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
   configForm: FormGroup;
   dataChanged = false;
   isFormValid = false;
-  private configDataChangedSubscription: Subscription | null = null;
+  private ngUnsubscribe = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
@@ -40,9 +40,11 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
     this.configForm = this.fb.group({
       tagsJson: ['', [UnitRichNoteTagsConfigComponent.jsonValidator]]
     });
-    this.configForm.statusChanges.subscribe(() => {
-      this.isFormValid = this.configForm.valid;
-    });
+    this.configForm.statusChanges
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {
+        this.isFormValid = this.configForm.valid;
+      });
   }
 
   ngOnInit(): void {
@@ -52,16 +54,14 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
   loadData(): void {
     this.backendService.getUnitRichNoteTags()
       .subscribe(tags => {
-        if (this.configDataChangedSubscription !== null) {
-          this.configDataChangedSubscription.unsubscribe();
-          this.configDataChangedSubscription = null;
-        }
         this.configForm.patchValue({
           tagsJson: JSON.stringify(tags, null, 2)
         });
-        this.configDataChangedSubscription = this.configForm.valueChanges.subscribe(() => {
-          this.dataChanged = true;
-        });
+        this.configForm.valueChanges
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(() => {
+            this.dataChanged = true;
+          });
         this.dataChanged = false;
         this.isFormValid = this.configForm.valid;
       });
@@ -71,22 +71,24 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
     if (this.configForm.valid) {
       const jsonValue = this.configForm.get('tagsJson')?.value;
       const tags: UnitRichNoteTagDto[] = jsonValue?.trim() ? JSON.parse(jsonValue) : [];
-      this.backendService.setUnitRichNoteTags(tags).subscribe(success => {
-        if (success) {
-          this.snackBar.open(
-            this.translateService.instant('workspace.tags-saved-success'),
-            '',
-            { duration: 3000 }
-          );
-          this.dataChanged = false;
-        } else {
-          this.snackBar.open(
-            this.translateService.instant('workspace.tags-saved-error'),
-            this.translateService.instant('error'),
-            { duration: 3000 }
-          );
-        }
-      });
+      this.backendService.setUnitRichNoteTags(tags)
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(success => {
+          if (success) {
+            this.snackBar.open(
+              this.translateService.instant('workspace.tags-saved-success'),
+              '',
+              { duration: 3000 }
+            );
+            this.dataChanged = false;
+          } else {
+            this.snackBar.open(
+              this.translateService.instant('workspace.tags-saved-error'),
+              this.translateService.instant('error'),
+              { duration: 3000 }
+            );
+          }
+        });
     }
   }
 
@@ -102,8 +104,7 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.configDataChangedSubscription !== null) {
-      this.configDataChangedSubscription.unsubscribe();
-    }
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
