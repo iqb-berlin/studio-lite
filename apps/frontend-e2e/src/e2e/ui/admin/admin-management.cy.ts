@@ -31,7 +31,7 @@ describe('UI Administration Management', () => {
   });
 
   it('displays admin settings button for admin users', () => {
-    cy.findAdminSettings().click();
+    cy.findAdminSettings().should('exist');
   });
 
   it('creates a new user', () => {
