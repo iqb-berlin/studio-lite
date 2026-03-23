@@ -81,6 +81,7 @@ export class UnitItemsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.appService.dataLoading = true;
     this.backendService
       .getAllUnitItemsForGroup(this.wsgAdminService.selectedWorkspaceGroupId.value)
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(items => {
         this.appService.dataLoading = false;
         if (Array.isArray(items)) {

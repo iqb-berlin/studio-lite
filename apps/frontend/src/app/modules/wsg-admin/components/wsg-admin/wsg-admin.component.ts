@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import {
   ActivatedRoute, RouterLinkActive, RouterLink, RouterOutlet
 } from '@angular/router';
@@ -15,7 +16,8 @@ import { AppService } from '../../../../services/app.service';
   styleUrls: ['./wsg-admin.component.scss'],
   imports: [MatTabNav, MatTabLink, RouterLinkActive, RouterLink, MatTabNavPanel, RouterOutlet, TranslateModule]
 })
-export class WsgAdminComponent implements OnInit {
+export class WsgAdminComponent implements OnInit, OnDestroy {
+  private ngUnsubscribe = new Subject<void>();
   navLinks: string[] = ['users', 'workspaces', 'units', 'unit-items', 'settings'];
   constructor(
     private wsgAdminService: WsgAdminService,
@@ -30,6 +32,7 @@ export class WsgAdminComponent implements OnInit {
     const routeKey = 'wsg';
     this.wsgAdminService.selectedWorkspaceGroupId.next(Number(this.route.snapshot.params[routeKey]));
     this.backendService.getWorkspaceGroupData(this.wsgAdminService.selectedWorkspaceGroupId.value)
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(wsgData => {
         if (wsgData) {
           this.wsgAdminService.selectedWorkspaceGroupName
@@ -53,5 +56,10 @@ export class WsgAdminComponent implements OnInit {
           });
         }
       });
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

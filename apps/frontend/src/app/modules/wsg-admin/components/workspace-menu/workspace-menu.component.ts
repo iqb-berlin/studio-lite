@@ -1,6 +1,7 @@
 import {
-  Component, EventEmitter, Input, Output
+  Component, EventEmitter, Input, Output, OnDestroy
 } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { WorkspaceGroupFullDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
@@ -24,7 +25,8 @@ import { SelectDropBoxComponent } from '../select-drop-box/select-drop-box.compo
   styleUrls: ['./workspace-menu.component.scss'],
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
-export class WorkspaceMenuComponent {
+export class WorkspaceMenuComponent implements OnDestroy {
+  private ngUnsubscribe = new Subject<void>();
   @Input() selectedWorkspaceId!: number;
   @Input() selectedRows!: WorkspaceInListDto[];
   @Input() workspaces!: WorkspaceInListDto[];
@@ -87,62 +89,70 @@ export class WorkspaceMenuComponent {
           workspacesCount: this.workspaces.length
         }
       });
-      dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-          this.workspaceAdded.emit(result as string);
-        }
-      });
+      dialogRef.afterClosed()
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(result => {
+          if (result) {
+            this.workspaceAdded.emit(result as string);
+          }
+        });
     }
   }
 
   moveObject() {
     const selectedRows = this.selectedRows;
-    this.appBackendService.getAuthData().subscribe(user => {
-      this.backendService.getWorkspaceGroupsByUser(user.userId).subscribe(dat => {
-        this.workspaceGroupsByUser = dat;
-        if (this.workspaceGroupsByUser && this.workspaceGroupsByUser.length > 1) {
-          let prompt;
-          if (selectedRows.length === 1) {
-            prompt = this.translateService.instant('wsg-admin.move-workspace-with-units', {
-              name: selectedRows[0].name
-            });
-          } else {
-            prompt = this.translateService
-              .instant('wsg-admin.move-workspaces', { count: selectedRows.length });
-          }
-          const dialogRef = this.moveWorkspaceDialog.open(MoveWorkspaceComponent, {
-            width: '600px',
-            data: {
-              title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
-              content: prompt,
-              warning: this.translateService.instant('wsg-admin.move-workspaces-warning'),
-              workspaceGroups: this.workspaceGroupsByUser,
-              selectedRows: selectedRows,
-              okButtonLabel: this.translateService.instant('move')
-            }
-          });
-          dialogRef.afterClosed().subscribe(result => {
-            if (result) {
-              this.workspaceMoved.emit({
-                selection: selectedRows,
-                workspaceGroupId: result as number
+    this.appBackendService.getAuthData()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(user => {
+        this.backendService.getWorkspaceGroupsByUser(user.userId)
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(dat => {
+            this.workspaceGroupsByUser = dat;
+            if (this.workspaceGroupsByUser && this.workspaceGroupsByUser.length > 1) {
+              let prompt;
+              if (selectedRows.length === 1) {
+                prompt = this.translateService.instant('wsg-admin.move-workspace-with-units', {
+                  name: selectedRows[0].name
+                });
+              } else {
+                prompt = this.translateService
+                  .instant('wsg-admin.move-workspaces', { count: selectedRows.length });
+              }
+              const dialogRef = this.moveWorkspaceDialog.open(MoveWorkspaceComponent, {
+                width: '600px',
+                data: {
+                  title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
+                  content: prompt,
+                  warning: this.translateService.instant('wsg-admin.move-workspaces-warning'),
+                  workspaceGroups: this.workspaceGroupsByUser,
+                  selectedRows: selectedRows,
+                  okButtonLabel: this.translateService.instant('move')
+                }
+              });
+              dialogRef.afterClosed()
+                .pipe(takeUntil(this.ngUnsubscribe))
+                .subscribe(result => {
+                  if (result) {
+                    this.workspaceMoved.emit({
+                      selection: selectedRows,
+                      workspaceGroupId: result as number
+                    });
+                  }
+                });
+            } else {
+              this.moveWorkspaceDialog.open(MoveWorkspaceComponent, {
+                width: '600px',
+                data: {
+                  title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
+                  content: this.translateService.instant('wsg-admin.move-workspaces-no-workspace-groups-hint'),
+                  warning: this.translateService.instant('wsg-admin.move-workspaces-warning'),
+                  workspaceGroups: this.workspaceGroupsByUser,
+                  okButtonLabel: this.translateService.instant('close')
+                }
               });
             }
           });
-        } else {
-          this.moveWorkspaceDialog.open(MoveWorkspaceComponent, {
-            width: '600px',
-            data: {
-              title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
-              content: this.translateService.instant('wsg-admin.move-workspaces-no-workspace-groups-hint'),
-              warning: this.translateService.instant('wsg-admin.move-workspaces-warning'),
-              workspaceGroups: this.workspaceGroupsByUser,
-              okButtonLabel: this.translateService.instant('close')
-            }
-          });
-        }
       });
-    });
   }
 
   renameObject() {
@@ -157,45 +167,51 @@ export class WorkspaceMenuComponent {
           okButtonLabel: this.translateService.instant('save')
         }
       });
-      dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-          this.workspaceRenamed.emit({
-            selection: selectedRows,
-            name: result as string
-          });
-        }
-      });
+      dialogRef.afterClosed()
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(result => {
+          if (result) {
+            this.workspaceRenamed.emit({
+              selection: selectedRows,
+              name: result as string
+            });
+          }
+        });
     }
   }
 
   changeObject(): void {
     const selectedRows = this.selectedRows;
     if (selectedRows.length) {
-      this.appBackendService.getWorkspaceData(selectedRows[0].id).subscribe(
-        wResponse => {
-          if (wResponse) {
-            const wsSettings = wResponse.settings || {
-              defaultEditor: '',
-              defaultPlayer: '',
-              defaultSchemer: '',
-              unitGroups: [],
-              stableModulesOnly: true,
-              profile: ''
-            };
-            const dialogRef = this.editWorkspaceSettingsDialog.open(EditWorkspaceSettingsComponent, {
-              width: '900px',
-              data: { settings: wsSettings, selectedRow: selectedRows[0] }
-            });
-            dialogRef.afterClosed().subscribe(result => {
-              if (result) {
-                this.workspaceChanged.emit({ selection: selectedRows, settings: result });
-              }
-            });
-          } else {
-            this.workspaceNotLoaded.emit();
+      this.appBackendService.getWorkspaceData(selectedRows[0].id)
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(
+          wResponse => {
+            if (wResponse) {
+              const wsSettings = wResponse.settings || {
+                defaultEditor: '',
+                defaultPlayer: '',
+                defaultSchemer: '',
+                unitGroups: [],
+                stableModulesOnly: true,
+                profile: ''
+              };
+              const dialogRef = this.editWorkspaceSettingsDialog.open(EditWorkspaceSettingsComponent, {
+                width: '900px',
+                data: { settings: wsSettings, selectedRow: selectedRows[0] }
+              });
+              dialogRef.afterClosed()
+                .pipe(takeUntil(this.ngUnsubscribe))
+                .subscribe(result => {
+                  if (result) {
+                    this.workspaceChanged.emit({ selection: selectedRows, settings: result });
+                  }
+                });
+            } else {
+              this.workspaceNotLoaded.emit();
+            }
           }
-        }
-      );
+        );
     }
   }
 
@@ -208,13 +224,20 @@ export class WorkspaceMenuComponent {
         selectedWorkspaceName: this.selectedRows[0].name
       }
     });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result !== undefined) {
-        this.workspaceDropBoxSelected.emit({
-          selection: this.selectedRows,
-          dropBoxId: result
-        });
-      }
-    });
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(result => {
+        if (result !== undefined) {
+          this.workspaceDropBoxSelected.emit({
+            selection: this.selectedRows,
+            dropBoxId: result
+          });
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

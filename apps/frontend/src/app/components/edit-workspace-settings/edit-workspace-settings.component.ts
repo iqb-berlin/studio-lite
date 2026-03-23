@@ -1,6 +1,7 @@
 import {
-  Component, Inject, OnInit
+  Component, Inject, OnInit, OnDestroy
 } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
@@ -38,7 +39,8 @@ type SelectedRow = {
   // eslint-disable-next-line max-len
   imports: [MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, MatError, MatSelect, MatOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule, IncludePipe]
 })
-export class EditWorkspaceSettingsComponent implements OnInit {
+export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
+  private ngUnsubscribe = new Subject<void>();
   constructor(
     public appService: AppService,
     public backendService: BackendService,
@@ -64,6 +66,7 @@ export class EditWorkspaceSettingsComponent implements OnInit {
     const workspaceGroupId = this.data.selectedRow?.groupId || this.workspaceService.groupId;
     if (workspaceGroupId) {
       this.backendService.getWorkspaceGroupById(workspaceGroupId)
+        .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe((res => {
           this.unitMDProfiles = (
             res && (res as WorkspaceGroupFullDto).settings && (res as WorkspaceGroupFullDto).settings?.profiles
@@ -77,6 +80,7 @@ export class EditWorkspaceSettingsComponent implements OnInit {
           ) || [];
         }));
       this.backendService.getWorkspaceById(this.data.selectedRow.id)
+        .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(res => {
           const itemMDProfile = (
             res && (res as WorkspaceFullDto).settings && (res as WorkspaceFullDto).settings?.itemMDProfile
@@ -132,5 +136,10 @@ export class EditWorkspaceSettingsComponent implements OnInit {
     } else if (!this.dialogData.hiddenRoutes.includes(route)) {
       this.dialogData.hiddenRoutes.push(route);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

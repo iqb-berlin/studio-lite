@@ -80,17 +80,19 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
     private i18nService: I18nService,
     private deleteConfirmDialog: MatDialog
   ) {
-    this.tableSelectionRow.changed.subscribe(
-      r => {
-        if (r.added.length > 0) {
-          this.selectedWorkspaceId = r.added[0].id;
-        } else {
-          this.selectedWorkspaceId = 0;
+    this.tableSelectionRow.changed
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(
+        r => {
+          if (r.added.length > 0) {
+            this.selectedWorkspaceId = r.added[0].id;
+          } else {
+            this.selectedWorkspaceId = 0;
+          }
+          this.updateUserList();
+          this.isWorkspaceGroupAdmin = this.appService.isWorkspaceGroupAdmin(this.selectedWorkspaceId);
         }
-        this.updateUserList();
-        this.isWorkspaceGroupAdmin = this.appService.isWorkspaceGroupAdmin(this.selectedWorkspaceId);
-      }
-    );
+      );
   }
 
   ngOnInit(): void {
@@ -126,12 +128,14 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
     }
     if (this.selectedWorkspaceId > 0) {
       this.appService.dataLoading = true;
-      this.backendService.getUsersByWorkspace(this.selectedWorkspaceId).subscribe(
-        (dataResponse: WorkspaceUserInListDto[]) => {
-          this.workspaceUsers.setChecks(dataResponse);
-          this.appService.dataLoading = false;
-        }
-      );
+      this.backendService.getUsersByWorkspace(this.selectedWorkspaceId)
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(
+          (dataResponse: WorkspaceUserInListDto[]) => {
+            this.workspaceUsers.setChecks(dataResponse);
+            this.appService.dataLoading = false;
+          }
+        );
     } else {
       this.workspaceUsers.setChecks();
     }
@@ -144,26 +148,28 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
         this.backendService.setUsersByWorkspace(
           this.selectedWorkspaceId,
           this.workspaceUsers.getChecks()
-        ).subscribe(
-          respOk => {
-            if (respOk) {
-              this.snackBar.open(
-                this.translateService.instant('access-rights.changed'),
-                '',
-                { duration: 1000 }
-              );
-              this.workspaceUsers.sortEntries();
-              this.workspaceUsers.setHasChangedFalse();
-            } else {
-              this.snackBar.open(
-                this.translateService.instant('access-rights.not-changed'),
-                this.translateService.instant('error'),
-                { duration: 3000 }
-              );
+        )
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(
+            respOk => {
+              if (respOk) {
+                this.snackBar.open(
+                  this.translateService.instant('access-rights.changed'),
+                  '',
+                  { duration: 1000 }
+                );
+                this.workspaceUsers.sortEntries();
+                this.workspaceUsers.setHasChangedFalse();
+              } else {
+                this.snackBar.open(
+                  this.translateService.instant('access-rights.not-changed'),
+                  this.translateService.instant('error'),
+                  { duration: 3000 }
+                );
+              }
+              this.appService.dataLoading = false;
             }
-            this.appService.dataLoading = false;
-          }
-        );
+          );
       }
     }
   }
@@ -173,6 +179,7 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
     this.updateUserList();
     this.appService.dataLoading = true;
     this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId.value)
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
         (workspaces: WorkspaceInListDto[]) => {
           this.workspaces = workspaces;
@@ -198,6 +205,7 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   createUserList(): void {
     this.workspaceUsers = new WorkspaceUserToCheckCollection([]);
     this.backendService.getUsers()
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(users => {
         this.workspaceUsers = new WorkspaceUserToCheckCollection(users);
         this.updateWorkspaceList();
@@ -211,6 +219,7 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   xlsxDownloadWorkspaceReport() {
     this.appService.dataLoading = true;
     this.backendService.getXlsWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId.value)
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(workspace => {
         const datePipe = new DatePipe(this.i18nService.fullLocale);
         const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
@@ -240,54 +249,59 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
       }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.appService.dataLoading = true;
-        this.backendService.deleteWorkspaces([workspace.id])
-          .subscribe(
-            respOk => {
-              if (respOk) {
-                this.snackBar.open(
-                  this.translateService.instant('wsg-admin.workspaces-deleted'),
-                  '',
-                  { duration: 1000 }
-                );
-                this.updateWorkspaceList();
-              } else {
-                this.snackBar.open(
-                  this.translateService.instant('wsg-admin.workspaces-not-deleted'),
-                  this.translateService.instant('error'),
-                  { duration: 1000 }
-                );
-                this.appService.dataLoading = false;
-              }
-            });
-      }
-    });
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(result => {
+        if (result) {
+          this.appService.dataLoading = true;
+          this.backendService.deleteWorkspaces([workspace.id])
+            .pipe(takeUntil(this.ngUnsubscribe))
+            .subscribe(
+              respOk => {
+                if (respOk) {
+                  this.snackBar.open(
+                    this.translateService.instant('wsg-admin.workspaces-deleted'),
+                    '',
+                    { duration: 1000 }
+                  );
+                  this.updateWorkspaceList();
+                } else {
+                  this.snackBar.open(
+                    this.translateService.instant('wsg-admin.workspaces-not-deleted'),
+                    this.translateService.instant('error'),
+                    { duration: 1000 }
+                  );
+                  this.appService.dataLoading = false;
+                }
+              });
+        }
+      });
   }
 
   moveWorkspace(value: { selection: WorkspaceInListDto[], workspaceGroupId: number }) {
     this.appService.dataLoading = true;
     const workspacesToMove: number[] = value.selection.map(workspace => workspace.id);
-    this.backendService.moveWorkspaces(value.workspaceGroupId, workspacesToMove).subscribe(
-      respOk => {
-        if (respOk) {
-          this.snackBar.open(
-            this.translateService.instant('wsg-admin.workspaces-moved'),
-            '',
-            { duration: 1000 }
-          );
-          this.updateWorkspaceList();
-        } else {
-          this.snackBar.open(
-            this.translateService.instant('wsg-admin.workspaces-not-moved'),
-            this.translateService.instant('error'),
-            { duration: 1000 }
-          );
-          this.appService.dataLoading = false;
+    this.backendService.moveWorkspaces(value.workspaceGroupId, workspacesToMove)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(
+        respOk => {
+          if (respOk) {
+            this.snackBar.open(
+              this.translateService.instant('wsg-admin.workspaces-moved'),
+              '',
+              { duration: 1000 }
+            );
+            this.updateWorkspaceList();
+          } else {
+            this.snackBar.open(
+              this.translateService.instant('wsg-admin.workspaces-not-moved'),
+              this.translateService.instant('error'),
+              { duration: 1000 }
+            );
+            this.appService.dataLoading = false;
+          }
         }
-      }
-    );
+      );
   }
 
   addWorkspace(result: string) {
@@ -295,76 +309,83 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
     this.backendService.addWorkspace(<CreateWorkspaceDto>{
       name: result,
       groupId: this.wsgAdminService.selectedWorkspaceGroupId.value
-    }).subscribe(
-      respOk => {
-        if (respOk) {
-          this.snackBar.open(
-            this.translateService.instant('wsg-admin.workspace-added'),
-            '',
-            { duration: 1000 }
-          );
-          this.updateWorkspaceList();
-        } else {
-          this.snackBar.open(
-            this.translateService.instant('wsg-admin.workspace-not-added'),
-            this.translateService.instant('error'),
-            { duration: 3000 }
-          );
+    })
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(
+        respOk => {
+          if (respOk) {
+            this.snackBar.open(
+              this.translateService.instant('wsg-admin.workspace-added'),
+              '',
+              { duration: 1000 }
+            );
+            this.updateWorkspaceList();
+          } else {
+            this.snackBar.open(
+              this.translateService.instant('wsg-admin.workspace-not-added'),
+              this.translateService.instant('error'),
+              { duration: 3000 }
+            );
+          }
+          this.appService.dataLoading = false;
         }
-        this.appService.dataLoading = false;
-      }
-    );
+      );
   }
 
   selectDropBox(value: { selection: WorkspaceInListDto[], dropBoxId: number }) {
     this.appService.dataLoading = true;
-    this.backendService.selectWorkspaceDropBox(value.selection[0].id, value.dropBoxId).subscribe(
-      respOk => {
-        if (respOk) {
-          this.snackBar.open(
-            this.translateService.instant('wsg-admin.drop-box-selected'),
-            '',
-            { duration: 1000 }
-          );
-          this.updateWorkspaceList();
-        } else {
-          this.snackBar.open(
-            this.translateService.instant('wsg-admin.drop-box-not-selected'),
-            this.translateService.instant('error'),
-            { duration: 3000 }
-          );
+    this.backendService.selectWorkspaceDropBox(value.selection[0].id, value.dropBoxId)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(
+        respOk => {
+          if (respOk) {
+            this.snackBar.open(
+              this.translateService.instant('wsg-admin.drop-box-selected'),
+              '',
+              { duration: 1000 }
+            );
+            this.updateWorkspaceList();
+          } else {
+            this.snackBar.open(
+              this.translateService.instant('wsg-admin.drop-box-not-selected'),
+              this.translateService.instant('error'),
+              { duration: 3000 }
+            );
+          }
+          this.appService.dataLoading = false;
         }
-        this.appService.dataLoading = false;
-      }
-    );
+      );
   }
 
   renameWorkspace(value: { selection: WorkspaceInListDto[], name: string }) {
     this.appService.dataLoading = true;
-    this.backendService.renameWorkspace(value.selection[0].id, value.name).subscribe(
-      respOk => {
-        if (respOk) {
-          this.snackBar.open(
-            this.translateService.instant('wsg-admin.workspace-renamed'),
-            '',
-            { duration: 1000 }
-          );
-          this.updateWorkspaceList();
-        } else {
-          this.snackBar.open(
-            this.translateService.instant('wsg-admin.workspace-not-renamed'),
-            this.translateService.instant('error'),
-            { duration: 3000 }
-          );
+    this.backendService.renameWorkspace(value.selection[0].id, value.name)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(
+        respOk => {
+          if (respOk) {
+            this.snackBar.open(
+              this.translateService.instant('wsg-admin.workspace-renamed'),
+              '',
+              { duration: 1000 }
+            );
+            this.updateWorkspaceList();
+          } else {
+            this.snackBar.open(
+              this.translateService.instant('wsg-admin.workspace-not-renamed'),
+              this.translateService.instant('error'),
+              { duration: 3000 }
+            );
+          }
+          this.appService.dataLoading = false;
         }
-        this.appService.dataLoading = false;
-      }
-    );
+      );
   }
 
   changeWorkspace(value: { selection: WorkspaceInListDto[], settings: WorkspaceSettings }) {
     this.appService.dataLoading = true;
     this.appBackendService.setWorkspaceSettings(value.selection[0].id, value.settings)
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(isOK => {
         this.appService.dataLoading = false;
         if (!isOK) {

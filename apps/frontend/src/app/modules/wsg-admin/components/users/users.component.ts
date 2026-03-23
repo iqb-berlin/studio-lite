@@ -2,7 +2,10 @@ import {
   MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell,
   MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
-import { ViewChild, Component, OnInit } from '@angular/core';
+import {
+  ViewChild, Component, OnInit, OnDestroy
+} from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -34,7 +37,8 @@ import { EntriesDividerComponent } from '../../../../components/entries-divider/
     MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, EntriesDividerComponent,
     MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule, RolesHeaderComponent, MatFabButton, MatIcon]
 })
-export class UsersComponent implements OnInit {
+export class UsersComponent implements OnInit, OnDestroy {
+  private ngUnsubscribe = new Subject<void>();
   objectsDatasource = new MatTableDataSource<UserFullDto>([]);
   displayedColumns = ['name', 'displayName', 'isAdmin', 'email', 'description'];
   tableSelectionCheckbox = new SelectionModel <UserFullDto>(true, []);
@@ -52,6 +56,7 @@ export class UsersComponent implements OnInit {
     private translateService: TranslateService
   ) {
     this.tableSelectionRow.changed
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
         r => {
           if (r.added.length) {
@@ -89,6 +94,7 @@ export class UsersComponent implements OnInit {
     if (this.selectedUser) {
       this.appService.dataLoading = true;
       this.backendService.getWorkspacesByUser(this.selectedUser)
+        .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(
           (dataResponse: UsersWorkspaceInListDto[]) => {
             this.userWorkspaces.setChecks(dataResponse);
@@ -118,24 +124,26 @@ export class UsersComponent implements OnInit {
         this.backendService.setWorkspacesByUser(
           this.selectedUser,
           this.userWorkspaces.getChecks(this.wsgAdminService.selectedWorkspaceGroupId.value)
-        ).subscribe(
-          respOk => {
-            if (respOk) {
-              this.snackBar.open(
-                this.translateService.instant('access-rights.changed'),
-                '',
-                { duration: 1000 });
-              this.userWorkspaces.sortEntries();
-              this.userWorkspaces.setHasChangedFalse();
-            } else {
-              this.snackBar.open(
-                this.translateService.instant('access-rights.not-changed'),
-                this.translateService.instant('error'),
-                { duration: 3000 });
+        )
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(
+            respOk => {
+              if (respOk) {
+                this.snackBar.open(
+                  this.translateService.instant('access-rights.changed'),
+                  '',
+                  { duration: 1000 });
+                this.userWorkspaces.sortEntries();
+                this.userWorkspaces.setHasChangedFalse();
+              } else {
+                this.snackBar.open(
+                  this.translateService.instant('access-rights.not-changed'),
+                  this.translateService.instant('error'),
+                  { duration: 3000 });
+              }
+              this.appService.dataLoading = false;
             }
-            this.appService.dataLoading = false;
-          }
-        );
+          );
       }
     }
   }
@@ -144,6 +152,7 @@ export class UsersComponent implements OnInit {
     this.selectedUser = 0;
     this.appService.dataLoading = true;
     this.backendService.getUsersFull()
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
         (dataResponse: UserFullDto[]) => {
           if (dataResponse.length > 0) {
@@ -163,6 +172,7 @@ export class UsersComponent implements OnInit {
   createWorkspaceList(): void {
     this.userWorkspaces = new WorkspaceToCheckCollection([]);
     this.backendService.getWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId.value)
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(workspaces => {
         this.userWorkspaces = new WorkspaceToCheckCollection(workspaces);
         this.updateUserList();
@@ -171,5 +181,10 @@ export class UsersComponent implements OnInit {
 
   toggleRowSelection(row: UserInListDto): void {
     this.tableSelectionRow.toggle(row);
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
