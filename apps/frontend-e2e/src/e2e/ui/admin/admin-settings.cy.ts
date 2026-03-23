@@ -57,7 +57,7 @@ describe('Admin Settings Tab Configuration', () => {
       cy.get('studio-lite-warning').should('contain.text', 'System-Wartung am 01.01.2026');
 
       // Log back in so that subsequent tests (which require admin access) can pass
-      login(Cypress.env('username'), Cypress.env('password'));
+      login(Cypress.expose('username'), Cypress.expose('password'));
     });
 
     it('clears the warning message and restores defaults', () => {

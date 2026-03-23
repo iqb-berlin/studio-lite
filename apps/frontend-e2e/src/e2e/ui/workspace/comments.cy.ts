@@ -77,7 +77,7 @@ describe('Unit Comments', () => {
   });
 
   it('deletes a comment', () => {
-    loginWithUser(Cypress.env('username'), Cypress.env('password'));
+    loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
     cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');

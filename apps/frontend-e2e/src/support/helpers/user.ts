@@ -16,7 +16,7 @@ import { editInput } from './common';
 export function login(username: string, password = ''): void {
   cy.visit('/');
   cy.login(username, password);
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.clickButtonWithResponseCheck(json.home.login, [201], '/api/login', 'POST', 'responseLogin');
   });
   cy.get('[data-cy="goto-user-menu"]').should('exist');
@@ -44,7 +44,7 @@ export function loginWithUser(username: string, pass: string): void {
 export function logout(): void {
   cy.get('[data-cy="goto-user-menu"]').click();
   cy.get('[data-cy="user-menu-logout"]').click();
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.clickDialogButton(json.home.logout);
   });
   cy.get('[data-cy="home-imprint-button"]').should('exist');

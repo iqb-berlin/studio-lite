@@ -48,7 +48,7 @@ describe('UI Administration Management', () => {
 
   it('creates a workspace within a group', () => {
     createWs(ws1, group1);
-    grantRemovePrivilegeAtWs([Cypress.env('username')], 'Mathematik I', [AccessLevel.Basic]);
+    grantRemovePrivilegeAtWs([Cypress.expose('username')], 'Mathematik I', [AccessLevel.Basic]);
   });
 
   it('uploads Verona modules',

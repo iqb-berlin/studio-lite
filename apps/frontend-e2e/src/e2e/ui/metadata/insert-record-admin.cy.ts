@@ -25,9 +25,9 @@ describe('Metadata Profile Management from Admin', () => {
   it('sets up workspaces in group', () => {
     createGroup(group);
     createWs(area, group);
-    grantRemovePrivilegeAtWs([Cypress.env('username')], area, [AccessLevel.Admin]);
+    grantRemovePrivilegeAtWs([Cypress.expose('username')], area, [AccessLevel.Admin]);
     createWs(mathArea, group);
-    grantRemovePrivilegeAtWs([Cypress.env('username')], mathArea, [AccessLevel.Admin]);
+    grantRemovePrivilegeAtWs([Cypress.expose('username')], mathArea, [AccessLevel.Admin]);
   });
   it('assigns metadata profiles to group from admin settings', () => {
     selectProfileForGroupFromAdmin(group, IqbProfile.DE);

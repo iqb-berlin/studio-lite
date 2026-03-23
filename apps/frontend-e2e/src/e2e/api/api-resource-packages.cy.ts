@@ -8,22 +8,22 @@ describe('Admin settings API tests', () => {
     isAdmin: false
   };
   before(() => {
-    cy.addFirstUserAPI(Cypress.env('username'), Cypress.env('password'))
+    cy.addFirstUserAPI(Cypress.expose('username'), Cypress.expose('password'))
       .then(resp => {
-        Cypress.env(`token_${Cypress.env('username')}`, resp.body);
+        Cypress.expose(`token_${Cypress.expose('username')}`, resp.body);
         expect(resp.status).to.equal(201);
-        cy.getUserIdAPI(Cypress.env(`token_${Cypress.env('username')}`))
+        cy.getUserIdAPI(Cypress.expose(`token_${Cypress.expose('username')}`))
           .then(resp2 => {
-            Cypress.env(`id_${Cypress.env('username')}`, resp2.body.userId);
+            Cypress.expose(`id_${Cypress.expose('username')}`, resp2.body.userId);
             expect(resp2.status).to.equal(200);
           });
-        cy.createUserAPI(user2, Cypress.env(`token_${Cypress.env('username')}`))
+        cy.createUserAPI(user2, Cypress.expose(`token_${Cypress.expose('username')}`))
           .then(res => {
-            Cypress.env(`id_${user2.username}`, res.body);
+            Cypress.expose(`id_${user2.username}`, res.body);
             expect(res.status).to.equal(201);
             cy.loginAPI(user2.username, user2.password)
               .then(resp3 => {
-                Cypress.env(`token_${user2.username}`, resp3.body);
+                Cypress.expose(`token_${user2.username}`, resp3.body);
                 expect(resp3.status).to.equal(201);
               });
           });
@@ -39,7 +39,7 @@ describe('Admin settings API tests', () => {
     //     });
     // });
     it('201 positive test: should allow an authorized administrator to successfully add a resource package', () => {
-      cy.addPackageAPI(resource, Cypress.env(`token_${Cypress.env('username')}`))
+      cy.addPackageAPI(resource, Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(201);
         });
@@ -49,14 +49,14 @@ describe('Admin settings API tests', () => {
   describe('109. GET /api/resource-packages', () => {
     it('200 positive test: should allow an authorized administrator to successfully ' +
       'retrieve a resource package', () => {
-      cy.getPackageAPI(Cypress.env(`token_${Cypress.env('username')}`))
+      cy.getPackageAPI(Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
     });
 
     it('200 positive test: should allow a regular user to successfully retrieve a resource package', () => {
-      cy.getPackageAPI(Cypress.env(`token_${user2.username}`))
+      cy.getPackageAPI(Cypress.expose(`token_${user2.username}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
@@ -72,7 +72,7 @@ describe('Admin settings API tests', () => {
 
   describe('110. DELETE /api/admin/resource-packages', () => {
     it('401 negative test: should deny resource package deletion to a user with regular permissions', () => {
-      cy.deletePackageAPI(Cypress.env(`token_${user2.username}`), '1')
+      cy.deletePackageAPI(Cypress.expose(`token_${user2.username}`), '1')
         .then(resp => {
           expect(resp.status).to.equal(401);
         });
@@ -86,7 +86,7 @@ describe('Admin settings API tests', () => {
     });
 
     it('200 positive test: should allow an authorized administrator to successfully delete a resource package', () => {
-      cy.deletePackageAPI(Cypress.env(`token_${Cypress.env('username')}`), '1')
+      cy.deletePackageAPI(Cypress.expose(`token_${Cypress.expose('username')}`), '1')
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
@@ -95,13 +95,14 @@ describe('Admin settings API tests', () => {
 
   describe('Erase the database', () => {
     it('Deletes users', () => {
-      cy.deleteUsersAPI([Cypress.env(`id_${user2.username}`)], Cypress.env(`token_${Cypress.env('username')}`))
+      cy.deleteUsersAPI([Cypress.expose(`id_${user2.username}`)], Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
-      cy.deleteUsersAPI([Cypress.env(`id_${Cypress.env('username')}`)], Cypress.env(`token_${Cypress.env('username')}`))
+      cy.deleteUsersAPI([Cypress.expose(`id_${Cypress.expose('username')}`)],
+        Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          Cypress.env('token_admin', '');
+          Cypress.expose('token_admin', '');
           expect(resp.status).to.equal(200);
         });
     });

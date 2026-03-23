@@ -11,7 +11,7 @@ describe('Admin verona API tests', () => {
       modules.forEach(m => {
         cy.addModuleAPI(
           m,
-          Cypress.env(`token_${Cypress.env('username')}`)
+          Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
           expect(resp.status).to.equal(201);
         });
@@ -22,7 +22,7 @@ describe('Admin verona API tests', () => {
   describe('23. GET /api/verona-modules', () => {
     it('200 positive test: should retrieve all registered Verona modules', () => {
       cy.wait(200);
-      cy.getModulesAPI(Cypress.env(`token_${Cypress.env('username')}`)).then(
+      cy.getModulesAPI(Cypress.expose(`token_${Cypress.expose('username')}`)).then(
         resp => {
           expect(resp.status).to.be.oneOf([200, 304]);
           expect(resp.body.length).equal(6);
@@ -41,7 +41,7 @@ describe('Admin verona API tests', () => {
     it('200 positive test: should retrieve metadata for a specific Verona module by its key', () => {
       cy.getModuleAPI(
         'iqb-schemer%402.6',
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
       });
@@ -56,7 +56,7 @@ describe('Admin verona API tests', () => {
     it('404 negative test: should return error when requesting a module with a non-existent key', () => {
       cy.getModuleAPI(
         noId,
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(404);
       });

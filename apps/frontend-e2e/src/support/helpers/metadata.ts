@@ -12,7 +12,7 @@
 export function createItem(itemId: string): void {
   cy.get('.add-button > .mdc-button__label').click();
   cy.get('[data-cy="metadata-new-item-button"]').click();
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.get(`mat-expansion-panel:contains("${json.metadata['without-id']}")`).click();
     cy.get('mat-label:contains("Item ID")').eq(-1).type(itemId);
   });
@@ -26,7 +26,7 @@ export function createItem(itemId: string): void {
  * assignVariableToItem(''); // Unassign
  */
 export function assignVariableToItem(variableName: string): void {
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.get(`mat-select[placeholder="${json.metadata['choose-item-variable']}"]`)
       .eq(-1)
       .find('svg')

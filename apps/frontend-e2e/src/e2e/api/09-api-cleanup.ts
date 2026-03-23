@@ -18,7 +18,7 @@ describe('Cleanup API tests', () => {
       'to delete without a workspace context', () => {
       cy.deleteWsAPI(
         [noId],
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
         // expect(resp.status).to.equal(500); should
@@ -26,15 +26,15 @@ describe('Cleanup API tests', () => {
     });
 
     it('401 negative test: should deny workspace deletion when no authentication token is provided', () => {
-      cy.deleteWsAPI([Cypress.env(ws2.id)], noId).then(resp => {
+      cy.deleteWsAPI([Cypress.expose(ws2.id)], noId).then(resp => {
         expect(resp.status).to.equal(401);
       });
     });
 
     it('200 positive test: should allow an authorized user to delete a specified list of workspaces', () => {
       cy.deleteWsAPI(
-        [Cypress.env(ws1.id), Cypress.env(ws2.id)],
-        Cypress.env(`token_${Cypress.env('username')}`)
+        [Cypress.expose(ws1.id), Cypress.expose(ws2.id)],
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
       });
@@ -43,8 +43,8 @@ describe('Cleanup API tests', () => {
     it('200/500 negative test: should return success or server error when attempting ' +
       'to delete a workspace that has already been removed', () => {
       cy.deleteWsAPI(
-        [Cypress.env(ws2.id)],
-        Cypress.env(`token_${Cypress.env('username')}`)
+        [Cypress.expose(ws2.id)],
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
         // expect(resp.status).to.equal(500); should
@@ -55,10 +55,10 @@ describe('Cleanup API tests', () => {
   describe('88. DELETE /api/admin/workspace-groups', () => {
     let qs: string[];
     before(() => {
-      qs = [Cypress.env(groupVera.id), Cypress.env(group2.id)];
+      qs = [Cypress.expose(groupVera.id), Cypress.expose(group2.id)];
     });
     it('401 negative test: should deny workspace group deletion for a regular user account', () => {
-      cy.deleteGroupsAPI(qs, Cypress.env(`token_${userGroupAdmin.username}`)).then(
+      cy.deleteGroupsAPI(qs, Cypress.expose(`token_${userGroupAdmin.username}`)).then(
         resp => {
           expect(resp.status).to.equal(401);
         }
@@ -70,7 +70,7 @@ describe('Cleanup API tests', () => {
       // This test should have 404 response, but we get 200
       cy.deleteGroupsAPI(
         [noId],
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
         // expect(resp.status).to.equal(404); // should
@@ -80,10 +80,10 @@ describe('Cleanup API tests', () => {
     it('200 positive test: should allow an administrator to successfully delete workspace groups', () => {
       cy.deleteGroupsAPI(
         qs,
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
-        Cypress.env(group2.id, '');
-        Cypress.env(groupVera.id, '');
+        Cypress.expose(group2.id, '');
+        Cypress.expose(groupVera.id, '');
         expect(resp.status).to.equal(200);
       });
     });
@@ -106,7 +106,7 @@ describe('Cleanup API tests', () => {
       'to delete a module that does not exist', () => {
       cy.deleteModulesAPI(
         [noId],
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
         // expect(resp.status).to.equal(500); should
@@ -115,7 +115,7 @@ describe('Cleanup API tests', () => {
     it('200 positive test: should allow an authorized user to successfully delete a list of modules', () => {
       cy.deleteModulesAPI(
         qs,
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
       });
@@ -127,7 +127,7 @@ describe('Cleanup API tests', () => {
       'to delete a user using an invalid ID', () => {
       cy.deleteUsersAPI(
         [noId],
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
         // expect(resp.status).to.equal(404); // should
@@ -135,7 +135,7 @@ describe('Cleanup API tests', () => {
     });
 
     it('401 negative test: should deny user deletion when no valid authentication token is provided', () => {
-      cy.deleteUsersAPI([Cypress.env(`id_${user3.username}`)], noId).then(
+      cy.deleteUsersAPI([Cypress.expose(`id_${user3.username}`)], noId).then(
         resp => {
           expect(resp.status).to.equal(401);
         }
@@ -145,10 +145,10 @@ describe('Cleanup API tests', () => {
     it('200 positive test: should allow an authorized administrator to successfully delete user accounts', () => {
       cy.deleteUsersAPI(
         [
-          Cypress.env(`id_${userGroupAdmin.username}`),
-          Cypress.env(`id_${user3.username}`)
+          Cypress.expose(`id_${userGroupAdmin.username}`),
+          Cypress.expose(`id_${user3.username}`)
         ],
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
       });
@@ -158,20 +158,20 @@ describe('Cleanup API tests', () => {
   describe('90. Delete the first user /api/admin/users/id', () => {
     it('200 positive test: should allow deleting the primary administrator user account', () => {
       cy.deleteUsersAPI(
-        [Cypress.env(`id_${Cypress.env('username')}`)],
-        Cypress.env(`token_${Cypress.env('username')}`)
+        [Cypress.expose(`id_${Cypress.expose('username')}`)],
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
-        Cypress.env('token_admin', '');
+        Cypress.expose('token_admin', '');
         expect(resp.status).to.equal(200);
       });
     });
 
     it('401 negative test: should deny deletion of a user account that no longer exists', () => {
       cy.deleteUsersAPI(
-        [Cypress.env(`id_${Cypress.env('username')}`)],
-        Cypress.env(`token_${Cypress.env('username')}`)
+        [Cypress.expose(`id_${Cypress.expose('username')}`)],
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
-        Cypress.env('token_admin', '');
+        Cypress.expose('token_admin', '');
         expect(resp.status).to.equal(401);
       });
     });

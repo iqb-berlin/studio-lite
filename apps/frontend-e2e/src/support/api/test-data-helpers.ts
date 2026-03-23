@@ -12,12 +12,12 @@
  * deleteTextField('ws_123', 'unit_456');
  */
 export function deleteTextField(wsId: string, unitId: string): void {
-  const authorization = `bearer ${Cypress.env(`token_${Cypress.env('username')}`)}`;
+  const authorization = `bearer ${Cypress.expose(`token_${Cypress.expose('username')}`)}`;
   cy.request({
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/units/${unitId}/definition`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {

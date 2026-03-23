@@ -93,7 +93,7 @@ describe('Workspace Unit Management', () => {
     cy.get('mat-option').should('have.length', 1);
     cy.get('.cdk-overlay-backdrop').last().click({ force: true });
 
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickDialogButton(json.cancel || json.close);
     });
   });
@@ -125,7 +125,7 @@ describe('Workspace Unit Management', () => {
     cy.get('[data-cy="edit-workspace-settings-schemer"]')
       .find('mat-select').should('have.class', 'mat-mdc-select-empty');
 
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickDialogButton(json.cancel || json.close);
     });
   });
@@ -209,7 +209,7 @@ describe('Workspace Unit Management', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-coding-report"]').click();
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickDialogButton(json.close);
     });
   });
@@ -220,7 +220,7 @@ describe('Workspace Unit Management', () => {
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-export-coding-book"]').click();
     selectListUnits([newUnit.shortname]);
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickButtonWithResponseCheck(
         json.export,
         [200, 304],

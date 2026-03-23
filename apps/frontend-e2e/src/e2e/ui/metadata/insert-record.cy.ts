@@ -32,9 +32,9 @@ describe('Metadata Management', () => {
   it('sets up workspaces with metadata profiles', () => {
     createGroup(group);
     createWs(ws1, group);
-    grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [AccessLevel.Admin]);
+    grantRemovePrivilegeAtWs([Cypress.expose('username')], ws1, [AccessLevel.Admin]);
     createWs(ws2, group);
-    grantRemovePrivilegeAtWs([Cypress.env('username')], ws2, [AccessLevel.Admin]);
+    grantRemovePrivilegeAtWs([Cypress.expose('username')], ws2, [AccessLevel.Admin]);
   });
 
   it('selects metadata profiles for group', () => {
