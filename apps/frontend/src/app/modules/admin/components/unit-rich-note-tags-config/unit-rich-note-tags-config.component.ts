@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors
+  FormBuilder, FormGroup, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
+import { StudioValidators } from '../../../../validators/studio-validators.validator';
 import { BackendService } from '../../services/backend.service';
 
 @Component({
@@ -38,7 +39,7 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
     private translateService: TranslateService
   ) {
     this.configForm = this.fb.group({
-      tagsJson: ['', [UnitRichNoteTagsConfigComponent.jsonValidator]]
+      tagsJson: ['', [StudioValidators.jsonValidator]]
     });
     this.configForm.statusChanges
       .pipe(takeUntil(this.ngUnsubscribe))
@@ -89,17 +90,6 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
             );
           }
         });
-    }
-  }
-
-  private static jsonValidator(control: AbstractControl): ValidationErrors | null {
-    try {
-      if (control.value) {
-        JSON.parse(control.value);
-      }
-      return null;
-    } catch (e) {
-      return { invalidJson: true };
     }
   }
 

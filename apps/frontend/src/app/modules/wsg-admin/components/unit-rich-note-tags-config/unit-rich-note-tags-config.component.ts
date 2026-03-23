@@ -2,7 +2,7 @@ import {
   Component, EventEmitter, OnDestroy, OnInit, Output
 } from '@angular/core';
 import {
-  AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors
+  AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { UnitRichNoteTagDto, WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
+import { StudioValidators } from '../../../../validators/studio-validators.validator';
 import { BackendService } from '../../../admin/services/backend.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 
@@ -50,7 +51,7 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
     private wsgAdminService: WsgAdminService
   ) {
     this.configForm = this.fb.group({
-      tagsJson: ['', [UnitRichNoteTagsConfigComponent.jsonValidator]]
+      tagsJson: ['', [StudioValidators.jsonValidator]]
     });
   }
 
@@ -89,17 +90,6 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
     this.configForm.patchValue({
       tagsJson: this.globalTagsJson
     });
-  }
-
-  private static jsonValidator(control: AbstractControl): ValidationErrors | null {
-    try {
-      if (control.value && control.value.trim()) {
-        JSON.parse(control.value);
-      }
-      return null;
-    } catch (e) {
-      return { invalidJson: true };
-    }
   }
 
   ngOnDestroy(): void {
