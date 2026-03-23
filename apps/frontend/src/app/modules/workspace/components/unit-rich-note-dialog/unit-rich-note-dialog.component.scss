@@ -19,7 +19,12 @@
 }
 
 .editor-container {
-  margin: 20px 0;
+  margin: 20px 0 35px 0; /* Add bottom margin for error space */
+}
+
+.editor-error {
+  padding: 5px 16px;
+  font-size: 75%;
 }
 
 .labels-section, .descriptions-section {

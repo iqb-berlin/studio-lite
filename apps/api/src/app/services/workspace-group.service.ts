@@ -81,8 +81,13 @@ export class WorkspaceGroupService {
       const workspaceGroupToUpdate = await this.workspaceGroupsRepository.findOne({
         where: { id: id }
       });
-      if (workspaceGroupData.name) workspaceGroupToUpdate.name = workspaceGroupData.name;
-      if (workspaceGroupData.settings) workspaceGroupToUpdate.settings = workspaceGroupData.settings;
+      if (workspaceGroupData.name !== undefined) workspaceGroupToUpdate.name = workspaceGroupData.name;
+      if (workspaceGroupData.settings !== undefined) {
+        workspaceGroupToUpdate.settings = {
+          ...workspaceGroupToUpdate.settings,
+          ...workspaceGroupData.settings
+        };
+      }
       await this.workspaceGroupsRepository.save(workspaceGroupToUpdate);
     } else {
       throw new ArgumentOutOfRangeError();

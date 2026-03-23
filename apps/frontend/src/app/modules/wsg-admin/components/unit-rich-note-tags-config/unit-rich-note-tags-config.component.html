@@ -3,12 +3,12 @@
 </div>
 
 <form [formGroup]="configForm">
-  <app-rich-note-tags-editor
+  <studio-lite-rich-note-tags-editor
     [control]="tagsJsonControl"
     [label]="'wsg-settings.unit-rich-note-tags-group'"
     [showGlobalPreview]="true"
     [globalPreviewLabel]="'wsg-settings.global-tags-preview'"
     [globalTagsJson]="globalTagsJson"
     (copyFromGlobalRequested)="copyFromGlobal()">
-  </app-rich-note-tags-editor>
+  </studio-lite-rich-note-tags-editor>
 </form>

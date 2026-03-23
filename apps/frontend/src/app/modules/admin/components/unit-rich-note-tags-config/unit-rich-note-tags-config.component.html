@@ -1,9 +1,9 @@
 <form [formGroup]="configForm" (ngSubmit)="saveData()" class="fx-column-start-stretch fx-gap-10">
-  <app-rich-note-tags-editor
+  <studio-lite-rich-note-tags-editor
     [control]="tagsJsonControl"
     [label]="'workspace.unit-rich-note-tags'"
     [rows]="20">
-  </app-rich-note-tags-editor>
+  </studio-lite-rich-note-tags-editor>
 
   <div class="fx-row-end-center">
     <button mat-raised-button color="primary" type="submit" [disabled]="!isFormValid || !dataChanged">

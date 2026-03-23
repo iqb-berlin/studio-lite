@@ -12,6 +12,7 @@
   font-size: 0.85em;
   resize: none;
   width: 100%;
+  min-height: 200px;
   box-sizing: border-box;
   margin: 0;
   display: block;
@@ -83,6 +84,7 @@
   flex-direction: row;
   justify-content: flex-start;
   align-items: stretch;
+  width: 100%;
 }
 
 .fx-column-center-center {
@@ -93,6 +95,7 @@
 }
 
 .fx-flex-fill {
-  flex: 1 1 100%;
+  flex: 1 1 auto;
+  min-width: 0;
   box-sizing: border-box;
 }

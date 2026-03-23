@@ -50,8 +50,8 @@ export interface UnitRichNoteDialogData {
 })
 export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
   @ViewChild(RichNoteEditorComponent) editorComponent!: RichNoteEditorComponent;
-  FormGroup!: FormGroup;
-  FormArray!: FormArray;
+  protected FormGroup!: FormGroup;
+  protected FormArray!: FormArray;
   noteForm: FormGroup;
   isEditMode = false;
   linksArray!: FormArray;
@@ -60,7 +60,8 @@ export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
   saveButtonLabel = '';
   flattenedTags: { id: string, label: string, depth: number, padding: number }[] = [];
   isSaveDisabled = true;
-  private currentContent = '';
+  protected currentContent = '';
+  protected isEditorTouched = false;
   private currentItems: string[] = [];
 
   private ngUnsubscribe = new Subject<void>();
@@ -77,7 +78,7 @@ export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
     this.initialItemReferences = data.note?.itemReferences || [];
 
     this.noteForm = this.fb.group({
-      tagId: [data.note?.tagId || '', Validators.required],
+      tagId: [data.note?.tagId || ''],
       links: this.fb.array(this.initLinks(data.note?.links))
     });
     this.linksArray = this.noteForm.get('links') as FormArray;
@@ -202,6 +203,10 @@ export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
     this.updateSaveButtonState();
   }
 
+  onEditorBlur(): void {
+    this.isEditorTouched = true;
+  }
+
   onSelectedItemChange(items: string[]): void {
     this.currentItems = items;
     this.updateSaveButtonState();
@@ -215,6 +220,7 @@ export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
   }
 
   onSave(): void {
+    this.isEditorTouched = true;
     if (this.noteForm.valid) {
       const editorData = this.editorComponent.getEditorData();
       if (editorData.text && editorData.text !== '<p></p>') {

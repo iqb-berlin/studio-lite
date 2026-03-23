@@ -11,11 +11,6 @@
           </mat-option>
         }
       </mat-select>
-      @if (noteForm.controls['tagId']?.errors?.['required']) {
-        <mat-error>
-          {{ 'workspace.tag-required' | translate }}
-        </mat-error>
-      }
     </mat-form-field>
 
     <div class="editor-container">
@@ -25,8 +20,14 @@
         [unitItems]="data.items"
         [selectedItems]="initialItemReferences"
         (contentChange)="onContentChange($event)"
-        (selectedItemsChange)="onSelectedItemChange($event)">
+        (selectedItemsChange)="onSelectedItemChange($event)"
+        (editorBlur)="onEditorBlur()">
       </studio-lite-rich-note-editor>
+      @if (isEditorTouched && (!currentContent || currentContent === '<p></p>')) {
+        <mat-error class="editor-error">
+          {{ 'workspace.content-required-warning' | translate }}
+        </mat-error>
+      }
     </div>
 
     <div class="links-section">

@@ -1,17 +1,18 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
-  FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule
+  FormBuilder, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
+import { takeUntil } from 'rxjs';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatButtonModule } from '@angular/material/button';
-import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 import {
   RichNoteTagsEditorComponent
 } from '../../../../components/rich-note-tags-editor/rich-note-tags-editor.component';
-import { StudioValidators } from '../../../../validators/studio-validators.validator';
+import {
+  RichNoteTagsConfigDirective
+} from '../../../../directives/rich-note-tags-config/rich-note-tags-config.directive';
 import { BackendService } from '../../services/backend.service';
 
 @Component({
@@ -29,24 +30,17 @@ import { BackendService } from '../../services/backend.service';
     RichNoteTagsEditorComponent
   ]
 })
-export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
-  configForm: FormGroup;
+export class UnitRichNoteTagsConfigComponent extends RichNoteTagsConfigDirective implements OnInit {
   dataChanged = false;
   isFormValid = false;
-  private ngUnsubscribe = new Subject<void>();
-
-  tagsJsonControl: FormControl;
 
   constructor(
-    private fb: FormBuilder,
+    fb: FormBuilder,
     private snackBar: MatSnackBar,
     private backendService: BackendService,
     private translateService: TranslateService
   ) {
-    this.configForm = this.fb.group({
-      tagsJson: ['', [StudioValidators.jsonValidator]]
-    });
-    this.tagsJsonControl = this.configForm.get('tagsJson') as FormControl;
+    super(fb);
     this.configForm.statusChanges
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
@@ -77,8 +71,7 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
 
   saveData(): void {
     if (this.configForm.valid) {
-      const jsonValue = this.configForm.get('tagsJson')?.value;
-      const tags: UnitRichNoteTagDto[] = jsonValue?.trim() ? JSON.parse(jsonValue) : [];
+      const tags = this.parseTags();
       this.backendService.setUnitRichNoteTags(tags)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(success => {
@@ -98,10 +91,5 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy {
           }
         });
     }
-  }
-
-  ngOnDestroy(): void {
-    this.ngUnsubscribe.next();
-    this.ngUnsubscribe.complete();
   }
 }

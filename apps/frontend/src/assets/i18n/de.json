@@ -770,6 +770,7 @@
     "enter-note-content": "Notiz-Inhalt hier eingeben...",
     "edit-rich-note": "Rich Note bearbeiten",
     "add-rich-note": "Rich Note hinzufügen",
+    "content-required-warning": "Es wurde noch kein Text eingegeben.",
     "unit-rich-note-tags": "Rich-Note Kategorien",
     "units-rich-note-tags-json": "Kategorien (JSON-Format)",
     "tags-saved-success": "Kategorien erfolgreich gespeichert",
@@ -781,7 +782,8 @@
     "link-type-placeholder": "z.B. Dokumentation",
     "lang-placeholder": "de",
     "label-placeholder": "Bezeichnung...",
-    "description-placeholder": "Beschreibung..."
+    "description-placeholder": "Beschreibung...",
+    "required": "Pflichtfeld"
   },
 
   "coding-report": {

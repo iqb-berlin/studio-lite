@@ -59,6 +59,7 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
         respOk => {
           if (respOk) {
             this.wsgAdminService.settingsChanged = false;
+            this.wsgAdminService.selectedWorkspaceGroupSettings.next(this.settings);
             this.snackBar.open(
               this.translateService.instant('wsg-settings.changed'),
               '',

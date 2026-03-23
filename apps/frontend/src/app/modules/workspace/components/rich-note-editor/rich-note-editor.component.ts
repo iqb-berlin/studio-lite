@@ -49,6 +49,7 @@ export class RichNoteEditorComponent implements OnInit, OnDestroy {
 
   @Output() selectedItemsChange = new EventEmitter<string[]>();
   @Output() contentChange = new EventEmitter<string>();
+  @Output() editorBlur = new EventEmitter<void>();
 
   editor!: Editor;
   selectedFontColor = 'black';
@@ -94,6 +95,9 @@ export class RichNoteEditorComponent implements OnInit, OnDestroy {
       },
       onUpdate: () => {
         this.contentChange.emit(this.editor.getHTML());
+      },
+      onBlur: () => {
+        this.editorBlur.emit();
       }
     });
     this.editor.commands.focus();
