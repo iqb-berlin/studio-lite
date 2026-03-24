@@ -32,8 +32,8 @@
               <div class="note-footer">
                 @if (note.itemReferences && note.itemReferences.length > 0) {
                   <div class="note-items">
-                    @for (itemId of note.itemReferences; track itemId) {
-                      <studio-lite-item-badge [label]="itemId | getItemLabel: unitItems"></studio-lite-item-badge>
+                    @for (uuidId of (note.itemReferences | commentItemUuidsIds: unitItems) | sortAscending: 'id'; track uuidId) {
+                      <studio-lite-item-badge [label]="uuidId.id"></studio-lite-item-badge>
                     }
                   </div>
                 }
