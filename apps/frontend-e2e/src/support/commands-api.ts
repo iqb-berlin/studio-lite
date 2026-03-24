@@ -22,7 +22,7 @@ Cypress.Commands.add('addFirstUserAPI', (username: string, password: string) => 
     method: 'POST',
     url: '/api/init-login',
     headers: {
-      'app-version': Cypress.env('version')
+      'app-version': Cypress.expose('version')
     },
     body: {
       username: username,
@@ -38,7 +38,7 @@ Cypress.Commands.add('loginAPI', (username: string, password:string) => {
     method: 'POST',
     url: '/api/login',
     headers: {
-      'app-version': Cypress.env('version')
+      'app-version': Cypress.expose('version')
     },
     body: {
       username: `${username}`,
@@ -55,7 +55,7 @@ Cypress.Commands.add('getUserIdAPI', (token: string) => {
     method: 'GET',
     url: '/api/auth-data',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -69,7 +69,7 @@ Cypress.Commands.add('updatePasswordAPI', (token: string, oldPass: string, newPa
     method: 'PATCH',
     url: '/api/password',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -85,7 +85,7 @@ Cypress.Commands.add('loginWithKeycloakAPI', (user:UserData) => {
     method: 'POST',
     url: '/api/keycloak-login',
     headers: {
-      'app-version': Cypress.env('version')
+      'app-version': Cypress.expose('version')
     },
     body: {
       description: '',
@@ -110,7 +110,7 @@ Cypress.Commands.add('createUserAPI', (userData:UserData, token:string) => {
     method: 'POST',
     url: '/api/admin/users',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -130,7 +130,7 @@ Cypress.Commands.add('getUsersAPI',
       method: 'GET',
       url: '/api/group-admin/users',
       headers: {
-        'app-version': Cypress.env('version'),
+        'app-version': Cypress.expose('version'),
         authorization
       },
       failOnStatusCode: false
@@ -145,7 +145,7 @@ Cypress.Commands.add('getUsersFullAPI',
       method: 'GET',
       url: `/api/group-admin/users?full=${full}`,
       headers: {
-        'app-version': Cypress.env('version'),
+        'app-version': Cypress.expose('version'),
         authorization
       },
       failOnStatusCode: false
@@ -156,12 +156,12 @@ Cypress.Commands.add('getUsersFullAPI',
 Cypress.Commands.add('updateUserAPI',
   (id: string, user:UserData, credentials: boolean, token:string) => {
     const authorization = `bearer ${token}`;
-    const nu = parseInt(`${Cypress.env(`id_${user.username}`)}`, 10);
+    const nu = parseInt(`${Cypress.expose(`id_${user.username}`)}`, 10);
     cy.request({
       method: 'PATCH',
       url: `/api/admin/users/${id}`,
       headers: {
-        'app-version': Cypress.env('version'),
+        'app-version': Cypress.expose('version'),
         authorization
       },
       body: {
@@ -179,7 +179,7 @@ Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string) => {
     method: 'POST',
     url: '/api/admin/workspace-groups',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -197,7 +197,7 @@ Cypress.Commands.add('getGroupByIdAPI', (groupId: string, token:string) => {
     method: 'GET',
     url: `/api/admin/workspace-groups/${groupId}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -211,7 +211,7 @@ Cypress.Commands.add('getWsGroupsAPI', (token:string) => {
     method: 'GET',
     url: '/api/admin/workspace-groups',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -225,7 +225,7 @@ Cypress.Commands.add('updateGroupAPI', (groupId:string, newGroupName: string, to
     method: 'PATCH',
     url: `/api/admin/workspace-groups/${groupId}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -243,7 +243,7 @@ Cypress.Commands.add('setAdminsOfGroupAPI', (userIds: string[], groupId: string,
     method: 'PATCH',
     url: `/api/admin/workspace-groups/${groupId}/admins`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: userIds,
@@ -258,7 +258,7 @@ Cypress.Commands.add('getAdminOfGroupAPI', (groupId: string, token:string) => {
     method: 'GET',
     url: `/api/admin/workspace-groups/${groupId}/admins`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -272,7 +272,7 @@ Cypress.Commands.add('createWsAPI', (groupId: string, ws:WsData, token:string) =
     method: 'POST',
     url: '/api/group-admin/workspaces',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -290,7 +290,7 @@ Cypress.Commands.add('moveWsAPI', (ws:string, newGroup: string, token:string) =>
     method: 'PATCH',
     url: '/api/group-admin/workspaces/group-id',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -308,7 +308,7 @@ Cypress.Commands.add('getWsAPI', (wsId: string, token:string) => {
     method: 'GET',
     url: `/api/group-admin/workspaces/${wsId}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -324,7 +324,7 @@ Cypress.Commands.add('updateUsersOfWsAPI', (wsId:string, level:AccessLevel,
     method: 'PATCH',
     url: `/api/group-admin/workspaces/${wsId}/users`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: [
@@ -346,7 +346,7 @@ Cypress.Commands.add(
       method: 'PATCH',
       url: `/api/group-admin/workspaces/${wsId}/users`,
       headers: {
-        'app-version': Cypress.env('version'),
+        'app-version': Cypress.expose('version'),
         authorization
       },
       body: [
@@ -371,7 +371,7 @@ Cypress.Commands.add('getUsersOfWsAPI', (wsId: string, token:string) => {
     method: 'GET',
     url: `/api/group-admin/workspaces/${wsId}/users`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -386,7 +386,7 @@ Cypress.Commands.add('getWsByGroupAPI',
       method: 'GET',
       url: `/api/admin/workspace-groups/${id}/workspaces`,
       headers: {
-        'app-version': Cypress.env('version'),
+        'app-version': Cypress.expose('version'),
         authorization
       },
       failOnStatusCode: false
@@ -404,7 +404,7 @@ Cypress.Commands.add('addModuleAPI', (module:string, token: string) => {
         method: 'POST',
         url: '/api/admin/verona-modules?type=editor&type=player&type=schemer',
         headers: {
-          'app-version': Cypress.env('version'),
+          'app-version': Cypress.expose('version'),
           'Content-Type': 'multipart/form-data',
           authorization
         },
@@ -421,7 +421,7 @@ Cypress.Commands.add('getModulesAPI', (token:string) => {
     method: 'GET',
     url: '/api/verona-modules',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -435,7 +435,7 @@ Cypress.Commands.add('getModuleAPI', (module:string, token:string) => {
     method: 'GET',
     url: `/api/verona-modules/${module}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -449,7 +449,7 @@ Cypress.Commands.add('createUnitAPI', (wsId:string, unit: UnitData, token:string
     method: 'POST',
     url: `/api/workspaces/${wsId}/units`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -468,7 +468,7 @@ Cypress.Commands.add('getUnitsAPI', (token:string) => {
     method: 'GET',
     url: '/api/admin/workspace-groups/units',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -482,7 +482,7 @@ Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, ws: WsSettings, token:
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/settings`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -505,7 +505,7 @@ Cypress.Commands.add('getWsNormalAPI', (wsId:string, token:string) => {
     method: 'GET',
     url: `/api/workspaces/${wsId}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -519,7 +519,7 @@ Cypress.Commands.add('getUsersByWsAPI', (wsId:string, token:string) => {
     method: 'GET',
     url: `/api/workspaces/${wsId}/users`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -533,7 +533,7 @@ Cypress.Commands.add('getUnitPropertiesAPI', (wsId:string, unitId:string, token:
     method: 'GET',
     url: `/api/workspaces/${wsId}/units/${unitId}/properties`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -550,7 +550,7 @@ Cypress.Commands.add(
       method: 'PATCH',
       url: `/api/workspaces/${wsId}/units/${unitId}/properties`,
       headers: {
-        'app-version': Cypress.env('version'),
+        'app-version': Cypress.expose('version'),
         authorization
       },
       body: {
@@ -569,7 +569,7 @@ Cypress.Commands.add('getUnitsByWsAPI', (wsId:string, token:string) => {
     method: 'GET',
     url: `/api/workspaces/${wsId}/units`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -586,7 +586,7 @@ Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitI
     method: 'PATCH',
     url: `/api/workspaces/${wsOriginId}/units/workspace-id`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -604,7 +604,7 @@ Cypress.Commands.add('renameWsAPI', (wsId:string, wsName:string, token:string) =
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/name`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -621,7 +621,7 @@ Cypress.Commands.add('copyToAPI', (wsDestinationId:string, copyUnit:CopyUnit, to
     method: 'POST',
     url: `/api/workspaces/${wsDestinationId}/units`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -641,7 +641,7 @@ Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
     method: 'GET',
     url: `/api/workspaces/${wsId}/groups`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -655,7 +655,7 @@ Cypress.Commands.add('updateGroupNameOfWsAPI', (wsId: string, groupName: string,
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/group-name`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -672,7 +672,7 @@ Cypress.Commands.add('getUnitSchemeAPI', (unitId: string, wsId: string, token:st
     method: 'GET',
     url: `/api/workspaces/${wsId}/units/${unitId}/scheme`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -688,7 +688,7 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/units/${unitId}/definition`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1103,7 +1103,7 @@ Cypress.Commands.add('getUnitDefinitionAPI', (unitId: string, wsId: string, toke
     method: 'GET',
     url: `/api/workspaces/${wsId}/units/${unitId}/definition`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1121,7 +1121,7 @@ Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/units/${unitId}/scheme`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1139,7 +1139,7 @@ Cypress.Commands.add('generateMetadataReportAPI', (wsId: string, token:string) =
     method: 'GET',
     url: `/api/workspaces/${wsId}/units/properties`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1153,7 +1153,7 @@ Cypress.Commands.add('getWsSchemeAPI', (wsId: string, token:string) => {
     method: 'GET',
     url: `/api/workspaces/${wsId}/units/scheme`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1172,7 +1172,7 @@ Cypress.Commands.add('getWsCodingBookAPI', (ids: string[], wsId: string, token:s
     method: 'GET',
     url: `/api/workspaces/${wsId}/units/coding-book${qp}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1186,7 +1186,7 @@ Cypress.Commands.add('updateGroupPropertiesAPI', (groupId: string, token:string)
     method: 'PATCH',
     url: `/api/workspace-groups/${groupId}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1194,12 +1194,12 @@ Cypress.Commands.add('updateGroupPropertiesAPI', (groupId: string, token:string)
       settings: {
         profiles: [
           {
-            id: `${Cypress.env('profile1')}`,
-            label: `${Cypress.env('label1')}`
+            id: `${Cypress.expose('profile1')}`,
+            label: `${Cypress.expose('label1')}`
           },
           {
-            id: `${Cypress.env('profile2')}`,
-            label: `${Cypress.env('label2')}`
+            id: `${Cypress.expose('profile2')}`,
+            label: `${Cypress.expose('label2')}`
           }],
         states: [
           {
@@ -1225,7 +1225,7 @@ Cypress.Commands.add('getGroupPropertiesAPI', (groupId: string, token:string) =>
     method: 'GET',
     url: `/api/workspace-groups/${groupId}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1240,7 +1240,7 @@ Cypress.Commands.add('updateUnitStateAPI', (wsId: string, unitId: string, state:
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/units/${unitId}/properties`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1258,7 +1258,7 @@ Cypress.Commands.add('getUnitMetadataAPI', (wsId: string, unitId: string, token:
     method: 'GET',
     url: `/api/workspaces/${wsId}/units/${unitId}/metadata`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1273,7 +1273,7 @@ Cypress.Commands.add('dropboxWsAPI', (wsId: string, wsDe: string, token:string) 
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/drop-box`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1292,7 +1292,7 @@ Cypress.Commands.add('submitUnitsAPI', (wsId: string, wsDe: string, unit:string,
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/units/drop-box-history`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1310,7 +1310,7 @@ Cypress.Commands.add('postCommentAPI', (wsId: string, unitId: string, comment: C
     method: 'POST',
     url: `/api/workspaces/${wsId}/units/${unitId}/comments`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1330,7 +1330,7 @@ Cypress.Commands.add('getCommentsAPI', (wsId: string, unitId: string, token:stri
     method: 'GET',
     url: `/api/workspaces/${wsId}/units/${unitId}/comments`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1346,7 +1346,7 @@ Cypress.Commands.add('updateCommentTimeAPI', (wsId: string, unitId: string, comm
     method: 'PATCH',
     url: `/api/workspaces/${wsId}/units/${unitId}/comments/`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1364,7 +1364,7 @@ Cypress.Commands.add('getCommentTimeAPI', (wsId: string, unitId: string, token:s
     method: 'GET',
     url: `/api/workspaces/${wsId}/units/${unitId}/comments/last-seen`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1380,7 +1380,7 @@ Cypress.Commands.add('updateCommentAPI',
       method: 'PATCH',
       url: `/api/workspaces/${wsId}/units/${unitId}/comments/${commentId}`,
       headers: {
-        'app-version': Cypress.env('version'),
+        'app-version': Cypress.expose('version'),
         authorization
       },
       body: {
@@ -1399,7 +1399,7 @@ Cypress.Commands.add('deleteCommentAPI',
       method: 'DELETE',
       url: `/api/workspaces/${wsId}/units/${unitId}/comments/${commentId}`,
       headers: {
-        'app-version': Cypress.env('version'),
+        'app-version': Cypress.expose('version'),
         authorization
       },
       failOnStatusCode: false
@@ -1414,7 +1414,7 @@ Cypress.Commands.add('addReviewAPI', (wsId:string, reviewName: string, token:str
     method: 'POST',
     url: `/api/workspaces/${wsId}/reviews/`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1432,7 +1432,7 @@ Cypress.Commands.add('getReviewAPI', (wsId:string, reviewId:string, token:string
     method: 'GET',
     url: `/api/workspaces/${wsId}/reviews/${reviewId}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1448,7 +1448,7 @@ Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:
       method: 'PATCH',
       url: `/api/workspaces/${wsId}/reviews/${review.id}`,
       headers: {
-        'app-version': Cypress.env('version'),
+        'app-version': Cypress.expose('version'),
         authorization
       },
       body: {
@@ -1477,7 +1477,7 @@ Cypress.Commands.add('getAllReviewAPI', (wsId:string, token:string) => {
     method: 'GET',
     url: `/api/workspaces/${wsId}/reviews`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1491,7 +1491,7 @@ Cypress.Commands.add('getReviewWindowAPI', (reviewId:string, token:string) => {
     method: 'GET',
     url: `api/reviews/${reviewId}/`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1505,7 +1505,7 @@ Cypress.Commands.add('getReviewPropertiesAPI', (reviewId:string, unitId:string, 
     method: 'GET',
     url: `/api/reviews/${reviewId}/units/${unitId}/properties`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1519,7 +1519,7 @@ Cypress.Commands.add('getReviewDefinitionAPI', (reviewId:string, unitId:string, 
     method: 'GET',
     url: `/api/reviews/${reviewId}/units/${unitId}/definition`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1533,7 +1533,7 @@ Cypress.Commands.add('getReviewSchemeAPI', (reviewId:string, unitId:string, toke
     method: 'GET',
     url: `/api/reviews/${reviewId}/units/${unitId}/scheme`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1547,7 +1547,7 @@ Cypress.Commands.add('createCommentReviewAPI', (reviewId:string, unitId: string,
     method: 'POST',
     url: `/api/reviews/${reviewId}/units/${unitId}/comments`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1568,7 +1568,7 @@ Cypress.Commands.add('getCommentReviewAPI', (reviewId:string, unitId: string, to
     method: 'GET',
     url: `/api/reviews/${reviewId}/units/${unitId}/comments`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1583,7 +1583,7 @@ Cypress.Commands.add('updateCommentReviewAPI',
       method: 'PATCH',
       url: `/api/reviews/${reviewId}/units/${unitId}/comments/${commentId}`,
       headers: {
-        'app-version': Cypress.env('version'),
+        'app-version': Cypress.expose('version'),
         authorization
       },
       body: {
@@ -1602,7 +1602,7 @@ Cypress.Commands.add('deleteCommentReviewAPI',
       method: 'DELETE',
       url: `/api/reviews/${reviewId}/units/${unitId}/comments/${commentId}`,
       headers: {
-        'app-version': Cypress.env('version'),
+        'app-version': Cypress.expose('version'),
         authorization
       },
       failOnStatusCode: false
@@ -1616,7 +1616,7 @@ Cypress.Commands.add('deleteReviewAPI', (wsId:string, reviewId:string, token:str
     method: 'DELETE',
     url: `/api/workspaces/${wsId}/reviews/${reviewId}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1630,7 +1630,7 @@ Cypress.Commands.add('getWsForUserAPI', (wsId:string, userId:string, token:strin
     method: 'GET',
     url: `/api/workspaces/${wsId}/users/${userId}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1644,7 +1644,7 @@ Cypress.Commands.add('getReportAPI', (token:string) => {
     method: 'GET',
     url: '/api/admin/workspace-groups?download=true',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1658,7 +1658,7 @@ Cypress.Commands.add('downloadWsAPI', (groupId:string, token:string) => {
     method: 'GET',
     url: `/api/workspace-groups/${groupId}?download=true`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1672,7 +1672,7 @@ Cypress.Commands.add('downloadWsUnitsAPI', (wsId:string, downloadQuery:string, t
     method: 'GET',
     url: `/api/workspaces/${wsId}?download=true&settings=${downloadQuery}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1687,7 +1687,7 @@ Cypress.Commands.add('deleteUnitsAPI', (ids:string[], wsId:string, token: string
     method: 'DELETE',
     url: `/api/workspaces/${wsId}/units${qp}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1701,7 +1701,7 @@ Cypress.Commands.add('getMyData', (token: string) => {
     method: 'GET',
     url: '/api/my-data',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1716,7 +1716,7 @@ Cypress.Commands.add('updateMyData', (token: string, data: MyData) => {
     method: 'PATCH',
     url: '/api/my-data',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1738,7 +1738,7 @@ Cypress.Commands.add('getWsByUserAPI', (userId:string, token:string) => {
     method: 'GET',
     url: `/api/group-admin/users/${userId}/workspaces`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1753,7 +1753,7 @@ Cypress.Commands.add('updateWsByUserAPI', (userId:string, groupId: string,
     method: 'PATCH',
     url: `/api/group-admin/users/${userId}/workspaces`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1781,7 +1781,7 @@ Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:str
         method: 'POST',
         url: `/api/workspaces/${wsId}`,
         headers: {
-          'app-version': Cypress.env('version'),
+          'app-version': Cypress.expose('version'),
           'content-type': 'multipart/form-data',
           authorization
         },
@@ -1798,7 +1798,7 @@ Cypress.Commands.add('getGroupsByUserAPI', (userId:string, token:string) => {
     method: 'GET',
     url: `/api/admin/users/${userId}/workspace-groups`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1812,7 +1812,7 @@ Cypress.Commands.add('updateGroupsByUserAPI', (userId:string, groupIds: string[]
     method: 'PATCH',
     url: `/api/admin/users/${userId}/workspace-groups`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1830,7 +1830,7 @@ Cypress.Commands.add('deleteWsAPI', (qs:string[], token:string) => {
     method: 'DELETE',
     url: `/api/group-admin/workspaces${qp}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1845,7 +1845,7 @@ Cypress.Commands.add('deleteGroupsAPI', (qs: string[], token:string) => {
     method: 'DELETE',
     url: `/api/admin/workspace-groups${qp}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1860,7 +1860,7 @@ Cypress.Commands.add('deleteModulesAPI', (modules:string[], token:string) => {
     method: 'DELETE',
     url: `/api/admin/verona-modules${qp}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1874,7 +1874,7 @@ Cypress.Commands.add('deleteModulesAPI', (modules:string[], token:string) => {
 //     method: 'DELETE',
 //     url: '/api/admin/users/',
 //     headers: {
-//       'app-version': Cypress.env('version'),
+//       'app-version': Cypress.expose('version'),
 //       authorization
 //     },
 //     qs: {
@@ -1892,7 +1892,7 @@ Cypress.Commands.add('deleteUsersAPI', (ids: string[], token: string) => {
     method: 'DELETE',
     url: `/api/admin/users${qp}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1906,7 +1906,7 @@ Cypress.Commands.add('getSettingConfigAPI', (token:string) => {
     method: 'GET',
     url: '/api/admin/settings/config',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1920,7 +1920,7 @@ Cypress.Commands.add('updateSettingConfigAPI', (token:string, hour:number) => {
     method: 'PATCH',
     url: '/api/admin/settings/config',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1941,7 +1941,7 @@ Cypress.Commands.add('getSettingLogoAPI', (token:string) => {
     method: 'GET',
     url: '/api/admin/settings/app-logo',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1955,7 +1955,7 @@ Cypress.Commands.add('updateSettingLogoAPI', (token:string, color: string) => {
     method: 'PATCH',
     url: '/api/admin/settings/app-logo',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -1975,7 +1975,7 @@ Cypress.Commands.add('getSettingUnitExportAPI', (token:string) => {
     method: 'GET',
     url: '/api/admin/settings/unit-export-config',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -1989,7 +1989,7 @@ Cypress.Commands.add('updateSettingUnitExportAPI', (token:string, unitExport: Un
     method: 'PATCH',
     url: '/api/admin/settings/unit-export-config',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -2008,7 +2008,7 @@ Cypress.Commands.add('getSettingMissingProfilesAPI', (token:string) => {
     method: 'GET',
     url: '/api/admin/settings/missings-profiles',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -2022,7 +2022,7 @@ Cypress.Commands.add('updateSettingMissingProfilesAPI', (token:string, profile:s
     method: 'PATCH',
     url: '/api/admin/settings/missings-profiles',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: [{
@@ -2045,7 +2045,7 @@ Cypress.Commands.add('addPackageAPI', (resource:string, token:string) => {
         method: 'POST',
         url: '/api/admin/resource-packages',
         headers: {
-          'app-version': Cypress.env('version'),
+          'app-version': Cypress.expose('version'),
           'Content-Type': 'multipart/form-data',
           authorization
         },
@@ -2062,7 +2062,7 @@ Cypress.Commands.add('getPackageAPI', (token:string) => {
     method: 'GET',
     url: '/api/resource-packages',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -2076,7 +2076,7 @@ Cypress.Commands.add('deletePackageAPI', (token:string, packageId:string) => {
     method: 'DELETE',
     url: `/api/admin/resource-packages?id=${packageId}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false

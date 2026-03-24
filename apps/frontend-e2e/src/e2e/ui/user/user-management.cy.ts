@@ -18,7 +18,7 @@ describe('UI User Management', () => {
     logout();
   });
   after(() => {
-    login(Cypress.env('username'), Cypress.env('password'));
+    login(Cypress.expose('username'), Cypress.expose('password'));
     deleteUser(newUser.username);
     deleteFirstUser();
     // cy.resetDb();
@@ -55,7 +55,7 @@ describe('UI User Management', () => {
 
   it('rejects login with invalid credentials', () => {
     cy.login(newUser.username, 'nopass');
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickButtonWithResponseCheck(json.home.login, [401], '/api/login', 'POST', 'loginFail');
     });
   });

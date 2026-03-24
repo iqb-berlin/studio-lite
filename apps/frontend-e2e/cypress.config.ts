@@ -14,7 +14,7 @@ const cypressJsonConfig = {
   supportFile: 'src/support/e2e.ts'
 };
 export default defineConfig({
-  env: {
+  expose: {
     username: 'fadmin',
     password: '4445',
     locale: 'de',

@@ -37,14 +37,14 @@ describe('Workspace Group Administration', () => {
     createNewUser(groupAdminUser);
     createGroup(group1);
     createWs(ws1, group1);
-    grantRemovePrivilegeAtWs([newUser.username, Cypress.env('username')],
+    grantRemovePrivilegeAtWs([newUser.username, Cypress.expose('username')],
       ws1,
       [AccessLevel.Basic, AccessLevel.Admin]);
     createWs(ws2, group1);
   });
 
   it('assigns group admin role to user', () => {
-    makeAdminOfGroup(group1, [Cypress.env('username'), groupAdminUser.username]);
+    makeAdminOfGroup(group1, [Cypress.expose('username'), groupAdminUser.username]);
   });
 
   it('displays all admin tabs (users, workspaces, units, settings)', () => {
@@ -97,7 +97,7 @@ describe('Workspace Group Administration', () => {
 
   it('cleans up test data', () => {
     logout();
-    login(Cypress.env('username'), Cypress.env('password'));
+    login(Cypress.expose('username'), Cypress.expose('password'));
     deleteGroup(group1);
     deleteUser('normaluser');
     deleteUser('groupadminuser');

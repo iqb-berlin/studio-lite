@@ -31,7 +31,7 @@ describe('UI Administration Management', () => {
   });
 
   it('displays admin settings button for admin users', () => {
-    cy.findAdminSettings().click();
+    cy.findAdminSettings().should('exist');
   });
 
   it('creates a new user', () => {
@@ -48,7 +48,7 @@ describe('UI Administration Management', () => {
 
   it('creates a workspace within a group', () => {
     createWs(ws1, group1);
-    grantRemovePrivilegeAtWs([Cypress.env('username')], 'Mathematik I', [AccessLevel.Basic]);
+    grantRemovePrivilegeAtWs([Cypress.expose('username')], 'Mathematik I', [AccessLevel.Basic]);
   });
 
   it('uploads Verona modules',

@@ -15,8 +15,8 @@ import { logout } from './user';
  */
 export function addFirstUser(): void {
   cy.visit('/');
-  cy.login(Cypress.env('username'), Cypress.env('password'));
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.login(Cypress.expose('username'), Cypress.expose('password'));
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.clickButtonWithResponseCheck(json.home.login, [201], '/api/init-login', 'POST', 'responseLogin');
   });
   cy.findAdminSettings().should('exist');
@@ -29,7 +29,7 @@ export function addFirstUser(): void {
  */
 export function deleteFirstUser(): void {
   cy.visit('/');
-  deleteUser(Cypress.env('username'));
+  deleteUser(Cypress.expose('username'));
   cy.visit('/');
   logout();
 }
@@ -68,7 +68,7 @@ export function deleteUser(user: string): void {
   cy.contains('mat-cell', user)
     .parent()
     .find('[data-cy="admin-users-delete-user"]').click();
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.clickDialogButtonWithResponseCheck(
       json.delete,
       [200],
@@ -88,7 +88,7 @@ export function deleteUser(user: string): void {
 export function createGroup(group: string): void {
   clickIndexTabAdmin('workspace-groups');
   cy.get('mat-icon').contains('add').click();
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.get(`input[placeholder="${json.admin['group-name']}"]`).type(group);
     cy.clickButtonWithResponseCheck(json.create, [201], '/api/admin/workspace-groups', 'POST', 'createWsGroup');
   });
@@ -108,7 +108,7 @@ export function deleteGroup(group: string): void {
     .parent()
     .find('[data-cy="admin-workspace-groups-delete-group"]')
     .click();
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.clickDialogButtonWithResponseCheck(
       json.delete,
       [200],
@@ -134,7 +134,7 @@ export function createWs(ws: string, group: string): void {
   cy.get('mat-icon')
     .contains('add')
     .click();
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.get(`input[placeholder="${json['wsg-admin']['enter-name']}"]`).type(ws);
     cy.clickButtonWithResponseCheck(json.create, [201], '/api/group-admin/workspaces*', 'POST', 'createWs');
   });
@@ -282,7 +282,7 @@ export function saveAndExpect(
   alias: string
 ): void {
   cy.intercept(method, urlPattern).as(alias);
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.get('button').contains(json.save).click({ force: true });
   });
   cy.wait(`@${alias}`).its('response.statusCode').should('eq', 200);
@@ -314,7 +314,7 @@ export function openWorkspaceSettingsDialog(group: string, ws:string): void {
  * @param setVisible - true to check (show), false to uncheck (hide)
  */
 export function setRouteVisibility(routeName: string, setVisible: boolean): void {
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     const routeLabel: string = json.workspace.routes[routeName];
     cy.get('mat-checkbox')
       .contains(routeLabel)

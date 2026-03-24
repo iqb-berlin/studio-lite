@@ -32,7 +32,7 @@ export function deleteAllModules(): void {
   cy.selectModule('IQB-Player');
   cy.selectModule('IQB-Editor');
   cy.get('div > mat-icon').contains('delete').click();
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/verona-modules*', 'DELETE', 'deleteModule');
   });
 }
@@ -75,7 +75,7 @@ export function deleteResource(): void {
   cy.get('div > mat-icon')
     .contains('delete')
     .click();
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.clickButtonWithResponseCheck(json.delete, [200], '/api/resource-packages', 'GET', 'deleteResource');
   });
 }
@@ -114,7 +114,7 @@ export function verifyModuleConfiguration(
     .should('contain', expectedSchemer);
 
   // Close dialog
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.clickDialogButton(json.cancel || json.close);
   });
 }

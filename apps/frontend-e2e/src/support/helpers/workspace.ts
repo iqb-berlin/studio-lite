@@ -30,7 +30,7 @@ export function deleteUnit(shortname: string): void {
     .type(shortname);
   cy.get(`mat-cell:contains("${shortname}")`).prev().click();
   cy.get('[data-cy="workspace-select-unit-button"]').click();
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.contains('button', json.delete).click();
   });
 }
@@ -110,7 +110,7 @@ export function addUnitFromExisting(ws: string, unit1: UnitData, newUnit: UnitDa
   cy.get('mat-select').click();
   cy.get(`mat-option:contains("${ws}")`).click();
   cy.get(`mat-cell:contains("${unit1.shortname}")`).prev().click();
-  cy.translate(Cypress.env('locale')).then(json => {
+  cy.translate(Cypress.expose('locale')).then(json => {
     cy.clickDialogButton(json.continue);
   });
   cy.get('[data-cy="workspace-new-unit-unit-key"]').clear().type(newUnit.shortname);
