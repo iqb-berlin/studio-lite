@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { UpdateUnitCommentUnitItemsDto } from '@studio-lite-lib/api-dto';
+import { UpdateUnitCommentUnitItemsDto, UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
+import { Comment } from '../models/comment.interface';
 import { BackendService } from './backend.service';
 
 describe('Comments BackendService', () => {
@@ -79,5 +80,110 @@ describe('Comments BackendService', () => {
       `${serverUrl}reviews/3/units/2/comments/4/items`
     );
     req.error(new ProgressEvent('error'));
+  });
+
+  it('should get comments for reviews', done => {
+    service.getComments(10, 20, 30).subscribe(result => {
+      expect(result).toEqual([]);
+      done();
+    });
+
+    const req = httpMock.expectOne(`${serverUrl}reviews/30/units/20/comments`);
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it('should get comments for workspaces when reviewId is 0 or less', done => {
+    service.getComments(10, 20, 0).subscribe(result => {
+      expect(result).toEqual([]);
+      done();
+    });
+
+    const req = httpMock.expectOne(`${serverUrl}workspaces/10/units/20/comments`);
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it('should handle error when getting comments', done => {
+    service.getComments(10, 20, 0).subscribe(result => {
+      expect(result).toEqual([]);
+      done();
+    });
+
+    const req = httpMock.expectOne(`${serverUrl}workspaces/10/units/20/comments`);
+    req.error(new ProgressEvent('error'));
+  });
+
+  it('should update comments', done => {
+    const dto = { status: 'reviewed' } as unknown as UpdateUnitUserDto;
+    service.updateComments(dto, 10, 20).subscribe(result => {
+      expect(result).toBe(true);
+      done();
+    });
+
+    const req = httpMock.expectOne(`${serverUrl}workspaces/10/units/20/comments`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual(dto);
+    req.flush({});
+  });
+
+  it('should create a comment for reviews', done => {
+    const comment = { text: 'test' } as unknown as Partial<Comment>;
+    service.createComment(comment, 10, 20, 30).subscribe(result => {
+      expect(result).toBe(42);
+      done();
+    });
+
+    const req = httpMock.expectOne(`${serverUrl}reviews/30/units/20/comments`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(comment);
+    req.flush('42');
+  });
+
+  it('should handle error when creating a comment', done => {
+    service.createComment({}, 10, 20, 0).subscribe(result => {
+      expect(result).toBeNull();
+      done();
+    });
+
+    const req = httpMock.expectOne(`${serverUrl}workspaces/10/units/20/comments`);
+    req.error(new ProgressEvent('error'));
+  });
+
+  it('should update a comment by id', done => {
+    const body = { text: 'updated test' } as unknown as Partial<Comment>;
+    service.updateComment(55, body, 10, 20, 0).subscribe(result => {
+      expect(result).toBe(true);
+      done();
+    });
+
+    const req = httpMock.expectOne(`${serverUrl}workspaces/10/units/20/comments/55`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual(body);
+    req.flush({});
+  });
+
+  it('should update comment visibility', done => {
+    const body = { hidden: true } as unknown as Partial<Comment>;
+    service.updateCommentVisibility(55, body, 10, 20, 30).subscribe(result => {
+      expect(result).toBe(true);
+      done();
+    });
+
+    const req = httpMock.expectOne(`${serverUrl}reviews/30/units/20/comments/55/hidden`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual(body);
+    req.flush({});
+  });
+
+  it('should delete a comment', done => {
+    service.deleteComment(55, 10, 20, 0).subscribe(result => {
+      expect(result).toBe(true);
+      done();
+    });
+
+    const req = httpMock.expectOne(`${serverUrl}workspaces/10/units/20/comments/55`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush({});
   });
 });
