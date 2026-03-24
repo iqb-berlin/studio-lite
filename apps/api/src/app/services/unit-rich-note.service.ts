@@ -2,13 +2,13 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  UnitRichNoteDto, CreateUnitRichNoteDto, UpdateUnitRichNoteDto, UnitRichNotesDto
+  UnitRichNoteDto, CreateUnitRichNoteDto, UpdateUnitRichNoteDto, UnitRichNotesDto, UnitRichNoteLinkDto
 } from '@studio-lite-lib/api-dto';
 import UnitRichNote from '../entities/unit-rich-note.entity';
 import { ItemRichNoteService } from './item-rich-note.service';
-import { WorkspaceService } from './workspace.service';
 import { UnitService } from './unit.service';
 import { SettingService } from './setting.service';
+import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 
 @Injectable()
 export class UnitRichNoteService {
@@ -18,7 +18,6 @@ export class UnitRichNoteService {
     @InjectRepository(UnitRichNote)
     private unitRichNotesRepository: Repository<UnitRichNote>,
     private itemRichNoteService: ItemRichNoteService,
-    private workspaceService: WorkspaceService,
     private unitService: UnitService,
     private settingService: SettingService
   ) {}
@@ -49,6 +48,35 @@ export class UnitRichNoteService {
     }));
 
     return { tags, notes: enrichedNotes };
+  }
+
+  async importNotes(
+    notes: Record<string, unknown>[],
+    unitId: number,
+    itemUuidLookups: ItemUuidLookup[]
+  ): Promise<void> {
+    await Promise.all(notes.map(async note => {
+      const { tagLabel, ...noteData } = note;
+
+      const newItemReferences: string[] = [];
+      const itemReferences = noteData.itemReferences as string[] | undefined;
+      if (itemReferences && itemReferences.length) {
+        itemReferences.forEach((oldItemUuid: string) => {
+          const match = itemUuidLookups.find(lookup => lookup.oldUuid === oldItemUuid);
+          if (match) {
+            newItemReferences.push(match.newUuid);
+          }
+        });
+      }
+
+      await this.createNote({
+        unitId,
+        tagId: noteData.tagId as string,
+        content: noteData.content as string,
+        links: noteData.links as unknown as UnitRichNoteLinkDto[],
+        itemReferences: newItemReferences
+      });
+    }));
   }
 
   async createNote(unitRichNote: CreateUnitRichNoteDto): Promise<number> {
