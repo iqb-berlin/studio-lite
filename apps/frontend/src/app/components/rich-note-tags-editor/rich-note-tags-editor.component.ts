@@ -27,7 +27,7 @@ import { TranslateModule } from '@ngx-translate/core';
 })
 export class RichNoteTagsEditorComponent {
   @Input() control!: FormControl;
-  @Input() label = '';
+  @Input() label!: string;
   @Input() globalTagsJson = '';
   @Input() showGlobalPreview = false;
   @Input() globalPreviewLabel = '';

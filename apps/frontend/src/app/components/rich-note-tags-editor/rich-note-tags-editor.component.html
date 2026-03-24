@@ -1,6 +1,8 @@
 <div [class.fx-row-start-stretch]="showGlobalPreview">
   <div class="fx-flex-fill">
-    <div class="editor-label">{{ label | translate }}</div>
+    @if (label) {
+      <div class="editor-label">{{ label | translate }}</div>
+    }
     <mat-form-field appearance="fill" class="full-width no-label">
       <textarea matInput [formControl]="control" [rows]="rows" class="json-textarea"></textarea>
       @if (control.errors?.['invalidJson']) {
