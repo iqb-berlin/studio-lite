@@ -16,7 +16,7 @@ import {
 } from '../../../../components/rich-note-tags-editor/rich-note-tags-editor.component';
 import {
   RichNoteTagsConfigDirective
-} from '../../../../directives/rich-note-tags-config/rich-note-tags-config.directive';
+} from '../../../../directives/rich-note-tags-config.directive';
 import { BackendService } from '../../../admin/services/backend.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 

@@ -2,7 +2,7 @@ import { Directive, OnDestroy } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
-import { StudioValidators } from '../../validators/studio-validators.validator';
+import { StudioValidators } from '../validators/studio-validators.validator';
 
 @Directive()
 export abstract class RichNoteTagsConfigDirective implements OnDestroy {
