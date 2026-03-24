@@ -230,4 +230,92 @@ describe('Workspace Unit Management', () => {
       );
     });
   });
+
+  it('displays print preview for units with coding and comments', () => {
+    cy.visitWs(ws1);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-preview-units"]').click();
+    selectListUnits([unit3.shortname]);
+
+    // Intercept API calls to provide mock data for coding and comments
+    cy.intercept('GET', '/api/workspaces/*/units/*/scheme', {
+      body: {
+        scheme: JSON.stringify({
+          variableCodings: [
+            {
+              id: 'var1',
+              alias: 'Variable_1',
+              sourceType: 'BASE',
+              codes: [
+                {
+                  id: 111,
+                  type: 'FULL_CREDIT',
+                  score: 1,
+                  ruleSetOperatorAnd: true,
+                  ruleSets: [
+                    {
+                      ruleOperatorAnd: false,
+                      rules: [
+                        {
+                          method: 'MATCH',
+                          parameters: ['adios']
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        })
+      }
+    }).as('getUnitScheme');
+
+    cy.intercept('GET', '/api/workspaces/*/units/*/comments*', {
+      body: [
+        {
+          id: 1,
+          body: '<p>Test comment</p>',
+          userName: 'tester',
+          changedAt: new Date().toISOString()
+        }
+      ]
+    }).as('getComments');
+
+    // Intercept window.open
+    cy.window().then(win => {
+      cy.stub(win, 'open')
+        .callsFake((url: string) => {
+          // Change location directly
+          win.location.hash = url.replace(/^#/, '');
+        })
+        .as('windowOpen');
+    });
+
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('button[type="submit"]').contains(json.construct).click();
+    });
+
+    cy.get('@windowOpen').should('be.called');
+    cy.url().should('include', '/print');
+
+    // Verify coding component and its mocked data
+    cy.get('studio-lite-unit-print-coding').should('exist');
+    cy.get('studio-lite-unit-print-coding')
+      .contains('Variable_1')
+      .should('exist');
+
+    // Verify code component (which is inside coding component)
+    cy.get('studio-lite-unit-print-code').should('exist');
+    cy.get('studio-lite-unit-print-code').contains('111').should('exist');
+
+    // Verify comments component and its mocked data
+    cy.get('studio-lite-unit-print-comments').should('exist');
+    cy.get('studio-lite-unit-print-comments')
+      .contains('Test comment')
+      .should('exist');
+    cy.get('studio-lite-unit-print-comments')
+      .contains('tester')
+      .should('exist');
+  });
 });
