@@ -17,7 +17,7 @@ import { ScrollEditorIntoViewDirective } from '../../directives/scroll-editor-in
 import { CommentEditorComponent } from '../comment-editor/comment-editor.component';
 import { CommentBadgeComponent } from '../comment-badge/comment-badge.component';
 import { FullTimestampPipe } from '../../pipes/full-timestamp.pipe';
-import { CommentItemComponent } from '../comment-item/comment-item/comment-item.component';
+import { ItemBadgeComponent } from '../item-badge/item-badge.component';
 import { CommentItemUuidsIdsPipe } from '../../pipes/comment-item-uuids-ids.pipe';
 import { SortAscendingPipe } from '../../pipes/sort-ascending.pipe';
 
@@ -26,7 +26,7 @@ import { SortAscendingPipe } from '../../pipes/sort-ascending.pipe';
   templateUrl: './comment.component.html',
   styleUrls: ['./comment.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FullTimestampPipe, CommentItemComponent, CommentItemUuidsIdsPipe, SortAscendingPipe]
+  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FullTimestampPipe, ItemBadgeComponent, CommentItemUuidsIdsPipe, SortAscendingPipe]
 })
 export class CommentComponent implements OnInit {
   @Input() comment!: Comment;

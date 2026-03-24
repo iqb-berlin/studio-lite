@@ -33,7 +33,7 @@
                 @if (note.itemReferences && note.itemReferences.length > 0) {
                   <div class="note-items">
                     @for (itemId of note.itemReferences; track itemId) {
-                      <studio-lite-comment-item [label]="itemId | getItemLabel: unitItems"></studio-lite-comment-item>
+                      <studio-lite-item-badge [label]="itemId | getItemLabel: unitItems"></studio-lite-item-badge>
                     }
                   </div>
                 }

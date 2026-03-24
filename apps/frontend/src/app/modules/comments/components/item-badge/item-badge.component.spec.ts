@@ -2,11 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
 import { By } from '@angular/platform-browser';
-import { CommentItemComponent } from './comment-item.component';
+import { ItemBadgeComponent } from './item-badge.component';
 
-describe('CommentItemComponent', () => {
-  let component: CommentItemComponent;
-  let fixture: ComponentFixture<CommentItemComponent>;
+describe('ItemBadgeComponent', () => {
+  let component: ItemBadgeComponent;
+  let fixture: ComponentFixture<ItemBadgeComponent>;
   let translateService: TranslateService;
 
   beforeEach(async () => {
@@ -14,7 +14,7 @@ describe('CommentItemComponent', () => {
       imports: [
         TranslateModule.forRoot(),
         MatTooltipModule,
-        CommentItemComponent
+        ItemBadgeComponent
       ]
     }).compileComponents();
 
@@ -26,7 +26,7 @@ describe('CommentItemComponent', () => {
     });
     translateService.use('en');
 
-    fixture = TestBed.createComponent(CommentItemComponent);
+    fixture = TestBed.createComponent(ItemBadgeComponent);
     component = fixture.componentInstance;
     component.label = 'Test Item';
     fixture.detectChanges();

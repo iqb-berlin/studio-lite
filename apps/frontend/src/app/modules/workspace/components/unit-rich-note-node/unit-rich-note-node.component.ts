@@ -9,7 +9,7 @@ import { UnitItemDto, UnitRichNoteDto } from '@studio-lite-lib/api-dto';
 import { GetLocalizedValuePipe } from '../../../../pipes/get-localized-value.pipe';
 import { GetItemLabelPipe } from '../../../../pipes/get-item-label.pipe';
 import { IsNoteFooterVisiblePipe } from '../../../../pipes/is-note-footer-visible.pipe';
-import { CommentItemComponent } from '../../../comments/components/comment-item/comment-item/comment-item.component';
+import { ItemBadgeComponent } from '../../../comments/components/item-badge/item-badge.component';
 
 export interface RichNoteNode {
   tagId: string;
@@ -31,7 +31,7 @@ export interface RichNoteNode {
     GetLocalizedValuePipe,
     GetItemLabelPipe,
     IsNoteFooterVisiblePipe,
-    CommentItemComponent
+    ItemBadgeComponent
   ]
 })
 export class UnitRichNoteNodeComponent {
