@@ -11,6 +11,7 @@ import { IsNoteFooterVisiblePipe } from '../../../../pipes/is-note-footer-visibl
 import { ItemBadgeComponent } from '../../../comments/components/item-badge/item-badge.component';
 import { MapItemUuidsIdsPipe } from '../../../comments/pipes/map-item-uuids-ids.pipe';
 import { SortAscendingPipe } from '../../../comments/pipes/sort-ascending.pipe';
+import { SafeResourceHTMLPipe } from '../../../../pipes/safe-resource-html.pipe';
 
 export interface RichNoteNode {
   tagId: string;
@@ -33,7 +34,8 @@ export interface RichNoteNode {
     IsNoteFooterVisiblePipe,
     ItemBadgeComponent,
     MapItemUuidsIdsPipe,
-    SortAscendingPipe
+    SortAscendingPipe,
+    SafeResourceHTMLPipe
   ]
 })
 export class UnitRichNoteNodeComponent {

@@ -44,8 +44,62 @@ describe('RichNoteEditorComponent', () => {
   });
 
   it('should toggle bold', () => {
-    const spy = jest.spyOn(component.editor.chain(), 'toggleBold');
+    const spy = jest.spyOn(component.editor, 'chain');
     component.toggleBold();
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should toggle bullet list', () => {
+    const spy = jest.spyOn(component.editor, 'chain');
+    component.toggleBulletList();
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should set bullet list style', () => {
+    const spy = jest.spyOn(component.editor, 'chain');
+    component.setBulletListStyle('square');
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should toggle ordered list', () => {
+    const spy = jest.spyOn(component.editor, 'chain');
+    component.toggleOrderedList();
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should set ordered list style to decimal', () => {
+    const spy = jest.spyOn(component.editor, 'chain');
+    component.setOrderedListStyle('decimal');
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should set ordered list style to lower-latin', () => {
+    const spy = jest.spyOn(component.editor, 'chain');
+    component.setOrderedListStyle('lower-latin');
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should set ordered list style to upper-latin', () => {
+    const spy = jest.spyOn(component.editor, 'chain');
+    component.setOrderedListStyle('upper-latin');
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should set ordered list style to lower-roman', () => {
+    const spy = jest.spyOn(component.editor, 'chain');
+    component.setOrderedListStyle('lower-roman');
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should set ordered list style to upper-roman', () => {
+    const spy = jest.spyOn(component.editor, 'chain');
+    component.setOrderedListStyle('upper-roman');
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should set ordered list style to lower-greek', () => {
+    const spy = jest.spyOn(component.editor, 'chain');
+    component.setOrderedListStyle('lower-greek');
     expect(spy).toHaveBeenCalled();
   });
 
@@ -60,6 +114,8 @@ describe('RichNoteEditorComponent', () => {
   it('should emit content change when editor is updated', () => {
     const spy = jest.spyOn(component.contentChange, 'emit');
     component.editor.commands.setContent('<p>New content</p>');
+    // Tiptap's onUpdate might be async or needs a tick
+    fixture.detectChanges();
     expect(spy).toHaveBeenCalled();
   });
 });

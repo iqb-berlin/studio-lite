@@ -10,12 +10,12 @@ declare module '@tiptap/core' {
 
 export const BulletListExtension = BulletList.extend({
   addAttributes() {
-    const listStyle = 'listStyle';
     return {
       listStyle: {
         default: 'disc',
         parseHTML: element => element.style.listStyleType,
-        renderHTML: attributes => ({ style: `list-style: ${attributes[listStyle]};` })
+        // eslint-disable-next-line @typescript-eslint/dot-notation
+        renderHTML: attributes => ({ style: `list-style: ${attributes['listStyle']};` })
       }
     };
   },

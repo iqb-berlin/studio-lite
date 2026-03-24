@@ -26,7 +26,7 @@
                 </button>
               </div>
             }
-            <div class="note-content" [innerHTML]="note.content"></div>
+            <div class="note-content" [innerHTML]="note.content | safeResourceHTML"></div>
 
             @if (note | isNoteFooterVisible) {
               <div class="note-footer">

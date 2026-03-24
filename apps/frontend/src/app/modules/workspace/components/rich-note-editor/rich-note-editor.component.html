@@ -93,14 +93,74 @@
                #textHighlightColorInput hidden
                (input)="onHighlightColorInput($event)">
       </div>
-      <button type="button"
-              mat-icon-button
-              matTooltip="{{'comment-editor.enumeration' | translate}}"
-              [matTooltipPosition]="'above'"
-              [class.active]="editorStates.bulletList"
-              (click)="toggleBulletList()">
-        <studio-lite-wrapped-icon icon="format_list_bulleted"></studio-lite-wrapped-icon>
-      </button>
+      <div class="fx-row-start-stretch">
+        <button type="button" mat-icon-button
+                matTooltip="{{'comment-editor.enumeration' | translate}}"
+                [matTooltipPosition]="'above'"
+                [matTooltipShowDelay]="300"
+                [class.active]="editorStates.bulletList"
+                (click)="toggleBulletList()">
+          <studio-lite-wrapped-icon icon="format_list_bulleted"></studio-lite-wrapped-icon>
+        </button>
+        <button type="button" mat-icon-button [matMenuTriggerFor]="bulletMenu"
+                class="list-style-trigger" [disableRipple]="true">
+          <studio-lite-wrapped-icon icon="arrow_drop_down"></studio-lite-wrapped-icon>
+        </button>
+        <mat-menu #bulletMenu="matMenu">
+          <button mat-menu-item (click)="setBulletListStyle('disc')"
+                  [class.active]="currentBulletListStyle === 'disc'">
+            <span>● {{'comment-editor.list-style-disc' | translate}}</span>
+          </button>
+          <button mat-menu-item (click)="setBulletListStyle('circle')"
+                  [class.active]="currentBulletListStyle === 'circle'">
+            <span>○ {{'comment-editor.list-style-circle' | translate}}</span>
+          </button>
+          <button mat-menu-item (click)="setBulletListStyle('square')"
+                  [class.active]="currentBulletListStyle === 'square'">
+            <span>■ {{'comment-editor.list-style-square' | translate}}</span>
+          </button>
+        </mat-menu>
+      </div>
+      <div class="fx-row-start-stretch">
+        <button type="button" mat-icon-button
+                matTooltip="{{'comment-editor.ordered-list' | translate}}"
+                [matTooltipPosition]="'above'"
+                [matTooltipShowDelay]="300"
+                [class.active]="editorStates.orderedList"
+                (click)="toggleOrderedList()">
+          <studio-lite-wrapped-icon icon="format_list_numbered"></studio-lite-wrapped-icon>
+        </button>
+        <button type="button" mat-icon-button [matMenuTriggerFor]="orderedMenu"
+                class="list-style-trigger" [disableRipple]="true">
+          <studio-lite-wrapped-icon icon="arrow_drop_down"></studio-lite-wrapped-icon>
+        </button>
+        <mat-menu #orderedMenu="matMenu">
+          <button mat-menu-item (click)="setOrderedListStyle('decimal')"
+                  [class.active]="currentOrderedListStyle === 'decimal'">
+            <span>1. {{'comment-editor.list-style-decimal' | translate}}</span>
+          </button>
+          <button mat-menu-item (click)="setOrderedListStyle('lower-latin')"
+                  [class.active]="currentOrderedListStyle === 'lower-latin'">
+            <span>a. {{'comment-editor.list-style-lower-latin' | translate}}</span>
+          </button>
+          <button mat-menu-item (click)="setOrderedListStyle('upper-latin')"
+                  [class.active]="currentOrderedListStyle === 'upper-latin'">
+            <span>A. {{'comment-editor.list-style-upper-latin' | translate}}</span>
+          </button>
+          <button mat-menu-item (click)="setOrderedListStyle('lower-roman')"
+                  [class.active]="currentOrderedListStyle === 'lower-roman'">
+            <span>i. {{'comment-editor.list-style-lower-roman' | translate}}</span>
+          </button>
+          <button mat-menu-item (click)="setOrderedListStyle('upper-roman')"
+                  [class.active]="currentOrderedListStyle === 'upper-roman'">
+            <span>I. {{'comment-editor.list-style-upper-roman' | translate}}</span>
+          </button>
+          <button mat-menu-item (click)="setOrderedListStyle('lower-greek')"
+                  [class.active]="currentOrderedListStyle === 'lower-greek'">
+            <span>α. {{'comment-editor.list-style-lower-greek' | translate}}</span>
+          </button>
+        </mat-menu>
+      </div>
       <button type="button"
             mat-icon-button
             matTooltip="{{'comment-editor.image' | translate}}"

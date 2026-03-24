@@ -20,7 +20,7 @@ import { CommentsComponent } from './components/comments/comments.component';
 import { BackendService } from './services/backend.service';
 import { IsEditingPipe } from './pipes/is-editing.pipe';
 import { IsReplyingPipe } from './pipes/is-replying.pipe';
-import { SafeResourceHTMLPipe } from './pipes/safe-resource-html.pipe';
+import { SafeResourceHTMLPipe } from '../../pipes/safe-resource-html.pipe';
 import { ScrollCommentIntoViewDirective } from './directives/scroll-comment-into-view.directive';
 import { AuthInterceptor } from '../../interceptors/auth.interceptor';
 import { CommentBadgeComponent } from './components/comment-badge/comment-badge.component';

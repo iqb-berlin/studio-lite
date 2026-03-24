@@ -137,7 +137,7 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
     };
 
     const dialogRef = this.dialog.open(UnitRichNoteDialogComponent, {
-      width: '600px',
+      width: '700px',
       data: dialogData
     });
 

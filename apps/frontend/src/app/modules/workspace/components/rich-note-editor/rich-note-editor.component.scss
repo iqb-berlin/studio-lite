@@ -44,6 +44,22 @@
   border-radius: 2px;
 }
 
+.list-style-trigger {
+  width: 24px;
+  height: 40px;
+  min-width: 24px;
+  padding: 0;
+  margin-left: -8px;
+
+  ::ng-deep {
+    .mat-mdc-button-touch-target,
+    .mat-mdc-button-persistent-ripple,
+    .mat-mdc-focus-indicator {
+      display: none;
+    }
+  }
+}
+
 .fx-column-start-stretch {
   display: flex;
   flex-direction: column;
@@ -79,3 +95,9 @@
   justify-content: flex-start;
   align-items: stretch;
 }
+
+
+button.active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+

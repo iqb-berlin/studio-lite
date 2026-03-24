@@ -10,7 +10,7 @@ import { ActiveComment, ActiveCommentType } from '../../models/active-comment.in
 import { Comment } from '../../models/comment.interface';
 import { IsReplyingPipe } from '../../pipes/is-replying.pipe';
 import { IsEditingPipe } from '../../pipes/is-editing.pipe';
-import { SafeResourceHTMLPipe } from '../../pipes/safe-resource-html.pipe';
+import { SafeResourceHTMLPipe } from '../../../../pipes/safe-resource-html.pipe';
 import { ScrollCommentIntoViewDirective } from '../../directives/scroll-comment-into-view.directive';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { ScrollEditorIntoViewDirective } from '../../directives/scroll-editor-into-view.directive';

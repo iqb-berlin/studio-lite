@@ -15,12 +15,15 @@ import { TranslateModule } from '@ngx-translate/core';
 import { TiptapEditorDirective } from 'ngx-tiptap';
 import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { FormsModule } from '@angular/forms';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { ItemSelectionComponent } from '../../../comments/components/item-selection/item-selection.component';
+import { BulletListExtension } from '../../../../extensions/bullet-list.extension';
+import { OrderedListExtension } from '../../../../extensions/ordered-list.extension';
 
 @Component({
   selector: 'studio-lite-rich-note-editor',
@@ -36,7 +39,10 @@ import { ItemSelectionComponent } from '../../../comments/components/item-select
     TiptapEditorDirective,
     TranslateModule,
     ItemSelectionComponent,
-    FormsModule
+    FormsModule,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger
   ]
 })
 export class RichNoteEditorComponent implements OnInit, OnDestroy {
@@ -61,13 +67,22 @@ export class RichNoteEditorComponent implements OnInit, OnDestroy {
     superscript: false,
     subscript: false,
     strike: false,
-    bulletList: false
+    bulletList: false,
+    orderedList: false
   };
+
+  currentBulletListStyle = 'disc';
+  currentOrderedListStyle = 'decimal';
 
   ngOnInit(): void {
     this.editor = new Editor({
       extensions: [
-        StarterKit,
+        StarterKit.configure({
+          bulletList: false,
+          orderedList: false
+        }),
+        BulletListExtension,
+        OrderedListExtension,
         Underline,
         Superscript,
         Subscript,
@@ -115,8 +130,13 @@ export class RichNoteEditorComponent implements OnInit, OnDestroy {
       superscript: this.editor.isActive('superscript'),
       subscript: this.editor.isActive('subscript'),
       strike: this.editor.isActive('strike'),
-      bulletList: this.editor.isActive('bulletList')
+      bulletList: this.editor.isActive('bulletList'),
+      orderedList: this.editor.isActive('orderedList')
     };
+    const bulletAttrs = this.editor.getAttributes('bulletList') as { listStyle?: string };
+    this.currentBulletListStyle = bulletAttrs.listStyle || 'disc';
+    const orderedAttrs = this.editor.getAttributes('orderedList') as { listStyle?: string };
+    this.currentOrderedListStyle = orderedAttrs.listStyle || 'decimal';
   }
 
   getEditorData(): { text: string, items: string[] } {
@@ -175,6 +195,18 @@ export class RichNoteEditorComponent implements OnInit, OnDestroy {
 
   toggleBulletList(): void {
     this.editor.chain().toggleBulletList().focus().run();
+  }
+
+  setBulletListStyle(style: string): void {
+    this.editor.chain().focus().setBulletListStyle(style).run();
+  }
+
+  toggleOrderedList(): void {
+    this.editor.chain().toggleOrderedList().focus().run();
+  }
+
+  setOrderedListStyle(style: string): void {
+    this.editor.chain().focus().setOrderedListStyle(style).run();
   }
 
   applyFontColor(): void {
