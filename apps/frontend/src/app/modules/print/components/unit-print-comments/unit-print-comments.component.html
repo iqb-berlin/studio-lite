@@ -21,7 +21,7 @@
           {{'print.connected-items' | translate}}:
         </span>
 
-        @for (uuidId of (comment.itemUuids | commentItemUuidsIds : metadata) | sortAscending : 'id'; track uuidId; let last = $last) {
+        @for (uuidId of (comment.itemUuids | mapItemUuidsIds : metadata) | sortAscending : 'id'; track uuidId; let last = $last) {
           <span class="comment-item">
             {{uuidId.id}}
             @if (!last) {

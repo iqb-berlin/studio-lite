@@ -27,12 +27,12 @@
               </div>
             }
             <div class="note-content" [innerHTML]="note.content"></div>
-            
+
             @if (note | isNoteFooterVisible) {
               <div class="note-footer">
                 @if (note.itemReferences && note.itemReferences.length > 0) {
                   <div class="note-items">
-                    @for (uuidId of (note.itemReferences | commentItemUuidsIds: unitItems) | sortAscending: 'id'; track uuidId) {
+                    @for (uuidId of (note.itemReferences | mapItemUuidsIds: unitItems) | sortAscending: 'id'; track uuidId) {
                       <studio-lite-item-badge [label]="uuidId.id"></studio-lite-item-badge>
                     }
                   </div>
@@ -68,9 +68,9 @@
     @if (node.children.length > 0) {
       <div class="node-children">
         @for (child of node.children; track child.tagId) {
-          <studio-lite-unit-rich-note-node 
-            [node]="child" 
-            [unitItems]="unitItems" 
+          <studio-lite-unit-rich-note-node
+            [node]="child"
+            [unitItems]="unitItems"
             [canWrite]="canWrite"
             (addNote)="addNote.emit($event)"
             (editNote)="editNote.emit($event)"

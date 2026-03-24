@@ -9,7 +9,7 @@ import { UnitItemDto, UnitRichNoteDto } from '@studio-lite-lib/api-dto';
 import { GetLocalizedValuePipe } from '../../../../pipes/get-localized-value.pipe';
 import { IsNoteFooterVisiblePipe } from '../../../../pipes/is-note-footer-visible.pipe';
 import { ItemBadgeComponent } from '../../../comments/components/item-badge/item-badge.component';
-import { CommentItemUuidsIdsPipe } from '../../../comments/pipes/comment-item-uuids-ids.pipe';
+import { MapItemUuidsIdsPipe } from '../../../comments/pipes/map-item-uuids-ids.pipe';
 import { SortAscendingPipe } from '../../../comments/pipes/sort-ascending.pipe';
 
 export interface RichNoteNode {
@@ -32,7 +32,7 @@ export interface RichNoteNode {
     GetLocalizedValuePipe,
     IsNoteFooterVisiblePipe,
     ItemBadgeComponent,
-    CommentItemUuidsIdsPipe,
+    MapItemUuidsIdsPipe,
     SortAscendingPipe
   ]
 })
