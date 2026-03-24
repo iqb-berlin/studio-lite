@@ -3,7 +3,7 @@
     <studio-lite-item-selection
       class="select-item fx-flex-fill"
       [unitItems]="unitItems"
-      [selectedItems]="selectedItems"
+      [(selectedItems)]="selectedItems"
       [label]="'comment-editor.link-to-item' | translate"
       (selectedItemsChange)="onSelectedItemChange()"
       data-cy="comment-editor-link-to-item">

@@ -99,8 +99,7 @@
   .note-items {
     display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
     margin-bottom: 8px;
-    mat-icon { font-size: 14px; width: 14px; height: 14px; color: #666; }
-    .item-tag { background-color: #e8eaf6; color: #3f51b5; padding: 1px 6px; border-radius: 10px; font-size: 0.7rem; }
+    font-size: 0.8rem;
   }
 
   .note-links {
