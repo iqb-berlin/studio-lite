@@ -7,22 +7,20 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 
 @Component({
-  selector: 'studio-lite-comment-item-selection',
-  imports: [
-    MatFormField,
-    MatLabel,
-    TranslateModule,
-    MatSelect,
-    MatOption
-  ],
-  templateUrl: './comment-item-selection.component.html',
-  styleUrl: './comment-item-selection.component.scss'
+  selector: 'studio-lite-item-selection',
+  templateUrl: './item-selection.component.html',
+  styleUrls: ['./item-selection.component.scss'],
+  imports: [MatFormField, MatLabel, MatSelect, MatOption, TranslateModule]
 })
-export class CommentItemSelectionComponent {
+export class ItemSelectionComponent {
   @Input() selectedItems: string[] = [];
   @Input() unitItems: UnitItemDto[] = [];
   @Input() label: string = '';
   @Input() disabled: boolean = false;
 
   @Output() selectedItemsChange = new EventEmitter<string[]>();
+
+  onSelectedItemChange(items: string[]): void {
+    this.selectedItemsChange.emit(items);
+  }
 }

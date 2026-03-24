@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Input, OnInit, Output
+  Component, EventEmitter, Input, OnDestroy, OnInit, Output
 } from '@angular/core';
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
@@ -22,16 +22,16 @@ import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { FormsModule } from '@angular/forms';
 import { IsCommentCommittablePipe } from '../../pipes/is-comment-commitable.pipe';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
-import { CommentItemSelectionComponent } from '../comment-item-selection/comment-item-selection.component';
+import { ItemSelectionComponent } from '../item-selection/item-selection.component';
 
 @Component({
   selector: 'studio-lite-comment-editor',
   templateUrl: './comment-editor.component.html',
   styleUrls: ['./comment-editor.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatIconButton, MatTooltip, WrappedIconComponent, MatSelect, MatInput, TiptapEditorDirective, MatDialogContent, MatFabButton, TranslateModule, IsCommentCommittablePipe, CommentItemSelectionComponent, FormsModule]
+  imports: [MatIconButton, MatTooltip, WrappedIconComponent, MatSelect, MatInput, TiptapEditorDirective, MatDialogContent, MatFabButton, TranslateModule, IsCommentCommittablePipe, ItemSelectionComponent, FormsModule]
 })
-export class CommentEditorComponent implements OnInit {
+export class CommentEditorComponent implements OnInit, OnDestroy {
   @Input() submitLabel!: string;
   @Input() initialHTML: string = '';
   @Input() editorHTML: string = '';
@@ -168,5 +168,9 @@ export class CommentEditorComponent implements OnInit {
   onHighlightColorInput(event: Event): void {
     this.selectedHighlightColor = (event.target as HTMLInputElement).value;
     this.applyHighlightColor();
+  }
+
+  ngOnDestroy(): void {
+    this.editor.destroy();
   }
 }

@@ -3,7 +3,8 @@
   <mat-select multiple
               [value]="selectedItems"
               [disabled]="disabled || !unitItems.length"
-              (valueChange)="selectedItemsChange.emit($event)">
+              (selectionChange)="onSelectedItemChange($event.value)"
+>
     @for (item of unitItems; track item;) {
       <mat-option [value]="item.uuid">
         {{item.id ? item.id : ('metadata.without-id' | translate)}}

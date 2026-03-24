@@ -20,9 +20,7 @@ import { MatIconButton } from '@angular/material/button';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { FormsModule } from '@angular/forms';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
-import {
-  CommentItemSelectionComponent
-} from '../../../comments/components/comment-item-selection/comment-item-selection.component';
+import { ItemSelectionComponent } from '../../../comments/components/item-selection/item-selection.component';
 
 @Component({
   selector: 'studio-lite-rich-note-editor',
@@ -37,7 +35,7 @@ import {
     MatInput,
     TiptapEditorDirective,
     TranslateModule,
-    CommentItemSelectionComponent,
+    ItemSelectionComponent,
     FormsModule
   ]
 })

@@ -2,12 +2,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import {
-  Component, EventEmitter, Input, Output, Pipe, PipeTransform
+  Component, Input, Pipe, PipeTransform
 } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
 import { TiptapEditorDirective } from 'ngx-tiptap';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { CommentEditorComponent } from './comment-editor.component';
 
@@ -58,14 +55,15 @@ class MockWrappedIconComponent {
 }
 
 @Component({
-  selector: 'studio-lite-comment-item-selection',
+  selector: 'studio-lite-item-selection',
   template: '',
   standalone: true
 })
-class MockCommentItemSelectionComponent {
-  @Input() unitItems: UnitItemDto[] = [];
+class MockItemSelectionComponent {
   @Input() selectedItems: string[] = [];
-  @Output() selectedItemsChange = new EventEmitter<string[]>();
+  @Input() unitItems: UnitItemDto[] = [];
+  @Input() label: string = '';
+  @Input() disabled: boolean = false;
 }
 
 describe('CommentEditorComponent', () => {
@@ -131,14 +129,11 @@ describe('CommentEditorComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslateModule.forRoot(),
-        MatIconModule,
-        MatSelectModule,
-        MatTooltipModule,
         TiptapEditorDirective,
         CommentEditorComponent,
         MockIsCommentCommittablePipe,
         MockWrappedIconComponent,
-        MockCommentItemSelectionComponent
+        MockItemSelectionComponent
       ]
     }).compileComponents();
 
