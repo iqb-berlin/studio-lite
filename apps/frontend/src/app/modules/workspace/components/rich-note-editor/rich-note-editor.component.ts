@@ -98,7 +98,6 @@ export class RichNoteEditorComponent implements OnInit, OnDestroy {
         this.editorBlur.emit();
       }
     });
-    this.editor.commands.focus();
     this.updateEditorStates();
     this.updateColorButtonStyles();
   }

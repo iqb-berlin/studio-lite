@@ -13,6 +13,7 @@
       </mat-select>
     </mat-form-field>
 
+    <h3 class="required-label">{{ 'workspace.rich-note' | translate }} <span class="required-star">*</span></h3>
     <div class="editor-container">
       <studio-lite-rich-note-editor
         [initialHTML]="data.note?.content || ''"

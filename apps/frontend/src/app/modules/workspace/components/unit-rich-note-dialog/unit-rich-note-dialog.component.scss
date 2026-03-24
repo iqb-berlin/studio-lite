@@ -8,6 +8,16 @@
   width: 100%;
 }
 
+.required-label {
+  margin-top: 10px;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.required-star {
+  margin-left: 2px;
+}
+
 .links-section {
   margin-top: 20px;
   border-top: 1px solid #ccc;
@@ -19,7 +29,7 @@
 }
 
 .editor-container {
-  margin: 20px 0 35px 0; /* Add bottom margin for error space */
+  margin: 0 0 35px 0; /* Add bottom margin for error space */
 }
 
 .editor-error {
