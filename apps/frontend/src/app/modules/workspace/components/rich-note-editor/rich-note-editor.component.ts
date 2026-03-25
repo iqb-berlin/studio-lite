@@ -1,7 +1,5 @@
-import {
-  Component, EventEmitter, Input, OnDestroy, OnInit, Output
-} from '@angular/core';
-import { Editor } from '@tiptap/core';
+import { Component, EventEmitter, Output } from '@angular/core';
+import { AnyExtension } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import { Underline } from '@tiptap/extension-underline';
 import { Superscript } from '@tiptap/extension-superscript';
@@ -18,12 +16,14 @@ import { MatSelect } from '@angular/material/select';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
-import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { FormsModule } from '@angular/forms';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
-import { ItemSelectionComponent } from '../../../comments/components/item-selection/item-selection.component';
+import { ItemSelectionComponent } from '../../../../components/item-selection/item-selection.component';
 import { BulletListExtension } from '../../../../extensions/bullet-list.extension';
 import { OrderedListExtension } from '../../../../extensions/ordered-list.extension';
+import {
+  RichTextEditorDirective
+} from '../../../../directives/rich-text-editor.directive';
 
 @Component({
   selector: 'studio-lite-rich-note-editor',
@@ -45,156 +45,56 @@ import { OrderedListExtension } from '../../../../extensions/ordered-list.extens
     MatMenuTrigger
   ]
 })
-export class RichNoteEditorComponent implements OnInit, OnDestroy {
-  @Input() initialHTML = '';
-  @Input() placeholder = '';
-  @Input() unitItems: UnitItemDto[] = [];
-  @Input() selectedItems: string[] = [];
-
+export class RichNoteEditorComponent extends RichTextEditorDirective {
   @Output() selectedItemsChange = new EventEmitter<string[]>();
   @Output() contentChange = new EventEmitter<string>();
   @Output() editorBlur = new EventEmitter<void>();
 
-  editor!: Editor;
-  selectedFontColor = 'black';
-  selectedHighlightColor = 'black';
-  fontColorButtonStyle = '';
-  highlightColorButtonStyle = '';
-  editorStates = {
-    bold: false,
-    italic: false,
-    underline: false,
-    superscript: false,
-    subscript: false,
-    strike: false,
-    bulletList: false,
-    orderedList: false
-  };
-
   currentBulletListStyle = 'disc';
   currentOrderedListStyle = 'decimal';
 
-  ngOnInit(): void {
-    this.editor = new Editor({
-      extensions: [
-        StarterKit.configure({
-          bulletList: false,
-          orderedList: false
-        }),
-        BulletListExtension,
-        OrderedListExtension,
-        Underline,
-        Superscript,
-        Subscript,
-        TextStyle,
-        Color,
-        Image.configure({
-          inline: false,
-          allowBase64: true,
-          HTMLAttributes: {
-            style: 'max-width: 500px;'
-          }
-        }),
-        Placeholder.configure({
-          placeholder: this.placeholder
-        }),
-        Highlight.configure({
-          multicolor: true
-        })
-      ],
-      content: this.initialHTML,
-      onTransaction: () => {
-        this.updateEditorStates();
-      },
-      onUpdate: () => {
-        this.contentChange.emit(this.editor.getHTML());
-      },
-      onBlur: () => {
-        this.editorBlur.emit();
-      }
-    });
-    this.updateEditorStates();
-    this.updateColorButtonStyles();
+  protected override getExtensions(): AnyExtension[] {
+    return [
+      StarterKit.configure({
+        bulletList: false,
+        orderedList: false
+      }),
+      BulletListExtension,
+      OrderedListExtension,
+      Underline,
+      Superscript,
+      Subscript,
+      TextStyle,
+      Color,
+      Image.configure({
+        inline: false,
+        allowBase64: true,
+        HTMLAttributes: {
+          style: 'max-width: 500px;'
+        }
+      }),
+      Placeholder.configure({
+        placeholder: this.placeholder
+      }),
+      Highlight.configure({
+        multicolor: true
+      })
+    ];
   }
 
-  private updateColorButtonStyles(): void {
-    this.fontColorButtonStyle = `linear-gradient(135deg, white 60%, ${this.selectedFontColor} 60%)`;
-    this.highlightColorButtonStyle = `linear-gradient(135deg, white 60%, ${this.selectedHighlightColor} 60%)`;
+  onEditorUpdate(): void {
+    this.contentChange.emit(this.editor.getHTML());
   }
 
-  private updateEditorStates(): void {
-    this.editorStates = {
-      bold: this.editor.isActive('bold'),
-      italic: this.editor.isActive('italic'),
-      underline: this.editor.isActive('underline'),
-      superscript: this.editor.isActive('superscript'),
-      subscript: this.editor.isActive('subscript'),
-      strike: this.editor.isActive('strike'),
-      bulletList: this.editor.isActive('bulletList'),
-      orderedList: this.editor.isActive('orderedList')
-    };
+  onEditorBlur(): void {
+    this.editorBlur.emit();
+  }
+
+  updateEditorStates(): void {
     const bulletAttrs = this.editor.getAttributes('bulletList') as { listStyle?: string };
     this.currentBulletListStyle = bulletAttrs.listStyle || 'disc';
     const orderedAttrs = this.editor.getAttributes('orderedList') as { listStyle?: string };
     this.currentOrderedListStyle = orderedAttrs.listStyle || 'decimal';
-  }
-
-  getEditorData(): { text: string, items: string[] } {
-    return {
-      text: this.editor.getHTML(),
-      items: this.selectedItems
-    };
-  }
-
-  async addImage(): Promise<void> {
-    const mediaSrc = await RichNoteEditorComponent.loadImage(['image/*']);
-    this.editor.commands.setImage({ src: mediaSrc });
-  }
-
-  private static async loadImage(fileTypes: string[] = []): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      const fileUploadElement = document.createElement('input');
-      fileUploadElement.type = 'file';
-      fileUploadElement.accept = fileTypes.toString();
-      fileUploadElement.addEventListener('change', event => {
-        const uploadedFile = (event.target as HTMLInputElement).files?.[0];
-        const reader = new FileReader();
-        reader.onload = loadEvent => resolve(loadEvent.target?.result as string);
-        reader.onerror = errorEvent => reject(errorEvent);
-        if (uploadedFile) {
-          reader.readAsDataURL(uploadedFile);
-        }
-      });
-      fileUploadElement.click();
-    });
-  }
-
-  toggleBold(): void {
-    this.editor.chain().toggleBold().focus().run();
-  }
-
-  toggleItalic(): void {
-    this.editor.chain().toggleItalic().focus().run();
-  }
-
-  toggleUnderline(): void {
-    this.editor.chain().toggleUnderline().focus().run();
-  }
-
-  toggleStrike(): void {
-    this.editor.commands.toggleStrike();
-  }
-
-  toggleSuperscript(): void {
-    this.editor.chain().toggleSuperscript().focus().run();
-  }
-
-  toggleSubscript(): void {
-    this.editor.chain().toggleSubscript().focus().run();
-  }
-
-  toggleBulletList(): void {
-    this.editor.chain().toggleBulletList().focus().run();
   }
 
   setBulletListStyle(style: string): void {
@@ -209,32 +109,15 @@ export class RichNoteEditorComponent implements OnInit, OnDestroy {
     this.editor.chain().focus().setOrderedListStyle(style).run();
   }
 
-  applyFontColor(): void {
-    this.editor.chain().focus().setColor(this.selectedFontColor).run();
-    this.updateColorButtonStyles();
-  }
-
-  applyHighlightColor(): void {
-    this.editor.chain().focus().toggleHighlight({ color: this.selectedHighlightColor }).run();
-    this.updateColorButtonStyles();
-  }
-
   onSelectedItemChange(items: string[]): void {
     this.selectedItems = items;
     this.selectedItemsChange.emit(this.selectedItems);
   }
 
-  onFontColorInput(event: Event): void {
-    this.selectedFontColor = (event.target as HTMLInputElement).value;
-    this.applyFontColor();
-  }
-
-  onHighlightColorInput(event: Event): void {
-    this.selectedHighlightColor = (event.target as HTMLInputElement).value;
-    this.applyHighlightColor();
-  }
-
-  ngOnDestroy(): void {
-    this.editor.destroy();
+  getEditorData(): { text: string, items: string[] } {
+    return {
+      text: this.editor.getHTML(),
+      items: this.selectedItems
+    };
   }
 }
