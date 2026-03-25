@@ -86,6 +86,42 @@ describe('Admin Settings Tab Configuration', () => {
   });
 
   // -------------------------------------------------------------------------
+  describe('Email Template card', () => {
+    it('displays the Email Template fields', () => {
+      goToSettings();
+      cy.get('[formcontrolname="emailSubject"]').should('exist');
+      cy.get('[formcontrolname="emailBody"]').should('exist');
+    });
+
+    it('saves a custom email template', () => {
+      goToSettings();
+      setFormControl('emailSubject', 'Welcome to Studio Lite!');
+      cy.get('[formcontrolname="emailBody"]')
+        .should('exist')
+        .clear({ force: true })
+        .type('Dear {{user}},\n\nWelcome to Studio Lite.', { force: true, parseSpecialCharSequences: false });
+      saveAndExpect(
+        'PATCH',
+        '/api/admin/settings/email-template',
+        'saveEmailTemplate',
+        1
+      );
+    });
+
+    it('clears the email template fields', () => {
+      goToSettings();
+      clearFormControl('emailSubject');
+      clearFormControl('emailBody');
+      saveAndExpect(
+        'PATCH',
+        '/api/admin/settings/email-template',
+        'clearEmailTemplate',
+        1
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
   describe('Logo and Colors card', () => {
     it('checks that the Colors card fields exist', () => {
       goToSettings();
