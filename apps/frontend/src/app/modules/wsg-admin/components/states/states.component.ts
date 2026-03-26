@@ -1,6 +1,7 @@
 import {
-  Component, EventEmitter, Output, OnInit
+  Component, EventEmitter, Output, OnInit, OnDestroy
 } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
@@ -20,7 +21,8 @@ import { State } from '../../../admin/models/state.type';
   // eslint-disable-next-line max-len
   imports: [MatProgressSpinner, MatFormField, MatInput, MatIconButton, MatTooltip, MatIcon, MatError, TranslateModule, MatFabButton]
 })
-export class StatesComponent implements OnInit {
+export class StatesComponent implements OnInit, OnDestroy {
+  private ngUnsubscribe = new Subject<void>();
   states: State[] = [];
   changedStates!: State[];
   isLoading: boolean = false;
@@ -84,26 +86,35 @@ export class StatesComponent implements OnInit {
         okButtonLabel: this.translateService.instant('delete')
       }
     });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.states = this.states?.filter((s: State) => s.id !== state.id);
-        this.changedStates = this.states as State[];
-        this.hasChanged.emit(this.changedStates);
-        this.stateDeleted.emit(this.changedStates);
-      }
-    });
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(result => {
+        if (result) {
+          this.states = this.states?.filter((s: State) => s.id !== state.id);
+          this.changedStates = this.states as State[];
+          this.hasChanged.emit(this.changedStates);
+          this.stateDeleted.emit(this.changedStates);
+        }
+      });
   }
 
   ngOnInit(): void {
-    if (!this.wsgAdminService.selectedWorkspaceGroupSettings.states) {
+    const currentSettings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
+    if (!currentSettings.states) {
       this.isLoading = true;
       setTimeout(() => {
-        this.states = this.wsgAdminService.selectedWorkspaceGroupSettings.states || [];
+        const settings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
+        this.states = settings.states || [];
         this.changedStates = this.states;
         this.isLoading = false;
       }, 200);
     }
-    this.states = this.wsgAdminService.selectedWorkspaceGroupSettings.states || [];
+    this.states = currentSettings.states || [];
     this.changedStates = this.states;
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

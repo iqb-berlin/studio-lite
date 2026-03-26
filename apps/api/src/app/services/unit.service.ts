@@ -55,6 +55,12 @@ export class UnitService {
     private unitMetadataToDeleteService: UnitMetadataToDeleteService
   ) {}
 
+  async findOne(id: number): Promise<Unit> {
+    const unit = await this.unitsRepository.findOne({ where: { id: id } });
+    if (!unit) throw new UnitNotFoundException(id, 0, 'GET');
+    return unit;
+  }
+
   async getUnitIdsByWorkspaceId(workspaceId: number): Promise<number[]> {
     const units = await this.unitsRepository
       .find({

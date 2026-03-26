@@ -9,6 +9,7 @@ import { AppConfigComponent } from '../app-config/app-config.component';
 import { MissingsProfilesConfigComponent } from '../missings-profiles-config/missings-profiles-config.component';
 import { UnitExportConfigComponent } from '../unit-export-config/unit-export-config.component';
 import { EmailTemplateComponent } from '../email-template/email-template.component';
+import { UnitRichNoteTagsConfigComponent } from '../unit-rich-note-tags-config/unit-rich-note-tags-config.component';
 
 @Component({
   selector: 'studio-lite-settings',
@@ -25,7 +26,8 @@ import { EmailTemplateComponent } from '../email-template/email-template.compone
     MatCardTitle,
     MatCard,
     MatCardContent,
-    EmailTemplateComponent
+    EmailTemplateComponent,
+    UnitRichNoteTagsConfigComponent
   ]
 })
 export class SettingsComponent {}

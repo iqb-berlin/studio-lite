@@ -31,6 +31,16 @@ describe('WsgAdminService', () => {
     expect(service).toBeTruthy();
   });
 
+  it('should initialize behavior subjects with default values', () => {
+    expect(service.selectedWorkspaceGroupId.getValue()).toBe(0);
+    expect(service.selectedWorkspaceGroupName.getValue()).toBe('');
+    expect(service.selectedWorkspaceGroupSettings.getValue()).toEqual({
+      defaultSchemer: '',
+      defaultPlayer: '',
+      defaultEditor: ''
+    });
+  });
+
   describe('setWorkspaceGroupSettings', () => {
     it('returns true on success', done => {
       const settings: WorkspaceGroupSettingsDto = {

@@ -15,7 +15,8 @@ import {
   UnitSchemeDto,
   UsersInWorkspaceDto,
   WorkspaceGroupFullDto,
-  UnitItemDto
+  UnitItemDto,
+  UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 import { firstValueFrom, Observable } from 'rxjs';
 import { WorkspaceBackendService } from './workspace-backend.service';
@@ -757,6 +758,31 @@ describe('WorkspaceBackendService', () => {
       const req = httpMock.expectOne(
         request => request.url === `${serverUrl}workspaces/1/units/1/items`
       );
+      req.error(new ProgressEvent('error'));
+
+      await resultPromise;
+    });
+  });
+
+  describe('getUnitRichNoteTags', () => {
+    it('should fetch rich note tags', async () => {
+      const mockData: UnitRichNoteTagDto[] = [
+        { id: 'tag1', label: [] }
+      ];
+
+      const resultPromise = expectObservableValue(service.getUnitRichNoteTags(), mockData);
+
+      const req = httpMock.expectOne(`${serverUrl}admin/settings/unit-rich-note-tags`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockData);
+
+      await resultPromise;
+    });
+
+    it('should return empty array on error', async () => {
+      const resultPromise = expectObservableValue(service.getUnitRichNoteTags(), []);
+
+      const req = httpMock.expectOne(`${serverUrl}admin/settings/unit-rich-note-tags`);
       req.error(new ProgressEvent('error'));
 
       await resultPromise;

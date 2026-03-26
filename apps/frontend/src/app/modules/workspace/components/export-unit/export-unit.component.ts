@@ -25,6 +25,7 @@ export class ExportUnitComponent {
   unitExportSettings: UnitDownloadSettingsDto = {
     unitIdList: [],
     addComments: false,
+    addRichNotes: false,
     addPlayers: false,
     addTestTakersReview: 0,
     addTestTakersMonitor: 0,

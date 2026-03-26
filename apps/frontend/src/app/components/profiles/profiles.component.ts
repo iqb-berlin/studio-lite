@@ -62,7 +62,8 @@ export class ProfilesComponent implements OnInit {
             })
           );
           this.wsgAdminService.profileStores = this.profileStoresWithProfiles;
-          this.fetchedProfiles = this.wsgAdminService.selectedWorkspaceGroupSettings.profiles || this.profiles;
+          const currentSettings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
+          this.fetchedProfiles = currentSettings.profiles || this.profiles;
           this.profilesSelected = this.fetchedProfiles || [];
           this.isError = false;
         } else {

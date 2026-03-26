@@ -20,7 +20,7 @@ import { CommentsComponent } from './components/comments/comments.component';
 import { BackendService } from './services/backend.service';
 import { IsEditingPipe } from './pipes/is-editing.pipe';
 import { IsReplyingPipe } from './pipes/is-replying.pipe';
-import { SafeResourceHTMLPipe } from './pipes/safe-resource-html.pipe';
+import { SafeResourceHTMLPipe } from '../../pipes/safe-resource-html.pipe';
 import { ScrollCommentIntoViewDirective } from './directives/scroll-comment-into-view.directive';
 import { AuthInterceptor } from '../../interceptors/auth.interceptor';
 import { CommentBadgeComponent } from './components/comment-badge/comment-badge.component';
@@ -28,7 +28,7 @@ import { ScrollEditorIntoViewDirective } from './directives/scroll-editor-into-v
 import { FromNowPipe } from './pipes/from-now.pipe';
 import { Comment } from './models/comment.interface';
 import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
-import { CommentItemSelectionComponent } from './components/comment-item-selection/comment-item-selection.component';
+import { ItemSelectionComponent } from '../../components/item-selection/item-selection.component';
 import { CommentService } from './services/comment.service';
 
 @NgModule({
@@ -50,7 +50,7 @@ import { CommentService } from './services/comment.service';
     CommentsComponent,
     CommentComponent,
     CommentEditorComponent,
-    CommentItemSelectionComponent,
+    ItemSelectionComponent,
     SafeResourceHTMLPipe,
     IsEditingPipe,
     IsReplyingPipe,

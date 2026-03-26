@@ -5,7 +5,8 @@ import {
   ApiBearerAuth, ApiHeader, ApiOkResponse, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
-  MissingsProfilesDto, ConfigDto, AppLogoDto, UnitExportConfigDto, ProfilesRegistryDto, EmailTemplateDto
+  MissingsProfilesDto, ConfigDto, AppLogoDto, UnitExportConfigDto, ProfilesRegistryDto,
+  EmailTemplateDto, UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 import { ApiNotAcceptableResponse } from '@nestjs/swagger/dist/decorators/api-response.decorator';
 import { SettingService } from '../services/setting.service';
@@ -135,5 +136,23 @@ export class SettingController {
   @ApiTags('admin settings')
   async patchMissingsProfiles(@Body() newMissingsProfiles: MissingsProfilesDto) {
     return this.settingService.patchMissingsProfiles(newMissingsProfiles);
+  }
+
+  @Get('unit-rich-note-tags')
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ description: 'Unit rich note tags retrieved successfully.' })
+  @ApiTags('admin settings')
+  async findUnitRichNoteTags(): Promise<UnitRichNoteTagDto[]> {
+    return this.settingService.findUnitRichNoteTags();
+  }
+
+  @Patch('unit-rich-note-tags')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiOkResponse({ description: 'Unit rich note tags updated successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiBearerAuth()
+  @ApiTags('admin settings')
+  async patchUnitRichNoteTags(@Body() newTags: UnitRichNoteTagDto[]) {
+    return this.settingService.patchUnitRichNoteTags(newTags);
   }
 }

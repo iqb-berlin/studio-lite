@@ -3,14 +3,14 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'studio-lite-comment-item',
+  selector: 'studio-lite-item-badge',
   imports: [
     MatTooltip,
     TranslateModule
   ],
-  templateUrl: './comment-item.component.html',
-  styleUrl: './comment-item.component.scss'
+  templateUrl: './item-badge.component.html',
+  styleUrl: './item-badge.component.scss'
 })
-export class CommentItemComponent {
+export class ItemBadgeComponent {
   @Input() label!: string;
 }

@@ -18,7 +18,12 @@ import {
   UnitSchemeDto,
   UsersInWorkspaceDto,
   WorkspaceGroupFullDto,
-  UnitItemDto
+  UnitItemDto,
+  UnitRichNotesDto,
+  CreateUnitRichNoteDto,
+  UpdateUnitRichNoteDto,
+  UpdateUnitRichNoteUnitItemsDto,
+  UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 
 @Injectable({
@@ -400,6 +405,63 @@ export class WorkspaceBackendService {
     const queryParams = new HttpParams().set('withoutMetadata', true);
     return this.http
       .get<UnitItemDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/items`, { params: queryParams })
+      .pipe(
+        catchError(() => of([]))
+      );
+  }
+
+  // --- Unit Rich Notes ---
+  getUnitRichNotes(workspaceId: number, unitId: number): Observable<UnitRichNotesDto | null> {
+    return this.http
+      .get<UnitRichNotesDto>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/rich-notes`)
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
+  addUnitRichNote(workspaceId: number, unitId: number, newNote: CreateUnitRichNoteDto): Observable<number | null> {
+    return this.http
+      .post<number>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/rich-notes`, newNote)
+      .pipe(
+        map(returnId => Number(returnId)),
+        catchError(() => of(null))
+      );
+  }
+
+  patchUnitRichNote(
+    workspaceId: number, unitId: number, noteId: number, noteData: UpdateUnitRichNoteDto
+  ): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/rich-notes/${noteId}`, noteData)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  patchUnitRichNoteItems(
+    workspaceId: number, unitId: number, noteId: number, itemsData: UpdateUnitRichNoteUnitItemsDto
+  ): Observable<boolean> {
+    return this.http
+      .patch(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/rich-notes/${noteId}/items`, itemsData)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  deleteUnitRichNote(workspaceId: number, unitId: number, noteId: number): Observable<boolean> {
+    return this.http
+      .delete(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/rich-notes/${noteId}`)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  getUnitRichNoteTags(): Observable<UnitRichNoteTagDto[]> {
+    return this.http
+      .get<UnitRichNoteTagDto[]>(`${this.serverUrl}admin/settings/unit-rich-note-tags`)
       .pipe(
         catchError(() => of([]))
       );

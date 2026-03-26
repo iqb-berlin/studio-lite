@@ -81,3 +81,10 @@ export { WorkspaceDto } from './lib/dtos/workspace/workspace.dto';
 export { WorkspaceGroupDto } from './lib/dtos/workspace-group/workspace-group.dto';
 export { VeronaModuleType } from './lib/dtos/verona-module/verona-module-metadata.dto';
 export { UnitDefinitionFullDto } from './lib/dtos/unit-definition/unit-definition-full.dto';
+
+// Unit Rich Notes
+export { UnitRichNoteDto, UnitRichNoteLinkDto, UnitRichNotesDto } from './lib/dtos/unit-rich-note/unit-rich-note.dto';
+export { CreateUnitRichNoteDto } from './lib/dtos/unit-rich-note/create-unit-rich-note.dto';
+export { UpdateUnitRichNoteDto } from './lib/dtos/unit-rich-note/update-unit-rich-note.dto';
+export { UpdateUnitRichNoteUnitItemsDto } from './lib/dtos/unit-rich-note/update-unit-rich-note-unit-items.dto';
+export { UnitRichNoteTagDto } from './lib/dtos/unit-rich-note/unit-rich-note-tag.dto';

@@ -1,26 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
-import { MatSelect, MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
 import { By } from '@angular/platform-browser';
+import { TranslateModule } from '@ngx-translate/core';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
-import { CommentItemSelectionComponent } from './comment-item-selection.component';
+import { ItemSelectionComponent } from './item-selection.component';
 
-describe('CommentItemSelectionComponent', () => {
-  let component: CommentItemSelectionComponent;
-  let fixture: ComponentFixture<CommentItemSelectionComponent>;
+describe('ItemSelectionComponent', () => {
+  let component: ItemSelectionComponent;
+  let fixture: ComponentFixture<ItemSelectionComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        TranslateModule.forRoot(),
-        MatSelectModule,
-        MatFormFieldModule,
-        CommentItemSelectionComponent
-      ]
+      imports: [ItemSelectionComponent, TranslateModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CommentItemSelectionComponent);
+    fixture = TestBed.createComponent(ItemSelectionComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -84,7 +78,7 @@ describe('CommentItemSelectionComponent', () => {
     fixture.detectChanges();
 
     const select = fixture.debugElement.query(By.css('mat-select')).componentInstance as MatSelect;
-    select.valueChange.emit(['1']);
+    select.selectionChange.emit({ value: ['1'], source: select });
     expect(spy).toHaveBeenCalledWith(['1']);
   });
 });

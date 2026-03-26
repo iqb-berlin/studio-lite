@@ -1,0 +1,20 @@
+<div class="rich-notes-container fx-column-start-stretch fx-flex-row-100">
+  <div class="notes-list fx-flex-fill">
+    @if (isLoading) {
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+      </div>
+    } @else {
+      @for (node of displayNodes; track node.tagId) {
+        <studio-lite-unit-rich-note-node 
+          [node]="node" 
+          [unitItems]="unitItems" 
+          [canWrite]="canWrite"
+          (addNote)="openNoteDialog(undefined, $event)"
+          (editNote)="openNoteDialog($event)"
+          (deleteNote)="deleteNote($event)">
+        </studio-lite-unit-rich-note-node>
+      }
+    }
+  </div>
+</div>

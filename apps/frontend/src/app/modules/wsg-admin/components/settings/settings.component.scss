@@ -1,6 +1,6 @@
 .scroll-area {
   height: calc(100% - 35px);
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .card-scroll-area {
@@ -11,8 +11,21 @@
   padding: 20px
 }
 
+.fx-flex-row-50 {
+  flex: 1 1 50%;
+  box-sizing: border-box;
+  max-width: 50%;
+}
+
+.fx-flex-row-100 {
+  flex: 1 1 100%;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding-bottom: 20px;
+}
+
 .container{
-  height: 100%
+  box-sizing: border-box;
 }
 
 .card-header {

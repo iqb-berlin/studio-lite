@@ -32,7 +32,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     { name: 'editor', duplicable: true },
     { name: 'preview', duplicable: true },
     { name: 'schemer', duplicable: true },
-    { name: 'comments', duplicable: true }
+    { name: 'comments', duplicable: true },
+    { name: 'notes', duplicable: true }
   ];
 
   navLinks = this.navTabs.map(link => link.name);
@@ -125,11 +126,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.workspaceService.groupId = workspace.groupId || 0;
     this.workspaceService.dropBoxId = workspace.dropBoxId;
     this.appService.appConfig.setPageTitle(this.workspaceService.selectedWorkspaceName);
-    this.workspaceService.setWorkspaceGroupStates();
-
     if (workspace.settings) {
       this.workspaceService.workspaceSettings = workspace.settings;
     }
+    this.workspaceService.setWorkspaceGroupStates();
+    this.workspaceService.loadRichNoteTags();
+
     this.workspaceService.userAccessLevel = workspace.userAccessLevel;
     this.workspaceService.isWorkspaceGroupAdmin =
       this.appService.isWorkspaceGroupAdmin(this.workspaceService.selectedWorkspaceId);

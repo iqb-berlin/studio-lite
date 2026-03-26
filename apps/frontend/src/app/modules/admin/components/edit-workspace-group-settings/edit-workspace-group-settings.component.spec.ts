@@ -5,7 +5,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { WorkspaceGroupFullDto, WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { EditWorkspaceGroupSettingsComponent } from './edit-workspace-group-settings.component';
 import { environment } from '../../../../../environments/environment';
@@ -59,7 +59,7 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
     };
 
     const wsgAdminServiceMock = {
-      selectedWorkspaceGroupSettings: mockSettings
+      selectedWorkspaceGroupSettings: new BehaviorSubject(mockSettings)
     };
 
     await TestBed.configureTestingModule({

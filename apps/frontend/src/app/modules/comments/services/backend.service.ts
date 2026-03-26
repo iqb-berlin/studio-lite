@@ -43,7 +43,7 @@ export class BackendService {
       .post<number>(url, comment)
       .pipe(
         catchError(() => of(null)),
-        map(returnId => Number(returnId))
+        map(returnId => (returnId === null ? null : Number(returnId)))
       );
   }
 

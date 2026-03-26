@@ -1,3 +1,4 @@
+import { createMock } from '@golevelup/ts-jest';
 import { UnitImportData } from './unit-import-data.class';
 import { FileIo } from '../interfaces/file-io.interface';
 
@@ -21,13 +22,14 @@ describe('UnitImportData', () => {
       </BaseVariables>
       <CodingSchemeRef schemer="schemer-v1" schemetype="type1">unit01.vocs</CodingSchemeRef>
       <UnitCommentsRef>unit01.vouc</UnitCommentsRef>
+      <UnitRichNotesRef>unit01.vorn</UnitRichNotesRef>
     </Unit>
   `;
 
-  const fileIoMock = {
+  const fileIoMock = createMock<FileIo>({
     originalname: 'folder/unit01.xml',
     buffer: Buffer.from(xmlContent)
-  } as unknown as FileIo;
+  });
 
   it('should parse metadata correctly from XML', () => {
     const data = new UnitImportData(fileIoMock);
@@ -44,6 +46,7 @@ describe('UnitImportData', () => {
     expect(data.definitionFileName).toBe('folder/unit01.voud');
     expect(data.codingSchemeFileName).toBe('folder/unit01.vocs');
     expect(data.commentsFileName).toBe('folder/unit01.vouc');
+    expect(data.richNotesFileName).toBe('folder/unit01.vorn');
     expect(data.metadataFileName).toBe('folder/unit01.vomd');
   });
 
@@ -57,10 +60,10 @@ describe('UnitImportData', () => {
   });
 
   it('should throw error if metadata is missing', () => {
-    const invalidFile = {
+    const invalidFile = createMock<FileIo>({
       originalname: 'test.xml',
       buffer: Buffer.from('<Invalid></Invalid>')
-    } as unknown as FileIo;
+    });
 
     expect(() => new UnitImportData(invalidFile)).toThrow('metadata element missing');
   });
@@ -73,10 +76,10 @@ describe('UnitImportData', () => {
     });
 
     it('should return empty string if no folder is present', () => {
-      const data = new UnitImportData({
+      const data = new UnitImportData(createMock<FileIo>({
         originalname: 'unit01.xml',
         buffer: Buffer.from(xmlContent)
-      } as unknown as FileIo);
+      }));
       const unitImportData = data as unknown as { getFolder: () => string };
       expect(unitImportData.getFolder()).toBe('');
     });

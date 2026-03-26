@@ -83,11 +83,14 @@ import { MetadataModule } from '../metadata/metadata.module';
 import { StatePipe } from './pipes/state.pipe';
 import { ShowMetadataComponent } from './components/show-metadata/show-metadata.component';
 import { PrintUnitsDialogComponent } from './components/print-units-dialog/print-units-dialog.component';
+import { UnitRichNotesComponent } from './components/unit-rich-notes/unit-rich-notes.component';
+import { UnitRichNoteDialogComponent } from './components/unit-rich-note-dialog/unit-rich-note-dialog.component';
 
 @NgModule({
   exports: [
     WorkspaceComponent,
     UnitCommentsComponent,
+    UnitRichNotesComponent,
     UnitGroupComponent,
     UnitTableComponent,
     SelectUnitListComponent
@@ -138,6 +141,8 @@ import { PrintUnitsDialogComponent } from './components/print-units-dialog/print
     WorkspaceUserListComponent,
     PagingModeSelectionComponent,
     UnitCommentsComponent,
+    UnitRichNotesComponent,
+    UnitRichNoteDialogComponent,
     GroupManageComponent,
     ReviewsComponent,
     ReviewConfigEditComponent,

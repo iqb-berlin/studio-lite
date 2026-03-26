@@ -40,6 +40,7 @@ import { WorkspaceUserService } from './workspace-user.service';
 import { UnitUserService } from './unit-user.service';
 import { UserWorkspaceGroupNotAdminException } from '../exceptions/user-workspace-group-not-admin.exception';
 import { UnitCommentService } from './unit-comment.service';
+import { UnitRichNoteService } from './unit-rich-note.service';
 import User from '../entities/user.entity';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 import { GroupAdminUnprocessableWorkspaceException } from '../exceptions/group-admin-unprocessable-workspace.exception';
@@ -63,7 +64,8 @@ export class WorkspaceService {
     private usersService: UsersService,
     private unitService: UnitService,
     private unitUserService: UnitUserService,
-    private unitCommentService: UnitCommentService
+    private unitCommentService: UnitCommentService,
+    private unitRichNoteService: UnitRichNoteService
   ) {}
 
   async getAllWorkspaces(): Promise<WorkspaceFullDto[]> {
@@ -307,7 +309,13 @@ export class WorkspaceService {
       }
     }
     this.logger.log(`Creating workspace with name: ${workspace.name}`);
-    const newWorkspace = this.workspacesRepository.create(workspace);
+    const newWorkspace = this.workspacesRepository.create({
+      ...workspace,
+      settings: {
+        ...new WorkspaceSettingsDto(),
+        hiddenRoutes: ['notes']
+      }
+    });
     const savedWorkspace = await this.workspacesRepository.save(newWorkspace);
     this.logger.log(
       `Workspace created successfully with ID: ${savedWorkspace.id}`
@@ -758,6 +766,16 @@ export class WorkspaceService {
           notXmlFiles[unitImportData.commentsFileName].buffer.toString();
         usedFiles.push(unitImportData.commentsFileName);
         await this.importComments(newUnitId, comments, itemUuidLookups);
+      }
+
+      if (
+        unitImportData.richNotesFileName &&
+        notXmlFiles[unitImportData.richNotesFileName]
+      ) {
+        const richNotes =
+          notXmlFiles[unitImportData.richNotesFileName].buffer.toString();
+        usedFiles.push(unitImportData.richNotesFileName);
+        await this.unitRichNoteService.importNotes(JSON.parse(richNotes), newUnitId, itemUuidLookups);
       }
 
       if (

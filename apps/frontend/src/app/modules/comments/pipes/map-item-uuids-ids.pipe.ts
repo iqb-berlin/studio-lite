@@ -3,11 +3,11 @@ import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { TranslateService } from '@ngx-translate/core';
 
 @Pipe({
-  name: 'commentItemUuidsIds',
+  name: 'mapItemUuidsIds',
   standalone: true
 })
 
-export class CommentItemUuidsIdsPipe implements PipeTransform {
+export class MapItemUuidsIdsPipe implements PipeTransform {
   constructor(private translateService: TranslateService) {}
 
   transform(itemUuids: string[], unitItems: UnitItemDto[]): { uuid: string, id: string }[] {
