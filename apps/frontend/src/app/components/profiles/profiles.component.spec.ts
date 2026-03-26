@@ -4,7 +4,7 @@ import { MatCheckboxModule, MatCheckboxChange } from '@angular/material/checkbox
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import {
   MetadataProfileDto,
@@ -41,12 +41,12 @@ describe('ProfilesComponent', () => {
 
   beforeEach(async () => {
     mockWsgAdminService = {
-      selectedWorkspaceGroupSettings: {
+      selectedWorkspaceGroupSettings: new BehaviorSubject({
         defaultSchemer: '',
         defaultPlayer: '',
         defaultEditor: '',
         profiles: [{ id: 'test-profile', label: 'Test Profile' }]
-      } as WorkspaceGroupSettingsDto,
+      } as WorkspaceGroupSettingsDto),
       profileStores: []
     };
 

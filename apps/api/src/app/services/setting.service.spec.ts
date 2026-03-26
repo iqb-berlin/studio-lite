@@ -177,10 +177,11 @@ describe('SettingService', () => {
   });
 
   describe('findUnitRichNoteTags', () => {
-    it('should return empty array if not found', async () => {
+    it('should return default tags if not found', async () => {
       settingsRepository.findOne.mockResolvedValue(null);
       const result = await service.findUnitRichNoteTags();
-      expect(result).toEqual([]);
+      expect(result.length).toBeGreaterThan(0);
+      expect(result[0].id).toBe('transcript');
     });
 
     it('should return parsed tags', async () => {

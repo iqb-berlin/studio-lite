@@ -3,7 +3,7 @@ import { AbstractControl, ValidationErrors } from '@angular/forms';
 export class StudioValidators {
   static jsonValidator(control: AbstractControl): ValidationErrors | null {
     try {
-      if (control.value) {
+      if (control.value?.trim()) {
         JSON.parse(control.value);
       }
       return null;

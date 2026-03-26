@@ -1,24 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+import { WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { StatesComponent } from './states.component';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 
 describe('StatesComponent', () => {
   let component: StatesComponent;
   let fixture: ComponentFixture<StatesComponent>;
-  let mockWsgAdminService: {
-    selectedWorkspaceGroupSettings: {
-      states: { id: number, label: string, color: string }[]
-    } };
+  let mockWsgAdminService: Partial<WsgAdminService>;
   let mockMatDialog: { open: jest.Mock };
 
   beforeEach(async () => {
     mockWsgAdminService = {
-      selectedWorkspaceGroupSettings: {
+      selectedWorkspaceGroupSettings: new BehaviorSubject<WorkspaceGroupSettingsDto>({
+        defaultEditor: '',
+        defaultPlayer: '',
+        defaultSchemer: '',
         states: [{ id: 1, label: 'State 1', color: '#000000' }]
-      }
+      })
     };
 
     mockMatDialog = {

@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSelect } from '@angular/material/select';
 import { By } from '@angular/platform-browser';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { ItemSelectionComponent } from './item-selection.component';
@@ -12,11 +11,7 @@ describe('ItemSelectionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        NoopAnimationsModule,
-        TranslateModule.forRoot(),
-        ItemSelectionComponent
-      ]
+      imports: [ItemSelectionComponent, TranslateModule.forRoot()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ItemSelectionComponent);
@@ -83,7 +78,7 @@ describe('ItemSelectionComponent', () => {
     fixture.detectChanges();
 
     const select = fixture.debugElement.query(By.css('mat-select')).componentInstance as MatSelect;
-    select.valueChange.emit(['1']);
+    select.selectionChange.emit({ value: ['1'], source: select });
     expect(spy).toHaveBeenCalledWith(['1']);
   });
 });

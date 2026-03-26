@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
 import { GetRichNoteTagLabelPipe } from './get-rich-note-tag-label.pipe';
 import { WorkspaceService } from '../modules/workspace/services/workspace.service';
 
@@ -8,6 +9,7 @@ describe('GetRichNoteTagLabelPipe', () => {
 
   beforeEach(() => {
     workspaceServiceMock = {
+      richNoteTags$: of([]),
       getRichNoteTagLabel: jest.fn().mockReturnValue([{ lang: 'de', value: 'Test' }])
     };
 
@@ -25,9 +27,11 @@ describe('GetRichNoteTagLabelPipe', () => {
     expect(pipe).toBeTruthy();
   });
 
-  it('should call workspaceService.getRichNoteTagLabel', () => {
-    const result = pipe.transform('path.to.tag');
-    expect(workspaceServiceMock.getRichNoteTagLabel).toHaveBeenCalledWith('path.to.tag');
-    expect(result).toEqual([{ lang: 'de', value: 'Test' }]);
+  it('should call workspaceService.getRichNoteTagLabel', done => {
+    pipe.transform('path.to.tag').subscribe(result => {
+      expect(workspaceServiceMock.getRichNoteTagLabel).toHaveBeenCalledWith('path.to.tag');
+      expect(result).toEqual([{ lang: 'de', value: 'Test' }]);
+      done();
+    });
   });
 });

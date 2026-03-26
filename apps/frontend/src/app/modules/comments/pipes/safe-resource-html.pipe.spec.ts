@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { DomSanitizer } from '@angular/platform-browser';
-import { SafeResourceHTMLPipe } from './safe-resource-html.pipe';
+import { SafeResourceHTMLPipe } from '../../../pipes/safe-resource-html.pipe';
 
 describe('SafeResourceHTMLPipe', () => {
   let pipe: SafeResourceHTMLPipe;

@@ -20,6 +20,7 @@ import { SettingService } from '../services/setting.service';
 import { UsersService } from '../services/users.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
 import { UnitCommentService } from '../services/unit-comment.service';
+import { UnitRichNoteService } from '../services/unit-rich-note.service';
 import { UnitDownloadClass } from '../classes/unit-download.class';
 import UserEntity from '../entities/user.entity';
 
@@ -51,6 +52,10 @@ describe('WorkspaceController', () => {
         {
           provide: SettingService,
           useValue: createMock<SettingService>()
+        },
+        {
+          provide: UnitRichNoteService,
+          useValue: createMock<UnitRichNoteService>()
         },
         {
           provide: UsersService,

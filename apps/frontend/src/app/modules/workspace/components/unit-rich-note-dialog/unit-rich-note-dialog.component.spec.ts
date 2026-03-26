@@ -20,10 +20,15 @@ describe('UnitRichNoteDialogComponent', () => {
       ]
     }
   ];
+  interface DialogData {
+    workspaceId: number;
+    unitId: number;
+    tags: UnitRichNoteTagDto[];
+    items: string[];
+    note?: { tagId: string, content: string };
+  }
 
-  beforeEach(async () => {
-    dialogRefMock = createMock<MatDialogRef<UnitRichNoteDialogComponent>>();
-
+  async function setupTestBed(data: DialogData) {
     await TestBed.configureTestingModule({
       imports: [
         UnitRichNoteDialogComponent,
@@ -33,36 +38,42 @@ describe('UnitRichNoteDialogComponent', () => {
       ],
       providers: [
         { provide: MatDialogRef, useValue: dialogRefMock },
-        {
-          provide: MAT_DIALOG_DATA,
-          useValue: {
-            workspaceId: 1,
-            unitId: 1,
-            tags: mockTags,
-            items: []
-          }
-        }
+        { provide: MAT_DIALOG_DATA, useValue: data }
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(UnitRichNoteDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  }
+
+  beforeEach(() => {
+    dialogRefMock = createMock<MatDialogRef<UnitRichNoteDialogComponent>>();
   });
 
-  it('should create', () => {
+  it('should create', async () => {
+    await setupTestBed({
+      workspaceId: 1,
+      unitId: 1,
+      tags: mockTags,
+      items: []
+    });
     expect(component).toBeTruthy();
   });
 
-  it('should flatten tags on init', () => {
+  it('should flatten tags on init', async () => {
+    await setupTestBed({
+      workspaceId: 1,
+      unitId: 1,
+      tags: mockTags,
+      items: []
+    });
     expect(component.flattenedTags.length).toBe(2);
     expect(component.flattenedTags[0].id).toBe('parent');
     expect(component.flattenedTags[1].id).toBe('parent.child');
   });
 
-  it('should resolve legacy tagId to full path', () => {
-    TestBed.resetTestingModule();
+  it('should resolve legacy tagId to full path', async () => {
     const legacyData = {
       note: { tagId: 'child', content: '<p>test</p>' },
       workspaceId: 1,
@@ -71,11 +82,7 @@ describe('UnitRichNoteDialogComponent', () => {
       items: []
     };
 
-    fixture = TestBed.overrideProvider(MAT_DIALOG_DATA, { useValue: legacyData })
-      .createComponent(UnitRichNoteDialogComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-
+    await setupTestBed(legacyData);
     expect(component.noteForm.get('tagId')?.value).toBe('parent.child');
   });
 
