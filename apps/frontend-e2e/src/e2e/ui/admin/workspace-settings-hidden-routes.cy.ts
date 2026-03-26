@@ -66,8 +66,7 @@ describe('Workspace Settings – hiddenRoutes', () => {
       clickIndexTabWsgAdmin('workspaces');
 
       cy.contains('mat-row', ws1)
-        .find('mat-icon:contains("directions_off")')
-        .should('not.exist');
+        .get('mat-icon:contains("directions_off")').should('have.length', 1);
     });
   });
 
