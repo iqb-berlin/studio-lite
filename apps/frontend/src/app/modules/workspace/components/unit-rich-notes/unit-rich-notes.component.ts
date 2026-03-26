@@ -96,6 +96,29 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
 
   rebuildDisplayNodes(): void {
     this.displayNodes = this.buildHierarchy(this.workspaceService.richNoteTags, '', true);
+
+    const assignedNoteIds = new Set(this.getAllAssignedNoteIds(this.displayNodes));
+    const orphanedNotes = this.notes.filter(n => !assignedNoteIds.has(n.id));
+
+    if (orphanedNotes.length > 0) {
+      this.displayNodes.push({
+        tagId: 'unassigned',
+        label: [{ lang: 'de', value: this.translateService.instant('workspace.unassigned-rich-notes') }],
+        notes: orphanedNotes,
+        children: []
+      });
+    }
+  }
+
+  private getAllAssignedNoteIds(nodes: RichNoteNode[]): number[] {
+    let ids: number[] = [];
+    nodes.forEach(node => {
+      ids = [...ids, ...node.notes.map(n => n.id)];
+      if (node.children.length > 0) {
+        ids = [...ids, ...this.getAllAssignedNoteIds(node.children)];
+      }
+    });
+    return ids;
   }
 
   private buildHierarchy(tags: UnitRichNoteTagDto[], parentId = '', isRoot = false): RichNoteNode[] {

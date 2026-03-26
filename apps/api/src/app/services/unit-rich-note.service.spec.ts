@@ -83,11 +83,11 @@ describe('UnitRichNoteService', () => {
   describe('findNotes', () => {
     it('should use workspace group tags if available', async () => {
       const groupTags = [{ id: 'group.tag', label: [{ lang: 'de', value: 'Group Tag' }] }];
-      unitRepository.findOne.mockResolvedValueOnce({ workspaceId: 1 } as unknown as Unit);
-      workspaceRepository.findOne.mockResolvedValueOnce({ groupId: 2 } as unknown as Workspace);
-      workspaceGroupRepository.findOne.mockResolvedValueOnce({
+      unitRepository.findOne.mockResolvedValueOnce(createMock<Unit>({ workspaceId: 1 }));
+      workspaceRepository.findOne.mockResolvedValueOnce(createMock<Workspace>({ groupId: 2 }));
+      workspaceGroupRepository.findOne.mockResolvedValueOnce(createMock<WorkspaceGroup>({
         settings: { richNoteTags: groupTags }
-      } as unknown as WorkspaceGroup);
+      }));
       unitRichNoteRepository.find.mockResolvedValueOnce([]);
 
       const result = await service.findNotes(100);
@@ -98,11 +98,11 @@ describe('UnitRichNoteService', () => {
 
     it('should fall back to global tags if group tags are missing', async () => {
       const globalTags = [{ id: 'global.tag', label: [{ lang: 'de', value: 'Global Tag' }] }];
-      unitRepository.findOne.mockResolvedValueOnce({ workspaceId: 1 } as unknown as Unit);
-      workspaceRepository.findOne.mockResolvedValueOnce({ groupId: 2 } as unknown as Workspace);
-      workspaceGroupRepository.findOne.mockResolvedValueOnce({
+      unitRepository.findOne.mockResolvedValueOnce(createMock<Unit>({ workspaceId: 1 }));
+      workspaceRepository.findOne.mockResolvedValueOnce(createMock<Workspace>({ groupId: 2 }));
+      workspaceGroupRepository.findOne.mockResolvedValueOnce(createMock<WorkspaceGroup>({
         settings: {}
-      } as unknown as WorkspaceGroup);
+      }));
       settingService.findUnitRichNoteTags.mockResolvedValueOnce(globalTags);
       unitRichNoteRepository.find.mockResolvedValueOnce([]);
 

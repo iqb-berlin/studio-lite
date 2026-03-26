@@ -784,7 +784,8 @@
     "lang-placeholder": "de",
     "label-placeholder": "Bezeichnung...",
     "description-placeholder": "Beschreibung...",
-    "required": "Pflichtfeld"
+    "required": "Pflichtfeld",
+    "unassigned-rich-notes": "Uneindeutige Rückmeldungen"
   },
 
   "coding-report": {

@@ -5,7 +5,9 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { BehaviorSubject, of } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { UnitRichNotesDto, UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
+import {
+  UnitRichNoteDto, UnitRichNotesDto, UnitRichNoteTagDto
+} from '@studio-lite-lib/api-dto';
 import { UnitRichNotesComponent } from './unit-rich-notes.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
@@ -78,5 +80,24 @@ describe('UnitRichNotesComponent', () => {
     expect(component.notes.length).toBe(1);
     expect(component.displayNodes.length).toBe(1);
     expect(component.displayNodes[0].tagId).toBe('t1');
+  });
+
+  it('should group notes with invalid tagIds into an "unassigned" node', () => {
+    const notes = [
+      {
+        id: 1, tagId: 't1', content: 'valid', unitId: 10
+      },
+      {
+        id: 2, tagId: 'invalid-tag', content: 'invalid', unitId: 10
+      }
+    ];
+    (component as unknown as { notes: UnitRichNoteDto[] }).notes = notes as UnitRichNoteDto[];
+    component.rebuildDisplayNodes();
+
+    expect(component.displayNodes.length).toBe(2);
+    expect(component.displayNodes[0].tagId).toBe('t1');
+    expect(component.displayNodes[1].tagId).toBe('unassigned');
+    expect(component.displayNodes[1].notes.length).toBe(1);
+    expect(component.displayNodes[1].notes[0].id).toBe(2);
   });
 });

@@ -1,10 +1,10 @@
 <div class="node-card">
   <div class="node-header">
     <div class="tag-label">
-      <mat-icon class="tag-icon">{{ node.notes.length > 0 ? 'description' : 'folder' }}</mat-icon>
+      <mat-icon class="tag-icon">{{ node.tagId === 'unassigned' ? 'help_outline' : (node.notes.length > 0 ? 'description' : 'folder') }}</mat-icon>
       <h3>{{ node.label | getLocalizedValue }}</h3>
     </div>
-    @if (canWrite) {
+    @if (canWrite && node.tagId !== 'unassigned') {
       <button mat-icon-button (click)="addNote.emit(node.tagId)" [title]="'workspace.add-rich-note' | translate">
         <mat-icon>add</mat-icon>
       </button>
