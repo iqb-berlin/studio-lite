@@ -2,9 +2,18 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  UnitRichNoteDto, CreateUnitRichNoteDto, UpdateUnitRichNoteDto, UnitRichNotesDto, UnitRichNoteLinkDto
+  UnitRichNoteDto,
+  CreateUnitRichNoteDto,
+  UpdateUnitRichNoteDto,
+  UnitRichNotesDto,
+  UnitRichNoteLinkDto,
+  UnitRichNoteTagDto,
+  WorkspaceGroupSettingsDto
 } from '@studio-lite-lib/api-dto';
 import UnitRichNote from '../entities/unit-rich-note.entity';
+import Unit from '../entities/unit.entity';
+import Workspace from '../entities/workspace.entity';
+import WorkspaceGroup from '../entities/workspace-group.entity';
 import { ItemRichNoteService } from './item-rich-note.service';
 import { UnitService } from './unit.service';
 import { SettingService } from './setting.service';
@@ -17,6 +26,12 @@ export class UnitRichNoteService {
   constructor(
     @InjectRepository(UnitRichNote)
     private unitRichNotesRepository: Repository<UnitRichNote>,
+    @InjectRepository(Unit)
+    private unitRepository: Repository<Unit>,
+    @InjectRepository(Workspace)
+    private workspaceRepository: Repository<Workspace>,
+    @InjectRepository(WorkspaceGroup)
+    private workspaceGroupRepository: Repository<WorkspaceGroup>,
     private itemRichNoteService: ItemRichNoteService,
     private unitService: UnitService,
     private settingService: SettingService
@@ -24,7 +39,34 @@ export class UnitRichNoteService {
 
   async findNotes(unitId: number): Promise<UnitRichNotesDto> {
     this.logger.log(`Returning rich notes for unit with id: ${unitId}`);
-    const tags = await this.settingService.findUnitRichNoteTags();
+    let tags: UnitRichNoteTagDto[] = [];
+
+    const unit = await this.unitRepository.findOne({
+      where: { id: unitId },
+      select: ['workspaceId']
+    });
+
+    if (unit) {
+      const workspace = await this.workspaceRepository.findOne({
+        where: { id: unit.workspaceId },
+        select: ['groupId']
+      });
+
+      if (workspace) {
+        const workspaceGroup = await this.workspaceGroupRepository.findOne({
+          where: { id: workspace.groupId },
+          select: ['settings']
+        });
+
+        if (workspaceGroup?.settings && (workspaceGroup.settings as WorkspaceGroupSettingsDto).richNoteTags) {
+          tags = (workspaceGroup.settings as WorkspaceGroupSettingsDto).richNoteTags;
+        }
+      }
+    }
+
+    if (tags.length === 0) {
+      tags = await this.settingService.findUnitRichNoteTags();
+    }
 
     const notes = await this.unitRichNotesRepository
       .find({
