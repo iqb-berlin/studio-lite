@@ -454,7 +454,7 @@
     "drop-box-selected": "Abgabebereich geändert",
     "drop-box-not-selected": "Konnte Abgabebereich nicht ändern",
     "no-drop-box": "Kein Abgabebereich",
-    "drop-box": "Abgabebereich",
+    "drop-box": "Abgabe-bereich",
     "too-many-workspaces-warning": "In dieser Bereichsgruppe sind mehr als {{maxWorkspaceCount}} Arbeitsbereiche mit insgesamt {{unitsCount}} Aufgaben vorhanden. Bitte löschen Sie Arbeitsbereiche, bevor Sie neue anlegen.",
     "too-many-workspaces-warning-small": "In dieser Bereichsgruppe sind mehr als {{maxWorkspaceCount}} Arbeitsbereiche vorhanden. Bitte löschen Sie Arbeitsbereiche, bevor Sie neue anlegen.",
     "units-count-info": "In dieser Bereichsgruppe sind insgesamt {{unitsCount}} Aufgaben vorhanden.",
@@ -557,7 +557,7 @@
       "preview": "Vorschau",
       "schemer": "Kodierung",
       "comments": "Kommentare",
-      "notes": "Rückmeldungen"
+      "notes": "Rück-meldungen"
     },
     "title": "Arbeitsbereich",
     "workspace-not-loaded": "Konnte Daten für Arbeitsbereich nicht laden",
