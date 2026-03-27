@@ -279,11 +279,12 @@ export function clearFormControl(formControlName: string): void {
 export function saveAndExpect(
   method: string,
   urlPattern: string,
-  alias: string
+  alias: string,
+  cardNum: number
 ): void {
   cy.intercept(method, urlPattern).as(alias);
   cy.translate(Cypress.expose('locale')).then(json => {
-    cy.get('button').contains(json.save).click({ force: true });
+    cy.get(`button:contains(${json.save})`).eq(cardNum).click({ force: true });
   });
   cy.wait(`@${alias}`).its('response.statusCode').should('eq', 200);
 }
