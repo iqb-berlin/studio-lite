@@ -308,3 +308,9 @@ export const importedUnit: UnitData = {
   name: '',
   group: ''
 };
+
+export const lightUnit: UnitData = {
+  shortname: 'M6_AK0013',
+  name: '',
+  group: ''
+};

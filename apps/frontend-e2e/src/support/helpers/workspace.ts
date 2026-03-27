@@ -198,3 +198,42 @@ export function selectListUnits(unitNames: string[]): void {
       .click();
   });
 }
+
+/**
+ * Creates a new rich note
+ * @param content - Text content of the rich note
+ * @param optionIndex - The index of the tag to select (default: -1 for last)
+ * @param linkItemName - Optional item to link to
+ * @example
+ * createRichNote('Erste Rich Note', 0);
+ * createRichNote('Note linked to 01', -1, '01');
+ */
+export function createRichNote(content: string, optionIndex: number = -1, linkItemName?: string): void {
+  cy.get('.node-header').contains('mat-icon', 'add').first().click({ force: true });
+  cy.get('mat-select[formControlName="tagId"]').click();
+  if (optionIndex === -1) {
+    cy.get('mat-option').last().click();
+  } else if (optionIndex === 0) {
+    cy.get('mat-option').first().click();
+  } else {
+    cy.get('mat-option').eq(optionIndex).click();
+  }
+  cy.get('tiptap-editor .ProseMirror').type(content);
+  if (linkItemName) {
+    cy.get('[data-cy="comment-editor-link-to-item"]').click();
+    cy.contains('mat-option', linkItemName).click();
+  }
+  cy.get('mat-dialog-actions button[color="primary"]').click({ force: true });
+}
+
+/**
+ * Edits the last rich note
+ * @param addedContent - Text content to append to the rich note
+ * @example
+ * editRichNote(' (bearbeitet)');
+ */
+export function editRichNote(addedContent: string): void {
+  cy.get('.note-item-actions').last().contains('mat-icon', 'edit').click({ force: true });
+  cy.get('tiptap-editor .ProseMirror').type(addedContent);
+  cy.get('mat-dialog-actions button[color="primary"]').click({ force: true });
+}

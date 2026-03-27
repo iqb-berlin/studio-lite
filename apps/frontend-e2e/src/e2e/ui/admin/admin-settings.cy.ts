@@ -331,4 +331,44 @@ describe('Admin Settings Tab Configuration', () => {
       );
     });
   });
+
+  // -------------------------------------------------------------------------
+  describe('Unit Rich Note Tags Config card', () => {
+    const validTagsJson =
+      '[{"id":"tag_1","label":"Tag 1","color":"#ff0000"}]';
+    let defaultJson = '';
+    it('displays the Unit Rich Note Tags JSON field', () => {
+      goToSettings();
+      cy.get('studio-lite-unit-rich-note-tags-config textarea').should('exist');
+    });
+
+    it('sets a valid rich note tags JSON', () => {
+      goToSettings();
+      cy.get('studio-lite-unit-rich-note-tags-config textarea').invoke('val').then(val => {
+        defaultJson = val as string;
+      });
+      cy.get('studio-lite-unit-rich-note-tags-config textarea')
+        .clear({ force: true })
+        .type(validTagsJson, { parseSpecialCharSequences: false, delay: 0 });
+      saveAndExpect(
+        'PATCH',
+        '/api/admin/settings/unit-rich-note-tags',
+        'saveUnitRichNoteTags',
+        6
+      );
+    });
+
+    it('restores the unit rich note tags JSON', () => {
+      goToSettings();
+      cy.get('studio-lite-unit-rich-note-tags-config textarea')
+        .clear({ force: true })
+        .type(defaultJson, { parseSpecialCharSequences: false, delay: 0 });
+      saveAndExpect(
+        'PATCH',
+        '/api/admin/settings/unit-rich-note-tags',
+        'clearUnitRichNoteTags',
+        6
+      );
+    });
+  });
 });
