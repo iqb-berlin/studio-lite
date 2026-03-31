@@ -407,7 +407,7 @@ export class DownloadDocx {
     backgroundColor: string,
     size: string
   ): void {
-    for (const node of nodes) {
+    nodes.forEach(node => {
       if (node.type === 'text') {
         if ('data' in node && node.data && node.data.trim()) {
           children.push(
@@ -448,12 +448,12 @@ export class DownloadDocx {
               );
             }
           }
-          continue;
+          return;
         }
 
         if (tagName === 'strong' || tagName === 'b') {
           if (element.children) {
-            for (const child of element.children) {
+            element.children.forEach(child => {
               if (child.type === 'text' && child.data) {
                 children.push(
                   new TextRun({
@@ -467,11 +467,11 @@ export class DownloadDocx {
                   })
                 );
               }
-            }
+            });
           }
         } else if (tagName === 'em' || tagName === 'i') {
           if (element.children) {
-            for (const child of element.children) {
+            element.children.forEach(child => {
               if (child.type === 'text' && child.data) {
                 children.push(
                   new TextRun({
@@ -485,11 +485,11 @@ export class DownloadDocx {
                   })
                 );
               }
-            }
+            });
           }
         } else if (tagName === 'u') {
           if (element.children) {
-            for (const child of element.children) {
+            element.children.forEach(child => {
               if (child.type === 'text' && child.data) {
                 children.push(
                   new TextRun({
@@ -503,11 +503,11 @@ export class DownloadDocx {
                   })
                 );
               }
-            }
+            });
           }
         } else if (tagName === 's') {
           if (element.children) {
-            for (const child of element.children) {
+            element.children.forEach(child => {
               if (child.type === 'text' && child.data) {
                 children.push(
                   new TextRun({
@@ -521,11 +521,11 @@ export class DownloadDocx {
                   })
                 );
               }
-            }
+            });
           }
         } else if (tagName === 'sub') {
           if (element.children) {
-            for (const child of element.children) {
+            element.children.forEach(child => {
               if (child.type === 'text' && child.data) {
                 children.push(
                   new TextRun({
@@ -539,11 +539,11 @@ export class DownloadDocx {
                   })
                 );
               }
-            }
+            });
           }
         } else if (tagName === 'sup') {
           if (element.children) {
-            for (const child of element.children) {
+            element.children.forEach(child => {
               if (child.type === 'text' && child.data) {
                 children.push(
                   new TextRun({
@@ -557,7 +557,7 @@ export class DownloadDocx {
                   })
                 );
               }
-            }
+            });
           }
         } else if (tagName === 'br') {
           children.push(
@@ -580,7 +580,7 @@ export class DownloadDocx {
           );
         }
       }
-    }
+    });
   }
 
   private static getImageSize(imageBuffer: Buffer): ISizeCalculationResult {
@@ -818,7 +818,7 @@ export class DownloadDocx {
 
   private static getAlignment(
     textAlignment: string
-  ): (typeof AlignmentType)[keyof typeof AlignmentType] {
+  ): typeof AlignmentType[keyof typeof AlignmentType] {
     switch (textAlignment) {
       case 'center':
         return AlignmentType.CENTER;
