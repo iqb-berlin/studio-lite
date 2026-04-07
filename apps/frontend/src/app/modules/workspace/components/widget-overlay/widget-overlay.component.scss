@@ -1,8 +1,8 @@
 .widget-wrapper {
   display: flex;
   flex-direction: column;
-  width: 80vw;
-  height: 80vh;
+  width: 95vw;
+  height: 90vh;
   background: white;
   border-radius: 8px;
   overflow: hidden;
@@ -24,6 +24,6 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 12px 16px;
+  padding: 8px 16px;
   border-top: 1px solid rgba(0, 0, 0, 0.12);
 }
