@@ -15,7 +15,10 @@ jest.mock('docx', () => ({
   Document: jest.fn(),
   HeadingLevel: { HEADING_1: 1, HEADING_2: 2, HEADING_3: 3 },
   AlignmentType: {
-    CENTER: 'center', LEFT: 'left', RIGHT: 'right', JUSTIFIED: 'justify'
+    CENTER: 'center',
+    LEFT: 'left',
+    RIGHT: 'right',
+    JUSTIFIED: 'justify'
   },
   Footer: jest.fn(),
   Table: jest.fn(),
@@ -24,10 +27,21 @@ jest.mock('docx', () => ({
   WidthType: { PERCENTAGE: 'pct' },
   PageNumber: { CURRENT: 'current', TOTAL_PAGES: 'total' },
   ImageRun: jest.fn(),
-  NumberFormat: { DECIMAL: 'decimal' }
+  NumberFormat: { DECIMAL: 'decimal' },
+  ImportedXmlComponent: {
+    fromXmlString: jest.fn().mockReturnValue({})
+  }
 }));
 
 jest.mock('image-size');
+
+jest.mock('katex', () => ({
+  renderToString: jest.fn().mockReturnValue('<math>mocked-mathml</math>')
+}));
+
+jest.mock('mathml2omml', () => ({
+  mml2omml: jest.fn().mockReturnValue('<oml:mocked-omml/>')
+}));
 
 describe('DownloadDocx', () => {
   describe('getDocXCodebook', () => {
@@ -53,7 +67,10 @@ describe('DownloadDocx', () => {
     });
 
     it('should return empty array when no units are provided', async () => {
-      const result = await DownloadDocx.getDocXCodebook([], {} as unknown as CodeBookContentSetting);
+      const result = await DownloadDocx.getDocXCodebook(
+        [],
+        {} as unknown as CodeBookContentSetting
+      );
       expect(result).toEqual([]);
     });
   });
@@ -63,23 +80,72 @@ describe('DownloadDocx', () => {
       const html = '<p>Hello <strong>World</strong></p>';
       const settings = {} as unknown as CodeBookContentSetting;
       // Accessing private method for testing via unknown casting
-      const result = (DownloadDocx as unknown as {
-        htmlToDocx: (html: string, settings: CodeBookContentSetting) => unknown[]
-      }).htmlToDocx(html, settings);
+      const result = (
+        DownloadDocx as unknown as {
+          htmlToDocx: (
+            html: string,
+            settings: CodeBookContentSetting
+          ) => unknown[];
+        }
+      ).htmlToDocx(html, settings);
 
       expect(result).toHaveLength(1);
     });
 
     it('should handle images in HTML', () => {
-      const html = '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJ' +
+      const html =
+        '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJ' +
         'AAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" alt="">';
-      const settings = { showScore: false } as unknown as CodeBookContentSetting;
+      const settings = {
+        showScore: false
+      } as unknown as CodeBookContentSetting;
 
-      (imageSizeModule.imageSize as jest.Mock).mockReturnValue({ width: 100, height: 100 });
+      (imageSizeModule.imageSize as jest.Mock).mockReturnValue({
+        width: 100,
+        height: 100
+      });
 
-      const result = (DownloadDocx as unknown as {
-        htmlToDocx: (html: string, settings: CodeBookContentSetting) => unknown[]
-      }).htmlToDocx(html, settings);
+      const result = (
+        DownloadDocx as unknown as {
+          htmlToDocx: (
+            html: string,
+            settings: CodeBookContentSetting
+          ) => unknown[];
+        }
+      ).htmlToDocx(html, settings);
+      expect(result).toHaveLength(1);
+    });
+
+    it('should handle math formulas in HTML', () => {
+      const html =
+        '<p>Formula: <span class="iqb-math-formula" data-latex="x^2%2By^2%3Dz^2"></span></p>';
+      const settings = {} as unknown as CodeBookContentSetting;
+
+      const result = (
+        DownloadDocx as unknown as {
+          htmlToDocx: (
+            html: string,
+            settings: CodeBookContentSetting
+          ) => unknown[];
+        }
+      ).htmlToDocx(html, settings);
+
+      expect(result).toHaveLength(1);
+    });
+
+    it('should normalize math tokens before processing', () => {
+      const html = '<p>Formula: [[iqb-math:x%5E2%2By%5E2%3Dz%5E2]]</p>';
+      const settings = {} as unknown as CodeBookContentSetting;
+
+      const result = (
+        DownloadDocx as unknown as {
+          htmlToDocx: (
+            html: string,
+            settings: CodeBookContentSetting
+          ) => unknown[];
+        }
+      ).htmlToDocx(html, settings);
+
       expect(result).toHaveLength(1);
     });
   });
@@ -87,15 +153,19 @@ describe('DownloadDocx', () => {
   describe('Utility methods', () => {
     it('parseCssRgbString should parse rgb and rgba correctly', () => {
       const downloadDocx = DownloadDocx as unknown as {
-        parseCssRgbString: (input: string) => number[]
+        parseCssRgbString: (input: string) => number[];
       };
-      expect(downloadDocx.parseCssRgbString('rgb(255, 0, 0)')).toEqual([255, 0, 0]);
-      expect(downloadDocx.parseCssRgbString('rgba(0, 255, 0, 0.5)')).toEqual([0, 255, 0]);
+      expect(downloadDocx.parseCssRgbString('rgb(255, 0, 0)')).toEqual([
+        255, 0, 0
+      ]);
+      expect(downloadDocx.parseCssRgbString('rgba(0, 255, 0, 0.5)')).toEqual([
+        0, 255, 0
+      ]);
     });
 
     it('toHex should convert rgb to hex', () => {
       const downloadDocx = DownloadDocx as unknown as {
-        toHex: (red: number, green: number, blue: number) => string
+        toHex: (red: number, green: number, blue: number) => string;
       };
       expect(downloadDocx.toHex(255, 0, 0)).toBe('ff0000');
       expect(downloadDocx.toHex(0, 255, 0)).toBe('00ff00');
@@ -104,9 +174,9 @@ describe('DownloadDocx', () => {
     it('getTransformation should resize large images', () => {
       const downloadDocx = DownloadDocx as unknown as {
         getTransformation: (
-          actualSize: { width: number, height: number },
+          actualSize: { width: number; height: number },
           max: number
-        ) => { width: number, height: number }
+        ) => { width: number; height: number };
       };
       const size = { width: 1000, height: 500 };
       const max = 400;

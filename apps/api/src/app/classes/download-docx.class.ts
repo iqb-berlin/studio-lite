@@ -13,7 +13,9 @@ import {
   Footer,
   WidthType,
   PageNumber,
-  ITableCellBorders
+  ITableCellBorders,
+  ImportedXmlComponent,
+  ParagraphChild
 } from 'docx';
 
 import {
@@ -30,21 +32,25 @@ import { BasicAcceptedElems } from 'cheerio';
 import { imageSize } from 'image-size';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
+import * as katex from 'katex';
+import { mml2omml } from 'mathml2omml';
 import { WebColors } from '../utils/web-colors';
 
-type AnyNodeWithName = AnyNode & { name: string; };
+type AnyNodeWithName = AnyNode & { name: string };
 
 export class DownloadDocx {
-  static async getDocXCodebook(codingBookUnits: CodebookUnitDto[],
-                               contentSetting: CodeBookContentSetting): Promise<Buffer | []> {
+  static async getDocXCodebook(
+    codingBookUnits: CodebookUnitDto[],
+    contentSetting: CodeBookContentSetting
+  ): Promise<Buffer | []> {
     if (codingBookUnits.length) {
       const units: FileChild[] = [];
       let missings: Paragraph[] = [];
       codingBookUnits.forEach(variableCoding => {
         missings = DownloadDocx.getMissings(variableCoding);
         if (variableCoding.variables.length) {
-          units.push(...(DownloadDocx
-            .createDocXForUnit(
+          units.push(
+            ...(DownloadDocx.createDocXForUnit(
               variableCoding.items,
               variableCoding.variables,
               contentSetting,
@@ -54,9 +60,7 @@ export class DownloadDocx {
         }
       });
       const b64string = await Packer.toBase64String(
-        DownloadDocx.setDocXDocument(
-          units,
-          missings)
+        DownloadDocx.setDocXDocument(units, missings)
       );
       return Buffer.from(b64string, 'base64');
     }
@@ -76,7 +80,6 @@ export class DownloadDocx {
           style: 'single',
           size: 10
         }
-
       },
       spacing: {
         after: 200
@@ -92,34 +95,47 @@ export class DownloadDocx {
     try {
       variableCoding.missings.forEach(missing => {
         if (missing.code && missing.label && missing.description) {
-          missings.push(new Paragraph({
-            children: [new TextRun({ text: `${missing.code} ${missing.label}`, bold: true })],
-            spacing: {
-              after: 20
-            }
-          }));
-          missings.push(new Paragraph({
-            text: `${missing.description}`,
-            spacing: {
-              after: 100
-            }
-          }));
+          missings.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `${missing.code} ${missing.label}`,
+                  bold: true
+                })
+              ],
+              spacing: {
+                after: 20
+              }
+            })
+          );
+          missings.push(
+            new Paragraph({
+              text: `${missing.description}`,
+              spacing: {
+                after: 100
+              }
+            })
+          );
         } else {
-          missings.push(new Paragraph({
-            text: 'kein valides Missing ',
-            spacing: {
-              after: 200
-            }
-          }));
+          missings.push(
+            new Paragraph({
+              text: 'kein valides Missing ',
+              spacing: {
+                after: 200
+              }
+            })
+          );
         }
       });
     } catch {
-      missings.push(new Paragraph({
-        text: 'kein validen Missings gefunden',
-        spacing: {
-          after: 200
-        }
-      }));
+      missings.push(
+        new Paragraph({
+          text: 'kein validen Missings gefunden',
+          spacing: {
+            after: 200
+          }
+        })
+      );
     }
     return missings;
   }
@@ -149,40 +165,58 @@ export class DownloadDocx {
     };
   }
 
-  private static getCodeRows(variable: CodeBookVariable, contentSetting: CodeBookContentSetting): TableRow[] {
-    return variable.codes.map(code => new TableRow({
-      cantSplit: true,
-      children: [
-        DownloadDocx.createCodeCell(
-          DownloadDocx.createCellChildren(code.id),
-          DownloadDocx.getColumnWidths(contentSetting)[0]),
-        DownloadDocx.createCodeCell(
-          DownloadDocx.createCellChildren(code.label),
-          DownloadDocx.getColumnWidths(contentSetting)[1]),
-        ...contentSetting.showScore ? [DownloadDocx
-          .createCodeCell(
-            DownloadDocx.createCellChildren(code.score),
-            DownloadDocx.getColumnWidths(contentSetting)[2])] : [],
-        DownloadDocx.createCodeCell(
-          [...DownloadDocx.htmlToDocx(code.description, contentSetting)],
-          DownloadDocx.getColumnWidths(contentSetting)[DownloadDocx.getColumnWidths(contentSetting).length - 1])
-      ]
-    })
+  private static getCodeRows(
+    variable: CodeBookVariable,
+    contentSetting: CodeBookContentSetting
+  ): TableRow[] {
+    return variable.codes.map(
+      code => new TableRow({
+        cantSplit: true,
+        children: [
+          DownloadDocx.createCodeCell(
+            DownloadDocx.createCellChildren(code.id),
+            DownloadDocx.getColumnWidths(contentSetting)[0]
+          ),
+          DownloadDocx.createCodeCell(
+            DownloadDocx.createCellChildren(code.label),
+            DownloadDocx.getColumnWidths(contentSetting)[1]
+          ),
+          ...(contentSetting.showScore ?
+            [
+              DownloadDocx.createCodeCell(
+                DownloadDocx.createCellChildren(code.score),
+                DownloadDocx.getColumnWidths(contentSetting)[2]
+              )
+            ] :
+            []),
+          DownloadDocx.createCodeCell(
+            [...DownloadDocx.htmlToDocx(code.description, contentSetting)],
+            DownloadDocx.getColumnWidths(contentSetting)[
+              DownloadDocx.getColumnWidths(contentSetting).length - 1
+            ]
+          )
+        ]
+      })
     );
   }
 
   private static createCellChildren(value: string): Paragraph[] {
-    return [new Paragraph({
-      text: value,
-      spacing: {
-        before: 100,
-        after: 100
-      },
-      indent: { start: 100, end: 100 }
-    })];
+    return [
+      new Paragraph({
+        text: value,
+        spacing: {
+          before: 100,
+          after: 100
+        },
+        indent: { start: 100, end: 100 }
+      })
+    ];
   }
 
-  private static createCodeCell(children: Paragraph[], width: number): TableCell {
+  private static createCodeCell(
+    children: Paragraph[],
+    width: number
+  ): TableCell {
     return new TableCell({
       borders: DownloadDocx.TableBoarders,
       children: children,
@@ -194,7 +228,10 @@ export class DownloadDocx {
     });
   }
 
-  private static setDocXDocument(units: FileChild[], missings: Paragraph[]): Document {
+  private static setDocXDocument(
+    units: FileChild[],
+    missings: Paragraph[]
+  ): Document {
     return new Document({
       background: {
         color: '#FFFFFF'
@@ -235,11 +272,9 @@ export class DownloadDocx {
               ]
             })
           },
-          children: [
-            ...missings,
-            ...units
-          ]
-        }]
+          children: [...missings, ...units]
+        }
+      ]
     });
   }
 
@@ -255,8 +290,13 @@ export class DownloadDocx {
     });
   }
 
-  private static getVariableItems(variable: CodeBookVariable, varItems:ItemsMetadataValues[]): Paragraph | [] {
-    const filteredVarItems = varItems.filter(item => item.variableId === variable.id);
+  private static getVariableItems(
+    variable: CodeBookVariable,
+    varItems: ItemsMetadataValues[]
+  ): Paragraph | [] {
+    const filteredVarItems = varItems.filter(
+      item => item.variableId === variable.id
+    );
     let itemString = '';
     filteredVarItems.forEach(item => {
       itemString += `${item.id}   `;
@@ -280,11 +320,18 @@ export class DownloadDocx {
     contentSetting: CodeBookContentSetting,
     codeBookVariable: CodeBookVariable
   ): Paragraph[] {
-    return contentSetting.hasGeneralInstructions ? DownloadDocx
-      .htmlToDocx(codeBookVariable.generalInstruction, contentSetting) : [];
+    return contentSetting.hasGeneralInstructions ?
+      DownloadDocx.htmlToDocx(
+        codeBookVariable.generalInstruction,
+        contentSetting
+      ) :
+      [];
   }
 
-  private static getCodeTable(codeBookVariable: CodeBookVariable, contentSetting: CodeBookContentSetting): Table {
+  private static getCodeTable(
+    codeBookVariable: CodeBookVariable,
+    contentSetting: CodeBookContentSetting
+  ): Table {
     return new Table({
       rows: DownloadDocx.getCodeRows(codeBookVariable, contentSetting),
       width: {
@@ -295,20 +342,29 @@ export class DownloadDocx {
     });
   }
 
-  private static getColumnWidths(contentSetting: CodeBookContentSetting): number[] {
+  private static getColumnWidths(
+    contentSetting: CodeBookContentSetting
+  ): number[] {
     return contentSetting.showScore ? [8, 24, 8, 60] : [8, 24, 68];
   }
 
-  private static getVariables(codeBookVariable: CodeBookVariable[],
-                              contentSetting: CodeBookContentSetting,
-                              varItems:ItemsMetadataValues[]): unknown[] {
+  private static getVariables(
+    codeBookVariable: CodeBookVariable[],
+    contentSetting: CodeBookContentSetting,
+    varItems: ItemsMetadataValues[]
+  ): unknown[] {
     const variables: unknown[] = [];
     codeBookVariable.forEach(variable => {
-      variables.push(...[
-        DownloadDocx.getVariableHeader(variable),
-        contentSetting.hideItemVarRelation ? [] : DownloadDocx.getVariableItems(variable, varItems),
-        ...DownloadDocx.getGeneralInstructions(contentSetting, variable),
-        DownloadDocx.getCodeTable(variable, contentSetting)]);
+      variables.push(
+        ...[
+          DownloadDocx.getVariableHeader(variable),
+          contentSetting.hideItemVarRelation ?
+            [] :
+            DownloadDocx.getVariableItems(variable, varItems),
+          ...DownloadDocx.getGeneralInstructions(contentSetting, variable),
+          DownloadDocx.getCodeTable(variable, contentSetting)
+        ]
+      );
     });
     return variables;
   }
@@ -317,7 +373,8 @@ export class DownloadDocx {
     varItems: ItemsMetadataValues[],
     codeBookVariable: CodeBookVariable[],
     contentSetting: CodeBookContentSetting,
-    unitHeader: Paragraph): unknown[] {
+    unitHeader: Paragraph
+  ): unknown[] {
     return [
       unitHeader,
       ...DownloadDocx.getVariables(codeBookVariable, contentSetting, varItems),
@@ -331,7 +388,10 @@ export class DownloadDocx {
     ];
   }
 
-  private static getChildren(cheerioAPI: cheerio.CheerioAPI, elem: BasicAcceptedElems<AnyNode>) {
+  private static getChildren(
+    cheerioAPI: cheerio.CheerioAPI,
+    elem: BasicAcceptedElems<AnyNode>
+  ) {
     const children: AnyNodeWithName[] = [];
     cheerioAPI(elem).each((i, child: AnyNodeWithName) => {
       children.push(child);
@@ -340,16 +400,208 @@ export class DownloadDocx {
     return children;
   }
 
+  private static processInlineElements(
+    nodes: AnyNode[],
+    children: ParagraphChild[],
+    colorParsed: string,
+    backgroundColor: string,
+    size: string
+  ): void {
+    nodes.forEach(node => {
+      if (node.type === 'text') {
+        if ('data' in node && node.data && node.data.trim()) {
+          children.push(
+            new TextRun({
+              text: node.data.trim(),
+              color: colorParsed,
+              shading: {
+                fill: backgroundColor
+              },
+              size: DownloadDocx.getFontSize(size)
+            })
+          );
+        }
+      } else if (node.type === 'tag') {
+        const element = node as Element;
+        const tagName = element.name.toLowerCase();
+
+        if (
+          tagName === 'span' &&
+          element.attribs?.class?.includes('iqb-math-formula')
+        ) {
+          const rawLatex = element.attribs?.['data-latex'] || '';
+          const latex = DownloadDocx.decodeLatex(rawLatex).trim();
+          if (latex) {
+            const ommlComponent = DownloadDocx.latexToOmml(latex);
+            if (ommlComponent) {
+              children.push(ommlComponent);
+            } else {
+              children.push(
+                new TextRun({
+                  text: latex,
+                  color: colorParsed,
+                  shading: {
+                    fill: backgroundColor
+                  },
+                  size: DownloadDocx.getFontSize(size)
+                })
+              );
+            }
+          }
+          return;
+        }
+
+        if (tagName === 'strong' || tagName === 'b') {
+          if (element.children) {
+            element.children.forEach(child => {
+              if (child.type === 'text' && child.data) {
+                children.push(
+                  new TextRun({
+                    text: child.data.trim(),
+                    bold: true,
+                    color: colorParsed,
+                    shading: {
+                      fill: backgroundColor
+                    },
+                    size: DownloadDocx.getFontSize(size)
+                  })
+                );
+              }
+            });
+          }
+        } else if (tagName === 'em' || tagName === 'i') {
+          if (element.children) {
+            element.children.forEach(child => {
+              if (child.type === 'text' && child.data) {
+                children.push(
+                  new TextRun({
+                    text: child.data.trim(),
+                    italics: true,
+                    color: colorParsed,
+                    shading: {
+                      fill: backgroundColor
+                    },
+                    size: DownloadDocx.getFontSize(size)
+                  })
+                );
+              }
+            });
+          }
+        } else if (tagName === 'u') {
+          if (element.children) {
+            element.children.forEach(child => {
+              if (child.type === 'text' && child.data) {
+                children.push(
+                  new TextRun({
+                    text: child.data.trim(),
+                    underline: {},
+                    color: colorParsed,
+                    shading: {
+                      fill: backgroundColor
+                    },
+                    size: DownloadDocx.getFontSize(size)
+                  })
+                );
+              }
+            });
+          }
+        } else if (tagName === 's') {
+          if (element.children) {
+            element.children.forEach(child => {
+              if (child.type === 'text' && child.data) {
+                children.push(
+                  new TextRun({
+                    text: child.data.trim(),
+                    strike: true,
+                    color: colorParsed,
+                    shading: {
+                      fill: backgroundColor
+                    },
+                    size: DownloadDocx.getFontSize(size)
+                  })
+                );
+              }
+            });
+          }
+        } else if (tagName === 'sub') {
+          if (element.children) {
+            element.children.forEach(child => {
+              if (child.type === 'text' && child.data) {
+                children.push(
+                  new TextRun({
+                    text: child.data.trim(),
+                    subScript: true,
+                    color: colorParsed,
+                    shading: {
+                      fill: backgroundColor
+                    },
+                    size: DownloadDocx.getFontSize(size)
+                  })
+                );
+              }
+            });
+          }
+        } else if (tagName === 'sup') {
+          if (element.children) {
+            element.children.forEach(child => {
+              if (child.type === 'text' && child.data) {
+                children.push(
+                  new TextRun({
+                    text: child.data.trim(),
+                    superScript: true,
+                    color: colorParsed,
+                    shading: {
+                      fill: backgroundColor
+                    },
+                    size: DownloadDocx.getFontSize(size)
+                  })
+                );
+              }
+            });
+          }
+        } else if (tagName === 'br') {
+          children.push(
+            new TextRun({
+              break: 1,
+              color: colorParsed,
+              shading: {
+                fill: backgroundColor
+              },
+              size: DownloadDocx.getFontSize(size)
+            })
+          );
+        } else if (element.children && element.children.length > 0) {
+          DownloadDocx.processInlineElements(
+            element.children,
+            children,
+            colorParsed,
+            backgroundColor,
+            size
+          );
+        }
+      }
+    });
+  }
+
   private static getImageSize(imageBuffer: Buffer): ISizeCalculationResult {
     return imageSize(imageBuffer as unknown as Uint8Array);
   }
 
-  private static getTransformation(actualSize: ISizeCalculationResult, max: number): ISizeCalculationResult {
-    const transformedSize: ISizeCalculationResult = { width: actualSize.width, height: actualSize.height };
+  private static getTransformation(
+    actualSize: ISizeCalculationResult,
+    max: number
+  ): ISizeCalculationResult {
+    const transformedSize: ISizeCalculationResult = {
+      width: actualSize.width,
+      height: actualSize.height
+    };
     const maxWidth = max;
     const maxHeight = max;
     if (actualSize.width > maxWidth || actualSize.height > maxHeight) {
-      const ratio = Math.min(maxWidth / actualSize.width, maxHeight / actualSize.height);
+      const ratio = Math.min(
+        maxWidth / actualSize.width,
+        maxHeight / actualSize.height
+      );
       transformedSize.width = actualSize.width * ratio;
       transformedSize.height = actualSize.height * ratio;
     }
@@ -360,38 +612,45 @@ export class DownloadDocx {
     elem: Element,
     contentSetting: CodeBookContentSetting
   ): Paragraph {
-    const imageBuffer = Buffer
-      .from(elem.attribs.src.substring(elem.attribs.src.indexOf(',') + 1), 'base64');
-    const size = DownloadDocx.getImageSize(imageBuffer);
-    return new Paragraph(
-      {
-        spacing: {
-          before: 100,
-          after: 100
-        },
-        indent: {
-          start: 100,
-          end: 100
-        },
-        children: [new ImageRun({
-          data: imageBuffer,
-          transformation: DownloadDocx
-            .getTransformation(size, contentSetting.showScore ? 334 : 382)
-        })]
-      }
+    const imageBuffer = Buffer.from(
+      elem.attribs.src.substring(elem.attribs.src.indexOf(',') + 1),
+      'base64'
     );
+    const size = DownloadDocx.getImageSize(imageBuffer);
+    return new Paragraph({
+      spacing: {
+        before: 100,
+        after: 100
+      },
+      indent: {
+        start: 100,
+        end: 100
+      },
+      children: [
+        new ImageRun({
+          data: imageBuffer,
+          transformation: DownloadDocx.getTransformation(
+            size,
+            contentSetting.showScore ? 334 : 382
+          )
+        })
+      ]
+    });
   }
 
-  private static getBackgroundColor(cheerioAPI: cheerio.CheerioAPI, elem: Element): string {
-    const mark = cheerioAPI(elem)
-      .find('mark');
-    return cheerioAPI(mark)
-      .css('background-color') || '#FFFFFF';
+  private static getBackgroundColor(
+    cheerioAPI: cheerio.CheerioAPI,
+    elem: Element
+  ): string {
+    const mark = cheerioAPI(elem).find('mark');
+    return cheerioAPI(mark).css('background-color') || '#FFFFFF';
   }
 
-  private static getColor(cheerioAPI: cheerio.CheerioAPI, tag: cheerio.Cheerio<Element>): string {
-    const color = cheerioAPI(tag)
-      .css('color');
+  private static getColor(
+    cheerioAPI: cheerio.CheerioAPI,
+    tag: cheerio.Cheerio<Element>
+  ): string {
+    const color = cheerioAPI(tag).css('color');
     // const name = elem.name;
     let colorParsed: string = '#000000';
     if (color) {
@@ -399,7 +658,11 @@ export class DownloadDocx {
         colorParsed = color;
       } else if (color.startsWith('rgb')) {
         const rgbString = DownloadDocx.parseCssRgbString(color);
-        colorParsed = DownloadDocx.toHex(rgbString[0], rgbString[1], rgbString[2]);
+        colorParsed = DownloadDocx.toHex(
+          rgbString[0],
+          rgbString[1],
+          rgbString[2]
+        );
       } else if (WebColors.getHexFromWebColor(color.toLowerCase())) {
         colorParsed = `#${WebColors.getHexFromWebColor(color.toLowerCase())}`;
       }
@@ -407,14 +670,18 @@ export class DownloadDocx {
     return colorParsed;
   }
 
-  private static getSize(cheerioAPI: cheerio.CheerioAPI, tag: cheerio.Cheerio<Element>): string {
-    return cheerioAPI(tag)
-      .css('font-size') || '20pt';
+  private static getSize(
+    cheerioAPI: cheerio.CheerioAPI,
+    tag: cheerio.Cheerio<Element>
+  ): string {
+    return cheerioAPI(tag).css('font-size') || '20pt';
   }
 
-  private static getTextAlignment(cheerioAPI: cheerio.CheerioAPI, elem: Element): string {
-    return cheerioAPI(elem)
-      .css('text-align') || 'left';
+  private static getTextAlignment(
+    cheerioAPI: cheerio.CheerioAPI,
+    elem: Element
+  ): string {
+    return cheerioAPI(elem).css('text-align') || 'left';
   }
 
   private static stripFromLeadingEmptyParagraph(html: string): string {
@@ -431,46 +698,96 @@ export class DownloadDocx {
     );
   }
 
+  private static decodeLatex(latex: string): string {
+    if (!latex) return '';
+    try {
+      return decodeURIComponent(latex);
+    } catch {
+      return latex;
+    }
+  }
+
+  private static latexToOmml(latex: string): ImportedXmlComponent | null {
+    const trimmed = latex.trim();
+    if (!trimmed) return null;
+    try {
+      const mathml = katex.renderToString(trimmed, {
+        output: 'mathml',
+        throwOnError: false,
+        strict: 'ignore'
+      });
+      const omml = mml2omml(mathml);
+      return ImportedXmlComponent.fromXmlString(omml);
+    } catch {
+      return null;
+    }
+  }
+
+  private static normalizeMathTokens(html: string): string {
+    return html.replace(
+      /\[\[iqb-math:([\s\S]*?)]]/g,
+      (_, encodedFormula: string) => {
+        const latex = this.decodeLatex(encodedFormula);
+        const escapedLatex = latex.replace(/"/g, '&quot;');
+        return `<span class="iqb-math-formula" data-latex="${escapedLatex}"></span>`;
+      }
+    );
+  }
+
   private static isListParagraph(elem: Element): boolean {
     return elem.parent && (elem.parent as Element).name === 'li';
   }
 
-  private static htmlToDocx(html: string, contentSetting: CodeBookContentSetting) {
-    const cheerioAPI = cheerio
-      .load(DownloadDocx.prepareHtml(html),
-        null,
-        false);
+  private static htmlToDocx(
+    html: string,
+    contentSetting: CodeBookContentSetting
+  ) {
+    const normalizedHtml = DownloadDocx.normalizeMathTokens(html);
+    const cheerioAPI = cheerio.load(
+      DownloadDocx.prepareHtml(normalizedHtml),
+      null,
+      false
+    );
     const elements: Paragraph[] = [];
-    cheerioAPI('p,h1,h2,h3,h4,img')
-      .each((i, elem) => {
-        try {
-          const span = cheerioAPI(elem).find('span');
-          if (elem.name === 'img') {
-            elements.push(DownloadDocx.createImagePragraph(elem, contentSetting));
-          } else {
-            elements.push(DownloadDocx
-              .createParagraph(
-                cheerioAPI,
-                elem.children,
-                DownloadDocx.getTextAlignment(cheerioAPI, elem),
-                DownloadDocx.getColor(cheerioAPI, span),
-                DownloadDocx.getBackgroundColor(cheerioAPI, elem),
-                DownloadDocx.getSize(cheerioAPI, span),
-                DownloadDocx.isListParagraph(elem)));
-          }
-        } catch (e) {
-          elements.push(new Paragraph(
-            {
-              text: 'HTML konnte nicht verarbeitet werden.'
-            }
-          ));
+    cheerioAPI('p,h1,h2,h3,h4,img').each((i, elem) => {
+      try {
+        const span = cheerioAPI(elem).find('span');
+        if (elem.name === 'img') {
+          elements.push(DownloadDocx.createImagePragraph(elem, contentSetting));
+        } else {
+          elements.push(
+            DownloadDocx.createParagraph(
+              cheerioAPI,
+              elem.children,
+              DownloadDocx.getTextAlignment(cheerioAPI, elem),
+              DownloadDocx.getColor(cheerioAPI, span),
+              DownloadDocx.getBackgroundColor(cheerioAPI, elem),
+              DownloadDocx.getSize(cheerioAPI, span),
+              DownloadDocx.isListParagraph(elem)
+            )
+          );
         }
-      });
+      } catch (e) {
+        elements.push(
+          new Paragraph({
+            text: 'HTML konnte nicht verarbeitet werden.'
+          })
+        );
+      }
+    });
     return elements.filter(e => e !== undefined && e !== null);
   }
 
   private static getFontSize(size: string): number {
-    const sizeTypes = ['xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'];
+    const sizeTypes = [
+      'xx-small',
+      'x-small',
+      'small',
+      'medium',
+      'large',
+      'x-large',
+      'xx-large'
+    ];
     return sizeTypes.includes(size) ? 20 : parseInt(size, 10);
   }
 
@@ -483,8 +800,7 @@ export class DownloadDocx {
   ): TextRun {
     const tag = child.name;
     return new TextRun({
-      text: cheerioAPI(child)
-        .text(),
+      text: cheerioAPI(child).text(),
       color: colorParsed,
       shading: {
         fill: backgroundColor
@@ -500,7 +816,9 @@ export class DownloadDocx {
     });
   }
 
-  private static getAlignment(textAlignment: string): (typeof AlignmentType)[keyof typeof AlignmentType] {
+  private static getAlignment(
+    textAlignment: string
+  ): typeof AlignmentType[keyof typeof AlignmentType] {
     switch (textAlignment) {
       case 'center':
         return AlignmentType.CENTER;
@@ -513,14 +831,24 @@ export class DownloadDocx {
     }
   }
 
-  private static createParagraph(cheerioAPI: cheerio.CheerioAPI,
-                                 elem: BasicAcceptedElems<AnyNode>,
-                                 textAlignment: string,
-                                 colorParsed: string,
-                                 backgroundColor: string,
-                                 size: string,
-                                 isListParagraph: boolean
+  private static createParagraph(
+    cheerioAPI: cheerio.CheerioAPI,
+    elem: BasicAcceptedElems<AnyNode>,
+    textAlignment: string,
+    colorParsed: string,
+    backgroundColor: string,
+    size: string,
+    isListParagraph: boolean
   ): Paragraph {
+    const children: ParagraphChild[] = [];
+    const childNodes = DownloadDocx.getChildren(cheerioAPI, elem);
+    DownloadDocx.processInlineElements(
+      childNodes,
+      children,
+      colorParsed,
+      backgroundColor,
+      size
+    );
     return new Paragraph({
       alignment: DownloadDocx.getAlignment(textAlignment),
       spacing: {
@@ -529,14 +857,15 @@ export class DownloadDocx {
       },
       indent: !isListParagraph ? { start: 100, end: 100 } : null,
       bullet: isListParagraph ? { level: 0 } : null,
-      children: DownloadDocx.getChildren(cheerioAPI, elem)
-        .map((child: AnyNodeWithName) => DownloadDocx
-          .getTextRun(cheerioAPI, child, colorParsed, backgroundColor, size))
+      children: children
     });
   }
 
   private static parseCssRgbString(input) {
-    const parts = input?.replace(/rgba?\(([^)]+)\)/, '$1').split(/[,\s/]+/).filter(Boolean);
+    const parts = input
+      ?.replace(/rgba?\(([^)]+)\)/, '$1')
+      .split(/[,\s/]+/)
+      .filter(Boolean);
     if (parts?.length < 3) {
       return;
     }
@@ -547,7 +876,7 @@ export class DownloadDocx {
 
       if (value.endsWith('%')) {
         // eslint-disable-next-line no-bitwise,no-mixed-operators
-        return Math.min(Number.parseFloat(value) * max / 100, max);
+        return Math.min((Number.parseFloat(value) * max) / 100, max);
       }
       return Math.min(Number.parseFloat(value), max);
     };
@@ -561,5 +890,5 @@ export class DownloadDocx {
 
   // Convert RGB color to HEX https://github.com/sindresorhus/rgb-hex
   // eslint-disable-next-line no-bitwise,no-mixed-operators
-  private static toHex = (red, green, blue) => ((blue | green << 8 | red << 16) | 1 << 24).toString(16).slice(1);
+  private static toHex = (red, green, blue) => (blue | (green << 8) | (red << 16) | (1 << 24)).toString(16).slice(1);
 }
