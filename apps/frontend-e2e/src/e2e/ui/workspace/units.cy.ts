@@ -318,4 +318,47 @@ describe('Workspace Unit Management', () => {
       .contains('tester')
       .should('exist');
   });
+
+  it('displays group management', () => {
+    cy.visitWs(ws1);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-manage-unit-groups"]').click();
+    cy.get('studio-lite-group-manage').should('exist');
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.clickDialogButton(json.close);
+    });
+  });
+
+  it('displays user list', () => {
+    cy.visitWs(ws1);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-user-list"]').click();
+    cy.get('studio-lite-workspace-user-list').should('exist');
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.clickDialogButton(json.close);
+    });
+  });
+
+  it('copies unit to another workspace', () => {
+    cy.visitWs(ws1);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-copy-unit"]').click();
+    cy.get('mat-select').click();
+    cy.get(`mat-option:contains("${ws2}")`).click();
+    cy.get(`mat-cell:contains("${unit3.shortname}")`).prev().click();
+    cy.clickDataCyWithResponseCheck(
+      '[data-cy="workspace-move-unit-button"]',
+      [200, 201],
+      '/api/workspaces/*/units',
+      'POST',
+      'copyUnit'
+    );
+  });
+
+  it('has disabled submit and return buttons', () => {
+    cy.visitWs(ws1);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-submit-units"]').should('be.disabled');
+    cy.get('[data-cy="workspace-edit-unit-return-submitted-units"]').should('be.disabled');
+  });
 });
