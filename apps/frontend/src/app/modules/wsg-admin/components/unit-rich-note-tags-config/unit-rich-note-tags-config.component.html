@@ -1,0 +1,14 @@
+<div class="info">
+  {{ 'wsg-settings.unit-rich-note-tags-info' | translate }}
+</div>
+
+<form [formGroup]="configForm">
+  <studio-lite-rich-note-tags-editor
+    [control]="tagsJsonControl"
+    [label]="'wsg-settings.unit-rich-note-tags-group'"
+    [showGlobalPreview]="true"
+    [globalPreviewLabel]="'wsg-settings.global-tags-preview'"
+    [globalTagsJson]="globalTagsJson"
+    (copyFromGlobalRequested)="copyFromGlobal()">
+  </studio-lite-rich-note-tags-editor>
+</form>

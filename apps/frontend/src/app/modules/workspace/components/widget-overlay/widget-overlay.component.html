@@ -1,9 +1,8 @@
 <div class="widget-wrapper">
+  <button mat-icon-button class="close-button" (click)="close()" [matTooltip]="'close' | translate">
+    <mat-icon>close</mat-icon>
+  </button>
   <div class="iframe-host">
     <iframe #widgetIframe class="widget-iframe"></iframe>
-  </div>
-  <div class="button-wrapper">
-    <button mat-button (click)="close()">{{ 'cancel' | translate }}</button>
-    <button mat-flat-button (click)="continue()">{{ 'next' | translate }}</button>
   </div>
 </div>

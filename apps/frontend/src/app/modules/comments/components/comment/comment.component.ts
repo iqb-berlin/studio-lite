@@ -10,15 +10,15 @@ import { ActiveComment, ActiveCommentType } from '../../models/active-comment.in
 import { Comment } from '../../models/comment.interface';
 import { IsReplyingPipe } from '../../pipes/is-replying.pipe';
 import { IsEditingPipe } from '../../pipes/is-editing.pipe';
-import { SafeResourceHTMLPipe } from '../../pipes/safe-resource-html.pipe';
+import { SafeResourceHTMLPipe } from '../../../../pipes/safe-resource-html.pipe';
 import { ScrollCommentIntoViewDirective } from '../../directives/scroll-comment-into-view.directive';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { ScrollEditorIntoViewDirective } from '../../directives/scroll-editor-into-view.directive';
 import { CommentEditorComponent } from '../comment-editor/comment-editor.component';
 import { CommentBadgeComponent } from '../comment-badge/comment-badge.component';
 import { FullTimestampPipe } from '../../pipes/full-timestamp.pipe';
-import { CommentItemComponent } from '../comment-item/comment-item/comment-item.component';
-import { CommentItemUuidsIdsPipe } from '../../pipes/comment-item-uuids-ids.pipe';
+import { ItemBadgeComponent } from '../item-badge/item-badge.component';
+import { MapItemUuidsIdsPipe } from '../../pipes/map-item-uuids-ids.pipe';
 import { SortAscendingPipe } from '../../pipes/sort-ascending.pipe';
 
 @Component({
@@ -26,7 +26,7 @@ import { SortAscendingPipe } from '../../pipes/sort-ascending.pipe';
   templateUrl: './comment.component.html',
   styleUrls: ['./comment.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FullTimestampPipe, CommentItemComponent, CommentItemUuidsIdsPipe, SortAscendingPipe]
+  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FullTimestampPipe, ItemBadgeComponent, MapItemUuidsIdsPipe, SortAscendingPipe]
 })
 export class CommentComponent implements OnInit {
   @Input() comment!: Comment;

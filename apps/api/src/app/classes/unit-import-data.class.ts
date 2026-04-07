@@ -13,6 +13,7 @@ export class UnitImportData {
   definition: string;
   definitionFileName: string;
   commentsFileName: string;
+  richNotesFileName: string;
   metadata:string;
   metadataFileName:string;
   player: string;
@@ -37,6 +38,7 @@ export class UnitImportData {
     this.setMetaData(xmlDocument);
     this.setDefinitionRef(xmlDocument);
     this.setCommentsRef(xmlDocument);
+    this.setRichNotesRef(xmlDocument);
     this.setBaseVariables(xmlDocument);
     this.setCodingSchemeRef(xmlDocument);
   }
@@ -57,6 +59,11 @@ export class UnitImportData {
   private setCommentsRef(xmlDocument: cheerio.CheerioAPI): void {
     const commentsRefElement = xmlDocument('UnitCommentsRef').first();
     this.commentsFileName = (commentsRefElement.length > 0) ? this.getFolder() + commentsRefElement.text() : '';
+  }
+
+  private setRichNotesRef(xmlDocument: cheerio.CheerioAPI): void {
+    const richNotesRefElement = xmlDocument('UnitRichNotesRef').first();
+    this.richNotesFileName = (richNotesRefElement.length > 0) ? this.getFolder() + richNotesRefElement.text() : '';
   }
 
   private setDefinitionRef(xmlDocument: cheerio.CheerioAPI): void {

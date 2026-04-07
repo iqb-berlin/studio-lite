@@ -153,6 +153,7 @@ describe('WorkspacesComponent', () => {
     expect(mockBackendService.getUsers).toHaveBeenCalled();
     expect(mockBackendService.getWorkspaces).toHaveBeenCalledWith(1);
     expect(component.workspaces.length).toBe(1);
+    expect(component.displayedColumns).toContain('notes');
   });
 
   it('should handle workspace selection', () => {
@@ -202,6 +203,10 @@ describe('WorkspacesComponent', () => {
     it('isRouteHidden should determine correctly', () => {
       expect(component.isRouteHidden(ws, 'preview')).toBe(true);
       expect(component.isRouteHidden(ws, 'editor')).toBe(false);
+      expect(component.isRouteHidden(ws, 'notes')).toBe(false);
+
+      ws.settings!.hiddenRoutes!.push('notes');
+      expect(component.isRouteHidden(ws, 'notes')).toBe(true);
 
       ws.settings = undefined;
       expect(component.isRouteHidden(ws, 'editor')).toBe(false);

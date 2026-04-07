@@ -83,8 +83,8 @@ describe('CommentComponent', () => {
     @Output() handleCancel = new EventEmitter<void>();
   }
 
-  @Component({ selector: 'studio-lite-comment-item', template: '', standalone: false })
-  class MockCommentItemComponent {
+  @Component({ selector: 'studio-lite-item-badge', template: '', standalone: false })
+  class MockItemBadgeComponent {
     @Input() label!: string;
   }
 
@@ -98,7 +98,7 @@ describe('CommentComponent', () => {
       declarations: [
         MockCommentBadgeComponent,
         MockCommentEditorComponent,
-        MockCommentItemComponent,
+        MockItemBadgeComponent,
         MockWrappedIconComponent,
         MockMomentFullTimestampPipe,
         MockIsEditingPipe,

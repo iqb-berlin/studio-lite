@@ -2,13 +2,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import {
-  Component, EventEmitter, Input, Output, Pipe, PipeTransform
+  Component, Input, Pipe, PipeTransform
 } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
 import { TiptapEditorDirective } from 'ngx-tiptap';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
+import {
+  RichTextEditorDirective
+} from '../../../../directives/rich-text-editor.directive';
 import { CommentEditorComponent } from './comment-editor.component';
 
 const mockEditor = {
@@ -47,7 +47,6 @@ jest.mock('@tiptap/core', () => {
     Editor: jest.fn().mockImplementation(() => mockEditor)
   };
 });
-
 @Component({
   selector: 'studio-lite-wrapped-icon',
   template: '',
@@ -58,14 +57,15 @@ class MockWrappedIconComponent {
 }
 
 @Component({
-  selector: 'studio-lite-comment-item-selection',
+  selector: 'studio-lite-item-selection',
   template: '',
   standalone: true
 })
-class MockCommentItemSelectionComponent {
-  @Input() unitItems: UnitItemDto[] = [];
+class MockItemSelectionComponent {
   @Input() selectedItems: string[] = [];
-  @Output() selectedItemsChange = new EventEmitter<string[]>();
+  @Input() unitItems: UnitItemDto[] = [];
+  @Input() label: string = '';
+  @Input() disabled: boolean = false;
 }
 
 describe('CommentEditorComponent', () => {
@@ -131,14 +131,11 @@ describe('CommentEditorComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslateModule.forRoot(),
-        MatIconModule,
-        MatSelectModule,
-        MatTooltipModule,
         TiptapEditorDirective,
         CommentEditorComponent,
         MockIsCommentCommittablePipe,
         MockWrappedIconComponent,
-        MockCommentItemSelectionComponent
+        MockItemSelectionComponent
       ]
     }).compileComponents();
 
@@ -164,7 +161,8 @@ describe('CommentEditorComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize editor in ngOnInit', () => {
+  it('should initialize specialization in ngAfterViewInit', () => {
+    component.ngAfterViewInit();
     expect(mockEditor.on).toHaveBeenCalledWith('update', expect.any(Function));
     expect(mockEditor.commands.focus).toHaveBeenCalled();
   });
@@ -278,7 +276,7 @@ describe('CommentEditorComponent', () => {
 
   it('should call setImage command when adding image', async () => {
     const mockSrc = 'data:image/png;base64,...';
-    jest.spyOn(CommentEditorComponent as unknown as {
+    jest.spyOn(RichTextEditorDirective as unknown as {
       loadImage: (fileTypes?: string[]) => Promise<string>
     }, 'loadImage').mockResolvedValue(mockSrc);
 

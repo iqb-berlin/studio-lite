@@ -2,7 +2,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { Component, Input } from '@angular/core';
+import {
+  Component, EventEmitter, Input, Output
+} from '@angular/core';
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { provideHttpClient } from '@angular/common/http';
@@ -47,6 +49,11 @@ describe('ExportUnitComponent', () => {
   class MockExportUnitFileConfigComponent {
     @Input() addPlayers!: boolean;
     @Input() addComments!: boolean;
+    @Input() addRichNotes!: boolean;
+    @Output() addPlayersChange = new EventEmitter<boolean>();
+    @Output() addCommentsChange = new EventEmitter<boolean>();
+    @Output() addRichNotesChange = new EventEmitter<boolean>();
+    @Output() unitsWithOutPlayerChange = new EventEmitter<number[]>();
   }
 
   beforeEach(async () => {

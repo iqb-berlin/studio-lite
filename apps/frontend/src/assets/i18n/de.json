@@ -7,6 +7,7 @@
   "create": "Anlegen",
   "export": "Exportieren",
   "construct": "Erstellen",
+  "edit": "Bearbeiten",
   "delete": "Löschen",
   "excel-download": "Herunterladen als Excel-Datei",
   "download": "Herunterladen",
@@ -41,6 +42,7 @@
     "add-files": "Zusätzliche Dateien",
     "add-player": "Player hinzufügen",
     "add-comments": "Kommentare hinzufügen",
+    "add-rich-notes": "Rückmeldungen hinzufügen",
     "no-player": "Keine Aufgabe hat einen gültigen Player gesetzt",
     "add-login": "Logins hinzufügen",
     "add-test-takers-review": "Anzahl für Review",
@@ -158,7 +160,9 @@
     "no-email": "keine",
     "last-name": "Nachname",
     "first-name": "Vorname",
-    "admin": "System-Administrator:in"
+    "admin": "System-Administrator:in",
+    "is-admin": "Admin-Rechte",
+    "is-not-admin": "Keine Admin-Rechte"
   },
   "access-rights": {
     "hint": "Zugriffsrechte: Nutzer:in auswählen",
@@ -319,7 +323,12 @@
     "delete-state-warning": "Soll dieser Status gelöscht werden? Dadurch verliert dieser seine Gültigkeit und den Aufgaben muss ein neuer Status zugewiesen werden! Alle vorherigen Statusänderungen werden gespeichert.",
     "delete-state": "Status löschen",
     "changed-settings-warning": "Sollen die Änderungen in den Einstellungen gespeichert werden?",
-    "route-visibility": "Arbeitsfläche"
+    "route-visibility": "Arbeitsfläche",
+    "unit-rich-note-tags": "Rückmeldungskategorien",
+    "unit-rich-note-tags-info": "Wenn hier keine Rückmeldungskategorien angegeben werden, werden die allgemeinen Rückmeldungskategorien des IQB-Studios verwendet.",
+    "use-global-tags": "Rückmeldungskategorien aus den allgemeinen Einstellungen kopieren",
+    "unit-rich-note-tags-group": "Rückmeldungskategorien der Bereichsgruppen",
+    "global-tags-preview": "Allgemeine Rückmeldungskategorien"
   },
   "settings": {
     "texts": "Texte",
@@ -330,7 +339,8 @@
     "email-template": "E-Mail-Template zum Anlegen neuer Nutzer:innen",
     "email-replace-values": "Folgende Platzhalter werden im E-Mail-Body durch die Nutzer:innen-Angaben ersetzt: {{firstname}}, {{lastname}}, {{user}}, {{password}}",
     "email-subject": "E-Mail-Betreff",
-    "email-body": "E-Mail-Body"
+    "email-body": "E-Mail-Body",
+    "unit-rich-note-tags": "Rückmeldungskategorien"
   },
   "profiles-registry": {
     "csv-url": "URL der CSV-Datei",
@@ -444,7 +454,7 @@
     "drop-box-selected": "Abgabebereich geändert",
     "drop-box-not-selected": "Konnte Abgabebereich nicht ändern",
     "no-drop-box": "Kein Abgabebereich",
-    "drop-box": "Abgabebereich",
+    "drop-box": "Abgabe-bereich",
     "too-many-workspaces-warning": "In dieser Bereichsgruppe sind mehr als {{maxWorkspaceCount}} Arbeitsbereiche mit insgesamt {{unitsCount}} Aufgaben vorhanden. Bitte löschen Sie Arbeitsbereiche, bevor Sie neue anlegen.",
     "too-many-workspaces-warning-small": "In dieser Bereichsgruppe sind mehr als {{maxWorkspaceCount}} Arbeitsbereiche vorhanden. Bitte löschen Sie Arbeitsbereiche, bevor Sie neue anlegen.",
     "units-count-info": "In dieser Bereichsgruppe sind insgesamt {{unitsCount}} Aufgaben vorhanden.",
@@ -546,7 +556,8 @@
       "editor": "Editor",
       "preview": "Vorschau",
       "schemer": "Kodierung",
-      "comments": "Kommentare"
+      "comments": "Kommentare",
+      "notes": "Rück-meldungen"
     },
     "title": "Arbeitsbereich",
     "workspace-not-loaded": "Konnte Daten für Arbeitsbereich nicht laden",
@@ -745,7 +756,36 @@
     "send-navigation-denied": "Pflichtfelder prüfen",
     "save-unit-data-changes-warning": "Formularfelder sind ungültig ausgefüllt",
     "vocabs-not-loaded":  "Vokabulare für das Metadatenprofil \"{{profileUrl}}\" können aktuell nicht geladen werden",
-    "profile-not-loaded":  "Metadatenprofil \"{{profileUrl}}\" kann aktuell nicht geladen werden"
+    "profile-not-loaded":  "Metadatenprofil \"{{profileUrl}}\" kann aktuell nicht geladen werden",
+    "tag": "Rückmeldungskategorie",
+    "tag-required": "Tag ist erforderlich",
+    "links": "Links",
+    "link-url": "Link URL",
+    "link-type": "Link Typ",
+    "labels": "Bezeichnungen",
+    "descriptions": "Beschreibungen",
+    "lang": "Sprache",
+    "value": "Wert",
+    "remove-link": "Link entfernen",
+    "new-link": "Neuer Link",
+    "rich-note": "Rückmeldung",
+    "enter-note-content": "Notiz-Inhalt hier eingeben...",
+    "edit-rich-note": "Rückmeldung bearbeiten",
+    "add-rich-note": "Rückmeldung hinzufügen",
+    "content-required-warning": "Es wurde noch kein Text eingegeben.",
+    "units-rich-note-tags-json": "Kategorien (JSON-Format)",
+    "tags-saved-success": "Rückmeldungskategorien erfolgreich gespeichert",
+    "tags-saved-error": "Fehler beim Speichern der Rückmeldungskategorien",
+    "invalid-json": "Ungültiges JSON-Format",
+    "delete-rich-note-confirm": "Soll diese Rückmeldung wirklich gelöscht werden?",
+    "delete-rich-note-title": "Rückmeldung löschen",
+    "link-url-placeholder": "https://...",
+    "link-type-placeholder": "z.B. Dokumentation",
+    "lang-placeholder": "de",
+    "label-placeholder": "Bezeichnung...",
+    "description-placeholder": "Beschreibung...",
+    "required": "Pflichtfeld",
+    "unassigned-rich-notes": "Uneindeutige Rückmeldungen"
   },
 
   "coding-report": {
@@ -805,7 +845,17 @@
     "strike": "Durchgestrichen",
     "text-color": "Textfarbe",
     "text-background": "Texthintergrund",
-    "enumeration": "Aufzählung",
+    "enumeration": "Aufzählung (unnummeriert)",
+    "ordered-list": "Aufzählung (nummeriert)",
+    "list-style-disc": "Punkt",
+    "list-style-circle": "Kreis",
+    "list-style-square": "Quadrat",
+    "list-style-decimal": "Ziffern",
+    "list-style-lower-latin": "Kleinbuchstaben (lateinisch)",
+    "list-style-upper-latin": "Großbuchstaben (lateinisch)",
+    "list-style-lower-roman": "Römische Zahlen (klein)",
+    "list-style-upper-roman": "Römische Zahlen (groß)",
+    "list-style-lower-greek": "Griechische Buchstaben",
     "image": "Bild",
     "link-to-item": "Mit Item verbinden"
   },

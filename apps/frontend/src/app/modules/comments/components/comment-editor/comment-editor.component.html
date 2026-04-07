@@ -1,21 +1,20 @@
 <div class="editor-container fx-column-start-stretch">
   <div class="fx-row-space-between-end fx-wrap">
-    <studio-lite-comment-item-selection
+    <studio-lite-item-selection
       class="select-item fx-flex-fill"
       [unitItems]="unitItems"
       [(selectedItems)]="selectedItems"
       [label]="'comment-editor.link-to-item' | translate"
-      [disabled]="(!(editorHTML | isCommentCommittable) && !(initialHTML | isCommentCommittable)) && !selectedItems.length"
       (selectedItemsChange)="onSelectedItemChange()"
       data-cy="comment-editor-link-to-item">
-    </studio-lite-comment-item-selection>
+    </studio-lite-item-selection>
 
     <div class="editor-menubar fx-row-end-stretch fx-wrap">
       <button type="button" mat-icon-button
               matTooltip="{{'comment-editor.bold' | translate}}"
               [matTooltipPosition]="'above'"
               [matTooltipShowDelay]="300"
-              [class.active]="editor.isActive('bold')"
+              [class.active]="editorStates.bold"
               (click)="toggleBold()">
         <studio-lite-wrapped-icon icon="format_bold"></studio-lite-wrapped-icon>
       </button>
@@ -23,7 +22,7 @@
               matTooltip="{{'comment-editor.italic' | translate}}"
               [matTooltipPosition]="'above'"
               [matTooltipShowDelay]="300"
-              [class.active]="editor.isActive('italic')"
+              [class.active]="editorStates.italic"
               (click)="toggleItalic()">
         <studio-lite-wrapped-icon icon="format_italic"></studio-lite-wrapped-icon>
       </button>
@@ -31,7 +30,7 @@
               matTooltip="{{'comment-editor.underline' | translate}}"
               [matTooltipPosition]="'above'"
               [matTooltipShowDelay]="300"
-              [class.active]="editor.isActive('underline')"
+              [class.active]="editorStates.underline"
               (click)="toggleUnderline()" style="text-decoration: underline">
         <studio-lite-wrapped-icon icon="format_underlined"></studio-lite-wrapped-icon>
       </button>
@@ -39,7 +38,7 @@
               matTooltip="{{'comment-editor.superscript' | translate}}"
               [matTooltipPosition]="'above'"
               [matTooltipShowDelay]="300"
-              [class.active]="editor.isActive('superscript')"
+              [class.active]="editorStates.superscript"
               (click)="toggleSuperscript()">
         <studio-lite-wrapped-icon icon="superscript"></studio-lite-wrapped-icon>
       </button>
@@ -47,7 +46,7 @@
               matTooltip="{{'comment-editor.subscript' | translate}}"
               [matTooltipPosition]="'above'"
               [matTooltipShowDelay]="300"
-              [class.active]="editor.isActive('subscript')"
+              [class.active]="editorStates.subscript"
               (click)="toggleSubscript()">
         <studio-lite-wrapped-icon icon="subscript"></studio-lite-wrapped-icon>
       </button>
@@ -55,7 +54,7 @@
               matTooltip="{{'comment-editor.strike' | translate}}"
               [matTooltipPosition]="'above'"
               [matTooltipShowDelay]="300"
-              [class.active]="editor.isActive('strike')"
+              [class.active]="editorStates.strike"
               (click)="toggleStrike()">
         <studio-lite-wrapped-icon icon="strikethrough_s"></studio-lite-wrapped-icon>
       </button>
@@ -69,7 +68,7 @@
         </button>
         <mat-select
           class="editor-color-select-button"
-          [style.background-image]="'linear-gradient(135deg, white 60%, ' + selectedFontColor +' 60%)'"
+          [style.background-image]="fontColorButtonStyle"
           (click)="textColorInput.click()">
         </mat-select>
         <input matInput
@@ -86,7 +85,7 @@
           <studio-lite-wrapped-icon icon="format_color_fill"></studio-lite-wrapped-icon>
         </button>
         <mat-select class="editor-color-select-button"
-                    [style.background-image]="'linear-gradient(135deg, white 60%, ' + selectedHighlightColor +' 60%)'"
+                    [style.background-image]="highlightColorButtonStyle"
                     (click)="textHighlightColorInput.click()">
         </mat-select>
         <input matInput
@@ -98,7 +97,7 @@
               mat-icon-button
               matTooltip="{{'comment-editor.enumeration' | translate}}"
               [matTooltipPosition]="'above'"
-              [class.active]="editor.isActive('bulletList')"
+              [class.active]="editorStates.bulletList"
               (click)="toggleBulletList()">
         <studio-lite-wrapped-icon icon="format_list_bulleted"></studio-lite-wrapped-icon>
       </button>

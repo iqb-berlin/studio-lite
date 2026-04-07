@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { WorkspaceGroupFullDto } from '@studio-lite-lib/api-dto';
+import { WorkspaceGroupFullDto, WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of } from 'rxjs';
 import { AppService } from '../../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
@@ -14,7 +14,8 @@ describe('WsgAdminComponent', () => {
   let mockWsgAdminService: {
     selectedWorkspaceGroupId: BehaviorSubject<number>;
     selectedWorkspaceGroupName: BehaviorSubject<string>;
-    selectedWorkspaceGroupSettings: Record<string, unknown>;
+    selectedWorkspaceGroupSettings: BehaviorSubject<WorkspaceGroupSettingsDto>;
+    settingsChanged: boolean; // Adding missing property if needed
   };
   let mockBackendService: {
     getWorkspaceGroupData: jest.Mock;
@@ -27,7 +28,12 @@ describe('WsgAdminComponent', () => {
     mockWsgAdminService = {
       selectedWorkspaceGroupId: new BehaviorSubject<number>(0),
       selectedWorkspaceGroupName: new BehaviorSubject<string>(''),
-      selectedWorkspaceGroupSettings: {}
+      selectedWorkspaceGroupSettings: new BehaviorSubject<WorkspaceGroupSettingsDto>({
+        defaultEditor: '',
+        defaultPlayer: '',
+        defaultSchemer: ''
+      }),
+      settingsChanged: false
     };
     mockBackendService = {
       getWorkspaceGroupData: jest.fn().mockReturnValue(of({
@@ -70,6 +76,6 @@ describe('WsgAdminComponent', () => {
     expect(mockBackendService.getWorkspaceGroupData).toHaveBeenCalledWith(10);
     expect(mockWsgAdminService.selectedWorkspaceGroupName.value).toBe('Group 1');
     expect(mockAppService.appConfig.setPageTitle).toHaveBeenCalled();
-    expect(mockWsgAdminService.selectedWorkspaceGroupSettings).toEqual({ defaultEditor: 'e' });
+    expect(mockWsgAdminService.selectedWorkspaceGroupSettings.value).toEqual({ defaultEditor: 'e' });
   });
 });

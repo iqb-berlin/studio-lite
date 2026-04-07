@@ -7,6 +7,7 @@ import { UnitEditorComponent } from './components/unit-editor/unit-editor.compon
 import { UnitPreviewComponent } from './components/unit-preview/unit-preview.component';
 import { UnitSchemerComponent } from './components/unit-schemer/unit-schemer.component';
 import { UnitCommentsComponent } from './components/unit-comments/unit-comments.component';
+import { UnitRichNotesComponent } from './components/unit-rich-notes/unit-rich-notes.component';
 import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
 import { HiddenRouteGuard } from './guards/hidden-route.guard';
 
@@ -28,6 +29,7 @@ const routes: Routes = [
       { path: 'preview', component: UnitPreviewComponent, canActivate: [HiddenRouteGuard] },
       { path: 'schemer', component: UnitSchemerComponent, canActivate: [HiddenRouteGuard] },
       { path: 'comments', component: UnitCommentsComponent, canActivate: [HiddenRouteGuard] },
+      { path: 'notes', component: UnitRichNotesComponent, canActivate: [HiddenRouteGuard] },
       { path: '**', component: UnitPropertiesComponent },
       {
         path: 'editor', component: UnitEditorComponent, outlet: 'secondary', canActivate: [HiddenRouteGuard]
@@ -40,6 +42,9 @@ const routes: Routes = [
       },
       {
         path: 'comments', component: UnitCommentsComponent, outlet: 'secondary', canActivate: [HiddenRouteGuard]
+      },
+      {
+        path: 'notes', component: UnitRichNotesComponent, outlet: 'secondary', canActivate: [HiddenRouteGuard]
       }
     ]
   }

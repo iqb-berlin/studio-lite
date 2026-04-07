@@ -34,12 +34,12 @@ export function createBasicSpecCy() {
 
     // admin can create a workspace (Arbeitsbereich) within its Bereichsgruppe
     createWs(ws1, group1);
-    grantRemovePrivilegeAtWs([Cypress.env('username'), newUser.username],
+    grantRemovePrivilegeAtWs([Cypress.expose('username'), newUser.username],
       ws1,
       [AccessLevel.Admin, AccessLevel.Developer]);
     createWs(ws2, group1);
     grantRemovePrivilegeAtWs(
-      [Cypress.env('username'), newUser.username],
+      [Cypress.expose('username'), newUser.username],
       ws2,
       [AccessLevel.Admin, AccessLevel.Developer]
     );
@@ -60,7 +60,7 @@ export function createBasicData() {
 
     // admin can create a workspace (Arbeitsbereich) within its Bereichsgruppe
     createWs(ws1, group1);
-    grantRemovePrivilegeAtWs([Cypress.env('username')], ws1, [
+    grantRemovePrivilegeAtWs([Cypress.expose('username')], ws1, [
       AccessLevel.Admin]);
   });
 }

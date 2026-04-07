@@ -103,6 +103,15 @@
           </mat-icon>
         </mat-cell>
       </ng-container>
+      <ng-container matColumnDef="notes">
+        <mat-header-cell *matHeaderCellDef class="header-center">{{'workspace.routes.notes' | translate}}</mat-header-cell>
+        <mat-cell *matCellDef="let element" class="cell-center">
+          <mat-icon [color]="isRouteHidden(element, 'notes') ? '' : 'primary'"
+                    [matTooltip]="(isRouteHidden(element, 'notes') ? 'wsg-admin.route-hidden' : 'wsg-admin.route-visible') | translate">
+            {{ isRouteHidden(element, 'notes') ? 'directions_off' : 'directions' }}
+          </mat-icon>
+        </mat-cell>
+      </ng-container>
       <ng-container matColumnDef="dropBoxId">
         <mat-header-cell *matHeaderCellDef class="header-center"
                          mat-sort-header="dropBoxId">{{'wsg-admin.drop-box' | translate}}

@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  WorkspaceGroupSettingsDto
+  WorkspaceGroupSettingsDto, UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
@@ -15,13 +15,16 @@ import { WsgAdminService } from '../../services/wsg-admin.service';
 import { State } from '../../../admin/models/state.type';
 import { CoreProfile, ProfilesComponent } from '../../../../components/profiles/profiles.component';
 import { StatesComponent } from '../states/states.component';
+import {
+  UnitRichNoteTagsConfigComponent
+} from '../unit-rich-note-tags-config/unit-rich-note-tags-config.component';
 
 @Component({
   selector: 'studio-lite-settings',
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
   imports: [MatTooltip, ProfilesComponent, StatesComponent, TranslateModule, MatFabButton,
-    MatIcon, MatCard, MatCardHeader, MatCardTitle, MatCardContent]
+    MatIcon, MatCard, MatCardHeader, MatCardTitle, MatCardContent, UnitRichNoteTagsConfigComponent]
 })
 export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   settings!: WorkspaceGroupSettingsDto;
@@ -35,7 +38,11 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.settings = this.wsgAdminService.selectedWorkspaceGroupSettings;
+    this.wsgAdminService.selectedWorkspaceGroupSettings
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(settings => {
+        this.settings = { ...settings };
+      });
   }
 
   ngOnDestroy(): void {
@@ -52,6 +59,7 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
         respOk => {
           if (respOk) {
             this.wsgAdminService.settingsChanged = false;
+            this.wsgAdminService.selectedWorkspaceGroupSettings.next(this.settings);
             this.snackBar.open(
               this.translateService.instant('wsg-settings.changed'),
               '',
@@ -76,5 +84,10 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   stateSettingsChange(states:State[]) {
     this.wsgAdminService.settingsChanged = true;
     this.settings.states = states;
+  }
+
+  richNoteTagsSettingsChange(tags: UnitRichNoteTagDto[]) {
+    this.wsgAdminService.settingsChanged = true;
+    this.settings.richNoteTags = tags;
   }
 }

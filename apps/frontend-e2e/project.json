@@ -17,6 +17,14 @@
         }
       }
     },
+    "e2e-coverage": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/frontend-e2e/cypress.config.ts",
+        "devServerTarget": "frontend:serve-coverage",
+        "testingType": "e2e"
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]

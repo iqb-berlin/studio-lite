@@ -194,7 +194,7 @@ export function getItem(profile: string, moreThanOne: boolean, copyItem?: string
     cy.get('[data-cy="metadata-new-item-button"]').click();
   } else if (moreThanOne) {
     cy.get('[data-cy="metadata-new-item-button"]').click();
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.get(`mat-expansion-panel:contains("${json.metadata['without-id']}")`).click();
       cy.get('mat-label:contains("Item ID")')
         .eq(-1).type(IqbProfileExamples.get(profile).get('Item ID'));
@@ -205,7 +205,7 @@ export function getItem(profile: string, moreThanOne: boolean, copyItem?: string
     });
     getStructure(profile, moreThanOne);
   } else {
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.get(`mat-expansion-panel:contains("${json.metadata['without-id']}")`).click();
       cy.get('mat-label:contains("Item ID")')
         .eq(-1).type(IqbProfileExamples.get(profile).get('Item ID'));

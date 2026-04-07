@@ -41,6 +41,7 @@ import { UsersService } from '../services/users.service';
 import UserEntity from '../entities/user.entity';
 import { User } from '../decorators/user.decorator';
 import { UnitCommentService } from '../services/unit-comment.service';
+import { UnitRichNoteService } from '../services/unit-rich-note.service';
 import { ReadOrGroupAdminAccessGuard } from '../guards/read-or-group-admin-access.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
@@ -54,6 +55,7 @@ export class WorkspaceController {
     private unitCommentService: UnitCommentService,
     private veronaModuleService: VeronaModulesService,
     private settingService: SettingService,
+    private unitRichNoteService: UnitRichNoteService,
     private usersService: UsersService
   ) {}
 
@@ -90,6 +92,7 @@ export class WorkspaceController {
         this.unitCommentService,
         this.veronaModuleService,
         this.settingService,
+        this.unitRichNoteService,
         unitDownloadSettings
       );
       res.set({

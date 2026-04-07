@@ -6,6 +6,8 @@ import { Subject, takeUntil } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { OverlayRef } from '@angular/cdk/overlay';
 import { TranslateModule } from '@ngx-translate/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AppService } from '../../../../services/app.service';
 import { WidgetCallData } from '../../models/widget-call-data.interface';
 import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
@@ -16,7 +18,9 @@ import { VeronaModuleDirective } from '../../../../directives/verona-module.dire
   styleUrls: ['./widget-overlay.component.scss'],
   imports: [
     MatButtonModule,
-    TranslateModule
+    MatIconModule,
+    TranslateModule,
+    MatTooltipModule
   ]
 })
 export class WidgetOverlayComponent implements AfterViewInit, OnDestroy {

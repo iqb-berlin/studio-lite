@@ -14,6 +14,7 @@ import { UnitService } from '../services/unit.service';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { SettingService } from '../services/setting.service';
+import { UnitRichNoteService } from '../services/unit-rich-note.service';
 
 jest.mock('adm-zip');
 
@@ -37,12 +38,18 @@ describe('UnitDownloadClass', () => {
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
+      const unitRichNoteServiceMock = createMock<UnitRichNoteService>();
 
       settingServiceMock.findUnitExportConfig.mockResolvedValue({
         unitXsdUrl: 'unit.xsd',
         bookletXsdUrl: 'booklet.xsd',
         testTakersXsdUrl: 'testtakers.xsd'
       } as unknown as UnitExportConfigDto);
+
+      unitRichNoteServiceMock.findNotes.mockResolvedValue({
+        tags: [],
+        notes: []
+      });
 
       unitServiceMock.findOnesProperties.mockResolvedValue({
         key: 'U1',
@@ -82,6 +89,7 @@ describe('UnitDownloadClass', () => {
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
+        unitRichNoteServiceMock,
         downloadSettings
       );
 

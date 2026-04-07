@@ -8,7 +8,7 @@ Cypress.Commands.add('getRegistryAPI',
       method: 'GET',
       url: '/api/metadata/registry',
       headers: {
-        'app-version': Cypress.env('version'),
+        'app-version': Cypress.expose('version'),
         authorization
       },
       failOnStatusCode: false
@@ -22,7 +22,7 @@ Cypress.Commands.add('getMetadataAPI', (profile:string, token:string) => {
     method: 'GET',
     url: `/api/metadata/profiles?url=${profile}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     failOnStatusCode: false
@@ -36,7 +36,7 @@ Cypress.Commands.add('updateGroupMetadataAPI', (groupId: string, token:string) =
     method: 'PATCH',
     url: `/api/workspace-groups/${groupId}`,
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -44,12 +44,12 @@ Cypress.Commands.add('updateGroupMetadataAPI', (groupId: string, token:string) =
       settings: {
         profiles: [
           {
-            id: `${Cypress.env('profile1')}`,
-            label: `${Cypress.env('label1')}`
+            id: `${Cypress.expose('profile1')}`,
+            label: `${Cypress.expose('label1')}`
           },
           {
-            id: `${Cypress.env('profile2')}`,
-            label: `${Cypress.env('label2')}`
+            id: `${Cypress.expose('profile2')}`,
+            label: `${Cypress.expose('label2')}`
           }]
       }
     },
@@ -64,7 +64,7 @@ Cypress.Commands.add('getVocabularyMetadataAPI', (profile: string, token:string)
     method: 'GET',
     url: '/api/metadata/vocabularies',
     headers: {
-      'app-version': Cypress.env('version'),
+      'app-version': Cypress.expose('version'),
       authorization
     },
     body: {
@@ -82,7 +82,7 @@ Cypress.Commands.add('updateWsMetadataAPI',
       method: 'PATCH',
       url: `/api/workspaces/${wsId}/settings`,
       headers: {
-        'app-version': Cypress.env('version'),
+        'app-version': Cypress.expose('version'),
         authorization
       },
       body: {
@@ -110,7 +110,7 @@ Cypress.Commands.add('updateWsMetadataAPI',
 //       method: 'PATCH',
 //       url: `/api/workspaces/${wsId}/units/${unitId}/metadata`,
 //       headers: {
-//         'app-version': Cypress.env('version'),
+//         'app-version': Cypress.expose('version'),
 //         authorization
 //       },
 //       body: {
@@ -148,7 +148,7 @@ Cypress.Commands.add('updateWsMetadataAPI',
 //     method: 'PATCH',
 //     url: `/api/workspace-groups/${groupId}`,
 //     headers: {
-//       'app-version': Cypress.env('version'),
+//       'app-version': Cypress.expose('version'),
 //       authorization
 //     },
 //     body: {

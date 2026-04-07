@@ -18,8 +18,8 @@ describe('Unit API tests part II', () => {
   describe('75. GET /api/workspaces/{workspace_id}/users/{user_id}', () => {
     it('401 negative test: should deny access to workspace data when no authentication token is provided', () => {
       cy.getWsForUserAPI(
-        Cypress.env(ws1.id),
-        Cypress.env(`id_${Cypress.env('username')}`),
+        Cypress.expose(ws1.id),
+        Cypress.expose(`id_${Cypress.expose('username')}`),
         noId
       ).then(resp => {
         expect(resp.status).to.equal(401);
@@ -29,8 +29,8 @@ describe('Unit API tests part II', () => {
     it('404 negative test: should return a not found error when requesting data for a non-existent workspace', () => {
       cy.getWsForUserAPI(
         noId,
-        Cypress.env(`id_${Cypress.env('username')}`),
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(`id_${Cypress.expose('username')}`),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(404);
       });
@@ -38,9 +38,9 @@ describe('Unit API tests part II', () => {
 
     it('404 negative test: should return a not found error when providing an invalid user ID', () => {
       cy.getWsForUserAPI(
-        Cypress.env(ws1.id),
+        Cypress.expose(ws1.id),
         noId,
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(404);
       });
@@ -48,9 +48,9 @@ describe('Unit API tests part II', () => {
 
     it('200 positive test: should successfully retrieve workspace information for an authorized user', () => {
       cy.getWsForUserAPI(
-        Cypress.env(ws1.id),
-        Cypress.env(`id_${Cypress.env('username')}`),
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(ws1.id),
+        Cypress.expose(`id_${Cypress.expose('username')}`),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
       });
@@ -59,7 +59,7 @@ describe('Unit API tests part II', () => {
 
   describe('76. GET /api/admin/workspace-groups download', () => {
     it('200 positive test: should allow an administrator to retrieve the workspace report', () => {
-      cy.getReportAPI(Cypress.env(`token_${Cypress.env('username')}`)).then(
+      cy.getReportAPI(Cypress.expose(`token_${Cypress.expose('username')}`)).then(
         resp => {
           expect(resp.status).to.equal(200);
         }
@@ -67,7 +67,7 @@ describe('Unit API tests part II', () => {
     });
 
     it('401 negative test: should deny workspace report retrieval to a regular user', () => {
-      cy.getReportAPI(Cypress.env(`token_${userGroupAdmin.username}`)).then(resp => {
+      cy.getReportAPI(Cypress.expose(`token_${userGroupAdmin.username}`)).then(resp => {
         expect(resp.status).to.equal(401);
       });
     });
@@ -82,15 +82,15 @@ describe('Unit API tests part II', () => {
   describe('77. GET /api/workspace-groups/{workspace_group_id} download=true', () => {
     it('200 positive test: should allow an authorized user to download all workspaces within a group', () => {
       cy.downloadWsAPI(
-        Cypress.env(groupVera.id),
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(groupVera.id),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
       });
     });
 
     it('401 negative test: should deny workspace group download when no valid credentials are provided', () => {
-      cy.downloadWsAPI(Cypress.env(group2.id), noId).then(resp => {
+      cy.downloadWsAPI(Cypress.expose(group2.id), noId).then(resp => {
         expect(resp.status).to.equal(401);
       });
     });
@@ -98,7 +98,7 @@ describe('Unit API tests part II', () => {
     it('500/200 negative test: should return success but provide an empty file for an invalid group ID', () => {
       cy.downloadWsAPI(
         noId,
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
         // It downloads an empty file with only headers
@@ -108,20 +108,20 @@ describe('Unit API tests part II', () => {
 
   describe('78. GET /api/workspaces/{workspace_id} download=true', () => {
     it('200 positive test: should allow downloading unit data from a workspace by ID', () => {
-      const unitIds = [Cypress.env(unit2.shortname)];
+      const unitIds = [Cypress.expose(unit2.shortname)];
       cy.downloadWsUnitsAPI(
-        Cypress.env(ws2.id),
+        Cypress.expose(ws2.id),
         buildDownloadQuery(unitIds),
-        Cypress.env(`token_${userGroupAdmin.username}`)
+        Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
       });
     });
 
     it('401 negative test: should deny unit download when an invalid authentication token is provided', () => {
-      const unitIds = [Cypress.env(unit2.shortname)];
+      const unitIds = [Cypress.expose(unit2.shortname)];
       cy.downloadWsUnitsAPI(
-        Cypress.env(ws2.id),
+        Cypress.expose(ws2.id),
         buildDownloadQuery(unitIds),
         noId
       ).then(resp => {
@@ -132,13 +132,13 @@ describe('Unit API tests part II', () => {
     it('404 negative test: should return error when attempting to download a unit ' +
       'that does not exist in the workspace', () => {
       const unitIds = [
-        Cypress.env(unit2.shortname),
-        Cypress.env(unit3.shortname)
+        Cypress.expose(unit2.shortname),
+        Cypress.expose(unit3.shortname)
       ];
       cy.downloadWsUnitsAPI(
-        Cypress.env(ws2.id),
+        Cypress.expose(ws2.id),
         buildDownloadQuery(unitIds),
-        Cypress.env(`token_${userGroupAdmin.username}`)
+        Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
         expect(resp.status).to.equal(404);
       });
@@ -146,11 +146,11 @@ describe('Unit API tests part II', () => {
 
     it('404 negative test: should return an not found error when attempting to download' +
       ' from an invalid workspace ID', () => {
-      const unitIds = [Cypress.env(unit2.shortname)];
+      const unitIds = [Cypress.expose(unit2.shortname)];
       cy.downloadWsUnitsAPI(
         noId,
         buildDownloadQuery(unitIds),
-        Cypress.env(`token_${userGroupAdmin.username}`)
+        Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
         expect(resp.status).to.equal(404);
       });
@@ -159,9 +159,9 @@ describe('Unit API tests part II', () => {
     it('401 negative test: should deny access to workspace downloads for a user without sufficient permissions', () => {
       const unitIds: string[] = [];
       cy.downloadWsUnitsAPI(
-        Cypress.env(ws3.id),
+        Cypress.expose(ws3.id),
         buildDownloadQuery(unitIds),
-        Cypress.env(`token_${userGroupAdmin.username}`)
+        Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
         expect(resp.status).to.equal(401);
       });
@@ -171,9 +171,9 @@ describe('Unit API tests part II', () => {
   describe('79. DELETE /api/workspaces/{workspace_id}/units/{ids}', () => {
     it('401 negative test: should deny unit deletion when attempting to delete another user\'s unit', () => {
       cy.deleteUnitsAPI(
-        [Cypress.env(unit1.shortname)],
-        Cypress.env(ws1.id),
-        Cypress.env(`token_${user3.username}`)
+        [Cypress.expose(unit1.shortname)],
+        Cypress.expose(ws1.id),
+        Cypress.expose(`token_${user3.username}`)
       ).then(resp => {
         expect(resp.status).to.equal(401);
       });
@@ -181,8 +181,8 @@ describe('Unit API tests part II', () => {
 
     it('401 negative test: should deny unit deletion when no authentication token is provided', () => {
       cy.deleteUnitsAPI(
-        [Cypress.env(unit1.shortname)],
-        Cypress.env(ws1.id),
+        [Cypress.expose(unit1.shortname)],
+        Cypress.expose(ws1.id),
         noId
       ).then(resp => {
         expect(resp.status).to.equal(401);
@@ -192,9 +192,9 @@ describe('Unit API tests part II', () => {
     it('500 negative test: should return a server error when attempting to delete units ' +
       'from a non-existent workspace', () => {
       cy.deleteUnitsAPI(
-        [Cypress.env(unit2.shortname)],
+        [Cypress.expose(unit2.shortname)],
         noId,
-        Cypress.env(`token_${userGroupAdmin.username}`)
+        Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
         expect(resp.status).to.equal(500);
       });
@@ -202,9 +202,9 @@ describe('Unit API tests part II', () => {
 
     it('401 negative test: should deny unit deletion when providing the wrong workspace for a specific unit', () => {
       cy.deleteUnitsAPI(
-        [Cypress.env(unit2.shortname)],
-        Cypress.env(ws1.id),
-        Cypress.env(`token_${user3.username}`)
+        [Cypress.expose(unit2.shortname)],
+        Cypress.expose(ws1.id),
+        Cypress.expose(`token_${user3.username}`)
       ).then(resp => {
         expect(resp.status).to.equal(401);
       });
@@ -212,12 +212,12 @@ describe('Unit API tests part II', () => {
 
     it('200 positive test: should allow a regular user to successfully delete multiple units they own', () => {
       // Delete 2 units at time
-      const ids = [Cypress.env(unit2.shortname), Cypress.env(unit1.shortname)];
+      const ids = [Cypress.expose(unit2.shortname), Cypress.expose(unit1.shortname)];
 
       cy.deleteUnitsAPI(
         ids,
-        Cypress.env(ws2.id),
-        Cypress.env(`token_${userGroupAdmin.username}`)
+        Cypress.expose(ws2.id),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
       });
@@ -227,7 +227,7 @@ describe('Unit API tests part II', () => {
   describe('Admin home API tests', () => {
     describe('80. GET /api/my-data', () => {
       it('200 positive test: should allow an authorized user to retrieve their own account profile data', () => {
-        cy.getMyData(Cypress.env(`token_${Cypress.env('username')}`)).then(
+        cy.getMyData(Cypress.expose(`token_${Cypress.expose('username')}`)).then(
           resp => {
             expect(resp.status).to.equal(200);
             expect(resp.body.description).to.equal('first initial user');
@@ -242,13 +242,13 @@ describe('Unit API tests part II', () => {
       });
 
       it('401 negative test: should deny personal data retrieval to a user with insufficient privileges', () => {
-        cy.getMyData(Cypress.env(`token_${user3.username}`)).then(resp => {
+        cy.getMyData(Cypress.expose(`token_${user3.username}`)).then(resp => {
           expect(resp.status).to.equal(401);
         });
       });
 
       it('200 positive test: should allow a superuser to successfully retrieve their own personal data', () => {
-        cy.getMyData(Cypress.env(`token_${userGroupAdmin.username}`)).then(resp => {
+        cy.getMyData(Cypress.expose(`token_${userGroupAdmin.username}`)).then(resp => {
           expect(resp.status).to.equal(200);
           expect(resp.body.description).to.equal(null);
         });
@@ -260,7 +260,7 @@ describe('Unit API tests part II', () => {
       let data1: MyData;
       before(() => {
         data = {
-          id: `${Cypress.env(`id_${Cypress.env('username')}`)}`,
+          id: `${Cypress.expose(`id_${Cypress.expose('username')}`)}`,
           description: '',
           email: 'first@user.es',
           lastName: 'First',
@@ -268,7 +268,7 @@ describe('Unit API tests part II', () => {
           emailPublishApproved: false
         };
         data1 = {
-          id: `${Cypress.env(`id_${userGroupAdmin.username}`)}`,
+          id: `${Cypress.expose(`id_${userGroupAdmin.username}`)}`,
           description: '',
           email: 'second@user.es',
           lastName: 'Second',
@@ -279,7 +279,7 @@ describe('Unit API tests part II', () => {
 
       it('200 positive test: should allow an authorized user to successfully update their personal data', () => {
         cy.updateMyData(
-          Cypress.env(`token_${Cypress.env('username')}`),
+          Cypress.expose(`token_${Cypress.expose('username')}`),
           data
         ).then(resp => {
           expect(resp.status).to.equal(200);
@@ -288,7 +288,7 @@ describe('Unit API tests part II', () => {
 
       it('401 negative test: should deny a superadmin from updating data belonging to another account', () => {
         cy.updateMyData(
-          Cypress.env(`token_${Cypress.env('username')}`),
+          Cypress.expose(`token_${Cypress.expose('username')}`),
           data1
         ).then(resp => {
           expect(resp.status).to.equal(401);
@@ -298,7 +298,7 @@ describe('Unit API tests part II', () => {
       it('401 negative test: should deny data updates when attempting to modify a non-existent user record', () => {
         data.id = noId;
         cy.updateMyData(
-          Cypress.env(`token_${Cypress.env('username')}`),
+          Cypress.expose(`token_${Cypress.expose('username')}`),
           data
         ).then(resp => {
           expect(resp.status).to.equal(401);
@@ -316,19 +316,19 @@ describe('Unit API tests part II', () => {
   describe('82. GET /api/group-admin/users/{id}/workspaces', () => {
     before(() => {
       cy.updateWsByUserAPI(
-        Cypress.env(`id_${Cypress.env('username')}`),
-        Cypress.env(group2.id),
+        Cypress.expose(`id_${Cypress.expose('username')}`),
+        Cypress.expose(group2.id),
         [4],
-        [Cypress.env(ws3.id)],
-        Cypress.env(`token_${Cypress.env('username')}`)
+        [Cypress.expose(ws3.id)],
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
       });
     });
     it('200 positive test: should successfully retrieve the workspace list for an administrator user', () => {
       cy.getWsByUserAPI(
-        Cypress.env(`id_${Cypress.env('username')}`),
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(`id_${Cypress.expose('username')}`),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
         expect(resp.body[1].userAccessLevel).to.equal(4);
@@ -338,8 +338,8 @@ describe('Unit API tests part II', () => {
 
     it('200 positive test: should successfully retrieve the workspace list for a regular user profile', () => {
       cy.getWsByUserAPI(
-        Cypress.env(`id_${userGroupAdmin.username}`),
-        Cypress.env(`token_${userGroupAdmin.username}`)
+        Cypress.expose(`id_${userGroupAdmin.username}`),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
         expect(resp.body.length).to.equal(2);
@@ -349,8 +349,8 @@ describe('Unit API tests part II', () => {
     it('401/200 negative test: should return error or empty data when requesting ' +
       'workspaces for a user you don\'t manage', () => {
       cy.getWsByUserAPI(
-        Cypress.env(`id_${Cypress.env('username')}`),
-        Cypress.env(`token_${userGroupAdmin.username}`)
+        Cypress.expose(`id_${Cypress.expose('username')}`),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
         expect(resp.body.length).to.equal(3);
@@ -360,7 +360,7 @@ describe('Unit API tests part II', () => {
 
     it('401 negative test: should deny access to the user workspace list when no authentication is provided', () => {
       cy.getWsByUserAPI(
-        Cypress.env(`id_${Cypress.env('username')}`),
+        Cypress.expose(`id_${Cypress.expose('username')}`),
         noId
       ).then(resp => {
         expect(resp.status).to.equal(401);
@@ -371,7 +371,7 @@ describe('Unit API tests part II', () => {
       // This test should be negative 404, but it returns an empty array
       cy.getWsByUserAPI(
         noId,
-        Cypress.env(`token_${Cypress.env('username')}`)
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
         // expect(resp.status).to.equal(404); should
@@ -384,11 +384,11 @@ describe('Unit API tests part II', () => {
       'access levels for managed users', () => {
       // The body structure id different to sweagger.
       cy.updateWsByUserAPI(
-        Cypress.env(`id_${userGroupAdmin.username}`),
-        Cypress.env(groupVera.id),
+        Cypress.expose(`id_${userGroupAdmin.username}`),
+        Cypress.expose(groupVera.id),
         [2],
-        [Cypress.env(ws2.id)],
-        Cypress.env(`token_${Cypress.env('username')}`)
+        [Cypress.expose(ws2.id)],
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
       });
@@ -397,11 +397,11 @@ describe('Unit API tests part II', () => {
     it('401 negative test: should deny workspace access modifications to a user' +
       ' without group administrator role', () => {
       cy.updateWsByUserAPI(
-        Cypress.env(`id_${Cypress.env('username')}`),
-        Cypress.env(groupVera.id),
+        Cypress.expose(`id_${Cypress.expose('username')}`),
+        Cypress.expose(groupVera.id),
         [2],
-        [Cypress.env(ws1.id)],
-        Cypress.env(`token_${user3.username}`)
+        [Cypress.expose(ws1.id)],
+        Cypress.expose(`token_${user3.username}`)
       ).then(resp => {
         expect(resp.status).to.equal(401);
       });
@@ -411,11 +411,11 @@ describe('Unit API tests part II', () => {
       '401/200 negative test: should deny a group administrator from modifying access in a group they does not manage',
       () => {
         cy.updateWsByUserAPI(
-          Cypress.env(`id_${Cypress.env('username')}`),
-          Cypress.env(group2.id),
+          Cypress.expose(`id_${Cypress.expose('username')}`),
+          Cypress.expose(group2.id),
           [1],
-          [Cypress.env(ws3.id)],
-          Cypress.env(`token_${userGroupAdmin.username}`)
+          [Cypress.expose(ws3.id)],
+          Cypress.expose(`token_${userGroupAdmin.username}`)
         ).then(resp => {
           expect(resp.status).to.equal(200);
           // expect(resp.status).to.equal(401); //should
@@ -427,11 +427,11 @@ describe('Unit API tests part II', () => {
       '500 negative test: should return a server error when attempting to modify access without a valid group ID',
       () => {
         cy.updateWsByUserAPI(
-          Cypress.env(`id_${Cypress.env('username')}`),
+          Cypress.expose(`id_${Cypress.expose('username')}`),
           noId,
           [2],
-          [Cypress.env(ws1.id)],
-          Cypress.env(`token_${Cypress.env('username')}`)
+          [Cypress.expose(ws1.id)],
+          Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
           expect(resp.status).to.equal(500);
         });
@@ -442,10 +442,10 @@ describe('Unit API tests part II', () => {
       'for a non-existent user record', () => {
       cy.updateWsByUserAPI(
         noId,
-        Cypress.env(groupVera.id),
+        Cypress.expose(groupVera.id),
         [4],
-        [Cypress.env(ws1.id)],
-        Cypress.env(`token_${Cypress.env('username')}`)
+        [Cypress.expose(ws1.id)],
+        Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(500);
       });
@@ -458,7 +458,7 @@ describe('Unit API tests part II', () => {
       '401/500 negative test: should return authentication or server error when uploading units without a token',
       { defaultCommandTimeout: 100000 },
       () => {
-        cy.uploadUnitsAPI(Cypress.env(ws1.id), units, noId).then(resp => {
+        cy.uploadUnitsAPI(Cypress.expose(ws1.id), units, noId).then(resp => {
           expect(resp.status).to.be.oneOf([401, 500]);
         });
       }
@@ -471,7 +471,7 @@ describe('Unit API tests part II', () => {
         cy.uploadUnitsAPI(
           noId,
           units,
-          Cypress.env(`token_${Cypress.env('username')}`)
+          Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
           expect(resp.status).to.equal(500);
         });
@@ -483,9 +483,9 @@ describe('Unit API tests part II', () => {
       { defaultCommandTimeout: 100000 },
       () => {
         cy.uploadUnitsAPI(
-          Cypress.env(ws1.id),
+          Cypress.expose(ws1.id),
           units,
-          Cypress.env(`token_${Cypress.env('username')}`)
+          Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
           expect(resp.status).to.equal(201);
         });
@@ -498,9 +498,9 @@ describe('Unit API tests part II', () => {
       { defaultCommandTimeout: 100000 },
       () => {
         cy.uploadUnitsAPI(
-          Cypress.env(ws2.id),
+          Cypress.expose(ws2.id),
           units,
-          Cypress.env(`token_${userGroupAdmin.username}`)
+          Cypress.expose(`token_${userGroupAdmin.username}`)
         ).then(resp => {
           expect(resp.status).to.be.oneOf([201]);
         });
@@ -512,17 +512,17 @@ describe('Unit API tests part II', () => {
       { defaultCommandTimeout: 100000 },
       () => {
         cy.updateUsersOfWsAPI(
-          Cypress.env(ws3.id),
+          Cypress.expose(ws3.id),
           AccessLevel.Developer,
-          Cypress.env(`id_${user3.username}`),
-          Cypress.env(`token_${Cypress.env('username')}`)
+          Cypress.expose(`id_${user3.username}`),
+          Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
           expect(resp.status).to.equal(200);
         });
         cy.uploadUnitsAPI(
-          Cypress.env(ws3.id),
+          Cypress.expose(ws3.id),
           units,
-          Cypress.env(`token_${user3.username}`)
+          Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
           expect(resp.status).to.be.oneOf([401, 500]);
         });
@@ -535,9 +535,9 @@ describe('Unit API tests part II', () => {
       { defaultCommandTimeout: 100000 },
       () => {
         cy.uploadUnitsAPI(
-          Cypress.env(ws3.id),
+          Cypress.expose(ws3.id),
           units,
-          Cypress.env(`token_${userGroupAdmin.username}`)
+          Cypress.expose(`token_${userGroupAdmin.username}`)
         ).then(resp => {
           expect(resp.status).to.be.oneOf([401, 500]);
         });
@@ -548,8 +548,8 @@ describe('Unit API tests part II', () => {
   describe('85. GET /api/admin/users/{id}/workspace-groups', () => {
     it('200 positive test: should successfully retrieve the list of workspace groups' +
       ' associated with an administrator ID', () => {
-      cy.getGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
-        Cypress.env(`token_${Cypress.env('username')}`))
+      cy.getGroupsByUserAPI(Cypress.expose(`id_${Cypress.expose('username')}`),
+        Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
           expect(resp.body[0].name).to.equal(group2.name);
@@ -557,8 +557,8 @@ describe('Unit API tests part II', () => {
     });
 
     it('401 negative test: should deny workspace group listing to a user with regular profile privileges', () => {
-      cy.getGroupsByUserAPI(Cypress.env(`id_${userGroupAdmin.username}`),
-        Cypress.env(`token_${userGroupAdmin.username}`))
+      cy.getGroupsByUserAPI(Cypress.expose(`id_${userGroupAdmin.username}`),
+        Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(401);
         });
@@ -566,7 +566,7 @@ describe('Unit API tests part II', () => {
 
     it('401 negative test: should deny access to the user group list ' +
       'when no valid authentication token is provided', () => {
-      cy.getGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+      cy.getGroupsByUserAPI(Cypress.expose(`id_${Cypress.expose('username')}`),
         noId)
         .then(resp => {
           expect(resp.status).to.equal(401);
@@ -575,7 +575,7 @@ describe('Unit API tests part II', () => {
 
     it('200/404 negative test: should return success but no results when providing a non-existent user ID', () => {
       cy.getGroupsByUserAPI(noId,
-        Cypress.env(`token_${Cypress.env('username')}`))
+        Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
           // expect(resp.status).to.equal(404); should
@@ -588,18 +588,18 @@ describe('Unit API tests part II', () => {
   describe('86. PATCH /api/admin/users/{id}/workspace-groups', () => {
     it('200 positive test: should allow an administrator to successfully update ' +
       'a user\'s assigned workspace groups', () => {
-      cy.updateGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
-        [Cypress.env(group2.id)],
-        Cypress.env(`token_${Cypress.env('username')}`))
+      cy.updateGroupsByUserAPI(Cypress.expose(`id_${Cypress.expose('username')}`),
+        [Cypress.expose(group2.id)],
+        Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
     });
 
     it('401 negative test: should deny regular users from updating workspace group assignments', () => {
-      cy.updateGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
-        [Cypress.env(group2.id)],
-        Cypress.env(`token_${userGroupAdmin.username}`))
+      cy.updateGroupsByUserAPI(Cypress.expose(`id_${Cypress.expose('username')}`),
+        [Cypress.expose(group2.id)],
+        Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
           expect(resp.status).to.equal(401);
         });
@@ -607,8 +607,8 @@ describe('Unit API tests part II', () => {
 
     it('401 negative test: should deny workspace group updates when no valid authentication credentials' +
       ' are provided', () => {
-      cy.updateGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
-        [Cypress.env(groupVera.id)],
+      cy.updateGroupsByUserAPI(Cypress.expose(`id_${Cypress.expose('username')}`),
+        [Cypress.expose(groupVera.id)],
         noId)
         .then(resp => {
           expect(resp.status).to.equal(401);
@@ -617,9 +617,9 @@ describe('Unit API tests part II', () => {
 
     it('500 negative test: should return a server error when attempting to update groups' +
       ' with missing group information', () => {
-      cy.updateGroupsByUserAPI(Cypress.env(`id_${Cypress.env('username')}`),
+      cy.updateGroupsByUserAPI(Cypress.expose(`id_${Cypress.expose('username')}`),
         [noId],
-        Cypress.env(`token_${Cypress.env('username')}`))
+        Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(500);
         });
@@ -628,8 +628,8 @@ describe('Unit API tests part II', () => {
     it('500 negative test: should return a server error when attempting to update ' +
       'groups for an invalid user ID', () => {
       cy.updateGroupsByUserAPI(noId,
-        [Cypress.env(groupVera.id)],
-        Cypress.env(`token_${Cypress.env('username')}`))
+        [Cypress.expose(groupVera.id)],
+        Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(500);
         });

@@ -7,6 +7,9 @@ export default {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }]
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
+  transformIgnorePatterns: [
+    'node_modules/(?!mathml2omml/)'
+  ],
   coverageDirectory: '../../coverage/apps/api'
   // No setupFilesAfterEnv here - backend doesn't need browser mocks
 };

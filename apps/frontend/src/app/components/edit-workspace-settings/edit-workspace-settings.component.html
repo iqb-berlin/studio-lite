@@ -115,6 +115,9 @@
             <mat-checkbox [checked]="!(dialogData.hiddenRoutes | include:'comments')" (change)="toggleRouteVisibility('comments', $event.checked)">
               {{'workspace.routes.comments' | translate}}
             </mat-checkbox>
+            <mat-checkbox [checked]="!(dialogData.hiddenRoutes | include:'notes')" (change)="toggleRouteVisibility('notes', $event.checked)">
+              {{'workspace.routes.notes' | translate}}
+            </mat-checkbox>
           </div>
         </div>
       </div>

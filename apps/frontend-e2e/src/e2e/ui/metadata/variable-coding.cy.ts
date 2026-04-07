@@ -42,7 +42,7 @@ describe('Variable and Item Metadata Coherence', () => {
     addModules(modules);
     createGroup(group);
     createWs(mathArea, group);
-    grantRemovePrivilegeAtWs([Cypress.env('username')], mathArea, [AccessLevel.Admin]);
+    grantRemovePrivilegeAtWs([Cypress.expose('username')], mathArea, [AccessLevel.Admin]);
     selectProfileForGroup(group, IqbProfile.MA);
     setModuleWithoutVerification(mathArea, 'Aspect', 'Aspect', 'Schemer');
     selectProfileForArea(IqbProfile.MA);
@@ -59,7 +59,7 @@ describe('Variable and Item Metadata Coherence', () => {
 
   it('prevents reusing assigned variable in new item', () => {
     createItem('02');
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.get(`mat-select[placeholder="${json.metadata['choose-item-variable']}"]`)
         .eq(-1).find('svg').click();
     });
@@ -92,7 +92,7 @@ describe('Variable and Item Metadata Coherence', () => {
     cy.visitWs(mathArea);
     selectUnit('MA_01');
     goToItem('03');
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.get(`mat-select[placeholder="${json.metadata['choose-item-variable']}"]`)
         .eq(-1).find('svg').click()
         .then(() => {
@@ -106,7 +106,7 @@ describe('Variable and Item Metadata Coherence', () => {
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-metadata"]').click();
     cy.get('[data-cy="workspace-show-metadata-display"]').click();
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.get(`.mdc-tab__text-label:contains("${json.metadata.items}")`).click();
     });
     cy.get('mat-dialog-container:contains("drop-list_1")').should('have.length', 0);
@@ -116,7 +116,7 @@ describe('Variable and Item Metadata Coherence', () => {
   it('sorts items by variable ID', () => {
     cy.get('studio-lite-item').eq(1).find('span:contains("02")').should('exist');
     cy.get('studio-lite-item').eq(0).find('span:contains("01")').should('exist');
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.get('select.sort-items').select(`${json.metadata['sort-by-variableId']}`,
         { force: true });
     });
@@ -125,7 +125,7 @@ describe('Variable and Item Metadata Coherence', () => {
   });
 
   it('provides sort by item ID option', () => {
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.get('select.sort-items').select(`${json.metadata['sort-by-id']}`, { force: true });
     });
   });

@@ -2,7 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  ConfigDto, AppLogoDto, UnitExportConfigDto, MissingsProfilesDto, ProfilesRegistryDto, EmailTemplateDto
+  ConfigDto, AppLogoDto, UnitExportConfigDto, MissingsProfilesDto,
+  ProfilesRegistryDto, EmailTemplateDto, UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 
 import Setting from '../entities/setting.entity';
@@ -157,6 +158,69 @@ export class SettingService {
       const newSetting = this.settingsRepository.create({
         key: 'email-template',
         content: JSON.stringify(emailTemplateDto)
+      });
+      await this.settingsRepository.save(newSetting);
+    }
+  }
+
+  async findUnitRichNoteTags(): Promise<UnitRichNoteTagDto[]> {
+    this.logger.log('Returning unit rich note tags settings');
+    const setting = await this.settingsRepository.findOne({ where: { key: 'unit-rich-note-tags' } });
+    if (setting) {
+      return JSON.parse(setting.content);
+    }
+    return [
+      {
+        id: 'transcript',
+        label: [{ lang: 'de', value: 'Transkript für das Haupt-Audio' }],
+        children: [
+          {
+            id: 'original',
+            label: [{ lang: 'de', value: 'Transkript der Originalquelle' }]
+          },
+          {
+            id: 'adapted',
+            label: [{ lang: 'de', value: 'Transkript der angepassten Version für die Aufgabe' }]
+          }
+        ]
+      },
+      {
+        id: 'didactical_guide',
+        label: [{ lang: 'de', value: 'Didaktische Handreichungen' }],
+        children: [
+          {
+            id: 'answering',
+            label: [{ lang: 'de', value: 'Beantwortung' }],
+            children: [
+              { id: 'full_credit', label: [{ lang: 'de', value: 'Richtige Antworten' }] },
+              { id: 'competence_level', label: [{ lang: 'de', value: 'Diskussion des Schwierigkeitsniveaus' }] },
+              { id: 'misconceptions', label: [{ lang: 'de', value: 'Typische Falschantworten' }] },
+              { id: 'problems', label: [{ lang: 'de', value: 'Mögliche Probleme bei der Beantwortung' }] }
+            ]
+          },
+          {
+            id: 'adaptation',
+            label: [{ lang: 'de', value: 'Empfehlungen zur Modifikation' }],
+            children: [
+              { id: 'stimulus', label: [{ lang: 'de', value: 'Den Stimulus verändern' }] },
+              { id: 'items', label: [{ lang: 'de', value: 'Die Fragen/Items verändern' }] }
+            ]
+          }
+        ]
+      }
+    ];
+  }
+
+  async patchUnitRichNoteTags(tags: UnitRichNoteTagDto[]) {
+    this.logger.log('Updating unit rich note tags settings.');
+    const settingToUpdate = await this.settingsRepository.findOne({ where: { key: 'unit-rich-note-tags' } });
+    if (settingToUpdate) {
+      settingToUpdate.content = JSON.stringify(tags);
+      await this.settingsRepository.save(settingToUpdate);
+    } else {
+      const newSetting = this.settingsRepository.create({
+        key: 'unit-rich-note-tags',
+        content: JSON.stringify(tags)
       });
       await this.settingsRepository.save(newSetting);
     }

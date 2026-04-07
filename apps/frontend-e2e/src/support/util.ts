@@ -66,8 +66,8 @@
 //
 // export function addFirstUser() {
 //   cy.visit('/');
-//   cy.login(Cypress.env('username'), Cypress.env('password'));
-//   cy.translate(Cypress.env('locale')).then(json => {
+//   cy.login(Cypress.expose('username'), Cypress.expose('password'));
+//   cy.translate(Cypress.expose('locale')).then(json => {
 //     cy.clickButtonWithResponseCheck(json.home.login, [201], '/api/init-login', 'POST', 'responseLogin');
 //   });
 //   cy.findAdminSettings().should('exist');
@@ -117,7 +117,8 @@
 //   editInput('admin-edit-user-firstname', newUser.firstName);
 //   editInput('admin-edit-user-email', newUser.email);
 //   editInput('admin-edit-user-password', newUser.password);
-//   cy.clickDataCyWithResponseCheck('[data-cy="admin-edit-user-button"]', [201], '/api/admin/users', 'POST', 'addUser');
+//   cy.clickDataCyWithResponseCheck('[data-cy="admin-edit-user-button"]',
+//   [201], '/api/admin/users', 'POST', 'addUser');
 // }
 //
 // export function deleteUser(user: string):void {
@@ -126,7 +127,7 @@
 //   clickIndexTabAdmin('users');
 //   selectCheckboxUser(user);
 //   cy.get('[data-cy="admin-users-menu-delete-users"]').click();
-//   cy.translate(Cypress.env('locale')).then(json => {
+//   cy.translate(Cypress.expose('locale')).then(json => {
 //     cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/users*', 'DELETE', 'deleteUser');
 //   });
 // }
@@ -137,7 +138,7 @@
 //     selectCheckboxUser(user);
 //   });
 //   cy.get('[data-cy="admin-users-menu-delete-users"]').click();
-//   cy.translate(Cypress.env('locale')).then(json => {
+//   cy.translate(Cypress.expose('locale')).then(json => {
 //     cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/users*', 'DELETE', 'deleteUser');
 //   });
 // }
@@ -145,7 +146,7 @@
 // export function createGroup(group:string):void {
 //   clickIndexTabAdmin('workspace-groups');
 //   cy.get('mat-icon').contains('add').click();
-//   cy.translate(Cypress.env('locale')).then(json => {
+//   cy.translate(Cypress.expose('locale')).then(json => {
 //     cy.get(`input[placeholder="${json.admin['group-name']}"]`).type(group);
 //     cy.clickButtonWithResponseCheck(json.create, [201], '/api/admin/workspace-groups', 'POST', 'createWsGroup');
 //   });
@@ -159,7 +160,7 @@
 //   cy.get('mat-icon')
 //     .contains('add')
 //     .click();
-//   cy.translate(Cypress.env('locale')).then(json => {
+//   cy.translate(Cypress.expose('locale')).then(json => {
 //     cy.get(`input[placeholder="${json['wsg-admin']['enter-name']}"]`).type(ws);
 //     cy.clickButtonWithResponseCheck(json.create, [201], '/api/group-admin/workspaces*', 'POST', 'createWs');
 //   });
@@ -252,7 +253,7 @@
 //
 // export function deleteFirstUser() {
 //   cy.visit('/');
-//   deleteUser(Cypress.env('username'));
+//   deleteUser(Cypress.expose('username'));
 //   cy.visit('/');
 //   logout();
 // }
@@ -260,7 +261,7 @@
 // export function login(username: string, password = '') {
 //   cy.visit('/');
 //   cy.login(username, password);
-//   cy.translate(Cypress.env('locale')).then(json => {
+//   cy.translate(Cypress.expose('locale')).then(json => {
 //     cy.clickButtonWithResponseCheck(json.home.login, [201], '/api/login', 'POST', 'responseLogin');
 //   });
 //   cy.get('[data-cy="goto-user-menu"]').should('exist');
@@ -288,7 +289,7 @@
 //   cy.selectModule('IQB-Player');
 //   cy.selectModule('IQB-Editor');
 //   cy.get('div > mat-icon').contains('delete').click();
-//   cy.translate(Cypress.env('locale')).then(json => {
+//   cy.translate(Cypress.expose('locale')).then(json => {
 //     cy.clickButtonWithResponseCheck(json.delete, [200], '/api/verona-modules', 'GET', 'deleteModule');
 //   });
 // }
@@ -305,7 +306,7 @@
 //   cy.get('div > mat-icon')
 //     .contains('delete')
 //     .click();
-//   cy.translate(Cypress.env('locale')).then(json => {
+//   cy.translate(Cypress.expose('locale')).then(json => {
 //     cy.clickButtonWithResponseCheck(json.delete, [200], '/api/resource-packages', 'GET', 'deleteResource');
 //   });
 // }
@@ -320,7 +321,7 @@
 //   cy.get('mat-icon')
 //     .contains('delete')
 //     .click();
-//   cy.translate(Cypress.env('locale')).then(json => {
+//   cy.translate(Cypress.expose('locale')).then(json => {
 //     cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/workspace-groups*', 'DELETE', 'deleteGroup');
 //   });
 // }
@@ -328,7 +329,7 @@
 // export function logout() {
 //   cy.get('[data-cy="goto-user-menu"]').click();
 //   cy.get('[data-cy="user-menu-logout"]').click();
-//   cy.translate(Cypress.env('locale')).then(json => {
+//   cy.translate(Cypress.expose('locale')).then(json => {
 //     cy.clickDialogButton(json.home.logout);
 //   });
 //   cy.get('[data-cy="home-imprint-button"]').should('exist');
@@ -377,7 +378,7 @@
 //     .type(shortname);
 //   cy.get(`mat-cell:contains("${shortname}")`).prev().click();
 //   cy.get('[data-cy="workspace-select-unit-button"]').click();
-//   cy.translate(Cypress.env('locale')).then(json => {
+//   cy.translate(Cypress.expose('locale')).then(json => {
 //     cy.contains('button', json.delete).click();
 //   });
 // }
@@ -434,7 +435,7 @@
 //   cy.get('mat-select').click();
 //   cy.get(`mat-option:contains("${ws}")`).click();
 //   cy.get(`mat-cell:contains("${unit1.shortname}")`).prev().click();
-//   cy.translate(Cypress.env('locale')).then(json => {
+//   cy.translate(Cypress.expose('locale')).then(json => {
 //     cy.clickDialogButton(json.continue);
 //   });
 //   cy.get('[data-cy="workspace-new-unit-unit-key"]').clear().type(newUnit.shortname);
@@ -506,14 +507,14 @@
 // export function createItem(itemId: string) {
 //   cy.get('.add-button > .mdc-button__label').click();
 //   cy.get('[data-cy="metadata-new-item-button"]').click();
-//   cy.translate(Cypress.env('locale')).then(json => {
+//   cy.translate(Cypress.expose('locale')).then(json => {
 //     cy.get(`mat-expansion-panel:contains("${json.metadata['without-id']}")`).click();
 //     cy.get('mat-label:contains("Item ID")').eq(-1).type(itemId);
 //   });
 // }
 //
 // export function assignVariableToItem(variableName: string) {
-//   cy.translate(Cypress.env('locale')).then(json => {
+//   cy.translate(Cypress.expose('locale')).then(json => {
 //     cy.get(`mat-select[placeholder="${json.metadata['choose-item-variable']}"]`)
 //       .eq(-1)
 //       .find('svg')

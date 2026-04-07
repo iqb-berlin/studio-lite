@@ -38,7 +38,7 @@ describe('Unit Reviews', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
     cy.get('[data-cy="workspace-review-menu-add-review-button"]').click();
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.get(`input[placeholder="${json.workspace['new-review-name']}"]`)
         .should('exist')
         .clear()
@@ -87,7 +87,7 @@ describe('Unit Reviews', () => {
       cy.get(`a:contains("${review}")`).should('exist');
     });
     logout();
-    login(Cypress.env('username'), Cypress.env('password'));
+    login(Cypress.expose('username'), Cypress.expose('password'));
   });
 
   it('exports a review', () => {
@@ -96,7 +96,7 @@ describe('Unit Reviews', () => {
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
     cy.contains('mat-row', review).click();
     cy.get('[data-cy="workspace-review-menu-export-review-button"]').click();
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickButton(json['unit-download'].dialog['ok-button-label']);
     });
     cy.get('[data-cy="workspace-review-close"]').click();
@@ -108,7 +108,7 @@ describe('Unit Reviews', () => {
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
     cy.contains('mat-row', review).click();
     cy.get('[data-cy="workspace-review-menu-print-review-button"]').click();
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickButton(json.workspace.print);
     });
     cy.get('[data-cy="workspace-review-close"]').click();
@@ -121,7 +121,7 @@ describe('Unit Reviews', () => {
     cy.contains('mat-row', review).click();
     cy.intercept('PATCH', '/api/workspaces/*/reviews/*').as('updateReview');
     selectCheckBox('M6_AK0013');
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.get('studio-lite-save-changes').within(() => {
         cy.clickButton(json.workspace.save);
       });
@@ -152,7 +152,7 @@ describe('Unit Reviews', () => {
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
     cy.contains('mat-row', review).click();
     cy.get('[data-cy="workspace-review-menu-delete-review-button"]').click();
-    cy.translate(Cypress.env('locale')).then(json => {
+    cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickButton(json.workspace.delete);
     });
     cy.get('[data-cy="workspace-review-close"]').click();

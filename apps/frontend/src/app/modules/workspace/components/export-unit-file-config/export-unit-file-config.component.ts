@@ -21,8 +21,10 @@ export class ExportUnitFileConfigComponent implements OnInit {
   enablePlayerOption = true;
   @Input() addPlayers!: boolean;
   @Input() addComments!: boolean;
+  @Input() addRichNotes!: boolean;
   @Output() addPlayersChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() addCommentsChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() addRichNotesChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() unitsWithOutPlayerChange = new EventEmitter<number[]>();
 
   constructor(

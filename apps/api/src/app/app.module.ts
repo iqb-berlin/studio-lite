@@ -83,6 +83,13 @@ import { WriteOrGroupAdminAccessGuard } from './guards/write-or-group-admin-acce
 import { ReadOrGroupAdminAccessGuard } from './guards/read-or-group-admin-access.guard';
 import { ManageOrGroupAdminAccessGuard } from './guards/manage-or-group-admin-access.guard';
 
+// Unit rich notes
+import UnitRichNote from './entities/unit-rich-note.entity';
+import UnitRichNoteUnitItem from './entities/unit-rich-note-unit-item.entity';
+import { UnitRichNoteService } from './services/unit-rich-note.service';
+import { ItemRichNoteService } from './services/item-rich-note.service';
+import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-rich-note.controller';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -110,6 +117,8 @@ import { ManageOrGroupAdminAccessGuard } from './guards/manage-or-group-admin-ac
     UnitDefinition,
     UnitComment,
     UnitCommentUnitItem,
+    UnitRichNote,
+    UnitRichNoteUnitItem,
     UnitDropBoxHistory,
     MetadataProfile,
     MetadataVocabulary,
@@ -146,6 +155,8 @@ import { ManageOrGroupAdminAccessGuard } from './guards/manage-or-group-admin-ac
           Unit,
           UnitComment,
           UnitCommentUnitItem,
+          UnitRichNote,
+          UnitRichNoteUnitItem,
           UnitDropBoxHistory,
           MetadataProfile,
           MetadataVocabulary,
@@ -177,6 +188,8 @@ import { ManageOrGroupAdminAccessGuard } from './guards/manage-or-group-admin-ac
       Unit,
       UnitComment,
       UnitCommentUnitItem,
+      UnitRichNote,
+      UnitRichNoteUnitItem,
       UnitDropBoxHistory,
       MetadataProfile,
       MetadataVocabulary,
@@ -208,6 +221,7 @@ import { ManageOrGroupAdminAccessGuard } from './guards/manage-or-group-admin-ac
     WorkspaceController,
     WorkspaceUnitController,
     WorkspaceUnitCommentController,
+    WorkspaceUnitRichNoteController,
     WorkspaceReviewController,
     ReviewController,
     ReviewUnitController,
@@ -236,6 +250,8 @@ import { ManageOrGroupAdminAccessGuard } from './guards/manage-or-group-admin-ac
     WorkspaceGroupAdminService,
     UnitService,
     UnitCommentService,
+    UnitRichNoteService,
+    ItemRichNoteService,
     MetadataProfileService,
     ItemCommentService,
     MetadataVocabularyService,

@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress';
 import { nxE2EPreset } from '@nx/cypress/plugins/cypress-preset';
 import { Client } from 'pg';
+import coverageTask from '@cypress/code-coverage/task';
 
 const cypressJsonConfig = {
   fileServerFolder: '.',
@@ -13,11 +14,11 @@ const cypressJsonConfig = {
   supportFile: 'src/support/e2e.ts'
 };
 export default defineConfig({
-  env: {
+  expose: {
     username: 'fadmin',
     password: '4445',
     locale: 'de',
-    version: '14.0.1'
+    version: '15.0.0'
   },
   e2e: {
     ...nxE2EPreset(__dirname),
@@ -37,6 +38,8 @@ export default defineConfig({
     // See https://docs.cypress.io/app/references/migration-guide#Changes-to-cyorigin
     injectDocumentDomain: true,
     setupNodeEvents(on, config) {
+      config.env = config.env || {};
+      coverageTask(on, config);
       on('task', {
         async resetDatabase() {
           const client = new Client({

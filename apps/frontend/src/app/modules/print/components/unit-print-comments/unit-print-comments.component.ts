@@ -9,13 +9,13 @@ import { Subject, takeUntil } from 'rxjs';
 import { Comment } from '../../../comments/models/comment.interface';
 import { BackendService } from '../../../comments/services/backend.service';
 import { SortAscendingPipe } from '../../../comments/pipes/sort-ascending.pipe';
-import { CommentItemUuidsIdsPipe } from '../../../comments/pipes/comment-item-uuids-ids.pipe';
+import { MapItemUuidsIdsPipe } from '../../../comments/pipes/map-item-uuids-ids.pipe';
 
 @Component({
   selector: 'studio-lite-unit-print-comments',
   templateUrl: './unit-print-comments.component.html',
   styleUrls: ['./unit-print-comments.component.scss'],
-  imports: [MatIcon, DatePipe, TranslateModule, SortAscendingPipe, CommentItemUuidsIdsPipe]
+  imports: [MatIcon, DatePipe, TranslateModule, SortAscendingPipe, MapItemUuidsIdsPipe]
 })
 export class UnitPrintCommentsComponent implements OnChanges, OnDestroy {
   @Input() unitId!: number;

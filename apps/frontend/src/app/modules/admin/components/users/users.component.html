@@ -29,7 +29,20 @@
           {{'user.login-name' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let element">
-          {{element.name}} {{element.isAdmin ? '*' : ''}}
+          {{element.name}}
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="isAdmin">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header="isAdmin">
+          {{'user.is-admin' | translate}}
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <mat-icon [color]="element.isAdmin ? 'primary' : ''"
+                    [matTooltip]="(element.isAdmin ? 'user.is-admin' : 'user.is-not-admin') | translate">
+            {{element.isAdmin ? 'how_to_reg' : 'person'}}
+          </mat-icon>
         </mat-cell>
       </ng-container>
 
