@@ -205,6 +205,7 @@ describe('Workspace Unit Management', () => {
   });
 
   it('displays coding report', () => {
+    cy.pause();
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();

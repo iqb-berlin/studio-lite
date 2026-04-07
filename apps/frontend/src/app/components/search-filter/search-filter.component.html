@@ -4,6 +4,7 @@
     <input #filterInput
            matInput
            [placeholder]="'search-filter.enter-filter' | translate"
+           data-cy="search-filter-input"
            (keyup)="value=filterInput.value; valueChange.emit(value)">
     <button matSuffix
             mat-icon-button
