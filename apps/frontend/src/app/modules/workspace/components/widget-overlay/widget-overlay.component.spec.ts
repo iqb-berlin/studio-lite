@@ -4,6 +4,8 @@ import {
 import { Subject } from 'rxjs';
 import { OverlayRef } from '@angular/cdk/overlay';
 import { TranslateModule } from '@ngx-translate/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AppService } from '../../../../services/app.service';
 import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
 import { WidgetOverlayComponent } from './widget-overlay.component';
@@ -30,7 +32,9 @@ describe('WidgetOverlayComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         WidgetOverlayComponent,
-        TranslateModule.forRoot()
+        TranslateModule.forRoot(),
+        MatIconModule,
+        MatTooltipModule
       ],
       providers: [
         {
@@ -168,5 +172,14 @@ describe('WidgetOverlayComponent', () => {
     } as unknown as MessageEvent);
 
     expect(continueSpy).toHaveBeenCalled();
+  });
+
+  it('should have a close icon button that calls close()', () => {
+    const closeSpy = jest.spyOn(component, 'close');
+    const closeBtn = fixture.nativeElement.querySelector('.close-button');
+    expect(closeBtn).toBeTruthy();
+    expect(closeBtn.querySelector('mat-icon').textContent).toContain('close');
+    closeBtn.click();
+    expect(closeSpy).toHaveBeenCalled();
   });
 });
