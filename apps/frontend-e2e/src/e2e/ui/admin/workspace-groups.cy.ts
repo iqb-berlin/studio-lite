@@ -1,9 +1,10 @@
 import {
   AccessLevel,
+  group1,
   newUser,
-  testGroups,
   testUsers,
-  testWorkspaces
+  ws1,
+  ws2
 } from '../../../support/testData';
 import {
   addFirstUser,
@@ -17,13 +18,11 @@ import {
   grantRemovePrivilegeAtWs,
   login,
   logout,
-  makeAdminOfGroup
+  makeAdminOfGroup,
+  clickIndexTabWsgAdmin, importExercise
 } from '../../../support/helpers';
 
 describe('Workspace Group Administration', () => {
-  const group1 = testGroups.admin;
-  const ws1 = testWorkspaces.admin.math1;
-  const ws2 = testWorkspaces.admin.german1;
   const groupAdminUser = testUsers.groupAdmin;
   before(() => {
     addFirstUser();
@@ -41,6 +40,12 @@ describe('Workspace Group Administration', () => {
       ws1,
       [AccessLevel.Basic, AccessLevel.Admin]);
     createWs(ws2, group1);
+  });
+
+  it('imports units from zip file', () => {
+    cy.visitWs(ws1);
+    importExercise('test_studio_units_download.zip');
+    cy.contains('M6_AK0011').should('exist');
   });
 
   it('assigns group admin role to user', () => {
@@ -86,6 +91,38 @@ describe('Workspace Group Administration', () => {
     cy.findAdminGroupSettings(group1).click();
     cy.get('[data-cy="wsg-admin-routes-users"]').click();
     grantRemovePrivilegeAtUser(newUser.username, [ws1, ws2], [AccessLevel.Basic, AccessLevel.Developer]);
+  });
+
+  it('displays the units table and filters by name', () => {
+    cy.findAdminGroupSettings(group1).click();
+    clickIndexTabWsgAdmin('units');
+    cy.get('table').should('be.visible');
+    cy.get('studio-lite-search-filter').should('exist');
+  });
+
+  it('displays the unit items table and filters by name', () => {
+    clickIndexTabWsgAdmin('unit-items');
+    cy.get('table').should('be.visible');
+    cy.get('studio-lite-search-filter').should('exist');
+  });
+
+  it('displays the roles matrix dialog from the users tab', () => {
+    clickIndexTabWsgAdmin('users');
+    // Select a user first to show the right panel and roles header
+    cy.get('mat-row').contains(newUser.username).click();
+    cy.get('studio-lite-roles-header').should('be.visible');
+    cy.get('studio-lite-roles-header').find('button.help').click();
+    cy.get('mat-dialog-container').should('be.visible');
+    cy.pause();
+    cy.get('mat-dialog-container').find('studio-lite-roles-matrix').should('exist');
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('mat-dialog-container').find('button').contains(json.dialogs.close).click();
+    });
+  });
+
+  it('displays the settings tab', () => {
+    clickIndexTabWsgAdmin('settings');
+    cy.get('studio-lite-unit-rich-note-tags-config').should('exist');
   });
 
   it('enables workspace editing for group admins', () => {
