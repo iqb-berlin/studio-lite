@@ -5,7 +5,7 @@ import { AppVersionGuard } from './app-version.guard';
 
 describe('AppVersionGuard', () => {
   let guard: AppVersionGuard;
-  const appVersion = '15.0.0';
+  const appVersion = '15.0.1';
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
