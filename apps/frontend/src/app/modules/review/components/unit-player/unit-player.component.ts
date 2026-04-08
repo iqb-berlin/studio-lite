@@ -18,12 +18,13 @@ import { PreviewDirective } from '../../../../directives/preview.directive';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { UnitState } from '../../../../models/verona.interface';
+import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
 @Component({
   selector: 'studio-lite-unit-player',
   templateUrl: './unit-player.component.html',
   styleUrls: ['./unit-player.component.scss'],
-  imports: [UnitInfoComponent, PageNavigationComponent]
+  imports: [UnitInfoComponent, PageNavigationComponent, TrackIframeActivityDirective]
 })
 export class UnitPlayerComponent extends PreviewDirective implements AfterViewInit {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;

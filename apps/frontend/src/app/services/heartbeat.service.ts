@@ -1,9 +1,12 @@
-import { Injectable, OnDestroy } from '@angular/core';
 import {
-  interval, Subscription, of, BehaviorSubject, timer, Subject, combineLatest, asapScheduler
+  Injectable, NgZone, OnDestroy, inject
+} from '@angular/core';
+import {
+  interval, Subscription, of, BehaviorSubject, timer, Subject, combineLatest, asapScheduler, merge, fromEvent
 } from 'rxjs';
 import {
-  switchMap, filter, distinctUntilChanged, startWith, map, catchError, shareReplay, takeUntil, observeOn
+  switchMap, filter, distinctUntilChanged, startWith, map, catchError, shareReplay, takeUntil, observeOn,
+  throttleTime
 } from 'rxjs/operators';
 import { AuthDataDto } from '@studio-lite-lib/api-dto';
 import { AppService } from './app.service';
@@ -21,6 +24,7 @@ export class HeartbeatService implements OnDestroy {
   private readonly pollIntervalMs = UI_BAR_REFRESH_INTERVAL_MS;
   private readonly activityThresholdMs = ACTIVE_THRESHOLD_MS;
   private readonly passiveThresholdMs = PASSIVE_THRESHOLD_MS;
+  private readonly ngZone = inject(NgZone);
 
   private readonly lastActivityPulse$ = new BehaviorSubject<number>(Date.now());
   private readonly ngUnsubscribe = new Subject<void>();
@@ -116,18 +120,23 @@ export class HeartbeatService implements OnDestroy {
       }, 1000);
     });
 
-    // Restore activity tracking for DOM events (mouse, keyboard) with throttling
-    // to avoid excessive localStorage writes
-    let lastInteractionRefresh = 0;
-    ['mousemove', 'keydown', 'mousedown', 'touchstart'].forEach(eventName => {
-      window.addEventListener(eventName, () => {
-        const now = Date.now();
-        if (now - lastInteractionRefresh > 1000) { // Throttle to once per second
-          lastInteractionRefresh = now;
-          this.refreshActivityPulse();
-        }
-      });
+    this.ngZone.runOutsideAngular(() => {
+      merge(
+        fromEvent(window, 'mousemove', { passive: true }),
+        fromEvent(window, 'keydown', { passive: true }),
+        fromEvent(window, 'mousedown', { passive: true }),
+        fromEvent(window, 'touchstart', { passive: true })
+      ).pipe(
+        throttleTime(1000),
+        takeUntil(this.ngUnsubscribe)
+      ).subscribe(() => this.refreshActivityPulse());
     });
+
+    this.appService.postMessage$
+      .pipe(
+        throttleTime(1000),
+        takeUntil(this.ngUnsubscribe)
+      ).subscribe(() => this.refreshActivityPulse());
   }
 
   start(): void {
