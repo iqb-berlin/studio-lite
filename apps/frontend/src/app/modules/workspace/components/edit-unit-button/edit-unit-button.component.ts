@@ -100,13 +100,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
         routingOk = true;
       }
       if (routingOk) {
-        this.workspaceService.workspaceSettings.defaultEditor = result.defaultEditor;
-        this.workspaceService.workspaceSettings.defaultPlayer = result.defaultPlayer;
-        this.workspaceService.workspaceSettings.defaultSchemer = result.defaultSchemer;
-        this.workspaceService.workspaceSettings.stableModulesOnly = result.stableModulesOnly;
-        this.workspaceService.workspaceSettings.unitMDProfile = result.unitMDProfile;
-        this.workspaceService.workspaceSettings.itemMDProfile = result.itemMDProfile;
-        this.workspaceService.workspaceSettings.states = result.states;
+        Object.assign(this.workspaceService.workspaceSettings, result);
 
         this.appBackendService.setWorkspaceSettings(
           this.workspaceService.selectedWorkspaceId, this.workspaceService.workspaceSettings

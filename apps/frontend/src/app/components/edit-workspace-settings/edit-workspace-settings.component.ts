@@ -134,7 +134,7 @@ export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
     if (isVisible) {
       this.dialogData.hiddenRoutes = this.dialogData.hiddenRoutes.filter((r:string) => r !== route);
     } else if (!this.dialogData.hiddenRoutes.includes(route)) {
-      this.dialogData.hiddenRoutes.push(route);
+      this.dialogData.hiddenRoutes = [...this.dialogData.hiddenRoutes, route];
     }
   }
 
