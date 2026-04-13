@@ -14,8 +14,12 @@ import { clickIndexTabAdmin } from './navigation';
 export function addModules(filenames: string[]): void {
   cy.findAdminSettings().click();
   clickIndexTabAdmin('v-modules');
+
+  cy.intercept('POST', '**/api/admin/verona-modules*').as('uploadModule');
+
   filenames.forEach(filename => {
     cy.loadModule(filename);
+    cy.wait('@uploadModule');
   });
 }
 

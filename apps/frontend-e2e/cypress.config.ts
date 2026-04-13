@@ -14,6 +14,12 @@ const cypressJsonConfig = {
   supportFile: 'src/support/e2e.ts'
 };
 export default defineConfig({
+  allowCypressEnv: false,
+  env: {
+    codeCoverage: {
+      quiet: true
+    }
+  },
   expose: {
     username: 'fadmin',
     password: '4445',
