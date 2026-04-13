@@ -23,7 +23,7 @@ describe('Unit Reviews', () => {
 
   after(() => {
     deleteBasicSpecCy();
-    // cy.resetDb();
+    cy.resetDb();
   });
 
   const review: string = 'Review1';

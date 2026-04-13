@@ -22,6 +22,7 @@ describe('Unit Comments', () => {
 
   after(() => {
     deleteBasicSpecCy();
+    cy.resetDb();
   });
 
   it('imports test units', () => {

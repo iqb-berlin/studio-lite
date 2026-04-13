@@ -29,6 +29,7 @@ describe('Workspace Group Administration', () => {
   });
   after(() => {
     deleteFirstUser();
+    cy.resetDb();
   });
 
   it('sets up test workspace and users', () => {

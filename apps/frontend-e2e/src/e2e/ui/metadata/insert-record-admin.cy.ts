@@ -15,11 +15,12 @@ describe('Metadata Profile Management from Admin', () => {
   const mathArea = testWorkspaces.metadata.math2;
   const group = 'Bista II';
   before(() => {
+    cy.resetDb();
     addFirstUser();
   });
   after(() => {
     deleteFirstUser();
-    // cy.resetDb();
+    cy.resetDb();
   });
 
   it('sets up workspaces in group', () => {

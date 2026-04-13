@@ -36,6 +36,7 @@ describe('Admin Units Management', () => {
 
   after(() => {
     deleteFirstUser();
+    cy.resetDb();
   });
 
   beforeEach(() => {

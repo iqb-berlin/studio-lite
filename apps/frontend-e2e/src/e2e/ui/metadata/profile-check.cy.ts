@@ -18,7 +18,7 @@ describe('Metadata Profile Management', () => {
   });
   after(() => {
     deleteFirstUser();
-    // cy.resetDb();
+    cy.resetDb();
   });
 
   it('sets up groups and users', () => {

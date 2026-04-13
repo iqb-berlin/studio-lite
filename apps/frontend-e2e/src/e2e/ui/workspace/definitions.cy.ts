@@ -13,6 +13,7 @@ describe('Unit Definitions', () => {
 
   after(() => {
     deleteBasicSpecCy();
+    cy.resetDb();
   });
 
   it('imports test units', () => {

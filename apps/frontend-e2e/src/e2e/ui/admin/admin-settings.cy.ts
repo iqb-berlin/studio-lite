@@ -13,7 +13,10 @@ import { group1 } from '../../../support/testData';
 
 describe('Admin Settings Tab Configuration', () => {
   before(() => addFirstUser());
-  after(() => deleteFirstUser());
+  after(() => {
+    deleteFirstUser();
+    cy.resetDb();
+  });
 
   // -------------------------------------------------------------------------
   describe('App Config – Texts card', () => {

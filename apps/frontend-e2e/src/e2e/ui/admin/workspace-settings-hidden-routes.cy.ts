@@ -1,27 +1,32 @@
-import {
-  group1,
-  ws1
-} from '../../../support/testData';
+import { group1, ws1, AccessLevel } from '../../../support/testData';
 
 import {
+  addFirstUser,
   clickIndexTabWsgAdmin,
+  createGroup,
+  createWs,
+  deleteFirstUser,
+  deleteGroup,
+  grantRemovePrivilegeAtWs,
   openWorkspaceSettingsDialog,
   saveWorkspaceSettings,
   setRouteVisibility
 } from '../../../support/helpers';
-import {
-  createBasicData,
-  deleteBasicData
-} from '../shared/basic.spec.cy';
 
 // ===========================================================================
 describe('Workspace Settings – hiddenRoutes', () => {
   before(() => {
-    createBasicData();
+    cy.resetDb();
+    addFirstUser();
+    createGroup(group1);
+    createWs(ws1, group1);
+    grantRemovePrivilegeAtWs([Cypress.expose('username')], ws1, [AccessLevel.Admin]);
   });
 
   after(() => {
-    deleteBasicData();
+    deleteGroup(group1);
+    deleteFirstUser();
+    cy.resetDb();
   });
 
   // -------------------------------------------------------------------------
