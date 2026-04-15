@@ -16,7 +16,6 @@ import {
 // ===========================================================================
 describe('Workspace Settings – hiddenRoutes', () => {
   before(() => {
-    cy.resetDb();
     addFirstUser();
     createGroup(group1);
     createWs(ws1, group1);

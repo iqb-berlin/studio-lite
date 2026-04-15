@@ -14,14 +14,9 @@ describe('Metadata Profile Management from Admin', () => {
   const area = 'Deutsch II';
   const mathArea = testWorkspaces.metadata.math2;
   const group = 'Bista II';
-  before(() => {
-    addFirstUser();
-  });
-  after(() => {
-    deleteFirstUser();
-  });
 
   it('sets up workspaces in group', () => {
+    addFirstUser();
     createGroup(group);
     createWs(area, group);
     grantRemovePrivilegeAtWs([Cypress.expose('username')], area, [AccessLevel.Admin]);
@@ -35,5 +30,6 @@ describe('Metadata Profile Management from Admin', () => {
 
   it('cleans up test data', () => {
     deleteGroup(group);
+    deleteFirstUser();
   });
 });

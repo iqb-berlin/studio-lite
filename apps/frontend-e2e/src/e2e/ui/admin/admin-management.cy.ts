@@ -25,7 +25,6 @@ describe('UI Administration Management', () => {
   const group1 = testGroups.admin;
   const ws1 = testWorkspaces.admin.math1;
   before(() => {
-    cy.resetDb();
     addFirstUser();
   });
   after(() => {
