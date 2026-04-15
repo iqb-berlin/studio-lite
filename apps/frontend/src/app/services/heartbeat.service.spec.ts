@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { of, Subject } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { AuthDataDto } from '@studio-lite-lib/api-dto';
@@ -17,14 +17,13 @@ jest.mock('../app.constants', () => ({
   ADMIN_USER_LIST_POLL_INTERVAL_MS: 1000
 }));
 
-const { location } = window;
-
 describe('HeartbeatService', () => {
   let service: HeartbeatService;
   let backendServiceMock: DeepMocked<BackendService>;
   let appServiceMock: DeepMocked<AppService>;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     localStorage.clear();
     sessionStorage.clear();
 
@@ -36,150 +35,118 @@ describe('HeartbeatService', () => {
       postMessage$: new Subject<MessageEvent>()
     });
 
-    delete (window as Partial<Window>).location;
-    (window as unknown as { location: Partial<Location> }).location = {
-      href: 'http://localhost/home',
-      assign: jest.fn(),
-      replace: jest.fn(),
-      reload: jest.fn(),
-      toString: () => 'http://localhost/home'
-    };
-
     Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true });
   });
+
+  const configureTestingModule = (): void => {
+    TestBed.configureTestingModule({
+      providers: [
+        HeartbeatService,
+        { provide: BackendService, useValue: backendServiceMock },
+        { provide: AppService, useValue: appServiceMock }
+      ]
+    });
+  };
 
   afterEach(() => {
     if (service) {
       service.stop();
+      service.ngOnDestroy();
     }
     jest.clearAllMocks();
     jest.useRealTimers();
-    (window as unknown as { location: Location }).location = location;
   });
 
   it('should be created', () => {
     appServiceMock.authData = { userId: 1 } as AuthDataDto;
-    TestBed.configureTestingModule({
-      providers: [
-        HeartbeatService,
-        { provide: BackendService, useValue: backendServiceMock },
-        { provide: AppService, useValue: appServiceMock }
-      ]
-    });
+    configureTestingModule();
     service = TestBed.inject(HeartbeatService);
     expect(service).toBeTruthy();
   });
 
-  it('should start pinging when user and app are active', fakeAsync(() => {
+  it('should start pinging when user and app are active', () => {
     appServiceMock.authData = { userId: 1 } as AuthDataDto;
-    TestBed.configureTestingModule({
-      providers: [
-        HeartbeatService,
-        { provide: BackendService, useValue: backendServiceMock },
-        { provide: AppService, useValue: appServiceMock }
-      ]
-    });
+    configureTestingModule();
     service = TestBed.inject(HeartbeatService);
     service.start();
-    tick(HEARTBEAT_PING_INTERVAL_MS + 1000);
+    jest.advanceTimersByTime(HEARTBEAT_PING_INTERVAL_MS + 1000);
 
     expect(backendServiceMock.ping).toHaveBeenCalled();
-  }));
+  });
 
-  it('should not ping when app is hidden', fakeAsync(() => {
+  it('should not ping when app is hidden', () => {
     appServiceMock.authData = { userId: 1 } as AuthDataDto;
     Object.defineProperty(document, 'visibilityState', { value: 'hidden', writable: true });
-    TestBed.configureTestingModule({
-      providers: [
-        HeartbeatService,
-        { provide: BackendService, useValue: backendServiceMock },
-        { provide: AppService, useValue: appServiceMock }
-      ]
-    });
+    configureTestingModule();
     service = TestBed.inject(HeartbeatService);
     service.start();
-    tick(HEARTBEAT_PING_INTERVAL_MS + 1000);
+    jest.advanceTimersByTime(HEARTBEAT_PING_INTERVAL_MS + 1000);
 
     expect(backendServiceMock.ping).not.toHaveBeenCalled();
-  }));
+  });
 
-  it('should stop pinging when user is idle', fakeAsync(() => {
+  it('should stop pinging when user is idle', () => {
     appServiceMock.authData = { userId: 1 } as AuthDataDto;
-    TestBed.configureTestingModule({
-      providers: [
-        HeartbeatService,
-        { provide: BackendService, useValue: backendServiceMock },
-        { provide: AppService, useValue: appServiceMock }
-      ]
-    });
+    configureTestingModule();
     service = TestBed.inject(HeartbeatService);
     service.start();
-    tick(HEARTBEAT_PING_INTERVAL_MS * 2);
+    jest.advanceTimersByTime(HEARTBEAT_PING_INTERVAL_MS * 2);
     expect(backendServiceMock.ping).toHaveBeenCalled();
 
     // Switch to idle
-    tick(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 1000);
+    jest.advanceTimersByTime(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 1000);
     backendServiceMock.ping.mockClear();
 
     // After being idle, no more pings should happen
-    tick(HEARTBEAT_PING_INTERVAL_MS * 2);
+    jest.advanceTimersByTime(HEARTBEAT_PING_INTERVAL_MS * 2);
     expect(backendServiceMock.ping).not.toHaveBeenCalled();
-  }));
+  });
 
-  it('should resume pinging upon user interaction', fakeAsync(() => {
+  it('should resume pinging upon user interaction', () => {
     appServiceMock.authData = { userId: 1 } as AuthDataDto;
-    TestBed.configureTestingModule({
-      providers: [
-        HeartbeatService,
-        { provide: BackendService, useValue: backendServiceMock },
-        { provide: AppService, useValue: appServiceMock }
-      ]
-    });
+    configureTestingModule();
     service = TestBed.inject(HeartbeatService);
     service.start();
 
     // Become idle
-    tick(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 10000);
+    jest.advanceTimersByTime(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 10000);
     backendServiceMock.ping.mockClear();
 
     // Simulated activity
     service.refreshActivityPulse();
-    tick(HEARTBEAT_PING_INTERVAL_MS + 10000); // Wait for heartbeat poll
+    jest.advanceTimersByTime(HEARTBEAT_PING_INTERVAL_MS + 10000); // Wait for heartbeat poll
 
     expect(backendServiceMock.ping).toHaveBeenCalled();
-  }));
+  });
 
-  it('should not start if no user is logged in', fakeAsync(() => {
+  it('should not start if no user is logged in', () => {
     appServiceMock.authData = { userId: 0 } as AuthDataDto;
-    TestBed.configureTestingModule({
-      providers: [
-        HeartbeatService,
-        { provide: BackendService, useValue: backendServiceMock },
-        { provide: AppService, useValue: appServiceMock }
-      ]
-    });
+    configureTestingModule();
     service = TestBed.inject(HeartbeatService);
     service.start();
-    tick(HEARTBEAT_PING_INTERVAL_MS + 1000);
+    jest.advanceTimersByTime(HEARTBEAT_PING_INTERVAL_MS + 1000);
 
     expect(backendServiceMock.ping).not.toHaveBeenCalled();
-  }));
+  });
 });
 
 describe('HeartbeatService Iframe Extension', () => {
   let service: HeartbeatService;
   let backendServiceMock: DeepMocked<BackendService>;
   let appServiceMock: DeepMocked<AppService>;
+  let postMessage$: Subject<MessageEvent>;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     localStorage.clear();
+    postMessage$ = new Subject<MessageEvent>();
     backendServiceMock = createMock<BackendService>({
       ping: jest.fn().mockReturnValue(of(true))
     });
     appServiceMock = createMock<AppService>({
       authData: { userId: 1 } as AuthDataDto,
       authDataChanged: new Subject<AuthDataDto>(),
-      postMessage$: new Subject<MessageEvent>()
+      postMessage$: postMessage$
     });
 
     TestBed.configureTestingModule({
@@ -196,33 +163,34 @@ describe('HeartbeatService Iframe Extension', () => {
   afterEach(() => {
     if (service) {
       service.stop();
+      service.ngOnDestroy();
     }
     jest.useRealTimers();
   });
 
-  it('should refresh pulse when a postMessage is received', fakeAsync(() => {
+  it('should refresh pulse when a postMessage is received', () => {
     // Become idle
-    tick(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 10000);
+    jest.advanceTimersByTime(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 10000);
     backendServiceMock.ping.mockClear();
 
     // Trigger postMessage
-    appServiceMock.postMessage$.next({ data: { type: 'some-message' } } as MessageEvent);
-    tick(1500); // Trigger throttled logic
-    tick(HEARTBEAT_PING_INTERVAL_MS + 10000);
+    postMessage$.next({ data: { type: 'some-message' } } as MessageEvent);
+    jest.advanceTimersByTime(1500); // Trigger throttled logic
+    jest.advanceTimersByTime(HEARTBEAT_PING_INTERVAL_MS + 10000);
 
     expect(backendServiceMock.ping).toHaveBeenCalled();
-  }));
+  });
 
-  it('should refresh pulse when refreshActivityPulse is called', fakeAsync(() => {
+  it('should refresh pulse when refreshActivityPulse is called', () => {
     // Become idle
-    tick(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 10000);
+    jest.advanceTimersByTime(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 10000);
     backendServiceMock.ping.mockClear();
 
     service.refreshActivityPulse();
 
-    tick(1500);
-    tick(HEARTBEAT_PING_INTERVAL_MS + 10000);
+    jest.advanceTimersByTime(1500);
+    jest.advanceTimersByTime(HEARTBEAT_PING_INTERVAL_MS + 10000);
 
     expect(backendServiceMock.ping).toHaveBeenCalled();
-  }));
+  });
 });

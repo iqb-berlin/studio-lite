@@ -16,6 +16,7 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { PreviewService } from '../../services/preview.service';
 import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
+import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { UnitPreviewComponent } from './unit-preview.component';
 import { PreviewBarComponent } from '../preview-bar/preview-bar.component';
 import { PageData } from '../../models/page-data.interface';
@@ -47,22 +48,22 @@ describe('UnitPreviewComponent', () => {
   beforeEach(async () => {
     snackBarStub = {
       open: jest.fn()
-    } as unknown as MatSnackBar;
+    } as never;
 
     dialogStub = {
       open: jest.fn()
-    } as unknown as MatDialog;
+    } as never;
 
     routerStub = {
       serializeUrl: jest.fn(),
       createUrlTree: jest.fn(),
       routerState: { snapshot: { url: '/a/1' } }
-    } as unknown as Router;
+    } as never;
 
     backendServiceStub = {
       getUnitScheme: jest.fn().mockReturnValue(of(null)),
       getDirectDownloadLink: jest.fn().mockReturnValue('direct')
-    } as unknown as WorkspaceBackendService;
+    } as never;
 
     workspaceServiceStub = {
       selectedUnit$: new BehaviorSubject<number>(5),
@@ -72,19 +73,19 @@ describe('UnitPreviewComponent', () => {
       isChanged: jest.fn().mockReturnValue(false),
       getUnitDefinitionStore: () => undefined,
       getUnitMetadataStore: () => undefined
-    } as unknown as WorkspaceService;
+    } as never;
 
     const previewServiceStub = {
       pagingMode: new BehaviorSubject<string>('linear')
-    } as unknown as PreviewService;
+    } as never;
 
     moduleServiceStub = {
       widgets: {},
       loadWidgets: jest.fn().mockResolvedValue(undefined),
       getModuleHtml: jest.fn().mockResolvedValue('<html lang="">Widget</html>')
-    } as unknown as ModuleService;
+    } as never;
 
-    const appServiceStub = { postMessage$: new Subject<MessageEvent>() } as unknown as AppService;
+    const appServiceStub = { postMessage$: new Subject<MessageEvent>() } as never;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -102,6 +103,7 @@ describe('UnitPreviewComponent', () => {
         { provide: PreviewService, useValue: previewServiceStub },
         { provide: ModuleService, useValue: moduleServiceStub },
         { provide: AppService, useValue: appServiceStub },
+        { provide: HeartbeatService, useValue: { refreshActivityPulse: jest.fn() } },
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl
@@ -170,7 +172,7 @@ describe('UnitPreviewComponent', () => {
       const calcWidget = {
         key: 'calc@1.0',
         metadata: { model: 'CALC', type: 'WIDGET' }
-      } as unknown as VeronaModuleClass;
+      } as VeronaModuleClass;
 
       (moduleServiceStub.loadWidgets as jest.Mock).mockImplementation(
         () => {
@@ -192,7 +194,7 @@ describe('UnitPreviewComponent', () => {
           }
         }),
         dispose: jest.fn()
-      } as unknown as ReturnType<Overlay['create']>);
+      } as never);
 
       component.handleWidgetCall({
         callId: 'c1',
@@ -215,7 +217,7 @@ describe('UnitPreviewComponent', () => {
       const calcWidget = {
         key: 'calc@1.0',
         metadata: { model: 'CALC', type: 'WIDGET' }
-      } as unknown as VeronaModuleClass;
+      } as VeronaModuleClass;
       moduleServiceStub.widgets = { 'calc@1.0': calcWidget };
 
       jest.spyOn(TestBed.inject(Overlay), 'create').mockReturnValue({
@@ -229,7 +231,7 @@ describe('UnitPreviewComponent', () => {
           }
         }),
         dispose: jest.fn()
-      } as unknown as ReturnType<Overlay['create']>);
+      } as never);
 
       component.handleWidgetCall({
         callId: 'c2',
@@ -261,7 +263,7 @@ describe('UnitPreviewComponent', () => {
       const calcWidget = {
         key: 'calc@1.0',
         metadata: { model: 'CALC', type: 'WIDGET' }
-      } as unknown as VeronaModuleClass;
+      } as VeronaModuleClass;
       moduleServiceStub.widgets = { 'calc@1.0': calcWidget };
 
       const fakeInstance = {
@@ -276,9 +278,9 @@ describe('UnitPreviewComponent', () => {
         dispose: jest.fn()
       };
       jest.spyOn(TestBed.inject(Overlay), 'create')
-        .mockReturnValue(fakeOverlayRef as unknown as ReturnType<Overlay['create']>);
+        .mockReturnValue(fakeOverlayRef as never);
 
-      const playerTarget = { postMessage: jest.fn() } as unknown as Window;
+      const playerTarget = { postMessage: jest.fn() } as never;
       component.postMessageTarget = playerTarget;
       component.sessionId = 'sess-99';
 
