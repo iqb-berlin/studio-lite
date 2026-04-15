@@ -26,7 +26,6 @@ describe('Unit Rich Notes', () => {
 
   after(() => {
     deleteBasicData();
-    cy.resetDb();
   });
 
   it('imports test units', () => {

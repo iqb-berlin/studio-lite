@@ -22,7 +22,6 @@ describe('UI User Management', () => {
     login(Cypress.expose('username'), Cypress.expose('password'));
     deleteUser(newUser.username);
     deleteFirstUser();
-    cy.resetDb();
   });
 
   describe('User options', () => {

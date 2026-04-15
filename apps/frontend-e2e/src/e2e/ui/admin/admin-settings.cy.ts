@@ -15,7 +15,6 @@ describe('Admin Settings Tab Configuration', () => {
   before(() => addFirstUser());
   after(() => {
     deleteFirstUser();
-    cy.resetDb();
   });
 
   // -------------------------------------------------------------------------

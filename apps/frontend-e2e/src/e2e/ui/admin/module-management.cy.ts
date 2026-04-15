@@ -14,7 +14,6 @@ describe('Verona Module Management', () => {
 
   after(() => {
     deleteFirstUser();
-    cy.resetDb();
   });
 
   it('uploads Verona modules successfully', () => {

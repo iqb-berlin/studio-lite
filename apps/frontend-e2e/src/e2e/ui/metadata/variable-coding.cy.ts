@@ -35,7 +35,6 @@ describe('Variable and Item Metadata Coherence', () => {
 
   after(() => {
     deleteFirstUser();
-    cy.resetDb();
   });
 
   it('sets up workspace with modules and profile', () => {

@@ -28,7 +28,6 @@ describe('Admin Workspaces Management', () => {
 
   after(() => {
     deleteFirstUser();
-    cy.resetDb();
   });
 
   beforeEach(() => {

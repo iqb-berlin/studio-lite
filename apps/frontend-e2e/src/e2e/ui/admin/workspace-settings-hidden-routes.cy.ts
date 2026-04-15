@@ -26,7 +26,6 @@ describe('Workspace Settings – hiddenRoutes', () => {
   after(() => {
     deleteGroup(group1);
     deleteFirstUser();
-    cy.resetDb();
   });
 
   // -------------------------------------------------------------------------

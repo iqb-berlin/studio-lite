@@ -30,7 +30,6 @@ describe('UI Administration Management', () => {
   });
   after(() => {
     deleteFirstUser();
-    cy.resetDb();
   });
 
   it('displays admin settings button for admin users', () => {
