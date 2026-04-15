@@ -23,7 +23,10 @@ export class HeartbeatService implements OnDestroy {
   private readonly intervalMs = HEARTBEAT_PING_INTERVAL_MS;
   private readonly pollIntervalMs = UI_BAR_REFRESH_INTERVAL_MS;
   private readonly activityThresholdMs = ACTIVE_THRESHOLD_MS;
-  private readonly passiveThresholdMs = PASSIVE_THRESHOLD_MS;
+  // PASSIVE_THRESHOLD_MS is treated as the total inactivity timeout from last activity.
+  // If productive values change, keep ACTIVE <= PASSIVE to preserve a visible passive phase.
+  private readonly inactivityTimeoutMs = PASSIVE_THRESHOLD_MS;
+  private readonly passivePhaseMs = Math.max(this.inactivityTimeoutMs - this.activityThresholdMs, 0);
   private readonly ngZone = inject(NgZone);
 
   private readonly lastActivityPulse$ = new BehaviorSubject<number>(Date.now());
@@ -33,34 +36,43 @@ export class HeartbeatService implements OnDestroy {
   readonly activityStatus$ = timer(0, UI_BAR_REFRESH_INTERVAL_MS).pipe(
     observeOn(asapScheduler),
     switchMap(() => this.lastActivityPulse$),
-    map(lastPulse => {
-      const now = Date.now();
-      const diff = now - lastPulse;
-
-      const isPhase1Value = diff <= this.activityThresholdMs;
-
-      if (isPhase1Value) {
-        const activeP = ((this.activityThresholdMs - diff) / this.activityThresholdMs) * 100;
-        return {
-          activePercentage: Math.max(0, Math.round(activeP * 100) / 100),
-          passivePercentage: 100
-        };
-      }
-
-      const passiveDiff = diff - this.activityThresholdMs;
-      const passiveP = ((this.passiveThresholdMs - passiveDiff) / this.passiveThresholdMs) * 100;
-
-      return {
-        activePercentage: 0,
-        passivePercentage: Math.max(0, Math.round(passiveP * 100) / 100)
-      };
-    }),
+    map(lastPulse => this.calculateActivityStatus(lastPulse)),
     distinctUntilChanged((prev, curr) => prev.activePercentage === curr.activePercentage &&
       prev.passivePercentage === curr.passivePercentage),
     shareReplay(1)
   );
 
   private autoLogoutSubscription: Subscription | null = null;
+
+  private calculateActivityStatus(lastPulse: number, now = Date.now()): {
+    activePercentage: number;
+    passivePercentage: number;
+  } {
+    const diff = now - lastPulse;
+
+    if (diff <= this.activityThresholdMs) {
+      const activeP = ((this.activityThresholdMs - diff) / this.activityThresholdMs) * 100;
+      return {
+        activePercentage: Math.max(0, Math.round(activeP * 100) / 100),
+        passivePercentage: 100
+      };
+    }
+
+    if (this.passivePhaseMs <= 0) {
+      return {
+        activePercentage: 0,
+        passivePercentage: 0
+      };
+    }
+
+    const passiveDiff = diff - this.activityThresholdMs;
+    const passiveP = ((this.passivePhaseMs - passiveDiff) / this.passivePhaseMs) * 100;
+
+    return {
+      activePercentage: 0,
+      passivePercentage: Math.max(0, Math.round(passiveP * 100) / 100)
+    };
+  }
 
   refreshActivityPulse(): void {
     const now = Date.now();
@@ -86,7 +98,7 @@ export class HeartbeatService implements OnDestroy {
     const existingPulse = localStorage.getItem(this.STORAGE_KEY);
     if (existingPulse) {
       const pulse = parseInt(existingPulse, 10);
-      if (Date.now() - pulse < (this.activityThresholdMs + this.passiveThresholdMs)) {
+      if (Date.now() - pulse < this.inactivityTimeoutMs) {
         this.lastActivityPulse$.next(pulse);
       }
     }
@@ -167,7 +179,7 @@ export class HeartbeatService implements OnDestroy {
         const authId = (authData as AuthDataDto)?.userId || 0;
         return {
           isVisible: typeof document !== 'undefined' && document.visibilityState === 'visible',
-          isNotIdle: (now - pulse) < this.activityThresholdMs + this.passiveThresholdMs,
+          isNotIdle: (now - pulse) < this.inactivityTimeoutMs,
           isLoggedIn: authId > 0
         };
       }),

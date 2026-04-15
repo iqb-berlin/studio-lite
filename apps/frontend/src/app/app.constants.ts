@@ -1,5 +1,6 @@
 // Session Timings
 export const ACTIVE_THRESHOLD_MS = 2 * 60 * 1000; // 2 minutes for testing
+// Total inactivity timeout since last user activity (active + passive visualization).
 export const PASSIVE_THRESHOLD_MS = 3 * 60 * 1000; // 3 minutes for testing
 
 // Intervall Settings
