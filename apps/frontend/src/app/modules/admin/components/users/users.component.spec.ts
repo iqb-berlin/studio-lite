@@ -49,6 +49,7 @@ describe('UsersComponent', () => {
   beforeEach(async () => {
     mockBackendService = {
       getUsersFull: jest.fn().mockReturnValue(of([])),
+      getUsersFullWithActivity: jest.fn().mockReturnValue(of([])),
       getWorkspaceGroupList: jest.fn().mockReturnValue(of([])),
       addUser: jest.fn().mockReturnValue(of(true)),
       changeUserData: jest.fn().mockReturnValue(of(true)),
@@ -122,8 +123,15 @@ describe('UsersComponent', () => {
     component.ngOnInit();
     jest.runOnlyPendingTimers();
     expect(mockBackendService.getWorkspaceGroupList).toHaveBeenCalled();
-    expect(mockBackendService.getUsersFull).toHaveBeenCalled();
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
     jest.useRealTimers();
+  });
+
+  it('should refresh without activity during polling', () => {
+    component.updateUserList(false);
+
+    expect(mockBackendService.getUsersFull).toHaveBeenCalled();
+    expect(mockBackendService.getUsersFullWithActivity).not.toHaveBeenCalled();
   });
 
   it('should add user successfully', () => {
@@ -138,7 +146,7 @@ describe('UsersComponent', () => {
     });
     component.addUser(userData);
     expect(mockBackendService.addUser).toHaveBeenCalled();
-    expect(mockBackendService.getUsersFull).toHaveBeenCalled();
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
     expect(mockSnackBar.open).toHaveBeenCalledWith('admin.user-created', '', { duration: 1000 });
   });
 
@@ -180,7 +188,7 @@ describe('UsersComponent', () => {
       isAdmin: true,
       password: 'newPass'
     }));
-    expect(mockBackendService.getUsersFull).toHaveBeenCalled();
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
     expect(mockSnackBar.open).toHaveBeenCalledWith('admin.user-edited', '', { duration: 1000 });
   });
 
@@ -196,7 +204,7 @@ describe('UsersComponent', () => {
     const users = [{ id: 1, isLoggedIn: true }, { id: 2, isLoggedIn: false }] as UserFullDto[];
     component.deleteUsers(users);
     expect(mockBackendService.deleteUsers).toHaveBeenCalledWith([1, 2]);
-    expect(mockBackendService.getUsersFull).toHaveBeenCalled();
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
     expect(mockSnackBar.open).toHaveBeenCalledWith('admin.users-deleted', '', { duration: 1000 });
   });
 

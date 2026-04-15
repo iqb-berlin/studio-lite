@@ -241,7 +241,10 @@ export class UsersComponent implements OnInit, OnDestroy {
       this.selectedUser = 0;
       this.appService.dataLoading = true;
     }
-    this.backendService.getUsersFull().subscribe(
+    const usersRequest = showLoading ? this.backendService.getUsersFullWithActivity() :
+      this.backendService.getUsersFull();
+
+    usersRequest.subscribe(
       (users: UserFullDto[]) => {
         this.setObjectsDatasource(users);
         if (showLoading) {

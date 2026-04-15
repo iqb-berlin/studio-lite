@@ -1,6 +1,6 @@
 import { Inject, Injectable, Injector } from '@angular/core';
 import {
-  HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpHeaders, HttpResponse
+  HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpResponse
 } from '@angular/common/http';
 import {
   finalize, Observable, throwError, BehaviorSubject, filter, take, switchMap, catchError, tap
@@ -35,10 +35,15 @@ export class AuthInterceptor implements HttpInterceptor {
     let httpErrorInfo: AppHttpError | null = null;
 
     // Only reset the visual activity bar for "real" interactions (not background pings or refreshes)
+    const activityIntentHeader = req.headers?.get('x-activity-intent');
+    const hasExplicitUserActivityIntent = activityIntentHeader === 'user';
     const isBackgroundRequest = req.url.includes('/ping') ||
                                 req.url.includes('/refresh') ||
                                 req.url.includes('/logout');
-    if (!isBackgroundRequest) {
+    const isUnflaggedGroupAdminUsersRequest = req.url.includes('/group-admin/users') &&
+      !hasExplicitUserActivityIntent;
+
+    if (!isBackgroundRequest && !isUnflaggedGroupAdminUsersRequest) {
       this.heartbeatService.refreshActivityPulse();
     }
 
@@ -78,13 +83,14 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 
   private addToken(request: HttpRequest<unknown>, token: string | null): HttpRequest<unknown> {
-    const headers = token ? new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-      'app-version': this.appVersion
-    }) : new HttpHeaders({
-      'app-version': this.appVersion
+    return request.clone({
+      setHeaders: token ? {
+        Authorization: `Bearer ${token}`,
+        'app-version': this.appVersion
+      } : {
+        'app-version': this.appVersion
+      }
     });
-    return request.clone({ headers });
   }
 
   private handle401Error(

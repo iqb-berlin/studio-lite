@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import {
@@ -88,10 +88,20 @@ export class BackendService {
   }
 
   getUsersFull(): Observable<UserFullDto[]> {
+    return this.getUsersFullRequest(false);
+  }
+
+  getUsersFullWithActivity(): Observable<UserFullDto[]> {
+    return this.getUsersFullRequest(true);
+  }
+
+  private getUsersFullRequest(countAsActivity: boolean): Observable<UserFullDto[]> {
     let queryParams = new HttpParams();
     queryParams = queryParams.append('full', true);
+    const headers = countAsActivity ? new HttpHeaders({ 'x-activity-intent': 'user' }) : undefined;
+    const requestOptions = { params: queryParams, headers };
     return this.http
-      .get<UserFullDto[]>(`${this.serverUrl}group-admin/users`, { params: queryParams })
+      .get<UserFullDto[]>(`${this.serverUrl}group-admin/users`, requestOptions)
       .pipe(
         catchError(() => of([]))
       );

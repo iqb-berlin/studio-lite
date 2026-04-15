@@ -106,6 +106,25 @@ describe('AuthInterceptor', () => {
     req.flush({});
   });
 
+  it('does not refresh activity pulse for unflagged group-admin/users polling', () => {
+    httpClient.get('/api/group-admin/users?full=true').subscribe();
+
+    const req = httpMock.expectOne('/api/group-admin/users?full=true');
+    expect(heartbeatServiceSpy.refreshActivityPulse).not.toHaveBeenCalled();
+    req.flush([]);
+  });
+
+  it('refreshes activity pulse for explicitly flagged group-admin/users requests', () => {
+    httpClient.get('/api/group-admin/users?full=true', {
+      headers: { 'x-activity-intent': 'user' }
+    }).subscribe();
+
+    const req = httpMock.expectOne('/api/group-admin/users?full=true');
+    expect(heartbeatServiceSpy.refreshActivityPulse).toHaveBeenCalledTimes(1);
+    expect(req.request.headers.get('x-activity-intent')).toBe('user');
+    req.flush([]);
+  });
+
   it('reports errors with method and url on error responses', () => {
     httpClient.get('/boom').subscribe({
       error: () => {

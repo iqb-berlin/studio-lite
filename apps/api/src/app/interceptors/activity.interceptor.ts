@@ -15,13 +15,19 @@ export class ActivityInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    // If an authenticated user is present, update their activity timestamp
-    // We ignore background requests like pings and refreshes to allow activity to expire naturally
-    // Exclude background requests (pings, refreshes, dashboard polling)
+    const activityIntentHeader = request.headers?.['x-activity-intent'];
+    const hasExplicitUserActivityIntent = activityIntentHeader === 'user' ||
+      (Array.isArray(activityIntentHeader) && activityIntentHeader.includes('user'));
+
+    // Ignore background requests that must not extend inactivity windows by default.
     const isBackgroundRequest = request.url.includes('/ping') ||
                                 request.url.includes('/refresh');
 
-    if (user && user.id && !isBackgroundRequest) {
+    // The admin users polling endpoint only counts as activity when explicitly flagged.
+    const isUnflaggedGroupAdminUsersRequest = request.url.includes('/group-admin/users') &&
+      !hasExplicitUserActivityIntent;
+
+    if (user && user.id && !isBackgroundRequest && !isUnflaggedGroupAdminUsersRequest) {
       this.usersService.updateLastActivity(user.id).catch(() => {
         /* ignore errors */
       });

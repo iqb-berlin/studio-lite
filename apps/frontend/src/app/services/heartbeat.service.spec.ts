@@ -150,7 +150,7 @@ describe('HeartbeatService', () => {
   }));
 
   it('should not start if no user is logged in', fakeAsync(() => {
-    appServiceMock.authData = null;
+    appServiceMock.authData = { userId: 0 } as AuthDataDto;
     TestBed.configureTestingModule({
       providers: [
         HeartbeatService,

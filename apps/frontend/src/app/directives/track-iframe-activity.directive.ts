@@ -12,7 +12,7 @@ import { HeartbeatService } from '../services/heartbeat.service';
 })
 export class TrackIframeActivityDirective implements OnDestroy {
   private elementRef = inject(ElementRef<HTMLIFrameElement>);
-  private heartbeatService = inject(HeartbeatService);
+  private heartbeatService = inject(HeartbeatService, { optional: true });
   private ngZone = inject(NgZone);
   private ngUnsubscribe = new Subject<void>();
   private iframeUnsubscribe = new Subject<void>();
@@ -43,7 +43,7 @@ export class TrackIframeActivityDirective implements OnDestroy {
         takeUntil(merge(this.ngUnsubscribe, this.iframeUnsubscribe))
       ).subscribe(() => {
         // We call refreshActivityPulse directly since throttling is handled here
-        this.heartbeatService.refreshActivityPulse();
+        this.heartbeatService?.refreshActivityPulse();
       });
     });
   }
