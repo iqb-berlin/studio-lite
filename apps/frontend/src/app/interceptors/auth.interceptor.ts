@@ -42,8 +42,9 @@ export class AuthInterceptor implements HttpInterceptor {
                                 req.url.includes('/logout');
     const isUnflaggedGroupAdminUsersRequest = req.url.includes('/group-admin/users') &&
       !hasExplicitUserActivityIntent;
+    const shouldRefreshActivityPulse = !isBackgroundRequest && !isUnflaggedGroupAdminUsersRequest;
 
-    if (!isBackgroundRequest && !isUnflaggedGroupAdminUsersRequest) {
+    if (shouldRefreshActivityPulse) {
       this.heartbeatService.refreshActivityPulse();
     }
 
@@ -62,7 +63,7 @@ export class AuthInterceptor implements HttpInterceptor {
               !req.url.includes('login') &&
               !req.url.includes('refresh') &&
               !req.url.includes('logout')) {
-            return this.handle401Error(req, next, isBackgroundRequest);
+            return this.handle401Error(req, next, shouldRefreshActivityPulse);
           }
           httpErrorInfo = new AppHttpError(error);
           return throwError(() => error);
@@ -96,7 +97,7 @@ export class AuthInterceptor implements HttpInterceptor {
   private handle401Error(
     request: HttpRequest<unknown>,
     next: HttpHandler,
-    isBackgroundRequest: boolean
+    shouldRefreshActivityPulse: boolean
   ): Observable<HttpEvent<unknown>> {
     if (!this.isRefreshing) {
       this.isRefreshing = true;
@@ -114,7 +115,7 @@ export class AuthInterceptor implements HttpInterceptor {
               this.refreshTokenSubject.next(accessToken);
 
               // Only reset the bar if it was triggered by a real interaction
-              if (!isBackgroundRequest) {
+              if (shouldRefreshActivityPulse) {
                 this.heartbeatService.refreshActivityPulse();
               }
 

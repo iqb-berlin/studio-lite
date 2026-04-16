@@ -161,6 +161,23 @@ describe('AuthInterceptor', () => {
     retryReqs[0].flush({});
   });
 
+  it('does not refresh activity pulse on 401 retry for unflagged group-admin/users polling', () => {
+    localStorage.setItem('refresh_token', 'old-refresh');
+    backendServiceSpy.refresh.mockReturnValue(of({ accessToken: 'new-access', refreshToken: 'new-refresh' }));
+
+    httpClient.get('/api/group-admin/users?full=true').subscribe();
+
+    const reqs = httpMock.match('/api/group-admin/users?full=true');
+    expect(reqs.length).toBe(1);
+    reqs[0].flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+    const retryReqs = httpMock.match('/api/group-admin/users?full=true');
+    expect(retryReqs.length).toBe(1);
+    retryReqs[0].flush([]);
+
+    expect(heartbeatServiceSpy.refreshActivityPulse).not.toHaveBeenCalled();
+  });
+
   it('should logout and redirect to login if refresh fails', () => {
     localStorage.setItem('refresh_token', 'old-refresh');
     backendServiceSpy.refresh.mockReturnValue(throwError(() => new Error('Refresh expired')));

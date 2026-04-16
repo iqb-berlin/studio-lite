@@ -17,6 +17,7 @@ import { of } from 'rxjs';
 import { AppConfig } from '../../../../classes/app-config.class';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
 import { environment } from '../../../../../environments/environment';
+import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '../../../../app.constants';
 import { UsersComponent } from './users.component';
 import { AppService } from '../../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
@@ -127,11 +128,21 @@ describe('UsersComponent', () => {
     jest.useRealTimers();
   });
 
-  it('should refresh without activity during polling', () => {
+  it('should refresh without activity when explicitly requested', () => {
     component.updateUserList(false);
 
     expect(mockBackendService.getUsersFull).toHaveBeenCalled();
     expect(mockBackendService.getUsersFullWithActivity).not.toHaveBeenCalled();
+  });
+
+  it('should refresh with activity intent on periodic polling', () => {
+    jest.useFakeTimers();
+    component.ngOnInit();
+
+    jest.advanceTimersByTime(ADMIN_USER_LIST_POLL_INTERVAL_MS);
+
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
+    jest.useRealTimers();
   });
 
   it('should add user successfully', () => {

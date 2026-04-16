@@ -80,7 +80,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     // Poll for updates
     this.pollingSubscription = timer(ADMIN_USER_LIST_POLL_INTERVAL_MS, ADMIN_USER_LIST_POLL_INTERVAL_MS)
       .subscribe(() => {
-        this.updateUserList(false);
+        this.updateUserList(false, true);
       });
   }
 
@@ -236,12 +236,13 @@ export class UsersComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateUserList(showLoading = true): void {
+  updateUserList(showLoading = true, countAsActivity = showLoading): void {
     if (showLoading) {
       this.selectedUser = 0;
       this.appService.dataLoading = true;
     }
-    const usersRequest = showLoading ? this.backendService.getUsersFullWithActivity() :
+    // Keep the admin route alive during periodic list polling by explicitly flagging user intent.
+    const usersRequest = countAsActivity ? this.backendService.getUsersFullWithActivity() :
       this.backendService.getUsersFull();
 
     usersRequest.subscribe(

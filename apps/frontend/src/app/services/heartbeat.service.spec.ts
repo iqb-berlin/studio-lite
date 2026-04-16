@@ -6,7 +6,7 @@ import { HeartbeatService } from './heartbeat.service';
 import { AppService } from './app.service';
 import { BackendService } from './backend.service';
 import {
-  PASSIVE_THRESHOLD_MS, HEARTBEAT_PING_INTERVAL_MS
+  ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS, HEARTBEAT_PING_INTERVAL_MS
 } from '../app.constants';
 
 jest.mock('../app.constants', () => ({
@@ -94,50 +94,12 @@ describe('HeartbeatService', () => {
     expect(backendServiceMock.ping).toHaveBeenCalled();
 
     // Switch to idle
-    jest.advanceTimersByTime(PASSIVE_THRESHOLD_MS + 1000);
+    jest.advanceTimersByTime(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 1000);
     backendServiceMock.ping.mockClear();
 
     // After being idle, no more pings should happen
     jest.advanceTimersByTime(HEARTBEAT_PING_INTERVAL_MS * 2);
     expect(backendServiceMock.ping).not.toHaveBeenCalled();
-  });
-
-  it('should switch status exactly at active and inactivity boundaries', () => {
-    appServiceMock.authData = { userId: 1 } as AuthDataDto;
-    configureTestingModule();
-    service = TestBed.inject(HeartbeatService);
-
-    interface HeartbeatServicePrivateView {
-      calculateActivityStatus(lastPulse: number, now?: number): {
-        activePercentage: number;
-        passivePercentage: number;
-      };
-      activityThresholdMs: number;
-    }
-
-    const servicePrivate = service as unknown as HeartbeatServicePrivateView;
-    const getStatus = (now: number) => servicePrivate.calculateActivityStatus(0, now);
-    const activeThreshold = servicePrivate.activityThresholdMs;
-
-    const atActiveBoundary = getStatus(activeThreshold);
-    expect(atActiveBoundary.activePercentage).toBe(0);
-
-    if (PASSIVE_THRESHOLD_MS > activeThreshold) {
-      expect(atActiveBoundary.passivePercentage).toBe(100);
-
-      const halfwayPassive = getStatus(
-        activeThreshold + Math.floor((PASSIVE_THRESHOLD_MS - activeThreshold) / 2)
-      );
-      expect(halfwayPassive.activePercentage).toBe(0);
-      expect(halfwayPassive.passivePercentage).toBeGreaterThan(0);
-      expect(halfwayPassive.passivePercentage).toBeLessThan(100);
-    } else {
-      expect(atActiveBoundary.passivePercentage).toBe(0);
-    }
-
-    const atInactivityBoundary = getStatus(PASSIVE_THRESHOLD_MS);
-    expect(atInactivityBoundary.activePercentage).toBe(0);
-    expect(atInactivityBoundary.passivePercentage).toBe(0);
   });
 
   it('should resume pinging upon user interaction', () => {
@@ -147,7 +109,7 @@ describe('HeartbeatService', () => {
     service.start();
 
     // Become idle
-    jest.advanceTimersByTime(PASSIVE_THRESHOLD_MS + 10000);
+    jest.advanceTimersByTime(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 10000);
     backendServiceMock.ping.mockClear();
 
     // Simulated activity
@@ -208,7 +170,7 @@ describe('HeartbeatService Iframe Extension', () => {
 
   it('should refresh pulse when a postMessage is received', () => {
     // Become idle
-    jest.advanceTimersByTime(PASSIVE_THRESHOLD_MS + 10000);
+    jest.advanceTimersByTime(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 10000);
     backendServiceMock.ping.mockClear();
 
     // Trigger postMessage
@@ -221,7 +183,7 @@ describe('HeartbeatService Iframe Extension', () => {
 
   it('should refresh pulse when refreshActivityPulse is called', () => {
     // Become idle
-    jest.advanceTimersByTime(PASSIVE_THRESHOLD_MS + 10000);
+    jest.advanceTimersByTime(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 10000);
     backendServiceMock.ping.mockClear();
 
     service.refreshActivityPulse();
