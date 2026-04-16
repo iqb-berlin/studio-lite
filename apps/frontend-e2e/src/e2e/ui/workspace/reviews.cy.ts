@@ -7,11 +7,13 @@ import {
 
 import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 import {
+  clickIndexTabWorkspace,
   clickIndexTabWsgAdmin,
   goToWsMenu,
   grantRemovePrivilegeAtWs,
   importExercise,
   login,
+  loginWithUser,
   logout,
   selectCheckBox
 } from '../../../support/helpers';
@@ -252,6 +254,39 @@ describe('Unit Reviews', () => {
     // Test backwards button
     cy.get('.backwards-button a').click();
     cy.url().should('include', '/u/2');
+  });
+
+  it('shows a dot for new comments in the workspace unit list: ', () => {
+    // do not show
+    cy.visitWs(ws1);
+    cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
+      cy.get('.new-comments').should('have.css', 'opacity', '1');
+    });
+
+    cy.get('mat-row').contains('M6_AK0012').click();
+    clickIndexTabWorkspace('comments');
+    clickIndexTabWorkspace('properties');
+  });
+
+  it('clears the new comment dot after viewing comments as different users', () => {
+    loginWithUser(newUser.username, newUser.password);
+    cy.visitWs(ws1);
+    cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
+      cy.get('.new-comments').should('have.css', 'opacity', '1');
+    });
+    cy.get('mat-row').contains('M6_AK0012').click();
+    clickIndexTabWorkspace('comments');
+    clickIndexTabWorkspace('properties');
+    // cy.get('studio-lite-comments', { timeout: 10000 }).should('be.visible');
+    // We wait for the dot to disappear, as the seen-status update might take a literal second
+    cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
+      cy.get('.new-comments', { timeout: 15000 }).should('have.css', 'opacity', '0');
+    });
+    loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
+    cy.visitWs(ws1);
+    cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
+      cy.get('.new-comments', { timeout: 15000 }).should('have.css', 'opacity', '0');
+    });
   });
 
   it('allows an admin to permanently delete a review', () => {
