@@ -38,7 +38,14 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 })
 export class CodingReportComponent implements OnInit {
   // Columns to display in the table
-  displayedColumns: string[] = ['unit', 'variable', 'item', 'validation', 'codingType'];
+  displayedColumns: string[] = [
+    'unit',
+    'variable',
+    'item',
+    'validation',
+    'codingType',
+    'trainingEffort'
+  ];
   dataSource!: MatTableDataSource<CodingReportDto>; // Datasource for the table
   isLoading = false; // Indicates if data is currently loading
   codedVariablesOnly = true; // Filter: Display only coded variables
@@ -115,5 +122,46 @@ export class CodingReportComponent implements OnInit {
   toggleChange(): void {
     this.codedVariablesOnly = !this.codedVariablesOnly;
     this.updateDataSource();
+  }
+
+  downloadCodingReport(): void {
+    const rows = this.dataSource?.filteredData || [];
+    const headers = this.displayedColumns
+      .map(column => this.getCsvHeader(column as keyof CodingReportDto))
+      .join(';');
+    const csvRows = rows.map(row => this.displayedColumns
+      .map(column => this.escapeCsvValue(this.stripHtml(String(
+        row[column as keyof CodingReportDto] ?? ''
+      ))))
+      .join(';')
+    );
+    const csvContent = `\uFEFF${[headers, ...csvRows].join('\n')}`;
+    const file = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const fileUrl = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = 'kodierbericht.csv';
+    link.click();
+    URL.revokeObjectURL(fileUrl);
+  }
+
+  private escapeCsvValue(value: string): string {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+
+  private stripHtml(value: string): string {
+    return value.replace(/<[^>]+>/g, '');
+  }
+
+  private getCsvHeader(column: keyof CodingReportDto): string {
+    const headers: Record<keyof CodingReportDto, string> = {
+      unit: 'Aufgabe',
+      variable: 'Variable',
+      item: 'Item',
+      validation: 'Validierung',
+      codingType: 'Kodiertyp',
+      trainingEffort: 'Schulungsaufwand'
+    };
+    return headers[column];
   }
 }

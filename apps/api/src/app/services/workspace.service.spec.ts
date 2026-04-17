@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import {
   CreateWorkspaceDto, UserWorkspaceAccessDto, WorkspaceSettingsDto, RenameGroupNameDto
 } from '@studio-lite-lib/api-dto';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { WorkspaceService } from './workspace.service';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -296,6 +297,60 @@ describe('WorkspaceService', () => {
       (unitService.findAllWithProperties as jest.Mock).mockResolvedValue([]);
       const result = await service.getCodingReport(1);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('determineCodingType', () => {
+    it('maps closed coding to automatisch', () => {
+      const codingType = WorkspaceService.determineCodingType({
+        codes: [{
+          type: 'RESIDUAL_AUTO',
+          manualInstruction: '',
+          ruleSets: [{ rules: [] }]
+        }]
+      } as unknown as VariableCodingData);
+
+      expect(codingType).toBe('automatisch');
+    });
+
+    it('maps rules-based coding to halbautomatisch', () => {
+      const codingType = WorkspaceService.determineCodingType({
+        codes: [{
+          manualInstruction: '',
+          ruleSets: [{ rules: [{ method: 'MATCH', parameters: ['a'] }] }]
+        }]
+      } as unknown as VariableCodingData);
+
+      expect(codingType).toBe('halbautomatisch');
+    });
+
+    it('maps manual coding to manuell', () => {
+      const codingType = WorkspaceService.determineCodingType({
+        codes: [{
+          manualInstruction: 'Hinweis',
+          ruleSets: [{ rules: [] }]
+        }]
+      } as unknown as VariableCodingData);
+
+      expect(codingType).toBe('manuell');
+    });
+  });
+
+  describe('determineTrainingEffort', () => {
+    it('returns erhöht when CODER_TRAINING_REQUIRED is set', () => {
+      const trainingEffort = WorkspaceService.determineTrainingEffort({
+        processing: ['CODER_TRAINING_REQUIRED']
+      } as unknown as VariableCodingData);
+
+      expect(trainingEffort).toBe('erhöht');
+    });
+
+    it('returns normal when CODER_TRAINING_REQUIRED is not set', () => {
+      const trainingEffort = WorkspaceService.determineTrainingEffort({
+        processing: []
+      } as unknown as VariableCodingData);
+
+      expect(trainingEffort).toBe('normal');
     });
   });
 
