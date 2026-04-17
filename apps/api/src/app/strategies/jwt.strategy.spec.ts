@@ -29,7 +29,8 @@ describe('JwtStrategy', () => {
     await expect(strategy.validate(payload)).resolves.toEqual({
       id: 12,
       name: 'alice',
-      reviewId: 34
+      reviewId: 34,
+      sessionId: undefined
     });
   });
 });

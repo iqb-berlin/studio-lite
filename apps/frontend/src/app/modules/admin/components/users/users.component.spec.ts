@@ -32,6 +32,14 @@ describe('UsersComponent', () => {
   let mockSnackBar: Partial<MatSnackBar>;
   let mockDialog: Partial<MatDialog>;
 
+  const setDocumentVisibility = (visibilityState: 'visible' | 'hidden'): void => {
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      value: visibilityState
+    });
+    document.dispatchEvent(new Event('visibilitychange'));
+  };
+
   @Component({ selector: 'studio-lite-search-filter', template: '', standalone: true })
   class MockSearchFilterComponent {
     @Input() title!: string;
@@ -137,8 +145,41 @@ describe('UsersComponent', () => {
 
   it('should refresh with activity intent on periodic polling', () => {
     jest.useFakeTimers();
+    setDocumentVisibility('visible');
     component.ngOnInit();
 
+    jest.advanceTimersByTime(ADMIN_USER_LIST_POLL_INTERVAL_MS);
+
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
+  it('should not poll when the tab is hidden', () => {
+    jest.useFakeTimers();
+    setDocumentVisibility('hidden');
+    component.ngOnInit();
+
+    jest.runOnlyPendingTimers();
+
+    jest.clearAllMocks();
+    jest.advanceTimersByTime(ADMIN_USER_LIST_POLL_INTERVAL_MS * 2);
+
+    expect(mockBackendService.getUsersFullWithActivity).not.toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
+  it('should resume polling when the tab becomes visible again', () => {
+    jest.useFakeTimers();
+    setDocumentVisibility('hidden');
+    component.ngOnInit();
+
+    jest.runOnlyPendingTimers();
+
+    jest.clearAllMocks();
+    jest.advanceTimersByTime(ADMIN_USER_LIST_POLL_INTERVAL_MS);
+    expect(mockBackendService.getUsersFullWithActivity).not.toHaveBeenCalled();
+
+    setDocumentVisibility('visible');
     jest.advanceTimersByTime(ADMIN_USER_LIST_POLL_INTERVAL_MS);
 
     expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
@@ -275,5 +316,55 @@ describe('UsersComponent', () => {
 
     component.toggleRowSelection(user);
     expect(component.tableSelectionRow.isSelected(user)).toBe(false);
+  });
+
+  it('should calculate active and logged-in counts from activityStatus', () => {
+    const users = [
+      {
+        id: 1,
+        name: 'a',
+        activityStatus: 'active',
+        isLoggedIn: true
+      },
+      {
+        id: 2,
+        name: 'p',
+        activityStatus: 'passive',
+        isLoggedIn: true
+      },
+      {
+        id: 3,
+        name: 'i',
+        activityStatus: 'inactive',
+        isLoggedIn: false
+      }
+    ] as UserFullDto[];
+
+    (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of(users));
+    component.updateUserList();
+
+    expect(component.activeUserCount).toBe(1);
+    expect(component.loggedInUserCount).toBe(2);
+  });
+
+  it('should not treat logged-in users as logged-out when activityStatus is missing', () => {
+    const users = [
+      {
+        id: 1,
+        name: 'u',
+        isLoggedIn: true
+      },
+      {
+        id: 2,
+        name: 'v',
+        isLoggedIn: false
+      }
+    ] as UserFullDto[];
+
+    (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of(users));
+    component.updateUserList();
+
+    expect(component.loggedInUserCount).toBe(1);
+    expect(component.activeUserCount).toBe(0);
   });
 });

@@ -28,11 +28,13 @@ describe('HeartbeatService', () => {
     sessionStorage.clear();
 
     backendServiceMock = createMock<BackendService>({
-      ping: jest.fn().mockReturnValue(of(true))
+      ping: jest.fn().mockReturnValue(of(true)),
+      activity: jest.fn().mockReturnValue(of(true))
     });
     appServiceMock = createMock<AppService>({
       authDataChanged: new Subject<AuthDataDto>(),
-      postMessage$: new Subject<MessageEvent>()
+      postMessage$: new Subject<MessageEvent>(),
+      getServerTime: jest.fn(() => Date.now())
     });
 
     Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true });
@@ -141,12 +143,14 @@ describe('HeartbeatService Iframe Extension', () => {
     localStorage.clear();
     postMessage$ = new Subject<MessageEvent>();
     backendServiceMock = createMock<BackendService>({
-      ping: jest.fn().mockReturnValue(of(true))
+      ping: jest.fn().mockReturnValue(of(true)),
+      activity: jest.fn().mockReturnValue(of(true))
     });
     appServiceMock = createMock<AppService>({
       authData: { userId: 1 } as AuthDataDto,
       authDataChanged: new Subject<AuthDataDto>(),
-      postMessage$: postMessage$
+      postMessage$: postMessage$,
+      getServerTime: jest.fn(() => Date.now())
     });
 
     TestBed.configureTestingModule({
@@ -179,6 +183,7 @@ describe('HeartbeatService Iframe Extension', () => {
     jest.advanceTimersByTime(HEARTBEAT_PING_INTERVAL_MS + 10000);
 
     expect(backendServiceMock.ping).toHaveBeenCalled();
+    expect(backendServiceMock.activity).toHaveBeenCalled();
   });
 
   it('should refresh pulse when refreshActivityPulse is called', () => {

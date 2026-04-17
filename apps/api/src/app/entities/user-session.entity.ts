@@ -3,19 +3,19 @@ import {
 } from 'typeorm';
 import User from './user.entity';
 
-@Entity()
-export class RefreshToken {
+@Entity({ name: 'user_session' })
+class UserSession {
   @PrimaryGeneratedColumn()
     id: number;
 
-  @Column({ name: 'token_hash' })
-    tokenHash: string;
+  @Column({ name: 'session_id' })
+    sessionId: string;
 
   @Column({ name: 'user_id' })
     userId: number;
 
-  @Column({ name: 'session_id' })
-    sessionId: string;
+  @Column({ name: 'last_activity', type: 'timestamp' })
+    lastActivity: Date;
 
   @Column({ name: 'expires_at', type: 'timestamp' })
     expiresAt: Date;
@@ -24,3 +24,5 @@ export class RefreshToken {
   @JoinColumn({ name: 'user_id' })
     user: User;
 }
+
+export default UserSession;

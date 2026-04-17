@@ -39,6 +39,7 @@ export class AuthInterceptor implements HttpInterceptor {
     const hasExplicitUserActivityIntent = activityIntentHeader === 'user';
     const isBackgroundRequest = req.url.includes('/ping') ||
                                 req.url.includes('/refresh') ||
+                                req.url.includes('/activity') ||
                                 req.url.includes('/logout');
     const isUnflaggedGroupAdminUsersRequest = req.url.includes('/group-admin/users') &&
       !hasExplicitUserActivityIntent;

@@ -21,14 +21,15 @@ export class ActivityInterceptor implements NestInterceptor {
 
     // Ignore background requests that must not extend inactivity windows by default.
     const isBackgroundRequest = request.url.includes('/ping') ||
-                                request.url.includes('/refresh');
+                                request.url.includes('/refresh') ||
+                                request.url.includes('/activity');
 
     // The admin users polling endpoint only counts as activity when explicitly flagged.
     const isUnflaggedGroupAdminUsersRequest = request.url.includes('/group-admin/users') &&
       !hasExplicitUserActivityIntent;
 
     if (user && user.id && !isBackgroundRequest && !isUnflaggedGroupAdminUsersRequest) {
-      this.usersService.updateLastActivity(user.id).catch(() => {
+      this.usersService.updateLastActivity(user.id, user.sessionId).catch(() => {
         /* ignore errors */
       });
     }

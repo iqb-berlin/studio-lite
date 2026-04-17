@@ -65,6 +65,56 @@ describe('AppController', () => {
     });
   });
 
+  describe('logout', () => {
+    it('should call logoutCurrentSession when refresh token is provided', async () => {
+      await controller.logout(3, { refreshToken: 'rt-3' });
+
+      expect(authService.logoutCurrentSession).toHaveBeenCalledWith('rt-3', 3);
+      expect(authService.logout).not.toHaveBeenCalled();
+    });
+
+    it('should call global logout when no refresh token is provided', async () => {
+      await controller.logout(4, {});
+
+      expect(authService.logout).toHaveBeenCalledWith(4);
+      expect(authService.logoutCurrentSession).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('logoutSilent', () => {
+    it('should call logoutCurrentSession when refresh token is provided', async () => {
+      await controller.logoutSilent({ refreshToken: 'rt-silent' });
+
+      expect(authService.logoutCurrentSession).toHaveBeenCalledWith('rt-silent');
+    });
+
+    it('should do nothing when refresh token is missing', async () => {
+      await controller.logoutSilent({});
+
+      expect(authService.logoutCurrentSession).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ping', () => {
+    it('should extend the current session expiry', async () => {
+      usersService.updateSessionExpiry.mockResolvedValue(undefined);
+
+      await controller.ping({ user: { id: 1, sessionId: 'sid-1' } });
+
+      expect(usersService.updateSessionExpiry).toHaveBeenCalledWith(1, 'sid-1');
+    });
+  });
+
+  describe('activity', () => {
+    it('should update the current session activity', async () => {
+      usersService.updateLastActivity.mockResolvedValue(undefined);
+
+      await controller.activity({ user: { id: 1, sessionId: 'sid-1' } });
+
+      expect(usersService.updateLastActivity).toHaveBeenCalledWith(1, 'sid-1');
+    });
+  });
+
   describe('findCanDos', () => {
     it('should return auth data for a user', async () => {
       usersService.getLongName.mockResolvedValue('Long Name');

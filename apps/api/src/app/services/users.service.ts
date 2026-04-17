@@ -5,6 +5,7 @@ import { MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import {
+  UserActivityStatus,
   CreateUserDto,
   MyDataDto,
   UserFullDto,
@@ -15,13 +16,13 @@ import {
 } from '@studio-lite-lib/api-dto';
 import User from '../entities/user.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
-import { RefreshToken } from '../entities/refresh-token.entity';
 import { AdminUserNotFoundException } from '../exceptions/admin-user-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import Workspace from '../entities/workspace.entity';
-import Review from '../entities/review.entity';
 import { UnitService } from './unit.service';
 import { UnitUserService } from './unit-user.service';
+import UserSession from '../entities/user-session.entity';
+import { ACTIVE_SESSION_THRESHOLD_SEC, INACTIVITY_THRESHOLD_SEC } from '../app.constants';
 
 @Injectable()
 export class UsersService {
@@ -36,13 +37,31 @@ export class UsersService {
     private workspaceGroupAdminRepository: Repository<WorkspaceGroupAdmin>,
     @InjectRepository(Workspace)
     private workspaceRepository: Repository<Workspace>,
-    @InjectRepository(Review)
-    private reviewRepository: Repository<Review>,
     private unitService: UnitService,
     private unitUserService: UnitUserService,
-    @InjectRepository(RefreshToken)
-    private refreshTokenRepository: Repository<RefreshToken>
+    @InjectRepository(UserSession)
+    private userSessionRepository: Repository<UserSession>
   ) {
+  }
+
+  private async findUsersOrderedByName(): Promise<User[]> {
+    return this.usersRepository.find({ order: { name: 'ASC' } });
+  }
+
+  private async findWorkspaceGroupAdminIds(workspaceGroupId: number): Promise<number[]> {
+    const workspaceGroupAdmins = await this.workspaceGroupAdminRepository.find({
+      where: { workspaceGroupId },
+      select: { userId: true }
+    });
+    return workspaceGroupAdmins.map(admin => admin.userId);
+  }
+
+  private async findWorkspaceUserIds(workspaceId: number): Promise<number[]> {
+    const workspaceUsers = await this.workspaceUsersRepository.find({
+      where: { workspaceId },
+      select: { userId: true }
+    });
+    return workspaceUsers.map(workspaceUser => workspaceUser.userId);
   }
 
   async findAllUsers(workspaceId?: number): Promise<WorkspaceUserInListDto[]> {
@@ -50,23 +69,20 @@ export class UsersService {
     this.logger.log(`Returning users${workspaceId ? ` for workspaceId: ${workspaceId}` : '.'}`);
     const validUsers: UserWorkspaceAccessDto[] = [];
     if (workspaceId) {
-      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
-        .find({ where: { workspaceId: workspaceId } });
-      workspaceUsers.forEach(wsU => validUsers.push(
-        { id: wsU.userId, accessLevel: wsU.accessLevel }
-      ));
+      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository.find({ where: { workspaceId } });
+      workspaceUsers.forEach(workspaceUser => validUsers.push({
+        id: workspaceUser.userId,
+        accessLevel: workspaceUser.accessLevel
+      }));
     }
-    const users: User[] = await this.usersRepository
-      .find({ order: { name: 'ASC' } });
+    const users = await this.findUsersOrderedByName();
     const returnUsers: WorkspaceUserInListDto[] = [];
     users.forEach(user => {
-      if (!workspaceId || (validUsers
-        .find(validUser => validUser.id === user.id))) {
+      if (!workspaceId || validUsers.find(validUser => validUser.id === user.id)) {
         returnUsers.push(<WorkspaceUserInListDto>{
           id: user.id,
           name: user.name,
-          workspaceAccessLevel: validUsers
-            .find(validUser => validUser.id === user.id)?.accessLevel || 0,
+          workspaceAccessLevel: validUsers.find(validUser => validUser.id === user.id)?.accessLevel || 0,
           isAdmin: user.isAdmin,
           description: user.description,
           displayName: UnitService.getUserDisplayName(user),
@@ -78,15 +94,11 @@ export class UsersService {
   }
 
   async findAllWorkspaceGroupAdmins(workspaceGroupId: number): Promise<UserInListDto[]> {
-    const workspaceGroupAdmins = await this.workspaceGroupAdminRepository.find({
-      where: { workspaceGroupId: workspaceGroupId },
-      select: { userId: true }
-    });
-    const workspaceGroupAdminsIds = workspaceGroupAdmins.map(wsgA => wsgA.userId);
-    const users: User[] = await this.usersRepository.find({ order: { name: 'ASC' } });
+    const workspaceGroupAdminsIds = await this.findWorkspaceGroupAdminIds(workspaceGroupId);
+    const users = await this.findUsersOrderedByName();
     const returnUsers: UserInListDto[] = [];
     users.forEach(user => {
-      if (workspaceGroupAdminsIds.indexOf(user.id) > -1) {
+      if (workspaceGroupAdminsIds.includes(user.id)) {
         returnUsers.push(<UserInListDto>{
           id: user.id,
           name: user.name,
@@ -101,6 +113,7 @@ export class UsersService {
   }
 
   async findAllWorkspaceUsers(workspaceId: number): Promise<UsersInWorkspaceDto> {
+    const sessionStatusByUser = await this.getSessionStatusByUser();
     const returnUsers: UsersInWorkspaceDto = {
       users: [],
       workspaceGroupAdmins: [],
@@ -110,25 +123,9 @@ export class UsersService {
       where: { id: workspaceId },
       select: { groupId: true }
     });
-    const workspaceGroupAdmins: number[] = [];
-    await this.workspaceGroupAdminRepository.find({
-      where: { workspaceGroupId: workspace.groupId },
-      select: { userId: true }
-    }).then(adminsData => {
-      adminsData.forEach(adminData => {
-        workspaceGroupAdmins.push(adminData.userId);
-      });
-    });
-    const users: number[] = [];
-    await this.workspaceUsersRepository.find({
-      where: { workspaceId: workspaceId },
-      select: { userId: true }
-    }).then(usersData => {
-      usersData.forEach(userData => {
-        users.push(userData.userId);
-      });
-    });
-    await this.usersRepository.find({
+    const workspaceGroupAdmins = await this.findWorkspaceGroupAdminIds(workspace.groupId);
+    const users = await this.findWorkspaceUserIds(workspaceId);
+    const allUsers = await this.usersRepository.find({
       select: {
         id: true,
         email: true,
@@ -139,39 +136,42 @@ export class UsersService {
         isAdmin: true,
         description: true
       }
-    }).then(allUsers => {
-      allUsers.forEach(user => {
-        const newUser: UserInListDto = {
-          id: user.id,
-          name: user.name,
-          isAdmin: user.isAdmin,
-          description: user.description,
-          displayName: UnitService.getUserDisplayName(user),
-          email: user.emailPublishApproved ? user.email : '',
-          lastActivity: user.lastActivity
-        };
-        if (user.isAdmin) {
-          returnUsers.admins.push(newUser);
-        } else if (workspaceGroupAdmins.indexOf(user.id) >= 0) {
-          returnUsers.workspaceGroupAdmins.push(newUser);
-        } else if (users.indexOf(user.id) >= 0) {
-          returnUsers.users.push(newUser);
-        }
-      });
     });
+
+    allUsers.forEach(user => {
+      const status = sessionStatusByUser.get(user.id);
+      const newUser: UserInListDto = {
+        id: user.id,
+        name: user.name,
+        isAdmin: user.isAdmin,
+        description: user.description,
+        displayName: UnitService.getUserDisplayName(user),
+        email: user.emailPublishApproved ? user.email : '',
+        lastActivity: status?.lastActivity
+      };
+      if (user.isAdmin) {
+        returnUsers.admins.push(newUser);
+      } else if (workspaceGroupAdmins.includes(user.id)) {
+        returnUsers.workspaceGroupAdmins.push(newUser);
+      } else if (users.includes(user.id)) {
+        returnUsers.users.push(newUser);
+      }
+    });
+
     return returnUsers;
   }
 
   async findAllFull(workspaceId?: number): Promise<UserFullDto[]> {
+    const sessionStatusByUser = await this.getSessionStatusByUser();
     const validUsers: number[] = [];
     if (workspaceId) {
-      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository
-        .find({ where: { workspaceId: workspaceId } });
+      const workspaceUsers: WorkspaceUser[] = await this.workspaceUsersRepository.find({ where: { workspaceId } });
       workspaceUsers.forEach(wsU => validUsers.push(wsU.userId));
     }
-    const users: User[] = await this.usersRepository.find({ order: { name: 'ASC' } });
-    return Promise.all(users.map(async user => {
-      if (!workspaceId || (validUsers.indexOf(user.id) > -1)) {
+    const users = await this.findUsersOrderedByName();
+    return users.map(user => {
+      if (!workspaceId || validUsers.includes(user.id)) {
+        const status = sessionStatusByUser.get(user.id);
         return <UserFullDto>{
           id: user.id,
           name: user.name,
@@ -181,12 +181,13 @@ export class UsersService {
           firstName: user.firstName,
           email: user.email,
           emailPublishApproved: user.emailPublishApproved,
-          lastActivity: user.lastActivity,
-          isLoggedIn: await this.isUserLoggedIn(user.id)
+          lastActivity: status?.lastActivity,
+          isLoggedIn: status?.isLoggedIn || false,
+          activityStatus: status?.activityStatus || 'inactive'
         };
       }
       return null;
-    })).then(results => results.filter(u => u !== null) as UserFullDto[]);
+    }).filter(u => u !== null) as UserFullDto[];
   }
 
   async findOne(id: number): Promise<UserFullDto> {
@@ -203,8 +204,7 @@ export class UsersService {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        emailPublishApproved: user.emailPublishApproved,
-        lastActivity: user.lastActivity
+        emailPublishApproved: user.emailPublishApproved
       };
     }
     throw new AdminUserNotFoundException(id, 'GET');
@@ -268,7 +268,7 @@ export class UsersService {
 
   async canAccessWorkSpace(userId: number, workspaceId: number): Promise<boolean> {
     const wsUser = await this.workspaceUsersRepository.findOne({
-      where: { userId: userId, workspaceId: workspaceId }
+      where: { userId, workspaceId }
     });
     if (wsUser) return true;
     const workspace = await this.workspaceRepository.findOne({
@@ -278,34 +278,22 @@ export class UsersService {
     return this.isWorkspaceGroupAdmin(userId, workspace.groupId);
   }
 
-  async canAccessReview(userId: number, reviewId: number): Promise<boolean> {
-    const review = await this.reviewRepository.findOne({
-      where: { id: reviewId },
-      select: { workspaceId: true }
-    });
-    if (review) return this.canAccessWorkSpace(userId, review.workspaceId);
-    return false;
-  }
-
   async isWorkspaceGroupAdmin(userId: number, workspaceGroupId?: number): Promise<boolean> {
     if (workspaceGroupId) {
       const wsgAdmin = await this.workspaceGroupAdminRepository.findOne({
-        where: { workspaceGroupId: workspaceGroupId, userId: userId }
+        where: { workspaceGroupId, userId }
       });
       return !!wsgAdmin;
     }
     const wsgAdmin = await this.workspaceGroupAdminRepository.findOne({
-      where: { userId: userId }
+      where: { userId }
     });
     return !!wsgAdmin;
   }
 
   async isUserLoggedIn(userId: number): Promise<boolean> {
-    const tokens = await this.refreshTokenRepository.find({
-      where: { userId, isRevoked: false }
-    });
-    const now = Date.now();
-    return tokens.some(t => new Date(t.expiresAt).getTime() > now);
+    const sessionStatusByUser = await this.getSessionStatusByUser();
+    return sessionStatusByUser.get(userId)?.isLoggedIn || false;
   }
 
   async getLongName(userId: number): Promise<string> {
@@ -442,8 +430,60 @@ export class UsersService {
     });
   }
 
-  async updateLastActivity(userId: number): Promise<void> {
-    await this.usersRepository.update(userId, { lastActivity: new Date() });
+  async updateLastActivity(userId: number, sessionId?: string): Promise<void> {
+    const now = new Date();
+    const expiresAt = new Date(Date.now() + (INACTIVITY_THRESHOLD_SEC * 1000));
+    const criteria = sessionId ? { userId, sessionId } : { userId };
+    await this.userSessionRepository.update(criteria, { lastActivity: now, expiresAt });
+  }
+
+  async updateSessionExpiry(userId: number, sessionId?: string): Promise<void> {
+    const expiresAt = new Date(Date.now() + (INACTIVITY_THRESHOLD_SEC * 1000));
+    const criteria = sessionId ? { userId, sessionId } : { userId };
+    await this.userSessionRepository.update(criteria, { expiresAt });
+  }
+
+  private async getSessionStatusByUser(): Promise<Map<number, {
+    isLoggedIn: boolean;
+    lastActivity?: Date;
+    activityStatus: UserActivityStatus;
+  }>> {
+    const nowMs = Date.now();
+    const sessionsByUser = new Map<number, {
+      isLoggedIn: boolean;
+      lastActivity?: Date;
+      activityStatus: UserActivityStatus;
+    }>();
+
+    (await this.userSessionRepository.find())
+      .filter(session => UsersService.isSessionStillValid(session.expiresAt, nowMs))
+      .forEach(session => {
+        const currentSession = sessionsByUser.get(session.userId);
+        if (UsersService.isNewerSession(session.lastActivity, currentSession?.lastActivity)) {
+          sessionsByUser.set(session.userId, {
+            isLoggedIn: true,
+            lastActivity: session.lastActivity,
+            activityStatus: UsersService.calculateActivityStatus(session.lastActivity, nowMs)
+          });
+        }
+      });
+
+    return sessionsByUser;
+  }
+
+  private static calculateActivityStatus(lastActivity: Date, nowMs: number): UserActivityStatus {
+    const ageMs = nowMs - new Date(lastActivity).getTime();
+    if (ageMs <= ACTIVE_SESSION_THRESHOLD_SEC * 1000) return 'active';
+    if (ageMs <= INACTIVITY_THRESHOLD_SEC * 1000) return 'passive';
+    return 'inactive';
+  }
+
+  private static isSessionStillValid(expiresAt: Date, nowMs: number): boolean {
+    return new Date(expiresAt).getTime() > nowMs;
+  }
+
+  private static isNewerSession(candidate: Date, current?: Date): boolean {
+    return !current || new Date(candidate).getTime() > new Date(current).getTime();
   }
 
   private static getPasswordHash(stringToHash: string): string {

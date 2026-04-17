@@ -6,7 +6,9 @@ import { DatePipe } from '@angular/common';
 import {
   ViewChild, Component, OnInit, OnDestroy
 } from '@angular/core';
-import { timer, Subscription } from 'rxjs';
+import {
+  fromEvent, Subject, Subscription, timer
+} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { UntypedFormGroup, FormsModule } from '@angular/forms';
@@ -20,26 +22,26 @@ import { MatFabButton, MatIconButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 import { MatIcon } from '@angular/material/icon';
+import { startWith, takeUntil } from 'rxjs/operators';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
+import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '../../../../app.constants';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
 import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { UsersMenuComponent } from '../users-menu/users-menu.component';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
-import { IsActiveUserPipe } from '../../../../pipes/is-active-user.pipe';
 import {
   BackendService
 } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
-import { ADMIN_USER_LIST_POLL_INTERVAL_MS, ACTIVE_THRESHOLD_MS } from '../../../../app.constants';
 
 @Component({
   selector: 'studio-lite-users',
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, IsActiveUserPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent, DatePipe]
+  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent, DatePipe]
 })
 export class UsersComponent implements OnInit, OnDestroy {
   objectsDatasource = new MatTableDataSource<UserFullDto>();
@@ -50,6 +52,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   activeUserCount = 0;
   loggedInUserCount = 0;
   private pollingSubscription: Subscription | null = null;
+  private readonly ngUnsubscribe = new Subject<void>();
 
   @ViewChild(MatSort) sort = new MatSort();
 
@@ -77,17 +80,28 @@ export class UsersComponent implements OnInit, OnDestroy {
       this.createWorkspaceList();
     });
 
-    // Poll for updates
-    this.pollingSubscription = timer(ADMIN_USER_LIST_POLL_INTERVAL_MS, ADMIN_USER_LIST_POLL_INTERVAL_MS)
-      .subscribe(() => {
-        this.updateUserList(false, true);
-      });
+    if (typeof document !== 'undefined') {
+      fromEvent(document, 'visibilitychange')
+        .pipe(
+          startWith(null),
+          takeUntil(this.ngUnsubscribe)
+        )
+        .subscribe(() => {
+          if (this.isTabVisible()) {
+            this.startPolling();
+          } else {
+            this.stopPolling();
+          }
+        });
+    } else {
+      this.startPolling();
+    }
   }
 
   ngOnDestroy(): void {
-    if (this.pollingSubscription) {
-      this.pollingSubscription.unsubscribe();
-    }
+    this.stopPolling();
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 
   addUser(userData: UntypedFormGroup): void {
@@ -264,6 +278,28 @@ export class UsersComponent implements OnInit, OnDestroy {
     );
   }
 
+  private startPolling(): void {
+    if (this.pollingSubscription || !this.isTabVisible()) {
+      return;
+    }
+
+    this.pollingSubscription = timer(ADMIN_USER_LIST_POLL_INTERVAL_MS, ADMIN_USER_LIST_POLL_INTERVAL_MS)
+      .subscribe(() => {
+        this.updateUserList(false, true);
+      });
+  }
+
+  private stopPolling(): void {
+    if (this.pollingSubscription) {
+      this.pollingSubscription.unsubscribe();
+      this.pollingSubscription = null;
+    }
+  }
+
+  private isTabVisible(): boolean {
+    return typeof document !== 'undefined' && document.visibilityState === 'visible';
+  }
+
   private setObjectsDatasource(users: UserFullDto[]): void {
     this.objectsDatasource = new MatTableDataSource(users);
     this.objectsDatasource
@@ -275,9 +311,7 @@ export class UsersComponent implements OnInit, OnDestroy {
         .includes(filter));
     this.objectsDatasource.sort = this.sort;
 
-    const oneMinuteAgo = this.appService.getServerTime() - ACTIVE_THRESHOLD_MS;
-    this.activeUserCount = users
-      .filter(u => u.isLoggedIn && u.lastActivity && new Date(u.lastActivity).getTime() > oneMinuteAgo).length;
+    this.activeUserCount = users.filter(u => u.activityStatus === 'active').length;
     this.loggedInUserCount = users.filter(u => u.isLoggedIn).length;
   }
 

@@ -252,6 +252,22 @@ describe('BackendService', () => {
       req.flush(null);
       expect(appService.authData).toEqual(AppService.defaultAuthData);
     });
+
+    it('should try logout-silent when logout returns an error', () => {
+      localStorage.setItem('id_token', 'test-token');
+      localStorage.setItem('refresh_token', 'test-refresh');
+
+      service.logout();
+
+      const logoutReq = httpMock.expectOne(`${serverUrl}logout`);
+      expect(logoutReq.request.method).toBe('POST');
+      logoutReq.error(new ProgressEvent('error'));
+
+      const silentReq = httpMock.expectOne(`${serverUrl}logout-silent`);
+      expect(silentReq.request.method).toBe('POST');
+      expect(silentReq.request.body).toEqual({ refreshToken: 'test-refresh' });
+      silentReq.flush(null);
+    });
   });
 
   describe('getConfig', () => {
@@ -549,6 +565,18 @@ describe('BackendService', () => {
 
       const req = httpMock.expectOne(`${serverUrl}admin/settings/email-template`);
       req.error(new ProgressEvent('error'));
+    });
+  });
+
+  describe('activity', () => {
+    it('should post activity update', done => {
+      service.activity().subscribe(() => {
+        done();
+      });
+
+      const req = httpMock.expectOne(`${serverUrl}activity`);
+      expect(req.request.method).toBe('POST');
+      req.flush(null);
     });
   });
 });

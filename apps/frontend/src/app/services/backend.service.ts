@@ -184,4 +184,8 @@ export class BackendService {
   ping(): Observable<void> {
     return this.http.post<void>(`${this.serverUrl}ping`, {});
   }
+
+  activity(): Observable<void> {
+    return this.http.post<void>(`${this.serverUrl}activity`, {});
+  }
 }

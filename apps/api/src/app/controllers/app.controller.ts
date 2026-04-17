@@ -63,8 +63,22 @@ export class AppController {
   @ApiBearerAuth()
   @ApiTags('auth')
   @ApiOkResponse({ description: 'Logged out successfully.' })
-  async logout(@UserId() userId: number) {
+  async logout(@UserId() userId: number, @Body() body: { refreshToken?: string }) {
+    if (body?.refreshToken) {
+      await this.authService.logoutCurrentSession(body.refreshToken, userId);
+      return;
+    }
     await this.authService.logout(userId);
+  }
+
+  @Post('logout-silent')
+  @ApiTags('auth')
+  @ApiOkResponse({ description: 'Session logout handled silently.' })
+  async logoutSilent(@Body() body: { refreshToken?: string }): Promise<void> {
+    if (!body?.refreshToken) {
+      return;
+    }
+    await this.authService.logoutCurrentSession(body.refreshToken);
   }
 
   @Post('init-login')
@@ -169,8 +183,17 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiTags('auth')
+  @ApiOkResponse({ description: 'Session keepalive updated.' })
+  async ping(@Request() req): Promise<void> {
+    await this.userService.updateSessionExpiry(req.user.id, req.user.sessionId);
+  }
+
+  @Post('activity')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiTags('auth')
   @ApiOkResponse({ description: 'User activity updated.' })
-  async ping(@UserId() userId: number): Promise<void> {
-    this.authService.isAdminUser(userId); // Just use this and userId to satisfy lint
+  async activity(@Request() req): Promise<void> {
+    await this.userService.updateLastActivity(req.user.id, req.user.sessionId);
   }
 }

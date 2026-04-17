@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+export type UserActivityStatus = 'active' | 'passive' | 'inactive';
+
 export class UserFullDto {
   @ApiProperty()
     id!: number;
@@ -33,4 +35,7 @@ export class UserFullDto {
 
   @ApiProperty()
     isLoggedIn?: boolean;
+
+  @ApiProperty({ required: false, enum: ['active', 'passive', 'inactive'] })
+    activityStatus?: UserActivityStatus;
 }

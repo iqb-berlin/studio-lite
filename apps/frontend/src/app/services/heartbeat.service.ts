@@ -30,6 +30,7 @@ export class HeartbeatService implements OnDestroy {
   private readonly ngZone = inject(NgZone);
 
   private readonly lastActivityPulse$ = new BehaviorSubject<number>(Date.now());
+  private readonly activitySync$ = new Subject<void>();
   private readonly ngUnsubscribe = new Subject<void>();
   private readonly STORAGE_KEY = 'st_activity_pulse';
 
@@ -44,7 +45,11 @@ export class HeartbeatService implements OnDestroy {
 
   private autoLogoutSubscription: Subscription | null = null;
 
-  private calculateActivityStatus(lastPulse: number, now = Date.now()): {
+  private getNow(): number {
+    return this.appService.getServerTime();
+  }
+
+  private calculateActivityStatus(lastPulse: number, now = this.getNow()): {
     activePercentage: number;
     passivePercentage: number;
   } {
@@ -53,7 +58,7 @@ export class HeartbeatService implements OnDestroy {
     if (diff <= this.activityThresholdMs) {
       const activeP = ((this.activityThresholdMs - diff) / this.activityThresholdMs) * 100;
       return {
-        activePercentage: Math.max(0, Math.round(activeP * 100) / 100),
+        activePercentage: Math.max(0, Math.min(100, activeP)),
         passivePercentage: 100
       };
     }
@@ -70,14 +75,19 @@ export class HeartbeatService implements OnDestroy {
 
     return {
       activePercentage: 0,
-      passivePercentage: Math.max(0, Math.round(passiveP * 100) / 100)
+      passivePercentage: Math.max(0, Math.min(100, passiveP))
     };
   }
 
   refreshActivityPulse(): void {
-    const now = Date.now();
+    const now = this.getNow();
     this.lastActivityPulse$.next(now);
     localStorage.setItem(this.STORAGE_KEY, now.toString());
+  }
+
+  registerUserActivity(): void {
+    this.refreshActivityPulse();
+    this.activitySync$.next();
   }
 
   constructor(
@@ -98,7 +108,7 @@ export class HeartbeatService implements OnDestroy {
     const existingPulse = localStorage.getItem(this.STORAGE_KEY);
     if (existingPulse) {
       const pulse = parseInt(existingPulse, 10);
-      if (Date.now() - pulse < this.inactivityTimeoutMs) {
+      if (this.getNow() - pulse < this.inactivityTimeoutMs) {
         this.lastActivityPulse$.next(pulse);
       }
     }
@@ -124,13 +134,24 @@ export class HeartbeatService implements OnDestroy {
       takeUntil(this.ngUnsubscribe)
     ).subscribe(() => {
       this.backendService.logout();
-      // Delay redirect slightly to allow the final 5s CSS transition to reach 0% if needed
+      // Delay redirect slightly so the user sees the fully depleted bar before redirect.
       setTimeout(() => {
         if (typeof window !== 'undefined') {
           window.location.href = '/home';
         }
       }, 1000);
     });
+
+    this.activitySync$
+      .pipe(
+        throttleTime(5000),
+        filter(() => (this.appService.authData?.userId || 0) > 0),
+        switchMap(() => this.backendService.activity().pipe(
+          catchError(() => of(null))
+        )),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe();
 
     this.ngZone.runOutsideAngular(() => {
       merge(
@@ -141,14 +162,14 @@ export class HeartbeatService implements OnDestroy {
       ).pipe(
         throttleTime(1000),
         takeUntil(this.ngUnsubscribe)
-      ).subscribe(() => this.refreshActivityPulse());
+      ).subscribe(() => this.registerUserActivity());
     });
 
     this.appService.postMessage$
       .pipe(
         throttleTime(1000),
         takeUntil(this.ngUnsubscribe)
-      ).subscribe(() => this.refreshActivityPulse());
+      ).subscribe(() => this.registerUserActivity());
   }
 
   start(): void {
@@ -175,7 +196,7 @@ export class HeartbeatService implements OnDestroy {
       interval(this.pollIntervalMs).pipe(startWith(0))
     ]).pipe(
       map(([pulse, authData]): HeartbeatState => {
-        const now = Date.now();
+        const now = this.getNow();
         const authId = (authData as AuthDataDto)?.userId || 0;
         return {
           isVisible: typeof document !== 'undefined' && document.visibilityState === 'visible',

@@ -45,6 +45,7 @@ import ResourcePackage from './entities/resource-package.entity';
 import Review from './entities/review.entity';
 import ReviewUnit from './entities/review-unit.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
+import UserSession from './entities/user-session.entity';
 import { ResourcePackageService } from './services/resource-package.service';
 import { UsersService } from './services/users.service';
 import { WorkspaceService } from './services/workspace.service';
@@ -133,6 +134,7 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
     ResourcePackage,
     Review,
     ReviewUnit,
+    UserSession,
     UnitItem,
     UnitItemMetadata,
     UnitMetadata,
@@ -171,6 +173,7 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
           Review,
           ReviewUnit,
           RefreshToken,
+          UserSession,
           UnitItem,
           UnitItemMetadata,
           UnitMetadata,
@@ -205,6 +208,7 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
       Review,
       ReviewUnit,
       RefreshToken,
+      UserSession,
       UnitItem,
       UnitItemMetadata,
       UnitMetadata,

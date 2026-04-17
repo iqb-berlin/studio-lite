@@ -36,12 +36,7 @@ export class GroupAdminUserController {
   async findAll(@Query('full',
     new ParseBoolPipe({ optional: true })) full?: boolean): Promise<WorkspaceUserInListDto[] | UserFullDto[]> {
     if (full) {
-      const users = await this.usersService.findAllFull();
-      return Promise.all(users.map(async user => {
-        // eslint-disable-next-line no-param-reassign
-        user.isLoggedIn = await this.usersService.isUserLoggedIn(user.id);
-        return user;
-      }));
+      return this.usersService.findAllFull();
     }
     return this.usersService.findAllUsers();
   }

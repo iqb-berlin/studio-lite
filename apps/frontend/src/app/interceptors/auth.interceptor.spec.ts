@@ -125,6 +125,14 @@ describe('AuthInterceptor', () => {
     req.flush([]);
   });
 
+  it('does not refresh activity pulse for activity sync requests', () => {
+    httpClient.post('/api/activity', {}).subscribe();
+
+    const req = httpMock.expectOne('/api/activity');
+    expect(heartbeatServiceSpy.refreshActivityPulse).not.toHaveBeenCalled();
+    req.flush({});
+  });
+
   it('reports errors with method and url on error responses', () => {
     httpClient.get('/boom').subscribe({
       error: () => {
