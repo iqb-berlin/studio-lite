@@ -265,6 +265,7 @@ describe('Unit Reviews', () => {
 
     cy.get('mat-row').contains('M6_AK0012').click();
     clickIndexTabWorkspace('comments');
+    cy.get('studio-lite-comments', { timeout: 10000 }).should('be.visible');
     clickIndexTabWorkspace('properties');
   });
 
@@ -276,20 +277,28 @@ describe('Unit Reviews', () => {
     });
     cy.get('mat-row').contains('M6_AK0012').click();
     clickIndexTabWorkspace('comments');
+    cy.wait(100);
     clickIndexTabWorkspace('properties');
     // cy.get('studio-lite-comments', { timeout: 10000 }).should('be.visible');
     // We wait for the dot to disappear, as the seen-status update might take a literal second
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments', { timeout: 15000 }).should('have.css', 'opacity', '0');
     });
-    loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
-    cy.visitWs(ws1);
-    cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
-      cy.get('.new-comments', { timeout: 15000 }).should('have.css', 'opacity', '0');
-    });
   });
 
   it('allows an admin to permanently delete a review', () => {
+    loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
+    cy.visitWs(ws1);
+    cy.get('mat-row')
+      .contains('M6_AK0012')
+      .parents('mat-row')
+      .within(() => {
+        cy.get('.new-comments', { timeout: 15000 }).should(
+          'have.css',
+          'opacity',
+          '0'
+        );
+      });
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
