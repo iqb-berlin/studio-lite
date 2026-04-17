@@ -717,10 +717,31 @@ export class DownloadDocx {
         strict: 'ignore'
       });
       const omml = mml2omml(mathml);
-      return ImportedXmlComponent.fromXmlString(omml);
+      return ImportedXmlComponent.fromXmlString(
+        DownloadDocx.sanitizeOmmlXml(omml)
+      );
     } catch {
       return null;
     }
+  }
+
+  private static sanitizeOmmlXml(omml: string): string {
+    if (!omml) return omml;
+    return omml.replace(
+      /(<m:t\b[^>]*>)([\s\S]*?)(<\/m:t>)/g,
+      (_, prefix: string, rawText: string, suffix: string) =>
+        `${prefix}${DownloadDocx.escapeXmlText(rawText)}${suffix}`
+    );
+  }
+
+  private static escapeXmlText(text: string): string {
+    return text
+      .replace(
+        /&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)/g,
+        '&amp;'
+      )
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
   private static normalizeMathTokens(html: string): string {
