@@ -13,6 +13,7 @@ import {
   addStatus,
   addUnitFromExisting,
   addUnitPred,
+  clickIndexTabWorkspace,
   clickIndexTabWsgAdmin,
   clickSaveButtonRight,
   deleteUnit,
@@ -20,6 +21,7 @@ import {
   importExercise,
   moveUnit,
   selectListUnits,
+  selectUnit,
   setModuleWithoutVerification,
   verifyModuleConfiguration
 } from '../../../support/helpers';
@@ -166,6 +168,90 @@ describe('Workspace Unit Management', () => {
     cy.contains('M6_AK0011')
       .should('exist');
   });
+  it('navigates to unit preview and verifies iframe', () => {
+    selectUnit('M6_AK0011');
+    clickIndexTabWorkspace('preview');
+    cy.get('[data-cy="unit-preview-iframe"]').should('be.visible');
+  });
+
+  it('verifies coding check functionality', () => {
+    // Mock the API for unit scheme
+    cy.intercept('GET', '/api/workspaces/*/units/*/scheme', {
+      body: {
+        scheme: JSON.stringify({
+          variableCodings: [
+            {
+              id: 'var1',
+              alias: 'Variable_1',
+              sourceType: 'BASE',
+              codes: [
+                {
+                  id: 111,
+                  type: 'FULL_CREDIT',
+                  score: 1,
+                  ruleSetOperatorAnd: true,
+                  ruleSets: []
+                }
+              ]
+            }
+          ]
+        })
+      }
+    }).as('getUnitScheme');
+
+    // Simulate player sending responses by dispatching a MessageEvent with the iframe as source
+    cy.get('[data-cy="unit-preview-iframe"]').then($iframe => {
+      const iframeWindow = ($iframe[0] as HTMLIFrameElement).contentWindow;
+      cy.window().then(win => {
+        const messageEvent = new MessageEvent('message', {
+          data: {
+            type: 'vopStateChangedNotification',
+            sessionId: 'test-session',
+            unitState: {
+              dataParts: { all: '[]' },
+              unitStateDataType: 'iqb-standard@1.0',
+              presentationProgress: 'complete',
+              responseProgress: 'complete'
+            }
+          },
+          source: iframeWindow
+        });
+        win.dispatchEvent(messageEvent);
+      });
+    });
+
+    cy.get('[data-cy="preview-bar-check-coding"]').click();
+    cy.wait('@getUnitScheme');
+
+    // Verify that the coding results dialog opens
+    // We check for both MDC and legacy dialog containers to be robust
+    cy.get('mat-mdc-dialog-container, mat-dialog-container', {
+      timeout: 15000
+    }).should('be.visible');
+
+    // Close the dialog
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('mat-dialog-actions, .mat-mdc-dialog-actions')
+        .contains('button', json.close)
+        .click({ force: true });
+    });
+  });
+
+  it('verifies print options dialog opens', () => {
+    cy.get('[data-cy="preview-bar-print"]').click();
+
+    // Verify that the print options dialog opens
+    cy.get('mat-mdc-dialog-container, mat-dialog-container', {
+      timeout: 15000
+    }).should('be.visible');
+
+    // Close the dialog
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('mat-dialog-actions, .mat-mdc-dialog-actions')
+        .contains('button', json.cancel || json.close)
+        .click({ force: true });
+    });
+  });
 
   it('deletes a unit', () => {
     cy.visitWs(ws1);
@@ -205,7 +291,6 @@ describe('Workspace Unit Management', () => {
   });
 
   it('displays coding report', () => {
-    cy.pause();
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
