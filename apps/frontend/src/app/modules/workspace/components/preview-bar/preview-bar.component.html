@@ -5,25 +5,25 @@
   </studio-lite-status-indication>
   <div class="fx-row-space-between-center fx-gap-20">
     <button matMiniFab
-            data-cy="preview-bar-navigation-denied"
             [color]="'default'"
             [disabled]="(playerApiVersion < 3) || (postMessageTarget === null)"
             [matTooltip]="'workspace.send-navigation-denied' | translate"
-            (click)="navigationDenied.emit()">
+            (click)="navigationDenied.emit()"
+            data-cy="preview-bar-navigation-denied">
       <mat-icon>warning</mat-icon>
     </button>
     <button matMiniFab
-            data-cy="preview-bar-check-coding"
             [color]="'default'"
             [matTooltip]="'workspace.coding-check' | translate"
-            (click)="checkCoding.emit()">
+            (click)="checkCoding.emit()"
+            data-cy="preview-bar-check-coding">
       <mat-icon>check_circle_outline</mat-icon>
     </button>
     <button matMiniFab
-            data-cy="preview-bar-print"
             [color]="'default'"
             [matTooltip]="'workspace.print' | translate"
-            (click)="print.emit()">
+            (click)="print.emit()"
+            data-cy="preview-bar-print">
       <mat-icon>print</mat-icon>
     </button>
     @if (pageList) {

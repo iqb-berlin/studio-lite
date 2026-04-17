@@ -9,13 +9,20 @@ import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 import {
   clickIndexTabWorkspace,
   clickIndexTabWsgAdmin,
-  goToWsMenu,
   grantRemovePrivilegeAtWs,
   importExercise,
   login,
   loginWithUser,
   logout,
-  selectCheckBox
+  createReview,
+  openReview,
+  verifyReviewStartPage,
+  startReview,
+  exportReview,
+  printReview,
+  deleteReview,
+  modifyReviewUnits,
+  goToReviewAdmin
 } from '../../../support/helpers';
 
 describe('Unit Reviews', () => {
@@ -28,30 +35,23 @@ describe('Unit Reviews', () => {
   });
 
   const review: string = 'Review1';
+
   it('imports test units successfully into the workspace', () => {
     cy.visitWs(ws1);
     importExercise('test_studio_units_download.zip');
+    cy.contains('M6_AK0011', { timeout: 15000 }).should('exist');
   });
 
   it('allows an admin to create a new review with specific unit selection and configuration', () => {
-    cy.visit('/');
     cy.visitWs(ws1);
-    goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
-    cy.get('[data-cy="workspace-review-menu-add-review-button"]').click();
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.get(`input[placeholder="${json.workspace['new-review-name']}"]`)
-        .should('exist')
-        .clear()
-        .type(review);
-      cy.get('.mat-mdc-dialog-component-host > .mat-mdc-dialog-actions').within(
-        () => {
-          cy.clickButton(json.workspace.save);
-        }
-      );
-      selectCheckBox('M6_AK0011');
-      selectCheckBox('M6_AK0012');
+    goToReviewAdmin();
+    createReview(review, ['M6_AK0011', 'M6_AK0012']);
 
+    // Re-configure to set booklet and review settings
+    goToReviewAdmin();
+    cy.contains('mat-row', review).click();
+
+    cy.translate(Cypress.expose('locale')).then(json => {
       // Set Review Configuration
       cy.get('studio-lite-review-config').within(() => {
         cy.contains('mat-checkbox', json.workspace['review-allow-comments'])
@@ -59,13 +59,14 @@ describe('Unit Reviews', () => {
         cy.contains('mat-checkbox', json.workspace['review-show-comments'])
           .find('input').check({ force: true });
       });
+
       // Set Booklet Configuration
       cy.get('mat-expansion-panel-header').contains(json.workspace['booklet-settings']).click();
       cy.get('mat-form-field').contains(json['booklet-config'].unitScreenHeader.label).click();
       cy.get('mat-option').contains(json['booklet-config'].unitScreenHeader.WITH_UNIT_TITLE).click();
 
       cy.get('studio-lite-save-changes').within(() => {
-        cy.clickButton(json.workspace.save);
+        cy.get('button').contains(json.workspace.save).click();
       });
       cy.get('[data-cy="workspace-review-close"]').click();
     });
@@ -73,16 +74,14 @@ describe('Unit Reviews', () => {
 
   it('displays the newly created review in the dashboard reviews section', () => {
     cy.visit('/');
-    cy.get('studio-lite-user-reviews-area').within(() => {
+    cy.get('studio-lite-user-reviews-area', { timeout: 20000 }).should('be.visible').within(() => {
       cy.get(`a:contains("${review}")`).should('exist');
     });
   });
 
   it('opens the review successfully and displays the unit navigation list', () => {
     cy.visit('/');
-    cy.get('studio-lite-user-reviews-area').within(() => {
-      cy.get(`a:contains("${review}")`).click();
-    });
+    openReview(review);
     cy.get('.start-data').should('exist');
     cy.get('studio-lite-unit-nav').within(() => {
       cy.get('i:contains("chevron_left")').should('exist');
@@ -106,71 +105,38 @@ describe('Unit Reviews', () => {
 
   it('exports the review configuration via the admin menu', () => {
     cy.visitWs(ws1);
-    goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
-    cy.contains('mat-row', review).click();
-    cy.get('[data-cy="workspace-review-menu-export-review-button"]').click();
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.clickButton(json['unit-download'].dialog['ok-button-label']);
-    });
+    goToReviewAdmin();
+    exportReview(review);
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 
   it('prints the review summary via the admin menu', () => {
     cy.visitWs(ws1);
-    goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
-    cy.contains('mat-row', review).click();
-    cy.get('[data-cy="workspace-review-menu-print-review-button"]').click();
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.clickButton(json.workspace.print);
-    });
+    goToReviewAdmin();
+    printReview(review);
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 
   it('allows modifying the unit selection for an existing review', () => {
     cy.visitWs(ws1);
-    goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
-    cy.contains('mat-row', review).click();
-    cy.intercept('PATCH', '/api/workspaces/*/reviews/*').as('updateReview');
-    selectCheckBox('M6_AK0013');
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.get('studio-lite-save-changes').within(() => {
-        cy.clickButton(json.workspace.save);
-      });
-    });
-    cy.wait('@updateReview');
-    cy.get('[data-cy="workspace-review-close"]').click();
+    goToReviewAdmin();
+    modifyReviewUnits(review, ['M6_AK0013']);
   });
 
   it.skip('reflects the updated unit count when the review is opened', () => {
     cy.intercept('GET', '/api/reviews/*').as('getReview');
     cy.visit('/');
-    cy.get('studio-lite-user-reviews-area').within(() => {
-      cy.get(`a:contains("${review}")`).click();
-    });
-    cy.wait('@getReview');
-    cy.reload();
+    openReview(review);
     cy.wait('@getReview');
     cy.get('studio-lite-unit-nav').within(() => {
-      cy.get('i:contains("chevron_left")').should('exist');
-      cy.get('i:contains("chevron_right")').should('exist');
-      cy.contains('.mat-mdc-list-item', '3').should('exist');
+      cy.get('.mat-mdc-list-item:contains("3")').should('exist');
     });
   });
 
-  it('displays correct review metadata and booklet settings on the start page', () => {
+  it('verifies metadata, booklet settings, and review player navigation', () => {
     cy.visit('/');
-    cy.get('studio-lite-user-reviews-area').within(() => {
-      // Ensure the link opens in the same window (prevents test failures if target="_blank" is used)
-      cy.contains('a', review).invoke('removeAttr', 'target').click();
-    });
-
-    // Check StartComponent (start-page)
-    cy.get('.start-page').should('be.visible');
-    cy.get('.start-data h1').should('contain', review);
-    cy.get('.start-data h2').should('contain', ws1);
+    openReview(review);
+    verifyReviewStartPage(review, ws1);
 
     // Check BookletConfigShowComponent
     cy.translate(Cypress.expose('locale')).then(json => {
@@ -181,9 +147,7 @@ describe('Unit Reviews', () => {
         .contains(json['booklet-config'].unitScreenHeader.WITH_UNIT_TITLE).should('exist');
     });
 
-    // Start the review
-    cy.get('.continue-button a').invoke('removeAttr', 'target').click();
-    cy.get('studio-lite-unit-player iframe').should('be.visible');
+    startReview();
   });
 
   it('loads the unit player and allows navigation through the review sequence', () => {
@@ -215,10 +179,8 @@ describe('Unit Reviews', () => {
     cy.get('mat-dialog-container').within(() => {
       cy.translate(Cypress.expose('locale')).then(json => {
         cy.contains(json.review.comment).should('exist');
-        // Interaction with studio-lite-comments (inside the dialog)
         cy.get('tiptap-editor').type('Test comment from Review');
         cy.contains('button', 'send').click({ force: true });
-        // The dialog remains open because we enabled showOthersComments
         cy.get('button').contains(json.dialogs.close).should('exist').click({ force: true });
       });
     });
@@ -231,12 +193,12 @@ describe('Unit Reviews', () => {
     // Open info panel
     cy.get('studio-lite-unit-info').within(() => {
       cy.contains('button', 'chevron_right').click();
-      cy.wait(500); // Wait for width transition
+      cy.wait(500);
       cy.get('.infoPanel').should('not.be.visible');
       cy.contains('button', 'chevron_left').click();
-      cy.wait(500); // Wait for width transition
+      cy.wait(500);
       cy.get('.infoPanel').should('be.visible');
-      cy.get('.infoPanel h2').should('not.be.empty'); // Unit Key
+      cy.get('.infoPanel h2').should('not.be.empty');
     });
   });
 
@@ -251,7 +213,7 @@ describe('Unit Reviews', () => {
     cy.get('.finish-page').should('be.visible');
     cy.get('.finish-data h1').should('contain', review);
 
-    // Test backwards button
+    // Backwards button
     cy.get('.backwards-button a').click();
     cy.url().should('include', '/u/2');
   });
@@ -277,10 +239,9 @@ describe('Unit Reviews', () => {
     });
     cy.get('mat-row').contains('M6_AK0012').click();
     clickIndexTabWorkspace('comments');
-    cy.wait(100);
+    cy.get('studio-lite-comments', { timeout: 15000 }).should('be.visible');
     clickIndexTabWorkspace('properties');
-    // cy.get('studio-lite-comments', { timeout: 10000 }).should('be.visible');
-    // We wait for the dot to disappear, as the seen-status update might take a literal second
+
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments', { timeout: 15000 }).should('have.css', 'opacity', '0');
     });
@@ -289,24 +250,9 @@ describe('Unit Reviews', () => {
   it('allows an admin to permanently delete a review', () => {
     loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
     cy.visitWs(ws1);
-    cy.get('mat-row')
-      .contains('M6_AK0012')
-      .parents('mat-row')
-      .within(() => {
-        cy.get('.new-comments', { timeout: 15000 }).should(
-          'have.css',
-          'opacity',
-          '0'
-        );
-      });
-    cy.visitWs(ws1);
-    goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-review-admin"]').click();
-    cy.contains('mat-row', review).click();
-    cy.get('[data-cy="workspace-review-menu-delete-review-button"]').click();
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.clickButton(json.workspace.delete);
-    });
+    goToReviewAdmin();
+    deleteReview(review);
     cy.get('[data-cy="workspace-review-close"]').click();
+    cy.contains('mat-row', review).should('not.exist');
   });
 });

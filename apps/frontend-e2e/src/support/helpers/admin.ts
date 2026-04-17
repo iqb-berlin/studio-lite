@@ -350,3 +350,36 @@ export function saveWorkspaceSettings(): void {
   cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
   cy.wait('@saveWsSettings').its('response.statusCode').should('eq', 200);
 }
+
+/**
+ * Configures one workspace as a drop-box for another within a group
+ * @param sourceWs - Name of the workspace to configure
+ * @param targetWs - Name of the workspace to set as drop-box
+ * @example
+ * configureDropBox('Workspace 1', 'Workspace 2');
+ */
+export function configureDropBox(sourceWs: string, targetWs: string): void {
+  clickIndexTabWsgAdmin('workspaces');
+  cy.get('mat-row').contains(sourceWs).click();
+  // Click the select-drop-box button (folder_special icon)
+  cy.get('button[mat-button], button[mat-mdc-button]')
+    .find('mat-icon')
+    .contains('folder_special')
+    .click();
+  cy.get('mat-mdc-dialog-container, mat-dialog-container').should('be.visible');
+  cy.get('mat-select').click();
+  cy.get('mat-mdc-option, mat-option').contains(targetWs).click();
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.get('mat-mdc-dialog-container, mat-dialog-container')
+      .find('button')
+      .contains(json.save)
+      .click();
+  });
+  // Verify check_circle icon appears in the row
+  cy.get('mat-row')
+    .contains(sourceWs)
+    .parent()
+    .find('mat-icon')
+    .contains('check_circle')
+    .should('exist');
+}

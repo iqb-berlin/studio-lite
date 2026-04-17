@@ -19,7 +19,11 @@ import {
   login,
   logout,
   makeAdminOfGroup,
-  clickIndexTabWsgAdmin, importExercise, selectListUnits
+  clickIndexTabWsgAdmin,
+  importExercise,
+  configureDropBox,
+  submitUnits,
+  returnSubmittedUnits
 } from '../../../support/helpers';
 
 describe('Workspace Group Administration', () => {
@@ -88,46 +92,12 @@ describe('Workspace Group Administration', () => {
 
   it('configures ws2 as a drop-box for ws1', () => {
     cy.findAdminGroupSettings(group1).click();
-    clickIndexTabWsgAdmin('workspaces');
-    cy.get('mat-row').contains(ws1).click();
-    // Click the select-drop-box button (folder_special icon)
-    cy.get('button[mat-button]')
-      .find('mat-icon')
-      .contains('folder_special')
-      .click();
-    cy.get('mat-dialog-container').should('be.visible');
-    cy.get('mat-select').click();
-    cy.get('mat-option').contains(ws2).click();
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.get('mat-dialog-container').find('button').contains(json.save).click();
-    });
-    // Verify check_circle icon appears in the row
-    cy.get('mat-row')
-      .contains(ws1)
-      .parent()
-      .find('mat-icon')
-      .contains('check_circle')
-      .should('exist');
+    configureDropBox(ws1, ws2);
   });
 
   it('submits a unit from ws1 to its drop-box ws2', () => {
     cy.visitWs(ws1);
-    cy.get('[data-cy="workspace-edit-unit-menu"]').click();
-    cy.get('[data-cy="workspace-edit-unit-submit-units"]').click();
-    cy.get('mat-dialog-container').should('be.visible');
-    // Select unit M6_AK0011
-    cy.get('mat-dialog-container').should('be.visible');
-    // Select unit M6_AK0011
-    selectListUnits(['M6_AK0011']);
-    // cy.get('mat-dialog-container')
-    //   .contains('mat-row', 'M6_AK0011')
-    //   .find('mat-checkbox')
-    //   .click();
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.get('[data-cy="workspace-select-unit-button"]')
-        .contains(json.workspace['submit-units'])
-        .click();
-    });
+    submitUnits(['M6_AK0011']);
     // Verify successful submission
     cy.get('mat-row')
       .contains('M6_AK0011', { timeout: 10000 })
@@ -140,20 +110,7 @@ describe('Workspace Group Administration', () => {
 
   it('returns a unit from the drop-box ws2 back to ws1', () => {
     cy.visitWs(ws2);
-    cy.get('[data-cy="workspace-edit-unit-menu"]').click();
-    cy.get('[data-cy="workspace-edit-unit-return-submitted-units"]').click();
-    cy.get('mat-dialog-container').should('be.visible');
-    // Select unit M6_AK0011
-    selectListUnits(['M6_AK0011']);
-    // cy.get('mat-dialog-container')
-    //   .contains('mat-row', 'M6_AK0011')
-    //   .find('mat-checkbox')
-    //   .click();
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.get('[data-cy="workspace-select-unit-button"]')
-        .contains(json.workspace['return-submitted-units'])
-        .click();
-    });
+    returnSubmittedUnits(['M6_AK0011']);
 
     // Verify it is back in ws1
     cy.visitWs(ws1);
