@@ -150,7 +150,15 @@ export class CodingReportComponent implements OnInit {
   }
 
   private stripHtml(value: string): string {
-    return value.replace(/<[^>]+>/g, '');
+    let sanitized = value;
+    let previous: string;
+
+    do {
+      previous = sanitized;
+      sanitized = sanitized.replace(/<[^>]+>/g, '');
+    } while (sanitized !== previous);
+
+    return sanitized;
   }
 
   private getCsvHeader(column: keyof CodingReportDto): string {
