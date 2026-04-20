@@ -217,6 +217,14 @@ export const modules: string[] = [
   'iqb-player-stars-0.6.26.html'
 ];
 
+/**
+ * Widgets for testing
+ */
+export const widgets: string[] = [
+  'molecule-editor-widget-0.2.0.html',
+  'periodic-system-select-widget-0.2.0.html'
+];
+
 // =============================================================================
 // Centralized Test Data
 // =============================================================================

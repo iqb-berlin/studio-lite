@@ -31,3 +31,6 @@ export * from './metadata';
 
 // Review helpers
 export * from './review';
+
+// Widget management helpers
+export * from './widgets';
