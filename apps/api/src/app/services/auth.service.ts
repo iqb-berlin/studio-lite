@@ -9,7 +9,10 @@ import { UsersService } from './users.service';
 import { ReviewService } from './review.service';
 import { RefreshToken } from '../entities/refresh-token.entity';
 import UserSession from '../entities/user-session.entity';
-import { REFRESH_TOKEN_EXPIRES_IN_SEC, INACTIVITY_THRESHOLD_SEC } from '../app.constants';
+import {
+  REFRESH_TOKEN_EXPIRES_IN_MS,
+  INACTIVITY_THRESHOLD_MS
+} from '../app.constants';
 
 @Injectable()
 export class AuthService {
@@ -123,7 +126,7 @@ export class AuthService {
   }
 
   private async createUserSession(userId: number, sessionId: string): Promise<void> {
-    const expiresAt = new Date(Date.now() + (INACTIVITY_THRESHOLD_SEC * 1000));
+    const expiresAt = new Date(Date.now() + INACTIVITY_THRESHOLD_MS);
     const session = this.userSessionRepository.create({
       sessionId,
       userId,
@@ -135,7 +138,7 @@ export class AuthService {
 
   private async generateRefreshToken(userId: number, sessionId: string): Promise<string> {
     const token = crypto.randomBytes(64).toString('hex');
-    const expiresAt = new Date(Date.now() + (REFRESH_TOKEN_EXPIRES_IN_SEC * 1000));
+    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN_MS);
     const tokenHash = AuthService.hashToken(token);
     const refreshToken = this.refreshTokenRepository.create({
       tokenHash,
@@ -160,7 +163,7 @@ export class AuthService {
     }
 
     const inactivityAge = Date.now() - new Date(userSession.lastActivity).getTime();
-    if (inactivityAge > INACTIVITY_THRESHOLD_SEC * 1000) {
+    if (inactivityAge > INACTIVITY_THRESHOLD_MS) {
       this.logger.log(`Denying refresh for user '${refreshToken.userId}' due to inactivity (${inactivityAge}ms).`);
       return null;
     }
@@ -170,7 +173,7 @@ export class AuthService {
 
     // Rotate refresh token and keep the current session alive.
     await this.refreshTokenRepository.delete({ tokenHash: refreshToken.tokenHash });
-    userSession.expiresAt = new Date(Date.now() + (INACTIVITY_THRESHOLD_SEC * 1000));
+    userSession.expiresAt = new Date(Date.now() + INACTIVITY_THRESHOLD_MS);
     await this.userSessionRepository.save(userSession);
 
     return this.login({ id: user.id, name: user.name, reviewId: 0 }, userSession.sessionId);

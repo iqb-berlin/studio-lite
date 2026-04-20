@@ -23,7 +23,10 @@ import Workspace from '../entities/workspace.entity';
 import { UnitService } from './unit.service';
 import { UnitUserService } from './unit-user.service';
 import UserSession from '../entities/user-session.entity';
-import { ACTIVE_SESSION_THRESHOLD_SEC, INACTIVITY_THRESHOLD_SEC } from '../app.constants';
+import {
+  ACTIVE_SESSION_THRESHOLD_MS,
+  INACTIVITY_THRESHOLD_MS
+} from '../app.constants';
 
 @Injectable()
 export class UsersService {
@@ -434,13 +437,13 @@ export class UsersService {
 
   async updateLastActivity(userId: number, sessionId?: string): Promise<void> {
     const now = new Date();
-    const expiresAt = new Date(Date.now() + (INACTIVITY_THRESHOLD_SEC * 1000));
+    const expiresAt = new Date(Date.now() + INACTIVITY_THRESHOLD_MS);
     const criteria = sessionId ? { userId, sessionId } : { userId };
     await this.userSessionRepository.update(criteria, { lastActivity: now, expiresAt });
   }
 
   async updateSessionExpiry(userId: number, sessionId?: string): Promise<void> {
-    const expiresAt = new Date(Date.now() + (INACTIVITY_THRESHOLD_SEC * 1000));
+    const expiresAt = new Date(Date.now() + INACTIVITY_THRESHOLD_MS);
     const criteria = sessionId ? { userId, sessionId } : { userId };
     await this.userSessionRepository.update(criteria, { expiresAt });
   }
@@ -489,8 +492,8 @@ export class UsersService {
 
   private static calculateActivityStatus(lastActivity: Date, nowMs: number): UserActivityStatus {
     const ageMs = nowMs - new Date(lastActivity).getTime();
-    if (ageMs <= ACTIVE_SESSION_THRESHOLD_SEC * 1000) return 'active';
-    if (ageMs <= INACTIVITY_THRESHOLD_SEC * 1000) return 'passive';
+    if (ageMs <= ACTIVE_SESSION_THRESHOLD_MS) return 'active';
+    if (ageMs <= INACTIVITY_THRESHOLD_MS) return 'passive';
     return 'inactive';
   }
 

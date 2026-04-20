@@ -12,7 +12,14 @@ import { AuthDataDto } from '@studio-lite-lib/api-dto';
 import { AppService } from './app.service';
 import { BackendService } from './backend.service';
 import {
-  ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS, HEARTBEAT_PING_INTERVAL_MS, UI_BAR_REFRESH_INTERVAL_MS
+  ACTIVE_THRESHOLD_MS,
+  PASSIVE_THRESHOLD_MS,
+  HEARTBEAT_PING_INTERVAL_MS,
+  UI_BAR_REFRESH_INTERVAL_MS,
+  ACTIVITY_SYNC_THROTTLE_MS,
+  USER_ACTIVITY_THROTTLE_MS,
+  POST_MESSAGE_ACTIVITY_THROTTLE_MS,
+  AUTO_LOGOUT_REDIRECT_DELAY_MS
 } from '../app.constants';
 
 @Injectable({
@@ -139,12 +146,12 @@ export class HeartbeatService implements OnDestroy {
         if (typeof window !== 'undefined') {
           window.location.href = '/home';
         }
-      }, 1000);
+      }, AUTO_LOGOUT_REDIRECT_DELAY_MS);
     });
 
     this.activitySync$
       .pipe(
-        throttleTime(5000),
+        throttleTime(ACTIVITY_SYNC_THROTTLE_MS),
         filter(() => (this.appService.authData?.userId || 0) > 0),
         switchMap(() => this.backendService.activity().pipe(
           catchError(() => of(null))
@@ -160,14 +167,14 @@ export class HeartbeatService implements OnDestroy {
         fromEvent(window, 'mousedown', { passive: true }),
         fromEvent(window, 'touchstart', { passive: true })
       ).pipe(
-        throttleTime(1000),
+        throttleTime(USER_ACTIVITY_THROTTLE_MS),
         takeUntil(this.ngUnsubscribe)
       ).subscribe(() => this.registerUserActivity());
     });
 
     this.appService.postMessage$
       .pipe(
-        throttleTime(1000),
+        throttleTime(POST_MESSAGE_ACTIVITY_THROTTLE_MS),
         takeUntil(this.ngUnsubscribe)
       ).subscribe(() => this.registerUserActivity());
   }

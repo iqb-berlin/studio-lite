@@ -1,9 +1,24 @@
-// Session Timings
-export const ACTIVE_THRESHOLD_MS = 2 * 60 * 1000; // 2 minutes for testing
-// Total inactivity timeout since last user activity (active + passive visualization).
-export const PASSIVE_THRESHOLD_MS = 3 * 60 * 1000; // 3 minutes for testing
+import {
+  ACTIVE_THRESHOLD_MS,
+  PASSIVE_THRESHOLD_MS,
+  HEARTBEAT_PING_INTERVAL_MS,
+  UI_BAR_REFRESH_INTERVAL_MS,
+  ADMIN_USER_LIST_POLL_INTERVAL_MS,
+  ACTIVITY_SYNC_THROTTLE_MS,
+  USER_ACTIVITY_THROTTLE_MS,
+  POST_MESSAGE_ACTIVITY_THROTTLE_MS,
+  AUTO_LOGOUT_REDIRECT_DELAY_MS
+} from '@studio-lite/shared-code';
 
-// Intervall Settings
-export const HEARTBEAT_PING_INTERVAL_MS = 30 * 1000; // 30 seconds for testing
-export const UI_BAR_REFRESH_INTERVAL_MS = 1000; // 1 second for smoother header bar precision
-export const ADMIN_USER_LIST_POLL_INTERVAL_MS = 15 * 1000; // 15 seconds for faster admin/users sync
+// Re-export app timings from one shared source to keep frontend/backend in sync.
+export {
+  ACTIVE_THRESHOLD_MS,
+  PASSIVE_THRESHOLD_MS,
+  HEARTBEAT_PING_INTERVAL_MS,
+  UI_BAR_REFRESH_INTERVAL_MS,
+  ADMIN_USER_LIST_POLL_INTERVAL_MS,
+  ACTIVITY_SYNC_THROTTLE_MS,
+  USER_ACTIVITY_THROTTLE_MS,
+  POST_MESSAGE_ACTIVITY_THROTTLE_MS,
+  AUTO_LOGOUT_REDIRECT_DELAY_MS
+};
