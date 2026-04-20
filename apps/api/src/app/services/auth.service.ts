@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import { UsersService } from './users.service';
 import { ReviewService } from './review.service';
@@ -39,17 +39,17 @@ export class AuthService {
     return this.reviewService.getReviewByKeyAndPassword(reviewKey, pass);
   }
 
-  private getLoginMessage(user: { id: number, reviewId: number }): string {
+  private static getLoginMessage(user: { id: number, reviewId: number }): string {
     return user.id ?
       `User with id '${user.id}' is logging in.` :
       `Review with id '${user.reviewId}' is logging in.`;
   }
 
-  private getSessionId(existingSessionId?: string): string {
+  private static getSessionId(existingSessionId?: string): string {
     return existingSessionId || crypto.randomUUID();
   }
 
-  private getJwtPayload(user: { id: number, name: string, reviewId: number }, sessionId: string): {
+  private static getJwtPayload(user: { id: number, name: string, reviewId: number }, sessionId: string): {
     username: string;
     sub: number;
     sub2: number;
@@ -86,10 +86,10 @@ export class AuthService {
     user: { id: number, name: string, reviewId: number },
     existingSessionId?: string
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    this.logger.log(this.getLoginMessage(user));
+    this.logger.log(AuthService.getLoginMessage(user));
 
-    const sessionId = this.getSessionId(existingSessionId);
-    const accessToken = this.jwtService.sign(this.getJwtPayload(user, sessionId));
+    const sessionId = AuthService.getSessionId(existingSessionId);
+    const accessToken = this.jwtService.sign(AuthService.getJwtPayload(user, sessionId));
 
     // Reviews do not keep long-lived user sessions.
     if (!user.id) {
@@ -97,11 +97,29 @@ export class AuthService {
     }
 
     if (!existingSessionId) {
+      await this.cleanupExpiredSessions(user.id);
       await this.createUserSession(user.id, sessionId);
     }
 
     const refreshToken = await this.generateRefreshToken(user.id, sessionId);
     return { accessToken, refreshToken };
+  }
+
+  private async cleanupExpiredSessions(userId: number): Promise<void> {
+    const now = new Date();
+    const expiredSessions = await this.userSessionRepository.find({
+      where: { userId, expiresAt: LessThan(now) },
+      select: { sessionId: true }
+    });
+    if (expiredSessions.length > 0) {
+      const expiredIds = expiredSessions.map(s => s.sessionId);
+      await this.refreshTokenRepository
+        .createQueryBuilder()
+        .delete()
+        .where('userId = :userId AND sessionId IN (:...ids)', { userId, ids: expiredIds })
+        .execute();
+      await this.userSessionRepository.delete({ userId, expiresAt: LessThan(now) });
+    }
   }
 
   private async createUserSession(userId: number, sessionId: string): Promise<void> {
@@ -195,12 +213,23 @@ export class AuthService {
     await this.userSessionRepository.delete({ userId });
   }
 
-  async logoutCurrentSession(token: string, fallbackUserId?: number): Promise<void> {
+  async logoutCurrentSession(
+    token: string,
+    fallbackUserId?: number,
+    fallbackSessionId?: string
+  ): Promise<void> {
     const refreshToken = await this.findRefreshTokenByToken(token);
 
     if (!refreshToken) {
-      if (fallbackUserId) {
-        await this.logout(fallbackUserId);
+      if (fallbackUserId && fallbackSessionId) {
+        await this.userSessionRepository.delete({
+          userId: fallbackUserId,
+          sessionId: fallbackSessionId
+        });
+        await this.refreshTokenRepository.delete({
+          userId: fallbackUserId,
+          sessionId: fallbackSessionId
+        });
       }
       return;
     }

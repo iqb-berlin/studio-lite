@@ -10,6 +10,7 @@ import {
   MyDataDto,
   UserFullDto,
   UserInListDto,
+  UserSessionInfoDto,
   UsersInWorkspaceDto,
   UserWorkspaceAccessDto,
   WorkspaceUserInListDto
@@ -183,7 +184,8 @@ export class UsersService {
           emailPublishApproved: user.emailPublishApproved,
           lastActivity: status?.lastActivity,
           isLoggedIn: status?.isLoggedIn || false,
-          activityStatus: status?.activityStatus || 'inactive'
+          activityStatus: status?.activityStatus || 'inactive',
+          sessions: status?.sessions || []
         };
       }
       return null;
@@ -447,23 +449,37 @@ export class UsersService {
     isLoggedIn: boolean;
     lastActivity?: Date;
     activityStatus: UserActivityStatus;
+    sessions: UserSessionInfoDto[];
   }>> {
     const nowMs = Date.now();
     const sessionsByUser = new Map<number, {
       isLoggedIn: boolean;
       lastActivity?: Date;
       activityStatus: UserActivityStatus;
+      sessions: UserSessionInfoDto[];
     }>();
 
     (await this.userSessionRepository.find())
       .filter(session => UsersService.isSessionStillValid(session.expiresAt, nowMs))
       .forEach(session => {
-        const currentSession = sessionsByUser.get(session.userId);
-        if (UsersService.isNewerSession(session.lastActivity, currentSession?.lastActivity)) {
+        const sessionInfo: UserSessionInfoDto = {
+          sessionId: session.sessionId,
+          lastActivity: session.lastActivity,
+          activityStatus: UsersService.calculateActivityStatus(session.lastActivity, nowMs)
+        };
+        const existing = sessionsByUser.get(session.userId);
+        if (existing) {
+          existing.sessions.push(sessionInfo);
+          if (UsersService.isNewerSession(session.lastActivity, existing.lastActivity)) {
+            existing.lastActivity = session.lastActivity;
+            existing.activityStatus = UsersService.calculateActivityStatus(session.lastActivity, nowMs);
+          }
+        } else {
           sessionsByUser.set(session.userId, {
             isLoggedIn: true,
             lastActivity: session.lastActivity,
-            activityStatus: UsersService.calculateActivityStatus(session.lastActivity, nowMs)
+            activityStatus: UsersService.calculateActivityStatus(session.lastActivity, nowMs),
+            sessions: [sessionInfo]
           });
         }
       });

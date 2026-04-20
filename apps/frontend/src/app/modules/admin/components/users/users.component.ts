@@ -35,6 +35,7 @@ import {
   BackendService
 } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
+import { HeartbeatService } from '../../../../services/heartbeat.service';
 
 @Component({
   selector: 'studio-lite-users',
@@ -51,6 +52,8 @@ export class UsersComponent implements OnInit, OnDestroy {
   userWorkspaceGroups = new WorkspaceGroupToCheckCollection([]);
   activeUserCount = 0;
   loggedInUserCount = 0;
+  activeSessionCount = 0;
+  passiveSessionCount = 0;
   private pollingSubscription: Subscription | null = null;
   private readonly ngUnsubscribe = new Subject<void>();
 
@@ -59,11 +62,12 @@ export class UsersComponent implements OnInit, OnDestroy {
   constructor(
     private appService: AppService,
     private backendService: BackendService,
+    private heartbeatService: HeartbeatService,
     private snackBar: MatSnackBar,
     private translateService: TranslateService,
     private deleteConfirmDialog: MatDialog
   ) {
-    this.tableSelectionRow.changed.subscribe(
+    this.tableSelectionRow.changed.pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       r => {
         if (r.added.length > 0) {
           this.selectedUser = r.added[0].id;
@@ -87,7 +91,7 @@ export class UsersComponent implements OnInit, OnDestroy {
           takeUntil(this.ngUnsubscribe)
         )
         .subscribe(() => {
-          if (this.isTabVisible()) {
+          if (UsersComponent.isTabVisible()) {
             this.startPolling();
           } else {
             this.stopPolling();
@@ -115,7 +119,7 @@ export class UsersComponent implements OnInit, OnDestroy {
       lastName: userData.get('lastName')?.value,
       email: userData.get('email')?.value
     };
-    this.backendService.addUser(user).subscribe(
+    this.backendService.addUser(user).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       respOk => {
         this.updateUserList();
         if (respOk) {
@@ -152,7 +156,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     if (newEmail !== value.selection[0].email) changedData.email = newEmail;
     if (newPassword) changedData.password = newPassword;
     if (newIsAdmin !== value.selection[0].isAdmin) changedData.isAdmin = newIsAdmin;
-    this.backendService.changeUserData(id, changedData).subscribe(
+    this.backendService.changeUserData(id, changedData).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       respOk => {
         this.updateUserList();
         if (respOk) {
@@ -185,12 +189,12 @@ export class UsersComponent implements OnInit, OnDestroy {
       }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
       if (result) {
         this.appService.dataLoading = true;
         const usersToDelete: number[] = [];
         users.forEach((r: UserFullDto) => usersToDelete.push(r.id));
-        this.backendService.deleteUsers(usersToDelete).subscribe(
+        this.backendService.deleteUsers(usersToDelete).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
           respOk => {
             if (respOk) {
               this.snackBar.open(
@@ -213,11 +217,15 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   updateWorkspaceGroupList(): void {
     if (this.userWorkspaceGroups.hasChanged) {
-      this.snackBar.open('Zugriffsrechte nicht gespeichert.', 'Warnung', { duration: 3000 });
+      this.snackBar.open(
+        this.translateService.instant('access-rights.not-saved'),
+        this.translateService.instant('warning'),
+        { duration: 3000 }
+      );
     }
     if (this.selectedUser > 0) {
       this.appService.dataLoading = true;
-      this.backendService.getWorkspaceGroupsByAdmin(this.selectedUser).subscribe(
+      this.backendService.getWorkspaceGroupsByAdmin(this.selectedUser).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
         (workspaceGroups: WorkspaceGroupInListDto[]) => {
           this.userWorkspaceGroups.setChecks(workspaceGroups);
           this.appService.dataLoading = false;
@@ -234,14 +242,22 @@ export class UsersComponent implements OnInit, OnDestroy {
         this.appService.dataLoading = true;
         this.backendService.setWorkspaceGroupsByAdmin(
           this.selectedUser, this.userWorkspaceGroups.getChecks()
-        ).subscribe(
+        ).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
           respOk => {
             if (respOk) {
-              this.snackBar.open('Zugriffsrechte geändert', '', { duration: 1000 });
+              this.snackBar.open(
+                this.translateService.instant('access-rights.changed'),
+                '',
+                { duration: 1000 }
+              );
               this.userWorkspaceGroups.setHasChangedFalse();
               this.userWorkspaceGroups.sortEntries();
             } else {
-              this.snackBar.open('Konnte Zugriffsrechte nicht ändern', 'Fehler', { duration: 3000 });
+              this.snackBar.open(
+                this.translateService.instant('access-rights.not-changed'),
+                this.translateService.instant('error'),
+                { duration: 3000 }
+              );
             }
             this.appService.dataLoading = false;
           }
@@ -255,11 +271,14 @@ export class UsersComponent implements OnInit, OnDestroy {
       this.selectedUser = 0;
       this.appService.dataLoading = true;
     }
+    if (countAsActivity && UsersComponent.isTabVisible()) {
+      this.heartbeatService.refreshActivityPulse();
+    }
     // Keep the admin route alive during periodic list polling by explicitly flagging user intent.
     const usersRequest = countAsActivity ? this.backendService.getUsersFullWithActivity() :
       this.backendService.getUsersFull();
 
-    usersRequest.subscribe(
+    usersRequest.pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       (users: UserFullDto[]) => {
         this.setObjectsDatasource(users);
         if (showLoading) {
@@ -279,11 +298,12 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   private startPolling(): void {
-    if (this.pollingSubscription || !this.isTabVisible()) {
+    if (this.pollingSubscription || !UsersComponent.isTabVisible()) {
       return;
     }
 
     this.pollingSubscription = timer(ADMIN_USER_LIST_POLL_INTERVAL_MS, ADMIN_USER_LIST_POLL_INTERVAL_MS)
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.updateUserList(false, true);
       });
@@ -296,7 +316,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     }
   }
 
-  private isTabVisible(): boolean {
+  private static isTabVisible(): boolean {
     return typeof document !== 'undefined' && document.visibilityState === 'visible';
   }
 
@@ -313,11 +333,17 @@ export class UsersComponent implements OnInit, OnDestroy {
 
     this.activeUserCount = users.filter(u => u.activityStatus === 'active').length;
     this.loggedInUserCount = users.filter(u => u.isLoggedIn).length;
+    this.activeSessionCount = users
+      .flatMap(user => user.sessions || [])
+      .filter(session => session.activityStatus === 'active').length;
+    this.passiveSessionCount = users
+      .flatMap(user => user.sessions || [])
+      .filter(session => session.activityStatus === 'passive').length;
   }
 
   createWorkspaceList(): void {
     this.userWorkspaceGroups = new WorkspaceGroupToCheckCollection([]);
-    this.backendService.getWorkspaceGroupList().subscribe(worksGroups => {
+    this.backendService.getWorkspaceGroupList().pipe(takeUntil(this.ngUnsubscribe)).subscribe(worksGroups => {
       this.userWorkspaceGroups = new WorkspaceGroupToCheckCollection(worksGroups);
       this.updateUserList();
     });

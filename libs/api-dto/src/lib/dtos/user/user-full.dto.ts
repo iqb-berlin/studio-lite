@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-
-export type UserActivityStatus = 'active' | 'passive' | 'inactive';
+import { UserSessionInfoDto } from './user-session-info.dto';
+import { UserActivityStatus } from './user-activity-status';
 
 export class UserFullDto {
   @ApiProperty()
@@ -38,4 +38,7 @@ export class UserFullDto {
 
   @ApiProperty({ required: false, enum: ['active', 'passive', 'inactive'] })
     activityStatus?: UserActivityStatus;
+
+  @ApiProperty({ type: [UserSessionInfoDto] })
+    sessions?: UserSessionInfoDto[];
 }

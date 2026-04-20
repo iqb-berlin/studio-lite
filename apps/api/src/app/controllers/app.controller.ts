@@ -63,9 +63,9 @@ export class AppController {
   @ApiBearerAuth()
   @ApiTags('auth')
   @ApiOkResponse({ description: 'Logged out successfully.' })
-  async logout(@UserId() userId: number, @Body() body: { refreshToken?: string }) {
+  async logout(@Request() req, @UserId() userId: number, @Body() body: { refreshToken?: string }) {
     if (body?.refreshToken) {
-      await this.authService.logoutCurrentSession(body.refreshToken, userId);
+      await this.authService.logoutCurrentSession(body.refreshToken, userId, req.user?.sessionId);
       return;
     }
     await this.authService.logout(userId);

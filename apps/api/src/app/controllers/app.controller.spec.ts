@@ -67,14 +67,14 @@ describe('AppController', () => {
 
   describe('logout', () => {
     it('should call logoutCurrentSession when refresh token is provided', async () => {
-      await controller.logout(3, { refreshToken: 'rt-3' });
+      await controller.logout({ user: { sessionId: 'sid-3' } }, 3, { refreshToken: 'rt-3' });
 
-      expect(authService.logoutCurrentSession).toHaveBeenCalledWith('rt-3', 3);
+      expect(authService.logoutCurrentSession).toHaveBeenCalledWith('rt-3', 3, 'sid-3');
       expect(authService.logout).not.toHaveBeenCalled();
     });
 
     it('should call global logout when no refresh token is provided', async () => {
-      await controller.logout(4, {});
+      await controller.logout({ user: { sessionId: 'sid-4' } }, 4, {});
 
       expect(authService.logout).toHaveBeenCalledWith(4);
       expect(authService.logoutCurrentSession).not.toHaveBeenCalled();

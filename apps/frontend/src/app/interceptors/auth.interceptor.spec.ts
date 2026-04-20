@@ -11,7 +11,6 @@ import { Router } from '@angular/router';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 import { AppHttpError } from '../classes/app-http-error.class';
-import { HeartbeatService } from '../services/heartbeat.service';
 import { AuthInterceptor } from './auth.interceptor';
 
 describe('AuthInterceptor', () => {
@@ -20,7 +19,6 @@ describe('AuthInterceptor', () => {
   let appServiceSpy: { addErrorMessage: jest.Mock };
   let backendServiceSpy: { refresh: jest.Mock, logout: jest.Mock };
   let routerSpy: { navigate: jest.Mock };
-  let heartbeatServiceSpy: { refreshActivityPulse: jest.Mock };
 
   beforeEach(() => {
     appServiceSpy = {
@@ -32,9 +30,6 @@ describe('AuthInterceptor', () => {
     };
     routerSpy = {
       navigate: jest.fn().mockResolvedValue(true)
-    };
-    heartbeatServiceSpy = {
-      refreshActivityPulse: jest.fn()
     };
 
     TestBed.configureTestingModule({
@@ -56,10 +51,6 @@ describe('AuthInterceptor', () => {
         {
           provide: Router,
           useValue: routerSpy
-        },
-        {
-          provide: HeartbeatService,
-          useValue: heartbeatServiceSpy
         },
         {
           provide: HTTP_INTERCEPTORS,
@@ -106,33 +97,6 @@ describe('AuthInterceptor', () => {
     req.flush({});
   });
 
-  it('does not refresh activity pulse for unflagged group-admin/users polling', () => {
-    httpClient.get('/api/group-admin/users?full=true').subscribe();
-
-    const req = httpMock.expectOne('/api/group-admin/users?full=true');
-    expect(heartbeatServiceSpy.refreshActivityPulse).not.toHaveBeenCalled();
-    req.flush([]);
-  });
-
-  it('refreshes activity pulse for explicitly flagged group-admin/users requests', () => {
-    httpClient.get('/api/group-admin/users?full=true', {
-      headers: { 'x-activity-intent': 'user' }
-    }).subscribe();
-
-    const req = httpMock.expectOne('/api/group-admin/users?full=true');
-    expect(heartbeatServiceSpy.refreshActivityPulse).toHaveBeenCalledTimes(1);
-    expect(req.request.headers.get('x-activity-intent')).toBe('user');
-    req.flush([]);
-  });
-
-  it('does not refresh activity pulse for activity sync requests', () => {
-    httpClient.post('/api/activity', {}).subscribe();
-
-    const req = httpMock.expectOne('/api/activity');
-    expect(heartbeatServiceSpy.refreshActivityPulse).not.toHaveBeenCalled();
-    req.flush({});
-  });
-
   it('reports errors with method and url on error responses', () => {
     httpClient.get('/boom').subscribe({
       error: () => {
@@ -167,23 +131,6 @@ describe('AuthInterceptor', () => {
     expect(retryReqs.length).toBe(1);
     expect(retryReqs[0].request.headers.get('Authorization')).toBe('Bearer new-aceess');
     retryReqs[0].flush({});
-  });
-
-  it('does not refresh activity pulse on 401 retry for unflagged group-admin/users polling', () => {
-    localStorage.setItem('refresh_token', 'old-refresh');
-    backendServiceSpy.refresh.mockReturnValue(of({ accessToken: 'new-access', refreshToken: 'new-refresh' }));
-
-    httpClient.get('/api/group-admin/users?full=true').subscribe();
-
-    const reqs = httpMock.match('/api/group-admin/users?full=true');
-    expect(reqs.length).toBe(1);
-    reqs[0].flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
-
-    const retryReqs = httpMock.match('/api/group-admin/users?full=true');
-    expect(retryReqs.length).toBe(1);
-    retryReqs[0].flush([]);
-
-    expect(heartbeatServiceSpy.refreshActivityPulse).not.toHaveBeenCalled();
   });
 
   it('should logout and redirect to login if refresh fails', () => {

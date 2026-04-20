@@ -226,19 +226,28 @@ describe('AuthService', () => {
         sessionId: 'sid-2'
       } as RefreshToken);
 
-      await service.logoutCurrentSession('raw-refresh-token', 2);
+      await service.logoutCurrentSession('raw-refresh-token', 2, 'sid-2');
 
       expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 2, sessionId: 'sid-2' });
       expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 2, sessionId: 'sid-2' });
     });
 
-    it('should fallback to full logout if token lookup fails and fallback user exists', async () => {
+    it('should fallback to session-scoped cleanup if token lookup fails and fallback session exists', async () => {
+      refreshTokenRepository.findOne.mockResolvedValue(null);
+
+      await service.logoutCurrentSession('missing-token', 9, 'sid-9');
+
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 9, sessionId: 'sid-9' });
+      expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 9, sessionId: 'sid-9' });
+    });
+
+    it('should do nothing when token lookup fails without fallback session id', async () => {
       refreshTokenRepository.findOne.mockResolvedValue(null);
 
       await service.logoutCurrentSession('missing-token', 9);
 
-      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 9 });
-      expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 9 });
+      expect(refreshTokenRepository.delete).not.toHaveBeenCalled();
+      expect(userSessionRepository.delete).not.toHaveBeenCalled();
     });
   });
 });

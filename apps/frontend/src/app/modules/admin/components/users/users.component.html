@@ -12,7 +12,10 @@
         { count: objectsDatasource.data.length, issue: ('admin.users' | translate)}
         }}
         {{ 'admin.users-logged-in' | translate: { count: loggedInUserCount } }}
-        <span>{{ 'admin.users-active' | translate: { count: activeUserCount } }}</span>
+        <span>{{ 'admin.users-sessions-status' | translate: {
+          activeSessions: activeSessionCount,
+          passiveSessions: passiveSessionCount
+        } }}</span>
       </div>
 
       <studio-lite-search-filter
@@ -28,19 +31,21 @@
       <ng-container matColumnDef="active">
         <mat-header-cell *matHeaderCellDef
                          mat-sort-header="lastActivity">
-          {{'user.active' | translate}}
+          {{'user.sessions' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let element">
           @if (!element.isLoggedIn) {
-            <span class="inactive-dot" [matTooltip]="('user.inactive' | translate) + (element.lastActivity ? ' (' + (element.lastActivity | date: 'HH:mm:ss') + ')' : '')"></span>
-          } @else if (element.activityStatus === 'active') {
-            <span class="active-dot" [matTooltip]="('user.active' | translate) + (element.lastActivity ? ' (' + (element.lastActivity | date: 'HH:mm:ss') + ')' : '')"></span>
+            <span class="inactive-dot" [matTooltip]="'user.inactive' | translate"></span>
           } @else {
-            <span class="passive-dot" [matTooltip]="('user.passive' | translate) + (element.lastActivity ? ' (' + (element.lastActivity | date: 'HH:mm:ss') + ')' : '')"></span>
+            @for (session of element.sessions; track session.sessionId) {
+              @if (session.activityStatus === 'active') {
+                <span class="active-dot" [matTooltip]="('user.active' | translate) + (session.lastActivity ? ' (' + (session.lastActivity | date: 'HH:mm:ss') + ')' : '')"></span>
+              } @else {
+                <span class="passive-dot" [matTooltip]="('user.passive' | translate) + (session.lastActivity ? ' (' + (session.lastActivity | date: 'HH:mm:ss') + ')' : '')"></span>
+              }
+            }
           }
         </mat-cell>
-
-
       </ng-container>
 
       <ng-container matColumnDef="name">

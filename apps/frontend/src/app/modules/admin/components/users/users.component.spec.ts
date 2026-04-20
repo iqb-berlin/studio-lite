@@ -21,6 +21,7 @@ import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '../../../../app.constants';
 import { UsersComponent } from './users.component';
 import { AppService } from '../../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
+import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { UsersMenuComponent } from '../users-menu/users-menu.component';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 
@@ -31,6 +32,7 @@ describe('UsersComponent', () => {
   let mockAppService: Partial<AppService>;
   let mockSnackBar: Partial<MatSnackBar>;
   let mockDialog: Partial<MatDialog>;
+  let mockHeartbeatService: Partial<HeartbeatService>;
 
   const setDocumentVisibility = (visibilityState: 'visible' | 'hidden'): void => {
     Object.defineProperty(document, 'visibilityState', {
@@ -85,6 +87,10 @@ describe('UsersComponent', () => {
       })
     };
 
+    mockHeartbeatService = {
+      refreshActivityPulse: jest.fn()
+    };
+
     await TestBed.configureTestingModule({
       imports: [
         MatSnackBarModule,
@@ -105,6 +111,7 @@ describe('UsersComponent', () => {
         },
         { provide: BackendService, useValue: mockBackendService },
         { provide: AppService, useValue: mockAppService },
+        { provide: HeartbeatService, useValue: mockHeartbeatService },
         { provide: MatSnackBar, useValue: mockSnackBar },
         { provide: MatDialog, useValue: mockDialog }
       ]
@@ -141,6 +148,7 @@ describe('UsersComponent', () => {
 
     expect(mockBackendService.getUsersFull).toHaveBeenCalled();
     expect(mockBackendService.getUsersFullWithActivity).not.toHaveBeenCalled();
+    expect(mockHeartbeatService.refreshActivityPulse).not.toHaveBeenCalled();
   });
 
   it('should refresh with activity intent on periodic polling', () => {
@@ -151,7 +159,26 @@ describe('UsersComponent', () => {
     jest.advanceTimersByTime(ADMIN_USER_LIST_POLL_INTERVAL_MS);
 
     expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
+    expect(mockHeartbeatService.refreshActivityPulse).toHaveBeenCalled();
     jest.useRealTimers();
+  });
+
+  it('should refresh heartbeat pulse for visible activity-counting refreshes', () => {
+    setDocumentVisibility('visible');
+
+    component.updateUserList(false, true);
+
+    expect(mockHeartbeatService.refreshActivityPulse).toHaveBeenCalled();
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
+  });
+
+  it('should not refresh heartbeat pulse while hidden', () => {
+    setDocumentVisibility('hidden');
+
+    component.updateUserList(false, true);
+
+    expect(mockHeartbeatService.refreshActivityPulse).not.toHaveBeenCalled();
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
   });
 
   it('should not poll when the tab is hidden', () => {
@@ -282,7 +309,7 @@ describe('UsersComponent', () => {
     } as unknown as WorkspaceGroupToCheckCollection;
     component.selectedUser = 0;
     component.updateWorkspaceGroupList();
-    expect(mockSnackBar.open).toHaveBeenCalledWith('Zugriffsrechte nicht gespeichert.', 'Warnung', { duration: 3000 });
+    expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.not-saved', 'warning', { duration: 3000 });
   });
 
   it('should save workspaces successfully', () => {
@@ -295,7 +322,7 @@ describe('UsersComponent', () => {
     } as unknown as WorkspaceGroupToCheckCollection;
     component.saveWorkspaces();
     expect(mockBackendService.setWorkspaceGroupsByAdmin).toHaveBeenCalled();
-    expect(mockSnackBar.open).toHaveBeenCalledWith('Zugriffsrechte geändert', '', { duration: 1000 });
+    expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.changed', '', { duration: 1000 });
   });
 
   it('should handle save workspaces failure', () => {
@@ -306,7 +333,7 @@ describe('UsersComponent', () => {
       getChecks: jest.fn().mockReturnValue([])
     } as unknown as WorkspaceGroupToCheckCollection;
     component.saveWorkspaces();
-    expect(mockSnackBar.open).toHaveBeenCalledWith('Konnte Zugriffsrechte nicht ändern', 'Fehler', { duration: 3000 });
+    expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.not-changed', 'error', { duration: 3000 });
   });
 
   it('should toggle row selection', () => {
@@ -324,19 +351,25 @@ describe('UsersComponent', () => {
         id: 1,
         name: 'a',
         activityStatus: 'active',
-        isLoggedIn: true
+        isLoggedIn: true,
+        sessions: [{ sessionId: 's1', activityStatus: 'active' }]
       },
       {
         id: 2,
         name: 'p',
         activityStatus: 'passive',
-        isLoggedIn: true
+        isLoggedIn: true,
+        sessions: [
+          { sessionId: 's2', activityStatus: 'passive' },
+          { sessionId: 's3', activityStatus: 'active' }
+        ]
       },
       {
         id: 3,
         name: 'i',
         activityStatus: 'inactive',
-        isLoggedIn: false
+        isLoggedIn: false,
+        sessions: []
       }
     ] as UserFullDto[];
 
@@ -345,6 +378,8 @@ describe('UsersComponent', () => {
 
     expect(component.activeUserCount).toBe(1);
     expect(component.loggedInUserCount).toBe(2);
+    expect(component.activeSessionCount).toBe(2);
+    expect(component.passiveSessionCount).toBe(1);
   });
 
   it('should not treat logged-in users as logged-out when activityStatus is missing', () => {
@@ -366,5 +401,7 @@ describe('UsersComponent', () => {
 
     expect(component.loggedInUserCount).toBe(1);
     expect(component.activeUserCount).toBe(0);
+    expect(component.activeSessionCount).toBe(0);
+    expect(component.passiveSessionCount).toBe(0);
   });
 });

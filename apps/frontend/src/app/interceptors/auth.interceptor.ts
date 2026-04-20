@@ -1,4 +1,4 @@
-import { Inject, Injectable, Injector } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import {
   HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpResponse
 } from '@angular/common/http';
@@ -9,7 +9,6 @@ import { Router } from '@angular/router';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 import { AppHttpError } from '../classes/app-http-error.class';
-import { HeartbeatService } from '../services/heartbeat.service';
 
 @Injectable({
   providedIn: 'root'
@@ -22,32 +21,17 @@ export class AuthInterceptor implements HttpInterceptor {
     @Inject('APP_VERSION') readonly appVersion: string,
     private appService: AppService,
     private backendService: BackendService,
-    private router: Router,
-    private injector: Injector
+    private router: Router
   ) {}
-
-  private get heartbeatService(): HeartbeatService {
-    return this.injector.get(HeartbeatService);
-  }
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const idToken = localStorage.getItem('id_token');
     let httpErrorInfo: AppHttpError | null = null;
 
-    // Only reset the visual activity bar for "real" interactions (not background pings or refreshes)
-    const activityIntentHeader = req.headers?.get('x-activity-intent');
-    const hasExplicitUserActivityIntent = activityIntentHeader === 'user';
     const isBackgroundRequest = req.url.includes('/ping') ||
                                 req.url.includes('/refresh') ||
                                 req.url.includes('/activity') ||
                                 req.url.includes('/logout');
-    const isUnflaggedGroupAdminUsersRequest = req.url.includes('/group-admin/users') &&
-      !hasExplicitUserActivityIntent;
-    const shouldRefreshActivityPulse = !isBackgroundRequest && !isUnflaggedGroupAdminUsersRequest;
-
-    if (shouldRefreshActivityPulse) {
-      this.heartbeatService.refreshActivityPulse();
-    }
 
     return next.handle(this.addToken(req, idToken))
       .pipe(
@@ -64,7 +48,7 @@ export class AuthInterceptor implements HttpInterceptor {
               !req.url.includes('login') &&
               !req.url.includes('refresh') &&
               !req.url.includes('logout')) {
-            return this.handle401Error(req, next, shouldRefreshActivityPulse);
+            return this.handle401Error(req, next);
           }
           httpErrorInfo = new AppHttpError(error);
           return throwError(() => error);
@@ -97,8 +81,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
   private handle401Error(
     request: HttpRequest<unknown>,
-    next: HttpHandler,
-    shouldRefreshActivityPulse: boolean
+    next: HttpHandler
   ): Observable<HttpEvent<unknown>> {
     if (!this.isRefreshing) {
       this.isRefreshing = true;
@@ -114,11 +97,6 @@ export class AuthInterceptor implements HttpInterceptor {
               localStorage.setItem('id_token', accessToken);
               localStorage.setItem('refresh_token', newRefreshToken);
               this.refreshTokenSubject.next(accessToken);
-
-              // Only reset the bar if it was triggered by a real interaction
-              if (shouldRefreshActivityPulse) {
-                this.heartbeatService.refreshActivityPulse();
-              }
 
               return next.handle(this.addToken(request, accessToken));
             }
