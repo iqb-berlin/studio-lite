@@ -455,12 +455,7 @@ export class UsersService {
     sessions: UserSessionInfoDto[];
   }>> {
     const nowMs = Date.now();
-    const sessionsByUser = new Map<number, {
-      isLoggedIn: boolean;
-      lastActivity?: Date;
-      activityStatus: UserActivityStatus;
-      sessions: UserSessionInfoDto[];
-    }>();
+    const sessionInfosByUser = new Map<number, UserSessionInfoDto[]>();
 
     (await this.userSessionRepository.find())
       .filter(session => UsersService.isSessionStillValid(session.expiresAt, nowMs))
@@ -468,33 +463,51 @@ export class UsersService {
         const sessionInfo: UserSessionInfoDto = {
           sessionId: session.sessionId,
           lastActivity: session.lastActivity,
-          activityStatus: UsersService.calculateActivityStatus(session.lastActivity, nowMs)
+          activityStatus: UsersService.calculateSessionStatus(session.lastActivity, nowMs)
         };
-        const existing = sessionsByUser.get(session.userId);
-        if (existing) {
-          existing.sessions.push(sessionInfo);
-          if (UsersService.isNewerSession(session.lastActivity, existing.lastActivity)) {
-            existing.lastActivity = session.lastActivity;
-            existing.activityStatus = UsersService.calculateActivityStatus(session.lastActivity, nowMs);
-          }
-        } else {
-          sessionsByUser.set(session.userId, {
-            isLoggedIn: true,
-            lastActivity: session.lastActivity,
-            activityStatus: UsersService.calculateActivityStatus(session.lastActivity, nowMs),
-            sessions: [sessionInfo]
-          });
-        }
+        const existing = sessionInfosByUser.get(session.userId) || [];
+        existing.push(sessionInfo);
+        sessionInfosByUser.set(session.userId, existing);
       });
+
+    const sessionsByUser = new Map<number, {
+      isLoggedIn: boolean;
+      lastActivity?: Date;
+      activityStatus: UserActivityStatus;
+      sessions: UserSessionInfoDto[];
+    }>();
+
+    sessionInfosByUser.forEach((sessions, userId) => {
+      const latestSession = sessions
+        .reduce<UserSessionInfoDto | undefined>(
+        (latest, current) => (UsersService
+          .isNewerSession(current.lastActivity as Date, latest?.lastActivity) ? current : latest),
+        undefined
+      );
+      const latestNonOrphanedSession = sessions
+        .filter(session => session.activityStatus !== 'orphaned')
+        .reduce<UserSessionInfoDto | undefined>(
+        (latest, current) => (UsersService
+          .isNewerSession(current.lastActivity as Date, latest?.lastActivity) ? current : latest),
+        undefined
+      );
+
+      sessionsByUser.set(userId, {
+        isLoggedIn: !!latestNonOrphanedSession,
+        lastActivity: latestSession?.lastActivity,
+        activityStatus: latestNonOrphanedSession?.activityStatus || 'orphaned',
+        sessions
+      });
+    });
 
     return sessionsByUser;
   }
 
-  private static calculateActivityStatus(lastActivity: Date, nowMs: number): UserActivityStatus {
+  private static calculateSessionStatus(lastActivity: Date, nowMs: number): UserActivityStatus {
     const ageMs = nowMs - new Date(lastActivity).getTime();
     if (ageMs <= ACTIVE_SESSION_THRESHOLD_MS) return 'active';
     if (ageMs <= INACTIVITY_THRESHOLD_MS) return 'passive';
-    return 'inactive';
+    return 'orphaned';
   }
 
   private static isSessionStillValid(expiresAt: Date, nowMs: number): boolean {

@@ -3,7 +3,7 @@
   overflow-y: auto;
 }
 
-.active-dot, .inactive-dot, .passive-dot {
+.active-dot, .inactive-dot, .passive-dot, .orphaned-dot {
   display: inline-block;
   width: 10px;
   height: 10px;
@@ -24,6 +24,11 @@
 .passive-dot {
   background-color: #6aa2a4;
   box-shadow: 0 0 5px #6aa2a4;
+}
+
+.orphaned-dot {
+  background-color: #b71c1c;
+  box-shadow: 0 0 5px #b71c1c;
 }
 
 .object-list {

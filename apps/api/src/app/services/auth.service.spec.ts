@@ -219,6 +219,47 @@ describe('AuthService', () => {
     });
   });
 
+  describe('logoutSession', () => {
+    it('should delete the targeted session and refresh token rows', async () => {
+      await service.logoutSession(7, 'session-7');
+
+      expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'session-7' });
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'session-7' });
+    });
+  });
+
+  describe('logoutOrphanedSession', () => {
+    it('should delete an orphaned session', async () => {
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+      const lastActivity = new Date();
+      lastActivity.setMinutes(lastActivity.getMinutes() - 10);
+      userSessionRepository.findOne.mockResolvedValue({
+        userId: 7, sessionId: 'sid-7', expiresAt, lastActivity
+      } as UserSession);
+
+      const result = await service.logoutOrphanedSession(7, 'sid-7');
+
+      expect(result).toBe(true);
+      expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'sid-7' });
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'sid-7' });
+    });
+
+    it('should not delete a non-orphaned session', async () => {
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+      const lastActivity = new Date();
+      userSessionRepository.findOne.mockResolvedValue({
+        userId: 7, sessionId: 'sid-7', expiresAt, lastActivity
+      } as UserSession);
+
+      const result = await service.logoutOrphanedSession(7, 'sid-7');
+
+      expect(result).toBe(false);
+      expect(userSessionRepository.delete).not.toHaveBeenCalledWith({ userId: 7, sessionId: 'sid-7' });
+    });
+  });
+
   describe('logoutCurrentSession', () => {
     it('should delete the current session and its refresh tokens', async () => {
       refreshTokenRepository.findOne.mockResolvedValue({

@@ -8,6 +8,6 @@ export class UserSessionInfoDto {
   @ApiProperty()
     lastActivity?: Date;
 
-  @ApiProperty({ enum: ['active', 'passive', 'inactive'] })
+  @ApiProperty({ enum: ['active', 'passive', 'inactive', 'orphaned'] })
     activityStatus!: UserActivityStatus;
 }

@@ -245,5 +245,21 @@ describe('UsersService', () => {
       const result = await service.isUserLoggedIn(1);
       expect(result).toBe(false);
     });
+
+    it('should return false if last activity exceeded inactivity threshold', async () => {
+      const userSessionRepository = (service as unknown as {
+        userSessionRepository: Repository<UserSession>
+      }).userSessionRepository;
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+      const staleLastActivity = new Date();
+      staleLastActivity.setMinutes(staleLastActivity.getMinutes() - 10);
+      jest.spyOn(userSessionRepository, 'find').mockResolvedValue([
+        { userId: 1, expiresAt, lastActivity: staleLastActivity } as UserSession
+      ]);
+
+      const result = await service.isUserLoggedIn(1);
+      expect(result).toBe(false);
+    });
   });
 });

@@ -14,7 +14,7 @@ import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { UntypedFormGroup, FormsModule } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
-  CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto
+  CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto, UserSessionInfoDto
 } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -25,7 +25,7 @@ import { MatIcon } from '@angular/material/icon';
 import { startWith, takeUntil } from 'rxjs/operators';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
-import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '../../../../app.constants';
+import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '@studio-lite/shared-code';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
 import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
@@ -188,7 +188,6 @@ export class UsersComponent implements OnInit, OnDestroy {
         showCancel: true
       }
     });
-
     dialogRef.afterClosed().pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
       if (result) {
         this.appService.dataLoading = true;
@@ -211,6 +210,39 @@ export class UsersComponent implements OnInit, OnDestroy {
             }
           }
         );
+      }
+    });
+  }
+
+  deleteSession(session: UserSessionInfoDto): void {
+    const selectedUser = this.tableSelectionRow.selected[0];
+    if (!selectedUser || session.activityStatus !== 'orphaned') {
+      return;
+    }
+
+    const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: <ConfirmDialogData>{
+        title: this.translateService.instant('delete'),
+        content: this.translateService.instant('admin.delete-orphaned-session', {
+          session: session.sessionId,
+          name: selectedUser.name
+        }),
+        confirmButtonLabel: this.translateService.instant('delete'),
+        showCancel: true
+      }
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
+      if (result) {
+        this.appService.dataLoading = true;
+        this.backendService.deleteUserSession(selectedUser.id, session.sessionId)
+          .pipe(takeUntil(this.ngUnsubscribe)).subscribe(respOk => {
+            this.appService.dataLoading = false;
+            if (respOk) {
+              this.updateUserList(false, true);
+            }
+          });
       }
     });
   }

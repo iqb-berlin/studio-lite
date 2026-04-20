@@ -34,12 +34,16 @@
           {{'user.sessions' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (!element.isLoggedIn) {
+          @if (!(element.sessions?.length)) {
             <span class="inactive-dot" [matTooltip]="'user.inactive' | translate"></span>
           } @else {
             @for (session of element.sessions; track session.sessionId) {
               @if (session.activityStatus === 'active') {
                 <span class="active-dot" [matTooltip]="('user.active' | translate) + (session.lastActivity ? ' (' + (session.lastActivity | date: 'HH:mm:ss') + ')' : '')"></span>
+              } @else if (session.activityStatus === 'orphaned') {
+                <span class="orphaned-dot"
+                      [matTooltip]="'admin.orphaned-session-delete-tooltip' | translate"
+                      (click)="$event.stopPropagation(); deleteSession(session)"></span>
               } @else {
                 <span class="passive-dot" [matTooltip]="('user.passive' | translate) + (session.lastActivity ? ' (' + (session.lastActivity | date: 'HH:mm:ss') + ')' : '')"></span>
               }

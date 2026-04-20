@@ -150,6 +150,30 @@ export class AuthService {
     return token;
   }
 
+  async logoutSession(userId: number, sessionId: string): Promise<void> {
+    await this.userSessionRepository.delete({ userId, sessionId });
+    await this.refreshTokenRepository.delete({ userId, sessionId });
+  }
+
+  async logoutOrphanedSession(userId: number, sessionId: string): Promise<boolean> {
+    const session = await this.userSessionRepository.findOne({
+      where: { userId, sessionId }
+    });
+    if (!session) {
+      return false;
+    }
+
+    const nowMs = Date.now();
+    const isSessionStillValid = new Date(session.expiresAt).getTime() > nowMs;
+    const isOrphaned = (nowMs - new Date(session.lastActivity).getTime()) > INACTIVITY_THRESHOLD_MS;
+    if (!isSessionStillValid || !isOrphaned) {
+      return false;
+    }
+
+    await this.logoutSession(userId, sessionId);
+    return true;
+  }
+
   async refreshAccessToken(token: string): Promise<{ accessToken: string, refreshToken: string } | null> {
     const refreshToken = await this.findRefreshTokenByToken(token);
 
@@ -225,25 +249,11 @@ export class AuthService {
 
     if (!refreshToken) {
       if (fallbackUserId && fallbackSessionId) {
-        await this.userSessionRepository.delete({
-          userId: fallbackUserId,
-          sessionId: fallbackSessionId
-        });
-        await this.refreshTokenRepository.delete({
-          userId: fallbackUserId,
-          sessionId: fallbackSessionId
-        });
+        await this.logoutSession(fallbackUserId, fallbackSessionId);
       }
       return;
     }
 
-    await this.userSessionRepository.delete({
-      userId: refreshToken.userId,
-      sessionId: refreshToken.sessionId
-    });
-    await this.refreshTokenRepository.delete({
-      userId: refreshToken.userId,
-      sessionId: refreshToken.sessionId
-    });
+    await this.logoutSession(refreshToken.userId, refreshToken.sessionId);
   }
 }

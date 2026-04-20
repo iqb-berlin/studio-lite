@@ -36,7 +36,7 @@ export class UserFullDto {
   @ApiProperty()
     isLoggedIn?: boolean;
 
-  @ApiProperty({ required: false, enum: ['active', 'passive', 'inactive'] })
+  @ApiProperty({ required: false, enum: ['active', 'passive', 'inactive', 'orphaned'] })
     activityStatus?: UserActivityStatus;
 
   @ApiProperty({ type: [UserSessionInfoDto] })

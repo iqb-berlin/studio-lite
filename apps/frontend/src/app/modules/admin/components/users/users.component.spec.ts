@@ -14,10 +14,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
 import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
+import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '@studio-lite/shared-code';
 import { AppConfig } from '../../../../classes/app-config.class';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
 import { environment } from '../../../../../environments/environment';
-import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '../../../../app.constants';
 import { UsersComponent } from './users.component';
 import { AppService } from '../../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
@@ -65,6 +65,7 @@ describe('UsersComponent', () => {
       addUser: jest.fn().mockReturnValue(of(true)),
       changeUserData: jest.fn().mockReturnValue(of(true)),
       deleteUsers: jest.fn().mockReturnValue(of(true)),
+      deleteUserSession: jest.fn().mockReturnValue(of(true)),
       getWorkspaceGroupsByAdmin: jest.fn().mockReturnValue(of([])),
       setWorkspaceGroupsByAdmin: jest.fn().mockReturnValue(of(true))
     };
@@ -285,6 +286,31 @@ describe('UsersComponent', () => {
     expect(mockBackendService.deleteUsers).toHaveBeenCalledWith([1, 2]);
     expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
     expect(mockSnackBar.open).toHaveBeenCalledWith('admin.users-deleted', '', { duration: 1000 });
+  });
+
+  it('should delete a specific session and refresh the user list', () => {
+    component.tableSelectionRow.select({
+      id: 1,
+      name: 'user1',
+      sessions: [{ sessionId: 's1', activityStatus: 'orphaned' }]
+    } as UserFullDto);
+
+    component.deleteSession({ sessionId: 's1', activityStatus: 'orphaned' });
+
+    expect(mockBackendService.deleteUserSession).toHaveBeenCalledWith(1, 's1');
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
+  });
+
+  it('should not delete non-orphaned sessions', () => {
+    component.tableSelectionRow.select({
+      id: 1,
+      name: 'user1',
+      sessions: [{ sessionId: 's1', activityStatus: 'active' }]
+    } as UserFullDto);
+
+    component.deleteSession({ sessionId: 's1', activityStatus: 'active' });
+
+    expect(mockBackendService.deleteUserSession).not.toHaveBeenCalled();
   });
 
   it('should handle delete users failure', () => {

@@ -233,6 +233,8 @@
     "delete-users-title": "Nutzer:in löschen",
     "delete-user": "Soll Nutzer:in \"{{name}}\" gelöscht werden?",
     "delete-users": "Sollen {{count}} Nutzer:innen gelöscht werden?",
+    "delete-orphaned-session": "Soll die verwaiste Session \"{{session}}\" von Nutzer:in \"{{name}}\" gelöscht werden?",
+    "orphaned-session-delete-tooltip": "Verwaiste Session (klicken zum Löschen)",
     "new-user": "Neue/r Nutzer:in",
     "edit-user": "Nutzer:innen-Daten bearbeiten",
     "password": "Kennwort",
