@@ -58,10 +58,7 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
 
         case 'vopStateChangedNotification': {
           if (msgData.playerState) {
-            const pages = msgData.playerState.validPages;
-            const targets = Array.isArray(pages) ?
-              pages.map((p: { id: string }) => p.id) :
-              Object.keys(pages);
+            const targets = PreviewDirective.extractPageTargets(msgData.playerState.validPages);
             this.setPageList(targets, msgData.playerState.currentPage);
             if (msgData.playerState.sharedParameters) {
               this.sharedParameters = this.getMergedSharedParameters(msgData.playerState.sharedParameters);
@@ -211,6 +208,15 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
 
   setFocusStatus(status: boolean): void {
     this.hasFocus = status;
+  }
+
+  private static extractPageTargets(pages: unknown): string[] {
+    if (Array.isArray(pages)) {
+      return pages.map((p: { id: string }) => p.id);
+    } if (pages) {
+      return Object.keys(pages as Record<string, unknown>);
+    }
+    return [];
   }
 
   protected static detectApiVersion(msgData: {
