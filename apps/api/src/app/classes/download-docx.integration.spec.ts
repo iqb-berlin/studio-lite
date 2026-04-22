@@ -91,6 +91,30 @@ describe('DownloadDocx integration', () => {
     expect(documentXml).not.toContain('a<b</m:t>');
   });
 
+  it('exports formula-only paragraphs as left-aligned math paragraphs for Word', async () => {
+    const description = '<p><span class="iqb-math-formula" data-latex="e^2=m"></span></p>';
+
+    const documentXml = await getDocumentXml(description);
+
+    expect(() => create(documentXml)).not.toThrow();
+    expect(documentXml).toContain('<m:oMathPara>');
+    expect(documentXml).toContain('<m:oMathParaPr><m:jc m:val="left"/></m:oMathParaPr>');
+    expect(documentXml).toContain('<m:oMath');
+  });
+
+  it('keeps inline formulas inline when a paragraph also contains text', async () => {
+    const description =
+      '<p>Prefix <span class="iqb-math-formula" data-latex="e^2=m"></span> suffix</p>';
+
+    const documentXml = await getDocumentXml(description);
+
+    expect(() => create(documentXml)).not.toThrow();
+    expect(documentXml).not.toContain('<m:oMathPara>');
+    expect(documentXml).toContain('<m:oMath');
+    expect(documentXml).toContain('Prefix');
+    expect(documentXml).toContain('suffix');
+  });
+
   it('keeps the DOCX valid when unsupported formulas fall back to plain text', async () => {
     const description =
       '<p>Formel: ' +

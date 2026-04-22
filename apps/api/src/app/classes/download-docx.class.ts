@@ -744,6 +744,49 @@ export class DownloadDocx {
       component;
   }
 
+  private static isMathComponent(
+    child: ParagraphChild
+  ): child is ImportedXmlComponent {
+    if (typeof child !== 'object' || child === null) {
+      return false;
+    }
+    const importedChild = child as ImportedXmlComponent & {
+      rootKey?: string;
+    };
+    return importedChild.rootKey === 'm:oMath' ||
+      importedChild.rootKey === 'm:oMathPara';
+  }
+
+  private static createLeftAlignedMathParagraph(
+    mathChildren: ImportedXmlComponent[]
+  ): ImportedXmlComponent {
+    const mathParagraph = new ImportedXmlComponent('m:oMathPara');
+    const mathParagraphProperties = new ImportedXmlComponent('m:oMathParaPr');
+    mathParagraphProperties.push(
+      new ImportedXmlComponent('m:jc', { 'm:val': 'left' })
+    );
+    mathParagraph.push(mathParagraphProperties);
+    mathChildren.forEach(mathChild => mathParagraph.push(mathChild));
+    return mathParagraph;
+  }
+
+  private static normalizeParagraphChildren(
+    children: ParagraphChild[]
+  ): ParagraphChild[] {
+    if (!children.length) {
+      return children;
+    }
+
+    const mathChildren = children.filter(
+      DownloadDocx.isMathComponent
+    ) as ImportedXmlComponent[];
+    if (mathChildren.length === children.length) {
+      return [DownloadDocx.createLeftAlignedMathParagraph(mathChildren)];
+    }
+
+    return children;
+  }
+
   private static sanitizeOmmlXml(omml: string): string {
     if (!omml) return omml;
     return omml.replace(
@@ -889,6 +932,9 @@ export class DownloadDocx {
       backgroundColor,
       size
     );
+    const normalizedChildren = DownloadDocx.normalizeParagraphChildren(
+      children
+    );
     return new Paragraph({
       alignment: DownloadDocx.getAlignment(textAlignment),
       spacing: {
@@ -897,7 +943,7 @@ export class DownloadDocx {
       },
       indent: !isListParagraph ? { start: 100, end: 100 } : null,
       bullet: isListParagraph ? { level: 0 } : null,
-      children: children
+      children: normalizedChildren
     });
   }
 
