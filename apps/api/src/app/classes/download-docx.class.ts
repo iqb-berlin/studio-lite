@@ -717,12 +717,31 @@ export class DownloadDocx {
         strict: 'ignore'
       });
       const omml = mml2omml(mathml);
-      return ImportedXmlComponent.fromXmlString(
+      return DownloadDocx.unwrapImportedXmlRoot(
+        ImportedXmlComponent.fromXmlString(
         DownloadDocx.sanitizeOmmlXml(omml)
+        )
       );
     } catch {
       return null;
     }
+  }
+
+  private static unwrapImportedXmlRoot(
+    component: ImportedXmlComponent
+  ): ImportedXmlComponent {
+    const importedComponent = component as ImportedXmlComponent & {
+      root?: Array<ImportedXmlComponent | string>;
+      rootKey?: string;
+    };
+    if (importedComponent.rootKey !== undefined) {
+      return component;
+    }
+
+    const firstChild = importedComponent.root?.[0];
+    return typeof firstChild === 'object' && firstChild !== null ?
+      firstChild as ImportedXmlComponent :
+      component;
   }
 
   private static sanitizeOmmlXml(omml: string): string {
