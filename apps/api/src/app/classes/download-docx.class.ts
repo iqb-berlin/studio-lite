@@ -719,7 +719,7 @@ export class DownloadDocx {
       const omml = mml2omml(mathml);
       return DownloadDocx.unwrapImportedXmlRoot(
         ImportedXmlComponent.fromXmlString(
-        DownloadDocx.sanitizeOmmlXml(omml)
+          DownloadDocx.sanitizeOmmlXml(omml)
         )
       );
     } catch {
@@ -791,8 +791,7 @@ export class DownloadDocx {
     if (!omml) return omml;
     return omml.replace(
       /(<m:t\b[^>]*>)([\s\S]*?)(<\/m:t>)/g,
-      (_, prefix: string, rawText: string, suffix: string) =>
-        `${prefix}${DownloadDocx.escapeXmlText(rawText)}${suffix}`
+      (_, prefix: string, rawText: string, suffix: string) => `${prefix}${DownloadDocx.escapeXmlText(rawText)}${suffix}`
     );
   }
 
@@ -872,31 +871,6 @@ export class DownloadDocx {
       'xx-large'
     ];
     return sizeTypes.includes(size) ? 20 : parseInt(size, 10);
-  }
-
-  private static getTextRun(
-    cheerioAPI: cheerio.CheerioAPI,
-    child: AnyNodeWithName,
-    colorParsed: string,
-    backgroundColor: string,
-    size: string
-  ): TextRun {
-    const tag = child.name;
-    return new TextRun({
-      text: cheerioAPI(child).text(),
-      color: colorParsed,
-      shading: {
-        fill: backgroundColor
-      },
-      break: tag === 'br' ? 1 : null,
-      underline: tag === 'u' ? {} : null,
-      bold: tag === 'strong',
-      italics: tag === 'em',
-      strike: tag === 's',
-      subScript: tag === 'sub',
-      superScript: tag === 'sup',
-      size: DownloadDocx.getFontSize(size)
-    });
   }
 
   private static getAlignment(
