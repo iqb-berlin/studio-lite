@@ -11,6 +11,7 @@ import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import Workspace from '../entities/workspace.entity';
 import UserSession from '../entities/user-session.entity';
+import { INACTIVITY_THRESHOLD_MS } from '../app.constants';
 import Unit from '../entities/unit.entity';
 import { UnitService } from './unit.service';
 import { UnitUserService } from './unit-user.service';
@@ -252,8 +253,7 @@ describe('UsersService', () => {
       }).userSessionRepository;
       const expiresAt = new Date();
       expiresAt.setMinutes(expiresAt.getMinutes() + 10);
-      const staleLastActivity = new Date();
-      staleLastActivity.setMinutes(staleLastActivity.getMinutes() - 10);
+      const staleLastActivity = new Date(Date.now() - INACTIVITY_THRESHOLD_MS - 1000);
       jest.spyOn(userSessionRepository, 'find').mockResolvedValue([
         { userId: 1, expiresAt, lastActivity: staleLastActivity } as UserSession
       ]);

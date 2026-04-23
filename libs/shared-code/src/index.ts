@@ -16,5 +16,6 @@ export {
   INACTIVITY_THRESHOLD_SEC,
   REFRESH_TOKEN_EXPIRES_IN_MS,
   INACTIVITY_THRESHOLD_MS,
-  JWT_EXPIRES_IN
+  JWT_EXPIRES_IN,
+  assertTimeConfig
 } from './lib/time.constants';

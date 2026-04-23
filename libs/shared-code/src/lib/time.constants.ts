@@ -1,11 +1,13 @@
 const SECOND_MS = 1000;
 const MINUTE_MS = 60 * SECOND_MS;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
 
 // Core session and UI timing values shared by frontend and backend.
-export const ACTIVE_THRESHOLD_MS = 2 * MINUTE_MS;
-export const PASSIVE_THRESHOLD_MS = 3 * MINUTE_MS;
+export const ACTIVE_THRESHOLD_MS = 30 * MINUTE_MS;
+export const PASSIVE_THRESHOLD_MS = 7 * DAY_MS;
 
-export const HEARTBEAT_PING_INTERVAL_MS = 30 * SECOND_MS;
+export const HEARTBEAT_PING_INTERVAL_MS = 60 * SECOND_MS;
 export const UI_BAR_REFRESH_INTERVAL_MS = SECOND_MS;
 export const ADMIN_USER_LIST_POLL_INTERVAL_MS = 15 * SECOND_MS;
 export const ACTIVITY_SYNC_THROTTLE_MS = 5 * SECOND_MS;
@@ -20,4 +22,42 @@ export const INACTIVITY_THRESHOLD_SEC = REFRESH_TOKEN_EXPIRES_IN_SEC;
 export const REFRESH_TOKEN_EXPIRES_IN_MS = REFRESH_TOKEN_EXPIRES_IN_SEC * SECOND_MS;
 export const INACTIVITY_THRESHOLD_MS = INACTIVITY_THRESHOLD_SEC * SECOND_MS;
 
-export const JWT_EXPIRES_IN = '2m';
+export const JWT_EXPIRES_IN = ACTIVE_THRESHOLD_MS / SECOND_MS;
+
+export const assertTimeConfig = (): void => {
+  const fail = (message: string): never => {
+    throw new Error(`Invalid time config: ${message}`);
+  };
+
+  if (ACTIVE_THRESHOLD_MS <= 0) {
+    fail('ACTIVE_THRESHOLD_MS must be > 0');
+  }
+
+  if (PASSIVE_THRESHOLD_MS <= 0) {
+    fail('PASSIVE_THRESHOLD_MS must be > 0');
+  }
+
+  if (ACTIVE_THRESHOLD_MS > PASSIVE_THRESHOLD_MS) {
+    fail('ACTIVE_THRESHOLD_MS must be <= PASSIVE_THRESHOLD_MS');
+  }
+
+  if (ACTIVE_SESSION_THRESHOLD_MS !== ACTIVE_THRESHOLD_MS) {
+    fail('ACTIVE_SESSION_THRESHOLD_MS must match ACTIVE_THRESHOLD_MS');
+  }
+
+  if (JWT_EXPIRES_IN * SECOND_MS !== ACTIVE_THRESHOLD_MS) {
+    fail('JWT_EXPIRES_IN must match ACTIVE_THRESHOLD_MS');
+  }
+
+  if (REFRESH_TOKEN_EXPIRES_IN_MS !== PASSIVE_THRESHOLD_MS) {
+    fail('REFRESH_TOKEN_EXPIRES_IN_MS must match PASSIVE_THRESHOLD_MS');
+  }
+
+  if (INACTIVITY_THRESHOLD_MS !== REFRESH_TOKEN_EXPIRES_IN_MS) {
+    fail('INACTIVITY_THRESHOLD_MS must match REFRESH_TOKEN_EXPIRES_IN_MS');
+  }
+
+  if (ADMIN_USER_LIST_POLL_INTERVAL_MS >= INACTIVITY_THRESHOLD_MS) {
+    fail('ADMIN_USER_LIST_POLL_INTERVAL_MS must stay below INACTIVITY_THRESHOLD_MS');
+  }
+};

@@ -152,7 +152,6 @@ export class AuthService {
 
   async logoutSession(userId: number, sessionId: string): Promise<void> {
     await this.userSessionRepository.delete({ userId, sessionId });
-    await this.refreshTokenRepository.delete({ userId, sessionId });
   }
 
   async logoutOrphanedSession(userId: number, sessionId: string): Promise<boolean> {

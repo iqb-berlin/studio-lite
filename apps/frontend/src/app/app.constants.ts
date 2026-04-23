@@ -7,8 +7,11 @@ import {
   ACTIVITY_SYNC_THROTTLE_MS,
   USER_ACTIVITY_THROTTLE_MS,
   POST_MESSAGE_ACTIVITY_THROTTLE_MS,
-  AUTO_LOGOUT_REDIRECT_DELAY_MS
+  AUTO_LOGOUT_REDIRECT_DELAY_MS,
+  assertTimeConfig
 } from '@studio-lite/shared-code';
+
+assertTimeConfig();
 
 // Re-export app timings from one shared source to keep frontend/backend in sync.
 export {

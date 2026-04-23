@@ -443,9 +443,19 @@ export class UsersService {
   }
 
   async updateSessionExpiry(userId: number, sessionId?: string): Promise<void> {
-    const expiresAt = new Date(Date.now() + INACTIVITY_THRESHOLD_MS);
     const criteria = sessionId ? { userId, sessionId } : { userId };
-    await this.userSessionRepository.update(criteria, { expiresAt });
+    const sessions = await this.userSessionRepository.find({
+      where: criteria,
+      select: { id: true, lastActivity: true, expiresAt: true }
+    });
+
+    await Promise.all(sessions.map(session => {
+      const expiresAt = new Date(new Date(session.lastActivity).getTime() + INACTIVITY_THRESHOLD_MS);
+      if (new Date(session.expiresAt).getTime() === expiresAt.getTime()) {
+        return Promise.resolve();
+      }
+      return this.userSessionRepository.update({ id: session.id }, { expiresAt });
+    }));
   }
 
   private async getSessionStatusByUser(): Promise<Map<number, {
