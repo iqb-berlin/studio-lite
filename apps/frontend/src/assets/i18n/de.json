@@ -42,7 +42,7 @@
     "add-files": "Zusätzliche Dateien",
     "add-player": "Player hinzufügen",
     "add-comments": "Kommentare hinzufügen",
-    "add-rich-notes": "Rückmeldungen hinzufügen",
+    "add-rich-notes": "Begleitmaterial hinzufügen",
     "no-player": "Keine Aufgabe hat einen gültigen Player gesetzt",
     "add-login": "Logins hinzufügen",
     "add-test-takers-review": "Anzahl für Review",
@@ -335,11 +335,11 @@
     "delete-state": "Status löschen",
     "changed-settings-warning": "Sollen die Änderungen in den Einstellungen gespeichert werden?",
     "route-visibility": "Arbeitsfläche",
-    "unit-rich-note-tags": "Rückmeldungskategorien",
-    "unit-rich-note-tags-info": "Wenn hier keine Rückmeldungskategorien angegeben werden, werden die allgemeinen Rückmeldungskategorien des IQB-Studios verwendet.",
-    "use-global-tags": "Rückmeldungskategorien aus den allgemeinen Einstellungen kopieren",
-    "unit-rich-note-tags-group": "Rückmeldungskategorien der Bereichsgruppen",
-    "global-tags-preview": "Allgemeine Rückmeldungskategorien"
+    "unit-rich-note-tags": "Kategorien für Begleitmaterial",
+    "unit-rich-note-tags-info": "Wenn hier keine Kategorien für Begleitmaterial angegeben werden, werden die allgemeinen Kategorien für Begleitmaterial des IQB-Studios verwendet.",
+    "use-global-tags": "Kategorien für Begleitmaterial aus den allgemeinen Einstellungen kopieren",
+    "unit-rich-note-tags-group": "Kategorien für Begleitmaterial der Bereichsgruppen",
+    "global-tags-preview": "Allgemeine Kategorien für Begleitmaterial"
   },
   "settings": {
     "texts": "Texte",
@@ -351,7 +351,7 @@
     "email-replace-values": "Folgende Platzhalter werden im E-Mail-Body durch die Nutzer:innen-Angaben ersetzt: {{firstname}}, {{lastname}}, {{user}}, {{password}}",
     "email-subject": "E-Mail-Betreff",
     "email-body": "E-Mail-Body",
-    "unit-rich-note-tags": "Rückmeldungskategorien"
+    "unit-rich-note-tags": "Kategorien für Begleitmaterial"
   },
   "profiles-registry": {
     "csv-url": "URL der CSV-Datei",
@@ -568,8 +568,8 @@
       "preview": "Vorschau",
       "schemer": "Kodierung",
       "comments": "Kommentare",
-      "notes": "Rückmeldungen",
-      "notes-separated": "Rück-meldungen"
+      "notes": "Begleitmaterial",
+      "notes-separated": "Begleit-material"
     },
     "title": "Arbeitsbereich",
     "workspace-not-loaded": "Konnte Daten für Arbeitsbereich nicht laden",
@@ -769,7 +769,7 @@
     "save-unit-data-changes-warning": "Formularfelder sind ungültig ausgefüllt",
     "vocabs-not-loaded":  "Vokabulare für das Metadatenprofil \"{{profileUrl}}\" können aktuell nicht geladen werden",
     "profile-not-loaded":  "Metadatenprofil \"{{profileUrl}}\" kann aktuell nicht geladen werden",
-    "tag": "Rückmeldungskategorie",
+    "tag": "Kategorie",
     "tag-required": "Tag ist erforderlich",
     "links": "Links",
     "link-url": "Link URL",
@@ -780,24 +780,24 @@
     "value": "Wert",
     "remove-link": "Link entfernen",
     "new-link": "Neuer Link",
-    "rich-note": "Rückmeldung",
+    "rich-note": "Begleitmaterial",
     "enter-note-content": "Notiz-Inhalt hier eingeben...",
-    "edit-rich-note": "Rückmeldung bearbeiten",
-    "add-rich-note": "Rückmeldung hinzufügen",
+    "edit-rich-note": "Begleitmaterial bearbeiten",
+    "add-rich-note": "Begleitmaterial hinzufügen",
     "content-required-warning": "Es wurde noch kein Text eingegeben.",
-    "units-rich-note-tags-json": "Kategorien (JSON-Format)",
-    "tags-saved-success": "Rückmeldungskategorien erfolgreich gespeichert",
-    "tags-saved-error": "Fehler beim Speichern der Rückmeldungskategorien",
+    "units-rich-note-tags-json": "Kategorien für Begleitmaterial (JSON-Format)",
+    "tags-saved-success": "Kategorien erfolgreich gespeichert",
+    "tags-saved-error": "Fehler beim Speichern der Kategorien",
     "invalid-json": "Ungültiges JSON-Format",
-    "delete-rich-note-confirm": "Soll diese Rückmeldung wirklich gelöscht werden?",
-    "delete-rich-note-title": "Rückmeldung löschen",
+    "delete-rich-note-confirm": "Soll dieses Begleitmaterial wirklich gelöscht werden?",
+    "delete-rich-note-title": "Begleitmaterial löschen",
     "link-url-placeholder": "https://...",
     "link-type-placeholder": "z.B. Dokumentation",
     "lang-placeholder": "de",
     "label-placeholder": "Bezeichnung...",
     "description-placeholder": "Beschreibung...",
     "required": "Pflichtfeld",
-    "unassigned-rich-notes": "Uneindeutige Rückmeldungen"
+    "unassigned-rich-notes": "Uneindeutiges Begleitmaterial"
   },
 
   "coding-report": {
