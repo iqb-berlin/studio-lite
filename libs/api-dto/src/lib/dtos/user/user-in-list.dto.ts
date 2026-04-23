@@ -18,4 +18,7 @@ export class UserInListDto {
 
   @ApiProperty()
     email?: string;
+
+  @ApiProperty()
+    lastActivity?: Date;
 }

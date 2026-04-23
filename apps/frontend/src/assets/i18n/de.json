@@ -162,7 +162,13 @@
     "first-name": "Vorname",
     "admin": "System-Administrator:in",
     "is-admin": "Admin-Rechte",
-    "is-not-admin": "Keine Admin-Rechte"
+    "is-not-admin": "Keine Admin-Rechte",
+    "sessions": "Sessions",
+    "active": "Aktiv",
+    "inactive": "Inaktiv (Offline)",
+    "passive": "Passiv (Eingeloggt, aber inaktiv)",
+    "activity-remaining": "Verbleibende aktive Zeit (Session wird durch Arbeit verlängert)",
+    "passive-remaining": "Passiv-Phase (automatischer Logout nach Ablauf)"
   },
   "access-rights": {
     "hint": "Zugriffsrechte: Nutzer:in auswählen",
@@ -206,6 +212,9 @@
     "user-not-edited": "Daten für Nutzer:in konnte nicht geändert werden",
     "users-deleted": "Nutzer:in(en) gelöscht",
     "users-not-deleted": "Nutzer:in(en) konnten nicht gelöscht werden",
+    "users-active": "{{count}} aktiv.",
+    "users-logged-in": "{{count}} angemeldet.",
+    "users-sessions-status": "{{activeSessions}} aktive Sessions, {{passiveSessions}} passive Sessions.",
     "workspace-groups": "Bereichsgruppen",
     "workspaces": "Arbeitsbereiche",
     "v-modules": "Module",
@@ -224,6 +233,8 @@
     "delete-users-title": "Nutzer:in löschen",
     "delete-user": "Soll Nutzer:in \"{{name}}\" gelöscht werden?",
     "delete-users": "Sollen {{count}} Nutzer:innen gelöscht werden?",
+    "delete-orphaned-session": "Soll die verwaiste Session \"{{session}}\" von Nutzer:in \"{{name}}\" gelöscht werden?",
+    "orphaned-session-delete-tooltip": "Verwaiste Session (klicken zum Löschen)",
     "new-user": "Neue/r Nutzer:in",
     "edit-user": "Nutzer:innen-Daten bearbeiten",
     "password": "Kennwort",

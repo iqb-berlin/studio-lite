@@ -41,6 +41,8 @@ export { CreateWorkspaceDto } from './lib/dtos/workspace/create-workspace.dto';
 export { CreateUserDto } from './lib/dtos/user/create-user.dto';
 export { UserInListDto } from './lib/dtos/user/user-in-list.dto';
 export { UserFullDto } from './lib/dtos/user/user-full.dto';
+export { UserActivityStatus } from './lib/dtos/user/user-activity-status';
+export { UserSessionInfoDto } from './lib/dtos/user/user-session-info.dto';
 export { IdArrayDto } from './lib/dtos/id-array.dto';
 export { MoveToDto } from './lib/dtos/move-to.dto';
 export { NewNameDto } from './lib/dtos/new-name.dto';

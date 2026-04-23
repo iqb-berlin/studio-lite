@@ -6,12 +6,14 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideRouter, ActivatedRoute } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { of, Subject } from 'rxjs';
+import { AuthDataDto } from '@studio-lite-lib/api-dto';
 import { Overlay } from '@angular/cdk/overlay';
 import { environment } from '../../../../../environments/environment';
 import { UnitPlayerComponent } from './unit-player.component';
 import { ReviewService } from '../../services/review.service';
 import { ReviewBackendService } from '../../services/review-backend.service';
 import { AppService } from '../../../../services/app.service';
+import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { ModuleService } from '../../../../services/module.service';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
@@ -57,7 +59,7 @@ describe('UnitPlayerComponent', () => {
         showCoding: false,
         showOthersComments: false
       }
-    } as unknown as jest.Mocked<ReviewService>;
+    } as never;
 
     mockReviewBackendService = {
       getUnitProperties: jest.fn().mockReturnValue(of({
@@ -68,33 +70,34 @@ describe('UnitPlayerComponent', () => {
       getUnitDefinition: jest.fn().mockReturnValue(of({
         definition: 'test definition'
       }))
-    } as unknown as jest.Mocked<ReviewBackendService>;
+    } as never;
 
     mockAppService = {
       authData: { userId: 1 },
+      authDataChanged: new Subject<AuthDataDto>(),
       postMessage$: new Subject()
-    } as unknown as jest.Mocked<AppService>;
+    } as never;
 
     mockModuleService = {
       players: { 'player-1': {} },
       widgets: {},
       loadWidgets: jest.fn().mockResolvedValue(undefined),
       getModuleHtml: jest.fn().mockResolvedValue('<html lang="">Widget</html>')
-    } as unknown as jest.Mocked<ModuleService>;
+    } as never;
 
     mockWorkspaceBackendService = {
       getDirectDownloadLink: jest.fn().mockReturnValue('http://test.com/download')
-    } as unknown as jest.Mocked<WorkspaceBackendService>;
+    } as never;
 
-    mockWorkspaceService = {} as unknown as jest.Mocked<WorkspaceService>;
+    mockWorkspaceService = {} as never;
 
     mockTranslateService = {
       instant: jest.fn((key: string) => key)
-    } as unknown as jest.Mocked<TranslateService>;
+    } as never;
 
     mockSnackBar = {
       open: jest.fn()
-    } as unknown as jest.Mocked<MatSnackBar>;
+    } as never;
 
     mockActivatedRoute = {
       params: paramsSubject.asObservable()
@@ -112,6 +115,7 @@ describe('UnitPlayerComponent', () => {
         { provide: ReviewService, useValue: mockReviewService },
         { provide: ReviewBackendService, useValue: mockReviewBackendService },
         { provide: AppService, useValue: mockAppService },
+        { provide: HeartbeatService, useValue: { refreshActivityPulse: jest.fn() } },
         { provide: ModuleService, useValue: mockModuleService },
         { provide: WorkspaceBackendService, useValue: mockWorkspaceBackendService },
         { provide: WorkspaceService, useValue: mockWorkspaceService },
@@ -139,7 +143,7 @@ describe('UnitPlayerComponent', () => {
     });
 
     it('should have all required services injected', () => {
-      const route = (component as unknown as { route: ActivatedRoute }).route;
+      const route = (component as never as { route: ActivatedRoute }).route;
       expect(route).toBeDefined();
       expect(component.snackBar).toBeDefined();
       expect(component.backendService).toBeDefined();
@@ -206,7 +210,7 @@ describe('UnitPlayerComponent', () => {
       const testResponses = { answer1: 'test', answer2: 'data' };
       const unitState = { dataParts: testResponses };
 
-      const handleMethod = (component as unknown as {
+      const handleMethod = (component as never as {
         handleUnitStateData: (state: { dataParts?: Record<string, unknown> }) => void
       }).handleUnitStateData;
       handleMethod.call(component, unitState);
@@ -219,7 +223,7 @@ describe('UnitPlayerComponent', () => {
       component.unitData.responses = initialResponses;
       const unitState = {};
 
-      const handleMethod = (component as unknown as {
+      const handleMethod = (component as never as {
         handleUnitStateData: (state: { dataParts?: Record<string, unknown> }) => void
       }).handleUnitStateData;
       handleMethod.call(component, unitState);
@@ -230,7 +234,7 @@ describe('UnitPlayerComponent', () => {
     it('should handle empty dataParts object', () => {
       const unitState = { dataParts: {} };
 
-      const handleMethod = (component as unknown as {
+      const handleMethod = (component as never as {
         handleUnitStateData: (state: { dataParts?: Record<string, unknown> }) => void
       }).handleUnitStateData;
       handleMethod.call(component, unitState);
@@ -241,19 +245,19 @@ describe('UnitPlayerComponent', () => {
 
   describe('postStore()', () => {
     beforeEach(() => {
-      const componentWithPrivates = component as unknown as {
+      const componentWithPrivates = component as {
         postMessageTarget: Window | undefined;
         sessionId: string;
         playerApiVersion: number;
       };
       componentWithPrivates.postMessageTarget = {
         postMessage: jest.fn()
-      } as unknown as Window;
+      } as never;
       componentWithPrivates.sessionId = 'test-session';
     });
 
     it('should not post message when postMessageTarget is not set', () => {
-      const componentWithPrivates = component as unknown as {
+      const componentWithPrivates = component as {
         postMessageTarget: Window | undefined;
       };
       componentWithPrivates.postMessageTarget = undefined;
@@ -265,7 +269,7 @@ describe('UnitPlayerComponent', () => {
     });
 
     it('should post message with API version 1 format', () => {
-      const componentWithPrivates = component as unknown as {
+      const componentWithPrivates = component as {
         postMessageTarget: Window | undefined;
         playerApiVersion: number;
       };
@@ -285,7 +289,7 @@ describe('UnitPlayerComponent', () => {
     });
 
     it('should post message with API version 2+ format', () => {
-      const componentWithPrivates = component as unknown as {
+      const componentWithPrivates = component as {
         postMessageTarget: Window | undefined;
         playerApiVersion: number;
       };
@@ -306,7 +310,7 @@ describe('UnitPlayerComponent', () => {
     });
 
     it('should handle empty definition string', () => {
-      const componentWithPrivates = component as unknown as {
+      const componentWithPrivates = component as {
         postMessageTarget: Window | undefined;
         playerApiVersion: number;
       };
@@ -336,7 +340,7 @@ describe('UnitPlayerComponent', () => {
 
   describe('Service Dependencies', () => {
     it('should inject ActivatedRoute', () => {
-      const route = (component as unknown as { route: ActivatedRoute }).route;
+      const route = (component as never as { route: ActivatedRoute }).route;
       expect(route).toBeDefined();
     });
 
@@ -349,7 +353,7 @@ describe('UnitPlayerComponent', () => {
     });
 
     it('should inject ReviewBackendService', () => {
-      const reviewBackendService = (component as unknown as {
+      const reviewBackendService = (component as never as {
         reviewBackendService: ReviewBackendService
       }).reviewBackendService;
       expect(reviewBackendService).toBeDefined();
@@ -371,11 +375,11 @@ describe('UnitPlayerComponent', () => {
       const calcWidget = {
         key: 'calc@1.0',
         metadata: { model: 'CALC', type: 'WIDGET' }
-      } as unknown as VeronaModuleClass;
+      } as VeronaModuleClass;
 
       (mockModuleService.loadWidgets as jest.Mock).mockImplementation(
         () => {
-          mockModuleService.widgets = { 'calc@1.0': calcWidget } as unknown as ModuleService['widgets'];
+          mockModuleService.widgets = { 'calc@1.0': calcWidget } as ModuleService['widgets'];
           return Promise.resolve();
         }
       );
@@ -391,7 +395,7 @@ describe('UnitPlayerComponent', () => {
           }
         }),
         dispose: jest.fn()
-      } as unknown as ReturnType<Overlay['create']>);
+      } as never);
 
       component.handleWidgetCall({
         callId: 'c1',
@@ -410,8 +414,8 @@ describe('UnitPlayerComponent', () => {
       const calcWidget = {
         key: 'calc@1.0',
         metadata: { model: 'CALC', type: 'WIDGET' }
-      } as unknown as VeronaModuleClass;
-      mockModuleService.widgets = { 'calc@1.0': calcWidget } as unknown as ModuleService['widgets'];
+      } as VeronaModuleClass;
+      mockModuleService.widgets = { 'calc@1.0': calcWidget } as ModuleService['widgets'];
 
       jest.spyOn(TestBed.inject(Overlay), 'create').mockReturnValue({
         attach: jest.fn().mockReturnValue({
@@ -424,7 +428,7 @@ describe('UnitPlayerComponent', () => {
           }
         }),
         dispose: jest.fn()
-      } as unknown as ReturnType<Overlay['create']>);
+      } as never);
 
       component.handleWidgetCall({
         callId: 'c2',
@@ -456,8 +460,8 @@ describe('UnitPlayerComponent', () => {
       const calcWidget = {
         key: 'calc@1.0',
         metadata: { model: 'CALC', type: 'WIDGET' }
-      } as unknown as VeronaModuleClass;
-      mockModuleService.widgets = { 'calc@1.0': calcWidget } as unknown as ModuleService['widgets'];
+      } as VeronaModuleClass;
+      mockModuleService.widgets = { 'calc@1.0': calcWidget } as ModuleService['widgets'];
 
       const fakeInstance = {
         widgetHtml: '',
@@ -471,10 +475,10 @@ describe('UnitPlayerComponent', () => {
         dispose: jest.fn()
       };
       jest.spyOn(TestBed.inject(Overlay), 'create')
-        .mockReturnValue(fakeOverlayRef as unknown as ReturnType<Overlay['create']>);
+        .mockReturnValue(fakeOverlayRef as never);
 
-      const playerTarget = { postMessage: jest.fn() } as unknown as Window;
-      component.postMessageTarget = playerTarget;
+      const playerTarget = { postMessage: jest.fn() } as never;
+      component.postMessageTarget = playerTarget as never;
       component.sessionId = 'sess-99';
 
       const callData = {

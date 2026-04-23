@@ -10,7 +10,8 @@ import User from '../entities/user.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import Workspace from '../entities/workspace.entity';
-import Review from '../entities/review.entity';
+import UserSession from '../entities/user-session.entity';
+import { INACTIVITY_THRESHOLD_MS } from '../app.constants';
 import Unit from '../entities/unit.entity';
 import { UnitService } from './unit.service';
 import { UnitUserService } from './unit-user.service';
@@ -47,7 +48,7 @@ describe('UsersService', () => {
         { provide: getRepositoryToken(WorkspaceUser), useFactory: mockRepository },
         { provide: getRepositoryToken(WorkspaceGroupAdmin), useFactory: mockRepository },
         { provide: getRepositoryToken(Workspace), useFactory: mockRepository },
-        { provide: getRepositoryToken(Review), useFactory: mockRepository },
+        { provide: getRepositoryToken(UserSession), useFactory: mockRepository },
         { provide: UnitService, useValue: mockUnitService },
         { provide: UnitUserService, useValue: mockUnitUserService }
       ]
@@ -214,6 +215,51 @@ describe('UsersService', () => {
 
       expect(workspaceUsersRepository.delete).toHaveBeenCalledWith({ workspaceId });
       expect(workspaceUsersRepository.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('isUserLoggedIn', () => {
+    it('should return true if there is a valid unrevoked token', async () => {
+      const userSessionRepository = (service as unknown as {
+        userSessionRepository: Repository<UserSession>
+      }).userSessionRepository;
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+      jest.spyOn(userSessionRepository, 'find').mockResolvedValue([
+        { userId: 1, expiresAt, lastActivity: new Date() } as UserSession
+      ]);
+
+      const result = await service.isUserLoggedIn(1);
+      expect(result).toBe(true);
+    });
+
+    it('should return false if tokens are expired or revoked', async () => {
+      const userSessionRepository = (service as unknown as {
+        userSessionRepository: Repository<UserSession>
+      }).userSessionRepository;
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() - 10);
+      jest.spyOn(userSessionRepository, 'find').mockResolvedValue([
+        { userId: 1, expiresAt, lastActivity: new Date() } as UserSession
+      ]);
+
+      const result = await service.isUserLoggedIn(1);
+      expect(result).toBe(false);
+    });
+
+    it('should return false if last activity exceeded inactivity threshold', async () => {
+      const userSessionRepository = (service as unknown as {
+        userSessionRepository: Repository<UserSession>
+      }).userSessionRepository;
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+      const staleLastActivity = new Date(Date.now() - INACTIVITY_THRESHOLD_MS - 1000);
+      jest.spyOn(userSessionRepository, 'find').mockResolvedValue([
+        { userId: 1, expiresAt, lastActivity: staleLastActivity } as UserSession
+      ]);
+
+      const result = await service.isUserLoggedIn(1);
+      expect(result).toBe(false);
     });
   });
 });

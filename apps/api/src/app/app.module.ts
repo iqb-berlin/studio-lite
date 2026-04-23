@@ -5,7 +5,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { JWT_EXPIRES_IN } from './app.constants';
 import { AppController } from './controllers/app.controller';
 import { AppVersionProvider } from './guards/app-version.guard';
 import { GroupAdminWorkspaceController } from './controllers/group-admin-workspace.controller';
@@ -43,6 +44,8 @@ import Setting from './entities/setting.entity';
 import ResourcePackage from './entities/resource-package.entity';
 import Review from './entities/review.entity';
 import ReviewUnit from './entities/review-unit.entity';
+import { RefreshToken } from './entities/refresh-token.entity';
+import UserSession from './entities/user-session.entity';
 import { ResourcePackageService } from './services/resource-package.service';
 import { UsersService } from './services/users.service';
 import { WorkspaceService } from './services/workspace.service';
@@ -82,6 +85,7 @@ import { AdminController } from './controllers/admin.controller';
 import { WriteOrGroupAdminAccessGuard } from './guards/write-or-group-admin-access.guard';
 import { ReadOrGroupAdminAccessGuard } from './guards/read-or-group-admin-access.guard';
 import { ManageOrGroupAdminAccessGuard } from './guards/manage-or-group-admin-access.guard';
+import { ActivityInterceptor } from './interceptors/activity.interceptor';
 
 // Unit rich notes
 import UnitRichNote from './entities/unit-rich-note.entity';
@@ -101,8 +105,9 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: '12h' }
+        signOptions: { expiresIn: JWT_EXPIRES_IN }
       }),
+
       inject: [ConfigService]
     }),
     HttpModule,
@@ -129,6 +134,7 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
     ResourcePackage,
     Review,
     ReviewUnit,
+    UserSession,
     UnitItem,
     UnitItemMetadata,
     UnitMetadata,
@@ -166,6 +172,8 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
           WorkspaceGroupAdmin,
           Review,
           ReviewUnit,
+          RefreshToken,
+          UserSession,
           UnitItem,
           UnitItemMetadata,
           UnitMetadata,
@@ -199,6 +207,8 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
       WorkspaceGroupAdmin,
       Review,
       ReviewUnit,
+      RefreshToken,
+      UserSession,
       UnitItem,
       UnitItemMetadata,
       UnitMetadata,
@@ -236,6 +246,10 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ActivityInterceptor
     },
 
     AppVersionProvider,

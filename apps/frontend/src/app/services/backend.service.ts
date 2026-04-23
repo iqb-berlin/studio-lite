@@ -28,7 +28,7 @@ export class BackendService {
   }
 
   login(name: string, password: string, initLoginMode: boolean): Observable<boolean> {
-    return this.http.post<string>(
+    return this.http.post<{ accessToken: string, refreshToken: string }>(
       `${this.serverUrl}${initLoginMode ? 'init-login' : 'login'}`, {
         username: name,
         password: password
@@ -36,9 +36,14 @@ export class BackendService {
     )
       .pipe(
         catchError(() => of(false)),
-        switchMap(loginToken => {
-          if (typeof loginToken === 'string') {
-            localStorage.setItem('id_token', loginToken);
+        switchMap(loginData => {
+          if (loginData && typeof loginData === 'object') {
+            const { accessToken, refreshToken } = loginData as {
+              accessToken: string,
+              refreshToken: string
+            };
+            localStorage.setItem('id_token', accessToken);
+            localStorage.setItem('refresh_token', refreshToken);
             return this.getAuthData()
               .pipe(
                 map(authData => {
@@ -48,9 +53,18 @@ export class BackendService {
                 catchError(() => of(false))
               );
           }
-          return of(loginToken);
+          return of(false);
         })
       );
+  }
+
+  refresh(refreshToken: string): Observable<{ accessToken: string, refreshToken: string } | null> {
+    return this.http.post<{ accessToken: string, refreshToken: string }>(
+      `${this.serverUrl}refresh`,
+      { refreshToken }
+    ).pipe(
+      catchError(() => of(null))
+    );
   }
 
   getAuthData(): Observable<AuthDataDto> {
@@ -73,7 +87,19 @@ export class BackendService {
   }
 
   logout(): void {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (refreshToken) {
+      this.http.post(`${this.serverUrl}logout`, { refreshToken }).subscribe({
+        error: () => {
+          // If JWT is expired, try silent logout with refresh token
+          this.http.post(`${this.serverUrl}logout-silent`, { refreshToken }).subscribe();
+        }
+      });
+    } else {
+      this.http.post(`${this.serverUrl}logout`, {}).subscribe();
+    }
     localStorage.removeItem('id_token');
+    localStorage.removeItem('refresh_token');
     this.appService.authData = AppService.defaultAuthData;
   }
 
@@ -153,5 +179,13 @@ export class BackendService {
         map(() => true),
         catchError(() => of(false))
       );
+  }
+
+  ping(): Observable<void> {
+    return this.http.post<void>(`${this.serverUrl}ping`, {});
+  }
+
+  activity(): Observable<void> {
+    return this.http.post<void>(`${this.serverUrl}activity`, {});
   }
 }

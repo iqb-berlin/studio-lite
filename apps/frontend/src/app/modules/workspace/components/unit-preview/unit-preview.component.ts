@@ -27,12 +27,13 @@ import {
 } from '../../../print/components/print-options-dialog/print-options-dialog.component';
 import { PreviewDirective } from '../../../../directives/preview.directive';
 import { UnitState } from '../../../../models/verona.interface';
+import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
 @Component({
   templateUrl: './unit-preview.component.html',
   styleUrls: ['./unit-preview.component.scss'],
   host: { class: 'unit-preview' },
-  imports: [PreviewBarComponent, MatProgressSpinner]
+  imports: [PreviewBarComponent, MatProgressSpinner, TrackIframeActivityDirective]
 })
 export class UnitPreviewComponent
   extends PreviewDirective

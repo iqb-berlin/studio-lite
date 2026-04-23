@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards
+  BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -17,6 +17,7 @@ import {
   UserFullDto, WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
 import { UsersService } from '../services/users.service';
+import { AuthService } from '../services/auth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
@@ -25,7 +26,8 @@ import { WorkspaceGroupService } from '../services/workspace-group.service';
 export class AdminUserController {
   constructor(
     private usersService: UsersService,
-    private workspaceGroupService: WorkspaceGroupService
+    private workspaceGroupService: WorkspaceGroupService,
+    private authService: AuthService
   ) {}
 
   @Get(':id/workspace-groups')
@@ -89,5 +91,20 @@ export class AdminUserController {
   @ApiTags('admin user')
   async patch(@Param('id') userId: number, @Body() userFullDto: UserFullDto) {
     return this.usersService.patch(userId, userFullDto);
+  }
+
+  @Delete(':userId/sessions/:sessionId')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin user')
+  @ApiOkResponse({ description: 'Session deleted successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
+  @ApiParam({ name: 'userId', type: Number })
+  @ApiParam({ name: 'sessionId', type: String })
+  async removeSession(@Param('userId') userId: number, @Param('sessionId') sessionId: string): Promise<void> {
+    const deleted = await this.authService.logoutOrphanedSession(userId, sessionId);
+    if (!deleted) {
+      throw new BadRequestException('Only orphaned sessions can be deleted.');
+    }
   }
 }

@@ -11,6 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { AppService } from '../../../../services/app.service';
 import { WidgetCallData } from '../../models/widget-call-data.interface';
 import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
+import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
 @Component({
   selector: 'studio-lite-widget-overlay',
@@ -20,7 +21,8 @@ import { VeronaModuleDirective } from '../../../../directives/verona-module.dire
     MatButtonModule,
     MatIconModule,
     TranslateModule,
-    MatTooltipModule
+    MatTooltipModule,
+    TrackIframeActivityDirective
   ]
 })
 export class WidgetOverlayComponent implements AfterViewInit, OnDestroy {

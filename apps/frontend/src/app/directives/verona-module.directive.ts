@@ -1,4 +1,6 @@
-import { Directive, ElementRef, OnDestroy } from '@angular/core';
+import {
+  Directive, ElementRef, OnDestroy
+} from '@angular/core';
 import {
   BehaviorSubject, from, map, Observable, of, Subject, takeUntil
 } from 'rxjs';

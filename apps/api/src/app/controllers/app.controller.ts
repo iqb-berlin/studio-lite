@@ -45,8 +45,40 @@ export class AppController {
   @ApiCreatedResponse({ description: 'Logged in successfully.' }) // TODO: Add Exception?
   @ApiUnauthorizedResponse({ description: 'The user is not registered. ' })
   async login(@Request() req) {
-    const token = await this.authService.login(req.user);
-    return `"${token}"`;
+    return this.authService.login(req.user);
+  }
+
+  @Post('refresh')
+  @ApiTags('auth')
+  @ApiCreatedResponse({ description: 'Token successfully refreshed.' })
+  @ApiUnauthorizedResponse({ description: 'Invalid or expired refresh token.' })
+  async refresh(@Body() body: { refreshToken: string }) {
+    const tokens = await this.authService.refreshAccessToken(body.refreshToken);
+    if (!tokens) throw new UnauthorizedException();
+    return tokens;
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiTags('auth')
+  @ApiOkResponse({ description: 'Logged out successfully.' })
+  async logout(@Request() req, @UserId() userId: number, @Body() body: { refreshToken?: string }) {
+    if (body?.refreshToken) {
+      await this.authService.logoutCurrentSession(body.refreshToken, userId, req.user?.sessionId);
+      return;
+    }
+    await this.authService.logout(userId);
+  }
+
+  @Post('logout-silent')
+  @ApiTags('auth')
+  @ApiOkResponse({ description: 'Session logout handled silently.' })
+  async logoutSilent(@Body() body: { refreshToken?: string }): Promise<void> {
+    if (!body?.refreshToken) {
+      return;
+    }
+    await this.authService.logoutCurrentSession(body.refreshToken);
   }
 
   @Post('init-login')
@@ -145,5 +177,23 @@ export class AppController {
     if (req.user.id !== myNewData.id) throw new UnauthorizedException();
     await this.userService.patchMyData(myNewData);
     return true;
+  }
+
+  @Post('ping')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiTags('auth')
+  @ApiOkResponse({ description: 'Session keepalive updated.' })
+  async ping(@Request() req): Promise<void> {
+    await this.userService.updateSessionExpiry(req.user.id, req.user.sessionId);
+  }
+
+  @Post('activity')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiTags('auth')
+  @ApiOkResponse({ description: 'User activity updated.' })
+  async activity(@Request() req): Promise<void> {
+    await this.userService.updateLastActivity(req.user.id, req.user.sessionId);
   }
 }

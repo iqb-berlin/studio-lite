@@ -1,14 +1,20 @@
 import {
-  // eslint-disable-next-line max-len
-  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
+  MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef,
+  MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
-import { ViewChild, Component, OnInit } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import {
+  ViewChild, Component, OnInit, OnDestroy
+} from '@angular/core';
+import {
+  fromEvent, Subject, Subscription, timer
+} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { UntypedFormGroup, FormsModule } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
-  CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto
+  CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto, UserSessionInfoDto
 } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -16,8 +22,10 @@ import { MatFabButton, MatIconButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 import { MatIcon } from '@angular/material/icon';
+import { startWith, takeUntil } from 'rxjs/operators';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
+import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '@studio-lite/shared-code';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
 import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
@@ -27,31 +35,39 @@ import {
   BackendService
 } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
+import { HeartbeatService } from '../../../../services/heartbeat.service';
 
 @Component({
   selector: 'studio-lite-users',
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent]
+  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent, DatePipe]
 })
-export class UsersComponent implements OnInit {
+export class UsersComponent implements OnInit, OnDestroy {
   objectsDatasource = new MatTableDataSource<UserFullDto>();
-  displayedColumns = ['name', 'displayName', 'isAdmin', 'email', 'id', 'description', 'delete'];
+  displayedColumns = ['active', 'name', 'displayName', 'isAdmin', 'email', 'id', 'description', 'delete'];
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
   userWorkspaceGroups = new WorkspaceGroupToCheckCollection([]);
+  activeUserCount = 0;
+  loggedInUserCount = 0;
+  activeSessionCount = 0;
+  passiveSessionCount = 0;
+  private pollingSubscription: Subscription | null = null;
+  private readonly ngUnsubscribe = new Subject<void>();
 
   @ViewChild(MatSort) sort = new MatSort();
 
   constructor(
     private appService: AppService,
     private backendService: BackendService,
+    private heartbeatService: HeartbeatService,
     private snackBar: MatSnackBar,
     private translateService: TranslateService,
     private deleteConfirmDialog: MatDialog
   ) {
-    this.tableSelectionRow.changed.subscribe(
+    this.tableSelectionRow.changed.pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       r => {
         if (r.added.length > 0) {
           this.selectedUser = r.added[0].id;
@@ -67,6 +83,29 @@ export class UsersComponent implements OnInit {
     setTimeout(() => {
       this.createWorkspaceList();
     });
+
+    if (typeof document !== 'undefined') {
+      fromEvent(document, 'visibilitychange')
+        .pipe(
+          startWith(null),
+          takeUntil(this.ngUnsubscribe)
+        )
+        .subscribe(() => {
+          if (UsersComponent.isTabVisible()) {
+            this.startPolling();
+          } else {
+            this.stopPolling();
+          }
+        });
+    } else {
+      this.startPolling();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.stopPolling();
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 
   addUser(userData: UntypedFormGroup): void {
@@ -80,7 +119,7 @@ export class UsersComponent implements OnInit {
       lastName: userData.get('lastName')?.value,
       email: userData.get('email')?.value
     };
-    this.backendService.addUser(user).subscribe(
+    this.backendService.addUser(user).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       respOk => {
         this.updateUserList();
         if (respOk) {
@@ -117,7 +156,7 @@ export class UsersComponent implements OnInit {
     if (newEmail !== value.selection[0].email) changedData.email = newEmail;
     if (newPassword) changedData.password = newPassword;
     if (newIsAdmin !== value.selection[0].isAdmin) changedData.isAdmin = newIsAdmin;
-    this.backendService.changeUserData(id, changedData).subscribe(
+    this.backendService.changeUserData(id, changedData).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       respOk => {
         this.updateUserList();
         if (respOk) {
@@ -149,13 +188,12 @@ export class UsersComponent implements OnInit {
         showCancel: true
       }
     });
-
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
       if (result) {
         this.appService.dataLoading = true;
         const usersToDelete: number[] = [];
         users.forEach((r: UserFullDto) => usersToDelete.push(r.id));
-        this.backendService.deleteUsers(usersToDelete).subscribe(
+        this.backendService.deleteUsers(usersToDelete).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
           respOk => {
             if (respOk) {
               this.snackBar.open(
@@ -176,13 +214,50 @@ export class UsersComponent implements OnInit {
     });
   }
 
+  deleteSession(session: UserSessionInfoDto): void {
+    const selectedUser = this.tableSelectionRow.selected[0];
+    if (!selectedUser || session.activityStatus !== 'orphaned') {
+      return;
+    }
+
+    const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: <ConfirmDialogData>{
+        title: this.translateService.instant('delete'),
+        content: this.translateService.instant('admin.delete-orphaned-session', {
+          session: session.sessionId,
+          name: selectedUser.name
+        }),
+        confirmButtonLabel: this.translateService.instant('delete'),
+        showCancel: true
+      }
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
+      if (result) {
+        this.appService.dataLoading = true;
+        this.backendService.deleteUserSession(selectedUser.id, session.sessionId)
+          .pipe(takeUntil(this.ngUnsubscribe)).subscribe(respOk => {
+            this.appService.dataLoading = false;
+            if (respOk) {
+              this.updateUserList(false, true);
+            }
+          });
+      }
+    });
+  }
+
   updateWorkspaceGroupList(): void {
     if (this.userWorkspaceGroups.hasChanged) {
-      this.snackBar.open('Zugriffsrechte nicht gespeichert.', 'Warnung', { duration: 3000 });
+      this.snackBar.open(
+        this.translateService.instant('access-rights.not-saved'),
+        this.translateService.instant('warning'),
+        { duration: 3000 }
+      );
     }
     if (this.selectedUser > 0) {
       this.appService.dataLoading = true;
-      this.backendService.getWorkspaceGroupsByAdmin(this.selectedUser).subscribe(
+      this.backendService.getWorkspaceGroupsByAdmin(this.selectedUser).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
         (workspaceGroups: WorkspaceGroupInListDto[]) => {
           this.userWorkspaceGroups.setChecks(workspaceGroups);
           this.appService.dataLoading = false;
@@ -199,14 +274,22 @@ export class UsersComponent implements OnInit {
         this.appService.dataLoading = true;
         this.backendService.setWorkspaceGroupsByAdmin(
           this.selectedUser, this.userWorkspaceGroups.getChecks()
-        ).subscribe(
+        ).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
           respOk => {
             if (respOk) {
-              this.snackBar.open('Zugriffsrechte geändert', '', { duration: 1000 });
+              this.snackBar.open(
+                this.translateService.instant('access-rights.changed'),
+                '',
+                { duration: 1000 }
+              );
               this.userWorkspaceGroups.setHasChangedFalse();
               this.userWorkspaceGroups.sortEntries();
             } else {
-              this.snackBar.open('Konnte Zugriffsrechte nicht ändern', 'Fehler', { duration: 3000 });
+              this.snackBar.open(
+                this.translateService.instant('access-rights.not-changed'),
+                this.translateService.instant('error'),
+                { duration: 3000 }
+              );
             }
             this.appService.dataLoading = false;
           }
@@ -215,21 +298,58 @@ export class UsersComponent implements OnInit {
     }
   }
 
-  updateUserList(): void {
-    this.selectedUser = 0;
-    this.appService.dataLoading = true;
-    this.backendService.getUsersFull().subscribe(
+  updateUserList(showLoading = true, countAsActivity = showLoading): void {
+    if (showLoading) {
+      this.selectedUser = 0;
+      this.appService.dataLoading = true;
+    }
+    if (countAsActivity && UsersComponent.isTabVisible()) {
+      this.heartbeatService.refreshActivityPulse();
+    }
+    // Keep the admin route alive during periodic list polling by explicitly flagging user intent.
+    const usersRequest = countAsActivity ? this.backendService.getUsersFullWithActivity() :
+      this.backendService.getUsersFull();
+
+    usersRequest.pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       (users: UserFullDto[]) => {
-        if (users.length > 0) {
-          this.setObjectsDatasource(users);
+        this.setObjectsDatasource(users);
+        if (showLoading) {
           this.tableSelectionRow.clear();
           this.appService.dataLoading = false;
-        } else {
-          this.tableSelectionRow.clear();
-          this.appService.dataLoading = false;
+        } else if (this.selectedUser) {
+          const selected = users.find(u => u.id === this.selectedUser);
+          if (selected) {
+            this.tableSelectionRow.select(selected);
+          } else {
+            this.selectedUser = 0;
+            this.tableSelectionRow.clear();
+          }
         }
       }
     );
+  }
+
+  private startPolling(): void {
+    if (this.pollingSubscription || !UsersComponent.isTabVisible()) {
+      return;
+    }
+
+    this.pollingSubscription = timer(ADMIN_USER_LIST_POLL_INTERVAL_MS, ADMIN_USER_LIST_POLL_INTERVAL_MS)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => {
+        this.updateUserList(false, true);
+      });
+  }
+
+  private stopPolling(): void {
+    if (this.pollingSubscription) {
+      this.pollingSubscription.unsubscribe();
+      this.pollingSubscription = null;
+    }
+  }
+
+  private static isTabVisible(): boolean {
+    return typeof document !== 'undefined' && document.visibilityState === 'visible';
   }
 
   private setObjectsDatasource(users: UserFullDto[]): void {
@@ -242,11 +362,20 @@ export class UsersComponent implements OnInit {
         .toLowerCase()
         .includes(filter));
     this.objectsDatasource.sort = this.sort;
+
+    this.activeUserCount = users.filter(u => u.activityStatus === 'active').length;
+    this.loggedInUserCount = users.filter(u => u.isLoggedIn).length;
+    this.activeSessionCount = users
+      .flatMap(user => user.sessions || [])
+      .filter(session => session.activityStatus === 'active').length;
+    this.passiveSessionCount = users
+      .flatMap(user => user.sessions || [])
+      .filter(session => session.activityStatus === 'passive').length;
   }
 
   createWorkspaceList(): void {
     this.userWorkspaceGroups = new WorkspaceGroupToCheckCollection([]);
-    this.backendService.getWorkspaceGroupList().subscribe(worksGroups => {
+    this.backendService.getWorkspaceGroupList().pipe(takeUntil(this.ngUnsubscribe)).subscribe(worksGroups => {
       this.userWorkspaceGroups = new WorkspaceGroupToCheckCollection(worksGroups);
       this.updateUserList();
     });

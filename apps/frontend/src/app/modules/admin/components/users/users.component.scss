@@ -3,8 +3,37 @@
   overflow-y: auto;
 }
 
+.active-dot, .inactive-dot, .passive-dot, .orphaned-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.active-dot {
+  background-color: #006064;
+  box-shadow: 0 0 5px #006064;
+}
+
+.inactive-dot {
+  background-color: #9e9e9e;
+  box-shadow: 0 0 5px #9e9e9e;
+}
+
+.passive-dot {
+  background-color: #6aa2a4;
+  box-shadow: 0 0 5px #6aa2a4;
+}
+
+.orphaned-dot {
+  background-color: #b71c1c;
+  box-shadow: 0 0 5px #b71c1c;
+}
+
 .object-list {
   height: calc(100% - 5px);
+  padding-right: 20px;
   .object-header-container {
     margin-top: 35px;
     .object-header {

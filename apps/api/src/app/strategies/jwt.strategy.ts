@@ -3,6 +3,13 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+type JwtPayload = {
+  sub: number;
+  username: string;
+  sub2: number;
+  sid?: string;
+};
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(configService: ConfigService) {
@@ -14,10 +21,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async validate(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    payload: any
-  ) {
-    return { id: payload.sub, name: payload.username, reviewId: payload.sub2 };
+  async validate(payload: JwtPayload) {
+    return {
+      id: payload.sub,
+      name: payload.username,
+      reviewId: payload.sub2,
+      sessionId: payload.sid
+    };
   }
 }

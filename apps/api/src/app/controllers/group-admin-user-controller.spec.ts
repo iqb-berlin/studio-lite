@@ -49,12 +49,12 @@ describe('GroupAdminUserController', () => {
     });
 
     it('should return all full users if full is true', async () => {
-      const mockUsers = [{ id: 1, name: 'U1' }] as UserFullDto[];
+      const mockUsers = [{ id: 1, name: 'U1', isLoggedIn: true }] as UserFullDto[];
       usersService.findAllFull.mockResolvedValue(mockUsers);
 
       const result = await controller.findAll(true);
 
-      expect(result).toBe(mockUsers);
+      expect(result).toEqual(mockUsers);
       expect(usersService.findAllFull).toHaveBeenCalled();
     });
   });

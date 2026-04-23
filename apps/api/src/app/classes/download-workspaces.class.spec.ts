@@ -22,7 +22,8 @@ jest.mock('./download-docx.class', () => ({
 }));
 
 jest.mock('@iqbspecs/coding-scheme', () => ({
-  CodingScheme: jest.fn().mockImplementation(schemeData => (typeof schemeData === 'string' ? JSON.parse(schemeData) : schemeData))
+  CodingScheme: jest.fn()
+    .mockImplementation(schemeData => (typeof schemeData === 'string' ? JSON.parse(schemeData) : schemeData))
 }));
 
 describe('DownloadWorkspacesClass', () => {
@@ -501,9 +502,12 @@ describe('DownloadWorkspacesClass', () => {
           hasOnlyManualCoding: true,
           hasClosedVars: true
         });
-        expect(ids).toContain('v_manual'); // manual-only: included via OR
-        expect(ids).toContain('v_manual_but_only_closed'); // Because BOTH filters are on, it matches 'isManual' OR 'isClosed' and is included!
-        expect(ids).toContain('v_closed'); // closed-only: included via OR
+        // manual-only: included via OR
+        expect(ids).toContain('v_manual');
+        // Because BOTH filters are on, it matches 'isManual' OR 'isClosed' and is included!
+        expect(ids).toContain('v_manual_but_only_closed');
+        // closed-only: included via OR
+        expect(ids).toContain('v_closed');
         expect(ids).not.toContain('v_uncoded');
       }
     );
