@@ -46,6 +46,7 @@ export class CodingReportComponent implements OnInit {
     'codingType',
     'trainingEffort'
   ];
+
   dataSource!: MatTableDataSource<CodingReportDto>; // Datasource for the table
   isLoading = false; // Indicates if data is currently loading
   codedVariablesOnly = true; // Filter: Display only coded variables
@@ -127,10 +128,10 @@ export class CodingReportComponent implements OnInit {
   downloadCodingReport(): void {
     const rows = this.dataSource?.filteredData || [];
     const headers = this.displayedColumns
-      .map(column => this.getCsvHeader(column as keyof CodingReportDto))
+      .map(column => CodingReportComponent.getCsvHeader(column as keyof CodingReportDto))
       .join(';');
     const csvRows = rows.map(row => this.displayedColumns
-      .map(column => this.escapeCsvValue(this.stripHtml(String(
+      .map(column => CodingReportComponent.escapeCsvValue(CodingReportComponent.stripHtml(String(
         row[column as keyof CodingReportDto] ?? ''
       ))))
       .join(';')
@@ -145,11 +146,11 @@ export class CodingReportComponent implements OnInit {
     URL.revokeObjectURL(fileUrl);
   }
 
-  private escapeCsvValue(value: string): string {
+  private static escapeCsvValue(value: string): string {
     return `"${value.replace(/"/g, '""')}"`;
   }
 
-  private stripHtml(value: string): string {
+  private static stripHtml(value: string): string {
     let sanitized = value;
     let previous: string;
 
@@ -161,7 +162,7 @@ export class CodingReportComponent implements OnInit {
     return sanitized;
   }
 
-  private getCsvHeader(column: keyof CodingReportDto): string {
+  private static getCsvHeader(column: keyof CodingReportDto): string {
     const headers: Record<keyof CodingReportDto, string> = {
       unit: 'Aufgabe',
       variable: 'Variable',
