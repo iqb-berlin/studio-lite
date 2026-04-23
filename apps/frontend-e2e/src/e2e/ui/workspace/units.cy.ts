@@ -441,10 +441,41 @@ describe('Workspace Unit Management', () => {
     );
   });
 
-  it('has disabled submit and return buttons', () => {
+  it('verifies save-or-discard dialog when navigating with unsaved changes', () => {
     cy.visitWs(ws1);
-    goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-submit-units"]').should('be.disabled');
-    cy.get('[data-cy="workspace-edit-unit-return-submitted-units"]').should('be.disabled');
+    selectUnit('M6_AK0011');
+    clickIndexTabWorkspace('properties');
+
+    // Modify unit name to trigger "isChanged" state
+    cy.get('input[formControlName="name"]').type(' New Title');
+
+    // Try to select another unit
+    selectUnit('M6_AK0012');
+
+    // Verify SaveOrDiscard dialog
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('studio-lite-save-or-discard, mat-dialog-container', {
+        timeout: 5000
+      })
+        .eq(0)
+        .within(() => {
+          cy.contains(json.workspace.save).should('be.visible'); // Title
+          cy.contains(json.workspace['save-unit-data-changes']).should(
+            'be.visible'
+          ); // Content
+        });
+
+      // Test "Cancel" button
+      cy.get('button').contains(json.cancel).click();
+      cy.url().should('include', '/properties'); // Stay on properties tab
+    });
+
+    // Try to select another unit
+    selectUnit('M6_AK0012');
+
+    // Test "Discard" button
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('button').contains(json.workspace['reject-changes-label']).click();
+    });
   });
 });

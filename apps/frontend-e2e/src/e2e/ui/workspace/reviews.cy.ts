@@ -62,8 +62,30 @@ describe('Unit Reviews', () => {
 
       // Set Booklet Configuration
       cy.get('mat-expansion-panel-header').contains(json.workspace['booklet-settings']).click();
+
+      // Paging Mode
+      cy.get('mat-form-field').contains(json['booklet-config'].pagingMode.label).click();
+      cy.get('mat-option').contains(json['booklet-config'].pagingMode.buttons).click();
+
+      // Page Navigation Buttons
+      cy.get('mat-form-field').contains(json['booklet-config'].pageNaviButtons.label).click();
+      cy.get('mat-option').contains(json['booklet-config'].pageNaviButtons.SEPARATE_BOTTOM).click();
+
+      // Unit Navigation Buttons
+      cy.get('mat-form-field').contains(json['booklet-config'].unitNaviButtons.label).click();
+      cy.get('mat-option').contains(json['booklet-config'].unitNaviButtons.FULL).click();
+
+      // Controller Design
+      cy.get('mat-form-field').contains(json['booklet-config'].controllerDesign.label).click();
+      cy.get('mat-option').contains(json['booklet-config'].controllerDesign['2018']).click();
+
+      // Unit Screen Header
       cy.get('mat-form-field').contains(json['booklet-config'].unitScreenHeader.label).click();
       cy.get('mat-option').contains(json['booklet-config'].unitScreenHeader.WITH_UNIT_TITLE).click();
+
+      // Unit Title
+      cy.get('mat-form-field').contains(json['booklet-config'].unitTitle.label).click();
+      cy.get('mat-option').contains(json['booklet-config'].unitTitle.ON).click();
 
       cy.get('studio-lite-save-changes').within(() => {
         cy.get('button').contains(json.workspace.save).click();
@@ -135,6 +157,7 @@ describe('Unit Reviews', () => {
 
   it('verifies metadata, booklet settings, and review player navigation', () => {
     cy.visit('/');
+
     openReview(review);
     verifyReviewStartPage(review, ws1);
 
@@ -143,8 +166,25 @@ describe('Unit Reviews', () => {
       cy.get('mat-expansion-panel-header').click();
       cy.get('studio-lite-booklet-config-show').should('be.visible');
       // Verify the configuration we set earlier
-      cy.get('studio-lite-booklet-config-show')
-        .contains(json['booklet-config'].unitScreenHeader.WITH_UNIT_TITLE).should('exist');
+      cy.get('studio-lite-booklet-config-show').within(() => {
+        cy.contains(json['booklet-config'].pagingMode.label).should('exist');
+        cy.contains(json['booklet-config'].pagingMode.buttons).should('exist');
+
+        cy.contains(json['booklet-config'].pageNaviButtons.label).should('exist');
+        cy.contains(json['booklet-config'].pageNaviButtons.SEPARATE_BOTTOM).should('exist');
+
+        cy.contains(json['booklet-config'].unitNaviButtons.label).should('exist');
+        cy.contains(json['booklet-config'].unitNaviButtons.FULL).should('exist');
+
+        cy.contains(json['booklet-config'].controllerDesign.label).should('exist');
+        cy.contains(json['booklet-config'].controllerDesign['2018']).should('exist');
+
+        cy.contains(json['booklet-config'].unitScreenHeader.label).should('exist');
+        cy.contains(json['booklet-config'].unitScreenHeader.WITH_UNIT_TITLE).should('exist');
+
+        cy.contains(json['booklet-config'].unitTitle.label).should('exist');
+        cy.contains(json['booklet-config'].unitTitle.ON).should('exist');
+      });
     });
 
     startReview();
