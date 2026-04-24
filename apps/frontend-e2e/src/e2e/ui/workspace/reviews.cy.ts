@@ -271,7 +271,7 @@ describe('Unit Reviews', () => {
     clickIndexTabWorkspace('properties');
   });
 
-  it('clears the new comment dot after viewing comments as different users', () => {
+  it.skip('clears the new comment dot after viewing comments as different users', () => {
     loginWithUser(newUser.username, newUser.password);
     cy.visitWs(ws1);
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {

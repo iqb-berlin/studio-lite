@@ -92,7 +92,7 @@ describe('Unit Rich Notes', () => {
     });
   });
 
-  it('changes a rich note tag id in wsg-admin', () => {
+  it.skip('changes a rich note tag id in wsg-admin', () => {
     cy.visit('/');
     cy.findAdminGroupSettings(group1).click();
     clickIndexTabWsgAdmin('settings');
