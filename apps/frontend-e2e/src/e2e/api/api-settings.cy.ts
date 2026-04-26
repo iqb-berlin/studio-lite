@@ -23,7 +23,7 @@ describe('Admin settings API tests', () => {
             expect(res.status).to.equal(201);
             cy.loginAPI(userGroupAdmin.username, userGroupAdmin.password)
               .then(resp3 => {
-                Cypress.expose(`token_${userGroupAdmin.username}`, resp3.body);
+                Cypress.expose(`token_${userGroupAdmin.username}`, resp3.body.accessToken);
                 expect(resp3.status).to.equal(201);
               });
           });

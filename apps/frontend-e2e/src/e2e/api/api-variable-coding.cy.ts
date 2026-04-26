@@ -28,12 +28,17 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
   before(() => {
     cy.addFirstUserAPI(Cypress.expose('username'), Cypress.expose('password'))
       .then(resp => {
-        Cypress.expose(`token_${Cypress.expose('username')}`, resp.body);
         expect(resp.status).to.equal(201);
-        cy.getUserIdAPI(Cypress.expose(`token_${Cypress.expose('username')}`))
-          .then(resp2 => {
-            Cypress.expose(`id_${Cypress.expose('username')}`, resp2.body.userId);
-            expect(resp2.status).to.equal(200);
+        cy.loginAPI(Cypress.expose('username'), Cypress.expose('password'))
+          .then(resp1 => {
+            Cypress.expose(`token_${Cypress.expose('username')}`, resp1.body.accessToken);
+            Cypress.expose(`refresh_${Cypress.expose('username')}`, resp1.body.refreshToken);
+            expect(resp1.status).to.equal(201);
+            cy.getUserIdAPI(Cypress.expose(`token_${Cypress.expose('username')}`))
+              .then(resp2 => {
+                Cypress.expose(`id_${Cypress.expose('username')}`, resp2.body.userId);
+                expect(resp2.status).to.equal(200);
+              });
           });
       });
   });
