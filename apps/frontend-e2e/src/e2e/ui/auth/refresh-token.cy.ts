@@ -6,7 +6,6 @@ import {
   deleteUser,
   login,
   loginWithUser,
-  logout,
   clickIndexTabAdmin
 } from '../../../support/helpers';
 
@@ -130,14 +129,12 @@ describe('Token Refresh UI Logic', () => {
 
     // We mock the users endpoint to simulate the different activity states
     const now = new Date().getTime();
-    // ACTIVE_THRESHOLD_MS is 2 min. We set active to 1 min ago.
-    const activeDate = new Date(now - 60000).toISOString();
-    // PASSIVE_THRESHOLD_MS is 3 min. (Although isActiveUser pipe only uses ACTIVE_THRESHOLD_MS,
-    // the UI will show passive-dot if isLoggedIn is true and the pipe returns false).
-    // We set passive to 2.5 min ago.
-    const passiveDate = new Date(now - 150000).toISOString();
-    // inactive is when isLoggedIn is false
-    const inactiveDate = new Date(now - 200000).toISOString();
+    // ACTIVE_THRESHOLD_MS is 30 min. We set active to 5 min ago.
+    const activeDate = new Date(now - (5 * 60 * 1000)).toISOString();
+    // PASSIVE_THRESHOLD_MS is 7 days. We set passive to 4 hours ago.
+    const passiveDate = new Date(now - (4 * 60 * 60 * 1000)).toISOString();
+    // inactive is when isLoggedIn is false OR no sessions
+    const inactiveDate = new Date(now - (10 * 24 * 60 * 60 * 1000)).toISOString();
 
     cy.intercept('GET', '/api/group-admin/users*', {
       statusCode: 200,
@@ -149,7 +146,14 @@ describe('Token Refresh UI Logic', () => {
           lastActivity: activeDate,
           isAdmin: false,
           email: '',
-          description: ''
+          description: '',
+          sessions: [
+            {
+              sessionId: 's1',
+              lastActivity: activeDate,
+              activityStatus: 'active'
+            }
+          ]
         },
         {
           id: 102,
@@ -158,7 +162,14 @@ describe('Token Refresh UI Logic', () => {
           lastActivity: passiveDate,
           isAdmin: false,
           email: '',
-          description: ''
+          description: '',
+          sessions: [
+            {
+              sessionId: 's2',
+              lastActivity: passiveDate,
+              activityStatus: 'passive'
+            }
+          ]
         },
         {
           id: 103,
@@ -167,7 +178,8 @@ describe('Token Refresh UI Logic', () => {
           lastActivity: inactiveDate,
           isAdmin: false,
           email: '',
-          description: ''
+          description: '',
+          sessions: []
         }
       ]
     }).as('getUsersFull');
@@ -197,6 +209,5 @@ describe('Token Refresh UI Logic', () => {
   it('deletes user', () => {
     cy.findAdminSettings().click();
     deleteUser(newUser.username);
-    logout();
   });
 });
