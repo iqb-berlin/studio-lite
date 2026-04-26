@@ -32,7 +32,8 @@ describe('Auth API tests', () => {
     it('201 positive test: should allow logging in with valid credentials', () => {
       cy.loginAPI(Cypress.expose('username'), Cypress.expose('password'))
         .then(resp => {
-          Cypress.expose(`token_${Cypress.expose('username')}`, resp.body);
+          Cypress.expose(`token_${Cypress.expose('username')}`, resp.body.accessToken);
+          Cypress.expose(`refresh_${Cypress.expose('username')}`, resp.body.refreshToken);
           expect(resp.status).to.equal(201);
         });
     });
@@ -72,7 +73,7 @@ describe('Auth API tests', () => {
 
       cy.loginAPI(Cypress.expose('username'), '4567')
         .then(resp => {
-          Cypress.expose(`token_${Cypress.expose('username')}`, resp.body);
+          Cypress.expose(`token_${Cypress.expose('username')}`, resp.body.accessToken);
           expect(resp.status).to.equal(201);
         });
 

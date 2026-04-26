@@ -100,6 +100,7 @@ describe('Workspace Group Administration', () => {
     login(Cypress.expose('username'), Cypress.expose('password'));
     deleteGroup(group1);
     deleteUser('normaluser');
+    cy.findAdminSettings().click();
     deleteUser('groupadminuser');
   });
 });

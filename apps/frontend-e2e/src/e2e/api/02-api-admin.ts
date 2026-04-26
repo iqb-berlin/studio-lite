@@ -21,7 +21,8 @@ describe('Admin API tests', () => {
             });
           cy.loginAPI(userGroupAdmin.username, userGroupAdmin.password)
             .then(resp => {
-              Cypress.expose(`token_${userGroupAdmin.username}`, resp.body);
+              Cypress.expose(`token_${userGroupAdmin.username}`, resp.body.accessToken);
+              Cypress.expose(`refresh_${userGroupAdmin.username}`, resp.body.refreshToken);
               expect(resp.status).to.equal(201);
             });
         });
