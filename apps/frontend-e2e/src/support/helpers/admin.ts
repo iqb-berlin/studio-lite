@@ -16,21 +16,15 @@ export function addFirstUser(): void {
   cy.visit('/');
   cy.login(Cypress.expose('username'), Cypress.expose('password'));
   cy.translate(Cypress.expose('locale')).then(json => {
-  //   cy.clickButtonWithResponseCheck(json.home.login, [201], '/api/init-login', 'POST', 'responseLogin');
-    cy.clickButton(json.home.login);
+    cy.clickButtonWithResponseCheck(
+      json.home.login,
+      [201],
+      '/api/init-login',
+      'POST',
+      'responseLogin'
+    );
   });
-
-  cy.reload();
-  cy.wait(100);
-  // cy.intercept('POST', 'api/activity').as('getActivity');
-  cy.login(Cypress.expose('username'), Cypress.expose('password'));
-  cy.translate(Cypress.expose('locale')).then(json => {
-    //   cy.clickButtonWithResponseCheck(json.home.login, [201], '/api/init-login', 'POST', 'responseLogin');
-    cy.clickButton(json.home.login);
-  });
-  cy.wait(100);
-  // cy.wait('@getActivity');
-  // cy.findAdminSettings().should('exist');
+  cy.findAdminSettings().should('exist');
 }
 
 /**
