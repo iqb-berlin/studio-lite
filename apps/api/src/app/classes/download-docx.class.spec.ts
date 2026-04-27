@@ -151,6 +151,43 @@ describe('DownloadDocx', () => {
   });
 
   describe('Utility methods', () => {
+    it('should sanitize invalid XML chars inside OMML text nodes', () => {
+      const downloadDocx = DownloadDocx as unknown as {
+        sanitizeOmmlXml: (omml: string) => string;
+      };
+      const rawOmml = '<m:oMath><m:r><m:t xml:space="preserve">a<b & c</m:t></m:r></m:oMath>';
+      const sanitizedOmml = downloadDocx.sanitizeOmmlXml(rawOmml);
+
+      expect(sanitizedOmml).toContain('a&lt;b &amp; c');
+      expect(sanitizedOmml).not.toContain('a<b & c');
+    });
+
+    it('should sanitize OMML before creating ImportedXmlComponent', () => {
+      const fromXmlString = (
+        jest.requireMock('docx') as {
+          ImportedXmlComponent: { fromXmlString: jest.Mock };
+        }
+      ).ImportedXmlComponent.fromXmlString;
+      fromXmlString.mockClear();
+
+      const mml2ommlMock = (
+        jest.requireMock('mathml2omml') as { mml2omml: jest.Mock }
+      ).mml2omml;
+      mml2ommlMock.mockReturnValueOnce(
+        '<m:oMath><m:r><m:t xml:space="preserve">a<b & c</m:t></m:r></m:oMath>'
+      );
+
+      const downloadDocx = DownloadDocx as unknown as {
+        latexToOmml: (latex: string) => unknown;
+      };
+      const result = downloadDocx.latexToOmml('a<b');
+
+      expect(result).toEqual({});
+      expect(fromXmlString).toHaveBeenCalledWith(
+        '<m:oMath><m:r><m:t xml:space="preserve">a&lt;b &amp; c</m:t></m:r></m:oMath>'
+      );
+    });
+
     it('parseCssRgbString should parse rgb and rgba correctly', () => {
       const downloadDocx = DownloadDocx as unknown as {
         parseCssRgbString: (input: string) => number[];

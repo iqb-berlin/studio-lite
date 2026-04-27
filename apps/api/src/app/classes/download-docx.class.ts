@@ -717,10 +717,92 @@ export class DownloadDocx {
         strict: 'ignore'
       });
       const omml = mml2omml(mathml);
-      return ImportedXmlComponent.fromXmlString(omml);
+      return DownloadDocx.unwrapImportedXmlRoot(
+        ImportedXmlComponent.fromXmlString(
+          DownloadDocx.sanitizeOmmlXml(omml)
+        )
+      );
     } catch {
       return null;
     }
+  }
+
+  private static unwrapImportedXmlRoot(
+    component: ImportedXmlComponent
+  ): ImportedXmlComponent {
+    const importedComponent = component as ImportedXmlComponent & {
+      root?: Array<ImportedXmlComponent | string>;
+      rootKey?: string;
+    };
+    if (importedComponent.rootKey !== undefined) {
+      return component;
+    }
+
+    const firstChild = importedComponent.root?.[0];
+    return typeof firstChild === 'object' && firstChild !== null ?
+      firstChild as ImportedXmlComponent :
+      component;
+  }
+
+  private static isMathComponent(
+    child: ParagraphChild
+  ): child is ImportedXmlComponent {
+    if (typeof child !== 'object' || child === null) {
+      return false;
+    }
+    const importedChild = child as ImportedXmlComponent & {
+      rootKey?: string;
+    };
+    return importedChild.rootKey === 'm:oMath' ||
+      importedChild.rootKey === 'm:oMathPara';
+  }
+
+  private static createLeftAlignedMathParagraph(
+    mathChildren: ImportedXmlComponent[]
+  ): ImportedXmlComponent {
+    const mathParagraph = new ImportedXmlComponent('m:oMathPara');
+    const mathParagraphProperties = new ImportedXmlComponent('m:oMathParaPr');
+    mathParagraphProperties.push(
+      new ImportedXmlComponent('m:jc', { 'm:val': 'left' })
+    );
+    mathParagraph.push(mathParagraphProperties);
+    mathChildren.forEach(mathChild => mathParagraph.push(mathChild));
+    return mathParagraph;
+  }
+
+  private static normalizeParagraphChildren(
+    children: ParagraphChild[]
+  ): ParagraphChild[] {
+    if (!children.length) {
+      return children;
+    }
+
+    const mathChildren = children.filter(
+      DownloadDocx.isMathComponent
+    ) as ImportedXmlComponent[];
+    if (mathChildren.length === children.length) {
+      return [DownloadDocx.createLeftAlignedMathParagraph(mathChildren)];
+    }
+
+    return children;
+  }
+
+  private static sanitizeOmmlXml(omml: string): string {
+    if (!omml) return omml;
+    return omml.replace(
+      /(<m:t\b[^>]*>)([\s\S]*?)(<\/m:t>)/g,
+      (_, prefix: string, rawText: string, suffix: string) => `${prefix}${DownloadDocx.escapeXmlText(rawText)}${suffix}`
+    );
+  }
+
+  private static escapeXmlText(text: string): string {
+    return text
+      .replace(
+        /&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)/g,
+        '&amp;'
+      )
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
   private static normalizeMathTokens(html: string): string {
@@ -791,31 +873,6 @@ export class DownloadDocx {
     return sizeTypes.includes(size) ? 20 : parseInt(size, 10);
   }
 
-  private static getTextRun(
-    cheerioAPI: cheerio.CheerioAPI,
-    child: AnyNodeWithName,
-    colorParsed: string,
-    backgroundColor: string,
-    size: string
-  ): TextRun {
-    const tag = child.name;
-    return new TextRun({
-      text: cheerioAPI(child).text(),
-      color: colorParsed,
-      shading: {
-        fill: backgroundColor
-      },
-      break: tag === 'br' ? 1 : null,
-      underline: tag === 'u' ? {} : null,
-      bold: tag === 'strong',
-      italics: tag === 'em',
-      strike: tag === 's',
-      subScript: tag === 'sub',
-      superScript: tag === 'sup',
-      size: DownloadDocx.getFontSize(size)
-    });
-  }
-
   private static getAlignment(
     textAlignment: string
   ): typeof AlignmentType[keyof typeof AlignmentType] {
@@ -849,6 +906,9 @@ export class DownloadDocx {
       backgroundColor,
       size
     );
+    const normalizedChildren = DownloadDocx.normalizeParagraphChildren(
+      children
+    );
     return new Paragraph({
       alignment: DownloadDocx.getAlignment(textAlignment),
       spacing: {
@@ -857,7 +917,7 @@ export class DownloadDocx {
       },
       indent: !isListParagraph ? { start: 100, end: 100 } : null,
       bullet: isListParagraph ? { level: 0 } : null,
-      children: children
+      children: normalizedChildren
     });
   }
 
