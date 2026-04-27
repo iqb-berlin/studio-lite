@@ -12,7 +12,6 @@ import {
 
 describe('Unit Comments', () => {
   before(() => {
-    // cy.resetDb();
     createBasicSpecCy();
   });
 

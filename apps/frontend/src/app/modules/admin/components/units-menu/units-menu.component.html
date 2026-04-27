@@ -1,7 +1,8 @@
 <div class="fx-row-start-stretch">
   <button mat-button
           [matTooltip]="'admin.download-units' | translate"
-          (click)="downloadUnits.emit(true)">
+          (click)="downloadUnits.emit(true)"
+          data-cy="admin-units-menu-download">
     <studio-lite-wrapped-icon icon="file_download"></studio-lite-wrapped-icon>
   </button>
 </div>

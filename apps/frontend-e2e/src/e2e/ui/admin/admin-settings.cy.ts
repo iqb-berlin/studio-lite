@@ -13,7 +13,9 @@ import { group1 } from '../../../support/testData';
 
 describe('Admin Settings Tab Configuration', () => {
   before(() => addFirstUser());
-  after(() => deleteFirstUser());
+  after(() => {
+    deleteFirstUser();
+  });
 
   // -------------------------------------------------------------------------
   describe('App Config – Texts card', () => {

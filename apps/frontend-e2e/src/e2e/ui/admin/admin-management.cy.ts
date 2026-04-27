@@ -24,10 +24,11 @@ import {
 describe('UI Administration Management', () => {
   const group1 = testGroups.admin;
   const ws1 = testWorkspaces.admin.math1;
-  before(() => addFirstUser());
+  before(() => {
+    addFirstUser();
+  });
   after(() => {
     deleteFirstUser();
-    // cy.resetDb();
   });
 
   it('displays admin settings button for admin users', () => {
