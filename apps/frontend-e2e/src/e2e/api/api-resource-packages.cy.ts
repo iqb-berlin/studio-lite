@@ -10,7 +10,7 @@ describe('Admin settings API tests', () => {
   before(() => {
     cy.addFirstUserAPI(Cypress.expose('username'), Cypress.expose('password'))
       .then(resp => {
-        Cypress.expose(`token_${Cypress.expose('username')}`, resp.body);
+        Cypress.expose(`token_${Cypress.expose('username')}`, resp.body.accessToken);
         expect(resp.status).to.equal(201);
         cy.getUserIdAPI(Cypress.expose(`token_${Cypress.expose('username')}`))
           .then(resp2 => {
