@@ -55,12 +55,13 @@ describe('AppController', () => {
   });
 
   describe('initLogin', () => {
-    it('should return a token for first login', async () => {
-      authService.initLogin.mockResolvedValue('mock-token');
+    it('should return tokens for first login', async () => {
+      const mockTokens = { accessToken: 'access-token', refreshToken: 'refresh-token' };
+      authService.initLogin.mockResolvedValue(mockTokens);
 
       const result = await controller.initLogin({ username: 'user', password: 'pass' });
 
-      expect(result).toBe('"mock-token"');
+      expect(result).toEqual(mockTokens);
       expect(authService.initLogin).toHaveBeenCalledWith('user', 'pass');
     });
   });

@@ -159,7 +159,11 @@ describe('AuthService', () => {
     it('should create user and return token if no users exist', async () => {
       usersService.hasUsers.mockResolvedValue(false);
       usersService.create.mockResolvedValue(1);
-      jwtService.sign.mockReturnValue('token');
+      jwtService.sign.mockReturnValue('access-token');
+      refreshTokenRepository.create.mockReturnValue({} as RefreshToken);
+      refreshTokenRepository.save.mockResolvedValue({} as RefreshToken);
+      userSessionRepository.create.mockReturnValue({} as UserSession);
+      userSessionRepository.save.mockResolvedValue({} as UserSession);
 
       const result = await service.initLogin('user', 'pass');
 
@@ -169,8 +173,10 @@ describe('AuthService', () => {
         isAdmin: true,
         description: 'first initial user'
       });
-      expect(result).toBe('token');
-      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ username: 'user', sub: 1, sub2: 0 }));
+      expect(result.accessToken).toBe('access-token');
+      expect(result.refreshToken).toBeDefined();
+      expect(refreshTokenRepository.save).toHaveBeenCalled();
+      expect(userSessionRepository.save).toHaveBeenCalled();
     });
   });
 

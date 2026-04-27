@@ -202,7 +202,7 @@ export class AuthService {
     return this.login({ id: user.id, name: user.name, reviewId: 0 }, userSession.sessionId);
   }
 
-  async initLogin(username: string, password: string): Promise<string> {
+  async initLogin(username: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {
     if (await this.usersService.hasUsers()) throw new ForbiddenException();
     const newUserId = await this.usersService.create({
       name: username,
@@ -211,13 +211,7 @@ export class AuthService {
       description: 'first initial user'
     });
     this.logger.log(`First User with id '${newUserId}' is logging in.`);
-    const payload = {
-      username,
-      sub: newUserId,
-      sub2: 0,
-      sid: crypto.randomUUID()
-    };
-    return this.jwtService.sign(payload);
+    return this.login({ id: newUserId, name: username, reviewId: 0 });
   }
 
   async isAdminUser(userId: number): Promise<boolean> {

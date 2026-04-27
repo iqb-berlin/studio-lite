@@ -94,8 +94,7 @@ export class AppController {
   @ApiForbiddenResponse({ description: 'First user already created.' })
   async initLogin(@Body() body: { username: string, password: string }
   ) {
-    const token = await this.authService.initLogin(body.username, body.password);
-    return `"${token}"`;
+    return this.authService.initLogin(body.username, body.password);
   }
 
   @Get('auth-data')
