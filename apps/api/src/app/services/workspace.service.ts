@@ -404,6 +404,9 @@ export class WorkspaceService {
           codingVariable
         );
         const codingType = WorkspaceService.determineCodingType(codingVariable);
+        const trainingEffort = WorkspaceService.determineTrainingEffort(
+          codingVariable
+        );
         const foundItem = WorkspaceService.findMatchingItem(
           unit,
           codingVariable
@@ -414,7 +417,8 @@ export class WorkspaceService {
           variable: codingVariable.alias || codingVariable.id || '–',
           item: foundItem?.id || '–',
           validation: validationResultText,
-          codingType: codingType
+          codingType: codingType,
+          trainingEffort: trainingEffort
         });
       });
   }
@@ -453,10 +457,16 @@ export class WorkspaceService {
       );
     });
 
-    if (closedCoding) return 'geschlossen';
+    if (closedCoding) return 'automatisch';
     if (manualCodingOnly) return 'manuell';
-    if (hasRules) return 'regelbasiert';
+    if (hasRules) return 'halbautomatisch';
     return 'keine Regeln';
+  }
+
+  static determineTrainingEffort(codingVariable: VariableCodingData): string {
+    return codingVariable.processing?.includes('CODER_TRAINING_REQUIRED') ?
+      'erhöht' :
+      'normal';
   }
 
   static findMatchingItem(
@@ -487,7 +497,8 @@ export class WorkspaceService {
       variable: '',
       item: '',
       validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
-      codingType: ''
+      codingType: '',
+      trainingEffort: ''
     });
   }
 

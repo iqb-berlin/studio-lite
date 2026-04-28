@@ -15,4 +15,7 @@ export class CodingReportDto {
 
   @ApiProperty()
     codingType!: string;
+
+  @ApiProperty()
+    trainingEffort!: string;
 }

@@ -805,7 +805,8 @@
     "variable": "Variable",
     "item": "Item",
     "validation": "Validierung",
-    "codingType": "Kodiertyp"
+    "codingType": "Kodiertyp",
+    "trainingEffort": "Schulungsaufwand"
   },
   "unit-properties": {
     "title": "Aufgaben-Eigenschaften",
