@@ -10,7 +10,7 @@ describe('Admin settings API tests', () => {
   before(() => {
     cy.addFirstUserAPI(Cypress.expose('username'), Cypress.expose('password'))
       .then(resp => {
-        Cypress.expose(`token_${Cypress.expose('username')}`, resp.body);
+        Cypress.expose(`token_${Cypress.expose('username')}`, resp.body.accessToken);
         expect(resp.status).to.equal(201);
         cy.getUserIdAPI(Cypress.expose(`token_${Cypress.expose('username')}`))
           .then(resp2 => {
@@ -23,7 +23,7 @@ describe('Admin settings API tests', () => {
             expect(res.status).to.equal(201);
             cy.loginAPI(userGroupAdmin.username, userGroupAdmin.password)
               .then(resp3 => {
-                Cypress.expose(`token_${userGroupAdmin.username}`, resp3.body);
+                Cypress.expose(`token_${userGroupAdmin.username}`, resp3.body.accessToken);
                 expect(resp3.status).to.equal(201);
               });
           });

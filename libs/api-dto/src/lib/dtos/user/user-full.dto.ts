@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { UserSessionInfoDto } from './user-session-info.dto';
+import { UserActivityStatus } from './user-activity-status';
 
 export class UserFullDto {
   @ApiProperty()
@@ -27,4 +29,16 @@ export class UserFullDto {
 
   @ApiProperty()
     emailPublishApproved?: boolean;
+
+  @ApiProperty()
+    lastActivity?: Date;
+
+  @ApiProperty()
+    isLoggedIn?: boolean;
+
+  @ApiProperty({ required: false, enum: ['active', 'passive', 'inactive', 'orphaned'] })
+    activityStatus?: UserActivityStatus;
+
+  @ApiProperty({ type: [UserSessionInfoDto] })
+    sessions?: UserSessionInfoDto[];
 }

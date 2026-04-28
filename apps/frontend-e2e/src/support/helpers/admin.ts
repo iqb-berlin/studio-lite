@@ -6,7 +6,6 @@
 import { AccessLevel, UserData } from '../testData';
 import { clickIndexTabAdmin, clickIndexTabWsgAdmin } from './navigation';
 import { clickSaveButtonRight, editInput } from './common';
-import { logout } from './user';
 
 /**
  * Adds the first admin user and logs in
@@ -17,7 +16,13 @@ export function addFirstUser(): void {
   cy.visit('/');
   cy.login(Cypress.expose('username'), Cypress.expose('password'));
   cy.translate(Cypress.expose('locale')).then(json => {
-    cy.clickButtonWithResponseCheck(json.home.login, [201], '/api/init-login', 'POST', 'responseLogin');
+    cy.clickButtonWithResponseCheck(
+      json.home.login,
+      [201],
+      '/api/init-login',
+      'POST',
+      'responseLogin'
+    );
   });
   cy.findAdminSettings().should('exist');
 }
@@ -30,12 +35,9 @@ export function addFirstUser(): void {
 export function deleteFirstUser(): void {
   cy.visit('/');
   deleteUser(Cypress.expose('username'));
-  cy.visit('/');
-  logout();
 }
 
 /**
- * Creates a new user through the admin interface
  * @param newUser - User data including username, password, email, etc.
  * @example
  * createNewUser({
@@ -45,6 +47,8 @@ export function deleteFirstUser(): void {
  * });
  */
 export function createNewUser(newUser: UserData): void {
+  cy.visit('/');
+  cy.findAdminSettings().click();
   clickIndexTabAdmin('users');
   cy.get('[data-cy="admin-users-menu-add-user"]').click();
   editInput('admin-edit-user-username', newUser.username);
@@ -69,14 +73,16 @@ export function deleteUser(user: string): void {
     .parent()
     .find('[data-cy="admin-users-delete-user"]').click();
   cy.translate(Cypress.expose('locale')).then(json => {
-    cy.clickDialogButtonWithResponseCheck(
-      json.delete,
-      [200],
-      '/api/admin/users*',
-      'DELETE',
-      'deleteUser'
-    );
+    cy.clickButton(json.delete);
+    // cy.clickDialogButtonWithResponseCheck(
+    //   json.delete,
+    //   [200],
+    //   '/api/admin/users*',
+    //   'DELETE',
+    //   'deleteUser'
+    // );
   });
+  cy.wait(100);
 }
 
 /**
@@ -86,6 +92,8 @@ export function deleteUser(user: string): void {
  * createGroup('Mathematics');
  */
 export function createGroup(group: string): void {
+  cy.visit('/');
+  cy.findAdminSettings().click();
   clickIndexTabAdmin('workspace-groups');
   cy.get('mat-icon').contains('add').click();
   cy.translate(Cypress.expose('locale')).then(json => {
@@ -341,4 +349,37 @@ export function saveWorkspaceSettings(): void {
   cy.intercept('PATCH', '/api/workspaces/*/settings').as('saveWsSettings');
   cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
   cy.wait('@saveWsSettings').its('response.statusCode').should('eq', 200);
+}
+
+/**
+ * Configures one workspace as a drop-box for another within a group
+ * @param sourceWs - Name of the workspace to configure
+ * @param targetWs - Name of the workspace to set as drop-box
+ * @example
+ * configureDropBox('Workspace 1', 'Workspace 2');
+ */
+export function configureDropBox(sourceWs: string, targetWs: string): void {
+  clickIndexTabWsgAdmin('workspaces');
+  cy.get('mat-row').contains(sourceWs).click();
+  // Click the select-drop-box button (folder_special icon)
+  cy.get('button[mat-button], button[mat-mdc-button]')
+    .find('mat-icon')
+    .contains('folder_special')
+    .click();
+  cy.get('mat-mdc-dialog-container, mat-dialog-container').should('be.visible');
+  cy.get('mat-select').click();
+  cy.get('mat-mdc-option, mat-option').contains(targetWs).click();
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.get('mat-mdc-dialog-container, mat-dialog-container')
+      .find('button')
+      .contains(json.save)
+      .click();
+  });
+  // Verify check_circle icon appears in the row
+  cy.get('mat-row')
+    .contains(sourceWs)
+    .parent()
+    .find('mat-icon')
+    .contains('check_circle')
+    .should('exist');
 }

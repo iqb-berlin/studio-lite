@@ -4,6 +4,7 @@ import { MatCheckboxModule, MatCheckboxChange } from '@angular/material/checkbox
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { BehaviorSubject, of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import {
@@ -61,6 +62,7 @@ describe('ProfilesComponent', () => {
         MatFormFieldModule,
         MatProgressSpinnerModule,
         MatExpansionModule,
+        NoopAnimationsModule,
         TranslateModule.forRoot(),
         ProfilesComponent
       ],

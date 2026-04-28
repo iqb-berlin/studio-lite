@@ -11,12 +11,14 @@ import { WorkspaceService } from '../../../workspace/services/workspace.service'
 import { PreviewDirective } from '../../../../directives/preview.directive';
 import { UnitState } from '../../../../models/verona.interface';
 import { WidgetCallData } from '../../../workspace/models/widget-call-data.interface';
+import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
 @Component({
   selector: 'studio-lite-unit-print-player',
   templateUrl: './unit-print-player.component.html',
   styleUrls: ['./unit-print-player.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [TrackIframeActivityDirective]
 })
 export class UnitPrintPlayerComponent extends PreviewDirective implements AfterViewInit, OnDestroy {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;

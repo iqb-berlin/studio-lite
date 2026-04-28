@@ -5,50 +5,57 @@ import { provideHttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, Subject } from 'rxjs';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { AuthDataDto } from '@studio-lite-lib/api-dto';
 import { UnitPrintPlayerComponent } from './unit-print-player.component';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
+import { BackendService } from '../../../../services/backend.service';
+import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { environment } from '../../../../../environments/environment';
 
 describe('UnitPrintPlayerComponent', () => {
+  type UnitPrintPlayerTestAccess = UnitPrintPlayerComponent & {
+    setHostingIframe: () => void;
+    subscribeForPostMessages: () => void;
+    buildVeronaModule: (moduleId: string, moduleType: 'player') => void;
+  };
+
   let component: UnitPrintPlayerComponent;
   let fixture: ComponentFixture<UnitPrintPlayerComponent>;
-  let mockBackendService: {
-    getUnitDefinition: jest.Mock;
-    getDirectDownloadLink: jest.Mock;
-  };
-  let mockWorkspaceService: Record<string, unknown>;
-  let mockModuleService: Record<string, unknown>;
-  let mockAppService: Record<string, unknown>;
-  let mockTranslateService: Record<string, unknown>;
-  let mockSnackBar: Record<string, unknown>;
+  let mockBackendService: DeepMocked<WorkspaceBackendService>;
+  let mockWorkspaceService: DeepMocked<WorkspaceService>;
+  let mockModuleService: DeepMocked<ModuleService>;
+  let mockAppService: DeepMocked<AppService>;
+  let mockTranslateService: DeepMocked<TranslateService>;
+  let mockSnackBar: DeepMocked<MatSnackBar>;
 
   beforeEach(async () => {
-    mockBackendService = {
+    mockBackendService = createMock<WorkspaceBackendService>({
       getUnitDefinition: jest.fn(),
       getDirectDownloadLink: jest.fn().mockReturnValue('http://test-download-link')
-    };
+    });
 
-    mockWorkspaceService = {};
-    mockModuleService = {
-      players: {
-        'test-player@1.0.0': {
-          id: 'test-player@1.0.0'
-        }
-      },
+    mockWorkspaceService = createMock<WorkspaceService>({});
+    mockModuleService = createMock<ModuleService>({
       getModuleHtml: jest.fn().mockReturnValue(of('<html lang=""></html>'))
+    });
+    mockModuleService.players = {
+      'test-player@1.0.0': { key: 'test-player@1.0.0' } as never
     };
-    mockAppService = {
-      postMessage$: new Subject()
-    };
-    mockTranslateService = {
-      instant: jest.fn((key: string) => key)
-    };
-    mockSnackBar = {
+    mockAppService = createMock<AppService>({
+      postMessage$: new Subject<MessageEvent>(),
+      authData: { userId: 1 } as AuthDataDto,
+      authDataChanged: new Subject<AuthDataDto>()
+    });
+    mockTranslateService = createMock<TranslateService>();
+    mockTranslateService.instant = jest.fn()
+      .mockImplementation((key: string | string[]) => (Array.isArray(key) ? key[0] : key));
+    mockSnackBar = createMock<MatSnackBar>({
       open: jest.fn()
-    };
+    });
 
     await TestBed.configureTestingModule({
       imports: [
@@ -76,6 +83,14 @@ describe('UnitPrintPlayerComponent', () => {
         {
           provide: AppService,
           useValue: mockAppService
+        },
+        {
+          provide: BackendService,
+          useValue: { ping: jest.fn(), logout: jest.fn() }
+        },
+        {
+          provide: HeartbeatService,
+          useValue: { refreshActivityPulse: jest.fn() }
         },
         {
           provide: TranslateService,
@@ -108,7 +123,7 @@ describe('UnitPrintPlayerComponent', () => {
     });
 
     it('should set hosting iframe', () => {
-      const setHostingIframeSpy = jest.spyOn(component as never, 'setHostingIframe');
+      const setHostingIframeSpy = jest.spyOn(component as UnitPrintPlayerTestAccess, 'setHostingIframe');
 
       component.ngAfterViewInit();
 
@@ -116,7 +131,7 @@ describe('UnitPrintPlayerComponent', () => {
     });
 
     it('should subscribe for post messages', () => {
-      const subscribeSpy = jest.spyOn(component as never, 'subscribeForPostMessages');
+      const subscribeSpy = jest.spyOn(component as UnitPrintPlayerTestAccess, 'subscribeForPostMessages');
 
       component.ngAfterViewInit();
 
@@ -124,7 +139,7 @@ describe('UnitPrintPlayerComponent', () => {
     });
 
     it('should build verona module with playerId', () => {
-      const buildSpy = jest.spyOn(component as never, 'buildVeronaModule');
+      const buildSpy = jest.spyOn(component as UnitPrintPlayerTestAccess, 'buildVeronaModule');
       component.playerId = 'test-player@1.0.0';
 
       component.ngAfterViewInit();
@@ -150,7 +165,7 @@ describe('UnitPrintPlayerComponent', () => {
     }));
 
     it('should handle empty definition', fakeAsync(() => {
-      const mockDefinition = { definition: null };
+      const mockDefinition = { definition: undefined };
       mockBackendService.getUnitDefinition.mockReturnValue(of(mockDefinition));
       const postStoreSpy = jest.spyOn(component, 'postStore');
 
@@ -277,10 +292,7 @@ describe('UnitPrintPlayerComponent', () => {
       };
       component.iFrameElement = mockIframe as never;
       const nextSpy = jest.spyOn(component.iFrameHeightChange, 'next');
-
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      const calculateMethod = (component as unknown as Record<string, () => void>)['calculateIFrameHeight'];
-      calculateMethod.call(component);
+      (component as never as { calculateIFrameHeight: () => void }).calculateIFrameHeight();
 
       expect(component.iFrameHeight).toBe(500);
       expect(nextSpy).toHaveBeenCalledWith(500);
@@ -298,10 +310,7 @@ describe('UnitPrintPlayerComponent', () => {
       };
       component.iFrameElement = mockIframe as never;
       const nextSpy = jest.spyOn(component.iFrameHeightChange, 'next');
-
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      const calculateMethod = (component as unknown as Record<string, () => void>)['calculateIFrameHeight'];
-      calculateMethod.call(component);
+      (component as never as { calculateIFrameHeight: () => void }).calculateIFrameHeight();
 
       expect(component.iFrameHeight).toBe(600);
       expect(nextSpy).toHaveBeenCalledWith(600);
@@ -310,10 +319,7 @@ describe('UnitPrintPlayerComponent', () => {
     it('should not emit if height is not available', () => {
       component.iFrameElement = undefined;
       const nextSpy = jest.spyOn(component.iFrameHeightChange, 'next');
-
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      const calculateMethod = (component as unknown as Record<string, () => void>)['calculateIFrameHeight'];
-      calculateMethod.call(component);
+      (component as never as { calculateIFrameHeight: () => void }).calculateIFrameHeight();
 
       expect(nextSpy).not.toHaveBeenCalled();
     });

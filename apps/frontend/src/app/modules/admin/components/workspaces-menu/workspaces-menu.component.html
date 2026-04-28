@@ -1,7 +1,8 @@
 <div class="fx-row-start-stretch">
   <button mat-button
           [matTooltip]="'admin.download-xlsx' | translate"
-          (click)="downloadWorkspacesReport.emit(true)">
+          (click)="downloadWorkspacesReport.emit(true)"
+          data-cy="admin-workspaces-menu-download">
     <studio-lite-wrapped-icon icon="save_alt"></studio-lite-wrapped-icon>
   </button>
 </div>

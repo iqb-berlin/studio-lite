@@ -13,10 +13,12 @@ describe('AdminUserController', () => {
   let controller: AdminUserController;
   let usersService: DeepMocked<UsersService>;
   let workspaceGroupService: DeepMocked<WorkspaceGroupService>;
+  let authService: DeepMocked<AuthService>;
 
   beforeEach(async () => {
     usersService = createMock<UsersService>();
     workspaceGroupService = createMock<WorkspaceGroupService>();
+    authService = createMock<AuthService>();
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AdminUserController],
@@ -24,7 +26,7 @@ describe('AdminUserController', () => {
         { provide: UsersService, useValue: usersService },
         { provide: WorkspaceGroupService, useValue: workspaceGroupService },
         { provide: IsAdminGuard, useValue: { canActivate: jest.fn(() => true) } },
-        { provide: AuthService, useValue: createMock<AuthService>() }
+        { provide: AuthService, useValue: authService }
       ]
     }).compile();
 
@@ -88,11 +90,27 @@ describe('AdminUserController', () => {
   describe('patch', () => {
     it('should update a user', async () => {
       const dto = { id: 1, name: 'updated' } as UserFullDto;
-      usersService.patch.mockResolvedValue(undefined as unknown as void);
+      usersService.patch.mockResolvedValue(undefined);
 
       await controller.patch(1, dto);
 
       expect(usersService.patch).toHaveBeenCalledWith(1, dto);
+    });
+  });
+
+  describe('removeSession', () => {
+    it('should remove a specific orphaned user session', async () => {
+      authService.logoutOrphanedSession.mockResolvedValue(true);
+
+      await controller.removeSession(1, 'session-1');
+
+      expect(authService.logoutOrphanedSession).toHaveBeenCalledWith(1, 'session-1');
+    });
+
+    it('should reject non-orphaned session deletion', async () => {
+      authService.logoutOrphanedSession.mockResolvedValue(false);
+
+      await expect(controller.removeSession(1, 'session-1')).rejects.toThrow('Only orphaned sessions can be deleted.');
     });
   });
 });

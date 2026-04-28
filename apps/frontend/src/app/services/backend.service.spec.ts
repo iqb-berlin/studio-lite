@@ -52,7 +52,7 @@ describe('BackendService', () => {
 
   describe('login', () => {
     it('should login successfully with valid credentials', done => {
-      const mockToken = 'test-token-123';
+      const mockLoginResponse = { accessToken: 'test-token-123', refreshToken: 'refresh-token-123' };
       const mockAuthData: AuthDataDto = {
         userId: 1,
         userName: 'testUser',
@@ -64,7 +64,8 @@ describe('BackendService', () => {
 
       service.login('testUser', 'password', false).subscribe(result => {
         expect(result).toBe(true);
-        expect(localStorage.getItem('id_token')).toBe(mockToken);
+        expect(localStorage.getItem('id_token')).toBe(mockLoginResponse.accessToken);
+        expect(localStorage.getItem('refresh_token')).toBe(mockLoginResponse.refreshToken);
         expect(appService.authData).toEqual(mockAuthData);
         done();
       });
@@ -75,7 +76,7 @@ describe('BackendService', () => {
         username: 'testUser',
         password: 'password'
       });
-      loginReq.flush(mockToken);
+      loginReq.flush(mockLoginResponse);
 
       const authReq = httpMock.expectOne(`${serverUrl}auth-data`);
       expect(authReq.request.method).toBe('GET');
@@ -83,7 +84,7 @@ describe('BackendService', () => {
     });
 
     it('should use init-login endpoint when initLoginMode is true', done => {
-      const mockToken = 'init-token';
+      const mockLoginResponse = { accessToken: 'init-token', refreshToken: 'init-refresh' };
       const mockAuthData: AuthDataDto = {
         userId: 1,
         userName: 'admin',
@@ -100,7 +101,7 @@ describe('BackendService', () => {
 
       const loginReq = httpMock.expectOne(`${serverUrl}init-login`);
       expect(loginReq.request.method).toBe('POST');
-      loginReq.flush(mockToken);
+      loginReq.flush(mockLoginResponse);
 
       const authReq = httpMock.expectOne(`${serverUrl}auth-data`);
       authReq.flush(mockAuthData);
@@ -117,7 +118,7 @@ describe('BackendService', () => {
     });
 
     it('should return false when auth-data fails after successful login', done => {
-      const mockToken = 'test-token';
+      const mockLoginResponse = { accessToken: 'test-token', refreshToken: 'test-refresh' };
 
       service.login('testUser', 'password', false).subscribe(result => {
         expect(result).toBe(false);
@@ -125,7 +126,7 @@ describe('BackendService', () => {
       });
 
       const loginReq = httpMock.expectOne(`${serverUrl}login`);
-      loginReq.flush(mockToken);
+      loginReq.flush(mockLoginResponse);
 
       const authReq = httpMock.expectOne(`${serverUrl}auth-data`);
       authReq.error(new ProgressEvent('error'));
@@ -225,10 +226,15 @@ describe('BackendService', () => {
   });
 
   describe('logout', () => {
-    it('should remove token from localStorage', () => {
+    it('should remove tokens from localStorage', () => {
       localStorage.setItem('id_token', 'test-token');
+      localStorage.setItem('refresh_token', 'test-refresh');
       service.logout();
+      const req = httpMock.expectOne(`${serverUrl}logout`);
+      expect(req.request.method).toBe('POST');
+      req.flush(null);
       expect(localStorage.getItem('id_token')).toBeNull();
+      expect(localStorage.getItem('refresh_token')).toBeNull();
     });
 
     it('should reset authData to default', () => {
@@ -242,7 +248,25 @@ describe('BackendService', () => {
       };
 
       service.logout();
+      const req = httpMock.expectOne(`${serverUrl}logout`);
+      req.flush(null);
       expect(appService.authData).toEqual(AppService.defaultAuthData);
+    });
+
+    it('should try logout-silent when logout returns an error', () => {
+      localStorage.setItem('id_token', 'test-token');
+      localStorage.setItem('refresh_token', 'test-refresh');
+
+      service.logout();
+
+      const logoutReq = httpMock.expectOne(`${serverUrl}logout`);
+      expect(logoutReq.request.method).toBe('POST');
+      logoutReq.error(new ProgressEvent('error'));
+
+      const silentReq = httpMock.expectOne(`${serverUrl}logout-silent`);
+      expect(silentReq.request.method).toBe('POST');
+      expect(silentReq.request.body).toEqual({ refreshToken: 'test-refresh' });
+      silentReq.flush(null);
     });
   });
 
@@ -541,6 +565,18 @@ describe('BackendService', () => {
 
       const req = httpMock.expectOne(`${serverUrl}admin/settings/email-template`);
       req.error(new ProgressEvent('error'));
+    });
+  });
+
+  describe('activity', () => {
+    it('should post activity update', done => {
+      service.activity().subscribe(() => {
+        done();
+      });
+
+      const req = httpMock.expectOne(`${serverUrl}activity`);
+      expect(req.request.method).toBe('POST');
+      req.flush(null);
     });
   });
 });

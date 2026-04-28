@@ -23,14 +23,16 @@ describe('CodingReportComponent', () => {
       variable: 'V1',
       item: 'I1',
       validation: 'ok',
-      codingType: 'keine Regeln'
+      codingType: 'keine Regeln',
+      trainingEffort: 'normal'
     } as CodingReportDto,
     {
       unit: 'U1',
       variable: 'V2',
       item: 'I2',
       validation: 'ok',
-      codingType: 'REGEL'
+      codingType: 'REGEL',
+      trainingEffort: 'erhöht'
     } as CodingReportDto
   ];
 
@@ -89,5 +91,32 @@ describe('CodingReportComponent', () => {
     component.applyFilter(event);
 
     expect(component.dataSource.filter).toBe('v2');
+  });
+
+  it('downloadCodingReport creates and revokes object URL', () => {
+    const createObjectURLMock = jest.fn(() => 'blob:test-url');
+    const revokeObjectURLMock = jest.fn();
+    Object.defineProperty(URL, 'createObjectURL', {
+      value: createObjectURLMock,
+      writable: true
+    });
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      value: revokeObjectURLMock,
+      writable: true
+    });
+    const clickMock = jest.fn();
+    const createElementSpy = jest.spyOn(document, 'createElement').mockReturnValue({
+      href: '',
+      download: '',
+      click: clickMock
+    } as unknown as HTMLAnchorElement);
+
+    component.downloadCodingReport();
+
+    expect(createObjectURLMock).toHaveBeenCalled();
+    expect(clickMock).toHaveBeenCalled();
+    expect(revokeObjectURLMock).toHaveBeenCalledWith('blob:test-url');
+
+    createElementSpy.mockRestore();
   });
 });

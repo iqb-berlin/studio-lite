@@ -12,13 +12,14 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { RolePipe } from '../../pipes/role.pipe';
 import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
+import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
 @Component({
   selector: 'studio-lite-unit-editor',
   templateUrl: './unit-editor.component.html',
   styleUrls: ['./unit-editor.component.scss'],
   host: { class: 'unit-editor' },
-  imports: [MatProgressSpinner]
+  imports: [MatProgressSpinner, TrackIframeActivityDirective]
 })
 export class UnitEditorComponent extends VeronaModuleDirective implements AfterViewInit {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;

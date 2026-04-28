@@ -237,3 +237,39 @@ export function editRichNote(addedContent: string): void {
   cy.get('tiptap-editor .ProseMirror').type(addedContent);
   cy.get('mat-dialog-actions button[color="primary"]').click({ force: true });
 }
+
+/**
+ * Submits selected units to the configured drop-box
+ * @param unitNames - Array of unit names to submit
+ * @example
+ * submitUnits(['Unit 1', 'Unit 2']);
+ */
+export function submitUnits(unitNames: string[]): void {
+  cy.get('[data-cy="workspace-edit-unit-menu"]').click();
+  cy.get('[data-cy="workspace-edit-unit-submit-units"]').click();
+  cy.get('mat-mdc-dialog-container, mat-dialog-container').should('be.visible');
+  selectListUnits(unitNames);
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.get('[data-cy="workspace-select-unit-button"]')
+      .contains(json.workspace['submit-units'])
+      .click();
+  });
+}
+
+/**
+ * Returns units from the drop-box back to the original workspace
+ * @param unitNames - Array of unit names to return
+ * @example
+ * returnSubmittedUnits(['Unit 1', 'Unit 2']);
+ */
+export function returnSubmittedUnits(unitNames: string[]): void {
+  cy.get('[data-cy="workspace-edit-unit-menu"]').click();
+  cy.get('[data-cy="workspace-edit-unit-return-submitted-units"]').click();
+  cy.get('mat-mdc-dialog-container, mat-dialog-container').should('be.visible');
+  selectListUnits(unitNames);
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.get('[data-cy="workspace-select-unit-button"]')
+      .contains(json.workspace['return-submitted-units'])
+      .click();
+  });
+}

@@ -9,8 +9,9 @@
     <mat-spinner class="wait-animation fx-flex-fill"></mat-spinner>
   }
   <div class="preview-body fx-flex-fill">
-    <iframe #hostingIframe
-      class="unitHost">
+    <iframe #hostingIframe studioLiteTrackIframeActivity
+      class="unitHost"
+      data-cy="unit-preview-iframe">
     </iframe>
   </div>
   <studio-lite-preview-bar [pageList]="pageList"

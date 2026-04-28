@@ -33,9 +33,12 @@ import { EntriesDividerComponent } from '../../../../components/entries-divider/
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
+  imports: [
+    SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
     MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, EntriesDividerComponent,
-    MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule, RolesHeaderComponent, MatFabButton, MatIcon]
+    MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule,
+    RolesHeaderComponent, MatFabButton, MatIcon
+  ]
 })
 export class UsersComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();

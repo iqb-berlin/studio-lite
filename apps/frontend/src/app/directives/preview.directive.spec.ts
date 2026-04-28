@@ -109,6 +109,104 @@ describe('PreviewDirective', () => {
     expect(directive.handleUnitStateData).toHaveBeenCalled();
   });
 
+  it('does not throw when vopStateChangedNotification has no validPages', () => {
+    const directive = createDirective();
+    const mockWindow = window;
+    directive.iFrameElement = createIFrameWithWindow(mockWindow);
+
+    const message = createMessageEvent(
+      {
+        type: 'vopStateChangedNotification',
+        playerState: {
+          currentPage: 'p1'
+        }
+      },
+      mockWindow
+    );
+
+    expect(() => directive.handleIncomingMessage(message)).not.toThrow();
+  });
+
+  it('does not throw when vopStateChangedNotification has null validPages', () => {
+    const directive = createDirective();
+    const mockWindow = window;
+    directive.iFrameElement = createIFrameWithWindow(mockWindow);
+
+    directive.setPageList(['p1', 'p2'], 'p1');
+
+    const message = createMessageEvent(
+      {
+        type: 'vopStateChangedNotification',
+        playerState: {
+          validPages: null,
+          currentPage: 'p2'
+        }
+      },
+      mockWindow
+    );
+
+    expect(() => directive.handleIncomingMessage(message)).not.toThrow();
+
+    const activeGoto = directive.pageList.find(p => p.type === '#goto' && p.disabled);
+    expect(activeGoto?.id).toBe('p2');
+  });
+
+  it('handles object-map validPages in vopStateChangedNotification', () => {
+    const directive = createDirective();
+    const mockWindow = window;
+    directive.iFrameElement = createIFrameWithWindow(mockWindow);
+
+    const message = createMessageEvent(
+      {
+        type: 'vopStateChangedNotification',
+        playerState: {
+          validPages: {
+            p1: {},
+            p2: {}
+          },
+          currentPage: 'p2'
+        }
+      },
+      mockWindow
+    );
+
+    directive.handleIncomingMessage(message);
+
+    expect(directive.pageList).toHaveLength(4);
+    const activeGoto = directive.pageList.find(p => p.type === '#goto' && p.disabled);
+    expect(activeGoto?.id).toBe('p2');
+  });
+
+  it('does not throw for null playerState and still processes unitState', () => {
+    const directive = createDirective();
+    const mockWindow = window;
+    directive.iFrameElement = createIFrameWithWindow(mockWindow);
+
+    directive.setPageList(['p1', 'p2'], 'p1');
+    const initialPageList = [...directive.pageList];
+    const unitState = {
+      presentationProgress: 'complete',
+      responseProgress: 'some'
+    } as UnitState;
+
+    const message = createMessageEvent(
+      {
+        type: 'vopStateChangedNotification',
+        playerState: null,
+        unitState
+      },
+      mockWindow
+    );
+
+    expect(() => directive.handleIncomingMessage(message)).not.toThrow();
+
+    expect(directive.pageList).toEqual(initialPageList);
+    expect(directive.presentationProgress).toBe('complete');
+    expect(directive.responseProgress).toBe('some');
+    expect(directive.handleUnitStateData).toHaveBeenCalledWith(unitState);
+    expect(directive.handleUnitStateData).toHaveBeenCalledTimes(1);
+  });
+
   it('routes page navigation request and shows notification', () => {
     const directive = createDirective();
     const mockWindow = window;

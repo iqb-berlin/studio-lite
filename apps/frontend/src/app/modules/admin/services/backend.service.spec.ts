@@ -200,7 +200,7 @@ describe('Admin BackendService', () => {
   });
 
   describe('getUsersFull', () => {
-    it('requests users with full param', done => {
+    it('requests users with full param without activity header', done => {
       const users: UserFullDto[] = [{ id: 2 } as UserFullDto];
 
       service.getUsersFull().subscribe(result => {
@@ -211,6 +211,22 @@ describe('Admin BackendService', () => {
       const req = httpMock.expectOne(r => r.url === `${baseUrl}group-admin/users`);
       expect(req.request.method).toBe('GET');
       expect(req.request.params.get('full')).toBe('true');
+      expect(req.request.headers.has('x-activity-intent')).toBe(false);
+      req.flush(users);
+    });
+
+    it('sets activity intent header when explicitly requested', done => {
+      const users: UserFullDto[] = [{ id: 2 } as UserFullDto];
+
+      service.getUsersFullWithActivity().subscribe(result => {
+        expect(result).toEqual(users);
+        done();
+      });
+
+      const req = httpMock.expectOne(r => r.url === `${baseUrl}group-admin/users`);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.params.get('full')).toBe('true');
+      expect(req.request.headers.get('x-activity-intent')).toBe('user');
       req.flush(users);
     });
 

@@ -14,13 +14,14 @@ import {
   UnitDefinitionDirective
 } from '../../../../directives/unit-definition.directive';
 import { RolePipe } from '../../pipes/role.pipe';
+import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
 @Component({
   selector: 'studio-lite-unit-schemer',
   templateUrl: './unit-schemer.component.html',
   styleUrls: ['./unit-schemer.component.scss'],
   host: { class: 'unit-schemer' },
-  imports: [MatProgressSpinner]
+  imports: [MatProgressSpinner, TrackIframeActivityDirective]
 })
 export class UnitSchemerComponent
   extends UnitDefinitionDirective

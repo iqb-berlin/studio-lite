@@ -21,15 +21,9 @@ describe('Metadata Management', () => {
   const ws1 = testWorkspaces.metadata.german1;
   const ws2 = testWorkspaces.metadata.math1;
   const group = testGroups.metadata.bista1;
-  before(() => {
-    addFirstUser();
-  });
-  after(() => {
-    deleteFirstUser();
-    // cy.resetDb();
-  });
 
   it('sets up workspaces with metadata profiles', () => {
+    addFirstUser();
     createGroup(group);
     createWs(ws1, group);
     grantRemovePrivilegeAtWs([Cypress.expose('username')], ws1, [AccessLevel.Admin]);
@@ -86,5 +80,6 @@ describe('Metadata Management', () => {
 
   it('cleans up test data', () => {
     deleteGroup(group);
+    deleteFirstUser();
   });
 });

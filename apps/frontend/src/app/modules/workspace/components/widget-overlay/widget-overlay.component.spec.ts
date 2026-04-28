@@ -6,16 +6,28 @@ import { OverlayRef } from '@angular/cdk/overlay';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { provideHttpClient } from '@angular/common/http';
+import { createMock } from '@golevelup/ts-jest';
+import { AuthDataDto } from '@studio-lite-lib/api-dto';
 import { AppService } from '../../../../services/app.service';
+import { BackendService } from '../../../../services/backend.service';
+import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
 import { WidgetOverlayComponent } from './widget-overlay.component';
 import { WidgetCallData } from '../../models/widget-call-data.interface';
 
 describe('WidgetOverlayComponent', () => {
+  type WidgetOverlayTestAccess = {
+    widgetState: string;
+    widgetPostMessageTarget?: Window;
+    ngUnsubscribe: Subject<void>;
+  };
+
   let component: WidgetOverlayComponent;
   let fixture: ComponentFixture<WidgetOverlayComponent>;
   let postMessage$: Subject<MessageEvent>;
   let overlayRefStub: OverlayRef;
+  let playerPostMessageTarget: { postMessage: jest.Mock };
 
   const callData: WidgetCallData = {
     callId: 'call-42',
@@ -27,7 +39,19 @@ describe('WidgetOverlayComponent', () => {
 
   beforeEach(async () => {
     postMessage$ = new Subject<MessageEvent>();
-    overlayRefStub = { dispose: jest.fn() } as unknown as OverlayRef;
+    overlayRefStub = createMock<OverlayRef>({ dispose: jest.fn() });
+    playerPostMessageTarget = { postMessage: jest.fn() };
+
+    const mockAppService = {
+      postMessage$,
+      authData: { userId: 1 } as AuthDataDto,
+      authDataChanged: new Subject<AuthDataDto>()
+    } as AppService;
+
+    const mockBackendService = createMock<BackendService>({
+      ping: jest.fn(),
+      logout: jest.fn()
+    });
 
     await TestBed.configureTestingModule({
       imports: [
@@ -37,9 +61,22 @@ describe('WidgetOverlayComponent', () => {
         MatTooltipModule
       ],
       providers: [
+        provideHttpClient(),
         {
           provide: AppService,
-          useValue: { postMessage$ } as unknown as AppService
+          useValue: mockAppService
+        },
+        {
+          provide: BackendService,
+          useValue: mockBackendService
+        },
+        {
+          provide: HeartbeatService,
+          useValue: createMock<HeartbeatService>({ refreshActivityPulse: jest.fn() })
+        },
+        {
+          provide: 'SERVER_URL',
+          useValue: 'http://localhost:4200/'
         }
       ]
     }).compileComponents();
@@ -49,9 +86,7 @@ describe('WidgetOverlayComponent', () => {
 
     component.widgetHtml = '<html lang=""><body>Widget</body></html>';
     component.widgetCallData = callData;
-    component.playerPostMessageTarget = {
-      postMessage: jest.fn()
-    } as unknown as Window;
+    component.playerPostMessageTarget = playerPostMessageTarget as never;
     component.playerSessionId = 'player-session-1';
     component.overlayRef = overlayRefStub;
 
@@ -63,7 +98,8 @@ describe('WidgetOverlayComponent', () => {
   });
 
   it('initialises widgetState from callData on AfterViewInit', () => {
-    expect((component as unknown as { widgetState: string }).widgetState)
+    const testAccess = component as never as WidgetOverlayTestAccess;
+    expect(testAccess.widgetState)
       .toBe('initial-state');
   });
 
@@ -75,16 +111,14 @@ describe('WidgetOverlayComponent', () => {
     const fakeSource = iframeEl?.contentWindow;
     if (!fakeSource) return;
 
-    const msg = {
-      data: { type: 'vowReadyNotification' },
-      source: fakeSource
-    } as unknown as MessageEvent;
+    const msg = new MessageEvent('message', {
+      data: { type: 'vowReadyNotification' }
+    });
+    Object.defineProperty(msg, 'source', { value: fakeSource });
 
     postMessage$.next(msg);
 
-    const target = (component as unknown as {
-      widgetPostMessageTarget: Window;
-    }).widgetPostMessageTarget;
+    const target = (component as never as WidgetOverlayTestAccess).widgetPostMessageTarget;
     expect(target).toBe(fakeSource);
     expect(fakeSource.postMessage).toBeDefined();
   });
@@ -97,21 +131,21 @@ describe('WidgetOverlayComponent', () => {
     postMessage$.next({
       data: { type: 'vowStateChangedNotification', state: 'new-state' },
       source: fakeSource
-    } as unknown as MessageEvent);
+    } as never as MessageEvent);
 
-    expect((component as unknown as { widgetState: string }).widgetState)
+    expect((component as never as WidgetOverlayTestAccess).widgetState)
       .toBe('new-state');
   });
 
   it('ignores messages from unknown sources', () => {
-    const otherWindow = {} as Window;
+    const otherWindow = {} as never;
 
     postMessage$.next({
       data: { type: 'vowStateChangedNotification', state: 'hacked' },
       source: otherWindow
-    } as unknown as MessageEvent);
+    } as never as MessageEvent);
 
-    expect((component as unknown as { widgetState: string }).widgetState)
+    expect((component as never as WidgetOverlayTestAccess).widgetState)
       .toBe('initial-state');
   });
 
@@ -119,23 +153,15 @@ describe('WidgetOverlayComponent', () => {
     component.close();
 
     expect(overlayRefStub.dispose).toHaveBeenCalled();
-    expect(
-      (component.playerPostMessageTarget as unknown as {
-        postMessage: jest.Mock;
-      }).postMessage
-    ).not.toHaveBeenCalled();
+    expect(playerPostMessageTarget.postMessage).not.toHaveBeenCalled();
   });
 
   it('continue() sends vopWidgetReturn and disposes overlay', () => {
-    (component as unknown as { widgetState: string }).widgetState =
-      'final-state';
+    (component as never as WidgetOverlayTestAccess).widgetState = 'final-state';
 
     component.continue();
 
-    const playerTarget = component.playerPostMessageTarget as unknown as {
-      postMessage: jest.Mock;
-    };
-    expect(playerTarget.postMessage).toHaveBeenCalledWith(
+    expect(playerPostMessageTarget.postMessage).toHaveBeenCalledWith(
       {
         type: 'vopWidgetReturn',
         sessionId: 'player-session-1',
@@ -148,9 +174,7 @@ describe('WidgetOverlayComponent', () => {
   });
 
   it('ngOnDestroy completes the unsubscribe subject', () => {
-    const privateSub = (component as unknown as {
-      ngUnsubscribe: Subject<void>;
-    }).ngUnsubscribe;
+    const privateSub = (component as never as WidgetOverlayTestAccess).ngUnsubscribe;
     const nextSpy = jest.spyOn(privateSub, 'next');
     const completeSpy = jest.spyOn(privateSub, 'complete');
 
@@ -169,7 +193,7 @@ describe('WidgetOverlayComponent', () => {
     postMessage$.next({
       data: { type: 'vowReturnRequested' },
       source: fakeSource
-    } as unknown as MessageEvent);
+    } as never as MessageEvent);
 
     expect(continueSpy).toHaveBeenCalled();
   });

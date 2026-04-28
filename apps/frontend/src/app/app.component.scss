@@ -22,7 +22,7 @@
 }
 
 .header {
-  border-bottom: 1px solid #ffffff50;
+  position: relative;
 }
 
 .page-title {
@@ -89,4 +89,35 @@
   min-height: 100px;
   width: 100px;
   height: 100px;
+}
+
+.activity-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #ffffff40; // White-gray neutral background
+  overflow: hidden;
+  z-index: 10;
+
+  .activity-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    // No transition for high-precision 1s updates
+  }
+
+  .active-layer {
+    background-color: #006064; // Active color
+    box-shadow: 0 0 5px #006064;
+    //z-index: 2;
+  }
+
+  .passive-layer {
+    background-color: #3d8b8e; // Passive color
+    box-shadow: 0 0 5px #3d8b8e;
+    //z-index: 1;
+  }
 }

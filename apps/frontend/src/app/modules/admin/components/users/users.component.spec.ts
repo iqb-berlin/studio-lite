@@ -14,12 +14,14 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
 import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
+import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '@studio-lite/shared-code';
 import { AppConfig } from '../../../../classes/app-config.class';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
 import { environment } from '../../../../../environments/environment';
 import { UsersComponent } from './users.component';
 import { AppService } from '../../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
+import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { UsersMenuComponent } from '../users-menu/users-menu.component';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 
@@ -30,6 +32,15 @@ describe('UsersComponent', () => {
   let mockAppService: Partial<AppService>;
   let mockSnackBar: Partial<MatSnackBar>;
   let mockDialog: Partial<MatDialog>;
+  let mockHeartbeatService: Partial<HeartbeatService>;
+
+  const setDocumentVisibility = (visibilityState: 'visible' | 'hidden'): void => {
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      value: visibilityState
+    });
+    document.dispatchEvent(new Event('visibilitychange'));
+  };
 
   @Component({ selector: 'studio-lite-search-filter', template: '', standalone: true })
   class MockSearchFilterComponent {
@@ -49,10 +60,12 @@ describe('UsersComponent', () => {
   beforeEach(async () => {
     mockBackendService = {
       getUsersFull: jest.fn().mockReturnValue(of([])),
+      getUsersFullWithActivity: jest.fn().mockReturnValue(of([])),
       getWorkspaceGroupList: jest.fn().mockReturnValue(of([])),
       addUser: jest.fn().mockReturnValue(of(true)),
       changeUserData: jest.fn().mockReturnValue(of(true)),
       deleteUsers: jest.fn().mockReturnValue(of(true)),
+      deleteUserSession: jest.fn().mockReturnValue(of(true)),
       getWorkspaceGroupsByAdmin: jest.fn().mockReturnValue(of([])),
       setWorkspaceGroupsByAdmin: jest.fn().mockReturnValue(of(true))
     };
@@ -61,7 +74,8 @@ describe('UsersComponent', () => {
       dataLoading: false,
       appConfig: {
         setPageTitle: jest.fn()
-      } as unknown as AppConfig
+      } as unknown as AppConfig,
+      getServerTime: jest.fn().mockReturnValue(Date.now())
     };
 
     mockSnackBar = {
@@ -72,6 +86,10 @@ describe('UsersComponent', () => {
       open: jest.fn().mockReturnValue({
         afterClosed: jest.fn().mockReturnValue(of(true))
       })
+    };
+
+    mockHeartbeatService = {
+      refreshActivityPulse: jest.fn()
     };
 
     await TestBed.configureTestingModule({
@@ -94,6 +112,7 @@ describe('UsersComponent', () => {
         },
         { provide: BackendService, useValue: mockBackendService },
         { provide: AppService, useValue: mockAppService },
+        { provide: HeartbeatService, useValue: mockHeartbeatService },
         { provide: MatSnackBar, useValue: mockSnackBar },
         { provide: MatDialog, useValue: mockDialog }
       ]
@@ -119,9 +138,79 @@ describe('UsersComponent', () => {
   it('should load initial data on init', () => {
     jest.useFakeTimers();
     component.ngOnInit();
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
     expect(mockBackendService.getWorkspaceGroupList).toHaveBeenCalled();
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
+  it('should refresh without activity when explicitly requested', () => {
+    component.updateUserList(false);
+
     expect(mockBackendService.getUsersFull).toHaveBeenCalled();
+    expect(mockBackendService.getUsersFullWithActivity).not.toHaveBeenCalled();
+    expect(mockHeartbeatService.refreshActivityPulse).not.toHaveBeenCalled();
+  });
+
+  it('should refresh with activity intent on periodic polling', () => {
+    jest.useFakeTimers();
+    setDocumentVisibility('visible');
+    component.ngOnInit();
+
+    jest.advanceTimersByTime(ADMIN_USER_LIST_POLL_INTERVAL_MS);
+
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
+    expect(mockHeartbeatService.refreshActivityPulse).toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
+  it('should refresh heartbeat pulse for visible activity-counting refreshes', () => {
+    setDocumentVisibility('visible');
+
+    component.updateUserList(false, true);
+
+    expect(mockHeartbeatService.refreshActivityPulse).toHaveBeenCalled();
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
+  });
+
+  it('should not refresh heartbeat pulse while hidden', () => {
+    setDocumentVisibility('hidden');
+
+    component.updateUserList(false, true);
+
+    expect(mockHeartbeatService.refreshActivityPulse).not.toHaveBeenCalled();
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
+  });
+
+  it('should not poll when the tab is hidden', () => {
+    jest.useFakeTimers();
+    setDocumentVisibility('hidden');
+    component.ngOnInit();
+
+    jest.runOnlyPendingTimers();
+
+    jest.clearAllMocks();
+    jest.advanceTimersByTime(ADMIN_USER_LIST_POLL_INTERVAL_MS * 2);
+
+    expect(mockBackendService.getUsersFullWithActivity).not.toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
+  it('should resume polling when the tab becomes visible again', () => {
+    jest.useFakeTimers();
+    setDocumentVisibility('hidden');
+    component.ngOnInit();
+
+    jest.runOnlyPendingTimers();
+
+    jest.clearAllMocks();
+    jest.advanceTimersByTime(ADMIN_USER_LIST_POLL_INTERVAL_MS);
+    expect(mockBackendService.getUsersFullWithActivity).not.toHaveBeenCalled();
+
+    setDocumentVisibility('visible');
+    jest.advanceTimersByTime(ADMIN_USER_LIST_POLL_INTERVAL_MS);
+
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
     jest.useRealTimers();
   });
 
@@ -137,7 +226,7 @@ describe('UsersComponent', () => {
     });
     component.addUser(userData);
     expect(mockBackendService.addUser).toHaveBeenCalled();
-    expect(mockBackendService.getUsersFull).toHaveBeenCalled();
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
     expect(mockSnackBar.open).toHaveBeenCalledWith('admin.user-created', '', { duration: 1000 });
   });
 
@@ -179,7 +268,7 @@ describe('UsersComponent', () => {
       isAdmin: true,
       password: 'newPass'
     }));
-    expect(mockBackendService.getUsersFull).toHaveBeenCalled();
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
     expect(mockSnackBar.open).toHaveBeenCalledWith('admin.user-edited', '', { duration: 1000 });
   });
 
@@ -192,11 +281,36 @@ describe('UsersComponent', () => {
   });
 
   it('should delete users successfully', () => {
-    const users = [{ id: 1 }, { id: 2 }] as UserFullDto[];
+    const users = [{ id: 1, isLoggedIn: true }, { id: 2, isLoggedIn: false }] as UserFullDto[];
     component.deleteUsers(users);
     expect(mockBackendService.deleteUsers).toHaveBeenCalledWith([1, 2]);
-    expect(mockBackendService.getUsersFull).toHaveBeenCalled();
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
     expect(mockSnackBar.open).toHaveBeenCalledWith('admin.users-deleted', '', { duration: 1000 });
+  });
+
+  it('should delete a specific session and refresh the user list', () => {
+    component.tableSelectionRow.select({
+      id: 1,
+      name: 'user1',
+      sessions: [{ sessionId: 's1', activityStatus: 'orphaned' }]
+    } as UserFullDto);
+
+    component.deleteSession({ sessionId: 's1', activityStatus: 'orphaned' });
+
+    expect(mockBackendService.deleteUserSession).toHaveBeenCalledWith(1, 's1');
+    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
+  });
+
+  it('should not delete non-orphaned sessions', () => {
+    component.tableSelectionRow.select({
+      id: 1,
+      name: 'user1',
+      sessions: [{ sessionId: 's1', activityStatus: 'active' }]
+    } as UserFullDto);
+
+    component.deleteSession({ sessionId: 's1', activityStatus: 'active' });
+
+    expect(mockBackendService.deleteUserSession).not.toHaveBeenCalled();
   });
 
   it('should handle delete users failure', () => {
@@ -221,7 +335,7 @@ describe('UsersComponent', () => {
     } as unknown as WorkspaceGroupToCheckCollection;
     component.selectedUser = 0;
     component.updateWorkspaceGroupList();
-    expect(mockSnackBar.open).toHaveBeenCalledWith('Zugriffsrechte nicht gespeichert.', 'Warnung', { duration: 3000 });
+    expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.not-saved', 'warning', { duration: 3000 });
   });
 
   it('should save workspaces successfully', () => {
@@ -234,7 +348,7 @@ describe('UsersComponent', () => {
     } as unknown as WorkspaceGroupToCheckCollection;
     component.saveWorkspaces();
     expect(mockBackendService.setWorkspaceGroupsByAdmin).toHaveBeenCalled();
-    expect(mockSnackBar.open).toHaveBeenCalledWith('Zugriffsrechte geändert', '', { duration: 1000 });
+    expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.changed', '', { duration: 1000 });
   });
 
   it('should handle save workspaces failure', () => {
@@ -245,7 +359,7 @@ describe('UsersComponent', () => {
       getChecks: jest.fn().mockReturnValue([])
     } as unknown as WorkspaceGroupToCheckCollection;
     component.saveWorkspaces();
-    expect(mockSnackBar.open).toHaveBeenCalledWith('Konnte Zugriffsrechte nicht ändern', 'Fehler', { duration: 3000 });
+    expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.not-changed', 'error', { duration: 3000 });
   });
 
   it('should toggle row selection', () => {
@@ -255,5 +369,65 @@ describe('UsersComponent', () => {
 
     component.toggleRowSelection(user);
     expect(component.tableSelectionRow.isSelected(user)).toBe(false);
+  });
+
+  it('should calculate active and logged-in counts from activityStatus', () => {
+    const users = [
+      {
+        id: 1,
+        name: 'a',
+        activityStatus: 'active',
+        isLoggedIn: true,
+        sessions: [{ sessionId: 's1', activityStatus: 'active' }]
+      },
+      {
+        id: 2,
+        name: 'p',
+        activityStatus: 'passive',
+        isLoggedIn: true,
+        sessions: [
+          { sessionId: 's2', activityStatus: 'passive' },
+          { sessionId: 's3', activityStatus: 'active' }
+        ]
+      },
+      {
+        id: 3,
+        name: 'i',
+        activityStatus: 'inactive',
+        isLoggedIn: false,
+        sessions: []
+      }
+    ] as UserFullDto[];
+
+    (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of(users));
+    component.updateUserList();
+
+    expect(component.activeUserCount).toBe(1);
+    expect(component.loggedInUserCount).toBe(2);
+    expect(component.activeSessionCount).toBe(2);
+    expect(component.passiveSessionCount).toBe(1);
+  });
+
+  it('should not treat logged-in users as logged-out when activityStatus is missing', () => {
+    const users = [
+      {
+        id: 1,
+        name: 'u',
+        isLoggedIn: true
+      },
+      {
+        id: 2,
+        name: 'v',
+        isLoggedIn: false
+      }
+    ] as UserFullDto[];
+
+    (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of(users));
+    component.updateUserList();
+
+    expect(component.loggedInUserCount).toBe(1);
+    expect(component.activeUserCount).toBe(0);
+    expect(component.activeSessionCount).toBe(0);
+    expect(component.passiveSessionCount).toBe(0);
   });
 });

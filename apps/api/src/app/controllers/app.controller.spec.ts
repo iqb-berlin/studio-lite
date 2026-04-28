@@ -44,23 +44,75 @@ describe('AppController', () => {
   describe('login', () => {
     it('should return a token', async () => {
       const mockUser = { id: 1, name: 'test' } as UserEntity;
-      authService.login.mockResolvedValue('mock-token');
+      const mockTokens = { accessToken: 'mock-atoken', refreshToken: 'mock-rtoken' };
+      authService.login.mockResolvedValue(mockTokens);
 
       const result = await controller.login({ user: mockUser });
 
-      expect(result).toBe('"mock-token"');
+      expect(result).toBe(mockTokens);
       expect(authService.login).toHaveBeenCalledWith(mockUser);
     });
   });
 
   describe('initLogin', () => {
-    it('should return a token for first login', async () => {
-      authService.initLogin.mockResolvedValue('mock-token');
+    it('should return tokens for first login', async () => {
+      const mockTokens = { accessToken: 'access-token', refreshToken: 'refresh-token' };
+      authService.initLogin.mockResolvedValue(mockTokens);
 
       const result = await controller.initLogin({ username: 'user', password: 'pass' });
 
-      expect(result).toBe('"mock-token"');
+      expect(result).toEqual(mockTokens);
       expect(authService.initLogin).toHaveBeenCalledWith('user', 'pass');
+    });
+  });
+
+  describe('logout', () => {
+    it('should call logoutCurrentSession when refresh token is provided', async () => {
+      await controller.logout({ user: { sessionId: 'sid-3' } }, 3, { refreshToken: 'rt-3' });
+
+      expect(authService.logoutCurrentSession).toHaveBeenCalledWith('rt-3', 3, 'sid-3');
+      expect(authService.logout).not.toHaveBeenCalled();
+    });
+
+    it('should call global logout when no refresh token is provided', async () => {
+      await controller.logout({ user: { sessionId: 'sid-4' } }, 4, {});
+
+      expect(authService.logout).toHaveBeenCalledWith(4);
+      expect(authService.logoutCurrentSession).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('logoutSilent', () => {
+    it('should call logoutCurrentSession when refresh token is provided', async () => {
+      await controller.logoutSilent({ refreshToken: 'rt-silent' });
+
+      expect(authService.logoutCurrentSession).toHaveBeenCalledWith('rt-silent');
+    });
+
+    it('should do nothing when refresh token is missing', async () => {
+      await controller.logoutSilent({});
+
+      expect(authService.logoutCurrentSession).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ping', () => {
+    it('should extend the current session expiry', async () => {
+      usersService.updateSessionExpiry.mockResolvedValue(undefined);
+
+      await controller.ping({ user: { id: 1, sessionId: 'sid-1' } });
+
+      expect(usersService.updateSessionExpiry).toHaveBeenCalledWith(1, 'sid-1');
+    });
+  });
+
+  describe('activity', () => {
+    it('should update the current session activity', async () => {
+      usersService.updateLastActivity.mockResolvedValue(undefined);
+
+      await controller.activity({ user: { id: 1, sessionId: 'sid-1' } });
+
+      expect(usersService.updateLastActivity).toHaveBeenCalledWith(1, 'sid-1');
     });
   });
 

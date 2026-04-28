@@ -204,26 +204,35 @@ describe('EditWorkspaceSettingsComponent', () => {
   });
 
   describe('Route Visibility Configurations', () => {
-    it('toggleRouteVisibility should filter out route when adding visibility back (isVisible=true)', () => {
-      component.dialogData.hiddenRoutes = ['editor', 'preview'];
+    it('toggleRouteVisibility should create a new array reference when adding visibility back (isVisible=true)', () => {
+      const initialHiddenRoutes = ['editor', 'preview'];
+      component.dialogData.hiddenRoutes = initialHiddenRoutes;
       component.toggleRouteVisibility('editor', true);
       expect(component.dialogData.hiddenRoutes).not.toContain('editor');
       expect(component.dialogData.hiddenRoutes).toContain('preview');
+      expect(component.dialogData.hiddenRoutes).not.toBe(initialHiddenRoutes);
     });
 
-    it('toggleRouteVisibility should push route to hiddenRoutes when hiding (isVisible=false)', () => {
-      component.dialogData.hiddenRoutes = ['preview'];
+    it('toggleRouteVisibility should create a new array reference when hiding a route (isVisible=false)', () => {
+      const initialHiddenRoutes = ['preview'];
+      component.dialogData.hiddenRoutes = initialHiddenRoutes;
       component.toggleRouteVisibility('editor', false);
       expect(component.dialogData.hiddenRoutes).toContain('editor');
       expect(component.dialogData.hiddenRoutes).toContain('preview');
+      expect(component.dialogData.hiddenRoutes).not.toBe(initialHiddenRoutes);
     });
 
-    it('toggleRouteVisibility should handle "notes" route correctly', () => {
-      component.dialogData.hiddenRoutes = [];
+    it('toggleRouteVisibility should create a new array reference for handle "notes" route correctly', () => {
+      const initialHiddenRoutes: string[] = [];
+      component.dialogData.hiddenRoutes = initialHiddenRoutes;
       component.toggleRouteVisibility('notes', false);
       expect(component.dialogData.hiddenRoutes).toContain('notes');
+      expect(component.dialogData.hiddenRoutes).not.toBe(initialHiddenRoutes);
+
+      const updatedHiddenRoutes = component.dialogData.hiddenRoutes;
       component.toggleRouteVisibility('notes', true);
       expect(component.dialogData.hiddenRoutes).not.toContain('notes');
+      expect(component.dialogData.hiddenRoutes).not.toBe(updatedHiddenRoutes);
     });
   });
 });

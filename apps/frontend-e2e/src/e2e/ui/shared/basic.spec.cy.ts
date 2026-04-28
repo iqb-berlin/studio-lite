@@ -26,6 +26,7 @@ export function createBasicSpecCy() {
   describe('Create test base:', () => {
     // creates the first user
     addFirstUser();
+
     // admin can add new user
     createNewUser(newUser);
 
@@ -55,6 +56,7 @@ export function createBasicData() {
   describe('Create test base:', () => {
     // creates the first user
     addFirstUser();
+
     // admin can create a group (Bereichsgruppe)
     createGroup(group1);
 

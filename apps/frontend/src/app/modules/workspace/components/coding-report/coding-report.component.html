@@ -28,10 +28,16 @@
 <mat-dialog-actions align="end" >
   <button mat-raised-button
           color="primary"
+          type="button"
+          data-cy="coding-report-download"
+          (click)="downloadCodingReport()">
+    {{ 'download' | translate }}
+  </button>
+  <button mat-raised-button
+          color="primary"
           type="submit"
           [mat-dialog-close]="">
     {{ 'close' | translate }}
   </button>
 </mat-dialog-actions>
-
 
