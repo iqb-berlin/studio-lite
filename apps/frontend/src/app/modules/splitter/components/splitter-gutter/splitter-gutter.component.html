@@ -4,8 +4,6 @@
        [style.width.px]="pointerPressed ? hotspotSize * 200 : hotspotSize"
        [style.left.px]="pointerPressed ? (-(hotspotSize - lineSize)/2) * 200 : -(hotspotSize - lineSize)/2"
        [class.draggable]="!isFixed"
-       (mouseleave)="pointerPressed = false"
-       (mousedown)="onPointerDown($event)"
-       (touchstart)="onPointerDown($event)">
+       (pointerdown)="onPointerDown($event)">
   </div>
 </div>
