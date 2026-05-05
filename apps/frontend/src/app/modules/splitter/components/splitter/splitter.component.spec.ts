@@ -26,12 +26,12 @@ class MockSplitterPaneComponent {
   elementRef = {
     nativeElement: {
       offsetWidth: 100,
-      style: {}
+      style: {},
+      getBoundingClientRect: jest.fn(() => ({ left: 0 }))
     }
   };
 
   init = jest.fn();
-  calculateSize = jest.fn();
   setStyle = jest.fn();
 }
 
@@ -74,8 +74,7 @@ describe('SplitterComponent', () => {
       pane2 as unknown as SplitterPaneComponent
     ]);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (component.panes as any) = panesMock;
+    (component as unknown as { panes: QueryList<SplitterPaneComponent> }).panes = panesMock;
     jest.useFakeTimers();
 
     component.ngAfterViewInit();
@@ -99,8 +98,7 @@ describe('SplitterComponent', () => {
         pane1 as unknown as SplitterPaneComponent,
         pane2 as unknown as SplitterPaneComponent
       ]);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (component.panes as any) = panesMock;
+      (component as unknown as { panes: QueryList<SplitterPaneComponent> }).panes = panesMock;
     });
 
     it('should calculate available size on start dragging', () => {
@@ -110,16 +108,13 @@ describe('SplitterComponent', () => {
 
     it('should calculate sizes and set styles during dragging', () => {
       component.availablePanesSize = 200;
-      jest.useFakeTimers();
 
-      // Ensure that getCalculatedPanesSizeForIndex returns 200 (100 + 100)
-      component.onGutterDragging({ index: 0, position: 50 });
-      jest.runAllTimers();
+      component.onGutterDragging({ index: 0, position: 150 });
 
-      expect(pane1.calculateSize).toHaveBeenCalled();
-      expect(pane2.calculateSize).toHaveBeenCalled();
-      expect(pane1.setStyle).toHaveBeenCalled();
-      expect(pane2.setStyle).toHaveBeenCalled();
+      expect(pane1.size).toBe(150);
+      expect(pane2.size).toBe(50);
+      expect(pane1.setStyle).toHaveBeenCalledWith(150);
+      expect(pane2.setStyle).toHaveBeenCalledWith(50);
     });
 
     it('should update service on stop dragging', () => {
