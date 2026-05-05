@@ -93,11 +93,9 @@
     @if (appService.authData.userId) {
       @if (activityStatus$ | async; as status) {
         <div class="activity-layer passive-layer"
-             [style.width]="status.passivePercentage + '%'"
-             [matTooltip]="status.activePercentage === 0 ? ('user.passive-remaining' | translate) : null"></div>
+             [style.width]="status.passivePercentage + '%'"></div>
         <div class="activity-layer active-layer"
-             [style.width]="status.activePercentage + '%'"
-             [matTooltip]="'user.activity-remaining' | translate"></div>
+             [style.width]="status.activePercentage + '%'"></div>
       }
     }
   </div>
