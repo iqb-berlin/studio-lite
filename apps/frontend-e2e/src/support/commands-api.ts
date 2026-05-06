@@ -33,6 +33,7 @@ Cypress.Commands.add('addFirstUserAPI', (username: string, password: string) => 
 });
 
 // 2
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('loginAPI', (username: string, password:string) => {
   cy.request({
     method: 'POST',
@@ -49,6 +50,7 @@ Cypress.Commands.add('loginAPI', (username: string, password:string) => {
 });
 
 // 3
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('getUserIdAPI', (token: string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -79,6 +81,7 @@ Cypress.Commands.add('updatePasswordAPI', (token: string, oldPass: string, newPa
     failOnStatusCode: false
   });
 });
+
 // 5
 Cypress.Commands.add('loginWithKeycloakAPI', (user:UserData) => {
   cy.request({
@@ -499,6 +502,7 @@ Cypress.Commands.add('updateWsSettingsAPI', (wsId:string, ws: WsSettings, token:
 });
 
 // 28
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('getWsNormalAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -527,6 +531,7 @@ Cypress.Commands.add('getUsersByWsAPI', (wsId:string, token:string) => {
 });
 
 // 35
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('getUnitPropertiesAPI', (wsId:string, unitId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -541,6 +546,7 @@ Cypress.Commands.add('getUnitPropertiesAPI', (wsId:string, unitId:string, token:
 });
 
 // 36
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add(
   'updateUnitPropertiesAPI',
   (wsId: string, unitId: string, entry: DefinitionUnit, token: string) => {
@@ -563,6 +569,7 @@ Cypress.Commands.add(
 );
 
 // 37
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('getUnitsByWsAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -635,6 +642,7 @@ Cypress.Commands.add('copyToAPI', (wsDestinationId:string, copyUnit:CopyUnit, to
 });
 
 // 41
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -649,6 +657,7 @@ Cypress.Commands.add('getGroupsOfWsAPI', (wsId: string, token:string) => {
 });
 
 // 42
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('updateGroupNameOfWsAPI', (wsId: string, groupName: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -666,6 +675,7 @@ Cypress.Commands.add('updateGroupNameOfWsAPI', (wsId: string, groupName: string,
 });
 
 // 43
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('getUnitSchemeAPI', (unitId: string, wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1097,6 +1107,7 @@ Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, t
 });
 
 // 45
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('getUnitDefinitionAPI', (unitId: string, wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1133,6 +1144,7 @@ Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token
 });
 
 // 47
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('generateMetadataReportAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1147,6 +1159,7 @@ Cypress.Commands.add('generateMetadataReportAPI', (wsId: string, token:string) =
 });
 
 // 48
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('getWsSchemeAPI', (wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1161,6 +1174,7 @@ Cypress.Commands.add('getWsSchemeAPI', (wsId: string, token:string) => {
 });
 
 // 49
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('getWsCodingBookAPI', (ids: string[], wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
   const parameters = ['format', 'missingsProfile', 'generalInstructions',
@@ -1219,6 +1233,7 @@ Cypress.Commands.add('updateGroupPropertiesAPI', (groupId: string, token:string)
 });
 
 // 51
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('getGroupPropertiesAPI', (groupId: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1233,6 +1248,7 @@ Cypress.Commands.add('getGroupPropertiesAPI', (groupId: string, token:string) =>
 });
 
 // 52
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('updateUnitStateAPI', (wsId: string, unitId: string, state: string, token:string) => {
   const authorization = `bearer ${token}`;
   const nu = parseInt(`${unitId}`, 10);
@@ -1304,6 +1320,7 @@ Cypress.Commands.add('submitUnitsAPI', (wsId: string, wsDe: string, unit:string,
 });
 
 // 56
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('postCommentAPI', (wsId: string, unitId: string, comment: CommentData, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1652,6 +1669,7 @@ Cypress.Commands.add('getReportAPI', (token:string) => {
 });
 
 // 77
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('downloadWsAPI', (groupId:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1666,6 +1684,7 @@ Cypress.Commands.add('downloadWsAPI', (groupId:string, token:string) => {
 });
 
 // 78
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('downloadWsUnitsAPI', (wsId:string, downloadQuery:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
@@ -1770,6 +1789,7 @@ Cypress.Commands.add('updateWsByUserAPI', (userId:string, groupId: string,
 });
 
 // 84
+// ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.fixture(filename, 'binary')
