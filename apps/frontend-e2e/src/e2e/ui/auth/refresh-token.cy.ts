@@ -28,7 +28,7 @@ describe('Token Refresh UI Logic', () => {
     // Using a counter to only return 401 once, so the retry can succeed
     let authDataCallCount = 0;
     cy.intercept('GET', '/api/auth-data', req => {
-      authDataCallCount = +1;
+      authDataCallCount += 1;
       if (authDataCallCount === 1) {
         req.reply({
           statusCode: 401,

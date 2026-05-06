@@ -111,6 +111,7 @@ describe('Workspace Group Administration', () => {
   it('returns a unit from the drop-box ws2 back to ws1', () => {
     cy.visitWs(ws2);
     returnSubmittedUnits(['M6_AK0011']);
+    cy.wait(500);
 
     // Verify it is back in ws1
     cy.visitWs(ws1);
