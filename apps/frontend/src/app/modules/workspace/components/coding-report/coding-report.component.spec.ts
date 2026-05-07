@@ -21,6 +21,7 @@ describe('CodingReportComponent', () => {
     {
       unit: 'U1',
       variable: 'V1',
+      variableType: 'Basisvariable',
       item: 'I1',
       validation: 'ok',
       codingType: 'keine Regeln',
@@ -29,6 +30,7 @@ describe('CodingReportComponent', () => {
     {
       unit: 'U1',
       variable: 'V2',
+      variableType: 'abgeleitete Variable',
       item: 'I2',
       validation: 'ok',
       codingType: 'REGEL',
@@ -94,7 +96,20 @@ describe('CodingReportComponent', () => {
   });
 
   it('downloadCodingReport creates and revokes object URL', () => {
-    const createObjectURLMock = jest.fn(() => 'blob:test-url');
+    const blobParts: BlobPart[][] = [];
+    const OriginalBlob = globalThis.Blob;
+    const blobMock = jest.fn((parts: BlobPart[] = [], options?: BlobPropertyBag) => {
+      blobParts.push(parts);
+      return new OriginalBlob(parts, options);
+    });
+    Object.defineProperty(globalThis, 'Blob', {
+      value: blobMock,
+      writable: true
+    });
+    const createObjectURLMock = jest.fn((blob: Blob) => {
+      expect(blob).toBeInstanceOf(OriginalBlob);
+      return 'blob:test-url';
+    });
     const revokeObjectURLMock = jest.fn();
     Object.defineProperty(URL, 'createObjectURL', {
       value: createObjectURLMock,
@@ -116,7 +131,15 @@ describe('CodingReportComponent', () => {
     expect(createObjectURLMock).toHaveBeenCalled();
     expect(clickMock).toHaveBeenCalled();
     expect(revokeObjectURLMock).toHaveBeenCalledWith('blob:test-url');
+    expect(String(blobParts[0][0])).toContain(
+      'Aufgabe;Variable;Variablentyp;Item;Validierung;Kodiertyp;Schulungsaufwand'
+    );
+    expect(String(blobParts[0][0])).toContain('"abgeleitete Variable"');
 
+    Object.defineProperty(globalThis, 'Blob', {
+      value: OriginalBlob,
+      writable: true
+    });
     createElementSpy.mockRestore();
   });
 });

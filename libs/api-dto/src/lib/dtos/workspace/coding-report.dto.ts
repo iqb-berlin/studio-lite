@@ -8,6 +8,9 @@ export class CodingReportDto {
     variable!: string;
 
   @ApiProperty()
+    variableType!: string;
+
+  @ApiProperty()
     item!: string;
 
   @ApiProperty()
