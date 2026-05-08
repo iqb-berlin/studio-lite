@@ -415,6 +415,7 @@ export class WorkspaceService {
         unitDataRows.push({
           unit: WorkspaceService.generateUnitLink(workspaceId, unit),
           variable: codingVariable.alias || codingVariable.id || '–',
+          variableType: WorkspaceService.determineVariableType(codingVariable),
           item: foundItem?.id || '–',
           validation: validationResultText,
           codingType: codingType,
@@ -463,6 +464,12 @@ export class WorkspaceService {
     return 'keine Regeln';
   }
 
+  static determineVariableType(codingVariable: VariableCodingData): string {
+    return codingVariable.sourceType === 'BASE' ?
+      'Basisvariable' :
+      'abgeleitete Variable';
+  }
+
   static determineTrainingEffort(codingVariable: VariableCodingData): string {
     return codingVariable.processing?.includes('CODER_TRAINING_REQUIRED') ?
       'erhöht' :
@@ -495,6 +502,7 @@ export class WorkspaceService {
     unitDataRows.push({
       unit: WorkspaceService.generateUnitLink(id, unit),
       variable: '',
+      variableType: '',
       item: '',
       validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
       codingType: '',

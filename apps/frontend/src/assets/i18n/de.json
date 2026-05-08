@@ -803,6 +803,7 @@
   "coding-report": {
     "unit": "Aufgabe",
     "variable": "Variable",
+    "variableType": "Variablentyp",
     "item": "Item",
     "validation": "Validierung",
     "codingType": "Kodiertyp",
