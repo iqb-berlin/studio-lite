@@ -711,6 +711,7 @@ describe('WorkspaceBackendService', () => {
           variable: 'var1',
           item: 'item1',
           validation: 'ok',
+          variableType: 'string',
           codingType: 'manual',
           trainingEffort: 'normal'
         }
