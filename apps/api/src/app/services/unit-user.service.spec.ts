@@ -5,23 +5,17 @@ import { UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
 import { UnitUserService } from './unit-user.service';
 import UnitUser from '../entities/unit-user.entity';
 import Unit from '../entities/unit.entity';
+import { createMock } from '@golevelup/ts-jest';
+import { UnitCommentService } from './unit-comment.service';
 
 describe('UnitUserService', () => {
   let service: UnitUserService;
   let unitUserRepository: Repository<UnitUser>;
   let unitRepository: Repository<Unit>;
 
-  const mockUnitUserRepository = {
-    create: jest.fn(),
-    save: jest.fn(),
-    findOne: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn()
-  };
-
-  const mockUnitRepository = {
-    find: jest.fn()
-  };
+  const mockUnitUserRepository = createMock<Repository<UnitUser>>();
+  const mockUnitRepository = createMock<Repository<Unit>>();
+  const mockUnitCommentService = createMock<UnitCommentService>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,6 +28,10 @@ describe('UnitUserService', () => {
         {
           provide: getRepositoryToken(Unit),
           useValue: mockUnitRepository
+        },
+        {
+          provide: UnitCommentService,
+          useValue: mockUnitCommentService
         }
       ]
     }).compile();
@@ -52,18 +50,36 @@ describe('UnitUserService', () => {
   });
 
   describe('createUnitUser', () => {
-    it('should create and save a unit user', async () => {
+    it('should create and save a unit user with latest comment timestamp', async () => {
       const userId = 1;
       const unitId = 2;
-      const createdEntity = { userId, unitId, lastSeenCommentChangedAt: new Date() } as UnitUser;
+      const date = new Date();
+      const createdEntity = { userId, unitId, lastSeenCommentChangedAt: date } as UnitUser;
 
-      mockUnitUserRepository.create.mockReturnValue(createdEntity);
+      mockUnitCommentService.findOnesLastChangedComment.mockResolvedValue({ changedAt: date } as any);
+      (mockUnitUserRepository.create as jest.Mock).mockReturnValue(createdEntity);
       mockUnitUserRepository.save.mockResolvedValue(createdEntity);
 
       await service.createUnitUser(userId, unitId);
 
-      expect(unitUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ userId, unitId }));
+      expect(mockUnitCommentService.findOnesLastChangedComment).toHaveBeenCalledWith(unitId);
+      expect(unitUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ userId, unitId, lastSeenCommentChangedAt: date }));
       expect(unitUserRepository.save).toHaveBeenCalledWith(createdEntity);
+    });
+
+    it('should create and save a unit user with current timestamp if no comments', async () => {
+      const userId = 1;
+      const unitId = 2;
+      
+      mockUnitCommentService.findOnesLastChangedComment.mockResolvedValue(null);
+      (mockUnitUserRepository.create as jest.Mock).mockReturnValue({} as UnitUser);
+      mockUnitUserRepository.save.mockResolvedValue({} as UnitUser);
+
+      await service.createUnitUser(userId, unitId);
+
+      expect(mockUnitCommentService.findOnesLastChangedComment).toHaveBeenCalledWith(unitId);
+      expect(unitUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ userId, unitId }));
+      expect(unitUserRepository.save).toHaveBeenCalled();
     });
   });
 
@@ -84,11 +100,13 @@ describe('UnitUserService', () => {
 
     it('should return default timestamp if unit user does not exist', async () => {
       mockUnitUserRepository.findOne.mockResolvedValue(null);
-      const defaultDate = new Date(2022, 6);
-
+      
+      const before = new Date().getTime();
       const result = await service.findLastSeenCommentTimestamp(1, 2);
+      const after = new Date().getTime();
 
-      expect(result).toEqual(defaultDate);
+      expect(result.getTime()).toBeGreaterThanOrEqual(before);
+      expect(result.getTime()).toBeLessThanOrEqual(after);
     });
   });
 
@@ -126,7 +144,7 @@ describe('UnitUserService', () => {
         .mockResolvedValueOnce(unitUser1) // Found for unit 101
         .mockResolvedValueOnce(null); // Not found for unit 102
 
-      mockUnitUserRepository.delete.mockResolvedValue({ affected: 1 });
+      mockUnitUserRepository.delete.mockResolvedValue({ affected: 1, raw: [] });
 
       await service.deleteUnitUsersByWorkspaceId(workspaceId, userId);
 

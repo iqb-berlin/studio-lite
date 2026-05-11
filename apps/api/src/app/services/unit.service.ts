@@ -179,7 +179,7 @@ export class UnitService {
         return {
           ...unit,
           lastCommentChangedAt:
-            comment ? comment.changedAt : new Date(2022, 6),
+            comment ? comment.changedAt : new Date(0),
           lastSeenCommentChangedAt:
             await this.unitUserService.findLastSeenCommentTimestamp(userId, unit.id)
         };
