@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not } from 'typeorm';
 import {
   UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto, UpdateUnitCommentVisibilityDto
 } from '@studio-lite-lib/api-dto';
@@ -76,10 +76,14 @@ export class UnitCommentService {
           .createCommentItemConnection(unitId, itemUuid, commentId)));
   }
 
-  async findOnesLastChangedComment(unitId: number): Promise<UnitCommentDto | null> {
+  async findOnesLastChangedComment(unitId: number, excludeUserId?: number): Promise<UnitCommentDto | null> {
+    const whereClause: any = { unitId: unitId };
+    if (excludeUserId) {
+      whereClause.userId = Not(excludeUserId);
+    }
     const comments = await this.unitCommentsRepository
       .find({
-        where: { unitId: unitId },
+        where: whereClause,
         order: { changedAt: 'DESC' }
       });
     if (comments && comments.length) {

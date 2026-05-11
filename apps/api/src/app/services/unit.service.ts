@@ -175,7 +175,7 @@ export class UnitService {
     }) as UnitInListDto[];
     if (userId && withLastSeenCommentTimeStamp) {
       units = await Promise.all(units.map(async unit => {
-        const comment = await this.unitCommentService.findOnesLastChangedComment(unit.id);
+        const comment = await this.unitCommentService.findOnesLastChangedComment(unit.id, userId);
         return {
           ...unit,
           lastCommentChangedAt:

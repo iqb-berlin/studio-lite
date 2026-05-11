@@ -5,25 +5,16 @@ import { UnitCommentDto, UpdateUnitCommentDto, UpdateUnitCommentVisibilityDto } 
 import { UnitCommentService } from './unit-comment.service';
 import UnitComment from '../entities/unit-comment.entity';
 import { ItemCommentService } from './item-comment.service';
+import { createMock } from '@golevelup/ts-jest';
+import { Not } from 'typeorm';
 
 describe('UnitCommentService', () => {
   let service: UnitCommentService;
   let repository: Repository<UnitComment>;
   let itemCommentService: ItemCommentService;
 
-  const mockRepository = {
-    find: jest.fn(),
-    create: jest.fn(),
-    save: jest.fn(),
-    delete: jest.fn(),
-    findOneBy: jest.fn(),
-    findOne: jest.fn()
-  };
-
-  const mockItemCommentService = {
-    findUnitItemComments: jest.fn(),
-    createCommentItemConnection: jest.fn()
-  };
+  const mockRepository = createMock<Repository<UnitComment>>();
+  const mockItemCommentService = createMock<ItemCommentService>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -56,7 +47,7 @@ describe('UnitCommentService', () => {
       const itemComments = [{ unitItemUuid: 'uuid-1' }];
 
       mockRepository.find.mockResolvedValue(comments);
-      mockItemCommentService.findUnitItemComments.mockResolvedValue(itemComments);
+      mockItemCommentService.findUnitItemComments.mockResolvedValue(itemComments as any);
 
       const result = await service.findOnesComments(unitId);
 
@@ -88,8 +79,8 @@ describe('UnitCommentService', () => {
       mockRepository.find.mockResolvedValue(comments);
       mockItemCommentService.findUnitItemComments.mockResolvedValue(itemComments);
 
-      mockRepository.create.mockImplementation(dto => ({ ...dto, id: 100 }));
-      mockRepository.save.mockResolvedValue({ id: 100 });
+      (mockRepository.create as jest.Mock).mockImplementation(dto => ({ ...dto, id: 100 }));
+      mockRepository.save.mockResolvedValue({ id: 100 } as any);
 
       await service.copyComments(oldUnitId, newUnitId, itemUuidLookups);
 
@@ -134,6 +125,21 @@ describe('UnitCommentService', () => {
       const result = await service.findOnesLastChangedComment(1);
       expect(result).toBeNull();
     });
+
+    it('should exclude user if excludeUserId is provided', async () => {
+      const unitId = 1;
+      const excludeUserId = 2;
+      const comments = [{ id: 1, changedAt: new Date() }] as UnitComment[];
+      mockRepository.find.mockResolvedValue(comments);
+
+      const result = await service.findOnesLastChangedComment(unitId, excludeUserId);
+
+      expect(repository.find).toHaveBeenCalledWith({
+        where: { unitId, userId: Not(excludeUserId) },
+        order: { changedAt: 'DESC' }
+      });
+      expect(result).toEqual(comments[0]);
+    });
   });
 
   describe('createComment', () => {
@@ -143,8 +149,8 @@ describe('UnitCommentService', () => {
         ...dto, id: 123, createdAt: new Date(), changedAt: new Date()
       };
 
-      mockRepository.create.mockReturnValue(savedEntity);
-      mockRepository.save.mockResolvedValue(savedEntity);
+      (mockRepository.create as jest.Mock).mockReturnValue(savedEntity as any);
+      mockRepository.save.mockResolvedValue(savedEntity as any);
 
       const result = await service.createComment(dto);
 
@@ -163,8 +169,8 @@ describe('UnitCommentService', () => {
         { id: 2, parentId: 1 } as UnitCommentDto
       ];
 
-      mockRepository.create.mockImplementation(dto => ({ ...dto, id: Math.random() }));
-      mockRepository.save.mockImplementation(entity => Promise.resolve(entity));
+      mockRepository.create.mockImplementation(dto => ({ ...dto, id: Math.random() }) as any);
+      mockRepository.save.mockImplementation(entity => Promise.resolve(entity) as any);
 
       await service.createComments(comments, unitId, itemUuids);
 
@@ -179,7 +185,7 @@ describe('UnitCommentService', () => {
       const children = [{ id: 2 }, { id: 3 }] as UnitComment[];
 
       mockRepository.find.mockResolvedValue(children);
-      mockRepository.delete.mockResolvedValue({ affected: 3 });
+      mockRepository.delete.mockResolvedValue({ affected: 3 } as any);
 
       await service.removeComment(id);
 
