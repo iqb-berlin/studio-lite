@@ -42,6 +42,7 @@
     "add-files": "Zusätzliche Dateien",
     "add-player": "Player hinzufügen",
     "add-comments": "Kommentare hinzufügen",
+    "export-votes-warning": "Hinweis: Abstimmungen (Daumen hoch/runter) werden beim Export nicht übernommen.",
     "add-rich-notes": "Begleitmaterial hinzufügen",
     "no-player": "Keine Aufgabe hat einen gültigen Player gesetzt",
     "add-login": "Logins hinzufügen",
@@ -597,6 +598,7 @@
     "move-to": "Verschieben",
     "copy-unit": "Aufgaben in anderen Arbeitsbereich kopieren",
     "copy-unit-comments": "Kommentare der Aufgaben kopieren",
+    "copy-votes-warning": "Hinweis: Abstimmungen (Daumen hoch/runter) werden beim Kopieren nicht übernommen.",
     "copy-to": "Kopieren",
     "manage-groups": "Aufgabengruppen",
     "manage-unit-groups": "Aufgabengruppen verwalten",
@@ -885,7 +887,15 @@
     "visibility-updated": "Sichtbarkeit des Kommentars aktualisiert",
     "visibility-not-updated": "Sichtbarkeit des Kommentars konnte nicht aktualisiert werden",
     "hide": "Verbergen",
-    "show": "Anzeigen"
+    "show": "Anzeigen",
+    "vote-up": "Zustimmung",
+    "vote-down": "Ablehnung",
+    "show-voters": "Abstimmungsdetails anzeigen",
+    "voter-overview": "Abstimmungsübersicht",
+    "up-votes": "Zustimmung",
+    "down-votes": "Ablehnung",
+    "no-votes": "Keine Stimmen vorhanden",
+    "voters-title": "Abstimmungsübersicht"
   },
   "comments": {
     "comment-delete-title": "Kommentar löschen",
@@ -897,6 +907,7 @@
     "filter-items": "Item-Filter anwenden",
     "filter": "Kommentare filtern",
     "comment": "Kommentieren",
+    "more-actions": "Weitere Aktionen",
     "showHidden": "Sichtbarkeitseinstellungen ignorieren",
     "filter-no-items": "Keine Item Verbindung",
     "info": "Anzahl der Kommentare insgesamt: {{total}}.",
@@ -906,7 +917,8 @@
   },
   "delete-dialog": {
     "cancel": "Abbrechen",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "close": "Schließen"
   },
   "booklet-config": {
     "show-xml-params": "XML Parameter zeigen",

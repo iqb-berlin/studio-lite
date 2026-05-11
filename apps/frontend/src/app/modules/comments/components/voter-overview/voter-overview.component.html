@@ -1,0 +1,33 @@
+<h2 mat-dialog-title>{{ 'comment.voter-overview' | translate }}</h2>
+<mat-dialog-content class="voter-dialog-content">
+  <div class="voter-section up">
+    <div class="section-header">
+      <mat-icon>thumb_up</mat-icon>
+      <h3>{{ 'comment.up-votes' | translate }} ({{ upVoters.length }})</h3>
+    </div>
+    <div class="voter-list">
+      @for (name of upVoters; track name) {
+        <span class="voter-chip">{{ name }}</span>
+      } @empty {
+        <p class="empty-msg">{{ 'comment.no-votes' | translate }}</p>
+      }
+    </div>
+  </div>
+
+  <div class="voter-section down">
+    <div class="section-header">
+      <mat-icon>thumb_down</mat-icon>
+      <h3>{{ 'comment.down-votes' | translate }} ({{ downVoters.length }})</h3>
+    </div>
+    <div class="voter-list">
+      @for (name of downVoters; track name) {
+        <span class="voter-chip">{{ name }}</span>
+      } @empty {
+        <p class="empty-msg">{{ 'comment.no-votes' | translate }}</p>
+      }
+    </div>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close color="primary">{{ 'close' | translate }}</button>
+</mat-dialog-actions>

@@ -37,9 +37,95 @@
   min-width: 150px;
 }
 
-.fx-flex-row-fix-200 {
-  flex: 1 1 200px;
+.comment-content-container {
+  flex: 1 1 auto;
+  min-width: 300px; /* Garantiert Platz für den Text, bevor Buttons umbrechen */
+}
+
+.comment-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   box-sizing: border-box;
-  max-width: 200px;
-  min-width: 200px;
+  flex: 0 0 auto;
+  margin-left: auto;
+  flex-wrap: nowrap;
+  transition: opacity 0.5s ease-in-out;
+
+  .vote-section {
+    opacity: 0.7;
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  .comment-action {
+    opacity: 0.3;
+    transition: opacity 0.5s ease-in-out;
+
+    // Sanfter Verlauf nach rechts
+    &:nth-of-type(3) { opacity: 0.2; }
+    &:nth-of-type(4) { opacity: 0.1; }
+  }
+}
+
+.comment:hover .comment-actions {
+  .vote-section, .comment-action {
+    opacity: 1;
+  }
+}
+
+.vote-section {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 12px;
+}
+
+.integrated-vote-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  color: #777;
+
+  &.vote-active-up {
+    color: var(--primary);
+    .vote-button { color: var(--primary); }
+    .vote-count { background-color: var(--primary); color: white; }
+  }
+
+  &.vote-active-down {
+    color: #b71c1c;
+    .vote-button { color: #b71c1c; }
+    .vote-count { background-color: #b71c1c; color: white; }
+  }
+}
+
+.vote-button {
+  color: inherit;
+  &:hover {
+    color: #555;
+  }
+}
+
+.vote-count {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  background-color: #eee;
+  color: #666;
+  font-weight: bold;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  z-index: 1;
+
+  &:hover {
+    transform: scale(1.2);
+    filter: brightness(0.9);
+  }
 }

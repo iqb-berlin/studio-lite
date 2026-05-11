@@ -54,6 +54,8 @@
             (deleteComment)="deleteComment($event)"
             (updateComment)="updateComment($event)"
             (toggleVisibility)="toggleVisibility($event)"
+            (voteComment)="onVoteComment($event)"
+            (showVoters)="onShowVoters($event)"
             studioLiteScrollCommentIntoView
             [id]="rootComment.rootComment.id"
             [scrollTargetId]="latestCommentId">

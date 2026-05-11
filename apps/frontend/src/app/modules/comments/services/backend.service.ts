@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
-import { UpdateUnitCommentUnitItemsDto, UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
+import { UpdateUnitCommentUnitItemsDto, UpdateUnitUserDto, UnitCommentVoterDto } from '@studio-lite-lib/api-dto';
 import { Comment } from '../models/comment.interface';
 
 @Injectable()
@@ -98,6 +98,33 @@ export class BackendService {
       .pipe(
         map(() => true),
         catchError(() => of(false))
+      );
+  }
+
+  toggleVote(
+    workspaceId: number, unitId: number, reviewId: number, commentId: number, vote: 'up' | 'down' | null
+  ): Observable<boolean> {
+    const url = reviewId > 0 ?
+      `${this.serverUrl}reviews/${reviewId}/units/${unitId}/comments/${commentId}/vote` :
+      `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments/${commentId}/vote`;
+    return this.httpClient
+      .post(url, { vote })
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  getCommentVoters(
+    workspaceId: number, unitId: number, reviewId: number, commentId: number
+  ): Observable<UnitCommentVoterDto[]> {
+    const url = reviewId > 0 ?
+      `${this.serverUrl}reviews/${reviewId}/units/${unitId}/comments/${commentId}/votes` :
+      `${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/comments/${commentId}/votes`;
+    return this.httpClient
+      .get<UnitCommentVoterDto[]>(url)
+      .pipe(
+        catchError(() => of([]))
       );
   }
 }

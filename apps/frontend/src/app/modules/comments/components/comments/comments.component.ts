@@ -23,6 +23,7 @@ import { RootCommentWithReplies } from '../../models/root-comment-with-replies.i
 import { CommentFilterComponent } from '../comment-filter/comment-filter.component';
 import { HiddenCommentsCountPipe } from '../../pipes/hidden-comments-count.pipe';
 import { CommentService } from '../../services/comment.service';
+import { VoterOverviewComponent } from '../voter-overview/voter-overview.component';
 
 @Component({
   selector: 'studio-lite-comments',
@@ -279,5 +280,27 @@ export class CommentsComponent implements OnInit, OnDestroy {
 
   toggleVisibility(comment : Comment): void {
     this.updateCommentVisibility(comment.id, !comment.hidden);
+  }
+
+  onVoteComment({ commentId, vote }: { commentId: number; vote: 'up' | 'down' | null }): void {
+    this.backendService
+      .toggleVote(this.workspaceId, this.unitId, this.reviewId, commentId, vote)
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        switchMap(() => this.getUpdatedComments())
+      )
+      .subscribe();
+  }
+
+  onShowVoters(commentId: number): void {
+    this.backendService
+      .getCommentVoters(this.workspaceId, this.unitId, this.reviewId, commentId)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(voters => {
+        this.dialog.open(VoterOverviewComponent, {
+          width: '450px',
+          data: { voters }
+        });
+      });
   }
 }

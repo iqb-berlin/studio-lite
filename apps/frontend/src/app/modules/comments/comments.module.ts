@@ -30,8 +30,12 @@ import { Comment } from './models/comment.interface';
 import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
 import { ItemSelectionComponent } from '../../components/item-selection/item-selection.component';
 import { CommentService } from './services/comment.service';
+import { VoterOverviewComponent } from './components/voter-overview/voter-overview.component';
 
 @NgModule({
+  declarations: [
+    VoterOverviewComponent
+  ],
   imports: [
     CommonModule,
     ReactiveFormsModule,

@@ -212,4 +212,27 @@ describe('CommentComponent', () => {
       expect(deleteIcon).toBeTruthy();
     });
   });
+
+  describe('onVote', () => {
+    it('should emit voteComment with up if currently no vote', () => {
+      jest.spyOn(component.voteComment, 'emit');
+      component.comment.userVote = null;
+      component.onVote('up');
+      expect(component.voteComment.emit).toHaveBeenCalledWith({ commentId: 1, vote: 'up' });
+    });
+
+    it('should emit voteComment with null if currently up and up clicked again', () => {
+      jest.spyOn(component.voteComment, 'emit');
+      component.comment.userVote = 'up';
+      component.onVote('up');
+      expect(component.voteComment.emit).toHaveBeenCalledWith({ commentId: 1, vote: null });
+    });
+
+    it('should emit voteComment with down if currently up and down clicked', () => {
+      jest.spyOn(component.voteComment, 'emit');
+      component.comment.userVote = 'up';
+      component.onVote('down');
+      expect(component.voteComment.emit).toHaveBeenCalledWith({ commentId: 1, vote: 'down' });
+    });
+  });
 });

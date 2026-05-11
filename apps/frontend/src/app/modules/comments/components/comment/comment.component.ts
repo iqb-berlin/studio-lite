@@ -5,6 +5,9 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatMenuModule } from '@angular/material/menu';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { ActiveComment, ActiveCommentType } from '../../models/active-comment.interface';
 import { Comment } from '../../models/comment.interface';
@@ -26,7 +29,7 @@ import { SortAscendingPipe } from '../../pipes/sort-ascending.pipe';
   templateUrl: './comment.component.html',
   styleUrls: ['./comment.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FullTimestampPipe, ItemBadgeComponent, MapItemUuidsIdsPipe, SortAscendingPipe]
+  imports: [CommentBadgeComponent, CommentEditorComponent, ScrollEditorIntoViewDirective, MatIconButton, MatIcon, MatTooltip, WrappedIconComponent, ScrollCommentIntoViewDirective, TranslateModule, SafeResourceHTMLPipe, IsEditingPipe, IsReplyingPipe, FullTimestampPipe, ItemBadgeComponent, MapItemUuidsIdsPipe, SortAscendingPipe, MatBadgeModule, MatMenuModule]
 })
 export class CommentComponent implements OnInit {
   @Input() comment!: Comment;
@@ -44,6 +47,8 @@ export class CommentComponent implements OnInit {
   @Output() addComment = new EventEmitter<{ text: string; parentId: number | null, items: string[] }>();
   @Output() updateComment = new EventEmitter<{ text: string; commentId: number, items: string[] }>();
   @Output() toggleVisibility = new EventEmitter<Comment>();
+  @Output() voteComment = new EventEmitter<{ commentId: number; vote: 'up' | 'down' | null }>();
+  @Output() showVoters = new EventEmitter<number>();
 
   ownComment: boolean = false;
   activeCommentType = ActiveCommentType;
@@ -52,5 +57,10 @@ export class CommentComponent implements OnInit {
   ngOnInit(): void {
     this.ownComment = this.userId > 0 && this.userId === this.comment.userId;
     this.replyId = this.parentId ? this.parentId : this.comment.id;
+  }
+
+  onVote(direction: 'up' | 'down'): void {
+    const newVote = this.comment.userVote === direction ? null : direction;
+    this.voteComment.emit({ commentId: this.comment.id, vote: newVote });
   }
 }

@@ -186,4 +186,28 @@ describe('Comments BackendService', () => {
     expect(req.request.method).toBe('DELETE');
     req.flush({});
   });
+
+  it('should toggle vote', done => {
+    service.toggleVote(10, 20, 30, 55, 'up').subscribe(result => {
+      expect(result).toBe(true);
+      done();
+    });
+
+    const req = httpMock.expectOne(`${serverUrl}reviews/30/units/20/comments/55/vote`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ vote: 'up' });
+    req.flush({});
+  });
+
+  it('should get comment voters', done => {
+    const voters = [{ userName: 'User 1', vote: 'up' }];
+    service.getCommentVoters(10, 20, 0, 55).subscribe(result => {
+      expect(result).toEqual(voters);
+      done();
+    });
+
+    const req = httpMock.expectOne(`${serverUrl}workspaces/10/units/20/comments/55/votes`);
+    expect(req.request.method).toBe('GET');
+    req.flush(voters);
+  });
 });

@@ -2,16 +2,24 @@
   {{title}}
 </h1>
 <div mat-dialog-content>
-  <p>{{content}}</p>
+  <p [style.white-space]="'pre-line'">{{content}}</p>
 </div>
 <div mat-dialog-actions align="end">
-  <button mat-raised-button color='primary'
-          (click)="confirm()">
-    {{'delete-dialog.delete' | translate}}
-  </button>
-  <button mat-raised-button
-          cdkFocusInitial
-          (click)="decline()">
-    {{'delete-dialog.cancel' | translate}}
-  </button>
+  @if (!isReadOnly) {
+    <button mat-raised-button color='primary'
+            (click)="confirm()">
+      {{'delete-dialog.delete' | translate}}
+    </button>
+    <button mat-raised-button
+            cdkFocusInitial
+            (click)="decline()">
+      {{'delete-dialog.cancel' | translate}}
+    </button>
+  } @else {
+    <button mat-raised-button
+            cdkFocusInitial
+            (click)="decline()">
+      {{'delete-dialog.close' | translate}}
+    </button>
+  }
 </div>
