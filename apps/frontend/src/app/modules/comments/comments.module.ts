@@ -34,7 +34,6 @@ import { VoterOverviewComponent } from './components/voter-overview/voter-overvi
 
 @NgModule({
   declarations: [
-    VoterOverviewComponent
   ],
   imports: [
     CommonModule,
@@ -62,7 +61,8 @@ import { VoterOverviewComponent } from './components/voter-overview/voter-overvi
     ScrollEditorIntoViewDirective,
     CommentBadgeComponent,
     FromNowPipe,
-    IsCommentCommittablePipe
+    IsCommentCommittablePipe,
+    VoterOverviewComponent
   ],
   exports: [CommentsComponent],
   providers: [

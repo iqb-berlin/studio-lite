@@ -8,7 +8,8 @@ import { UnitCommentVoterDto } from '@studio-lite-lib/api-dto';
 
 @Component({
   selector: 'studio-lite-voter-overview',
-  standalone: false,
+  standalone: true,
+  imports: [MatDialogModule, MatIconModule, CommonModule, TranslateModule, MatButtonModule],
   templateUrl: './voter-overview.component.html',
   styleUrls: ['./voter-overview.component.scss']
 })

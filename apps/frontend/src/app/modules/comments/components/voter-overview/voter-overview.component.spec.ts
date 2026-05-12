@@ -17,8 +17,8 @@ describe('VoterOverviewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [VoterOverviewComponent],
       imports: [
+        VoterOverviewComponent,
         MatDialogModule,
         MatIconModule,
         TranslateModule.forRoot()
@@ -52,8 +52,7 @@ describe('VoterOverviewComponent', () => {
     // Re-configure for empty data
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-      declarations: [VoterOverviewComponent],
-      imports: [MatDialogModule, MatIconModule, TranslateModule.forRoot()],
+      imports: [VoterOverviewComponent, MatDialogModule, MatIconModule, TranslateModule.forRoot()],
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: { voters: [] } }
       ]
