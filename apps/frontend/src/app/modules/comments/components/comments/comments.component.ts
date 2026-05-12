@@ -49,6 +49,7 @@ export class CommentsComponent implements OnInit, OnDestroy {
   latestCommentId: Subject<number> = new Subject();
   isCommentProcessing: boolean = false;
   filteredItems: string[] = [];
+  voteFilters: string[] = [];
 
   private latestComment!: Comment;
   private ngUnsubscribe = new Subject<void>();

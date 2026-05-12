@@ -913,7 +913,11 @@
     "info": "Anzahl der Kommentare insgesamt: {{total}}.",
     "hidden-info": " Davon durch Sichtbarkeitseinstellungen verborgen: {{hidden}}.",
     "additional-filter-info": " Zusätzlich angewendete Item-Filter: {{filter}}.",
-    "filter-info": " Angewendete Item-Filter: {{filter}}."
+    "filter-info": " Angewendete Item-Filter: {{filter}}.",
+    "filter-votes": "Nach Voten filtern",
+    "filter-up-votes": "Nur mit Zustimmung",
+    "filter-down-votes": "Nur mit Ablehnung",
+    "filter-controversial": "Kontrovers"
   },
   "delete-dialog": {
     "cancel": "Abbrechen",
