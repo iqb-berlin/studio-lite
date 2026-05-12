@@ -8,7 +8,9 @@ import { Comment } from '../models/comment.interface';
 })
 export class FilteredCommentsPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
-  transform(comments: Comment[], itemFilters: string[], voteFilters: string[] = []): Comment[] {
+  transform(
+    comments: Comment[], itemFilters: string[], voteFilters: string[] = []
+  ): Comment[] {
     let filtered = comments;
 
     if (itemFilters && itemFilters.length > 0) {
