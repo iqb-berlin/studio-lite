@@ -128,7 +128,9 @@ describe('CommentsComponent', () => {
       updateCommentVisibility: jest.fn().mockReturnValue(of(true)),
       updateCommentItemConnections: jest.fn().mockReturnValue(of(true)),
       deleteComment: jest.fn().mockReturnValue(of(true)),
-      updateComments: jest.fn().mockReturnValue(of(true))
+      updateComments: jest.fn().mockReturnValue(of(true)),
+      toggleVote: jest.fn().mockReturnValue(of(true)),
+      getCommentVoters: jest.fn().mockReturnValue(of([]))
     } as unknown as jest.Mocked<BackendService>;
 
     dialogSpy = {
@@ -236,5 +238,19 @@ describe('CommentsComponent', () => {
     const mockActive: ActiveComment = { id: 1, type: ActiveCommentType.replying };
     component.setActiveComment(mockActive);
     expect(component.activeComment).toBe(mockActive);
+  });
+
+  it('should handle onVoteComment', () => {
+    component.onVoteComment({ commentId: 1, vote: 'up' });
+    expect(backendServiceSpy.toggleVote).toHaveBeenCalledWith(1, 1, 0, 1, 'up');
+    expect(backendServiceSpy.getComments).toHaveBeenCalledTimes(2); // once on init, once after vote
+  });
+
+  it('should handle onShowVoters', () => {
+    const mockVoters = [{ userName: 'User 1', vote: 'up' as const }];
+    backendServiceSpy.getCommentVoters.mockReturnValue(of(mockVoters));
+    component.onShowVoters(1);
+    expect(backendServiceSpy.getCommentVoters).toHaveBeenCalledWith(1, 1, 0, 1);
+    expect(dialogSpy.open).toHaveBeenCalled();
   });
 });

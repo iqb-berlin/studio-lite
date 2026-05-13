@@ -36,8 +36,10 @@ export class CommentFilterComponent {
   @Input() showHiddenComments!: BehaviorSubject<boolean>;
   @Input() filteredItems: string[] = [];
   @Input() unitItems: UnitItemDto[] = [];
+  @Input() voteFilters: string[] = [];
   @Input() disabled!: boolean;
 
   @Output() filteredItemsChange = new EventEmitter<string[]>();
+  @Output() voteFiltersChange = new EventEmitter<string[]>();
   @Output() showHiddenCommentsChange = new EventEmitter<boolean>();
 }

@@ -1,0 +1,60 @@
+.voter-dialog-content {
+  min-width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 10px;
+}
+
+.voter-section {
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 500;
+    }
+  }
+
+  &.up {
+    .section-header { color: var(--primary); }
+    .voter-chip { border-left: 3px solid var(--primary); }
+  }
+
+  &.down {
+    .section-header { color: #b71c1c; }
+    .voter-chip { border-left: 3px solid #b71c1c; }
+  }
+}
+
+.voter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-left: 32px;
+}
+
+.voter-chip {
+  background-color: #f5f5f5;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #444;
+}
+
+.empty-msg {
+  margin: 0;
+  font-size: 13px;
+  color: #999;
+  font-style: italic;
+}

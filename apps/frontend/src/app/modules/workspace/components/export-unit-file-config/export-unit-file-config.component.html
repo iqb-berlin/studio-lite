@@ -4,6 +4,9 @@
                 (ngModelChange)="addCommentsChange.emit($event)">
     {{'unit-download.add-comments' | translate}}
   </mat-checkbox>
+  @if (addComments) {
+    <div class="config-message">{{'unit-download.export-votes-warning' | translate}}</div>
+  }
   <mat-checkbox [ngModel]="addRichNotes"
                 (ngModelChange)="addRichNotesChange.emit($event)">
     {{'unit-download.add-rich-notes' | translate}}

@@ -7,6 +7,7 @@
   @if (!newCommentOnly) {
     <studio-lite-comment-filter class="filter-button"
                                      [(filteredItems)]="filteredItems"
+                                     [(voteFilters)]="voteFilters"
                                      [unitItems]="unitItems"
                                      [disabled] ="!rootCommentsWithReplies || !rootCommentsWithReplies.length"
                                      [showHiddenComments]="commentService.showHiddenComments">
@@ -23,14 +24,14 @@
             hidden: rootCommentsWithReplies | hiddenCommentsCount }
           }}
         }
-        @if (filteredItems.length) {
+        @if (filteredItems.length || voteFilters.length) {
           @if (commentService.showHiddenComments.value) {
             {{'comments.filter-info' | translate : {
-              filter: filteredItems.length }
+              filter: filteredItems.length + voteFilters.length }
             }}
           } @else {
             {{'comments.additional-filter-info' | translate : {
-              filter: filteredItems.length }
+              filter: filteredItems.length + voteFilters.length }
             }}
           }
         }
@@ -38,14 +39,14 @@
 
       </div>
 
-      @for (rootComment of rootCommentsWithReplies | filteredRootComments : filteredItems; track rootComment) {
+      @for (rootComment of rootCommentsWithReplies | filteredRootComments : filteredItems : voteFilters; track rootComment) {
         @if (!rootComment.rootComment.hidden || (rootComment.rootComment.hidden && commentService.showHiddenComments.value)) {
           <studio-lite-comment
             [showHiddenComments]="commentService.showHiddenComments"
             [comment]="rootComment.rootComment"
             [userId]="userId"
             [unitItems]="unitItems"
-            [replies]="(rootComment.replies | filteredComments : filteredItems)"
+            [replies]="(rootComment.replies | filteredComments : filteredItems : voteFilters)"
             [activeComment]="activeComment"
             [latestCommentId]="latestCommentId"
             [adminMode]="adminMode"
@@ -54,6 +55,8 @@
             (deleteComment)="deleteComment($event)"
             (updateComment)="updateComment($event)"
             (toggleVisibility)="toggleVisibility($event)"
+            (voteComment)="onVoteComment($event)"
+            (showVoters)="onShowVoters($event)"
             studioLiteScrollCommentIntoView
             [id]="rootComment.rootComment.id"
             [scrollTargetId]="latestCommentId">

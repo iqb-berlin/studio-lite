@@ -4,26 +4,20 @@ import { Repository } from 'typeorm';
 import { UnitCommentDto, UpdateUnitCommentDto, UpdateUnitCommentVisibilityDto } from '@studio-lite-lib/api-dto';
 import { UnitCommentService } from './unit-comment.service';
 import UnitComment from '../entities/unit-comment.entity';
+import UnitCommentVote from '../entities/unit-comment-vote.entity';
 import { ItemCommentService } from './item-comment.service';
+import { createMock } from '@golevelup/ts-jest';
+import { Not, In } from 'typeorm';
 
 describe('UnitCommentService', () => {
   let service: UnitCommentService;
   let repository: Repository<UnitComment>;
+  let voteRepository: Repository<UnitCommentVote>;
   let itemCommentService: ItemCommentService;
 
-  const mockRepository = {
-    find: jest.fn(),
-    create: jest.fn(),
-    save: jest.fn(),
-    delete: jest.fn(),
-    findOneBy: jest.fn(),
-    findOne: jest.fn()
-  };
-
-  const mockItemCommentService = {
-    findUnitItemComments: jest.fn(),
-    createCommentItemConnection: jest.fn()
-  };
+  const mockRepository = createMock<Repository<UnitComment>>();
+  const mockVoteRepository = createMock<Repository<UnitCommentVote>>();
+  const mockItemCommentService = createMock<ItemCommentService>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,6 +28,10 @@ describe('UnitCommentService', () => {
           useValue: mockRepository
         },
         {
+          provide: getRepositoryToken(UnitCommentVote),
+          useValue: mockVoteRepository
+        },
+        {
           provide: ItemCommentService,
           useValue: mockItemCommentService
         }
@@ -42,6 +40,7 @@ describe('UnitCommentService', () => {
 
     service = module.get<UnitCommentService>(UnitCommentService);
     repository = module.get<Repository<UnitComment>>(getRepositoryToken(UnitComment));
+    voteRepository = module.get<Repository<UnitCommentVote>>(getRepositoryToken(UnitCommentVote));
     itemCommentService = module.get<ItemCommentService>(ItemCommentService);
   });
 
@@ -50,25 +49,37 @@ describe('UnitCommentService', () => {
   });
 
   describe('findOnesComments', () => {
-    it('should return comments with itemUuids', async () => {
+    it('should return comments with itemUuids and vote counts', async () => {
       const unitId = 1;
       const comments = [{ id: 1, body: 'test', unitId }] as UnitComment[];
       const itemComments = [{ unitItemUuid: 'uuid-1' }];
+      const votes = [
+        { commentId: 1, userId: 1, vote: 'up' },
+        { commentId: 1, userId: 2, vote: 'up' },
+        { commentId: 1, userId: 3, vote: 'down' }
+      ] as UnitCommentVote[];
 
       mockRepository.find.mockResolvedValue(comments);
-      mockItemCommentService.findUnitItemComments.mockResolvedValue(itemComments);
+      mockVoteRepository.find.mockResolvedValue(votes);
+      mockItemCommentService.findUnitItemComments.mockResolvedValue(itemComments as any);
 
-      const result = await service.findOnesComments(unitId);
+      const result = await service.findOnesComments(unitId, 1);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: { unitId },
         order: { createdAt: 'ASC' }
       });
+      expect(voteRepository.find).toHaveBeenCalledWith({
+        where: { commentId: In([1]) }
+      });
       expect(itemCommentService.findUnitItemComments).toHaveBeenCalledWith(unitId, 1);
       expect(result).toEqual([
         {
           ...comments[0],
-          itemUuids: ['uuid-1']
+          itemUuids: ['uuid-1'],
+          upVotes: 2,
+          downVotes: 1,
+          userVote: 'up'
         }
       ]);
     });
@@ -88,8 +99,8 @@ describe('UnitCommentService', () => {
       mockRepository.find.mockResolvedValue(comments);
       mockItemCommentService.findUnitItemComments.mockResolvedValue(itemComments);
 
-      mockRepository.create.mockImplementation(dto => ({ ...dto, id: 100 }));
-      mockRepository.save.mockResolvedValue({ id: 100 });
+      (mockRepository.create as jest.Mock).mockImplementation(dto => ({ ...dto, id: 100 }));
+      mockRepository.save.mockResolvedValue({ id: 100 } as any);
 
       await service.copyComments(oldUnitId, newUnitId, itemUuidLookups);
 
@@ -134,6 +145,21 @@ describe('UnitCommentService', () => {
       const result = await service.findOnesLastChangedComment(1);
       expect(result).toBeNull();
     });
+
+    it('should exclude user if excludeUserId is provided', async () => {
+      const unitId = 1;
+      const excludeUserId = 2;
+      const comments = [{ id: 1, changedAt: new Date() }] as UnitComment[];
+      mockRepository.find.mockResolvedValue(comments);
+
+      const result = await service.findOnesLastChangedComment(unitId, excludeUserId);
+
+      expect(repository.find).toHaveBeenCalledWith({
+        where: { unitId, userId: Not(excludeUserId) },
+        order: { changedAt: 'DESC' }
+      });
+      expect(result).toEqual(comments[0]);
+    });
   });
 
   describe('createComment', () => {
@@ -143,8 +169,8 @@ describe('UnitCommentService', () => {
         ...dto, id: 123, createdAt: new Date(), changedAt: new Date()
       };
 
-      mockRepository.create.mockReturnValue(savedEntity);
-      mockRepository.save.mockResolvedValue(savedEntity);
+      (mockRepository.create as jest.Mock).mockReturnValue(savedEntity as any);
+      mockRepository.save.mockResolvedValue(savedEntity as any);
 
       const result = await service.createComment(dto);
 
@@ -163,8 +189,8 @@ describe('UnitCommentService', () => {
         { id: 2, parentId: 1 } as UnitCommentDto
       ];
 
-      mockRepository.create.mockImplementation(dto => ({ ...dto, id: Math.random() }));
-      mockRepository.save.mockImplementation(entity => Promise.resolve(entity));
+      mockRepository.create.mockImplementation(dto => ({ ...dto, id: Math.random() }) as any);
+      mockRepository.save.mockImplementation(entity => Promise.resolve(entity) as any);
 
       await service.createComments(comments, unitId, itemUuids);
 
@@ -179,7 +205,7 @@ describe('UnitCommentService', () => {
       const children = [{ id: 2 }, { id: 3 }] as UnitComment[];
 
       mockRepository.find.mockResolvedValue(children);
-      mockRepository.delete.mockResolvedValue({ affected: 3 });
+      mockRepository.delete.mockResolvedValue({ affected: 3 } as any);
 
       await service.removeComment(id);
 
@@ -230,6 +256,59 @@ describe('UnitCommentService', () => {
 
       expect(comment.hidden).toBe(true);
       expect(repository.save).toHaveBeenCalledWith(comment);
+    });
+  });
+
+  describe('toggleVote', () => {
+    it('should delete vote if vote is null', async () => {
+      const commentId = 1;
+      const userId = 1;
+      await service.toggleVote(commentId, userId, null);
+      expect(voteRepository.delete).toHaveBeenCalledWith({ commentId, userId });
+    });
+
+    it('should update existing vote', async () => {
+      const commentId = 1;
+      const userId = 1;
+      const existingVote = { commentId, userId, vote: 'up' } as UnitCommentVote;
+      mockVoteRepository.findOne.mockResolvedValue(existingVote);
+
+      await service.toggleVote(commentId, userId, 'down');
+
+      expect(voteRepository.findOne).toHaveBeenCalledWith({ where: { commentId, userId } });
+      expect(existingVote.vote).toBe('down');
+      expect(voteRepository.save).toHaveBeenCalledWith(existingVote);
+    });
+
+    it('should create new vote if not exists', async () => {
+      const commentId = 1;
+      const userId = 1;
+      mockVoteRepository.findOne.mockResolvedValue(null);
+      mockVoteRepository.create.mockReturnValue({ commentId, userId, vote: 'up' } as any);
+
+      await service.toggleVote(commentId, userId, 'up');
+
+      expect(voteRepository.create).toHaveBeenCalledWith({ commentId, userId, vote: 'up' });
+      expect(voteRepository.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('getCommentVoters', () => {
+    it('should return mapped voters from raw query', async () => {
+      const commentId = 1;
+      const rawVotes = [
+        { firstName: 'John', lastName: 'Doe', name: 'jdoe', vote: 'up' },
+        { firstName: '', lastName: '', name: 'user2', vote: 'down' }
+      ];
+      mockVoteRepository.query.mockResolvedValue(rawVotes);
+
+      const result = await service.getCommentVoters(commentId);
+
+      expect(voteRepository.query).toHaveBeenCalled();
+      expect(result).toEqual([
+        { userName: 'Doe, John', vote: 'up' },
+        { userName: 'user2', vote: 'down' }
+      ]);
     });
   });
 });

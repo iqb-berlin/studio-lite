@@ -14,13 +14,15 @@ import { MatButton } from '@angular/material/button';
 export class DeleteDialogComponent {
   title!: string;
   content!: string;
+  isReadOnly: boolean = false;
 
   constructor(
     public dialogRef: MatDialogRef<DeleteDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { title: string, content:string }
+    @Inject(MAT_DIALOG_DATA) public data: { title: string, content: string, isReadOnly?: boolean }
   ) {
     this.title = data.title;
     this.content = data.content;
+    this.isReadOnly = data.isReadOnly || false;
   }
 
   confirm() {

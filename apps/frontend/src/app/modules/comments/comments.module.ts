@@ -30,8 +30,11 @@ import { Comment } from './models/comment.interface';
 import { IsCommentCommittablePipe } from './pipes/is-comment-commitable.pipe';
 import { ItemSelectionComponent } from '../../components/item-selection/item-selection.component';
 import { CommentService } from './services/comment.service';
+import { VoterOverviewComponent } from './components/voter-overview/voter-overview.component';
 
 @NgModule({
+  declarations: [
+  ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -58,7 +61,8 @@ import { CommentService } from './services/comment.service';
     ScrollEditorIntoViewDirective,
     CommentBadgeComponent,
     FromNowPipe,
-    IsCommentCommittablePipe
+    IsCommentCommittablePipe,
+    VoterOverviewComponent
   ],
   exports: [CommentsComponent],
   providers: [

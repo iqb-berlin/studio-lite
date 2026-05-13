@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
 import UnitUser from '../entities/unit-user.entity';
 import Unit from '../entities/unit.entity';
+import { UnitCommentService } from './unit-comment.service';
 
 @Injectable()
 export class UnitUserService {
@@ -13,15 +14,17 @@ export class UnitUserService {
     @InjectRepository(UnitUser)
     private unitUserRepository: Repository<UnitUser>,
     @InjectRepository(Unit)
-    private unitRepository: Repository<Unit>
+    private unitRepository: Repository<Unit>,
+    private unitCommentService: UnitCommentService
   ) {}
 
   async createUnitUser(userId: number, unitId: number): Promise<void> {
     this.logger.log(`Creating UnitUser with userId ${userId} & unitId ${unitId}`);
+    const latestComment = await this.unitCommentService.findOnesLastChangedComment(unitId);
     const unitUser = await this.unitUserRepository.create(<UnitUser>{
       userId: userId,
       unitId: unitId,
-      lastSeenCommentChangedAt: new Date(2022, 6)
+      lastSeenCommentChangedAt: latestComment ? latestComment.changedAt : new Date()
     });
     await this.unitUserRepository.save(unitUser);
   }
@@ -33,7 +36,7 @@ export class UnitUserService {
         unitId: unitId
       }
     });
-    return unitUser ? unitUser.lastSeenCommentChangedAt : new Date(2022, 6);
+    return unitUser ? unitUser.lastSeenCommentChangedAt : new Date();
   }
 
   async patchUnitUserCommentsLastSeen(

@@ -1,10 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, In } from 'typeorm';
 import {
-  UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto, UpdateUnitCommentVisibilityDto
+  UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto, UpdateUnitCommentVisibilityDto,
+  UnitCommentVoterDto, UnitCommentVoteDto
 } from '@studio-lite-lib/api-dto';
 import UnitComment from '../entities/unit-comment.entity';
+import UnitCommentVote from '../entities/unit-comment-vote.entity';
 import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-found.exception';
 import { ItemCommentService } from './item-comment.service';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
@@ -16,21 +18,34 @@ export class UnitCommentService {
   constructor(
     @InjectRepository(UnitComment)
     private unitCommentsRepository: Repository<UnitComment>,
+    @InjectRepository(UnitCommentVote)
+    private unitCommentVoteRepository: Repository<UnitCommentVote>,
     private itemCommentService: ItemCommentService
   ) {}
 
-  async findOnesComments(unitId: number): Promise<UnitCommentDto[]> {
+  async findOnesComments(unitId: number, userId?: number): Promise<UnitCommentDto[]> {
     this.logger.log(`Returning comments for unit with id: ${unitId}`);
     const comments = await this.unitCommentsRepository
       .find({
         where: { unitId: unitId },
         order: { createdAt: 'ASC' }
       });
-    return Promise.all(comments.map(async comment => ({
-      ...comment,
-      itemUuids: (await this.itemCommentService.findUnitItemComments(unitId, comment.id))
-        .map(i => i.unitItemUuid)
-    })));
+      
+    const votes = await this.unitCommentVoteRepository.find({
+      where: comments.length > 0 ? { commentId: In(comments.map(c => c.id)) } : { commentId: -1 }
+    });
+
+    return Promise.all(comments.map(async comment => {
+      const commentVotes = votes.filter(v => v.commentId === comment.id);
+      return {
+        ...comment,
+        upVotes: commentVotes.filter(v => v.vote === 'up').length,
+        downVotes: commentVotes.filter(v => v.vote === 'down').length,
+        userVote: userId ? commentVotes.find(v => v.userId === userId)?.vote || null : null,
+        itemUuids: (await this.itemCommentService.findUnitItemComments(unitId, comment.id))
+          .map(i => i.unitItemUuid)
+      };
+    }));
   }
 
   async copyComments(oldUnitId: number, newUnitId: number, itemUuidLookups: ItemUuidLookup[]): Promise<void> {
@@ -76,10 +91,14 @@ export class UnitCommentService {
           .createCommentItemConnection(unitId, itemUuid, commentId)));
   }
 
-  async findOnesLastChangedComment(unitId: number): Promise<UnitCommentDto | null> {
+  async findOnesLastChangedComment(unitId: number, excludeUserId?: number): Promise<UnitCommentDto | null> {
+    const whereClause: any = { unitId: unitId };
+    if (excludeUserId) {
+      whereClause.userId = Not(excludeUserId);
+    }
     const comments = await this.unitCommentsRepository
       .find({
-        where: { unitId: unitId },
+        where: whereClause,
         order: { changedAt: 'DESC' }
       });
     if (comments && comments.length) {
@@ -143,5 +162,40 @@ export class UnitCommentService {
     } else {
       throw new UnitCommentNotFoundException(id, 'PATCH');
     }
+  }
+
+  async toggleVote(commentId: number, userId: number, vote: 'up' | 'down' | null): Promise<void> {
+    this.logger.log(`User ${userId} toggling vote on comment ${commentId} to ${vote}`);
+    if (!vote) {
+      await this.unitCommentVoteRepository.delete({ commentId, userId });
+    } else {
+      const existingVote = await this.unitCommentVoteRepository.findOne({ where: { commentId, userId } });
+      if (existingVote) {
+        existingVote.vote = vote;
+        await this.unitCommentVoteRepository.save(existingVote);
+      } else {
+        const newVote = this.unitCommentVoteRepository.create({ commentId, userId, vote });
+        await this.unitCommentVoteRepository.save(newVote);
+      }
+    }
+  }
+
+  async getCommentVoters(commentId: number): Promise<UnitCommentVoterDto[]> {
+    const rawVotes = await this.unitCommentVoteRepository.query(`
+      SELECT u.first_name AS "firstName", u.last_name AS "lastName", u.name, v.vote
+      FROM unit_comment_vote v
+      JOIN "user" u ON u.id = v.user_id
+      WHERE v.comment_id = $1
+      ORDER BY u.last_name ASC, u.first_name ASC
+    `, [commentId]);
+
+    return rawVotes.map((r: any) => {
+      const lastName = r.lastName ? r.lastName.trim() : '';
+      const firstName = r.firstName ? r.firstName.trim() : '';
+      const name = r.name ? r.name.trim() : '';
+      const displayName = lastName ? lastName : name;
+      const userName = firstName ? `${displayName}, ${firstName}` : displayName;
+      return { userName, vote: r.vote };
+    });
   }
 }

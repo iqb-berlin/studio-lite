@@ -1,6 +1,6 @@
 import {
   Body,
-  Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards
+  Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards, Req
 } from '@nestjs/common';
 import {
   ApiUnauthorizedResponse,
@@ -14,7 +14,7 @@ import {
 } from '@nestjs/swagger';
 import {
   CreateUnitCommentDto, UnitCommentDto, UpdateUnitCommentDto, UpdateUnitCommentUnitItemsDto,
-  UpdateUnitCommentVisibilityDto
+  UpdateUnitCommentVisibilityDto, UnitCommentVoteDto, UnitCommentVoterDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { UnitCommentService } from '../services/unit-comment.service';
@@ -34,8 +34,8 @@ export class ReviewUnitCommentController {
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges to retrieve comments for the unit.' })
   @ApiTags('review unit comment')
-  async findOnesComments(@Param('unit_id', ParseIntPipe) unitId: number): Promise<UnitCommentDto[]> {
-    return this.unitCommentService.findOnesComments(unitId);
+  async findOnesComments(@Req() request, @Param('unit_id', ParseIntPipe) unitId: number): Promise<UnitCommentDto[]> {
+    return this.unitCommentService.findOnesComments(unitId, request.user.id);
   }
 
   @Post()
@@ -100,5 +100,33 @@ export class ReviewUnitCommentController {
     @UnitId() unitId: number,
     @Body() comment: UpdateUnitCommentUnitItemsDto) {
     return this.itemCommentService.updateCommentItems(unitId, commentId, comment.unitItemUuids);
+  }
+
+  @Post(':comment_id/vote')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'review_id', type: Number })
+  @ApiParam({ name: 'unit_id', type: Number })
+  @ApiParam({ name: 'comment_id', type: Number })
+  @ApiOkResponse({ description: 'Comment vote toggled.' })
+  @ApiTags('review unit comment')
+  async toggleVote(
+    @Req() request,
+    @Param('comment_id', ParseIntPipe) commentId: number,
+    @Body() body: UnitCommentVoteDto
+  ): Promise<void> {
+    return this.unitCommentService.toggleVote(commentId, request.user.id, body.vote);
+  }
+
+  @Get(':comment_id/votes')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'review_id', type: Number })
+  @ApiParam({ name: 'unit_id', type: Number })
+  @ApiParam({ name: 'comment_id', type: Number })
+  @ApiOkResponse({ description: 'Get comment voters.', type: [UnitCommentVoterDto] })
+  @ApiTags('review unit comment')
+  async getCommentVoters(@Param('comment_id', ParseIntPipe) commentId: number): Promise<UnitCommentVoterDto[]> {
+    return this.unitCommentService.getCommentVoters(commentId);
   }
 }
