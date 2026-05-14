@@ -146,13 +146,23 @@ export class SettingController {
     return this.settingService.findUnitRichNoteTags();
   }
 
+  @Get('unit-rich-note-tags-config')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiOkResponse({ description: 'Unit rich note tags config retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiBearerAuth()
+  @ApiTags('admin settings')
+  async findUnitRichNoteTagsConfig(): Promise<UnitRichNoteTagDto[] | string> {
+    return this.settingService.findUnitRichNoteTagsConfig();
+  }
+
   @Patch('unit-rich-note-tags')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Unit rich note tags updated successfully.' })
   @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
-  async patchUnitRichNoteTags(@Body() newTags: UnitRichNoteTagDto[]) {
+  async patchUnitRichNoteTags(@Body() newTags: UnitRichNoteTagDto[] | string) {
     return this.settingService.patchUnitRichNoteTags(newTags);
   }
 }

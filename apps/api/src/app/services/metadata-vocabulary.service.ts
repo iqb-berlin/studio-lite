@@ -27,7 +27,7 @@ export class MetadataVocabularyService {
   }
 
   private async getMetadataVocabulary(id: string): Promise<MetadataVocabularyDto | null> {
-    const url = `${id}index.jsonld`;
+    const url = id.endsWith('.json') || id.endsWith('.jsonld') ? id : `${id}index.jsonld`;
     const vocabulary = await firstValueFrom(
       this.http.get<MetadataVocabularyDto>(url)
         .pipe(

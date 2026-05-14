@@ -4,9 +4,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UnitRichNoteService } from './unit-rich-note.service';
 import UnitRichNote from '../entities/unit-rich-note.entity';
-import Unit from '../entities/unit.entity';
 import Workspace from '../entities/workspace.entity';
-import WorkspaceGroup from '../entities/workspace-group.entity';
+import Unit from '../entities/unit.entity';
 import { ItemRichNoteService } from './item-rich-note.service';
 import { UnitService } from './unit.service';
 import { SettingService } from './setting.service';
@@ -14,18 +13,14 @@ import { SettingService } from './setting.service';
 describe('UnitRichNoteService', () => {
   let service: UnitRichNoteService;
   let unitRichNoteRepository: DeepMocked<Repository<UnitRichNote>>;
-  let unitRepository: DeepMocked<Repository<Unit>>;
   let workspaceRepository: DeepMocked<Repository<Workspace>>;
-  let workspaceGroupRepository: DeepMocked<Repository<WorkspaceGroup>>;
   let itemRichNoteService: DeepMocked<ItemRichNoteService>;
   let unitService: DeepMocked<UnitService>;
   let settingService: DeepMocked<SettingService>;
 
   beforeEach(async () => {
     unitRichNoteRepository = createMock<Repository<UnitRichNote>>();
-    unitRepository = createMock<Repository<Unit>>();
     workspaceRepository = createMock<Repository<Workspace>>();
-    workspaceGroupRepository = createMock<Repository<WorkspaceGroup>>();
     itemRichNoteService = createMock<ItemRichNoteService>();
     unitService = createMock<UnitService>();
     settingService = createMock<SettingService>();
@@ -35,9 +30,7 @@ describe('UnitRichNoteService', () => {
       providers: [
         UnitRichNoteService,
         { provide: getRepositoryToken(UnitRichNote), useValue: unitRichNoteRepository },
-        { provide: getRepositoryToken(Unit), useValue: unitRepository },
         { provide: getRepositoryToken(Workspace), useValue: workspaceRepository },
-        { provide: getRepositoryToken(WorkspaceGroup), useValue: workspaceGroupRepository },
         { provide: ItemRichNoteService, useValue: itemRichNoteService },
         { provide: UnitService, useValue: unitService },
         { provide: SettingService, useValue: settingService }
@@ -61,7 +54,7 @@ describe('UnitRichNoteService', () => {
           tagLabel: 'Tag Label',
           content: 'Some note',
           links: [],
-          itemReferences: ['old-uuid-1']
+          itemUuids: ['old-uuid-1']
         }
       ];
       const lookups = [
@@ -81,35 +74,20 @@ describe('UnitRichNoteService', () => {
   });
 
   describe('findNotes', () => {
-    it('should use workspace group tags if available', async () => {
-      const groupTags = [{ id: 'group.tag', label: [{ lang: 'de', value: 'Group Tag' }] }];
-      unitRepository.findOne.mockResolvedValueOnce(createMock<Unit>({ workspaceId: 1 }));
-      workspaceRepository.findOne.mockResolvedValueOnce(createMock<Workspace>({ groupId: 2 }));
-      workspaceGroupRepository.findOne.mockResolvedValueOnce(createMock<WorkspaceGroup>({
-        settings: { richNoteTags: groupTags }
-      }));
+    it('should use group-specific tags if available', async () => {
+      const unit = { id: 100, workspaceId: 1 } as unknown as Unit;
+      const workspace = { id: 1, groupId: 2 } as unknown as Workspace;
+      unitService.findOne.mockResolvedValueOnce(unit);
+      workspaceRepository.findOneBy.mockResolvedValueOnce(workspace);
+
+      const tags = [{ id: 'group.tag', label: [{ lang: 'de', value: 'Group Tag' }] }];
+      settingService.findUnitRichNoteTags.mockResolvedValueOnce(tags);
       unitRichNoteRepository.find.mockResolvedValueOnce([]);
 
       const result = await service.findNotes(100);
 
-      expect(result.tags).toEqual(groupTags);
-      expect(settingService.findUnitRichNoteTags).not.toHaveBeenCalled();
-    });
-
-    it('should fall back to global tags if group tags are missing', async () => {
-      const globalTags = [{ id: 'global.tag', label: [{ lang: 'de', value: 'Global Tag' }] }];
-      unitRepository.findOne.mockResolvedValueOnce(createMock<Unit>({ workspaceId: 1 }));
-      workspaceRepository.findOne.mockResolvedValueOnce(createMock<Workspace>({ groupId: 2 }));
-      workspaceGroupRepository.findOne.mockResolvedValueOnce(createMock<WorkspaceGroup>({
-        settings: {}
-      }));
-      settingService.findUnitRichNoteTags.mockResolvedValueOnce(globalTags);
-      unitRichNoteRepository.find.mockResolvedValueOnce([]);
-
-      const result = await service.findNotes(100);
-
-      expect(result.tags).toEqual(globalTags);
-      expect(settingService.findUnitRichNoteTags).toHaveBeenCalled();
+      expect(result.tags).toEqual(tags);
+      expect(settingService.findUnitRichNoteTags).toHaveBeenCalledWith(2);
     });
   });
 });

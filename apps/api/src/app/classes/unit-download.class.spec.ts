@@ -6,7 +6,8 @@ import {
   UnitDefinitionDto,
   UnitSchemeDto,
   VeronaModuleInListDto,
-  VeronaModuleFileDto
+  VeronaModuleFileDto,
+  UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import { UnitDownloadClass } from './unit-download.class';
@@ -290,6 +291,62 @@ describe('UnitDownloadClass', () => {
       expect(xmlString).toContain('id="cc" type="string"');
       expect(xmlString).toContain('id="uv" type="boolean"');
       expect(xmlString).toContain('id="mv" type="string"');
+    });
+  });
+
+  describe('findTag and getLabelString', () => {
+    const unitDownloadClass = UnitDownloadClass as unknown as {
+      findTag: (tags: UnitRichNoteTagDto[], id: string) => UnitRichNoteTagDto;
+      getLabelString: (label: { lang: string; value: string }[] | null) => string | null;
+    };
+    const tags = [
+      {
+        id: 't1',
+        label: [{ lang: 'de', value: 'Label 1' }],
+        children: [
+          {
+            id: 'c1',
+            label: [{ lang: 'de', value: 'Label 1.1' }]
+          }
+        ]
+      },
+      {
+        id: 'https://example.com/vocab/t2',
+        label: [{ lang: 'de', value: 'Label 2' }]
+      }
+    ];
+
+    it('should find tag by exact ID recursively', () => {
+      const tag = unitDownloadClass.findTag(tags, 'c1');
+      expect(tag.id).toBe('c1');
+      expect(unitDownloadClass.getLabelString(tag.label)).toBe('Label 1.1');
+    });
+
+    it('should find tag by URL ID', () => {
+      const tag = unitDownloadClass.findTag(tags, 'https://example.com/vocab/t2');
+      expect(tag.id).toBe('https://example.com/vocab/t2');
+      expect(unitDownloadClass.getLabelString(tag.label)).toBe('Label 2');
+    });
+
+    it('should find tag by legacy dot-separated path', () => {
+      const tag = unitDownloadClass.findTag(tags, 't1.c1');
+      expect(tag.id).toBe('c1');
+      expect(unitDownloadClass.getLabelString(tag.label)).toBe('Label 1.1');
+    });
+
+    it('should return null if tagId is not found', () => {
+      const tag = unitDownloadClass.findTag(tags, 'nonexistent');
+      expect(tag).toBeNull();
+    });
+
+    it('should return null if tagId is empty', () => {
+      const tag = unitDownloadClass.findTag(tags, '');
+      expect(tag).toBeNull();
+    });
+
+    it('should handle missing labels in getLabelString', () => {
+      expect(unitDownloadClass.getLabelString(null)).toBeNull();
+      expect(unitDownloadClass.getLabelString([])).toBeNull();
     });
   });
 });
