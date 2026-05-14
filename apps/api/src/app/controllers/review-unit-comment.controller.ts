@@ -112,8 +112,8 @@ export class ReviewUnitCommentController {
   @ApiTags('review unit comment')
   async toggleVote(
     @Req() request,
-    @Param('comment_id', ParseIntPipe) commentId: number,
-    @Body() body: UnitCommentVoteDto
+      @Param('comment_id', ParseIntPipe) commentId: number,
+      @Body() body: UnitCommentVoteDto
   ): Promise<void> {
     return this.unitCommentService.toggleVote(commentId, request.user.id, body.vote);
   }

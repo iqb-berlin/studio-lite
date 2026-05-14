@@ -1,5 +1,5 @@
 import {
-  ComponentFixture, TestBed
+  ComponentFixture, fakeAsync, TestBed, tick
 } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -14,10 +14,6 @@ import { EmailTemplateDto } from '@studio-lite-lib/api-dto';
 import { EmailTemplateComponent } from './email-template.component';
 import { environment } from '../../../../../environments/environment';
 import { BackendService } from '../../../../services/backend.service';
-
-const wait = (ms: number) => new Promise<void>(resolve => {
-  setTimeout(() => resolve(), ms);
-});
 
 describe('EmailTemplateComponent', () => {
   let component: EmailTemplateComponent;
@@ -82,34 +78,34 @@ describe('EmailTemplateComponent', () => {
     expect(component.dataChanged).toBe(false);
   });
 
-  it('should load email template on init', async () => {
-    fixture.detectChanges();
-    await wait(200);
+  it('should load email template on init', fakeAsync(() => {
+    component.ngOnInit();
+    tick(200);
     expect(backendService.getEmailTemplate).toHaveBeenCalled();
-  });
+  }));
 
-  it('should update form fields with loaded template', async () => {
-    fixture.detectChanges();
-    await wait(200);
+  it('should update form fields with loaded template', fakeAsync(() => {
+    component.ngOnInit();
+    tick(200);
     fixture.detectChanges();
     expect(component.configForm.get('emailSubject')?.value).toBe('Welcome {{user}}');
     expect(component.configForm.get('emailBody')?.value)
       .toBe('Hello {{firstname}} {{lastname}}, your password is {{password}}');
-  });
+  }));
 
-  it('should set dataChanged flag when form values change', async () => {
-    fixture.detectChanges();
-    await wait(200);
+  it('should set dataChanged flag when form values change', fakeAsync(() => {
+    component.ngOnInit();
+    tick(200);
     component.dataChanged = false;
     component.configForm.get('emailSubject')?.setValue('New Subject');
-    await wait(100);
+    tick(100);
     expect(component.dataChanged).toBe(true);
-  });
+  }));
 
-  it('should save email template successfully', async () => {
+  it('should save email template successfully', fakeAsync(() => {
     backendService.setEmailTemplate.mockReturnValue(of(true));
-    fixture.detectChanges();
-    await wait(200);
+    component.ngOnInit();
+    tick(200);
 
     component.configForm.patchValue({
       emailSubject: 'Test Subject',
@@ -117,7 +113,7 @@ describe('EmailTemplateComponent', () => {
     });
     component.dataChanged = true;
     component.saveData();
-    await wait(100);
+    tick(100);
 
     const expectedTemplate: EmailTemplateDto = {
       emailSubject: 'Test Subject',
@@ -125,40 +121,40 @@ describe('EmailTemplateComponent', () => {
     };
 
     expect(backendService.setEmailTemplate).toHaveBeenCalledWith(expectedTemplate);
-    await wait(100);
+    tick(100);
     expect(snackBar.open).toHaveBeenCalled();
     expect(component.dataChanged).toBe(false);
-  });
+  }));
 
-  it('should show error message when save fails', async () => {
+  it('should show error message when save fails', fakeAsync(() => {
     backendService.setEmailTemplate.mockReturnValue(of(false));
-    fixture.detectChanges();
-    await wait(200);
+    component.ngOnInit();
+    tick(200);
 
     component.saveData();
-    await wait(100);
+    tick(100);
 
     expect(backendService.setEmailTemplate).toHaveBeenCalled();
-    await wait(100);
+    tick(100);
     expect(snackBar.open).toHaveBeenCalled();
-  });
+  }));
 
-  it('should handle null email template response', async () => {
+  it('should handle null email template response', fakeAsync(() => {
     backendService.getEmailTemplate.mockReturnValue(of(null as unknown as EmailTemplateDto));
 
     const newFixture = TestBed.createComponent(EmailTemplateComponent);
     const newComponent = newFixture.componentInstance;
-    newFixture.detectChanges();
-    await wait(200);
+    newComponent.ngOnInit();
+    tick(200);
 
     expect(newComponent.configForm.get('emailSubject')?.value).toBe('');
     expect(newComponent.configForm.get('emailBody')?.value).toBe('');
-  });
+  }));
 
-  it('should properly construct EmailTemplateDto when saving', async () => {
+  it('should properly construct EmailTemplateDto when saving', fakeAsync(() => {
     backendService.setEmailTemplate.mockReturnValue(of(true));
-    fixture.detectChanges();
-    await wait(200);
+    component.ngOnInit();
+    tick(200);
 
     component.configForm.patchValue({
       emailSubject: 'Custom Subject',
@@ -166,19 +162,19 @@ describe('EmailTemplateComponent', () => {
     });
 
     component.saveData();
-    await wait(100);
+    tick(100);
 
     const callArgs = backendService.setEmailTemplate.mock.calls[0][0];
     expect(callArgs).toEqual({
       emailSubject: 'Custom Subject',
       emailBody: 'Custom Body with {{placeholder}}'
     });
-  });
+  }));
 
-  it('should handle empty form values when saving', async () => {
+  it('should handle empty form values when saving', fakeAsync(() => {
     backendService.setEmailTemplate.mockReturnValue(of(true));
-    fixture.detectChanges();
-    await wait(200);
+    component.ngOnInit();
+    tick(200);
 
     component.configForm.patchValue({
       emailSubject: '',
@@ -186,12 +182,12 @@ describe('EmailTemplateComponent', () => {
     });
 
     component.saveData();
-    await wait(100);
+    tick(100);
 
     const callArgs = backendService.setEmailTemplate.mock.calls[0][0];
     expect(callArgs.emailSubject).toBe('');
     expect(callArgs.emailBody).toBe('');
-  });
+  }));
 
   it('should not save if configForm is null', () => {
     component.configForm = null as unknown as typeof component.configForm;

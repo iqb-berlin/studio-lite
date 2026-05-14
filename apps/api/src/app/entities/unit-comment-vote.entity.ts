@@ -1,6 +1,7 @@
 import {
-  Entity, Column, PrimaryColumn
+  Entity, Column, PrimaryColumn, JoinColumn, ManyToOne
 } from 'typeorm';
+import User from './user.entity';
 
 @Entity('unit_comment_vote')
 export default class UnitCommentVote {
@@ -12,4 +13,8 @@ export default class UnitCommentVote {
 
   @Column({ type: 'varchar', length: 10 })
     vote!: 'up' | 'down';
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id' })
+    user!: User;
 }

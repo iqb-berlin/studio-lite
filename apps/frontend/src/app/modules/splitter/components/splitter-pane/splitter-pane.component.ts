@@ -26,28 +26,25 @@ export class SplitterPaneComponent {
   }
 
   private initSize(): void {
-    const storedSize = this.splitterService.panelSizes[this.index];
-    if (storedSize && !this.isLast) {
-      this.setSize(storedSize);
-    } else if (this.initialSize !== 'auto') {
-      this.setSize(this.initialSize);
-    }
-    if (this.initialSize !== 'auto' || (storedSize && !this.isLast) || this.isLast) {
+    const targetSize = this.getTargetSize();
+    if (targetSize > 0 || this.isLast) {
+      this.size = this.applyConstraints(targetSize);
       this.setStyle(this.size);
     }
   }
 
-  private setSize(size: number): void {
-    let paneSize = size < this.minSize ? this.minSize : size;
-    paneSize = this.maxSize && paneSize > this.maxSize ? this.maxSize : paneSize;
-    this.size = paneSize;
+  private getTargetSize(): number {
+    const storedSize = this.splitterService.panelSizes[this.index];
+    if (storedSize && !this.isLast) return storedSize;
+    return this.initialSize === 'auto' ? 0 : this.initialSize;
   }
 
-  calculateSize(isBeforeGutter: boolean, position: number, gutterOffset: number): void {
-    const paneSize = isBeforeGutter ?
-      position - this.elementRef.nativeElement.offsetLeft :
-      (this.elementRef.nativeElement.offsetLeft + this.elementRef.nativeElement.offsetWidth) - position - gutterOffset;
-    this.setSize(paneSize);
+  private applyConstraints(targetSize: number): number {
+    let constrainedSize = Math.max(targetSize, this.minSize);
+    if (this.maxSize) {
+      constrainedSize = Math.min(constrainedSize, this.maxSize);
+    }
+    return constrainedSize;
   }
 
   setStyle(paneSize: number): void {

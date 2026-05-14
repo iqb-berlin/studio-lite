@@ -2,8 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
-import { VoterOverviewComponent } from './voter-overview.component';
 import { UnitCommentVoterDto } from '@studio-lite-lib/api-dto';
+import { VoterOverviewComponent } from './voter-overview.component';
 
 describe('VoterOverviewComponent', () => {
   let component: VoterOverviewComponent;

@@ -1,9 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Not, In } from 'typeorm';
+import {
+  Repository, Not, In, FindOptionsWhere
+} from 'typeorm';
 import {
   UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto, UpdateUnitCommentVisibilityDto,
-  UnitCommentVoterDto, UnitCommentVoteDto
+  UnitCommentVoterDto
 } from '@studio-lite-lib/api-dto';
 import UnitComment from '../entities/unit-comment.entity';
 import UnitCommentVote from '../entities/unit-comment-vote.entity';
@@ -30,7 +32,7 @@ export class UnitCommentService {
         where: { unitId: unitId },
         order: { createdAt: 'ASC' }
       });
-      
+
     const votes = await this.unitCommentVoteRepository.find({
       where: comments.length > 0 ? { commentId: In(comments.map(c => c.id)) } : { commentId: -1 }
     });
@@ -92,7 +94,7 @@ export class UnitCommentService {
   }
 
   async findOnesLastChangedComment(unitId: number, excludeUserId?: number): Promise<UnitCommentDto | null> {
-    const whereClause: any = { unitId: unitId };
+    const whereClause: FindOptionsWhere<UnitComment> = { unitId: unitId };
     if (excludeUserId) {
       whereClause.userId = Not(excludeUserId);
     }
@@ -181,21 +183,24 @@ export class UnitCommentService {
   }
 
   async getCommentVoters(commentId: number): Promise<UnitCommentVoterDto[]> {
-    const rawVotes = await this.unitCommentVoteRepository.query(`
-      SELECT u.first_name AS "firstName", u.last_name AS "lastName", u.name, v.vote
-      FROM unit_comment_vote v
-      JOIN "user" u ON u.id = v.user_id
-      WHERE v.comment_id = $1
-      ORDER BY u.last_name ASC, u.first_name ASC
-    `, [commentId]);
+    const votesWithUsers = await this.unitCommentVoteRepository.find({
+      where: { commentId },
+      relations: ['user'],
+      order: {
+        user: {
+          lastName: 'ASC',
+          firstName: 'ASC'
+        }
+      }
+    });
 
-    return rawVotes.map((r: any) => {
-      const lastName = r.lastName ? r.lastName.trim() : '';
-      const firstName = r.firstName ? r.firstName.trim() : '';
-      const name = r.name ? r.name.trim() : '';
-      const displayName = lastName ? lastName : name;
+    return votesWithUsers.map(v => {
+      const lastName = v.user.lastName ? v.user.lastName.trim() : '';
+      const firstName = v.user.firstName ? v.user.firstName.trim() : '';
+      const name = v.user.name ? v.user.name.trim() : '';
+      const displayName = lastName || name;
       const userName = firstName ? `${displayName}, ${firstName}` : displayName;
-      return { userName, vote: r.vote };
+      return { userName, vote: v.vote };
     });
   }
 }

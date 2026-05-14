@@ -38,12 +38,38 @@ export class SplitterComponent implements AfterViewInit {
   }
 
   onGutterDragging(value: { index: number, position: number }): void {
-    this.calculatePanesSizeForIndex(value.index, value.position);
-    setTimeout(() => {
-      if (this.availablePanesSize === this.getCalculatedPanesSizeForIndex(value.index)) {
-        this.setPanesStyleForIndex(value.index);
-      }
-    });
+    const panes = this.getPanesForIndex(value.index);
+    if (panes.length === 2) {
+      this.updatePanesSize(panes[0], panes[1], value.position);
+    }
+  }
+
+  private updatePanesSize(paneA: SplitterPaneComponent, paneB: SplitterPaneComponent, pointerPosition: number): void {
+    const totalSize = this.availablePanesSize;
+    const paneBounds = paneA.elementRef.nativeElement.getBoundingClientRect();
+    const rawSizeA = Math.round(pointerPosition - paneBounds.left);
+
+    const constrainedSizeA = SplitterComponent.constrainSizeA(paneA, paneB, rawSizeA, totalSize);
+
+    if (Math.round(paneA.size) === constrainedSizeA) {
+      return;
+    }
+
+    const constrainedSizeB = totalSize - constrainedSizeA;
+
+    paneA.size = constrainedSizeA;
+    paneB.size = constrainedSizeB;
+
+    paneA.setStyle(constrainedSizeA);
+    paneB.setStyle(constrainedSizeB);
+  }
+
+  private static constrainSizeA(
+    paneA: SplitterPaneComponent, paneB: SplitterPaneComponent, sizeA: number, totalSize: number
+  ): number {
+    const minA = Math.max(paneA.minSize, totalSize - (paneB.maxSize || totalSize));
+    const maxA = Math.min(paneA.maxSize || totalSize, totalSize - paneB.minSize);
+    return Math.max(minA, Math.min(sizeA, maxA));
   }
 
   private getPanesForIndex(paneIndex: number): SplitterPaneComponent[] {
@@ -53,22 +79,8 @@ export class SplitterComponent implements AfterViewInit {
 
   private setAvailablePanesSizeForIndex(paneIndex: number): void {
     this.availablePanesSize = this.getPanesForIndex(paneIndex)
-      .reduce((sum, pane) => sum + pane.elementRef.nativeElement.offsetWidth,
+      .reduce((sum, pane) => sum + pane.elementRef.nativeElement.getBoundingClientRect().width,
         0);
-  }
-
-  private calculatePanesSizeForIndex(paneIndex: number, position: number): void {
-    this.getPanesForIndex(paneIndex)
-      .map(pane => pane.calculateSize(pane.index === paneIndex, position, this.gutterLineSize));
-  }
-
-  private getCalculatedPanesSizeForIndex(paneIndex: number): number {
-    return this.getPanesForIndex(paneIndex)
-      .reduce((sum, pane) => sum + pane.size, 0);
-  }
-
-  private setPanesStyleForIndex(paneIndex: number): void {
-    this.getPanesForIndex(paneIndex).map(pane => pane.setStyle(pane.size));
   }
 
   onGutterStopDragging() {
