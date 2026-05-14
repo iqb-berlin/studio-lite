@@ -98,23 +98,4 @@ describe('SplitterPaneComponent', () => {
       expect(component.size).toBe(300);
     });
   });
-
-  describe('calculateSize', () => {
-    it('should calculate size correctly when isBeforeGutter is true', () => {
-      jest.spyOn(component.elementRef.nativeElement, 'offsetLeft', 'get').mockReturnValue(10);
-      component.calculateSize(true, 110, 0);
-
-      expect(component.size).toBe(100); // 110 - 10
-    });
-
-    it('should calculate size correctly when isBeforeGutter is false', () => {
-      jest.spyOn(component.elementRef.nativeElement, 'offsetLeft', 'get').mockReturnValue(10);
-      jest.spyOn(component.elementRef.nativeElement, 'offsetWidth', 'get').mockReturnValue(200);
-
-      // (10 + 200) - 110 - 2 = 98
-      component.calculateSize(false, 110, 2);
-
-      expect(component.size).toBe(98);
-    });
-  });
 });

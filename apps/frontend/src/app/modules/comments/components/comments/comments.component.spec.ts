@@ -99,9 +99,11 @@ class MockCommentComponent {
 class MockCommentFilterComponent {
   @Input() unitItems: UnitItemDto[] = [];
   @Input() filteredItems: string[] = [];
+  @Input() voteFilters: string[] = [];
   @Input() disabled = false;
   @Input() showHiddenComments!: Subject<boolean> | { value: boolean };
   @Output() filteredItemsChange = new EventEmitter<string[]>();
+  @Output() voteFiltersChange = new EventEmitter<string[]>();
 }
 
 describe('CommentsComponent', () => {
