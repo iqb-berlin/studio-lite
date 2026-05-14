@@ -50,7 +50,7 @@ describe('AppController', () => {
       const result = await controller.login({ user: mockUser });
 
       expect(result).toBe(mockTokens);
-      expect(authService.login).toHaveBeenCalledWith(mockUser);
+      expect(authService.login).toHaveBeenCalledWith(mockUser, undefined);
     });
   });
 

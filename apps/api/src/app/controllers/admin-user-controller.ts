@@ -107,4 +107,15 @@ export class AdminUserController {
       throw new BadRequestException('Only orphaned sessions can be deleted.');
     }
   }
+
+  @Delete(':id/passive-sessions')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiBearerAuth()
+  @ApiTags('admin user')
+  @ApiOkResponse({ description: 'Passive sessions deleted successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
+  @ApiParam({ name: 'id', type: Number })
+  async removePassiveSessions(@Param('id') id: number): Promise<void> {
+    return this.authService.deletePassiveSessions(id);
+  }
 }

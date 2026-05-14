@@ -2,6 +2,9 @@ import { Component, inject, OnInit } from '@angular/core';
 import { DomSanitizer, Title } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import {
+  catchError, tap, of, forkJoin
+} from 'rxjs';
+import {
   Router, RouterState, RouterLink, RouterOutlet, NavigationEnd
 } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
@@ -53,39 +56,58 @@ export class AppComponent implements OnInit {
     });
     setTimeout(() => {
       this.appService.dataLoading = true;
-      this.backendService.getConfig().subscribe(newConfig => {
-        if (newConfig) {
-          this.appService.appConfig = new AppConfig(this.titleService, newConfig, this.sanitizer);
-          this.titleService.setTitle(this.appService.appConfig.appTitle);
-          this.appService.dataLoading = false;
-          this.appService.globalWarning = this.appService.appConfig.globalWarningText();
-        }
-      });
-      this.backendService.getAppLogo().subscribe(newLogo => {
-        this.appService.appLogo = standardLogo;
-        if (newLogo) {
-          if (newLogo.data && newLogo.data.length > 0) this.appService.appLogo.data = newLogo.data;
-          if (newLogo.bodyBackground && newLogo.bodyBackground.length > 0) {
-            this.appService.appLogo.bodyBackground = newLogo.bodyBackground;
+
+      const config$ = this.backendService.getConfig().pipe(
+        tap(newConfig => {
+          if (newConfig) {
+            this.appService.appConfig = new AppConfig(this.titleService, newConfig, this.sanitizer);
+            this.titleService.setTitle(this.appService.appConfig.appTitle);
+            this.appService.globalWarning = this.appService.appConfig.globalWarningText();
           }
-          if (newLogo.boxBackground && newLogo.boxBackground.length > 0) {
-            this.appService.appLogo.boxBackground = newLogo.boxBackground;
+        }),
+        catchError(() => of(null))
+      );
+
+      const logo$ = this.backendService.getAppLogo().pipe(
+        tap(newLogo => {
+          this.appService.appLogo = standardLogo;
+          if (newLogo) {
+            if (newLogo.data && newLogo.data.length > 0) this.appService.appLogo.data = newLogo.data;
+            if (newLogo.bodyBackground && newLogo.bodyBackground.length > 0) {
+              this.appService.appLogo.bodyBackground = newLogo.bodyBackground;
+            }
+            if (newLogo.boxBackground && newLogo.boxBackground.length > 0) {
+              this.appService.appLogo.boxBackground = newLogo.boxBackground;
+            }
           }
-        }
-        if (this.appService.appLogo.bodyBackground) {
-          document.documentElement.style.setProperty('--st-body-background', this.appService.appLogo.bodyBackground);
-        }
-        if (this.appService.appLogo.boxBackground) {
-          document.documentElement.style.setProperty('--st-box-background', this.appService.appLogo.boxBackground);
-        }
-      });
+          if (this.appService.appLogo.bodyBackground) {
+            document.documentElement.style.setProperty('--st-body-background', this.appService.appLogo.bodyBackground);
+          }
+          if (this.appService.appLogo.boxBackground) {
+            document.documentElement.style.setProperty('--st-box-background', this.appService.appLogo.boxBackground);
+          }
+        }),
+        catchError(() => of(null))
+      );
+
       const token = localStorage.getItem('id_token');
-      if (token) {
-        this.backendService.getAuthData().subscribe(authData => {
-          this.appService.authData = authData;
-          if (authData.userId) this.heartbeatService.start();
-        });
-      }
+      const auth$ = token ?
+        this.backendService.getAuthData().pipe(
+          tap(authData => {
+            this.appService.authData = authData;
+            if (authData.userId) this.heartbeatService.start();
+          }),
+          catchError(() => {
+            this.appService.authInitializationStatus$.next('complete');
+            return of(null);
+          })
+        ) :
+        of(null).pipe(tap(() => this.appService.authInitializationStatus$.next('complete')));
+
+      forkJoin([config$, logo$, auth$]).subscribe(() => {
+        this.appService.dataLoading = false;
+      });
+
       window.addEventListener('message', event => {
         this.appService.processMessagePost(event);
       }, false);

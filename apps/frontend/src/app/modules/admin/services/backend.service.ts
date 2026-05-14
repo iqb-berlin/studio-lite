@@ -145,6 +145,15 @@ export class BackendService {
       );
   }
 
+  deleteUserPassiveSessions(userId: number): Observable<boolean> {
+    return this.http
+      .delete(`${this.serverUrl}admin/users/${userId}/passive-sessions`)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
   getWorkspaceGroupsByAdmin(userId: number): Observable<WorkspaceGroupInListDto[]> {
     return this.http
       .get<WorkspaceGroupInListDto[]>(`${this.serverUrl}admin/users/${userId}/workspace-groups`)
