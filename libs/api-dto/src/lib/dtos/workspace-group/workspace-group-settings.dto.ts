@@ -28,5 +28,5 @@ export class WorkspaceGroupSettingsDto {
     hiddenRoutes?: string[];
 
   @ApiProperty()
-    richNoteTags?: UnitRichNoteTagDto[] = [];
+    richNoteTags?: string[] | UnitRichNoteTagDto[] = [];
 }

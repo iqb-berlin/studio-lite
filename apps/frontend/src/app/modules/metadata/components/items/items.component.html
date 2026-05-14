@@ -47,20 +47,22 @@
             (metadataChange)="onMetadataChange($event)">
           </studio-lite-item>
           <button mat-icon-button
-            color="primary"
+            color="warn"
             type="button"
-            (click)="openDeleteDialog(i)">
+            class="delete-button"
+            (click)="openDeleteDialog(i)"
+            [matTooltip]="'delete' | translate">
             <mat-icon>delete</mat-icon>
           </button>
         </div>
       </div>
     }
-    <button mat-fab extended="true"
+    <button mat-stroked-button
             color="primary"
             type="button"
-            class="add-button"
+            class="add-item-button"
             (click)="add()">
-      <mat-icon>add</mat-icon>
+      <mat-icon class="button-icon">add</mat-icon>
       {{'metadata.add-item' | translate}}
     </button>
   </div>

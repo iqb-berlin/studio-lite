@@ -6,7 +6,6 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
 import {
-  UnitRichNoteTagDto,
   WorkspaceGroupSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of } from 'rxjs';
@@ -17,7 +16,7 @@ import { WsgAdminService } from '../../services/wsg-admin.service';
 import { StatesComponent } from '../states/states.component';
 import {
   UnitRichNoteTagsConfigComponent
-} from '../unit-rich-note-tags-config/unit-rich-note-tags-config.component';
+} from '../../../admin/components/unit-rich-note-tags-config/unit-rich-note-tags-config.component';
 import { WorkspaceSettingsComponent } from './settings.component';
 
 @Component({
@@ -26,8 +25,9 @@ import { WorkspaceSettingsComponent } from './settings.component';
   standalone: true
 })
 class MockUnitRichNoteTagsConfigComponent {
-  @Input() globalTagsJson = '';
-  @Output() hasChanged = new EventEmitter<UnitRichNoteTagDto[]>();
+  @Input() config: string[] | null = null;
+  @Input() showSaveButton = true;
+  @Output() configChange = new EventEmitter<string[]>();
 }
 
 @Component({

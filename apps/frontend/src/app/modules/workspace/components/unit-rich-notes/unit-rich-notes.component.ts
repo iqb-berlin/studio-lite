@@ -95,7 +95,7 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
   }
 
   rebuildDisplayNodes(): void {
-    this.displayNodes = this.buildHierarchy(this.workspaceService.richNoteTags, '', true);
+    this.displayNodes = this.buildHierarchy(this.workspaceService.richNoteTags, true);
 
     const assignedNoteIds = new Set(this.getAllAssignedNoteIds(this.displayNodes));
     const orphanedNotes = this.notes.filter(n => !assignedNoteIds.has(n.id));
@@ -121,12 +121,12 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
     return ids;
   }
 
-  private buildHierarchy(tags: UnitRichNoteTagDto[], parentId = '', isRoot = false): RichNoteNode[] {
+  private buildHierarchy(tags: UnitRichNoteTagDto[], isRoot = false): RichNoteNode[] {
     const result: RichNoteNode[] = [];
     tags.forEach(tag => {
-      const fullId = parentId ? `${parentId}.${tag.id}` : tag.id;
+      const fullId = tag.id;
       const nodeNotes = this.notes.filter(n => n.tagId === fullId);
-      const childrenNodes = tag.children ? this.buildHierarchy(tag.children, fullId) : [];
+      const childrenNodes = tag.children ? this.buildHierarchy(tag.children) : [];
       if (isRoot || nodeNotes.length > 0 || childrenNodes.length > 0) {
         result.push({
           tagId: fullId,
@@ -182,6 +182,8 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
             unitId: this.unitId,
             tagId: result.tagId,
             content: result.content,
+            format: result.format || 'html',
+            language: result.language,
             links: result.links,
             itemReferences: result.itemReferences
           };

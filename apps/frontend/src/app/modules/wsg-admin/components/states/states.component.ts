@@ -8,7 +8,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatError } from '@angular/material/form-field';
-import { MatFabButton, MatIconButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { DeleteStateComponent } from '../delete-state/delete-state.component';
 import { WsgAdminService } from '../../services/wsg-admin.service';
@@ -19,7 +19,7 @@ import { State } from '../../../admin/models/state.type';
   templateUrl: './states.component.html',
   styleUrls: ['./states.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatProgressSpinner, MatFormField, MatInput, MatIconButton, MatTooltip, MatIcon, MatError, TranslateModule, MatFabButton]
+  imports: [MatProgressSpinner, MatFormField, MatInput, MatIconButton, MatTooltip, MatIcon, MatError, TranslateModule, MatButton]
 })
 export class StatesComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();

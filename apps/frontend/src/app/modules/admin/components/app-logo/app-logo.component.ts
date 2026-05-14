@@ -9,8 +9,9 @@ import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
-import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+
 import { BackendService as ReadBackendService } from '../../../../services/backend.service';
 import { BackendService as WriteBackendService } from '../../services/backend.service';
 
@@ -19,7 +20,19 @@ import { BackendService as WriteBackendService } from '../../services/backend.se
   templateUrl: './app-logo.component.html',
   styleUrls: ['./app-logo.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [FormsModule, ReactiveFormsModule, MatButton, MatTooltip, WrappedIconComponent, MatFormField, MatLabel, MatInput, TranslateModule]
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatButton,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+
+    MatFormField,
+    MatLabel,
+    MatInput,
+    TranslateModule
+  ]
 })
 
 export class AppLogoComponent implements OnInit, OnDestroy {

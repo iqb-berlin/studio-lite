@@ -31,5 +31,5 @@ export class WorkspaceSettingsDto {
     hiddenRoutes?: string[];
 
   @ApiProperty()
-    richNoteTags?: UnitRichNoteTagDto[];
+    richNoteTags?: string[] | UnitRichNoteTagDto[];
 }

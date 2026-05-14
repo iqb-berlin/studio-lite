@@ -10,6 +10,7 @@ import { AbstractControl } from '@angular/forms';
 import { WorkspaceService } from './workspace.service';
 import { WorkspaceBackendService } from './workspace-backend.service';
 import { AppService } from '../../../services/app.service';
+import { RichNoteTagsService } from './rich-note-tags.service';
 import { UnitMetadataStore } from '../classes/unit-metadata-store';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
@@ -18,6 +19,7 @@ describe('WorkspaceService', () => {
   let service: WorkspaceService;
   let backendService: jest.Mocked<WorkspaceBackendService>;
   let appService: jest.Mocked<AppService>;
+  let richNoteTagsService: jest.Mocked<RichNoteTagsService>;
 
   const mockAuthData: AuthDataDto = {
     userId: 1,
@@ -44,17 +46,26 @@ describe('WorkspaceService', () => {
       dataLoading: false
     };
 
+    const richNoteTagsServiceMock = {
+      tags: [],
+      tags$: of([]),
+      loadTags: jest.fn(),
+      getTagLabel: jest.fn().mockReturnValue([])
+    };
+
     TestBed.configureTestingModule({
       providers: [
         WorkspaceService,
         { provide: WorkspaceBackendService, useValue: backendServiceMock },
-        { provide: AppService, useValue: appServiceMock }
+        { provide: AppService, useValue: appServiceMock },
+        { provide: RichNoteTagsService, useValue: richNoteTagsServiceMock }
       ]
     });
 
     service = TestBed.inject(WorkspaceService);
     backendService = TestBed.inject(WorkspaceBackendService) as jest.Mocked<WorkspaceBackendService>;
     appService = TestBed.inject(AppService) as jest.Mocked<AppService>;
+    richNoteTagsService = TestBed.inject(RichNoteTagsService) as jest.Mocked<RichNoteTagsService>;
   });
 
   it('should be created', () => {
@@ -370,7 +381,6 @@ describe('WorkspaceService', () => {
       expect(backendService.getWorkspaceGroupStates).toHaveBeenCalledWith(1);
       expect(service.workspaceSettings.states).toEqual(mockStates);
       expect(service.workspaceSettings.richNoteTags).toEqual(mockTags);
-      expect(service.richNoteTags).toEqual(mockTags);
     });
 
     it('should not fetch when groupId is not set', () => {
@@ -669,49 +679,20 @@ describe('WorkspaceService', () => {
   });
 
   describe('loadRichNoteTags', () => {
-    it('should prioritize tags from workspaceSettings', () => {
-      const mockTags = [{ id: 'group-tag', label: [] }];
-      service.workspaceSettings.richNoteTags = mockTags;
-
+    it('should call RichNoteTagsService.loadTags', () => {
       service.loadRichNoteTags();
-
-      expect(service.richNoteTags).toEqual(mockTags);
-      expect(backendService.getUnitRichNoteTags).not.toHaveBeenCalled();
-    });
-
-    it('should load rich note tags from backend if no group tags exist', () => {
-      const mockTags = [{ id: 'global-tag', label: [] }];
-      service.workspaceSettings.richNoteTags = undefined;
-      service.richNoteTags = [];
-      backendService.getUnitRichNoteTags.mockReturnValue(of(mockTags));
-
-      service.loadRichNoteTags();
-
-      expect(backendService.getUnitRichNoteTags).toHaveBeenCalled();
-      expect(service.richNoteTags).toEqual(mockTags);
+      expect(richNoteTagsService.loadTags).toHaveBeenCalled();
     });
   });
 
   describe('getRichNoteTagLabel', () => {
-    it('should resolve hierarchical tag path', () => {
-      service.richNoteTags = [
-        {
-          id: 'p1',
-          label: [{ lang: 'de', value: 'Parent' }],
-          children: [
-            { id: 'c1', label: [{ lang: 'de', value: 'Child' }] }
-          ]
-        }
-      ];
+    it('should call RichNoteTagsService.getTagLabel', () => {
+      const mockLabel = [{ lang: 'de', value: 'Label' }];
+      richNoteTagsService.getTagLabel.mockReturnValue(mockLabel);
 
-      const result = service.getRichNoteTagLabel('p1.c1');
-      expect(result).toEqual([{ lang: 'de', value: 'Child' }]);
-    });
-
-    it('should return empty array if path is invalid', () => {
-      service.richNoteTags = [{ id: 'p1', label: [] }];
-      const result = service.getRichNoteTagLabel('p1.invalid');
-      expect(result).toEqual([]);
+      const result = service.getRichNoteTagLabel('tag1');
+      expect(richNoteTagsService.getTagLabel).toHaveBeenCalledWith('tag1');
+      expect(result).toEqual(mockLabel);
     });
   });
 });

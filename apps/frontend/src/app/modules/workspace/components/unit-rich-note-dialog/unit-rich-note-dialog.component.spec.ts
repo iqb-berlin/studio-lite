@@ -5,6 +5,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 import { UnitRichNoteDialogComponent } from './unit-rich-note-dialog.component';
+import { RichNoteEditorComponent } from '../rich-note-editor/rich-note-editor.component';
 
 describe('UnitRichNoteDialogComponent', () => {
   let component: UnitRichNoteDialogComponent;
@@ -70,7 +71,7 @@ describe('UnitRichNoteDialogComponent', () => {
     });
     expect(component.flattenedTags.length).toBe(2);
     expect(component.flattenedTags[0].id).toBe('parent');
-    expect(component.flattenedTags[1].id).toBe('parent.child');
+    expect(component.flattenedTags[1].id).toBe('child');
   });
 
   it('should resolve legacy tagId to full path', async () => {
@@ -83,7 +84,7 @@ describe('UnitRichNoteDialogComponent', () => {
     };
 
     await setupTestBed(legacyData);
-    expect(component.noteForm.get('tagId')?.value).toBe('parent.child');
+    expect(component.noteForm.get('tagId')?.value).toBe('child');
   });
 
   it('should disable save button if content is empty', () => {
@@ -102,5 +103,46 @@ describe('UnitRichNoteDialogComponent', () => {
     component.onContentChange('');
     component.onSelectedItemChange(['item1']);
     expect(component.isSaveDisabled).toBe(false);
+  });
+
+  it('should add and remove links', async () => {
+    await setupTestBed({
+      workspaceId: 1,
+      unitId: 1,
+      tags: mockTags,
+      items: []
+    });
+
+    expect(component.linksArray.length).toBe(0);
+    component.addLink();
+    expect(component.linksArray.length).toBe(1);
+    component.removeLink(0);
+    expect(component.linksArray.length).toBe(0);
+  });
+
+  it('should close dialog with data on save', async () => {
+    await setupTestBed({
+      workspaceId: 1,
+      unitId: 1,
+      tags: mockTags,
+      items: []
+    });
+
+    component.noteForm.get('tagId')?.setValue('child');
+    component.onContentChange('<p>test content</p>');
+
+    // Mock editor component
+    component.editorComponent = {
+      getEditorData: () => ({ text: '<p>test content</p>', items: ['item1'] })
+    } as unknown as RichNoteEditorComponent;
+
+    component.onSave();
+    expect(dialogRefMock.close).toHaveBeenCalledWith({
+      tagId: 'child',
+      links: [],
+      content: '<p>test content</p>',
+      itemReferences: ['item1'],
+      id: undefined
+    });
   });
 });

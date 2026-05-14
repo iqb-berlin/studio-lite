@@ -37,14 +37,36 @@
   font-size: 75%;
 }
 
-.labels-section, .descriptions-section {
-  margin: 10px 0;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
+.add-button {
+  border-radius: 20px;
+  border-color: #7fafb1;
+  color: #006064;
+  height: 40px;
+  padding: 0 16px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 
-  h4 {
-    margin: 5px 0;
-    font-size: 0.9em;
+  .button-icon {
+    margin-right: 8px;
   }
+
+  &:hover {
+    background-color: rgba(127, 175, 177, 0.1);
+  }
+}
+
+.delete-button {
+  border-radius: 20px;
+  height: 40px;
+  padding: 0 16px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+
+  .button-icon {
+    margin-right: 8px;
+  }
+}
+
+.labels-section, .descriptions-section {
+  display: none; /* These are now obsolete as we simplified to simple fields */
 }

@@ -130,7 +130,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       this.workspaceService.workspaceSettings = workspace.settings;
     }
     this.workspaceService.setWorkspaceGroupStates();
-    this.workspaceService.loadRichNoteTags();
 
     this.workspaceService.userAccessLevel = workspace.userAccessLevel;
     this.workspaceService.isWorkspaceGroupAdmin =

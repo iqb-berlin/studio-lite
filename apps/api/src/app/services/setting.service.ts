@@ -3,20 +3,26 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
   ConfigDto, AppLogoDto, UnitExportConfigDto, MissingsProfilesDto,
-  ProfilesRegistryDto, EmailTemplateDto, UnitRichNoteTagDto
+  ProfilesRegistryDto, EmailTemplateDto, UnitRichNoteTagDto, TopConcept
 } from '@studio-lite-lib/api-dto';
 
 import Setting from '../entities/setting.entity';
+import WorkspaceGroup from '../entities/workspace-group.entity';
 import { UsersService } from './users.service';
+import { MetadataVocabularyService } from './metadata-vocabulary.service';
 
 @Injectable()
 export class SettingService {
   private readonly logger = new Logger(SettingService.name);
+  private readonly DEFAULT_RICH_NOTE_TAGS_URL = 'https://w3id.org/iqb/v05/r1/index.json';
 
   constructor(
     @InjectRepository(Setting)
     private settingsRepository: Repository<Setting>,
-    private usersService: UsersService
+    @InjectRepository(WorkspaceGroup)
+    private workspaceGroupRepository: Repository<WorkspaceGroup>,
+    private usersService: UsersService,
+    private metadataVocabularyService: MetadataVocabularyService
   ) {}
 
   async findConfig(): Promise<ConfigDto> {
@@ -163,55 +169,68 @@ export class SettingService {
     }
   }
 
-  async findUnitRichNoteTags(): Promise<UnitRichNoteTagDto[]> {
-    this.logger.log('Returning unit rich note tags settings');
-    const setting = await this.settingsRepository.findOne({ where: { key: 'unit-rich-note-tags' } });
-    if (setting) {
-      return JSON.parse(setting.content);
-    }
-    return [
-      {
-        id: 'transcript',
-        label: [{ lang: 'de', value: 'Transkript für das Haupt-Audio' }],
-        children: [
-          {
-            id: 'original',
-            label: [{ lang: 'de', value: 'Transkript der Originalquelle' }]
-          },
-          {
-            id: 'adapted',
-            label: [{ lang: 'de', value: 'Transkript der angepassten Version für die Aufgabe' }]
-          }
-        ]
-      },
-      {
-        id: 'didactical_guide',
-        label: [{ lang: 'de', value: 'Didaktische Handreichungen' }],
-        children: [
-          {
-            id: 'answering',
-            label: [{ lang: 'de', value: 'Beantwortung' }],
-            children: [
-              { id: 'full_credit', label: [{ lang: 'de', value: 'Richtige Antworten' }] },
-              { id: 'competence_level', label: [{ lang: 'de', value: 'Diskussion des Schwierigkeitsniveaus' }] },
-              { id: 'misconceptions', label: [{ lang: 'de', value: 'Typische Falschantworten' }] },
-              { id: 'problems', label: [{ lang: 'de', value: 'Mögliche Probleme bei der Beantwortung' }] }
-            ]
-          },
-          {
-            id: 'adaptation',
-            label: [{ lang: 'de', value: 'Empfehlungen zur Modifikation' }],
-            children: [
-              { id: 'stimulus', label: [{ lang: 'de', value: 'Den Stimulus verändern' }] },
-              { id: 'items', label: [{ lang: 'de', value: 'Die Fragen/Items verändern' }] }
-            ]
-          }
-        ]
+  async findUnitRichNoteTags(workspaceGroupId?: number): Promise<UnitRichNoteTagDto[]> {
+    this.logger.log(`Returning unit rich note tags settings${
+      workspaceGroupId ? ` for group ${workspaceGroupId}` : ''}`);
+    let urlOrTags: string[] | UnitRichNoteTagDto[] | string | null = null;
+
+    if (workspaceGroupId) {
+      const group = await this.workspaceGroupRepository.findOneBy({ id: workspaceGroupId });
+      const settings = group?.settings as Record<string, unknown> | undefined;
+      if (settings?.richNoteTags) {
+        urlOrTags = settings.richNoteTags as string[] | UnitRichNoteTagDto[];
       }
-    ];
+    }
+
+    if (!urlOrTags || (Array.isArray(urlOrTags) && urlOrTags.length === 0)) {
+      const setting = await this.settingsRepository.findOne({ where: { key: 'unit-rich-note-tags' } });
+      if (setting) {
+        try {
+          urlOrTags = JSON.parse(setting.content);
+        } catch (e) {
+          this.logger.error('Could not parse global unit-rich-note-tags setting', e);
+        }
+      }
+    }
+
+    if (!urlOrTags || (Array.isArray(urlOrTags) && urlOrTags.length === 0)) {
+      urlOrTags = this.DEFAULT_RICH_NOTE_TAGS_URL;
+    }
+
+    if (urlOrTags) {
+      try {
+        if (Array.isArray(urlOrTags) && urlOrTags.length > 0 && typeof urlOrTags[0] === 'string') {
+          const allTags: UnitRichNoteTagDto[] = [];
+          await Promise.all(urlOrTags.map(async url => {
+            if (url.startsWith('http')) {
+              const vocabulary = await this.metadataVocabularyService.getStoredMetadataVocabularyById(url);
+              if (vocabulary && vocabulary.hasTopConcept) {
+                allTags.push(...vocabulary.hasTopConcept.map(concept => this.mapConceptToTag(concept, vocabulary.id)));
+              }
+            }
+          }));
+          return allTags;
+        }
+        if (typeof urlOrTags === 'string' && urlOrTags.startsWith('http')) {
+          const vocabulary = await this.metadataVocabularyService.getStoredMetadataVocabularyById(urlOrTags);
+          if (vocabulary && vocabulary.hasTopConcept) {
+            return vocabulary.hasTopConcept.map(concept => this.mapConceptToTag(concept, vocabulary.id));
+          }
+        }
+        return Array.isArray(urlOrTags) ? urlOrTags as UnitRichNoteTagDto[] : [];
+      } catch (e) {
+        this.logger.error('Could not fetch vocabulary for unit-rich-note-tags', e);
+      }
+    }
+    return [];
   }
 
-  async patchUnitRichNoteTags(tags: UnitRichNoteTagDto[]) {
+  async findUnitRichNoteTagsConfig(): Promise<UnitRichNoteTagDto[] | string> {
+    const setting = await this.settingsRepository.findOne({ where: { key: 'unit-rich-note-tags' } });
+    return setting ? JSON.parse(setting.content) : this.DEFAULT_RICH_NOTE_TAGS_URL;
+  }
+
+  async patchUnitRichNoteTags(tags: UnitRichNoteTagDto[] | string) {
     this.logger.log('Updating unit rich note tags settings.');
     const settingToUpdate = await this.settingsRepository.findOne({ where: { key: 'unit-rich-note-tags' } });
     if (settingToUpdate) {
@@ -224,5 +243,23 @@ export class SettingService {
       });
       await this.settingsRepository.save(newSetting);
     }
+  }
+
+  private mapConceptToTag(concept: TopConcept, baseUri?: string): UnitRichNoteTagDto {
+    const label = concept.prefLabel ?
+      Object.entries(concept.prefLabel).map(([lang, value]) => ({ lang, value: value as string })) :
+      [{ lang: 'de', value: concept.id }];
+
+    let id = concept.id;
+    if (baseUri && !id.startsWith('http')) {
+      id = `${baseUri}#${id}`;
+    }
+
+    return {
+      id,
+      label,
+      children: concept.narrower ?
+        concept.narrower.map((child: TopConcept) => this.mapConceptToTag(child, baseUri)) : []
+    };
   }
 }
