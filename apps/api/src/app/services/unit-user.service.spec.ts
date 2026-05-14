@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
+import { UpdateUnitUserDto, UnitCommentDto } from '@studio-lite-lib/api-dto';
+import { createMock } from '@golevelup/ts-jest';
 import { UnitUserService } from './unit-user.service';
 import UnitUser from '../entities/unit-user.entity';
 import Unit from '../entities/unit.entity';
-import { createMock } from '@golevelup/ts-jest';
 import { UnitCommentService } from './unit-comment.service';
 
 describe('UnitUserService', () => {
@@ -56,21 +56,25 @@ describe('UnitUserService', () => {
       const date = new Date();
       const createdEntity = { userId, unitId, lastSeenCommentChangedAt: date } as UnitUser;
 
-      mockUnitCommentService.findOnesLastChangedComment.mockResolvedValue({ changedAt: date } as any);
+      mockUnitCommentService.findOnesLastChangedComment.mockResolvedValue(
+        { changedAt: date } as UnitCommentDto
+      );
       (mockUnitUserRepository.create as jest.Mock).mockReturnValue(createdEntity);
       mockUnitUserRepository.save.mockResolvedValue(createdEntity);
 
       await service.createUnitUser(userId, unitId);
 
       expect(mockUnitCommentService.findOnesLastChangedComment).toHaveBeenCalledWith(unitId);
-      expect(unitUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ userId, unitId, lastSeenCommentChangedAt: date }));
+      expect(unitUserRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({ userId, unitId, lastSeenCommentChangedAt: date })
+      );
       expect(unitUserRepository.save).toHaveBeenCalledWith(createdEntity);
     });
 
     it('should create and save a unit user with current timestamp if no comments', async () => {
       const userId = 1;
       const unitId = 2;
-      
+
       mockUnitCommentService.findOnesLastChangedComment.mockResolvedValue(null);
       (mockUnitUserRepository.create as jest.Mock).mockReturnValue({} as UnitUser);
       mockUnitUserRepository.save.mockResolvedValue({} as UnitUser);
@@ -100,7 +104,7 @@ describe('UnitUserService', () => {
 
     it('should return default timestamp if unit user does not exist', async () => {
       mockUnitUserRepository.findOne.mockResolvedValue(null);
-      
+
       const before = new Date().getTime();
       const result = await service.findLastSeenCommentTimestamp(1, 2);
       const after = new Date().getTime();

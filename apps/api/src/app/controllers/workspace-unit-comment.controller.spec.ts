@@ -65,9 +65,10 @@ describe('WorkspaceUnitCommentController', () => {
   describe('findOnesComments', () => {
     it('should return comments for a unit', async () => {
       const result: UnitCommentDto[] = [];
+      const mockRequest = { user: { id: 1 } };
       jest.spyOn(unitCommentService, 'findOnesComments').mockResolvedValue(result);
 
-      expect(await controller.findOnesComments({ user: { id: 1 } }, 1)).toBe(result);
+      expect(await controller.findOnesComments(mockRequest, 1)).toBe(result);
       expect(unitCommentService.findOnesComments).toHaveBeenCalledWith(1, 1);
     });
   });
