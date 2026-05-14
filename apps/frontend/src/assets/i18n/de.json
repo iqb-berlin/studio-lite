@@ -284,6 +284,8 @@
     "issue-count-info": "Das System verfügt über {{count}} {{issue}}.",
     "generate_password": "Kennwort generieren",
     "and-send-mail": "und E-Mail senden",
+    "delete-passive-sessions": "Alle passiven Sitzungen dieses Nutzers löschen",
+    "delete-passive-sessions-confirm": "Sollen alle passiven Sitzungen von Nutzer:in \"{{name}}\" gelöscht werden?",
     "model": "Model"
   },
   "metadata": {

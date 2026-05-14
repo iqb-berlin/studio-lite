@@ -169,6 +169,24 @@ export class BackendService {
       );
   }
 
+  deleteUserSession(userId: number, sessionId: string): Observable<boolean> {
+    return this.http
+      .delete(`${this.serverUrl}admin/users/${userId}/sessions/${sessionId}`)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  deleteUserPassiveSessions(userId: number): Observable<boolean> {
+    return this.http
+      .delete(`${this.serverUrl}admin/users/${userId}/passive-sessions`)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
   getEmailTemplate(): Observable<EmailTemplateDto> {
     return this.http
       .get<EmailTemplateDto>(`${this.serverUrl}admin/settings/email-template`);
