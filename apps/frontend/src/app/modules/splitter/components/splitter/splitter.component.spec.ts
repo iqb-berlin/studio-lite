@@ -27,7 +27,7 @@ class MockSplitterPaneComponent {
     nativeElement: {
       offsetWidth: 100,
       style: {},
-      getBoundingClientRect: jest.fn(() => ({ left: 0 }))
+      getBoundingClientRect: jest.fn(() => ({ left: 0, width: 100 }))
     }
   };
 
