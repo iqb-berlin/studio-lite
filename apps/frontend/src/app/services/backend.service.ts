@@ -28,10 +28,12 @@ export class BackendService {
   }
 
   login(name: string, password: string, initLoginMode: boolean): Observable<boolean> {
+    const sessionId = BackendService.getSessionIdFromToken();
     return this.http.post<{ accessToken: string, refreshToken: string }>(
       `${this.serverUrl}${initLoginMode ? 'init-login' : 'login'}`, {
         username: name,
-        password: password
+        password: password,
+        sessionId
       }
     )
       .pipe(
@@ -187,5 +189,23 @@ export class BackendService {
 
   activity(): Observable<void> {
     return this.http.post<void>(`${this.serverUrl}activity`, {});
+  }
+
+  private static getSessionIdFromToken(): string | undefined {
+    const token = localStorage.getItem('id_token');
+    if (!token) return undefined;
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`)
+          .join('')
+      );
+      return (JSON.parse(jsonPayload) as { sid: string }).sid;
+    } catch (e) {
+      return undefined;
+    }
   }
 }

@@ -91,7 +91,24 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     this.logger.log(AuthService.getLoginMessage(user));
 
-    const sessionId = AuthService.getSessionId(existingSessionId);
+    let sessionId = AuthService.getSessionId(existingSessionId);
+    let isNewSession = !existingSessionId;
+
+    // If no existingSessionId was provided, check if the user has a very recent active session
+    // to reuse it instead of creating a new one (prevents bloat from rapid login attempts).
+    if (isNewSession) {
+      const recentSession = await this.userSessionRepository.findOne({
+        where: { userId: user.id },
+        order: { lastActivity: 'DESC' }
+      });
+
+      // If the most recent session was updated in the last 15 seconds, reuse its ID.
+      if (recentSession && (Date.now() - new Date(recentSession.lastActivity).getTime() < 15000)) {
+        sessionId = recentSession.sessionId;
+        isNewSession = false;
+      }
+    }
+
     const accessToken = this.jwtService.sign(AuthService.getJwtPayload(user, sessionId));
 
     // Reviews do not keep long-lived user sessions.
@@ -99,9 +116,12 @@ export class AuthService {
       return { accessToken, refreshToken: '' };
     }
 
-    if (!existingSessionId) {
+    if (isNewSession) {
       await this.cleanupExpiredSessions(user.id);
       await this.createUserSession(user.id, sessionId);
+    } else {
+      // If we are reusing a session, update its expiry and last activity.
+      await this.updateUserSession(user.id, sessionId);
     }
 
     const refreshToken = await this.generateRefreshToken(user.id, sessionId);
@@ -134,6 +154,16 @@ export class AuthService {
       expiresAt
     });
     await this.userSessionRepository.save(session);
+  }
+
+  private async updateUserSession(userId: number, sessionId: string): Promise<void> {
+    await this.userSessionRepository.update(
+      { userId, sessionId },
+      {
+        lastActivity: new Date(),
+        expiresAt: new Date(Date.now() + INACTIVITY_THRESHOLD_MS)
+      }
+    );
   }
 
   private async generateRefreshToken(userId: number, sessionId: string): Promise<string> {

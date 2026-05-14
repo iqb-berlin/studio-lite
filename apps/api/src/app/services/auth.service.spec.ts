@@ -87,6 +87,7 @@ describe('AuthService', () => {
       jwtService.sign.mockReturnValue('atoken');
       refreshTokenRepository.create.mockReturnValue({} as RefreshToken);
       refreshTokenRepository.save.mockResolvedValue({} as RefreshToken);
+      userSessionRepository.findOne.mockResolvedValue(null);
 
       const result = await service.login({ id: 1, name: 'user', reviewId: 0 });
 
@@ -99,6 +100,41 @@ describe('AuthService', () => {
       }));
       expect(userSessionRepository.save).toHaveBeenCalled();
       expect(refreshTokenRepository.save).toHaveBeenCalled();
+    });
+
+    it('should reuse a very recent session if no sessionId is provided (throttling)', async () => {
+      const recentSession = {
+        sessionId: 'recent-sid',
+        userId: 1,
+        lastActivity: new Date(Date.now() - 5000) // 5 seconds ago
+      } as UserSession;
+      userSessionRepository.findOne.mockResolvedValue(recentSession);
+      jwtService.sign.mockReturnValue('reused-token');
+
+      await service.login({ id: 1, name: 'user', reviewId: 0 });
+
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({
+        sid: 'recent-sid'
+      }));
+      expect(userSessionRepository.update).toHaveBeenCalledWith(
+        { userId: 1, sessionId: 'recent-sid' },
+        expect.any(Object)
+      );
+      expect(userSessionRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should reuse the provided existingSessionId', async () => {
+      jwtService.sign.mockReturnValue('reused-token');
+
+      await service.login({ id: 1, name: 'user', reviewId: 0 }, 'provided-sid');
+
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({
+        sid: 'provided-sid'
+      }));
+      expect(userSessionRepository.update).toHaveBeenCalledWith(
+        { userId: 1, sessionId: 'provided-sid' },
+        expect.any(Object)
+      );
     });
   });
 
