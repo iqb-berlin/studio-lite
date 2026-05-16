@@ -119,7 +119,7 @@
 
           @if (ownComment || adminMode) {
             <button mat-icon-button
-                    class="comment-action"
+                    class="comment-action delete-action"
                     matTooltip="{{'comment.delete' | translate}}"
                     (click)="deleteComment.emit({commentId: comment.id, numberOfReplies: replies.length})">
               <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
