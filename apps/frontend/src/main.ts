@@ -8,7 +8,7 @@ import {
   TranslateService, TranslateParser
 } from '@ngx-translate/core';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
-import { RouterModule } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -32,7 +32,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { PaginatorIntlService } from './app/services/paginator-intl.service';
 import { AuthInterceptor } from './app/interceptors/auth.interceptor';
-import { AppRoutingModule } from './app/app-routing.module';
+import { APP_ROUTES } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
 import { BackendService } from './app/services/backend.service';
@@ -50,6 +50,7 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
   providers: [
+    provideRouter(APP_ROUTES),
     importProvidersFrom(
       ApplicationModule,
       BrowserModule,
@@ -69,9 +70,7 @@ bootstrapApplication(AppComponent, {
       MatProgressSpinnerModule,
       MatSnackBarModule,
       MatPaginatorModule,
-      RouterModule,
       ReactiveFormsModule,
-      AppRoutingModule,
       IqbComponentsModule.forRoot(),
       TranslateModule.forRoot({
         defaultLanguage: 'de',
