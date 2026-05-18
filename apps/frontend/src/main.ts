@@ -24,7 +24,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatPaginatorModule, MatPaginatorIntl } from '@angular/material/paginator';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
-import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi
+} from '@angular/common/http';
 import { DateFnsAdapter } from '@angular/material-date-fns-adapter';
 import { MAT_DATE_LOCALE, DateAdapter } from '@angular/material/core';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
@@ -33,6 +35,7 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { PaginatorIntlService } from './app/services/paginator-intl.service';
 import { AuthInterceptor } from './app/interceptors/auth.interceptor';
 import { APP_ROUTES } from './app/app.routes';
+import { MetadataModule } from './app/modules/metadata/metadata.module';
 import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
 import { BackendService } from './app/services/backend.service';
@@ -51,6 +54,7 @@ if (environment.production) {
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(APP_ROUTES),
+    provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(
       ApplicationModule,
       BrowserModule,
@@ -72,6 +76,7 @@ bootstrapApplication(AppComponent, {
       MatPaginatorModule,
       ReactiveFormsModule,
       IqbComponentsModule.forRoot(),
+      MetadataModule,
       TranslateModule.forRoot({
         defaultLanguage: 'de',
         loader: {

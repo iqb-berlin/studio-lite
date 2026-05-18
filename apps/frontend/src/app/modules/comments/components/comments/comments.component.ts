@@ -30,7 +30,8 @@ import { VoterOverviewComponent } from '../voter-overview/voter-overview.compone
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, FilteredCommentsPipe, FormsModule, FilteredRootCommentsPipe, CommentFilterComponent, HiddenCommentsCountPipe]
+  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, FilteredCommentsPipe, FormsModule, FilteredRootCommentsPipe, CommentFilterComponent, HiddenCommentsCountPipe],
+  providers: [CommentService, BackendService]
 })
 export class CommentsComponent implements OnInit, OnDestroy {
   @Input() userId!: number;

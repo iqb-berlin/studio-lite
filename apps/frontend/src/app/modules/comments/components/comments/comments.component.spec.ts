@@ -151,10 +151,8 @@ describe('CommentsComponent', () => {
         CommentsComponent
       ],
       providers: [
-        { provide: BackendService, useValue: backendServiceSpy },
         { provide: MatDialog, useValue: dialogSpy },
-        { provide: MatSnackBar, useValue: snackBarSpy },
-        CommentService
+        { provide: MatSnackBar, useValue: snackBarSpy }
       ]
     })
       .overrideComponent(CommentsComponent, {
@@ -167,6 +165,10 @@ describe('CommentsComponent', () => {
             MockFilteredCommentsPipe,
             MockFilteredRootCommentsPipe,
             MockHiddenCommentsCountPipe
+          ],
+          providers: [
+            { provide: BackendService, useValue: backendServiceSpy },
+            CommentService
           ]
         }
       })
