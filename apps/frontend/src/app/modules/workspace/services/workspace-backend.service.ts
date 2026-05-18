@@ -459,9 +459,13 @@ export class WorkspaceBackendService {
       );
   }
 
-  getUnitRichNoteTags(): Observable<UnitRichNoteTagDto[]> {
+  getUnitRichNoteTags(workspaceGroupId?: number): Observable<UnitRichNoteTagDto[]> {
+    let params = new HttpParams();
+    if (workspaceGroupId) {
+      params = params.set('workspaceGroupId', workspaceGroupId.toString());
+    }
     return this.http
-      .get<UnitRichNoteTagDto[]>(`${this.serverUrl}admin/settings/unit-rich-note-tags`)
+      .get<UnitRichNoteTagDto[]>(`${this.serverUrl}admin/settings/unit-rich-note-tags`, { params })
       .pipe(
         catchError(() => of([]))
       );
