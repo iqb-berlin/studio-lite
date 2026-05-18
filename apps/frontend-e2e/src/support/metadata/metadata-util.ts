@@ -187,7 +187,7 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
 }
 
 export function getItem(profile: string, moreThanOne: boolean, copyItem?: string) {
-  cy.get('.add-button > .mdc-button__label').click();
+  cy.get('.add-item-button > .mdc-button__label').click();
   if (copyItem) {
     cy.get('[data-cy="metadata-new-item-content"]').click();
     cy.contains('mat-option', '02').click();
