@@ -1,11 +1,10 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes } from '@angular/router';
 import { ReviewComponent } from './components/review/review.component';
 import { StartComponent } from './components/start/start.component';
 import { FinishComponent } from './components/finish/finish.component';
 import { UnitPlayerComponent } from './components/unit-player/unit-player.component';
 
-const routes: Routes = [
+export const REVIEW_ROUTES: Routes = [
   {
     path: '',
     component: ReviewComponent,
@@ -39,9 +38,3 @@ const routes: Routes = [
     component: ReviewComponent
   }
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
-})
-export class ReviewRoutingModule { }

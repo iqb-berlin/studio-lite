@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes } from '@angular/router';
 import { WorkspacesComponent } from './components/workspaces/workspaces.component';
 import { UsersComponent } from './components/users/users.component';
 import { WsgAdminComponent } from './components/wsg-admin/wsg-admin.component';
@@ -7,7 +6,7 @@ import { WorkspaceSettingsComponent } from './components/settings/settings.compo
 import { UnitsComponent } from './components/units/units.component';
 import { UnitItemsComponent } from './components/unit-items/unit-items.component';
 
-const routes: Routes = [
+export const WSG_ADMIN_ROUTES: Routes = [
   {
     path: '',
     component: WsgAdminComponent,
@@ -22,9 +21,3 @@ const routes: Routes = [
     ]
   }
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
-})
-export class WsgAdminRoutingModule { }

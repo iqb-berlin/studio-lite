@@ -1,6 +1,4 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-
+import { Routes } from '@angular/router';
 import { WorkspaceGroupsComponent } from './components/workspace-groups/workspace-groups.component';
 import { UsersComponent } from './components/users/users.component';
 import { AdminComponent } from './components/admin/admin.component';
@@ -12,7 +10,7 @@ import { UnitsComponent } from './components/units/units.component';
 import { UnitItemsComponent } from './components/unit-items/unit-items.component';
 import { WidgetsComponent } from './components/widgets/widgets.component';
 
-const routes: Routes = [
+export const ADMIN_ROUTES: Routes = [
   {
     path: '',
     component: AdminComponent,
@@ -31,9 +29,3 @@ const routes: Routes = [
     ]
   }
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
-})
-export class AdminRoutingModule { }

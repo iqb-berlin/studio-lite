@@ -8,7 +8,9 @@ import { SaveOrDiscardComponent } from '../components/save-or-discard/save-or-di
 import { WorkspaceService } from '../services/workspace.service';
 import { ConfirmDialogData } from '../models/confirm-dialog.interface';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UnitRoutingCanDeactivateGuard {
   constructor(
     public confirmDialog: MatDialog,

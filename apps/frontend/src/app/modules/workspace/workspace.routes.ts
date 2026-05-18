@@ -1,6 +1,4 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-// eslint-disable-next-line import/no-cycle
+import { Routes } from '@angular/router';
 import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { UnitRoutingCanDeactivateGuard } from './guards/unit-routing.guard';
 import { UnitEditorComponent } from './components/unit-editor/unit-editor.component';
@@ -11,7 +9,7 @@ import { UnitRichNotesComponent } from './components/unit-rich-notes/unit-rich-n
 import { UnitPropertiesComponent } from './components/unit-properties/unit-properties.component';
 import { HiddenRouteGuard } from './guards/hidden-route.guard';
 
-const routes: Routes = [
+export const WORKSPACE_ROUTES: Routes = [
   {
     path: '',
     component: WorkspaceComponent
@@ -49,9 +47,3 @@ const routes: Routes = [
     ]
   }
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
-})
-export class WorkspaceRoutingModule { }
