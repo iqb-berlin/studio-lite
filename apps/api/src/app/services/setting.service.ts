@@ -232,9 +232,22 @@ export class SettingService {
     return [];
   }
 
-  async findUnitRichNoteTagsConfig(): Promise<UnitRichNoteTagDto[] | string> {
+  async findUnitRichNoteTagsConfig(): Promise<UnitRichNoteTagDto[] | string[]> {
     const setting = await this.settingsRepository.findOne({ where: { key: 'unit-rich-note-tags' } });
-    return setting ? JSON.parse(setting.content) : this.DEFAULT_RICH_NOTE_TAGS_URL;
+    if (setting) {
+      try {
+        const parsed = JSON.parse(setting.content);
+        if (Array.isArray(parsed)) {
+          return parsed as UnitRichNoteTagDto[] | string[];
+        }
+        if (typeof parsed === 'string') {
+          return [parsed];
+        }
+      } catch (e) {
+        this.logger.error('Could not parse global unit-rich-note-tags setting', e);
+      }
+    }
+    return [this.DEFAULT_RICH_NOTE_TAGS_URL];
   }
 
   async patchUnitRichNoteTags(tags: UnitRichNoteTagDto[] | string) {

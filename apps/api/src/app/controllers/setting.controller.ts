@@ -153,7 +153,7 @@ export class SettingController {
   @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
-  async findUnitRichNoteTagsConfig(): Promise<UnitRichNoteTagDto[] | string> {
+  async findUnitRichNoteTagsConfig(): Promise<UnitRichNoteTagDto[] | string[]> {
     return this.settingService.findUnitRichNoteTagsConfig();
   }
 
