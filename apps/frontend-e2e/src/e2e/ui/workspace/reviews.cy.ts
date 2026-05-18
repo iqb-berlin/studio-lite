@@ -259,7 +259,6 @@ describe('Unit Reviews', () => {
   });
 
   it('shows no dot for comments inserted by himself in the workspace unit list: ', () => {
-    cy.pause();
     cy.visitWs(ws1);
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments').should('have.css', 'opacity', '0');
@@ -280,8 +279,9 @@ describe('Unit Reviews', () => {
     cy.get('mat-row').contains('M6_AK0012').click();
     clickIndexTabWorkspace('comments');
     cy.get('studio-lite-comments', { timeout: 15000 }).should('be.visible');
+    cy.wait(100);
     clickIndexTabWorkspace('properties');
-
+    cy.wait(100);
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments', { timeout: 15000 }).should('have.css', 'opacity', '0');
     });
