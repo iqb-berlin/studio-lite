@@ -10,7 +10,7 @@
  * createItem('01');
  */
 export function createItem(itemId: string): void {
-  cy.get('.add-button > .mdc-button__label').click();
+  cy.get('.add-item-button > .mdc-button__label').click();
   cy.get('[data-cy="metadata-new-item-button"]').click();
   cy.translate(Cypress.expose('locale')).then(json => {
     cy.get(`mat-expansion-panel:contains("${json.metadata['without-id']}")`).click();
