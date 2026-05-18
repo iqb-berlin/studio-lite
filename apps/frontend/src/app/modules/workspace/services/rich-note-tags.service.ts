@@ -10,6 +10,7 @@ import { WorkspaceBackendService } from './workspace-backend.service';
 export class RichNoteTagsService {
   private _tags$ = new BehaviorSubject<UnitRichNoteTagDto[] | null>(null);
   private _loading = false;
+  private currentGroupId?: number;
 
   constructor(private backendService: WorkspaceBackendService) {}
 
@@ -26,10 +27,11 @@ export class RichNoteTagsService {
     return this._tags$.getValue() || [];
   }
 
-  loadTags(): void {
-    if (this._loading) return;
+  loadTags(workspaceGroupId?: number): void {
+    if (this._loading && this.currentGroupId === workspaceGroupId) return;
     this._loading = true;
-    this.backendService.getUnitRichNoteTags()
+    this.currentGroupId = workspaceGroupId;
+    this.backendService.getUnitRichNoteTags(workspaceGroupId)
       .subscribe({
         next: tags => {
           this._tags$.next(tags);

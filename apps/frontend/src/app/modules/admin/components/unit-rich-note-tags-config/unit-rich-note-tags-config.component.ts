@@ -75,7 +75,9 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy, OnCha
     // eslint-disable-next-line @typescript-eslint/dot-notation
     if (changes['config'] && !changes['config'].firstChange) {
       if (this.config !== undefined) {
-        this.updateForm(this.config);
+        if (this.hasConfigChanged(this.config)) {
+          this.updateForm(this.config);
+        }
       } else if (this.isGlobal) {
         this.loadData();
       }
@@ -167,6 +169,37 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy, OnCha
           }
         });
     }
+  }
+
+  private hasConfigChanged(newConfig: unknown): boolean {
+    const currentValidUrls = this.urls.value
+      .map((u: string) => (u ? u.trim() : ''))
+      .filter((u: string) => u !== '');
+
+    let newUrls: string[] = [];
+    if (Array.isArray(newConfig)) {
+      if (newConfig.length > 0 && typeof newConfig[0] === 'string') {
+        newUrls = (newConfig as string[]).filter(url => url && url.trim() !== '');
+      } else if (newConfig.length > 0) {
+        newUrls = [JSON.stringify(newConfig)];
+      }
+    } else if (typeof newConfig === 'string' && newConfig.startsWith('http')) {
+      newUrls = [newConfig];
+    } else if (newConfig) {
+      newUrls = [String(newConfig)];
+    }
+
+    if (currentValidUrls.length !== newUrls.length) {
+      return true;
+    }
+
+    for (let i = 0; i < currentValidUrls.length; i++) {
+      if (currentValidUrls[i] !== newUrls[i]) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   ngOnDestroy(): void {

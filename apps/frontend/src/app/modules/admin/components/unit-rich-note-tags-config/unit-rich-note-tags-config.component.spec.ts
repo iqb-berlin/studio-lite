@@ -77,4 +77,37 @@ describe('UnitRichNoteTagsConfigComponent', () => {
     component.saveData();
     expect(backendServiceMock.setUnitRichNoteTags).toHaveBeenCalledWith(urls as string[]);
   });
+
+  it('should not reset form in ngOnChanges if config is semantically identical', () => {
+    component.config = ['http://url1'];
+    component.urls.clear();
+    component.addUrl('http://url1');
+
+    const updateFormSpy = jest.spyOn(component as unknown as { updateForm: (c: unknown) => void }, 'updateForm');
+
+    // Simulate input change with semantically identical value
+    component.ngOnChanges({
+      config: {
+        currentValue: ['http://url1'],
+        previousValue: null,
+        firstChange: false,
+        isFirstChange: () => false
+      }
+    });
+
+    expect(updateFormSpy).not.toHaveBeenCalled();
+
+    // Now change to a different value
+    component.config = ['http://url2'];
+    component.ngOnChanges({
+      config: {
+        currentValue: ['http://url2'],
+        previousValue: ['http://url1'],
+        firstChange: false,
+        isFirstChange: () => false
+      }
+    });
+
+    expect(updateFormSpy).toHaveBeenCalledWith(['http://url2']);
+  });
 });

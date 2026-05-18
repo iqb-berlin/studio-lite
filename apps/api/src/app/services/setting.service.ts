@@ -173,27 +173,34 @@ export class SettingService {
     this.logger.log(`Returning unit rich note tags settings${
       workspaceGroupId ? ` for group ${workspaceGroupId}` : ''}`);
     let urlOrTags: string[] | UnitRichNoteTagDto[] | string | null = null;
+    let isConfiguredForGroup = false;
 
     if (workspaceGroupId) {
       const group = await this.workspaceGroupRepository.findOneBy({ id: workspaceGroupId });
       const settings = group?.settings as Record<string, unknown> | undefined;
-      if (settings?.richNoteTags) {
-        urlOrTags = settings.richNoteTags as string[] | UnitRichNoteTagDto[];
+      if (settings && 'richNoteTags' in settings && settings.richNoteTags !== undefined) {
+        const groupTags = settings.richNoteTags as string[] | UnitRichNoteTagDto[];
+        if (groupTags && (typeof groupTags === 'string' || (Array.isArray(groupTags) && groupTags.length > 0))) {
+          urlOrTags = groupTags;
+          isConfiguredForGroup = true;
+        }
       }
     }
 
-    if (!urlOrTags || (Array.isArray(urlOrTags) && urlOrTags.length === 0)) {
+    let isConfiguredGlobally = false;
+    if (!isConfiguredForGroup) {
       const setting = await this.settingsRepository.findOne({ where: { key: 'unit-rich-note-tags' } });
       if (setting) {
         try {
           urlOrTags = JSON.parse(setting.content);
+          isConfiguredGlobally = true;
         } catch (e) {
           this.logger.error('Could not parse global unit-rich-note-tags setting', e);
         }
       }
     }
 
-    if (!urlOrTags || (Array.isArray(urlOrTags) && urlOrTags.length === 0)) {
+    if (!isConfiguredForGroup && !isConfiguredGlobally) {
       urlOrTags = this.DEFAULT_RICH_NOTE_TAGS_URL;
     }
 
@@ -225,9 +232,22 @@ export class SettingService {
     return [];
   }
 
-  async findUnitRichNoteTagsConfig(): Promise<UnitRichNoteTagDto[] | string> {
+  async findUnitRichNoteTagsConfig(): Promise<UnitRichNoteTagDto[] | string[]> {
     const setting = await this.settingsRepository.findOne({ where: { key: 'unit-rich-note-tags' } });
-    return setting ? JSON.parse(setting.content) : this.DEFAULT_RICH_NOTE_TAGS_URL;
+    if (setting) {
+      try {
+        const parsed = JSON.parse(setting.content);
+        if (Array.isArray(parsed)) {
+          return parsed as UnitRichNoteTagDto[] | string[];
+        }
+        if (typeof parsed === 'string') {
+          return [parsed];
+        }
+      } catch (e) {
+        this.logger.error('Could not parse global unit-rich-note-tags setting', e);
+      }
+    }
+    return [this.DEFAULT_RICH_NOTE_TAGS_URL];
   }
 
   async patchUnitRichNoteTags(tags: UnitRichNoteTagDto[] | string) {

@@ -348,7 +348,7 @@ export class WorkspaceService {
   }
 
   loadRichNoteTags(): void {
-    this.richNoteTagsService.loadTags();
+    this.richNoteTagsService.loadTags(this.groupId);
   }
 
   getRichNoteTagLabel(tagId: string): { lang: string, value: string }[] {
