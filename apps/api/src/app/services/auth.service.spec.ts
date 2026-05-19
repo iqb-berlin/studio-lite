@@ -21,7 +21,10 @@ describe('AuthService', () => {
   let refreshTokenRepository: DeepMocked<Repository<RefreshToken>>;
   let userSessionRepository: DeepMocked<Repository<UserSession>>;
 
+  const realDateNow = Date.now;
+
   beforeEach(async () => {
+    Date.now = jest.fn(() => 1000000);
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -58,6 +61,10 @@ describe('AuthService', () => {
     jwtService = module.get(JwtService);
     refreshTokenRepository = module.get(getRepositoryToken(RefreshToken));
     userSessionRepository = module.get(getRepositoryToken(UserSession));
+  });
+
+  afterEach(() => {
+    Date.now = realDateNow;
   });
 
   it('should be defined', () => {
@@ -107,7 +114,7 @@ describe('AuthService', () => {
       const recentSession = {
         sessionId: validSid,
         userId: 1,
-        lastActivity: new Date(Date.now() - 5000) // 5 seconds ago
+        lastActivity: new Date(Date.now() - 2000) // 2 seconds ago
       } as UserSession;
       userSessionRepository.findOne.mockResolvedValue(recentSession);
       userSessionRepository.update.mockResolvedValue({ affected: 1, raw: [], generatedMaps: [] });
