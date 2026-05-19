@@ -9,7 +9,7 @@ import { clickIndexTabAdmin } from './navigation';
  * Adds Verona modules through the admin interface
  * @param filenames - Array of module filenames to upload
  * @example
- * addModules(['iqb-editor-aspect-2.12.1.html', 'iqb-player-aspect-2.12.1.html']);
+ * addModules(['iqb-editor-aspect-2.12.5.html', 'iqb-player-aspect-2.12.5.html']);
  */
 export function addModules(filenames: string[]): void {
   cy.findAdminSettings().click();
