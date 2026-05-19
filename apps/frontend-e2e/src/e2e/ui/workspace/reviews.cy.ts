@@ -258,11 +258,10 @@ describe('Unit Reviews', () => {
     cy.url().should('include', '/u/2');
   });
 
-  it('shows a dot for new comments in the workspace unit list: ', () => {
-    // do not show
+  it('shows no dot for comments inserted by himself in the workspace unit list: ', () => {
     cy.visitWs(ws1);
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
-      cy.get('.new-comments').should('have.css', 'opacity', '1');
+      cy.get('.new-comments').should('have.css', 'opacity', '0');
     });
 
     cy.get('mat-row').contains('M6_AK0012').click();
@@ -271,7 +270,7 @@ describe('Unit Reviews', () => {
     clickIndexTabWorkspace('properties');
   });
 
-  it.skip('clears the new comment dot after viewing comments as different users', () => {
+  it('clears the new comment dot after viewing comments as different users', () => {
     loginWithUser(newUser.username, newUser.password);
     cy.visitWs(ws1);
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
@@ -280,8 +279,9 @@ describe('Unit Reviews', () => {
     cy.get('mat-row').contains('M6_AK0012').click();
     clickIndexTabWorkspace('comments');
     cy.get('studio-lite-comments', { timeout: 15000 }).should('be.visible');
+    cy.wait(100);
     clickIndexTabWorkspace('properties');
-
+    cy.wait(100);
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments', { timeout: 15000 }).should('have.css', 'opacity', '0');
     });

@@ -30,4 +30,13 @@ export class UnitCommentDto {
 
   @ApiProperty()
     changedAt?: Date;
+
+  @ApiProperty({ required: false })
+    upVotes?: number;
+
+  @ApiProperty({ required: false })
+    downVotes?: number;
+
+  @ApiProperty({ required: false, enum: ['up', 'down', null] })
+    userVote?: 'up' | 'down' | null;
 }

@@ -2,8 +2,8 @@ import { UnitRichNoteTagDto } from './unit-rich-note-tag.dto';
 
 export interface UnitRichNoteLinkDto {
   url: string;
-  label: { lang: string; value: string }[];
-  description?: { lang: string; value: string }[];
+  label: string;
+  description?: string;
   type?: string;
 }
 

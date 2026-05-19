@@ -23,7 +23,7 @@
         </mat-form-field>
         <button class="delete-button"
                 [matTooltip]="'delete' | translate"
-                color="primary"
+                color="warn"
                 mat-icon-button
                 matTooltipPosition="above"
                 (click)="deleteState(state)">
@@ -33,12 +33,12 @@
     }
   </div>
   <div class="add-state">
-    <button mat-fab extended="true"
-            color="primary"
+    <button mat-stroked-button color="primary"
             type="button"
             (click)="addState()"
+            class="add-button"
             data-cy="wsg-admin-states-add-state-button">
-      <mat-icon>add</mat-icon>
+      <mat-icon class="button-icon">add</mat-icon>
       {{'wsg-settings.add-state' | translate}}
     </button>
   </div>

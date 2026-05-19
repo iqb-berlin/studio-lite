@@ -23,7 +23,6 @@ import { MatCheckbox } from '@angular/material/checkbox';
 
 import { MatIcon } from '@angular/material/icon';
 import { startWith, takeUntil } from 'rxjs/operators';
-import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
 import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '@studio-lite/shared-code';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
@@ -36,6 +35,7 @@ import {
 } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { HeartbeatService } from '../../../../services/heartbeat.service';
+import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
 
 @Component({
   selector: 'studio-lite-users',
@@ -45,6 +45,7 @@ import { HeartbeatService } from '../../../../services/heartbeat.service';
   imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent, DatePipe]
 })
 export class UsersComponent implements OnInit, OnDestroy {
+  readonly UsersComponent = UsersComponent;
   objectsDatasource = new MatTableDataSource<UserFullDto>();
   displayedColumns = ['active', 'name', 'displayName', 'isAdmin', 'email', 'id', 'description', 'delete'];
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
@@ -179,13 +180,11 @@ export class UsersComponent implements OnInit, OnDestroy {
     const content = (users.length === 1) ?
       this.translateService.instant('admin.delete-user', { name: users[0].name }) :
       this.translateService.instant('admin.delete-users', { count: users.length });
-    const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
+    const dialogRef = this.deleteConfirmDialog.open(DeleteDialogComponent, {
       width: '400px',
-      data: <ConfirmDialogData>{
+      data: {
         title: this.translateService.instant('admin.delete-users-title'),
-        content: content,
-        confirmButtonLabel: this.translateService.instant('delete'),
-        showCancel: true
+        content: content
       }
     });
     dialogRef.afterClosed().pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
@@ -220,16 +219,14 @@ export class UsersComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
+    const dialogRef = this.deleteConfirmDialog.open(DeleteDialogComponent, {
       width: '400px',
-      data: <ConfirmDialogData>{
+      data: {
         title: this.translateService.instant('delete'),
         content: this.translateService.instant('admin.delete-orphaned-session', {
           session: session.sessionId,
           name: selectedUser.name
-        }),
-        confirmButtonLabel: this.translateService.instant('delete'),
-        showCancel: true
+        })
       }
     });
 
@@ -245,6 +242,35 @@ export class UsersComponent implements OnInit, OnDestroy {
           });
       }
     });
+  }
+
+  deletePassiveSessions(user: UserFullDto): void {
+    const dialogRef = this.deleteConfirmDialog.open(DeleteDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translateService.instant('delete'),
+        content: this.translateService.instant('admin.delete-passive-sessions-confirm', {
+          name: user.name
+        })
+      }
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
+      if (result) {
+        this.appService.dataLoading = true;
+        this.backendService.deleteUserPassiveSessions(user.id)
+          .pipe(takeUntil(this.ngUnsubscribe)).subscribe(respOk => {
+            this.appService.dataLoading = false;
+            if (respOk) {
+              this.updateUserList(false, true);
+            }
+          });
+      }
+    });
+  }
+
+  static hasStatus(status: string, sessions: UserSessionInfoDto[] = []): boolean {
+    return sessions.some(s => s.activityStatus === status);
   }
 
   updateWorkspaceGroupList(): void {

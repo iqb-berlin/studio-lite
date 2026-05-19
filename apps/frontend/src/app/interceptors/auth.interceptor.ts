@@ -3,7 +3,7 @@ import {
   HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpResponse
 } from '@angular/common/http';
 import {
-  finalize, Observable, throwError, BehaviorSubject, filter, take, switchMap, catchError, tap
+  finalize, Observable, throwError, BehaviorSubject, filter, take, switchMap, catchError, tap, fromEvent, timeout
 } from 'rxjs';
 import { Router } from '@angular/router';
 import { AppService } from '../services/app.service';
@@ -48,7 +48,7 @@ export class AuthInterceptor implements HttpInterceptor {
               !req.url.includes('login') &&
               !req.url.includes('refresh') &&
               !req.url.includes('logout')) {
-            return this.handle401Error(req, next);
+            return this.handle401Error(req, next, idToken);
           }
           httpErrorInfo = new AppHttpError(error);
           return throwError(() => error);
@@ -81,50 +81,93 @@ export class AuthInterceptor implements HttpInterceptor {
 
   private handle401Error(
     request: HttpRequest<unknown>,
-    next: HttpHandler
+    next: HttpHandler,
+    failedToken: string | null
   ): Observable<HttpEvent<unknown>> {
-    if (!this.isRefreshing) {
-      this.isRefreshing = true;
-      this.refreshTokenSubject.next(null);
-
-      const refreshToken = localStorage.getItem('refresh_token');
-      if (refreshToken) {
-        return this.backendService.refresh(refreshToken).pipe(
-          switchMap(tokenData => {
-            this.isRefreshing = false;
-            if (tokenData) {
-              const { accessToken, refreshToken: newRefreshToken } = tokenData;
-              localStorage.setItem('id_token', accessToken);
-              localStorage.setItem('refresh_token', newRefreshToken);
-              this.refreshTokenSubject.next(accessToken);
-
-              return next.handle(this.addToken(request, accessToken));
-            }
-            this.backendService.logout();
-            this.router.navigate(['/home']);
-            return throwError(() => new Error('Refresh failed'));
-          }),
-          catchError(err => {
-            this.isRefreshing = false;
-            this.backendService.logout();
-            this.router.navigate(['/home']);
-            return throwError(() => err);
-          })
-        );
-      }
-      // Safety: if no refresh token, logout and reset state
-      this.isRefreshing = false;
-      this.backendService.logout();
-      this.router.navigate(['/home']);
-      const error = new Error('No refresh token available') as Error & { status?: number };
-      error.status = 401; // Marker for finalize to suppress background alert
-      return throwError(() => error);
+    if (this.isRefreshing) {
+      return this.refreshTokenSubject.pipe(
+        filter(token => token !== null),
+        take(1),
+        switchMap(jwt => next.handle(this.addToken(request, jwt)))
+      );
     }
 
-    return this.refreshTokenSubject.pipe(
-      filter(token => token !== null),
-      take(1),
-      switchMap(jwt => next.handle(this.addToken(request, jwt)))
-    );
+    const lockTime = parseInt(localStorage.getItem('st_refresh_lock') || '0', 10);
+    const isLocked = lockTime && (Date.now() - lockTime < 5000);
+    const currentToken = localStorage.getItem('id_token');
+
+    if (isLocked) {
+      if (currentToken && currentToken !== failedToken) {
+        // Another tab refreshed it just now. Retry immediately.
+        return next.handle(this.addToken(request, currentToken));
+      }
+
+      // Wait for another tab to finish refreshing
+      return fromEvent<StorageEvent>(window, 'storage').pipe(
+        filter(event => event.key === 'id_token'),
+        take(1),
+        timeout({
+          each: 5000,
+          with: () => throwError(() => new Error('Storage event timeout'))
+        }),
+        switchMap(event => {
+          const newToken = event.newValue;
+          if (newToken) {
+            return next.handle(this.addToken(request, newToken));
+          }
+          return throwError(() => new Error('Refresh by other tab failed'));
+        }),
+        // Timeout or error reached - fallback: try refreshing ourselves!
+        catchError(() => this.performRefresh(request, next))
+      );
+    }
+
+    return this.performRefresh(request, next);
+  }
+
+  private performRefresh(
+    request: HttpRequest<unknown>,
+    next: HttpHandler
+  ): Observable<HttpEvent<unknown>> {
+    this.isRefreshing = true;
+    this.refreshTokenSubject.next(null);
+    localStorage.setItem('st_refresh_lock', Date.now().toString());
+
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (refreshToken) {
+      return this.backendService.refresh(refreshToken).pipe(
+        switchMap(tokenData => {
+          this.isRefreshing = false;
+          localStorage.removeItem('st_refresh_lock');
+          if (tokenData) {
+            const { accessToken, refreshToken: newRefreshToken } = tokenData;
+            localStorage.setItem('id_token', accessToken);
+            localStorage.setItem('refresh_token', newRefreshToken);
+            this.refreshTokenSubject.next(accessToken);
+
+            return next.handle(this.addToken(request, accessToken));
+          }
+          this.backendService.logout();
+          this.router.navigate(['/home']);
+          return throwError(() => new Error('Refresh failed'));
+        }),
+        catchError(err => {
+          this.isRefreshing = false;
+          localStorage.removeItem('st_refresh_lock');
+          this.backendService.logout();
+          this.router.navigate(['/home']);
+          return throwError(() => err);
+        })
+      );
+    }
+
+    // Safety fallback: if no refresh token
+    this.isRefreshing = false;
+    localStorage.removeItem('st_refresh_lock');
+    this.backendService.logout();
+    this.router.navigate(['/home']);
+    const error = new Error('No refresh token available') as Error & { status?: number };
+    error.status = 401;
+    return throwError(() => error);
   }
 }

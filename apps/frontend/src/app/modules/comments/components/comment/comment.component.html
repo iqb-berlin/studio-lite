@@ -18,7 +18,7 @@
     </div>
 
     <div class="fx-row-start-stretch fx-wrap">
-      <div>
+      <div class="comment-content-container">
         @if (!(activeComment | isEditing: comment)) {
           <div
             class="comment-html"
@@ -54,38 +54,74 @@
       </div>
 
       @if (!(activeComment | isEditing: comment) && !(activeComment | isReplying: comment)) {
-        <div class="fx-flex-row-fix-200">
+        <div class="comment-actions">
+
+          <div class="vote-section">
+            <div class="integrated-vote-container"
+                 [class.vote-active-up]="comment.userVote === 'up'">
+              <button mat-icon-button
+                      class="vote-button"
+                      matTooltip="{{'comment.vote-up' | translate}}"
+                      (click)="onVote('up')">
+                <studio-lite-wrapped-icon icon="thumb_up"></studio-lite-wrapped-icon>
+              </button>
+              @if (comment.upVotes) {
+                <span class="vote-count"
+                      matTooltip="{{'comment.show-voters' | translate}}"
+                      (click)="$event.stopPropagation(); showVoters.emit(comment.id)">
+                  {{ comment.upVotes }}
+                </span>
+              }
+            </div>
+
+            <div class="integrated-vote-container"
+                 [class.vote-active-down]="comment.userVote === 'down'">
+              <button mat-icon-button
+                      class="vote-button"
+                      matTooltip="{{'comment.vote-down' | translate}}"
+                      (click)="onVote('down')">
+                <studio-lite-wrapped-icon icon="thumb_down"></studio-lite-wrapped-icon>
+              </button>
+              @if (comment.downVotes) {
+                <span class="vote-count"
+                      matTooltip="{{'comment.show-voters' | translate}}"
+                      (click)="$event.stopPropagation(); showVoters.emit(comment.id)">
+                  {{ comment.downVotes }}
+                </span>
+              }
+            </div>
+          </div>
 
           <button mat-icon-button
                   class="comment-action"
-                  matTooltip = "{{(comment.hidden ? 'comment.show' :'comment.hide' )| translate}}"
-                  (click)="toggleVisibility.emit(comment)">
+                  (click)="toggleVisibility.emit(comment)"
+                  matTooltip="{{(comment.hidden ? 'comment.show' : 'comment.hide') | translate}}">
             <studio-lite-wrapped-icon
               [icon]="comment.hidden ? 'visibility' : 'visibility_off'">
             </studio-lite-wrapped-icon>
           </button>
 
           <button mat-icon-button
-            class="comment-action"
-            matTooltip = "{{'comment.reply' | translate}}"
-            (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.replying })">
+                  class="comment-action"
+                  matTooltip="{{'comment.reply' | translate}}"
+                  (click)="setActiveComment.emit({id: comment.id, type: activeCommentType.replying})">
             <studio-lite-wrapped-icon icon="reply"></studio-lite-wrapped-icon>
           </button>
+
           @if (ownComment) {
-            <button
-              mat-icon-button
-              class="comment-action"
-              matTooltip = "{{'comment.edit' | translate}}"
-              (click)="setActiveComment.emit({ id: comment.id, type: activeCommentType.editing })">
+            <button mat-icon-button
+                    class="comment-action"
+                    matTooltip="{{'comment.edit' | translate}}"
+                    (click)="setActiveComment.emit({id: comment.id, type: activeCommentType.editing})">
               <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
             </button>
           }
+
           @if (ownComment || adminMode) {
-            <button
-              mat-icon-button
-              class="comment-action"
-              matTooltip = "{{'comment.delete' | translate}}"
-              (click)="deleteComment.emit({ commentId: comment.id, numberOfReplies: replies.length })">
+            <button mat-icon-button
+                    class="comment-action delete-action"
+                    matTooltip="{{'comment.delete' | translate}}"
+                    (click)="deleteComment.emit({commentId: comment.id, numberOfReplies: replies.length})">
               <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
             </button>
           }
@@ -110,6 +146,8 @@
             (deleteComment)="deleteComment.emit($event)"
             (addComment)="addComment.emit($event)"
             (toggleVisibility)="toggleVisibility.emit($event)"
+            (voteComment)="voteComment.emit($event)"
+            (showVoters)="showVoters.emit($event)"
             studioLiteScrollCommentIntoView
             [id]="reply.id"
             [scrollTargetId]="latestCommentId">

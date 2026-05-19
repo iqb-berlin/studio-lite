@@ -145,6 +145,15 @@ export class BackendService {
       );
   }
 
+  deleteUserPassiveSessions(userId: number): Observable<boolean> {
+    return this.http
+      .delete(`${this.serverUrl}admin/users/${userId}/passive-sessions`)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
   getWorkspaceGroupsByAdmin(userId: number): Observable<WorkspaceGroupInListDto[]> {
     return this.http
       .get<WorkspaceGroupInListDto[]>(`${this.serverUrl}admin/users/${userId}/workspace-groups`)
@@ -327,7 +336,15 @@ export class BackendService {
       );
   }
 
-  setUnitRichNoteTags(tags: UnitRichNoteTagDto[]): Observable<boolean> {
+  getUnitRichNoteTagsConfig(): Observable<UnitRichNoteTagDto[] | string[] | string> {
+    return this.http
+      .get<UnitRichNoteTagDto[] | string[] | string>(`${this.serverUrl}admin/settings/unit-rich-note-tags-config`)
+      .pipe(
+        catchError(() => of([]))
+      );
+  }
+
+  setUnitRichNoteTags(tags: UnitRichNoteTagDto[] | string[] | string): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/settings/unit-rich-note-tags`, tags)
       .pipe(

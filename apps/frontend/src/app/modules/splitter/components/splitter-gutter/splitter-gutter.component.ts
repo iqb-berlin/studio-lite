@@ -18,38 +18,36 @@ export class SplitterGutterComponent {
   @Output() startDragging = new EventEmitter<number>();
   @Output() stopDragging = new EventEmitter<number>();
 
-  onPointerDown(event: MouseEvent | TouchEvent) {
+  onPointerDown(event: PointerEvent) {
     if (!this.isFixed) {
       this.pointerPressed = true;
+      if (event.target instanceof HTMLElement) {
+        event.target.setPointerCapture(event.pointerId);
+      }
       this.startDragging.emit(this.index);
-      event.preventDefault();
     }
   }
 
-  @HostListener('window:mousemove', ['$event'])
-  onGlobalPointerMove(event: MouseEvent) {
+  @HostListener('window:pointermove', ['$event'])
+  onGlobalPointerMove(event: PointerEvent) {
     if (this.pointerPressed) {
       this.dragging.emit({ index: this.index, position: event.clientX });
     }
   }
 
-  @HostListener('window:touchmove', ['$event'])
-  onGlobalTouchMove(event: TouchEvent) {
-    if (this.pointerPressed && event.touches.length > 0) {
-      this.dragging.emit({ index: this.index, position: event.touches[0].clientX });
+  @HostListener('window:pointerup', ['$event'])
+  @HostListener('window:pointercancel', ['$event'])
+  onGlobalPointerUp(event: PointerEvent): void {
+    if (this.pointerPressed) {
+      this.pointerPressed = false;
+      if (event.target instanceof HTMLElement) {
+        try {
+          event.target.releasePointerCapture(event.pointerId);
+        } catch {
+          // Ignore if pointer capture was already released or invalid
+        }
+      }
+      this.stopDragging.emit(this.index);
     }
-  }
-
-  @HostListener('window:mouseup')
-  onGlobalPointerUp(): void {
-    this.pointerPressed = false;
-    this.stopDragging.emit(this.index);
-  }
-
-  @HostListener('window:touchend')
-  @HostListener('window:touchcancel')
-  onGlobalTouchEnd(): void {
-    this.pointerPressed = false;
-    this.stopDragging.emit(this.index);
   }
 }

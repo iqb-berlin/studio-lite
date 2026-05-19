@@ -4,16 +4,20 @@ import { Repository } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import {
   ConfigDto, AppLogoDto, UnitExportConfigDto, MissingsProfilesDto,
-  ProfilesRegistryDto, EmailTemplateDto, UnitRichNoteTagDto
+  ProfilesRegistryDto, EmailTemplateDto, UnitRichNoteTagDto, MetadataVocabularyDto
 } from '@studio-lite-lib/api-dto';
 import Setting from '../entities/setting.entity';
+import WorkspaceGroup from '../entities/workspace-group.entity';
 import { UsersService } from './users.service';
 import { SettingService } from './setting.service';
+import { MetadataVocabularyService } from './metadata-vocabulary.service';
 
 describe('SettingService', () => {
   let service: SettingService;
   let settingsRepository: DeepMocked<Repository<Setting>>;
+  let workspaceGroupRepository: DeepMocked<Repository<WorkspaceGroup>>;
   let usersService: DeepMocked<UsersService>;
+  let metadataVocabularyService: DeepMocked<MetadataVocabularyService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -24,15 +28,25 @@ describe('SettingService', () => {
           useValue: createMock<Repository<Setting>>()
         },
         {
+          provide: getRepositoryToken(WorkspaceGroup),
+          useValue: createMock<Repository<WorkspaceGroup>>()
+        },
+        {
           provide: UsersService,
           useValue: createMock<UsersService>()
+        },
+        {
+          provide: MetadataVocabularyService,
+          useValue: createMock<MetadataVocabularyService>()
         }
       ]
     }).compile();
 
     service = module.get<SettingService>(SettingService);
     settingsRepository = module.get(getRepositoryToken(Setting));
+    workspaceGroupRepository = module.get(getRepositoryToken(WorkspaceGroup));
     usersService = module.get(UsersService);
+    metadataVocabularyService = module.get(MetadataVocabularyService);
   });
 
   it('should be defined', () => {
@@ -177,11 +191,10 @@ describe('SettingService', () => {
   });
 
   describe('findUnitRichNoteTags', () => {
-    it('should return default tags if not found', async () => {
+    it('should return empty array if not found', async () => {
       settingsRepository.findOne.mockResolvedValue(null);
       const result = await service.findUnitRichNoteTags();
-      expect(result.length).toBeGreaterThan(0);
-      expect(result[0].id).toBe('transcript');
+      expect(result).toEqual([]);
     });
 
     it('should return parsed tags', async () => {
@@ -191,6 +204,48 @@ describe('SettingService', () => {
       const result = await service.findUnitRichNoteTags();
       expect(result).toEqual(tags);
     });
+
+    it('should return group-specific tags if workspaceGroupId is provided', async () => {
+      const groupTags = ['http://example.com/vocab'];
+      const group = { id: 1, settings: { richNoteTags: groupTags } } as unknown as WorkspaceGroup;
+      workspaceGroupRepository.findOneBy.mockResolvedValue(group);
+
+      const vocabulary = {
+        id: 'vocab1',
+        hasTopConcept: [{ id: 'c1', prefLabel: { de: 'Concept 1' } }]
+      };
+      metadataVocabularyService.getStoredMetadataVocabularyById.mockResolvedValue(
+        vocabulary as unknown as MetadataVocabularyDto
+      );
+
+      const result = await service.findUnitRichNoteTags(1);
+      expect(result.length).toBe(1);
+      expect(result[0].id).toBe('vocab1#c1');
+    });
+
+    it('should fall back to global settings if group has empty tags configured', async () => {
+      const group = { id: 1, settings: { richNoteTags: [] } } as unknown as WorkspaceGroup;
+      workspaceGroupRepository.findOneBy.mockResolvedValue(group);
+
+      const globalTags = [{ id: 'global1', label: [] }];
+      const setting = { key: 'unit-rich-note-tags', content: JSON.stringify(globalTags) } as Setting;
+      settingsRepository.findOne.mockResolvedValue(setting);
+
+      const result = await service.findUnitRichNoteTags(1);
+      expect(result).toEqual(globalTags);
+      expect(settingsRepository.findOne).toHaveBeenCalled();
+    });
+
+    it('should return empty array and not fall back to default if global has explicitly empty tags configured',
+      async () => {
+        workspaceGroupRepository.findOneBy.mockResolvedValue(null);
+        const setting = { key: 'unit-rich-note-tags', content: '[]' } as Setting;
+        settingsRepository.findOne.mockResolvedValue(setting);
+
+        const result = await service.findUnitRichNoteTags();
+        expect(result).toEqual([]);
+        expect(metadataVocabularyService.getStoredMetadataVocabularyById).not.toHaveBeenCalled();
+      });
   });
 
   describe('patchUnitRichNoteTags', () => {

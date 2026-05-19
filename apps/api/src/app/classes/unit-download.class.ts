@@ -361,24 +361,55 @@ export class UnitDownloadClass {
     }
   }
 
-  private static findTagLabel(
+  private static findTag(
     tags: UnitRichNoteTagDto[],
     tagId: string
-  ): { lang: string; value: string }[] | null {
+  ): UnitRichNoteTagDto | null {
     if (!tagId) return null;
+
+    const findTagRecursive = (
+      currentTags: UnitRichNoteTagDto[]
+    ): UnitRichNoteTagDto | undefined => {
+      let found: UnitRichNoteTagDto | undefined = currentTags.find(
+        tag => tag.id === tagId || tag.id.endsWith(`#${tagId}`)
+      );
+      if (!found) {
+        currentTags.forEach(tag => {
+          if (!found && tag.children?.length) {
+            found = findTagRecursive(tag.children);
+          }
+        });
+      }
+      return found;
+    };
+
+    const foundTag = findTagRecursive(tags);
+    if (foundTag) return foundTag;
+
     return tagId.split('.').reduce<{
-      tags: UnitRichNoteTagDto[],
-      label: { lang: string; value: string }[] | null
+      tags: UnitRichNoteTagDto[];
+      tag: UnitRichNoteTagDto | null;
     }>(
       (acc, segment) => {
-        const found = acc.tags.find(t => t.id === segment);
+        const found = acc.tags.find(t => t.id === segment || t.id.endsWith(`#${segment}`));
         return {
           tags: found?.children || [],
-          label: found?.label || null
+          tag: found || null
         };
       },
-      { tags, label: null }
-    ).label;
+      { tags, tag: null }
+    ).tag;
+  }
+
+  private static getLabelString(
+    labels: { lang: string; value: string }[] | null | undefined
+  ): string | null {
+    if (!labels || labels.length === 0) return null;
+    const de = labels.find(l => l.lang === 'de');
+    if (de) return de.value;
+    const en = labels.find(l => l.lang === 'en');
+    if (en) return en.value;
+    return labels[0].value;
   }
 
   private static async addRichNotes(
@@ -390,13 +421,16 @@ export class UnitDownloadClass {
   ): Promise<void> {
     const { notes, tags } = await unitRichNoteService.findNotes(unitId);
     if (notes && notes.length) {
-      const transformedNotes = notes.map(note => ({
-        tagId: note.tagId,
-        tagLabel: UnitDownloadClass.findTagLabel(tags, note.tagId),
-        content: note.content,
-        links: note.links,
-        itemReferences: note.itemReferences
-      }));
+      const transformedNotes = notes.map(note => {
+        const tag = UnitDownloadClass.findTag(tags, note.tagId);
+        return {
+          tagId: tag ? tag.id : note.tagId,
+          tagLabel: UnitDownloadClass.getLabelString(tag?.label),
+          content: note.content,
+          links: note.links,
+          itemUuids: note.itemReferences
+        };
+      });
       const fileName = `${unitMetadata.key}.vorn`;
       unitXml.root().ele({
         UnitRichNotesRef: {

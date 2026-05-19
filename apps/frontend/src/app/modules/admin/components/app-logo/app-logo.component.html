@@ -8,17 +8,12 @@
       type="file"
       [hidden]="true"
       (change)="imgFileChange($event)"/>
-    <button mat-raised-button
-      [matTooltip]="'logo.upload' | translate"
-      matTooltipPosition="above"
-      (click)="hiddenimgfileinput.click()" >
-      <studio-lite-wrapped-icon icon="cloud_upload"></studio-lite-wrapped-icon>
+    <button mat-stroked-button color="primary" type="button" (click)="hiddenimgfileinput.click()" [matTooltip]="'logo.upload' | translate" class="upload-button">
+      <mat-icon class="button-icon">cloud_upload</mat-icon>
+      {{ 'logo.upload' | translate }}
     </button>
-    <button mat-raised-button
-      [matTooltip]="'logo.reset' | translate"
-      matTooltipPosition="above"
-      (click)="removeLogoImg()">
-      <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
+    <button mat-icon-button color="warn" type="button" (click)="removeLogoImg()" [matTooltip]="'logo.reset' | translate" [disabled]="!logoImageBase64" class="delete-button">
+      <mat-icon>delete</mat-icon>
     </button>
     @if (imageError) {
       <div class="warning-warning">
@@ -38,17 +33,14 @@
       formControlName="boxBackground"
       [placeholder]="'logo.boxes-background-color-placeholder' | translate">
   </mat-form-field>
-  <div class="fx-row-end-center fx-gap-30">
+  <div class="fx-row-end-center fx-gap-30" style="margin-top: 25px;">
     @if (dataChanged) {
       <div class="fx-flex-fill info">
-        {{'admin.reload-page' | translate}}
+        {{ 'admin.reload-page' | translate }}
       </div>
     }
-    <button mat-raised-button
-            color="primary"
-            [disabled]="!dataChanged"
-            (click)="saveData()">
-      {{'save' | translate}}
+    <button mat-raised-button color="primary" [disabled]="!dataChanged" (click)="saveData()">
+      {{ 'save' | translate }}
     </button>
   </div>
 </form>

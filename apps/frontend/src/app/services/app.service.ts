@@ -1,4 +1,4 @@
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { AuthDataDto, AppLogoDto, ConfigDto } from '@studio-lite-lib/api-dto';
 import { Title } from '@angular/platform-browser';
@@ -46,11 +46,13 @@ export class AppService {
   postMessage$ = new Subject<MessageEvent>();
   dataLoading: boolean | number = false;
   serverTimeOffset = 0; // clock skew compensation in ms (serverTime - clientTime)
+  authInitializationStatus$ = new BehaviorSubject<'pending' | 'complete'>('pending');
   @Output() authDataChanged = new EventEmitter<AuthDataDto>();
 
   set authData(authData: AuthDataDto) {
     this._authData = authData;
     this.authDataChanged.emit(authData);
+    this.authInitializationStatus$.next('complete');
   }
 
   get authData(): AuthDataDto {

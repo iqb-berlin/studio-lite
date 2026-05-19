@@ -7,7 +7,7 @@ import {
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatIconButton, MatButton } from '@angular/material/button';
 
 import { ItemsMetadataValues, ProfileMetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
@@ -29,7 +29,7 @@ import { DeleteDialogComponent } from '../../../../components/delete-dialog/dele
   templateUrl: './items.component.html',
   styleUrls: ['./items.component.scss'],
   imports: [MatIconButton, MatTooltip, WrappedIconComponent, ItemComponent, MatIcon,
-    MatFabButton, MetadataReadonlyItemsComponent, TranslateModule, FormsModule]
+    MatButton, MetadataReadonlyItemsComponent, TranslateModule, FormsModule]
 })
 
 export class ItemsComponent implements OnInit, OnChanges, OnDestroy {

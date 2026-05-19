@@ -1,4 +1,5 @@
 {
+  "add": "Hinzufügen",
   "next": "Weiter",
   "back": "Zurück",
   "continue": "Fortsetzen",
@@ -42,6 +43,7 @@
     "add-files": "Zusätzliche Dateien",
     "add-player": "Player hinzufügen",
     "add-comments": "Kommentare hinzufügen",
+    "export-votes-warning": "Hinweis: Voten (Daumen hoch/runter) werden beim Export nicht übernommen.",
     "add-rich-notes": "Begleitmaterial hinzufügen",
     "no-player": "Keine Aufgabe hat einen gültigen Player gesetzt",
     "add-login": "Logins hinzufügen",
@@ -282,6 +284,8 @@
     "issue-count-info": "Das System verfügt über {{count}} {{issue}}.",
     "generate_password": "Kennwort generieren",
     "and-send-mail": "und E-Mail senden",
+    "delete-passive-sessions": "Alle passiven Sitzungen dieses Nutzers löschen",
+    "delete-passive-sessions-confirm": "Sollen alle passiven Sitzungen von Nutzer:in \"{{name}}\" gelöscht werden?",
     "model": "Model"
   },
   "metadata": {
@@ -597,6 +601,7 @@
     "move-to": "Verschieben",
     "copy-unit": "Aufgaben in anderen Arbeitsbereich kopieren",
     "copy-unit-comments": "Kommentare der Aufgaben kopieren",
+    "copy-votes-warning": "Hinweis: Voten (Daumen hoch/runter) werden beim Kopieren nicht übernommen.",
     "copy-to": "Kopieren",
     "manage-groups": "Aufgabengruppen",
     "manage-unit-groups": "Aufgabengruppen verwalten",
@@ -771,15 +776,6 @@
     "profile-not-loaded":  "Metadatenprofil \"{{profileUrl}}\" kann aktuell nicht geladen werden",
     "tag": "Kategorie",
     "tag-required": "Tag ist erforderlich",
-    "links": "Links",
-    "link-url": "Link URL",
-    "link-type": "Link Typ",
-    "labels": "Bezeichnungen",
-    "descriptions": "Beschreibungen",
-    "lang": "Sprache",
-    "value": "Wert",
-    "remove-link": "Link entfernen",
-    "new-link": "Neuer Link",
     "rich-note": "Begleitmaterial",
     "enter-note-content": "Notiz-Inhalt hier eingeben...",
     "edit-rich-note": "Begleitmaterial bearbeiten",
@@ -791,18 +787,39 @@
     "invalid-json": "Ungültiges JSON-Format",
     "delete-rich-note-confirm": "Soll dieses Begleitmaterial wirklich gelöscht werden?",
     "delete-rich-note-title": "Begleitmaterial löschen",
-    "link-url-placeholder": "https://...",
-    "link-type-placeholder": "z.B. Dokumentation",
-    "lang-placeholder": "de",
-    "label-placeholder": "Bezeichnung...",
-    "description-placeholder": "Beschreibung...",
     "required": "Pflichtfeld",
     "unassigned-rich-notes": "Uneindeutiges Begleitmaterial"
+  },
+  "rich-note": {
+    "tag": "Kategorie",
+    "add-tag-url": "Vokabular-URL hinzufügen",
+    "invalid-url": "Bitte geben Sie eine gültige URL ein (z. B. https://...)",
+    "links": "Links",
+    "link-label": "Bezeichnung",
+    "link-description": "Beschreibung",
+    "link-url": "URL",
+    "link-type": "Typ",
+    "remove-link": "Link entfernen",
+    "add-link": "Link hinzufügen",
+    "new-link": "Neuer Link",
+    "link-url-placeholder": "https://...",
+    "label-placeholder": "Bezeichnung...",
+    "description-placeholder": "Beschreibung...",
+    "link-type-values": {
+      "competence-description": "Kompetenzbeschreibung",
+      "competence-structure": "Kompetenzstruktur",
+      "material-download": "Material (Download)",
+      "material-read": "Material (Lesen)",
+      "media-sources": "Medienquellen",
+      "assessment-task-example": "Beispielaufgabe (Leistung)",
+      "training-task-example": "Beispielaufgabe (Training)"
+    }
   },
 
   "coding-report": {
     "unit": "Aufgabe",
     "variable": "Variable",
+    "variableType": "Variablentyp",
     "item": "Item",
     "validation": "Validierung",
     "codingType": "Kodiertyp",
@@ -884,7 +901,15 @@
     "visibility-updated": "Sichtbarkeit des Kommentars aktualisiert",
     "visibility-not-updated": "Sichtbarkeit des Kommentars konnte nicht aktualisiert werden",
     "hide": "Verbergen",
-    "show": "Anzeigen"
+    "show": "Anzeigen",
+    "vote-up": "Zustimmung",
+    "vote-down": "Ablehnung",
+    "show-voters": "Details zum Votum anzeigen",
+    "voter-overview": "Votum-Übersicht",
+    "up-votes": "Zustimmung",
+    "down-votes": "Ablehnung",
+    "no-votes": "Keine Voten vorhanden",
+    "voters-title": "Votum-Übersicht"
   },
   "comments": {
     "comment-delete-title": "Kommentar löschen",
@@ -893,19 +918,25 @@
     "comments-delete-question": "Soll der Kommentar einschließlich aller Antworten gelöscht werden?",
     "write-comment": "Kommentar verfassen ...",
     "send-comment": "Kommentar senden",
-    "filter-items": "Item-Filter anwenden",
+    "filter-items": "Item-Filter",
     "filter": "Kommentare filtern",
     "comment": "Kommentieren",
+    "more-actions": "Weitere Aktionen",
     "showHidden": "Sichtbarkeitseinstellungen ignorieren",
     "filter-no-items": "Keine Item Verbindung",
     "info": "Anzahl der Kommentare insgesamt: {{total}}.",
     "hidden-info": " Davon durch Sichtbarkeitseinstellungen verborgen: {{hidden}}.",
     "additional-filter-info": " Zusätzlich angewendete Item-Filter: {{filter}}.",
-    "filter-info": " Angewendete Item-Filter: {{filter}}."
+    "filter-info": " Angewendete Item-Filter: {{filter}}.",
+    "filter-votes": "Votum-Filter",
+    "filter-up-votes": "Mit Zustimmung",
+    "filter-down-votes": "Mit Ablehnung",
+    "filter-controversial": "Kontrovers"
   },
   "delete-dialog": {
     "cancel": "Abbrechen",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "close": "Schließen"
   },
   "booklet-config": {
     "show-xml-params": "XML Parameter zeigen",

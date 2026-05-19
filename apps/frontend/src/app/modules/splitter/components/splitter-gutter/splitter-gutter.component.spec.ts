@@ -7,6 +7,20 @@ describe('SplitterGutterComponent', () => {
   let fixture: ComponentFixture<SplitterGutterComponent>;
 
   beforeEach(async () => {
+    if (!('PointerEvent' in window)) {
+      class PointerEventMock extends MouseEvent {
+        pointerId: number;
+        constructor(type: string, params: PointerEventInit = {}) {
+          super(type, params);
+          this.pointerId = params.pointerId || 0;
+        }
+      }
+      Object.defineProperty(window, 'PointerEvent', {
+        value: PointerEventMock,
+        writable: true
+      });
+    }
+
     await TestBed.configureTestingModule({
       imports: [SplitterGutterComponent]
     }).compileComponents();
@@ -20,22 +34,24 @@ describe('SplitterGutterComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit startDragging and set pointerPressed on mouseDown', () => {
+  it('should emit startDragging and set pointerPressed on pointerdown', () => {
     jest.spyOn(component.startDragging, 'emit');
-    const event = new MouseEvent('mousedown');
-    jest.spyOn(event, 'preventDefault');
+    const event = new PointerEvent('pointerdown');
+    const target = document.createElement('div');
+    Object.defineProperty(event, 'target', { value: target });
+    target.setPointerCapture = jest.fn();
 
     component.onPointerDown(event);
 
     expect(component.pointerPressed).toBe(true);
+    expect(target.setPointerCapture).toHaveBeenCalledWith(event.pointerId);
     expect(component.startDragging.emit).toHaveBeenCalledWith(component.index);
-    expect(event.preventDefault).toHaveBeenCalled();
   });
 
   it('should not emit startDragging if isFixed is true', () => {
     component.isFixed = true;
     jest.spyOn(component.startDragging, 'emit');
-    const event = new MouseEvent('mousedown');
+    const event = new PointerEvent('pointerdown');
 
     component.onPointerDown(event);
 
@@ -43,10 +59,10 @@ describe('SplitterGutterComponent', () => {
     expect(component.startDragging.emit).not.toHaveBeenCalled();
   });
 
-  it('should emit dragging when pointerPressed is true on global mouse move', () => {
+  it('should emit dragging when pointerPressed is true on global pointer move', () => {
     component.pointerPressed = true;
     jest.spyOn(component.dragging, 'emit');
-    const event = new MouseEvent('mousemove', { clientX: 100 });
+    const event = new PointerEvent('pointermove', { clientX: 100 });
 
     component.onGlobalPointerMove(event);
 
@@ -56,20 +72,25 @@ describe('SplitterGutterComponent', () => {
   it('should not emit dragging when pointerPressed is false', () => {
     component.pointerPressed = false;
     jest.spyOn(component.dragging, 'emit');
-    const event = new MouseEvent('mousemove');
+    const event = new PointerEvent('pointermove');
 
     component.onGlobalPointerMove(event);
 
     expect(component.dragging.emit).not.toHaveBeenCalled();
   });
 
-  it('should emit stopDragging and reset pointerPressed on global mouse up', () => {
+  it('should emit stopDragging and reset pointerPressed on global pointer up', () => {
     component.pointerPressed = true;
     jest.spyOn(component.stopDragging, 'emit');
+    const event = new PointerEvent('pointerup');
+    const target = document.createElement('div');
+    Object.defineProperty(event, 'target', { value: target });
+    target.releasePointerCapture = jest.fn();
 
-    component.onGlobalPointerUp();
+    component.onGlobalPointerUp(event);
 
     expect(component.pointerPressed).toBe(false);
+    expect(target.releasePointerCapture).toHaveBeenCalledWith(event.pointerId);
     expect(component.stopDragging.emit).toHaveBeenCalledWith(component.index);
   });
 });

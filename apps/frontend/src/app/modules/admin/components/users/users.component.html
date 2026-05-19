@@ -39,13 +39,13 @@
           } @else {
             @for (session of element.sessions; track session.sessionId) {
               @if (session.activityStatus === 'active') {
-                <span class="active-dot" [matTooltip]="('user.active' | translate) + (session.lastActivity ? ' (' + (session.lastActivity | date: 'HH:mm:ss') + ')' : '')"></span>
+                <span class="active-dot" [matTooltip]="('user.active' | translate) + (session.lastActivity ? ' (' + (session.lastActivity | date: 'dd.MM., HH:mm') + ')' : '')"></span>
               } @else if (session.activityStatus === 'orphaned') {
                 <span class="orphaned-dot"
                       [matTooltip]="'admin.orphaned-session-delete-tooltip' | translate"
                       (click)="$event.stopPropagation(); deleteSession(session)"></span>
               } @else {
-                <span class="passive-dot" [matTooltip]="('user.passive' | translate) + (session.lastActivity ? ' (' + (session.lastActivity | date: 'HH:mm:ss') + ')' : '')"></span>
+                <span class="passive-dot" [matTooltip]="('user.passive' | translate) + (session.lastActivity ? ' (' + (session.lastActivity | date: 'dd.MM., HH:mm') + ')' : '')"></span>
               }
             }
           }
@@ -123,6 +123,15 @@
       <ng-container matColumnDef="delete">
         <mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="true" class="header-right"></mat-header-cell>
         <mat-cell *matCellDef="let row" class="cell-right">
+          @if (UsersComponent.hasStatus('passive', row.sessions)) {
+            <button mat-icon-button
+                    [matTooltip]="'admin.delete-passive-sessions' | translate"
+                    [color]="'primary'"
+                    matTooltipPosition="above"
+                    (click)="$event.stopPropagation(); deletePassiveSessions(row)">
+              <mat-icon>cleaning_services</mat-icon>
+            </button>
+          }
           <button mat-icon-button
                   [matTooltip]="'admin.delete-name' | translate: { name: row.name }"
                   [color]="'warn'"

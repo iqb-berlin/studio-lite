@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  WorkspaceGroupSettingsDto, UnitRichNoteTagDto
+  WorkspaceGroupSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
@@ -17,7 +17,7 @@ import { CoreProfile, ProfilesComponent } from '../../../../components/profiles/
 import { StatesComponent } from '../states/states.component';
 import {
   UnitRichNoteTagsConfigComponent
-} from '../unit-rich-note-tags-config/unit-rich-note-tags-config.component';
+} from '../../../admin/components/unit-rich-note-tags-config/unit-rich-note-tags-config.component';
 
 @Component({
   selector: 'studio-lite-settings',
@@ -86,7 +86,7 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
     this.settings.states = states;
   }
 
-  richNoteTagsSettingsChange(tags: UnitRichNoteTagDto[]) {
+  richNoteTagsSettingsChange(tags: string[]) {
     this.wsgAdminService.settingsChanged = true;
     this.settings.richNoteTags = tags;
   }

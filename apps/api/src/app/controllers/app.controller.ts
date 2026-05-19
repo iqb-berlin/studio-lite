@@ -44,8 +44,8 @@ export class AppController {
   })
   @ApiCreatedResponse({ description: 'Logged in successfully.' }) // TODO: Add Exception?
   @ApiUnauthorizedResponse({ description: 'The user is not registered. ' })
-  async login(@Request() req) {
-    return this.authService.login(req.user);
+  async login(@Request() req, @Body('sessionId') sessionId?: string) {
+    return this.authService.login(req.user, sessionId);
   }
 
   @Post('refresh')

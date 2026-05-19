@@ -11,7 +11,9 @@ import { RefreshToken } from '../entities/refresh-token.entity';
 import UserSession from '../entities/user-session.entity';
 import {
   REFRESH_TOKEN_EXPIRES_IN_MS,
-  INACTIVITY_THRESHOLD_MS
+  INACTIVITY_THRESHOLD_MS,
+  SESSION_REUSE_THRESHOLD_MS,
+  ACTIVE_SESSION_THRESHOLD_MS
 } from '../app.constants';
 
 @Injectable()
@@ -49,7 +51,10 @@ export class AuthService {
   }
 
   private static getSessionId(existingSessionId?: string): string {
-    return existingSessionId || crypto.randomUUID();
+    if (existingSessionId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(existingSessionId)) {
+      return existingSessionId;
+    }
+    return crypto.randomUUID();
   }
 
   private static getJwtPayload(user: { id: number, name: string, reviewId: number }, sessionId: string): {
@@ -91,19 +96,46 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     this.logger.log(AuthService.getLoginMessage(user));
 
-    const sessionId = AuthService.getSessionId(existingSessionId);
-    const accessToken = this.jwtService.sign(AuthService.getJwtPayload(user, sessionId));
+    let sessionId = AuthService.getSessionId(existingSessionId);
+    let isNewSession = !existingSessionId;
+
+    // If no existingSessionId was provided, check if the user has a very recent active session
+    // to reuse it instead of creating a new one (prevents bloat from rapid login attempts).
+    if (isNewSession) {
+      const recentSession = await this.userSessionRepository.findOne({
+        where: { userId: user.id },
+        order: { lastActivity: 'DESC' }
+      });
+
+      // If the most recent session was updated in the last few seconds, reuse its ID.
+      if (recentSession && (Date.now() - new Date(recentSession.lastActivity).getTime() < SESSION_REUSE_THRESHOLD_MS)) {
+        sessionId = recentSession.sessionId;
+        isNewSession = false;
+      }
+    }
 
     // Reviews do not keep long-lived user sessions.
     if (!user.id) {
+      const accessToken = this.jwtService.sign(AuthService.getJwtPayload(user, sessionId));
       return { accessToken, refreshToken: '' };
     }
 
-    if (!existingSessionId) {
+    if (isNewSession) {
       await this.cleanupExpiredSessions(user.id);
       await this.createUserSession(user.id, sessionId);
+    } else {
+      // If we are reusing a session, update its expiry and last activity.
+      const updateResult = await this.updateUserSession(user.id, sessionId);
+
+      // If the session was not found (e.g. already deleted or wrong format rejected by regex),
+      // we must create a new one with a fresh UUID.
+      if (updateResult.affected === 0) {
+        sessionId = crypto.randomUUID();
+        await this.createUserSession(user.id, sessionId);
+      }
     }
 
+    const accessToken = this.jwtService.sign(AuthService.getJwtPayload(user, sessionId));
     const refreshToken = await this.generateRefreshToken(user.id, sessionId);
     return { accessToken, refreshToken };
   }
@@ -136,6 +168,16 @@ export class AuthService {
     await this.userSessionRepository.save(session);
   }
 
+  private async updateUserSession(userId: number, sessionId: string): Promise<{ affected?: number }> {
+    return this.userSessionRepository.update(
+      { userId, sessionId },
+      {
+        lastActivity: new Date(),
+        expiresAt: new Date(Date.now() + INACTIVITY_THRESHOLD_MS)
+      }
+    );
+  }
+
   private async generateRefreshToken(userId: number, sessionId: string): Promise<string> {
     const token = crypto.randomBytes(64).toString('hex');
     const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN_MS);
@@ -152,6 +194,22 @@ export class AuthService {
 
   async logoutSession(userId: number, sessionId: string): Promise<void> {
     await this.userSessionRepository.delete({ userId, sessionId });
+  }
+
+  async deletePassiveSessions(userId: number): Promise<void> {
+    const now = new Date();
+    // Since INACTIVITY_THRESHOLD_MS is 7 days, let's use ACTIVE_SESSION_THRESHOLD_MS (30 min)
+    // for what we consider "passive" in the context of cleaning up bloat.
+    const threshold = new Date(now.getTime() - ACTIVE_SESSION_THRESHOLD_MS);
+
+    await this.userSessionRepository.delete({
+      userId,
+      lastActivity: LessThan(threshold)
+    });
+    // Also cleanup associated refresh tokens if possible?
+    // Refresh tokens don't have a direct link to UserSession row in DB currently,
+    // but they share the sessionId.
+    // However, deleting all sessions where activity < threshold is the main goal.
   }
 
   async logoutOrphanedSession(userId: number, sessionId: string): Promise<boolean> {

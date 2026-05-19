@@ -39,13 +39,13 @@
                 }
                 @if (note.links && note.links.length > 0) {
                   <div class="note-links">
-                    <h6>{{ 'workspace.links' | translate }}</h6>
+                    <h6>{{ 'rich-note.links' | translate }}</h6>
                     <div class="links-list">
                       @for (link of note.links; track link.url) {
                         <div class="link-item">
-                          <div class="link-label">{{ link.label | getLocalizedValue }}</div>
-                          @if (link.description && (link.description | getLocalizedValue)) {
-                            <div class="link-description">{{ link.description | getLocalizedValue }}</div>
+                          <div class="link-label">{{ link.label }}</div>
+                          @if (link.description) {
+                            <div class="link-description">{{ link.description }}</div>
                           }
                           <div class="link-url-container">
                             <a [href]="link.url" target="_blank" class="link-url">{{ link.url }}</a>

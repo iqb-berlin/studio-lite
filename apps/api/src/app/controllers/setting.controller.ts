@@ -1,8 +1,8 @@
 import {
-  Body, Controller, Get, Inject, Patch, UseGuards
+  Body, Controller, Get, Inject, Patch, Query, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiHeader, ApiOkResponse, ApiTags, ApiUnauthorizedResponse
+  ApiBearerAuth, ApiHeader, ApiOkResponse, ApiQuery, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
   MissingsProfilesDto, ConfigDto, AppLogoDto, UnitExportConfigDto, ProfilesRegistryDto,
@@ -140,10 +140,21 @@ export class SettingController {
 
   @Get('unit-rich-note-tags')
   @UseGuards(JwtAuthGuard)
+  @ApiQuery({ name: 'workspaceGroupId', type: Number, required: false })
   @ApiOkResponse({ description: 'Unit rich note tags retrieved successfully.' })
   @ApiTags('admin settings')
-  async findUnitRichNoteTags(): Promise<UnitRichNoteTagDto[]> {
-    return this.settingService.findUnitRichNoteTags();
+  async findUnitRichNoteTags(@Query('workspaceGroupId') workspaceGroupId?: number): Promise<UnitRichNoteTagDto[]> {
+    return this.settingService.findUnitRichNoteTags(workspaceGroupId ? Number(workspaceGroupId) : undefined);
+  }
+
+  @Get('unit-rich-note-tags-config')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  @ApiOkResponse({ description: 'Unit rich note tags config retrieved successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiBearerAuth()
+  @ApiTags('admin settings')
+  async findUnitRichNoteTagsConfig(): Promise<UnitRichNoteTagDto[] | string[]> {
+    return this.settingService.findUnitRichNoteTagsConfig();
   }
 
   @Patch('unit-rich-note-tags')
@@ -152,7 +163,7 @@ export class SettingController {
   @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
-  async patchUnitRichNoteTags(@Body() newTags: UnitRichNoteTagDto[]) {
+  async patchUnitRichNoteTags(@Body() newTags: UnitRichNoteTagDto[] | string) {
     return this.settingService.patchUnitRichNoteTags(newTags);
   }
 }

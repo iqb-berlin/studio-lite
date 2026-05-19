@@ -13,7 +13,7 @@ import {
   CreateUnitCommentDto,
   UnitCommentDto,
   UpdateUnitCommentDto, UpdateUnitCommentUnitItemsDto, UpdateUnitCommentVisibilityDto,
-  UpdateUnitUserDto
+  UpdateUnitUserDto, UnitCommentVoteDto, UnitCommentVoterDto
 } from '@studio-lite-lib/api-dto';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -41,8 +41,8 @@ export class WorkspaceUnitCommentController {
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit comment')
-  async findOnesComments(@Param('unit_id', ParseIntPipe) unitId: number): Promise<UnitCommentDto[]> {
-    return this.unitCommentService.findOnesComments(unitId);
+  async findOnesComments(@Req() request, @Param('unit_id', ParseIntPipe) unitId: number): Promise<UnitCommentDto[]> {
+    return this.unitCommentService.findOnesComments(unitId, request.user.id);
   }
 
   @Get('last-seen')
@@ -140,5 +140,33 @@ export class WorkspaceUnitCommentController {
   async patchCommentVisibility(@Param('comment_id', ParseIntPipe) id: number,
     @Body() comment: UpdateUnitCommentVisibilityDto) {
     return this.unitCommentService.patchCommentVisibility(id, comment);
+  }
+
+  @Post(':comment_id/vote')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'unit_id', type: Number })
+  @ApiParam({ name: 'comment_id', type: Number })
+  @ApiOkResponse({ description: 'Comment vote toggled.' })
+  @ApiTags('workspace unit comment')
+  async toggleVote(
+    @Req() request,
+      @Param('comment_id', ParseIntPipe) commentId: number,
+      @Body() body: UnitCommentVoteDto
+  ): Promise<void> {
+    return this.unitCommentService.toggleVote(commentId, request.user.id, body.vote);
+  }
+
+  @Get(':comment_id/votes')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiParam({ name: 'unit_id', type: Number })
+  @ApiParam({ name: 'comment_id', type: Number })
+  @ApiOkResponse({ description: 'Get comment voters.', type: [UnitCommentVoterDto] })
+  @ApiTags('workspace unit comment')
+  async getCommentVoters(@Param('comment_id', ParseIntPipe) commentId: number): Promise<UnitCommentVoterDto[]> {
+    return this.unitCommentService.getCommentVoters(commentId);
   }
 }

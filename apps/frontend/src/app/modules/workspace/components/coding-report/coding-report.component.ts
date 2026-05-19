@@ -41,6 +41,7 @@ export class CodingReportComponent implements OnInit {
   displayedColumns: string[] = [
     'unit',
     'variable',
+    'variableType',
     'item',
     'validation',
     'codingType',
@@ -166,6 +167,7 @@ export class CodingReportComponent implements OnInit {
     const headers: Record<keyof CodingReportDto, string> = {
       unit: 'Aufgabe',
       variable: 'Variable',
+      variableType: 'Variablentyp',
       item: 'Item',
       validation: 'Validierung',
       codingType: 'Kodiertyp',

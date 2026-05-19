@@ -34,6 +34,7 @@ import WorkspaceGroupAdmin from './entities/workspace-group-admin.entity';
 import VeronaModule from './entities/verona-module.entity';
 import UnitDefinition from './entities/unit-definition.entity';
 import UnitComment from './entities/unit-comment.entity';
+import UnitCommentVote from './entities/unit-comment-vote.entity';
 import UnitDropBoxHistory from './entities/unit-drop-box-history.entity';
 import MetadataProfile from './entities/metadata-profile.entity';
 import MetadataVocabulary from './entities/metadata-vocabulary.entity';
@@ -121,6 +122,7 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
     VeronaModule,
     UnitDefinition,
     UnitComment,
+    UnitCommentVote,
     UnitCommentUnitItem,
     UnitRichNote,
     UnitRichNoteUnitItem,
@@ -160,6 +162,7 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
           Setting,
           Unit,
           UnitComment,
+          UnitCommentVote,
           UnitCommentUnitItem,
           UnitRichNote,
           UnitRichNoteUnitItem,
@@ -195,6 +198,7 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
       Setting,
       Unit,
       UnitComment,
+      UnitCommentVote,
       UnitCommentUnitItem,
       UnitRichNote,
       UnitRichNoteUnitItem,

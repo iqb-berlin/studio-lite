@@ -150,6 +150,7 @@ describe('UnitService', () => {
       unitUserService.findLastSeenCommentTimestamp.mockResolvedValue(new Date(0));
 
       const result = await service.findAllForWorkspace(1, 1, true);
+      expect(unitCommentService.findOnesLastChangedComment).toHaveBeenCalledWith(1, 1);
       expect(result[0].lastSeenCommentChangedAt).toEqual(new Date(0));
     });
   });

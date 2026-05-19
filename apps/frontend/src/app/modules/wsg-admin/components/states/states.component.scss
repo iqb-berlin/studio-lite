@@ -1,5 +1,5 @@
 .state-container {
-  padding: 15px;
+  padding: 15px 0;
 }
 
 .color-form-field {
@@ -24,13 +24,37 @@
 }
 
 .add-state {
-  position: sticky;
-  bottom: 0;
+  padding: 10px 0;
+
+  .add-button {
+    border-radius: 20px;
+    border-color: #7fafb1;
+    color: #006064;
+    height: 40px;
+    padding: 0 16px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+
+    .button-icon {
+      margin-right: 8px;
+    }
+
+    &:hover {
+      background-color: rgba(127, 175, 177, 0.1);
+    }
+  }
 }
 
 .delete-button{
   margin-left:20px;
   margin-top :5px;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+
+  &:hover {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 }
 
 .spinner{

@@ -336,6 +336,24 @@ describe('WorkspaceService', () => {
     });
   });
 
+  describe('determineVariableType', () => {
+    it('maps base variables to Basisvariable', () => {
+      const variableType = WorkspaceService.determineVariableType({
+        sourceType: 'BASE'
+      } as unknown as VariableCodingData);
+
+      expect(variableType).toBe('Basisvariable');
+    });
+
+    it('maps derived variables to abgeleitete Variable', () => {
+      const variableType = WorkspaceService.determineVariableType({
+        sourceType: 'SUM_SCORE'
+      } as unknown as VariableCodingData);
+
+      expect(variableType).toBe('abgeleitete Variable');
+    });
+  });
+
   describe('determineTrainingEffort', () => {
     it('returns erhöht when CODER_TRAINING_REQUIRED is set', () => {
       const trainingEffort = WorkspaceService.determineTrainingEffort({

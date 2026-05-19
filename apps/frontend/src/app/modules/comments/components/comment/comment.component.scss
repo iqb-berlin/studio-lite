@@ -25,8 +25,12 @@
 
 .comment-action{
   color: #777;
+  transition: color 0.2s ease-in-out;
   &:hover{
-    color: #666666;
+    color: #444;
+  }
+  &.delete-action:hover {
+    color: #c62828;
   }
 }
 
@@ -37,9 +41,87 @@
   min-width: 150px;
 }
 
-.fx-flex-row-fix-200 {
-  flex: 1 1 200px;
+.comment-content-container {
+  flex: 1 1 auto;
+  min-width: 300px; /* Garantiert Platz für den Text, bevor Buttons umbrechen */
+}
+
+.comment-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   box-sizing: border-box;
-  max-width: 200px;
-  min-width: 200px;
+  flex: 0 0 auto;
+  margin-left: auto;
+  flex-wrap: nowrap;
+
+  .vote-section, .comment-action {
+    opacity: 0.4;
+    transition: opacity 0.2s ease-in-out;
+  }
+}
+
+.comment:hover .comment-actions {
+  .vote-section, .comment-action {
+    opacity: 1;
+  }
+}
+
+.vote-section {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 8px;
+}
+
+.integrated-vote-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  color: #777;
+  transition: color 0.2s ease-in-out;
+
+  &.vote-active-up {
+    color: var(--primary);
+    .vote-button { color: var(--primary); }
+    .vote-count { background-color: var(--primary); color: white; }
+  }
+
+  &.vote-active-down {
+    color: #c62828;
+    .vote-button { color: #c62828; }
+    .vote-count { background-color: #c62828; color: white; }
+  }
+}
+
+.vote-button {
+  color: inherit;
+  &:hover {
+    color: #444;
+  }
+}
+
+.vote-count {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  background-color: #e0e0e0;
+  color: #616161;
+  font-weight: bold;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  z-index: 1;
+  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.1);
+    filter: brightness(0.95);
+  }
 }

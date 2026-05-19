@@ -1,17 +1,50 @@
-.fx-column-start-stretch {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  align-content: stretch;
+:host {
+  display: block;
+}
+
+.info {
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 5px;
+  color: #006064;
+  background: #00606410;
+  font-size: 0.9rem;
+}
+
+.fx-row-start-center {
+  align-items: center;
+
+  .delete-button {
+    margin-top: -20px;
+    opacity: 0.6;
+    transition: opacity 0.2s, transform 0.2s;
+
+    &:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+  }
+}
+
+.add-tag-button {
+  margin-top: 8px;
+  padding: 0 16px;
+  height: 40px;
+  border-radius: 20px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border-color: #7fafb1;
+  color: #006064;
+
+  .button-icon {
+    margin-right: 8px;
+  }
+
+  &:hover {
+    background-color: rgba(127, 175, 177, 0.1);
+  }
 }
 
 .fx-row-end-center {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-}
-
-.fx-gap-10 {
-  gap: 10px;
+  padding-top: 10px;
 }

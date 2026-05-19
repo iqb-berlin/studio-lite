@@ -19,6 +19,7 @@ import { TextFieldModule } from '@angular/cdk/text-field';
 import { Subject, takeUntil } from 'rxjs';
 import { RichNoteEditorComponent } from '../rich-note-editor/rich-note-editor.component';
 import { CastPipe } from '../../../../pipes/cast.pipe';
+import { GetRichNoteLinkTypeLabelPipe } from '../../../../pipes/get-rich-note-link-type-label.pipe';
 
 export interface UnitRichNoteDialogData {
   note?: UnitRichNoteDto;
@@ -45,6 +46,7 @@ export interface UnitRichNoteDialogData {
     TranslateModule,
     RichNoteEditorComponent,
     CastPipe,
+    GetRichNoteLinkTypeLabelPipe,
     TextFieldModule
   ]
 })
@@ -63,6 +65,15 @@ export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
   protected currentContent = '';
   protected isEditorTouched = false;
   private currentItems: string[] = [];
+  linkTypes = [
+    'COMPETENCE_DESCRIPTION',
+    'COMPETENCE_STRUCTURE',
+    'MATERIAL_DOWNLOAD',
+    'MATERIAL_READ',
+    'MEDIA_SOURCES',
+    'ASSESSMENT_TASK_EXAMPLE',
+    'TRAINING_TASK_EXAMPLE'
+  ];
 
   private ngUnsubscribe = new Subject<void>();
 
@@ -104,7 +115,12 @@ export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
   private resolveInitialTagId(): void {
     const currentTagId = this.noteForm.get('tagId')?.value || '';
     if (currentTagId && !this.flattenedTags.find(t => t.id === currentTagId)) {
-      const foundTag = this.flattenedTags.find(t => t.id.split('.').pop() === currentTagId);
+      const foundTag = this.flattenedTags.find(t => {
+        if (t.id.startsWith('http')) {
+          return t.id.split('/').pop() === currentTagId || t.id.split('#').pop() === currentTagId;
+        }
+        return t.id.split('.').pop() === currentTagId;
+      });
       if (foundTag) {
         this.noteForm.get('tagId')?.setValue(foundTag.id, { emitEvent: false });
       }
@@ -123,28 +139,18 @@ export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
     if (!links || links.length === 0) return [];
     return links.map(link => this.fb.group({
       url: [link.url || '', Validators.required],
-      type: [link.type || ''],
-      label: this.fb.array(this.initLangValues(link.label)),
-      description: this.fb.array(this.initLangValues(link.description))
-    }));
-  }
-
-  private initLangValues(values?: { lang: string; value: string }[]): FormGroup[] {
-    if (!values || values.length === 0) {
-      return [this.fb.group({ lang: ['de'], value: [''] })];
-    }
-    return values.map(v => this.fb.group({
-      lang: [v.lang || 'de', Validators.required],
-      value: [v.value || '']
+      type: [link.type || 'COMPETENCE_DESCRIPTION'],
+      label: [link.label || '', Validators.required],
+      description: [link.description || '']
     }));
   }
 
   addLink(): void {
     this.linksArray.push(this.fb.group({
       url: ['', Validators.required],
-      type: [''],
-      label: this.fb.array([this.fb.group({ lang: ['de'], value: [''] })]),
-      description: this.fb.array([this.fb.group({ lang: ['de'], value: [''] })])
+      type: ['COMPETENCE_DESCRIPTION'],
+      label: ['', Validators.required],
+      description: ['']
     }));
   }
 
@@ -152,33 +158,9 @@ export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
     this.linksArray.removeAt(index);
   }
 
-  getLabels(linkIndex: number): FormArray {
-    return this.linksArray.at(linkIndex).get('label') as FormArray;
-  }
-
-  addLabel(linkIndex: number): void {
-    this.getLabels(linkIndex).push(this.fb.group({ lang: [''], value: [''] }));
-  }
-
-  removeLabel(linkIndex: number, labelIndex: number): void {
-    this.getLabels(linkIndex).removeAt(labelIndex);
-  }
-
-  getDescriptions(linkIndex: number): FormArray {
-    return this.linksArray.at(linkIndex).get('description') as FormArray;
-  }
-
-  addDescription(linkIndex: number): void {
-    this.getDescriptions(linkIndex).push(this.fb.group({ lang: [''], value: [''] }));
-  }
-
-  removeDescription(linkIndex: number, descriptionIndex: number): void {
-    this.getDescriptions(linkIndex).removeAt(descriptionIndex);
-  }
-
-  private flattenTags(tags: UnitRichNoteTagDto[], parentPath = '', depth = 0): void {
+  private flattenTags(tags: UnitRichNoteTagDto[], depth = 0): void {
     tags.forEach(tag => {
-      const fullPath = parentPath ? `${parentPath}.${tag.id}` : tag.id;
+      const fullPath = tag.id;
       this.flattenedTags.push({
         id: fullPath,
         label: this.getLocalizedLabel(tag.label),
@@ -186,7 +168,7 @@ export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
         padding: depth * 20
       });
       if (tag.children && tag.children.length) {
-        this.flattenTags(tag.children, fullPath, depth + 1);
+        this.flattenTags(tag.children, depth + 1);
       }
     });
   }
@@ -223,7 +205,11 @@ export class UnitRichNoteDialogComponent implements OnInit, OnDestroy {
     this.isEditorTouched = true;
     if (this.noteForm.valid) {
       const editorData = this.editorComponent.getEditorData();
-      if (editorData.text && editorData.text !== '<p></p>') {
+      const isTextEmpty = !editorData.text || editorData.text === '<p></p>';
+      const isItemsEmpty = !editorData.items || editorData.items.length === 0;
+      const isLinksEmpty = !this.linksArray || this.linksArray.length === 0;
+
+      if (!isTextEmpty || !isItemsEmpty || !isLinksEmpty) {
         this.dialogRef.close({
           ...this.noteForm.value,
           content: editorData.text,

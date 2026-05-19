@@ -71,10 +71,10 @@ describe('ReviewUnitCommentController', () => {
       jest.spyOn(unitCommentService, 'findOnesComments')
         .mockResolvedValue(mockComments);
 
-      const result = await controller.findOnesComments(unitId);
+      const result = await controller.findOnesComments({ user: { id: 1 } }, unitId);
 
       expect(result).toEqual(mockComments);
-      expect(unitCommentService.findOnesComments).toHaveBeenCalledWith(unitId);
+      expect(unitCommentService.findOnesComments).toHaveBeenCalledWith(unitId, 1);
       expect(unitCommentService.findOnesComments).toHaveBeenCalledTimes(1);
     });
 
@@ -84,10 +84,10 @@ describe('ReviewUnitCommentController', () => {
       jest.spyOn(unitCommentService, 'findOnesComments')
         .mockResolvedValue([]);
 
-      const result = await controller.findOnesComments(unitId);
+      const result = await controller.findOnesComments({ user: { id: 1 } }, unitId);
 
       expect(result).toEqual([]);
-      expect(unitCommentService.findOnesComments).toHaveBeenCalledWith(unitId);
+      expect(unitCommentService.findOnesComments).toHaveBeenCalledWith(unitId, 1);
     });
   });
 

@@ -6,14 +6,10 @@ import {
   CreateUnitRichNoteDto,
   UpdateUnitRichNoteDto,
   UnitRichNotesDto,
-  UnitRichNoteLinkDto,
-  UnitRichNoteTagDto,
-  WorkspaceGroupSettingsDto
+  UnitRichNoteLinkDto
 } from '@studio-lite-lib/api-dto';
 import UnitRichNote from '../entities/unit-rich-note.entity';
-import Unit from '../entities/unit.entity';
 import Workspace from '../entities/workspace.entity';
-import WorkspaceGroup from '../entities/workspace-group.entity';
 import { ItemRichNoteService } from './item-rich-note.service';
 import { UnitService } from './unit.service';
 import { SettingService } from './setting.service';
@@ -26,12 +22,8 @@ export class UnitRichNoteService {
   constructor(
     @InjectRepository(UnitRichNote)
     private unitRichNotesRepository: Repository<UnitRichNote>,
-    @InjectRepository(Unit)
-    private unitRepository: Repository<Unit>,
     @InjectRepository(Workspace)
     private workspaceRepository: Repository<Workspace>,
-    @InjectRepository(WorkspaceGroup)
-    private workspaceGroupRepository: Repository<WorkspaceGroup>,
     private itemRichNoteService: ItemRichNoteService,
     private unitService: UnitService,
     private settingService: SettingService
@@ -39,34 +31,15 @@ export class UnitRichNoteService {
 
   async findNotes(unitId: number): Promise<UnitRichNotesDto> {
     this.logger.log(`Returning rich notes for unit with id: ${unitId}`);
-    let tags: UnitRichNoteTagDto[] = [];
-
-    const unit = await this.unitRepository.findOne({
-      where: { id: unitId },
-      select: ['workspaceId']
-    });
-
+    const unit = await this.unitService.findOne(unitId);
+    let groupId: number | undefined;
     if (unit) {
-      const workspace = await this.workspaceRepository.findOne({
-        where: { id: unit.workspaceId },
-        select: ['groupId']
-      });
-
+      const workspace = await this.workspaceRepository.findOneBy({ id: unit.workspaceId });
       if (workspace) {
-        const workspaceGroup = await this.workspaceGroupRepository.findOne({
-          where: { id: workspace.groupId },
-          select: ['settings']
-        });
-
-        if (workspaceGroup?.settings && (workspaceGroup.settings as WorkspaceGroupSettingsDto).richNoteTags) {
-          tags = (workspaceGroup.settings as WorkspaceGroupSettingsDto).richNoteTags;
-        }
+        groupId = workspace.groupId;
       }
     }
-
-    if (tags.length === 0) {
-      tags = await this.settingService.findUnitRichNoteTags();
-    }
+    const tags = await this.settingService.findUnitRichNoteTags(groupId);
 
     const notes = await this.unitRichNotesRepository
       .find({
@@ -101,7 +74,7 @@ export class UnitRichNoteService {
       const { tagLabel, ...noteData } = note;
 
       const newItemReferences: string[] = [];
-      const itemReferences = noteData.itemReferences as string[] | undefined;
+      const itemReferences = noteData.itemUuids as string[] | undefined;
       if (itemReferences && itemReferences.length) {
         itemReferences.forEach((oldItemUuid: string) => {
           const match = itemUuidLookups.find(lookup => lookup.oldUuid === oldItemUuid);
@@ -152,7 +125,16 @@ export class UnitRichNoteService {
     const note = await this.unitRichNotesRepository.findOne({ where: { id: id } });
     if (note) {
       const itemReferences = (await this.itemRichNoteService.findNoteItems(id)).map(i => i.unitItemUuid);
-      return { ...note, itemReferences };
+      return {
+        id: note.id,
+        unitId: note.unitId,
+        tagId: note.tagId,
+        content: note.content,
+        links: note.links,
+        createdAt: note.createdAt,
+        changedAt: note.changedAt,
+        itemReferences
+      };
     }
     throw new NotFoundException(`Rich note with id ${id} not found`);
   }

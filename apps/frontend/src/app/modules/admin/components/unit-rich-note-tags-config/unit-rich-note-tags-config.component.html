@@ -1,12 +1,45 @@
-<form [formGroup]="configForm" (ngSubmit)="saveData()" class="fx-column-start-stretch fx-gap-10">
-  <studio-lite-rich-note-tags-editor
-    [control]="tagsJsonControl"
-    [rows]="20">
-  </studio-lite-rich-note-tags-editor>
+<form [formGroup]="configForm" class="fx-column-start-stretch fx-gap-10">
 
-  <div class="fx-row-end-center">
-    <button mat-raised-button color="primary" type="submit" [disabled]="!isFormValid || !dataChanged">
-      {{ 'save' | translate }}
+  <div formArrayName="urls" class="fx-column-start-stretch fx-gap-10">
+    @for (urlCtrl of urls.controls; track $index; let i = $index) {
+      <div class="fx-row-start-center fx-gap-10">
+        <mat-form-field class="fx-flex-fill">
+          <mat-label>{{ 'wsg-settings.unit-rich-note-tags-url' | translate }} {{ i + 1 }}</mat-label>
+          <input matInput [formControlName]="i" placeholder="https://w3id.org/...">
+          @if (urlCtrl.hasError('pattern')) {
+            <mat-error>{{ 'rich-note.invalid-url' | translate }}</mat-error>
+          }
+        </mat-form-field>
+        <button mat-icon-button color="warn" type="button" (click)="removeUrl(i)" [matTooltip]="'delete' | translate" class="delete-button">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (!isGlobal && urls.length === 0) {
+    <div class="info" style="margin-top: 10px;">
+      <span>{{ 'wsg-settings.unit-rich-note-tags-info' | translate }}</span>
+    </div>
+  }
+
+  <div class="fx-row-start-center">
+    <button mat-stroked-button color="primary" type="button" (click)="addUrl()" class="add-tag-button">
+      <mat-icon class="button-icon">add</mat-icon>
+      {{ 'rich-note.add-tag-url' | translate }}
     </button>
   </div>
+
+  @if (showSaveButton) {
+    <div class="fx-row-end-center fx-gap-30" style="margin-top: 25px;">
+      @if (isGlobal && dataChanged) {
+        <div class="fx-flex-fill info">
+          {{ 'admin.reload-page' | translate }}
+        </div>
+      }
+      <button mat-raised-button color="primary" type="button" (click)="saveData()" [disabled]="configForm.invalid || !dataChanged">
+        {{ 'save' | translate }}
+      </button>
+    </div>
+  }
 </form>

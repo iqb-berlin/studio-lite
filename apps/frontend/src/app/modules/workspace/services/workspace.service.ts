@@ -18,6 +18,7 @@ import { AppService } from '../../../services/app.service';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
 import { State } from '../../admin/models/state.type';
+import { RichNoteTagsService } from './rich-note-tags.service';
 
 @Injectable({
   providedIn: 'root'
@@ -70,18 +71,13 @@ export class WorkspaceService {
   codingScheme!: CodingSchemeData;
   dropBoxId: number | null = null;
   hasDroppedUnits: boolean = false;
-  private _richNoteTags = new BehaviorSubject<UnitRichNoteTagDto[]>([]);
 
   get richNoteTags(): UnitRichNoteTagDto[] {
-    return this._richNoteTags.getValue();
-  }
-
-  set richNoteTags(value: UnitRichNoteTagDto[]) {
-    this._richNoteTags.next(value);
+    return this.richNoteTagsService.tags;
   }
 
   get richNoteTags$(): Observable<UnitRichNoteTagDto[]> {
-    return this._richNoteTags.asObservable();
+    return this.richNoteTagsService.tags$;
   }
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
@@ -102,7 +98,8 @@ export class WorkspaceService {
 
   constructor(
     private backendService: WorkspaceBackendService,
-    private appService: AppService
+    private appService: AppService,
+    private richNoteTagsService: RichNoteTagsService
   ) {
     this.workspaceSettings = {
       defaultEditor: '',
@@ -225,10 +222,7 @@ export class WorkspaceService {
           if (res.settings) {
             this.workspaceSettings.states = res.settings.states;
             this.states = res.settings.states || [];
-            if (res.settings.richNoteTags && res.settings.richNoteTags.length > 0) {
-              this.workspaceSettings.richNoteTags = res.settings.richNoteTags;
-              this.richNoteTags = res.settings.richNoteTags;
-            }
+            this.workspaceSettings.richNoteTags = res.settings.richNoteTags;
           }
         });
     }
@@ -354,28 +348,10 @@ export class WorkspaceService {
   }
 
   loadRichNoteTags(): void {
-    if (this.workspaceSettings.richNoteTags && this.workspaceSettings.richNoteTags.length > 0) {
-      this.richNoteTags = this.workspaceSettings.richNoteTags;
-    } else if (this.richNoteTags.length === 0) {
-      this.backendService.getUnitRichNoteTags()
-        .subscribe(tags => {
-          // Double check if tags were loaded in the meantime (e.g. by setWorkspaceGroupStates)
-          if (this.richNoteTags.length === 0) {
-            this.richNoteTags = tags;
-          }
-        });
-    }
+    this.richNoteTagsService.loadTags(this.groupId);
   }
 
   getRichNoteTagLabel(tagId: string): { lang: string, value: string }[] {
-    const path = tagId.split('.');
-    let currentTags = this.richNoteTags;
-    let foundTag: UnitRichNoteTagDto | undefined;
-    for (let i = 0; i < path.length; i++) {
-      foundTag = currentTags.find(t => t.id === path[i]);
-      if (!foundTag) break;
-      currentTags = foundTag.children || [];
-    }
-    return foundTag?.label || [];
+    return this.richNoteTagsService.getTagLabel(tagId);
   }
 }

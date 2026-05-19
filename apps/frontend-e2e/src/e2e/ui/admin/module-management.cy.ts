@@ -38,7 +38,7 @@ describe('Verona Module Management', () => {
 
     // Verify Schemer module
     cy.contains('mat-row', 'Schemer').within(() => {
-      cy.contains('2.6.0').should('exist');
+      cy.contains('2.7.0').should('exist');
     });
 
     // Verify Aspect modules (editor and player)

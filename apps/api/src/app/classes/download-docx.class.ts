@@ -36,9 +36,9 @@ import * as katex from 'katex';
 import { mml2omml } from 'mathml2omml';
 import { WebColors } from '../utils/web-colors';
 
-type AnyNodeWithName = AnyNode & { name: string };
-
 export class DownloadDocx {
+  private static ommlCache: Record<string, string> = {};
+
   static async getDocXCodebook(
     codingBookUnits: CodebookUnitDto[],
     contentSetting: CodeBookContentSetting
@@ -391,13 +391,8 @@ export class DownloadDocx {
   private static getChildren(
     cheerioAPI: cheerio.CheerioAPI,
     elem: BasicAcceptedElems<AnyNode>
-  ) {
-    const children: AnyNodeWithName[] = [];
-    cheerioAPI(elem).each((i, child: AnyNodeWithName) => {
-      children.push(child);
-      DownloadDocx.getChildren(cheerioAPI, cheerioAPI(child).contents());
-    });
-    return children;
+  ): AnyNode[] {
+    return cheerioAPI(elem).toArray();
   }
 
   private static processInlineElements(
@@ -711,12 +706,15 @@ export class DownloadDocx {
     const trimmed = latex.trim();
     if (!trimmed) return null;
     try {
-      const mathml = katex.renderToString(trimmed, {
-        output: 'mathml',
-        throwOnError: false,
-        strict: 'ignore'
-      });
-      const omml = mml2omml(mathml);
+      if (!DownloadDocx.ommlCache[trimmed]) {
+        const mathml = katex.renderToString(trimmed, {
+          output: 'mathml',
+          throwOnError: false,
+          strict: 'ignore'
+        });
+        DownloadDocx.ommlCache[trimmed] = mml2omml(mathml);
+      }
+      const omml = DownloadDocx.ommlCache[trimmed];
       return DownloadDocx.unwrapImportedXmlRoot(
         ImportedXmlComponent.fromXmlString(
           DownloadDocx.sanitizeOmmlXml(omml)

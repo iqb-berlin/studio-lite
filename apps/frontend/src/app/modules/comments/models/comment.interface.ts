@@ -9,4 +9,7 @@ export interface Comment {
   parentId: number | null;
   createdAt: Date;
   changedAt: Date;
+  upVotes?: number;
+  downVotes?: number;
+  userVote?: 'up' | 'down' | null;
 }
