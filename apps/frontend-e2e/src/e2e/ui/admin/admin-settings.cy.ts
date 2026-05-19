@@ -349,10 +349,19 @@ describe('Admin Settings Tab Configuration', () => {
       saveAndExpect('PATCH', '/api/admin/settings/unit-rich-note-tags', 'saveRichNoteTags', 6);
     });
 
-    it('deletes the second rich note tags JSON', () => {
+    it('deletes the second rich note tags JSON and set again the default', () => {
       goToSettings();
       cy.get('studio-lite-unit-rich-note-tags-config .delete-button').last().click();
       saveAndExpect('PATCH', '/api/admin/settings/unit-rich-note-tags', 'deleteRichNoteTags', 6);
+    });
+
+    it('resets the default JSON', () => {
+      goToSettings();
+      cy.get('studio-lite-unit-rich-note-tags-config input')
+        .last()
+        .clear({ force: true })
+        .type('https://w3id.org/iqb/v05/r1/index.json', { force: true });
+      saveAndExpect('PATCH', '/api/admin/settings/unit-rich-note-tags', 'resetRichNoteTags', 6);
     });
   });
 });
