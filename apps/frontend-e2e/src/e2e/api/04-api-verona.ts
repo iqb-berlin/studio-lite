@@ -40,7 +40,7 @@ describe('Admin verona API tests', () => {
   describe('24. GET /api/verona-modules/{key}', () => {
     it('200 positive test: should retrieve metadata for a specific Verona module by its key', () => {
       cy.getModuleAPI(
-        'iqb-schemer%402.6',
+        'iqb-schemer%402.7',
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);

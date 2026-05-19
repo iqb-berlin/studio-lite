@@ -18,7 +18,7 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
   const newSettings: WsSettings = {
     defaultEditor: 'iqb-editor-aspect@2.12',
     defaultPlayer: 'iqb-player-aspect@2.12',
-    defaultSchemer: 'iqb-schemer@2.6',
+    defaultSchemer: 'iqb-schemer@2.7',
     unitGroups: [],
     stableModulesOnly: false,
     unitMDProfile: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json',
