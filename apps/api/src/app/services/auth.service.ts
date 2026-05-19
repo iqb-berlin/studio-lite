@@ -12,6 +12,7 @@ import UserSession from '../entities/user-session.entity';
 import {
   REFRESH_TOKEN_EXPIRES_IN_MS,
   INACTIVITY_THRESHOLD_MS,
+  SESSION_REUSE_THRESHOLD_MS,
   ACTIVE_SESSION_THRESHOLD_MS
 } from '../app.constants';
 
@@ -106,8 +107,8 @@ export class AuthService {
         order: { lastActivity: 'DESC' }
       });
 
-      // If the most recent session was updated in the last 15 seconds, reuse its ID.
-      if (recentSession && (Date.now() - new Date(recentSession.lastActivity).getTime() < 15000)) {
+      // If the most recent session was updated in the last few seconds, reuse its ID.
+      if (recentSession && (Date.now() - new Date(recentSession.lastActivity).getTime() < SESSION_REUSE_THRESHOLD_MS)) {
         sessionId = recentSession.sessionId;
         isNewSession = false;
       }
