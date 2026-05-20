@@ -12,8 +12,8 @@ import UserSession from '../entities/user-session.entity';
 import {
   REFRESH_TOKEN_EXPIRES_IN_MS,
   INACTIVITY_THRESHOLD_MS,
-  SESSION_REUSE_THRESHOLD_MS,
-  ACTIVE_SESSION_THRESHOLD_MS
+  ACTIVE_SESSION_THRESHOLD_MS,
+  SESSION_REUSE_THRESHOLD_MS
 } from '../app.constants';
 
 @Injectable()
@@ -99,15 +99,13 @@ export class AuthService {
     let sessionId = AuthService.getSessionId(existingSessionId);
     let isNewSession = !existingSessionId;
 
-    // If no existingSessionId was provided, check if the user has a very recent active session
-    // to reuse it instead of creating a new one (prevents bloat from rapid login attempts).
+    // If no sessionId was provided, check for a truly simultaneous login (within 200ms)
+    // to prevent session bloat from parallel Angular initialization requests on the same page load.
     if (isNewSession) {
       const recentSession = await this.userSessionRepository.findOne({
         where: { userId: user.id },
         order: { lastActivity: 'DESC' }
       });
-
-      // If the most recent session was updated in the last few seconds, reuse its ID.
       if (recentSession && (Date.now() - new Date(recentSession.lastActivity).getTime() < SESSION_REUSE_THRESHOLD_MS)) {
         sessionId = recentSession.sessionId;
         isNewSession = false;
@@ -193,23 +191,26 @@ export class AuthService {
   }
 
   async logoutSession(userId: number, sessionId: string): Promise<void> {
+    await this.refreshTokenRepository.delete({ userId, sessionId });
     await this.userSessionRepository.delete({ userId, sessionId });
   }
 
   async deletePassiveSessions(userId: number): Promise<void> {
     const now = new Date();
-    // Since INACTIVITY_THRESHOLD_MS is 7 days, let's use ACTIVE_SESSION_THRESHOLD_MS (30 min)
-    // for what we consider "passive" in the context of cleaning up bloat.
     const threshold = new Date(now.getTime() - ACTIVE_SESSION_THRESHOLD_MS);
-
-    await this.userSessionRepository.delete({
-      userId,
-      lastActivity: LessThan(threshold)
+    const passiveSessions = await this.userSessionRepository.find({
+      where: { userId, lastActivity: LessThan(threshold) },
+      select: { sessionId: true }
     });
-    // Also cleanup associated refresh tokens if possible?
-    // Refresh tokens don't have a direct link to UserSession row in DB currently,
-    // but they share the sessionId.
-    // However, deleting all sessions where activity < threshold is the main goal.
+    if (passiveSessions.length > 0) {
+      const ids = passiveSessions.map(s => s.sessionId);
+      await this.refreshTokenRepository
+        .createQueryBuilder()
+        .delete()
+        .where('userId = :userId AND sessionId IN (:...ids)', { userId, ids })
+        .execute();
+      await this.userSessionRepository.delete({ userId, lastActivity: LessThan(threshold) });
+    }
   }
 
   async logoutOrphanedSession(userId: number, sessionId: string): Promise<boolean> {

@@ -94,7 +94,6 @@ describe('AuthService', () => {
       jwtService.sign.mockReturnValue('atoken');
       refreshTokenRepository.create.mockReturnValue({} as RefreshToken);
       refreshTokenRepository.save.mockResolvedValue({} as RefreshToken);
-      userSessionRepository.findOne.mockResolvedValue(null);
 
       const result = await service.login({ id: 1, name: 'user', reviewId: 0 });
 
@@ -109,12 +108,12 @@ describe('AuthService', () => {
       expect(refreshTokenRepository.save).toHaveBeenCalled();
     });
 
-    it('should reuse a very recent session if no sessionId is provided (throttling)', async () => {
+    it('should reuse a session created within 200ms (simultaneous page-load requests)', async () => {
       const validSid = '550e8400-e29b-41d4-a716-446655440000';
       const recentSession = {
         sessionId: validSid,
         userId: 1,
-        lastActivity: new Date(Date.now() - 2000) // 2 seconds ago
+        lastActivity: new Date(Date.now() - 100) // 100ms ago
       } as UserSession;
       userSessionRepository.findOne.mockResolvedValue(recentSession);
       userSessionRepository.update.mockResolvedValue({ affected: 1, raw: [], generatedMaps: [] });
@@ -122,14 +121,32 @@ describe('AuthService', () => {
 
       await service.login({ id: 1, name: 'user', reviewId: 0 });
 
-      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({
-        sid: validSid
-      }));
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sid: validSid }));
       expect(userSessionRepository.update).toHaveBeenCalledWith(
         { userId: 1, sessionId: validSid },
         expect.any(Object)
       );
       expect(userSessionRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should create a new session if no sessionId is provided and last session is older than 200ms', async () => {
+      const recentSession = {
+        sessionId: '550e8400-e29b-41d4-a716-446655440000',
+        userId: 1,
+        lastActivity: new Date(Date.now() - 500) // 500ms ago — outside threshold
+      } as UserSession;
+      userSessionRepository.findOne.mockResolvedValue(recentSession);
+      refreshTokenRepository.create.mockReturnValue({} as RefreshToken);
+      refreshTokenRepository.save.mockResolvedValue({} as RefreshToken);
+      jwtService.sign.mockReturnValue('new-token');
+
+      await service.login({ id: 1, name: 'user', reviewId: 0 });
+
+      expect(userSessionRepository.save).toHaveBeenCalled();
+      expect(userSessionRepository.update).not.toHaveBeenCalledWith(
+        { userId: 1, sessionId: recentSession.sessionId },
+        expect.any(Object)
+      );
     });
 
     it('should reuse the provided existingSessionId', async () => {
@@ -274,11 +291,11 @@ describe('AuthService', () => {
   });
 
   describe('logoutSession', () => {
-    it('should delete only the targeted session row', async () => {
+    it('should delete the targeted session and its refresh tokens', async () => {
       await service.logoutSession(7, 'session-7');
 
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'session-7' });
       expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'session-7' });
-      expect(refreshTokenRepository.delete).not.toHaveBeenCalledWith({ userId: 7, sessionId: 'session-7' });
     });
   });
 
@@ -294,8 +311,8 @@ describe('AuthService', () => {
       const result = await service.logoutOrphanedSession(7, 'sid-7');
 
       expect(result).toBe(true);
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'sid-7' });
       expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'sid-7' });
-      expect(refreshTokenRepository.delete).not.toHaveBeenCalledWith({ userId: 7, sessionId: 'sid-7' });
     });
 
     it('should not delete a non-orphaned session', async () => {
@@ -322,8 +339,8 @@ describe('AuthService', () => {
 
       await service.logoutCurrentSession('raw-refresh-token', 2, 'sid-2');
 
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 2, sessionId: 'sid-2' });
       expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 2, sessionId: 'sid-2' });
-      expect(refreshTokenRepository.delete).not.toHaveBeenCalledWith({ userId: 2, sessionId: 'sid-2' });
     });
 
     it('should fallback to session-scoped cleanup if token lookup fails and fallback session exists', async () => {
@@ -331,8 +348,8 @@ describe('AuthService', () => {
 
       await service.logoutCurrentSession('missing-token', 9, 'sid-9');
 
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 9, sessionId: 'sid-9' });
       expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 9, sessionId: 'sid-9' });
-      expect(refreshTokenRepository.delete).not.toHaveBeenCalledWith({ userId: 9, sessionId: 'sid-9' });
     });
 
     it('should do nothing when token lookup fails without fallback session id', async () => {
