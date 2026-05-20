@@ -291,11 +291,11 @@ describe('AuthService', () => {
   });
 
   describe('logoutSession', () => {
-    it('should delete only the targeted session row', async () => {
+    it('should delete the targeted session and its refresh tokens', async () => {
       await service.logoutSession(7, 'session-7');
 
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'session-7' });
       expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'session-7' });
-      expect(refreshTokenRepository.delete).not.toHaveBeenCalledWith({ userId: 7, sessionId: 'session-7' });
     });
   });
 
@@ -311,8 +311,8 @@ describe('AuthService', () => {
       const result = await service.logoutOrphanedSession(7, 'sid-7');
 
       expect(result).toBe(true);
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'sid-7' });
       expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'sid-7' });
-      expect(refreshTokenRepository.delete).not.toHaveBeenCalledWith({ userId: 7, sessionId: 'sid-7' });
     });
 
     it('should not delete a non-orphaned session', async () => {
@@ -339,8 +339,8 @@ describe('AuthService', () => {
 
       await service.logoutCurrentSession('raw-refresh-token', 2, 'sid-2');
 
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 2, sessionId: 'sid-2' });
       expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 2, sessionId: 'sid-2' });
-      expect(refreshTokenRepository.delete).not.toHaveBeenCalledWith({ userId: 2, sessionId: 'sid-2' });
     });
 
     it('should fallback to session-scoped cleanup if token lookup fails and fallback session exists', async () => {
@@ -348,8 +348,8 @@ describe('AuthService', () => {
 
       await service.logoutCurrentSession('missing-token', 9, 'sid-9');
 
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 9, sessionId: 'sid-9' });
       expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 9, sessionId: 'sid-9' });
-      expect(refreshTokenRepository.delete).not.toHaveBeenCalledWith({ userId: 9, sessionId: 'sid-9' });
     });
 
     it('should do nothing when token lookup fails without fallback session id', async () => {
