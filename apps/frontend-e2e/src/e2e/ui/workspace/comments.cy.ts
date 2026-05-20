@@ -181,7 +181,8 @@ describe('Unit Comments', () => {
     cy.wait('@getComments');
 
     cy.get('studio-lite-comment').eq(0).within(() => {
-      cy.get('.integrated-vote-container').eq(1).find('.vote-count').should('be.visible').click();
+      cy.get('.integrated-vote-container').eq(1).find('.vote-count').should('be.visible')
+        .click();
     });
 
     cy.get('mat-dialog-content.voter-dialog-content').should('be.visible');
