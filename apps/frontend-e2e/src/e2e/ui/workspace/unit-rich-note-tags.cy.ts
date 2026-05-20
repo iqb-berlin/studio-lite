@@ -1,4 +1,6 @@
-import { ws1, group1, lightUnit } from '../../../support/testData';
+import {
+  ws1, group1, lightUnit, AccessLevel
+} from '../../../support/testData';
 import {
   createBasicData,
   deleteBasicData
@@ -12,7 +14,11 @@ import {
   saveWorkspaceSettings,
   clickIndexTabWsgAdmin,
   createRichNote,
-  editRichNote
+  editRichNote,
+  createGroup,
+  createWs,
+  deleteGroup,
+  grantRemovePrivilegeAtWs
 } from '../../../support/helpers';
 
 describe('Unit Rich Notes', () => {
@@ -92,24 +98,6 @@ describe('Unit Rich Notes', () => {
     });
   });
 
-  it.skip('changes a rich note tag id in wsg-admin', () => {
-    cy.visit('/');
-    cy.findAdminGroupSettings(group1).click();
-    clickIndexTabWsgAdmin('settings');
-    cy.get('button').contains('mat-icon', 'mediation').click({ force: true });
-    cy.get('studio-lite-unit-rich-note-tags-config textarea').not('.global-textarea').invoke('val').then(val => {
-      const jsonStr = (val as string) || '';
-      const modifiedJson = jsonStr.replace(/"id"\s*:\s*"transcript"/g, '"id":"transcript_modified"');
-      cy.get('studio-lite-unit-rich-note-tags-config textarea').not('.global-textarea').clear({ force: true });
-      if (modifiedJson) {
-        cy.get('studio-lite-unit-rich-note-tags-config textarea').not('.global-textarea')
-          .type(modifiedJson, { parseSpecialCharSequences: false, delay: 0 });
-      }
-    });
-
-    cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
-  });
-
   it('deletes a rich note', () => {
     cy.visitWs(ws1);
     selectUnit(lightUnit.shortname);
@@ -117,11 +105,91 @@ describe('Unit Rich Notes', () => {
     cy.wait('@getRichNotes');
 
     // Note: there are 3 notes total now.
-    cy.get('.note-item-actions').eq(0).contains('mat-icon', 'delete').click({ force: true });
+    cy.get('.note-item-actions')
+      .eq(0)
+      .contains('mat-icon', 'delete')
+      .click({ force: true });
 
     cy.clickButtonWithResponseCheck(
-      'Löschen', [200], '/api/workspaces/*/units/*/rich-notes/*', 'DELETE', 'deleteNote');
+      'Löschen',
+      [200],
+      '/api/workspaces/*/units/*/rich-notes/*',
+      'DELETE',
+      'deleteNote'
+    );
 
     cy.get('.note-content').should('have.length', '2');
+  });
+
+  describe('Block configures personalised rich note tags', () => {
+    const testGroup = 'richNoteGroup2';
+    const testWs = 'Ws2';
+
+    it('creates new group, workspace and grants rights', () => {
+      createGroup(testGroup);
+      createWs(testWs, testGroup);
+      grantRemovePrivilegeAtWs([Cypress.expose('username')], testWs, [
+        AccessLevel.Admin
+      ]);
+    });
+
+    it('sets rich note config', () => {
+      cy.visit('/');
+      cy.findAdminGroupSettings(testGroup).click();
+      clickIndexTabWsgAdmin('settings');
+      // cy.intercept('PATCH', '/api/group-admin/*/settings').as('saveWsgSettings');
+      cy.get('studio-lite-unit-rich-note-tags-config .add-tag-button').click();
+
+      cy.get('studio-lite-unit-rich-note-tags-config input')
+        .last()
+        .clear({ force: true })
+        .type('https://w3id.org/iqb/v06/t1/index.json', { force: true });
+
+      cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
+      // cy.wait('@saveWsgSettings');
+    });
+
+    it('imports unit', () => {
+      cy.visitWs(`${testWs}`);
+
+      importExercise('test2_studio_units_download.zip');
+    });
+
+    it('activates Rückmeldung in the new workspace', () => {
+      openWorkspaceSettingsDialog(testGroup, testWs);
+      setRouteVisibility('notes', true);
+      saveWorkspaceSettings();
+    });
+
+    it('verifies the rich notes config is applied', () => {
+      cy.visitWs(`${testWs}`);
+
+      cy.get('mat-cell.mat-column-key')
+        .first()
+        .invoke('text')
+        .then(shortname => {
+          selectUnit(shortname.trim());
+          clickIndexTabWorkspace('notes');
+          cy.wait('@getRichNotes');
+
+          cy.get('.node-header')
+            .contains('mat-icon', 'add')
+            .first()
+            .click({ force: true });
+          cy.get('mat-select[formControlName="tagId"]').click();
+
+          cy.get('mat-option').should('have.length.greaterThan', 0);
+          cy.get('mat-option').contains('Transkript 2 der Originalquelle').should('exist');
+          cy.translate(Cypress.expose('locale')).then(json => {
+            cy.get('mat-dialog-actions button')
+              .contains(json.cancel, { matchCase: false })
+              .click({ force: true });
+          });
+        });
+    });
+
+    it('cleans up the custom group', () => {
+      deleteGroup(testGroup);
+    });
   });
 });
