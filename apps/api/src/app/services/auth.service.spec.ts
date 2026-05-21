@@ -167,7 +167,7 @@ describe('AuthService', () => {
   });
 
   describe('refreshAccessToken', () => {
-    it('should return new tokens if refresh token is valid', async () => {
+    it('should return new tokens and replace the old session', async () => {
       const expiresAt = new Date();
       expiresAt.setMinutes(expiresAt.getMinutes() + 10);
       const mockToken = {
@@ -191,7 +191,11 @@ describe('AuthService', () => {
       const result = await service.refreshAccessToken('valid-token');
 
       expect(result?.accessToken).toBe('new-atoken');
+      // Old refresh token is rotated
       expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ tokenHash: 'token-hash' });
+      // Old session is deleted so a fresh independent one is created
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 1, sessionId: 'session-1' });
+      expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 1, sessionId: 'session-1' });
     });
 
     it('should return null if token not found', async () => {

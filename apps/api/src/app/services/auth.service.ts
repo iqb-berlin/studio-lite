@@ -253,12 +253,14 @@ export class AuthService {
     const user = await this.usersService.findOne(refreshToken.userId);
     if (!user || !user.name) return null;
 
-    // Rotate refresh token and keep the current session alive.
+    // Rotate refresh token and replace the old session with a fresh one.
+    // This ensures each browser/client gets its own independent session.
+    // The SESSION_REUSE_THRESHOLD_MS check in login() prevents duplicate
+    // sessions from parallel requests within the same page load.
     await this.refreshTokenRepository.delete({ tokenHash: refreshToken.tokenHash });
-    userSession.expiresAt = new Date(Date.now() + INACTIVITY_THRESHOLD_MS);
-    await this.userSessionRepository.save(userSession);
+    await this.logoutSession(refreshToken.userId, userSession.sessionId);
 
-    return this.login({ id: user.id, name: user.name, reviewId: 0 }, userSession.sessionId);
+    return this.login({ id: user.id, name: user.name, reviewId: 0 });
   }
 
   async initLogin(username: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {
