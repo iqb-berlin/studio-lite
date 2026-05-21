@@ -4,11 +4,13 @@ import { AccessLevel, testWorkspaces } from '../../../support/testData';
 import {
   addFirstUser,
   createGroup,
-  createWs,
   deleteFirstUser,
-  deleteGroup,
-  grantRemovePrivilegeAtWs
+  deleteGroup
 } from '../../../support/helpers';
+import {
+  createWs,
+  grantRemovePrivilegeAtWs
+} from '../../../support/helpers/group-admin';
 
 describe('Metadata Profile Management from Admin', () => {
   const area = 'Deutsch II';

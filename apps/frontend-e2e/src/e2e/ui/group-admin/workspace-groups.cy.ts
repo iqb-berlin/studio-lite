@@ -10,23 +10,25 @@ import {
   addFirstUser,
   createGroup,
   createNewUser,
-  createWs,
   deleteFirstUser,
   deleteGroup,
   deleteUser,
-  grantRemovePrivilegeAtUser,
-  grantRemovePrivilegeAtWs,
   login,
   logout,
   makeAdminOfGroup,
   clickIndexTabWsgAdmin,
   importExercise,
-  configureDropBox,
   submitUnits,
-  returnSubmittedUnits,
-  addState,
-  deleteState
+  returnSubmittedUnits
 } from '../../../support/helpers';
+import {
+  addState,
+  configureDropBox,
+  createWs,
+  deleteState,
+  grantRemovePrivilegeAtUser,
+  grantRemovePrivilegeAtWs
+} from '../../../support/helpers/group-admin';
 
 describe('Workspace Group Administration', () => {
   const groupAdminUser = testUsers.groupAdmin;

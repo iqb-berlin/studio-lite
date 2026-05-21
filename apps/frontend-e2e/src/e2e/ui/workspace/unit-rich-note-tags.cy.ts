@@ -16,10 +16,12 @@ import {
   createRichNote,
   editRichNote,
   createGroup,
-  createWs,
-  deleteGroup,
-  grantRemovePrivilegeAtWs
+  deleteGroup
 } from '../../../support/helpers';
+import {
+  createWs,
+  grantRemovePrivilegeAtWs
+} from '../../../support/helpers/group-admin';
 
 describe('Unit Rich Notes', () => {
   before(() => {

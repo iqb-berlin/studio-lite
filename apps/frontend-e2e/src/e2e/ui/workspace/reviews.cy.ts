@@ -9,7 +9,6 @@ import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 import {
   clickIndexTabWorkspace,
   clickIndexTabWsgAdmin,
-  grantRemovePrivilegeAtWs,
   importExercise,
   login,
   loginWithUser,
@@ -24,6 +23,7 @@ import {
   modifyReviewUnits,
   goToReviewAdmin
 } from '../../../support/helpers';
+import { grantRemovePrivilegeAtWs } from '../../../support/helpers/group-admin';
 
 describe('Unit Reviews', () => {
   before(() => {

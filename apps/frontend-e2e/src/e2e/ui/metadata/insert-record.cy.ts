@@ -11,11 +11,13 @@ import {
   addFirstUser,
   addUnit,
   createGroup,
-  createWs,
   deleteFirstUser,
-  deleteGroup,
-  grantRemovePrivilegeAtWs
+  deleteGroup
 } from '../../../support/helpers';
+import {
+  createWs,
+  grantRemovePrivilegeAtWs
+} from '../../../support/helpers/group-admin';
 
 describe('Metadata Management', () => {
   const ws1 = testWorkspaces.metadata.german1;
