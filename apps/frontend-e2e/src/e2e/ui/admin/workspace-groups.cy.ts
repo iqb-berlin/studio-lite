@@ -23,7 +23,9 @@ import {
   importExercise,
   configureDropBox,
   submitUnits,
-  returnSubmittedUnits
+  returnSubmittedUnits,
+  addState,
+  deleteState
 } from '../../../support/helpers';
 
 describe('Workspace Group Administration', () => {
@@ -164,6 +166,12 @@ describe('Workspace Group Administration', () => {
   it('displays the settings tab', () => {
     clickIndexTabWsgAdmin('settings');
     cy.get('studio-lite-unit-rich-note-tags-config').should('exist');
+  });
+
+  it('adds and deletes a state', () => {
+    clickIndexTabWsgAdmin('settings');
+    addState('Test Delete State');
+    deleteState('Test Delete State');
   });
 
   it('enables workspace editing for group admins', () => {

@@ -383,3 +383,43 @@ export function configureDropBox(sourceWs: string, targetWs: string): void {
     .contains('check_circle')
     .should('exist');
 }
+
+/**
+ * Adds a new state in workspace group settings
+ * @param stateName - The label for the new state
+ */
+export function addState(stateName: string): void {
+  cy.get('[data-cy="wsg-admin-states-add-state-button"]').click();
+  cy.get('studio-lite-states .state').last().within(() => {
+    cy.get('.text-form-field input').clear().type(stateName);
+  });
+  cy.intercept('PATCH', '/api/admin/workspace-groups/*').as('saveState');
+  cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
+  cy.wait('@saveState').its('response.statusCode').should('eq', 200);
+}
+
+/**
+ * Deletes a state in workspace group settings
+ * @param stateName - The label of the state to delete
+ */
+export function deleteState(stateName: string): void {
+  cy.get('studio-lite-states .state').then($states => {
+    const stateEl = Array.from($states).find(el => {
+      const input = el.querySelector('.text-form-field input') as HTMLInputElement;
+      return input && input.value === stateName;
+    });
+    if (stateEl) {
+      cy.wrap(stateEl).find('button.delete-button').click();
+    } else {
+      throw new Error(`State with name ${stateName} not found`);
+    }
+  });
+
+  cy.get('studio-lite-delete-state').should('exist');
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.intercept('PATCH', '/api/admin/workspace-groups/*').as('deleteStateRequest');
+    cy.clickDialogButton(json.delete);
+    cy.wait('@deleteStateRequest').its('response.statusCode').should('eq', 200);
+  });
+  cy.get('studio-lite-delete-state').should('not.exist');
+}
