@@ -244,31 +244,6 @@ export class UsersComponent implements OnInit, OnDestroy {
     });
   }
 
-  deletePassiveSessions(user: UserFullDto): void {
-    const dialogRef = this.deleteConfirmDialog.open(DeleteDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.translateService.instant('delete'),
-        content: this.translateService.instant('admin.delete-passive-sessions-confirm', {
-          name: user.name
-        })
-      }
-    });
-
-    dialogRef.afterClosed().pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
-      if (result) {
-        this.appService.dataLoading = true;
-        this.backendService.deleteUserPassiveSessions(user.id)
-          .pipe(takeUntil(this.ngUnsubscribe)).subscribe(respOk => {
-            this.appService.dataLoading = false;
-            if (respOk) {
-              this.updateUserList(false, true);
-            }
-          });
-      }
-    });
-  }
-
   static hasStatus(status: string, sessions: UserSessionInfoDto[] = []): boolean {
     return sessions.some(s => s.activityStatus === status);
   }
