@@ -167,7 +167,7 @@
     "is-not-admin": "Keine Admin-Rechte",
     "sessions": "Sessions",
     "active": "Aktiv",
-    "inactive": "Inaktiv (Offline)",
+    "inactive": "Inaktiv oder Offline",
     "passive": "Passiv (Eingeloggt, aber inaktiv)",
     "activity-remaining": "Verbleibende aktive Zeit (Session wird durch Arbeit verlängert)",
     "passive-remaining": "Passiv-Phase (automatischer Logout nach Ablauf)"
