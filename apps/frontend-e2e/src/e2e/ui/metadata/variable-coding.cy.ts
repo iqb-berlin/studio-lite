@@ -14,16 +14,18 @@ import {
   clickIndexTabWorkspace,
   createGroup,
   createItem,
-  createWs,
   deleteAllModules,
   deleteFirstUser,
   deleteGroup,
   goToItem,
   goToWsMenu,
-  grantRemovePrivilegeAtWs,
   importExercise,
   selectUnit, setModuleWithoutVerification
 } from '../../../support/helpers';
+import {
+  createWs,
+  grantRemovePrivilegeAtWs
+} from '../../../support/helpers/group-admin';
 
 describe('Variable and Item Metadata Coherence', () => {
   const mathArea = testWorkspaces.metadata.mathPrimar1;

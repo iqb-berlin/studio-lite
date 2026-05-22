@@ -124,4 +124,72 @@ describe('Unit Comments', () => {
     cy.contains('mat-list-option', '01').click();
     cy.get('studio-lite-comment').should('have.length', '1');
   });
+
+  it('upvotes a comment and checks count and coloring', () => {
+    cy.visitWs(ws1);
+    selectUnit(importedUnit.shortname);
+    clickIndexTabWorkspace('comments');
+    cy.wait('@getComments');
+
+    cy.get('studio-lite-comment').eq(0).within(() => {
+      cy.get('.integrated-vote-container').eq(0).should('not.have.class', 'vote-active-up');
+
+      cy.get('.integrated-vote-container').eq(0).find('button.vote-button').click();
+
+      cy.get('.integrated-vote-container').eq(0).should('have.class', 'vote-active-up');
+      cy.get('.integrated-vote-container').eq(0).find('.vote-count').should('contain', '1');
+    });
+  });
+
+  it('removes upvote on a comment', () => {
+    cy.visitWs(ws1);
+    selectUnit(importedUnit.shortname);
+    clickIndexTabWorkspace('comments');
+    cy.wait('@getComments');
+
+    cy.get('studio-lite-comment').eq(0).within(() => {
+      cy.get('.integrated-vote-container').eq(0).should('have.class', 'vote-active-up');
+      cy.get('.integrated-vote-container').eq(0).find('.vote-count').should('contain', '1');
+
+      cy.get('.integrated-vote-container').eq(0).find('button.vote-button').click();
+
+      cy.get('.integrated-vote-container').eq(0).should('not.have.class', 'vote-active-up');
+      cy.get('.integrated-vote-container').eq(0).find('.vote-count').should('not.exist');
+    });
+  });
+
+  it('downvotes a comment and checks count and coloring', () => {
+    cy.visitWs(ws1);
+    selectUnit(importedUnit.shortname);
+    clickIndexTabWorkspace('comments');
+    cy.wait('@getComments');
+
+    cy.get('studio-lite-comment').eq(0).within(() => {
+      cy.get('.integrated-vote-container').eq(1).should('not.have.class', 'vote-active-down');
+
+      cy.get('.integrated-vote-container').eq(1).find('button.vote-button').click();
+
+      cy.get('.integrated-vote-container').eq(1).should('have.class', 'vote-active-down');
+      cy.get('.integrated-vote-container').eq(1).find('.vote-count').should('contain', '1');
+    });
+  });
+
+  it('shows voter overview dialog', () => {
+    cy.visitWs(ws1);
+    selectUnit(importedUnit.shortname);
+    clickIndexTabWorkspace('comments');
+    cy.wait('@getComments');
+
+    cy.get('studio-lite-comment').eq(0).within(() => {
+      cy.get('.integrated-vote-container').eq(1).find('.vote-count').should('be.visible')
+        .click();
+    });
+
+    cy.get('mat-dialog-content.voter-dialog-content').should('be.visible');
+    cy.get('.voter-section.down .voter-chip').should('contain', Cypress.expose('username'));
+
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('mat-dialog-actions button').contains(json.close, { matchCase: false }).click();
+    });
+  });
 });

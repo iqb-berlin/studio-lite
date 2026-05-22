@@ -4,14 +4,16 @@ import {
   addFirstUser,
   clickIndexTabWsgAdmin,
   createGroup,
-  createWs,
   deleteFirstUser,
   deleteGroup,
-  grantRemovePrivilegeAtWs,
   openWorkspaceSettingsDialog,
   saveWorkspaceSettings,
   setRouteVisibility
 } from '../../../support/helpers';
+import {
+  createWs,
+  grantRemovePrivilegeAtWs
+} from '../../../support/helpers/group-admin';
 
 // ===========================================================================
 describe('Workspace Settings – hiddenRoutes', () => {
