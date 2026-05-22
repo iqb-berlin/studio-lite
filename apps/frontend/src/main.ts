@@ -8,7 +8,7 @@ import {
   TranslateService, TranslateParser
 } from '@ngx-translate/core';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withRouterConfig } from '@angular/router';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -53,7 +53,7 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideRouter(APP_ROUTES),
+    provideRouter(APP_ROUTES, withRouterConfig({ onSameUrlNavigation: 'reload' })),
     provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(
       ApplicationModule,
@@ -67,14 +67,12 @@ bootstrapApplication(AppComponent, {
       MatTooltipModule,
       MatDialogModule,
       MatCardModule,
-      MatIconModule,
       MatTabsModule,
       MatTableModule,
       ReactiveFormsModule,
       MatProgressSpinnerModule,
       MatSnackBarModule,
       MatPaginatorModule,
-      ReactiveFormsModule,
       IqbComponentsModule.forRoot(),
       MetadataModule,
       TranslateModule.forRoot({
