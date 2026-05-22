@@ -157,7 +157,7 @@ describe('Token Refresh UI Logic', () => {
         },
         {
           id: 102,
-          name: 'passiveUser',
+          name: 'orphanedUser',
           isLoggedIn: true,
           lastActivity: passiveDate,
           isAdmin: false,
@@ -167,7 +167,7 @@ describe('Token Refresh UI Logic', () => {
             {
               sessionId: 's2',
               lastActivity: passiveDate,
-              activityStatus: 'passive'
+              activityStatus: 'orphaned'
             }
           ]
         },
@@ -191,62 +191,24 @@ describe('Token Refresh UI Logic', () => {
     // In admin navigation, wait for users to load
     cy.wait('@getUsersFull');
 
-    // Wait for the table to render and verify active/passive/inactive dots
+    // Wait for the table to render and verify active/orphaned/inactive dots
     cy.get('mat-row').contains('mat-cell', 'activeUser')
       .parent()
       .find('.active-dot')
       .should('exist');
-    cy.get('mat-row').contains('mat-cell', 'passiveUser')
+    cy.get('mat-row').contains('mat-cell', 'orphanedUser')
       .parent()
-      .find('.passive-dot')
+      .find('.orphaned-dot')
+      .should('exist');
+    cy.get('mat-row').contains('mat-cell', 'orphanedUser')
+      .parent()
+      .find('.inactive-dot')
       .should('exist');
     cy.get('mat-row').contains('mat-cell', 'inactiveUser')
       .parent()
       .find('.inactive-dot')
       .should('exist');
-  });
-
-  it('deletes passive user', () => {
-    loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
-
-    const now = new Date().getTime();
-    const passiveDate = new Date(now - (4 * 60 * 60 * 1000)).toISOString();
-
-    cy.intercept('GET', '/api/group-admin/users*', {
-      statusCode: 200,
-      body: [
-        {
-          id: 102,
-          name: 'passiveUser',
-          isLoggedIn: true,
-          lastActivity: passiveDate,
-          isAdmin: false,
-          email: '',
-          description: '',
-          sessions: [
-            {
-              sessionId: 's2',
-              lastActivity: passiveDate,
-              activityStatus: 'passive'
-            }
-          ]
-        }
-      ]
-    }).as('getUsersPassive');
-
-    cy.findAdminSettings().click();
-    clickIndexTabAdmin('users');
-    cy.wait('@getUsersPassive');
-
-    cy.get('mat-row').contains('mat-cell', 'passiveUser')
-      .parent()
-      .find('mat-icon')
-      .contains('cleaning_services')
-      .click();
-
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.clickButton(json.delete);
-    });
+    cy.pause();
   });
 
   it('deletes user', () => {
