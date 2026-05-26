@@ -118,4 +118,16 @@ describe('SelectUnitListComponent', () => {
 
     expect(component.selectedUnitIds).toEqual([1, 3]);
   });
+
+  it('should toggle master selection only for filtered rows', () => {
+    component.queryParams = new HttpParams();
+    component.updateUnitList(10);
+    component.objectsDatasource.filter = 'g1';
+
+    component.masterToggle();
+    expect(component.selectedUnitIds).toEqual([1, 2]);
+
+    component.masterToggle();
+    expect(component.selectedUnitIds).toEqual([]);
+  });
 });

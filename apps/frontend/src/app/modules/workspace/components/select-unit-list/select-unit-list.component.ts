@@ -14,8 +14,6 @@ import { MatCheckbox } from '@angular/material/checkbox';
 
 import { HttpParams } from '@angular/common/http';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
-import { HasSelectionValuePipe } from '../../../../pipes/has-selection-value.pipe';
-import { IsAllSelectedPipe } from '../../../../pipes/is-all-selected.pipe';
 import { IsSelectedPipe } from '../../../../pipes/is-selected.pipe';
 import { IncludePipe } from '../../../../pipes/include.pipe';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
@@ -26,7 +24,7 @@ import { ScrollIntoViewDirective } from '../../directives/scroll-into-view.direc
   templateUrl: './select-unit-list.component.html',
   styleUrls: ['select-unit-list.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, IncludePipe, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, TranslateModule, ScrollIntoViewDirective]
+  imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, IncludePipe, IsSelectedPipe, TranslateModule, ScrollIntoViewDirective]
 })
 export class SelectUnitListComponent implements OnChanges, OnDestroy {
   objectsDatasource = new MatTableDataSource<UnitInListDto>();
@@ -105,6 +103,16 @@ export class SelectUnitListComponent implements OnChanges, OnDestroy {
     return this.tableSelectionCheckboxes.selected.length;
   }
 
+  get visibleSelectionCount(): number {
+    return this.visibleRows
+      .filter(row => this.tableSelectionCheckboxes.isSelected(row))
+      .length;
+  }
+
+  get isAllVisibleRowsSelected(): boolean {
+    return !!this.visibleRows.length && this.visibleSelectionCount === this.visibleRows.length;
+  }
+
   get selectedUnitIds(): number[] {
     return this.tableSelectionCheckboxes.selected.map(ud => ud.id);
   }
@@ -141,16 +149,16 @@ export class SelectUnitListComponent implements OnChanges, OnDestroy {
       .subscribe(() => this.selectionChanged.emit(this.selectedUnitIds));
   }
 
-  private isAllSelected(): boolean {
-    const numSelected = this.tableSelectionCheckboxes.selected.length;
-    const numRows = this.objectsDatasource ? this.objectsDatasource.data.length : 0;
-    return numSelected === numRows;
+  private get visibleRows(): UnitInListDto[] {
+    return this.objectsDatasource ? this.objectsDatasource.filteredData : [];
   }
 
   masterToggle(): void {
-    this.isAllSelected() || !this.objectsDatasource ?
-      this.tableSelectionCheckboxes.clear() :
-      this.objectsDatasource.data.forEach(row => this.tableSelectionCheckboxes.select(row));
+    if (this.isAllVisibleRowsSelected) {
+      this.visibleRows.forEach(row => this.tableSelectionCheckboxes.deselect(row));
+    } else {
+      this.visibleRows.forEach(row => this.tableSelectionCheckboxes.select(row));
+    }
   }
 
   ngOnDestroy(): void {
