@@ -154,11 +154,10 @@ export class SelectUnitListComponent implements OnChanges, OnDestroy {
   }
 
   masterToggle(): void {
-    if (this.isAllVisibleRowsSelected) {
-      this.visibleRows.forEach(row => this.tableSelectionCheckboxes.deselect(row));
-    } else {
-      this.visibleRows.forEach(row => this.tableSelectionCheckboxes.select(row));
-    }
+    const shouldSelectVisibleRows = !this.isAllVisibleRowsSelected;
+
+    this.tableSelectionCheckboxes.clear();
+    if (shouldSelectVisibleRows) this.visibleRows.forEach(row => this.tableSelectionCheckboxes.select(row));
   }
 
   ngOnDestroy(): void {

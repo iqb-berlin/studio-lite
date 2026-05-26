@@ -26,13 +26,13 @@ describe('SelectUnitListComponent', () => {
 
   const createUnits = (): UnitInListDto[] => ([
     {
-      id: 1, key: 'U1', name: 'Unit 1', groupName: 'G1'
+      id: 1, key: 'U1', name: 'Unit 1', groupName: 'GruA'
     },
     {
-      id: 2, key: 'U2', name: 'Unit 2', groupName: 'G1'
+      id: 2, key: 'U2', name: 'Unit 2', groupName: 'GruA'
     },
     {
-      id: 3, key: 'U3', name: 'Unit 3', groupName: 'G2'
+      id: 3, key: 'U3', name: 'Unit 3', groupName: 'GruB'
     }
   ]);
 
@@ -122,12 +122,26 @@ describe('SelectUnitListComponent', () => {
   it('should toggle master selection only for filtered rows', () => {
     component.queryParams = new HttpParams();
     component.updateUnitList(10);
-    component.objectsDatasource.filter = 'g1';
+    component.objectsDatasource.filter = 'grua';
 
     component.masterToggle();
     expect(component.selectedUnitIds).toEqual([1, 2]);
 
     component.masterToggle();
     expect(component.selectedUnitIds).toEqual([]);
+  });
+
+  it('should not keep hidden selections when filter narrows after master selection', () => {
+    component.queryParams = new HttpParams();
+    component.updateUnitList(10);
+    component.objectsDatasource.filter = 'gru';
+    component.masterToggle();
+    expect(component.selectedUnitIds).toEqual([1, 2, 3]);
+
+    component.objectsDatasource.filter = 'grua';
+    component.masterToggle();
+    component.masterToggle();
+
+    expect(component.selectedUnitIds).toEqual([1, 2]);
   });
 });
