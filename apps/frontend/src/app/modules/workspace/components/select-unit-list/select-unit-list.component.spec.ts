@@ -144,4 +144,17 @@ describe('SelectUnitListComponent', () => {
 
     expect(component.selectedUnitIds).toEqual([1, 2]);
   });
+
+  it('should keep previous hidden selections when selecting another filtered row set', () => {
+    component.queryParams = new HttpParams();
+    component.updateUnitList(10);
+    component.objectsDatasource.filter = 'grua';
+    component.masterToggle();
+    expect(component.selectedUnitIds).toEqual([1, 2]);
+
+    component.objectsDatasource.filter = 'grub';
+    component.masterToggle();
+
+    expect(component.selectedUnitIds).toEqual([1, 2, 3]);
+  });
 });
