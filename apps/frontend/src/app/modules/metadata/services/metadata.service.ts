@@ -4,22 +4,42 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { TopConcept, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
+import { VocabularyProvider, Vocab } from '@iqb/metadata-components';
 import { MetadataBackendService } from './metadata-backend.service';
 import { WorkspaceService } from '../../workspace/services/workspace.service';
 import {
-  Vocab, VocabData, VocabIdDictionaryValue
+  VocabData, VocabIdDictionaryValue
 } from '../models/vocabulary.class';
 
 @Injectable({
   providedIn: 'root'
 })
 
-export class MetadataService {
+export class MetadataService implements VocabularyProvider {
   idLabelDictionary: Record<string, VocabIdDictionaryValue> = {};
   vocabulariesIdDictionary: Record<string, VocabIdDictionaryValue> = {};
   vocabularies: Vocab[] = [];
   unitProfileColumns:MDProfileGroup[] = [];
   itemProfileColumns:MDProfileGroup = {} as MDProfileGroup;
+
+  getVocabularies(): Vocab[] {
+    return this.vocabularies;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getVocabularyDictionary(): Record<string, any> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const libraryDictionary: Record<string, any> = {};
+    Object.entries(this.vocabulariesIdDictionary).forEach(([id, value]) => {
+      libraryDictionary[id] = {
+        id: id,
+        name: value.labels?.de || '',
+        notation: value.notation || [],
+        text: Object.entries(value.labels || {}).map(([lang, val]) => ({ lang, value: val }))
+      };
+    });
+    return libraryDictionary;
+  }
 
   constructor(@Inject('SERVER_URL') private readonly serverUrl: string,
               private backendService: MetadataBackendService,

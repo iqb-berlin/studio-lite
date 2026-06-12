@@ -41,10 +41,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIcon } from '@angular/material/icon';
 import { MDProfile } from '@iqbspecs/metadata-profile';
+import { ProfileFormComponent } from '@iqb/metadata-components';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
-import { ProfileFormComponent } from '../../../metadata/components/profile-form/profile-form.component';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { State } from '../../../admin/models/state.type';
@@ -136,7 +136,7 @@ export class UnitPropertiesComponent
     private confirmDialog: MatDialog,
     public translateService: TranslateService,
     private metadataBackendService: MetadataBackendService,
-    private metadataService: MetadataService,
+    public metadataService: MetadataService,
     public i18nService: I18nService
   ) {
     super();
@@ -446,7 +446,8 @@ export class UnitPropertiesComponent
     return [];
   }
 
-  onMetadataChange(metadata: UnitMetadataValues): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onMetadataChange(metadata: any): void {
     this.workspaceService.getUnitMetadataStore()?.setMetadata(metadata);
   }
 

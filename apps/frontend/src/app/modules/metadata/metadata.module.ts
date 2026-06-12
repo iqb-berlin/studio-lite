@@ -24,15 +24,16 @@ import { MatListModule } from '@angular/material/list';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
-import { FormlyChipsComponent } from './components/formly-chips/formly-chips.component';
-import { FormlyWrapperPanel } from './components/formly-wrapper-panel/formly-wrapper-panel.component';
-import { FormlyToggleComponent } from './components/formly-toggle/formly-toggle.component';
-import { FormlyDurationComponent } from './components/formly-duration/formly-duration.component';
+import {
+  FormlyChipsComponent,
+  FormlyWrapperPanel,
+  FormlyToggleComponent,
+  FormlyDurationComponent,
+  ProfileFormComponent,
+  NestedTreeComponent
+} from '@iqb/metadata-components';
 import { ItemsComponent } from './components/items/items.component';
 import { ItemComponent } from './components/item/item.component';
-import { ProfileFormComponent } from './components/profile-form/profile-form.component';
-import { NestedTreeComponent } from './components/nested-tree/nested-tree.component';
-
 import { TableViewComponent } from './components/table-view/table-view.component';
 
 export function formlyValidationConfig(translate: TranslateService) {

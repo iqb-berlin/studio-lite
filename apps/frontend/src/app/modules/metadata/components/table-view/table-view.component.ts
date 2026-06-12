@@ -15,6 +15,7 @@ import {
   MatHeaderRow, MatRowDef, MatRow, MatTableDataSource
 } from '@angular/material/table';
 import { ItemsMetadataValues, MetadataValuesEntry, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
+import { MetadataResolver } from '@iqb/metadata-resolver';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSort, MatSortModule } from '@angular/material/sort';
@@ -22,7 +23,6 @@ import { MetadataService } from '../../services/metadata.service';
 import { IncludePipe } from '../../../../pipes/include.pipe';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { I18nService } from '../../../../services/i18n.service';
-import { MetadataResolver } from '@iqb/metadata-resolver';
 
 interface ColumnValues {
   key?: string;
