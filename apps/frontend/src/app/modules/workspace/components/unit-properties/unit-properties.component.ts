@@ -40,7 +40,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIcon } from '@angular/material/icon';
-import { MDProfile } from '@iqb/metadata';
+import { MDProfile } from '@iqbspecs/metadata-profile';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
@@ -334,7 +334,7 @@ export class UnitPropertiesComponent
         .getMetadataProfile(this.workspaceSettings.unitMDProfile)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(profile => {
-          const unitProfile = new MDProfile(profile);
+          const unitProfile = profile as unknown as MDProfile;
           this.metadataService.loadProfileVocabularies(unitProfile).then(() => {
             this.unitProfile = unitProfile;
           });
@@ -350,7 +350,7 @@ export class UnitPropertiesComponent
         .getMetadataProfile(this.workspaceSettings.itemMDProfile)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(profile => {
-          const itemProfile = new MDProfile(profile);
+          const itemProfile = profile as unknown as MDProfile;
           this.metadataService.loadProfileVocabularies(itemProfile).then(() => {
             this.itemProfile = itemProfile;
           });

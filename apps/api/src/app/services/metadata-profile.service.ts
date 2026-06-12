@@ -6,7 +6,7 @@ import {
   catchError, firstValueFrom, map, of
 } from 'rxjs';
 import { MetadataProfileDto, MetadataVocabularyDto } from '@studio-lite-lib/api-dto';
-import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
+import { ProfileEntryParametersVocabulary } from '@iqbspecs/metadata-profile';
 import MetadataProfile from '../entities/metadata-profile.entity';
 import { MetadataVocabularyService } from './metadata-vocabulary.service';
 

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { TextWithLanguage } from '@iqb/metadata/md-main';
+import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profile';
 
 export class RegisteredMetadataProfileDto {
   @ApiProperty()

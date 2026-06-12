@@ -6,7 +6,7 @@ import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { MDProfileGroup } from '@iqb/metadata';
+import { MDProfileGroup } from '@iqbspecs/metadata-profile';
 import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { TableViewComponent } from './table-view.component';
 import { MetadataService } from '../../services/metadata.service';

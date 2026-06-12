@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { of } from 'rxjs';
-import { MDProfile } from '@iqb/metadata';
+import { MDProfile } from '@iqbspecs/metadata-profile';
 import {
   MetadataVocabularyDto, TopConcept, UnitPropertiesDto
 } from '@studio-lite-lib/api-dto';

@@ -6,7 +6,7 @@ import { FormlyFieldConfig, FormlyFormOptions, FormlyModule } from '@ngx-formly/
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { ItemsMetadataValues, ProfileMetadataValues } from '@studio-lite-lib/api-dto';
-import { MDProfile } from '@iqb/metadata';
+import { MDProfile } from '@iqbspecs/metadata-profile';
 import { MatIcon } from '@angular/material/icon';
 import {
   BehaviorSubject, delay, map, Observable, Subject, takeUntil

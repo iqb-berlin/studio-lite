@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@angular/core';
-import { MDProfile, MDProfileGroup } from '@iqb/metadata';
-import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
+import { MDProfile, MDProfileGroup, ProfileEntryParametersVocabulary } from '@iqbspecs/metadata-profile';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
