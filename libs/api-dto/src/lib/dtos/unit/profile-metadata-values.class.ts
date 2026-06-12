@@ -1,6 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
-import { TextsWithLanguageAndId } from '@iqb/metadata/md-values';
-import { TextWithLanguage } from '@iqb/metadata/md-main';
+import { TextWithLanguageAndId as TextsWithLanguageAndId } from '@iqb/metadata-resolver';
+import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profile';
 
 export class ProfileMetadataValues {
   profiles?: MetadataValues[];

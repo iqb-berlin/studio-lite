@@ -22,6 +22,7 @@ import { MetadataService } from '../../services/metadata.service';
 import { IncludePipe } from '../../../../pipes/include.pipe';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { I18nService } from '../../../../services/i18n.service';
+import { MetadataResolver } from '@iqb/metadata-resolver';
 
 interface ColumnValues {
   key?: string;
@@ -223,7 +224,7 @@ export class TableViewComponent implements OnInit {
     if (!this.metadataService.itemProfileColumns) return [];
     const columnsDefinitions: string[] =
       this.metadataService.itemProfileColumns.entries?.map(
-        entry => entry.label
+        entry => MetadataResolver.extractLabelText(entry.label)
       ) || [];
     return [...this.displayedColumns, ...columnsDefinitions];
   }
@@ -232,7 +233,7 @@ export class TableViewComponent implements OnInit {
     const columnsDefinitions: string[][] = [];
     if (!this.metadataService.unitProfileColumns) return [];
     this.metadataService.unitProfileColumns.forEach(group => {
-      columnsDefinitions.push(group.entries.map(entry => entry.label));
+      columnsDefinitions.push(group.entries.map(entry => MetadataResolver.extractLabelText(entry.label)));
     });
     return ['key', ...columnsDefinitions.flat()];
   }

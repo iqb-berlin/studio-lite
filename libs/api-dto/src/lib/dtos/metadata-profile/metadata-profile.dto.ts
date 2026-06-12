@@ -1,6 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 import { ApiProperty } from '@nestjs/swagger';
-import { TextWithLanguage } from '@iqb/metadata/md-main';
+import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profile';
 
 export class MetadataProfileDto {
   @ApiProperty()

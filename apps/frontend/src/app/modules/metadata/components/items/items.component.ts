@@ -11,7 +11,7 @@ import { MatIconButton, MatButton } from '@angular/material/button';
 
 import { ItemsMetadataValues, ProfileMetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
-import { MDProfile } from '@iqb/metadata';
+import { MDProfile } from '@iqbspecs/metadata-profile';
 import { FormsModule } from '@angular/forms';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { ItemComponent } from '../item/item.component';

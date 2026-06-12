@@ -2,7 +2,7 @@ import {
   ComponentFixture, TestBed, fakeAsync, tick
 } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MDProfile, MDProfileGroup } from '@iqb/metadata';
+import { MDProfile, MDProfileGroup } from '@iqbspecs/metadata-profile';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { TranslateModule } from '@ngx-translate/core';

@@ -2,17 +2,19 @@ import {
   Component, OnInit, Output, EventEmitter, Input
 } from '@angular/core';
 import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
-import { MDProfileStore, MDProfile } from '@iqb/metadata';
+import { MDProfile } from '@iqbspecs/metadata-profile';
+import { MDProfileStore } from '@iqbspecs/metadata-store/metadata-store.interface';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatError } from '@angular/material/form-field';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { FormsModule } from '@angular/forms';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MetadataResolver } from '@iqb/metadata-resolver';
 import { ProfileStoreWithProfiles, WsgAdminService } from '../../modules/wsg-admin/services/wsg-admin.service';
 import { Profile } from '../../models/profile.type';
 import { MetadataBackendService } from '../../modules/metadata/services/metadata-backend.service';
 
-export type CoreProfile = Omit<MDProfile, 'groups'>;
+export type CoreProfile = Profile;
 
 @Component({
   selector: 'studio-lite-profiles',
@@ -48,7 +50,7 @@ export class ProfilesComponent implements OnInit {
         if (Array.isArray(registeredProfiles)) {
           this.profileStoresWithProfiles = await Promise.all(
             registeredProfiles.map(async registeredProfile => {
-              const ProfilesStore = new MDProfileStore(registeredProfile);
+              const ProfilesStore = registeredProfile as MDProfileStore;
               const profiles = await Promise.all(
                 ProfilesStore.profiles.map(profile => {
                   const afterWith = registeredProfile.url.slice(0, registeredProfile.url.lastIndexOf('/'));
@@ -78,7 +80,7 @@ export class ProfilesComponent implements OnInit {
       this.backendService.getMetadataProfile(profileUrl)
         .subscribe(profile => {
           if (profile && profile !== true) {
-            return resolve(new MDProfile(profile));
+            return resolve(profile as unknown as MDProfile);
           }
           return resolve(null);
         });
@@ -87,6 +89,10 @@ export class ProfilesComponent implements OnInit {
 
   isChecked(id:string):boolean {
     return !!this.profilesSelected?.find((profile: { id: string; }) => profile.id === id);
+  }
+
+  getProfileLabel(profile: MDProfile): string {
+    return MetadataResolver.extractLabelText(profile.label);
   }
 
   changeSelection(checkbox:MatCheckboxChange) {

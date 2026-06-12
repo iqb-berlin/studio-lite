@@ -2,19 +2,19 @@ import {
   Component, EventEmitter, Input, OnDestroy, OnInit, Output
 } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
+import { Subject } from 'rxjs';
 import {
   MDProfile,
   MDProfileEntry,
   MDProfileGroup,
   ProfileEntryParametersBoolean,
-  ProfileEntryParametersNumber
-} from '@iqb/metadata';
-import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
-import { Subject } from 'rxjs';
-import { ProfileEntryParametersText, ProfileEntryParametersVocabulary }
-  from '@iqb/metadata/md-profile-entry';
-import { TextWithLanguage } from '@iqb/metadata/md-main';
-import { TextsWithLanguageAndId } from '@iqb/metadata/md-values';
+  ProfileEntryParametersNumber,
+  ProfileEntryParametersText,
+  ProfileEntryParametersVocabulary,
+  LanguageCodedText as TextWithLanguage
+} from '@iqbspecs/metadata-profile';
+import { TextWithLanguageAndId as TextsWithLanguageAndId, MetadataResolver } from '@iqb/metadata-resolver';
 import {
   MetadataValues,
   MetadataValuesEntry,
@@ -88,12 +88,14 @@ export class ProfileFormComponent implements OnInit, OnDestroy {
 
   private static getFormlyType(entry: MDProfileEntry): string {
     let type: string = entry.type;
-    if (entry.parameters instanceof ProfileEntryParametersText) {
-      if (entry.parameters.format === 'multiline') {
+    if (entry.type === 'text' || entry.type === 'textarea') {
+      const params = entry.parameters as ProfileEntryParametersText;
+      if (params && params.format === 'multiline') {
         type = 'textarea';
       }
-    } else if (entry.parameters instanceof ProfileEntryParametersNumber) {
-      if (entry.parameters.isPeriodSeconds) {
+    } else if (entry.type === 'number') {
+      const params = entry.parameters as ProfileEntryParametersNumber;
+      if (params && params.isPeriodSeconds) {
         type = 'duration';
       }
     }
@@ -184,10 +186,11 @@ export class ProfileFormComponent implements OnInit, OnDestroy {
   }
 
   private getBooleanTypeLabel(key: string, value: boolean): string {
+    const params = this.profileItemKeys[key].parameters as ProfileEntryParametersBoolean;
     if (value) {
-      return (this.profileItemKeys[key].parameters as ProfileEntryParametersBoolean).trueLabel || value.toString();
+      return params.trueLabel ? MetadataResolver.extractLabelText(params.trueLabel) : value.toString();
     }
-    return (this.profileItemKeys[key].parameters as ProfileEntryParametersBoolean).falseLabel || value.toString();
+    return params.falseLabel ? MetadataResolver.extractLabelText(params.falseLabel) : value.toString();
   }
 
   // //////////////////////////////////
@@ -268,7 +271,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy {
   private mapProfileToFormlyFieldConfig(profile: MDProfile): FormlyFieldConfig[] {
     if (profile) {
       const groups = profile?.groups;
-      if (groups[0].label === 'Item') {
+      if (MetadataResolver.extractLabelText(groups[0].label) === 'Item') {
         this.metadataService.itemProfileColumns = groups[0];
       } else {
         this.metadataService.unitProfileColumns = groups;
@@ -277,7 +280,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy {
       return groups?.map((group: MDProfileGroup) => ({
         wrappers: this.formlyWrapper ? [this.formlyWrapper] : undefined,
         props: {
-          label: group.label,
+          label: MetadataResolver.extractLabelText(group.label),
           expanded: this.panelExpanded
         },
         fieldGroup: group.entries
@@ -292,25 +295,29 @@ export class ProfileFormComponent implements OnInit, OnDestroy {
 
   private static getFormlyField(entry: MDProfileEntry): FormlyFieldConfig {
     const props: FormlyConfigProps = {
-      ...entry.parameters,
-      label: entry.label
-    };
-    if (entry.parameters instanceof ProfileEntryParametersNumber) {
-      if (ProfileFormComponent.getFormlyType(entry) !== 'duration') {
-        props.min = entry.parameters.minValue === null ? undefined : entry.parameters.minValue;
-        props.max = entry.parameters.maxValue === null ? undefined : entry.parameters.maxValue;
+      ...(entry.parameters || {}),
+      label: MetadataResolver.extractLabelText(entry.label)
+    } as unknown as FormlyConfigProps;
+    if (entry.type === 'number') {
+      const params = entry.parameters as ProfileEntryParametersNumber;
+      if (params && ProfileFormComponent.getFormlyType(entry) !== 'duration') {
+        props.min = params.minValue === null ? undefined : params.minValue;
+        props.max = params.maxValue === null ? undefined : params.maxValue;
       }
-    } else if (entry.parameters instanceof ProfileEntryParametersText) {
-      if (ProfileFormComponent.getFormlyType(entry) === 'textarea') {
-        props.autosize = true;
-        props.autosizeMinRows = 3;
-        props.autosizeMaxRows = 10;
+    } else if (entry.type === 'text' || entry.type === 'textarea') {
+      const params = entry.parameters as ProfileEntryParametersText;
+      if (params) {
+        if (ProfileFormComponent.getFormlyType(entry) === 'textarea') {
+          props.autosize = true;
+          props.autosizeMinRows = 3;
+          props.autosizeMaxRows = 10;
+        }
+        return {
+          key: entry.id,
+          fieldGroup: (params.textLanguages || [])
+            .map((language: string) => ProfileFormComponent.createFormlyField(language, entry, props))
+        };
       }
-      return {
-        key: entry.id,
-        fieldGroup: entry.parameters.textLanguages
-          .map(language => ProfileFormComponent.createFormlyField(language, entry, props))
-      };
     }
     return ProfileFormComponent.createFormlyField(entry.id, entry, props);
   }
@@ -325,7 +332,7 @@ export class ProfileFormComponent implements OnInit, OnDestroy {
 
   private registerProfileItem(entry: MDProfileEntry): void {
     this.profileItemKeys[entry.id] = {
-      label: entry.label,
+      label: MetadataResolver.extractLabelText(entry.label),
       type: entry.type,
       parameters: entry.parameters
     };
