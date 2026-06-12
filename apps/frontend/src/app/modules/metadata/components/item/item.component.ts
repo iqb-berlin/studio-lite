@@ -5,14 +5,15 @@ import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions, FormlyModule } from '@ngx-formly/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
-import { ItemsMetadataValues, ProfileMetadataValues } from '@studio-lite-lib/api-dto';
+import { ItemsMetadataValues } from '@studio-lite-lib/api-dto';
 import { MDProfile } from '@iqbspecs/metadata-profile';
 import { MatIcon } from '@angular/material/icon';
 import {
   BehaviorSubject, delay, map, Observable, Subject, takeUntil
 } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
-import { ProfileFormComponent } from '../profile-form/profile-form.component';
+import { ProfileFormComponent } from '@iqb/metadata-components';
+import { MetadataService } from '../../services/metadata.service';
 import { AliasId } from '../../models/alias-id.interface';
 import { ItemModel } from '../../models/item-model.interface';
 
@@ -39,7 +40,10 @@ export class ItemComponent implements OnInit, OnChanges, OnDestroy {
   model: ItemModel = {};
   options: FormlyFormOptions = {};
 
-  constructor(private translateService:TranslateService) { }
+  constructor(
+    private translateService: TranslateService,
+    public metadataService: MetadataService
+  ) { }
 
   ngOnInit(): void {
     this.initModel();
@@ -190,7 +194,8 @@ export class ItemComponent implements OnInit, OnChanges, OnDestroy {
     this.emitMetadata();
   }
 
-  onMetadataChange(metadata: Partial<ProfileMetadataValues>): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onMetadataChange(metadata: any): void {
     this.metadata[this.itemIndex] = metadata;
     this.emitMetadata();
   }

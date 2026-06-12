@@ -91,6 +91,7 @@ export class ProfilesComponent implements OnInit {
     return !!this.profilesSelected?.find((profile: { id: string; }) => profile.id === id);
   }
 
+  // eslint-disable-next-line class-methods-use-this
   getProfileLabel(profile: MDProfile): string {
     return MetadataResolver.extractLabelText(profile.label);
   }
