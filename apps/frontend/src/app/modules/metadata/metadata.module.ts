@@ -107,7 +107,10 @@ export function IdValidator(control: AbstractControl, field: FormlyFieldConfig):
           wrappers: ['form-field'],
           component: FormlyChipsComponent,
           defaultOptions: {
-            defaultValue: []
+            defaultValue: [],
+            props: {
+              maxLevel: 0
+            }
           }
         },
         {
@@ -120,6 +123,7 @@ export function IdValidator(control: AbstractControl, field: FormlyFieldConfig):
         },
         {
           name: 'duration',
+          wrappers: ['form-field'],
           component: FormlyDurationComponent
         }
       ]
