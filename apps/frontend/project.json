@@ -120,14 +120,14 @@
       }
     },
     "compodoc": {
-      "executor": "@twittwer/compodoc:compodoc",
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/compodoc/frontend"],
       "options": {
-        "tsConfig": "apps/frontend/tsconfig.editor.json",
-        "outputPath": "dist/compodoc/frontend"
+        "command": "compodoc -p apps/frontend/tsconfig.editor.json -d dist/compodoc/frontend"
       },
       "configurations": {
         "json": {
-          "exportFormat": "json"
+          "command": "compodoc -p apps/frontend/tsconfig.editor.json -d dist/compodoc/frontend -e json"
         }
       }
     },
