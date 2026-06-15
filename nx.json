@@ -98,7 +98,11 @@
     },
     "@nx/eslint:lint": {
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/tools/eslint-rules/**/*"]
+      "inputs": [
+        "default",
+        "^default",
+        "{workspaceRoot}/tools/eslint-rules/**/*"
+      ]
     }
   },
   "namedInputs": {
@@ -106,5 +110,6 @@
     "sharedGlobals": [],
     "production": ["default"]
   },
-  "defaultBase": "main"
+  "defaultBase": "main",
+  "analytics": false
 }
