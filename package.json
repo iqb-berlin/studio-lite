@@ -118,9 +118,6 @@
   "overrides": {
     "stylus": "0.0.1-security",
     "@parcel/watcher": "2.5.1",
-    "express": {
-      "path-to-regexp": "^0.1.13"
-    },
     "@nestjs/platform-express": {
       "path-to-regexp": "^8.4.2"
     },
