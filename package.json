@@ -121,15 +121,11 @@
     "express": {
       "path-to-regexp": "^0.1.13"
     },
-    "@nestjs/platform-express": {
+    "router": {
       "path-to-regexp": "^8.4.2"
     },
     "@nestjs/swagger": {
-      "path-to-regexp": "^8.4.2",
       "js-yaml": "^4.2.0"
-    },
-    "@nestjs/core": {
-      "path-to-regexp": "^8.4.2"
     },
     "@nestjs/common": {
       "file-type": "^21.3.4"
