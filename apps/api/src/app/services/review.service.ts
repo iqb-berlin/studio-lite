@@ -7,7 +7,7 @@ import {
   ReviewInListDto,
   ReviewDto, UnitPropertiesDto
 } from '@studio-lite-lib/api-dto';
-import { v4 as uuIdv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import Review from '../entities/review.entity';
 import ReviewUnit from '../entities/review-unit.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -53,7 +53,7 @@ export class ReviewService {
     const timeStamp = new Date();
     const newReview = this.reviewRepository.create({
       ...createReview,
-      link: uuIdv4(),
+      link: randomUUID(),
       createdAt: timeStamp,
       changedAt: timeStamp
     });
