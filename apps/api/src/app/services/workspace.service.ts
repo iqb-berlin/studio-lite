@@ -16,7 +16,8 @@ import {
   GroupNameDto,
   RenameGroupNameDto,
   UnitFullMetadataDto,
-  ItemsMetadataValues
+  ItemsMetadataValues,
+  UnitCommentDto
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import {
@@ -930,8 +931,15 @@ export class WorkspaceService {
     comments: string,
     itemUuidLookups: ItemUuidLookup[]
   ) {
+    const parsedComments: UnitCommentDto[] = JSON.parse(comments);
+    // User IDs from another instance are unreliable and could randomly collide with local IDs.
+    // We therefore set them to -1 during import to ensure comments are marked as unread for all local users.
+    const sanitizedComments = parsedComments.map(c => ({
+      ...c,
+      userId: -1
+    }));
     await this.unitCommentService.createComments(
-      JSON.parse(comments),
+      sanitizedComments,
       unitId,
       itemUuidLookups
     );

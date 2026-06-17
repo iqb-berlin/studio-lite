@@ -1,12 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UpdateUnitUserDto, UnitCommentDto } from '@studio-lite-lib/api-dto';
+import { UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
 import { createMock } from '@golevelup/ts-jest';
 import { UnitUserService } from './unit-user.service';
 import UnitUser from '../entities/unit-user.entity';
 import Unit from '../entities/unit.entity';
-import { UnitCommentService } from './unit-comment.service';
 
 describe('UnitUserService', () => {
   let service: UnitUserService;
@@ -15,7 +14,6 @@ describe('UnitUserService', () => {
 
   const mockUnitUserRepository = createMock<Repository<UnitUser>>();
   const mockUnitRepository = createMock<Repository<Unit>>();
-  const mockUnitCommentService = createMock<UnitCommentService>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,10 +26,6 @@ describe('UnitUserService', () => {
         {
           provide: getRepositoryToken(Unit),
           useValue: mockUnitRepository
-        },
-        {
-          provide: UnitCommentService,
-          useValue: mockUnitCommentService
         }
       ]
     }).compile();
@@ -50,40 +44,37 @@ describe('UnitUserService', () => {
   });
 
   describe('createUnitUser', () => {
-    it('should create and save a unit user with latest comment timestamp', async () => {
+    it('should create and save a unit user with default timestamp (July 2022) when none is specified', async () => {
       const userId = 1;
       const unitId = 2;
-      const date = new Date();
-      const createdEntity = { userId, unitId, lastSeenCommentChangedAt: date } as UnitUser;
+      const createdEntity = { userId, unitId, lastSeenCommentChangedAt: new Date(2022, 6) } as UnitUser;
 
-      mockUnitCommentService.findOnesLastChangedComment.mockResolvedValue(
-        { changedAt: date } as UnitCommentDto
-      );
       (mockUnitUserRepository.create as jest.Mock).mockReturnValue(createdEntity);
       mockUnitUserRepository.save.mockResolvedValue(createdEntity);
 
       await service.createUnitUser(userId, unitId);
 
-      expect(mockUnitCommentService.findOnesLastChangedComment).toHaveBeenCalledWith(unitId);
       expect(unitUserRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({ userId, unitId, lastSeenCommentChangedAt: date })
+        expect.objectContaining({ userId, unitId, lastSeenCommentChangedAt: new Date(2022, 6) })
       );
       expect(unitUserRepository.save).toHaveBeenCalledWith(createdEntity);
     });
 
-    it('should create and save a unit user with current timestamp if no comments', async () => {
+    it('should create and save a unit user with the specified timestamp', async () => {
       const userId = 1;
       const unitId = 2;
+      const date = new Date(2025, 5);
+      const createdEntity = { userId, unitId, lastSeenCommentChangedAt: date } as UnitUser;
 
-      mockUnitCommentService.findOnesLastChangedComment.mockResolvedValue(null);
-      (mockUnitUserRepository.create as jest.Mock).mockReturnValue({} as UnitUser);
-      mockUnitUserRepository.save.mockResolvedValue({} as UnitUser);
+      (mockUnitUserRepository.create as jest.Mock).mockReturnValue(createdEntity);
+      mockUnitUserRepository.save.mockResolvedValue(createdEntity);
 
-      await service.createUnitUser(userId, unitId);
+      await service.createUnitUser(userId, unitId, date);
 
-      expect(mockUnitCommentService.findOnesLastChangedComment).toHaveBeenCalledWith(unitId);
-      expect(unitUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ userId, unitId }));
-      expect(unitUserRepository.save).toHaveBeenCalled();
+      expect(unitUserRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({ userId, unitId, lastSeenCommentChangedAt: date })
+      );
+      expect(unitUserRepository.save).toHaveBeenCalledWith(createdEntity);
     });
   });
 
@@ -102,15 +93,12 @@ describe('UnitUserService', () => {
       expect(result).toEqual(date);
     });
 
-    it('should return default timestamp if unit user does not exist', async () => {
+    it('should return default timestamp (July 2022) if unit user does not exist', async () => {
       mockUnitUserRepository.findOne.mockResolvedValue(null);
 
-      const before = new Date().getTime();
       const result = await service.findLastSeenCommentTimestamp(1, 2);
-      const after = new Date().getTime();
 
-      expect(result.getTime()).toBeGreaterThanOrEqual(before);
-      expect(result.getTime()).toBeLessThanOrEqual(after);
+      expect(result).toEqual(new Date(2022, 6));
     });
   });
 
