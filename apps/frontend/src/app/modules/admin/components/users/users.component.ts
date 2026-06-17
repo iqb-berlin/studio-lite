@@ -313,7 +313,7 @@ export class UsersComponent implements OnInit, OnDestroy {
 
     usersRequest.pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       (users: UserFullDto[]) => {
-        this.setObjectsDatasource(users);
+        this.setObjectsDatasource(users, showLoading);
         if (showLoading) {
           this.tableSelectionRow.clear();
           this.appService.dataLoading = false;
@@ -353,17 +353,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     return typeof document !== 'undefined' && document.visibilityState === 'visible';
   }
 
-  private setObjectsDatasource(users: UserFullDto[]): void {
-    this.objectsDatasource = new MatTableDataSource(users);
-    this.objectsDatasource
-      .filterPredicate = (userList: UserFullDto, filter) => [
-        'name', 'firstName', 'lastName', 'email', 'id', 'description'
-      ].some(column => (userList[column as keyof UserFullDto] || '')
-        .toString()
-        .toLowerCase()
-        .includes(filter));
-    this.objectsDatasource.sort = this.sort;
-
+  private setObjectsDatasource(users: UserFullDto[], forceRecreate = false): void {
     this.activeUserCount = users.filter(u => u.activityStatus === 'active').length;
     this.loggedInUserCount = users.filter(u => u.isLoggedIn).length;
     this.activeSessionCount = users
@@ -372,6 +362,70 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.passiveSessionCount = users
       .flatMap(user => user.sessions || [])
       .filter(session => session.activityStatus === 'passive').length;
+
+    const canUpdateInPlace = !forceRecreate &&
+      this.objectsDatasource?.data?.length === users.length;
+
+    if (canUpdateInPlace) {
+      let dataStructureChanged = false;
+      users.some(updatedUser => {
+        const existing = this.objectsDatasource.data.find(u => u.id === updatedUser.id);
+        if (existing) {
+          Object.assign(existing, updatedUser);
+          return false;
+        }
+        dataStructureChanged = true;
+        return true;
+      });
+      if (dataStructureChanged) {
+        this.objectsDatasource.data = users;
+      }
+      return;
+    }
+
+    this.objectsDatasource = new MatTableDataSource(users);
+    this.objectsDatasource
+      .filterPredicate = (userList: UserFullDto, filter) => [
+        'name', 'firstName', 'lastName', 'email', 'id', 'description'
+      ].some(column => (userList[column as keyof UserFullDto] || '')
+        .toString()
+        .toLowerCase()
+        .includes(filter));
+
+    const defaultSortData = this.objectsDatasource.sortData;
+    this.objectsDatasource.sortData = (data: UserFullDto[], sort: MatSort) => {
+      const { active, direction } = sort;
+      if (active !== 'lastActivity' || !direction) {
+        return defaultSortData(data, sort);
+      }
+
+      const isAsc = direction === 'asc';
+      return data.sort((a, b) => {
+        const weight = (u: UserFullDto) => {
+          const status = u.activityStatus || 'inactive';
+          return {
+            active: 3, passive: 2, orphaned: 1, inactive: 0
+          }[status] || 0;
+        };
+
+        const diffWeight = weight(a) - weight(b);
+        if (diffWeight !== 0) {
+          return diffWeight * (isAsc ? 1 : -1);
+        }
+
+        if (weight(a) > 0) {
+          const timeA = a.lastActivity ? new Date(a.lastActivity).getTime() : 0;
+          const timeB = b.lastActivity ? new Date(b.lastActivity).getTime() : 0;
+          if (timeA !== timeB) {
+            return (timeA - timeB) * (isAsc ? 1 : -1);
+          }
+        }
+
+        return 0;
+      });
+    };
+
+    this.objectsDatasource.sort = this.sort;
   }
 
   createWorkspaceList(): void {
