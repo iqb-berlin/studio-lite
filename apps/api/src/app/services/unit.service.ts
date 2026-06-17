@@ -232,11 +232,6 @@ export class UnitService {
     newUnit.groupName = unit.groupName;
     await this.unitsRepository.save(newUnit);
 
-    const workspaceUsers = await this.workspaceUserRepository
-      .find({ where: { workspaceId: workspaceId } });
-    await Promise.all(workspaceUsers.map(async workspaceUser => {
-      await this.unitUserService.createUnitUser(workspaceUser.userId, newUnit.id);
-    }));
     if (unit.createFrom) {
       const unitSourceData = await this.unitsRepository.findOne({
         where: { id: unit.createFrom },
@@ -297,6 +292,25 @@ export class UnitService {
       newUnit.lastChangedMetadataUser = await this.getDisplayNameForUser(user.id);
       await this.unitsRepository.save(newUnit);
     }
+
+    // unit_user-Einträge NACH copyComments bzw. Erstellung anlegen, damit
+    // createUnitUser die kopierten/neuen Kommentare sieht.
+    // Für den kopierenden User: lastSeenCommentChangedAt aus dem Quell-Workspace übernehmen
+    // (spiegelt sein bisheriges Icon-Verhalten). Für alle anderen: Standard aus createUnitUser.
+    const workspaceUsers = await this.workspaceUserRepository
+      .find({ where: { workspaceId: workspaceId } });
+    const initiatingUserLastSeen = unit.createFrom ?
+      await this.unitUserService.findLastSeenCommentTimestamp(user.id, unit.createFrom) :
+      undefined;
+    await Promise.all(workspaceUsers.map(async workspaceUser => {
+      if (unit.createFrom && workspaceUser.userId === user.id && initiatingUserLastSeen !== undefined) {
+        // Kopierender User: Status aus Quell-Workspace übernehmen
+        await this.unitUserService.createUnitUser(workspaceUser.userId, newUnit.id, initiatingUserLastSeen);
+      } else {
+        // Alle anderen: standardmäßig new Date(2022, 6)
+        await this.unitUserService.createUnitUser(workspaceUser.userId, newUnit.id);
+      }
+    }));
     return newUnit.id;
   }
 
