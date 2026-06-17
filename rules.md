@@ -73,6 +73,14 @@
   - **Rationale**: These suppressions hide potential bugs and architecture flaws instead of fixing them.
   - **Solution**: Adjust types, interfaces, or mock data to satisfy the compiler properly.
 
+### Avoid Loops in Favor of Array Iterations
+- **Rule**: Avoid standard loops (`for`, `for...of`, `for...in`, `while`) in favor of functional array iteration methods (e.g., `forEach`, `map`, `filter`, `some`, `every`, `reduce`).
+- **Rationale**: Functional array methods are less error-prone, promote immutability, and improve readability. Standard loops trigger the linter rule `no-restricted-syntax`.
+- **Preferred Solution**:
+  - Use `forEach` for simple iterations without early termination.
+  - Use `some` or `every` if you need to terminate early (equivalent to `break` or `continue` respectively).
+  - Use `map`, `filter`, `reduce` for data transformation.
+
 ### Component Structure
 - **Rule**: Every Angular component MUST reside in its own dedicated directory.
 - **Rule**: Every component MUST be split into four separate files:
