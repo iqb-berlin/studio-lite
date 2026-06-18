@@ -21,12 +21,12 @@
      </formly-form>
     </form>
     <iqb-profile-form
-      [metadataValues]="$any(metadata[itemIndex])"
+      [metadataValues]="iqbMetadataValues"
       [profileData]="profile"
       [language]="language"
       [formlyWrapper]="''"
       [panelExpanded]="false"
       [vocabularyProvider]="metadataService"
-      (metadataChange)="onMetadataChange($any($event))">
+      (metadataChange)="onMetadataChange($event)">
     </iqb-profile-form>
 </mat-expansion-panel>

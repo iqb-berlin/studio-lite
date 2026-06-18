@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { TopConcept, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
-import { VocabularyProvider, Vocab } from '@iqb/metadata-components';
+import { VocabularyProvider, Vocab, VocabularyEntry } from '@iqb/metadata-components';
 import { MetadataBackendService } from './metadata-backend.service';
 import { WorkspaceService } from '../../workspace/services/workspace.service';
 import {
@@ -26,10 +26,8 @@ export class MetadataService implements VocabularyProvider {
     return this.vocabularies;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getVocabularyDictionary(): Record<string, any> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const libraryDictionary: Record<string, any> = {};
+  getVocabularyDictionary(): Record<string, VocabularyEntry> {
+    const libraryDictionary: Record<string, VocabularyEntry> = {};
     Object.entries(this.vocabulariesIdDictionary).forEach(([id, value]) => {
       libraryDictionary[id] = {
         id: id,

@@ -41,7 +41,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIcon } from '@angular/material/icon';
 import { MDProfile } from '@iqbspecs/metadata-profile';
-import { ProfileFormComponent } from '@iqb/metadata-components';
+import { ProfileFormComponent, UnitMetadataValues as IqbUnitMetadataValues } from '@iqb/metadata-components';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
@@ -105,6 +105,10 @@ export class UnitPropertiesComponent
   private statesChangedSubscription: Subscription | undefined;
   ngUnsubscribe = new Subject<void>();
   metadata!: UnitMetadataValues;
+  get iqbMetadataValues(): IqbUnitMetadataValues {
+    return this.metadata as unknown as IqbUnitMetadataValues;
+  }
+
   workspaceSettings!: WorkspaceSettingsDto;
   metadataLoader: BehaviorSubject<UnitMetadataValues> = new BehaviorSubject({});
   variablesLoader: BehaviorSubject<AliasId[]> = new BehaviorSubject<AliasId[]>(
@@ -446,8 +450,11 @@ export class UnitPropertiesComponent
     return [];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onMetadataChange(metadata: any): void {
+  onMetadataChange(metadata: Partial<IqbUnitMetadataValues>): void {
+    this.workspaceService.getUnitMetadataStore()?.setMetadata(metadata as unknown as UnitMetadataValues);
+  }
+
+  onItemsMetadataChange(metadata: UnitMetadataValues): void {
     this.workspaceService.getUnitMetadataStore()?.setMetadata(metadata);
   }
 

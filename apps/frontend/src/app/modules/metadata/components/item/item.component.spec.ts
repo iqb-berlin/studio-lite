@@ -16,15 +16,14 @@ describe('ItemComponent', () => {
   let component: ItemComponent;
   let fixture: ComponentFixture<ItemComponent>;
 
-  @Component({ selector: 'studio-lite-profile-form', template: '', standalone: true })
+  @Component({ selector: 'iqb-profile-form', template: '', standalone: true })
   class MockProfileFormComponent {
     @Input() language!: string;
-    @Input() profileUrl!: string | undefined;
-    @Input() metadataKey!: 'profiles' | 'items';
-    @Input() metadata!: ItemsMetadataValues[];
+    @Input() profileData!: unknown;
+    @Input() metadataValues!: unknown;
     @Input() formlyWrapper!: string;
     @Input() panelExpanded!: boolean;
-    @Input() profile!: unknown;
+    @Input() vocabularyProvider!: unknown;
   }
 
   beforeEach(async () => {
@@ -89,7 +88,7 @@ describe('ItemComponent', () => {
   it('should update metadata when onMetadataChange is called', () => {
     const emitSpy = jest.spyOn(component.metadataChange, 'emit');
     const newMetadata = { id: 'item1', description: 'updated' } as unknown as ItemsMetadataValues;
-    component.onMetadataChange(newMetadata);
+    component.onMetadataChange(newMetadata as unknown as Parameters<typeof component.onMetadataChange>[0]);
     expect(component.metadata[0]).toEqual(newMetadata);
     expect(emitSpy).toHaveBeenCalled();
   });
