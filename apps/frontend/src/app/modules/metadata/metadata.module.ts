@@ -124,7 +124,12 @@ export function IdValidator(control: AbstractControl, field: FormlyFieldConfig):
         {
           name: 'duration',
           wrappers: ['form-field'],
-          component: FormlyDurationComponent
+          component: FormlyDurationComponent,
+          defaultOptions: {
+            props: {
+              floatLabel: 'always'
+            }
+          }
         }
       ]
     }),
