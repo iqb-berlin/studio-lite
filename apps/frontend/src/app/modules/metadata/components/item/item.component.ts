@@ -12,7 +12,7 @@ import {
   BehaviorSubject, delay, map, Observable, Subject, takeUntil
 } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
-import { ProfileFormComponent } from '@iqb/metadata-components';
+import { ProfileFormComponent, UnitMetadataValues as IqbUnitMetadataValues } from '@iqb/metadata-components';
 import { MetadataService } from '../../services/metadata.service';
 import { AliasId } from '../../models/alias-id.interface';
 import { ItemModel } from '../../models/item-model.interface';
@@ -34,6 +34,10 @@ export class ItemComponent implements OnInit, OnChanges, OnDestroy {
   @Output() metadataChange: EventEmitter<ItemsMetadataValues[]> = new EventEmitter();
 
   hasError!: Observable<boolean>;
+  get iqbMetadataValues(): IqbUnitMetadataValues {
+    return this.metadata[this.itemIndex] as unknown as IqbUnitMetadataValues;
+  }
+
   private ngUnsubscribe = new Subject<void>();
   form = new FormGroup({});
   fields!: FormlyFieldConfig[];
@@ -194,9 +198,8 @@ export class ItemComponent implements OnInit, OnChanges, OnDestroy {
     this.emitMetadata();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onMetadataChange(metadata: any): void {
-    this.metadata[this.itemIndex] = metadata;
+  onMetadataChange(metadata: Partial<IqbUnitMetadataValues>): void {
+    this.metadata[this.itemIndex] = metadata as unknown as ItemsMetadataValues;
     this.emitMetadata();
   }
 

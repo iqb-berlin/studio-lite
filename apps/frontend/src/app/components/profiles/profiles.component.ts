@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, Output, EventEmitter, Input
+  Component, OnInit, Output, EventEmitter, Input, OnDestroy, ChangeDetectorRef
 } from '@angular/core';
 import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
 import { MDProfile } from '@iqbspecs/metadata-profile';
@@ -9,10 +9,13 @@ import { MatError } from '@angular/material/form-field';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { FormsModule } from '@angular/forms';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MetadataResolver } from '@iqb/metadata-resolver';
+import {
+  Subject, takeUntil, firstValueFrom, of, forkJoin, from, switchMap, map
+} from 'rxjs';
 import { ProfileStoreWithProfiles, WsgAdminService } from '../../modules/wsg-admin/services/wsg-admin.service';
 import { Profile } from '../../models/profile.type';
 import { MetadataBackendService } from '../../modules/metadata/services/metadata-backend.service';
+import { ProfileLabelPipe } from '../../pipes/profile-label.pipe';
 
 export type CoreProfile = Profile;
 
@@ -21,9 +24,10 @@ export type CoreProfile = Profile;
   templateUrl: './profiles.component.html',
   styleUrls: ['./profiles.component.scss'],
   imports: [MatProgressSpinner, FormsModule, MatExpansionPanel,
-    MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule]
+    MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule, ProfileLabelPipe]
 })
-export class ProfilesComponent implements OnInit {
+export class ProfilesComponent implements OnInit, OnDestroy {
+  private ngUnsubscribe = new Subject<void>();
   isLoading: boolean = false;
   isError: boolean = false;
   profileStoresWithProfiles : ProfileStoreWithProfiles[] = [];
@@ -32,11 +36,26 @@ export class ProfilesComponent implements OnInit {
   profile!:Profile;
 
   @Output() hasChanged = new EventEmitter<Array<CoreProfile>>();
-  @Input() profiles!: Profile[];
+  private _profiles: Profile[] | undefined;
+
+  @Input()
+  set profiles(value: Profile[]) {
+    this._profiles = value;
+    if (value) {
+      this.fetchedProfiles = value;
+      this.profilesSelected = [...this.fetchedProfiles];
+      this.changeDetectorRef.detectChanges();
+    }
+  }
+
+  get profiles(): Profile[] {
+    return this._profiles || [];
+  }
 
   constructor(
     private wsgAdminService: WsgAdminService,
-    private backendService: MetadataBackendService
+    private backendService: MetadataBackendService,
+    private changeDetectorRef: ChangeDetectorRef
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -46,54 +65,68 @@ export class ProfilesComponent implements OnInit {
   private loadProfiles(): void {
     this.isLoading = true;
     this.backendService.getRegisteredProfiles()
-      .subscribe(async registeredProfiles => {
-        if (Array.isArray(registeredProfiles)) {
-          this.profileStoresWithProfiles = await Promise.all(
-            registeredProfiles.map(async registeredProfile => {
-              const ProfilesStore = registeredProfile as MDProfileStore;
-              const profiles = await Promise.all(
-                ProfilesStore.profiles.map(profile => {
-                  const afterWith = registeredProfile.url.slice(0, registeredProfile.url.lastIndexOf('/'));
-                  return this.getProfile(`${afterWith}/${profile}`);
-                })
-              );
-              return {
-                profileStore: ProfilesStore,
-                profiles: profiles.filter(p => !!p) as MDProfile[]
-              };
-            })
-          );
-          this.wsgAdminService.profileStores = this.profileStoresWithProfiles;
-          const currentSettings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
-          this.fetchedProfiles = currentSettings.profiles || this.profiles;
-          this.profilesSelected = this.fetchedProfiles || [];
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        switchMap(registeredProfiles => {
+          if (!Array.isArray(registeredProfiles)) {
+            this.isError = true;
+            return of([]);
+          }
           this.isError = false;
-        } else {
-          this.isError = true;
-        }
+          const storeObsList = registeredProfiles.map(registeredProfile => {
+            const afterWith = registeredProfile.url.slice(0, registeredProfile.url.lastIndexOf('/'));
+            const urls = registeredProfile.profiles;
+            const profilePromises = urls.map(p => this.getProfile(`${afterWith}/${p}`));
+            return from(Promise.all(profilePromises)).pipe(
+              map(profiles => ({
+                profileStore: registeredProfile as MDProfileStore,
+                profiles: profiles.filter(p => !!p) as MDProfile[]
+              }))
+            );
+          });
+          return forkJoin(storeObsList);
+        })
+      )
+      .subscribe(profileStoresWithProfiles => {
+        this.profileStoresWithProfiles = profileStoresWithProfiles;
+        this.wsgAdminService.profileStores = this.profileStoresWithProfiles;
         this.isLoading = false;
+
+        if (this.profilesSelected.length === 0) {
+          const currentSettings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
+          this.fetchedProfiles = this._profiles !== undefined ?
+            (this._profiles || []) : (currentSettings.profiles || []);
+          this.profilesSelected = [...this.fetchedProfiles];
+        }
+
+        this.changeDetectorRef.detectChanges();
+      });
+
+    this.wsgAdminService.selectedWorkspaceGroupSettings
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(settings => {
+        if (settings && this._profiles === undefined) {
+          this.fetchedProfiles = settings.profiles || [];
+          this.profilesSelected = [...this.fetchedProfiles];
+          this.changeDetectorRef.detectChanges();
+        }
       });
   }
 
   async getProfile(profileUrl:string): Promise<MDProfile | null> {
-    return new Promise(resolve => {
-      this.backendService.getMetadataProfile(profileUrl)
-        .subscribe(profile => {
-          if (profile && profile !== true) {
-            return resolve(profile as unknown as MDProfile);
-          }
-          return resolve(null);
-        });
-    });
+    try {
+      const profile = await firstValueFrom(this.backendService.getMetadataProfile(profileUrl));
+      if (profile && profile !== true) {
+        return profile as unknown as MDProfile;
+      }
+    } catch {
+      // return null if error occurs
+    }
+    return null;
   }
 
   isChecked(id:string):boolean {
     return !!this.profilesSelected?.find((profile: { id: string; }) => profile.id === id);
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getProfileLabel(profile: MDProfile): string {
-    return MetadataResolver.extractLabelText(profile.label);
   }
 
   changeSelection(checkbox:MatCheckboxChange) {
@@ -103,5 +136,10 @@ export class ProfilesComponent implements OnInit {
       this.profilesSelected = this.profilesSelected
         .filter((profile: CoreProfile) => profile.id !== checkbox.source.id);
     this.hasChanged.emit(this.profilesSelected);
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
