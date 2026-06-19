@@ -133,6 +133,27 @@ describe('AppConfigComponent', () => {
     expect(component.configForm.get('globalWarningText')?.value).toBe('Test Warning');
   });
 
+  it('should convert globalWarningExpiredDay from string to Date object', () => {
+    const stringConfig = {
+      appTitle: 'Test App',
+      introHtml: '<p>Test Intro</p>',
+      imprintHtml: '<p>Test Imprint</p>',
+      emailSubject: 'Test Email Subject',
+      emailBody: 'Test Email Body',
+      globalWarningText: 'Test Warning',
+      globalWarningExpiredDay: '2026-12-31T00:00:00.000Z',
+      globalWarningExpiredHour: 12,
+      hasUsers: true
+    };
+    readBackendService.getConfig.mockReturnValue(of(stringConfig as unknown as ConfigDto));
+    const stringFixture = TestBed.createComponent(AppConfigComponent);
+    const stringComponent = stringFixture.componentInstance;
+    stringFixture.detectChanges();
+
+    expect(stringComponent.appConfig.globalWarningExpiredDay).toBeInstanceOf(Date);
+    expect(stringComponent.configForm.get('globalWarningExpiredDay')?.value).toBeInstanceOf(Date);
+  });
+
   it('should set dataChanged flag when form values change', fakeAsync(() => {
     fixture.detectChanges();
     component.dataChanged = false;
