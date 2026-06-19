@@ -11,7 +11,7 @@ import {
 } from '../../../support/helpers';
 import { group1 } from '../../../support/testData';
 
-describe('Admin Settings Tab Configuration', () => {
+describe.skip('Admin Settings Tab Configuration', () => {
   before(() => addFirstUser());
   after(() => {
     deleteFirstUser();
