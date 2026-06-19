@@ -76,7 +76,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
         if (appConfig.imprintHtml) this.appConfig.imprintHtml = appConfig.imprintHtml;
         if (appConfig.globalWarningText) this.appConfig.globalWarningText = appConfig.globalWarningText;
         if (appConfig.globalWarningExpiredDay) {
-          this.appConfig.globalWarningExpiredDay = appConfig.globalWarningExpiredDay;
+          this.appConfig.globalWarningExpiredDay = new Date(appConfig.globalWarningExpiredDay);
         }
         if (appConfig.globalWarningExpiredHour) {
           this.appConfig.globalWarningExpiredHour = appConfig.globalWarningExpiredHour;

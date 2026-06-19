@@ -27,8 +27,9 @@ import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import {
   HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi
 } from '@angular/common/http';
-import { DateFnsAdapter } from '@angular/material-date-fns-adapter';
-import { MAT_DATE_LOCALE, DateAdapter } from '@angular/material/core';
+import { provideDateFnsAdapter } from '@angular/material-date-fns-adapter';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { de } from 'date-fns/locale';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -100,13 +101,9 @@ bootstrapApplication(AppComponent, {
     },
     {
       provide: MAT_DATE_LOCALE,
-      useValue: 'de'
+      useValue: de
     },
-    {
-      provide: DateAdapter,
-      useClass: DateFnsAdapter,
-      useValue: [MAT_DATE_LOCALE]
-    },
+    provideDateFnsAdapter(),
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
