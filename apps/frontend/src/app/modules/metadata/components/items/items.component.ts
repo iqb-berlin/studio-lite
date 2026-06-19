@@ -23,6 +23,7 @@ import { NewItemComponent } from '../new-item/new-item.component';
 import { ItemSortService } from '../../services/item-sort.service';
 import { SortAscendingPipe } from '../../../comments/pipes/sort-ascending.pipe';
 import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
+import { WorkspaceService } from '../../../workspace/services/workspace.service';
 
 @Component({
   selector: 'studio-lite-items',
@@ -50,7 +51,8 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
     private addItemDialog: MatDialog,
     public itemSortService: ItemSortService,
     private translateService: TranslateService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private workspaceService: WorkspaceService
   ) {
   }
 
@@ -135,8 +137,14 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       const item = structuredClone(this.items[result]);
       if (item.profiles) {
+        const currentProfileId = this.workspaceService.workspaceSettings?.itemMDProfile;
         item.profiles = item.profiles
-          .map(profile => (profile.isCurrent ? profile : {}));
+          .map(profile => {
+            const isCurrent = profile.isCurrent || (currentProfileId && profile.profileId === currentProfileId);
+            return isCurrent ?
+              { ...profile, id: undefined, isCurrent: true } :
+              { profileId: profile.profileId, isCurrent: false, entries: [] };
+          });
       }
       this.addItem({
         ...item,
