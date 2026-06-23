@@ -42,13 +42,15 @@ describe('UnitPrintCommentsComponent', () => {
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl
-        },
-        {
-          provide: BackendService,
-          useValue: mockBackendService
         }
       ]
-    }).compileComponents();
+    })
+      .overrideComponent(UnitPrintCommentsComponent, {
+        set: {
+          providers: [{ provide: BackendService, useValue: mockBackendService }]
+        }
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(UnitPrintCommentsComponent);
     component = fixture.componentInstance;
