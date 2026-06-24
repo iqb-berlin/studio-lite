@@ -211,10 +211,11 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
       dialogRef.afterClosed().subscribe((result: UnitDownloadSettingsDto | boolean) => {
         if (result) {
           this.appService.dataLoading = true;
-          this.backendService.downloadUnits(
-            this.workspaceService.selectedWorkspaceId,
-            result as UnitDownloadSettingsDto
-          ).subscribe(b => {
+          const settings = result as UnitDownloadSettingsDto;
+          const download$ = settings.exportFormat === 'json' ?
+            this.backendService.downloadUnitsJson(this.workspaceService.selectedWorkspaceId, settings) :
+            this.backendService.downloadUnits(this.workspaceService.selectedWorkspaceId, settings);
+          download$.subscribe(b => {
             if (b) {
               if (typeof b === 'number') {
                 this.appService.dataLoading = b;

@@ -26,6 +26,7 @@ import {
   WorkspaceFullDto,
   RequestReportDto,
   WorkspaceSettingsDto,
+  UnitDownloadSettingsDto,
   UsersInWorkspaceDto, UserWorkspaceFullDto, GroupNameDto, RenameGroupNameDto, NameDto
 } from '@studio-lite-lib/api-dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -85,7 +86,8 @@ export class WorkspaceController {
       @Res({ passthrough: true }) res: Response
   ): Promise<WorkspaceFullDto | StreamableFile> {
     if (download) {
-      const unitDownloadSettings = JSON.parse(settings);
+      const unitDownloadSettings: UnitDownloadSettingsDto = JSON.parse(settings);
+      unitDownloadSettings.exportFormat = 'xml';
       const file = await UnitDownloadClass.get(
         workspaceId,
         this.unitService,
@@ -102,6 +104,36 @@ export class WorkspaceController {
       return new StreamableFile(file as unknown as Uint8Array);
     }
     return this.workspaceService.findOne(workspaceId);
+  }
+
+  @Post('download-units')
+  @UseGuards(JwtAuthGuard, ReadOrGroupAdminAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse()
+  @ApiForbiddenResponse({ description: 'Forbidden.' })
+  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiTags('workspace')
+  async downloadUnitsJson(
+    @WorkspaceId() workspaceId: number,
+      @Body() settings: UnitDownloadSettingsDto,
+      @Res({ passthrough: true }) res: Response
+  ): Promise<StreamableFile> {
+    settings.exportFormat = 'json';
+    const file = await UnitDownloadClass.get(
+      workspaceId,
+      this.unitService,
+      this.unitCommentService,
+      this.veronaModuleService,
+      this.settingService,
+      this.unitRichNoteService,
+      settings
+    );
+    res.set({
+      'Content-Type': 'application/zip',
+      'Content-Disposition': 'attachment; filename="studio-export-units.zip"'
+    });
+    return new StreamableFile(file as unknown as Uint8Array);
   }
 
   @Get('users/:user_id')
