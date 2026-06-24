@@ -115,7 +115,8 @@ class Unit {
     lastChangedMetadataUser: string;
 
   @Column({
-    nullable: true
+    nullable: true,
+    unique: true
   })
     uuid: string;
 }

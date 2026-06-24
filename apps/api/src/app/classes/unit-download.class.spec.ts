@@ -652,6 +652,7 @@ describe('UnitDownloadClass', () => {
       const parsed = JSON.parse((jsonCall[1] as Buffer).toString());
       expect(parsed.userInterface).toHaveProperty('player');
     });
+
   });
 
   describe('buildVariablesJSON', () => {

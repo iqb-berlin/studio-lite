@@ -434,5 +434,11 @@ describe('UnitService', () => {
       );
       expect(unitsRepository.save).toHaveBeenCalled();
     });
+
+    it('should throw UnitNotFoundException when unit does not exist', async () => {
+      unitsRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.ensureUuid(999)).rejects.toThrow(UnitNotFoundException);
+    });
   });
 });

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -86,7 +87,12 @@ export class WorkspaceController {
       @Res({ passthrough: true }) res: Response
   ): Promise<WorkspaceFullDto | StreamableFile> {
     if (download) {
-      const unitDownloadSettings: UnitDownloadSettingsDto = JSON.parse(settings);
+      let unitDownloadSettings: UnitDownloadSettingsDto;
+      try {
+        unitDownloadSettings = JSON.parse(settings);
+      } catch {
+        throw new BadRequestException('Invalid settings JSON');
+      }
       unitDownloadSettings.exportFormat = 'xml';
       const file = await UnitDownloadClass.get(
         workspaceId,

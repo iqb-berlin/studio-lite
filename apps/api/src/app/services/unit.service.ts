@@ -320,6 +320,7 @@ export class UnitService {
       where: { id: unitId },
       select: ['id', 'uuid']
     });
+    if (!unit) throw new UnitNotFoundException(unitId, 0, 'GET');
     if (unit.uuid) return unit.uuid;
     unit.uuid = crypto.randomUUID();
     await this.unitsRepository.save(unit);

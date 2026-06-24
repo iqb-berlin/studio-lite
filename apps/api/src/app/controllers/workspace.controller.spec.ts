@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
-import { StreamableFile } from '@nestjs/common';
+import { BadRequestException, StreamableFile } from '@nestjs/common';
 import {
   GroupNameDto,
   NameDto,
@@ -115,6 +115,13 @@ describe('WorkspaceController', () => {
       await controller.find(1, true, settingsJson, res);
 
       expect(spy.mock.lastCall[6]).toEqual(expect.objectContaining({ exportFormat: 'xml' }));
+    });
+
+    it('should throw BadRequestException for malformed settings JSON', async () => {
+      const res = createMock<Response>();
+
+      await expect(controller.find(1, true, '{not-json}', res))
+        .rejects.toThrow(BadRequestException);
     });
   });
 

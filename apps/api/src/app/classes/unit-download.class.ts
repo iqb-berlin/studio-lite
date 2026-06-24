@@ -178,7 +178,7 @@ export class UnitDownloadClass {
           '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
           '@xsi:noNamespaceSchemaLocation': unitExportConfig.unitXsdUrl,
           Metadata: {
-            '@lastChange': unitMetadata.lastChangedMetadata.toISOString(),
+            '@lastChange': unitMetadata.lastChangedMetadata?.toISOString(),
             Id: unitMetadata.key,
             Label: unitMetadata.name,
             Description: unitMetadata.description,

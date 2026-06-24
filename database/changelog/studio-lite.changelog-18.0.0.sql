@@ -30,8 +30,9 @@ DELETE FROM "public"."user_session" WHERE "expires_at" < now();
 
 -- changeset jojohoch:5
 ALTER TABLE "public"."unit"
-  ADD COLUMN "uuid" VARCHAR(255);
--- rollback ALTER TABLE "public"."unit" DROP COLUMN "uuid";
+  ADD COLUMN "uuid" VARCHAR(255),
+  ADD CONSTRAINT "unit_uuid_unique" UNIQUE ("uuid");
+-- rollback ALTER TABLE "public"."unit" DROP CONSTRAINT "unit_uuid_unique"; ALTER TABLE "public"."unit" DROP COLUMN "uuid";
 
 -- changeset jojohoch:6
 UPDATE "public"."unit"
