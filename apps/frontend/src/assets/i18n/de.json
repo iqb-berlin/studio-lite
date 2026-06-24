@@ -40,6 +40,9 @@
     "request-error": "Allgemeiner Fehler (Netzverbindung?)"
   },
   "unit-download": {
+    "export-format": "Exportformat",
+    "export-format-json": "JSON (Standard)",
+    "export-format-xml": "XML (Legacy)",
     "add-files": "Zusätzliche Dateien",
     "add-player": "Player hinzufügen",
     "add-comments": "Kommentare hinzufügen",

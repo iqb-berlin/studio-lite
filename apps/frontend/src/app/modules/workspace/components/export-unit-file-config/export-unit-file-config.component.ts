@@ -6,6 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatCard } from '@angular/material/card';
+import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { ModuleService } from '../../../../services/module.service';
@@ -14,14 +15,16 @@ import { ModuleService } from '../../../../services/module.service';
   selector: 'studio-lite-export-unit-file-config',
   templateUrl: './export-unit-file-config.component.html',
   styleUrls: ['./export-unit-file-config.component.scss'],
-  imports: [MatCheckbox, FormsModule, TranslateModule, MatCard]
+  imports: [MatCheckbox, FormsModule, TranslateModule, MatCard, MatRadioGroup, MatRadioButton]
 })
 export class ExportUnitFileConfigComponent implements OnInit {
   unitsWithOutPlayer: number[] = [];
   enablePlayerOption = true;
+  @Input() exportFormat: 'xml' | 'json' = 'json';
   @Input() addPlayers!: boolean;
   @Input() addComments!: boolean;
   @Input() addRichNotes!: boolean;
+  @Output() exportFormatChange = new EventEmitter<'xml' | 'json'>();
   @Output() addPlayersChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() addCommentsChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() addRichNotesChange: EventEmitter<boolean> = new EventEmitter<boolean>();

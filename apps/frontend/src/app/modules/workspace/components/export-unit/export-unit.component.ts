@@ -24,6 +24,7 @@ import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export
 export class ExportUnitComponent {
   unitExportSettings: UnitDownloadSettingsDto = {
     unitIdList: [],
+    exportFormat: 'json',
     addComments: false,
     addRichNotes: false,
     addPlayers: false,
