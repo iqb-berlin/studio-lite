@@ -15,7 +15,8 @@ import { MapItemUuidsIdsPipe } from '../../../comments/pipes/map-item-uuids-ids.
   selector: 'studio-lite-unit-print-comments',
   templateUrl: './unit-print-comments.component.html',
   styleUrls: ['./unit-print-comments.component.scss'],
-  imports: [MatIcon, DatePipe, TranslateModule, SortAscendingPipe, MapItemUuidsIdsPipe]
+  imports: [MatIcon, DatePipe, TranslateModule, SortAscendingPipe, MapItemUuidsIdsPipe],
+  providers: [BackendService]
 })
 export class UnitPrintCommentsComponent implements OnChanges, OnDestroy {
   @Input() unitId!: number;
