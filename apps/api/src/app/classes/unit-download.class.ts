@@ -32,7 +32,8 @@ export class UnitDownloadClass {
     veronaModuleService: VeronaModulesService,
     settingService: SettingService,
     unitRichNoteService: UnitRichNoteService,
-    unitDownloadSettings: UnitDownloadSettingsDto
+    unitDownloadSettings: UnitDownloadSettingsDto,
+    exportFormat: 'xml' | 'json' = 'xml'
   ): Promise<Buffer> {
     const zip = new AdmZip();
     const unitsMetadata: UnitPropertiesDto[] = [];
@@ -43,7 +44,7 @@ export class UnitDownloadClass {
 
     await Promise.all(
       unitDownloadSettings.unitIdList.map(async unitId => {
-        if (unitDownloadSettings.exportFormat === 'json') {
+        if (exportFormat === 'json') {
           await UnitDownloadClass.getUnitDataJSON(
             unitService,
             unitCommentService,

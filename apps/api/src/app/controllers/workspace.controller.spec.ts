@@ -106,15 +106,14 @@ describe('WorkspaceController', () => {
       expect(result).toBeInstanceOf(StreamableFile);
     });
 
-    it('should force exportFormat to xml even when json is provided in settings', async () => {
+    it('should pass xml as explicit exportFormat argument', async () => {
       const mockFileBuffer = Buffer.from('test');
       const spy = jest.spyOn(UnitDownloadClass, 'get').mockResolvedValue(mockFileBuffer);
       const res = createMock<Response>();
-      const settingsJson = JSON.stringify({ unitIdList: [1], exportFormat: 'json' });
 
-      await controller.find(1, true, settingsJson, res);
+      await controller.find(1, true, '{}', res);
 
-      expect(spy.mock.lastCall[6]).toEqual(expect.objectContaining({ exportFormat: 'xml' }));
+      expect(spy.mock.lastCall[7]).toBe('xml');
     });
 
     it('should throw BadRequestException for malformed settings JSON', async () => {
@@ -147,13 +146,12 @@ describe('WorkspaceController', () => {
       expect(result).toBeInstanceOf(StreamableFile);
     });
 
-    it('should force exportFormat to json regardless of body value', async () => {
+    it('should pass json as explicit exportFormat argument', async () => {
       const spy = jest.spyOn(UnitDownloadClass, 'get').mockResolvedValue(Buffer.from('test'));
-      const settings = minimalSettings();
 
-      await controller.downloadUnitsJson(1, settings, createMock<Response>());
+      await controller.downloadUnitsJson(1, minimalSettings(), createMock<Response>());
 
-      expect(spy.mock.lastCall[6]).toEqual(expect.objectContaining({ exportFormat: 'json' }));
+      expect(spy.mock.lastCall[7]).toBe('json');
     });
 
     it('should set application/zip content-type header', async () => {

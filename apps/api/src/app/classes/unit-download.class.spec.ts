@@ -410,7 +410,8 @@ describe('UnitDownloadClass', () => {
         veronaModuleServiceMock,
         settingServiceMock,
         unitRichNoteServiceMock,
-        downloadSettings
+        downloadSettings,
+        'json'
       );
 
       const addedFiles = mockZip.addFile.mock.calls.map((c: string[]) => c[0]);
@@ -463,7 +464,8 @@ describe('UnitDownloadClass', () => {
         veronaModuleServiceMock,
         settingServiceMock,
         unitRichNoteServiceMock,
-        downloadSettings
+        downloadSettings,
+        'json'
       );
 
       const jsonCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U2.json');
@@ -515,7 +517,8 @@ describe('UnitDownloadClass', () => {
         veronaModuleServiceMock,
         settingServiceMock,
         unitRichNoteServiceMock,
-        downloadSettings
+        downloadSettings,
+        'json'
       );
 
       const jsonCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U3.json');
@@ -561,7 +564,7 @@ describe('UnitDownloadClass', () => {
 
       await UnitDownloadClass.get(
         1, unitServiceMock, unitCommentServiceMock, veronaModuleServiceMock,
-        settingServiceMock, unitRichNoteServiceMock, downloadSettings
+        settingServiceMock, unitRichNoteServiceMock, downloadSettings, 'json'
       );
 
       const jsonCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U4.json');
@@ -606,9 +609,10 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1, unitServiceMock, unitCommentServiceMock, veronaModuleServiceMock,
         settingServiceMock, unitRichNoteServiceMock,
-        { unitIdList: [6], exportFormat: 'json', addPlayers: false, addComments: false,
+        { unitIdList: [6], addPlayers: false, addComments: false,
           addRichNotes: false, addTestTakersHot: 0, addTestTakersMonitor: 0, addTestTakersReview: 0
-        } as unknown as UnitDownloadSettingsDto
+        } as unknown as UnitDownloadSettingsDto,
+        'json'
       );
 
       const jsonCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U6.json');
@@ -643,9 +647,10 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1, unitServiceMock, unitCommentServiceMock, veronaModuleServiceMock,
         settingServiceMock, unitRichNoteServiceMock,
-        { unitIdList: [5], exportFormat: 'json', addPlayers: false, addComments: false,
+        { unitIdList: [5], addPlayers: false, addComments: false,
           addRichNotes: false, addTestTakersHot: 0, addTestTakersMonitor: 0, addTestTakersReview: 0
-        } as unknown as UnitDownloadSettingsDto
+        } as unknown as UnitDownloadSettingsDto,
+        'json'
       );
 
       const jsonCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U5.json');

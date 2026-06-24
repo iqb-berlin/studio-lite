@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnDestroy } from '@angular/core';
 import { BookletConfigDto, UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import { format } from 'date-fns';
 import { saveAs } from 'file-saver-es';
@@ -6,6 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
+import { Subject, takeUntil } from 'rxjs';
 import { ExportUnitComponent } from '../export-unit/export-unit.component';
 import { AppService } from '../../../../services/app.service';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -18,16 +19,24 @@ import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrappe
   styleUrls: ['./export-review-button.component.scss'],
   imports: [MatButton, MatTooltip, WrappedIconComponent, TranslateModule]
 })
-export class ExportReviewButtonComponent {
+export class ExportReviewButtonComponent implements OnDestroy {
   @Input() bookletConfigSettings!: BookletConfigDto | undefined;
   @Input() workspaceId!: number;
   @Input() units!: number[];
   @Input() selectedReviewId!: number;
+
+  private ngUnsubscribe = new Subject<void>();
+
   constructor(
     private dialog: MatDialog,
     public workspaceService: WorkspaceService,
     public backendService: WorkspaceBackendService,
     private appService: AppService) {}
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
+  }
 
   exportReview(): void {
     const dialogRef = this.dialog
@@ -37,6 +46,7 @@ export class ExportReviewButtonComponent {
       });
 
     dialogRef.afterClosed()
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((result: UnitDownloadSettingsDto | boolean) => {
         if (result !== false) {
           this.appService.dataLoading = true;
@@ -44,7 +54,7 @@ export class ExportReviewButtonComponent {
           const download$ = settings.exportFormat === 'json' ?
             this.backendService.downloadUnitsJson(this.workspaceService.selectedWorkspaceId, settings) :
             this.backendService.downloadUnits(this.workspaceService.selectedWorkspaceId, settings);
-          download$.subscribe(b => {
+          download$.pipe(takeUntil(this.ngUnsubscribe)).subscribe(b => {
             if (b) {
               if (typeof b === 'number') {
                 this.appService.dataLoading = b;

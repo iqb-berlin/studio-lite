@@ -12,7 +12,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatButton } from '@angular/material/button';
-import { lastValueFrom, map, Subject } from 'rxjs';
+import { lastValueFrom, map, Subject, takeUntil } from 'rxjs';
 import { HttpParams } from '@angular/common/http';
 import { WorkspaceService } from '../../services/workspace.service';
 import { GroupManageComponent } from '../group-manage/group-manage.component';
@@ -215,7 +215,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
           const download$ = settings.exportFormat === 'json' ?
             this.backendService.downloadUnitsJson(this.workspaceService.selectedWorkspaceId, settings) :
             this.backendService.downloadUnits(this.workspaceService.selectedWorkspaceId, settings);
-          download$.subscribe(b => {
+          download$.pipe(takeUntil(this.ngUnsubscribe)).subscribe(b => {
             if (b) {
               if (typeof b === 'number') {
                 this.appService.dataLoading = b;

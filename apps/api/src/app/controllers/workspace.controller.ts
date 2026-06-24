@@ -93,7 +93,6 @@ export class WorkspaceController {
       } catch {
         throw new BadRequestException('Invalid settings JSON');
       }
-      unitDownloadSettings.exportFormat = 'xml';
       const file = await UnitDownloadClass.get(
         workspaceId,
         this.unitService,
@@ -101,7 +100,8 @@ export class WorkspaceController {
         this.veronaModuleService,
         this.settingService,
         this.unitRichNoteService,
-        unitDownloadSettings
+        unitDownloadSettings,
+        'xml'
       );
       res.set({
         'Content-Type': 'text/html',
@@ -125,7 +125,6 @@ export class WorkspaceController {
       @Body() settings: UnitDownloadSettingsDto,
       @Res({ passthrough: true }) res: Response
   ): Promise<StreamableFile> {
-    settings.exportFormat = 'json';
     const file = await UnitDownloadClass.get(
       workspaceId,
       this.unitService,
@@ -133,7 +132,8 @@ export class WorkspaceController {
       this.veronaModuleService,
       this.settingService,
       this.unitRichNoteService,
-      settings
+      settings,
+      'json'
     );
     res.set({
       'Content-Type': 'application/zip',
