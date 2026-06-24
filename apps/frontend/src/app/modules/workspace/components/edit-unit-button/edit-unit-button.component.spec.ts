@@ -12,10 +12,11 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, of } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { UnitDownloadSettingsDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import {
   EditWorkspaceSettingsComponent
 } from '../../../../components/edit-workspace-settings/edit-workspace-settings.component';
+import { ExportUnitComponent } from '../export-unit/export-unit.component';
 import { environment } from '../../../../../environments/environment';
 import { EditUnitButtonComponent } from './edit-unit-button.component';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -105,6 +106,55 @@ describe('EditUnitButtonComponent', () => {
 
   it('should set userListTitle on init', () => {
     expect(component.userListTitle).toBe('workspace.user-list');
+  });
+
+  describe('exportUnit', () => {
+    const buildSettings = (format: 'json' | 'xml'): UnitDownloadSettingsDto => ({
+      unitIdList: [1],
+      exportFormat: format,
+      addPlayers: false,
+      addComments: false,
+      addRichNotes: false,
+      addTestTakersReview: 0,
+      addTestTakersMonitor: 0,
+      addTestTakersHot: 0,
+      passwordLess: false,
+      bookletSettings: []
+    });
+
+    beforeEach(() => {
+      mockWorkspaceService.unitList = { 1: {} } as unknown as typeof mockWorkspaceService.unitList;
+      mockWorkspaceBackendService.downloadUnitsJson.mockReturnValue(of(null));
+      mockWorkspaceBackendService.downloadUnits.mockReturnValue(of(null));
+    });
+
+    it('should call downloadUnitsJson when exportFormat is json', () => {
+      const settings = buildSettings('json');
+      mockDialog.open.mockReturnValue(createMock<MatDialogRef<ExportUnitComponent>>({
+        afterClosed: () => of(settings)
+      }));
+
+      component.exportUnit();
+
+      expect(mockWorkspaceBackendService.downloadUnitsJson).toHaveBeenCalledWith(
+        mockWorkspaceService.selectedWorkspaceId, settings
+      );
+      expect(mockWorkspaceBackendService.downloadUnits).not.toHaveBeenCalled();
+    });
+
+    it('should call downloadUnits when exportFormat is xml', () => {
+      const settings = buildSettings('xml');
+      mockDialog.open.mockReturnValue(createMock<MatDialogRef<ExportUnitComponent>>({
+        afterClosed: () => of(settings)
+      }));
+
+      component.exportUnit();
+
+      expect(mockWorkspaceBackendService.downloadUnits).toHaveBeenCalledWith(
+        mockWorkspaceService.selectedWorkspaceId, settings
+      );
+      expect(mockWorkspaceBackendService.downloadUnitsJson).not.toHaveBeenCalled();
+    });
   });
 
   it('should update workspace settings and call backend when settings dialog is closed with result', async () => {

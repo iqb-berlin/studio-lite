@@ -5,6 +5,7 @@ import {
   GroupNameDto,
   NameDto,
   RequestReportDto,
+  UnitDownloadSettingsDto,
   UsersInWorkspaceDto,
   UserWorkspaceFullDto,
   WorkspaceFullDto,
@@ -90,7 +91,7 @@ describe('WorkspaceController', () => {
       expect(res).toEqual(result);
     });
 
-    it('should download units', async () => {
+    it('should download units as StreamableFile', async () => {
       const mockFileBuffer = Buffer.from('test');
       jest.spyOn(UnitDownloadClass, 'get').mockResolvedValue(mockFileBuffer);
       const res = createMock<Response>();
@@ -103,6 +104,61 @@ describe('WorkspaceController', () => {
         'Content-Disposition': 'attachment; filename="studio-export-units.zip"'
       });
       expect(result).toBeInstanceOf(StreamableFile);
+    });
+
+    it('should force exportFormat to xml even when json is provided in settings', async () => {
+      const mockFileBuffer = Buffer.from('test');
+      const spy = jest.spyOn(UnitDownloadClass, 'get').mockResolvedValue(mockFileBuffer);
+      const res = createMock<Response>();
+      const settingsJson = JSON.stringify({ unitIdList: [1], exportFormat: 'json' });
+
+      await controller.find(1, true, settingsJson, res);
+
+      expect(spy.mock.lastCall[6]).toEqual(expect.objectContaining({ exportFormat: 'xml' }));
+    });
+  });
+
+  describe('downloadUnitsJson', () => {
+    const minimalSettings = (): UnitDownloadSettingsDto => ({
+      unitIdList: [1, 2],
+      exportFormat: 'xml',
+      addPlayers: false,
+      addComments: false,
+      addRichNotes: false,
+      addTestTakersReview: 0,
+      addTestTakersMonitor: 0,
+      addTestTakersHot: 0,
+      passwordLess: false,
+      bookletSettings: []
+    });
+
+    afterEach(() => jest.restoreAllMocks());
+
+    it('should return a StreamableFile', async () => {
+      jest.spyOn(UnitDownloadClass, 'get').mockResolvedValue(Buffer.from('test'));
+      const result = await controller.downloadUnitsJson(1, minimalSettings(), createMock<Response>());
+      expect(result).toBeInstanceOf(StreamableFile);
+    });
+
+    it('should force exportFormat to json regardless of body value', async () => {
+      const spy = jest.spyOn(UnitDownloadClass, 'get').mockResolvedValue(Buffer.from('test'));
+      const settings = minimalSettings();
+
+      await controller.downloadUnitsJson(1, settings, createMock<Response>());
+
+      expect(spy.mock.lastCall[6]).toEqual(expect.objectContaining({ exportFormat: 'json' }));
+    });
+
+    it('should set application/zip content-type header', async () => {
+      jest.spyOn(UnitDownloadClass, 'get').mockResolvedValue(Buffer.from('test'));
+      const res = createMock<Response>();
+
+      await controller.downloadUnitsJson(1, minimalSettings(), res);
+
+      expect(res.set).toHaveBeenCalledWith({
+        'Content-Type': 'application/zip',
+        'Content-Disposition': 'attachment; filename="studio-export-units.zip"'
+      });
     });
   });
 
