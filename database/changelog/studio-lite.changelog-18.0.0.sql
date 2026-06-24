@@ -27,3 +27,8 @@ ALTER TABLE "public"."refresh_token"
 DELETE FROM "public"."refresh_token" WHERE "expires_at" < now();
 DELETE FROM "public"."user_session" WHERE "expires_at" < now();
 -- rollback SELECT 1;
+
+-- changeset jojohoch:5
+ALTER TABLE "public"."unit"
+  ADD COLUMN "uuid" VARCHAR(255);
+-- rollback ALTER TABLE "public"."unit" DROP COLUMN "uuid";
