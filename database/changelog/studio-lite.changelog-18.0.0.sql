@@ -32,3 +32,9 @@ DELETE FROM "public"."user_session" WHERE "expires_at" < now();
 ALTER TABLE "public"."unit"
   ADD COLUMN "uuid" VARCHAR(255);
 -- rollback ALTER TABLE "public"."unit" DROP COLUMN "uuid";
+
+-- changeset jojohoch:6
+UPDATE "public"."unit"
+  SET "uuid" = gen_random_uuid()::VARCHAR
+  WHERE "uuid" IS NULL;
+-- rollback UPDATE "public"."unit" SET "uuid" = NULL;

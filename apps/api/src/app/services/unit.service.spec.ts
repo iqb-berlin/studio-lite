@@ -172,6 +172,21 @@ describe('UnitService', () => {
       const result = await service.create(1, { key: 'u1' } as CreateUnitDto, { id: 1 } as User, false);
       expect(result).toBe(0);
     });
+
+    it('should assign a uuid to the new unit', async () => {
+      const newUnit: Partial<Unit> = { id: 2 };
+      unitsRepository.findOne.mockResolvedValue(null);
+      unitsRepository.create.mockReturnValue(newUnit as Unit);
+      unitsRepository.save.mockResolvedValue(newUnit as Unit);
+      workspaceUserRepository.find.mockResolvedValue([]);
+      usersRepository.findOne.mockResolvedValue({ lastName: 'Doe' } as User);
+
+      await service.create(1, { key: 'u1' } as CreateUnitDto, { id: 1 } as User, false);
+
+      expect(newUnit.uuid).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      );
+    });
   });
 
   describe('findOnesProperties', () => {
@@ -280,6 +295,35 @@ describe('UnitService', () => {
 
       await service.copy([1], 2, { id: 1, name: 'u' } as User, false);
       expect(unitsRepository.create).toHaveBeenCalled();
+    });
+
+    it('should not copy uuid to the new unit', async () => {
+      const sourceUnit = {
+        id: 1,
+        key: 'k',
+        uuid: 'original-uuid',
+        scheme: '{"variableCodings": []}',
+        variables: []
+      } as unknown as Unit;
+
+      unitsRepository.findOne
+        .mockResolvedValueOnce(sourceUnit)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValue(sourceUnit);
+
+      const capturedCreateArg: Partial<Unit> = {};
+      unitsRepository.create.mockImplementation((dto: Partial<Unit>) => {
+        Object.assign(capturedCreateArg, dto);
+        return { id: 2 } as Unit;
+      });
+      unitsRepository.save.mockResolvedValue({ id: 2 } as Unit);
+      workspaceUserRepository.find.mockResolvedValue([]);
+      usersRepository.findOne.mockResolvedValue({ firstName: 'F', lastName: 'L', name: 'N' } as User);
+      unitDefinitionsRepository.findOne.mockResolvedValue({ data: 'xml' } as UnitDefinition);
+
+      await service.copy([1], 2, { id: 1, name: 'u' } as User, false);
+
+      expect(capturedCreateArg.uuid).toBeUndefined();
     });
   });
 

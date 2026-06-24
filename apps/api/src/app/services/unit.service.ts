@@ -230,6 +230,7 @@ export class UnitService {
     const newUnit = this.unitsRepository.create(unit);
     newUnit.workspaceId = workspaceId;
     newUnit.groupName = unit.groupName;
+    newUnit.uuid = crypto.randomUUID();
     await this.unitsRepository.save(newUnit);
 
     if (unit.createFrom) {
@@ -612,7 +613,7 @@ export class UnitService {
       const unitToCopy = await this.unitsRepository.findOne({
         where: { id: unitId }
       });
-      const keysToIgnore = ['id', 'groupName', 'key', 'state'];
+      const keysToIgnore = ['id', 'groupName', 'key', 'state', 'uuid'];
       const keysToCopy = Object.keys(unitToCopy)
         .filter(key => !keysToIgnore.includes(key))
         .reduce((obj, key) => {
