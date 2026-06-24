@@ -314,13 +314,24 @@ export class UnitService {
     return newUnit.id;
   }
 
+  async ensureUuid(unitId: number): Promise<string> {
+    const unit = await this.unitsRepository.findOne({
+      where: { id: unitId },
+      select: ['id', 'uuid']
+    });
+    if (unit.uuid) return unit.uuid;
+    unit.uuid = crypto.randomUUID();
+    await this.unitsRepository.save(unit);
+    return unit.uuid;
+  }
+
   async findOnesProperties(unitId: number, workspaceId: number): Promise<UnitPropertiesDto> {
     this.logger.log(`Returning metadata for unit wit id: ${unitId}`);
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId, workspaceId: workspaceId },
       select: [
         'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
-        'player', 'description', 'transcript', 'reference',
+        'player', 'description', 'transcript', 'reference', 'uuid',
         'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state',
         'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser'
       ]
