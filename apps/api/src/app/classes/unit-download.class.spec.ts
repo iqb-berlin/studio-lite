@@ -554,14 +554,14 @@ describe('UnitDownloadClass', () => {
       expect(result.derivedVariables).toHaveLength(0);
     });
 
-    it('should separate base and derived variables from scheme', () => {
+    it('should set id and basedOn for derived variables, exclude BASE entries', () => {
       const result = unitDownloadClass.buildVariablesJSON(
         { definition: '', variables: [] } as unknown as UnitDefinitionDto,
         {
           scheme: JSON.stringify({
             variableCodings: [
               { id: 'b1', sourceType: 'BASE', alias: 'b1' },
-              { id: 'd1', sourceType: 'SUM_CODE', alias: 'd1_alias' }
+              { id: 'd1', sourceType: 'SUM_CODE', alias: 'd1_alias', deriveSources: ['b1', 'b2'] }
             ]
           }),
           schemeType: 'test'
@@ -569,7 +569,23 @@ describe('UnitDownloadClass', () => {
       );
       expect(result).not.toBeNull();
       expect(result.derivedVariables).toHaveLength(1);
-      expect((result.derivedVariables[0] as { id: string }).id).toBe('d1_alias');
+      expect(result.derivedVariables[0]).toEqual({ id: 'd1_alias', basedOn: ['b1', 'b2'] });
+    });
+
+    it('should use empty array for basedOn when deriveSources is absent', () => {
+      const result = unitDownloadClass.buildVariablesJSON(
+        { definition: '', variables: [] } as unknown as UnitDefinitionDto,
+        {
+          scheme: JSON.stringify({
+            variableCodings: [
+              { id: 'd1', sourceType: 'CONCAT_CODE' }
+            ]
+          }),
+          schemeType: 'test'
+        } as unknown as UnitSchemeDto
+      );
+      expect(result).not.toBeNull();
+      expect(result.derivedVariables[0]).toEqual({ id: 'd1', basedOn: [] });
     });
   });
 });

@@ -724,9 +724,9 @@ export class UnitDownloadClass {
   private static buildVariablesJSON(
     definitionData: UnitDefinitionDto,
     schemeData: UnitSchemeDto
-  ): { baseVariables: VariableInfo[]; derivedVariables: { id: string; type: string; page?: string }[] } | null {
+  ): { baseVariables: VariableInfo[]; derivedVariables: { id: string; basedOn: string[] }[] } | null {
     const baseVariables: VariableInfo[] = definitionData?.variables ?? [];
-    const derivedVariables: { id: string; type: string; page?: string }[] = [];
+    const derivedVariables: { id: string; basedOn: string[] }[] = [];
 
     if (schemeData?.scheme) {
       let codingScheme: CodingSchemeData;
@@ -740,8 +740,7 @@ export class UnitDownloadClass {
         .forEach(coding => {
           derivedVariables.push({
             id: coding.alias || coding.id,
-            type: UnitDownloadClass.getDerivedVariableType(coding),
-            ...(coding.page && { page: coding.page })
+            basedOn: coding.deriveSources ?? []
           });
         });
     }
