@@ -4,8 +4,10 @@ import {
   UnitDownloadSettingsDto,
   UnitExportConfigDto,
   UnitPropertiesDto,
-  UnitSchemeDto,
+  UnitRichNoteDto,
+  UnitRichNoteLinkDto,
   UnitRichNoteTagDto,
+  UnitSchemeDto,
   VeronaModuleFileDto,
   VeronaModuleInListDto
 } from '@studio-lite-lib/api-dto';
@@ -24,6 +26,34 @@ import { SettingService } from '../services/setting.service';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitRichNoteService } from '../services/unit-rich-note.service';
 
+interface ExternalDataBlock {
+  id: string;
+  type: string;
+  modifiedAt?: string;
+}
+
+interface UserInterfaceBlock {
+  player: string;
+  editor?: string;
+  definition?: string;
+  isDefinitionInline?: boolean;
+  modifiedAt?: string;
+}
+
+interface UnitIndexJson {
+  id: string;
+  uuid?: string;
+  modifiedAt?: string;
+  label?: string;
+  description?: string;
+  userInterface: UserInterfaceBlock;
+  codingScheme?: ExternalDataBlock;
+  comments?: ExternalDataBlock;
+  richNotes?: ExternalDataBlock;
+  metadata?: ExternalDataBlock;
+  variables?: ExternalDataBlock;
+}
+
 export class UnitDownloadClass {
   static async get(
     workspaceId: number,
@@ -38,9 +68,9 @@ export class UnitDownloadClass {
     const zip = new AdmZip();
     const unitsMetadata: UnitPropertiesDto[] = [];
     const usedPlayers: string[] = [];
-    const unitExportConfig = await UnitDownloadClass.getUnitExportConfig(
-      settingService
-    );
+    const unitExportConfig = exportFormat === 'xml' ?
+      await UnitDownloadClass.getUnitExportConfig(settingService) :
+      new UnitExportConfigDto();
 
     await Promise.all(
       unitDownloadSettings.unitIdList.map(async unitId => {
@@ -301,21 +331,24 @@ export class UnitDownloadClass {
     }
   }
 
-  private static addDerivedVariables(
-    schemeData: UnitSchemeDto,
-    unitXml: XMLBuilder
-  ): void {
-    if (!schemeData?.scheme) return;
+  private static parseDerivedCodings(schemeData: UnitSchemeDto): VariableCodingData[] {
+    if (!schemeData?.scheme) return [];
     let codingScheme: CodingSchemeData;
     try {
       codingScheme = JSON.parse(schemeData.scheme) as CodingSchemeData;
     } catch {
-      return;
+      return [];
     }
-    if (!codingScheme?.variableCodings) return;
-    const derivedCodings = codingScheme.variableCodings.filter(
+    return codingScheme?.variableCodings?.filter(
       vc => vc.sourceType !== 'BASE' && vc.sourceType !== 'BASE_NO_VALUE'
-    );
+    ) ?? [];
+  }
+
+  private static addDerivedVariables(
+    schemeData: UnitSchemeDto,
+    unitXml: XMLBuilder
+  ): void {
+    const derivedCodings = UnitDownloadClass.parseDerivedCodings(schemeData);
     if (derivedCodings.length === 0) return;
     const derivedVariablesElement = unitXml.root().ele('DerivedVariables');
     derivedCodings.forEach(coding => {
@@ -428,6 +461,22 @@ export class UnitDownloadClass {
     return labels[0].value;
   }
 
+  private static transformRichNotes(
+    notes: UnitRichNoteDto[],
+    tags: UnitRichNoteTagDto[]
+  ): { tagId: string; tagLabel: string; content: string; links?: UnitRichNoteLinkDto[]; itemUuids?: string[] }[] {
+    return notes.map(note => {
+      const tag = UnitDownloadClass.findTag(tags, note.tagId);
+      return {
+        tagId: tag ? tag.id : note.tagId,
+        tagLabel: UnitDownloadClass.getLabelString(tag?.label),
+        content: note.content,
+        links: note.links,
+        itemUuids: note.itemReferences
+      };
+    });
+  }
+
   private static async addRichNotes(
     unitRichNoteService: UnitRichNoteService,
     unitId: number,
@@ -437,16 +486,7 @@ export class UnitDownloadClass {
   ): Promise<void> {
     const { notes, tags } = await unitRichNoteService.findNotes(unitId);
     if (notes && notes.length) {
-      const transformedNotes = notes.map(note => {
-        const tag = UnitDownloadClass.findTag(tags, note.tagId);
-        return {
-          tagId: tag ? tag.id : note.tagId,
-          tagLabel: UnitDownloadClass.getLabelString(tag?.label),
-          content: note.content,
-          links: note.links,
-          itemUuids: note.itemReferences
-        };
-      });
+      const transformedNotes = UnitDownloadClass.transformRichNotes(notes, tags);
       const fileName = `${unitMetadata.key}.vorn`;
       unitXml.root().ele({
         UnitRichNotesRef: {
@@ -655,33 +695,30 @@ export class UnitDownloadClass {
     const uuid = await unitService.ensureUuid(unitId);
     const key = unitMetadata.key;
 
-    const index: Record<string, unknown> = {
+    const index: UnitIndexJson = {
       id: key,
       uuid,
       modifiedAt: unitMetadata.lastChangedMetadata?.toISOString(),
       label: unitMetadata.name || undefined,
-      description: unitMetadata.description || undefined
+      description: unitMetadata.description || undefined,
+      userInterface: { player: unitMetadata.player || '' }
     };
 
     const definitionData = await unitService.findOnesDefinition(unitId);
-    const userInterface: Record<string, unknown> = {
-      player: unitMetadata.player || ''
-    };
-    if (unitMetadata.editor) userInterface['editor'] = unitMetadata.editor;
+    if (unitMetadata.editor) index.userInterface.editor = unitMetadata.editor;
     if (definitionData?.definition?.length > 0) {
       zip.addFile(`${key}.voud`, Buffer.from(definitionData.definition));
-      userInterface['definition'] = `${key}.voud`;
-      userInterface['isDefinitionInline'] = false;
+      index.userInterface.definition = `${key}.voud`;
+      index.userInterface.isDefinitionInline = false;
     }
     if (unitMetadata.lastChangedDefinition) {
-      userInterface['modifiedAt'] = unitMetadata.lastChangedDefinition.toISOString();
+      index.userInterface.modifiedAt = unitMetadata.lastChangedDefinition.toISOString();
     }
-    index['userInterface'] = userInterface;
 
     const schemeData = await unitService.findOnesScheme(unitId);
     if (schemeData?.scheme) {
       zip.addFile(`${key}.vocs.json`, Buffer.from(schemeData.scheme));
-      index['codingScheme'] = {
+      index.codingScheme = {
         id: `${key}.vocs.json`,
         type: 'iqb-coding-scheme',
         ...(unitMetadata.lastChangedScheme && { modifiedAt: unitMetadata.lastChangedScheme.toISOString() })
@@ -692,31 +729,22 @@ export class UnitDownloadClass {
       const comments = await unitCommentService.findOnesComments(unitId);
       if (comments?.length) {
         zip.addFile(`${key}.voco.json`, Buffer.from(JSON.stringify(comments)));
-        index['comments'] = { id: `${key}.voco.json`, type: 'iqb-unit-comments' };
+        index.comments = { id: `${key}.voco.json`, type: 'iqb-unit-comments' };
       }
     }
 
     if (unitDownloadSettings.addRichNotes) {
       const { notes, tags } = await unitRichNoteService.findNotes(unitId);
       if (notes?.length) {
-        const transformedNotes = notes.map(note => {
-          const tag = UnitDownloadClass.findTag(tags, note.tagId);
-          return {
-            tagId: tag ? tag.id : note.tagId,
-            tagLabel: UnitDownloadClass.getLabelString(tag?.label),
-            content: note.content,
-            links: note.links,
-            itemUuids: note.itemReferences
-          };
-        });
+        const transformedNotes = UnitDownloadClass.transformRichNotes(notes, tags);
         zip.addFile(`${key}.vorn.json`, Buffer.from(JSON.stringify(transformedNotes, null, 2)));
-        index['richNotes'] = { id: `${key}.vorn.json`, type: 'iqb-unit-rich-notes' };
+        index.richNotes = { id: `${key}.vorn.json`, type: 'iqb-unit-rich-notes' };
       }
     }
 
     if (unitMetadata.metadata && Object.keys(unitMetadata.metadata).length > 0) {
       zip.addFile(`${key}.vomd.json`, Buffer.from(JSON.stringify(unitMetadata.metadata)));
-      index['metadata'] = {
+      index.metadata = {
         id: `${key}.vomd.json`,
         type: 'metadata-values',
         ...(unitMetadata.lastChangedMetadata && { modifiedAt: unitMetadata.lastChangedMetadata.toISOString() })
@@ -726,7 +754,7 @@ export class UnitDownloadClass {
     const variables = UnitDownloadClass.buildVariablesJSON(definitionData, schemeData);
     if (variables) {
       zip.addFile(`${key}.vova.json`, Buffer.from(JSON.stringify(variables, null, 2)));
-      index['variables'] = {
+      index.variables = {
         id: `${key}.vova.json`,
         type: 'unit-variables',
         ...(unitMetadata.lastChangedDefinition && { modifiedAt: unitMetadata.lastChangedDefinition.toISOString() })
@@ -743,24 +771,12 @@ export class UnitDownloadClass {
     schemeData: UnitSchemeDto
   ): { baseVariables: VariableInfo[]; derivedVariables: { id: string; basedOn: string[] }[] } | null {
     const baseVariables: VariableInfo[] = definitionData?.variables ?? [];
-    const derivedVariables: { id: string; basedOn: string[] }[] = [];
-
-    if (schemeData?.scheme) {
-      let codingScheme: CodingSchemeData;
-      try {
-        codingScheme = JSON.parse(schemeData.scheme) as CodingSchemeData;
-      } catch {
-        codingScheme = null;
-      }
-      codingScheme?.variableCodings
-        ?.filter(vc => vc.sourceType !== 'BASE' && vc.sourceType !== 'BASE_NO_VALUE')
-        .forEach(coding => {
-          derivedVariables.push({
-            id: coding.alias || coding.id,
-            basedOn: coding.deriveSources ?? []
-          });
-        });
-    }
+    const derivedVariables: { id: string; basedOn: string[] }[] = UnitDownloadClass
+      .parseDerivedCodings(schemeData)
+      .map(coding => ({
+        id: coding.alias || coding.id,
+        basedOn: coding.deriveSources ?? []
+      }));
 
     if (baseVariables.length === 0 && derivedVariables.length === 0) return null;
     return { baseVariables, derivedVariables };

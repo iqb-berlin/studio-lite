@@ -1,5 +1,7 @@
 import { catchError, map } from 'rxjs/operators';
-import { HttpClient, HttpEvent, HttpEventType, HttpParams } from '@angular/common/http';
+import {
+  HttpClient, HttpEvent, HttpEventType, HttpParams
+} from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Inject, Injectable } from '@angular/core';
 import {

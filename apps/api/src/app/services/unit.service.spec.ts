@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import {
   CreateUnitDto,
   UnitFullMetadataDto,
@@ -414,29 +414,42 @@ describe('UnitService', () => {
   });
 
   describe('ensureUuid', () => {
+    const setupTransaction = (unit: Unit | null) => {
+      const mockManager = createMock<EntityManager>();
+      mockManager.findOne.mockResolvedValue(unit);
+      const transaction = jest.fn().mockImplementation(
+        (cb: (manager: EntityManager) => Promise<string>) => cb(mockManager)
+      );
+      Object.defineProperty(unitsRepository, 'manager', {
+        value: { transaction },
+        configurable: true
+      });
+      return mockManager;
+    };
+
     it('should return existing uuid without saving', async () => {
-      unitsRepository.findOne.mockResolvedValue({ id: 1, uuid: 'existing-uuid' } as Unit);
+      const mockManager = setupTransaction({ id: 1, uuid: 'existing-uuid' } as Unit);
 
       const result = await service.ensureUuid(1);
 
       expect(result).toBe('existing-uuid');
-      expect(unitsRepository.save).not.toHaveBeenCalled();
+      expect(mockManager.save).not.toHaveBeenCalled();
     });
 
     it('should generate, persist and return uuid when none exists', async () => {
-      unitsRepository.findOne.mockResolvedValue({ id: 1, uuid: null } as Unit);
-      unitsRepository.save.mockResolvedValue({ id: 1 } as Unit);
+      const mockManager = setupTransaction({ id: 1, uuid: null } as Unit);
+      mockManager.save.mockResolvedValue({ id: 1 } as Unit);
 
       const result = await service.ensureUuid(1);
 
       expect(result).toMatch(
         /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
       );
-      expect(unitsRepository.save).toHaveBeenCalled();
+      expect(mockManager.save).toHaveBeenCalled();
     });
 
     it('should throw UnitNotFoundException when unit does not exist', async () => {
-      unitsRepository.findOne.mockResolvedValue(null);
+      setupTransaction(null);
 
       await expect(service.ensureUuid(999)).rejects.toThrow(UnitNotFoundException);
     });

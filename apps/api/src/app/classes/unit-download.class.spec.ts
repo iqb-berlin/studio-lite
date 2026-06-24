@@ -485,8 +485,12 @@ describe('UnitDownloadClass', () => {
 
       settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
       unitServiceMock.findOnesProperties.mockResolvedValue({
-        key: 'U3', name: 'Unit 3', description: '', metadata: {},
-        player: '', lastChangedMetadata: new Date()
+        key: 'U3',
+        name: 'Unit 3',
+        description: '',
+        metadata: {},
+        player: '',
+        lastChangedMetadata: new Date()
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-3');
       unitServiceMock.findOnesDefinition.mockResolvedValue({
@@ -539,8 +543,12 @@ describe('UnitDownloadClass', () => {
 
       settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
       unitServiceMock.findOnesProperties.mockResolvedValue({
-        key: 'U4', name: 'Unit 4', description: '', metadata: { profile: 'x' },
-        player: 'player-1', lastChangedMetadata: new Date()
+        key: 'U4',
+        name: 'Unit 4',
+        description: '',
+        metadata: { profile: 'x' },
+        player: 'player-1',
+        lastChangedMetadata: new Date()
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-4');
       unitServiceMock.findOnesDefinition.mockResolvedValue({
@@ -552,19 +560,32 @@ describe('UnitDownloadClass', () => {
       unitCommentServiceMock.findOnesComments.mockResolvedValue([{ id: 1 }] as unknown as UnitCommentDto[]);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({
         tags: [],
-        notes: [{ tagId: 't1', content: 'note', links: [], itemReferences: [] } as unknown as UnitRichNoteDto]
+        notes: [{
+          tagId: 't1', content: 'note', links: [], itemReferences: []
+        } as unknown as UnitRichNoteDto]
       } as UnitRichNotesDto);
       veronaModuleServiceMock.findAll.mockResolvedValue([]);
 
       const downloadSettings = {
-        unitIdList: [4], exportFormat: 'json',
-        addPlayers: false, addComments: true, addRichNotes: true,
-        addTestTakersHot: 0, addTestTakersMonitor: 0, addTestTakersReview: 0
+        unitIdList: [4],
+        exportFormat: 'json',
+        addPlayers: false,
+        addComments: true,
+        addRichNotes: true,
+        addTestTakersHot: 0,
+        addTestTakersMonitor: 0,
+        addTestTakersReview: 0
       } as unknown as UnitDownloadSettingsDto;
 
       await UnitDownloadClass.get(
-        1, unitServiceMock, unitCommentServiceMock, veronaModuleServiceMock,
-        settingServiceMock, unitRichNoteServiceMock, downloadSettings, 'json'
+        1,
+        unitServiceMock,
+        unitCommentServiceMock,
+        veronaModuleServiceMock,
+        settingServiceMock,
+        unitRichNoteServiceMock,
+        downloadSettings,
+        'json'
       );
 
       const jsonCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U4.json');
@@ -590,7 +611,10 @@ describe('UnitDownloadClass', () => {
 
       settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
       unitServiceMock.findOnesProperties.mockResolvedValue({
-        key: 'U6', name: 'Unit 6', description: '', metadata: { x: 1 },
+        key: 'U6',
+        name: 'Unit 6',
+        description: '',
+        metadata: { x: 1 },
         player: 'player-1',
         lastChangedMetadata: metadataChanged,
         lastChangedDefinition: definitionChanged,
@@ -607,10 +631,20 @@ describe('UnitDownloadClass', () => {
       veronaModuleServiceMock.findAll.mockResolvedValue([]);
 
       await UnitDownloadClass.get(
-        1, unitServiceMock, unitCommentServiceMock, veronaModuleServiceMock,
-        settingServiceMock, unitRichNoteServiceMock,
-        { unitIdList: [6], addPlayers: false, addComments: false,
-          addRichNotes: false, addTestTakersHot: 0, addTestTakersMonitor: 0, addTestTakersReview: 0
+        1,
+        unitServiceMock,
+        unitCommentServiceMock,
+        veronaModuleServiceMock,
+        settingServiceMock,
+        unitRichNoteServiceMock,
+        {
+          unitIdList: [6],
+          addPlayers: false,
+          addComments: false,
+          addRichNotes: false,
+          addTestTakersHot: 0,
+          addTestTakersMonitor: 0,
+          addTestTakersReview: 0
         } as unknown as UnitDownloadSettingsDto,
         'json'
       );
@@ -633,8 +667,12 @@ describe('UnitDownloadClass', () => {
 
       settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
       unitServiceMock.findOnesProperties.mockResolvedValue({
-        key: 'U5', name: 'Unit 5', description: '', metadata: {},
-        player: '', lastChangedMetadata: new Date()
+        key: 'U5',
+        name: 'Unit 5',
+        description: '',
+        metadata: {},
+        player: '',
+        lastChangedMetadata: new Date()
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-5');
       unitServiceMock.findOnesDefinition.mockResolvedValue({
@@ -645,10 +683,20 @@ describe('UnitDownloadClass', () => {
       veronaModuleServiceMock.findAll.mockResolvedValue([]);
 
       await UnitDownloadClass.get(
-        1, unitServiceMock, unitCommentServiceMock, veronaModuleServiceMock,
-        settingServiceMock, unitRichNoteServiceMock,
-        { unitIdList: [5], addPlayers: false, addComments: false,
-          addRichNotes: false, addTestTakersHot: 0, addTestTakersMonitor: 0, addTestTakersReview: 0
+        1,
+        unitServiceMock,
+        unitCommentServiceMock,
+        veronaModuleServiceMock,
+        settingServiceMock,
+        unitRichNoteServiceMock,
+        {
+          unitIdList: [5],
+          addPlayers: false,
+          addComments: false,
+          addRichNotes: false,
+          addTestTakersHot: 0,
+          addTestTakersMonitor: 0,
+          addTestTakersReview: 0
         } as unknown as UnitDownloadSettingsDto,
         'json'
       );
@@ -657,7 +705,6 @@ describe('UnitDownloadClass', () => {
       const parsed = JSON.parse((jsonCall[1] as Buffer).toString());
       expect(parsed.userInterface).toHaveProperty('player');
     });
-
   });
 
   describe('buildVariablesJSON', () => {
@@ -696,7 +743,9 @@ describe('UnitDownloadClass', () => {
           scheme: JSON.stringify({
             variableCodings: [
               { id: 'b1', sourceType: 'BASE', alias: 'b1' },
-              { id: 'd1', sourceType: 'SUM_CODE', alias: 'd1_alias', deriveSources: ['b1', 'b2'] }
+              {
+                id: 'd1', sourceType: 'SUM_CODE', alias: 'd1_alias', deriveSources: ['b1', 'b2']
+              }
             ]
           }),
           schemeType: 'test'

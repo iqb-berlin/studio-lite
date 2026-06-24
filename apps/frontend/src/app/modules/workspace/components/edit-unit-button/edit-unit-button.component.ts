@@ -12,7 +12,9 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatButton } from '@angular/material/button';
-import { lastValueFrom, map, Subject, takeUntil } from 'rxjs';
+import {
+  lastValueFrom, map, Subject, takeUntil
+} from 'rxjs';
 import { HttpParams } from '@angular/common/http';
 import { WorkspaceService } from '../../services/workspace.service';
 import { GroupManageComponent } from '../group-manage/group-manage.component';

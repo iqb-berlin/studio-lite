@@ -316,15 +316,18 @@ export class UnitService {
   }
 
   async ensureUuid(unitId: number): Promise<string> {
-    const unit = await this.unitsRepository.findOne({
-      where: { id: unitId },
-      select: ['id', 'uuid']
+    return this.unitsRepository.manager.transaction(async manager => {
+      const unit = await manager.findOne(Unit, {
+        where: { id: unitId },
+        select: ['id', 'uuid'],
+        lock: { mode: 'pessimistic_write' }
+      });
+      if (!unit) throw new UnitNotFoundException(unitId, 0, 'GET');
+      if (unit.uuid) return unit.uuid;
+      unit.uuid = crypto.randomUUID();
+      await manager.save(unit);
+      return unit.uuid;
     });
-    if (!unit) throw new UnitNotFoundException(unitId, 0, 'GET');
-    if (unit.uuid) return unit.uuid;
-    unit.uuid = crypto.randomUUID();
-    await this.unitsRepository.save(unit);
-    return unit.uuid;
   }
 
   async findOnesProperties(unitId: number, workspaceId: number): Promise<UnitPropertiesDto> {
