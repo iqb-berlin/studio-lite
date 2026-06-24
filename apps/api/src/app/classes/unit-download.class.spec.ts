@@ -349,4 +349,227 @@ describe('UnitDownloadClass', () => {
       expect(unitDownloadClass.getLabelString([])).toBeNull();
     });
   });
+
+  describe('get with exportFormat json', () => {
+    it('should create key.json index file and not key.xml', async () => {
+      const unitServiceMock = createMock<UnitService>();
+      const unitCommentServiceMock = createMock<UnitCommentService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      const settingServiceMock = createMock<SettingService>();
+      const unitRichNoteServiceMock = createMock<UnitRichNoteService>();
+
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({
+        unitXsdUrl: 'unit.xsd',
+        bookletXsdUrl: 'booklet.xsd',
+        testTakersXsdUrl: 'testtakers.xsd'
+      } as unknown as UnitExportConfigDto);
+
+      unitServiceMock.findOnesProperties.mockResolvedValue({
+        key: 'U1',
+        name: 'Unit 1',
+        description: 'Desc',
+        metadata: {},
+        player: 'player-1',
+        lastChangedMetadata: new Date('2025-01-01')
+      } as unknown as UnitPropertiesDto);
+
+      unitServiceMock.ensureUuid.mockResolvedValue('test-uuid-1234');
+
+      unitServiceMock.findOnesDefinition.mockResolvedValue({
+        definition: '<content/>',
+        variables: []
+      } as unknown as UnitDefinitionDto);
+
+      unitServiceMock.findOnesScheme.mockResolvedValue({
+        scheme: '',
+        schemeType: ''
+      } as unknown as UnitSchemeDto);
+
+      unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
+
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
+
+      const downloadSettings = {
+        unitIdList: [1],
+        exportFormat: 'json',
+        addPlayers: false,
+        addComments: false,
+        addRichNotes: false,
+        addTestTakersHot: 0,
+        addTestTakersMonitor: 0,
+        addTestTakersReview: 0
+      } as unknown as UnitDownloadSettingsDto;
+
+      await UnitDownloadClass.get(
+        1,
+        unitServiceMock,
+        unitCommentServiceMock,
+        veronaModuleServiceMock,
+        settingServiceMock,
+        unitRichNoteServiceMock,
+        downloadSettings
+      );
+
+      const addedFiles = mockZip.addFile.mock.calls.map((c: string[]) => c[0]);
+      expect(addedFiles).toContain('U1.json');
+      expect(addedFiles).not.toContain('U1.xml');
+    });
+
+    it('should embed uuid and modifiedAt in the JSON index', async () => {
+      const unitServiceMock = createMock<UnitService>();
+      const unitCommentServiceMock = createMock<UnitCommentService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      const settingServiceMock = createMock<SettingService>();
+      const unitRichNoteServiceMock = createMock<UnitRichNoteService>();
+
+      const modifiedAt = new Date('2025-06-01T10:00:00.000Z');
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
+      unitServiceMock.findOnesProperties.mockResolvedValue({
+        key: 'U2',
+        name: 'Unit 2',
+        description: '',
+        metadata: {},
+        player: 'player-1',
+        lastChangedMetadata: modifiedAt
+      } as unknown as UnitPropertiesDto);
+      unitServiceMock.ensureUuid.mockResolvedValue('my-uuid-5678');
+      unitServiceMock.findOnesDefinition.mockResolvedValue({
+        definition: '', variables: []
+      } as unknown as UnitDefinitionDto);
+      unitServiceMock.findOnesScheme.mockResolvedValue({
+        scheme: '', schemeType: ''
+      } as unknown as UnitSchemeDto);
+      unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
+
+      const downloadSettings = {
+        unitIdList: [2],
+        exportFormat: 'json',
+        addPlayers: false,
+        addComments: false,
+        addRichNotes: false,
+        addTestTakersHot: 0,
+        addTestTakersMonitor: 0,
+        addTestTakersReview: 0
+      } as unknown as UnitDownloadSettingsDto;
+
+      await UnitDownloadClass.get(
+        1,
+        unitServiceMock,
+        unitCommentServiceMock,
+        veronaModuleServiceMock,
+        settingServiceMock,
+        unitRichNoteServiceMock,
+        downloadSettings
+      );
+
+      const jsonCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U2.json');
+      expect(jsonCall).toBeDefined();
+      const parsed = JSON.parse((jsonCall[1] as Buffer).toString());
+      expect(parsed.uuid).toBe('my-uuid-5678');
+      expect(parsed.modifiedAt).toBe('2025-06-01T10:00:00.000Z');
+      expect(parsed.id).toBe('U2');
+    });
+
+    it('should only include external blocks when data is present', async () => {
+      const unitServiceMock = createMock<UnitService>();
+      const unitCommentServiceMock = createMock<UnitCommentService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      const settingServiceMock = createMock<SettingService>();
+      const unitRichNoteServiceMock = createMock<UnitRichNoteService>();
+
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
+      unitServiceMock.findOnesProperties.mockResolvedValue({
+        key: 'U3', name: 'Unit 3', description: '', metadata: {},
+        player: '', lastChangedMetadata: new Date()
+      } as unknown as UnitPropertiesDto);
+      unitServiceMock.ensureUuid.mockResolvedValue('uuid-3');
+      unitServiceMock.findOnesDefinition.mockResolvedValue({
+        definition: '', variables: []
+      } as unknown as UnitDefinitionDto);
+      unitServiceMock.findOnesScheme.mockResolvedValue({
+        scheme: '', schemeType: ''
+      } as unknown as UnitSchemeDto);
+      unitCommentServiceMock.findOnesComments.mockResolvedValue([]);
+      unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
+
+      const downloadSettings = {
+        unitIdList: [3],
+        exportFormat: 'json',
+        addPlayers: false,
+        addComments: true,
+        addRichNotes: true,
+        addTestTakersHot: 0,
+        addTestTakersMonitor: 0,
+        addTestTakersReview: 0
+      } as unknown as UnitDownloadSettingsDto;
+
+      await UnitDownloadClass.get(
+        1,
+        unitServiceMock,
+        unitCommentServiceMock,
+        veronaModuleServiceMock,
+        settingServiceMock,
+        unitRichNoteServiceMock,
+        downloadSettings
+      );
+
+      const jsonCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U3.json');
+      const parsed = JSON.parse((jsonCall[1] as Buffer).toString());
+      expect(parsed.codingScheme).toBeUndefined();
+      expect(parsed.comments).toBeUndefined();
+      expect(parsed.richNotes).toBeUndefined();
+      expect(parsed.metadata).toBeUndefined();
+      expect(parsed.variables).toBeUndefined();
+    });
+  });
+
+  describe('buildVariablesJSON', () => {
+    const unitDownloadClass = UnitDownloadClass as unknown as {
+      buildVariablesJSON: (
+        definitionData: UnitDefinitionDto,
+        schemeData: UnitSchemeDto
+      ) => { baseVariables: unknown[]; derivedVariables: unknown[] } | null;
+    };
+
+    it('should return null when no variables exist', () => {
+      const result = unitDownloadClass.buildVariablesJSON(
+        { definition: '', variables: [] } as unknown as UnitDefinitionDto,
+        { scheme: '', schemeType: '' } as unknown as UnitSchemeDto
+      );
+      expect(result).toBeNull();
+    });
+
+    it('should return baseVariables from definition', () => {
+      const result = unitDownloadClass.buildVariablesJSON(
+        {
+          definition: '',
+          variables: [{ id: 'v1', type: 'string' }]
+        } as unknown as UnitDefinitionDto,
+        { scheme: '', schemeType: '' } as unknown as UnitSchemeDto
+      );
+      expect(result).not.toBeNull();
+      expect(result.baseVariables).toHaveLength(1);
+      expect(result.derivedVariables).toHaveLength(0);
+    });
+
+    it('should separate base and derived variables from scheme', () => {
+      const result = unitDownloadClass.buildVariablesJSON(
+        { definition: '', variables: [] } as unknown as UnitDefinitionDto,
+        {
+          scheme: JSON.stringify({
+            variableCodings: [
+              { id: 'b1', sourceType: 'BASE', alias: 'b1' },
+              { id: 'd1', sourceType: 'SUM_CODE', alias: 'd1_alias' }
+            ]
+          }),
+          schemeType: 'test'
+        } as unknown as UnitSchemeDto
+      );
+      expect(result).not.toBeNull();
+      expect(result.derivedVariables).toHaveLength(1);
+      expect((result.derivedVariables[0] as { id: string }).id).toBe('d1_alias');
+    });
+  });
 });

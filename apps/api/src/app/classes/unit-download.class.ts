@@ -17,6 +17,7 @@ import {
   CodingSchemeData,
   VariableCodingData
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitService } from '../services/unit.service';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { SettingService } from '../services/setting.service';
@@ -42,18 +43,32 @@ export class UnitDownloadClass {
 
     await Promise.all(
       unitDownloadSettings.unitIdList.map(async unitId => {
-        await UnitDownloadClass.getUnitData(
-          unitService,
-          unitCommentService,
-          unitId,
-          workspaceId,
-          unitDownloadSettings,
-          unitExportConfig,
-          unitRichNoteService,
-          unitsMetadata,
-          usedPlayers,
-          zip
-        );
+        if (unitDownloadSettings.exportFormat === 'json') {
+          await UnitDownloadClass.getUnitDataJSON(
+            unitService,
+            unitCommentService,
+            unitId,
+            workspaceId,
+            unitDownloadSettings,
+            unitRichNoteService,
+            unitsMetadata,
+            usedPlayers,
+            zip
+          );
+        } else {
+          await UnitDownloadClass.getUnitData(
+            unitService,
+            unitCommentService,
+            unitId,
+            workspaceId,
+            unitDownloadSettings,
+            unitExportConfig,
+            unitRichNoteService,
+            unitsMetadata,
+            usedPlayers,
+            zip
+          );
+        }
       })
     );
 
@@ -622,6 +637,117 @@ export class UnitDownloadClass {
       'testtaker1.xml',
       Buffer.from(testTakerXml.toString({ prettyPrint: true }))
     );
+  }
+
+  private static async getUnitDataJSON(
+    unitService: UnitService,
+    unitCommentService: UnitCommentService,
+    unitId: number,
+    workspaceId: number,
+    unitDownloadSettings: UnitDownloadSettingsDto,
+    unitRichNoteService: UnitRichNoteService,
+    unitsMetadata: UnitPropertiesDto[],
+    usedPlayers: string[],
+    zip: AdmZip
+  ): Promise<void> {
+    const unitMetadata = await unitService.findOnesProperties(unitId, workspaceId);
+    const uuid = await unitService.ensureUuid(unitId);
+    const key = unitMetadata.key;
+
+    const index: Record<string, unknown> = {
+      id: key,
+      uuid,
+      modifiedAt: unitMetadata.lastChangedMetadata?.toISOString(),
+      label: unitMetadata.name || undefined,
+      description: unitMetadata.description || undefined
+    };
+
+    const definitionData = await unitService.findOnesDefinition(unitId);
+    const userInterface: Record<string, unknown> = {};
+    if (unitMetadata.player) userInterface['player'] = unitMetadata.player;
+    if (unitMetadata.editor) userInterface['editor'] = unitMetadata.editor;
+    if (definitionData?.definition?.length > 0) {
+      zip.addFile(`${key}.voud`, Buffer.from(definitionData.definition));
+      userInterface['definition'] = `${key}.voud`;
+      userInterface['isDefinitionInline'] = false;
+    }
+    index['userInterface'] = userInterface;
+
+    const schemeData = await unitService.findOnesScheme(unitId);
+    if (schemeData?.scheme) {
+      zip.addFile(`${key}.vocs.json`, Buffer.from(schemeData.scheme));
+      index['codingScheme'] = { type: 'iqb-coding-scheme', fileName: `${key}.vocs.json` };
+    }
+
+    if (unitDownloadSettings.addComments) {
+      const comments = await unitCommentService.findOnesComments(unitId);
+      if (comments?.length) {
+        zip.addFile(`${key}.voco.json`, Buffer.from(JSON.stringify(comments)));
+        index['comments'] = { type: 'iqb-unit-comments', fileName: `${key}.voco.json` };
+      }
+    }
+
+    if (unitDownloadSettings.addRichNotes) {
+      const { notes, tags } = await unitRichNoteService.findNotes(unitId);
+      if (notes?.length) {
+        const transformedNotes = notes.map(note => {
+          const tag = UnitDownloadClass.findTag(tags, note.tagId);
+          return {
+            tagId: tag ? tag.id : note.tagId,
+            tagLabel: UnitDownloadClass.getLabelString(tag?.label),
+            content: note.content,
+            links: note.links,
+            itemUuids: note.itemReferences
+          };
+        });
+        zip.addFile(`${key}.vorn.json`, Buffer.from(JSON.stringify(transformedNotes, null, 2)));
+        index['richNotes'] = { type: 'iqb-unit-rich-notes', fileName: `${key}.vorn.json` };
+      }
+    }
+
+    if (unitMetadata.metadata && Object.keys(unitMetadata.metadata).length > 0) {
+      zip.addFile(`${key}.vomd.json`, Buffer.from(JSON.stringify(unitMetadata.metadata)));
+      index['metadata'] = { type: 'metadata-values', fileName: `${key}.vomd.json` };
+    }
+
+    const variables = UnitDownloadClass.buildVariablesJSON(definitionData, schemeData);
+    if (variables) {
+      zip.addFile(`${key}.vova.json`, Buffer.from(JSON.stringify(variables, null, 2)));
+      index['variables'] = { type: 'unit-variables', fileName: `${key}.vova.json` };
+    }
+
+    zip.addFile(`${key}.json`, Buffer.from(JSON.stringify(index, null, 2)));
+    unitsMetadata.push(unitMetadata);
+    if (usedPlayers.indexOf(unitMetadata.player) < 0) usedPlayers.push(unitMetadata.player);
+  }
+
+  private static buildVariablesJSON(
+    definitionData: UnitDefinitionDto,
+    schemeData: UnitSchemeDto
+  ): { baseVariables: VariableInfo[]; derivedVariables: { id: string; type: string; page?: string }[] } | null {
+    const baseVariables: VariableInfo[] = definitionData?.variables ?? [];
+    const derivedVariables: { id: string; type: string; page?: string }[] = [];
+
+    if (schemeData?.scheme) {
+      let codingScheme: CodingSchemeData;
+      try {
+        codingScheme = JSON.parse(schemeData.scheme) as CodingSchemeData;
+      } catch {
+        codingScheme = null;
+      }
+      codingScheme?.variableCodings
+        ?.filter(vc => vc.sourceType !== 'BASE' && vc.sourceType !== 'BASE_NO_VALUE')
+        .forEach(coding => {
+          derivedVariables.push({
+            id: coding.alias || coding.id,
+            type: UnitDownloadClass.getDerivedVariableType(coding),
+            ...(coding.page && { page: coding.page })
+          });
+        });
+    }
+
+    if (baseVariables.length === 0 && derivedVariables.length === 0) return null;
+    return { baseVariables, derivedVariables };
   }
 
   static generateCodeList(codeLen: number, codeCount: number): string[] {

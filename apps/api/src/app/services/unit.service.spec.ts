@@ -368,4 +368,27 @@ describe('UnitService', () => {
       expect(unitMetadataService.getAllByUnitId).toHaveBeenCalledWith(1);
     });
   });
+
+  describe('ensureUuid', () => {
+    it('should return existing uuid without saving', async () => {
+      unitsRepository.findOne.mockResolvedValue({ id: 1, uuid: 'existing-uuid' } as Unit);
+
+      const result = await service.ensureUuid(1);
+
+      expect(result).toBe('existing-uuid');
+      expect(unitsRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should generate, persist and return uuid when none exists', async () => {
+      unitsRepository.findOne.mockResolvedValue({ id: 1, uuid: null } as Unit);
+      unitsRepository.save.mockResolvedValue({ id: 1 } as Unit);
+
+      const result = await service.ensureUuid(1);
+
+      expect(result).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      );
+      expect(unitsRepository.save).toHaveBeenCalled();
+    });
+  });
 });
