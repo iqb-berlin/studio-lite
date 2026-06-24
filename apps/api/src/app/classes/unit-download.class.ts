@@ -672,12 +672,19 @@ export class UnitDownloadClass {
       userInterface['definition'] = `${key}.voud`;
       userInterface['isDefinitionInline'] = false;
     }
+    if (unitMetadata.lastChangedDefinition) {
+      userInterface['modifiedAt'] = unitMetadata.lastChangedDefinition.toISOString();
+    }
     index['userInterface'] = userInterface;
 
     const schemeData = await unitService.findOnesScheme(unitId);
     if (schemeData?.scheme) {
       zip.addFile(`${key}.vocs.json`, Buffer.from(schemeData.scheme));
-      index['codingScheme'] = { id: `${key}.vocs.json`, type: 'iqb-coding-scheme' };
+      index['codingScheme'] = {
+        id: `${key}.vocs.json`,
+        type: 'iqb-coding-scheme',
+        ...(unitMetadata.lastChangedScheme && { modifiedAt: unitMetadata.lastChangedScheme.toISOString() })
+      };
     }
 
     if (unitDownloadSettings.addComments) {
@@ -708,13 +715,21 @@ export class UnitDownloadClass {
 
     if (unitMetadata.metadata && Object.keys(unitMetadata.metadata).length > 0) {
       zip.addFile(`${key}.vomd.json`, Buffer.from(JSON.stringify(unitMetadata.metadata)));
-      index['metadata'] = { id: `${key}.vomd.json`, type: 'metadata-values' };
+      index['metadata'] = {
+        id: `${key}.vomd.json`,
+        type: 'metadata-values',
+        ...(unitMetadata.lastChangedMetadata && { modifiedAt: unitMetadata.lastChangedMetadata.toISOString() })
+      };
     }
 
     const variables = UnitDownloadClass.buildVariablesJSON(definitionData, schemeData);
     if (variables) {
       zip.addFile(`${key}.vova.json`, Buffer.from(JSON.stringify(variables, null, 2)));
-      index['variables'] = { id: `${key}.vova.json`, type: 'unit-variables' };
+      index['variables'] = {
+        id: `${key}.vova.json`,
+        type: 'unit-variables',
+        ...(unitMetadata.lastChangedDefinition && { modifiedAt: unitMetadata.lastChangedDefinition.toISOString() })
+      };
     }
 
     zip.addFile(`${key}.json`, Buffer.from(JSON.stringify(index, null, 2)));

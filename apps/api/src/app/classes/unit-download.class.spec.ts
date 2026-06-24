@@ -567,11 +567,57 @@ describe('UnitDownloadClass', () => {
       const jsonCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U4.json');
       const parsed = JSON.parse((jsonCall[1] as Buffer).toString());
 
-      expect(parsed.codingScheme).toEqual({ id: 'U4.vocs.json', type: 'iqb-coding-scheme' });
+      expect(parsed.codingScheme).toMatchObject({ id: 'U4.vocs.json', type: 'iqb-coding-scheme' });
       expect(parsed.comments).toEqual({ id: 'U4.voco.json', type: 'iqb-unit-comments' });
       expect(parsed.richNotes).toEqual({ id: 'U4.vorn.json', type: 'iqb-unit-rich-notes' });
-      expect(parsed.metadata).toEqual({ id: 'U4.vomd.json', type: 'metadata-values' });
-      expect(parsed.variables).toEqual({ id: 'U4.vova.json', type: 'unit-variables' });
+      expect(parsed.metadata).toMatchObject({ id: 'U4.vomd.json', type: 'metadata-values' });
+      expect(parsed.variables).toMatchObject({ id: 'U4.vova.json', type: 'unit-variables' });
+    });
+
+    it('should set modifiedAt on userInterface and external blocks when timestamps are available', async () => {
+      const unitServiceMock = createMock<UnitService>();
+      const unitCommentServiceMock = createMock<UnitCommentService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      const settingServiceMock = createMock<SettingService>();
+      const unitRichNoteServiceMock = createMock<UnitRichNoteService>();
+
+      const definitionChanged = new Date('2025-03-01T08:00:00.000Z');
+      const schemeChanged = new Date('2025-04-01T09:00:00.000Z');
+      const metadataChanged = new Date('2025-05-01T10:00:00.000Z');
+
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
+      unitServiceMock.findOnesProperties.mockResolvedValue({
+        key: 'U6', name: 'Unit 6', description: '', metadata: { x: 1 },
+        player: 'player-1',
+        lastChangedMetadata: metadataChanged,
+        lastChangedDefinition: definitionChanged,
+        lastChangedScheme: schemeChanged
+      } as unknown as UnitPropertiesDto);
+      unitServiceMock.ensureUuid.mockResolvedValue('uuid-6');
+      unitServiceMock.findOnesDefinition.mockResolvedValue({
+        definition: '<content/>', variables: [{ id: 'v1', type: 'string' }]
+      } as unknown as UnitDefinitionDto);
+      unitServiceMock.findOnesScheme.mockResolvedValue({
+        scheme: JSON.stringify({ variableCodings: [] }), schemeType: 'iqb-coding-scheme'
+      } as unknown as UnitSchemeDto);
+      unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
+
+      await UnitDownloadClass.get(
+        1, unitServiceMock, unitCommentServiceMock, veronaModuleServiceMock,
+        settingServiceMock, unitRichNoteServiceMock,
+        { unitIdList: [6], exportFormat: 'json', addPlayers: false, addComments: false,
+          addRichNotes: false, addTestTakersHot: 0, addTestTakersMonitor: 0, addTestTakersReview: 0
+        } as unknown as UnitDownloadSettingsDto
+      );
+
+      const jsonCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U6.json');
+      const parsed = JSON.parse((jsonCall[1] as Buffer).toString());
+
+      expect(parsed.userInterface.modifiedAt).toBe(definitionChanged.toISOString());
+      expect(parsed.codingScheme.modifiedAt).toBe(schemeChanged.toISOString());
+      expect(parsed.metadata.modifiedAt).toBe(metadataChanged.toISOString());
+      expect(parsed.variables.modifiedAt).toBe(definitionChanged.toISOString());
     });
 
     it('should always include player in userInterface even when empty', async () => {
