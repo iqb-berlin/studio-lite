@@ -6,6 +6,9 @@ export class UnitDownloadSettingsDto {
     unitIdList!: number[];
 
   @ApiProperty()
+    exportFormat: 'xml' | 'json' = 'json';
+
+  @ApiProperty()
     addPlayers = false;
 
   @ApiProperty()
