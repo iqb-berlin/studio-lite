@@ -663,8 +663,9 @@ export class UnitDownloadClass {
     };
 
     const definitionData = await unitService.findOnesDefinition(unitId);
-    const userInterface: Record<string, unknown> = {};
-    if (unitMetadata.player) userInterface['player'] = unitMetadata.player;
+    const userInterface: Record<string, unknown> = {
+      player: unitMetadata.player || ''
+    };
     if (unitMetadata.editor) userInterface['editor'] = unitMetadata.editor;
     if (definitionData?.definition?.length > 0) {
       zip.addFile(`${key}.voud`, Buffer.from(definitionData.definition));
@@ -676,14 +677,14 @@ export class UnitDownloadClass {
     const schemeData = await unitService.findOnesScheme(unitId);
     if (schemeData?.scheme) {
       zip.addFile(`${key}.vocs.json`, Buffer.from(schemeData.scheme));
-      index['codingScheme'] = { type: 'iqb-coding-scheme', fileName: `${key}.vocs.json` };
+      index['codingScheme'] = { id: `${key}.vocs.json`, type: 'iqb-coding-scheme' };
     }
 
     if (unitDownloadSettings.addComments) {
       const comments = await unitCommentService.findOnesComments(unitId);
       if (comments?.length) {
         zip.addFile(`${key}.voco.json`, Buffer.from(JSON.stringify(comments)));
-        index['comments'] = { type: 'iqb-unit-comments', fileName: `${key}.voco.json` };
+        index['comments'] = { id: `${key}.voco.json`, type: 'iqb-unit-comments' };
       }
     }
 
@@ -701,19 +702,19 @@ export class UnitDownloadClass {
           };
         });
         zip.addFile(`${key}.vorn.json`, Buffer.from(JSON.stringify(transformedNotes, null, 2)));
-        index['richNotes'] = { type: 'iqb-unit-rich-notes', fileName: `${key}.vorn.json` };
+        index['richNotes'] = { id: `${key}.vorn.json`, type: 'iqb-unit-rich-notes' };
       }
     }
 
     if (unitMetadata.metadata && Object.keys(unitMetadata.metadata).length > 0) {
       zip.addFile(`${key}.vomd.json`, Buffer.from(JSON.stringify(unitMetadata.metadata)));
-      index['metadata'] = { type: 'metadata-values', fileName: `${key}.vomd.json` };
+      index['metadata'] = { id: `${key}.vomd.json`, type: 'metadata-values' };
     }
 
     const variables = UnitDownloadClass.buildVariablesJSON(definitionData, schemeData);
     if (variables) {
       zip.addFile(`${key}.vova.json`, Buffer.from(JSON.stringify(variables, null, 2)));
-      index['variables'] = { type: 'unit-variables', fileName: `${key}.vova.json` };
+      index['variables'] = { id: `${key}.vova.json`, type: 'unit-variables' };
     }
 
     zip.addFile(`${key}.json`, Buffer.from(JSON.stringify(index, null, 2)));

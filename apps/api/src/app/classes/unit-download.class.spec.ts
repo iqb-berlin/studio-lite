@@ -1,9 +1,12 @@
 import { createMock } from '@golevelup/ts-jest';
 import {
+  UnitCommentDto,
   UnitDownloadSettingsDto,
   UnitExportConfigDto,
   UnitPropertiesDto,
   UnitDefinitionDto,
+  UnitRichNoteDto,
+  UnitRichNotesDto,
   UnitSchemeDto,
   VeronaModuleInListDto,
   VeronaModuleFileDto,
@@ -522,6 +525,86 @@ describe('UnitDownloadClass', () => {
       expect(parsed.richNotes).toBeUndefined();
       expect(parsed.metadata).toBeUndefined();
       expect(parsed.variables).toBeUndefined();
+    });
+
+    it('should use id (not fileName) in external data blocks', async () => {
+      const unitServiceMock = createMock<UnitService>();
+      const unitCommentServiceMock = createMock<UnitCommentService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      const settingServiceMock = createMock<SettingService>();
+      const unitRichNoteServiceMock = createMock<UnitRichNoteService>();
+
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
+      unitServiceMock.findOnesProperties.mockResolvedValue({
+        key: 'U4', name: 'Unit 4', description: '', metadata: { profile: 'x' },
+        player: 'player-1', lastChangedMetadata: new Date()
+      } as unknown as UnitPropertiesDto);
+      unitServiceMock.ensureUuid.mockResolvedValue('uuid-4');
+      unitServiceMock.findOnesDefinition.mockResolvedValue({
+        definition: '<content/>', variables: [{ id: 'v1', type: 'string' }]
+      } as unknown as UnitDefinitionDto);
+      unitServiceMock.findOnesScheme.mockResolvedValue({
+        scheme: JSON.stringify({ variableCodings: [] }), schemeType: 'iqb-coding-scheme'
+      } as unknown as UnitSchemeDto);
+      unitCommentServiceMock.findOnesComments.mockResolvedValue([{ id: 1 }] as unknown as UnitCommentDto[]);
+      unitRichNoteServiceMock.findNotes.mockResolvedValue({
+        tags: [],
+        notes: [{ tagId: 't1', content: 'note', links: [], itemReferences: [] } as unknown as UnitRichNoteDto]
+      } as UnitRichNotesDto);
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
+
+      const downloadSettings = {
+        unitIdList: [4], exportFormat: 'json',
+        addPlayers: false, addComments: true, addRichNotes: true,
+        addTestTakersHot: 0, addTestTakersMonitor: 0, addTestTakersReview: 0
+      } as unknown as UnitDownloadSettingsDto;
+
+      await UnitDownloadClass.get(
+        1, unitServiceMock, unitCommentServiceMock, veronaModuleServiceMock,
+        settingServiceMock, unitRichNoteServiceMock, downloadSettings
+      );
+
+      const jsonCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U4.json');
+      const parsed = JSON.parse((jsonCall[1] as Buffer).toString());
+
+      expect(parsed.codingScheme).toEqual({ id: 'U4.vocs.json', type: 'iqb-coding-scheme' });
+      expect(parsed.comments).toEqual({ id: 'U4.voco.json', type: 'iqb-unit-comments' });
+      expect(parsed.richNotes).toEqual({ id: 'U4.vorn.json', type: 'iqb-unit-rich-notes' });
+      expect(parsed.metadata).toEqual({ id: 'U4.vomd.json', type: 'metadata-values' });
+      expect(parsed.variables).toEqual({ id: 'U4.vova.json', type: 'unit-variables' });
+    });
+
+    it('should always include player in userInterface even when empty', async () => {
+      const unitServiceMock = createMock<UnitService>();
+      const unitCommentServiceMock = createMock<UnitCommentService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      const settingServiceMock = createMock<SettingService>();
+      const unitRichNoteServiceMock = createMock<UnitRichNoteService>();
+
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
+      unitServiceMock.findOnesProperties.mockResolvedValue({
+        key: 'U5', name: 'Unit 5', description: '', metadata: {},
+        player: '', lastChangedMetadata: new Date()
+      } as unknown as UnitPropertiesDto);
+      unitServiceMock.ensureUuid.mockResolvedValue('uuid-5');
+      unitServiceMock.findOnesDefinition.mockResolvedValue({
+        definition: '', variables: []
+      } as unknown as UnitDefinitionDto);
+      unitServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as unknown as UnitSchemeDto);
+      unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
+
+      await UnitDownloadClass.get(
+        1, unitServiceMock, unitCommentServiceMock, veronaModuleServiceMock,
+        settingServiceMock, unitRichNoteServiceMock,
+        { unitIdList: [5], exportFormat: 'json', addPlayers: false, addComments: false,
+          addRichNotes: false, addTestTakersHot: 0, addTestTakersMonitor: 0, addTestTakersReview: 0
+        } as unknown as UnitDownloadSettingsDto
+      );
+
+      const jsonCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U5.json');
+      const parsed = JSON.parse((jsonCall[1] as Buffer).toString());
+      expect(parsed.userInterface).toHaveProperty('player');
     });
   });
 
