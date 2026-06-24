@@ -18,8 +18,13 @@ import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export
 @Component({
   templateUrl: './export-unit.component.html',
   styleUrls: ['export-unit.component.scss'],
-  // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, SelectUnitListComponent, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, ExportTestTakerConfigComponent, BookletConfigEditComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, FormsModule, ExportUnitFileConfigComponent]
+  imports: [
+    MatDialogTitle, MatDialogContent, SelectUnitListComponent,
+    MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle,
+    ExportTestTakerConfigComponent, BookletConfigEditComponent,
+    MatDialogActions, MatButton, MatDialogClose,
+    TranslateModule, FormsModule, ExportUnitFileConfigComponent
+  ]
 })
 export class ExportUnitComponent {
   unitExportSettings: UnitDownloadSettingsDto = {

@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiCreatedResponse, ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
@@ -116,6 +117,7 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, ReadOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiBody({ type: UnitDownloadSettingsDto })
   @ApiOkResponse()
   @ApiForbiddenResponse({ description: 'Forbidden.' })
   @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })

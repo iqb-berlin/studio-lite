@@ -1,6 +1,7 @@
 import {
-  Component, EventEmitter, Input, OnInit, Output
+  Component, EventEmitter, Input, OnDestroy, OnInit, Output
 } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
@@ -17,7 +18,7 @@ import { ModuleService } from '../../../../services/module.service';
   styleUrls: ['./export-unit-file-config.component.scss'],
   imports: [MatCheckbox, FormsModule, TranslateModule, MatCard, MatRadioGroup, MatRadioButton]
 })
-export class ExportUnitFileConfigComponent implements OnInit {
+export class ExportUnitFileConfigComponent implements OnInit, OnDestroy {
   unitsWithOutPlayer: number[] = [];
   enablePlayerOption = true;
   @Input() exportFormat: 'xml' | 'json' = 'json';
@@ -30,6 +31,8 @@ export class ExportUnitFileConfigComponent implements OnInit {
   @Output() addRichNotesChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() unitsWithOutPlayerChange = new EventEmitter<number[]>();
 
+  private ngUnsubscribe = new Subject<void>();
+
   constructor(
     public workspaceService: WorkspaceService,
     private moduleService: ModuleService,
@@ -39,7 +42,7 @@ export class ExportUnitFileConfigComponent implements OnInit {
   ngOnInit(): void {
     this.backendService.getUnitListWithProperties(
       this.workspaceService.selectedWorkspaceId
-    ).subscribe(unitsWithMetadata => {
+    ).pipe(takeUntil(this.ngUnsubscribe)).subscribe(unitsWithMetadata => {
       unitsWithMetadata.forEach(umd => {
         if (umd.player) {
           const validPlayerId = VeronaModuleFactory.isValid(umd.player, Object.keys(this.moduleService.players));
@@ -50,5 +53,10 @@ export class ExportUnitFileConfigComponent implements OnInit {
       });
       this.enablePlayerOption = this.unitsWithOutPlayer.length < unitsWithMetadata.length;
     });
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

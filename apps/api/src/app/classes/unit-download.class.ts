@@ -128,7 +128,7 @@ export class UnitDownloadClass {
     return zip.toBuffer();
   }
 
-  private static async getUnitExportConfig(
+  static async getUnitExportConfig(
     settingService: SettingService
   ): Promise<UnitExportConfigDto> {
     const unitExportConfig = new UnitExportConfigDto();
@@ -145,7 +145,7 @@ export class UnitDownloadClass {
     return unitExportConfig;
   }
 
-  private static async getUnitData(
+  static async getUnitData(
     unitService: UnitService,
     unitCommentService: UnitCommentService,
     unitId: number,
@@ -198,7 +198,7 @@ export class UnitDownloadClass {
     if (usedPlayers.indexOf(unitMetadata.player) < 0) usedPlayers.push(unitMetadata.player);
   }
 
-  private static createUnitXML(
+  static createUnitXML(
     unitExportConfig: UnitExportConfigDto,
     unitMetadata: UnitPropertiesDto
   ): XMLBuilder {
@@ -223,7 +223,7 @@ export class UnitDownloadClass {
     );
   }
 
-  private static addMetadata(
+  static addMetadata(
     unitMetadata: UnitPropertiesDto,
     zip: AdmZip
   ): void {
@@ -235,7 +235,7 @@ export class UnitDownloadClass {
     }
   }
 
-  private static addUnitDefinition(
+  static addUnitDefinition(
     definitionData: UnitDefinitionDto,
     unitXml: XMLBuilder,
     unitMetadata: UnitPropertiesDto,
@@ -269,7 +269,7 @@ export class UnitDownloadClass {
     }
   }
 
-  private static addVariables(
+  static addVariables(
     definitionData: UnitDefinitionDto,
     unitXml: XMLBuilder
   ): void {
@@ -314,7 +314,7 @@ export class UnitDownloadClass {
     }
   }
 
-  private static getDerivedVariableType(coding: VariableCodingData): string {
+  static getDerivedVariableType(coding: VariableCodingData): string {
     switch (coding.sourceType) {
       case 'SUM_CODE':
       case 'SUM_SCORE':
@@ -331,7 +331,7 @@ export class UnitDownloadClass {
     }
   }
 
-  private static parseDerivedCodings(schemeData: UnitSchemeDto): VariableCodingData[] {
+  static parseDerivedCodings(schemeData: UnitSchemeDto): VariableCodingData[] {
     if (!schemeData?.scheme) return [];
     let codingScheme: CodingSchemeData;
     try {
@@ -344,7 +344,7 @@ export class UnitDownloadClass {
     ) ?? [];
   }
 
-  private static addDerivedVariables(
+  static addDerivedVariables(
     schemeData: UnitSchemeDto,
     unitXml: XMLBuilder
   ): void {
@@ -365,7 +365,7 @@ export class UnitDownloadClass {
     });
   }
 
-  private static addComments(
+  static addComments(
     comments: UnitCommentDto[],
     unitXml: XMLBuilder,
     unitMetadata: UnitPropertiesDto,
@@ -384,7 +384,7 @@ export class UnitDownloadClass {
     }
   }
 
-  private static addScheme(
+  static addScheme(
     schemeData: UnitSchemeDto,
     unitXml: XMLBuilder,
     unitMetadata: UnitPropertiesDto,
@@ -410,7 +410,7 @@ export class UnitDownloadClass {
     }
   }
 
-  private static findTag(
+  static findTag(
     tags: UnitRichNoteTagDto[],
     tagId: string
   ): UnitRichNoteTagDto | null {
@@ -450,7 +450,7 @@ export class UnitDownloadClass {
     ).tag;
   }
 
-  private static getLabelString(
+  static getLabelString(
     labels: { lang: string; value: string }[] | null | undefined
   ): string | null {
     if (!labels || labels.length === 0) return null;
@@ -461,7 +461,7 @@ export class UnitDownloadClass {
     return labels[0].value;
   }
 
-  private static transformRichNotes(
+  static transformRichNotes(
     notes: UnitRichNoteDto[],
     tags: UnitRichNoteTagDto[]
   ): { tagId: string; tagLabel: string; content: string; links?: UnitRichNoteLinkDto[]; itemUuids?: string[] }[] {
@@ -477,7 +477,7 @@ export class UnitDownloadClass {
     });
   }
 
-  private static async addRichNotes(
+  static async addRichNotes(
     unitRichNoteService: UnitRichNoteService,
     unitId: number,
     unitXml: XMLBuilder,
@@ -500,7 +500,7 @@ export class UnitDownloadClass {
     }
   }
 
-  private static async addPlayers(
+  static async addPlayers(
     veronaModuleService: VeronaModulesService,
     zip: AdmZip,
     usedPlayers: string[]
@@ -526,7 +526,7 @@ export class UnitDownloadClass {
     );
   }
 
-  private static createBookletXml(
+  static createBookletXml(
     unitExportConfig: UnitExportConfigDto
   ): XMLBuilder {
     return XmlBuilder.create(
@@ -544,7 +544,7 @@ export class UnitDownloadClass {
     );
   }
 
-  private static addBooklet(
+  static addBooklet(
     unitExportConfig: UnitExportConfigDto,
     unitDownloadSettings: UnitDownloadSettingsDto,
     unitsMetadata: UnitPropertiesDto[],
@@ -578,7 +578,7 @@ export class UnitDownloadClass {
     );
   }
 
-  private static createTestTakersXml(
+  static createTestTakersXml(
     unitExportConfig: UnitExportConfigDto
   ): XMLBuilder {
     return XmlBuilder.create(
@@ -599,7 +599,7 @@ export class UnitDownloadClass {
     );
   }
 
-  private static addTestTakers(
+  static addTestTakers(
     unitExportConfig: UnitExportConfigDto,
     unitDownloadSettings: UnitDownloadSettingsDto,
     loginCount: number,
@@ -626,7 +626,7 @@ export class UnitDownloadClass {
         '@label': 'Login-Gruppe A'
       }
     });
-    for (let i = 0; i < unitDownloadSettings.addTestTakersHot; i++) {
+    Array.from({ length: unitDownloadSettings.addTestTakersHot }).forEach((_, i) => {
       loginIndex += 1;
       const prefix =
         unitDownloadSettings.addTestTakersMonitor > 0 ?
@@ -644,8 +644,8 @@ export class UnitDownloadClass {
           '#': 'booklet1'
         }
       });
-    }
-    for (let i = 0; i < unitDownloadSettings.addTestTakersReview; i++) {
+    });
+    Array.from({ length: unitDownloadSettings.addTestTakersReview }).forEach(() => {
       loginIndex += 1;
       const loginElement = groupElement.ele({
         Login: {
@@ -659,8 +659,8 @@ export class UnitDownloadClass {
           '#': 'booklet1'
         }
       });
-    }
-    for (let i = 0; i < unitDownloadSettings.addTestTakersMonitor; i++) {
+    });
+    Array.from({ length: unitDownloadSettings.addTestTakersMonitor }).forEach((_, i) => {
       loginIndex += 1;
       const prefix =
         unitDownloadSettings.addTestTakersMonitor > 1 ?
@@ -673,14 +673,14 @@ export class UnitDownloadClass {
         }
       });
       if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex - 1]);
-    }
+    });
     zip.addFile(
       'testtaker1.xml',
       Buffer.from(testTakerXml.toString({ prettyPrint: true }))
     );
   }
 
-  private static async getUnitDataJSON(
+  static async getUnitDataJSON(
     unitService: UnitService,
     unitCommentService: UnitCommentService,
     unitId: number,
@@ -766,7 +766,7 @@ export class UnitDownloadClass {
     if (usedPlayers.indexOf(unitMetadata.player) < 0) usedPlayers.push(unitMetadata.player);
   }
 
-  private static buildVariablesJSON(
+  static buildVariablesJSON(
     definitionData: UnitDefinitionDto,
     schemeData: UnitSchemeDto
   ): { baseVariables: VariableInfo[]; derivedVariables: { id: string; basedOn: string[] }[] } | null {
@@ -785,8 +785,7 @@ export class UnitDownloadClass {
   static generateCodeList(codeLen: number, codeCount: number): string[] {
     const codeCharacters = 'abcdefghprqstuvxyz';
     const codeNumbers = '2345679';
-    const codeList: string[] = [];
-    for (let i = 0; i < codeCount; i++) {
+    return Array.from({ length: codeCount }).reduce<string[]>(list => {
       let newCode = '';
       do {
         newCode = '';
@@ -803,9 +802,8 @@ export class UnitDownloadClass {
             );
           isNumber = !isNumber;
         } while (newCode.length < codeLen);
-      } while (codeList.indexOf(newCode) >= 0);
-      codeList.push(newCode);
-    }
-    return codeList;
+      } while (list.indexOf(newCode) >= 0);
+      return [...list, newCode];
+    }, []);
   }
 }
