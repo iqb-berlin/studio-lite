@@ -43,6 +43,7 @@ describe('ExportUnitComponent', () => {
   class MockBookletConfigComponent {
     @Input() disabled!: boolean;
     @Input() config!: BookletConfigDto | undefined;
+    @Input() context!: 'review' | 'export';
   }
 
   @Component({ selector: 'studio-lite-export-unit-file-config', template: '', standalone: true })

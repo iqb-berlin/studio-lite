@@ -23,11 +23,18 @@ export class BookletConfigEditComponent {
   controllerDesignOptions = ['2018', '2022'];
   unitScreenHeaderOptions = ['OFF', 'WITH_UNIT_TITLE', 'WITH_BOOKLET_TITLE', 'WITH_BLOCK_TITLE', 'EMPTY'];
   unitTitleOptions = ['OFF', 'ON'];
+  navbarUnitLabelOptions = ['HIDDEN', 'INDEX', 'LABEL'];
+  navbarPageLabelOptions = ['HIDDEN', 'INDEX', 'LABEL', 'LIST'];
+  navbarButtonOptions = ['HIDDEN', 'DYNAMIC', 'UNITS', 'PAGES'];
+  boolOptions = ['FALSE', 'TRUE'];
+  browserBehaviourOptions = ['standard', 'preventNav'];
+  forceOptions = ['OFF', 'ON', 'ALWAYS'];
 
   bookletConfig!: BookletConfigDto;
 
   @Output() configChanged = new EventEmitter<BookletConfigDto>();
   @Input() disabled = false;
+  @Input() context: 'review' | 'export' = 'review';
   @Input('config')
   set config(value: BookletConfigDto | undefined) {
     this.bookletConfig = value || {

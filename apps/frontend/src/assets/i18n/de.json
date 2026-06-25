@@ -979,6 +979,90 @@
       "label": "Unit-Titel unterhalb der Bildschirm-Kopfzeile",
       "ON": "eingeblendet",
       "OFF": "ausgeblendet"
+    },
+    "navbarUnitLabel": {
+      "label": "Beschriftung der Unit-Navigation",
+      "HIDDEN": "ausgeblendet",
+      "INDEX": "Index (aktuelle Nr. / Gesamt)",
+      "LABEL": "Bezeichnung der Unit"
+    },
+    "navbarUnitControlsHidden": {
+      "label": "Navigationselemente zwischen Units ausblenden",
+      "FALSE": "eingeblendet",
+      "TRUE": "ausgeblendet"
+    },
+    "navbarPageLabel": {
+      "label": "Beschriftung der Seiten-Navigation",
+      "HIDDEN": "ausgeblendet",
+      "INDEX": "Index (aktuelle Nr. / Gesamt)",
+      "LABEL": "Bezeichnung der Seite",
+      "LIST": "horizontale Liste"
+    },
+    "navbarPageControlsHidden": {
+      "label": "Navigationselemente zwischen Seiten ausblenden",
+      "FALSE": "eingeblendet",
+      "TRUE": "ausgeblendet"
+    },
+    "navbarBackwardButton": {
+      "label": "Zurück-Button in der Navigationsleiste",
+      "HIDDEN": "ausgeblendet",
+      "DYNAMIC": "dynamisch (Seite oder Unit)",
+      "UNITS": "zur vorherigen Unit",
+      "PAGES": "zur vorherigen Seite"
+    },
+    "navbarForwardButton": {
+      "label": "Vorwärts-Button in der Navigationsleiste",
+      "HIDDEN": "ausgeblendet",
+      "DYNAMIC": "dynamisch (Seite oder Unit)",
+      "UNITS": "zur nächsten Unit",
+      "PAGES": "zur nächsten Seite"
+    },
+    "toolbarShowUnitTitle": {
+      "label": "Unit-Titel in der Werkzeugleiste anzeigen",
+      "FALSE": "ausgeblendet",
+      "TRUE": "eingeblendet"
+    },
+    "toolbarShowUnitList": {
+      "label": "Unit-Liste in der Werkzeugleiste anzeigen",
+      "FALSE": "ausgeblendet",
+      "TRUE": "eingeblendet"
+    },
+    "toolbarShowFullscreenButton": {
+      "label": "Vollbild-Button in der Werkzeugleiste",
+      "FALSE": "ausgeblendet",
+      "TRUE": "eingeblendet"
+    },
+    "toolbarShowReloadButton": {
+      "label": "Neu-Laden-Button in der Werkzeugleiste",
+      "FALSE": "ausgeblendet",
+      "TRUE": "eingeblendet"
+    },
+    "toolbarShowTimeLeft": {
+      "label": "Verbleibende Zeit in der Werkzeugleiste anzeigen",
+      "FALSE": "ausgeblendet",
+      "TRUE": "eingeblendet"
+    },
+    "silentMode": {
+      "label": "Stiller Modus (keine Dialoge/Einblendungen)",
+      "FALSE": "deaktiviert",
+      "TRUE": "aktiviert"
+    },
+    "browserBehaviour": {
+      "label": "Browser-Navigation",
+      "standard": "Standardverhalten",
+      "preventNav": "Navigation verhindern"
+    },
+    "forcePresentationComplete": {
+      "label": "Vollständige Anzeige erzwingen",
+      "OFF": "nicht erzwingen",
+      "ON": "beim Vorwärtsblättern",
+      "ALWAYS": "immer"
+    },
+    "forceResponseComplete": {
+      "label": "Vollständige Antwort erzwingen",
+      "OFF": "nicht erzwingen",
+      "ON": "beim Vorwärtsblättern",
+      "ALWAYS": "immer"
     }
   },
   "resource-packages": {

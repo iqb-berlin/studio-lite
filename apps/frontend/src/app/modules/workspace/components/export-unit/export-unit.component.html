@@ -44,6 +44,7 @@
                                                              unitExportSettings.addTestTakersHot +
                                                              unitExportSettings.addTestTakersMonitor)"
                                                [config]="bookletConfigSettings"
+                                               [context]="'export'"
                                                (configChanged)="setBookletConfigSettings($event)">
               </studio-lite-booklet-config-edit>
           </mat-expansion-panel>

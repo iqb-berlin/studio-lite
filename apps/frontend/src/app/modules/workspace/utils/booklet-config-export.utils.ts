@@ -8,13 +8,16 @@ const headerContentMap: Record<string, string> = {
 };
 
 export function mapBookletConfigToModernKeys(config: BookletConfigDto): UnitDownloadBookletSettingsDto[] {
-  return [
+  const all = [
     ...pagingModeEntries(config),
     ...headerEntries(config),
     ...unitTitleEntries(config),
     ...unitNaviEntries(config),
-    ...pageNaviEntries(config)
+    ...pageNaviEntries(config),
+    ...directStringEntries(config)
   ];
+  const deduped = new Map<string, string>(all.map(({ key, value }) => [key, value]));
+  return [...deduped.entries()].map(([key, value]) => ({ key, value }));
 }
 
 function pagingModeEntries(config: BookletConfigDto): UnitDownloadBookletSettingsDto[] {
@@ -77,4 +80,28 @@ function pageNaviEntries(config: BookletConfigDto): UnitDownloadBookletSettingsD
     ];
   }
   return [];
+}
+
+const directKeyMap: Partial<Record<keyof BookletConfigDto, string>> = {
+  navbarUnitLabel: 'navbar_unit_label',
+  navbarUnitControlsHidden: 'navbar_unit_controls_hidden',
+  navbarPageLabel: 'navbar_page_label',
+  navbarPageControlsHidden: 'navbar_page_controls_hidden',
+  navbarBackwardButton: 'navbar_backward_button',
+  navbarForwardButton: 'navbar_forward_button',
+  toolbarShowUnitTitle: 'toolbar_show_unit_title',
+  toolbarShowUnitList: 'toolbar_show_unit_list',
+  toolbarShowFullscreenButton: 'toolbar_show_fullscreen_button',
+  toolbarShowReloadButton: 'toolbar_show_reload_button',
+  toolbarShowTimeLeft: 'toolbar_show_time_left',
+  silentMode: 'silent_mode',
+  browserBehaviour: 'browserBehaviour',
+  forcePresentationComplete: 'force_presentation_complete',
+  forceResponseComplete: 'force_response_complete'
+};
+
+function directStringEntries(config: BookletConfigDto): UnitDownloadBookletSettingsDto[] {
+  return (Object.keys(directKeyMap) as (keyof BookletConfigDto)[])
+    .filter(field => !!config[field])
+    .map(field => ({ key: directKeyMap[field] as string, value: config[field] as string }));
 }

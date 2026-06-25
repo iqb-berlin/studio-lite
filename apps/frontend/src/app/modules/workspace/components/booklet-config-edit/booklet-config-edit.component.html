@@ -25,12 +25,13 @@
       }
     </mat-select>
   </mat-form-field>
+
   <mat-form-field>
     <mat-label>{{xmlParams.checked ?
-      'page_navibuttons' :
+      (context === 'export' ? 'navbar_page_label' : 'page_navibuttons') :
     'booklet-config.pageNaviButtons.label' | translate}}</mat-label>
     <mat-select [placeholder]="xmlParams.checked ?
-                  'page_navibuttons' :
+                  (context === 'export' ? 'navbar_page_label' : 'page_navibuttons') :
                   'booklet-config.pageNaviButtons.label' | translate"
       [disabled]="disabled"
       [(ngModel)]="bookletConfig.pageNaviButtons"
@@ -44,12 +45,13 @@
       }
     </mat-select>
   </mat-form-field>
+
   <mat-form-field>
     <mat-label>{{xmlParams.checked ?
-      'unit_navibuttons' :
+      (context === 'export' ? 'navbar_unit_label' : 'unit_navibuttons') :
     'booklet-config.unitNaviButtons.label' | translate}}</mat-label>
     <mat-select [placeholder]="xmlParams.checked ?
-                  'unit_navibuttons' :
+                  (context === 'export' ? 'navbar_unit_label' : 'unit_navibuttons') :
                   'booklet-config.unitNaviButtons.label' | translate"
       [disabled]="disabled"
       [(ngModel)]="bookletConfig.unitNaviButtons"
@@ -63,31 +65,35 @@
       }
     </mat-select>
   </mat-form-field>
+
+  @if (context !== 'export') {
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'controller_design' :
+      'booklet-config.controllerDesign.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'controller_design' :
+                    'booklet-config.controllerDesign.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.controllerDesign"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of controllerDesignOptions; track option) {
+          <mat-option
+            [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.controllerDesign.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+
   <mat-form-field>
     <mat-label>{{xmlParams.checked ?
-      'controller_design' :
-    'booklet-config.controllerDesign.label' | translate}}</mat-label>
-    <mat-select [placeholder]="xmlParams.checked ?
-                  'controller_design' :
-                  'booklet-config.controllerDesign.label' | translate"
-      [disabled]="disabled"
-      [(ngModel)]="bookletConfig.controllerDesign"
-      (selectionChange)="configChanged.emit(bookletConfig)">
-      <mat-option value=""></mat-option>
-      @for (option of controllerDesignOptions; track option) {
-        <mat-option
-          [value]="option">
-          {{xmlParams.checked ? option : 'booklet-config.controllerDesign.' + option | translate}}
-        </mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>{{xmlParams.checked ?
-      'unit_screenheader' :
+      (context === 'export' ? 'header_content' : 'unit_screenheader') :
     'booklet-config.unitScreenHeader.label' | translate}}</mat-label>
     <mat-select [placeholder]="xmlParams.checked ?
-                  'unit_screenheader' :
+                  (context === 'export' ? 'header_content' : 'unit_screenheader') :
                   'booklet-config.unitScreenHeader.label' | translate"
       [disabled]="disabled"
       [(ngModel)]="bookletConfig.unitScreenHeader"
@@ -101,12 +107,13 @@
       }
     </mat-select>
   </mat-form-field>
+
   <mat-form-field>
     <mat-label>{{xmlParams.checked ?
-      'unit_title' :
+      (context === 'export' ? 'toolbar_show_unit_title' : 'unit_title') :
     'booklet-config.unitTitle.label' | translate}}</mat-label>
     <mat-select [placeholder]="xmlParams.checked ?
-                  'unit_title' :
+                  (context === 'export' ? 'toolbar_show_unit_title' : 'unit_title') :
                   'booklet-config.unitTitle.label' | translate"
       [disabled]="disabled"
       [(ngModel)]="bookletConfig.unitTitle"
@@ -120,4 +127,291 @@
       }
     </mat-select>
   </mat-form-field>
+
+  @if (context === 'export') {
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'navbar_unit_label' :
+      'booklet-config.navbarUnitLabel.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'navbar_unit_label' :
+                    'booklet-config.navbarUnitLabel.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.navbarUnitLabel"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of navbarUnitLabelOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.navbarUnitLabel.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'navbar_unit_controls_hidden' :
+      'booklet-config.navbarUnitControlsHidden.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'navbar_unit_controls_hidden' :
+                    'booklet-config.navbarUnitControlsHidden.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.navbarUnitControlsHidden"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.navbarUnitControlsHidden.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'navbar_page_label' :
+      'booklet-config.navbarPageLabel.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'navbar_page_label' :
+                    'booklet-config.navbarPageLabel.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.navbarPageLabel"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of navbarPageLabelOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.navbarPageLabel.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'navbar_page_controls_hidden' :
+      'booklet-config.navbarPageControlsHidden.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'navbar_page_controls_hidden' :
+                    'booklet-config.navbarPageControlsHidden.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.navbarPageControlsHidden"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.navbarPageControlsHidden.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'navbar_backward_button' :
+      'booklet-config.navbarBackwardButton.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'navbar_backward_button' :
+                    'booklet-config.navbarBackwardButton.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.navbarBackwardButton"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of navbarButtonOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.navbarBackwardButton.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'navbar_forward_button' :
+      'booklet-config.navbarForwardButton.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'navbar_forward_button' :
+                    'booklet-config.navbarForwardButton.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.navbarForwardButton"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of navbarButtonOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.navbarForwardButton.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'toolbar_show_unit_title' :
+      'booklet-config.toolbarShowUnitTitle.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'toolbar_show_unit_title' :
+                    'booklet-config.toolbarShowUnitTitle.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.toolbarShowUnitTitle"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.toolbarShowUnitTitle.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'toolbar_show_unit_list' :
+      'booklet-config.toolbarShowUnitList.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'toolbar_show_unit_list' :
+                    'booklet-config.toolbarShowUnitList.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.toolbarShowUnitList"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.toolbarShowUnitList.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'toolbar_show_fullscreen_button' :
+      'booklet-config.toolbarShowFullscreenButton.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'toolbar_show_fullscreen_button' :
+                    'booklet-config.toolbarShowFullscreenButton.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.toolbarShowFullscreenButton"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.toolbarShowFullscreenButton.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'toolbar_show_reload_button' :
+      'booklet-config.toolbarShowReloadButton.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'toolbar_show_reload_button' :
+                    'booklet-config.toolbarShowReloadButton.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.toolbarShowReloadButton"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.toolbarShowReloadButton.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'toolbar_show_time_left' :
+      'booklet-config.toolbarShowTimeLeft.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'toolbar_show_time_left' :
+                    'booklet-config.toolbarShowTimeLeft.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.toolbarShowTimeLeft"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.toolbarShowTimeLeft.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'silent_mode' :
+      'booklet-config.silentMode.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'silent_mode' :
+                    'booklet-config.silentMode.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.silentMode"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.silentMode.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'browserBehaviour' :
+      'booklet-config.browserBehaviour.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'browserBehaviour' :
+                    'booklet-config.browserBehaviour.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.browserBehaviour"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of browserBehaviourOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.browserBehaviour.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'force_presentation_complete' :
+      'booklet-config.forcePresentationComplete.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'force_presentation_complete' :
+                    'booklet-config.forcePresentationComplete.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.forcePresentationComplete"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of forceOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.forcePresentationComplete.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{xmlParams.checked ?
+        'force_response_complete' :
+      'booklet-config.forceResponseComplete.label' | translate}}</mat-label>
+      <mat-select [placeholder]="xmlParams.checked ?
+                    'force_response_complete' :
+                    'booklet-config.forceResponseComplete.label' | translate"
+        [disabled]="disabled"
+        [(ngModel)]="bookletConfig.forceResponseComplete"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of forceOptions; track option) {
+          <mat-option [value]="option">
+            {{xmlParams.checked ? option : 'booklet-config.forceResponseComplete.' + option | translate}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
 </div>
