@@ -593,13 +593,7 @@ export class UnitDownloadClass {
         Testtakers: {
           '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
           '@xsi:noNamespaceSchemaLocation': unitExportConfig.testTakersXsdUrl,
-          Metadata: {},
-          CustomTexts: {
-            CustomText: {
-              '@key': 'login_testEndButtonText',
-              '#': 'Test beenden'
-            }
-          }
+          Metadata: {}
         }
       }
     );
@@ -627,10 +621,11 @@ export class UnitDownloadClass {
         loginCount
       );
     let loginIndex = 0;
+    const groupLabel = unitDownloadSettings.groupLabel || 'Gruppe 1';
     const groupElement = testTakerXml.root().ele({
       Group: {
-        '@id': `TestTakerGroup_${loginNames[loginIndex]}`,
-        '@label': 'Login-Gruppe A'
+        '@id': `${bookletId}_group`,
+        '@label': groupLabel
       }
     });
     Array.from({ length: unitDownloadSettings.addTestTakersHot }).forEach((_, i) => {
@@ -680,9 +675,16 @@ export class UnitDownloadClass {
         }
       });
       if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex - 1]);
+      if (unitDownloadSettings.monitorBookletVisibility) {
+        loginElement.ele({
+          ViewSettings: {
+            monitorBookletVisibility: unitDownloadSettings.monitorBookletVisibility
+          }
+        });
+      }
     });
     zip.addFile(
-      'testtaker1.xml',
+      `${bookletId}_testtaker.xml`,
       Buffer.from(testTakerXml.toString({ prettyPrint: true }))
     );
   }

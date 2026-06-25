@@ -645,6 +645,16 @@
     "booklet-label": {
       "label": "Booklet-Bezeichnung"
     },
+    "group-label": {
+      "label": "Gruppen-Bezeichnung"
+    },
+    "monitor-booklet-visibility": {
+      "label": "Testheft-Sichtbarkeit im Monitor",
+      "default": "TC-Standard",
+      "visible": "Sichtbar",
+      "collapsed": "Eingeklappt",
+      "hidden": "Ausgeblendet"
+    },
     "review-settings": "Review-Einstellungen",
     "test-taker-settings": "Testtaker-Einstellungen",
     "new-review": "Neue Aufgabenfolge",

@@ -48,6 +48,23 @@
                 <mat-label>{{'workspace.booklet-label.label' | translate}}</mat-label>
                 <input matInput [(ngModel)]="unitExportSettings.bookletLabel" placeholder="Testheft 1">
               </mat-form-field>
+              <mat-form-field>
+                <mat-label>{{'workspace.group-label.label' | translate}}</mat-label>
+                <input matInput [(ngModel)]="unitExportSettings.groupLabel" placeholder="Gruppe 1">
+              </mat-form-field>
+              @if (unitExportSettings.addTestTakersMonitor) {
+                <mat-form-field>
+                  <mat-label>{{'workspace.monitor-booklet-visibility.label' | translate}}</mat-label>
+                  <mat-select [(ngModel)]="unitExportSettings.monitorBookletVisibility">
+                    <mat-option [value]="undefined">{{'workspace.monitor-booklet-visibility.default' | translate}}</mat-option>
+                    <mat-option value="visible">{{'workspace.monitor-booklet-visibility.visible' | translate}}</mat-option>
+                    <mat-option value="collapsed">
+                      {{'workspace.monitor-booklet-visibility.collapsed' | translate}}
+                    </mat-option>
+                    <mat-option value="hidden">{{'workspace.monitor-booklet-visibility.hidden' | translate}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              }
               <studio-lite-booklet-config-edit [disabled]="!(unitExportSettings.addTestTakersReview +
                                                              unitExportSettings.addTestTakersHot +
                                                              unitExportSettings.addTestTakersMonitor)"

@@ -11,6 +11,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
+import { MatSelect, MatOption } from '@angular/material/select';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BookletConfigEditComponent } from '../booklet-config-edit/booklet-config-edit.component';
 import { ExportTestTakerConfigComponent } from '../export-test-taker-config/export-test-taker-config.component';
@@ -27,7 +28,7 @@ import { mapBookletConfigToModernKeys } from '../../utils/booklet-config-export.
     ExportTestTakerConfigComponent, BookletConfigEditComponent,
     MatDialogActions, MatButton, MatDialogClose,
     TranslateModule, FormsModule, ExportUnitFileConfigComponent,
-    MatFormField, MatLabel, MatInput
+    MatFormField, MatLabel, MatInput, MatSelect, MatOption
   ]
 })
 export class ExportUnitComponent {

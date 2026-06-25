@@ -36,6 +36,12 @@ export class UnitDownloadSettingsDto {
     bookletLabel?: string;
 
   @ApiProperty()
+    groupLabel?: string;
+
+  @ApiProperty()
+    monitorBookletVisibility?: 'visible' | 'collapsed' | 'hidden';
+
+  @ApiProperty()
     bookletSettings: UnitDownloadBookletSettingsDto[] = [];
 }
 
