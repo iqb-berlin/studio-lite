@@ -29,13 +29,14 @@
       "zip": "Zip-Datei konnte nicht extrahiert werden"
     },
     "api-warning": {
-      "missing-definition": "Korrespondierende Unit-Definition (separate Datei?) nicht gefunden.",
       "xml-parse": "Nicht als Unit-Xml erkannt",
+      "json-parse": "Nicht als Unit-Json-Index erkannt",
+      "missing-file": "Referenzierte Datei nicht im Upload gefunden",
       "ignore-file": "Datei wurde ignoriert"
     },
     "menu-label": {
       "import": "Import",
-      "import-tooltip": "Unit-Dateien (*.xml, *.voud usw.) importieren"
+      "import-tooltip": "Unit-Dateien (*.json, *.xml, *.voud usw.) importieren"
     },
     "request-error": "Allgemeiner Fehler (Netzverbindung?)"
   },

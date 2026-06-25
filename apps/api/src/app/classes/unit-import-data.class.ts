@@ -23,6 +23,7 @@ export class UnitImportData {
   baseVariables: VariableInfo[] = [];
   codingScheme: string;
   codingSchemeFileName: string;
+  variablesFileName = '';
   lastChangedMetadata: Date;
   lastChangedDefinition: Date;
   lastChangedScheme: Date;

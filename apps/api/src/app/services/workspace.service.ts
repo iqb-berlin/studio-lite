@@ -26,6 +26,7 @@ import {
   CodeData,
   CodingSchemeData
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -33,6 +34,7 @@ import WorkspaceGroup from '../entities/workspace-group.entity';
 import Unit from '../entities/unit.entity';
 import { FileIo } from '../interfaces/file-io.interface';
 import { UnitImportData } from '../classes/unit-import-data.class';
+import { UnitImportJsonData } from '../classes/unit-import-json-data.class';
 import { UnitService } from './unit.service';
 import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
@@ -379,7 +381,9 @@ export class WorkspaceService {
     scheme: string | undefined,
     schemer: string
   ): boolean {
-    return !!scheme && !!schemer && schemer.split('@')[1] >= '1.5';
+    if (!scheme) return false;
+    if (!schemer) return true; // JSON format: schemer is no longer explicitly assigned per spec
+    return schemer.split('@')[1] >= '1.5';
   }
 
   private static parseScheme(scheme: string): CodingSchemeData | null {
@@ -705,18 +709,49 @@ export class WorkspaceService {
     files: FileIo[],
     functionReturn: RequestReportDto
   ): {
-      unitData: UnitImportData[];
+      unitData: (UnitImportData | UnitImportJsonData)[];
       notXmlFiles: { [fName: string]: FileIo };
       usedFiles: string[];
     } {
-    const unitData: UnitImportData[] = [];
+    const processedKeys = new Set<string>();
+    const unitData: (UnitImportData | UnitImportJsonData)[] = [];
     const notXmlFiles: { [fName: string]: FileIo } = {};
     const usedFiles: string[] = [];
+    const xmlCandidates: UnitImportData[] = [];
+
     files.forEach(f => {
-      if (f.mimetype === 'text/xml') {
+      if (f.mimetype === 'application/json') {
+        const isCompanionJson = /\.(vocs|voco|vorn|vomd|vova)\.json$/i.test(f.originalname);
         try {
-          unitData.push(new UnitImportData(f));
-        } catch (e) {
+          const parsed = JSON.parse(f.buffer.toString()) as Record<string, unknown>;
+          if (parsed.id && parsed.userInterface) {
+            const jsonData = new UnitImportJsonData(f);
+            unitData.push(jsonData);
+            processedKeys.add(jsonData.key);
+          } else if (isCompanionJson) {
+            notXmlFiles[f.originalname] = f;
+          } else {
+            functionReturn.messages.push({
+              objectKey: f.originalname,
+              messageKey: 'unit-upload.api-warning.json-parse'
+            });
+            usedFiles.push(f.originalname);
+          }
+        } catch {
+          if (isCompanionJson) {
+            notXmlFiles[f.originalname] = f;
+          } else {
+            functionReturn.messages.push({
+              objectKey: f.originalname,
+              messageKey: 'unit-upload.api-warning.json-parse'
+            });
+            usedFiles.push(f.originalname);
+          }
+        }
+      } else if (f.mimetype === 'text/xml') {
+        try {
+          xmlCandidates.push(new UnitImportData(f));
+        } catch {
           functionReturn.messages.push({
             objectKey: f.originalname,
             messageKey: 'unit-upload.api-warning.xml-parse'
@@ -727,16 +762,22 @@ export class WorkspaceService {
         notXmlFiles[f.originalname] = f;
       }
     });
-    return {
-      unitData,
-      notXmlFiles,
-      usedFiles
-    };
+
+    xmlCandidates.forEach(xmlData => {
+      if (processedKeys.has(xmlData.key)) {
+        usedFiles.push(xmlData.fileName);
+      } else {
+        unitData.push(xmlData);
+        processedKeys.add(xmlData.key);
+      }
+    });
+
+    return { unitData, notXmlFiles, usedFiles };
   }
 
   private async uploadFile(
     usedFiles: string[],
-    unitImportData: UnitImportData,
+    unitImportData: UnitImportData | UnitImportJsonData,
     workspaceId: number,
     user: User,
     functionReturn: RequestReportDto,
@@ -750,15 +791,27 @@ export class WorkspaceService {
       true
     );
     if (newUnitId > 0) {
-      if (
-        unitImportData.definitionFileName &&
-        notXmlFiles[unitImportData.definitionFileName]
-      ) {
-        unitImportData.definition =
-          notXmlFiles[unitImportData.definitionFileName].buffer.toString();
-        usedFiles.push(unitImportData.definitionFileName);
-        if (unitImportData.definition || unitImportData.lastChangedDefinition) {
-          await this.importDefinition(newUnitId, unitImportData);
+      if (unitImportData.variablesFileName && notXmlFiles[unitImportData.variablesFileName]) {
+        const variablesData = JSON.parse(
+          notXmlFiles[unitImportData.variablesFileName].buffer.toString()
+        ) as { baseVariables?: VariableInfo[] };
+        unitImportData.baseVariables = variablesData.baseVariables ?? [];
+        usedFiles.push(unitImportData.variablesFileName);
+      }
+
+      if (unitImportData.definitionFileName) {
+        if (notXmlFiles[unitImportData.definitionFileName]) {
+          unitImportData.definition =
+            notXmlFiles[unitImportData.definitionFileName].buffer.toString();
+          usedFiles.push(unitImportData.definitionFileName);
+          if (unitImportData.definition || unitImportData.lastChangedDefinition) {
+            await this.importDefinition(newUnitId, unitImportData);
+          }
+        } else {
+          functionReturn.messages.push({
+            objectKey: unitImportData.definitionFileName,
+            messageKey: 'unit-upload.api-warning.missing-file'
+          });
         }
       }
 
@@ -798,14 +851,18 @@ export class WorkspaceService {
         await this.unitRichNoteService.importNotes(JSON.parse(richNotes), newUnitId, itemUuidLookups);
       }
 
-      if (
-        unitImportData.codingSchemeFileName &&
-        notXmlFiles[unitImportData.codingSchemeFileName]
-      ) {
-        unitImportData.codingScheme =
-          notXmlFiles[unitImportData.codingSchemeFileName].buffer.toString();
-        usedFiles.push(unitImportData.codingSchemeFileName);
-        await this.importScheme(newUnitId, unitImportData);
+      if (unitImportData.codingSchemeFileName) {
+        if (notXmlFiles[unitImportData.codingSchemeFileName]) {
+          unitImportData.codingScheme =
+            notXmlFiles[unitImportData.codingSchemeFileName].buffer.toString();
+          usedFiles.push(unitImportData.codingSchemeFileName);
+          await this.importScheme(newUnitId, unitImportData);
+        } else {
+          functionReturn.messages.push({
+            objectKey: unitImportData.codingSchemeFileName,
+            messageKey: 'unit-upload.api-warning.missing-file'
+          });
+        }
       }
     } else {
       functionReturn.messages.push({
@@ -832,10 +889,12 @@ export class WorkspaceService {
           const zipEntries = zip.getEntries();
           zipEntries.forEach(zipEntry => {
             const isXmlFile = /\.xml$/i.test(zipEntry.entryName);
+            const isJsonFile = /\.json$/i.test(zipEntry.entryName);
             const fileContent = zipEntry.getData();
             files.push({
               originalname: `${f.originalname}/${zipEntry.entryName}`,
-              mimetype: isXmlFile ? 'text/xml' : 'application/octet-stream',
+              // eslint-disable-next-line no-nested-ternary
+              mimetype: isXmlFile ? 'text/xml' : isJsonFile ? 'application/json' : 'application/octet-stream',
               fieldname: f.fieldname,
               encoding: f.encoding,
               buffer: fileContent,
@@ -858,7 +917,7 @@ export class WorkspaceService {
   private async importUnitProperties(
     workspaceId: number,
     newUnitId: number,
-    unitImportData: UnitImportData
+    unitImportData: UnitImportData | UnitImportJsonData
   ): Promise<ItemUuidLookup[]> {
     let itemUuidLookups: ItemUuidLookup[] = [];
     await this.unitService.patchUnitProperties(
@@ -898,7 +957,7 @@ export class WorkspaceService {
 
   private async importDefinition(
     newUnitId: number,
-    unitImportData: UnitImportData
+    unitImportData: UnitImportData | UnitImportJsonData
   ) {
     await this.unitService.patchDefinition(
       newUnitId,
@@ -913,7 +972,7 @@ export class WorkspaceService {
 
   private async importScheme(
     newUnitId: number,
-    unitImportData: UnitImportData
+    unitImportData: UnitImportData | UnitImportJsonData
   ) {
     await this.unitService.patchScheme(
       newUnitId,

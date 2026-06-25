@@ -373,25 +373,123 @@ describe('WorkspaceService', () => {
   });
 
   describe('uploadFiles', () => {
-    it('should process upload', async () => {
-      const files: FileIo[] = [{
-        originalname: 'test.xml',
-        mimetype: 'text/xml',
-        buffer: Buffer.from('<Unit><Metadata><Id>1</Id><Label>l</Label></Metadata></Unit>'),
-        fieldname: 'file',
-        encoding: '7bit',
-        size: 100
-      }];
-      const user = { id: 1 } as User;
+    const user = { id: 1 } as User;
+    const buildFile = (name: string, mime: string, content: string): FileIo => ({
+      originalname: name,
+      mimetype: mime,
+      buffer: Buffer.from(content),
+      fieldname: 'files',
+      encoding: '7bit',
+      size: content.length
+    });
+    const xmlUnit = (key: string) => `<Unit><Metadata><Id>${key}</Id><Label>L</Label></Metadata></Unit>`;
+    const jsonIndex = (key: string, extra: object = {}) => JSON
+      .stringify({ id: key, userInterface: { player: 'test-player' }, ...extra });
 
+    it('should process upload', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
       (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
 
-      const result = await service.uploadFiles(1, files, user);
+      const result = await service.uploadFiles(1, [
+        buildFile('test.xml', 'text/xml', xmlUnit('1'))
+      ], user);
 
       expect(result.messages).toHaveLength(0);
       expect(unitService.create).toHaveBeenCalled();
+    });
+
+    it('should prefer JSON over XML for the same unit key', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.xml', 'text/xml', xmlUnit('UNIT01')),
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01'))
+      ], user);
+
+      expect(result.messages).toHaveLength(0);
+      expect(unitService.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('should warn for non-companion JSON that is not a valid unit index', async () => {
+      const result = await service.uploadFiles(1, [
+        buildFile('broken.json', 'application/json', JSON.stringify({ notId: 'something' }))
+      ], user);
+
+      expect(result.messages).toHaveLength(1);
+      expect(result.messages[0].messageKey).toBe('unit-upload.api-warning.json-parse');
+    });
+
+    it('should not warn for companion JSON files that are not unit indices', async () => {
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.vocs.json', 'application/json', JSON.stringify({ something: 'else' }))
+      ], user);
+
+      expect(result.messages.every(m => m.messageKey !== 'unit-upload.api-warning.json-parse')).toBe(true);
+    });
+
+    it('should warn when definition file referenced in index is missing from upload', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const result = await service.uploadFiles(1, [
+        buildFile(
+          'unit01.json',
+          'application/json',
+          jsonIndex('UNIT01', { userInterface: { player: 'p', definition: 'unit01.voud' } })
+        )
+      ], user);
+
+      expect(result.messages.some(m => m.messageKey === 'unit-upload.api-warning.missing-file')).toBe(true);
+    });
+
+    it('should load baseVariables from vova.json before importing definition', async () => {
+      const baseVariables = [{
+        id: 'VAR1',
+        type: 'string',
+        format: 'text',
+        nullable: false,
+        multiple: false
+      }];
+      const vovaContent = JSON.stringify({ baseVariables, derivedVariables: [] });
+
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchDefinition as jest.Mock).mockResolvedValue(undefined);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          userInterface: { player: 'p', definition: 'unit01.voud' },
+          variables: { id: 'unit01.vova.json', type: 'unit-variables' }
+        })),
+        buildFile('unit01.voud', 'application/octet-stream', '<definition/>'),
+        buildFile('unit01.vova.json', 'application/json', vovaContent)
+      ], user);
+
+      expect(unitService.patchDefinition).toHaveBeenCalledWith(
+        10,
+        expect.objectContaining({ variables: baseVariables }),
+        null,
+        undefined
+      );
+    });
+
+    it('should warn when coding scheme file referenced in index is missing from upload', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          codingScheme: { id: 'unit01.vocs.json', type: 'iqb-coding-scheme' }
+        }))
+      ], user);
+
+      expect(result.messages.some(m => m.messageKey === 'unit-upload.api-warning.missing-file')).toBe(true);
     });
   });
 });
