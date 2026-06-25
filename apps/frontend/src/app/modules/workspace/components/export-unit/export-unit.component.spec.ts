@@ -107,4 +107,19 @@ describe('ExportUnitComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should map booklet config to modern keys on setBookletConfigSettings', () => {
+    component.setBookletConfigSettings({
+      unitScreenHeader: 'WITH_BOOKLET_TITLE',
+      unitTitle: 'ON',
+      unitNaviButtons: 'FULL',
+      controllerDesign: '2022'
+    });
+    const keys = component.unitExportSettings.bookletSettings.map(s => s.key);
+    expect(keys).toContain('header_content');
+    expect(keys).toContain('toolbar_show_unit_title');
+    expect(keys).toContain('navbar_unit_controls_hidden');
+    expect(keys).not.toContain('controller_design');
+    expect(keys).not.toContain('unit_screenheader');
+  });
 });

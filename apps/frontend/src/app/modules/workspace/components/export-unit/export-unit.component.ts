@@ -14,6 +14,7 @@ import { BookletConfigEditComponent } from '../booklet-config-edit/booklet-confi
 import { ExportTestTakerConfigComponent } from '../export-test-taker-config/export-test-taker-config.component';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export-unit-file-config.component';
+import { mapBookletConfigToModernKeys } from '../../utils/booklet-config-export.utils';
 
 @Component({
   templateUrl: './export-unit.component.html',
@@ -40,15 +41,6 @@ export class ExportUnitComponent {
     bookletSettings: []
   };
 
-  readonly bookletKeyMap = {
-    pagingMode: 'pagingMode',
-    pageNaviButtons: 'page_navibuttons',
-    unitNaviButtons: 'unit_navibuttons',
-    controllerDesign: 'controller_design',
-    unitScreenHeader: 'unit_screenheader',
-    unitTitle: 'unit_title'
-  };
-
   bookletConfigSettings: BookletConfigDto | undefined;
 
   constructor(
@@ -61,12 +53,7 @@ export class ExportUnitComponent {
     }
   }
 
-  setBookletConfigSettings(booklet: BookletConfigDto) {
-    this.unitExportSettings.bookletSettings = Object.keys(booklet)
-      .map(key => ({
-        key: this.bookletKeyMap[key as keyof BookletConfigDto] as string,
-        value: booklet[key as keyof BookletConfigDto] as string
-      }))
-      .filter(config => config.value !== '');
+  setBookletConfigSettings(booklet: BookletConfigDto): void {
+    this.unitExportSettings.bookletSettings = mapBookletConfigToModernKeys(booklet);
   }
 }
