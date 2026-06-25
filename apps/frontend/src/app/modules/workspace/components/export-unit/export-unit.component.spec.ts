@@ -109,6 +109,11 @@ describe('ExportUnitComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should initialize bookletId and bookletLabel as undefined', () => {
+    expect(component.unitExportSettings.bookletId).toBeUndefined();
+    expect(component.unitExportSettings.bookletLabel).toBeUndefined();
+  });
+
   it('should map booklet config to modern keys on setBookletConfigSettings', () => {
     component.setBookletConfigSettings({
       unitScreenHeader: 'WITH_BOOKLET_TITLE',

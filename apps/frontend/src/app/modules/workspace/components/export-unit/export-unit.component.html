@@ -40,6 +40,14 @@
                 {{'workspace.booklet-settings' | translate}}
               </mat-panel-title>
             </mat-expansion-panel-header>
+              <mat-form-field>
+                <mat-label>{{'workspace.booklet-id.label' | translate}}</mat-label>
+                <input matInput [(ngModel)]="unitExportSettings.bookletId" placeholder="booklet1">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>{{'workspace.booklet-label.label' | translate}}</mat-label>
+                <input matInput [(ngModel)]="unitExportSettings.bookletLabel" placeholder="Testheft 1">
+              </mat-form-field>
               <studio-lite-booklet-config-edit [disabled]="!(unitExportSettings.addTestTakersReview +
                                                              unitExportSettings.addTestTakersHot +
                                                              unitExportSettings.addTestTakersMonitor)"

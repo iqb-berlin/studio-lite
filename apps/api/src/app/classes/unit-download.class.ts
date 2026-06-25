@@ -527,7 +527,9 @@ export class UnitDownloadClass {
   }
 
   static createBookletXml(
-    unitExportConfig: UnitExportConfigDto
+    unitExportConfig: UnitExportConfigDto,
+    bookletId: string = 'booklet1',
+    bookletLabel: string = 'Testheft 1'
   ): XMLBuilder {
     return XmlBuilder.create(
       { version: '1.0' },
@@ -536,12 +538,16 @@ export class UnitDownloadClass {
           '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
           '@xsi:noNamespaceSchemaLocation': unitExportConfig.bookletXsdUrl,
           Metadata: {
-            Id: 'booklet1',
-            Label: 'Testheft 1'
+            Id: bookletId,
+            Label: bookletLabel
           }
         }
       }
     );
+  }
+
+  static safeBookletId(raw: string | undefined): string {
+    return (raw || 'booklet1').replace(/[^A-Za-z0-9_-]/g, '_');
   }
 
   static addBooklet(
@@ -550,7 +556,9 @@ export class UnitDownloadClass {
     unitsMetadata: UnitPropertiesDto[],
     zip: AdmZip
   ): void {
-    const bookletXml = UnitDownloadClass.createBookletXml(unitExportConfig);
+    const bookletId = UnitDownloadClass.safeBookletId(unitDownloadSettings.bookletId);
+    const bookletLabel = unitDownloadSettings.bookletLabel || 'Testheft 1';
+    const bookletXml = UnitDownloadClass.createBookletXml(unitExportConfig, bookletId, bookletLabel);
     const configElement = bookletXml.root().ele('BookletConfig');
     unitDownloadSettings.bookletSettings.forEach(bc => {
       configElement.ele({
@@ -560,20 +568,18 @@ export class UnitDownloadClass {
         }
       });
     });
-    let unitCount = 1;
     const unitsElement = bookletXml.root().ele('Units');
-    unitsMetadata.forEach(u => {
+    unitsMetadata.forEach((u, i) => {
       unitsElement.ele({
         Unit: {
           '@id': u.key,
-          '@label': u.name || `Aufgabe ${unitCount}`,
-          '@labelshort': `${unitCount}`
+          '@label': u.name || `Aufgabe ${i + 1}`,
+          '@labelshort': `${i + 1}`
         }
       });
-      unitCount += 1;
     });
     zip.addFile(
-      'booklet1.xml',
+      `${bookletId}.xml`,
       Buffer.from(bookletXml.toString({ prettyPrint: true }))
     );
   }
@@ -605,6 +611,7 @@ export class UnitDownloadClass {
     loginCount: number,
     zip: AdmZip
   ): void {
+    const bookletId = UnitDownloadClass.safeBookletId(unitDownloadSettings.bookletId);
     const testTakerXml =
       UnitDownloadClass.createTestTakersXml(unitExportConfig);
     let codeLen = loginCount > 1000 ? 8 : 5;
@@ -641,7 +648,7 @@ export class UnitDownloadClass {
       if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex - 1]);
       loginElement.ele({
         Booklet: {
-          '#': 'booklet1'
+          '#': bookletId
         }
       });
     });
@@ -656,7 +663,7 @@ export class UnitDownloadClass {
       if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex - 1]);
       loginElement.ele({
         Booklet: {
-          '#': 'booklet1'
+          '#': bookletId
         }
       });
     });

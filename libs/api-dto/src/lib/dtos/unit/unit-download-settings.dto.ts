@@ -30,6 +30,12 @@ export class UnitDownloadSettingsDto {
     passwordLess = false;
 
   @ApiProperty()
+    bookletId?: string;
+
+  @ApiProperty()
+    bookletLabel?: string;
+
+  @ApiProperty()
     bookletSettings: UnitDownloadBookletSettingsDto[] = [];
 }
 

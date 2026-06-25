@@ -772,4 +772,128 @@ describe('UnitDownloadClass', () => {
       expect(result.derivedVariables[0]).toEqual({ id: 'd1', basedOn: [] });
     });
   });
+
+  describe('safeBookletId', () => {
+    it('should return booklet1 when input is undefined', () => {
+      expect(UnitDownloadClass.safeBookletId(undefined)).toBe('booklet1');
+    });
+
+    it('should return booklet1 when input is empty string', () => {
+      expect(UnitDownloadClass.safeBookletId('')).toBe('booklet1');
+    });
+
+    it('should return the value unchanged when it contains only safe characters', () => {
+      expect(UnitDownloadClass.safeBookletId('myBooklet-1_A')).toBe('myBooklet-1_A');
+    });
+
+    it('should replace path separators and unsafe characters with underscores', () => {
+      expect(UnitDownloadClass.safeBookletId('../../evil')).toBe('______evil');
+    });
+  });
+
+  describe('createBookletXml', () => {
+    const exportConfig = createMock<UnitExportConfigDto>({ bookletXsdUrl: 'booklet.xsd' });
+
+    it('should use default Id and Label when no args provided', () => {
+      const xml = UnitDownloadClass.createBookletXml(exportConfig).toString();
+      expect(xml).toContain('<Id>booklet1</Id>');
+      expect(xml).toContain('<Label>Testheft 1</Label>');
+    });
+
+    it('should use custom Id and Label when provided', () => {
+      const xml = UnitDownloadClass.createBookletXml(exportConfig, 'myStudy', 'Mein Testheft').toString();
+      expect(xml).toContain('<Id>myStudy</Id>');
+      expect(xml).toContain('<Label>Mein Testheft</Label>');
+    });
+  });
+
+  describe('addBooklet', () => {
+    const exportConfig = createMock<UnitExportConfigDto>({ bookletXsdUrl: 'booklet.xsd' });
+    const units: UnitPropertiesDto[] = [
+      createMock<UnitPropertiesDto>({ key: 'unit1', name: 'Aufgabe A' }),
+      createMock<UnitPropertiesDto>({ key: 'unit2', name: '' })
+    ];
+
+    it('should write booklet1.xml when bookletId is not set', () => {
+      const settings = createMock<UnitDownloadSettingsDto>({ bookletId: undefined, bookletSettings: [] });
+      UnitDownloadClass.addBooklet(exportConfig, settings, units, mockZip as unknown as AdmZip);
+      expect(mockZip.addFile).toHaveBeenCalledWith(
+        'booklet1.xml',
+        expect.any(Buffer)
+      );
+    });
+
+    it('should write <bookletId>.xml when bookletId is set', () => {
+      const settings = createMock<UnitDownloadSettingsDto>({ bookletId: 'studie2025', bookletSettings: [] });
+      UnitDownloadClass.addBooklet(exportConfig, settings, units, mockZip as unknown as AdmZip);
+      expect(mockZip.addFile).toHaveBeenCalledWith('studie2025.xml', expect.any(Buffer));
+    });
+
+    it('should sanitize bookletId used as filename', () => {
+      const settings = createMock<UnitDownloadSettingsDto>({ bookletId: 'a/b', bookletSettings: [] });
+      UnitDownloadClass.addBooklet(exportConfig, settings, units, mockZip as unknown as AdmZip);
+      expect(mockZip.addFile).toHaveBeenCalledWith('a_b.xml', expect.any(Buffer));
+    });
+
+    it('should use fallback label Testheft 1 when bookletLabel is not set', () => {
+      const settings = createMock<UnitDownloadSettingsDto>(
+        { bookletId: undefined, bookletLabel: undefined, bookletSettings: [] }
+      );
+      UnitDownloadClass.addBooklet(exportConfig, settings, units, mockZip as unknown as AdmZip);
+      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
+      expect(xmlContent).toContain('<Label>Testheft 1</Label>');
+    });
+
+    it('should use provided bookletLabel in the XML', () => {
+      const settings = createMock<UnitDownloadSettingsDto>(
+        { bookletId: undefined, bookletLabel: 'Mein Test', bookletSettings: [] }
+      );
+      UnitDownloadClass.addBooklet(exportConfig, settings, units, mockZip as unknown as AdmZip);
+      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
+      expect(xmlContent).toContain('<Label>Mein Test</Label>');
+    });
+
+    it('should use unit index as labelshort', () => {
+      const settings = createMock<UnitDownloadSettingsDto>({ bookletId: undefined, bookletSettings: [] });
+      UnitDownloadClass.addBooklet(exportConfig, settings, units, mockZip as unknown as AdmZip);
+      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
+      expect(xmlContent).toContain('labelshort="1"');
+      expect(xmlContent).toContain('labelshort="2"');
+    });
+  });
+
+  describe('addTestTakers booklet reference', () => {
+    const exportConfig = createMock<UnitExportConfigDto>(
+      { bookletXsdUrl: 'booklet.xsd', testTakersXsdUrl: 'testtakers.xsd' }
+    );
+
+    it('should reference booklet1 in testtaker XML when no bookletId is set', () => {
+      const settings = createMock<UnitDownloadSettingsDto>({
+        bookletId: undefined,
+        addTestTakersReview: 1,
+        addTestTakersHot: 0,
+        addTestTakersMonitor: 0,
+        passwordLess: true,
+        bookletSettings: []
+      });
+      UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
+      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
+      expect(xmlContent).toContain('booklet1');
+    });
+
+    it('should reference custom bookletId in testtaker XML', () => {
+      const settings = createMock<UnitDownloadSettingsDto>({
+        bookletId: 'studie2025',
+        addTestTakersReview: 1,
+        addTestTakersHot: 0,
+        addTestTakersMonitor: 0,
+        passwordLess: true,
+        bookletSettings: []
+      });
+      UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
+      const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
+      expect(xmlContent).toContain('studie2025');
+      expect(xmlContent).not.toContain('booklet1');
+    });
+  });
 });
