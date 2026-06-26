@@ -1,5 +1,5 @@
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
-import { mapBookletConfigToModernKeys } from './booklet-config-export.utils';
+import { mapBookletConfigToModernKeys, normalizeLegacyBookletConfig } from './booklet-config-export.utils';
 
 describe('mapBookletConfigToModernKeys', () => {
   it('should produce no entries for empty config', () => {
@@ -21,16 +21,16 @@ describe('mapBookletConfigToModernKeys', () => {
     expect(result.map(e => e.key)).not.toContain('pagingMode');
   });
 
-  it('should map unitScreenHeader OFF to header_hidden TRUE only', () => {
+  it('should map unitScreenHeader OFF to header_content NONE', () => {
     const result = mapBookletConfigToModernKeys({ unitScreenHeader: 'OFF' });
-    expect(result).toContainEqual({ key: 'header_hidden', value: 'TRUE' });
-    expect(result.map(e => e.key)).not.toContain('header_content');
+    expect(result).toContainEqual({ key: 'header_content', value: 'NONE' });
+    expect(result.map(e => e.key)).not.toContain('header_hidden');
   });
 
-  it('should map unitScreenHeader WITH_BOOKLET_TITLE to header_hidden FALSE and header_content BOOKLET_LABEL', () => {
+  it('should map unitScreenHeader WITH_BOOKLET_TITLE to header_content BOOKLET_LABEL', () => {
     const result = mapBookletConfigToModernKeys({ unitScreenHeader: 'WITH_BOOKLET_TITLE' });
-    expect(result).toContainEqual({ key: 'header_hidden', value: 'FALSE' });
     expect(result).toContainEqual({ key: 'header_content', value: 'BOOKLET_LABEL' });
+    expect(result.map(e => e.key)).not.toContain('header_hidden');
   });
 
   it('should map unitScreenHeader WITH_UNIT_TITLE to header_content UNIT_LABEL', () => {
@@ -45,8 +45,8 @@ describe('mapBookletConfigToModernKeys', () => {
 
   it('should map unitScreenHeader EMPTY to header_content NONE', () => {
     const result = mapBookletConfigToModernKeys({ unitScreenHeader: 'EMPTY' });
-    expect(result).toContainEqual({ key: 'header_hidden', value: 'FALSE' });
     expect(result).toContainEqual({ key: 'header_content', value: 'NONE' });
+    expect(result.map(e => e.key)).not.toContain('header_hidden');
   });
 
   it('should map unitTitle ON to toolbar_show_unit_title TRUE', () => {
@@ -201,8 +201,8 @@ describe('mapBookletConfigToModernKeys', () => {
     const result = mapBookletConfigToModernKeys(config);
     const keys = result.map(e => e.key);
     expect(keys).toContain('pagingMode');
-    expect(keys).toContain('header_hidden');
     expect(keys).toContain('header_content');
+    expect(keys).not.toContain('header_hidden');
     expect(keys).toContain('toolbar_show_unit_title');
     expect(keys).toContain('navbar_unit_label');
     expect(keys).toContain('navbar_unit_controls_hidden');
@@ -210,5 +210,129 @@ describe('mapBookletConfigToModernKeys', () => {
     expect(keys).toContain('navbar_page_label');
     expect(keys).toContain('navbar_page_controls_hidden');
     expect(keys).not.toContain('controller_design');
+  });
+});
+
+describe('normalizeLegacyBookletConfig', () => {
+  it('should return empty object unchanged', () => {
+    expect(normalizeLegacyBookletConfig({})).toEqual({});
+  });
+
+  it('should not mutate the input object', () => {
+    const input: BookletConfigDto = { unitScreenHeader: 'WITH_UNIT_TITLE', unitTitle: 'ON', controllerDesign: '2022' };
+    normalizeLegacyBookletConfig(input);
+    expect(input).toEqual({ unitScreenHeader: 'WITH_UNIT_TITLE', unitTitle: 'ON', controllerDesign: '2022' });
+  });
+
+  it('should pass through modern fields unchanged', () => {
+    const config: BookletConfigDto = { pagingMode: 'separate', loadingMode: 'LAZY' };
+    expect(normalizeLegacyBookletConfig(config)).toEqual(config);
+  });
+
+  it('should remove controllerDesign', () => {
+    const result = normalizeLegacyBookletConfig({ controllerDesign: '2022' } as BookletConfigDto);
+    expect(result).not.toHaveProperty('controllerDesign');
+  });
+
+  it('should map unitScreenHeader to headerContent and remove it', () => {
+    const result = normalizeLegacyBookletConfig({ unitScreenHeader: 'WITH_BOOKLET_TITLE' });
+    expect(result.headerContent).toBe('BOOKLET_LABEL');
+    expect(result).not.toHaveProperty('unitScreenHeader');
+  });
+
+  it('should map unitScreenHeader OFF to headerContent NONE', () => {
+    const result = normalizeLegacyBookletConfig({ unitScreenHeader: 'OFF' });
+    expect(result.headerContent).toBe('NONE');
+  });
+
+  it('should not overwrite existing headerContent', () => {
+    const result = normalizeLegacyBookletConfig(
+      { unitScreenHeader: 'WITH_UNIT_TITLE', headerContent: 'BOOKLET_LABEL' }
+    );
+    expect(result.headerContent).toBe('BOOKLET_LABEL');
+    expect(result).not.toHaveProperty('unitScreenHeader');
+  });
+
+  it('should map unitTitle ON to toolbarShowUnitTitle TRUE and remove it', () => {
+    const result = normalizeLegacyBookletConfig({ unitTitle: 'ON' });
+    expect(result.toolbarShowUnitTitle).toBe('TRUE');
+    expect(result).not.toHaveProperty('unitTitle');
+  });
+
+  it('should map unitTitle OFF to toolbarShowUnitTitle FALSE', () => {
+    const result = normalizeLegacyBookletConfig({ unitTitle: 'OFF' });
+    expect(result.toolbarShowUnitTitle).toBe('FALSE');
+  });
+
+  it('should not overwrite existing toolbarShowUnitTitle', () => {
+    const result = normalizeLegacyBookletConfig({ unitTitle: 'OFF', toolbarShowUnitTitle: 'TRUE' });
+    expect(result.toolbarShowUnitTitle).toBe('TRUE');
+  });
+
+  it('should map unitNaviButtons OFF to navbarUnitLabel HIDDEN', () => {
+    const result = normalizeLegacyBookletConfig({ unitNaviButtons: 'OFF' });
+    expect(result.navbarUnitLabel).toBe('HIDDEN');
+    expect(result.navbarUnitControlsHidden).toBe('TRUE');
+    expect(result).not.toHaveProperty('unitNaviButtons');
+  });
+
+  it('should map unitNaviButtons ARROWS_ONLY correctly', () => {
+    const result = normalizeLegacyBookletConfig({ unitNaviButtons: 'ARROWS_ONLY' });
+    expect(result.navbarUnitLabel).toBe('INDEX');
+    expect(result.navbarUnitControlsHidden).toBe('FALSE');
+    expect(result.toolbarShowUnitList).toBe('FALSE');
+  });
+
+  it('should map unitNaviButtons FULL correctly', () => {
+    const result = normalizeLegacyBookletConfig({ unitNaviButtons: 'FULL' });
+    expect(result.navbarUnitLabel).toBe('INDEX');
+    expect(result.navbarUnitControlsHidden).toBe('FALSE');
+    expect(result.toolbarShowUnitList).toBe('TRUE');
+  });
+
+  it('should not overwrite existing navbarUnitLabel', () => {
+    const result = normalizeLegacyBookletConfig({ unitNaviButtons: 'FULL', navbarUnitLabel: 'LABEL' });
+    expect(result.navbarUnitLabel).toBe('LABEL');
+  });
+
+  it('should map pageNaviButtons OFF correctly', () => {
+    const result = normalizeLegacyBookletConfig({ pageNaviButtons: 'OFF' });
+    expect(result.navbarPageLabel).toBe('HIDDEN');
+    expect(result.navbarPageControlsHidden).toBe('TRUE');
+    expect(result).not.toHaveProperty('pageNaviButtons');
+  });
+
+  it('should map pageNaviButtons SEPARATE_BOTTOM correctly', () => {
+    const result = normalizeLegacyBookletConfig({ pageNaviButtons: 'SEPARATE_BOTTOM' });
+    expect(result.navbarPageLabel).toBe('LIST');
+    expect(result.navbarPageControlsHidden).toBe('FALSE');
+  });
+
+  it('should not overwrite existing navbarPageLabel', () => {
+    const result = normalizeLegacyBookletConfig({ pageNaviButtons: 'SEPARATE_BOTTOM', navbarPageLabel: 'INDEX' });
+    expect(result.navbarPageLabel).toBe('INDEX');
+  });
+
+  it('should handle full legacy review config', () => {
+    const reviewConfig: BookletConfigDto = {
+      pagingMode: 'separate',
+      pageNaviButtons: 'SEPARATE_BOTTOM',
+      unitNaviButtons: 'FULL',
+      controllerDesign: '2022',
+      unitScreenHeader: 'WITH_BOOKLET_TITLE',
+      unitTitle: 'ON'
+    };
+    const result = normalizeLegacyBookletConfig(reviewConfig);
+    expect(result.pagingMode).toBe('separate');
+    expect(result.headerContent).toBe('BOOKLET_LABEL');
+    expect(result.toolbarShowUnitTitle).toBe('TRUE');
+    expect(result.navbarUnitLabel).toBe('INDEX');
+    expect(result.toolbarShowUnitList).toBe('TRUE');
+    expect(result.navbarPageLabel).toBe('LIST');
+    expect(result).not.toHaveProperty('unitScreenHeader');
+    expect(result).not.toHaveProperty('unitTitle');
+    expect(result).not.toHaveProperty('unitNaviButtons');
+    expect(result).not.toHaveProperty('pageNaviButtons');
+    expect(result).not.toHaveProperty('controllerDesign');
   });
 });

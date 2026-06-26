@@ -1,12 +1,66 @@
 import { BookletConfigDto, UnitDownloadBookletSettingsDto } from '@studio-lite-lib/api-dto';
 
-const headerContentMap: Record<string, string> = {
+const unitScreenHeaderToContentMap: Record<string, string> = {
   OFF: 'NONE',
   WITH_UNIT_TITLE: 'UNIT_LABEL',
   WITH_BOOKLET_TITLE: 'BOOKLET_LABEL',
   WITH_BLOCK_TITLE: 'BLOCK_LABEL',
   EMPTY: 'NONE'
 };
+
+export function normalizeLegacyBookletConfig(config: BookletConfigDto): BookletConfigDto {
+  const result: BookletConfigDto = { ...config };
+
+  if (result.unitScreenHeader) {
+    if (!result.headerContent) {
+      const mapped = unitScreenHeaderToContentMap[result.unitScreenHeader];
+      if (mapped) result.headerContent = mapped;
+    }
+    delete result.unitScreenHeader;
+  }
+
+  if (result.unitTitle) {
+    if (!result.toolbarShowUnitTitle) {
+      result.toolbarShowUnitTitle = result.unitTitle === 'ON' ? 'TRUE' : 'FALSE';
+    }
+    delete result.unitTitle;
+  }
+
+  if (result.unitNaviButtons) {
+    if (!result.navbarUnitLabel) {
+      if (result.unitNaviButtons === 'OFF') {
+        result.navbarUnitLabel = 'HIDDEN';
+        result.navbarUnitControlsHidden ??= 'TRUE';
+      } else if (result.unitNaviButtons === 'ARROWS_ONLY') {
+        result.navbarUnitLabel = 'INDEX';
+        result.navbarUnitControlsHidden ??= 'FALSE';
+        result.toolbarShowUnitList ??= 'FALSE';
+      } else if (result.unitNaviButtons === 'FULL') {
+        result.navbarUnitLabel = 'INDEX';
+        result.navbarUnitControlsHidden ??= 'FALSE';
+        result.toolbarShowUnitList ??= 'TRUE';
+      }
+    }
+    delete result.unitNaviButtons;
+  }
+
+  if (result.pageNaviButtons) {
+    if (!result.navbarPageLabel) {
+      if (result.pageNaviButtons === 'OFF') {
+        result.navbarPageLabel = 'HIDDEN';
+        result.navbarPageControlsHidden ??= 'TRUE';
+      } else if (result.pageNaviButtons === 'SEPARATE_BOTTOM') {
+        result.navbarPageLabel = 'LIST';
+        result.navbarPageControlsHidden ??= 'FALSE';
+      }
+    }
+    delete result.pageNaviButtons;
+  }
+
+  delete result.controllerDesign;
+
+  return result;
+}
 
 export function mapBookletConfigToModernKeys(config: BookletConfigDto): UnitDownloadBookletSettingsDto[] {
   const all = [
@@ -28,7 +82,7 @@ function pagingModeEntries(config: BookletConfigDto): UnitDownloadBookletSetting
 
 function headerEntries(config: BookletConfigDto): UnitDownloadBookletSettingsDto[] {
   if (!config.unitScreenHeader) return [];
-  const content = headerContentMap[config.unitScreenHeader];
+  const content = unitScreenHeaderToContentMap[config.unitScreenHeader];
   if (!content) return [];
   return [{ key: 'header_content', value: content }];
 }

@@ -17,7 +17,7 @@ import { BookletConfigEditComponent } from '../booklet-config-edit/booklet-confi
 import { ExportTestTakerConfigComponent } from '../export-test-taker-config/export-test-taker-config.component';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export-unit-file-config.component';
-import { mapBookletConfigToModernKeys } from '../../utils/booklet-config-export.utils';
+import { mapBookletConfigToModernKeys, normalizeLegacyBookletConfig } from '../../utils/booklet-config-export.utils';
 import { HasTakersPipe } from '../../pipes/has-takers.pipe';
 
 @Component({
@@ -56,7 +56,7 @@ export class ExportUnitComponent {
     public workspaceService: WorkspaceService
   ) {
     if (this.data && this.data.bookletConfigSettings) {
-      this.bookletConfigSettings = data.bookletConfigSettings;
+      this.bookletConfigSettings = normalizeLegacyBookletConfig(data.bookletConfigSettings);
       this.setBookletConfigSettings(this.bookletConfigSettings);
     }
   }
