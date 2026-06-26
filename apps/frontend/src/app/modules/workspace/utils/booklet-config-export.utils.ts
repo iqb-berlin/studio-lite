@@ -1,6 +1,7 @@
 import { BookletConfigDto, UnitDownloadBookletSettingsDto } from '@studio-lite-lib/api-dto';
 
 const headerContentMap: Record<string, string> = {
+  OFF: 'NONE',
   WITH_UNIT_TITLE: 'UNIT_LABEL',
   WITH_BOOKLET_TITLE: 'BOOKLET_LABEL',
   WITH_BLOCK_TITLE: 'BLOCK_LABEL',
@@ -27,13 +28,9 @@ function pagingModeEntries(config: BookletConfigDto): UnitDownloadBookletSetting
 
 function headerEntries(config: BookletConfigDto): UnitDownloadBookletSettingsDto[] {
   if (!config.unitScreenHeader) return [];
-  if (config.unitScreenHeader === 'OFF') return [{ key: 'header_hidden', value: 'TRUE' }];
   const content = headerContentMap[config.unitScreenHeader];
   if (!content) return [];
-  return [
-    { key: 'header_hidden', value: 'FALSE' },
-    { key: 'header_content', value: content }
-  ];
+  return [{ key: 'header_content', value: content }];
 }
 
 function unitTitleEntries(config: BookletConfigDto): UnitDownloadBookletSettingsDto[] {
@@ -83,6 +80,16 @@ function pageNaviEntries(config: BookletConfigDto): UnitDownloadBookletSettingsD
 }
 
 const directKeyMap: Partial<Record<keyof BookletConfigDto, string>> = {
+  loadingMode: 'loading_mode',
+  logPolicy: 'logPolicy',
+  restoreCurrentPageOnReturn: 'restore_current_page_on_return',
+  lockTestOnTermination: 'lock_test_on_termination',
+  askForFullscreen: 'ask_for_fullscreen',
+  unitTimeLeftWarnings: 'unit_time_left_warnings',
+  unitResponsesBufferTime: 'unit_responses_buffer_time',
+  unitStateBufferTime: 'unit_state_buffer_time',
+  testStateBufferTime: 'test_state_buffer_time',
+  headerContent: 'header_content',
   navbarUnitLabel: 'navbar_unit_label',
   navbarUnitControlsHidden: 'navbar_unit_controls_hidden',
   navbarPageLabel: 'navbar_page_label',

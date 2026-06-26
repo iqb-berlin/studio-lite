@@ -9,7 +9,7 @@ import {
   MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle
 } from '@angular/material/expansion';
 import { FormsModule } from '@angular/forms';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSelect, MatOption } from '@angular/material/select';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -18,6 +18,7 @@ import { ExportTestTakerConfigComponent } from '../export-test-taker-config/expo
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export-unit-file-config.component';
 import { mapBookletConfigToModernKeys } from '../../utils/booklet-config-export.utils';
+import { HasTakersPipe } from '../../pipes/has-takers.pipe';
 
 @Component({
   templateUrl: './export-unit.component.html',
@@ -28,7 +29,8 @@ import { mapBookletConfigToModernKeys } from '../../utils/booklet-config-export.
     ExportTestTakerConfigComponent, BookletConfigEditComponent,
     MatDialogActions, MatButton, MatDialogClose,
     TranslateModule, FormsModule, ExportUnitFileConfigComponent,
-    MatFormField, MatLabel, MatInput, MatSelect, MatOption
+    MatFormField, MatLabel, MatError, MatInput, MatSelect, MatOption,
+    HasTakersPipe
   ]
 })
 export class ExportUnitComponent {
@@ -42,6 +44,8 @@ export class ExportUnitComponent {
     addTestTakersMonitor: 0,
     addTestTakersHot: 0,
     passwordLess: false,
+    bookletLabel: 'Testheft 1',
+    groupLabel: 'Gruppe 1',
     bookletSettings: []
   };
 

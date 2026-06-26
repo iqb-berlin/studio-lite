@@ -529,7 +529,7 @@ export class UnitDownloadClass {
   static createBookletXml(
     unitExportConfig: UnitExportConfigDto,
     bookletId: string = 'booklet1',
-    bookletLabel: string = 'Testheft 1'
+    bookletLabel: string = ''
   ): XMLBuilder {
     return XmlBuilder.create(
       { version: '1.0' },
@@ -557,7 +557,7 @@ export class UnitDownloadClass {
     zip: AdmZip
   ): void {
     const bookletId = UnitDownloadClass.safeBookletId(unitDownloadSettings.bookletId);
-    const bookletLabel = unitDownloadSettings.bookletLabel || 'Testheft 1';
+    const bookletLabel = unitDownloadSettings.bookletLabel ?? '';
     const bookletXml = UnitDownloadClass.createBookletXml(unitExportConfig, bookletId, bookletLabel);
     const configElement = bookletXml.root().ele('BookletConfig');
     unitDownloadSettings.bookletSettings.forEach(bc => {
@@ -621,7 +621,7 @@ export class UnitDownloadClass {
         loginCount
       );
     let loginIndex = 0;
-    const groupLabel = unitDownloadSettings.groupLabel || 'Gruppe 1';
+    const groupLabel = unitDownloadSettings.groupLabel ?? '';
     const groupElement = testTakerXml.root().ele({
       Group: {
         '@id': `${bookletId}_group`,

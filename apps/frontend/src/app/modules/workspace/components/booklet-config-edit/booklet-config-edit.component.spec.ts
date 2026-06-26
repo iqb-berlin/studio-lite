@@ -42,14 +42,7 @@ describe('BookletConfigEditComponent', () => {
   });
 
   it('defaults config values when undefined', () => {
-    expect(component.bookletConfig).toEqual({
-      pagingMode: '',
-      pageNaviButtons: '',
-      unitNaviButtons: '',
-      controllerDesign: '',
-      unitScreenHeader: '',
-      unitTitle: ''
-    });
+    expect(component.bookletConfig).toEqual({});
   });
 
   it('accepts a provided config object', () => {
@@ -104,7 +97,7 @@ describe('BookletConfigEditComponent', () => {
     it('should render new modern fields', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       const selects = compiled.querySelectorAll('mat-select');
-      expect(selects.length).toBe(20);
+      expect(selects.length).toBe(22);
     });
   });
 });

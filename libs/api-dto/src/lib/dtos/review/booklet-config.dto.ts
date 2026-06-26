@@ -35,6 +35,36 @@ export class BookletConfigDto {
   })
     unitTitle? = 'ON';
 
+  @ApiProperty({ examples: ['LAZY', 'EAGER'] })
+    loadingMode?: string;
+
+  @ApiProperty({ examples: ['disabled', 'lean', 'rich', 'debug'] })
+    logPolicy?: string;
+
+  @ApiProperty({ examples: ['OFF', 'ON'] })
+    restoreCurrentPageOnReturn?: string;
+
+  @ApiProperty({ examples: ['ON', 'OFF'] })
+    lockTestOnTermination?: string;
+
+  @ApiProperty({ examples: ['ON', 'OFF'] })
+    askForFullscreen?: string;
+
+  @ApiProperty({ description: 'Comma-separated minutes, e.g. 5,1' })
+    unitTimeLeftWarnings?: string;
+
+  @ApiProperty({ description: 'Milliseconds' })
+    unitResponsesBufferTime?: string;
+
+  @ApiProperty({ description: 'Milliseconds' })
+    unitStateBufferTime?: string;
+
+  @ApiProperty({ description: 'Milliseconds' })
+    testStateBufferTime?: string;
+
+  @ApiProperty({ examples: ['NONE', 'BOOKLET_LABEL', 'BLOCK_LABEL', 'UNIT_LABEL'] })
+    headerContent?: string;
+
   @ApiProperty({ examples: ['HIDDEN', 'INDEX', 'LABEL'] })
     navbarUnitLabel?: string;
 

@@ -109,9 +109,10 @@ describe('ExportUnitComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize bookletId and bookletLabel as undefined', () => {
+  it('should initialize bookletId as undefined and prefill bookletLabel and groupLabel', () => {
     expect(component.unitExportSettings.bookletId).toBeUndefined();
-    expect(component.unitExportSettings.bookletLabel).toBeUndefined();
+    expect(component.unitExportSettings.bookletLabel).toBe('Testheft 1');
+    expect(component.unitExportSettings.groupLabel).toBe('Gruppe 1');
   });
 
   it('should map booklet config to modern keys on setBookletConfigSettings', () => {
@@ -127,5 +128,21 @@ describe('ExportUnitComponent', () => {
     expect(keys).toContain('navbar_unit_controls_hidden');
     expect(keys).not.toContain('controller_design');
     expect(keys).not.toContain('unit_screenheader');
+  });
+
+  it('should map unitScreenHeader OFF to header_content NONE, not header_hidden', () => {
+    component.setBookletConfigSettings({ unitScreenHeader: 'OFF' });
+    const settings = component.unitExportSettings.bookletSettings;
+    const headerContent = settings.find(s => s.key === 'header_content');
+    expect(headerContent?.value).toBe('NONE');
+    expect(settings.some(s => s.key === 'header_hidden')).toBe(false);
+  });
+
+  it('should map unitScreenHeader EMPTY to header_content NONE', () => {
+    component.setBookletConfigSettings({ unitScreenHeader: 'EMPTY' });
+    const settings = component.unitExportSettings.bookletSettings;
+    const headerContent = settings.find(s => s.key === 'header_content');
+    expect(headerContent?.value).toBe('NONE');
+    expect(settings.some(s => s.key === 'header_hidden')).toBe(false);
   });
 });
