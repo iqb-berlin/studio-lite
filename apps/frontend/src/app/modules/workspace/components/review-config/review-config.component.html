@@ -42,6 +42,7 @@
         {{'workspace.booklet-settings' | translate}}
       </mat-panel-title>
     </mat-expansion-panel-header>
+    <div class="info">{{'workspace.booklet-settings-studio-hint' | translate}}</div>
     <studio-lite-booklet-config-edit [disabled]="!selectedReviewId"
                                      [config]="bookletConfigSettings"
                                      (configChanged)="bookletConfigSettingsChange.emit($event); reviewChange.emit()">

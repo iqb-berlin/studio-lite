@@ -633,6 +633,7 @@
     "review-name": "Name",
     "review-password-info": "Zugriff von Extern nur mit Kennwort (mind. 4 Zeichen)",
     "booklet-settings": "Booklet-Einstellungen",
+    "booklet-settings-studio-hint": "Diese Einstellungen gelten nur für die Darstellung der Aufgabenfolge im Studio und werden beim Export nicht übernommen.",
     "review-settings": "Review-Einstellungen",
     "test-taker-settings": "Testtaker-Einstellungen",
     "new-review": "Neue Aufgabenfolge",
