@@ -795,10 +795,10 @@ describe('UnitDownloadClass', () => {
   describe('createBookletXml', () => {
     const exportConfig = createMock<UnitExportConfigDto>({ bookletXsdUrl: 'booklet.xsd' });
 
-    it('should use default Id and Label when no args provided', () => {
+    it('should use default Id and empty Label when no args provided', () => {
       const xml = UnitDownloadClass.createBookletXml(exportConfig).toString();
       expect(xml).toContain('<Id>booklet1</Id>');
-      expect(xml).toContain('<Label>Testheft 1</Label>');
+      expect(xml).toContain('<Label/>');
     });
 
     it('should use custom Id and Label when provided', () => {
@@ -836,13 +836,13 @@ describe('UnitDownloadClass', () => {
       expect(mockZip.addFile).toHaveBeenCalledWith('a_b.xml', expect.any(Buffer));
     });
 
-    it('should use fallback label Testheft 1 when bookletLabel is not set', () => {
+    it('should write an empty label when bookletLabel is not set', () => {
       const settings = createMock<UnitDownloadSettingsDto>(
         { bookletId: undefined, bookletLabel: undefined, bookletSettings: [] }
       );
       UnitDownloadClass.addBooklet(exportConfig, settings, units, mockZip as unknown as AdmZip);
       const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).toContain('<Label>Testheft 1</Label>');
+      expect(xmlContent).toContain('<Label/>');
     });
 
     it('should use provided bookletLabel in the XML', () => {
@@ -926,11 +926,11 @@ describe('UnitDownloadClass', () => {
       expect(xmlContent).toContain('label="Meine Gruppe"');
     });
 
-    it('should fall back to Gruppe 1 when groupLabel is not set', () => {
+    it('should write an empty group label when groupLabel is not set', () => {
       const settings = createMock<UnitDownloadSettingsDto>({ ...baseSettings });
       UnitDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
       const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
-      expect(xmlContent).toContain('label="Gruppe 1"');
+      expect(xmlContent).toContain('label=""');
     });
 
     it('should not include CustomTexts in testtaker XML', () => {
