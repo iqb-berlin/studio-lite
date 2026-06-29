@@ -40,6 +40,20 @@ interface UserInterfaceBlock {
   modifiedAt?: string;
 }
 
+// Comment shape as defined by the iqb unit-comments@0.1 specification
+// (https://iqb-specifications.github.io/unit-comments/). Fields without a
+// counterpart in the spec are intentionally dropped on export.
+interface UnitCommentJson {
+  id: number;
+  body: string;
+  commentator?: string;
+  parentComment?: number;
+  isHidden?: boolean;
+  createdAt?: string;
+  changedAt?: string;
+  itemUuids?: string[];
+}
+
 interface UnitIndexJson {
   id: string;
   uuid?: string;
@@ -477,6 +491,27 @@ export class UnitDownloadClass {
     });
   }
 
+  // Maps internal comment DTOs onto the iqb unit-comments@0.1 spec shape.
+  // userId/unitId/upVotes/downVotes/userVote have no spec counterpart and are
+  // dropped without information loss: they are overwritten or ignored on import.
+  static transformComments(comments: UnitCommentDto[]): UnitCommentJson[] {
+    return comments.map(comment => {
+      const transformed: UnitCommentJson = {
+        id: comment.id,
+        body: comment.body
+      };
+      if (comment.userName) transformed.commentator = comment.userName;
+      if (comment.parentId !== null && comment.parentId !== undefined) {
+        transformed.parentComment = comment.parentId;
+      }
+      if (comment.hidden) transformed.isHidden = comment.hidden;
+      if (comment.createdAt) transformed.createdAt = new Date(comment.createdAt).toISOString();
+      if (comment.changedAt) transformed.changedAt = new Date(comment.changedAt).toISOString();
+      if (comment.itemUuids?.length) transformed.itemUuids = comment.itemUuids;
+      return transformed;
+    });
+  }
+
   static async addRichNotes(
     unitRichNoteService: UnitRichNoteService,
     unitId: number,
@@ -737,7 +772,8 @@ export class UnitDownloadClass {
     if (unitDownloadSettings.addComments) {
       const comments = await unitCommentService.findOnesComments(unitId);
       if (comments?.length) {
-        zip.addFile(`${key}.voco.json`, Buffer.from(JSON.stringify(comments)));
+        const transformedComments = UnitDownloadClass.transformComments(comments);
+        zip.addFile(`${key}.voco.json`, Buffer.from(JSON.stringify(transformedComments, null, 2)));
         index.comments = { id: `${key}.voco.json`, type: 'iqb-unit-comments' };
       }
     }

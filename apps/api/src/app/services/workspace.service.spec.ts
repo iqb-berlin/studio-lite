@@ -372,6 +372,60 @@ describe('WorkspaceService', () => {
     });
   });
 
+  describe('mapImportedComment', () => {
+    it('maps spec field names (commentator/isHidden/parentComment) onto the internal DTO', () => {
+      const mapped = WorkspaceService.mapImportedComment({
+        id: 7,
+        body: 'a comment',
+        commentator: 'Jane Doe',
+        parentComment: 3,
+        isHidden: true,
+        createdAt: '2026-04-09T13:15:10.977Z',
+        changedAt: '2026-04-10T13:15:10.977Z',
+        itemUuids: ['item-uuid-1']
+      });
+
+      expect(mapped).toEqual({
+        id: 7,
+        body: 'a comment',
+        userName: 'Jane Doe',
+        userId: -1,
+        parentId: 3,
+        hidden: true,
+        createdAt: new Date('2026-04-09T13:15:10.977Z'),
+        changedAt: new Date('2026-04-10T13:15:10.977Z'),
+        itemUuids: ['item-uuid-1']
+      });
+    });
+
+    it('falls back to legacy field names (userName/hidden/parentId)', () => {
+      const mapped = WorkspaceService.mapImportedComment({
+        id: 1,
+        body: 'legacy',
+        userName: 'Old Name',
+        parentId: 5,
+        hidden: true
+      });
+
+      expect(mapped.userName).toBe('Old Name');
+      expect(mapped.parentId).toBe(5);
+      expect(mapped.hidden).toBe(true);
+    });
+
+    it('always sets userId to -1 regardless of any exported user id', () => {
+      const mapped = WorkspaceService.mapImportedComment({ id: 1, body: 'x' });
+
+      expect(mapped.userId).toBe(-1);
+    });
+
+    it('defaults parentId to null and hidden to false when absent', () => {
+      const mapped = WorkspaceService.mapImportedComment({ id: 1, body: 'root' });
+
+      expect(mapped.parentId).toBeNull();
+      expect(mapped.hidden).toBe(false);
+    });
+  });
+
   describe('uploadFiles', () => {
     const user = { id: 1 } as User;
     const buildFile = (name: string, mime: string, content: string): FileIo => ({

@@ -48,6 +48,22 @@ import User from '../entities/user.entity';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 import { GroupAdminUnprocessableWorkspaceException } from '../exceptions/group-admin-unprocessable-workspace.exception';
 
+// A comment as found in an exported *.voco.json file. Supports both the iqb
+// unit-comments@0.1 spec field names and the legacy ones for backwards compat.
+interface ImportedComment {
+  id: number;
+  body: string;
+  commentator?: string;
+  userName?: string;
+  parentComment?: number | null;
+  parentId?: number | null;
+  isHidden?: boolean;
+  hidden?: boolean;
+  createdAt?: string;
+  changedAt?: string;
+  itemUuids?: string[];
+}
+
 @Injectable()
 export class WorkspaceService {
   private readonly logger = new Logger(WorkspaceService.name);
@@ -990,18 +1006,32 @@ export class WorkspaceService {
     comments: string,
     itemUuidLookups: ItemUuidLookup[]
   ) {
-    const parsedComments: UnitCommentDto[] = JSON.parse(comments);
-    // User IDs from another instance are unreliable and could randomly collide with local IDs.
-    // We therefore set them to -1 during import to ensure comments are marked as unread for all local users.
-    const sanitizedComments = parsedComments.map(c => ({
-      ...c,
-      userId: -1
-    }));
+    const parsedComments = JSON.parse(comments) as ImportedComment[];
+    const mappedComments = parsedComments.map(c => WorkspaceService.mapImportedComment(c));
     await this.unitCommentService.createComments(
-      sanitizedComments,
+      mappedComments,
       unitId,
       itemUuidLookups
     );
+  }
+
+  // Maps a comment from the iqb unit-comments@0.1 spec shape (commentator/
+  // isHidden/parentComment) back onto the internal DTO, accepting the legacy
+  // field names (userName/hidden/parentId) for backwards compatibility.
+  static mapImportedComment(comment: ImportedComment): UnitCommentDto {
+    return {
+      id: comment.id,
+      body: comment.body,
+      userName: comment.commentator ?? comment.userName ?? '',
+      // User IDs from another instance are unreliable and could randomly collide with local IDs.
+      // We therefore set them to -1 during import to ensure comments are marked as unread for all local users.
+      userId: -1,
+      parentId: comment.parentComment ?? comment.parentId ?? null,
+      hidden: comment.isHidden ?? comment.hidden ?? false,
+      createdAt: comment.createdAt ? new Date(comment.createdAt) : undefined,
+      changedAt: comment.changedAt ? new Date(comment.changedAt) : undefined,
+      itemUuids: comment.itemUuids
+    };
   }
 
   private async checkForProfileUpdate(

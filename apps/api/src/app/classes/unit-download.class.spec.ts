@@ -599,6 +599,93 @@ describe('UnitDownloadClass', () => {
       expect(parsed.variables).toMatchObject({ id: 'U4.vova.json', type: 'unit-variables' });
     });
 
+    it('should write voco.json in the unit-comments spec shape and drop non-spec fields', async () => {
+      const unitServiceMock = createMock<UnitService>();
+      const unitCommentServiceMock = createMock<UnitCommentService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      const settingServiceMock = createMock<SettingService>();
+      const unitRichNoteServiceMock = createMock<UnitRichNoteService>();
+
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
+      unitServiceMock.findOnesProperties.mockResolvedValue({
+        key: 'U5', name: 'Unit 5', description: '', player: 'player-1', lastChangedMetadata: new Date()
+      } as unknown as UnitPropertiesDto);
+      unitServiceMock.ensureUuid.mockResolvedValue('uuid-5');
+      unitServiceMock.findOnesDefinition.mockResolvedValue(
+        { definition: '', variables: [] } as unknown as UnitDefinitionDto
+      );
+      unitServiceMock.findOnesScheme.mockResolvedValue(undefined as unknown as UnitSchemeDto);
+      unitCommentServiceMock.findOnesComments.mockResolvedValue([{
+        id: 7,
+        body: 'a comment',
+        userName: 'Jane Doe',
+        userId: 42,
+        unitId: 99,
+        parentId: 3,
+        hidden: true,
+        createdAt: new Date('2026-04-09T13:15:10.977Z'),
+        changedAt: new Date('2026-04-10T13:15:10.977Z'),
+        itemUuids: ['item-uuid-1'],
+        upVotes: 5,
+        downVotes: 2,
+        userVote: 'up'
+      }] as unknown as UnitCommentDto[]);
+      unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] } as unknown as UnitRichNotesDto);
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
+
+      const downloadSettings = {
+        unitIdList: [5],
+        exportFormat: 'json',
+        addPlayers: false,
+        addComments: true,
+        addRichNotes: false,
+        addTestTakersHot: 0,
+        addTestTakersMonitor: 0,
+        addTestTakersReview: 0
+      } as unknown as UnitDownloadSettingsDto;
+
+      await UnitDownloadClass.get(
+        1,
+        unitServiceMock,
+        unitCommentServiceMock,
+        veronaModuleServiceMock,
+        settingServiceMock,
+        unitRichNoteServiceMock,
+        downloadSettings,
+        'json'
+      );
+
+      const vocoCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U5.voco.json');
+      expect(vocoCall).toBeDefined();
+      const parsed = JSON.parse((vocoCall[1] as Buffer).toString());
+      expect(parsed).toEqual([{
+        id: 7,
+        body: 'a comment',
+        commentator: 'Jane Doe',
+        parentComment: 3,
+        isHidden: true,
+        createdAt: '2026-04-09T13:15:10.977Z',
+        changedAt: '2026-04-10T13:15:10.977Z',
+        itemUuids: ['item-uuid-1']
+      }]);
+      // non-spec fields must be absent (additionalProperties: false)
+      expect(parsed[0]).not.toHaveProperty('userId');
+      expect(parsed[0]).not.toHaveProperty('unitId');
+      expect(parsed[0]).not.toHaveProperty('upVotes');
+      expect(parsed[0]).not.toHaveProperty('downVotes');
+      expect(parsed[0]).not.toHaveProperty('userVote');
+      expect(parsed[0]).not.toHaveProperty('userName');
+      expect(parsed[0]).not.toHaveProperty('hidden');
+      expect(parsed[0]).not.toHaveProperty('parentId');
+    });
+
+    it('should omit optional comment fields when they are empty', () => {
+      const result = UnitDownloadClass.transformComments([{
+        id: 1, body: 'minimal', userName: '', parentId: null, hidden: false
+      } as unknown as UnitCommentDto]);
+      expect(result).toEqual([{ id: 1, body: 'minimal' }]);
+    });
+
     it('should set modifiedAt on userInterface and external blocks when timestamps are available', async () => {
       const unitServiceMock = createMock<UnitService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
