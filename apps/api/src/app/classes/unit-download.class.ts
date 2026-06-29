@@ -54,6 +54,17 @@ interface UnitCommentJson {
   itemUuids?: string[];
 }
 
+// Rich note shape as defined by the iqb unit-rich-notes@0.2 specification
+// (https://github.com/iqb-specifications/unit-rich-notes). links and itemUuids
+// have minItems: 1, so they must be omitted rather than emitted empty.
+interface UnitRichNoteJson {
+  tagId: string;
+  tagLabel?: string;
+  content: string;
+  links?: UnitRichNoteLinkDto[];
+  itemUuids?: string[];
+}
+
 interface UnitIndexJson {
   id: string;
   uuid?: string;
@@ -475,19 +486,24 @@ export class UnitDownloadClass {
     return labels[0].value;
   }
 
+  // Maps internal rich note DTOs onto the iqb unit-rich-notes@0.2 spec shape.
+  // links and itemUuids are only emitted when non-empty: the spec requires
+  // minItems: 1, so an empty/null array would make the file schema-invalid.
   static transformRichNotes(
     notes: UnitRichNoteDto[],
     tags: UnitRichNoteTagDto[]
-  ): { tagId: string; tagLabel: string; content: string; links?: UnitRichNoteLinkDto[]; itemUuids?: string[] }[] {
+  ): UnitRichNoteJson[] {
     return notes.map(note => {
       const tag = UnitDownloadClass.findTag(tags, note.tagId);
-      return {
+      const transformed: UnitRichNoteJson = {
         tagId: tag ? tag.id : note.tagId,
-        tagLabel: UnitDownloadClass.getLabelString(tag?.label),
-        content: note.content,
-        links: note.links,
-        itemUuids: note.itemReferences
+        content: note.content
       };
+      const tagLabel = UnitDownloadClass.getLabelString(tag?.label);
+      if (tagLabel) transformed.tagLabel = tagLabel;
+      if (note.links?.length) transformed.links = note.links;
+      if (note.itemReferences?.length) transformed.itemUuids = note.itemReferences;
+      return transformed;
     });
   }
 

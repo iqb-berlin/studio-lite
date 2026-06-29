@@ -861,6 +861,60 @@ describe('UnitDownloadClass', () => {
     });
   });
 
+  describe('transformRichNotes', () => {
+    it('should map a note onto the unit-rich-notes spec shape', () => {
+      const notes = [{
+        tagId: 'tag-1',
+        content: '<p>note</p>',
+        links: [{ url: 'https://example.org', label: 'Ref' }],
+        itemReferences: ['item-uuid-1']
+      }] as unknown as UnitRichNoteDto[];
+      const tags = [
+        { id: 'tag-1', label: [{ lang: 'de', value: 'Tag Label' }] }
+      ] as unknown as UnitRichNoteTagDto[];
+
+      const result = UnitDownloadClass.transformRichNotes(notes, tags);
+
+      expect(result).toEqual([{
+        tagId: 'tag-1',
+        tagLabel: 'Tag Label',
+        content: '<p>note</p>',
+        links: [{ url: 'https://example.org', label: 'Ref' }],
+        itemUuids: ['item-uuid-1']
+      }]);
+    });
+
+    it('should omit links and itemUuids when empty (spec minItems: 1)', () => {
+      const notes = [{
+        tagId: 'tag-1',
+        content: 'note',
+        links: [],
+        itemReferences: []
+      }] as unknown as UnitRichNoteDto[];
+
+      const result = UnitDownloadClass.transformRichNotes(notes, []);
+
+      expect(result[0]).not.toHaveProperty('links');
+      expect(result[0]).not.toHaveProperty('itemUuids');
+      expect(result[0]).not.toHaveProperty('tagLabel');
+      expect(result[0]).toEqual({ tagId: 'tag-1', content: 'note' });
+    });
+
+    it('should omit links when the column is null', () => {
+      const notes = [{
+        tagId: 'tag-1',
+        content: 'note',
+        links: null,
+        itemReferences: ['item-uuid-1']
+      }] as unknown as UnitRichNoteDto[];
+
+      const result = UnitDownloadClass.transformRichNotes(notes, []);
+
+      expect(result[0]).not.toHaveProperty('links');
+      expect(result[0].itemUuids).toEqual(['item-uuid-1']);
+    });
+  });
+
   describe('safeBookletId', () => {
     it('should return booklet1 when input is undefined', () => {
       expect(UnitDownloadClass.safeBookletId(undefined)).toBe('booklet1');
