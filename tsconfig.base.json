@@ -16,7 +16,6 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@iqb/metadata-resolver": ["node_modules/@iqb/metadata-resolver/dist/index.cjs"],
       "@studio-lite-lib/api-dto": ["libs/api-dto/src/index.ts"],
       "@studio-lite-lib/iqb-components": ["libs/iqb-components/src/index.ts"],
       "@studio-lite/shared-code": ["libs/shared-code/src/index.ts"]
