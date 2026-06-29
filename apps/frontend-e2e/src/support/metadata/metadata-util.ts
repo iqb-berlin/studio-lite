@@ -15,15 +15,13 @@ function getCheckBoxByName(name: string) {
         cy.wrap($actualElem).prev().click();
       }
     });
-    cy.contains('mat-dialog-actions > button', 'confirm').click();
-    // cy.translate(Cypress.expose('locale')).then(json => {
-    //   cy.get('button').contains(json.confirm).click();
-    // });
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('button').contains(json.confirm).click();
+    });
   } else {
-    cy.contains('mat-dialog-actions > button', 'cancel').click();
-    // cy.translate(Cypress.expose('locale')).then(json => {
-    //   cy.get('button').contains(json.cancel).click();
-    // });
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('button').contains(json.cancel).click();
+    });
   }
 }
 
