@@ -109,5 +109,43 @@ describe('RegisteredMetadataProfileService', () => {
       expect(result[0]).toBe(newProfile);
       expect(registeredMetadataProfileRepository.save).toHaveBeenCalled();
     });
+
+    it('extracts the url from the classic 3-column format despite a comma in a quoted title', async () => {
+      const csvContent = [
+        'title,description,url',
+        '"IQB Mathematik, Aufgaben und Items","desc",https://example.org/p111/profile-config.json'
+      ].join('\n');
+      settingsService.findUnitProfilesRegistry.mockResolvedValue({ csvUrl: 'csv-url' } as ProfilesRegistryDto);
+      metadataProfileRegistryRepository.findOneBy.mockResolvedValue({ csv: csvContent } as MetadataProfileRegistry);
+      const existingProfile = new RegisteredMetadataProfile();
+      existingProfile.url = 'https://example.org/p111/profile-config.json';
+      registeredMetadataProfileRepository.findOneBy.mockResolvedValue(existingProfile);
+      mockHttpGet(httpService, {} as RegisteredMetadataProfile);
+
+      const result = await service.getRegisteredMetadataProfiles();
+
+      expect(registeredMetadataProfileRepository.findOneBy)
+        .toHaveBeenCalledWith({ url: 'https://example.org/p111/profile-config.json' });
+      expect(result).toHaveLength(1);
+    });
+
+    it('extracts the url column from the newer 4-column (target) registry format', async () => {
+      const csvContent = [
+        'title,description,target,url',
+        '"IQB Testprofil Aufgaben","Lange, Description","UNIT",https://w3id.org/iqb/p100/unit/'
+      ].join('\n');
+      settingsService.findUnitProfilesRegistry.mockResolvedValue({ csvUrl: 'csv-url' } as ProfilesRegistryDto);
+      metadataProfileRegistryRepository.findOneBy.mockResolvedValue({ csv: csvContent } as MetadataProfileRegistry);
+      const existingProfile = new RegisteredMetadataProfile();
+      existingProfile.url = 'https://w3id.org/iqb/p100/unit/';
+      registeredMetadataProfileRepository.findOneBy.mockResolvedValue(existingProfile);
+      mockHttpGet(httpService, {} as RegisteredMetadataProfile);
+
+      const result = await service.getRegisteredMetadataProfiles();
+
+      expect(registeredMetadataProfileRepository.findOneBy)
+        .toHaveBeenCalledWith({ url: 'https://w3id.org/iqb/p100/unit/' });
+      expect(result).toHaveLength(1);
+    });
   });
 });

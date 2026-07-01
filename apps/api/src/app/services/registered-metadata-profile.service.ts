@@ -25,7 +25,7 @@ export class RegisteredMetadataProfileService {
   async getRegisteredMetadataProfiles(): Promise<RegisteredMetadataProfile[] | null> {
     const registryCsv = await this.getRegisteredMetadataProfilesAsCSV();
     if (registryCsv) {
-      const profileUrls = RegisteredMetadataProfileService.getProfileUrls(registryCsv, '"');
+      const profileUrls = RegisteredMetadataProfileService.getProfileUrls(registryCsv);
       return Promise
         .all(profileUrls
           .map(async url => {
@@ -129,12 +129,56 @@ export class RegisteredMetadataProfileService {
     await this.metadataProfileRegistryRepository.save(registry);
   }
 
-  private static getProfileUrls(stringVal:string, splitter:string): string[] {
-    const [, ...rest] = stringVal
+  // Extracts the profile URLs from the registry CSV. Resolves the "url" column by
+  // header name so it tolerates layout changes (e.g. the added "target" column in the
+  // newer registry format); falls back to the last column when no "url" header exists.
+  private static getProfileUrls(csv: string): string[] {
+    const lines = csv
       .trim()
-      .split('\n')
-      .map(item => item.split(splitter));
-    const storesArray = rest.map(e => e.filter(el => (el !== ',' && el !== '')));
-    return storesArray.map(store => store[2].replace(',', ''));
+      .split(/\r?\n/)
+      .filter(line => line.trim() !== '');
+    if (lines.length < 2) return [];
+    const header = RegisteredMetadataProfileService.parseCsvRow(lines[0])
+      .map(column => column.toLowerCase());
+    const urlIndex = header.indexOf('url');
+    return lines
+      .slice(1)
+      .map(line => {
+        const fields = RegisteredMetadataProfileService.parseCsvRow(line);
+        const value = urlIndex >= 0 ? fields[urlIndex] : fields[fields.length - 1];
+        return (value ?? '').trim();
+      })
+      .filter(url => url !== '');
+  }
+
+  // Minimal RFC-4180-style CSV row parser: honours double-quoted fields (which may
+  // contain commas) and escaped quotes (""), so quoted titles no longer corrupt the
+  // column alignment.
+  private static parseCsvRow(line: string): string[] {
+    const fields: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i += 1) {
+      const char = line[i];
+      if (inQuotes) {
+        if (char === '"' && line[i + 1] === '"') {
+          current += '"';
+          i += 1;
+        } else if (char === '"') {
+          inQuotes = false;
+        } else {
+          current += char;
+        }
+      } else if (char === '"') {
+        inQuotes = true;
+      } else if (char === ',') {
+        fields.push(current);
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    fields.push(current);
+    return fields.map(field => field.trim());
   }
 }
