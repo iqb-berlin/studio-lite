@@ -140,4 +140,49 @@ describe('MetadataService', () => {
       req.error(new ErrorEvent('Network error'));
     });
   });
+
+  describe('VocabularyProvider bridge', () => {
+    it('getVocabularies should return the vocabularies array', () => {
+      const vocabularies = [{ id: 'voc1', label: 'Voc 1' }] as unknown as MetadataService['vocabularies'];
+      service.vocabularies = vocabularies;
+      expect(service.getVocabularies()).toBe(vocabularies);
+    });
+
+    it('getVocabularyDictionary should map id, label, notation and text', () => {
+      service.vocabulariesIdDictionary = {
+        id1: {
+          labels: { de: 'Label DE' },
+          notation: ['n1', 'n2']
+        } as unknown as MetadataService['vocabulariesIdDictionary']['id1']
+      };
+
+      const dictionary = service.getVocabularyDictionary();
+
+      expect(dictionary).toEqual({
+        id1: {
+          id: 'id1',
+          name: 'Label DE',
+          notation: ['n1', 'n2'],
+          text: [{ lang: 'de', value: 'Label DE' }]
+        }
+      });
+    });
+
+    it('getVocabularyDictionary should fall back to empty name/notation when missing', () => {
+      service.vocabulariesIdDictionary = {
+        id2: {} as unknown as MetadataService['vocabulariesIdDictionary']['id2']
+      };
+
+      const dictionary = service.getVocabularyDictionary();
+
+      expect(dictionary).toEqual({
+        id2: {
+          id: 'id2',
+          name: '',
+          notation: [],
+          text: []
+        }
+      });
+    });
+  });
 });
