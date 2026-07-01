@@ -56,7 +56,17 @@ export class MetadataService implements VocabularyProvider {
   }
 
   private async loadProfileColumnsForTarget(target: 'unit' | 'item', url?: string): Promise<void> {
-    if (!url) return;
+    if (!url) {
+      // No profile configured for this workspace: clear columns that may still be set
+      // from a previously viewed workspace. (A transient fetch failure below instead
+      // keeps the existing columns rather than wiping them.)
+      if (target === 'unit') {
+        this.unitProfileColumns = [];
+      } else {
+        this.itemProfileColumns = {} as MDProfileGroup;
+      }
+      return;
+    }
     const profile = await firstValueFrom(this.backendService.getMetadataProfile(url));
     if (!profile || profile === true) return;
     const mdProfile = profile as unknown as MDProfile;

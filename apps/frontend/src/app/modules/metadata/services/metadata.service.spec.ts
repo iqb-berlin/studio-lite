@@ -204,9 +204,19 @@ describe('MetadataService', () => {
       expect(service.itemProfileColumns).toBe(itemProfile.groups[0]);
     });
 
-    it('does nothing when no profile url is provided', async () => {
+    it('clears the columns and skips fetching when no profile url is provided', async () => {
+      service.unitProfileColumns = [
+        { label: [], entries: [] }
+      ] as unknown as MetadataService['unitProfileColumns'];
+      service.itemProfileColumns = {
+        label: [], entries: []
+      } as unknown as MetadataService['itemProfileColumns'];
+
       await service.loadProfileColumns(undefined, undefined);
+
       expect(backendServiceMock.getMetadataProfile).not.toHaveBeenCalled();
+      expect(service.unitProfileColumns).toEqual([]);
+      expect(service.itemProfileColumns).toEqual({});
     });
   });
 });
