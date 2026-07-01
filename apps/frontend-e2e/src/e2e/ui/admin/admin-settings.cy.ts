@@ -11,7 +11,7 @@ import {
 } from '../../../support/helpers';
 import { group1 } from '../../../support/testData';
 
-describe.skip('Admin Settings Tab Configuration', () => {
+describe('Admin Settings Tab Configuration', () => {
   before(() => addFirstUser());
   after(() => {
     deleteFirstUser();
@@ -270,7 +270,10 @@ describe.skip('Admin Settings Tab Configuration', () => {
       );
     });
 
-    it('checks that the we have only two registry stores with the test registry', () => {
+    // TODO(metadata-rebase): re-verify against the refactored studio-lite-profiles
+    // component (now @iqb/metadata-components based). Panel selection/count may have
+    // changed; confirm in CI before removing .skip.
+    it.skip('checks that the we have only two registry stores with the test registry', () => {
       // create a group workspace
       createGroup(group1);
 

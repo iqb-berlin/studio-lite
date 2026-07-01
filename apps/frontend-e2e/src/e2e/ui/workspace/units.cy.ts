@@ -317,7 +317,7 @@ describe('Workspace Unit Management', () => {
     });
   });
 
-  it.skip('displays print preview for units with coding and comments', () => {
+  it('displays print preview for units with coding and comments', () => {
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-preview-units"]').click();
