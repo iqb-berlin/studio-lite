@@ -40,7 +40,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIcon } from '@angular/material/icon';
-import { MDProfile } from '@iqbspecs/metadata-profile';
+import { MDProfile, MDProfileGroup } from '@iqbspecs/metadata-profile';
 import { ProfileFormComponent, UnitMetadataValues as IqbUnitMetadataValues } from '@iqb/metadata-components';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
@@ -340,6 +340,10 @@ export class UnitPropertiesComponent
         .subscribe(profile => {
           const unitProfile = profile as unknown as MDProfile;
           this.metadataService.loadProfileVocabularies(unitProfile).then(() => {
+            // Populate the report column definitions read by TableViewComponent.
+            // The former local profile-form component used to do this; the external
+            // iqb-profile-form keeps them in its own service instance, so restore it here.
+            this.metadataService.unitProfileColumns = unitProfile.groups ?? [];
             this.unitProfile = unitProfile;
           });
         });
@@ -356,6 +360,9 @@ export class UnitPropertiesComponent
         .subscribe(profile => {
           const itemProfile = profile as unknown as MDProfile;
           this.metadataService.loadProfileVocabularies(itemProfile).then(() => {
+            // See unit profile above: restore the item report column definitions.
+            [this.metadataService.itemProfileColumns] = itemProfile.groups?.length ?
+              itemProfile.groups : [{} as MDProfileGroup];
             this.itemProfile = itemProfile;
           });
         });
