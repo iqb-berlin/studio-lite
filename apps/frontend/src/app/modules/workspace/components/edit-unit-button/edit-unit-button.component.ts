@@ -351,9 +351,14 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
         width: '800px'
       }).afterClosed()
         .subscribe(res => {
-          this.metadataService.createMetadataReport()
-            .subscribe((units: UnitPropertiesDto[] | boolean) => {
-              if (res) {
+          if (!res) return;
+          // Load the report column definitions up front, so the report shows metadata
+          // even if no unit metadata tab was opened in this session.
+          const settings = this.workspaceService.workspaceSettings;
+          this.metadataService
+            .loadProfileColumns(settings?.unitMDProfile, settings?.itemMDProfile)
+            .then(() => this.metadataService.createMetadataReport()
+              .subscribe((units: UnitPropertiesDto[] | boolean) => {
                 const selectedUnits = (units as UnitPropertiesDto[])
                   .filter((unit: UnitPropertiesDto) => res.selectedUnits.includes(unit.id));
                 this.showMetadataDialog.open(TableViewComponent, {
@@ -364,8 +369,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
                   },
                   autoFocus: false
                 });
-              }
-            });
+              }));
         });
     }
   }

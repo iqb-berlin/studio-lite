@@ -4,7 +4,7 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 import { of } from 'rxjs';
 import { MDProfile } from '@iqbspecs/metadata-profile';
 import {
-  MetadataVocabularyDto, TopConcept, UnitPropertiesDto
+  MetadataProfileDto, MetadataVocabularyDto, TopConcept, UnitPropertiesDto
 } from '@studio-lite-lib/api-dto';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { MetadataService } from './metadata.service';
@@ -183,6 +183,30 @@ describe('MetadataService', () => {
           text: []
         }
       });
+    });
+  });
+
+  describe('loadProfileColumns', () => {
+    it('populates unit and item profile columns from the configured profiles', async () => {
+      const unitProfile = {
+        id: 'unit-url',
+        groups: [{ label: [], entries: [] }, { label: [], entries: [] }]
+      };
+      const itemProfile = { id: 'item-url', groups: [{ label: [], entries: [] }] };
+      backendServiceMock.getMetadataProfile.mockImplementation(
+        (url: string) => of((url === 'unit-url' ? unitProfile : itemProfile) as unknown as MetadataProfileDto)
+      );
+      backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of(true));
+
+      await service.loadProfileColumns('unit-url', 'item-url');
+
+      expect(service.unitProfileColumns).toHaveLength(2);
+      expect(service.itemProfileColumns).toBe(itemProfile.groups[0]);
+    });
+
+    it('does nothing when no profile url is provided', async () => {
+      await service.loadProfileColumns(undefined, undefined);
+      expect(backendServiceMock.getMetadataProfile).not.toHaveBeenCalled();
     });
   });
 });
