@@ -35,3 +35,14 @@ export function profileIdsMatch(
   if (!a || !b) return a === b;
   return canonicalizeProfileId(a) === canonicalizeProfileId(b);
 }
+
+/**
+ * Whether a profile URL denotes an item profile (as opposed to a unit profile),
+ * covering both spellings: the classic github filename `.../item.json` and the newer
+ * w3id path segment `.../item/`. Any other form is treated as not-an-item (unit).
+ */
+export function isItemProfileId(profileId: string | undefined | null): boolean {
+  if (!profileId) return false;
+  const segment = profileId.replace(/\/+$/, '').split('/').pop() ?? '';
+  return segment.replace(/\.json$/i, '').toLowerCase() === 'item';
+}

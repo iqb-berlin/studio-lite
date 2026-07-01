@@ -1,6 +1,6 @@
 export { VeronaModuleFactory } from './lib/helper/verona-module.factory';
 export { VeronaModuleKeyCollection } from './lib/helper/verona-module-key-collection.class';
-export { canonicalizeProfileId, profileIdsMatch } from './lib/profile-id';
+export { canonicalizeProfileId, profileIdsMatch, isItemProfileId } from './lib/profile-id';
 export {
   ACTIVE_THRESHOLD_MS,
   PASSIVE_THRESHOLD_MS,
