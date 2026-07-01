@@ -1,13 +1,15 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { MetadataResolver } from '@iqb/metadata-resolver';
 
+type LabelText = string | Array<{ lang: string; value: string }>;
+
 @Pipe({
   name: 'profileLabel',
   standalone: true
 })
 export class ProfileLabelPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
-  transform(value: any): string {
+  transform(value: unknown): string {
     if (!value) {
       return '';
     }
@@ -15,11 +17,12 @@ export class ProfileLabelPipe implements PipeTransform {
       return value;
     }
     if (typeof value === 'object') {
-      if ('label' in value && value.label) {
-        return MetadataResolver.extractLabelText(value.label);
+      const labelled = value as { label?: LabelText; title?: LabelText };
+      if (labelled.label) {
+        return MetadataResolver.extractLabelText(labelled.label);
       }
-      if ('title' in value && value.title) {
-        return MetadataResolver.extractLabelText(value.title);
+      if (labelled.title) {
+        return MetadataResolver.extractLabelText(labelled.title);
       }
     }
     return '';
