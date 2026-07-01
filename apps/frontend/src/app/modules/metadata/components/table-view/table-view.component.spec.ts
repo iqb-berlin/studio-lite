@@ -94,4 +94,33 @@ describe('TableViewComponent', () => {
     component.applyFilter(event);
     expect(component.dataSource.filter).toBe('test');
   });
+
+  it('keys cell values under the same resolved label as the column header', () => {
+    // 'de' deliberately NOT at index 0 to expose the label[0] vs extractLabelText mismatch
+    const label = [
+      { lang: 'en', value: 'Task time' },
+      { lang: 'de', value: 'Aufgabenzeit' }
+    ];
+    mockMetadataService.unitProfileColumns = [
+      {
+        label,
+        entries: [{
+          id: 'e1', label, type: 'text', parameters: null
+        }]
+      }
+    ] as unknown as MDProfileGroup[];
+    const unit = {
+      id: 1,
+      key: 'K1',
+      metadata: {
+        profiles: [{ isCurrent: true, entries: [{ label, valueAsText: { value: '42' } }] }]
+      }
+    } as unknown as UnitPropertiesDto;
+
+    component.data = { units: [unit], warning: '' };
+    component.tabChanged({ index: 0, tab: null as unknown as MatTab } as MatTabChangeEvent);
+
+    expect(component.columnsToDisplay).toContain('Aufgabenzeit');
+    expect(component.dataSource.data[0]).toMatchObject({ Aufgabenzeit: '42' });
+  });
 });
