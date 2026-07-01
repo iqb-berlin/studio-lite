@@ -6,6 +6,7 @@ import { HttpService } from '@nestjs/axios';
 import {
   catchError, firstValueFrom, map, of
 } from 'rxjs';
+import { LanguageCodedText } from '@iqbspecs/metadata-profile';
 import { ProfilesRegistryDto } from '@studio-lite-lib/api-dto';
 import RegisteredMetadataProfile from '../entities/registered-metadata-profile.entity';
 import MetadataProfileRegistry from '../entities/metadata-profile-registry.entity';
@@ -87,9 +88,27 @@ export class RegisteredMetadataProfileService {
     );
   }
 
+  // The newer registry format serves a profile directly ({ id, label, target, groups })
+  // instead of a profile store ({ id, title, creator, maintainer, profiles }). Fill the
+  // store fields with sensible defaults so both shapes can be persisted without hitting
+  // the NOT NULL constraints (notably `creator`) on registered_metadata_profile.
+  private static normalizeRegisteredProfile(
+    profile: RegisteredMetadataProfile
+  ): RegisteredMetadataProfile {
+    const directProfile = profile as RegisteredMetadataProfile & { label?: LanguageCodedText[] };
+    return {
+      ...profile,
+      title: profile.title?.length ? profile.title : (directProfile.label ?? []),
+      creator: profile.creator ?? '',
+      maintainer: profile.maintainer ?? '',
+      profiles: profile.profiles ?? []
+    };
+  }
+
   private async storeRegisteredMetadataProfile(
-    profile: RegisteredMetadataProfile, url: string
+    rawProfile: RegisteredMetadataProfile, url: string
   ): Promise<RegisteredMetadataProfile> {
+    const profile = RegisteredMetadataProfileService.normalizeRegisteredProfile(rawProfile);
     const storedProfile = await this.registeredMetadataProfileRepository
       .findOneBy({ id: profile.id });
     if (storedProfile) {
