@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@angular/core';
 import { MDProfile, MDProfileGroup, ProfileEntryParametersVocabulary } from '@iqbspecs/metadata-profile';
-import { Observable, of } from 'rxjs';
+import { Observable, of, firstValueFrom } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { TopConcept, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
@@ -43,6 +43,29 @@ export class MetadataService implements VocabularyProvider {
               private backendService: MetadataBackendService,
               private workspaceService: WorkspaceService,
               private http: HttpClient) {
+  }
+
+  // Loads the report column definitions (read by TableViewComponent) directly from
+  // the configured workspace profiles, so the metadata report works regardless of
+  // whether a unit metadata tab was opened before.
+  async loadProfileColumns(unitMDProfile?: string, itemMDProfile?: string): Promise<void> {
+    await Promise.all([
+      this.loadProfileColumnsForTarget('unit', unitMDProfile),
+      this.loadProfileColumnsForTarget('item', itemMDProfile)
+    ]);
+  }
+
+  private async loadProfileColumnsForTarget(target: 'unit' | 'item', url?: string): Promise<void> {
+    if (!url) return;
+    const profile = await firstValueFrom(this.backendService.getMetadataProfile(url));
+    if (!profile || profile === true) return;
+    const mdProfile = profile as unknown as MDProfile;
+    await this.loadProfileVocabularies(mdProfile);
+    if (target === 'unit') {
+      this.unitProfileColumns = mdProfile.groups ?? [];
+    } else {
+      [this.itemProfileColumns] = mdProfile.groups?.length ? mdProfile.groups : [{} as MDProfileGroup];
+    }
   }
 
   async loadProfileVocabularies(profile: MDProfile): Promise<boolean> {
