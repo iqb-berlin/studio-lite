@@ -1,4 +1,4 @@
-import { canonicalizeProfileId, profileIdsMatch } from './profile-id';
+import { canonicalizeProfileId, isItemProfileId, profileIdsMatch } from './profile-id';
 
 describe('profile-id', () => {
   const github = 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json';
@@ -49,6 +49,24 @@ describe('profile-id', () => {
     it('treats nullish ids with strict equality', () => {
       expect(profileIdsMatch(undefined, undefined)).toBe(true);
       expect(profileIdsMatch(github, undefined)).toBe(false);
+    });
+  });
+
+  describe('isItemProfileId', () => {
+    it('recognizes the classic github item/unit filenames', () => {
+      expect(isItemProfileId('https://raw.githubusercontent.com/iqb-vocabs/p11/master/item.json')).toBe(true);
+      expect(isItemProfileId('https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json')).toBe(false);
+    });
+
+    it('recognizes the newer w3id item/unit path segments (trailing slash)', () => {
+      expect(isItemProfileId('https://w3id.org/iqb/p100/item/')).toBe(true);
+      expect(isItemProfileId('https://w3id.org/iqb/p100/unit/')).toBe(false);
+    });
+
+    it('treats unknown or empty forms as not-an-item', () => {
+      expect(isItemProfileId('https://example.org/whatever')).toBe(false);
+      expect(isItemProfileId('')).toBe(false);
+      expect(isItemProfileId(undefined)).toBe(false);
     });
   });
 });
