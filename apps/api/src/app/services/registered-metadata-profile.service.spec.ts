@@ -147,5 +147,42 @@ describe('RegisteredMetadataProfileService', () => {
         .toHaveBeenCalledWith({ url: 'https://w3id.org/iqb/p100/unit/' });
       expect(result).toHaveLength(1);
     });
+
+    it('normalizes a direct profile (new format) so it can be stored without NOT NULL violations', async () => {
+      const csvContent = [
+        'title,description,target,url',
+        '"t","d","UNIT",https://w3id.org/iqb/p100/unit/'
+      ].join('\n');
+      settingsService.findUnitProfilesRegistry.mockResolvedValue({ csvUrl: 'csv-url' } as ProfilesRegistryDto);
+      metadataProfileRegistryRepository.findOneBy.mockResolvedValue({ csv: csvContent } as MetadataProfileRegistry);
+      registeredMetadataProfileRepository.findOneBy.mockResolvedValue(null);
+
+      // Newer registry serves a profile directly: label/target/groups, but no
+      // creator/title/maintainer/profiles.
+      const directProfile = {
+        id: 'https://w3id.org/iqb/p100/unit/',
+        label: [{ lang: 'de', value: 'Aufgabe' }],
+        target: ['UNIT'],
+        groups: []
+      };
+      mockHttpGet(httpService, directProfile as unknown as RegisteredMetadataProfile);
+      registeredMetadataProfileRepository.create
+        .mockImplementation(input => input as RegisteredMetadataProfile);
+      registeredMetadataProfileRepository.save
+        .mockImplementation(async input => input as RegisteredMetadataProfile);
+
+      await service.getRegisteredMetadataProfiles();
+
+      expect(registeredMetadataProfileRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'https://w3id.org/iqb/p100/unit/',
+          url: 'https://w3id.org/iqb/p100/unit/',
+          title: [{ lang: 'de', value: 'Aufgabe' }],
+          creator: '',
+          maintainer: '',
+          profiles: []
+        })
+      );
+    });
   });
 });
