@@ -96,6 +96,30 @@ describe('ProfilesComponent', () => {
     expect(component.profilesSelected[0].id).toBe('test-profile');
   });
 
+  it('resolves a direct profile (empty profiles list) from the registered url itself', async () => {
+    const directRegistered: RegisteredMetadataProfileDto[] = [
+      {
+        id: 'https://w3id.org/iqb/p100/unit/',
+        url: 'https://w3id.org/iqb/p100/unit/',
+        title: [{ lang: 'de', value: 'IQB Testprofil Aufgaben' }],
+        creator: '',
+        profiles: [],
+        modifiedAt: new Date()
+      }
+    ];
+    (mockMetadataBackendService.getRegisteredProfiles as jest.Mock).mockReturnValue(of(directRegistered));
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await new Promise<void>(resolve => { setTimeout(() => resolve(), 10); });
+    fixture.detectChanges();
+
+    expect(mockMetadataBackendService.getMetadataProfile)
+      .toHaveBeenCalledWith('https://w3id.org/iqb/p100/unit/');
+    expect(component.profileStoresWithProfiles.length).toBe(1);
+    expect(component.profileStoresWithProfiles[0].profiles.length).toBe(1);
+  });
+
   it('should set isError to true if registered profiles fetch fails', async () => {
     (mockMetadataBackendService.getRegisteredProfiles as jest.Mock).mockReturnValue(of(true));
     fixture.detectChanges();

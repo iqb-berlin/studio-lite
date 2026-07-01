@@ -74,9 +74,17 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           }
           this.isError = false;
           const storeObsList = registeredProfiles.map(registeredProfile => {
-            const afterWith = registeredProfile.url.slice(0, registeredProfile.url.lastIndexOf('/'));
-            const urls = registeredProfile.profiles;
-            const profilePromises = urls.map(p => this.getProfile(`${afterWith}/${p}`));
+            const profileFiles = registeredProfile.profiles ?? [];
+            // Newer registry entries are direct profiles (empty profiles list): the
+            // registered url is the profile itself. Classic stores instead list the
+            // relative profile files resolved against the store url.
+            const profileUrls = profileFiles.length ?
+              profileFiles.map(file => {
+                const base = registeredProfile.url.slice(0, registeredProfile.url.lastIndexOf('/'));
+                return `${base}/${file}`;
+              }) :
+              [registeredProfile.url];
+            const profilePromises = profileUrls.map(profileUrl => this.getProfile(profileUrl));
             return from(Promise.all(profilePromises)).pipe(
               map(profiles => ({
                 profileStore: registeredProfile as MDProfileStore,
