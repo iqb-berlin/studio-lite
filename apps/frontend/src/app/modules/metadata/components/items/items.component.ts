@@ -12,6 +12,7 @@ import { MatIconButton, MatButton } from '@angular/material/button';
 import { ItemsMetadataValues, ProfileMetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
 import { MDProfile } from '@iqbspecs/metadata-profile';
+import { profileIdsMatch } from '@studio-lite/shared-code';
 import { FormsModule } from '@angular/forms';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { ItemComponent } from '../item/item.component';
@@ -140,7 +141,7 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
         const currentProfileId = this.workspaceService.workspaceSettings?.itemMDProfile;
         item.profiles = item.profiles
           .map(profile => {
-            const isCurrent = profile.isCurrent || (currentProfileId && profile.profileId === currentProfileId);
+            const isCurrent = profile.isCurrent || profileIdsMatch(profile.profileId, currentProfileId);
             return isCurrent ?
               { ...profile, id: undefined, isCurrent: true } :
               { profileId: profile.profileId, isCurrent: false, entries: [] };
