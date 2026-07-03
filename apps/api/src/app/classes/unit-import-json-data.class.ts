@@ -1,4 +1,5 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { UnitFullMetadataDto } from '@studio-lite-lib/api-dto';
 import { FileIo } from '../interfaces/file-io.interface';
 
 interface ExternalDataBlock {
@@ -24,6 +25,7 @@ interface UnitIndexJson {
   comments?: ExternalDataBlock;
   richNotes?: ExternalDataBlock;
   metadata?: ExternalDataBlock;
+  items?: ExternalDataBlock;
   variables?: ExternalDataBlock;
 }
 
@@ -38,8 +40,9 @@ export class UnitImportJsonData {
   definitionFileName: string;
   commentsFileName: string;
   richNotesFileName: string;
-  metadata: string;
+  metadata: UnitFullMetadataDto;
   metadataFileName: string;
+  itemsFileName: string;
   player: string;
   editor: string;
   schemer = '';
@@ -71,6 +74,7 @@ export class UnitImportJsonData {
     this.commentsFileName = index.comments?.id ? folder + index.comments.id : '';
     this.richNotesFileName = index.richNotes?.id ? folder + index.richNotes.id : '';
     this.metadataFileName = index.metadata?.id ? folder + index.metadata.id : '';
+    this.itemsFileName = index.items?.id ? folder + index.items.id : '';
     this.codingSchemeFileName = index.codingScheme?.id ? folder + index.codingScheme.id : '';
     this.variablesFileName = index.variables?.id ? folder + index.variables.id : '';
 

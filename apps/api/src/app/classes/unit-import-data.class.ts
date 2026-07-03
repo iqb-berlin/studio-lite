@@ -1,6 +1,7 @@
 import type { Element } from 'domhandler';
 import * as cheerio from 'cheerio';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { UnitFullMetadataDto } from '@studio-lite-lib/api-dto';
 import { FileIo } from '../interfaces/file-io.interface';
 
 export class UnitImportData {
@@ -14,8 +15,10 @@ export class UnitImportData {
   definitionFileName: string;
   commentsFileName: string;
   richNotesFileName: string;
-  metadata:string;
-  metadataFileName:string;
+  metadata: UnitFullMetadataDto;
+  metadataFileName: string;
+  // XML units keep items inside the metadata file; there is no separate items file
+  itemsFileName = '';
   player: string;
   editor: string;
   schemer: string;

@@ -426,6 +426,130 @@ describe('WorkspaceService', () => {
     });
   });
 
+  describe('mapImportedMetadata', () => {
+    it('maps the unit-metadata@0.1 wrapper onto the internal profiles structure', () => {
+      const mapped = WorkspaceService.mapImportedMetadata({
+        changedAt: '2026-05-01T08:00:00.000Z',
+        metadata: [{
+          profileId: 'https://example.org/unit-profile.json',
+          entries: [{
+            id: 'iqb_author',
+            label: [{ lang: 'de', value: 'Entwickler:in' }],
+            value: [{ lang: 'de', value: 'Ana Maier' }]
+          }]
+        }]
+      });
+
+      expect(mapped).toEqual({
+        profiles: [{
+          profileId: 'https://example.org/unit-profile.json',
+          entries: [{
+            id: 'iqb_author',
+            label: [{ lang: 'de', value: 'Entwickler:in' }],
+            value: [{ lang: 'de', value: 'Ana Maier' }],
+            valueAsText: [{ lang: 'de', value: 'Ana Maier' }]
+          }]
+        }]
+      });
+    });
+
+    it('reconstructs value and valueAsText from a simple_value', () => {
+      const mapped = WorkspaceService.mapImportedMetadata({
+        metadata: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'a1',
+            value: { raw: 'false', asText: [{ lang: 'de', value: 'nein' }] }
+          }]
+        }]
+      });
+
+      expect(mapped.profiles[0].entries[0]).toEqual({
+        id: 'a1',
+        label: [],
+        value: 'false',
+        valueAsText: [{ lang: 'de', value: 'nein' }]
+      });
+    });
+
+    it('reconstructs internal vocabulary values ({ id, text }) from vocabulary_entries', () => {
+      const mapped = WorkspaceService.mapImportedMetadata({
+        metadata: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'w4',
+            value: [{ id: 'https://w3id.org/iqb/vocab/p2', label: [{ lang: 'de', value: 'Anwenden' }] }]
+          }]
+        }]
+      });
+
+      expect(mapped.profiles[0].entries[0]).toEqual({
+        id: 'w4',
+        label: [],
+        value: [{ id: 'https://w3id.org/iqb/vocab/p2', text: [{ lang: 'de', value: 'Anwenden' }] }],
+        valueAsText: [{ lang: 'de', value: 'Anwenden' }]
+      });
+    });
+
+    it('passes a legacy raw { profiles, items } blob through unchanged', () => {
+      const legacy = {
+        profiles: [{ profileId: 'p1', isCurrent: true, entries: [] }],
+        items: [{ id: 'ITEM1', profiles: [] }]
+      };
+
+      expect(WorkspaceService.mapImportedMetadata(legacy)).toBe(legacy);
+    });
+  });
+
+  describe('mapImportedItems', () => {
+    it('maps unit-items@0.2 items onto the internal structure', () => {
+      const mapped = WorkspaceService.mapImportedItems([{
+        uuid: 'item-uuid-1',
+        id: 'ITEM1',
+        description: 'Notiz',
+        order: 3,
+        sourceVariableId: 'VAR1',
+        sourceVariableUuid: 'var-uuid-1',
+        changedAt: '2026-04-01T00:00:00.000Z',
+        metadata: [{
+          profileId: 'https://example.org/item-profile.json',
+          entries: [{
+            id: 'w4',
+            label: [{ lang: 'de', value: 'Prozess' }],
+            value: [{ lang: 'de', value: 'Anwenden' }]
+          }]
+        }]
+      }]);
+
+      expect(mapped).toEqual([{
+        uuid: 'item-uuid-1',
+        id: 'ITEM1',
+        description: 'Notiz',
+        order: 3,
+        variableId: 'VAR1',
+        variableReadOnlyId: 'var-uuid-1',
+        createdAt: undefined,
+        changedAt: new Date('2026-04-01T00:00:00.000Z'),
+        profiles: [{
+          profileId: 'https://example.org/item-profile.json',
+          entries: [{
+            id: 'w4',
+            label: [{ lang: 'de', value: 'Prozess' }],
+            value: [{ lang: 'de', value: 'Anwenden' }],
+            valueAsText: [{ lang: 'de', value: 'Anwenden' }]
+          }]
+        }]
+      }]);
+    });
+
+    it('defaults missing source variables to null', () => {
+      const mapped = WorkspaceService.mapImportedItems([{ id: 'ITEM1' }]);
+
+      expect(mapped[0].variableId).toBeNull();
+      expect(mapped[0].variableReadOnlyId).toBeNull();
+    });
+  });
+
   describe('uploadFiles', () => {
     const user = { id: 1 } as User;
     const buildFile = (name: string, mime: string, content: string): FileIo => ({
@@ -530,6 +654,91 @@ describe('WorkspaceService', () => {
         null,
         undefined
       );
+    });
+
+    it('should import vomd (unit-metadata@0.1) and voit (unit-items@0.2) files', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const vomdContent = JSON.stringify({
+        changedAt: '2026-05-01T08:00:00.000Z',
+        metadata: [{
+          profileId: 'https://example.org/unit-profile.json',
+          entries: [{
+            id: 'a1',
+            label: [{ lang: 'de', value: 'Für SPF geeignet' }],
+            value: { raw: 'false', asText: [{ lang: 'de', value: 'nein' }] }
+          }]
+        }]
+      });
+      const voitContent = JSON.stringify([{
+        uuid: 'item-uuid-1',
+        id: 'ITEM1',
+        order: 0,
+        sourceVariableId: 'VAR1',
+        sourceVariableUuid: 'var-uuid-1'
+      }]);
+
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          metadata: { id: 'unit01.vomd.json', type: 'unit-metadata@0.1' },
+          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
+        })),
+        buildFile('unit01.vomd.json', 'application/json', vomdContent),
+        buildFile('unit01.voit.json', 'application/json', voitContent)
+      ], user);
+
+      expect(result.messages).toHaveLength(0);
+      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, {
+        profiles: [{
+          profileId: 'https://example.org/unit-profile.json',
+          isCurrent: false,
+          entries: [{
+            id: 'a1',
+            label: [{ lang: 'de', value: 'Für SPF geeignet' }],
+            value: 'false',
+            valueAsText: [{ lang: 'de', value: 'nein' }]
+          }]
+        }],
+        items: [{
+          uuid: 'item-uuid-1',
+          id: 'ITEM1',
+          description: undefined,
+          order: 0,
+          variableId: 'VAR1',
+          variableReadOnlyId: 'var-uuid-1',
+          createdAt: undefined,
+          changedAt: undefined,
+          profiles: []
+        }]
+      });
+    });
+
+    it('should still import a legacy raw vomd blob with embedded items', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const legacyVomd = JSON.stringify({
+        profiles: [{ profileId: 'p1', isCurrent: true, entries: [] }],
+        items: [{ id: 'ITEM1', variableId: 'VAR1', profiles: [] }]
+      });
+
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          metadata: { id: 'unit01.vomd.json', type: 'metadata-values' }
+        })),
+        buildFile('unit01.vomd.json', 'application/json', legacyVomd)
+      ], user);
+
+      expect(result.messages).toHaveLength(0);
+      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, {
+        profiles: [{ profileId: 'p1', isCurrent: false, entries: [] }],
+        items: [{ id: 'ITEM1', variableId: 'VAR1', profiles: [] }]
+      });
     });
 
     it('should warn when coding scheme file referenced in index is missing from upload', async () => {

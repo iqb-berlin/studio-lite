@@ -17,7 +17,10 @@ import {
   RenameGroupNameDto,
   UnitFullMetadataDto,
   ItemsMetadataValues,
-  UnitCommentDto
+  MetadataValuesEntry,
+  UnitCommentDto,
+  UnitItemWithMetadataDto,
+  UnitMetadataDto
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import {
@@ -47,6 +50,50 @@ import { UnitRichNoteService } from './unit-rich-note.service';
 import User from '../entities/user.entity';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 import { GroupAdminUnprocessableWorkspaceException } from '../exceptions/group-admin-unprocessable-workspace.exception';
+
+// Shapes as found in exported *.vomd.json (iqb unit-metadata@0.1) and
+// *.voit.json (iqb unit-items@0.2) files, both referencing metadata-values@3.0
+// (https://github.com/iqb-specifications).
+interface ImportedLanguageCodedText {
+  lang: string;
+  value: string;
+}
+
+interface ImportedVocabularyEntry {
+  id: string;
+  label?: ImportedLanguageCodedText[];
+  annotation?: ImportedLanguageCodedText[];
+}
+
+interface ImportedMetadataEntry {
+  id: string;
+  label?: ImportedLanguageCodedText[];
+  value: ImportedLanguageCodedText[] | ImportedVocabularyEntry[] | { raw: string; asText?: ImportedLanguageCodedText[] };
+}
+
+interface ImportedMetadataValues {
+  profileId: string;
+  order?: number;
+  entries: ImportedMetadataEntry[];
+}
+
+interface ImportedUnitMetadata {
+  createdAt?: string;
+  changedAt?: string;
+  metadata?: ImportedMetadataValues[];
+}
+
+interface ImportedUnitItem {
+  uuid?: string;
+  id: string;
+  description?: string;
+  order?: number;
+  sourceVariableId?: string;
+  sourceVariableUuid?: string;
+  createdAt?: string;
+  changedAt?: string;
+  metadata?: ImportedMetadataValues[];
+}
 
 // A comment as found in an exported *.voco.json file. Supports both the iqb
 // unit-comments@0.1 spec field names and the legacy ones for backwards compat.
@@ -737,7 +784,7 @@ export class WorkspaceService {
 
     files.forEach(f => {
       if (f.mimetype === 'application/json') {
-        const isCompanionJson = /\.(vocs|voco|vorn|vomd|vova)\.json$/i.test(f.originalname);
+        const isCompanionJson = /\.(vocs|voco|vorn|vomd|voit|vova)\.json$/i.test(f.originalname);
         try {
           const parsed = JSON.parse(f.buffer.toString()) as Record<string, unknown>;
           if (parsed.id && parsed.userInterface) {
@@ -835,10 +882,26 @@ export class WorkspaceService {
         unitImportData.metadataFileName &&
         notXmlFiles[unitImportData.metadataFileName]
       ) {
-        unitImportData.metadata = JSON.parse(
-          notXmlFiles[unitImportData.metadataFileName].buffer.toString()
+        unitImportData.metadata = WorkspaceService.mapImportedMetadata(
+          JSON.parse(notXmlFiles[unitImportData.metadataFileName].buffer.toString())
         );
         usedFiles.push(unitImportData.metadataFileName);
+      }
+
+      if (
+        unitImportData.itemsFileName &&
+        notXmlFiles[unitImportData.itemsFileName]
+      ) {
+        const items = WorkspaceService.mapImportedItems(
+          JSON.parse(notXmlFiles[unitImportData.itemsFileName].buffer.toString())
+        );
+        if (items.length) {
+          unitImportData.metadata = {
+            ...(unitImportData.metadata ?? {}),
+            items: items as unknown as UnitItemWithMetadataDto[]
+          };
+        }
+        usedFiles.push(unitImportData.itemsFileName);
       }
 
       const itemUuidLookups = await this.importUnitProperties(
@@ -1013,6 +1076,88 @@ export class WorkspaceService {
       unitId,
       itemUuidLookups
     );
+  }
+
+  // Maps metadata from an exported *.vomd.json back onto the internal
+  // structure. Detects the iqb unit-metadata@0.1 wrapper ({ metadata: [...] })
+  // and falls back to the legacy raw { profiles, items } blob for backwards
+  // compatibility.
+  static mapImportedMetadata(parsed: unknown): UnitFullMetadataDto {
+    const wrapper = parsed as ImportedUnitMetadata;
+    if (Array.isArray(wrapper?.metadata)) {
+      return {
+        profiles: WorkspaceService
+          .mapImportedMetadataValues(wrapper.metadata) as UnitMetadataDto[]
+      };
+    }
+    return (parsed ?? {}) as UnitFullMetadataDto;
+  }
+
+  // Maps metadata-values@3.0 profiles back onto the internal structure.
+  // isCurrent is not restored here; setCurrentProfiles assigns it against
+  // the workspace profile settings during import.
+  static mapImportedMetadataValues(
+    values: ImportedMetadataValues[]
+  ): { profileId: string; entries: MetadataValuesEntry[] }[] {
+    return (values ?? [])
+      .filter(profile => !!profile?.profileId)
+      .map(profile => ({
+        profileId: profile.profileId,
+        entries: (profile.entries ?? [])
+          .filter(entry => !!entry?.id)
+          .map(entry => WorkspaceService.mapImportedMetadataEntry(entry))
+      }));
+  }
+
+  // Reconstructs the internal entry shape (value/valueAsText) from the three
+  // metadata-values@3.0 value forms: simple_value, vocabulary_entries and
+  // language_coded_texts. Vocabulary labels become both the internal `text`
+  // and the display texts in valueAsText.
+  private static mapImportedMetadataEntry(entry: ImportedMetadataEntry): MetadataValuesEntry {
+    const { value } = entry;
+    let internalValue: MetadataValuesEntry['value'] = '';
+    let valueAsText: ImportedLanguageCodedText[] = [];
+    if (Array.isArray(value)) {
+      if (value.some(entryValue => !!entryValue && typeof (entryValue as ImportedVocabularyEntry).id === 'string')) {
+        const vocabularyEntries = value as ImportedVocabularyEntry[];
+        internalValue = vocabularyEntries.map(vocabularyEntry => ({
+          id: vocabularyEntry.id,
+          text: vocabularyEntry.label ?? []
+        }));
+        valueAsText = vocabularyEntries.flatMap(vocabularyEntry => vocabularyEntry.label ?? []);
+      } else {
+        internalValue = value as ImportedLanguageCodedText[];
+        valueAsText = value as ImportedLanguageCodedText[];
+      }
+    } else if (value && typeof value === 'object' && typeof value.raw === 'string') {
+      internalValue = value.raw;
+      valueAsText = value.asText ?? [];
+    }
+    return {
+      id: entry.id,
+      label: entry.label ?? [],
+      value: internalValue,
+      valueAsText
+    };
+  }
+
+  // Maps items from the iqb unit-items@0.2 spec shape back onto the internal
+  // structure: sourceVariableId/sourceVariableUuid become
+  // variableId/variableReadOnlyId.
+  static mapImportedItems(items: ImportedUnitItem[]): ItemsMetadataValues[] {
+    return (items ?? [])
+      .filter(item => !!item)
+      .map(item => ({
+        uuid: item.uuid,
+        id: item.id,
+        description: item.description,
+        order: item.order,
+        variableId: item.sourceVariableId ?? null,
+        variableReadOnlyId: item.sourceVariableUuid ?? null,
+        createdAt: item.createdAt ? new Date(item.createdAt) : undefined,
+        changedAt: item.changedAt ? new Date(item.changedAt) : undefined,
+        profiles: WorkspaceService.mapImportedMetadataValues(item.metadata ?? [])
+      }));
   }
 
   // Maps a comment from the iqb unit-comments@0.1 spec shape (commentator/
