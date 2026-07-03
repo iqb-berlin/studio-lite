@@ -1,4 +1,7 @@
 import {
+  ItemsMetadataValues,
+  MetadataValues,
+  MetadataValuesEntry,
   UnitCommentDto,
   UnitDefinitionDto,
   UnitDownloadSettingsDto,
@@ -65,6 +68,60 @@ interface UnitRichNoteJson {
   itemUuids?: string[];
 }
 
+// Shapes as defined by the iqb metadata-values@3.0 specification
+// (https://github.com/iqb-specifications/metadata-values). All objects have
+// additionalProperties: false, so internal-only fields must be dropped.
+interface LanguageCodedText {
+  lang: string;
+  value: string;
+}
+
+interface VocabularyEntryJson {
+  id: string;
+  label?: LanguageCodedText[];
+  annotation?: LanguageCodedText[];
+}
+
+interface SimpleValueJson {
+  raw: string;
+  asText?: LanguageCodedText[];
+}
+
+type MetadataValueJson = LanguageCodedText[] | VocabularyEntryJson[] | SimpleValueJson;
+
+interface MetadataValuesJson {
+  profileId: string;
+  order?: number;
+  entries: {
+    id: string;
+    label?: LanguageCodedText[];
+    value: MetadataValueJson;
+  }[];
+}
+
+// Unit metadata shape as defined by the iqb unit-metadata@0.1 specification
+// (https://github.com/iqb-specifications/unit-metadata).
+interface UnitMetadataJson {
+  createdAt?: string;
+  changedAt?: string;
+  metadata: MetadataValuesJson[];
+}
+
+// Item shape as defined by the iqb unit-items@0.2 specification
+// (https://github.com/iqb-specifications/unit-items). Fields without a
+// counterpart in the spec are intentionally dropped on export.
+interface UnitItemJson {
+  uuid?: string;
+  id: string;
+  description?: string;
+  order?: number;
+  sourceVariableId?: string;
+  sourceVariableUuid?: string;
+  createdAt?: string;
+  changedAt?: string;
+  metadata?: MetadataValuesJson[];
+}
+
 interface UnitIndexJson {
   id: string;
   uuid?: string;
@@ -76,6 +133,7 @@ interface UnitIndexJson {
   comments?: ExternalDataBlock;
   richNotes?: ExternalDataBlock;
   metadata?: ExternalDataBlock;
+  items?: ExternalDataBlock;
   variables?: ExternalDataBlock;
 }
 
@@ -528,6 +586,92 @@ export class UnitDownloadClass {
     });
   }
 
+  // Normalizes internal text data (single object or array, e.g. label or
+  // valueAsText) to the language_coded_texts shape of metadata-values@3.0.
+  // Items without a valid two-letter language code have no spec counterpart
+  // (pattern ^[a-z]{2}$) and are dropped; empty lists become undefined since
+  // the spec requires minItems: 1.
+  static toLanguageCodedTexts(texts: unknown): LanguageCodedText[] | undefined {
+    const list = Array.isArray(texts) ? texts : [texts];
+    const valid = list
+      .filter((text): text is LanguageCodedText => !!text &&
+        typeof (text as LanguageCodedText).lang === 'string' &&
+        /^[a-z]{2}$/.test((text as LanguageCodedText).lang) &&
+        typeof (text as LanguageCodedText).value === 'string')
+      .map(text => ({ lang: text.lang, value: text.value }));
+    return valid.length ? valid : undefined;
+  }
+
+  // Maps an internal entry value onto one of the three value forms of
+  // metadata-values@3.0: simple_value (internal plain string plus valueAsText),
+  // vocabulary_entries (internal { id, text } lists) or language_coded_texts.
+  // Returns undefined for empty values since the spec requires `value`.
+  static transformEntryValue(entry: MetadataValuesEntry): MetadataValueJson | undefined {
+    const { value } = entry;
+    if (typeof value === 'string') {
+      if (!value) return undefined;
+      const asText = UnitDownloadClass.toLanguageCodedTexts(entry.valueAsText);
+      return { raw: value, ...(asText && { asText }) };
+    }
+    if (Array.isArray(value) && value.length) {
+      const vocabularyEntries = value
+        .filter(entryValue => !!entryValue && typeof (entryValue as { id?: unknown }).id === 'string')
+        .map(entryValue => {
+          const vocabularyEntry = entryValue as { id: string; text?: unknown; label?: unknown; annotation?: unknown };
+          const label = UnitDownloadClass.toLanguageCodedTexts(vocabularyEntry.text ?? vocabularyEntry.label);
+          const annotation = UnitDownloadClass.toLanguageCodedTexts(vocabularyEntry.annotation);
+          return {
+            id: vocabularyEntry.id,
+            ...(label && { label }),
+            ...(annotation && { annotation })
+          };
+        });
+      if (vocabularyEntries.length) return vocabularyEntries;
+      return UnitDownloadClass.toLanguageCodedTexts(value);
+    }
+    return undefined;
+  }
+
+  // Maps internal profile values onto metadata-values@3.0. Internal-only
+  // fields (isCurrent, valueAsText) are dropped; profiles without profileId
+  // or without any exportable entry are omitted since the spec requires
+  // profileId and entries with minItems: 1.
+  static transformProfilesToMetadataValues(profiles?: MetadataValues[]): MetadataValuesJson[] {
+    return (profiles ?? []).flatMap(profile => {
+      if (!profile?.profileId) return [];
+      const entries = (profile.entries ?? []).flatMap(entry => {
+        if (!entry?.id) return [];
+        const value = UnitDownloadClass.transformEntryValue(entry);
+        if (!value) return [];
+        const label = UnitDownloadClass.toLanguageCodedTexts(entry.label);
+        return [{ id: entry.id, ...(label && { label }), value }];
+      });
+      if (!entries.length) return [];
+      return [{ profileId: profile.profileId, entries }];
+    });
+  }
+
+  // Maps internal item data onto the iqb unit-items@0.2 spec shape:
+  // variableId/variableReadOnlyId become sourceVariableId/sourceVariableUuid;
+  // position/locked/unitId/weighting have no spec counterpart and are
+  // dropped. Items without the required id are skipped.
+  static transformItems(items?: ItemsMetadataValues[]): UnitItemJson[] {
+    return (items ?? []).flatMap((item, itemIndex) => {
+      if (!item?.id) return [];
+      const transformed: UnitItemJson = { id: item.id };
+      if (item.uuid) transformed.uuid = item.uuid;
+      if (item.description) transformed.description = item.description;
+      transformed.order = typeof item.order === 'number' ? item.order : itemIndex;
+      if (item.variableId) transformed.sourceVariableId = item.variableId;
+      if (item.variableReadOnlyId) transformed.sourceVariableUuid = item.variableReadOnlyId;
+      if (item.createdAt) transformed.createdAt = new Date(item.createdAt).toISOString();
+      if (item.changedAt) transformed.changedAt = new Date(item.changedAt).toISOString();
+      const metadata = UnitDownloadClass.transformProfilesToMetadataValues(item.profiles);
+      if (metadata.length) transformed.metadata = metadata;
+      return [transformed];
+    });
+  }
+
   static async addRichNotes(
     unitRichNoteService: UnitRichNoteService,
     unitId: number,
@@ -803,11 +947,26 @@ export class UnitDownloadClass {
       }
     }
 
-    if (unitMetadata.metadata && Object.keys(unitMetadata.metadata).length > 0) {
-      zip.addFile(`${key}.vomd.json`, Buffer.from(JSON.stringify(unitMetadata.metadata)));
+    const metadataValues = UnitDownloadClass.transformProfilesToMetadataValues(unitMetadata.metadata?.profiles);
+    if (metadataValues.length) {
+      const unitMetadataJson: UnitMetadataJson = {
+        ...(unitMetadata.lastChangedMetadata && { changedAt: unitMetadata.lastChangedMetadata.toISOString() }),
+        metadata: metadataValues
+      };
+      zip.addFile(`${key}.vomd.json`, Buffer.from(JSON.stringify(unitMetadataJson, null, 2)));
       index.metadata = {
         id: `${key}.vomd.json`,
-        type: 'metadata-values',
+        type: 'unit-metadata@0.1',
+        ...(unitMetadata.lastChangedMetadata && { modifiedAt: unitMetadata.lastChangedMetadata.toISOString() })
+      };
+    }
+
+    const items = UnitDownloadClass.transformItems(unitMetadata.metadata?.items);
+    if (items.length) {
+      zip.addFile(`${key}.voit.json`, Buffer.from(JSON.stringify(items, null, 2)));
+      index.items = {
+        id: `${key}.voit.json`,
+        type: 'unit-items@0.2',
         ...(unitMetadata.lastChangedMetadata && { modifiedAt: unitMetadata.lastChangedMetadata.toISOString() })
       };
     }

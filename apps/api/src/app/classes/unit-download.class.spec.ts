@@ -1,5 +1,7 @@
 import { createMock } from '@golevelup/ts-jest';
 import {
+  ItemsMetadataValues,
+  MetadataValues,
   UnitCommentDto,
   UnitDownloadBookletSettingsDto,
   UnitDownloadSettingsDto,
@@ -547,7 +549,18 @@ describe('UnitDownloadClass', () => {
         key: 'U4',
         name: 'Unit 4',
         description: '',
-        metadata: { profile: 'x' },
+        metadata: {
+          profiles: [{
+            profileId: 'https://example.org/unit-profile.json',
+            isCurrent: true,
+            entries: [{
+              id: 'a1',
+              label: [{ lang: 'de', value: 'Autor:in' }],
+              value: [{ lang: 'de', value: 'Ana Maier' }],
+              valueAsText: [{ lang: 'de', value: 'Ana Maier' }]
+            }]
+          }]
+        },
         player: 'player-1',
         lastChangedMetadata: new Date()
       } as unknown as UnitPropertiesDto);
@@ -595,7 +608,7 @@ describe('UnitDownloadClass', () => {
       expect(parsed.codingScheme).toMatchObject({ id: 'U4.vocs.json', type: 'iqb-coding-scheme' });
       expect(parsed.comments).toEqual({ id: 'U4.voco.json', type: 'iqb-unit-comments' });
       expect(parsed.richNotes).toEqual({ id: 'U4.vorn.json', type: 'iqb-unit-rich-notes' });
-      expect(parsed.metadata).toMatchObject({ id: 'U4.vomd.json', type: 'metadata-values' });
+      expect(parsed.metadata).toMatchObject({ id: 'U4.vomd.json', type: 'unit-metadata@0.1' });
       expect(parsed.variables).toMatchObject({ id: 'U4.vova.json', type: 'unit-variables' });
     });
 
@@ -702,7 +715,18 @@ describe('UnitDownloadClass', () => {
         key: 'U6',
         name: 'Unit 6',
         description: '',
-        metadata: { x: 1 },
+        metadata: {
+          profiles: [{
+            profileId: 'https://example.org/unit-profile.json',
+            isCurrent: true,
+            entries: [{
+              id: 'a1',
+              label: [{ lang: 'de', value: 'Autor:in' }],
+              value: [{ lang: 'de', value: 'Ana Maier' }],
+              valueAsText: [{ lang: 'de', value: 'Ana Maier' }]
+            }]
+          }]
+        },
         player: 'player-1',
         lastChangedMetadata: metadataChanged,
         lastChangedDefinition: definitionChanged,
@@ -792,6 +816,266 @@ describe('UnitDownloadClass', () => {
       const jsonCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U5.json');
       const parsed = JSON.parse((jsonCall[1] as Buffer).toString());
       expect(parsed.userInterface).toHaveProperty('player');
+    });
+
+    it('should write vomd.json as unit-metadata@0.1 wrapper and voit.json as unit-items@0.2', async () => {
+      const unitServiceMock = createMock<UnitService>();
+      const unitCommentServiceMock = createMock<UnitCommentService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      const settingServiceMock = createMock<SettingService>();
+      const unitRichNoteServiceMock = createMock<UnitRichNoteService>();
+
+      const lastChangedMetadata = new Date('2025-05-01T08:00:00.000Z');
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
+      unitServiceMock.findOnesProperties.mockResolvedValue({
+        key: 'U6',
+        name: 'Unit 6',
+        description: '',
+        metadata: {
+          profiles: [{
+            profileId: 'https://example.org/unit-profile.json',
+            isCurrent: true,
+            entries: [{
+              id: 'a1',
+              label: [{ lang: 'de', value: 'Für SPF geeignet' }],
+              value: 'false',
+              valueAsText: { lang: 'de', value: 'nein' }
+            }, {
+              id: 'iqb_phones',
+              label: [{ lang: 'de', value: 'Kopfhörer' }],
+              value: [],
+              valueAsText: []
+            }]
+          }],
+          items: [{
+            uuid: 'item-uuid-1',
+            id: 'ITEM1',
+            description: 'Notiz',
+            order: 3,
+            position: '01',
+            locked: false,
+            unitId: 6,
+            weighting: 2,
+            variableId: 'VAR1',
+            variableReadOnlyId: 'var-uuid-1',
+            changedAt: '2025-04-01T00:00:00.000Z',
+            profiles: [{
+              profileId: 'https://example.org/item-profile.json',
+              isCurrent: true,
+              entries: [{
+                id: 'w4',
+                label: [{ lang: 'de', value: 'Prozess' }],
+                value: [{ id: 'https://w3id.org/iqb/vocab/p2', text: [{ lang: 'de', value: 'Anwenden' }] }],
+                valueAsText: [{ lang: 'de', value: 'Anwenden' }]
+              }]
+            }]
+          }]
+        },
+        player: 'player-1',
+        lastChangedMetadata
+      } as unknown as UnitPropertiesDto);
+      unitServiceMock.ensureUuid.mockResolvedValue('uuid-6');
+      unitServiceMock.findOnesDefinition.mockResolvedValue({
+        definition: '', variables: []
+      } as unknown as UnitDefinitionDto);
+      unitServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as unknown as UnitSchemeDto);
+      unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
+
+      await UnitDownloadClass.get(
+        1,
+        unitServiceMock,
+        unitCommentServiceMock,
+        veronaModuleServiceMock,
+        settingServiceMock,
+        unitRichNoteServiceMock,
+        {
+          unitIdList: [6],
+          addPlayers: false,
+          addComments: false,
+          addRichNotes: false,
+          addTestTakersHot: 0,
+          addTestTakersMonitor: 0,
+          addTestTakersReview: 0
+        } as unknown as UnitDownloadSettingsDto,
+        'json'
+      );
+
+      const vomdCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U6.vomd.json');
+      expect(vomdCall).toBeDefined();
+      const vomd = JSON.parse((vomdCall[1] as Buffer).toString());
+      expect(vomd).toEqual({
+        changedAt: '2025-05-01T08:00:00.000Z',
+        metadata: [{
+          profileId: 'https://example.org/unit-profile.json',
+          entries: [{
+            id: 'a1',
+            label: [{ lang: 'de', value: 'Für SPF geeignet' }],
+            value: { raw: 'false', asText: [{ lang: 'de', value: 'nein' }] }
+          }]
+        }]
+      });
+
+      const voitCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U6.voit.json');
+      expect(voitCall).toBeDefined();
+      const voit = JSON.parse((voitCall[1] as Buffer).toString());
+      expect(voit).toEqual([{
+        uuid: 'item-uuid-1',
+        id: 'ITEM1',
+        description: 'Notiz',
+        order: 3,
+        sourceVariableId: 'VAR1',
+        sourceVariableUuid: 'var-uuid-1',
+        changedAt: '2025-04-01T00:00:00.000Z',
+        metadata: [{
+          profileId: 'https://example.org/item-profile.json',
+          entries: [{
+            id: 'w4',
+            label: [{ lang: 'de', value: 'Prozess' }],
+            value: [{ id: 'https://w3id.org/iqb/vocab/p2', label: [{ lang: 'de', value: 'Anwenden' }] }]
+          }]
+        }]
+      }]);
+
+      const indexCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'U6.json');
+      const index = JSON.parse((indexCall[1] as Buffer).toString());
+      expect(index.metadata).toEqual({
+        id: 'U6.vomd.json',
+        type: 'unit-metadata@0.1',
+        modifiedAt: '2025-05-01T08:00:00.000Z'
+      });
+      expect(index.items).toEqual({
+        id: 'U6.voit.json',
+        type: 'unit-items@0.2',
+        modifiedAt: '2025-05-01T08:00:00.000Z'
+      });
+    });
+  });
+
+  describe('transformProfilesToMetadataValues', () => {
+    it('should map internal profiles to metadata-values@3.0 and drop internal-only fields', () => {
+      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
+        profileId: 'https://example.org/profile.json',
+        isCurrent: true,
+        entries: [{
+          id: 'iqb_author',
+          label: [{ lang: 'de', value: 'Entwickler:in' }],
+          value: [{ lang: 'de', value: 'Ana Maier' }],
+          valueAsText: [{ lang: 'de', value: 'Ana Maier' }]
+        }]
+      }] as unknown as MetadataValues[]);
+
+      expect(result).toEqual([{
+        profileId: 'https://example.org/profile.json',
+        entries: [{
+          id: 'iqb_author',
+          label: [{ lang: 'de', value: 'Entwickler:in' }],
+          value: [{ lang: 'de', value: 'Ana Maier' }]
+        }]
+      }]);
+    });
+
+    it('should omit profiles without profileId or without exportable entries', () => {
+      const result = UnitDownloadClass.transformProfilesToMetadataValues([
+        { isCurrent: true, entries: [{ id: 'a1', value: 'x', valueAsText: [] }] },
+        { profileId: 'p1', entries: [{ id: 'empty', value: [], valueAsText: [] }] },
+        { profileId: 'p2', entries: [] }
+      ] as unknown as MetadataValues[]);
+      expect(result).toEqual([]);
+    });
+
+    it('should map vocabulary values with text to vocabulary_entries with label', () => {
+      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
+        profileId: 'p1',
+        entries: [{
+          id: 'w8',
+          label: [{ lang: 'de', value: 'Leitidee' }],
+          value: [{ id: 'https://w3id.org/iqb/vocab/l3', text: [{ lang: 'de', value: 'Raum und Form' }] }],
+          valueAsText: [{ lang: 'de', value: 'Raum und Form' }]
+        }]
+      }] as unknown as MetadataValues[]);
+
+      expect(result[0].entries[0].value).toEqual([{
+        id: 'https://w3id.org/iqb/vocab/l3',
+        label: [{ lang: 'de', value: 'Raum und Form' }]
+      }]);
+    });
+
+    it('should map string values to simple_value and skip empty strings', () => {
+      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
+        profileId: 'p1',
+        entries: [
+          {
+            id: 'a1', label: [], value: 'true', valueAsText: { lang: 'de', value: 'ja' }
+          },
+          {
+            id: 'a2', label: [], value: '', valueAsText: []
+          }
+        ]
+      }] as unknown as MetadataValues[]);
+
+      expect(result[0].entries).toEqual([{
+        id: 'a1',
+        value: { raw: 'true', asText: [{ lang: 'de', value: 'ja' }] }
+      }]);
+    });
+
+    it('should drop label and asText entries without a valid two-letter language code', () => {
+      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
+        profileId: 'p1',
+        entries: [{
+          id: 'a1',
+          label: [{ value: 'no lang' }],
+          value: 'x',
+          valueAsText: [{ value: 'no lang either' }]
+        }]
+      }] as unknown as MetadataValues[]);
+
+      expect(result[0].entries).toEqual([{ id: 'a1', value: { raw: 'x' } }]);
+    });
+  });
+
+  describe('transformItems', () => {
+    it('should map internal items to unit-items@0.2 and drop non-spec fields', () => {
+      const result = UnitDownloadClass.transformItems([{
+        uuid: 'u1',
+        id: 'ITEM1',
+        description: 'Desc',
+        order: 1,
+        position: '01',
+        locked: true,
+        unitId: 12,
+        weighting: 2,
+        variableId: 'VAR1',
+        variableReadOnlyId: 'var-uuid-1',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        changedAt: '2025-02-01T00:00:00.000Z',
+        profiles: []
+      }] as unknown as ItemsMetadataValues[]);
+
+      expect(result).toEqual([{
+        uuid: 'u1',
+        id: 'ITEM1',
+        description: 'Desc',
+        order: 1,
+        sourceVariableId: 'VAR1',
+        sourceVariableUuid: 'var-uuid-1',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        changedAt: '2025-02-01T00:00:00.000Z'
+      }]);
+    });
+
+    it('should skip items without id and derive order from the position in the list', () => {
+      const result = UnitDownloadClass.transformItems([
+        { uuid: 'u1', profiles: [] },
+        { uuid: 'u2', id: 'ITEM2', profiles: [] }
+      ] as unknown as ItemsMetadataValues[]);
+
+      expect(result).toEqual([{ uuid: 'u2', id: 'ITEM2', order: 1 }]);
+    });
+
+    it('should return an empty array for missing items', () => {
+      expect(UnitDownloadClass.transformItems(undefined)).toEqual([]);
     });
   });
 
