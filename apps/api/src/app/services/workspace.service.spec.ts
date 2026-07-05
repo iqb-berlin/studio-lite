@@ -548,6 +548,16 @@ describe('WorkspaceService', () => {
       expect(mapped[0].variableId).toBeNull();
       expect(mapped[0].variableReadOnlyId).toBeNull();
     });
+
+    it('drops items without the required id', () => {
+      const mapped = WorkspaceService.mapImportedItems([
+        { uuid: 'item-uuid-1' } as never,
+        { id: 'ITEM1' }
+      ]);
+
+      expect(mapped).toHaveLength(1);
+      expect(mapped[0].id).toBe('ITEM1');
+    });
   });
 
   describe('uploadFiles', () => {
@@ -739,6 +749,75 @@ describe('WorkspaceService', () => {
         profiles: [{ profileId: 'p1', isCurrent: false, entries: [] }],
         items: [{ id: 'ITEM1', variableId: 'VAR1', profiles: [] }]
       });
+    });
+
+    it('should adopt the unit uuid from the index when present', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', { uuid: 'imported-unit-uuid' }))
+      ], user);
+
+      expect(unitService.adoptUuidIfFree).toHaveBeenCalledWith(10, 'imported-unit-uuid');
+    });
+
+    it('should not try to adopt a uuid when the index has none', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01'))
+      ], user);
+
+      expect(unitService.adoptUuidIfFree).not.toHaveBeenCalled();
+    });
+
+    it('should warn and continue when a companion JSON file is broken', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          metadata: { id: 'unit01.vomd.json', type: 'unit-metadata@0.1' },
+          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
+        })),
+        buildFile('unit01.vomd.json', 'application/json', '{ "metadata": broken !!!'),
+        buildFile('unit01.voit.json', 'application/json', '[{ "id": "X", broken !!!')
+      ], user);
+
+      const parseWarnings = result.messages
+        .filter(m => m.messageKey === 'unit-upload.api-warning.json-parse')
+        .map(m => m.objectKey);
+      expect(parseWarnings).toEqual(expect.arrayContaining(['unit01.vomd.json', 'unit01.voit.json']));
+      expect(unitService.create).toHaveBeenCalledTimes(1);
+      expect(unitService.copyItemsWithMetadata).not.toHaveBeenCalled();
+    });
+
+    it('should import remaining blocks when only one companion file is broken', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const voitContent = JSON.stringify([{ id: 'ITEM1', sourceVariableId: 'VAR1' }]);
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          metadata: { id: 'unit01.vomd.json', type: 'unit-metadata@0.1' },
+          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
+        })),
+        buildFile('unit01.vomd.json', 'application/json', '{ broken'),
+        buildFile('unit01.voit.json', 'application/json', voitContent)
+      ], user);
+
+      expect(result.messages.map(m => m.objectKey)).toEqual(['unit01.vomd.json']);
+      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, expect.objectContaining({
+        items: [expect.objectContaining({ id: 'ITEM1', variableId: 'VAR1' })]
+      }));
     });
 
     it('should warn when coding scheme file referenced in index is missing from upload', async () => {

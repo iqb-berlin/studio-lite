@@ -7,6 +7,8 @@ import { FileIo } from '../interfaces/file-io.interface';
 export class UnitImportData {
   key: string;
   name: string;
+  // XML units carry no universal id; only the JSON index provides one
+  uuid = '';
   fileName: string;
   description: string;
   transcript: string;

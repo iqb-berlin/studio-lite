@@ -1,6 +1,8 @@
 import { Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
+import {
+  In, Not, QueryFailedError, Repository
+} from 'typeorm';
 import {
   CreateUnitDto,
   MetadataDto,
@@ -314,6 +316,28 @@ export class UnitService {
       }
     }));
     return newUnit.id;
+  }
+
+  // Adopts the universal id from an imported unit index so a unit keeps its
+  // identity across instances (spec: uuid helps to find variants/versions).
+  // If another unit already holds the uuid (e.g. the same export was imported
+  // twice), the unit keeps the fresh uuid assigned by create().
+  async adoptUuidIfFree(unitId: number, uuid: string): Promise<void> {
+    const existing = await this.unitsRepository.findOne({
+      where: { uuid },
+      select: ['id']
+    });
+    if (existing) return;
+    try {
+      await this.unitsRepository.update(unitId, { uuid });
+    } catch (error) {
+      const isUniqueViolation = error instanceof QueryFailedError &&
+        (error.driverError as { code?: string })?.code === '23505';
+      if (!isUniqueViolation) {
+        this.logger.warn(`Could not adopt uuid '${uuid}' for unit ${unitId}: ${error}`);
+      }
+      // on unique violation a concurrent import claimed the uuid first – keep the fresh one
+    }
   }
 
   async ensureUuid(unitId: number): Promise<string> {

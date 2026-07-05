@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Logger } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import {
   CreateUnitDto,
   UnitFullMetadataDto,
@@ -452,6 +453,48 @@ describe('UnitService', () => {
       setupTransaction(null);
 
       await expect(service.ensureUuid(999)).rejects.toThrow(UnitNotFoundException);
+    });
+  });
+
+  describe('adoptUuidIfFree', () => {
+    it('should adopt the uuid when no other unit holds it', async () => {
+      (unitsRepository.findOne as jest.Mock).mockResolvedValue(null);
+
+      await service.adoptUuidIfFree(1, 'imported-uuid');
+
+      expect(unitsRepository.update).toHaveBeenCalledWith(1, { uuid: 'imported-uuid' });
+    });
+
+    it('should keep none when another unit already holds the uuid', async () => {
+      (unitsRepository.findOne as jest.Mock).mockResolvedValue({ id: 2 } as Unit);
+
+      await service.adoptUuidIfFree(1, 'taken-uuid');
+
+      expect(unitsRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('should silently swallow a unique constraint violation from a concurrent import', async () => {
+      const warnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+      (unitsRepository.findOne as jest.Mock).mockResolvedValue(null);
+      (unitsRepository.update as jest.Mock).mockRejectedValue(
+        new QueryFailedError('UPDATE', [], Object.assign(new Error('duplicate key'), { code: '23505' }))
+      );
+
+      await expect(service.adoptUuidIfFree(1, 'raced-uuid')).resolves.toBeUndefined();
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
+    });
+
+    it('should warn about other update failures instead of hiding them', async () => {
+      const warnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+      (unitsRepository.findOne as jest.Mock).mockResolvedValue(null);
+      (unitsRepository.update as jest.Mock).mockRejectedValue(new Error('connection lost'));
+
+      await expect(service.adoptUuidIfFree(1, 'imported-uuid')).resolves.toBeUndefined();
+
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('connection lost'));
+      warnSpy.mockRestore();
     });
   });
 });

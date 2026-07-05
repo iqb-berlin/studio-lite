@@ -65,10 +65,15 @@ interface ImportedVocabularyEntry {
   annotation?: ImportedLanguageCodedText[];
 }
 
+interface ImportedSimpleValue {
+  raw: string;
+  asText?: ImportedLanguageCodedText[];
+}
+
 interface ImportedMetadataEntry {
   id: string;
   label?: ImportedLanguageCodedText[];
-  value: ImportedLanguageCodedText[] | ImportedVocabularyEntry[] | { raw: string; asText?: ImportedLanguageCodedText[] };
+  value: ImportedLanguageCodedText[] | ImportedVocabularyEntry[] | ImportedSimpleValue;
 }
 
 interface ImportedMetadataValues {
@@ -854,11 +859,15 @@ export class WorkspaceService {
       true
     );
     if (newUnitId > 0) {
+      if (unitImportData.uuid) {
+        await this.unitService.adoptUuidIfFree(newUnitId, unitImportData.uuid);
+      }
+
       if (unitImportData.variablesFileName && notXmlFiles[unitImportData.variablesFileName]) {
-        const variablesData = JSON.parse(
-          notXmlFiles[unitImportData.variablesFileName].buffer.toString()
-        ) as { baseVariables?: VariableInfo[] };
-        unitImportData.baseVariables = variablesData.baseVariables ?? [];
+        const variablesData = WorkspaceService.parseCompanionJson<{ baseVariables?: VariableInfo[] }>(
+          notXmlFiles[unitImportData.variablesFileName], functionReturn
+        );
+        if (variablesData) unitImportData.baseVariables = variablesData.baseVariables ?? [];
         usedFiles.push(unitImportData.variablesFileName);
       }
 
@@ -882,9 +891,12 @@ export class WorkspaceService {
         unitImportData.metadataFileName &&
         notXmlFiles[unitImportData.metadataFileName]
       ) {
-        unitImportData.metadata = WorkspaceService.mapImportedMetadata(
-          JSON.parse(notXmlFiles[unitImportData.metadataFileName].buffer.toString())
+        const parsedMetadata = WorkspaceService.parseCompanionJson<unknown>(
+          notXmlFiles[unitImportData.metadataFileName], functionReturn
         );
+        if (parsedMetadata !== undefined) {
+          unitImportData.metadata = WorkspaceService.mapImportedMetadata(parsedMetadata);
+        }
         usedFiles.push(unitImportData.metadataFileName);
       }
 
@@ -892,9 +904,10 @@ export class WorkspaceService {
         unitImportData.itemsFileName &&
         notXmlFiles[unitImportData.itemsFileName]
       ) {
-        const items = WorkspaceService.mapImportedItems(
-          JSON.parse(notXmlFiles[unitImportData.itemsFileName].buffer.toString())
+        const parsedItems = WorkspaceService.parseCompanionJson<ImportedUnitItem[]>(
+          notXmlFiles[unitImportData.itemsFileName], functionReturn
         );
+        const items = WorkspaceService.mapImportedItems(parsedItems ?? []);
         if (items.length) {
           unitImportData.metadata = {
             ...(unitImportData.metadata ?? {}),
@@ -914,20 +927,24 @@ export class WorkspaceService {
         unitImportData.commentsFileName &&
         notXmlFiles[unitImportData.commentsFileName]
       ) {
-        const comments =
-          notXmlFiles[unitImportData.commentsFileName].buffer.toString();
+        const comments = WorkspaceService.parseCompanionJson<ImportedComment[]>(
+          notXmlFiles[unitImportData.commentsFileName], functionReturn
+        );
         usedFiles.push(unitImportData.commentsFileName);
-        await this.importComments(newUnitId, comments, itemUuidLookups);
+        if (comments) await this.importComments(newUnitId, comments, itemUuidLookups);
       }
 
       if (
         unitImportData.richNotesFileName &&
         notXmlFiles[unitImportData.richNotesFileName]
       ) {
-        const richNotes =
-          notXmlFiles[unitImportData.richNotesFileName].buffer.toString();
+        const richNotes = WorkspaceService.parseCompanionJson<Record<string, unknown>[]>(
+          notXmlFiles[unitImportData.richNotesFileName], functionReturn
+        );
         usedFiles.push(unitImportData.richNotesFileName);
-        await this.unitRichNoteService.importNotes(JSON.parse(richNotes), newUnitId, itemUuidLookups);
+        if (richNotes) {
+          await this.unitRichNoteService.importNotes(richNotes, newUnitId, itemUuidLookups);
+        }
       }
 
       if (unitImportData.codingSchemeFileName) {
@@ -948,6 +965,24 @@ export class WorkspaceService {
         objectKey: unitImportData.fileName,
         messageKey: 'unit-patch.duplicate-unit-id'
       });
+    }
+  }
+
+  // Parses a companion JSON file (vocs/voco/vorn/vomd/voit/vova). A broken
+  // file must not abort the whole upload: report a json-parse warning for
+  // the file and import the unit without this block.
+  private static parseCompanionJson<T>(
+    file: FileIo,
+    functionReturn: RequestReportDto
+  ): T | undefined {
+    try {
+      return JSON.parse(file.buffer.toString()) as T;
+    } catch {
+      functionReturn.messages.push({
+        objectKey: file.originalname,
+        messageKey: 'unit-upload.api-warning.json-parse'
+      });
+      return undefined;
     }
   }
 
@@ -1024,7 +1059,7 @@ export class WorkspaceService {
       const metadata = UnitService.setCurrentProfiles(
         workspace.settings?.unitMDProfile,
         workspace.settings?.itemMDProfile,
-        unitImportData.metadata as UnitFullMetadataDto
+        unitImportData.metadata
       );
       itemUuidLookups = await this.unitService.copyItemsWithMetadata(
         newUnitId,
@@ -1066,11 +1101,10 @@ export class WorkspaceService {
 
   private async importComments(
     unitId: number,
-    comments: string,
+    comments: ImportedComment[],
     itemUuidLookups: ItemUuidLookup[]
   ) {
-    const parsedComments = JSON.parse(comments) as ImportedComment[];
-    const mappedComments = parsedComments.map(c => WorkspaceService.mapImportedComment(c));
+    const mappedComments = comments.map(c => WorkspaceService.mapImportedComment(c));
     await this.unitCommentService.createComments(
       mappedComments,
       unitId,
@@ -1143,10 +1177,12 @@ export class WorkspaceService {
 
   // Maps items from the iqb unit-items@0.2 spec shape back onto the internal
   // structure: sourceVariableId/sourceVariableUuid become
-  // variableId/variableReadOnlyId.
+  // variableId/variableReadOnlyId. Items without the required id are dropped
+  // (mirrors transformItems on export); they would otherwise end up as
+  // unaddressable NULL-id rows in unit_item.
   static mapImportedItems(items: ImportedUnitItem[]): ItemsMetadataValues[] {
-    return (items ?? [])
-      .filter(item => !!item)
+    return (Array.isArray(items) ? items : [])
+      .filter(item => !!item?.id)
       .map(item => ({
         uuid: item.uuid,
         id: item.id,

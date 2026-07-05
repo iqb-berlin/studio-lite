@@ -32,6 +32,7 @@ interface UnitIndexJson {
 export class UnitImportJsonData {
   key: string;
   name: string;
+  uuid: string;
   fileName: string;
   description: string;
   transcript = '';
@@ -67,6 +68,7 @@ export class UnitImportJsonData {
 
     this.key = index.id;
     this.name = index.label ?? '';
+    this.uuid = index.uuid ?? '';
     this.description = index.description ?? '';
     this.player = index.userInterface.player ?? '';
     this.editor = index.userInterface.editor ?? '';

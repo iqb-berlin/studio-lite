@@ -617,13 +617,11 @@ export class UnitDownloadClass {
       const vocabularyEntries = value
         .filter(entryValue => !!entryValue && typeof (entryValue as { id?: unknown }).id === 'string')
         .map(entryValue => {
-          const vocabularyEntry = entryValue as { id: string; text?: unknown; label?: unknown; annotation?: unknown };
-          const label = UnitDownloadClass.toLanguageCodedTexts(vocabularyEntry.text ?? vocabularyEntry.label);
-          const annotation = UnitDownloadClass.toLanguageCodedTexts(vocabularyEntry.annotation);
+          const vocabularyEntry = entryValue as { id: string; text?: unknown };
+          const label = UnitDownloadClass.toLanguageCodedTexts(vocabularyEntry.text);
           return {
             id: vocabularyEntry.id,
-            ...(label && { label }),
-            ...(annotation && { annotation })
+            ...(label && { label })
           };
         });
       if (vocabularyEntries.length) return vocabularyEntries;
