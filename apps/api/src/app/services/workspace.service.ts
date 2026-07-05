@@ -746,6 +746,12 @@ export class WorkspaceService {
 
     files.forEach(f => {
       if (f.mimetype === 'application/json') {
+        // an export-report.json is informational output of the JSON export;
+        // silently accept it instead of flagging it as a broken unit file
+        if (/(^|\/)export-report\.json$/i.test(f.originalname)) {
+          usedFiles.push(f.originalname);
+          return;
+        }
         const isCompanionJson = /\.(vocs|voco|vorn|vomd|voit|vova)\.json$/i.test(f.originalname);
         try {
           const parsed = JSON.parse(f.buffer.toString()) as Record<string, unknown>;
@@ -864,11 +870,12 @@ export class WorkspaceService {
         const parsedItems = WorkspaceService.parseCompanionJson<UnitItemJson[]>(
           notXmlFiles[unitImportData.itemsFileName], functionReturn
         );
-        const items = WorkspaceService.mapImportedItems(parsedItems ?? []);
-        if (items.length) {
+        if (parsedItems !== undefined) {
+          // the items file is the authority on items: an empty list also
+          // overrides items embedded in a legacy metadata blob
           unitImportData.metadata = {
             ...(unitImportData.metadata ?? {}),
-            items
+            items: WorkspaceService.mapImportedItems(parsedItems)
           };
         }
         usedFiles.push(unitImportData.itemsFileName);

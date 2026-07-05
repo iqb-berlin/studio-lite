@@ -820,6 +820,39 @@ describe('WorkspaceService', () => {
       }));
     });
 
+    it('should clear legacy items when the items file is legitimately empty', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const legacyBlob = JSON.stringify({ profiles: [], items: [{ id: 'OLD' }] });
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          metadata: { id: 'unit01.vomd.json', type: 'metadata-values' },
+          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
+        })),
+        buildFile('unit01.vomd.json', 'application/json', legacyBlob),
+        buildFile('unit01.voit.json', 'application/json', '[]')
+      ], user);
+
+      expect(result.messages).toHaveLength(0);
+      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, expect.objectContaining({
+        items: []
+      }));
+    });
+
+    it('should silently accept an export-report.json without creating units or warnings', async () => {
+      const result = await service.uploadFiles(1, [
+        buildFile('export-report.json', 'application/json', JSON.stringify({
+          messages: [{ unitKey: 'U1', messageKey: 'unit-download.api-warning.metadata-not-exported' }]
+        }))
+      ], user);
+
+      expect(result.messages).toHaveLength(0);
+      expect(unitService.create).not.toHaveBeenCalled();
+    });
+
     it('should warn when coding scheme file referenced in index is missing from upload', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);

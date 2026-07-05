@@ -16,7 +16,7 @@ import {
   UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
-import { UnitDownloadClass } from './unit-download.class';
+import { ExportReportMessage, UnitDownloadClass } from './unit-download.class';
 import { UnitService } from '../services/unit.service';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { VeronaModulesService } from '../services/verona-modules.service';
@@ -949,6 +949,66 @@ describe('UnitDownloadClass', () => {
         type: 'unit-items@0.2',
         modifiedAt: '2025-05-01T08:00:00.000Z'
       });
+
+      const addedFiles = mockZip.addFile.mock.calls.map((c: string[]) => c[0]);
+      expect(addedFiles).not.toContain('export-report.json');
+    });
+
+    it('should add an export-report.json when legacy metadata cannot be exported', async () => {
+      const unitServiceMock = createMock<UnitService>();
+      const unitCommentServiceMock = createMock<UnitCommentService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      const settingServiceMock = createMock<SettingService>();
+      const unitRichNoteServiceMock = createMock<UnitRichNoteService>();
+
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
+      unitServiceMock.findOnesProperties.mockResolvedValue({
+        key: 'U7',
+        name: 'Unit 7',
+        description: '',
+        metadata: { profile: 'https://example.org/old-profile.json' },
+        player: 'player-1'
+      } as unknown as UnitPropertiesDto);
+      unitServiceMock.ensureUuid.mockResolvedValue('uuid-7');
+      unitServiceMock.findOnesDefinition.mockResolvedValue({
+        definition: '', variables: []
+      } as unknown as UnitDefinitionDto);
+      unitServiceMock.findOnesScheme.mockResolvedValue({
+        scheme: '', schemeType: ''
+      } as unknown as UnitSchemeDto);
+      unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
+
+      await UnitDownloadClass.get(
+        1,
+        unitServiceMock,
+        unitCommentServiceMock,
+        veronaModuleServiceMock,
+        settingServiceMock,
+        unitRichNoteServiceMock,
+        {
+          unitIdList: [7],
+          addPlayers: false,
+          addComments: false,
+          addRichNotes: false,
+          addTestTakersHot: 0,
+          addTestTakersMonitor: 0,
+          addTestTakersReview: 0
+        } as unknown as UnitDownloadSettingsDto,
+        'json'
+      );
+
+      const addedFiles = mockZip.addFile.mock.calls.map((c: string[]) => c[0]);
+      expect(addedFiles).not.toContain('U7.vomd.json');
+
+      const reportCall = mockZip.addFile.mock.calls.find((c: unknown[]) => c[0] === 'export-report.json');
+      expect(reportCall).toBeDefined();
+      const report = JSON.parse((reportCall[1] as Buffer).toString());
+      expect(report.messages).toEqual([{
+        unitKey: 'U7',
+        objectKey: 'U7.vomd.json',
+        messageKey: 'unit-download.api-warning.metadata-not-exported'
+      }]);
     });
   });
 
@@ -1076,6 +1136,95 @@ describe('UnitDownloadClass', () => {
 
     it('should return an empty array for missing items', () => {
       expect(UnitDownloadClass.transformItems(undefined)).toEqual([]);
+    });
+  });
+
+  describe('export report', () => {
+    const makeScope = (objectKey: string) => ({
+      unitKey: 'U1',
+      objectKey,
+      messages: [] as ExportReportMessage[]
+    });
+
+    it('should report texts dropped for an invalid language code', () => {
+      const scope = makeScope('U1.vomd.json');
+      UnitDownloadClass.transformProfilesToMetadataValues([{
+        profileId: 'p1',
+        entries: [{
+          id: 'e1', label: [], value: [{ lang: 'de-DE', value: 'Text' }], valueAsText: []
+        }]
+      }] as unknown as MetadataValues[], scope);
+
+      expect(scope.messages).toEqual([{
+        unitKey: 'U1',
+        objectKey: 'U1.vomd.json',
+        messageKey: 'unit-download.api-warning.invalid-language-code',
+        details: {
+          profileId: 'p1', entryId: 'e1', lang: 'de-DE', value: 'Text'
+        }
+      }]);
+    });
+
+    it('should report when plain texts are dropped from a mixed vocabulary value', () => {
+      const scope = makeScope('U1.vomd.json');
+      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
+        profileId: 'p1',
+        entries: [{
+          id: 'e1',
+          label: [],
+          value: [
+            { id: 'v1', text: [{ lang: 'de', value: 'A' }] },
+            { lang: 'de', value: 'B' }
+          ],
+          valueAsText: []
+        }]
+      }] as unknown as MetadataValues[], scope);
+
+      expect(result[0].entries[0].value).toEqual([{ id: 'v1', label: [{ lang: 'de', value: 'A' }] }]);
+      expect(scope.messages).toEqual([expect.objectContaining({
+        messageKey: 'unit-download.api-warning.mixed-value-dropped',
+        details: { profileId: 'p1', entryId: 'e1', droppedCount: '1' }
+      })]);
+    });
+
+    it('should report a profile that is dropped for a missing profileId', () => {
+      const scope = makeScope('U1.vomd.json');
+      UnitDownloadClass.transformProfilesToMetadataValues([{
+        entries: [{
+          id: 'e1', label: [], value: 'x', valueAsText: []
+        }]
+      }] as unknown as MetadataValues[], scope);
+
+      expect(scope.messages).toEqual([expect.objectContaining({
+        messageKey: 'unit-download.api-warning.profile-not-exported'
+      })]);
+    });
+
+    it('should report an item that is dropped for a missing id', () => {
+      const scope = makeScope('U1.voit.json');
+      UnitDownloadClass.transformItems(
+        [{ uuid: 'item-uuid-1', profiles: [] }] as unknown as ItemsMetadataValues[],
+        scope
+      );
+
+      expect(scope.messages).toEqual([{
+        unitKey: 'U1',
+        objectKey: 'U1.voit.json',
+        messageKey: 'unit-download.api-warning.item-not-exported',
+        details: { uuid: 'item-uuid-1' }
+      }]);
+    });
+
+    it('should not report anything for clean data', () => {
+      const scope = makeScope('U1.vomd.json');
+      UnitDownloadClass.transformProfilesToMetadataValues([{
+        profileId: 'p1',
+        entries: [{
+          id: 'e1', label: [{ lang: 'de', value: 'L' }], value: 'x', valueAsText: []
+        }]
+      }] as unknown as MetadataValues[], scope);
+
+      expect(scope.messages).toEqual([]);
     });
   });
 

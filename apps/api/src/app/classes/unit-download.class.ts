@@ -90,6 +90,26 @@ interface UnitIndexJson {
   variables?: ExternalDataBlock;
 }
 
+// A message of the export-report.json that is added to a JSON export zip
+// when mapping internal data onto the iqb spec shapes had to drop content.
+// The file is only written when at least one message exists; the import
+// recognizes it by name and skips it.
+export interface ExportReportMessage {
+  unitKey: string;
+  objectKey: string;
+  messageKey: string;
+  details?: Record<string, string>;
+}
+
+// Scope handed down through the spec transforms so dropped content can be
+// reported against the unit and target file it would have belonged to.
+interface ExportReportScope {
+  unitKey: string;
+  objectKey: string;
+  messages: ExportReportMessage[];
+  profileId?: string;
+}
+
 export class UnitDownloadClass {
   static async get(
     workspaceId: number,
@@ -104,6 +124,7 @@ export class UnitDownloadClass {
     const zip = new AdmZip();
     const unitsMetadata: UnitPropertiesDto[] = [];
     const usedPlayers: string[] = [];
+    const exportReport: ExportReportMessage[] = [];
     const unitExportConfig = exportFormat === 'xml' ?
       await UnitDownloadClass.getUnitExportConfig(settingService) :
       new UnitExportConfigDto();
@@ -120,7 +141,8 @@ export class UnitDownloadClass {
             unitRichNoteService,
             unitsMetadata,
             usedPlayers,
-            zip
+            zip,
+            exportReport
           );
         } else {
           await UnitDownloadClass.getUnitData(
@@ -160,6 +182,10 @@ export class UnitDownloadClass {
         loginCount,
         zip
       );
+    }
+    if (exportReport.length) {
+      exportReport.sort((a, b) => a.unitKey.localeCompare(b.unitKey));
+      zip.addFile('export-report.json', Buffer.from(JSON.stringify({ messages: exportReport }, null, 2)));
     }
     return zip.toBuffer();
   }
@@ -555,11 +581,46 @@ export class UnitDownloadClass {
     return valid.length ? valid : undefined;
   }
 
+  // True when stored metadata holds content the spec transform cannot carry
+  // over: profiles that produced no output, or keys of a pre-profile legacy
+  // shape (anything besides profiles/items).
+  private static hasUnexportedMetadata(metadata?: { profiles?: MetadataValues[] }): boolean {
+    if (!metadata) return false;
+    if (metadata.profiles?.length) return true;
+    return Object.keys(metadata).some(k => k !== 'profiles' && k !== 'items');
+  }
+
+  // Reports a text that carried actual content but was dropped because its
+  // language code does not match the spec pattern ^[a-z]{2}$.
+  private static reportDroppedTexts(
+    texts: unknown, entryId: string, scope?: ExportReportScope
+  ): void {
+    if (!scope) return;
+    const list = Array.isArray(texts) ? texts : [texts];
+    list
+      .filter(text => !!text &&
+        typeof (text as LanguageCodedText).value === 'string' &&
+        (text as LanguageCodedText).value !== '' &&
+        !(typeof (text as LanguageCodedText).lang === 'string' &&
+          /^[a-z]{2}$/.test((text as LanguageCodedText).lang)))
+      .forEach(text => scope.messages.push({
+        unitKey: scope.unitKey,
+        objectKey: scope.objectKey,
+        messageKey: 'unit-download.api-warning.invalid-language-code',
+        details: {
+          ...(scope.profileId && { profileId: scope.profileId }),
+          entryId,
+          lang: typeof (text as LanguageCodedText).lang === 'string' ? (text as LanguageCodedText).lang : '',
+          value: (text as LanguageCodedText).value
+        }
+      }));
+  }
+
   // Maps an internal entry value onto one of the three value forms of
   // metadata-values@3.0: simple_value (internal plain string plus valueAsText),
   // vocabulary_entries (internal { id, text } lists) or language_coded_texts.
   // Returns undefined for empty values since the spec requires `value`.
-  static transformEntryValue(entry: MetadataValuesEntry): MetadataValueJson | undefined {
+  static transformEntryValue(entry: MetadataValuesEntry, scope?: ExportReportScope): MetadataValueJson | undefined {
     const { value } = entry;
     if (typeof value === 'string') {
       if (!value) return undefined;
@@ -571,13 +632,30 @@ export class UnitDownloadClass {
         .filter(entryValue => !!entryValue && typeof (entryValue as { id?: unknown }).id === 'string')
         .map(entryValue => {
           const vocabularyEntry = entryValue as { id: string; text?: unknown };
+          UnitDownloadClass.reportDroppedTexts(vocabularyEntry.text, entry.id, scope);
           const label = UnitDownloadClass.toLanguageCodedTexts(vocabularyEntry.text);
           return {
             id: vocabularyEntry.id,
             ...(label && { label })
           };
         });
-      if (vocabularyEntries.length) return vocabularyEntries;
+      if (vocabularyEntries.length) {
+        const presentValues = value.filter(entryValue => !!entryValue).length;
+        if (scope && vocabularyEntries.length < presentValues) {
+          scope.messages.push({
+            unitKey: scope.unitKey,
+            objectKey: scope.objectKey,
+            messageKey: 'unit-download.api-warning.mixed-value-dropped',
+            details: {
+              ...(scope.profileId && { profileId: scope.profileId }),
+              entryId: entry.id,
+              droppedCount: String(presentValues - vocabularyEntries.length)
+            }
+          });
+        }
+        return vocabularyEntries;
+      }
+      UnitDownloadClass.reportDroppedTexts(value, entry.id, scope);
       return UnitDownloadClass.toLanguageCodedTexts(value);
     }
     return undefined;
@@ -587,12 +665,25 @@ export class UnitDownloadClass {
   // fields (isCurrent, valueAsText) are dropped; profiles without profileId
   // or without any exportable entry are omitted since the spec requires
   // profileId and entries with minItems: 1.
-  static transformProfilesToMetadataValues(profiles?: MetadataValues[]): MetadataValuesJson[] {
+  static transformProfilesToMetadataValues(
+    profiles?: MetadataValues[], scope?: ExportReportScope
+  ): MetadataValuesJson[] {
     return (profiles ?? []).flatMap(profile => {
-      if (!profile?.profileId) return [];
+      if (!profile?.profileId) {
+        if (scope && profile?.entries?.length) {
+          scope.messages.push({
+            unitKey: scope.unitKey,
+            objectKey: scope.objectKey,
+            messageKey: 'unit-download.api-warning.profile-not-exported',
+            details: { entryCount: String(profile.entries.length) }
+          });
+        }
+        return [];
+      }
+      const profileScope = scope && { ...scope, profileId: profile.profileId };
       const entries = (profile.entries ?? []).flatMap(entry => {
         if (!entry?.id) return [];
-        const value = UnitDownloadClass.transformEntryValue(entry);
+        const value = UnitDownloadClass.transformEntryValue(entry, profileScope);
         if (!value) return [];
         const label = UnitDownloadClass.toLanguageCodedTexts(entry.label);
         return [{ id: entry.id, ...(label && { label }), value }];
@@ -606,9 +697,19 @@ export class UnitDownloadClass {
   // variableId/variableReadOnlyId become sourceVariableId/sourceVariableUuid;
   // position/locked/unitId/weighting have no spec counterpart and are
   // dropped. Items without the required id are skipped.
-  static transformItems(items?: ItemsMetadataValues[]): UnitItemJson[] {
+  static transformItems(items?: ItemsMetadataValues[], scope?: ExportReportScope): UnitItemJson[] {
     return (items ?? []).flatMap((item, itemIndex) => {
-      if (!item?.id) return [];
+      if (!item?.id) {
+        if (scope && item) {
+          scope.messages.push({
+            unitKey: scope.unitKey,
+            objectKey: scope.objectKey,
+            messageKey: 'unit-download.api-warning.item-not-exported',
+            details: { ...(item.uuid && { uuid: item.uuid }) }
+          });
+        }
+        return [];
+      }
       const transformed: UnitItemJson = { id: item.id };
       if (item.uuid) transformed.uuid = item.uuid;
       if (item.description) transformed.description = item.description;
@@ -617,7 +718,7 @@ export class UnitDownloadClass {
       if (item.variableReadOnlyId) transformed.sourceVariableUuid = item.variableReadOnlyId;
       if (item.createdAt) transformed.createdAt = new Date(item.createdAt).toISOString();
       if (item.changedAt) transformed.changedAt = new Date(item.changedAt).toISOString();
-      const metadata = UnitDownloadClass.transformProfilesToMetadataValues(item.profiles);
+      const metadata = UnitDownloadClass.transformProfilesToMetadataValues(item.profiles, scope);
       if (metadata.length) transformed.metadata = metadata;
       return [transformed];
     });
@@ -844,7 +945,8 @@ export class UnitDownloadClass {
     unitRichNoteService: UnitRichNoteService,
     unitsMetadata: UnitPropertiesDto[],
     usedPlayers: string[],
-    zip: AdmZip
+    zip: AdmZip,
+    exportReport: ExportReportMessage[] = []
   ): Promise<void> {
     const unitMetadata = await unitService.findOnesProperties(unitId, workspaceId);
     const uuid = await unitService.ensureUuid(unitId);
@@ -898,7 +1000,9 @@ export class UnitDownloadClass {
       }
     }
 
-    const metadataValues = UnitDownloadClass.transformProfilesToMetadataValues(unitMetadata.metadata?.profiles);
+    const metadataScope = { unitKey: key, objectKey: `${key}.vomd.json`, messages: exportReport };
+    const metadataValues = UnitDownloadClass
+      .transformProfilesToMetadataValues(unitMetadata.metadata?.profiles, metadataScope);
     if (metadataValues.length) {
       const unitMetadataJson: UnitMetadataJson = {
         ...(unitMetadata.lastChangedMetadata && { changedAt: unitMetadata.lastChangedMetadata.toISOString() }),
@@ -910,9 +1014,19 @@ export class UnitDownloadClass {
         type: 'unit-metadata@0.1',
         ...(unitMetadata.lastChangedMetadata && { modifiedAt: unitMetadata.lastChangedMetadata.toISOString() })
       };
+    } else if (UnitDownloadClass.hasUnexportedMetadata(unitMetadata.metadata)) {
+      // stored metadata exists but none of it fits the spec (e.g. a legacy
+      // shape without profileId) — before the spec export this was written
+      // verbatim, so the omission must not stay silent
+      exportReport.push({
+        unitKey: key,
+        objectKey: `${key}.vomd.json`,
+        messageKey: 'unit-download.api-warning.metadata-not-exported'
+      });
     }
 
-    const items = UnitDownloadClass.transformItems(unitMetadata.metadata?.items);
+    const itemsScope = { unitKey: key, objectKey: `${key}.voit.json`, messages: exportReport };
+    const items = UnitDownloadClass.transformItems(unitMetadata.metadata?.items, itemsScope);
     if (items.length) {
       zip.addFile(`${key}.voit.json`, Buffer.from(JSON.stringify(items, null, 2)));
       index.items = {
