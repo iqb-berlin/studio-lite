@@ -1,5 +1,5 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { UnitFullMetadataDto } from '@studio-lite-lib/api-dto';
+import { UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { FileIo } from '../interfaces/file-io.interface';
 
 interface ExternalDataBlock {
@@ -41,7 +41,7 @@ export class UnitImportJsonData {
   definitionFileName: string;
   commentsFileName: string;
   richNotesFileName: string;
-  metadata: UnitFullMetadataDto;
+  metadata: UnitMetadataValues;
   metadataFileName: string;
   itemsFileName: string;
   player: string;

@@ -5,7 +5,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import {
   CreateUnitDto,
-  UnitFullMetadataDto,
+  UnitMetadataValues,
   UnitPropertiesDto,
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
@@ -397,7 +397,7 @@ describe('UnitService', () => {
       const metadata = {
         profiles: [{ profileId: 'p1' }, { profileId: 'p2' }],
         items: []
-      } as UnitFullMetadataDto;
+      } as UnitMetadataValues;
       const result = UnitService.setCurrentProfiles('p1', 'p2', metadata);
       expect(result.profiles[0].isCurrent).toBe(true);
       expect(result.profiles[1].isCurrent).toBe(false);

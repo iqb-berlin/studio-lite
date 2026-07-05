@@ -5,14 +5,13 @@ import {
 } from 'typeorm';
 import {
   CreateUnitDto,
-  MetadataDto,
+  MetadataValues,
   RequestReportDto,
   UnitInViewDto,
   UnitDefinitionDto,
   UnitDefinitionFullDto,
   UnitFullMetadataDto,
   UnitInListDto,
-  UnitItemMetadataDto,
   UnitItemWithMetadataDto,
   UnitMetadataDto,
   UnitMetadataValues,
@@ -266,9 +265,9 @@ export class UnitService {
         UnitService.setCurrentProfiles(
           workspace.settings?.unitMDProfile,
           workspace.settings?.itemMDProfile,
-          metadata as UnitFullMetadataDto
+          metadata
         );
-        const itemUuidLookups = await this.copyItemsWithMetadata(newUnit.id, metadata as UnitFullMetadataDto);
+        const itemUuidLookups = await this.copyItemsWithMetadata(newUnit.id, metadata);
 
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition.definition || newUnit.lastChangedDefinition) {
@@ -404,17 +403,17 @@ export class UnitService {
   }
 
   static setCurrentProfiles(
-    unitProfile: string, itemProfile: string, metadata: UnitFullMetadataDto
-  ): UnitFullMetadataDto {
+    unitProfile: string, itemProfile: string, metadata: UnitMetadataValues
+  ): UnitMetadataValues {
     if (metadata.profiles) {
-      metadata.profiles = metadata.profiles.map((profile => UnitService
-        .setCurrentProfile(unitProfile, profile) as UnitMetadataDto));
+      metadata.profiles = metadata.profiles.map(profile => UnitService
+        .setCurrentProfile(unitProfile, profile));
     }
     if (metadata.items) {
       metadata.items.forEach(item => {
         if (item.profiles) {
           item.profiles = item.profiles.map(profile => UnitService
-            .setCurrentProfile(itemProfile, profile) as UnitItemMetadataDto);
+            .setCurrentProfile(itemProfile, profile));
         }
       });
     }
@@ -433,7 +432,7 @@ export class UnitService {
     return user.firstName && user.firstName.trim() ? `${displayName}, ${user.firstName.trim()}` : displayName;
   }
 
-  private static setCurrentProfile(profileId: string, profile: MetadataDto): MetadataDto {
+  private static setCurrentProfile<T extends MetadataValues>(profileId: string, profile: T): T {
     return {
       ...profile,
       isCurrent: profileIdsMatch(profile.profileId, profileId)
@@ -462,9 +461,12 @@ export class UnitService {
       .map(item => this.unitItemService.addItem(unitId, item));
   }
 
+  // Takes the internal write shape: id and unitItemUuid do not exist yet —
+  // addItem/addItemMetadata generate or discard them — hence the casts at the
+  // DTO boundary below.
   async copyItemsWithMetadata(
     unitId: number,
-    metadata: UnitFullMetadataDto
+    metadata: UnitMetadataValues
   ): Promise<ItemUuidLookup[]> {
     const profiles = metadata.profiles || [];
     profiles
@@ -474,7 +476,7 @@ export class UnitService {
     const itemUuids = await Promise.all(items
       .map(async item => ({
         newUuid: await this.unitItemService
-          .addItem(unitId, item as UnitItemWithMetadataDto),
+          .addItem(unitId, item as unknown as UnitItemWithMetadataDto),
         oldUuid: item.uuid
       })));
     await this.unitMetadataToDeleteService.upsertOneForUnit(unitId);
@@ -821,10 +823,12 @@ export class UnitService {
     await this.unitsRepository.save(unitToUpdate);
   }
 
-  private async getMetadataOfUnit(unit: Unit, createFrom: number): Promise<UnitMetadataValues | UnitFullMetadataDto> {
+  private async getMetadataOfUnit(unit: Unit, createFrom: number): Promise<UnitMetadataValues> {
     const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(createFrom);
     if (unitMetadataToDelete) {
-      return this.findOnesMetadata(createFrom);
+      // the read DTO is a runtime superset of the internal write shape; only
+      // the index signature of ItemsMetadataValues blocks direct assignment
+      return await this.findOnesMetadata(createFrom) as unknown as UnitMetadataValues;
     }
     return unit.metadata;
   }

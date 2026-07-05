@@ -24,6 +24,13 @@ import {
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitService } from '../services/unit.service';
+import {
+  LanguageCodedText,
+  MetadataValueJson,
+  MetadataValuesJson,
+  UnitItemJson,
+  UnitMetadataJson
+} from '../interfaces/unit-json-specs.interface';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { SettingService } from '../services/setting.service';
 import { UnitCommentService } from '../services/unit-comment.service';
@@ -66,60 +73,6 @@ interface UnitRichNoteJson {
   content: string;
   links?: UnitRichNoteLinkDto[];
   itemUuids?: string[];
-}
-
-// Shapes as defined by the iqb metadata-values@3.0 specification
-// (https://github.com/iqb-specifications/metadata-values). All objects have
-// additionalProperties: false, so internal-only fields must be dropped.
-interface LanguageCodedText {
-  lang: string;
-  value: string;
-}
-
-interface VocabularyEntryJson {
-  id: string;
-  label?: LanguageCodedText[];
-  annotation?: LanguageCodedText[];
-}
-
-interface SimpleValueJson {
-  raw: string;
-  asText?: LanguageCodedText[];
-}
-
-type MetadataValueJson = LanguageCodedText[] | VocabularyEntryJson[] | SimpleValueJson;
-
-interface MetadataValuesJson {
-  profileId: string;
-  order?: number;
-  entries: {
-    id: string;
-    label?: LanguageCodedText[];
-    value: MetadataValueJson;
-  }[];
-}
-
-// Unit metadata shape as defined by the iqb unit-metadata@0.1 specification
-// (https://github.com/iqb-specifications/unit-metadata).
-interface UnitMetadataJson {
-  createdAt?: string;
-  changedAt?: string;
-  metadata: MetadataValuesJson[];
-}
-
-// Item shape as defined by the iqb unit-items@0.2 specification
-// (https://github.com/iqb-specifications/unit-items). Fields without a
-// counterpart in the spec are intentionally dropped on export.
-interface UnitItemJson {
-  uuid?: string;
-  id: string;
-  description?: string;
-  order?: number;
-  sourceVariableId?: string;
-  sourceVariableUuid?: string;
-  createdAt?: string;
-  changedAt?: string;
-  metadata?: MetadataValuesJson[];
 }
 
 interface UnitIndexJson {
