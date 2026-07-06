@@ -40,7 +40,7 @@
     "@angular/router": "20.3.25",
     "@golevelup/ts-jest": "^0.3.4",
     "@iqb/metadata": "^1.4.1",
-    "@iqb/responses": "5.0.0",
+    "@iqb/responses": "5.2.0",
     "@iqb/validate-md-profile": "^0.10.0",
     "@iqb/ngx-coding-components": "3.1.0",
     "@iqbspecs/response": "1.4.0",
