@@ -48,6 +48,7 @@ import { UnitRichNoteService } from './unit-rich-note.service';
 import User from '../entities/user.entity';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 import {
+  EXPORT_REPORT_FILENAME,
   LanguageCodedText,
   MetadataEntryJson,
   MetadataValuesJson,
@@ -746,9 +747,10 @@ export class WorkspaceService {
 
     files.forEach(f => {
       if (f.mimetype === 'application/json') {
-        // an export-report.json is informational output of the JSON export;
+        // the export report file is informational output of the JSON export;
         // silently accept it instead of flagging it as a broken unit file
-        if (/(^|\/)export-report\.json$/i.test(f.originalname)) {
+        if (f.originalname === EXPORT_REPORT_FILENAME ||
+          f.originalname.endsWith(`/${EXPORT_REPORT_FILENAME}`)) {
           usedFiles.push(f.originalname);
           return;
         }
@@ -826,12 +828,16 @@ export class WorkspaceService {
         await this.unitService.adoptUuidIfFree(newUnitId, unitImportData.uuid);
       }
 
-      if (unitImportData.variablesFileName && notXmlFiles[unitImportData.variablesFileName]) {
-        const variablesData = WorkspaceService.parseCompanionJson<{ baseVariables?: VariableInfo[] }>(
-          notXmlFiles[unitImportData.variablesFileName], functionReturn
-        );
-        if (variablesData) unitImportData.baseVariables = variablesData.baseVariables ?? [];
-        usedFiles.push(unitImportData.variablesFileName);
+      if (unitImportData.variablesFileName) {
+        if (notXmlFiles[unitImportData.variablesFileName]) {
+          const variablesData = WorkspaceService.parseCompanionJson<{ baseVariables?: VariableInfo[] }>(
+            notXmlFiles[unitImportData.variablesFileName], functionReturn
+          );
+          if (variablesData) unitImportData.baseVariables = variablesData.baseVariables ?? [];
+          usedFiles.push(unitImportData.variablesFileName);
+        } else {
+          WorkspaceService.warnMissingFile(unitImportData.variablesFileName, functionReturn);
+        }
       }
 
       if (unitImportData.definitionFileName) {
@@ -843,42 +849,51 @@ export class WorkspaceService {
             await this.importDefinition(newUnitId, unitImportData);
           }
         } else {
-          functionReturn.messages.push({
-            objectKey: unitImportData.definitionFileName,
-            messageKey: 'unit-upload.api-warning.missing-file'
-          });
+          WorkspaceService.warnMissingFile(unitImportData.definitionFileName, functionReturn);
         }
       }
 
-      if (
-        unitImportData.metadataFileName &&
-        notXmlFiles[unitImportData.metadataFileName]
-      ) {
-        const parsedMetadata = WorkspaceService.parseCompanionJson<unknown>(
-          notXmlFiles[unitImportData.metadataFileName], functionReturn
-        );
-        if (parsedMetadata !== undefined) {
-          unitImportData.metadata = WorkspaceService.mapImportedMetadata(parsedMetadata);
+      if (unitImportData.metadataFileName) {
+        if (notXmlFiles[unitImportData.metadataFileName]) {
+          const parsedMetadata = WorkspaceService.parseCompanionJson<unknown>(
+            notXmlFiles[unitImportData.metadataFileName], functionReturn
+          );
+          if (parsedMetadata !== undefined) {
+            unitImportData.metadata = WorkspaceService.mapImportedMetadata(parsedMetadata);
+            WorkspaceService.warnDroppedAnnotations(
+              (parsedMetadata as UnitMetadataJson)?.metadata,
+              unitImportData.metadataFileName,
+              functionReturn
+            );
+          }
+          usedFiles.push(unitImportData.metadataFileName);
+        } else {
+          WorkspaceService.warnMissingFile(unitImportData.metadataFileName, functionReturn);
         }
-        usedFiles.push(unitImportData.metadataFileName);
       }
 
-      if (
-        unitImportData.itemsFileName &&
-        notXmlFiles[unitImportData.itemsFileName]
-      ) {
-        const parsedItems = WorkspaceService.parseCompanionJson<UnitItemJson[]>(
-          notXmlFiles[unitImportData.itemsFileName], functionReturn
-        );
-        if (parsedItems !== undefined) {
-          // the items file is the authority on items: an empty list also
-          // overrides items embedded in a legacy metadata blob
-          unitImportData.metadata = {
-            ...(unitImportData.metadata ?? {}),
-            items: WorkspaceService.mapImportedItems(parsedItems)
-          };
+      if (unitImportData.itemsFileName) {
+        if (notXmlFiles[unitImportData.itemsFileName]) {
+          const parsedItems = WorkspaceService.parseCompanionJson<UnitItemJson[]>(
+            notXmlFiles[unitImportData.itemsFileName], functionReturn
+          );
+          if (parsedItems !== undefined) {
+            // the items file is the authority on items: an empty list also
+            // overrides items embedded in a legacy metadata blob
+            unitImportData.metadata = {
+              ...(unitImportData.metadata ?? {}),
+              items: WorkspaceService.mapImportedItems(parsedItems)
+            };
+            if (Array.isArray(parsedItems)) {
+              parsedItems.forEach(item => WorkspaceService.warnDroppedAnnotations(
+                item?.metadata, unitImportData.itemsFileName, functionReturn
+              ));
+            }
+          }
+          usedFiles.push(unitImportData.itemsFileName);
+        } else {
+          WorkspaceService.warnMissingFile(unitImportData.itemsFileName, functionReturn);
         }
-        usedFiles.push(unitImportData.itemsFileName);
       }
 
       const itemUuidLookups = await this.importUnitProperties(
@@ -887,27 +902,29 @@ export class WorkspaceService {
         unitImportData
       );
 
-      if (
-        unitImportData.commentsFileName &&
-        notXmlFiles[unitImportData.commentsFileName]
-      ) {
-        const comments = WorkspaceService.parseCompanionJson<ImportedComment[]>(
-          notXmlFiles[unitImportData.commentsFileName], functionReturn
-        );
-        usedFiles.push(unitImportData.commentsFileName);
-        if (comments) await this.importComments(newUnitId, comments, itemUuidLookups);
+      if (unitImportData.commentsFileName) {
+        if (notXmlFiles[unitImportData.commentsFileName]) {
+          const comments = WorkspaceService.parseCompanionJson<ImportedComment[]>(
+            notXmlFiles[unitImportData.commentsFileName], functionReturn
+          );
+          usedFiles.push(unitImportData.commentsFileName);
+          if (comments) await this.importComments(newUnitId, comments, itemUuidLookups);
+        } else {
+          WorkspaceService.warnMissingFile(unitImportData.commentsFileName, functionReturn);
+        }
       }
 
-      if (
-        unitImportData.richNotesFileName &&
-        notXmlFiles[unitImportData.richNotesFileName]
-      ) {
-        const richNotes = WorkspaceService.parseCompanionJson<Record<string, unknown>[]>(
-          notXmlFiles[unitImportData.richNotesFileName], functionReturn
-        );
-        usedFiles.push(unitImportData.richNotesFileName);
-        if (richNotes) {
-          await this.unitRichNoteService.importNotes(richNotes, newUnitId, itemUuidLookups);
+      if (unitImportData.richNotesFileName) {
+        if (notXmlFiles[unitImportData.richNotesFileName]) {
+          const richNotes = WorkspaceService.parseCompanionJson<Record<string, unknown>[]>(
+            notXmlFiles[unitImportData.richNotesFileName], functionReturn
+          );
+          usedFiles.push(unitImportData.richNotesFileName);
+          if (richNotes) {
+            await this.unitRichNoteService.importNotes(richNotes, newUnitId, itemUuidLookups);
+          }
+        } else {
+          WorkspaceService.warnMissingFile(unitImportData.richNotesFileName, functionReturn);
         }
       }
 
@@ -918,16 +935,46 @@ export class WorkspaceService {
           usedFiles.push(unitImportData.codingSchemeFileName);
           await this.importScheme(newUnitId, unitImportData);
         } else {
-          functionReturn.messages.push({
-            objectKey: unitImportData.codingSchemeFileName,
-            messageKey: 'unit-upload.api-warning.missing-file'
-          });
+          WorkspaceService.warnMissingFile(unitImportData.codingSchemeFileName, functionReturn);
         }
       }
     } else {
       functionReturn.messages.push({
         objectKey: unitImportData.fileName,
         messageKey: 'unit-patch.duplicate-unit-id'
+      });
+    }
+  }
+
+  private static warnMissingFile(fileName: string, functionReturn: RequestReportDto): void {
+    functionReturn.messages.push({
+      objectKey: fileName,
+      messageKey: 'unit-upload.api-warning.missing-file'
+    });
+  }
+
+  // The internal model (TextWithLanguageAndId: { id, text }) has no field for
+  // the spec-optional `annotation` of vocabulary entries, so annotations from
+  // third-party files cannot be stored — surface the drop instead of losing
+  // the data silently. One warning per companion file.
+  private static warnDroppedAnnotations(
+    values: MetadataValuesJson[] | undefined,
+    fileName: string,
+    functionReturn: RequestReportDto
+  ): void {
+    if (!Array.isArray(values)) return;
+    const hasAnnotations = values.some(profile => (profile?.entries ?? []).some(
+      entry => Array.isArray(entry?.value) && (entry.value as VocabularyEntryJson[]).some(
+        vocabularyEntry => Array.isArray(vocabularyEntry?.annotation) && vocabularyEntry.annotation.length > 0
+      )
+    ));
+    if (hasAnnotations && !functionReturn.messages.some(
+      message => message.objectKey === fileName &&
+        message.messageKey === 'unit-upload.api-warning.annotation-dropped'
+    )) {
+      functionReturn.messages.push({
+        objectKey: fileName,
+        messageKey: 'unit-upload.api-warning.annotation-dropped'
       });
     }
   }

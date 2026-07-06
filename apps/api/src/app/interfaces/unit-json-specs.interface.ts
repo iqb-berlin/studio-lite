@@ -10,14 +10,22 @@
 // `order`, `label`, `annotation` and `asText` as required although the schema
 // lists none of them under `required`, and `minItems: 1` even forbids the
 // empty arrays the package types would suggest. Switch to the package types
-// once that is fixed upstream.
+// once that is fixed upstream. LanguageCodedText is unaffected (lang and
+// value are genuinely required), so it is reused from the metadata-profile
+// spec package that the repo already imports elsewhere.
+import { LanguageCodedText } from '@iqbspecs/metadata-profile';
+
+export type { LanguageCodedText };
+
+// Name of the report file a JSON export adds to the zip when spec mapping
+// had to drop content. Shared between the export (writer) and the import
+// (accepts it silently). The leading underscore keeps it collision-free:
+// unit keys must start with a letter, so no unit index file (`${key}.json`)
+// can ever claim this name.
+export const EXPORT_REPORT_FILENAME = '_export-report.json';
 
 // All objects have additionalProperties: false, so internal-only fields must
 // be dropped on export.
-export interface LanguageCodedText {
-  lang: string;
-  value: string;
-}
 
 export interface VocabularyEntryJson {
   id: string;

@@ -842,15 +842,64 @@ describe('WorkspaceService', () => {
       }));
     });
 
-    it('should silently accept an export-report.json without creating units or warnings', async () => {
+    it('should silently accept an export report file without creating units or warnings', async () => {
       const result = await service.uploadFiles(1, [
-        buildFile('export-report.json', 'application/json', JSON.stringify({
+        buildFile('_export-report.json', 'application/json', JSON.stringify({
           messages: [{ unitKey: 'U1', messageKey: 'unit-download.api-warning.metadata-not-exported' }]
         }))
       ], user);
 
       expect(result.messages).toHaveLength(0);
       expect(unitService.create).not.toHaveBeenCalled();
+    });
+
+    it('should warn when the items file referenced in the index is missing from the upload', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
+        }))
+      ], user);
+
+      expect(result.messages).toEqual([{
+        objectKey: 'unit01.voit.json',
+        messageKey: 'unit-upload.api-warning.missing-file'
+      }]);
+    });
+
+    it('should warn when imported vocabulary entries carry annotations the model cannot hold', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const vomdContent = JSON.stringify({
+        metadata: [{
+          profileId: 'https://example.org/unit-profile.json',
+          entries: [{
+            id: 'a1',
+            value: [{
+              id: 'https://w3id.org/iqb/vocab/p2',
+              label: [{ lang: 'de', value: 'Anwenden' }],
+              annotation: [{ lang: 'de', value: 'Hinweis' }]
+            }]
+          }]
+        }]
+      });
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          metadata: { id: 'unit01.vomd.json', type: 'unit-metadata@0.1' }
+        })),
+        buildFile('unit01.vomd.json', 'application/json', vomdContent)
+      ], user);
+
+      expect(result.messages).toEqual([{
+        objectKey: 'unit01.vomd.json',
+        messageKey: 'unit-upload.api-warning.annotation-dropped'
+      }]);
     });
 
     it('should warn when coding scheme file referenced in index is missing from upload', async () => {
