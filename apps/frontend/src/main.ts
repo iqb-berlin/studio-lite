@@ -123,7 +123,7 @@ bootstrapApplication(AppComponent, {
     },
     {
       provide: 'APP_VERSION',
-      useValue: '17.0.1'
+      useValue: '17.1.0'
     }
   ]
 });
