@@ -8,7 +8,7 @@ import {
   TranslateService, TranslateParser
 } from '@ngx-translate/core';
 import { IqbComponentsModule } from '@studio-lite-lib/iqb-components';
-import { RouterModule } from '@angular/router';
+import { provideRouter, withRouterConfig } from '@angular/router';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -24,15 +24,19 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatPaginatorModule, MatPaginatorIntl } from '@angular/material/paginator';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
-import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
-import { DateFnsAdapter } from '@angular/material-date-fns-adapter';
-import { MAT_DATE_LOCALE, DateAdapter } from '@angular/material/core';
+import {
+  HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi
+} from '@angular/common/http';
+import { provideDateFnsAdapter } from '@angular/material-date-fns-adapter';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { de } from 'date-fns/locale';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { PaginatorIntlService } from './app/services/paginator-intl.service';
 import { AuthInterceptor } from './app/interceptors/auth.interceptor';
-import { AppRoutingModule } from './app/app-routing.module';
+import { APP_ROUTES } from './app/app.routes';
+import { MetadataModule } from './app/modules/metadata/metadata.module';
 import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
 import { BackendService } from './app/services/backend.service';
@@ -50,6 +54,8 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
   providers: [
+    provideRouter(APP_ROUTES, withRouterConfig({ onSameUrlNavigation: 'reload' })),
+    provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(
       ApplicationModule,
       BrowserModule,
@@ -62,17 +68,14 @@ bootstrapApplication(AppComponent, {
       MatTooltipModule,
       MatDialogModule,
       MatCardModule,
-      MatIconModule,
       MatTabsModule,
       MatTableModule,
       ReactiveFormsModule,
       MatProgressSpinnerModule,
       MatSnackBarModule,
       MatPaginatorModule,
-      RouterModule,
-      ReactiveFormsModule,
-      AppRoutingModule,
       IqbComponentsModule.forRoot(),
+      MetadataModule,
       TranslateModule.forRoot({
         defaultLanguage: 'de',
         loader: {
@@ -98,13 +101,9 @@ bootstrapApplication(AppComponent, {
     },
     {
       provide: MAT_DATE_LOCALE,
-      useValue: 'de'
+      useValue: de
     },
-    {
-      provide: DateAdapter,
-      useClass: DateFnsAdapter,
-      useValue: [MAT_DATE_LOCALE]
-    },
+    provideDateFnsAdapter(),
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
@@ -124,7 +123,7 @@ bootstrapApplication(AppComponent, {
     },
     {
       provide: 'APP_VERSION',
-      useValue: '17.0.1'
+      useValue: '17.1.0'
     }
   ]
 });

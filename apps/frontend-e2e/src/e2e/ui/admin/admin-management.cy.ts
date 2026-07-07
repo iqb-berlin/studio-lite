@@ -12,14 +12,16 @@ import {
   addResourcePackage,
   createGroup,
   createNewUser,
-  createWs,
   deleteFirstUser,
   deleteGroup,
   deleteAllModules,
   deleteResource,
-  deleteUser,
-  grantRemovePrivilegeAtWs
+  deleteUser
 } from '../../../support/helpers';
+import {
+  createWs,
+  grantRemovePrivilegeAtWs
+} from '../../../support/helpers/group-admin';
 
 describe('UI Administration Management', () => {
   const group1 = testGroups.admin;

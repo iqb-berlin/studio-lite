@@ -10,21 +10,25 @@ import {
   addFirstUser,
   createGroup,
   createNewUser,
-  createWs,
   deleteFirstUser,
   deleteGroup,
   deleteUser,
-  grantRemovePrivilegeAtUser,
-  grantRemovePrivilegeAtWs,
   login,
   logout,
   makeAdminOfGroup,
   clickIndexTabWsgAdmin,
   importExercise,
-  configureDropBox,
   submitUnits,
   returnSubmittedUnits
 } from '../../../support/helpers';
+import {
+  addState,
+  configureDropBox,
+  createWs,
+  deleteState,
+  grantRemovePrivilegeAtUser,
+  grantRemovePrivilegeAtWs
+} from '../../../support/helpers/group-admin';
 
 describe('Workspace Group Administration', () => {
   const groupAdminUser = testUsers.groupAdmin;
@@ -164,6 +168,12 @@ describe('Workspace Group Administration', () => {
   it('displays the settings tab', () => {
     clickIndexTabWsgAdmin('settings');
     cy.get('studio-lite-unit-rich-note-tags-config').should('exist');
+  });
+
+  it('adds and deletes a state', () => {
+    clickIndexTabWsgAdmin('settings');
+    addState('Test Delete State');
+    deleteState('Test Delete State');
   });
 
   it('enables workspace editing for group admins', () => {

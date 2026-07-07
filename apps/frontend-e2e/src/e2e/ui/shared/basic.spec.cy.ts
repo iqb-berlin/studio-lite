@@ -13,14 +13,16 @@ import {
   addResourcePackage,
   createGroup,
   createNewUser,
-  createWs,
   deleteFirstUser,
   deleteGroup,
   deleteAllModules,
   deleteResource,
-  deleteUser,
-  grantRemovePrivilegeAtWs
+  deleteUser
 } from '../../../support/helpers';
+import {
+  createWs,
+  grantRemovePrivilegeAtWs
+} from '../../../support/helpers/group-admin';
 
 export function createBasicSpecCy() {
   describe('Create test base:', () => {

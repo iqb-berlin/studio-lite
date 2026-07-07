@@ -47,6 +47,7 @@ describe('SettingService', () => {
     workspaceGroupRepository = module.get(getRepositoryToken(WorkspaceGroup));
     usersService = module.get(UsersService);
     metadataVocabularyService = module.get(MetadataVocabularyService);
+    metadataVocabularyService.getStoredMetadataVocabularyById.mockResolvedValue(null);
   });
 
   it('should be defined', () => {

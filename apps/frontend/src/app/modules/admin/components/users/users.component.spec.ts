@@ -8,6 +8,7 @@ import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
 import { UserFullDto, UserInListDto } from '@studio-lite-lib/api-dto';
 import { FormControl, FormGroup, UntypedFormGroup } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -427,7 +428,51 @@ describe('UsersComponent', () => {
 
     expect(component.loggedInUserCount).toBe(1);
     expect(component.activeUserCount).toBe(0);
-    expect(component.activeSessionCount).toBe(0);
-    expect(component.passiveSessionCount).toBe(0);
+  });
+  describe('custom sorting logic', () => {
+    it('should sort users by lastActivity (activityStatus category weight, then date, then name)', () => {
+      const users = [
+        {
+          id: 1, name: 'Inactive B', activityStatus: 'inactive', lastActivity: undefined
+        },
+        {
+          id: 2, name: 'Active User', activityStatus: 'active', lastActivity: new Date('2026-06-17T12:00:00Z')
+        },
+        {
+          id: 3, name: 'Passive User', activityStatus: 'passive', lastActivity: new Date('2026-06-17T11:00:00Z')
+        },
+        {
+          id: 4, name: 'Inactive A', activityStatus: 'inactive', lastActivity: undefined
+        },
+        {
+          id: 5, name: 'Newer Active', activityStatus: 'active', lastActivity: new Date('2026-06-17T13:00:00Z')
+        }
+      ] as UserFullDto[];
+
+      (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of(users));
+      component.updateUserList(true); // force recreate datasource
+
+      // Sort by lastActivity asc
+      const sortedAsc = component.objectsDatasource
+        .sortData(users.slice(), { active: 'lastActivity', direction: 'asc' } as MatSort);
+      expect(sortedAsc.map(u => u.name)).toEqual([
+        'Inactive B',
+        'Inactive A',
+        'Passive User',
+        'Active User',
+        'Newer Active'
+      ]);
+
+      // Sort by lastActivity desc
+      const sortedDesc = component.objectsDatasource
+        .sortData(users.slice(), { active: 'lastActivity', direction: 'desc' } as MatSort);
+      expect(sortedDesc.map(u => u.name)).toEqual([
+        'Newer Active',
+        'Active User',
+        'Passive User',
+        'Inactive B',
+        'Inactive A'
+      ]);
+    });
   });
 });

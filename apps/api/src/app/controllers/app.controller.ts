@@ -68,6 +68,10 @@ export class AppController {
       await this.authService.logoutCurrentSession(body.refreshToken, userId, req.user?.sessionId);
       return;
     }
+    if (req.user?.sessionId) {
+      await this.authService.logoutSession(userId, req.user.sessionId);
+      return;
+    }
     await this.authService.logout(userId);
   }
 

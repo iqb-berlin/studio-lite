@@ -75,4 +75,5 @@ testem.log
 
 # ai
 /.ai
-rules.md
+
+.claude/worktrees

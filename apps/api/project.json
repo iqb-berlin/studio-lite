@@ -50,14 +50,14 @@
       }
     },
     "compodoc": {
-      "executor": "@twittwer/compodoc:compodoc",
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/compodoc/api"],
       "options": {
-        "tsConfig": "apps/api/tsconfig.app.json",
-        "outputPath": "dist/compodoc/api"
+        "command": "compodoc -p apps/api/tsconfig.app.json -d dist/compodoc/api"
       },
       "configurations": {
         "json": {
-          "exportFormat": "json"
+          "command": "compodoc -p apps/api/tsconfig.app.json -d dist/compodoc/api -e json"
         }
       }
     },
