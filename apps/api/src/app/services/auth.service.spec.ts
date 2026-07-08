@@ -108,44 +108,28 @@ describe('AuthService', () => {
       expect(refreshTokenRepository.save).toHaveBeenCalled();
     });
 
-    it('should reuse a session created within 200ms (simultaneous page-load requests)', async () => {
-      const validSid = '550e8400-e29b-41d4-a716-446655440000';
-      const recentSession = {
-        sessionId: validSid,
-        userId: 1,
-        lastActivity: new Date(Date.now() - 100) // 100ms ago
-      } as UserSession;
-      userSessionRepository.findOne.mockResolvedValue(recentSession);
-      userSessionRepository.update.mockResolvedValue({ affected: 1, raw: [], generatedMaps: [] });
-      jwtService.sign.mockReturnValue('reused-token');
-
-      await service.login({ id: 1, name: 'user', reviewId: 0 });
-
-      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sid: validSid }));
-      expect(userSessionRepository.update).toHaveBeenCalledWith(
-        { userId: 1, sessionId: validSid },
-        expect.any(Object)
-      );
-      expect(userSessionRepository.save).not.toHaveBeenCalled();
-    });
-
-    it('should create a new session if no sessionId is provided and last session is older than 200ms', async () => {
-      const recentSession = {
+    it('should create an independent new session on every fresh login (no cross-session reuse)', async () => {
+      // Another browser of the same user already has a very recent session.
+      const otherBrowserSession = {
         sessionId: '550e8400-e29b-41d4-a716-446655440000',
         userId: 1,
-        lastActivity: new Date(Date.now() - 500) // 500ms ago — outside threshold
+        lastActivity: new Date(Date.now() - 50) // 50ms ago — would have been reused before
       } as UserSession;
-      userSessionRepository.findOne.mockResolvedValue(recentSession);
+      userSessionRepository.findOne.mockResolvedValue(otherBrowserSession);
       refreshTokenRepository.create.mockReturnValue({} as RefreshToken);
       refreshTokenRepository.save.mockResolvedValue({} as RefreshToken);
       jwtService.sign.mockReturnValue('new-token');
 
       await service.login({ id: 1, name: 'user', reviewId: 0 });
 
+      // A brand new session is created instead of latching onto the other browser's session.
       expect(userSessionRepository.save).toHaveBeenCalled();
       expect(userSessionRepository.update).not.toHaveBeenCalledWith(
-        { userId: 1, sessionId: recentSession.sessionId },
+        { userId: 1, sessionId: otherBrowserSession.sessionId },
         expect.any(Object)
+      );
+      expect(jwtService.sign).not.toHaveBeenCalledWith(
+        expect.objectContaining({ sid: otherBrowserSession.sessionId })
       );
     });
 
@@ -167,7 +151,7 @@ describe('AuthService', () => {
   });
 
   describe('refreshAccessToken', () => {
-    it('should return new tokens and replace the old session', async () => {
+    it('should rotate the refresh token but keep the same session identity', async () => {
       const expiresAt = new Date();
       expiresAt.setMinutes(expiresAt.getMinutes() + 10);
       const mockToken = {
@@ -185,17 +169,22 @@ describe('AuthService', () => {
 
       refreshTokenRepository.findOne.mockResolvedValue(mockToken);
       userSessionRepository.findOne.mockResolvedValue(session);
+      userSessionRepository.update.mockResolvedValue({ affected: 1, raw: [], generatedMaps: [] });
       usersService.findOne.mockResolvedValue({ id: 1, name: 'user' } as User);
       jwtService.sign.mockReturnValue('new-atoken');
 
       const result = await service.refreshAccessToken('valid-token');
 
       expect(result?.accessToken).toBe('new-atoken');
-      // Old refresh token is rotated
+      // Old refresh token is rotated out ...
       expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ tokenHash: 'token-hash' });
-      // Old session is deleted so a fresh independent one is created
-      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 1, sessionId: 'session-1' });
-      expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 1, sessionId: 'session-1' });
+      // ... but the session itself is preserved (not deleted) and its identity kept.
+      expect(userSessionRepository.delete).not.toHaveBeenCalled();
+      expect(userSessionRepository.update).toHaveBeenCalledWith(
+        { userId: 1, sessionId: 'session-1' },
+        expect.any(Object)
+      );
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sid: 'session-1' }));
     });
 
     it('should return null if token not found', async () => {

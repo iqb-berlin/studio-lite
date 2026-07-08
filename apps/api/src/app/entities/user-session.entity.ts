@@ -14,10 +14,10 @@ class UserSession {
   @Column({ name: 'user_id' })
     userId: number;
 
-  @Column({ name: 'last_activity', type: 'timestamp' })
+  @Column({ name: 'last_activity', type: 'timestamptz' })
     lastActivity: Date;
 
-  @Column({ name: 'expires_at', type: 'timestamp' })
+  @Column({ name: 'expires_at', type: 'timestamptz' })
     expiresAt: Date;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })

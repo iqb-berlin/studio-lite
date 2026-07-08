@@ -27,6 +27,7 @@ describe('UsersService', () => {
     findOne: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
+    update: jest.fn(),
     delete: jest.fn()
   });
 
@@ -260,6 +261,48 @@ describe('UsersService', () => {
 
       const result = await service.isUserLoggedIn(1);
       expect(result).toBe(false);
+    });
+  });
+
+  describe('updateLastActivity', () => {
+    it('should scope the update to the given session', async () => {
+      const userSessionRepository = (service as unknown as {
+        userSessionRepository: Repository<UserSession>
+      }).userSessionRepository;
+      const updateSpy = jest.spyOn(userSessionRepository, 'update');
+
+      await service.updateLastActivity(1, 'session-1');
+
+      expect(updateSpy).toHaveBeenCalledWith(
+        { userId: 1, sessionId: 'session-1' },
+        expect.objectContaining({ lastActivity: expect.any(Date), expiresAt: expect.any(Date) })
+      );
+    });
+
+    it('should never touch any session when no sessionId is provided', async () => {
+      const userSessionRepository = (service as unknown as {
+        userSessionRepository: Repository<UserSession>
+      }).userSessionRepository;
+      const updateSpy = jest.spyOn(userSessionRepository, 'update');
+
+      await service.updateLastActivity(1);
+
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateSessionExpiry', () => {
+    it('should never touch any session when no sessionId is provided', async () => {
+      const userSessionRepository = (service as unknown as {
+        userSessionRepository: Repository<UserSession>
+      }).userSessionRepository;
+      const findSpy = jest.spyOn(userSessionRepository, 'find');
+      const updateSpy = jest.spyOn(userSessionRepository, 'update');
+
+      await service.updateSessionExpiry(1);
+
+      expect(findSpy).not.toHaveBeenCalled();
+      expect(updateSpy).not.toHaveBeenCalled();
     });
   });
 });

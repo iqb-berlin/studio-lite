@@ -17,7 +17,7 @@ export class RefreshToken {
   @Column({ name: 'session_id' })
     sessionId: string;
 
-  @Column({ name: 'expires_at', type: 'timestamp' })
+  @Column({ name: 'expires_at', type: 'timestamptz' })
     expiresAt: Date;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })

@@ -436,16 +436,19 @@ export class UsersService {
   }
 
   async updateLastActivity(userId: number, sessionId?: string): Promise<void> {
+    // Defensive: without a concrete sessionId we must never touch every session of
+    // the user (that would let a single request affect all of a user's browsers).
+    if (!sessionId) return;
     const now = new Date();
     const expiresAt = new Date(Date.now() + INACTIVITY_THRESHOLD_MS);
-    const criteria = sessionId ? { userId, sessionId } : { userId };
-    await this.userSessionRepository.update(criteria, { lastActivity: now, expiresAt });
+    await this.userSessionRepository.update({ userId, sessionId }, { lastActivity: now, expiresAt });
   }
 
   async updateSessionExpiry(userId: number, sessionId?: string): Promise<void> {
-    const criteria = sessionId ? { userId, sessionId } : { userId };
+    // Defensive: scope strictly to the current session, never the whole user.
+    if (!sessionId) return;
     const sessions = await this.userSessionRepository.find({
-      where: criteria,
+      where: { userId, sessionId },
       select: { id: true, lastActivity: true, expiresAt: true }
     });
 
