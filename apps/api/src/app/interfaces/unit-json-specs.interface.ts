@@ -5,14 +5,20 @@
 // (unit-download.class.ts) and the import (workspace.service.ts) so the two
 // sides cannot drift apart.
 //
-// Deliberately NOT imported from @iqbspecs/metadata-values: its interfaces
-// contradict the normative JSON schema of the same spec — they declare
-// `order`, `label`, `annotation` and `asText` as required although the schema
-// lists none of them under `required`, and `minItems: 1` even forbids the
-// empty arrays the package types would suggest. Switch to the package types
-// once that is fixed upstream. LanguageCodedText is unaffected (lang and
-// value are genuinely required), so it is reused from the metadata-profile
-// spec package that the repo already imports elsewhere.
+// The metadata-values value shapes below are hand-declared instead of being
+// imported from @iqbspecs/metadata-values. They mirror the 3.0.2 package
+// interfaces field for field (order/label/annotation/asText optional, empty
+// arrays allowed — the 3.0.1 interface/schema mismatch was fixed in 3.0.2,
+// see iqb-specifications/metadata-values#1). We cannot bump the dependency to
+// 3.0.2 yet because @iqb/metadata-components (<= 0.2.4) pins its peer
+// dependency to metadata-values exactly 3.0.1, so bumping the root to 3.0.2
+// breaks `npm ci`. Once metadata-components widens that peer range, replace
+// these declarations with re-exports of the package types (VocabularyEntry,
+// SimpleValue, MetadataValue, MetadataProfileValues) — tracked in
+// iqb-berlin/studio-lite#1514, blocked by iqb-berlin/metadata-components#10.
+// LanguageCodedText is unaffected (lang and value are genuinely required), so
+// it is reused from the metadata-profile spec package that the repo already
+// imports elsewhere.
 import { LanguageCodedText } from '@iqbspecs/metadata-profile';
 
 export type { LanguageCodedText };
