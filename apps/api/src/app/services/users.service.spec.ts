@@ -290,19 +290,4 @@ describe('UsersService', () => {
       expect(updateSpy).not.toHaveBeenCalled();
     });
   });
-
-  describe('updateSessionExpiry', () => {
-    it('should never touch any session when no sessionId is provided', async () => {
-      const userSessionRepository = (service as unknown as {
-        userSessionRepository: Repository<UserSession>
-      }).userSessionRepository;
-      const findSpy = jest.spyOn(userSessionRepository, 'find');
-      const updateSpy = jest.spyOn(userSessionRepository, 'update');
-
-      await service.updateSessionExpiry(1);
-
-      expect(findSpy).not.toHaveBeenCalled();
-      expect(updateSpy).not.toHaveBeenCalled();
-    });
-  });
 });

@@ -2,19 +2,17 @@ import {
   Injectable, NgZone, OnDestroy, inject
 } from '@angular/core';
 import {
-  interval, Subscription, of, BehaviorSubject, timer, Subject, combineLatest, asapScheduler, merge, fromEvent
+  Subscription, of, BehaviorSubject, timer, Subject, asapScheduler, merge, fromEvent
 } from 'rxjs';
 import {
-  switchMap, filter, distinctUntilChanged, startWith, map, catchError, shareReplay, takeUntil, observeOn,
+  switchMap, filter, distinctUntilChanged, map, catchError, shareReplay, takeUntil, observeOn,
   throttleTime
 } from 'rxjs/operators';
-import { AuthDataDto } from '@studio-lite-lib/api-dto';
 import { AppService } from './app.service';
 import { BackendService } from './backend.service';
 import {
   ACTIVE_THRESHOLD_MS,
   PASSIVE_THRESHOLD_MS,
-  HEARTBEAT_PING_INTERVAL_MS,
   UI_BAR_REFRESH_INTERVAL_MS,
   ACTIVITY_SYNC_THROTTLE_MS,
   USER_ACTIVITY_THROTTLE_MS,
@@ -26,9 +24,7 @@ import {
   providedIn: 'root'
 })
 export class HeartbeatService implements OnDestroy {
-  private heartbeatSubscription: Subscription | null = null;
-  private readonly intervalMs = HEARTBEAT_PING_INTERVAL_MS;
-  private readonly pollIntervalMs = UI_BAR_REFRESH_INTERVAL_MS;
+  private started = false;
   private readonly activityThresholdMs = ACTIVE_THRESHOLD_MS;
   // PASSIVE_THRESHOLD_MS is treated as the total inactivity timeout from last activity.
   // If productive values change, keep ACTIVE <= PASSIVE to preserve a visible passive phase.
@@ -180,66 +176,15 @@ export class HeartbeatService implements OnDestroy {
   }
 
   start(): void {
-    if (this.heartbeatSubscription) {
+    if (this.started) {
       return;
     }
-
+    this.started = true;
     this.refreshActivityPulse();
-
-    // Reactively manage heartbeat lifecycle:
-    // Ping every minute ONLY if:
-    // 1. Tab is visible
-    // 2. User is NOT idle (active or passive phase)
-    // 3. User is logged in
-    interface HeartbeatState {
-      isVisible: boolean;
-      isNotIdle: boolean;
-      isLoggedIn: boolean;
-    }
-
-    const heartbeatTriggers$ = combineLatest([
-      this.lastActivityPulse$,
-      this.appService.authDataChanged.pipe(startWith(this.appService.authData)),
-      interval(this.pollIntervalMs).pipe(startWith(0))
-    ]).pipe(
-      map(([pulse, authData]): HeartbeatState => {
-        const now = this.getNow();
-        const authId = (authData as AuthDataDto)?.userId || 0;
-        return {
-          isVisible: typeof document !== 'undefined' && document.visibilityState === 'visible',
-          isNotIdle: (now - pulse) < this.inactivityTimeoutMs,
-          isLoggedIn: authId > 0
-        };
-      }),
-      distinctUntilChanged((prev: HeartbeatState, curr: HeartbeatState) => (
-        prev.isVisible === curr.isVisible &&
-        prev.isNotIdle === curr.isNotIdle &&
-        prev.isLoggedIn === curr.isLoggedIn
-      )),
-      shareReplay(1)
-    );
-
-    this.heartbeatSubscription = heartbeatTriggers$.pipe(
-      switchMap((state: HeartbeatState) => {
-        if (state.isVisible && state.isNotIdle && state.isLoggedIn) {
-          return interval(this.intervalMs).pipe(
-            startWith(0),
-            switchMap(() => this.backendService.ping().pipe(
-              catchError(() => of(null)),
-              map(() => null)
-            ))
-          );
-        }
-        return of(null);
-      })
-    ).subscribe();
   }
 
   stop(): void {
-    if (this.heartbeatSubscription) {
-      this.heartbeatSubscription.unsubscribe();
-      this.heartbeatSubscription = null;
-    }
+    this.started = false;
     if (this.autoLogoutSubscription) {
       this.autoLogoutSubscription.unsubscribe();
       this.autoLogoutSubscription = null;

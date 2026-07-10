@@ -3,7 +3,6 @@ export { VeronaModuleKeyCollection } from './lib/helper/verona-module-key-collec
 export {
   ACTIVE_THRESHOLD_MS,
   PASSIVE_THRESHOLD_MS,
-  HEARTBEAT_PING_INTERVAL_MS,
   UI_BAR_REFRESH_INTERVAL_MS,
   ADMIN_USER_LIST_POLL_INTERVAL_MS,
   ACTIVITY_SYNC_THROTTLE_MS,

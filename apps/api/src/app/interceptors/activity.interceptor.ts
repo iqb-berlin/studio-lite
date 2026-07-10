@@ -20,8 +20,7 @@ export class ActivityInterceptor implements NestInterceptor {
       (Array.isArray(activityIntentHeader) && activityIntentHeader.includes('user'));
 
     // Ignore background requests that must not extend inactivity windows by default.
-    const isBackgroundRequest = request.url.includes('/ping') ||
-                                request.url.includes('/refresh') ||
+    const isBackgroundRequest = request.url.includes('/refresh') ||
                                 request.url.includes('/activity');
 
     // The admin users polling endpoint only counts as activity when explicitly flagged.

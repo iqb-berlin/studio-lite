@@ -182,15 +182,6 @@ export class AppController {
     return true;
   }
 
-  @Post('ping')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiTags('auth')
-  @ApiOkResponse({ description: 'Session keepalive updated.' })
-  async ping(@Request() req): Promise<void> {
-    await this.userService.updateSessionExpiry(req.user.id, req.user.sessionId);
-  }
-
   @Post('activity')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
