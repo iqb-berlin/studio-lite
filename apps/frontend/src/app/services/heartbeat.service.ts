@@ -2,7 +2,7 @@ import {
   Injectable, NgZone, OnDestroy, inject
 } from '@angular/core';
 import {
-  Subscription, of, BehaviorSubject, timer, Subject, asapScheduler, merge, fromEvent
+  of, BehaviorSubject, timer, Subject, asapScheduler, merge, fromEvent
 } from 'rxjs';
 import {
   switchMap, filter, distinctUntilChanged, map, catchError, shareReplay, takeUntil, observeOn,
@@ -45,8 +45,6 @@ export class HeartbeatService implements OnDestroy {
       prev.passivePercentage === curr.passivePercentage),
     shareReplay(1)
   );
-
-  private autoLogoutSubscription: Subscription | null = null;
 
   private getNow(): number {
     return this.appService.getServerTime();
@@ -132,7 +130,10 @@ export class HeartbeatService implements OnDestroy {
       this.start();
     }
 
-    this.autoLogoutSubscription = this.activityStatus$.pipe(
+    // Gate on the login state instead of tearing the subscription down in stop():
+    // a manual unsubscribe would leave auto-logout dead after logout + re-login.
+    this.activityStatus$.pipe(
+      filter(() => (this.appService.authData?.userId || 0) > 0),
       filter(status => status.activePercentage === 0 && status.passivePercentage <= 0),
       takeUntil(this.ngUnsubscribe)
     ).subscribe(() => {
@@ -185,10 +186,6 @@ export class HeartbeatService implements OnDestroy {
 
   stop(): void {
     this.started = false;
-    if (this.autoLogoutSubscription) {
-      this.autoLogoutSubscription.unsubscribe();
-      this.autoLogoutSubscription = null;
-    }
   }
 
   ngOnDestroy(): void {

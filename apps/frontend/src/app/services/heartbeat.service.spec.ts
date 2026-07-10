@@ -135,6 +135,33 @@ describe('HeartbeatService', () => {
     expect(backendServiceMock.logout).toHaveBeenCalled();
   });
 
+  it('should not log out while no user is logged in', async () => {
+    appServiceMock.authData = { userId: 0 } as AuthDataDto;
+    configureTestingModule();
+    service = TestBed.inject(HeartbeatService);
+
+    await jest.advanceTimersByTimeAsync(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 2000);
+
+    expect(backendServiceMock.logout).not.toHaveBeenCalled();
+  });
+
+  it('should still log out after a logout and re-login in the same tab', async () => {
+    appServiceMock.authData = { userId: 1 } as AuthDataDto;
+    configureTestingModule();
+    service = TestBed.inject(HeartbeatService);
+    service.start();
+
+    appServiceMock.authData = { userId: 0 } as AuthDataDto;
+    (appServiceMock.authDataChanged as Subject<AuthDataDto>).next({ userId: 0 } as AuthDataDto);
+    await jest.advanceTimersByTimeAsync(1000);
+
+    appServiceMock.authData = { userId: 1 } as AuthDataDto;
+    (appServiceMock.authDataChanged as Subject<AuthDataDto>).next({ userId: 1 } as AuthDataDto);
+    await jest.advanceTimersByTimeAsync(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 2000);
+
+    expect(backendServiceMock.logout).toHaveBeenCalled();
+  });
+
   it('should not log out while activity keeps the pulse fresh', async () => {
     appServiceMock.authData = { userId: 1 } as AuthDataDto;
     configureTestingModule();
