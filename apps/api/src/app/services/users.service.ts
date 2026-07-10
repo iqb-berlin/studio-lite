@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import {
   UserActivityStatus,
+  SessionActivityStatus,
   CreateUserDto,
   MyDataDto,
   UserFullDto,
@@ -499,7 +500,7 @@ export class UsersService {
     return sessionsByUser;
   }
 
-  private static calculateSessionStatus(lastActivity: Date, nowMs: number): UserActivityStatus {
+  private static calculateSessionStatus(lastActivity: Date, nowMs: number): SessionActivityStatus {
     const ageMs = nowMs - new Date(lastActivity).getTime();
     if (ageMs <= ACTIVE_SESSION_THRESHOLD_MS) return 'active';
     if (ageMs <= INACTIVITY_THRESHOLD_MS) return 'passive';
