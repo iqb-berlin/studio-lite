@@ -16,13 +16,14 @@ import { AuthInterceptor } from './auth.interceptor';
 describe('AuthInterceptor', () => {
   let httpClient: HttpClient;
   let httpMock: HttpTestingController;
-  let appServiceSpy: { addErrorMessage: jest.Mock };
+  let appServiceSpy: { addErrorMessage: jest.Mock, serverTimeOffset: number };
   let backendServiceSpy: { refresh: jest.Mock, logout: jest.Mock };
   let routerSpy: { navigate: jest.Mock };
 
   beforeEach(() => {
     appServiceSpy = {
-      addErrorMessage: jest.fn()
+      addErrorMessage: jest.fn(),
+      serverTimeOffset: 0
     };
     backendServiceSpy = {
       refresh: jest.fn(),
@@ -95,6 +96,29 @@ describe('AuthInterceptor', () => {
     expect(req.request.headers.get('Authorization')).toBeNull();
     expect(req.request.headers.get('app-version')).toBe('0.0.0');
     req.flush({});
+  });
+
+  it('updates the server time offset when the Date header shows real clock skew', () => {
+    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1000000);
+
+    httpClient.get('/skewed').subscribe();
+    const req = httpMock.expectOne('/skewed');
+    req.flush({}, { headers: { Date: new Date(1000000 + 60000).toUTCString() } });
+
+    expect(appServiceSpy.serverTimeOffset).toBe(60000);
+    nowSpy.mockRestore();
+  });
+
+  it('ignores Date header changes within the jitter deadband', () => {
+    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1000000);
+    appServiceSpy.serverTimeOffset = 60000;
+
+    httpClient.get('/jitter').subscribe();
+    const req = httpMock.expectOne('/jitter');
+    req.flush({}, { headers: { Date: new Date(1000000 + 61000).toUTCString() } });
+
+    expect(appServiceSpy.serverTimeOffset).toBe(60000);
+    nowSpy.mockRestore();
   });
 
   it('reports errors with method and url on error responses', () => {

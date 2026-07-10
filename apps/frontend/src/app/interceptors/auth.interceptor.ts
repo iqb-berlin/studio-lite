@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 import { AppHttpError } from '../classes/app-http-error.class';
+import { SERVER_TIME_OFFSET_DEADBAND_MS } from '../app.constants';
 
 @Injectable({
   providedIn: 'root'
@@ -38,7 +39,12 @@ export class AuthInterceptor implements HttpInterceptor {
           if (event instanceof HttpResponse) {
             const serverDate = event.headers.get('Date');
             if (serverDate) {
-              this.appService.serverTimeOffset = new Date(serverDate).getTime() - Date.now();
+              const measuredOffset = new Date(serverDate).getTime() - Date.now();
+              // The Date header only has second resolution; changes within the
+              // deadband are measurement jitter, not real clock skew.
+              if (Math.abs(measuredOffset - this.appService.serverTimeOffset) > SERVER_TIME_OFFSET_DEADBAND_MS) {
+                this.appService.serverTimeOffset = measuredOffset;
+              }
             }
           }
         }),

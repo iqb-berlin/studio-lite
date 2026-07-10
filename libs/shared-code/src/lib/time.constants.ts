@@ -13,6 +13,9 @@ export const ACTIVITY_SYNC_THROTTLE_MS = 5 * SECOND_MS;
 export const USER_ACTIVITY_THROTTLE_MS = SECOND_MS;
 export const POST_MESSAGE_ACTIVITY_THROTTLE_MS = SECOND_MS;
 export const AUTO_LOGOUT_REDIRECT_DELAY_MS = SECOND_MS;
+// HTTP Date headers only carry second resolution, so successive clock-skew
+// measurements jitter by up to ±1s; only offsets beyond this deadband are real skew.
+export const SERVER_TIME_OFFSET_DEADBAND_MS = 2 * SECOND_MS;
 
 export const ACTIVE_SESSION_THRESHOLD_SEC = ACTIVE_THRESHOLD_MS / SECOND_MS;
 export const ACTIVE_SESSION_THRESHOLD_MS = ACTIVE_SESSION_THRESHOLD_SEC * SECOND_MS;
