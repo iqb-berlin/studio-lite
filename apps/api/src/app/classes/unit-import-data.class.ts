@@ -58,18 +58,19 @@ export class UnitImportData {
       this.schemeType = codingSchemeElement.attr('schemetype');
       const lastChangedScheme = codingSchemeElement.attr('lastChange');
       if (lastChangedScheme) this.lastChangedScheme = new Date(lastChangedScheme);
-      this.codingSchemeFileName = this.getFolder() + codingSchemeElement.text();
+      this.codingSchemeFileName = this.resolveCompanionFile(codingSchemeElement.text());
     }
   }
 
   private setCommentsRef(xmlDocument: cheerio.CheerioAPI): void {
     const commentsRefElement = xmlDocument('UnitCommentsRef').first();
-    this.commentsFileName = (commentsRefElement.length > 0) ? this.getFolder() + commentsRefElement.text() : '';
+    this.commentsFileName = (commentsRefElement.length > 0) ? this.resolveCompanionFile(commentsRefElement.text()) : '';
   }
 
   private setRichNotesRef(xmlDocument: cheerio.CheerioAPI): void {
     const richNotesRefElement = xmlDocument('UnitRichNotesRef').first();
-    this.richNotesFileName = (richNotesRefElement.length > 0) ? this.getFolder() + richNotesRefElement.text() : '';
+    this.richNotesFileName =
+      (richNotesRefElement.length > 0) ? this.resolveCompanionFile(richNotesRefElement.text()) : '';
   }
 
   private setDefinitionRef(xmlDocument: cheerio.CheerioAPI): void {
@@ -81,7 +82,7 @@ export class UnitImportData {
       this.editor = definitionRefElement.attr('editor');
       const lastChangedDefinition = definitionRefElement.attr('lastChange');
       if (lastChangedDefinition) this.lastChangedDefinition = new Date(lastChangedDefinition);
-      this.definitionFileName = this.getFolder() + definitionRefElement.text();
+      this.definitionFileName = this.resolveCompanionFile(definitionRefElement.text());
     } else {
       const definitionElement = xmlDocument('Definition').first();
       if (definitionElement.length > 0) {
@@ -105,7 +106,7 @@ export class UnitImportData {
     this.name = unitLabelElement.length > 0 ? unitLabelElement.text() : '';
     const unitMetadataReferenceElement = metadataElement.find('Reference').first();
     this.metadataFileName = unitMetadataReferenceElement.length > 0 ?
-      this.getFolder() + unitMetadataReferenceElement.text() : '';
+      this.resolveCompanionFile(unitMetadataReferenceElement.text()) : '';
     const unitDescriptionElement = metadataElement.find('Description').first();
     this.description =
       unitDescriptionElement.length > 0 ? unitDescriptionElement.text() : '';
@@ -195,5 +196,13 @@ export class UnitImportData {
     const lastSlash = this.fileName.lastIndexOf('/');
     if (lastSlash > 0 && lastSlash < this.fileName.length - 1) return this.fileName.substring(0, lastSlash + 1);
     return '';
+  }
+
+  // Resolve a companion file reference to a folder-qualified name. An empty
+  // reference (e.g. an empty <CodingSchemeRef/>) means the unit points at no
+  // companion file, so it must yield '' rather than the bare folder prefix -
+  // otherwise the import would report a missing file that was never referenced.
+  private resolveCompanionFile(refText: string): string {
+    return refText.trim().length > 0 ? this.getFolder() + refText : '';
   }
 }
