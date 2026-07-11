@@ -103,16 +103,6 @@ describe('AppController', () => {
     });
   });
 
-  describe('ping', () => {
-    it('should extend the current session expiry', async () => {
-      usersService.updateSessionExpiry.mockResolvedValue(undefined);
-
-      await controller.ping({ user: { id: 1, sessionId: 'sid-1' } });
-
-      expect(usersService.updateSessionExpiry).toHaveBeenCalledWith(1, 'sid-1');
-    });
-  });
-
   describe('activity', () => {
     it('should update the current session activity', async () => {
       usersService.updateLastActivity.mockResolvedValue(undefined);

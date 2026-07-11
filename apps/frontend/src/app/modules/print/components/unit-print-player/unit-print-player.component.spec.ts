@@ -86,7 +86,7 @@ describe('UnitPrintPlayerComponent', () => {
         },
         {
           provide: BackendService,
-          useValue: { ping: jest.fn(), logout: jest.fn() }
+          useValue: { activity: jest.fn(), logout: jest.fn() }
         },
         {
           provide: HeartbeatService,

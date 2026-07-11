@@ -7,14 +7,15 @@ const DAY_MS = 24 * HOUR_MS;
 export const ACTIVE_THRESHOLD_MS = 30 * MINUTE_MS;
 export const PASSIVE_THRESHOLD_MS = 7 * DAY_MS;
 
-export const HEARTBEAT_PING_INTERVAL_MS = 60 * SECOND_MS;
 export const UI_BAR_REFRESH_INTERVAL_MS = SECOND_MS;
 export const ADMIN_USER_LIST_POLL_INTERVAL_MS = 15 * SECOND_MS;
-export const SESSION_REUSE_THRESHOLD_MS = 200;
 export const ACTIVITY_SYNC_THROTTLE_MS = 5 * SECOND_MS;
 export const USER_ACTIVITY_THROTTLE_MS = SECOND_MS;
 export const POST_MESSAGE_ACTIVITY_THROTTLE_MS = SECOND_MS;
 export const AUTO_LOGOUT_REDIRECT_DELAY_MS = SECOND_MS;
+// HTTP Date headers only carry second resolution, so successive clock-skew
+// measurements jitter by up to ±1s; only offsets beyond this deadband are real skew.
+export const SERVER_TIME_OFFSET_DEADBAND_MS = 2 * SECOND_MS;
 
 export const ACTIVE_SESSION_THRESHOLD_SEC = ACTIVE_THRESHOLD_MS / SECOND_MS;
 export const ACTIVE_SESSION_THRESHOLD_MS = ACTIVE_SESSION_THRESHOLD_SEC * SECOND_MS;
