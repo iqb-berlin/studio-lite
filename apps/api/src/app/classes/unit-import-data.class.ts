@@ -192,9 +192,8 @@ export class UnitImportData {
   }
 
   private getFolder(): string {
-    const regexPattern = /^(.+)\/.+$/;
-    const folderMatch = regexPattern.exec(this.fileName);
-    if (folderMatch && folderMatch.length === 2) return `${folderMatch[1]}/`;
+    const lastSlash = this.fileName.lastIndexOf('/');
+    if (lastSlash > 0 && lastSlash < this.fileName.length - 1) return this.fileName.substring(0, lastSlash + 1);
     return '';
   }
 }
