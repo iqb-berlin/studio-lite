@@ -287,6 +287,61 @@ describe('Unit Reviews', () => {
     });
   });
 
+  it('grants anonymous access to a password-protected review link', () => {
+    loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
+    cy.visitWs(ws1);
+    goToReviewAdmin();
+    cy.intercept('GET', '/api/workspaces/*/reviews/*').as('getReviewData');
+    cy.contains('mat-row', review).click();
+    cy.wait('@getReviewData').then(interception => {
+      const reviewLink = interception.response?.body.link;
+
+      // set a password for the review; wait until the async review data
+      // arrived and the config form re-rendered, otherwise typing races
+      // against the form being replaced
+      cy.translate(Cypress.expose('locale')).then(json => {
+        cy.get(`input[placeholder="${json.workspace['review-password']}"]`).should('be.visible');
+        cy.wait(300);
+        cy.get(`input[placeholder="${json.workspace['review-password']}"]`).clear();
+        cy.get(`input[placeholder="${json.workspace['review-password']}"]`).type('rev-1234');
+        cy.get('studio-lite-save-changes').within(() => {
+          cy.get('button').contains(json.workspace.save).click();
+        });
+        cy.get('[data-cy="workspace-review-close"]').click();
+        logout();
+
+        // open the shared link as anonymous visitor and log in with the
+        // password; wait out the initial re-renders (logout response and
+        // config load replace the input right after page load)
+        cy.visit(`/#/${reviewLink}`);
+        cy.get('[data-cy="home-password"]').should('be.visible');
+        cy.wait(500);
+        cy.get('[data-cy="home-password"]').type('rev-1234');
+        cy.clickButtonWithResponseCheck(
+          json.home.login,
+          [201],
+          '/api/login',
+          'POST',
+          'responseReviewLogin'
+        );
+      });
+
+      // the review must open and its units must be playable
+      openReview(review);
+      cy.get('.start-data').should('exist');
+      startReview();
+      cy.url().should('include', '/u/0');
+
+      // drop the anonymous review session so subsequent tests find the
+      // regular logged-in state they expect
+      cy.window().then(win => {
+        win.localStorage.removeItem('id_token');
+        win.localStorage.removeItem('refresh_token');
+      });
+      login(Cypress.expose('username'), Cypress.expose('password'));
+    });
+  });
+
   it('allows an admin to permanently delete a review', () => {
     loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
     cy.visitWs(ws1);
