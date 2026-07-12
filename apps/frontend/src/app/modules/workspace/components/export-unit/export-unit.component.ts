@@ -36,7 +36,7 @@ import { HasTakersPipe } from '../../pipes/has-takers.pipe';
 export class ExportUnitComponent {
   unitExportSettings: UnitDownloadSettingsDto = {
     unitIdList: [],
-    exportFormat: 'json',
+    exportFormat: 'xml',
     addComments: false,
     addRichNotes: false,
     addPlayers: false,

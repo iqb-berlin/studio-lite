@@ -121,13 +121,13 @@ describe('ExportUnitComponent', () => {
     const fileConfig = fixture.debugElement
       .query(By.directive(MockExportUnitFileConfigComponent))
       .componentInstance as MockExportUnitFileConfigComponent;
-    expect(fileConfig.exportFormat).toBe('json');
+    expect(fileConfig.exportFormat).toBe('xml');
 
-    fileConfig.exportFormatChange.emit('xml');
+    fileConfig.exportFormatChange.emit('json');
     fixture.detectChanges();
 
-    expect(component.unitExportSettings.exportFormat).toBe('xml');
-    expect(fileConfig.exportFormat).toBe('xml');
+    expect(component.unitExportSettings.exportFormat).toBe('json');
+    expect(fileConfig.exportFormat).toBe('json');
   });
 
   it('should adopt the unit selection from the unit list', () => {
