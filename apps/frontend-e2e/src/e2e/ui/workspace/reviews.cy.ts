@@ -145,7 +145,7 @@ describe('Unit Reviews', () => {
     modifyReviewUnits(review, ['M6_AK0013']);
   });
 
-  it.skip('reflects the updated unit count when the review is opened', () => {
+  it('reflects the updated unit count when the review is opened', () => {
     cy.intercept('GET', '/api/reviews/*').as('getReview');
     cy.visit('/');
     openReview(review);

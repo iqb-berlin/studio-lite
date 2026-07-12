@@ -169,14 +169,15 @@ export class ReviewService {
     if (Object.prototype.hasOwnProperty.call(newData, 'units')) {
       await this.reviewUnitRepository.delete({ reviewId: reviewId });
       this.logger.log(`Set units for review with id: ${reviewId}`);
-      newData.units.forEach(unitId => {
-        const newReviewUnit = this.reviewUnitRepository.create({
-          reviewId: reviewId,
-          unitId: unitId,
-          order: newData.units.indexOf(unitId)
-        });
-        this.reviewUnitRepository.save(newReviewUnit);
-      });
+      const newReviewUnits = newData.units.map((unitId, index) => this.reviewUnitRepository.create({
+        reviewId: reviewId,
+        unitId: unitId,
+        order: index
+      }));
+      // Await the inserts: responding before they are written lets clients
+      // re-read the review without its new units, and insert errors would
+      // otherwise be swallowed after a 200.
+      await this.reviewUnitRepository.save(newReviewUnits);
     }
   }
 
