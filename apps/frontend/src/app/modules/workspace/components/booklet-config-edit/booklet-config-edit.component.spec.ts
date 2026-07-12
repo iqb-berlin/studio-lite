@@ -42,7 +42,14 @@ describe('BookletConfigEditComponent', () => {
   });
 
   it('defaults config values when undefined', () => {
-    expect(component.bookletConfig).toEqual({});
+    expect(component.bookletConfig).toEqual({
+      pagingMode: '',
+      pageNaviButtons: '',
+      unitNaviButtons: '',
+      controllerDesign: '',
+      unitScreenHeader: '',
+      unitTitle: ''
+    });
   });
 
   it('accepts a provided config object', () => {

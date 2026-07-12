@@ -42,6 +42,16 @@ export class BookletConfigEditComponent {
   @Input() context: 'review' | 'export' = 'review';
   @Input('config')
   set config(value: BookletConfigDto | undefined) {
-    this.bookletConfig = value || {};
+    // Default the review-context fields to '' (not undefined) so their empty
+    // <mat-option value=""> is selected instead of showing a placeholder that
+    // would overlap - and block clicks on - the floating field label.
+    this.bookletConfig = value || {
+      pagingMode: '',
+      pageNaviButtons: '',
+      unitNaviButtons: '',
+      controllerDesign: '',
+      unitScreenHeader: '',
+      unitTitle: ''
+    };
   }
 }
