@@ -2,6 +2,9 @@
 // when mapping internal data onto the iqb spec shapes had to drop content.
 // The file is only written when at least one message exists; the import
 // recognizes it by name and accepts it silently.
+// messageKey holds a stable machine code (dropped-content.*) for readers of
+// the report file — deliberately NOT an i18n key: no frontend code displays
+// the report, so there is nothing to translate in assets/i18n.
 export interface ExportReportMessage {
   unitKey: string;
   objectKey: string;

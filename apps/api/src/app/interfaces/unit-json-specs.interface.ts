@@ -54,3 +54,36 @@ export interface UnitItemJson {
   changedAt?: string;
   metadata?: MetadataValuesJson[];
 }
+
+// Reference from the unit index to a companion file of the unit.
+export interface ExternalDataBlock {
+  id: string;
+  type: string;
+  modifiedAt?: string;
+}
+
+export interface UserInterfaceBlock {
+  player: string;
+  editor?: string;
+  definition?: string;
+  isDefinitionInline?: boolean;
+  modifiedAt?: string;
+}
+
+// Unit index shape as defined by the iqb unit-index specification
+// (https://github.com/iqb-specifications/unit-index) — the `${key}.json`
+// entry file of each exported unit.
+export interface UnitIndexJson {
+  id: string;
+  uuid?: string;
+  modifiedAt?: string;
+  label?: string;
+  description?: string;
+  userInterface: UserInterfaceBlock;
+  codingScheme?: ExternalDataBlock;
+  comments?: ExternalDataBlock;
+  richNotes?: ExternalDataBlock;
+  metadata?: ExternalDataBlock;
+  items?: ExternalDataBlock;
+  variables?: ExternalDataBlock;
+}

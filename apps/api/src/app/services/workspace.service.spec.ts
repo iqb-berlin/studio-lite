@@ -601,13 +601,13 @@ describe('WorkspaceService', () => {
       expect(unitService.create).toHaveBeenCalledTimes(1);
     });
 
-    it('should warn for non-companion JSON that is not a valid unit index', async () => {
+    it('should report unreferenced JSON that is not a valid unit index as ignored', async () => {
       const result = await service.uploadFiles(1, [
         buildFile('broken.json', 'application/json', JSON.stringify({ notId: 'something' }))
       ], user);
 
       expect(result.messages).toHaveLength(1);
-      expect(result.messages[0].messageKey).toBe('unit-upload.api-warning.json-parse');
+      expect(result.messages[0].messageKey).toBe('unit-upload.api-warning.ignore-file');
     });
 
     it('should not warn for companion JSON files that are not unit indices', async () => {
@@ -616,6 +616,29 @@ describe('WorkspaceService', () => {
       ], user);
 
       expect(result.messages.every(m => m.messageKey !== 'unit-upload.api-warning.json-parse')).toBe(true);
+    });
+
+    it('should import companion files with arbitrary names when the index references them', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchScheme as jest.Mock).mockResolvedValue(undefined);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const schemeContent = JSON.stringify({ variableCodings: [] });
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          codingScheme: { id: 'scheme.json', type: 'iqb-coding-scheme' }
+        })),
+        buildFile('scheme.json', 'application/json', schemeContent)
+      ], user);
+
+      expect(result.messages).toHaveLength(0);
+      expect(unitService.patchScheme).toHaveBeenCalledWith(
+        10,
+        expect.objectContaining({ scheme: schemeContent }),
+        null,
+        undefined
+      );
     });
 
     it('should warn when definition file referenced in index is missing from upload', async () => {
@@ -845,7 +868,7 @@ describe('WorkspaceService', () => {
     it('should silently accept an export report file without creating units or warnings', async () => {
       const result = await service.uploadFiles(1, [
         buildFile('_export-report.json', 'application/json', JSON.stringify({
-          messages: [{ unitKey: 'U1', messageKey: 'unit-download.api-warning.metadata-not-exported' }]
+          messages: [{ unitKey: 'U1', messageKey: 'dropped-content.metadata-not-exported' }]
         }))
       ], user);
 

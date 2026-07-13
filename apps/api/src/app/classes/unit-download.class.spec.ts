@@ -1008,7 +1008,7 @@ describe('UnitDownloadClass', () => {
       expect(report.messages).toEqual([{
         unitKey: 'U7',
         objectKey: 'U7.vomd.json',
-        messageKey: 'unit-download.api-warning.metadata-not-exported'
+        messageKey: 'dropped-content.metadata-not-exported'
       }]);
     });
 
@@ -1069,7 +1069,7 @@ describe('UnitDownloadClass', () => {
       expect(report.messages).toEqual([{
         unitKey: 'U8',
         objectKey: 'U8.vomd.json',
-        messageKey: 'unit-download.api-warning.profile-not-exported',
+        messageKey: 'dropped-content.profile-not-exported',
         details: { entryCount: '2' }
       }]);
     });
@@ -1221,7 +1221,7 @@ describe('UnitDownloadClass', () => {
       expect(messages).toEqual([{
         unitKey: 'U1',
         objectKey: 'U1.vomd.json',
-        messageKey: 'unit-download.api-warning.invalid-language-code',
+        messageKey: 'dropped-content.invalid-language-code',
         details: {
           profileId: 'p1', entryId: 'e1', lang: 'de-DE', value: 'Text'
         }
@@ -1245,7 +1245,7 @@ describe('UnitDownloadClass', () => {
 
       expect(result[0].entries[0].value).toEqual([{ id: 'v1', label: [{ lang: 'de', value: 'A' }] }]);
       expect(messages).toEqual([expect.objectContaining({
-        messageKey: 'unit-download.api-warning.mixed-value-dropped',
+        messageKey: 'dropped-content.mixed-value-dropped',
         details: { profileId: 'p1', entryId: 'e1', droppedCount: '1' }
       })]);
     });
@@ -1259,7 +1259,7 @@ describe('UnitDownloadClass', () => {
       }] as unknown as MetadataValues[], scope);
 
       expect(messages).toEqual([expect.objectContaining({
-        messageKey: 'unit-download.api-warning.profile-not-exported'
+        messageKey: 'dropped-content.profile-not-exported'
       })]);
     });
 
@@ -1279,7 +1279,7 @@ describe('UnitDownloadClass', () => {
       expect(messages).toEqual([{
         unitKey: 'U1',
         objectKey: 'U1.vomd.json',
-        messageKey: 'unit-download.api-warning.entry-not-exported',
+        messageKey: 'dropped-content.entry-not-exported',
         details: { profileId: 'p1' }
       }]);
     });
@@ -1304,7 +1304,7 @@ describe('UnitDownloadClass', () => {
       expect(messages).toEqual([{
         unitKey: 'U1',
         objectKey: 'U1.voit.json',
-        messageKey: 'unit-download.api-warning.item-not-exported',
+        messageKey: 'dropped-content.item-not-exported',
         details: { uuid: 'item-uuid-1' }
       }]);
     });

@@ -31,6 +31,7 @@ import {
   LanguageCodedText,
   MetadataValueJson,
   MetadataValuesJson,
+  UnitIndexJson,
   UnitItemJson,
   UnitMetadataJson
 } from '../interfaces/unit-json-specs.interface';
@@ -38,20 +39,6 @@ import { VeronaModulesService } from '../services/verona-modules.service';
 import { SettingService } from '../services/setting.service';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitRichNoteService } from '../services/unit-rich-note.service';
-
-interface ExternalDataBlock {
-  id: string;
-  type: string;
-  modifiedAt?: string;
-}
-
-interface UserInterfaceBlock {
-  player: string;
-  editor?: string;
-  definition?: string;
-  isDefinitionInline?: boolean;
-  modifiedAt?: string;
-}
 
 // Comment shape as defined by the iqb unit-comments@0.1 specification
 // (https://iqb-specifications.github.io/unit-comments/). Fields without a
@@ -78,21 +65,6 @@ interface UnitRichNoteJson {
   itemUuids?: string[];
 }
 
-interface UnitIndexJson {
-  id: string;
-  uuid?: string;
-  modifiedAt?: string;
-  label?: string;
-  description?: string;
-  userInterface: UserInterfaceBlock;
-  codingScheme?: ExternalDataBlock;
-  comments?: ExternalDataBlock;
-  richNotes?: ExternalDataBlock;
-  metadata?: ExternalDataBlock;
-  items?: ExternalDataBlock;
-  variables?: ExternalDataBlock;
-}
-
 export class UnitDownloadClass {
   static async get(
     workspaceId: number,
@@ -108,9 +80,7 @@ export class UnitDownloadClass {
     const unitsMetadata: UnitPropertiesDto[] = [];
     const usedPlayers: string[] = [];
     const exportReport: ExportReportMessage[] = [];
-    const unitExportConfig = exportFormat === 'xml' ?
-      await UnitDownloadClass.getUnitExportConfig(settingService) :
-      new UnitExportConfigDto();
+    const unitExportConfig = await UnitDownloadClass.getUnitExportConfig(settingService);
 
     await Promise.all(
       unitDownloadSettings.unitIdList.map(async unitId => {
@@ -605,7 +575,7 @@ export class UnitDownloadClass {
         typeof (text as LanguageCodedText).value === 'string' &&
         (text as LanguageCodedText).value !== '' &&
         !UnitDownloadClass.isValidLanguageCodedText(text))
-      .forEach(text => scope?.report('unit-download.api-warning.invalid-language-code', {
+      .forEach(text => scope?.report('dropped-content.invalid-language-code', {
         entryId,
         lang: typeof (text as LanguageCodedText).lang === 'string' ? (text as LanguageCodedText).lang : '',
         value: (text as LanguageCodedText).value
@@ -638,7 +608,7 @@ export class UnitDownloadClass {
       if (vocabularyEntries.length) {
         const presentValues = value.filter(entryValue => !!entryValue).length;
         if (vocabularyEntries.length < presentValues) {
-          scope?.report('unit-download.api-warning.mixed-value-dropped', {
+          scope?.report('dropped-content.mixed-value-dropped', {
             entryId: entry.id,
             droppedCount: String(presentValues - vocabularyEntries.length)
           });
@@ -662,7 +632,7 @@ export class UnitDownloadClass {
     return (profiles ?? []).flatMap(profile => {
       if (!profile?.profileId) {
         if (profile?.entries?.length) {
-          scope?.report('unit-download.api-warning.profile-not-exported', {
+          scope?.report('dropped-content.profile-not-exported', {
             entryCount: String(profile.entries.length)
           });
         }
@@ -672,7 +642,7 @@ export class UnitDownloadClass {
       const entries = (profile.entries ?? []).flatMap(entry => {
         if (!entry?.id) {
           if (UnitDownloadClass.entryHasContent(entry)) {
-            profileScope?.report('unit-download.api-warning.entry-not-exported');
+            profileScope?.report('dropped-content.entry-not-exported');
           }
           return [];
         }
@@ -695,7 +665,7 @@ export class UnitDownloadClass {
       if (!item?.id) {
         if (item) {
           scope?.report(
-            'unit-download.api-warning.item-not-exported',
+            'dropped-content.item-not-exported',
             item.uuid ? { uuid: item.uuid } : undefined
           );
         }
@@ -1014,7 +984,7 @@ export class UnitDownloadClass {
       // transform reported nothing specific (e.g. a legacy shape without
       // profileId) — before the spec export this was written verbatim, so
       // the omission must not stay silent
-      metadataScope.report('unit-download.api-warning.metadata-not-exported');
+      metadataScope.report('dropped-content.metadata-not-exported');
     }
 
     const itemsScope = new ExportReportScope(key, `${key}.voit.json`, exportReport);

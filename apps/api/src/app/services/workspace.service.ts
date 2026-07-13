@@ -754,32 +754,23 @@ export class WorkspaceService {
           usedFiles.push(f.originalname);
           return;
         }
-        const isCompanionJson = /\.(vocs|voco|vorn|vomd|voit|vova)\.json$/i.test(f.originalname);
+        // Only the unit index shape is recognized here. Every other JSON file
+        // becomes a lookup candidate regardless of its name: the index decides
+        // what is a companion file, so spec-conform exports of third-party
+        // systems (arbitrary companion names) import cleanly. Broken referenced
+        // files are reported by parseCompanionJson; files no unit references
+        // fall into the final ignore-file check.
         try {
           const parsed = JSON.parse(f.buffer.toString()) as Record<string, unknown>;
           if (parsed.id && parsed.userInterface) {
             const jsonData = new UnitImportJsonData(f);
             unitData.push(jsonData);
             processedKeys.add(jsonData.key);
-          } else if (isCompanionJson) {
-            notXmlFiles[f.originalname] = f;
           } else {
-            functionReturn.messages.push({
-              objectKey: f.originalname,
-              messageKey: 'unit-upload.api-warning.json-parse'
-            });
-            usedFiles.push(f.originalname);
+            notXmlFiles[f.originalname] = f;
           }
         } catch {
-          if (isCompanionJson) {
-            notXmlFiles[f.originalname] = f;
-          } else {
-            functionReturn.messages.push({
-              objectKey: f.originalname,
-              messageKey: 'unit-upload.api-warning.json-parse'
-            });
-            usedFiles.push(f.originalname);
-          }
+          notXmlFiles[f.originalname] = f;
         }
       } else if (f.mimetype === 'text/xml') {
         try {

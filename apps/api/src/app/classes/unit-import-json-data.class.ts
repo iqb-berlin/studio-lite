@@ -1,33 +1,7 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { FileIo } from '../interfaces/file-io.interface';
-
-interface ExternalDataBlock {
-  id: string;
-  type: string;
-  modifiedAt?: string;
-}
-
-interface UnitIndexJson {
-  id: string;
-  uuid?: string;
-  modifiedAt?: string;
-  label?: string;
-  description?: string;
-  userInterface: {
-    player: string;
-    editor?: string;
-    definition?: string;
-    isDefinitionInline?: boolean;
-    modifiedAt?: string;
-  };
-  codingScheme?: ExternalDataBlock;
-  comments?: ExternalDataBlock;
-  richNotes?: ExternalDataBlock;
-  metadata?: ExternalDataBlock;
-  items?: ExternalDataBlock;
-  variables?: ExternalDataBlock;
-}
+import { UnitIndexJson } from '../interfaces/unit-json-specs.interface';
 
 export class UnitImportJsonData {
   key: string;
