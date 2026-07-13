@@ -1,4 +1,6 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import {
+  Component, Inject, OnInit, ChangeDetectorRef
+} from '@angular/core';
 import {
   MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle
 } from '@angular/material/dialog';
@@ -34,6 +36,7 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
   fetchedProfiles: Profile[] = [];
   constructor(public wsgAdminService: WsgAdminService,
               public backendService: BackendService,
+              private changeDetectorRef: ChangeDetectorRef,
               @Inject(MAT_DIALOG_DATA) public data: EditWorkspaceGroupComponentData) {
   }
 
@@ -48,6 +51,7 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
         res && (res as WorkspaceGroupFullDto).settings && (res as WorkspaceGroupFullDto).settings?.profiles
       ) || [];
       this.formData.profilesSelected = this.fetchedProfiles;
+      this.changeDetectorRef.detectChanges();
     });
   }
 }

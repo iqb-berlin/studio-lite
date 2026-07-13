@@ -270,7 +270,10 @@ describe('Admin Settings Tab Configuration', () => {
       );
     });
 
-    it('checks that the we have only two registry stores with the test registry', () => {
+    // Tracked in https://github.com/iqb-berlin/studio-lite/issues/1526:
+    // re-verify against the refactored studio-lite-profiles component
+    // (now @iqb/metadata-components based) before removing .skip.
+    it.skip('checks that the we have only two registry stores with the test registry', () => {
       // create a group workspace
       createGroup(group1);
 

@@ -21,34 +21,24 @@ function getCheckBoxByName(name: string) {
   }
 }
 
-function getTimeNumber(time: string, propName: string, profile: string, moreThanOne: boolean) {
+function getTimeNumber(time: string, propName: string, profile: string) {
   if (time.split(':').length !== 1) {
     const minAuf = time.split(':')[0];
     const secAuf = time.split(':')[1];
-    if (moreThanOne) {
-      cy.contains(propName)
-        .prevUntil('.duration-container > div > mat-form-field > div')
-        .find('input')
-        .eq(-1)
-        .as('aufgabenzeit');
-    } else {
-      cy.contains(propName)
-        .prevUntil('.duration-container > div > mat-form-field > div')
-        .find('input')
-        .as('aufgabenzeit');
-    }
+    cy.get(`mat-form-field:contains("${propName}")`)
+      .eq(-1)
+      .find('input')
+      .as('aufgabenzeit');
     if (minAuf !== '00' && typeof minAuf !== 'undefined') {
-      cy.get('@aufgabenzeit')
-        .eq(0)
-        .type(minAuf);
+      cy.get('@aufgabenzeit').eq(0).type(minAuf);
     }
     if (secAuf !== '00' && typeof secAuf !== 'undefined') {
-      cy.get('@aufgabenzeit')
-        .eq(1)
-        .type(secAuf);
+      cy.get('@aufgabenzeit').eq(1).type(secAuf);
     }
   } else {
-    cy.get(`mat-label:contains("${propName}")`).type(IqbProfileExamples.get(profile).get(propName));
+    cy.get(`mat-label:contains("${propName}")`).type(
+      IqbProfileExamples.get(profile).get(propName)
+    );
   }
 }
 
@@ -159,7 +149,7 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
       if (IqbProfileExamples.get(profile).get(fieldName) !== ('')) {
         switch (type) {
           case 'number': {
-            getTimeNumber(IqbProfileExamples.get(profile).get(fieldName), fieldName, profile, moreThanOne);
+            getTimeNumber(IqbProfileExamples.get(profile).get(fieldName), fieldName, profile);
             break;
           }
           case 'vocabulary': {

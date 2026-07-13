@@ -27,3 +27,15 @@ ALTER TABLE "public"."refresh_token"
 DELETE FROM "public"."refresh_token" WHERE "expires_at" < now();
 DELETE FROM "public"."user_session" WHERE "expires_at" < now();
 -- rollback SELECT 1;
+
+-- changeset jojohoch:5
+ALTER TABLE "public"."unit"
+  ADD COLUMN "uuid" VARCHAR(255),
+  ADD CONSTRAINT "unit_uuid_unique" UNIQUE ("uuid");
+-- rollback ALTER TABLE "public"."unit" DROP CONSTRAINT "unit_uuid_unique"; ALTER TABLE "public"."unit" DROP COLUMN "uuid";
+
+-- changeset jojohoch:6
+UPDATE "public"."unit"
+  SET "uuid" = gen_random_uuid()::VARCHAR
+  WHERE "uuid" IS NULL;
+-- rollback UPDATE "public"."unit" SET "uuid" = NULL;

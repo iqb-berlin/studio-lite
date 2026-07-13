@@ -6,6 +6,9 @@ export class UnitDownloadSettingsDto {
     unitIdList!: number[];
 
   @ApiProperty()
+    exportFormat: 'xml' | 'json' = 'xml';
+
+  @ApiProperty()
     addPlayers = false;
 
   @ApiProperty()
@@ -25,6 +28,18 @@ export class UnitDownloadSettingsDto {
 
   @ApiProperty()
     passwordLess = false;
+
+  @ApiProperty()
+    bookletId?: string;
+
+  @ApiProperty()
+    bookletLabel?: string;
+
+  @ApiProperty()
+    groupLabel?: string;
+
+  @ApiProperty()
+    monitorBookletVisibility?: 'visible' | 'collapsed' | 'hidden';
 
   @ApiProperty()
     bookletSettings: UnitDownloadBookletSettingsDto[] = [];

@@ -1,16 +1,17 @@
 import { Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
+import {
+  In, Not, QueryFailedError, Repository
+} from 'typeorm';
 import {
   CreateUnitDto,
-  MetadataDto,
+  MetadataValues,
   RequestReportDto,
   UnitInViewDto,
   UnitDefinitionDto,
   UnitDefinitionFullDto,
   UnitFullMetadataDto,
   UnitInListDto,
-  UnitItemMetadataDto,
   UnitItemWithMetadataDto,
   UnitMetadataDto,
   UnitMetadataValues,
@@ -18,6 +19,7 @@ import {
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { profileIdsMatch } from '@studio-lite/shared-code';
 import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
@@ -230,6 +232,7 @@ export class UnitService {
     const newUnit = this.unitsRepository.create(unit);
     newUnit.workspaceId = workspaceId;
     newUnit.groupName = unit.groupName;
+    newUnit.uuid = crypto.randomUUID();
     await this.unitsRepository.save(newUnit);
 
     if (unit.createFrom) {
@@ -262,9 +265,9 @@ export class UnitService {
         UnitService.setCurrentProfiles(
           workspace.settings?.unitMDProfile,
           workspace.settings?.itemMDProfile,
-          metadata as UnitFullMetadataDto
+          metadata
         );
-        const itemUuidLookups = await this.copyItemsWithMetadata(newUnit.id, metadata as UnitFullMetadataDto);
+        const itemUuidLookups = await this.copyItemsWithMetadata(newUnit.id, metadata);
 
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition.definition || newUnit.lastChangedDefinition) {
@@ -314,13 +317,50 @@ export class UnitService {
     return newUnit.id;
   }
 
+  // Adopts the universal id from an imported unit index so a unit keeps its
+  // identity across instances (spec: uuid helps to find variants/versions).
+  // If another unit already holds the uuid (e.g. the same export was imported
+  // twice), the unit keeps the fresh uuid assigned by create().
+  async adoptUuidIfFree(unitId: number, uuid: string): Promise<void> {
+    const existing = await this.unitsRepository.findOne({
+      where: { uuid },
+      select: ['id']
+    });
+    if (existing) return;
+    try {
+      await this.unitsRepository.update(unitId, { uuid });
+    } catch (error) {
+      const isUniqueViolation = error instanceof QueryFailedError &&
+        (error.driverError as { code?: string })?.code === '23505';
+      if (!isUniqueViolation) {
+        this.logger.warn(`Could not adopt uuid '${uuid}' for unit ${unitId}: ${error}`);
+      }
+      // on unique violation a concurrent import claimed the uuid first – keep the fresh one
+    }
+  }
+
+  async ensureUuid(unitId: number): Promise<string> {
+    return this.unitsRepository.manager.transaction(async manager => {
+      const unit = await manager.findOne(Unit, {
+        where: { id: unitId },
+        select: ['id', 'uuid'],
+        lock: { mode: 'pessimistic_write' }
+      });
+      if (!unit) throw new UnitNotFoundException(unitId, 0, 'GET');
+      if (unit.uuid) return unit.uuid;
+      unit.uuid = crypto.randomUUID();
+      await manager.save(unit);
+      return unit.uuid;
+    });
+  }
+
   async findOnesProperties(unitId: number, workspaceId: number): Promise<UnitPropertiesDto> {
     this.logger.log(`Returning metadata for unit wit id: ${unitId}`);
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId, workspaceId: workspaceId },
       select: [
         'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
-        'player', 'description', 'transcript', 'reference',
+        'player', 'description', 'transcript', 'reference', 'uuid',
         'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state',
         'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser'
       ]
@@ -363,17 +403,17 @@ export class UnitService {
   }
 
   static setCurrentProfiles(
-    unitProfile: string, itemProfile: string, metadata: UnitFullMetadataDto
-  ): UnitFullMetadataDto {
+    unitProfile: string, itemProfile: string, metadata: UnitMetadataValues
+  ): UnitMetadataValues {
     if (metadata.profiles) {
-      metadata.profiles = metadata.profiles.map((profile => UnitService
-        .setCurrentProfile(unitProfile, profile) as UnitMetadataDto));
+      metadata.profiles = metadata.profiles.map(profile => UnitService
+        .setCurrentProfile(unitProfile, profile));
     }
     if (metadata.items) {
       metadata.items.forEach(item => {
         if (item.profiles) {
           item.profiles = item.profiles.map(profile => UnitService
-            .setCurrentProfile(itemProfile, profile) as UnitItemMetadataDto);
+            .setCurrentProfile(itemProfile, profile));
         }
       });
     }
@@ -392,10 +432,10 @@ export class UnitService {
     return user.firstName && user.firstName.trim() ? `${displayName}, ${user.firstName.trim()}` : displayName;
   }
 
-  private static setCurrentProfile(profileId: string, profile: MetadataDto): MetadataDto {
+  private static setCurrentProfile<T extends MetadataValues>(profileId: string, profile: T): T {
     return {
       ...profile,
-      isCurrent: profile.profileId === profileId
+      isCurrent: profileIdsMatch(profile.profileId, profileId)
     };
   }
 
@@ -421,9 +461,12 @@ export class UnitService {
       .map(item => this.unitItemService.addItem(unitId, item));
   }
 
+  // Takes the internal write shape: id and unitItemUuid do not exist yet —
+  // addItem/addItemMetadata generate or discard them — hence the casts at the
+  // DTO boundary below.
   async copyItemsWithMetadata(
     unitId: number,
-    metadata: UnitFullMetadataDto
+    metadata: UnitMetadataValues
   ): Promise<ItemUuidLookup[]> {
     const profiles = metadata.profiles || [];
     profiles
@@ -433,7 +476,7 @@ export class UnitService {
     const itemUuids = await Promise.all(items
       .map(async item => ({
         newUuid: await this.unitItemService
-          .addItem(unitId, item as UnitItemWithMetadataDto),
+          .addItem(unitId, item as unknown as UnitItemWithMetadataDto),
         oldUuid: item.uuid
       })));
     await this.unitMetadataToDeleteService.upsertOneForUnit(unitId);
@@ -590,7 +633,7 @@ export class UnitService {
   private async patchUnitMetadataCurrentProfile(unitId: number, unitProfile: string): Promise<void> {
     const profilesToUpdate: UnitMetadataDto[] = await this.unitMetadataService.getAllByUnitId(unitId);
     profilesToUpdate.map(metadata => {
-      metadata.isCurrent = metadata.profileId === unitProfile;
+      metadata.isCurrent = profileIdsMatch(metadata.profileId, unitProfile);
       this.unitMetadataService.updateMetadata(metadata.id, metadata);
       return metadata;
     });
@@ -601,7 +644,7 @@ export class UnitService {
       const unitToCopy = await this.unitsRepository.findOne({
         where: { id: unitId }
       });
-      const keysToIgnore = ['id', 'groupName', 'key', 'state'];
+      const keysToIgnore = ['id', 'groupName', 'key', 'state', 'uuid'];
       const keysToCopy = Object.keys(unitToCopy)
         .filter(key => !keysToIgnore.includes(key))
         .reduce((obj, key) => {
@@ -780,10 +823,12 @@ export class UnitService {
     await this.unitsRepository.save(unitToUpdate);
   }
 
-  private async getMetadataOfUnit(unit: Unit, createFrom: number): Promise<UnitMetadataValues | UnitFullMetadataDto> {
+  private async getMetadataOfUnit(unit: Unit, createFrom: number): Promise<UnitMetadataValues> {
     const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(createFrom);
     if (unitMetadataToDelete) {
-      return this.findOnesMetadata(createFrom);
+      // the read DTO is a runtime superset of the internal write shape; only
+      // the index signature of ItemsMetadataValues blocks direct assignment
+      return await this.findOnesMetadata(createFrom) as unknown as UnitMetadataValues;
     }
     return unit.metadata;
   }

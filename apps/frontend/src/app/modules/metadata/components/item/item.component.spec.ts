@@ -6,8 +6,8 @@ import { Component, Input } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ItemsMetadataValues } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of } from 'rxjs';
+import { ProfileFormComponent } from '@iqb/metadata-components';
 import { ItemComponent } from './item.component';
-import { ProfileFormComponent } from '../profile-form/profile-form.component';
 import { MetadataService } from '../../services/metadata.service';
 import { MetadataBackendService } from '../../services/metadata-backend.service';
 import { IdValidator } from '../../metadata.module';
@@ -16,15 +16,14 @@ describe('ItemComponent', () => {
   let component: ItemComponent;
   let fixture: ComponentFixture<ItemComponent>;
 
-  @Component({ selector: 'studio-lite-profile-form', template: '', standalone: true })
+  @Component({ selector: 'iqb-profile-form', template: '', standalone: true })
   class MockProfileFormComponent {
     @Input() language!: string;
-    @Input() profileUrl!: string | undefined;
-    @Input() metadataKey!: 'profiles' | 'items';
-    @Input() metadata!: ItemsMetadataValues[];
+    @Input() profileData!: unknown;
+    @Input() metadataValues!: unknown;
     @Input() formlyWrapper!: string;
     @Input() panelExpanded!: boolean;
-    @Input() profile!: unknown;
+    @Input() vocabularyProvider!: unknown;
   }
 
   beforeEach(async () => {
@@ -86,12 +85,30 @@ describe('ItemComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith(component.metadata);
   });
 
-  it('should update metadata when onMetadataChange is called', () => {
+  it('should update profiles and keep the item identity when onMetadataChange is called', () => {
     const emitSpy = jest.spyOn(component.metadataChange, 'emit');
-    const newMetadata = { id: 'item1', description: 'updated' } as unknown as ItemsMetadataValues;
+    const originalItem = component.metadata[0];
+    const profiles = [{ profileId: 'p1', entries: [] }];
+    const newMetadata = { profiles } as unknown as Parameters<typeof component.onMetadataChange>[0];
     component.onMetadataChange(newMetadata);
-    expect(component.metadata[0]).toEqual(newMetadata);
-    expect(emitSpy).toHaveBeenCalled();
+    expect(component.metadata[0]).toBe(originalItem);
+    expect(component.metadata[0].profiles).toEqual(profiles);
+    expect(emitSpy).toHaveBeenCalledWith(component.metadata);
+  });
+
+  it('should not overwrite core item fields with stale values from onMetadataChange', () => {
+    component.metadata[0].description = 'current description';
+    component.metadata[0].weighting = 2;
+    const newMetadata = {
+      id: 'stale-id',
+      description: 'stale description',
+      weighting: 1,
+      profiles: [{ profileId: 'p1', entries: [] }]
+    } as unknown as Parameters<typeof component.onMetadataChange>[0];
+    component.onMetadataChange(newMetadata);
+    expect(component.metadata[0].id).toBe('item1');
+    expect(component.metadata[0].description).toBe('current description');
+    expect(component.metadata[0].weighting).toBe(2);
   });
 
   it('should get unused variables correctly', () => {

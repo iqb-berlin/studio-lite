@@ -2,6 +2,7 @@ import { Logger } from '@nestjs/common';
 import { UnitItemDto, UnitItemInViewDto, UnitItemWithMetadataDto } from '@studio-lite-lib/api-dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
+import { profileIdsMatch } from '@studio-lite/shared-code';
 import UnitItem from '../entities/unit-item.entity';
 import { UnitItemMetadataService } from './unit-item-metadata.service';
 import { ItemCommentService } from './item-comment.service';
@@ -95,7 +96,7 @@ export class UnitItemService {
     const itemsToUpdate: UnitItemWithMetadataDto[] = await this.getAllByUnitIdWithMetadata(unitId);
     const profiles = itemsToUpdate.flatMap(metadata => metadata.profiles);
     profiles.map(metadata => {
-      metadata.isCurrent = metadata.profileId === itemProfile;
+      metadata.isCurrent = profileIdsMatch(metadata.profileId, itemProfile);
       this.unitItemMetadataService.updateItemMetadata(metadata.id, metadata);
       return metadata;
     });

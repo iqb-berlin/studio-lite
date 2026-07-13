@@ -29,24 +29,29 @@
       "zip": "Zip-Datei konnte nicht extrahiert werden"
     },
     "api-warning": {
-      "missing-definition": "Korrespondierende Unit-Definition (separate Datei?) nicht gefunden.",
       "xml-parse": "Nicht als Unit-Xml erkannt",
-      "ignore-file": "Datei wurde ignoriert"
+      "json-parse": "Nicht als Unit-Json-Index erkannt",
+      "missing-file": "Referenzierte Datei nicht im Upload gefunden",
+      "ignore-file": "Datei wurde ignoriert",
+      "annotation-dropped": "Anmerkungen (annotation) zu Vokabular-Einträgen können nicht gespeichert werden und wurden verworfen"
     },
     "menu-label": {
       "import": "Import",
-      "import-tooltip": "Unit-Dateien (*.xml, *.voud usw.) importieren"
+      "import-tooltip": "Unit-Dateien (*.json, *.xml, *.voud usw.) importieren"
     },
     "request-error": "Allgemeiner Fehler (Netzverbindung?)"
   },
   "unit-download": {
+    "export-format": "Exportformat",
+    "export-format-json": "JSON",
+    "export-format-xml": "XML (Standard)",
     "add-files": "Zusätzliche Dateien",
     "add-player": "Player hinzufügen",
     "add-comments": "Kommentare hinzufügen",
     "export-votes-warning": "Hinweis: Voten (Daumen hoch/runter) werden beim Export nicht übernommen.",
     "add-rich-notes": "Begleitmaterial hinzufügen",
     "no-player": "Keine Aufgabe hat einen gültigen Player gesetzt",
-    "add-login": "Logins hinzufügen",
+    "add-login": "Logins generieren",
     "add-test-takers-review": "Anzahl für Review",
     "add-test-takers-monitor": "Anzahl für Monitor",
     "add-test-takers-hot": "Anzahl für Test",
@@ -58,22 +63,16 @@
     },
     "dialog": {
       "title": "Aufgabe(n) als Datei herunterladen",
-      "ok-button-label": "Herunterladen"
-    },
-    "booklet-config": {
-      "paging-mode": {
-        "label": "Modus Seitenwechsel",
-        "separate": "Blättern",
-        "buttons": "Schaltflächen",
-        "concat-scroll": "Scrollen",
-        "concat-scroll-snap": "Magnetisch Scrollen"
-      },
-      "unit_navibuttons": {
-        "label": "Buttons für Unit-Navigation",
-        "FULL": "Pfeil-Buttons und dazwischen Unit-Buttons",
-        "ARROWS_ONLY": "Nur Pfeil-Buttons",
-        "OFF": "Keine Buttons für Unit-Navigation"
-      }
+      "ok-button-label": "Herunterladen",
+      "booklet-id-required": "Pflichtfeld",
+      "xml-key-group-label": "Group/@label",
+      "xml-key-booklet-id": "Metadata/Id",
+      "xml-key-booklet-label": "Metadata/Label",
+      "xml-key-monitor-booklet-visibility": "ViewSettings/monitorBookletVisibility",
+      "desc-group-label": "Bezeichnung der Testgruppe in der Testtaker-Datei (optional)",
+      "desc-monitor-booklet-visibility": "Sichtbarkeit des Testhefts für Beobachter · Standard: (kein Eintrag)",
+      "desc-booklet-id": "Eindeutige technische ID des Testhefts (Pflichtfeld)",
+      "desc-booklet-label": "Anzeigename des Testhefts (optional)"
     }
   },
   "unit-preview": {
@@ -635,6 +634,7 @@
     "review-name": "Name",
     "review-password-info": "Zugriff von Extern nur mit Kennwort (mind. 4 Zeichen)",
     "booklet-settings": "Booklet-Einstellungen",
+    "booklet-settings-studio-hint": "Diese Einstellungen gelten nur für die Darstellung der Aufgabenfolge im Studio und werden beim Export nicht übernommen.",
     "review-settings": "Review-Einstellungen",
     "test-taker-settings": "Testtaker-Einstellungen",
     "new-review": "Neue Aufgabenfolge",
@@ -940,6 +940,7 @@
   },
   "booklet-config": {
     "show-xml-params": "XML Parameter zeigen",
+    "hint-default": "Standard:",
     "pagingMode": {
       "label": "Darstellung der Seiten einer Unit",
       "separate": "Blättern",
@@ -948,12 +949,12 @@
       "concat-scroll-snap": "Magnetisch Scrollen"
     },
     "pageNaviButtons": {
-      "label": "Buttons für Seitennavigation",
+      "label": "Navigationsbuttons für die Seitennavigation (innerhalb einer Aufgabe)",
       "OFF": "ausblenden",
       "SEPARATE_BOTTOM": "einblenden unten rechts"
     },
     "unitNaviButtons": {
-      "label": "Buttons für Navigation zwischen Units",
+      "label": "Navigationsbuttons für die Navigation zwischen den Aufgaben",
       "OFF": "ausgeblendet",
       "ARROWS_ONLY": "Nur Pfeil-Buttons oben rechts",
       "FULL": "Pfeil-Buttons und Unit-Buttons oben rechts"
@@ -964,7 +965,7 @@
       "2022": "eckig und ohne besondere Farbe"
     },
     "unitScreenHeader": {
-      "label": "Bildschirm-Kopfzeile Inhalt",
+      "label": "Legt fest, ob im obersten Seitenbereich Platz für Logo, Navigations-Buttons u. ä. gelassen wird",
       "OFF": "Keine - komplett ausblenden",
       "WITH_UNIT_TITLE": "Unit-Name",
       "WITH_BOOKLET_TITLE": "Testheft-Name",
@@ -972,9 +973,139 @@
       "EMPTY": "Leer"
     },
     "unitTitle": {
-      "label": "Unit-Titel unterhalb der Bildschirm-Kopfzeile",
+      "label": "Festlegung, ob oberhalb des Unitbereiches eine Zeile mit dem Unit-Titel gezeigt werden soll",
       "ON": "eingeblendet",
       "OFF": "ausgeblendet"
+    },
+    "navbarUnitLabel": {
+      "label": "Darstellung der aktiven Aufgabe/Unit auf der Navigationsleiste",
+      "HIDDEN": "ausgeblendet",
+      "INDEX": "Index (aktuelle Nr. / Gesamt)",
+      "LABEL": "Bezeichnung der Unit"
+    },
+    "navbarUnitControlsHidden": {
+      "label": "Ausblenden der Elemente für die Navigation zwischen Units",
+      "FALSE": "eingeblendet",
+      "TRUE": "ausgeblendet"
+    },
+    "navbarPageLabel": {
+      "label": "Darstellung der aktiven Seite/Teilaufgabe (innerhalb einer Aufgabe)",
+      "HIDDEN": "ausgeblendet",
+      "INDEX": "Index (aktuelle Nr. / Gesamt)",
+      "LABEL": "Bezeichnung der Seite",
+      "LIST": "horizontale Liste"
+    },
+    "navbarPageControlsHidden": {
+      "label": "Ausblenden der Elemente für die Navigation zwischen Seiten/Teilaufgaben",
+      "FALSE": "eingeblendet",
+      "TRUE": "ausgeblendet"
+    },
+    "navbarBackwardButton": {
+      "label": "Zeigt einen Knopf zur Rückwärtsnavigation auf der Navigationsleiste",
+      "HIDDEN": "ausgeblendet",
+      "DYNAMIC": "dynamisch (Seite oder Unit)",
+      "UNITS": "zur vorherigen Unit",
+      "PAGES": "zur vorherigen Seite"
+    },
+    "navbarForwardButton": {
+      "label": "Zeigt einen Knopf zur Vorwärtsnavigation auf der Navigationsleiste",
+      "HIDDEN": "ausgeblendet",
+      "DYNAMIC": "dynamisch (Seite oder Unit)",
+      "UNITS": "zur nächsten Unit",
+      "PAGES": "zur nächsten Seite"
+    },
+    "toolbarShowUnitTitle": {
+      "label": "Anzeige des Titels der aktiven Unit auf der Werkzeugleiste",
+      "FALSE": "ausgeblendet",
+      "TRUE": "eingeblendet"
+    },
+    "toolbarShowUnitList": {
+      "label": "Listenansicht aller Units via Werkzeugleiste",
+      "FALSE": "ausgeblendet",
+      "TRUE": "eingeblendet"
+    },
+    "toolbarShowFullscreenButton": {
+      "label": "Knopf für Vollbilddarstellung via Werkzeugleiste",
+      "FALSE": "ausgeblendet",
+      "TRUE": "eingeblendet"
+    },
+    "toolbarShowReloadButton": {
+      "label": "Knopf für 'Seite neu laden' via Werkzeugleiste",
+      "FALSE": "ausgeblendet",
+      "TRUE": "eingeblendet"
+    },
+    "toolbarShowTimeLeft": {
+      "label": "Anzeige verbleibender Zeit (falls definiert) auf der Werkzeugleiste",
+      "FALSE": "ausgeblendet",
+      "TRUE": "eingeblendet"
+    },
+    "silentMode": {
+      "label": "Unterdrückung von Einblendungen, z.B. Dialoge",
+      "FALSE": "deaktiviert",
+      "TRUE": "aktiviert"
+    },
+    "browserBehaviour": {
+      "label": "Verhalten bei Browser-Navigation",
+      "standard": "Standardverhalten",
+      "preventNav": "Navigation verhindern"
+    },
+    "forcePresentationComplete": {
+      "label": "Legt fest, ob eine Aufgabe verlassen werden darf, die noch nicht vollständig angezeigt wurde",
+      "OFF": "nicht erzwingen",
+      "ON": "beim Vorwärtsblättern",
+      "ALWAYS": "immer"
+    },
+    "forceResponseComplete": {
+      "label": "Legt fest, ob eine Aufgabe verlassen werden darf, die noch nicht beantwortet wurde",
+      "OFF": "nicht erzwingen",
+      "ON": "beim Vorwärtsblättern",
+      "ALWAYS": "immer"
+    },
+    "headerContent": {
+      "label": "Legt fest, was im Kopfbereich als Titel angezeigt wird",
+      "NONE": "keine Kopfzeile",
+      "BOOKLET_LABEL": "Testheft-Name",
+      "BLOCK_LABEL": "Block-Name",
+      "UNIT_LABEL": "Unit-Name"
+    },
+    "loadingMode": {
+      "label": "Ladeverhalten beim Start",
+      "LAZY": "sofort starten, im Hintergrund weiterladen",
+      "EAGER": "vollständig laden vor Start"
+    },
+    "logPolicy": {
+      "label": "Erfassen und Speichern von Log-Daten",
+      "disabled": "deaktiviert",
+      "lean": "minimal",
+      "rich": "ausführlich",
+      "debug": "Debug"
+    },
+    "restoreCurrentPageOnReturn": {
+      "label": "Legt fest, ob beim erneuten Öffnen einer Unit zur letzten geöffneten Seite gesprungen werden soll",
+      "OFF": "deaktiviert",
+      "ON": "aktiviert"
+    },
+    "lockTestOnTermination": {
+      "label": "Legt fest, ob der Test gesperrt werden soll, wenn er beendet wird",
+      "ON": "sperren",
+      "OFF": "nicht sperren"
+    },
+    "askForFullscreen": {
+      "label": "Soll beim Starten des Booklets eine Aufforderung erscheinen, ins Vollbild zu gehen?",
+      "ON": "anfragen",
+      "OFF": "nicht anfragen"
+    },
+    "unitTimeLeftWarnings": {
+      "label": "Konfiguriert, bei wie vielen verbleibenden Minuten im zeitbeschränkten Block eine Warnung angezeigt werden soll"
+    },
+    "unitResponsesBufferTime": {
+      "label": "Speicherfrequenz für Antworten in Ms."
+    },
+    "unitStateBufferTime": {
+      "label": "Speicherfrequenz für Unit-Zustände (z.B. responseProgress etc.) in Ms."
+    },
+    "testStateBufferTime": {
+      "label": "Pufferzeit für Test-Status (Millisekunden)"
     }
   },
   "resource-packages": {

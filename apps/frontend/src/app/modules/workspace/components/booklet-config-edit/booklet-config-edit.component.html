@@ -1,123 +1,454 @@
 <div class="fx-column-start-stretch">
 
-  <mat-slide-toggle #xmlParams
-    class="show-xml-params"
-    labelPosition="before">
-    {{'booklet-config.show-xml-params' | translate}}
-  </mat-slide-toggle>
+  @if (context === 'review') {
+    <mat-form-field>
+      <mat-label>{{'booklet-config.pageNaviButtons.label' | translate}}</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.pageNaviButtons"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of pageNaviButtonsOptions; track option) {
+          <mat-option [value]="option">{{'booklet-config.pageNaviButtons.' + option | translate}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <label class="field-description">{{'booklet-config.hint-default' | translate}} SEPARATE_BOTTOM</label>
 
-  <mat-form-field>
-    <mat-label>{{xmlParams.checked ?
-      'pagingMode' :
-    'booklet-config.pagingMode.label' | translate}}</mat-label>
-    <mat-select [placeholder]="xmlParams.checked ?
-                  'pagingMode' :
-                  'booklet-config.pagingMode.label' | translate"
-      [disabled]="disabled"
-      [(ngModel)]="bookletConfig.pagingMode"
-      (selectionChange)="configChanged.emit(bookletConfig)">
-      <mat-option value=""></mat-option>
-      @for (option of pagingModeOptions; track option) {
-        <mat-option
-          [value]="option">
-          {{xmlParams.checked ? option : 'booklet-config.pagingMode.' + option | translate}}
-        </mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>{{xmlParams.checked ?
-      'page_navibuttons' :
-    'booklet-config.pageNaviButtons.label' | translate}}</mat-label>
-    <mat-select [placeholder]="xmlParams.checked ?
-                  'page_navibuttons' :
-                  'booklet-config.pageNaviButtons.label' | translate"
-      [disabled]="disabled"
-      [(ngModel)]="bookletConfig.pageNaviButtons"
-      (selectionChange)="configChanged.emit(bookletConfig)">
-      <mat-option value=""></mat-option>
-      @for (option of pageNaviButtonsOptions; track option) {
-        <mat-option
-          [value]="option">
-          {{xmlParams.checked ? option : 'booklet-config.pageNaviButtons.' + option | translate}}
-        </mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>{{xmlParams.checked ?
-      'unit_navibuttons' :
-    'booklet-config.unitNaviButtons.label' | translate}}</mat-label>
-    <mat-select [placeholder]="xmlParams.checked ?
-                  'unit_navibuttons' :
-                  'booklet-config.unitNaviButtons.label' | translate"
-      [disabled]="disabled"
-      [(ngModel)]="bookletConfig.unitNaviButtons"
-      (selectionChange)="configChanged.emit(bookletConfig)">
-      <mat-option value=""></mat-option>
-      @for (option of unitNaviButtonsOptions; track option) {
-        <mat-option
-          [value]="option">
-          {{xmlParams.checked ? option : 'booklet-config.unitNaviButtons.' + option | translate}}
-        </mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>{{xmlParams.checked ?
-      'controller_design' :
-    'booklet-config.controllerDesign.label' | translate}}</mat-label>
-    <mat-select [placeholder]="xmlParams.checked ?
-                  'controller_design' :
-                  'booklet-config.controllerDesign.label' | translate"
-      [disabled]="disabled"
-      [(ngModel)]="bookletConfig.controllerDesign"
-      (selectionChange)="configChanged.emit(bookletConfig)">
-      <mat-option value=""></mat-option>
-      @for (option of controllerDesignOptions; track option) {
-        <mat-option
-          [value]="option">
-          {{xmlParams.checked ? option : 'booklet-config.controllerDesign.' + option | translate}}
-        </mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>{{xmlParams.checked ?
-      'unit_screenheader' :
-    'booklet-config.unitScreenHeader.label' | translate}}</mat-label>
-    <mat-select [placeholder]="xmlParams.checked ?
-                  'unit_screenheader' :
-                  'booklet-config.unitScreenHeader.label' | translate"
-      [disabled]="disabled"
-      [(ngModel)]="bookletConfig.unitScreenHeader"
-      (selectionChange)="configChanged.emit(bookletConfig)">
-      <mat-option value=""></mat-option>
-      @for (option of unitScreenHeaderOptions; track option) {
-        <mat-option
-          [value]="option">
-          {{xmlParams.checked ? option : 'booklet-config.unitScreenHeader.' + option | translate}}
-        </mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>{{xmlParams.checked ?
-      'unit_title' :
-    'booklet-config.unitTitle.label' | translate}}</mat-label>
-    <mat-select [placeholder]="xmlParams.checked ?
-                  'unit_title' :
-                  'booklet-config.unitTitle.label' | translate"
-      [disabled]="disabled"
-      [(ngModel)]="bookletConfig.unitTitle"
-      (selectionChange)="configChanged.emit(bookletConfig)">
-      <mat-option value=""></mat-option>
-      @for (option of unitTitleOptions; track option) {
-        <mat-option
-          [value]="option">
-          {{xmlParams.checked ? option : 'booklet-config.unitTitle.' + option | translate}}
-        </mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{'booklet-config.pagingMode.label' | translate}}</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.pagingMode"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of pagingModeOptions; track option) {
+          <mat-option [value]="option">{{'booklet-config.pagingMode.' + option | translate}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <label class="field-description">{{'booklet-config.hint-default' | translate}} separate</label>
+
+    <mat-form-field>
+      <mat-label>{{'booklet-config.unitNaviButtons.label' | translate}}</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.unitNaviButtons"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of unitNaviButtonsOptions; track option) {
+          <mat-option [value]="option">{{'booklet-config.unitNaviButtons.' + option | translate}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <label class="field-description">{{'booklet-config.hint-default' | translate}} FULL</label>
+
+    <mat-form-field>
+      <mat-label>{{'booklet-config.controllerDesign.label' | translate}}</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.controllerDesign"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of controllerDesignOptions; track option) {
+          <mat-option [value]="option">{{'booklet-config.controllerDesign.' + option | translate}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <label class="field-description">{{'booklet-config.hint-default' | translate}} 2022</label>
+
+    <mat-form-field>
+      <mat-label>{{'booklet-config.unitScreenHeader.label' | translate}}</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.unitScreenHeader"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of unitScreenHeaderOptions; track option) {
+          <mat-option [value]="option">{{'booklet-config.unitScreenHeader.' + option | translate}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <label class="field-description">{{'booklet-config.hint-default' | translate}} WITH_BOOKLET_TITLE</label>
+
+    <mat-form-field>
+      <mat-label>{{'booklet-config.unitTitle.label' | translate}}</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.unitTitle"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option value=""></mat-option>
+        @for (option of unitTitleOptions; track option) {
+          <mat-option [value]="option">{{'booklet-config.unitTitle.' + option | translate}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <label class="field-description">{{'booklet-config.hint-default' | translate}} ON</label>
+  }
+
+  @if (context === 'export') {
+    <label class="field-description">
+      {{'booklet-config.askForFullscreen.label' | translate}} · {{'booklet-config.hint-default' | translate}} OFF
+    </label>
+    <mat-form-field>
+      <mat-label>ask_for_fullscreen</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.askForFullscreen"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of askForFullscreenOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.browserBehaviour.label' | translate}} · {{'booklet-config.hint-default' | translate}} standard
+    </label>
+    <mat-form-field>
+      <mat-label>browserBehaviour</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.browserBehaviour"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of browserBehaviourOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.forcePresentationComplete.label' | translate}} · {{'booklet-config.hint-default' | translate}} OFF
+    </label>
+    <mat-form-field>
+      <mat-label>force_presentation_complete</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.forcePresentationComplete"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of forceOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.forceResponseComplete.label' | translate}} · {{'booklet-config.hint-default' | translate}} OFF
+    </label>
+    <mat-form-field>
+      <mat-label>force_response_complete</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.forceResponseComplete"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of forceOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.headerContent.label' | translate}} · {{'booklet-config.hint-default' | translate}} BOOKLET_LABEL
+    </label>
+    <mat-form-field>
+      <mat-label>header_content</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.headerContent"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of headerContentOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.loadingMode.label' | translate}} · {{'booklet-config.hint-default' | translate}} LAZY
+    </label>
+    <mat-form-field>
+      <mat-label>loading_mode</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.loadingMode"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of loadingModeOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.lockTestOnTermination.label' | translate}} · {{'booklet-config.hint-default' | translate}} OFF
+    </label>
+    <mat-form-field>
+      <mat-label>lock_test_on_termination</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.lockTestOnTermination"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of lockTestOnTerminationOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.logPolicy.label' | translate}} · {{'booklet-config.hint-default' | translate}} rich
+    </label>
+    <mat-form-field>
+      <mat-label>logPolicy</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.logPolicy"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of logPolicyOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.navbarBackwardButton.label' | translate}} · {{'booklet-config.hint-default' | translate}} HIDDEN
+    </label>
+    <mat-form-field>
+      <mat-label>navbar_backward_button</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.navbarBackwardButton"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of navbarButtonOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.navbarForwardButton.label' | translate}} · {{'booklet-config.hint-default' | translate}} HIDDEN
+    </label>
+    <mat-form-field>
+      <mat-label>navbar_forward_button</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.navbarForwardButton"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of navbarButtonOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.navbarPageControlsHidden.label' | translate}} · {{'booklet-config.hint-default' | translate}} FALSE
+    </label>
+    <mat-form-field>
+      <mat-label>navbar_page_controls_hidden</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.navbarPageControlsHidden"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.navbarPageLabel.label' | translate}} · {{'booklet-config.hint-default' | translate}} INDEX
+    </label>
+    <mat-form-field>
+      <mat-label>navbar_page_label</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.navbarPageLabel"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of navbarPageLabelOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.navbarUnitControlsHidden.label' | translate}} · {{'booklet-config.hint-default' | translate}} FALSE
+    </label>
+    <mat-form-field>
+      <mat-label>navbar_unit_controls_hidden</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.navbarUnitControlsHidden"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.navbarUnitLabel.label' | translate}} · {{'booklet-config.hint-default' | translate}} INDEX
+    </label>
+    <mat-form-field>
+      <mat-label>navbar_unit_label</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.navbarUnitLabel"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of navbarUnitLabelOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.pagingMode.label' | translate}} · {{'booklet-config.hint-default' | translate}} separate
+    </label>
+    <mat-form-field>
+      <mat-label>pagingMode</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.pagingMode"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of pagingModeOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.restoreCurrentPageOnReturn.label' | translate}} · {{'booklet-config.hint-default' | translate}} OFF
+    </label>
+    <mat-form-field>
+      <mat-label>restore_current_page_on_return</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.restoreCurrentPageOnReturn"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of restoreCurrentPageOnReturnOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.silentMode.label' | translate}} · {{'booklet-config.hint-default' | translate}} FALSE
+    </label>
+    <mat-form-field>
+      <mat-label>silent_mode</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.silentMode"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.testStateBufferTime.label' | translate}} · {{'booklet-config.hint-default' | translate}} 1000
+    </label>
+    <mat-form-field>
+      <mat-label>test_state_buffer_time</mat-label>
+      <input matInput type="number" [disabled]="disabled"
+        [(ngModel)]="bookletConfig.testStateBufferTime"
+        (ngModelChange)="configChanged.emit(bookletConfig)">
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.toolbarShowFullscreenButton.label' | translate}} · {{'booklet-config.hint-default' | translate}} FALSE
+    </label>
+    <mat-form-field>
+      <mat-label>toolbar_show_fullscreen_button</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.toolbarShowFullscreenButton"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.toolbarShowReloadButton.label' | translate}} · {{'booklet-config.hint-default' | translate}} FALSE
+    </label>
+    <mat-form-field>
+      <mat-label>toolbar_show_reload_button</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.toolbarShowReloadButton"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.toolbarShowTimeLeft.label' | translate}} · {{'booklet-config.hint-default' | translate}} FALSE
+    </label>
+    <mat-form-field>
+      <mat-label>toolbar_show_time_left</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.toolbarShowTimeLeft"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.toolbarShowUnitList.label' | translate}} · {{'booklet-config.hint-default' | translate}} FALSE
+    </label>
+    <mat-form-field>
+      <mat-label>toolbar_show_unit_list</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.toolbarShowUnitList"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.toolbarShowUnitTitle.label' | translate}} · {{'booklet-config.hint-default' | translate}} TRUE
+    </label>
+    <mat-form-field>
+      <mat-label>toolbar_show_unit_title</mat-label>
+      <mat-select [disabled]="disabled"
+        [(ngModel)]="bookletConfig.toolbarShowUnitTitle"
+        (selectionChange)="configChanged.emit(bookletConfig)">
+        <mat-option [value]="undefined"></mat-option>
+        @for (option of boolOptions; track option) {
+          <mat-option [value]="option">{{option}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.unitResponsesBufferTime.label' | translate}} · {{'booklet-config.hint-default' | translate}} 5000
+    </label>
+    <mat-form-field>
+      <mat-label>unit_responses_buffer_time</mat-label>
+      <input matInput type="number" [disabled]="disabled"
+        [(ngModel)]="bookletConfig.unitResponsesBufferTime"
+        (ngModelChange)="configChanged.emit(bookletConfig)">
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.unitStateBufferTime.label' | translate}} · {{'booklet-config.hint-default' | translate}} 6000
+    </label>
+    <mat-form-field>
+      <mat-label>unit_state_buffer_time</mat-label>
+      <input matInput type="number" [disabled]="disabled"
+        [(ngModel)]="bookletConfig.unitStateBufferTime"
+        (ngModelChange)="configChanged.emit(bookletConfig)">
+    </mat-form-field>
+
+    <label class="field-description">
+      {{'booklet-config.unitTimeLeftWarnings.label' | translate}} · {{'booklet-config.hint-default' | translate}} 5,1
+    </label>
+    <mat-form-field>
+      <mat-label>unit_time_left_warnings</mat-label>
+      <input matInput [disabled]="disabled"
+        [(ngModel)]="bookletConfig.unitTimeLeftWarnings"
+        (ngModelChange)="configChanged.emit(bookletConfig)">
+    </mat-form-field>
+  }
 </div>

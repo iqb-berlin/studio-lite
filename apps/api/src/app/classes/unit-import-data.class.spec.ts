@@ -68,6 +68,45 @@ describe('UnitImportData', () => {
     expect(() => new UnitImportData(invalidFile)).toThrow('metadata element missing');
   });
 
+  it('should not resolve empty companion references to a bare folder', () => {
+    // An empty <CodingSchemeRef/> (and an empty metadata <Reference/>) means the
+    // unit points at no companion file. It must yield '' rather than the folder
+    // prefix, otherwise the import reports a missing file that was never referenced.
+    const emptyRefsXml = `
+      <Unit>
+        <Metadata lastChange="2023-01-01T12:00:00Z">
+          <Id>UNIT02</Id>
+          <Label>Unit Label</Label>
+          <Reference/>
+        </Metadata>
+        <CodingSchemeRef schemer="schemer-v1"/>
+        <UnitCommentsRef/>
+        <UnitRichNotesRef/>
+      </Unit>
+    `;
+    const data = new UnitImportData(createMock<FileIo>({
+      originalname: 'folder/unit02.xml',
+      buffer: Buffer.from(emptyRefsXml)
+    }));
+
+    expect(data.codingSchemeFileName).toBe('');
+    expect(data.metadataFileName).toBe('');
+    expect(data.commentsFileName).toBe('');
+    expect(data.richNotesFileName).toBe('');
+    expect(data.definitionFileName).toBe('');
+  });
+
+  it('should resolve references relative to a nested folder path', () => {
+    const data = new UnitImportData(createMock<FileIo>({
+      originalname: 'bundle.zip/sub/unit01.xml',
+      buffer: Buffer.from(xmlContent)
+    }));
+
+    expect(data.definitionFileName).toBe('bundle.zip/sub/unit01.voud');
+    expect(data.codingSchemeFileName).toBe('bundle.zip/sub/unit01.vocs');
+    expect(data.metadataFileName).toBe('bundle.zip/sub/unit01.vomd');
+  });
+
   describe('getFolder', () => {
     it('should return folder path if present', () => {
       const data = new UnitImportData(fileIoMock);

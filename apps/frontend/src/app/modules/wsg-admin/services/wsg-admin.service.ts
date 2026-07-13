@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
-import { MDProfile, MDProfileStore } from '@iqb/metadata';
+import { MDProfile } from '@iqbspecs/metadata-profile';
+import { MDProfileStore } from '@iqbspecs/metadata-store/metadata-store.interface';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';

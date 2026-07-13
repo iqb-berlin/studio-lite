@@ -10,6 +10,7 @@ import {
   ReviewFullDto,
   ReviewInListDto,
   UnitDefinitionDto,
+  UnitDownloadSettingsDto,
   UnitInListDto,
   UnitPropertiesDto,
   UnitSchemeDto,
@@ -788,6 +789,49 @@ describe('WorkspaceBackendService', () => {
       req.error(new ProgressEvent('error'));
 
       await resultPromise;
+    });
+  });
+
+  describe('downloadUnitsJson', () => {
+    const buildSettings = (): UnitDownloadSettingsDto => ({
+      unitIdList: [1, 2],
+      exportFormat: 'json',
+      addPlayers: false,
+      addComments: false,
+      addRichNotes: false,
+      addTestTakersReview: 0,
+      addTestTakersMonitor: 0,
+      addTestTakersHot: 0,
+      passwordLess: false,
+      bookletSettings: []
+    });
+
+    it('should send POST request to download-units endpoint', done => {
+      const settings = buildSettings();
+
+      service.downloadUnitsJson(1, settings).subscribe(result => {
+        if (result instanceof Blob) {
+          expect(result).toBeTruthy();
+          done();
+        }
+      });
+
+      const req = httpMock.expectOne(`${serverUrl}workspaces/1/download-units`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(settings);
+      req.flush(new Blob(['zip'], { type: 'application/zip' }));
+    });
+
+    it('should include the settings as request body', () => {
+      const settings = buildSettings();
+      settings.addPlayers = true;
+      settings.unitIdList = [5, 6, 7];
+
+      service.downloadUnitsJson(1, settings).subscribe();
+
+      const req = httpMock.expectOne(`${serverUrl}workspaces/1/download-units`);
+      expect(req.request.body).toEqual(settings);
+      req.flush(new Blob(['zip']));
     });
   });
 });

@@ -1,10 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Logger } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import {
   CreateUnitDto,
-  UnitFullMetadataDto,
+  UnitMetadataValues,
   UnitPropertiesDto,
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
@@ -172,6 +173,21 @@ describe('UnitService', () => {
       const result = await service.create(1, { key: 'u1' } as CreateUnitDto, { id: 1 } as User, false);
       expect(result).toBe(0);
     });
+
+    it('should assign a uuid to the new unit', async () => {
+      const newUnit: Partial<Unit> = { id: 2 };
+      unitsRepository.findOne.mockResolvedValue(null);
+      unitsRepository.create.mockReturnValue(newUnit as Unit);
+      unitsRepository.save.mockResolvedValue(newUnit as Unit);
+      workspaceUserRepository.find.mockResolvedValue([]);
+      usersRepository.findOne.mockResolvedValue({ lastName: 'Doe' } as User);
+
+      await service.create(1, { key: 'u1' } as CreateUnitDto, { id: 1 } as User, false);
+
+      expect(newUnit.uuid).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      );
+    });
   });
 
   describe('findOnesProperties', () => {
@@ -281,6 +297,35 @@ describe('UnitService', () => {
       await service.copy([1], 2, { id: 1, name: 'u' } as User, false);
       expect(unitsRepository.create).toHaveBeenCalled();
     });
+
+    it('should not copy uuid to the new unit', async () => {
+      const sourceUnit = {
+        id: 1,
+        key: 'k',
+        uuid: 'original-uuid',
+        scheme: '{"variableCodings": []}',
+        variables: []
+      } as unknown as Unit;
+
+      unitsRepository.findOne
+        .mockResolvedValueOnce(sourceUnit)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValue(sourceUnit);
+
+      const capturedCreateArg: Partial<Unit> = {};
+      unitsRepository.create.mockImplementation((dto: Partial<Unit>) => {
+        Object.assign(capturedCreateArg, dto);
+        return { id: 2 } as Unit;
+      });
+      unitsRepository.save.mockResolvedValue({ id: 2 } as Unit);
+      workspaceUserRepository.find.mockResolvedValue([]);
+      usersRepository.findOne.mockResolvedValue({ firstName: 'F', lastName: 'L', name: 'N' } as User);
+      unitDefinitionsRepository.findOne.mockResolvedValue({ data: 'xml' } as UnitDefinition);
+
+      await service.copy([1], 2, { id: 1, name: 'u' } as User, false);
+
+      expect(capturedCreateArg.uuid).toBeUndefined();
+    });
   });
 
   describe('remove', () => {
@@ -352,7 +397,7 @@ describe('UnitService', () => {
       const metadata = {
         profiles: [{ profileId: 'p1' }, { profileId: 'p2' }],
         items: []
-      } as UnitFullMetadataDto;
+      } as UnitMetadataValues;
       const result = UnitService.setCurrentProfiles('p1', 'p2', metadata);
       expect(result.profiles[0].isCurrent).toBe(true);
       expect(result.profiles[1].isCurrent).toBe(false);
@@ -366,6 +411,90 @@ describe('UnitService', () => {
 
       await service.findOnesMetadata(1);
       expect(unitMetadataService.getAllByUnitId).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('ensureUuid', () => {
+    const setupTransaction = (unit: Unit | null) => {
+      const mockManager = createMock<EntityManager>();
+      mockManager.findOne.mockResolvedValue(unit);
+      const transaction = jest.fn().mockImplementation(
+        (cb: (manager: EntityManager) => Promise<string>) => cb(mockManager)
+      );
+      Object.defineProperty(unitsRepository, 'manager', {
+        value: { transaction },
+        configurable: true
+      });
+      return mockManager;
+    };
+
+    it('should return existing uuid without saving', async () => {
+      const mockManager = setupTransaction({ id: 1, uuid: 'existing-uuid' } as Unit);
+
+      const result = await service.ensureUuid(1);
+
+      expect(result).toBe('existing-uuid');
+      expect(mockManager.save).not.toHaveBeenCalled();
+    });
+
+    it('should generate, persist and return uuid when none exists', async () => {
+      const mockManager = setupTransaction({ id: 1, uuid: null } as Unit);
+      mockManager.save.mockResolvedValue({ id: 1 } as Unit);
+
+      const result = await service.ensureUuid(1);
+
+      expect(result).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      );
+      expect(mockManager.save).toHaveBeenCalled();
+    });
+
+    it('should throw UnitNotFoundException when unit does not exist', async () => {
+      setupTransaction(null);
+
+      await expect(service.ensureUuid(999)).rejects.toThrow(UnitNotFoundException);
+    });
+  });
+
+  describe('adoptUuidIfFree', () => {
+    it('should adopt the uuid when no other unit holds it', async () => {
+      (unitsRepository.findOne as jest.Mock).mockResolvedValue(null);
+
+      await service.adoptUuidIfFree(1, 'imported-uuid');
+
+      expect(unitsRepository.update).toHaveBeenCalledWith(1, { uuid: 'imported-uuid' });
+    });
+
+    it('should keep none when another unit already holds the uuid', async () => {
+      (unitsRepository.findOne as jest.Mock).mockResolvedValue({ id: 2 } as Unit);
+
+      await service.adoptUuidIfFree(1, 'taken-uuid');
+
+      expect(unitsRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('should silently swallow a unique constraint violation from a concurrent import', async () => {
+      const warnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+      (unitsRepository.findOne as jest.Mock).mockResolvedValue(null);
+      (unitsRepository.update as jest.Mock).mockRejectedValue(
+        new QueryFailedError('UPDATE', [], Object.assign(new Error('duplicate key'), { code: '23505' }))
+      );
+
+      await expect(service.adoptUuidIfFree(1, 'raced-uuid')).resolves.toBeUndefined();
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
+    });
+
+    it('should warn about other update failures instead of hiding them', async () => {
+      const warnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+      (unitsRepository.findOne as jest.Mock).mockResolvedValue(null);
+      (unitsRepository.update as jest.Mock).mockRejectedValue(new Error('connection lost'));
+
+      await expect(service.adoptUuidIfFree(1, 'imported-uuid')).resolves.toBeUndefined();
+
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('connection lost'));
+      warnSpy.mockRestore();
     });
   });
 });

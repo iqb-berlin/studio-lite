@@ -1,10 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
-import { StreamableFile } from '@nestjs/common';
+import { BadRequestException, StreamableFile } from '@nestjs/common';
 import {
   GroupNameDto,
   NameDto,
   RequestReportDto,
+  UnitDownloadSettingsDto,
   UsersInWorkspaceDto,
   UserWorkspaceFullDto,
   WorkspaceFullDto,
@@ -90,7 +91,7 @@ describe('WorkspaceController', () => {
       expect(res).toEqual(result);
     });
 
-    it('should download units', async () => {
+    it('should download units as StreamableFile', async () => {
       const mockFileBuffer = Buffer.from('test');
       jest.spyOn(UnitDownloadClass, 'get').mockResolvedValue(mockFileBuffer);
       const res = createMock<Response>();
@@ -103,6 +104,66 @@ describe('WorkspaceController', () => {
         'Content-Disposition': 'attachment; filename="studio-export-units.zip"'
       });
       expect(result).toBeInstanceOf(StreamableFile);
+    });
+
+    it('should pass xml as explicit exportFormat argument', async () => {
+      const mockFileBuffer = Buffer.from('test');
+      const spy = jest.spyOn(UnitDownloadClass, 'get').mockResolvedValue(mockFileBuffer);
+      const res = createMock<Response>();
+
+      await controller.find(1, true, '{}', res);
+
+      expect(spy.mock.lastCall[7]).toBe('xml');
+    });
+
+    it('should throw BadRequestException for malformed settings JSON', async () => {
+      const res = createMock<Response>();
+
+      await expect(controller.find(1, true, '{not-json}', res))
+        .rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('downloadUnitsJson', () => {
+    const minimalSettings = (): UnitDownloadSettingsDto => ({
+      unitIdList: [1, 2],
+      exportFormat: 'xml',
+      addPlayers: false,
+      addComments: false,
+      addRichNotes: false,
+      addTestTakersReview: 0,
+      addTestTakersMonitor: 0,
+      addTestTakersHot: 0,
+      passwordLess: false,
+      bookletSettings: []
+    });
+
+    afterEach(() => jest.restoreAllMocks());
+
+    it('should return a StreamableFile', async () => {
+      jest.spyOn(UnitDownloadClass, 'get').mockResolvedValue(Buffer.from('test'));
+      const result = await controller.downloadUnitsJson(1, minimalSettings(), createMock<Response>());
+      expect(result).toBeInstanceOf(StreamableFile);
+    });
+
+    it('should pass json as explicit exportFormat argument', async () => {
+      const spy = jest.spyOn(UnitDownloadClass, 'get').mockResolvedValue(Buffer.from('test'));
+
+      await controller.downloadUnitsJson(1, minimalSettings(), createMock<Response>());
+
+      expect(spy.mock.lastCall[7]).toBe('json');
+    });
+
+    it('should set application/zip content-type header', async () => {
+      jest.spyOn(UnitDownloadClass, 'get').mockResolvedValue(Buffer.from('test'));
+      const res = createMock<Response>();
+
+      await controller.downloadUnitsJson(1, minimalSettings(), res);
+
+      expect(res.set).toHaveBeenCalledWith({
+        'Content-Type': 'application/zip',
+        'Content-Disposition': 'attachment; filename="studio-export-units.zip"'
+      });
     });
   });
 

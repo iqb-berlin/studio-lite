@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
-import { TextWithLanguage } from '@iqb/metadata';
+import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profile';
 import { MetadataProfileGroup } from '@studio-lite-lib/api-dto';
 
 @Entity()

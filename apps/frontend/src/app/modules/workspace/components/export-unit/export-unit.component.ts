@@ -9,21 +9,34 @@ import {
   MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle
 } from '@angular/material/expansion';
 import { FormsModule } from '@angular/forms';
+import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect, MatOption } from '@angular/material/select';
 import { WorkspaceService } from '../../services/workspace.service';
 import { BookletConfigEditComponent } from '../booklet-config-edit/booklet-config-edit.component';
 import { ExportTestTakerConfigComponent } from '../export-test-taker-config/export-test-taker-config.component';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export-unit-file-config.component';
+import { mapBookletConfigToModernKeys, normalizeLegacyBookletConfig } from '../../utils/booklet-config-export.utils';
+import { HasTakersPipe } from '../../pipes/has-takers.pipe';
 
 @Component({
   templateUrl: './export-unit.component.html',
   styleUrls: ['export-unit.component.scss'],
-  // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, SelectUnitListComponent, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, ExportTestTakerConfigComponent, BookletConfigEditComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, FormsModule, ExportUnitFileConfigComponent]
+  imports: [
+    MatDialogTitle, MatDialogContent, SelectUnitListComponent,
+    MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle,
+    ExportTestTakerConfigComponent, BookletConfigEditComponent,
+    MatDialogActions, MatButton, MatDialogClose,
+    TranslateModule, FormsModule, ExportUnitFileConfigComponent,
+    MatFormField, MatLabel, MatError, MatInput, MatSelect, MatOption,
+    HasTakersPipe
+  ]
 })
 export class ExportUnitComponent {
   unitExportSettings: UnitDownloadSettingsDto = {
     unitIdList: [],
+    exportFormat: 'xml',
     addComments: false,
     addRichNotes: false,
     addPlayers: false,
@@ -31,16 +44,9 @@ export class ExportUnitComponent {
     addTestTakersMonitor: 0,
     addTestTakersHot: 0,
     passwordLess: false,
+    bookletLabel: 'Testheft 1',
+    groupLabel: 'Gruppe 1',
     bookletSettings: []
-  };
-
-  readonly bookletKeyMap = {
-    pagingMode: 'pagingMode',
-    pageNaviButtons: 'page_navibuttons',
-    unitNaviButtons: 'unit_navibuttons',
-    controllerDesign: 'controller_design',
-    unitScreenHeader: 'unit_screenheader',
-    unitTitle: 'unit_title'
   };
 
   bookletConfigSettings: BookletConfigDto | undefined;
@@ -50,17 +56,12 @@ export class ExportUnitComponent {
     public workspaceService: WorkspaceService
   ) {
     if (this.data && this.data.bookletConfigSettings) {
-      this.bookletConfigSettings = data.bookletConfigSettings;
+      this.bookletConfigSettings = normalizeLegacyBookletConfig(data.bookletConfigSettings);
       this.setBookletConfigSettings(this.bookletConfigSettings);
     }
   }
 
-  setBookletConfigSettings(booklet: BookletConfigDto) {
-    this.unitExportSettings.bookletSettings = Object.keys(booklet)
-      .map(key => ({
-        key: this.bookletKeyMap[key as keyof BookletConfigDto] as string,
-        value: booklet[key as keyof BookletConfigDto] as string
-      }))
-      .filter(config => config.value !== '');
+  setBookletConfigSettings(booklet: BookletConfigDto): void {
+    this.unitExportSettings.bookletSettings = mapBookletConfigToModernKeys(booklet);
   }
 }

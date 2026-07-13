@@ -5,14 +5,15 @@ import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions, FormlyModule } from '@ngx-formly/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
-import { ItemsMetadataValues, ProfileMetadataValues } from '@studio-lite-lib/api-dto';
-import { MDProfile } from '@iqb/metadata';
+import { ItemsMetadataValues, MetadataValues } from '@studio-lite-lib/api-dto';
+import { MDProfile } from '@iqbspecs/metadata-profile';
 import { MatIcon } from '@angular/material/icon';
 import {
   BehaviorSubject, delay, map, Observable, Subject, takeUntil
 } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
-import { ProfileFormComponent } from '../profile-form/profile-form.component';
+import { ProfileFormComponent, UnitMetadataValues as IqbUnitMetadataValues } from '@iqb/metadata-components';
+import { MetadataService } from '../../services/metadata.service';
 import { AliasId } from '../../models/alias-id.interface';
 import { ItemModel } from '../../models/item-model.interface';
 
@@ -33,13 +34,20 @@ export class ItemComponent implements OnInit, OnChanges, OnDestroy {
   @Output() metadataChange: EventEmitter<ItemsMetadataValues[]> = new EventEmitter();
 
   hasError!: Observable<boolean>;
+  get iqbMetadataValues(): IqbUnitMetadataValues {
+    return this.metadata[this.itemIndex] as unknown as IqbUnitMetadataValues;
+  }
+
   private ngUnsubscribe = new Subject<void>();
   form = new FormGroup({});
   fields!: FormlyFieldConfig[];
   model: ItemModel = {};
   options: FormlyFormOptions = {};
 
-  constructor(private translateService:TranslateService) { }
+  constructor(
+    private translateService: TranslateService,
+    public metadataService: MetadataService
+  ) { }
 
   ngOnInit(): void {
     this.initModel();
@@ -190,8 +198,11 @@ export class ItemComponent implements OnInit, OnChanges, OnDestroy {
     this.emitMetadata();
   }
 
-  onMetadataChange(metadata: Partial<ProfileMetadataValues>): void {
-    this.metadata[this.itemIndex] = metadata;
+  onMetadataChange(metadata: Partial<IqbUnitMetadataValues>): void {
+    // Keep the identity of items[itemIndex]: the parent tracks the item list
+    // by object identity, so replacing the object collapses the item panel.
+    // The profile form only owns 'profiles'; other keys in the event may be stale.
+    this.metadata[this.itemIndex].profiles = metadata.profiles as unknown as MetadataValues[];
     this.emitMetadata();
   }
 

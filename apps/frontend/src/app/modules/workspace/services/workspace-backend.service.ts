@@ -1,5 +1,7 @@
 import { catchError, map } from 'rxjs/operators';
-import { HttpClient, HttpEventType, HttpParams } from '@angular/common/http';
+import {
+  HttpClient, HttpEvent, HttpEventType, HttpParams
+} from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Inject, Injectable } from '@angular/core';
 import {
@@ -143,6 +145,19 @@ export class WorkspaceBackendService {
       );
   }
 
+  private static mapDownloadEvent(event: HttpEvent<Blob>): Blob | number | null {
+    if (event) {
+      if (event.type === HttpEventType.DownloadProgress) {
+        return event.total ? Math.round(100 * (event.loaded / event.total)) : event.loaded;
+      }
+      if (event.type === HttpEventType.Response) {
+        return event.body;
+      }
+      return 0;
+    }
+    return -1;
+  }
+
   downloadUnits(
     workspaceId: number, settings: UnitDownloadSettingsDto
   ): Observable<Blob | number | null> {
@@ -150,27 +165,27 @@ export class WorkspaceBackendService {
     queryParams = queryParams.append('download', true);
     queryParams = queryParams.append('settings', JSON.stringify(settings));
     return this.http.get(`${this.serverUrl}workspaces/${workspaceId}`, {
-      headers: {
-        Accept: 'application/zip'
-      },
+      headers: { Accept: 'application/zip' },
       params: queryParams,
       responseType: 'blob',
       reportProgress: true,
       observe: 'events'
-    }).pipe(
-      map(event => {
-        if (event) {
-          if (event.type === HttpEventType.DownloadProgress) {
-            return event.total ? Math.round(100 * (event.loaded / event.total)) : event.loaded;
-          }
-          if (event.type === HttpEventType.Response) {
-            return event.body;
-          }
-          return 0;
-        }
-        return -1;
-      })
-    );
+    }).pipe(map(WorkspaceBackendService.mapDownloadEvent));
+  }
+
+  downloadUnitsJson(
+    workspaceId: number, settings: UnitDownloadSettingsDto
+  ): Observable<Blob | number | null> {
+    return this.http.post<Blob>(
+      `${this.serverUrl}workspaces/${workspaceId}/download-units`,
+      settings,
+      {
+        headers: { Accept: 'application/zip' },
+        responseType: 'blob' as 'json',
+        reportProgress: true,
+        observe: 'events'
+      }
+    ).pipe(map(WorkspaceBackendService.mapDownloadEvent));
   }
 
   getCodingBook(workspaceId: number, missingsProfile:string, contentOptions: CodeBookContentSetting,

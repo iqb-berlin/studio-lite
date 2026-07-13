@@ -7,6 +7,9 @@ export class UnitPropertiesDto {
     id!: number;
 
   @ApiProperty()
+    uuid?: string;
+
+  @ApiProperty()
     key?: string;
 
   @ApiProperty()

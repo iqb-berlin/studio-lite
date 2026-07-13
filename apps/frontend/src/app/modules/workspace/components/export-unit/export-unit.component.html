@@ -11,12 +11,13 @@
     </studio-lite-select-unit-list>
     <div class="fx-flex-row-50 settings">
       <studio-lite-export-unit-file-config
+        [(exportFormat)]="unitExportSettings.exportFormat"
         [(addPlayers)]="unitExportSettings.addPlayers"
         [(addComments)]="unitExportSettings.addComments"
         [(addRichNotes)]="unitExportSettings.addRichNotes"
         (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
       </studio-lite-export-unit-file-config>
-      <mat-accordion>
+      <mat-accordion multi>
         <mat-expansion-panel
           [expanded]="true">
           <mat-expansion-panel-header>
@@ -29,21 +30,56 @@
                                      [(addTestTakersMonitor)]="unitExportSettings.addTestTakersMonitor"
                                      [(passwordLess)]="unitExportSettings.passwordLess">
             </studio-lite-export-test-taker-config>
+            <label class="field-description">{{'unit-download.dialog.desc-group-label' | translate}}</label>
+            <mat-form-field class="full-width">
+              <mat-label>{{'unit-download.dialog.xml-key-group-label' | translate}}</mat-label>
+              <input matInput [(ngModel)]="unitExportSettings.groupLabel">
+            </mat-form-field>
+            <label class="field-description">{{'unit-download.dialog.desc-monitor-booklet-visibility' | translate}}</label>
+            <mat-form-field class="full-width">
+              <mat-label>{{'unit-download.dialog.xml-key-monitor-booklet-visibility' | translate}}</mat-label>
+              <mat-select [(ngModel)]="unitExportSettings.monitorBookletVisibility"
+                          [disabled]="!unitExportSettings.addTestTakersMonitor">
+                <mat-option [value]="undefined"></mat-option>
+                <mat-option value="visible">visible</mat-option>
+                <mat-option value="collapsed">collapsed</mat-option>
+                <mat-option value="hidden">hidden</mat-option>
+              </mat-select>
+            </mat-form-field>
           </mat-expansion-panel>
-          <mat-expansion-panel expanded="false"
-                               [disabled]="!(unitExportSettings.addTestTakersReview +
-                                             unitExportSettings.addTestTakersHot +
-                                             unitExportSettings.addTestTakersMonitor)">
+          <mat-expansion-panel
+            [expanded]="unitExportSettings.addTestTakersReview
+              | hasTakers : unitExportSettings.addTestTakersHot : unitExportSettings.addTestTakersMonitor"
+            [disabled]="!(unitExportSettings.addTestTakersReview
+              | hasTakers : unitExportSettings.addTestTakersHot : unitExportSettings.addTestTakersMonitor)">
             <mat-expansion-panel-header>
               <mat-panel-title>
                 {{'workspace.booklet-settings' | translate}}
               </mat-panel-title>
             </mat-expansion-panel-header>
-              <studio-lite-booklet-config-edit [disabled]="!(unitExportSettings.addTestTakersReview +
-                                                             unitExportSettings.addTestTakersHot +
-                                                             unitExportSettings.addTestTakersMonitor)"
-                                               [config]="bookletConfigSettings"
-                                               (configChanged)="setBookletConfigSettings($event)">
+              <label class="field-description">{{'unit-download.dialog.desc-booklet-id' | translate}}</label>
+              <mat-form-field class="full-width">
+                <mat-label>{{'unit-download.dialog.xml-key-booklet-id' | translate}}</mat-label>
+                <input matInput
+                  name="bookletId"
+                  [(ngModel)]="unitExportSettings.bookletId"
+                  [required]="true"
+                  #bookletId="ngModel">
+                @if (bookletId.invalid && bookletId.touched) {
+                  <mat-error>{{'unit-download.dialog.booklet-id-required' | translate}}</mat-error>
+                }
+              </mat-form-field>
+              <label class="field-description">{{'unit-download.dialog.desc-booklet-label' | translate}}</label>
+              <mat-form-field class="full-width">
+                <mat-label>{{'unit-download.dialog.xml-key-booklet-label' | translate}}</mat-label>
+                <input matInput [(ngModel)]="unitExportSettings.bookletLabel">
+              </mat-form-field>
+              <studio-lite-booklet-config-edit
+                [disabled]="!(unitExportSettings.addTestTakersReview
+                  | hasTakers : unitExportSettings.addTestTakersHot : unitExportSettings.addTestTakersMonitor)"
+                [config]="bookletConfigSettings"
+                [context]="'export'"
+                (configChanged)="setBookletConfigSettings($event)">
               </studio-lite-booklet-config-edit>
           </mat-expansion-panel>
         </mat-accordion>
@@ -52,9 +88,11 @@
   <mat-dialog-actions align="end">
     <div class="fx-row-start-stretch">
       <button mat-raised-button color="primary"
-              type="submit"
               [mat-dialog-close]="unitExportSettings"
-              [disabled]="!unitExportSettings.unitIdList.length"
+              [disabled]="!unitExportSettings.unitIdList.length
+                || ((unitExportSettings.addTestTakersReview
+                     | hasTakers : unitExportSettings.addTestTakersHot : unitExportSettings.addTestTakersMonitor)
+                    && !unitExportSettings.bookletId)"
               data-cy="workspace-export-unit-button">
         {{'unit-download.dialog.ok-button-label' | translate}}</button>
       <button mat-raised-button [mat-dialog-close]="false">

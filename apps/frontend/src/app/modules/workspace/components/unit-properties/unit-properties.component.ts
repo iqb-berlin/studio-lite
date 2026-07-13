@@ -40,11 +40,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIcon } from '@angular/material/icon';
-import { MDProfile } from '@iqb/metadata';
+import { MDProfile } from '@iqbspecs/metadata-profile';
+import { ProfileFormComponent, UnitMetadataValues as IqbUnitMetadataValues } from '@iqb/metadata-components';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
-import { ProfileFormComponent } from '../../../metadata/components/profile-form/profile-form.component';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { State } from '../../../admin/models/state.type';
@@ -105,6 +105,10 @@ export class UnitPropertiesComponent
   private statesChangedSubscription: Subscription | undefined;
   ngUnsubscribe = new Subject<void>();
   metadata!: UnitMetadataValues;
+  get iqbMetadataValues(): IqbUnitMetadataValues {
+    return this.metadata as unknown as IqbUnitMetadataValues;
+  }
+
   workspaceSettings!: WorkspaceSettingsDto;
   metadataLoader: BehaviorSubject<UnitMetadataValues> = new BehaviorSubject({});
   variablesLoader: BehaviorSubject<AliasId[]> = new BehaviorSubject<AliasId[]>(
@@ -136,7 +140,7 @@ export class UnitPropertiesComponent
     private confirmDialog: MatDialog,
     public translateService: TranslateService,
     private metadataBackendService: MetadataBackendService,
-    private metadataService: MetadataService,
+    public metadataService: MetadataService,
     public i18nService: I18nService
   ) {
     super();
@@ -334,7 +338,7 @@ export class UnitPropertiesComponent
         .getMetadataProfile(this.workspaceSettings.unitMDProfile)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(profile => {
-          const unitProfile = new MDProfile(profile);
+          const unitProfile = profile as unknown as MDProfile;
           this.metadataService.loadProfileVocabularies(unitProfile).then(() => {
             this.unitProfile = unitProfile;
           });
@@ -350,7 +354,7 @@ export class UnitPropertiesComponent
         .getMetadataProfile(this.workspaceSettings.itemMDProfile)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(profile => {
-          const itemProfile = new MDProfile(profile);
+          const itemProfile = profile as unknown as MDProfile;
           this.metadataService.loadProfileVocabularies(itemProfile).then(() => {
             this.itemProfile = itemProfile;
           });
@@ -446,7 +450,11 @@ export class UnitPropertiesComponent
     return [];
   }
 
-  onMetadataChange(metadata: UnitMetadataValues): void {
+  onMetadataChange(metadata: Partial<IqbUnitMetadataValues>): void {
+    this.workspaceService.getUnitMetadataStore()?.setMetadata(metadata as unknown as UnitMetadataValues);
+  }
+
+  onItemsMetadataChange(metadata: UnitMetadataValues): void {
     this.workspaceService.getUnitMetadataStore()?.setMetadata(metadata);
   }
 

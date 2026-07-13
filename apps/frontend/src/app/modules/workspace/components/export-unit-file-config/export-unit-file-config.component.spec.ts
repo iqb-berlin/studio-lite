@@ -65,4 +65,14 @@ describe('ExportUnitFileConfigComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should default exportFormat to json', () => {
+    expect(component.exportFormat).toBe('json');
+  });
+
+  it('should emit exportFormatChange when format changes', () => {
+    jest.spyOn(component.exportFormatChange, 'emit');
+    component.exportFormatChange.emit('xml');
+    expect(component.exportFormatChange.emit).toHaveBeenCalledWith('xml');
+  });
 });
