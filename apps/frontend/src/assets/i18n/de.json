@@ -32,7 +32,8 @@
       "xml-parse": "Nicht als Unit-Xml erkannt",
       "json-parse": "Nicht als Unit-Json-Index erkannt",
       "missing-file": "Referenzierte Datei nicht im Upload gefunden",
-      "ignore-file": "Datei wurde ignoriert"
+      "ignore-file": "Datei wurde ignoriert",
+      "annotation-dropped": "Anmerkungen (annotation) zu Vokabular-Einträgen können nicht gespeichert werden und wurden verworfen"
     },
     "menu-label": {
       "import": "Import",
@@ -42,8 +43,8 @@
   },
   "unit-download": {
     "export-format": "Exportformat",
-    "export-format-json": "JSON (Standard)",
-    "export-format-xml": "XML (Legacy)",
+    "export-format-json": "JSON",
+    "export-format-xml": "XML (Standard)",
     "add-files": "Zusätzliche Dateien",
     "add-player": "Player hinzufügen",
     "add-comments": "Kommentare hinzufügen",
