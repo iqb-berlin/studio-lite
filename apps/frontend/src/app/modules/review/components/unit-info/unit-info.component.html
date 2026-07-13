@@ -28,13 +28,7 @@
     }
     @if (reviewService.reviewConfig.showMetadata && properties) {
       <studio-lite-unit-properties
-        [description]="properties ? properties.description : null"
-        [lastChangedDefinition] = "properties ? properties.lastChangedDefinition : null"
-        [lastChangedMetadata] = "properties ? properties.lastChangedMetadata : null"
-        [lastChangedScheme] = "properties ? properties.lastChangedScheme : null"
-        [lastChangedDefinitionUser]="properties ? properties.lastChangedDefinitionUser : null"
-        [lastChangedMetadataUser]="properties ? properties.lastChangedMetadataUser : null"
-        [lastChangedSchemeUser]="properties ? properties.lastChangedSchemeUser : null">
+        [description]="properties ? properties.description : null">
       </studio-lite-unit-properties>
       <studio-lite-print-metadata
         [metadata] = "properties && properties.metadata || null">
@@ -55,6 +49,17 @@
         [reviewId]="reviewService.reviewId"
         [comments]="reviewService.allComments">
       </studio-lite-unit-print-comments>
+    }
+
+    @if (reviewService.reviewConfig.showMetadata && properties) {
+      <studio-lite-unit-last-changes
+        [lastChangedDefinition]="properties.lastChangedDefinition"
+        [lastChangedMetadata]="properties.lastChangedMetadata"
+        [lastChangedScheme]="properties.lastChangedScheme"
+        [lastChangedDefinitionUser]="properties.lastChangedDefinitionUser"
+        [lastChangedMetadataUser]="properties.lastChangedMetadataUser"
+        [lastChangedSchemeUser]="properties.lastChangedSchemeUser">
+      </studio-lite-unit-last-changes>
     }
   </div>
 </div>

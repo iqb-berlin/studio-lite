@@ -43,6 +43,10 @@ describe('UnitPrintLayoutComponent', () => {
     @Input() player!: string;
     @Input() editor!: string | undefined | null;
     @Input() schemer!: string | undefined | null;
+  }
+
+  @Component({ selector: 'studio-lite-unit-last-changes', template: '', standalone: false })
+  class MockUnitLastChangesComponent {
     @Input() lastChangedDefinition!: Date | undefined | null;
     @Input() lastChangedMetadata!: Date | undefined | null;
     @Input() lastChangedScheme!: Date | undefined | null;
@@ -101,6 +105,7 @@ describe('UnitPrintLayoutComponent', () => {
       declarations: [
         MockUnitPrintMetaDateComponent,
         MockUnitMetaDataComponent,
+        MockUnitLastChangesComponent,
         MockUnitPrintCommentsComponent,
         MockUnitPrintCodingComponent,
         MockUnitPrintPlayerComponent,
