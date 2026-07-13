@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import { DatePipe } from '@angular/common';
 import { of } from 'rxjs';
 import { SimpleChange } from '@angular/core';
 import { UnitPropertiesComponent } from './unit-properties.component';
@@ -29,8 +28,7 @@ describe('UnitPropertiesComponent', () => {
         UnitPropertiesComponent
       ],
       providers: [
-        { provide: WorkspaceBackendService, useValue: mockBackendService },
-        DatePipe
+        { provide: WorkspaceBackendService, useValue: mockBackendService }
       ]
     }).compileComponents();
 
@@ -66,6 +64,28 @@ describe('UnitPropertiesComponent', () => {
     expect(mockBackendService.getWorkspaceGroupStates).not.toHaveBeenCalled();
   });
 
+  it('should render key and name as headings', () => {
+    component.key = 'UNIT01';
+    component.name = 'Meine Aufgabe';
+
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.unit-key')?.textContent).toBe('UNIT01');
+    expect(compiled.querySelector('.unit-name')?.textContent).toBe('Meine Aufgabe');
+  });
+
+  it('should not render key and name headings when they are not set', () => {
+    component.key = '';
+    component.name = null;
+
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.unit-key')).toBeNull();
+    expect(compiled.querySelector('.unit-name')).toBeNull();
+  });
+
   it('should render all properties in the table', () => {
     component.stateLabel = 'Resolved State';
     component.groupName = 'Group A';
@@ -74,8 +94,6 @@ describe('UnitPropertiesComponent', () => {
     component.player = 'Player 1.0';
     component.editor = 'Editor 1.0';
     component.schemer = 'Schemer 1.0';
-    component.lastChangedDefinition = new Date('2024-01-22T10:00:00');
-    component.lastChangedDefinitionUser = 'John Doe';
 
     fixture.detectChanges();
 
@@ -89,8 +107,5 @@ describe('UnitPropertiesComponent', () => {
     expect(text).toContain('Player 1.0');
     expect(text).toContain('Editor 1.0');
     expect(text).toContain('Schemer 1.0');
-    expect(text).toContain('John Doe');
-    // DatePipe format: dd.MM.yyyy HH:mm
-    expect(text).toContain('22.01.2024 10:00');
   });
 });

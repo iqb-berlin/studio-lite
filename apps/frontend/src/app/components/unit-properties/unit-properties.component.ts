@@ -2,7 +2,6 @@ import {
   Component, Input, OnChanges, SimpleChanges
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
-import { DatePipe } from '@angular/common';
 import { WorkspaceBackendService } from '../../modules/workspace/services/workspace-backend.service';
 import { State } from '../../modules/admin/models/state.type';
 
@@ -10,7 +9,7 @@ import { State } from '../../modules/admin/models/state.type';
   selector: 'studio-lite-unit-properties',
   templateUrl: './unit-properties.component.html',
   styleUrls: ['./unit-properties.component.scss'],
-  imports: [DatePipe, TranslateModule]
+  imports: [TranslateModule]
 })
 export class UnitPropertiesComponent implements OnChanges {
   @Input() workspaceGroupId!: number;
@@ -24,12 +23,6 @@ export class UnitPropertiesComponent implements OnChanges {
   @Input() player!: string;
   @Input() editor!: string | undefined | null;
   @Input() schemer!: string | undefined | null;
-  @Input() lastChangedDefinition!: Date | undefined | null;
-  @Input() lastChangedMetadata!: Date | undefined | null;
-  @Input() lastChangedScheme!: Date | undefined | null;
-  @Input() lastChangedDefinitionUser!: string | undefined | null;
-  @Input() lastChangedMetadataUser!: string | undefined | null;
-  @Input() lastChangedSchemeUser!: string | undefined | null;
 
   states: State[] = [];
   stateLabel: string = '';
