@@ -66,6 +66,28 @@ describe('UnitPropertiesComponent', () => {
     expect(mockBackendService.getWorkspaceGroupStates).not.toHaveBeenCalled();
   });
 
+  it('should render key and name as headings', () => {
+    component.key = 'UNIT01';
+    component.name = 'Meine Aufgabe';
+
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.unit-key')?.textContent).toBe('UNIT01');
+    expect(compiled.querySelector('.unit-name')?.textContent).toBe('Meine Aufgabe');
+  });
+
+  it('should not render key and name headings when they are not set', () => {
+    component.key = '';
+    component.name = null;
+
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.unit-key')).toBeNull();
+    expect(compiled.querySelector('.unit-name')).toBeNull();
+  });
+
   it('should render all properties in the table', () => {
     component.stateLabel = 'Resolved State';
     component.groupName = 'Group A';
