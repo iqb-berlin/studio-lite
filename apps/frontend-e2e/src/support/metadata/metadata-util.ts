@@ -15,13 +15,9 @@ function getCheckBoxByName(name: string) {
         cy.wrap($actualElem).prev().click();
       }
     });
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.get('button').contains(json.confirm).click();
-    });
+    cy.get('[data-cy="metadata-nested-tree-confirm-button"]').click();
   } else {
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.get('button').contains(json.cancel).click();
-    });
+    cy.get('[data-cy="metadata-nested-tree-cancel-button"]').click();
   }
 }
 
