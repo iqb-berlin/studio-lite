@@ -85,12 +85,30 @@ describe('ItemComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith(component.metadata);
   });
 
-  it('should update metadata when onMetadataChange is called', () => {
+  it('should update profiles and keep the item identity when onMetadataChange is called', () => {
     const emitSpy = jest.spyOn(component.metadataChange, 'emit');
-    const newMetadata = { id: 'item1', description: 'updated' } as unknown as ItemsMetadataValues;
-    component.onMetadataChange(newMetadata as unknown as Parameters<typeof component.onMetadataChange>[0]);
-    expect(component.metadata[0]).toEqual(newMetadata);
-    expect(emitSpy).toHaveBeenCalled();
+    const originalItem = component.metadata[0];
+    const profiles = [{ profileId: 'p1', entries: [] }];
+    const newMetadata = { profiles } as unknown as Parameters<typeof component.onMetadataChange>[0];
+    component.onMetadataChange(newMetadata);
+    expect(component.metadata[0]).toBe(originalItem);
+    expect(component.metadata[0].profiles).toEqual(profiles);
+    expect(emitSpy).toHaveBeenCalledWith(component.metadata);
+  });
+
+  it('should not overwrite core item fields with stale values from onMetadataChange', () => {
+    component.metadata[0].description = 'current description';
+    component.metadata[0].weighting = 2;
+    const newMetadata = {
+      id: 'stale-id',
+      description: 'stale description',
+      weighting: 1,
+      profiles: [{ profileId: 'p1', entries: [] }]
+    } as unknown as Parameters<typeof component.onMetadataChange>[0];
+    component.onMetadataChange(newMetadata);
+    expect(component.metadata[0].id).toBe('item1');
+    expect(component.metadata[0].description).toBe('current description');
+    expect(component.metadata[0].weighting).toBe(2);
   });
 
   it('should get unused variables correctly', () => {

@@ -5,7 +5,7 @@ import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions, FormlyModule } from '@ngx-formly/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
-import { ItemsMetadataValues } from '@studio-lite-lib/api-dto';
+import { ItemsMetadataValues, MetadataValues } from '@studio-lite-lib/api-dto';
 import { MDProfile } from '@iqbspecs/metadata-profile';
 import { MatIcon } from '@angular/material/icon';
 import {
@@ -199,7 +199,10 @@ export class ItemComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onMetadataChange(metadata: Partial<IqbUnitMetadataValues>): void {
-    this.metadata[this.itemIndex] = metadata as unknown as ItemsMetadataValues;
+    // Keep the identity of items[itemIndex]: the parent tracks the item list
+    // by object identity, so replacing the object collapses the item panel.
+    // The profile form only owns 'profiles'; other keys in the event may be stale.
+    this.metadata[this.itemIndex].profiles = metadata.profiles as unknown as MetadataValues[];
     this.emitMetadata();
   }
 
