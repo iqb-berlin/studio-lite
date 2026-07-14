@@ -1,5 +1,7 @@
 import { Logger } from '@nestjs/common';
-import { UnitItemDto, UnitItemInViewDto, UnitItemWithMetadataDto } from '@studio-lite-lib/api-dto';
+import {
+  MetadataDto, UnitItemDto, UnitItemInViewDto, UnitItemMetadataDto, UnitItemWithMetadataDto
+} from '@studio-lite-lib/api-dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { profileIdsMatch } from '@studio-lite/shared-code';
@@ -76,30 +78,53 @@ export class UnitItemService {
     return { unchanged, removed, added };
   }
 
+  // Reconcile an incoming profile with its stored row: the client cannot supply a
+  // stable row id (the profile form re-emits without it), so identity, creation
+  // time and the current-profile flag are carried over from the stored row and
+  // only the entries/values come from the incoming payload.
+  static mergeMetadata<T extends MetadataDto>(existing: T, incoming: T): T {
+    return {
+      ...existing,
+      ...incoming,
+      id: existing.id,
+      createdAt: existing.createdAt,
+      isCurrent: incoming.isCurrent ?? existing.isCurrent
+    };
+  }
+
   async updateItem(uuid: string, item: UnitItemWithMetadataDto): Promise<void> {
     const updateItem = await this.getOneByUuid(uuid);
     if (updateItem) {
       const { profiles, ...unitItem } = item;
       await this.unitItemRepository.update(uuid, unitItem);
-      const profilesToUpdate = await this.unitItemMetadataService.getAllByItemId(item.uuid);
-      const { unchanged, removed, added } = UnitItemService.compare(profilesToUpdate, profiles, 'id');
-      unchanged
-        .map(metadata => this.unitItemMetadataService.updateItemMetadata(metadata.id, metadata));
-      removed
-        .map(metadata => this.unitItemMetadataService.removeItemMetadata(metadata.id));
-      added
-        .map(metadata => this.unitItemMetadataService.addItemMetadata(uuid, metadata));
+      await this.reconcileItemProfiles(uuid, profiles || []);
     }
   }
 
-  async patchItemMetadataCurrentProfile(unitId: number, itemProfile: string) {
+  // Match incoming profiles to stored rows by profileId (not by the missing row
+  // id), so an edit updates the existing row instead of deleting and re-inserting
+  // it — which previously dropped created_at/is_current and violated NOT NULL.
+  private async reconcileItemProfiles(uuid: string, profiles: UnitItemMetadataDto[]): Promise<void> {
+    const existingProfiles = await this.unitItemMetadataService.getAllByItemId(uuid);
+    const incomingProfileIds = new Set(profiles.map(profile => profile.profileId));
+    const removed = existingProfiles.filter(existing => !incomingProfileIds.has(existing.profileId));
+    await Promise.all(removed
+      .map(profile => this.unitItemMetadataService.removeItemMetadata(profile.id)));
+    await Promise.all(profiles.map(profile => {
+      const existing = existingProfiles.find(candidate => candidate.profileId === profile.profileId);
+      return existing ?
+        this.unitItemMetadataService.updateItemMetadata(existing.id, UnitItemService.mergeMetadata(existing, profile)) :
+        this.unitItemMetadataService.addItemMetadata(uuid, profile);
+    }));
+  }
+
+  async patchItemMetadataCurrentProfile(unitId: number, itemProfile: string): Promise<void> {
     const itemsToUpdate: UnitItemWithMetadataDto[] = await this.getAllByUnitIdWithMetadata(unitId);
     const profiles = itemsToUpdate.flatMap(metadata => metadata.profiles);
-    profiles.map(metadata => {
+    await Promise.all(profiles.map(metadata => {
       metadata.isCurrent = profileIdsMatch(metadata.profileId, itemProfile);
-      this.unitItemMetadataService.updateItemMetadata(metadata.id, metadata);
-      return metadata;
-    });
+      return this.unitItemMetadataService.updateItemMetadata(metadata.id, metadata);
+    }));
   }
 
   async addItem(unitId: number, item: UnitItemWithMetadataDto): Promise<string> {
@@ -108,9 +133,9 @@ export class UnitItemService {
     const newItem = this.unitItemRepository.create(itemWithoutUuid);
     await this.unitItemRepository.save(newItem);
     if (item.profiles) {
-      item.profiles
-        .map(async profile => this.unitItemMetadataService
-          .addItemMetadata(newItem.uuid, profile));
+      await Promise.all(item.profiles
+        .map(profile => this.unitItemMetadataService
+          .addItemMetadata(newItem.uuid, profile)));
     }
     return newItem.uuid;
   }

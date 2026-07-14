@@ -96,7 +96,10 @@ describe('UnitItemMetadataService', () => {
 
       const result = await service.updateItemMetadata(id, dto);
 
-      expect(repository.update).toHaveBeenCalledWith(id, dto);
+      expect(repository.update).toHaveBeenCalledWith(
+        id,
+        expect.objectContaining({ profileId: 'p1', changedAt: expect.any(Date) })
+      );
       expect(result).toBe(id);
     });
   });

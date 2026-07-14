@@ -23,13 +23,22 @@ export class UnitItemMetadataService {
   async addItemMetadata(unitItemUuid: string, metadata: UnitItemMetadataDto): Promise<number> {
     metadata.unitItemUuid = unitItemUuid;
     const { id, ...metadataWithoutId } = metadata;
-    const newItemMetadata = this.unitItemMetadataRepository.create(metadataWithoutId);
+    // created_at, changed_at and is_current are NOT NULL columns without a DB
+    // default. The client cannot supply them (the profile form re-emits without
+    // them), so they are set here — otherwise the INSERT violates NOT NULL.
+    const now = new Date();
+    const newItemMetadata = this.unitItemMetadataRepository.create({
+      ...metadataWithoutId,
+      isCurrent: metadataWithoutId.isCurrent ?? false,
+      createdAt: metadataWithoutId.createdAt ?? now,
+      changedAt: now
+    });
     await this.unitItemMetadataRepository.save(newItemMetadata);
     return newItemMetadata.id;
   }
 
   async updateItemMetadata(id: number, metadata: UnitItemMetadataDto): Promise<number> {
-    await this.unitItemMetadataRepository.update(id, metadata);
+    await this.unitItemMetadataRepository.update(id, { ...metadata, changedAt: new Date() });
     return id;
   }
 

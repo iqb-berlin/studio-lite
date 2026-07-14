@@ -5,6 +5,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import {
   CreateUnitDto,
+  UnitMetadataDto,
   UnitMetadataValues,
   UnitPropertiesDto,
   UnitSchemeDto
@@ -228,6 +229,33 @@ describe('UnitService', () => {
       unitMetadataService.getAllByUnitId.mockResolvedValue([]);
       await service.patchUnitMetadata(1, []);
       expect(unitMetadataService.getAllByUnitId).toHaveBeenCalled();
+    });
+
+    it('updates the matching stored profile by profileId instead of re-inserting', async () => {
+      // The incoming profile has no row id (the profile form drops it) but keeps
+      // its profileId; it must update the stored row, not delete + re-insert.
+      unitMetadataService.getAllByUnitId.mockResolvedValue([
+        { id: 7, profileId: 'p1' },
+        { id: 8, profileId: 'p2' }
+      ] as UnitMetadataDto[]);
+
+      await service.patchUnitMetadata(1, [{ profileId: 'p1' } as UnitMetadataDto]);
+
+      expect(unitMetadataService.updateMetadata)
+        .toHaveBeenCalledWith(7, expect.objectContaining({ id: 7, profileId: 'p1' }));
+      expect(unitMetadataService.addMetadata).not.toHaveBeenCalled();
+      // p2 is gone from the incoming payload -> removed
+      expect(unitMetadataService.removeMetadata).toHaveBeenCalledWith(8);
+    });
+
+    it('inserts a profile that has no stored counterpart', async () => {
+      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
+
+      await service.patchUnitMetadata(1, [{ profileId: 'p-new' } as UnitMetadataDto]);
+
+      expect(unitMetadataService.addMetadata)
+        .toHaveBeenCalledWith(1, expect.objectContaining({ profileId: 'p-new' }));
+      expect(unitMetadataService.removeMetadata).not.toHaveBeenCalled();
     });
   });
 

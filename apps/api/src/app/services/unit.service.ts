@@ -439,26 +439,31 @@ export class UnitService {
     };
   }
 
+  // Match incoming profiles to stored rows by profileId (not by the missing row
+  // id), so an edit updates the existing row instead of deleting and re-inserting
+  // it — which previously dropped created_at/is_current and violated NOT NULL.
   async patchUnitMetadata(unitId: number, profiles: UnitMetadataDto[]): Promise<void> {
-    const profilesToUpdate = await this.unitMetadataService.getAllByUnitId(unitId);
-    const { unchanged, removed, added } = UnitItemService.compare(profilesToUpdate, profiles, 'id');
-    unchanged
-      .map(metadata => this.unitMetadataService.updateMetadata(metadata.id, metadata));
-    removed
-      .map(metadata => this.unitMetadataService.removeMetadata(metadata.id));
-    added
-      .map(metadata => this.unitMetadataService.addMetadata(unitId, metadata));
+    const existingProfiles = await this.unitMetadataService.getAllByUnitId(unitId);
+    const incomingProfileIds = new Set(profiles.map(profile => profile.profileId));
+    const removed = existingProfiles.filter(existing => !incomingProfileIds.has(existing.profileId));
+    await Promise.all(removed
+      .map(profile => this.unitMetadataService.removeMetadata(profile.id)));
+    await Promise.all(profiles.map(profile => {
+      const existing = existingProfiles.find(candidate => candidate.profileId === profile.profileId);
+      return existing ?
+        this.unitMetadataService.updateMetadata(existing.id, UnitItemService.mergeMetadata(existing, profile)) :
+        this.unitMetadataService.addMetadata(unitId, profile);
+    }));
   }
 
   async patchItemsMetadata(unitId: number, items: UnitItemWithMetadataDto[]): Promise<void> {
     const itemsToUpdate = await this.unitItemService.getAllByUnitIdWithMetadata(unitId);
     const { unchanged, removed, added } = UnitItemService.compare(itemsToUpdate, items, 'uuid');
-    unchanged
-      .map(item => this.unitItemService.updateItem(item.uuid, item));
-    removed
-      .map(item => this.unitItemService.removeItem(item.uuid));
-    added
-      .map(item => this.unitItemService.addItem(unitId, item));
+    await Promise.all([
+      ...unchanged.map(item => this.unitItemService.updateItem(item.uuid, item)),
+      ...removed.map(item => this.unitItemService.removeItem(item.uuid)),
+      ...added.map(item => this.unitItemService.addItem(unitId, item))
+    ]);
   }
 
   // Takes the internal write shape: id and unitItemUuid do not exist yet —
@@ -469,9 +474,9 @@ export class UnitService {
     metadata: UnitMetadataValues
   ): Promise<ItemUuidLookup[]> {
     const profiles = metadata.profiles || [];
-    profiles
+    await Promise.all(profiles
       .map(profile => this.unitMetadataService
-        .addMetadata(unitId, profile as UnitMetadataDto));
+        .addMetadata(unitId, profile as UnitMetadataDto)));
     const items = metadata.items || [];
     const itemUuids = await Promise.all(items
       .map(async item => ({
@@ -632,11 +637,10 @@ export class UnitService {
 
   private async patchUnitMetadataCurrentProfile(unitId: number, unitProfile: string): Promise<void> {
     const profilesToUpdate: UnitMetadataDto[] = await this.unitMetadataService.getAllByUnitId(unitId);
-    profilesToUpdate.map(metadata => {
+    await Promise.all(profilesToUpdate.map(metadata => {
       metadata.isCurrent = profileIdsMatch(metadata.profileId, unitProfile);
-      this.unitMetadataService.updateMetadata(metadata.id, metadata);
-      return metadata;
-    });
+      return this.unitMetadataService.updateMetadata(metadata.id, metadata);
+    }));
   }
 
   async copy(unitIds: number[], newWorkspace: number, user: User, addComments: boolean): Promise<RequestReportDto> {
