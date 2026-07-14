@@ -19,7 +19,7 @@ import {
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { profileIdsMatch } from '@studio-lite/shared-code';
+import { profileIdsMatch, reconcileProfilesByProfileId } from '@studio-lite/shared-code';
 import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
@@ -439,21 +439,15 @@ export class UnitService {
     };
   }
 
-  // Match incoming profiles to stored rows by profileId (not by the missing row
-  // id), so an edit updates the existing row instead of deleting and re-inserting
-  // it — which previously dropped created_at/is_current and violated NOT NULL.
+  // Reconcile unit metadata by profileId (the profile form re-emits without the
+  // row id), so an edit updates the existing row instead of delete + re-insert.
   async patchUnitMetadata(unitId: number, profiles: UnitMetadataDto[]): Promise<void> {
     const existingProfiles = await this.unitMetadataService.getAllByUnitId(unitId);
-    const incomingProfileIds = new Set(profiles.map(profile => profile.profileId));
-    const removed = existingProfiles.filter(existing => !incomingProfileIds.has(existing.profileId));
-    await Promise.all(removed
-      .map(profile => this.unitMetadataService.removeMetadata(profile.id)));
-    await Promise.all(profiles.map(profile => {
-      const existing = existingProfiles.find(candidate => candidate.profileId === profile.profileId);
-      return existing ?
-        this.unitMetadataService.updateMetadata(existing.id, UnitItemService.mergeMetadata(existing, profile)) :
-        this.unitMetadataService.addMetadata(unitId, profile);
-    }));
+    await reconcileProfilesByProfileId(existingProfiles, profiles, {
+      remove: id => this.unitMetadataService.removeMetadata(id),
+      update: (id, metadata) => this.unitMetadataService.updateMetadata(id, metadata),
+      add: metadata => this.unitMetadataService.addMetadata(unitId, metadata)
+    });
   }
 
   async patchItemsMetadata(unitId: number, items: UnitItemWithMetadataDto[]): Promise<void> {

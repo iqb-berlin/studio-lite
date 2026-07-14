@@ -1,10 +1,10 @@
 import { Logger } from '@nestjs/common';
 import {
-  MetadataDto, UnitItemDto, UnitItemInViewDto, UnitItemMetadataDto, UnitItemWithMetadataDto
+  UnitItemDto, UnitItemInViewDto, UnitItemMetadataDto, UnitItemWithMetadataDto
 } from '@studio-lite-lib/api-dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { profileIdsMatch } from '@studio-lite/shared-code';
+import { profileIdsMatch, reconcileProfilesByProfileId } from '@studio-lite/shared-code';
 import UnitItem from '../entities/unit-item.entity';
 import { UnitItemMetadataService } from './unit-item-metadata.service';
 import { ItemCommentService } from './item-comment.service';
@@ -78,20 +78,6 @@ export class UnitItemService {
     return { unchanged, removed, added };
   }
 
-  // Reconcile an incoming profile with its stored row: the client cannot supply a
-  // stable row id (the profile form re-emits without it), so identity, creation
-  // time and the current-profile flag are carried over from the stored row and
-  // only the entries/values come from the incoming payload.
-  static mergeMetadata<T extends MetadataDto>(existing: T, incoming: T): T {
-    return {
-      ...existing,
-      ...incoming,
-      id: existing.id,
-      createdAt: existing.createdAt,
-      isCurrent: incoming.isCurrent ?? existing.isCurrent
-    };
-  }
-
   async updateItem(uuid: string, item: UnitItemWithMetadataDto): Promise<void> {
     const updateItem = await this.getOneByUuid(uuid);
     if (updateItem) {
@@ -101,21 +87,15 @@ export class UnitItemService {
     }
   }
 
-  // Match incoming profiles to stored rows by profileId (not by the missing row
-  // id), so an edit updates the existing row instead of deleting and re-inserting
-  // it — which previously dropped created_at/is_current and violated NOT NULL.
+  // Reconcile item metadata by profileId (the profile form re-emits without the
+  // row id), so an edit updates the existing row instead of delete + re-insert.
   private async reconcileItemProfiles(uuid: string, profiles: UnitItemMetadataDto[]): Promise<void> {
     const existingProfiles = await this.unitItemMetadataService.getAllByItemId(uuid);
-    const incomingProfileIds = new Set(profiles.map(profile => profile.profileId));
-    const removed = existingProfiles.filter(existing => !incomingProfileIds.has(existing.profileId));
-    await Promise.all(removed
-      .map(profile => this.unitItemMetadataService.removeItemMetadata(profile.id)));
-    await Promise.all(profiles.map(profile => {
-      const existing = existingProfiles.find(candidate => candidate.profileId === profile.profileId);
-      return existing ?
-        this.unitItemMetadataService.updateItemMetadata(existing.id, UnitItemService.mergeMetadata(existing, profile)) :
-        this.unitItemMetadataService.addItemMetadata(uuid, profile);
-    }));
+    await reconcileProfilesByProfileId(existingProfiles, profiles, {
+      remove: id => this.unitItemMetadataService.removeItemMetadata(id),
+      update: (id, metadata) => this.unitItemMetadataService.updateItemMetadata(id, metadata),
+      add: metadata => this.unitItemMetadataService.addItemMetadata(uuid, metadata)
+    });
   }
 
   async patchItemMetadataCurrentProfile(unitId: number, itemProfile: string): Promise<void> {

@@ -2,6 +2,9 @@ export { VeronaModuleFactory } from './lib/helper/verona-module.factory';
 export { VeronaModuleKeyCollection } from './lib/helper/verona-module-key-collection.class';
 export { canonicalizeProfileId, profileIdsMatch, isItemProfileId } from './lib/profile-id';
 export {
+  ReconcilableProfile, ProfileReconcileOps, mergeProfile, reconcileProfilesByProfileId
+} from './lib/metadata-reconcile';
+export {
   ACTIVE_THRESHOLD_MS,
   PASSIVE_THRESHOLD_MS,
   UI_BAR_REFRESH_INTERVAL_MS,
