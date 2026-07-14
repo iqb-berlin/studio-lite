@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  In, Not, QueryFailedError, Repository
+  EntityManager, In, Not, QueryFailedError, Repository
 } from 'typeorm';
 import {
   CreateUnitDto,
@@ -19,7 +19,7 @@ import {
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { profileIdsMatch } from '@studio-lite/shared-code';
+import { profileIdsMatch, reconcileProfilesByProfileId } from '@studio-lite/shared-code';
 import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
@@ -439,26 +439,29 @@ export class UnitService {
     };
   }
 
-  async patchUnitMetadata(unitId: number, profiles: UnitMetadataDto[]): Promise<void> {
-    const profilesToUpdate = await this.unitMetadataService.getAllByUnitId(unitId);
-    const { unchanged, removed, added } = UnitItemService.compare(profilesToUpdate, profiles, 'id');
-    unchanged
-      .map(metadata => this.unitMetadataService.updateMetadata(metadata.id, metadata));
-    removed
-      .map(metadata => this.unitMetadataService.removeMetadata(metadata.id));
-    added
-      .map(metadata => this.unitMetadataService.addMetadata(unitId, metadata));
+  // Reconcile unit metadata by profileId (the profile form re-emits without the
+  // row id), so an edit updates the existing row instead of delete + re-insert.
+  async patchUnitMetadata(unitId: number, profiles: UnitMetadataDto[], manager?: EntityManager): Promise<void> {
+    const existingProfiles = await this.unitMetadataService.getAllByUnitId(unitId, manager);
+    await reconcileProfilesByProfileId(existingProfiles, profiles, {
+      remove: id => this.unitMetadataService.removeMetadata(id, manager),
+      update: (id, metadata) => this.unitMetadataService.updateMetadata(id, metadata, manager),
+      add: metadata => this.unitMetadataService.addMetadata(unitId, metadata, manager)
+    });
   }
 
-  async patchItemsMetadata(unitId: number, items: UnitItemWithMetadataDto[]): Promise<void> {
-    const itemsToUpdate = await this.unitItemService.getAllByUnitIdWithMetadata(unitId);
+  async patchItemsMetadata(
+    unitId: number,
+    items: UnitItemWithMetadataDto[],
+    manager?: EntityManager
+  ): Promise<void> {
+    const itemsToUpdate = await this.unitItemService.getAllByUnitIdWithMetadata(unitId, manager);
     const { unchanged, removed, added } = UnitItemService.compare(itemsToUpdate, items, 'uuid');
-    unchanged
-      .map(item => this.unitItemService.updateItem(item.uuid, item));
-    removed
-      .map(item => this.unitItemService.removeItem(item.uuid));
-    added
-      .map(item => this.unitItemService.addItem(unitId, item));
+    await Promise.all([
+      ...unchanged.map(item => this.unitItemService.updateItem(item.uuid, item, manager)),
+      ...removed.map(item => this.unitItemService.removeItem(item.uuid, manager)),
+      ...added.map(item => this.unitItemService.addItem(unitId, item, manager))
+    ]);
   }
 
   // Takes the internal write shape: id and unitItemUuid do not exist yet —
@@ -469,9 +472,9 @@ export class UnitService {
     metadata: UnitMetadataValues
   ): Promise<ItemUuidLookup[]> {
     const profiles = metadata.profiles || [];
-    profiles
+    await Promise.all(profiles
       .map(profile => this.unitMetadataService
-        .addMetadata(unitId, profile as UnitMetadataDto));
+        .addMetadata(unitId, profile as UnitMetadataDto)));
     const items = metadata.items || [];
     const itemUuids = await Promise.all(items
       .map(async item => ({
@@ -483,14 +486,17 @@ export class UnitService {
     return itemUuids;
   }
 
+  // The whole metadata save runs in one transaction so a mid-sequence failure
+  // (e.g. a constraint error on one profile) rolls back every write instead of
+  // leaving the unit's profiles/items half-updated.
   async patchMetadata(unitId: number, metadata: UnitMetadataValues): Promise<void> {
     const profiles = metadata.profiles || [];
-    await this.patchUnitMetadata(unitId, profiles as UnitMetadataDto[]);
-
     const items = metadata.items || [];
-    await this.patchItemsMetadata(unitId, items as unknown as UnitItemWithMetadataDto[]);
-
-    await this.unitMetadataToDeleteService.upsertOneForUnit(unitId);
+    await this.unitsRepository.manager.transaction(async manager => {
+      await this.patchUnitMetadata(unitId, profiles as UnitMetadataDto[], manager);
+      await this.patchItemsMetadata(unitId, items as unknown as UnitItemWithMetadataDto[], manager);
+      await this.unitMetadataToDeleteService.upsertOneForUnit(unitId, manager);
+    });
   }
 
   async patchUnit(unitId: number, newData: UnitPropertiesDto, userName: string | null): Promise<void> {
@@ -632,11 +638,10 @@ export class UnitService {
 
   private async patchUnitMetadataCurrentProfile(unitId: number, unitProfile: string): Promise<void> {
     const profilesToUpdate: UnitMetadataDto[] = await this.unitMetadataService.getAllByUnitId(unitId);
-    profilesToUpdate.map(metadata => {
+    await Promise.all(profilesToUpdate.map(metadata => {
       metadata.isCurrent = profileIdsMatch(metadata.profileId, unitProfile);
-      this.unitMetadataService.updateMetadata(metadata.id, metadata);
-      return metadata;
-    });
+      return this.unitMetadataService.updateMetadata(metadata.id, metadata);
+    }));
   }
 
   async copy(unitIds: number[], newWorkspace: number, user: User, addComments: boolean): Promise<RequestReportDto> {
