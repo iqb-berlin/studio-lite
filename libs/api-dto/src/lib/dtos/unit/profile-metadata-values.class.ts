@@ -3,14 +3,14 @@ import { TextWithLanguageAndId as TextsWithLanguageAndId } from '@iqb/metadata-r
 import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profile';
 
 export class ProfileMetadataValues {
-  profiles?: MetadataValues[];
+  profiles?: ProfileValues[];
 }
 
 export class UnitMetadataValues extends ProfileMetadataValues {
   items?: ItemsMetadataValues[];
 }
 
-export class MetadataValues {
+export class ProfileValues {
   entries?: MetadataValuesEntry[];
   profileId?: string;
   isCurrent?: boolean;
@@ -29,7 +29,7 @@ export class ItemsMetadataValues extends ProfileMetadataValues {
   variableId?: string | null;
   variableReadOnlyId?: string | null;
   weighting?: number;
-  [key: string]: string | number | MetadataValues[] | null | undefined | boolean | Date;
+  [key: string]: string | number | ProfileValues[] | null | undefined | boolean | Date;
 }
 
 export class MetadataValuesEntry {

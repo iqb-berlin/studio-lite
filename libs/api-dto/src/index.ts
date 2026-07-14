@@ -55,7 +55,7 @@ export { UnitCommentVoteDto } from './lib/dtos/unit-comment/unit-comment-vote.dt
 export { UnitCommentVoterDto } from './lib/dtos/unit-comment/unit-comment-voter.dto';
 export { UpdateUnitUserDto } from './lib/dtos/unit-user/update-unit-user.dto';
 export { ProfileMetadataValues } from './lib/dtos/unit/profile-metadata-values.class';
-export { MetadataValues } from './lib/dtos/unit/profile-metadata-values.class';
+export { ProfileValues } from './lib/dtos/unit/profile-metadata-values.class';
 export { ItemsMetadataValues } from './lib/dtos/unit/profile-metadata-values.class';
 export { MetadataValuesEntry } from './lib/dtos/unit/profile-metadata-values.class';
 export { CodebookUnitDto, CodeBookVariable } from './lib/dtos/coding/coding.dto';

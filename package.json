@@ -47,7 +47,7 @@
     "@iqbspecs/coding-scheme": "3.4.1",
     "@iqbspecs/metadata-profile": "^0.11.1",
     "@iqbspecs/metadata-store": "^0.4.0",
-    "@iqbspecs/metadata-values": "^3.0.2",
+    "@iqbspecs/metadata-values": "^3.0.3",
     "@iqbspecs/response": "2.0.0",
     "@iqbspecs/variable-info": "1.3.0",
     "@nestjs/axios": "4.0.1",

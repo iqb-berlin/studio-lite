@@ -4,7 +4,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import {
   Component, Input, Pipe, PipeTransform
 } from '@angular/core';
-import { ItemsMetadataValues, MetadataValues } from '@studio-lite-lib/api-dto';
+import { ItemsMetadataValues, ProfileValues } from '@studio-lite-lib/api-dto';
 import { MetadataReadonlyItemsComponent } from './metadata-readonly-items.component';
 import { MetadataProfileEntriesComponent } from '../metadata-profile-entries/metadata-profile-entries.component';
 import { VariableIdPipe } from '../../pipes/variable-id.pipe';
@@ -20,7 +20,7 @@ describe('MetadataReadonlyItemsComponent', () => {
     standalone: true
   })
   class MockMetadataProfileEntriesComponent {
-    @Input() profiles!: MetadataValues[];
+    @Input() profiles!: ProfileValues[];
   }
 
   @Pipe({
