@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import UnitMetadataToDelete from '../entities/unit-metadata-to-delete.entity';
 
 @Injectable()
@@ -9,8 +9,9 @@ export class UnitMetadataToDeleteService {
     @InjectRepository(UnitMetadataToDelete)
     private unitMetadataToDeleteRepository: Repository<UnitMetadataToDelete>) {}
 
-  async upsertOneForUnit(unitId: number) {
-    await this.unitMetadataToDeleteRepository
+  async upsertOneForUnit(unitId: number, manager?: EntityManager) {
+    const repo = manager ? manager.getRepository(UnitMetadataToDelete) : this.unitMetadataToDeleteRepository;
+    await repo
       .upsert(<UnitMetadataToDelete>{ unitId: unitId, changedAt: new Date() }, ['unitId']);
   }
 

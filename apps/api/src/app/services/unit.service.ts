@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  In, Not, QueryFailedError, Repository
+  EntityManager, In, Not, QueryFailedError, Repository
 } from 'typeorm';
 import {
   CreateUnitDto,
@@ -441,22 +441,26 @@ export class UnitService {
 
   // Reconcile unit metadata by profileId (the profile form re-emits without the
   // row id), so an edit updates the existing row instead of delete + re-insert.
-  async patchUnitMetadata(unitId: number, profiles: UnitMetadataDto[]): Promise<void> {
-    const existingProfiles = await this.unitMetadataService.getAllByUnitId(unitId);
+  async patchUnitMetadata(unitId: number, profiles: UnitMetadataDto[], manager?: EntityManager): Promise<void> {
+    const existingProfiles = await this.unitMetadataService.getAllByUnitId(unitId, manager);
     await reconcileProfilesByProfileId(existingProfiles, profiles, {
-      remove: id => this.unitMetadataService.removeMetadata(id),
-      update: (id, metadata) => this.unitMetadataService.updateMetadata(id, metadata),
-      add: metadata => this.unitMetadataService.addMetadata(unitId, metadata)
+      remove: id => this.unitMetadataService.removeMetadata(id, manager),
+      update: (id, metadata) => this.unitMetadataService.updateMetadata(id, metadata, manager),
+      add: metadata => this.unitMetadataService.addMetadata(unitId, metadata, manager)
     });
   }
 
-  async patchItemsMetadata(unitId: number, items: UnitItemWithMetadataDto[]): Promise<void> {
-    const itemsToUpdate = await this.unitItemService.getAllByUnitIdWithMetadata(unitId);
+  async patchItemsMetadata(
+    unitId: number,
+    items: UnitItemWithMetadataDto[],
+    manager?: EntityManager
+  ): Promise<void> {
+    const itemsToUpdate = await this.unitItemService.getAllByUnitIdWithMetadata(unitId, manager);
     const { unchanged, removed, added } = UnitItemService.compare(itemsToUpdate, items, 'uuid');
     await Promise.all([
-      ...unchanged.map(item => this.unitItemService.updateItem(item.uuid, item)),
-      ...removed.map(item => this.unitItemService.removeItem(item.uuid)),
-      ...added.map(item => this.unitItemService.addItem(unitId, item))
+      ...unchanged.map(item => this.unitItemService.updateItem(item.uuid, item, manager)),
+      ...removed.map(item => this.unitItemService.removeItem(item.uuid, manager)),
+      ...added.map(item => this.unitItemService.addItem(unitId, item, manager))
     ]);
   }
 
@@ -482,14 +486,17 @@ export class UnitService {
     return itemUuids;
   }
 
+  // The whole metadata save runs in one transaction so a mid-sequence failure
+  // (e.g. a constraint error on one profile) rolls back every write instead of
+  // leaving the unit's profiles/items half-updated.
   async patchMetadata(unitId: number, metadata: UnitMetadataValues): Promise<void> {
     const profiles = metadata.profiles || [];
-    await this.patchUnitMetadata(unitId, profiles as UnitMetadataDto[]);
-
     const items = metadata.items || [];
-    await this.patchItemsMetadata(unitId, items as unknown as UnitItemWithMetadataDto[]);
-
-    await this.unitMetadataToDeleteService.upsertOneForUnit(unitId);
+    await this.unitsRepository.manager.transaction(async manager => {
+      await this.patchUnitMetadata(unitId, profiles as UnitMetadataDto[], manager);
+      await this.patchItemsMetadata(unitId, items as unknown as UnitItemWithMetadataDto[], manager);
+      await this.unitMetadataToDeleteService.upsertOneForUnit(unitId, manager);
+    });
   }
 
   async patchUnit(unitId: number, newData: UnitPropertiesDto, userName: string | null): Promise<void> {

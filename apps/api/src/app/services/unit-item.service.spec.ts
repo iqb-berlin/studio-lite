@@ -144,10 +144,10 @@ describe('UnitItemService', () => {
       expect(repository.update).toHaveBeenCalled();
       // p1 matches an existing row -> update it (identity kept), never re-inserted
       expect(unitItemMetadataService.updateItemMetadata)
-        .toHaveBeenCalledWith(2, expect.objectContaining({ id: 2, profileId: 'p1' }));
+        .toHaveBeenCalledWith(2, expect.objectContaining({ id: 2, profileId: 'p1' }), undefined);
       expect(unitItemMetadataService.addItemMetadata).not.toHaveBeenCalled();
       // p2 is no longer present -> removed
-      expect(unitItemMetadataService.removeItemMetadata).toHaveBeenCalledWith(3);
+      expect(unitItemMetadataService.removeItemMetadata).toHaveBeenCalledWith(3, undefined);
     });
 
     it('inserts an item profile that has no stored counterpart', async () => {
@@ -164,7 +164,7 @@ describe('UnitItemService', () => {
       await service.updateItem(uuid, inputItem);
 
       expect(unitItemMetadataService.addItemMetadata)
-        .toHaveBeenCalledWith(uuid, expect.objectContaining({ profileId: 'p-new' }));
+        .toHaveBeenCalledWith(uuid, expect.objectContaining({ profileId: 'p-new' }), undefined);
       expect(unitItemMetadataService.removeItemMetadata).not.toHaveBeenCalled();
     });
   });

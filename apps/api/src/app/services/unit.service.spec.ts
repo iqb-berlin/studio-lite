@@ -242,10 +242,10 @@ describe('UnitService', () => {
       await service.patchUnitMetadata(1, [{ profileId: 'p1' } as UnitMetadataDto]);
 
       expect(unitMetadataService.updateMetadata)
-        .toHaveBeenCalledWith(7, expect.objectContaining({ id: 7, profileId: 'p1' }));
+        .toHaveBeenCalledWith(7, expect.objectContaining({ id: 7, profileId: 'p1' }), undefined);
       expect(unitMetadataService.addMetadata).not.toHaveBeenCalled();
       // p2 is gone from the incoming payload -> removed
-      expect(unitMetadataService.removeMetadata).toHaveBeenCalledWith(8);
+      expect(unitMetadataService.removeMetadata).toHaveBeenCalledWith(8, undefined);
     });
 
     it('inserts a profile that has no stored counterpart', async () => {
@@ -254,7 +254,7 @@ describe('UnitService', () => {
       await service.patchUnitMetadata(1, [{ profileId: 'p-new' } as UnitMetadataDto]);
 
       expect(unitMetadataService.addMetadata)
-        .toHaveBeenCalledWith(1, expect.objectContaining({ profileId: 'p-new' }));
+        .toHaveBeenCalledWith(1, expect.objectContaining({ profileId: 'p-new' }), undefined);
       expect(unitMetadataService.removeMetadata).not.toHaveBeenCalled();
     });
   });
@@ -264,6 +264,28 @@ describe('UnitService', () => {
       unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
       await service.patchItemsMetadata(1, []);
       expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalled();
+    });
+  });
+
+  describe('patchMetadata', () => {
+    it('runs the whole save in one transaction and threads the manager through', async () => {
+      const manager = createMock<EntityManager>();
+      const transaction = jest.fn().mockImplementation(
+        (runInTransaction: (m: EntityManager) => Promise<unknown>) => runInTransaction(manager)
+      );
+      Object.defineProperty(unitsRepository, 'manager', {
+        value: { transaction } as unknown as EntityManager,
+        configurable: true
+      });
+      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
+      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
+
+      await service.patchMetadata(1, { profiles: [], items: [] });
+
+      expect(transaction).toHaveBeenCalled();
+      expect(unitMetadataService.getAllByUnitId).toHaveBeenCalledWith(1, manager);
+      expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalledWith(1, manager);
+      expect(unitMetadataToDeleteService.upsertOneForUnit).toHaveBeenCalledWith(1, manager);
     });
   });
 
