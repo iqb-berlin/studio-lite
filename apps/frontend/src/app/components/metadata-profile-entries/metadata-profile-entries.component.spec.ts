@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MetadataValues } from '@studio-lite-lib/api-dto';
+import { ProfileValues } from '@studio-lite-lib/api-dto';
 import { MetadataProfileEntriesComponent } from './metadata-profile-entries.component';
 import { IsArrayPipe } from '../../pipes/is-array.pipe';
 import { CastPipe } from '../../pipes/cast.pipe';
@@ -8,7 +8,7 @@ describe('MetadataProfileEntriesComponent', () => {
   let component: MetadataProfileEntriesComponent;
   let fixture: ComponentFixture<MetadataProfileEntriesComponent>;
 
-  const mockProfiles: MetadataValues[] = [
+  const mockProfiles: ProfileValues[] = [
     {
       profileId: 'profile1',
       isCurrent: true,

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { MetadataValues } from '@studio-lite-lib/api-dto';
+import { ProfileValues } from '@studio-lite-lib/api-dto';
 import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profile';
 import { IsArrayPipe } from '../../pipes/is-array.pipe';
 import { CastPipe } from '../../pipes/cast.pipe';
@@ -14,7 +14,7 @@ import { CastPipe } from '../../pipes/cast.pipe';
   ]
 })
 export class MetadataProfileEntriesComponent {
-  @Input() profiles!: MetadataValues[];
+  @Input() profiles!: ProfileValues[];
 
   TextWithLanguageArray!: TextWithLanguage[];
   TextWithLanguage!: TextWithLanguage;

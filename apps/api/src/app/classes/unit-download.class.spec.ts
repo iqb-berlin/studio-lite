@@ -1,7 +1,7 @@
 import { createMock } from '@golevelup/ts-jest';
 import {
   ItemsMetadataValues,
-  MetadataValues,
+  ProfileValues,
   UnitCommentDto,
   UnitDownloadBookletSettingsDto,
   UnitDownloadSettingsDto,
@@ -1086,7 +1086,7 @@ describe('UnitDownloadClass', () => {
           value: [{ lang: 'de', value: 'Ana Maier' }],
           valueAsText: [{ lang: 'de', value: 'Ana Maier' }]
         }]
-      }] as unknown as MetadataValues[]);
+      }] as unknown as ProfileValues[]);
 
       expect(result).toEqual([{
         profileId: 'https://example.org/profile.json',
@@ -1103,7 +1103,7 @@ describe('UnitDownloadClass', () => {
         { isCurrent: true, entries: [{ id: 'a1', value: 'x', valueAsText: [] }] },
         { profileId: 'p1', entries: [{ id: 'empty', value: [], valueAsText: [] }] },
         { profileId: 'p2', entries: [] }
-      ] as unknown as MetadataValues[]);
+      ] as unknown as ProfileValues[]);
       expect(result).toEqual([]);
     });
 
@@ -1116,7 +1116,7 @@ describe('UnitDownloadClass', () => {
           value: [{ id: 'https://w3id.org/iqb/vocab/l3', text: [{ lang: 'de', value: 'Raum und Form' }] }],
           valueAsText: [{ lang: 'de', value: 'Raum und Form' }]
         }]
-      }] as unknown as MetadataValues[]);
+      }] as unknown as ProfileValues[]);
 
       expect(result[0].entries[0].value).toEqual([{
         id: 'https://w3id.org/iqb/vocab/l3',
@@ -1135,7 +1135,7 @@ describe('UnitDownloadClass', () => {
             id: 'a2', label: [], value: '', valueAsText: []
           }
         ]
-      }] as unknown as MetadataValues[]);
+      }] as unknown as ProfileValues[]);
 
       expect(result[0].entries).toEqual([{
         id: 'a1',
@@ -1152,7 +1152,7 @@ describe('UnitDownloadClass', () => {
           value: 'x',
           valueAsText: [{ value: 'no lang either' }]
         }]
-      }] as unknown as MetadataValues[]);
+      }] as unknown as ProfileValues[]);
 
       expect(result[0].entries).toEqual([{ id: 'a1', value: { raw: 'x' } }]);
     });
@@ -1216,7 +1216,7 @@ describe('UnitDownloadClass', () => {
         entries: [{
           id: 'e1', label: [], value: [{ lang: 'de-DE', value: 'Text' }], valueAsText: []
         }]
-      }] as unknown as MetadataValues[], scope);
+      }] as unknown as ProfileValues[], scope);
 
       expect(messages).toEqual([{
         unitKey: 'U1',
@@ -1241,7 +1241,7 @@ describe('UnitDownloadClass', () => {
           ],
           valueAsText: []
         }]
-      }] as unknown as MetadataValues[], scope);
+      }] as unknown as ProfileValues[], scope);
 
       expect(result[0].entries[0].value).toEqual([{ id: 'v1', label: [{ lang: 'de', value: 'A' }] }]);
       expect(messages).toEqual([expect.objectContaining({
@@ -1256,7 +1256,7 @@ describe('UnitDownloadClass', () => {
         entries: [{
           id: 'e1', label: [], value: 'x', valueAsText: []
         }]
-      }] as unknown as MetadataValues[], scope);
+      }] as unknown as ProfileValues[], scope);
 
       expect(messages).toEqual([expect.objectContaining({
         messageKey: 'dropped-content.profile-not-exported'
@@ -1273,7 +1273,7 @@ describe('UnitDownloadClass', () => {
             id: 'e2', label: [], value: 'x', valueAsText: []
           }
         ]
-      }] as unknown as MetadataValues[], scope);
+      }] as unknown as ProfileValues[], scope);
 
       expect(result).toHaveLength(1);
       expect(messages).toEqual([{
@@ -1289,7 +1289,7 @@ describe('UnitDownloadClass', () => {
       UnitDownloadClass.transformProfilesToMetadataValues([{
         profileId: 'p1',
         entries: [{ label: [], value: '', valueAsText: [] }]
-      }] as unknown as MetadataValues[], scope);
+      }] as unknown as ProfileValues[], scope);
 
       expect(messages).toEqual([]);
     });
@@ -1316,7 +1316,7 @@ describe('UnitDownloadClass', () => {
         entries: [{
           id: 'e1', label: [{ lang: 'de', value: 'L' }], value: 'x', valueAsText: []
         }]
-      }] as unknown as MetadataValues[], scope);
+      }] as unknown as ProfileValues[], scope);
 
       expect(messages).toEqual([]);
     });

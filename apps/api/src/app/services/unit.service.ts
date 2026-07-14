@@ -5,7 +5,7 @@ import {
 } from 'typeorm';
 import {
   CreateUnitDto,
-  MetadataValues,
+  ProfileValues,
   RequestReportDto,
   UnitInViewDto,
   UnitDefinitionDto,
@@ -432,7 +432,7 @@ export class UnitService {
     return user.firstName && user.firstName.trim() ? `${displayName}, ${user.firstName.trim()}` : displayName;
   }
 
-  private static setCurrentProfile<T extends MetadataValues>(profileId: string, profile: T): T {
+  private static setCurrentProfile<T extends ProfileValues>(profileId: string, profile: T): T {
     return {
       ...profile,
       isCurrent: profileIdsMatch(profile.profileId, profileId)

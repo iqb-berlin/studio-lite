@@ -1,6 +1,6 @@
 import {
   ItemsMetadataValues,
-  MetadataValues,
+  ProfileValues,
   UnitMetadataValues,
   MetadataValuesEntry,
   UnitCommentDto,
@@ -555,7 +555,7 @@ export class UnitDownloadClass {
   // shape. knownMetadataKeys is checked against UnitMetadataValues so a new
   // field on the internal shape fails compilation here instead of producing
   // false warnings.
-  private static hasUnexportedMetadata(metadata?: { profiles?: MetadataValues[] }): boolean {
+  private static hasUnexportedMetadata(metadata?: { profiles?: ProfileValues[] }): boolean {
     if (!metadata) return false;
     if (metadata.profiles?.some(
       profile => (profile?.entries ?? []).some(entry => UnitDownloadClass.entryHasContent(entry))
@@ -627,7 +627,7 @@ export class UnitDownloadClass {
   // profileId and entries with minItems: 1. Every dropped piece that carried
   // content is reported through the scope.
   static transformProfilesToMetadataValues(
-    profiles?: MetadataValues[], scope?: ExportReportScope
+    profiles?: ProfileValues[], scope?: ExportReportScope
   ): MetadataValuesJson[] {
     return (profiles ?? []).flatMap(profile => {
       if (!profile?.profileId) {
