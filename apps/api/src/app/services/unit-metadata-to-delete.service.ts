@@ -11,8 +11,9 @@ export class UnitMetadataToDeleteService {
 
   async upsertOneForUnit(unitId: number, manager?: EntityManager) {
     const repo = manager ? manager.getRepository(UnitMetadataToDelete) : this.unitMetadataToDeleteRepository;
+    const now = new Date();
     await repo
-      .upsert(<UnitMetadataToDelete>{ unitId: unitId, changedAt: new Date() }, ['unitId']);
+      .upsert(<UnitMetadataToDelete>{ unitId: unitId, createdAt: now, changedAt: now }, ['unitId']);
   }
 
   async getOneByUnit(unitId: number): Promise<UnitMetadataToDelete> {
