@@ -490,8 +490,26 @@ export class UnitService {
   // (e.g. a constraint error on one profile) rolls back every write instead of
   // leaving the unit's profiles/items half-updated.
   async patchMetadata(unitId: number, metadata: UnitMetadataValues): Promise<void> {
-    const profiles = metadata.profiles || [];
-    const items = metadata.items || [];
+    const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
+    const workspace = await this.workspaceRepository.findOne({ where: { id: unit.workspaceId } });
+    const unitProfile = workspace?.settings?.unitMDProfile || '';
+    const itemProfile = workspace?.settings?.itemMDProfile || '';
+
+    const profiles = (metadata.profiles || []).map(profile => ({
+      ...profile,
+      isCurrent: profileIdsMatch(profile.profileId, unitProfile)
+    }));
+
+    const items = (metadata.items || []).map(item => {
+      if (item.profiles) {
+        item.profiles = item.profiles.map(profile => ({
+          ...profile,
+          isCurrent: profileIdsMatch(profile.profileId, itemProfile)
+        }));
+      }
+      return item;
+    });
+
     await this.unitsRepository.manager.transaction(async manager => {
       await this.patchUnitMetadata(unitId, profiles as UnitMetadataDto[], manager);
       await this.patchItemsMetadata(unitId, items as unknown as UnitItemWithMetadataDto[], manager);

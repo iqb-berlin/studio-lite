@@ -5,6 +5,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import {
   CreateUnitDto,
+  ItemsMetadataValues,
+  UnitItemMetadataDto,
   UnitMetadataDto,
   UnitMetadataValues,
   UnitPropertiesDto,
@@ -277,6 +279,12 @@ describe('UnitService', () => {
         value: { transaction } as unknown as EntityManager,
         configurable: true
       });
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 10 } as Unit);
+      workspaceRepository.findOne.mockResolvedValue({
+        id: 10,
+        settings: { unitMDProfile: 'profile-a', itemMDProfile: 'profile-b' }
+      } as unknown as Workspace);
+
       unitMetadataService.getAllByUnitId.mockResolvedValue([]);
       unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
 
@@ -286,6 +294,39 @@ describe('UnitService', () => {
       expect(unitMetadataService.getAllByUnitId).toHaveBeenCalledWith(1, manager);
       expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalledWith(1, manager);
       expect(unitMetadataToDeleteService.upsertOneForUnit).toHaveBeenCalledWith(1, manager);
+    });
+
+    it('sets isCurrent flag dynamically based on workspace settings when saving metadata', async () => {
+      const manager = createMock<EntityManager>();
+      const transaction = jest.fn().mockImplementation(
+        (runInTransaction: (m: EntityManager) => Promise<unknown>) => runInTransaction(manager)
+      );
+      Object.defineProperty(unitsRepository, 'manager', {
+        value: { transaction } as unknown as EntityManager,
+        configurable: true
+      });
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 10 } as Unit);
+      workspaceRepository.findOne.mockResolvedValue({
+        id: 10,
+        settings: { unitMDProfile: 'profile-a', itemMDProfile: 'profile-b' }
+      } as unknown as Workspace);
+
+      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
+      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
+
+      await service.patchMetadata(1, {
+        profiles: [{ profileId: 'profile-a' } as UnitMetadataDto],
+        items: [{
+          uuid: 'item-uuid',
+          profiles: [{ profileId: 'profile-b' } as UnitItemMetadataDto]
+        }] as unknown as ItemsMetadataValues[]
+      });
+
+      expect(unitMetadataService.addMetadata).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ profileId: 'profile-a', isCurrent: true }),
+        manager
+      );
     });
   });
 
