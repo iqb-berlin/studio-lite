@@ -5,6 +5,7 @@ import {
 } from 'typeorm';
 import {
   CreateUnitDto,
+  MetadataValuesEntry,
   ProfileValues,
   RequestReportDto,
   UnitInViewDto,
@@ -399,6 +400,7 @@ export class UnitService {
         workspace.settings?.itemMDProfile,
         unit.metadata);
     }
+    unit.metadata = UnitService.ensureValueAsText(unit.metadata);
     return unit;
   }
 
@@ -471,11 +473,12 @@ export class UnitService {
     unitId: number,
     metadata: UnitMetadataValues
   ): Promise<ItemUuidLookup[]> {
-    const profiles = metadata.profiles || [];
+    const cleanMetadata = UnitService.ensureValueAsText(metadata);
+    const profiles = cleanMetadata.profiles || [];
     await Promise.all(profiles
       .map(profile => this.unitMetadataService
         .addMetadata(unitId, profile as UnitMetadataDto)));
-    const items = metadata.items || [];
+    const items = cleanMetadata.items || [];
     const itemUuids = await Promise.all(items
       .map(async item => ({
         newUuid: await this.unitItemService
@@ -495,12 +498,14 @@ export class UnitService {
     const unitProfile = workspace?.settings?.unitMDProfile || '';
     const itemProfile = workspace?.settings?.itemMDProfile || '';
 
-    const profiles = (metadata.profiles || []).map(profile => ({
+    const cleanMetadata = UnitService.ensureValueAsText(metadata);
+
+    const profiles = (cleanMetadata.profiles || []).map(profile => ({
       ...profile,
       isCurrent: profileIdsMatch(profile.profileId, unitProfile)
     }));
 
-    const items = (metadata.items || []).map(item => {
+    const items = (cleanMetadata.items || []).map(item => {
       if (item.profiles) {
         item.profiles = item.profiles.map(profile => ({
           ...profile,
@@ -853,13 +858,65 @@ export class UnitService {
       // the index signature of ItemsMetadataValues blocks direct assignment
       return await this.findOnesMetadata(createFrom) as unknown as UnitMetadataValues;
     }
-    return unit.metadata;
+    return UnitService.ensureValueAsText(unit.metadata);
   }
 
   async findOnesMetadata(unitId: number): Promise<UnitFullMetadataDto> {
-    return {
+    const metadata = {
       profiles: await this.unitMetadataService.getAllByUnitId(unitId),
       items: await this.unitItemService.getAllByUnitIdWithMetadata(unitId)
     };
+    return UnitService.ensureValueAsText(metadata as unknown as UnitMetadataValues) as unknown as UnitFullMetadataDto;
+  }
+
+  static ensureValueAsText(metadata: UnitMetadataValues): UnitMetadataValues {
+    if (!metadata) return metadata;
+    if (metadata.profiles) {
+      metadata.profiles = metadata.profiles.map(profile => {
+        if (profile.entries) {
+          profile.entries = profile.entries.map(entry => {
+            if (!entry.valueAsText || (Array.isArray(entry.valueAsText) && entry.valueAsText.length === 0)) {
+              entry.valueAsText = UnitService.getEntryValueAsText(entry.value);
+            }
+            return entry;
+          });
+        }
+        return profile;
+      });
+    }
+    if (metadata.items) {
+      metadata.items = metadata.items.map(item => {
+        if (item.profiles) {
+          item.profiles = item.profiles.map(profile => {
+            if (profile.entries) {
+              profile.entries = profile.entries.map(entry => {
+                if (!entry.valueAsText || (Array.isArray(entry.valueAsText) && entry.valueAsText.length === 0)) {
+                  entry.valueAsText = UnitService.getEntryValueAsText(entry.value);
+                }
+                return entry;
+              });
+            }
+            return profile;
+          });
+        }
+        return item;
+      });
+    }
+    return metadata;
+  }
+
+  static getEntryValueAsText(
+    value: MetadataValuesEntry['value']
+  ): MetadataValuesEntry['valueAsText'] {
+    if (Array.isArray(value)) {
+      if (value.some(item => item && typeof item === 'object' && 'id' in item)) {
+        return value.flatMap(item => ('label' in item ? item.label ?? [] : []));
+      }
+      return value as MetadataValuesEntry['valueAsText'];
+    }
+    if (!Array.isArray(value) && typeof value !== 'string' && value) {
+      return (value as { asText?: MetadataValuesEntry['valueAsText'] }).asText || [];
+    }
+    return [];
   }
 }
