@@ -39,3 +39,10 @@ UPDATE "public"."unit"
   SET "uuid" = gen_random_uuid()::VARCHAR
   WHERE "uuid" IS NULL;
 -- rollback UPDATE "public"."unit" SET "uuid" = NULL;
+
+-- changeset nanoyan:7
+ALTER TABLE "public"."metadata"
+  ADD COLUMN "order" INTEGER NULL;
+-- rollback ALTER TABLE "public"."metadata" DROP COLUMN "order";
+
+

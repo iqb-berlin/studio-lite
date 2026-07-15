@@ -34,6 +34,12 @@ class Metadata {
     name: 'changed_at'
   })
     changedAt: Date;
+
+  @Column({
+    type: 'integer',
+    nullable: true
+  })
+    order: number | null;
 }
 
 export default Metadata;

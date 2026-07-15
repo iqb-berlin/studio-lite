@@ -19,4 +19,7 @@ export class MetadataDto {
 
   @ApiProperty()
     changedAt?: Date;
+
+  @ApiProperty()
+    order?: number;
 }
