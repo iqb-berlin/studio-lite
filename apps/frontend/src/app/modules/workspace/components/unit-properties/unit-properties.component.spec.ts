@@ -5,7 +5,10 @@ import { Component, Input } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { BehaviorSubject, of, Subject } from 'rxjs';
+import { createMock } from '@golevelup/ts-jest';
 import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { UnitMetadataValues as IqbUnitMetadataValues } from '@iqb/metadata-components';
+import { UnitMetadataStore } from '../../classes/unit-metadata-store';
 import { ModuleService } from '../../../../services/module.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -127,5 +130,42 @@ describe('UnitPropertiesComponent', () => {
     component.onGroupNameChange('Group A');
 
     expect(component.unitForm.get('group')?.value).toBe('Group A');
+  });
+
+  it('should merge profiles in onMetadataChange and call setMetadata', () => {
+    const mockStore = createMock<UnitMetadataStore>();
+    jest.spyOn(component.workspaceService, 'getUnitMetadataStore')
+      .mockReturnValue(mockStore);
+    component.metadata = {
+      profiles: [{ profileId: 'p1', entries: [] }],
+      items: [{ id: 'item1', profiles: [] }]
+    };
+
+    component.onMetadataChange(createMock<IqbUnitMetadataValues>({
+      profiles: [{ profileId: 'p2', entries: [] }]
+    }));
+
+    expect(component.metadata.profiles).toEqual([{ profileId: 'p2', entries: [] }]);
+    expect(component.metadata.items).toEqual([{ id: 'item1', profiles: [] }]);
+    expect(mockStore.setMetadata).toHaveBeenCalledWith(component.metadata);
+  });
+
+  it('should merge items in onItemsMetadataChange and call setMetadata', () => {
+    const mockStore = createMock<UnitMetadataStore>();
+    jest.spyOn(component.workspaceService, 'getUnitMetadataStore')
+      .mockReturnValue(mockStore);
+    component.metadata = {
+      profiles: [{ profileId: 'p1', entries: [] }],
+      items: [{ id: 'item1', profiles: [] }]
+    };
+
+    component.onItemsMetadataChange({
+      profiles: [],
+      items: [{ id: 'item2', profiles: [] }]
+    });
+
+    expect(component.metadata.profiles).toEqual([{ profileId: 'p1', entries: [] }]);
+    expect(component.metadata.items).toEqual([{ id: 'item2', profiles: [] }]);
+    expect(mockStore.setMetadata).toHaveBeenCalledWith(component.metadata);
   });
 });

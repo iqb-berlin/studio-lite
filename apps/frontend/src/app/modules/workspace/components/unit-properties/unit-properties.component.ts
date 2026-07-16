@@ -11,6 +11,7 @@ import {
   BehaviorSubject, Subject, Subscription, takeUntil
 } from 'rxjs';
 import {
+  UnitMetadataDto,
   UnitMetadataValues,
   UnitPropertiesDto,
   WorkspaceSettingsDto
@@ -451,11 +452,19 @@ export class UnitPropertiesComponent
   }
 
   onMetadataChange(metadata: Partial<IqbUnitMetadataValues>): void {
-    this.workspaceService.getUnitMetadataStore()?.setMetadata(metadata as unknown as UnitMetadataValues);
+    this.metadata = {
+      ...this.metadata,
+      profiles: metadata.profiles as unknown as UnitMetadataDto[]
+    };
+    this.workspaceService.getUnitMetadataStore()?.setMetadata(this.metadata);
   }
 
   onItemsMetadataChange(metadata: UnitMetadataValues): void {
-    this.workspaceService.getUnitMetadataStore()?.setMetadata(metadata);
+    this.metadata = {
+      ...this.metadata,
+      items: metadata.items || []
+    };
+    this.workspaceService.getUnitMetadataStore()?.setMetadata(this.metadata);
   }
 
   onGroupNameChange(name: string): void {
