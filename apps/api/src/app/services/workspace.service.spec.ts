@@ -508,6 +508,20 @@ describe('WorkspaceService', () => {
         items: [{ id: 'ITEM1', profiles: [{ profileId: 'ip1', order: 0, entries: [] }] }]
       });
     });
+
+    it('keeps an explicit order on a legacy profile instead of deriving from isCurrent', () => {
+      const legacy = {
+        profiles: [{
+          profileId: 'p1', order: 2, isCurrent: false, entries: []
+        }],
+        items: []
+      };
+
+      expect(WorkspaceService.mapImportedMetadata(legacy)).toEqual({
+        profiles: [{ profileId: 'p1', order: 2, entries: [] }],
+        items: []
+      });
+    });
   });
 
   describe('mapImportedItems', () => {

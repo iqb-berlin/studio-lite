@@ -16,9 +16,12 @@ describe('profile-order', () => {
   });
 
   describe('isCurrentFromOrder', () => {
-    it('treats order 0 (and any non-negative position) as current', () => {
+    it('treats only order 0 (the primary profile) as current', () => {
       expect(isCurrentFromOrder(0)).toBe(true);
-      expect(isCurrentFromOrder(3)).toBe(true);
+    });
+
+    it('treats a visible but non-primary position (order > 0) as not current', () => {
+      expect(isCurrentFromOrder(3)).toBe(false);
     });
 
     it('treats order -1 as not current (hidden)', () => {

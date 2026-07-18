@@ -4,11 +4,12 @@
  *
  *   order = -1   -> hidden/disabled (the former `isCurrent: false`)
  *   order >=  0  -> visible; the value is the position when several profiles are
- *                   used. Today a unit/item has at most one visible profile, so
- *                   the active one is `order: 0`.
+ *                   used. The profile at position 0 is the current/primary one.
  *
- * `isCurrent` is no longer persisted; where the legacy XML export still speaks in
- * terms of "the current profile", it is derived from `order` via these helpers.
+ * `isCurrent` is no longer persisted. `isCurrentFromOrder` is the faithful
+ * replacement of the legacy boolean: legacy data had exactly one current profile,
+ * which maps to `order: 0` — a visible-but-non-primary profile (order > 0, only
+ * possible once multiple profiles are supported) is NOT "the current one".
  */
 export const HIDDEN_PROFILE_ORDER = -1;
 export const ACTIVE_PROFILE_ORDER = 0;
@@ -18,5 +19,5 @@ export function orderFromCurrent(isCurrent: boolean): number {
 }
 
 export function isCurrentFromOrder(order: number | null | undefined): boolean {
-  return (order ?? HIDDEN_PROFILE_ORDER) !== HIDDEN_PROFILE_ORDER;
+  return order === ACTIVE_PROFILE_ORDER;
 }

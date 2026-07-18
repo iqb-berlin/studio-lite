@@ -11,12 +11,12 @@ describe('IsCurrentProfilePipe', () => {
     expect(pipe).toBeTruthy();
   });
 
-  it('should return true for a visible profile (order 0)', () => {
+  it('should return true for the primary profile (order 0)', () => {
     expect(pipe.transform(0)).toBe(true);
   });
 
-  it('should return true for any non-negative order (position)', () => {
-    expect(pipe.transform(2)).toBe(true);
+  it('should return false for a visible non-primary position (order > 0)', () => {
+    expect(pipe.transform(2)).toBe(false);
   });
 
   it('should return false for a hidden profile (order -1)', () => {
