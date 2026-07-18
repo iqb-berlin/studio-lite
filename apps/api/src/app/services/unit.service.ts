@@ -263,12 +263,12 @@ export class UnitService {
         newUnit.lastChangedScheme = unitSourceData.lastChangedScheme || null;
         await this.unitsRepository.save(newUnit);
 
-        const metadata = await this.getMetadataOfUnit(newUnit, unit.createFrom);
+        const rawMetadata = await this.getMetadataOfUnit(newUnit, unit.createFrom);
         const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
-        UnitService.setCurrentProfiles(
+        const metadata = UnitService.setCurrentProfiles(
           workspace.settings?.unitMDProfile,
           workspace.settings?.itemMDProfile,
-          metadata
+          rawMetadata
         );
         const itemUuidLookups = await this.copyItemsWithMetadata(newUnit.id, metadata);
 
@@ -395,33 +395,38 @@ export class UnitService {
   private async getModifiedMetadataForUnit(unit: Unit, workspace: Workspace): Promise<Unit> {
     const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(unit.id);
     if (unitMetadataToDelete) {
+      // findOnesMetadata already backfills valueAsText.
       unit.metadata = await this.findOnesMetadata(unit.id);
     } else {
-      unit.metadata = UnitService.setCurrentProfiles(
-        workspace.settings?.unitMDProfile,
-        workspace.settings?.itemMDProfile,
-        unit.metadata);
+      unit.metadata = UnitService.ensureValueAsText(
+        UnitService.setCurrentProfiles(
+          workspace.settings?.unitMDProfile,
+          workspace.settings?.itemMDProfile,
+          unit.metadata
+        )
+      );
     }
-    unit.metadata = UnitService.ensureValueAsText(unit.metadata as UnitMetadataValues);
     return unit;
   }
 
   static setCurrentProfiles(
     unitProfile: string, itemProfile: string, metadata: UnitMetadataValues
   ): UnitMetadataValues {
-    if (metadata.profiles) {
-      metadata.profiles = metadata.profiles.map(profile => UnitService
-        .setCurrentProfile(unitProfile, profile));
-    }
-    if (metadata.items) {
-      metadata.items.forEach(item => {
-        if (item.profiles) {
-          item.profiles = item.profiles.map(profile => UnitService
-            .setCurrentProfile(itemProfile, profile));
-        }
-      });
-    }
-    return metadata;
+    if (!metadata) return metadata;
+    return {
+      ...metadata,
+      ...(metadata.profiles && {
+        profiles: metadata.profiles.map(profile => UnitService.setCurrentProfile(unitProfile, profile))
+      }),
+      ...(metadata.items && {
+        items: metadata.items.map(item => ({
+          ...item,
+          ...(item.profiles && {
+            profiles: item.profiles.map(profile => UnitService.setCurrentProfile(itemProfile, profile))
+          })
+        }))
+      })
+    };
   }
 
   async getDisplayNameForUser(id: number): Promise<string> {
@@ -477,7 +482,7 @@ export class UnitService {
   private static getEntryValueAsText(value: MetadataValuesEntry['value']): MetadataValuesEntry['valueAsText'] {
     if (!Array.isArray(value)) return [];
     if (value.some(item => item && typeof item === 'object' && 'id' in item)) {
-      return value.flatMap(item => ('id' in item ? item.text ?? [] : []));
+      return value.flatMap(item => (item && typeof item === 'object' && 'id' in item ? item.text ?? [] : []));
     }
     // no vocabulary entries -> already multilingual free text
     return value as MetadataValuesEntry['valueAsText'];

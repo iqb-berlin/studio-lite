@@ -1135,17 +1135,20 @@ export class WorkspaceService {
   // it (true -> 0, false -> -1) and drop the flag so the imported structure
   // matches the current model. A profile that already carries `order` keeps it.
   private static normalizeLegacyProfileOrder(metadata: UnitMetadataValues): UnitMetadataValues {
+    if (!metadata || typeof metadata !== 'object') return metadata;
     const mapProfile = (profile: ProfileValues & { isCurrent?: boolean }): ProfileValues => {
       const { isCurrent, ...rest } = profile;
       return { ...rest, order: profile.order ?? orderFromCurrent(!!isCurrent) };
     };
     return {
       ...metadata,
-      profiles: metadata.profiles?.map(mapProfile),
-      items: metadata.items?.map(item => ({
-        ...item,
-        profiles: item.profiles?.map(mapProfile)
-      }))
+      ...(metadata.profiles && { profiles: metadata.profiles.map(mapProfile) }),
+      ...(metadata.items && {
+        items: metadata.items.map(item => ({
+          ...item,
+          ...(item.profiles && { profiles: item.profiles.map(mapProfile) })
+        }))
+      })
     };
   }
 

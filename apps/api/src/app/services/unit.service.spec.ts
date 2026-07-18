@@ -504,6 +504,24 @@ describe('UnitService', () => {
       expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
     });
 
+    it('tolerates a null element in a vocabulary value array without crashing', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [],
+            value: [{ id: 'v', text: [{ lang: 'de', value: 'Anwenden' }] }, null],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
+    });
+
     it('keeps multilingual free text arrays as valueAsText', () => {
       const metadata = {
         profiles: [{
