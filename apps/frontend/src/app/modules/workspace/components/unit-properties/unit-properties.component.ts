@@ -11,7 +11,6 @@ import {
   BehaviorSubject, Subject, Subscription, takeUntil
 } from 'rxjs';
 import {
-  UnitMetadataDto,
   UnitMetadataValues,
   UnitPropertiesDto,
   WorkspaceSettingsDto
@@ -451,20 +450,23 @@ export class UnitPropertiesComponent
     return [];
   }
 
+  // Profiles and items are edited by two independent child components. Each change
+  // must update only its own slice of the stored metadata: merging into the store's
+  // current value (rather than replacing it, or rebuilding `this.metadata` which
+  // would retrigger the items editor and drop in-flight item edits) keeps both the
+  // unit profiles and the item metadata when either side changes.
   onMetadataChange(metadata: Partial<IqbUnitMetadataValues>): void {
-    this.metadata = {
-      ...this.metadata,
-      profiles: metadata.profiles as unknown as UnitMetadataDto[]
-    };
-    this.workspaceService.getUnitMetadataStore()?.setMetadata(this.metadata);
+    const store = this.workspaceService.getUnitMetadataStore();
+    if (!store) return;
+    const current = (store.getData().metadata ?? {}) as UnitMetadataValues;
+    store.setMetadata({ ...current, profiles: metadata.profiles as unknown as UnitMetadataValues['profiles'] });
   }
 
   onItemsMetadataChange(metadata: UnitMetadataValues): void {
-    this.metadata = {
-      ...this.metadata,
-      items: metadata.items || []
-    };
-    this.workspaceService.getUnitMetadataStore()?.setMetadata(this.metadata);
+    const store = this.workspaceService.getUnitMetadataStore();
+    if (!store) return;
+    const current = (store.getData().metadata ?? {}) as UnitMetadataValues;
+    store.setMetadata({ ...current, items: metadata.items || [] });
   }
 
   onGroupNameChange(name: string): void {
