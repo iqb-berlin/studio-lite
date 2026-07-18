@@ -480,9 +480,20 @@ export class UnitService {
   }
 
   private static getEntryValueAsText(value: MetadataValuesEntry['value']): MetadataValuesEntry['valueAsText'] {
+    // metadata-values@3.x simple value { raw, asText } (form-created; the legacy
+    // form stored a plain string instead and has no asText to recover).
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return (value as unknown as { asText?: MetadataValuesEntry['valueAsText'] }).asText ?? [];
+    }
     if (!Array.isArray(value)) return [];
     if (value.some(item => item && typeof item === 'object' && 'id' in item)) {
-      return value.flatMap(item => (item && typeof item === 'object' && 'id' in item ? item.text ?? [] : []));
+      // vocabulary entries: metadata-values@3.x carries the display text in `label`,
+      // the legacy internal form in `text`.
+      return value.flatMap(item => {
+        if (!item || typeof item !== 'object' || !('id' in item)) return [];
+        const vocab = item as { label?: unknown[]; text?: unknown[] };
+        return vocab.label ?? vocab.text ?? [];
+      }) as MetadataValuesEntry['valueAsText'];
     }
     // no vocabulary entries -> already multilingual free text
     return value as MetadataValuesEntry['valueAsText'];

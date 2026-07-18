@@ -588,6 +588,14 @@ export class UnitDownloadClass {
   // Returns undefined for empty values since the spec requires `value`.
   static transformEntryValue(entry: MetadataValuesEntry, scope?: ExportReportScope): MetadataValueJson | undefined {
     const { value } = entry;
+    // metadata-values@3.x simple value { raw, asText } (form-created). The legacy
+    // form stored the raw value as a plain string, handled just below.
+    if (value && typeof value === 'object' && !Array.isArray(value) && 'raw' in value) {
+      const simple = value as unknown as { raw?: string; asText?: unknown };
+      if (!simple.raw) return undefined;
+      const asText = UnitDownloadClass.toLanguageCodedTexts(simple.asText ?? entry.valueAsText);
+      return { raw: simple.raw, ...(asText && { asText }) };
+    }
     if (typeof value === 'string') {
       if (!value) return undefined;
       const asText = UnitDownloadClass.toLanguageCodedTexts(entry.valueAsText);
@@ -597,9 +605,11 @@ export class UnitDownloadClass {
       const vocabularyEntries = value
         .filter(entryValue => !!entryValue && typeof (entryValue as { id?: unknown }).id === 'string')
         .map(entryValue => {
-          const vocabularyEntry = entryValue as { id: string; text?: unknown };
-          UnitDownloadClass.reportDroppedTexts(vocabularyEntry.text, entry.id, scope);
-          const label = UnitDownloadClass.toLanguageCodedTexts(vocabularyEntry.text);
+          const vocabularyEntry = entryValue as { id: string; label?: unknown; text?: unknown };
+          // metadata-values@3.x carries the vocab text in `label`, the legacy form in `text`.
+          const texts = vocabularyEntry.label ?? vocabularyEntry.text;
+          UnitDownloadClass.reportDroppedTexts(texts, entry.id, scope);
+          const label = UnitDownloadClass.toLanguageCodedTexts(texts);
           return {
             id: vocabularyEntry.id,
             ...(label && { label })

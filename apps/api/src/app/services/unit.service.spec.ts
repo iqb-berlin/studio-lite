@@ -504,6 +504,39 @@ describe('UnitService', () => {
       expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
     });
 
+    it('derives valueAsText from form-created vocabulary entries that carry label', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [],
+            value: [{ id: 'https://w3id.org/iqb/v24/kh/r5f', label: [{ lang: 'de', value: 'nein' }] }],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'nein' }]);
+    });
+
+    it('derives valueAsText from a form-created simple value object { raw, asText }', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1', label: [], value: { raw: 'true', asText: [{ lang: 'de', value: 'ja' }] }, valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'ja' }]);
+    });
+
     it('tolerates a null element in a vocabulary value array without crashing', () => {
       const metadata = {
         profiles: [{

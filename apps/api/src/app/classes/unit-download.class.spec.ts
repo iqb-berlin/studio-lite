@@ -1146,6 +1146,41 @@ describe('UnitDownloadClass', () => {
       }]);
     });
 
+    // metadata-values@3.x form-created shapes: the editor stores vocabulary values
+    // with `label` (not the legacy `text`) and simple values as { raw, asText }
+    // objects (not plain strings). The export must handle these, not just the
+    // legacy shapes, or form-edited metadata is lost on JSON export.
+    it('should export form-created vocabulary values that carry label (not text)', () => {
+      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
+        profileId: 'p1',
+        entries: [{
+          id: 'iqb_phones',
+          label: [{ lang: 'de', value: 'Kopfhörereinsatz' }],
+          value: [{ id: 'https://w3id.org/iqb/v24/kh/r5f', label: [{ lang: 'de', value: 'nein' }] }],
+          valueAsText: []
+        }]
+      }] as unknown as ProfileValues[]);
+
+      expect(result[0].entries[0].value).toEqual([{
+        id: 'https://w3id.org/iqb/v24/kh/r5f',
+        label: [{ lang: 'de', value: 'nein' }]
+      }]);
+    });
+
+    it('should export form-created simple value objects { raw, asText } (not drop them)', () => {
+      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
+        profileId: 'p1',
+        entries: [{
+          id: 'a1',
+          label: [{ lang: 'de', value: 'Für SPF geeignet' }],
+          value: { raw: 'true', asText: [{ lang: 'de', value: 'ja' }] },
+          valueAsText: []
+        }]
+      }] as unknown as ProfileValues[]);
+
+      expect(result[0].entries[0].value).toEqual({ raw: 'true', asText: [{ lang: 'de', value: 'ja' }] });
+    });
+
     it('should drop label and asText entries without a valid two-letter language code', () => {
       const result = UnitDownloadClass.transformProfilesToMetadataValues([{
         profileId: 'p1',
