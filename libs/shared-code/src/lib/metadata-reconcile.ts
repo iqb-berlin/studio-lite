@@ -2,7 +2,7 @@
  * Reconciling stored metadata rows with an incoming payload.
  *
  * The metadata profile form re-emits profiles WITHOUT their persisted row id (and
- * without created_at/is_current), so the write path cannot match stored rows to
+ * without created_at/order), so the write path cannot match stored rows to
  * incoming ones by id. It matches by `profileId` instead: a unit / item holds at
  * most one metadata row per profile, so the profileId is a stable natural key.
  */
@@ -11,7 +11,7 @@ export interface ReconcilableProfile {
   id: number;
   profileId?: string;
   createdAt?: Date;
-  isCurrent?: boolean;
+  order?: number;
 }
 
 export interface ProfileReconcileOps<T> {
@@ -21,9 +21,9 @@ export interface ProfileReconcileOps<T> {
 }
 
 /**
- * Carry identity, creation time and the current-profile flag over from the stored
- * row; take everything else (entries/values) from the incoming payload. `isCurrent`
- * is only inherited when the incoming payload omits it.
+ * Carry identity, creation time and the profile `order` over from the stored row;
+ * take everything else (entries/values) from the incoming payload. `order` is only
+ * inherited when the incoming payload omits it.
  */
 export function mergeProfile<T extends ReconcilableProfile>(existing: T, incoming: T): T {
   return {
@@ -31,7 +31,7 @@ export function mergeProfile<T extends ReconcilableProfile>(existing: T, incomin
     ...incoming,
     id: existing.id,
     createdAt: existing.createdAt,
-    isCurrent: incoming.isCurrent ?? existing.isCurrent
+    order: incoming.order ?? existing.order
   };
 }
 

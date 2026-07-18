@@ -449,8 +449,8 @@ describe('UnitService', () => {
         items: []
       } as UnitMetadataValues;
       const result = UnitService.setCurrentProfiles('p1', 'p2', metadata);
-      expect(result.profiles[0].isCurrent).toBe(true);
-      expect(result.profiles[1].isCurrent).toBe(false);
+      expect(result.profiles[0].order).toBe(0);
+      expect(result.profiles[1].order).toBe(-1);
     });
   });
 

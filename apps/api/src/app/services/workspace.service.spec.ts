@@ -491,13 +491,22 @@ describe('WorkspaceService', () => {
       });
     });
 
-    it('passes a legacy raw { profiles, items } blob through unchanged', () => {
+    it('normalizes a legacy raw { profiles, items } blob, deriving order from isCurrent', () => {
       const legacy = {
-        profiles: [{ profileId: 'p1', isCurrent: true, entries: [] }],
-        items: [{ id: 'ITEM1', profiles: [] }]
+        profiles: [
+          { profileId: 'p1', isCurrent: true, entries: [] },
+          { profileId: 'p2', isCurrent: false, entries: [] }
+        ],
+        items: [{ id: 'ITEM1', profiles: [{ profileId: 'ip1', isCurrent: true, entries: [] }] }]
       };
 
-      expect(WorkspaceService.mapImportedMetadata(legacy)).toBe(legacy);
+      expect(WorkspaceService.mapImportedMetadata(legacy)).toEqual({
+        profiles: [
+          { profileId: 'p1', order: 0, entries: [] },
+          { profileId: 'p2', order: -1, entries: [] }
+        ],
+        items: [{ id: 'ITEM1', profiles: [{ profileId: 'ip1', order: 0, entries: [] }] }]
+      });
     });
   });
 
@@ -727,7 +736,7 @@ describe('WorkspaceService', () => {
       expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, {
         profiles: [{
           profileId: 'https://example.org/unit-profile.json',
-          isCurrent: false,
+          order: -1,
           entries: [{
             id: 'a1',
             label: [{ lang: 'de', value: 'Für SPF geeignet' }],
@@ -769,7 +778,7 @@ describe('WorkspaceService', () => {
 
       expect(result.messages).toHaveLength(0);
       expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, {
-        profiles: [{ profileId: 'p1', isCurrent: false, entries: [] }],
+        profiles: [{ profileId: 'p1', order: -1, entries: [] }],
         items: [{ id: 'ITEM1', variableId: 'VAR1', profiles: [] }]
       });
     });

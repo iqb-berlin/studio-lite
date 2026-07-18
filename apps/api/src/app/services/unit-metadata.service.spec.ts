@@ -84,10 +84,10 @@ describe('UnitMetadataService', () => {
       expect(result).toBe(123);
     });
 
-    it('sets the NOT NULL columns when the client omits them', async () => {
-      // Regression: created_at/changed_at/is_current are NOT NULL without a DB
-      // default; the profile form re-emits without them, so the INSERT must fill
-      // them or Postgres rejects the row and the save crashes.
+    it('sets the NOT NULL columns and default order when the client omits them', async () => {
+      // Regression: created_at/changed_at are NOT NULL without a DB default; the
+      // profile form re-emits without them, so the INSERT must fill them or
+      // Postgres rejects the row and the save crashes. `order` defaults to -1.
       const dto = { profileId: 'profile1' } as UnitMetadataDto;
       mockRepository.create.mockImplementation((value: UnitMetadata) => value);
       mockRepository.save.mockResolvedValue({ id: 5 } as UnitMetadata);
@@ -95,7 +95,7 @@ describe('UnitMetadataService', () => {
       await service.addMetadata(1, dto);
 
       expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({
-        isCurrent: false,
+        order: -1,
         createdAt: expect.any(Date),
         changedAt: expect.any(Date)
       }));

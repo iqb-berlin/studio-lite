@@ -2,6 +2,7 @@ import { Logger } from '@nestjs/common';
 import { UnitItemMetadataDto } from '@studio-lite-lib/api-dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
+import { HIDDEN_PROFILE_ORDER } from '@studio-lite/shared-code';
 import UnitItemMetadata from '../entities/unit-item-metadata.entity';
 
 export class UnitItemMetadataService {
@@ -29,13 +30,14 @@ export class UnitItemMetadataService {
   async addItemMetadata(unitItemUuid: string, metadata: UnitItemMetadataDto, manager?: EntityManager): Promise<number> {
     metadata.unitItemUuid = unitItemUuid;
     const { id, ...metadataWithoutId } = metadata;
-    // created_at, changed_at and is_current are NOT NULL columns without a DB
-    // default. The client cannot supply them (the profile form re-emits without
-    // them), so they are set here — otherwise the INSERT violates NOT NULL.
+    // created_at and changed_at are NOT NULL columns without a DB default and the
+    // client cannot supply them (the profile form re-emits without them), so they
+    // are set here — otherwise the INSERT violates NOT NULL. `order` defaults to
+    // -1 (hidden) when the client omits it.
     const now = new Date();
     const newItemMetadata = this.repo(manager).create({
       ...metadataWithoutId,
-      isCurrent: metadataWithoutId.isCurrent ?? false,
+      order: metadataWithoutId.order ?? HIDDEN_PROFILE_ORDER,
       createdAt: metadataWithoutId.createdAt ?? now,
       changedAt: now
     });

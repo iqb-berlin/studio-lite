@@ -17,9 +17,11 @@ import {
   RenameGroupNameDto,
   ItemsMetadataValues,
   MetadataValuesEntry,
+  ProfileValues,
   UnitCommentDto,
   UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
+import { orderFromCurrent } from '@studio-lite/shared-code';
 import * as AdmZip from 'adm-zip';
 import {
   VariableCodingData,
@@ -1125,19 +1127,39 @@ export class WorkspaceService {
         profiles: WorkspaceService.mapMetadataValuesJson(wrapper.metadata)
       };
     }
-    return (parsed ?? {}) as UnitMetadataValues;
+    return WorkspaceService.normalizeLegacyProfileOrder((parsed ?? {}) as UnitMetadataValues);
   }
 
-  // Maps metadata-values@3.0 profiles back onto the internal structure.
-  // isCurrent is not restored here; setCurrentProfiles assigns it against
+  // Legacy raw-blob exports predate the metadata-values@3.x `order` field and
+  // carry the obsolete boolean `isCurrent` on each profile. Derive `order` from
+  // it (true -> 0, false -> -1) and drop the flag so the imported structure
+  // matches the current model. A profile that already carries `order` keeps it.
+  private static normalizeLegacyProfileOrder(metadata: UnitMetadataValues): UnitMetadataValues {
+    const mapProfile = (profile: ProfileValues & { isCurrent?: boolean }): ProfileValues => {
+      const { isCurrent, ...rest } = profile;
+      return { ...rest, order: profile.order ?? orderFromCurrent(!!isCurrent) };
+    };
+    return {
+      ...metadata,
+      profiles: metadata.profiles?.map(mapProfile),
+      items: metadata.items?.map(item => ({
+        ...item,
+        profiles: item.profiles?.map(mapProfile)
+      }))
+    };
+  }
+
+  // Maps metadata-values@3.0 profiles back onto the internal structure. The
+  // profile `order` is carried through; setCurrentProfiles reasserts it against
   // the workspace profile settings during import.
   static mapMetadataValuesJson(
     values: MetadataValuesJson[]
-  ): { profileId: string; entries: MetadataValuesEntry[] }[] {
+  ): { profileId: string; order?: number; entries: MetadataValuesEntry[] }[] {
     return (values ?? [])
       .filter(profile => !!profile?.profileId)
       .map(profile => ({
         profileId: profile.profileId,
+        order: profile.order,
         entries: (profile.entries ?? [])
           .filter(entry => !!entry?.id)
           .map(entry => WorkspaceService.mapMetadataEntryJson(entry))

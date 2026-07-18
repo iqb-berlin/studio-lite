@@ -19,7 +19,9 @@ import {
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { profileIdsMatch, reconcileProfilesByProfileId } from '@studio-lite/shared-code';
+import {
+  orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId
+} from '@studio-lite/shared-code';
 import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
@@ -435,7 +437,7 @@ export class UnitService {
   private static setCurrentProfile<T extends ProfileValues>(profileId: string, profile: T): T {
     return {
       ...profile,
-      isCurrent: profileIdsMatch(profile.profileId, profileId)
+      order: orderFromCurrent(profileIdsMatch(profile.profileId, profileId))
     };
   }
 
@@ -639,7 +641,7 @@ export class UnitService {
   private async patchUnitMetadataCurrentProfile(unitId: number, unitProfile: string): Promise<void> {
     const profilesToUpdate: UnitMetadataDto[] = await this.unitMetadataService.getAllByUnitId(unitId);
     await Promise.all(profilesToUpdate.map(metadata => {
-      metadata.isCurrent = profileIdsMatch(metadata.profileId, unitProfile);
+      metadata.order = orderFromCurrent(profileIdsMatch(metadata.profileId, unitProfile));
       return this.unitMetadataService.updateMetadata(metadata.id, metadata);
     }));
   }

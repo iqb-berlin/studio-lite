@@ -6,6 +6,7 @@ import {
   MissingsProfilesDto
 } from '@studio-lite-lib/api-dto';
 import { ToTextFactory, CodeAsText } from '@iqb/responses';
+import { isCurrentFromOrder } from '@studio-lite/shared-code';
 import {
   VariableCodingData,
   CodeData
@@ -59,7 +60,7 @@ export class DownloadWorkspacesClass {
       if (unit.metadata.items) {
         unit.metadata.items.forEach((item, i: number) => {
           const activeProfile = item.profiles?.find(
-            profile => profile.isCurrent
+            profile => isCurrentFromOrder(profile.order)
           );
           if (activeProfile) {
             const values: Record<string, string> = {};
@@ -102,7 +103,7 @@ export class DownloadWorkspacesClass {
     const totalValues: Record<string, string>[] = [];
     units.forEach(unit => {
       const activeProfile = unit.metadata.profiles?.find(
-        profile => profile.isCurrent
+        profile => isCurrentFromOrder(profile.order)
       );
       if (activeProfile) {
         const values: Record<string, string> = {};

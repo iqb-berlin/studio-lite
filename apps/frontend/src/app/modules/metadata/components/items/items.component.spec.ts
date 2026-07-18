@@ -117,12 +117,12 @@ describe('ItemsComponent', () => {
       profiles: [
         {
           profileId: 'test-profile-url',
-          isCurrent: false, // fallback will match with workspaceSettings.itemMDProfile
+          order: -1, // fallback will match with workspaceSettings.itemMDProfile
           entries: [{ id: 'entry1', value: 'value1' }]
         },
         {
           profileId: 'other-profile-url',
-          isCurrent: false,
+          order: -1,
           entries: [{ id: 'entry2', value: 'value2' }]
         }
       ]
@@ -140,16 +140,16 @@ describe('ItemsComponent', () => {
     expect(copiedItem.profiles).toBeDefined();
     expect(copiedItem.profiles?.length).toBe(2);
 
-    // Current profile: metadata entries copied, isCurrent set to true
+    // Current profile: metadata entries copied, order set to 0 (active)
     const currentProfile = copiedItem.profiles?.[0];
     expect(currentProfile?.profileId).toBe('test-profile-url');
-    expect(currentProfile?.isCurrent).toBe(true);
+    expect(currentProfile?.order).toBe(0);
     expect(currentProfile?.entries).toEqual([{ id: 'entry1', value: 'value1' }]);
 
-    // Non-current profile: metadata entries cleared, profileId preserved, isCurrent false
+    // Non-current profile: metadata entries cleared, profileId preserved, order -1 (hidden)
     const nonCurrentProfile = copiedItem.profiles?.[1];
     expect(nonCurrentProfile?.profileId).toBe('other-profile-url');
-    expect(nonCurrentProfile?.isCurrent).toBe(false);
+    expect(nonCurrentProfile?.order).toBe(-1);
     expect(nonCurrentProfile?.entries).toEqual([]);
 
     expect(emitSpy).toHaveBeenCalled();

@@ -17,7 +17,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
-import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
+import { HIDDEN_PROFILE_ORDER, VeronaModuleKeyCollection } from '@studio-lite/shared-code';
 import { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
 import {
   CodingSchemeData,
@@ -621,11 +621,12 @@ export class UnitDownloadClass {
     return undefined;
   }
 
-  // Maps internal profile values onto metadata-values@3.0. Internal-only
-  // fields (isCurrent, valueAsText) are dropped; profiles without profileId
-  // or without any exportable entry are omitted since the spec requires
-  // profileId and entries with minItems: 1. Every dropped piece that carried
-  // content is reported through the scope.
+  // Maps internal profile values onto metadata-values@3.0. The profile `order`
+  // (-1 = hidden/disabled, >= 0 = position) is emitted per spec; the internal-only
+  // `valueAsText` is dropped. Profiles without profileId or without any exportable
+  // entry are omitted since the spec requires profileId and entries with
+  // minItems: 1. Every dropped piece that carried content is reported through the
+  // scope.
   static transformProfilesToMetadataValues(
     profiles?: ProfileValues[], scope?: ExportReportScope
   ): MetadataValuesJson[] {
@@ -652,7 +653,7 @@ export class UnitDownloadClass {
         return [{ id: entry.id, ...(label && { label }), value }];
       });
       if (!entries.length) return [];
-      return [{ profileId: profile.profileId, entries }];
+      return [{ profileId: profile.profileId, order: profile.order ?? HIDDEN_PROFILE_ORDER, entries }];
     });
   }
 

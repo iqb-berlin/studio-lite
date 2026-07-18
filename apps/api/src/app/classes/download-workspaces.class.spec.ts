@@ -41,7 +41,7 @@ describe('DownloadWorkspacesClass', () => {
                 description: 'Desc1',
                 profiles: [
                   {
-                    isCurrent: true,
+                    order: 0,
                     entries: [
                       {
                         label: [{ value: 'EntryLabel' }],
@@ -79,7 +79,7 @@ describe('DownloadWorkspacesClass', () => {
                 id: 'ITEM1',
                 profiles: [
                   {
-                    isCurrent: true,
+                    order: 0,
                     entries: [
                       {
                         label: [{ value: 'MultiEntry' }],
@@ -108,7 +108,7 @@ describe('DownloadWorkspacesClass', () => {
           metadata: {
             profiles: [
               {
-                isCurrent: true,
+                order: 0,
                 entries: [
                   {
                     label: [{ value: 'UnitLabel' }],

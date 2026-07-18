@@ -4,7 +4,7 @@ interface TestProfile {
   id: number;
   profileId?: string;
   createdAt?: Date;
-  isCurrent?: boolean;
+  order?: number;
   entries?: string[];
 }
 
@@ -30,7 +30,7 @@ describe('mergeProfile', () => {
   it('keeps id/createdAt from the stored row and entries from the incoming payload', () => {
     const created = new Date('2020-01-01');
     const existing: TestProfile = {
-      id: 7, profileId: 'p1', createdAt: created, isCurrent: true, entries: ['old']
+      id: 7, profileId: 'p1', createdAt: created, order: 0, entries: ['old']
     };
     const incoming: TestProfile = { id: undefined as unknown as number, profileId: 'p1', entries: ['new'] };
 
@@ -39,14 +39,14 @@ describe('mergeProfile', () => {
     expect(merged.id).toBe(7);
     expect(merged.createdAt).toBe(created);
     expect(merged.entries).toEqual(['new']);
-    expect(merged.isCurrent).toBe(true); // inherited because incoming omits it
+    expect(merged.order).toBe(0); // inherited because incoming omits it
   });
 
-  it('takes isCurrent from the incoming payload when present, including false', () => {
-    const existing: TestProfile = { id: 1, profileId: 'p1', isCurrent: true };
-    const incoming: TestProfile = { id: 1, profileId: 'p1', isCurrent: false };
+  it('takes order from the incoming payload when present, including -1', () => {
+    const existing: TestProfile = { id: 1, profileId: 'p1', order: 0 };
+    const incoming: TestProfile = { id: 1, profileId: 'p1', order: -1 };
 
-    expect(mergeProfile(existing, incoming).isCurrent).toBe(false);
+    expect(mergeProfile(existing, incoming).order).toBe(-1);
   });
 });
 
