@@ -277,6 +277,8 @@ describe('UnitService', () => {
         value: { transaction } as unknown as EntityManager,
         configurable: true
       });
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 10 } as Unit);
+      workspaceRepository.findOne.mockResolvedValue({ id: 10, settings: {} } as unknown as Workspace);
       unitMetadataService.getAllByUnitId.mockResolvedValue([]);
       unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
 
@@ -286,6 +288,35 @@ describe('UnitService', () => {
       expect(unitMetadataService.getAllByUnitId).toHaveBeenCalledWith(1, manager);
       expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalledWith(1, manager);
       expect(unitMetadataToDeleteService.upsertOneForUnit).toHaveBeenCalledWith(1, manager);
+    });
+
+    it('flags the current profile as order 0 from the workspace settings on save', async () => {
+      const manager = createMock<EntityManager>();
+      const transaction = jest.fn().mockImplementation(
+        (runInTransaction: (m: EntityManager) => Promise<unknown>) => runInTransaction(manager)
+      );
+      Object.defineProperty(unitsRepository, 'manager', {
+        value: { transaction } as unknown as EntityManager,
+        configurable: true
+      });
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 10 } as Unit);
+      workspaceRepository.findOne.mockResolvedValue({
+        id: 10,
+        settings: { unitMDProfile: 'profile-a', itemMDProfile: 'profile-b' }
+      } as unknown as Workspace);
+      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
+      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
+
+      const patchUnitMetadataSpy = jest.spyOn(service, 'patchUnitMetadata').mockResolvedValue();
+      jest.spyOn(service, 'patchItemsMetadata').mockResolvedValue();
+
+      await service.patchMetadata(1, {
+        profiles: [{ profileId: 'profile-a' }, { profileId: 'other' }]
+      });
+
+      const savedProfiles = patchUnitMetadataSpy.mock.calls[0][1];
+      expect(savedProfiles[0]).toMatchObject({ profileId: 'profile-a', order: 0 });
+      expect(savedProfiles[1]).toMatchObject({ profileId: 'other', order: -1 });
     });
   });
 

@@ -533,9 +533,23 @@ export class UnitService {
   // The whole metadata save runs in one transaction so a mid-sequence failure
   // (e.g. a constraint error on one profile) rolls back every write instead of
   // leaving the unit's profiles/items half-updated.
+  //
+  // The profile form re-emits profiles without `order`, so the current profile
+  // must be flagged here from the workspace settings — otherwise a newly stored
+  // profile keeps the -1 (hidden) insert default and, because the read path uses
+  // the normalized tables (permanent unit_metadata_to_delete marker) without
+  // re-deriving, it would be read back as hidden.
   async patchMetadata(unitId: number, metadata: UnitMetadataValues): Promise<void> {
-    const profiles = metadata.profiles || [];
-    const items = metadata.items || [];
+    const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
+    if (!unit) throw new UnitNotFoundException(unitId, 0, 'PATCH');
+    const workspace = await this.workspaceRepository.findOne({ where: { id: unit.workspaceId } });
+    const withOrder = UnitService.setCurrentProfiles(
+      workspace?.settings?.unitMDProfile,
+      workspace?.settings?.itemMDProfile,
+      metadata
+    );
+    const profiles = withOrder.profiles || [];
+    const items = withOrder.items || [];
     await this.unitsRepository.manager.transaction(async manager => {
       await this.patchUnitMetadata(unitId, profiles as UnitMetadataDto[], manager);
       await this.patchItemsMetadata(unitId, items as unknown as UnitItemWithMetadataDto[], manager);
