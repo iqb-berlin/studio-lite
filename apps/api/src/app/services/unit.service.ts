@@ -5,6 +5,7 @@ import {
 } from 'typeorm';
 import {
   CreateUnitDto,
+  MetadataValuesEntry,
   ProfileValues,
   RequestReportDto,
   UnitInViewDto,
@@ -401,6 +402,7 @@ export class UnitService {
         workspace.settings?.itemMDProfile,
         unit.metadata);
     }
+    unit.metadata = UnitService.ensureValueAsText(unit.metadata as UnitMetadataValues);
     return unit;
   }
 
@@ -439,6 +441,46 @@ export class UnitService {
       ...profile,
       order: orderFromCurrent(profileIdsMatch(profile.profileId, profileId))
     };
+  }
+
+  // Backfill a display text (valueAsText) for entries that have none, e.g. rows
+  // stored before valueAsText was populated. Only structured values carry their
+  // own text: vocabulary entries hold it in `text`, multilingual free text is
+  // already language-coded. A plain string cannot be resolved here (a coded value
+  // needs its vocabulary, free text carries no language), so it is left empty
+  // rather than guessed. Returns new objects; the stored entities are not mutated.
+  static ensureValueAsText(metadata: UnitMetadataValues): UnitMetadataValues {
+    if (!metadata) return metadata;
+    return {
+      ...metadata,
+      ...(metadata.profiles && { profiles: metadata.profiles.map(UnitService.fillProfileValueAsText) }),
+      ...(metadata.items && {
+        items: metadata.items.map(item => ({
+          ...item,
+          ...(item.profiles && { profiles: item.profiles.map(UnitService.fillProfileValueAsText) })
+        }))
+      })
+    };
+  }
+
+  private static fillProfileValueAsText<T extends ProfileValues>(profile: T): T {
+    if (!profile.entries) return profile;
+    return { ...profile, entries: profile.entries.map(UnitService.fillEntryValueAsText) };
+  }
+
+  private static fillEntryValueAsText(entry: MetadataValuesEntry): MetadataValuesEntry {
+    const hasText = Array.isArray(entry.valueAsText) ? entry.valueAsText.length > 0 : !!entry.valueAsText;
+    if (hasText) return entry;
+    return { ...entry, valueAsText: UnitService.getEntryValueAsText(entry.value) };
+  }
+
+  private static getEntryValueAsText(value: MetadataValuesEntry['value']): MetadataValuesEntry['valueAsText'] {
+    if (!Array.isArray(value)) return [];
+    if (value.some(item => item && typeof item === 'object' && 'id' in item)) {
+      return value.flatMap(item => ('id' in item ? item.text ?? [] : []));
+    }
+    // no vocabulary entries -> already multilingual free text
+    return value as MetadataValuesEntry['valueAsText'];
   }
 
   // Reconcile unit metadata by profileId (the profile form re-emits without the
@@ -837,13 +879,15 @@ export class UnitService {
       // the index signature of ItemsMetadataValues blocks direct assignment
       return await this.findOnesMetadata(createFrom) as unknown as UnitMetadataValues;
     }
-    return unit.metadata;
+    return UnitService.ensureValueAsText(unit.metadata as UnitMetadataValues);
   }
 
   async findOnesMetadata(unitId: number): Promise<UnitFullMetadataDto> {
-    return {
+    const metadata: UnitMetadataValues = {
       profiles: await this.unitMetadataService.getAllByUnitId(unitId),
-      items: await this.unitItemService.getAllByUnitIdWithMetadata(unitId)
+      items: await this.unitItemService
+        .getAllByUnitIdWithMetadata(unitId) as unknown as UnitMetadataValues['items']
     };
+    return UnitService.ensureValueAsText(metadata) as unknown as UnitFullMetadataDto;
   }
 }

@@ -454,6 +454,100 @@ describe('UnitService', () => {
     });
   });
 
+  describe('ensureValueAsText', () => {
+    it('derives valueAsText from vocabulary entries (text, not label)', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [{ lang: 'de', value: 'Prozess' }],
+            value: [{ id: 'https://w3id.org/iqb/vocab/p2', text: [{ lang: 'de', value: 'Anwenden' }] }],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
+    });
+
+    it('keeps multilingual free text arrays as valueAsText', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [],
+            value: [{ lang: 'de', value: 'Freitext' }],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Freitext' }]);
+    });
+
+    it('leaves valueAsText empty for a plain string value (not derivable)', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1', label: [], value: 'false', valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([]);
+    });
+
+    it('does not overwrite an existing valueAsText', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [],
+            value: [{ id: 'v', text: [{ lang: 'de', value: 'Neu' }] }],
+            valueAsText: [{ lang: 'de', value: 'Alt' }]
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Alt' }]);
+    });
+
+    it('fills item profile entries and does not mutate the input', () => {
+      const metadata = {
+        items: [{
+          id: 'ITEM1',
+          profiles: [{
+            profileId: 'ip1',
+            entries: [{
+              id: 'e1',
+              label: [],
+              value: [{ id: 'v', text: [{ lang: 'de', value: 'Anwenden' }] }],
+              valueAsText: []
+            }]
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.items[0].profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
+      // input untouched
+      expect(metadata.items[0].profiles[0].entries[0].valueAsText).toEqual([]);
+    });
+  });
+
   describe('findOnesMetadata', () => {
     it('should return metadata', async () => {
       unitMetadataService.getAllByUnitId.mockResolvedValue([]);
