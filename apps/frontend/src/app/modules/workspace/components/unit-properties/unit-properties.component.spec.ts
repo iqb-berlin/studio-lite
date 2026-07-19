@@ -161,4 +161,19 @@ describe('UnitPropertiesComponent', () => {
       items: [{ id: 'new' }]
     });
   });
+
+  it('does not clobber stored profiles when onMetadataChange carries no profiles slice', () => {
+    const store = createMock<UnitMetadataStore>();
+    store.getData.mockReturnValue({
+      metadata: { profiles: [{ profileId: 'p1' }], items: [{ id: 'item1' }] }
+    } as unknown as UnitPropertiesDto);
+    jest.spyOn(component.workspaceService, 'getUnitMetadataStore').mockReturnValue(store);
+
+    component.onMetadataChange({} as unknown as Parameters<typeof component.onMetadataChange>[0]);
+
+    expect(store.setMetadata).toHaveBeenCalledWith({
+      profiles: [{ profileId: 'p1' }],
+      items: [{ id: 'item1' }]
+    });
+  });
 });

@@ -459,14 +459,23 @@ export class UnitPropertiesComponent
     const store = this.workspaceService.getUnitMetadataStore();
     if (!store) return;
     const current = (store.getData().metadata ?? {}) as UnitMetadataValues;
-    store.setMetadata({ ...current, profiles: metadata.profiles as unknown as UnitMetadataValues['profiles'] });
+    // Only overwrite the profiles slice when the event actually carries one, so a
+    // profiles-less emit can never clobber the stored profiles (an empty array is
+    // a deliberate "clear", undefined is not).
+    store.setMetadata({
+      ...current,
+      ...(metadata.profiles && { profiles: metadata.profiles as unknown as UnitMetadataValues['profiles'] })
+    });
   }
 
   onItemsMetadataChange(metadata: UnitMetadataValues): void {
     const store = this.workspaceService.getUnitMetadataStore();
     if (!store) return;
     const current = (store.getData().metadata ?? {}) as UnitMetadataValues;
-    store.setMetadata({ ...current, items: metadata.items || [] });
+    store.setMetadata({
+      ...current,
+      ...(metadata.items && { items: metadata.items })
+    });
   }
 
   onGroupNameChange(name: string): void {
