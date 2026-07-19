@@ -161,7 +161,6 @@
     "@angular/cli": "20.3.28",
     "@angular/compiler-cli": "20.3.25",
     "@angular/language-service": "20.3.25",
-    "@compodoc/compodoc": "^1.1.26",
     "@cypress/code-coverage": "^4.0.2",
     "@iqb/eslint-config": "^2.0.0",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
