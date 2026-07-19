@@ -2,6 +2,9 @@ export { VeronaModuleFactory } from './lib/helper/verona-module.factory';
 export { VeronaModuleKeyCollection } from './lib/helper/verona-module-key-collection.class';
 export { canonicalizeProfileId, profileIdsMatch, isItemProfileId } from './lib/profile-id';
 export {
+  HIDDEN_PROFILE_ORDER, ACTIVE_PROFILE_ORDER, orderFromCurrent, isCurrentFromOrder
+} from './lib/profile-order';
+export {
   ReconcilableProfile, ProfileReconcileOps, mergeProfile, reconcileProfilesByProfileId
 } from './lib/metadata-reconcile';
 export {

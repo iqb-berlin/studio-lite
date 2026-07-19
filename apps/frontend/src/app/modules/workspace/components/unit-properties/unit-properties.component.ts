@@ -450,12 +450,32 @@ export class UnitPropertiesComponent
     return [];
   }
 
+  // Profiles and items are edited by two independent child components. Each change
+  // must update only its own slice of the stored metadata: merging into the store's
+  // current value (rather than replacing it, or rebuilding `this.metadata` which
+  // would retrigger the items editor and drop in-flight item edits) keeps both the
+  // unit profiles and the item metadata when either side changes.
   onMetadataChange(metadata: Partial<IqbUnitMetadataValues>): void {
-    this.workspaceService.getUnitMetadataStore()?.setMetadata(metadata as unknown as UnitMetadataValues);
+    const store = this.workspaceService.getUnitMetadataStore();
+    if (!store) return;
+    const current = (store.getData().metadata ?? {}) as UnitMetadataValues;
+    // Only overwrite the profiles slice when the event actually carries one, so a
+    // profiles-less emit can never clobber the stored profiles (an empty array is
+    // a deliberate "clear", undefined is not).
+    store.setMetadata({
+      ...current,
+      ...(metadata.profiles && { profiles: metadata.profiles as unknown as UnitMetadataValues['profiles'] })
+    });
   }
 
   onItemsMetadataChange(metadata: UnitMetadataValues): void {
-    this.workspaceService.getUnitMetadataStore()?.setMetadata(metadata);
+    const store = this.workspaceService.getUnitMetadataStore();
+    if (!store) return;
+    const current = (store.getData().metadata ?? {}) as UnitMetadataValues;
+    store.setMetadata({
+      ...current,
+      ...(metadata.items && { items: metadata.items })
+    });
   }
 
   onGroupNameChange(name: string): void {

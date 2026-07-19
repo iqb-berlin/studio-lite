@@ -17,7 +17,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
-import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
+import { HIDDEN_PROFILE_ORDER, VeronaModuleKeyCollection } from '@studio-lite/shared-code';
 import { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
 import {
   CodingSchemeData,
@@ -588,6 +588,14 @@ export class UnitDownloadClass {
   // Returns undefined for empty values since the spec requires `value`.
   static transformEntryValue(entry: MetadataValuesEntry, scope?: ExportReportScope): MetadataValueJson | undefined {
     const { value } = entry;
+    // metadata-values@3.x simple value { raw, asText } (form-created). The legacy
+    // form stored the raw value as a plain string, handled just below.
+    if (value && typeof value === 'object' && !Array.isArray(value) && 'raw' in value) {
+      const simple = value as unknown as { raw?: string; asText?: unknown };
+      if (!simple.raw) return undefined;
+      const asText = UnitDownloadClass.toLanguageCodedTexts(simple.asText ?? entry.valueAsText);
+      return { raw: simple.raw, ...(asText && { asText }) };
+    }
     if (typeof value === 'string') {
       if (!value) return undefined;
       const asText = UnitDownloadClass.toLanguageCodedTexts(entry.valueAsText);
@@ -597,9 +605,11 @@ export class UnitDownloadClass {
       const vocabularyEntries = value
         .filter(entryValue => !!entryValue && typeof (entryValue as { id?: unknown }).id === 'string')
         .map(entryValue => {
-          const vocabularyEntry = entryValue as { id: string; text?: unknown };
-          UnitDownloadClass.reportDroppedTexts(vocabularyEntry.text, entry.id, scope);
-          const label = UnitDownloadClass.toLanguageCodedTexts(vocabularyEntry.text);
+          const vocabularyEntry = entryValue as { id: string; label?: unknown; text?: unknown };
+          // metadata-values@3.x carries the vocab text in `label`, the legacy form in `text`.
+          const texts = vocabularyEntry.label ?? vocabularyEntry.text;
+          UnitDownloadClass.reportDroppedTexts(texts, entry.id, scope);
+          const label = UnitDownloadClass.toLanguageCodedTexts(texts);
           return {
             id: vocabularyEntry.id,
             ...(label && { label })
@@ -621,11 +631,12 @@ export class UnitDownloadClass {
     return undefined;
   }
 
-  // Maps internal profile values onto metadata-values@3.0. Internal-only
-  // fields (isCurrent, valueAsText) are dropped; profiles without profileId
-  // or without any exportable entry are omitted since the spec requires
-  // profileId and entries with minItems: 1. Every dropped piece that carried
-  // content is reported through the scope.
+  // Maps internal profile values onto metadata-values@3.0. The profile `order`
+  // (-1 = hidden/disabled, >= 0 = position) is emitted per spec; the internal-only
+  // `valueAsText` is dropped. Profiles without profileId or without any exportable
+  // entry are omitted since the spec requires profileId and entries with
+  // minItems: 1. Every dropped piece that carried content is reported through the
+  // scope.
   static transformProfilesToMetadataValues(
     profiles?: ProfileValues[], scope?: ExportReportScope
   ): MetadataValuesJson[] {
@@ -652,7 +663,7 @@ export class UnitDownloadClass {
         return [{ id: entry.id, ...(label && { label }), value }];
       });
       if (!entries.length) return [];
-      return [{ profileId: profile.profileId, entries }];
+      return [{ profileId: profile.profileId, order: profile.order ?? HIDDEN_PROFILE_ORDER, entries }];
     });
   }
 

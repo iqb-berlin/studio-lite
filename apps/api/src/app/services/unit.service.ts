@@ -5,6 +5,7 @@ import {
 } from 'typeorm';
 import {
   CreateUnitDto,
+  MetadataValuesEntry,
   ProfileValues,
   RequestReportDto,
   UnitInViewDto,
@@ -19,7 +20,9 @@ import {
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { profileIdsMatch, reconcileProfilesByProfileId } from '@studio-lite/shared-code';
+import {
+  orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId
+} from '@studio-lite/shared-code';
 import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
@@ -260,12 +263,12 @@ export class UnitService {
         newUnit.lastChangedScheme = unitSourceData.lastChangedScheme || null;
         await this.unitsRepository.save(newUnit);
 
-        const metadata = await this.getMetadataOfUnit(newUnit, unit.createFrom);
+        const rawMetadata = await this.getMetadataOfUnit(newUnit, unit.createFrom);
         const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
-        UnitService.setCurrentProfiles(
+        const metadata = UnitService.setCurrentProfiles(
           workspace.settings?.unitMDProfile,
           workspace.settings?.itemMDProfile,
-          metadata
+          rawMetadata
         );
         const itemUuidLookups = await this.copyItemsWithMetadata(newUnit.id, metadata);
 
@@ -392,12 +395,16 @@ export class UnitService {
   private async getModifiedMetadataForUnit(unit: Unit, workspace: Workspace): Promise<Unit> {
     const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(unit.id);
     if (unitMetadataToDelete) {
+      // findOnesMetadata already backfills valueAsText.
       unit.metadata = await this.findOnesMetadata(unit.id);
     } else {
-      unit.metadata = UnitService.setCurrentProfiles(
-        workspace.settings?.unitMDProfile,
-        workspace.settings?.itemMDProfile,
-        unit.metadata);
+      unit.metadata = UnitService.ensureValueAsText(
+        UnitService.setCurrentProfiles(
+          workspace.settings?.unitMDProfile,
+          workspace.settings?.itemMDProfile,
+          unit.metadata
+        )
+      );
     }
     return unit;
   }
@@ -405,19 +412,21 @@ export class UnitService {
   static setCurrentProfiles(
     unitProfile: string, itemProfile: string, metadata: UnitMetadataValues
   ): UnitMetadataValues {
-    if (metadata.profiles) {
-      metadata.profiles = metadata.profiles.map(profile => UnitService
-        .setCurrentProfile(unitProfile, profile));
-    }
-    if (metadata.items) {
-      metadata.items.forEach(item => {
-        if (item.profiles) {
-          item.profiles = item.profiles.map(profile => UnitService
-            .setCurrentProfile(itemProfile, profile));
-        }
-      });
-    }
-    return metadata;
+    if (!metadata) return metadata;
+    return {
+      ...metadata,
+      ...(metadata.profiles && {
+        profiles: metadata.profiles.map(profile => UnitService.setCurrentProfile(unitProfile, profile))
+      }),
+      ...(metadata.items && {
+        items: metadata.items.map(item => ({
+          ...item,
+          ...(item.profiles && {
+            profiles: item.profiles.map(profile => UnitService.setCurrentProfile(itemProfile, profile))
+          })
+        }))
+      })
+    };
   }
 
   async getDisplayNameForUser(id: number): Promise<string> {
@@ -435,8 +444,59 @@ export class UnitService {
   private static setCurrentProfile<T extends ProfileValues>(profileId: string, profile: T): T {
     return {
       ...profile,
-      isCurrent: profileIdsMatch(profile.profileId, profileId)
+      order: orderFromCurrent(profileIdsMatch(profile.profileId, profileId))
     };
+  }
+
+  // Backfill a display text (valueAsText) for entries that have none, e.g. rows
+  // stored before valueAsText was populated. Only structured values carry their
+  // own text: vocabulary entries hold it in `text`, multilingual free text is
+  // already language-coded. A plain string cannot be resolved here (a coded value
+  // needs its vocabulary, free text carries no language), so it is left empty
+  // rather than guessed. Returns new objects; the stored entities are not mutated.
+  static ensureValueAsText(metadata: UnitMetadataValues): UnitMetadataValues {
+    if (!metadata) return metadata;
+    return {
+      ...metadata,
+      ...(metadata.profiles && { profiles: metadata.profiles.map(UnitService.fillProfileValueAsText) }),
+      ...(metadata.items && {
+        items: metadata.items.map(item => ({
+          ...item,
+          ...(item.profiles && { profiles: item.profiles.map(UnitService.fillProfileValueAsText) })
+        }))
+      })
+    };
+  }
+
+  private static fillProfileValueAsText<T extends ProfileValues>(profile: T): T {
+    if (!profile.entries) return profile;
+    return { ...profile, entries: profile.entries.map(UnitService.fillEntryValueAsText) };
+  }
+
+  private static fillEntryValueAsText(entry: MetadataValuesEntry): MetadataValuesEntry {
+    const hasText = Array.isArray(entry.valueAsText) ? entry.valueAsText.length > 0 : !!entry.valueAsText;
+    if (hasText) return entry;
+    return { ...entry, valueAsText: UnitService.getEntryValueAsText(entry.value) };
+  }
+
+  private static getEntryValueAsText(value: MetadataValuesEntry['value']): MetadataValuesEntry['valueAsText'] {
+    // metadata-values@3.x simple value { raw, asText } (form-created; the legacy
+    // form stored a plain string instead and has no asText to recover).
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return (value as unknown as { asText?: MetadataValuesEntry['valueAsText'] }).asText ?? [];
+    }
+    if (!Array.isArray(value)) return [];
+    if (value.some(item => item && typeof item === 'object' && 'id' in item)) {
+      // vocabulary entries: metadata-values@3.x carries the display text in `label`,
+      // the legacy internal form in `text`.
+      return value.flatMap(item => {
+        if (!item || typeof item !== 'object' || !('id' in item)) return [];
+        const vocab = item as { label?: unknown[]; text?: unknown[] };
+        return vocab.label ?? vocab.text ?? [];
+      }) as MetadataValuesEntry['valueAsText'];
+    }
+    // no vocabulary entries -> already multilingual free text
+    return value as MetadataValuesEntry['valueAsText'];
   }
 
   // Reconcile unit metadata by profileId (the profile form re-emits without the
@@ -489,9 +549,23 @@ export class UnitService {
   // The whole metadata save runs in one transaction so a mid-sequence failure
   // (e.g. a constraint error on one profile) rolls back every write instead of
   // leaving the unit's profiles/items half-updated.
+  //
+  // The profile form re-emits profiles without `order`, so the current profile
+  // must be flagged here from the workspace settings — otherwise a newly stored
+  // profile keeps the -1 (hidden) insert default and, because the read path uses
+  // the normalized tables (permanent unit_metadata_to_delete marker) without
+  // re-deriving, it would be read back as hidden.
   async patchMetadata(unitId: number, metadata: UnitMetadataValues): Promise<void> {
-    const profiles = metadata.profiles || [];
-    const items = metadata.items || [];
+    const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
+    if (!unit) throw new UnitNotFoundException(unitId, 0, 'PATCH');
+    const workspace = await this.workspaceRepository.findOne({ where: { id: unit.workspaceId } });
+    const withOrder = UnitService.setCurrentProfiles(
+      workspace?.settings?.unitMDProfile,
+      workspace?.settings?.itemMDProfile,
+      metadata
+    );
+    const profiles = withOrder.profiles || [];
+    const items = withOrder.items || [];
     await this.unitsRepository.manager.transaction(async manager => {
       await this.patchUnitMetadata(unitId, profiles as UnitMetadataDto[], manager);
       await this.patchItemsMetadata(unitId, items as unknown as UnitItemWithMetadataDto[], manager);
@@ -639,7 +713,7 @@ export class UnitService {
   private async patchUnitMetadataCurrentProfile(unitId: number, unitProfile: string): Promise<void> {
     const profilesToUpdate: UnitMetadataDto[] = await this.unitMetadataService.getAllByUnitId(unitId);
     await Promise.all(profilesToUpdate.map(metadata => {
-      metadata.isCurrent = profileIdsMatch(metadata.profileId, unitProfile);
+      metadata.order = orderFromCurrent(profileIdsMatch(metadata.profileId, unitProfile));
       return this.unitMetadataService.updateMetadata(metadata.id, metadata);
     }));
   }
@@ -835,13 +909,15 @@ export class UnitService {
       // the index signature of ItemsMetadataValues blocks direct assignment
       return await this.findOnesMetadata(createFrom) as unknown as UnitMetadataValues;
     }
-    return unit.metadata;
+    return UnitService.ensureValueAsText(unit.metadata as UnitMetadataValues);
   }
 
   async findOnesMetadata(unitId: number): Promise<UnitFullMetadataDto> {
-    return {
+    const metadata: UnitMetadataValues = {
       profiles: await this.unitMetadataService.getAllByUnitId(unitId),
-      items: await this.unitItemService.getAllByUnitIdWithMetadata(unitId)
+      items: await this.unitItemService
+        .getAllByUnitIdWithMetadata(unitId) as unknown as UnitMetadataValues['items']
     };
+    return UnitService.ensureValueAsText(metadata) as unknown as UnitFullMetadataDto;
   }
 }

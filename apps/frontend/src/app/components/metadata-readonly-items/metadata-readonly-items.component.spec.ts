@@ -41,7 +41,7 @@ describe('MetadataReadonlyItemsComponent', () => {
       variableReadOnlyId: 'ro-var-1',
       weighting: 1.5,
       description: 'Test Item 1',
-      profiles: [{ profileId: 'p1', isCurrent: true, entries: [] }]
+      profiles: [{ profileId: 'p1', order: 0, entries: [] }]
     },
     {
       id: '',

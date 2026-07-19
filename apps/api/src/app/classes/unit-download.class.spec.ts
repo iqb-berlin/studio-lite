@@ -553,7 +553,7 @@ describe('UnitDownloadClass', () => {
         metadata: {
           profiles: [{
             profileId: 'https://example.org/unit-profile.json',
-            isCurrent: true,
+            order: 0,
             entries: [{
               id: 'a1',
               label: [{ lang: 'de', value: 'Autor:in' }],
@@ -719,7 +719,7 @@ describe('UnitDownloadClass', () => {
         metadata: {
           profiles: [{
             profileId: 'https://example.org/unit-profile.json',
-            isCurrent: true,
+            order: 0,
             entries: [{
               id: 'a1',
               label: [{ lang: 'de', value: 'Autor:in' }],
@@ -835,7 +835,7 @@ describe('UnitDownloadClass', () => {
         metadata: {
           profiles: [{
             profileId: 'https://example.org/unit-profile.json',
-            isCurrent: true,
+            order: 0,
             entries: [{
               id: 'a1',
               label: [{ lang: 'de', value: 'Für SPF geeignet' }],
@@ -862,7 +862,7 @@ describe('UnitDownloadClass', () => {
             changedAt: '2025-04-01T00:00:00.000Z',
             profiles: [{
               profileId: 'https://example.org/item-profile.json',
-              isCurrent: true,
+              order: 0,
               entries: [{
                 id: 'w4',
                 label: [{ lang: 'de', value: 'Prozess' }],
@@ -909,6 +909,7 @@ describe('UnitDownloadClass', () => {
         changedAt: '2025-05-01T08:00:00.000Z',
         metadata: [{
           profileId: 'https://example.org/unit-profile.json',
+          order: 0,
           entries: [{
             id: 'a1',
             label: [{ lang: 'de', value: 'Für SPF geeignet' }],
@@ -930,6 +931,7 @@ describe('UnitDownloadClass', () => {
         changedAt: '2025-04-01T00:00:00.000Z',
         metadata: [{
           profileId: 'https://example.org/item-profile.json',
+          order: 0,
           entries: [{
             id: 'w4',
             label: [{ lang: 'de', value: 'Prozess' }],
@@ -1076,10 +1078,10 @@ describe('UnitDownloadClass', () => {
   });
 
   describe('transformProfilesToMetadataValues', () => {
-    it('should map internal profiles to metadata-values@3.0 and drop internal-only fields', () => {
+    it('should map internal profiles to metadata-values@3.0, emit order and drop internal-only fields', () => {
       const result = UnitDownloadClass.transformProfilesToMetadataValues([{
         profileId: 'https://example.org/profile.json',
-        isCurrent: true,
+        order: 0,
         entries: [{
           id: 'iqb_author',
           label: [{ lang: 'de', value: 'Entwickler:in' }],
@@ -1090,6 +1092,7 @@ describe('UnitDownloadClass', () => {
 
       expect(result).toEqual([{
         profileId: 'https://example.org/profile.json',
+        order: 0,
         entries: [{
           id: 'iqb_author',
           label: [{ lang: 'de', value: 'Entwickler:in' }],
@@ -1100,7 +1103,7 @@ describe('UnitDownloadClass', () => {
 
     it('should omit profiles without profileId or without exportable entries', () => {
       const result = UnitDownloadClass.transformProfilesToMetadataValues([
-        { isCurrent: true, entries: [{ id: 'a1', value: 'x', valueAsText: [] }] },
+        { order: 0, entries: [{ id: 'a1', value: 'x', valueAsText: [] }] },
         { profileId: 'p1', entries: [{ id: 'empty', value: [], valueAsText: [] }] },
         { profileId: 'p2', entries: [] }
       ] as unknown as ProfileValues[]);
@@ -1141,6 +1144,41 @@ describe('UnitDownloadClass', () => {
         id: 'a1',
         value: { raw: 'true', asText: [{ lang: 'de', value: 'ja' }] }
       }]);
+    });
+
+    // metadata-values@3.x form-created shapes: the editor stores vocabulary values
+    // with `label` (not the legacy `text`) and simple values as { raw, asText }
+    // objects (not plain strings). The export must handle these, not just the
+    // legacy shapes, or form-edited metadata is lost on JSON export.
+    it('should export form-created vocabulary values that carry label (not text)', () => {
+      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
+        profileId: 'p1',
+        entries: [{
+          id: 'iqb_phones',
+          label: [{ lang: 'de', value: 'Kopfhörereinsatz' }],
+          value: [{ id: 'https://w3id.org/iqb/v24/kh/r5f', label: [{ lang: 'de', value: 'nein' }] }],
+          valueAsText: []
+        }]
+      }] as unknown as ProfileValues[]);
+
+      expect(result[0].entries[0].value).toEqual([{
+        id: 'https://w3id.org/iqb/v24/kh/r5f',
+        label: [{ lang: 'de', value: 'nein' }]
+      }]);
+    });
+
+    it('should export form-created simple value objects { raw, asText } (not drop them)', () => {
+      const result = UnitDownloadClass.transformProfilesToMetadataValues([{
+        profileId: 'p1',
+        entries: [{
+          id: 'a1',
+          label: [{ lang: 'de', value: 'Für SPF geeignet' }],
+          value: { raw: 'true', asText: [{ lang: 'de', value: 'ja' }] },
+          valueAsText: []
+        }]
+      }] as unknown as ProfileValues[]);
+
+      expect(result[0].entries[0].value).toEqual({ raw: 'true', asText: [{ lang: 'de', value: 'ja' }] });
     });
 
     it('should drop label and asText entries without a valid two-letter language code', () => {

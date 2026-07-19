@@ -1,6 +1,6 @@
 @for (profile of profiles; track profile) {
   <div class="profiles">
-    @if (profile.isCurrent) {
+    @if (profile.order | isCurrentProfile) {
       @for (entry of profile.entries; track entry) {
         <div class="fx-row-space-between-start">
           <span class="item-key">{{ entry.label[0].value }}</span>

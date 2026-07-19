@@ -277,6 +277,8 @@ describe('UnitService', () => {
         value: { transaction } as unknown as EntityManager,
         configurable: true
       });
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 10 } as Unit);
+      workspaceRepository.findOne.mockResolvedValue({ id: 10, settings: {} } as unknown as Workspace);
       unitMetadataService.getAllByUnitId.mockResolvedValue([]);
       unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
 
@@ -286,6 +288,35 @@ describe('UnitService', () => {
       expect(unitMetadataService.getAllByUnitId).toHaveBeenCalledWith(1, manager);
       expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalledWith(1, manager);
       expect(unitMetadataToDeleteService.upsertOneForUnit).toHaveBeenCalledWith(1, manager);
+    });
+
+    it('flags the current profile as order 0 from the workspace settings on save', async () => {
+      const manager = createMock<EntityManager>();
+      const transaction = jest.fn().mockImplementation(
+        (runInTransaction: (m: EntityManager) => Promise<unknown>) => runInTransaction(manager)
+      );
+      Object.defineProperty(unitsRepository, 'manager', {
+        value: { transaction } as unknown as EntityManager,
+        configurable: true
+      });
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 10 } as Unit);
+      workspaceRepository.findOne.mockResolvedValue({
+        id: 10,
+        settings: { unitMDProfile: 'profile-a', itemMDProfile: 'profile-b' }
+      } as unknown as Workspace);
+      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
+      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
+
+      const patchUnitMetadataSpy = jest.spyOn(service, 'patchUnitMetadata').mockResolvedValue();
+      jest.spyOn(service, 'patchItemsMetadata').mockResolvedValue();
+
+      await service.patchMetadata(1, {
+        profiles: [{ profileId: 'profile-a' }, { profileId: 'other' }]
+      });
+
+      const savedProfiles = patchUnitMetadataSpy.mock.calls[0][1];
+      expect(savedProfiles[0]).toMatchObject({ profileId: 'profile-a', order: 0 });
+      expect(savedProfiles[1]).toMatchObject({ profileId: 'other', order: -1 });
     });
   });
 
@@ -449,8 +480,153 @@ describe('UnitService', () => {
         items: []
       } as UnitMetadataValues;
       const result = UnitService.setCurrentProfiles('p1', 'p2', metadata);
-      expect(result.profiles[0].isCurrent).toBe(true);
-      expect(result.profiles[1].isCurrent).toBe(false);
+      expect(result.profiles[0].order).toBe(0);
+      expect(result.profiles[1].order).toBe(-1);
+    });
+  });
+
+  describe('ensureValueAsText', () => {
+    it('derives valueAsText from vocabulary entries (text, not label)', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [{ lang: 'de', value: 'Prozess' }],
+            value: [{ id: 'https://w3id.org/iqb/vocab/p2', text: [{ lang: 'de', value: 'Anwenden' }] }],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
+    });
+
+    it('derives valueAsText from form-created vocabulary entries that carry label', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [],
+            value: [{ id: 'https://w3id.org/iqb/v24/kh/r5f', label: [{ lang: 'de', value: 'nein' }] }],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'nein' }]);
+    });
+
+    it('derives valueAsText from a form-created simple value object { raw, asText }', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1', label: [], value: { raw: 'true', asText: [{ lang: 'de', value: 'ja' }] }, valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'ja' }]);
+    });
+
+    it('tolerates a null element in a vocabulary value array without crashing', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [],
+            value: [{ id: 'v', text: [{ lang: 'de', value: 'Anwenden' }] }, null],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
+    });
+
+    it('keeps multilingual free text arrays as valueAsText', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [],
+            value: [{ lang: 'de', value: 'Freitext' }],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Freitext' }]);
+    });
+
+    it('leaves valueAsText empty for a plain string value (not derivable)', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1', label: [], value: 'false', valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([]);
+    });
+
+    it('does not overwrite an existing valueAsText', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [],
+            value: [{ id: 'v', text: [{ lang: 'de', value: 'Neu' }] }],
+            valueAsText: [{ lang: 'de', value: 'Alt' }]
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Alt' }]);
+    });
+
+    it('fills item profile entries and does not mutate the input', () => {
+      const metadata = {
+        items: [{
+          id: 'ITEM1',
+          profiles: [{
+            profileId: 'ip1',
+            entries: [{
+              id: 'e1',
+              label: [],
+              value: [{ id: 'v', text: [{ lang: 'de', value: 'Anwenden' }] }],
+              valueAsText: []
+            }]
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.items[0].profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
+      // input untouched
+      expect(metadata.items[0].profiles[0].entries[0].valueAsText).toEqual([]);
     });
   });
 

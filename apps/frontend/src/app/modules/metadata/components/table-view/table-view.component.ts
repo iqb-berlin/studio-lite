@@ -15,6 +15,7 @@ import {
   MatHeaderRow, MatRowDef, MatRow, MatTableDataSource
 } from '@angular/material/table';
 import { ItemsMetadataValues, MetadataValuesEntry, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
+import { isCurrentFromOrder } from '@studio-lite/shared-code';
 import { MetadataResolver } from '@iqb/metadata-resolver';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -126,7 +127,7 @@ export class TableViewComponent implements OnInit {
       if (unit.metadata && unit.metadata.items) {
         unit.metadata.items.forEach((item, i: number) => {
           const activeProfile = item.profiles?.find(
-            profile => profile.isCurrent
+            profile => isCurrentFromOrder(profile.order)
           );
           if (activeProfile && activeProfile.entries) {
             let values: ColumnValues = {};
@@ -201,7 +202,7 @@ export class TableViewComponent implements OnInit {
     units.forEach(unit => {
       const activeProfile =
         unit.metadata &&
-        unit.metadata.profiles?.find(profile => profile.isCurrent);
+        unit.metadata.profiles?.find(profile => isCurrentFromOrder(profile.order));
       if (activeProfile) {
         let values: ColumnValues = {};
         if (activeProfile.entries) {

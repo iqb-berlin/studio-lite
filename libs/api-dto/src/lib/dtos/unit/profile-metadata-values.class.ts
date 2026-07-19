@@ -13,14 +13,14 @@ export class UnitMetadataValues extends ProfileMetadataValues {
 export class ProfileValues {
   entries?: MetadataValuesEntry[];
   profileId?: string;
-  isCurrent?: boolean;
+  // metadata-values@3.x profile order: -1 = hidden/disabled, >= 0 = position.
+  // Replaces the legacy `isCurrent` boolean.
+  order?: number;
 }
 
 export class ItemsMetadataValues extends ProfileMetadataValues {
   uuid?: string;
   order?: number;
-  position?: string;
-  locked?: boolean;
   unitId?: number;
   createdAt?: Date;
   changedAt?: Date;

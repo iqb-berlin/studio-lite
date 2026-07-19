@@ -39,3 +39,21 @@ UPDATE "public"."unit"
   SET "uuid" = gen_random_uuid()::VARCHAR
   WHERE "uuid" IS NULL;
 -- rollback UPDATE "public"."unit" SET "uuid" = NULL;
+
+-- changeset jojohoch:7
+-- Replace the boolean "is_current" flag with the metadata-values@3.x "order"
+-- field (-1 = hidden/disabled, >= 0 = position). "order" is the single source of
+-- truth for the active/hidden profile; "isCurrent" is derived in code where the
+-- legacy XML export still needs it. The UPDATE migrates existing rows before the
+-- boolean is dropped. All statements target the parent table "metadata"; via
+-- Postgres table inheritance they propagate to "unit_metadata" and
+-- "unit_item_metadata".
+ALTER TABLE "public"."metadata"
+  ADD COLUMN "order" INTEGER NOT NULL DEFAULT -1;
+UPDATE "public"."metadata"
+  SET "order" = CASE WHEN "is_current" THEN 0 ELSE -1 END;
+ALTER TABLE "public"."metadata"
+  DROP COLUMN "is_current";
+-- rollback ALTER TABLE "public"."metadata" ADD COLUMN "is_current" BOOLEAN DEFAULT true;
+-- rollback UPDATE "public"."metadata" SET "is_current" = ("order" <> -1);
+-- rollback ALTER TABLE "public"."metadata" DROP COLUMN "order";

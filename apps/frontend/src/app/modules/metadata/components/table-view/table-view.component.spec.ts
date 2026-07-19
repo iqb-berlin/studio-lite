@@ -113,7 +113,7 @@ describe('TableViewComponent', () => {
       id: 1,
       key: 'K1',
       metadata: {
-        profiles: [{ isCurrent: true, entries: [{ label, valueAsText: { value: '42' } }] }]
+        profiles: [{ order: 0, entries: [{ label, valueAsText: { value: '42' } }] }]
       }
     } as unknown as UnitPropertiesDto;
 

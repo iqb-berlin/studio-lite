@@ -3,6 +3,7 @@ import { ProfileValues } from '@studio-lite-lib/api-dto';
 import { MetadataProfileEntriesComponent } from './metadata-profile-entries.component';
 import { IsArrayPipe } from '../../pipes/is-array.pipe';
 import { CastPipe } from '../../pipes/cast.pipe';
+import { IsCurrentProfilePipe } from '../../pipes/is-current-profile.pipe';
 
 describe('MetadataProfileEntriesComponent', () => {
   let component: MetadataProfileEntriesComponent;
@@ -11,7 +12,7 @@ describe('MetadataProfileEntriesComponent', () => {
   const mockProfiles: ProfileValues[] = [
     {
       profileId: 'profile1',
-      isCurrent: true,
+      order: 0,
       entries: [
         {
           id: 'entry1',
@@ -44,7 +45,7 @@ describe('MetadataProfileEntriesComponent', () => {
     },
     {
       profileId: 'profile2',
-      isCurrent: false,
+      order: -1,
       entries: [
         {
           id: 'entry5',
@@ -61,7 +62,8 @@ describe('MetadataProfileEntriesComponent', () => {
       imports: [
         MetadataProfileEntriesComponent,
         IsArrayPipe,
-        CastPipe
+        CastPipe,
+        IsCurrentProfilePipe
       ]
     }).compileComponents();
 

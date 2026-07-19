@@ -4,7 +4,9 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, In, Repository } from 'typeorm';
-import { profileIdsMatch, reconcileProfilesByProfileId } from '@studio-lite/shared-code';
+import {
+  orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId
+} from '@studio-lite/shared-code';
 import UnitItem from '../entities/unit-item.entity';
 import { UnitItemMetadataService } from './unit-item-metadata.service';
 import { ItemCommentService } from './item-comment.service';
@@ -113,7 +115,7 @@ export class UnitItemService {
     const itemsToUpdate: UnitItemWithMetadataDto[] = await this.getAllByUnitIdWithMetadata(unitId);
     const profiles = itemsToUpdate.flatMap(metadata => metadata.profiles);
     await Promise.all(profiles.map(metadata => {
-      metadata.isCurrent = profileIdsMatch(metadata.profileId, itemProfile);
+      metadata.order = orderFromCurrent(profileIdsMatch(metadata.profileId, itemProfile));
       return this.unitItemMetadataService.updateItemMetadata(metadata.id, metadata);
     }));
   }

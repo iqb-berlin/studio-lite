@@ -19,9 +19,11 @@ class Metadata {
     profileId: string;
 
   @Column({
-    name: 'is_current'
+    name: 'order',
+    type: 'integer',
+    default: -1
   })
-    isCurrent: boolean;
+    order: number;
 
   @Column({
     type: 'timestamp with time zone',
