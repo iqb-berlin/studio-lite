@@ -188,8 +188,6 @@ export function getItem(profile: string, moreThanOne: boolean, copyItem?: string
       cy.get(`mat-expansion-panel:contains("${json.metadata['without-id']}")`).click();
       cy.get('mat-label:contains("Item ID")')
         .eq(-1).type(IqbProfileExamples.get(profile).get('Item ID'));
-      cy.get(`mat-label:contains("${json.metadata.weighting}")`)
-        .eq(-1).type(IqbProfileExamples.get(profile).get('Wichtung'));
       cy.get(`mat-label:contains("${json.metadata.description}")`)
         .eq(-1).type(IqbProfileExamples.get(profile).get('Notiz'));
     });
@@ -199,8 +197,6 @@ export function getItem(profile: string, moreThanOne: boolean, copyItem?: string
       cy.get(`mat-expansion-panel:contains("${json.metadata['without-id']}")`).click();
       cy.get('mat-label:contains("Item ID")')
         .eq(-1).type(IqbProfileExamples.get(profile).get('Item ID'));
-      cy.get(`mat-label:contains("${json.metadata.weighting}")`)
-        .eq(-1).type(IqbProfileExamples.get(profile).get('Wichtung'));
       cy.get(`mat-label:contains("${json.metadata.description}")`)
         .eq(-1).type(IqbProfileExamples.get(profile).get('Notiz'));
     });

@@ -3,6 +3,5 @@ export interface ItemModel {
   variableId?: string | null;
   variableReadOnlyId?: string | null;
   description?: string;
-  weighting?: number;
   [key: string]: string | number | null | undefined;
 }

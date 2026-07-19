@@ -120,16 +120,6 @@ export class ItemComponent implements OnInit, OnChanges, OnDestroy {
             }
           },
           {
-            type: 'input',
-            key: 'weighting',
-            props: {
-              type: 'number',
-              min: 0,
-              placeholder: this.translateService.instant('metadata.weighting'),
-              label: this.translateService.instant('metadata.weighting')
-            }
-          },
-          {
             type: 'textarea',
             key: 'description',
             props: {
@@ -163,7 +153,6 @@ export class ItemComponent implements OnInit, OnChanges, OnDestroy {
   private initModel(): void {
     if (this.metadata[this.itemIndex].id) this.model.id = this.metadata[this.itemIndex].id;
     if (this.metadata[this.itemIndex].description) this.model.description = this.metadata[this.itemIndex].description;
-    if (this.metadata[this.itemIndex].weighting) this.model.weighting = this.metadata[this.itemIndex].weighting;
     this.updateModelVariableId();
   }
 

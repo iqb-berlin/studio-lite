@@ -21,8 +21,6 @@ export class ProfileValues {
 export class ItemsMetadataValues extends ProfileMetadataValues {
   uuid?: string;
   order?: number;
-  position?: string;
-  locked?: boolean;
   unitId?: number;
   createdAt?: Date;
   changedAt?: Date;
