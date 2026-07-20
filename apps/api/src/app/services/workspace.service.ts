@@ -38,7 +38,6 @@ import Unit from '../entities/unit.entity';
 import { FileIo } from '../interfaces/file-io.interface';
 import { UnitImportData } from '../classes/unit-import-data.class';
 import { UnitImportJsonData } from '../classes/unit-import-json-data.class';
-import { combineNotationAndLabel } from '../classes/metadata-value.util';
 import { UnitService } from './unit.service';
 import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
@@ -1146,18 +1145,16 @@ export class WorkspaceService {
       if (value.some(entryValue => !!entryValue && typeof (entryValue as VocabularyEntryJson).id === 'string')) {
         const vocabularyEntries = value as VocabularyEntryJson[];
         // Preserve the spec field `annotation` (the numbering / SKOS notation);
-        // the pure label stays in `text`. Display text combines both.
+        // the pure label stays in `text`. valueAsText is left empty here because
+        // the read path (UnitService.ensureValueAsText) always recomputes the
+        // vocabulary display text, honouring hideNumbering — computing it now
+        // would only be overwritten.
         internalValue = vocabularyEntries.map(vocabularyEntry => ({
           id: vocabularyEntry.id,
           text: vocabularyEntry.label ?? [],
           annotation: vocabularyEntry.annotation ?? []
         }));
-        valueAsText = vocabularyEntries.flatMap(
-          vocabularyEntry => combineNotationAndLabel(
-            vocabularyEntry.annotation,
-            vocabularyEntry.label
-          )
-        );
+        valueAsText = [];
       } else {
         internalValue = value as LanguageCodedText[];
         valueAsText = value as LanguageCodedText[];

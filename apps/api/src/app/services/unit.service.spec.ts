@@ -834,5 +834,19 @@ describe('UnitService', () => {
     it('returns an empty map for undefined metadata', async () => {
       await expect(service.buildHideNumberingMap(undefined)).resolves.toEqual({});
     });
+
+    it('reuses a shared profile cache across units so the profile is fetched once', async () => {
+      metadataProfileService.getStoredMetadataProfileFromDb.mockResolvedValue({
+        id: 'p1',
+        groups: [{ entries: [{ id: 'e1', parameters: { hideNumbering: true } }] }]
+      } as never);
+      const cache = new Map();
+      const metadata = { profiles: [{ profileId: 'p1', entries: [] }] } as unknown as UnitMetadataValues;
+
+      await service.buildHideNumberingMap(metadata, cache);
+      await service.buildHideNumberingMap(metadata, cache);
+
+      expect(metadataProfileService.getStoredMetadataProfileFromDb).toHaveBeenCalledTimes(1);
+    });
   });
 });

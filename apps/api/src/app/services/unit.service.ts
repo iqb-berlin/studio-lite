@@ -40,6 +40,11 @@ import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 
+// Dedupes profile lookups within a single request (a units list shares the same
+// profiles across units). Caches the pending promise so parallel unit reads
+// under Promise.all reuse one DB fetch instead of each firing its own.
+type ProfileFetchCache = Map<string, ReturnType<MetadataProfileService['getStoredMetadataProfileFromDb']>>;
+
 export class UnitService {
   private readonly logger = new Logger(UnitService.name);
 
@@ -393,10 +398,15 @@ export class UnitService {
         'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser'
       ]
     });
-    return Promise.all(units.map(async unit => this.getModifiedMetadataForUnit(unit, workspace)));
+    const profileCache: ProfileFetchCache = new Map();
+    return Promise.all(units.map(async unit => this.getModifiedMetadataForUnit(unit, workspace, profileCache)));
   }
 
-  private async getModifiedMetadataForUnit(unit: Unit, workspace: Workspace): Promise<Unit> {
+  private async getModifiedMetadataForUnit(
+    unit: Unit,
+    workspace: Workspace,
+    profileCache?: ProfileFetchCache
+  ): Promise<Unit> {
     const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(unit.id);
     if (unitMetadataToDelete) {
       // findOnesMetadata already backfills valueAsText.
@@ -407,7 +417,8 @@ export class UnitService {
           workspace.settings?.unitMDProfile,
           workspace.settings?.itemMDProfile,
           unit.metadata
-        )
+        ),
+        profileCache
       );
     }
     return unit;
@@ -540,8 +551,11 @@ export class UnitService {
   // Applies valueAsText (incl. hideNumbering) for display. The hideNumbering
   // flags come from the stored profile definitions, so vocabulary numbering is
   // suppressed consistently in every read-only view that consumes valueAsText.
-  private async resolveValueAsText(metadata: UnitMetadataValues): Promise<UnitMetadataValues> {
-    const hideNumbering = await this.buildHideNumberingMap(metadata);
+  private async resolveValueAsText(
+    metadata: UnitMetadataValues,
+    profileCache?: ProfileFetchCache
+  ): Promise<UnitMetadataValues> {
+    const hideNumbering = await this.buildHideNumberingMap(metadata, profileCache);
     return UnitService.ensureValueAsText(metadata, hideNumbering);
   }
 
@@ -550,7 +564,8 @@ export class UnitService {
   // profiles). DB-only reads keep this cheap on list endpoints. Public so the
   // XML export can fold the numbering back the same way (see toLegacyMetadataBlob).
   async buildHideNumberingMap(
-    metadata: UnitMetadataValues | undefined
+    metadata: UnitMetadataValues | undefined,
+    profileCache: ProfileFetchCache = new Map()
   ): Promise<Record<string, Record<string, boolean>>> {
     if (!metadata) return {};
     const profileIds = new Set<string>();
@@ -562,11 +577,16 @@ export class UnitService {
     }));
     const map: Record<string, Record<string, boolean>> = {};
     await Promise.all([...profileIds].map(async profileId => {
-      const profile = await this.metadataProfileService.getStoredMetadataProfileFromDb(profileId);
+      let pending = profileCache.get(profileId);
+      if (!pending) {
+        pending = this.metadataProfileService.getStoredMetadataProfileFromDb(profileId);
+        profileCache.set(profileId, pending);
+      }
+      const profile = await pending;
       if (!profile?.groups) return;
       const entryMap: Record<string, boolean> = {};
       profile.groups.forEach(group => (group.entries ?? []).forEach(entry => {
-        const parameters = entry.parameters as unknown as { hideNumbering?: boolean } | null;
+        const parameters = entry.parameters as { hideNumbering?: boolean } | null;
         if (parameters?.hideNumbering) entryMap[entry.id] = true;
       }));
       map[profileId] = entryMap;

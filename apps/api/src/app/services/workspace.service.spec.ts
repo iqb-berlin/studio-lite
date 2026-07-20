@@ -489,11 +489,12 @@ describe('WorkspaceService', () => {
         value: [{
           id: 'https://w3id.org/iqb/vocab/p2', text: [{ lang: 'de', value: 'Anwenden' }], annotation: []
         }],
-        valueAsText: [{ lang: 'de', value: 'Anwenden' }]
+        // vocabulary valueAsText is recomputed on read, not at import time
+        valueAsText: []
       });
     });
 
-    it('preserves the annotation (numbering) and combines it into valueAsText', () => {
+    it('preserves the annotation (numbering) in the value; valueAsText is filled on read', () => {
       const mapped = WorkspaceService.mapImportedMetadata({
         metadata: [{
           profileId: 'p1',
@@ -516,7 +517,8 @@ describe('WorkspaceService', () => {
           text: [{ lang: 'de', value: 'Anwenden' }],
           annotation: [{ lang: 'de', value: '1.2' }]
         }],
-        valueAsText: [{ lang: 'de', value: '1.2 Anwenden' }]
+        // recomputed by UnitService.ensureValueAsText on read (see unit.service.spec)
+        valueAsText: []
       });
     });
 
