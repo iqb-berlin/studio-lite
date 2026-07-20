@@ -32,8 +32,7 @@
       "xml-parse": "Nicht als Unit-Xml erkannt",
       "json-parse": "Nicht als Unit-Json-Index erkannt",
       "missing-file": "Referenzierte Datei nicht im Upload gefunden",
-      "ignore-file": "Datei wurde ignoriert",
-      "annotation-dropped": "Anmerkungen (annotation) zu Vokabular-Einträgen können nicht gespeichert werden und wurden verworfen"
+      "ignore-file": "Datei wurde ignoriert"
     },
     "menu-label": {
       "import": "Import",

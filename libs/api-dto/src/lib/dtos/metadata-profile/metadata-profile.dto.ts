@@ -25,5 +25,8 @@ export class MetadataProfileGroupEntry {
   id!: string;
   label!: TextWithLanguage[];
   type!: string;
-  parameters!: Record<string, unknown>[];
+  // A single parameter object (e.g. ProfileEntryParametersVocabulary) or null —
+  // matching the metadata-profile spec, where `parameters` is one keyed object,
+  // not an array.
+  parameters!: Record<string, unknown> | null;
 }

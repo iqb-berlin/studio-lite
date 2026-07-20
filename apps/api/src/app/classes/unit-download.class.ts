@@ -36,6 +36,7 @@ import {
   UnitMetadataJson
 } from '../interfaces/unit-json-specs.interface';
 import { VeronaModulesService } from '../services/verona-modules.service';
+import { combineNotationAndLabel } from './metadata-value.util';
 import { SettingService } from '../services/setting.service';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitRichNoteService } from '../services/unit-rich-note.service';
@@ -180,7 +181,8 @@ export class UnitDownloadClass {
       unitExportConfig,
       unitMetadata
     );
-    UnitDownloadClass.addMetadata(unitMetadata, zip);
+    const hideNumbering = await unitService.buildHideNumberingMap(unitMetadata.metadata);
+    UnitDownloadClass.addMetadata(unitMetadata, zip, hideNumbering);
     const definitionData = await unitService.findOnesDefinition(unitId);
     UnitDownloadClass.addUnitDefinition(
       definitionData,
@@ -240,14 +242,88 @@ export class UnitDownloadClass {
 
   static addMetadata(
     unitMetadata: UnitPropertiesDto,
-    zip: AdmZip
+    zip: AdmZip,
+    hideNumbering: Record<string, Record<string, boolean>> = {}
   ): void {
     if (Object.keys(unitMetadata.metadata).length !== 0) {
       zip.addFile(
         `${unitMetadata.key}.vomd`,
-        Buffer.from(JSON.stringify(unitMetadata.metadata))
+        Buffer.from(JSON.stringify(UnitDownloadClass.toLegacyMetadataBlob(unitMetadata.metadata, hideNumbering)))
       );
     }
+  }
+
+  // The legacy XML export writes the internal metadata blob (`${key}.vomd`) as-is.
+  // metadata-values@3.x split the vocabulary numbering off the label into a
+  // separate `annotation` field — a JSON-export concern. To keep the .vomd blob
+  // exactly as legacy consumers expect, fold the split back before serializing:
+  // when the field shows numbering, merge it into the display text; when it hides
+  // numbering (hideNumbering), keep the pure label — matching the shape the old
+  // form baked at save time. Only vocabulary values are touched.
+  static toLegacyMetadataBlob(
+    metadata: UnitMetadataValues,
+    hideNumbering: Record<string, Record<string, boolean>> = {}
+  ): UnitMetadataValues {
+    if (!metadata || typeof metadata !== 'object') return metadata;
+    const foldProfile = <T extends ProfileValues>(profile: T): T => UnitDownloadClass.foldProfileAnnotations(
+      profile,
+      hideNumbering[profile.profileId ?? ''] ?? {}
+    );
+    return {
+      ...metadata,
+      ...(metadata.profiles && { profiles: metadata.profiles.map(foldProfile) }),
+      ...(metadata.items && {
+        items: metadata.items.map(item => ({
+          ...item,
+          ...(item.profiles && { profiles: item.profiles.map(foldProfile) })
+        }))
+      })
+    };
+  }
+
+  private static foldProfileAnnotations<T extends ProfileValues>(
+    profile: T,
+    hideNumberingByEntry: Record<string, boolean>
+  ): T {
+    if (!profile?.entries) return profile;
+    return {
+      ...profile,
+      entries: profile.entries.map(
+        entry => UnitDownloadClass.foldEntryAnnotation(entry, hideNumberingByEntry[entry.id] ?? false)
+      )
+    };
+  }
+
+  private static foldEntryAnnotation(entry: MetadataValuesEntry, hideNumbering: boolean): MetadataValuesEntry {
+    const { value } = entry;
+    if (!Array.isArray(value) || !value.some(item => !!item && typeof item === 'object' && 'id' in item)) {
+      return entry;
+    }
+    return {
+      ...entry,
+      value: value.map(item => UnitDownloadClass.foldVocabValueToLegacy(item, hideNumbering)) as
+        MetadataValuesEntry['value']
+    };
+  }
+
+  // Restores the pre-split shape: form-created entries kept the text in `label`
+  // (with an empty `annotation`), imported entries in `text` (without
+  // `annotation`). The numbering is merged back only when it is shown; with
+  // hideNumbering the pure label is kept, exactly as the old form stored it.
+  private static foldVocabValueToLegacy(item: unknown, hideNumbering: boolean): unknown {
+    if (!item || typeof item !== 'object' || !('id' in item)) return item;
+    const entry = item as {
+      id: string; label?: LanguageCodedText[]; text?: LanguageCodedText[]; annotation?: LanguageCodedText[];
+    };
+    if (entry.label !== undefined) {
+      const label = hideNumbering ? entry.label : combineNotationAndLabel(entry.annotation, entry.label);
+      return { id: entry.id, label, annotation: [] };
+    }
+    if (entry.text !== undefined) {
+      const text = hideNumbering ? entry.text : combineNotationAndLabel(entry.annotation, entry.text);
+      return { id: entry.id, text };
+    }
+    return item;
   }
 
   static addUnitDefinition(
@@ -605,14 +681,19 @@ export class UnitDownloadClass {
       const vocabularyEntries = value
         .filter(entryValue => !!entryValue && typeof (entryValue as { id?: unknown }).id === 'string')
         .map(entryValue => {
-          const vocabularyEntry = entryValue as { id: string; label?: unknown; text?: unknown };
-          // metadata-values@3.x carries the vocab text in `label`, the legacy form in `text`.
+          const vocabularyEntry = entryValue as {
+            id: string; label?: unknown; text?: unknown; annotation?: unknown;
+          };
+          // metadata-values@3.x carries the vocab text in `label`, the legacy form in
+          // `text`; the numbering (SKOS notation) travels in `annotation`.
           const texts = vocabularyEntry.label ?? vocabularyEntry.text;
           UnitDownloadClass.reportDroppedTexts(texts, entry.id, scope);
           const label = UnitDownloadClass.toLanguageCodedTexts(texts);
+          const annotation = UnitDownloadClass.toLanguageCodedTexts(vocabularyEntry.annotation);
           return {
             id: vocabularyEntry.id,
-            ...(label && { label })
+            ...(label && { label }),
+            ...(annotation && { annotation })
           };
         });
       if (vocabularyEntries.length) {

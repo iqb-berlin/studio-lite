@@ -1,5 +1,4 @@
 // eslint-disable-next-line max-classes-per-file
-import { TextWithLanguageAndId as TextsWithLanguageAndId } from '@iqb/metadata-resolver';
 import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profile';
 
 export class ProfileMetadataValues {
@@ -32,9 +31,20 @@ export class ItemsMetadataValues extends ProfileMetadataValues {
   [key: string]: string | number | ProfileValues[] | null | undefined | boolean | Date;
 }
 
+// Internal vocabulary value entry. The display text lives in `label`
+// (form-created) or `text` (imported/legacy), the numbering in `annotation` —
+// the spec field `annotation` holds what the vocabulary exposes as its SKOS
+// notation.
+export interface VocabularyValueEntry {
+  id: string;
+  label?: TextWithLanguage[];
+  text?: TextWithLanguage[];
+  annotation?: TextWithLanguage[];
+}
+
 export class MetadataValuesEntry {
   id!: string;
   label!: TextWithLanguage[];
-  value!: TextsWithLanguageAndId[] | TextWithLanguage[] | string;
+  value!: VocabularyValueEntry[] | TextWithLanguage[] | string;
   valueAsText!: TextWithLanguage | TextWithLanguage[];
 }

@@ -50,6 +50,25 @@ describe('MetadataProfileService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('getStoredMetadataProfileFromDb', () => {
+    it('returns the stored profile from the DB without a background network fetch', async () => {
+      const profile = new MetadataProfile();
+      metadataProfileRepository.findOneBy.mockResolvedValue(profile);
+
+      const result = await service.getStoredMetadataProfileFromDb('url');
+
+      expect(result).toBe(profile);
+      expect(metadataProfileRepository.findOneBy).toHaveBeenCalledWith({ id: 'url' });
+      expect(httpService.get).not.toHaveBeenCalled();
+    });
+
+    it('returns null when the profile is not stored', async () => {
+      metadataProfileRepository.findOneBy.mockResolvedValue(null);
+      await expect(service.getStoredMetadataProfileFromDb('missing')).resolves.toBeNull();
+      expect(httpService.get).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getStoredMetadataProfile', () => {
     it('should return stored profile if found', async () => {
       const profile = new MetadataProfile();
