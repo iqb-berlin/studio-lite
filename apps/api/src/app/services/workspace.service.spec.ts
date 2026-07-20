@@ -486,8 +486,37 @@ describe('WorkspaceService', () => {
       expect(mapped.profiles[0].entries[0]).toEqual({
         id: 'w4',
         label: [],
-        value: [{ id: 'https://w3id.org/iqb/vocab/p2', text: [{ lang: 'de', value: 'Anwenden' }] }],
+        value: [{
+          id: 'https://w3id.org/iqb/vocab/p2', text: [{ lang: 'de', value: 'Anwenden' }], annotation: []
+        }],
         valueAsText: [{ lang: 'de', value: 'Anwenden' }]
+      });
+    });
+
+    it('preserves the annotation (numbering) and combines it into valueAsText', () => {
+      const mapped = WorkspaceService.mapImportedMetadata({
+        metadata: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'w5',
+            value: [{
+              id: 'https://w3id.org/iqb/vocab/p2',
+              label: [{ lang: 'de', value: 'Anwenden' }],
+              annotation: [{ lang: 'de', value: '1.2' }]
+            }]
+          }]
+        }]
+      });
+
+      expect(mapped.profiles[0].entries[0]).toEqual({
+        id: 'w5',
+        label: [],
+        value: [{
+          id: 'https://w3id.org/iqb/vocab/p2',
+          text: [{ lang: 'de', value: 'Anwenden' }],
+          annotation: [{ lang: 'de', value: '1.2' }]
+        }],
+        valueAsText: [{ lang: 'de', value: '1.2 Anwenden' }]
       });
     });
 
@@ -916,7 +945,7 @@ describe('WorkspaceService', () => {
       }]);
     });
 
-    it('should warn when imported vocabulary entries carry annotations the model cannot hold', async () => {
+    it('does not warn when imported vocabulary entries carry an annotation (it is now persisted)', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
       (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
@@ -930,7 +959,7 @@ describe('WorkspaceService', () => {
             value: [{
               id: 'https://w3id.org/iqb/vocab/p2',
               label: [{ lang: 'de', value: 'Anwenden' }],
-              annotation: [{ lang: 'de', value: 'Hinweis' }]
+              annotation: [{ lang: 'de', value: '1.2' }]
             }]
           }]
         }]
@@ -942,10 +971,9 @@ describe('WorkspaceService', () => {
         buildFile('unit01.vomd.json', 'application/json', vomdContent)
       ], user);
 
-      expect(result.messages).toEqual([{
-        objectKey: 'unit01.vomd.json',
-        messageKey: 'unit-upload.api-warning.annotation-dropped'
-      }]);
+      expect(result.messages.some(
+        message => message.messageKey === 'unit-upload.api-warning.annotation-dropped'
+      )).toBe(false);
     });
 
     it('should warn when coding scheme file referenced in index is missing from upload', async () => {

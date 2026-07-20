@@ -38,6 +38,7 @@ import Unit from '../entities/unit.entity';
 import { FileIo } from '../interfaces/file-io.interface';
 import { UnitImportData } from '../classes/unit-import-data.class';
 import { UnitImportJsonData } from '../classes/unit-import-json-data.class';
+import { combineNotationAndLabel } from '../classes/metadata-value.util';
 import { UnitService } from './unit.service';
 import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
@@ -853,11 +854,6 @@ export class WorkspaceService {
           );
           if (parsedMetadata !== undefined) {
             unitImportData.metadata = WorkspaceService.mapImportedMetadata(parsedMetadata);
-            WorkspaceService.warnDroppedAnnotations(
-              (parsedMetadata as UnitMetadataJson)?.metadata,
-              unitImportData.metadataFileName,
-              functionReturn
-            );
           }
           usedFiles.push(unitImportData.metadataFileName);
         } else {
@@ -877,11 +873,6 @@ export class WorkspaceService {
               ...(unitImportData.metadata ?? {}),
               items: WorkspaceService.mapImportedItems(parsedItems)
             };
-            if (Array.isArray(parsedItems)) {
-              parsedItems.forEach(item => WorkspaceService.warnDroppedAnnotations(
-                item?.metadata, unitImportData.itemsFileName, functionReturn
-              ));
-            }
           }
           usedFiles.push(unitImportData.itemsFileName);
         } else {
@@ -944,32 +935,6 @@ export class WorkspaceService {
       objectKey: fileName,
       messageKey: 'unit-upload.api-warning.missing-file'
     });
-  }
-
-  // The internal model (TextWithLanguageAndId: { id, text }) has no field for
-  // the spec-optional `annotation` of vocabulary entries, so annotations from
-  // third-party files cannot be stored — surface the drop instead of losing
-  // the data silently. One warning per companion file.
-  private static warnDroppedAnnotations(
-    values: MetadataValuesJson[] | undefined,
-    fileName: string,
-    functionReturn: RequestReportDto
-  ): void {
-    if (!Array.isArray(values)) return;
-    const hasAnnotations = values.some(profile => (profile?.entries ?? []).some(
-      entry => Array.isArray(entry?.value) && (entry.value as VocabularyEntryJson[]).some(
-        vocabularyEntry => Array.isArray(vocabularyEntry?.annotation) && vocabularyEntry.annotation.length > 0
-      )
-    ));
-    if (hasAnnotations && !functionReturn.messages.some(
-      message => message.objectKey === fileName &&
-        message.messageKey === 'unit-upload.api-warning.annotation-dropped'
-    )) {
-      functionReturn.messages.push({
-        objectKey: fileName,
-        messageKey: 'unit-upload.api-warning.annotation-dropped'
-      });
-    }
   }
 
   // Parses a companion JSON file (vocs/voco/vorn/vomd/voit/vova). A broken
@@ -1180,11 +1145,19 @@ export class WorkspaceService {
     if (Array.isArray(value)) {
       if (value.some(entryValue => !!entryValue && typeof (entryValue as VocabularyEntryJson).id === 'string')) {
         const vocabularyEntries = value as VocabularyEntryJson[];
+        // Preserve the spec field `annotation` (the numbering / SKOS notation);
+        // the pure label stays in `text`. Display text combines both.
         internalValue = vocabularyEntries.map(vocabularyEntry => ({
           id: vocabularyEntry.id,
-          text: vocabularyEntry.label ?? []
+          text: vocabularyEntry.label ?? [],
+          annotation: vocabularyEntry.annotation ?? []
         }));
-        valueAsText = vocabularyEntries.flatMap(vocabularyEntry => vocabularyEntry.label ?? []);
+        valueAsText = vocabularyEntries.flatMap(
+          vocabularyEntry => combineNotationAndLabel(
+            vocabularyEntry.annotation,
+            vocabularyEntry.label
+          )
+        );
       } else {
         internalValue = value as LanguageCodedText[];
         valueAsText = value as LanguageCodedText[];

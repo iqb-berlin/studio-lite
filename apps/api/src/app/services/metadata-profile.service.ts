@@ -29,6 +29,14 @@ export class MetadataProfileService {
     return this.getMetadataProfile(url);
   }
 
+  // DB-only read (no background network refresh). For hot read paths that only
+  // need the stored profile definition — e.g. resolving hideNumbering per entry
+  // when building the display text — so a units list does not spam the profile
+  // host with one fetch per unit.
+  getStoredMetadataProfileFromDb(url: string): Promise<MetadataProfile | null> {
+    return this.metadataProfileRepository.findOneBy({ id: url });
+  }
+
   private async getMetadataProfile(url: string): Promise<MetadataProfileDto | null> {
     const profile = await firstValueFrom(
       this.http.get<MetadataProfileDto>(url)

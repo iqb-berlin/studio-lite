@@ -22,6 +22,7 @@ import UnitDropBoxHistory from '../entities/unit-drop-box-history.entity';
 import { UnitMetadataService } from './unit-metadata.service';
 import { UnitItemService } from './unit-item.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
+import { MetadataProfileService } from './metadata-profile.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 
 describe('UnitService', () => {
@@ -36,6 +37,7 @@ describe('UnitService', () => {
   let unitMetadataService: DeepMocked<UnitMetadataService>;
   let unitItemService: DeepMocked<UnitItemService>;
   let unitMetadataToDeleteService: DeepMocked<UnitMetadataToDeleteService>;
+  let metadataProfileService: DeepMocked<MetadataProfileService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -60,6 +62,10 @@ describe('UnitService', () => {
         {
           provide: UnitMetadataToDeleteService,
           useValue: createMock<UnitMetadataToDeleteService>()
+        },
+        {
+          provide: MetadataProfileService,
+          useValue: createMock<MetadataProfileService>()
         },
         {
           provide: getRepositoryToken(Unit),
@@ -99,6 +105,7 @@ describe('UnitService', () => {
     unitMetadataService = module.get(UnitMetadataService);
     unitItemService = module.get(UnitItemService);
     unitMetadataToDeleteService = module.get(UnitMetadataToDeleteService);
+    metadataProfileService = module.get(MetadataProfileService);
   });
 
   it('should be defined', () => {
@@ -504,6 +511,72 @@ describe('UnitService', () => {
       expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
     });
 
+    it('combines the annotation (numbering) into valueAsText by default', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [{ lang: 'de', value: 'Prozess' }],
+            value: [{
+              id: 'https://w3id.org/iqb/vocab/p2',
+              label: [{ lang: 'de', value: 'Anwenden' }],
+              annotation: [{ lang: 'de', value: '1.2' }]
+            }],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: '1.2 Anwenden' }]);
+    });
+
+    it('drops the numbering when the entry hideNumbering flag is set', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [{ lang: 'de', value: 'Prozess' }],
+            value: [{
+              id: 'https://w3id.org/iqb/vocab/p2',
+              label: [{ lang: 'de', value: 'Anwenden' }],
+              annotation: [{ lang: 'de', value: '1.2' }]
+            }],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata, { p1: { e1: true } });
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
+    });
+
+    it('recomputes vocabulary valueAsText even when one was already stored (hideNumbering applies to imports)', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [{ lang: 'de', value: 'Prozess' }],
+            value: [{
+              id: 'https://w3id.org/iqb/vocab/p2',
+              text: [{ lang: 'de', value: 'Anwenden' }],
+              annotation: [{ lang: 'de', value: '1.2' }]
+            }],
+            valueAsText: [{ lang: 'de', value: '1.2 Anwenden' }]
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata, { p1: { e1: true } });
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
+    });
+
     it('derives valueAsText from form-created vocabulary entries that carry label', () => {
       const metadata = {
         profiles: [{
@@ -588,14 +661,16 @@ describe('UnitService', () => {
       expect(result.profiles[0].entries[0].valueAsText).toEqual([]);
     });
 
-    it('does not overwrite an existing valueAsText', () => {
+    it('does not overwrite an existing valueAsText for non-vocabulary values', () => {
+      // Vocabulary display text is always recomputed (so hideNumbering applies),
+      // but other value types keep a stored valueAsText.
       const metadata = {
         profiles: [{
           profileId: 'p1',
           entries: [{
             id: 'e1',
             label: [],
-            value: [{ id: 'v', text: [{ lang: 'de', value: 'Neu' }] }],
+            value: [{ lang: 'de', value: 'Neu' }],
             valueAsText: [{ lang: 'de', value: 'Alt' }]
           }]
         }]
@@ -721,6 +796,43 @@ describe('UnitService', () => {
 
       expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('connection lost'));
       warnSpy.mockRestore();
+    });
+  });
+
+  describe('buildHideNumberingMap', () => {
+    it('extracts hideNumbering per entry from the stored profile definition', async () => {
+      metadataProfileService.getStoredMetadataProfileFromDb.mockResolvedValue({
+        id: 'p1',
+        groups: [{
+          entries: [
+            { id: 'e1', parameters: { hideNumbering: true } },
+            { id: 'e2', parameters: { hideNumbering: false } },
+            { id: 'e3', parameters: null }
+          ]
+        }]
+      } as never);
+
+      const metadata = {
+        profiles: [{ profileId: 'p1', entries: [] }],
+        items: [{ id: 'i1', profiles: [{ profileId: 'p1', entries: [] }] }]
+      } as unknown as UnitMetadataValues;
+
+      const map = await service.buildHideNumberingMap(metadata);
+
+      // only the flagged entry is recorded; false/null yield no entry
+      expect(map).toEqual({ p1: { e1: true } });
+      // the profile is looked up once even though two profiles reference it
+      expect(metadataProfileService.getStoredMetadataProfileFromDb).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns an empty map when the profile is not stored', async () => {
+      metadataProfileService.getStoredMetadataProfileFromDb.mockResolvedValue(null);
+      const metadata = { profiles: [{ profileId: 'p1', entries: [] }] } as unknown as UnitMetadataValues;
+      await expect(service.buildHideNumberingMap(metadata)).resolves.toEqual({});
+    });
+
+    it('returns an empty map for undefined metadata', async () => {
+      await expect(service.buildHideNumberingMap(undefined)).resolves.toEqual({});
     });
   });
 });

@@ -20,9 +20,11 @@ import {
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { LanguageCodedText } from '@iqbspecs/metadata-profile';
 import {
   orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId
 } from '@studio-lite/shared-code';
+import { combineNotationAndLabel } from '../classes/metadata-value.util';
 import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
@@ -33,6 +35,7 @@ import User from '../entities/user.entity';
 import UnitDropBoxHistory from '../entities/unit-drop-box-history.entity';
 import { UnitMetadataService } from './unit-metadata.service';
 import { UnitItemService } from './unit-item.service';
+import { MetadataProfileService } from './metadata-profile.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
@@ -57,7 +60,8 @@ export class UnitService {
     private unitCommentService: UnitCommentService,
     private unitMetadataService: UnitMetadataService,
     private unitItemService: UnitItemService,
-    private unitMetadataToDeleteService: UnitMetadataToDeleteService
+    private unitMetadataToDeleteService: UnitMetadataToDeleteService,
+    private metadataProfileService: MetadataProfileService
   ) {}
 
   async findOne(id: number): Promise<Unit> {
@@ -398,7 +402,7 @@ export class UnitService {
       // findOnesMetadata already backfills valueAsText.
       unit.metadata = await this.findOnesMetadata(unit.id);
     } else {
-      unit.metadata = UnitService.ensureValueAsText(
+      unit.metadata = await this.resolveValueAsText(
         UnitService.setCurrentProfiles(
           workspace.settings?.unitMDProfile,
           workspace.settings?.itemMDProfile,
@@ -454,32 +458,62 @@ export class UnitService {
   // already language-coded. A plain string cannot be resolved here (a coded value
   // needs its vocabulary, free text carries no language), so it is left empty
   // rather than guessed. Returns new objects; the stored entities are not mutated.
-  static ensureValueAsText(metadata: UnitMetadataValues): UnitMetadataValues {
+  // hideNumbering maps profileId -> entryId -> true when that vocabulary field
+  // hides the numbering. Empty (the default) keeps the numbering everywhere,
+  // which matches the behaviour before hideNumbering was honoured server-side.
+  static ensureValueAsText(
+    metadata: UnitMetadataValues,
+    hideNumbering: Record<string, Record<string, boolean>> = {}
+  ): UnitMetadataValues {
     if (!metadata) return metadata;
+    const forProfile = <T extends ProfileValues>(profile: T): T => UnitService.fillProfileValueAsText(
+      profile,
+      hideNumbering[profile.profileId ?? ''] ?? {}
+    );
     return {
       ...metadata,
-      ...(metadata.profiles && { profiles: metadata.profiles.map(UnitService.fillProfileValueAsText) }),
+      ...(metadata.profiles && { profiles: metadata.profiles.map(forProfile) }),
       ...(metadata.items && {
         items: metadata.items.map(item => ({
           ...item,
-          ...(item.profiles && { profiles: item.profiles.map(UnitService.fillProfileValueAsText) })
+          ...(item.profiles && { profiles: item.profiles.map(forProfile) })
         }))
       })
     };
   }
 
-  private static fillProfileValueAsText<T extends ProfileValues>(profile: T): T {
+  private static fillProfileValueAsText<T extends ProfileValues>(
+    profile: T,
+    hideNumberingByEntry: Record<string, boolean>
+  ): T {
     if (!profile.entries) return profile;
-    return { ...profile, entries: profile.entries.map(UnitService.fillEntryValueAsText) };
+    return {
+      ...profile,
+      entries: profile.entries.map(
+        entry => UnitService.fillEntryValueAsText(entry, hideNumberingByEntry[entry.id] ?? false)
+      )
+    };
   }
 
-  private static fillEntryValueAsText(entry: MetadataValuesEntry): MetadataValuesEntry {
+  private static fillEntryValueAsText(entry: MetadataValuesEntry, hideNumbering: boolean): MetadataValuesEntry {
+    const { value } = entry;
+    const isVocabulary = Array.isArray(value) &&
+      value.some(item => !!item && typeof item === 'object' && 'id' in item);
+    // Vocabulary display text is always recomputed so hideNumbering applies even
+    // when a valueAsText was already stored (e.g. imported units); other value
+    // types keep their stored valueAsText and are only backfilled when empty.
+    if (isVocabulary) {
+      return { ...entry, valueAsText: UnitService.getEntryValueAsText(value, hideNumbering) };
+    }
     const hasText = Array.isArray(entry.valueAsText) ? entry.valueAsText.length > 0 : !!entry.valueAsText;
     if (hasText) return entry;
-    return { ...entry, valueAsText: UnitService.getEntryValueAsText(entry.value) };
+    return { ...entry, valueAsText: UnitService.getEntryValueAsText(value) };
   }
 
-  private static getEntryValueAsText(value: MetadataValuesEntry['value']): MetadataValuesEntry['valueAsText'] {
+  private static getEntryValueAsText(
+    value: MetadataValuesEntry['value'],
+    hideNumbering = false
+  ): MetadataValuesEntry['valueAsText'] {
     // metadata-values@3.x simple value { raw, asText } (form-created; the legacy
     // form stored a plain string instead and has no asText to recover).
     if (value && typeof value === 'object' && !Array.isArray(value)) {
@@ -487,16 +521,57 @@ export class UnitService {
     }
     if (!Array.isArray(value)) return [];
     if (value.some(item => item && typeof item === 'object' && 'id' in item)) {
-      // vocabulary entries: metadata-values@3.x carries the display text in `label`,
-      // the legacy internal form in `text`.
+      // vocabulary entries: metadata-values@3.x carries the pure label in `label`
+      // (legacy internal form in `text`) and the numbering in `annotation`; the
+      // display text combines numbering + label.
       return value.flatMap(item => {
         if (!item || typeof item !== 'object' || !('id' in item)) return [];
-        const vocab = item as { label?: unknown[]; text?: unknown[] };
-        return vocab.label ?? vocab.text ?? [];
+        const vocab = item as {
+          label?: LanguageCodedText[]; text?: LanguageCodedText[]; annotation?: LanguageCodedText[];
+        };
+        const texts = vocab.label ?? vocab.text;
+        return hideNumbering ? (texts ?? []) : combineNotationAndLabel(vocab.annotation, texts);
       }) as MetadataValuesEntry['valueAsText'];
     }
     // no vocabulary entries -> already multilingual free text
     return value as MetadataValuesEntry['valueAsText'];
+  }
+
+  // Applies valueAsText (incl. hideNumbering) for display. The hideNumbering
+  // flags come from the stored profile definitions, so vocabulary numbering is
+  // suppressed consistently in every read-only view that consumes valueAsText.
+  private async resolveValueAsText(metadata: UnitMetadataValues): Promise<UnitMetadataValues> {
+    const hideNumbering = await this.buildHideNumberingMap(metadata);
+    return UnitService.ensureValueAsText(metadata, hideNumbering);
+  }
+
+  // Builds profileId -> entryId -> hideNumbering from the DB-stored profile
+  // definitions of every profile referenced by the metadata (unit and item
+  // profiles). DB-only reads keep this cheap on list endpoints. Public so the
+  // XML export can fold the numbering back the same way (see toLegacyMetadataBlob).
+  async buildHideNumberingMap(
+    metadata: UnitMetadataValues | undefined
+  ): Promise<Record<string, Record<string, boolean>>> {
+    if (!metadata) return {};
+    const profileIds = new Set<string>();
+    (metadata.profiles ?? []).forEach(profile => {
+      if (profile.profileId) profileIds.add(profile.profileId);
+    });
+    (metadata.items ?? []).forEach(item => (item.profiles ?? []).forEach(profile => {
+      if (profile.profileId) profileIds.add(profile.profileId);
+    }));
+    const map: Record<string, Record<string, boolean>> = {};
+    await Promise.all([...profileIds].map(async profileId => {
+      const profile = await this.metadataProfileService.getStoredMetadataProfileFromDb(profileId);
+      if (!profile?.groups) return;
+      const entryMap: Record<string, boolean> = {};
+      profile.groups.forEach(group => (group.entries ?? []).forEach(entry => {
+        const parameters = entry.parameters as unknown as { hideNumbering?: boolean } | null;
+        if (parameters?.hideNumbering) entryMap[entry.id] = true;
+      }));
+      map[profileId] = entryMap;
+    }));
+    return map;
   }
 
   // Reconcile unit metadata by profileId (the profile form re-emits without the
@@ -909,7 +984,7 @@ export class UnitService {
       // the index signature of ItemsMetadataValues blocks direct assignment
       return await this.findOnesMetadata(createFrom) as unknown as UnitMetadataValues;
     }
-    return UnitService.ensureValueAsText(unit.metadata as UnitMetadataValues);
+    return this.resolveValueAsText(unit.metadata as UnitMetadataValues);
   }
 
   async findOnesMetadata(unitId: number): Promise<UnitFullMetadataDto> {
@@ -918,6 +993,6 @@ export class UnitService {
       items: await this.unitItemService
         .getAllByUnitIdWithMetadata(unitId) as unknown as UnitMetadataValues['items']
     };
-    return UnitService.ensureValueAsText(metadata) as unknown as UnitFullMetadataDto;
+    return await this.resolveValueAsText(metadata) as unknown as UnitFullMetadataDto;
   }
 }
