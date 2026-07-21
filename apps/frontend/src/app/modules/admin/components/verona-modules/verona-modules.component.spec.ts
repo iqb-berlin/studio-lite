@@ -165,6 +165,21 @@ describe('VeronaModulesComponent', () => {
     expect(component.selectedModules).not.toContain(module1);
   });
 
+  it('should replace selection case-insensitively when metadata uses the legacy lower-case type', () => {
+    const legacyEditor = { metadata: { type: 'editor' }, key: 'm1' } as VeronaModuleClass;
+    const player = { metadata: { type: 'PLAYER' }, key: 'm2' } as VeronaModuleClass;
+    const newEditor = { metadata: { type: 'EDITOR' }, key: 'm3' } as VeronaModuleClass;
+
+    component.selectedModules = [legacyEditor, player];
+
+    component.changeSelectedModules({ type: 'EDITOR', selectedModules: [newEditor] });
+
+    expect(component.selectedModules).toHaveLength(2);
+    expect(component.selectedModules).toContain(player);
+    expect(component.selectedModules).toContain(newEditor);
+    expect(component.selectedModules).not.toContain(legacyEditor);
+  });
+
   it('should delete modules successfully', () => {
     component.selectedModules = [{ key: 'm1' }] as VeronaModuleClass[];
 
