@@ -366,6 +366,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
                   .filter((unit: UnitPropertiesDto) => res.selectedUnits.includes(unit.id));
                 this.showMetadataDialog.open(TableViewComponent, {
                   width: '80%',
+                  height: '80%',
                   data: {
                     units: selectedUnits,
                     warning: ''
