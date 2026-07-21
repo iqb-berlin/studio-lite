@@ -2,6 +2,12 @@ export { VeronaModuleFactory } from './lib/helper/verona-module.factory';
 export { VeronaModuleKeyCollection } from './lib/helper/verona-module-key-collection.class';
 export { canonicalizeProfileId, profileIdsMatch, isItemProfileId } from './lib/profile-id';
 export {
+  VERONA_MODULE_TYPES,
+  normalizeVeronaModuleType,
+  veronaModuleTypesMatch,
+  isKnownVeronaModuleType
+} from './lib/verona-module-type';
+export {
   HIDDEN_PROFILE_ORDER, ACTIVE_PROFILE_ORDER, orderFromCurrent, isCurrentFromOrder
 } from './lib/profile-order';
 export {

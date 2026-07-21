@@ -1,6 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export type VeronaModuleType = 'editor' | 'player' | 'schemer' | 'WIDGET';
+// The Verona module metadata specification moved to upper-case type identifiers (EDITOR, PLAYER,
+// SCHEMER, WIDGET). Older modules still ship the historical lower-case spelling, so both casings
+// stay valid internally and are compared case-insensitively via veronaModuleTypesMatch (shared-code).
+export type VeronaModuleType =
+  | 'EDITOR' | 'PLAYER' | 'SCHEMER' | 'WIDGET'
+  | 'editor' | 'player' | 'schemer' | 'widget';
 
 export class VeronaModuleMetadataDto {
   [index: string]: unknown;

@@ -34,21 +34,21 @@
       </iqb-files-upload-queue>
       <div class="fx-column-start-stretch">
         <h2>{{'modules.player-name' | translate}}</h2>
-        <studio-lite-verona-modules-table type="player"
+        <studio-lite-verona-modules-table type="PLAYER"
                                           [modules]="moduleService.players"
                                           (selectionChanged)="changeSelectedModules($event)">
         </studio-lite-verona-modules-table>
       </div>
       <div class="fx-column-start-stretch">
         <h2>{{'modules.editor-name' | translate}}</h2>
-        <studio-lite-verona-modules-table type="editor"
+        <studio-lite-verona-modules-table type="EDITOR"
                                           [modules]="moduleService.editors"
                                           (selectionChanged)="changeSelectedModules($event)">
         </studio-lite-verona-modules-table>
       </div>
       <div class="fx-column-start-stretch">
         <h2>{{'modules.schemer-name' | translate}}</h2>
-        <studio-lite-verona-modules-table type="schemer"
+        <studio-lite-verona-modules-table type="SCHEMER"
                                           [modules]="moduleService.schemers"
                                           (selectionChanged)="changeSelectedModules($event)">
         </studio-lite-verona-modules-table>

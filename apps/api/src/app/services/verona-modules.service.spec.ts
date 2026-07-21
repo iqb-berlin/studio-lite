@@ -96,6 +96,59 @@ describe('VeronaModulesService', () => {
       expect(result).toHaveLength(1);
       expect(result[0].key).toBe('e');
     });
+
+    it('should match the query type case-insensitively (upper-case query, legacy metadata)', async () => {
+      const modules = [
+        { key: 'e', metadata: { type: 'editor', name: 'e' } },
+        { key: 'p', metadata: { type: 'player', name: 'p' } }
+      ];
+      mockRepository.find.mockResolvedValue(modules);
+
+      const result = await service.findAll('EDITOR');
+      expect(result).toHaveLength(1);
+      expect(result[0].key).toBe('e');
+    });
+
+    it('should match the query type case-insensitively (legacy query, upper-case metadata)', async () => {
+      const modules = [
+        { key: 'e', metadata: { type: 'EDITOR', name: 'e' } },
+        { key: 'p', metadata: { type: 'PLAYER', name: 'p' } }
+      ];
+      mockRepository.find.mockResolvedValue(modules);
+
+      const result = await service.findAll('editor');
+      expect(result).toHaveLength(1);
+      expect(result[0].key).toBe('e');
+    });
+  });
+
+  describe('upload', () => {
+    const buildModuleBuffer = (type: string): Buffer => {
+      const jsonLd = JSON.stringify({
+        type,
+        model: 'm',
+        id: 'mod',
+        version: '1.0.0',
+        specVersion: '5.0',
+        name: [{ lang: 'de', value: 'Name' }]
+      });
+      return Buffer.from(
+        `<html><head><script type="application/ld+json">${jsonLd}</script></head></html>`
+      );
+    };
+
+    it('accepts an upper-case metadata type against a legacy lower-case allowedTypes filter', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+      mockRepository.create.mockImplementation(m => m);
+
+      await expect(service.upload(buildModuleBuffer('EDITOR'), ['editor'])).resolves.toBeUndefined();
+      expect(repository.save).toHaveBeenCalled();
+    });
+
+    it('rejects a metadata type that is not in allowedTypes', async () => {
+      await expect(service.upload(buildModuleBuffer('EDITOR'), ['player'])).rejects.toThrow();
+      expect(repository.save).not.toHaveBeenCalled();
+    });
   });
 
   describe('remove', () => {

@@ -52,6 +52,26 @@ describe('AdminVeronaModuleController', () => {
         .toHaveBeenCalledWith(mockFile.buffer, ['WIDGET']);
     });
 
+    it('should accept the current upper-case module types', async () => {
+      const mockFile = { buffer: Buffer.from('test') };
+      veronaModulesService.upload.mockResolvedValue(undefined);
+
+      await controller.addModuleFile(mockFile, ['EDITOR', 'PLAYER', 'SCHEMER']);
+
+      expect(veronaModulesService.upload)
+        .toHaveBeenCalledWith(mockFile.buffer, ['EDITOR', 'PLAYER', 'SCHEMER']);
+    });
+
+    it('should still accept the legacy lower-case module types', async () => {
+      const mockFile = { buffer: Buffer.from('test') };
+      veronaModulesService.upload.mockResolvedValue(undefined);
+
+      await controller.addModuleFile(mockFile, ['editor', 'player', 'schemer']);
+
+      expect(veronaModulesService.upload)
+        .toHaveBeenCalledWith(mockFile.buffer, ['editor', 'player', 'schemer']);
+    });
+
     it('should reject unknown types', async () => {
       const mockFile = { buffer: Buffer.from('test') };
 

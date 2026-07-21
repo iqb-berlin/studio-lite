@@ -9,6 +9,7 @@ import { MatButton } from '@angular/material/button';
 import {
   IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent
 } from '@studio-lite-lib/iqb-components';
+import { veronaModuleTypesMatch } from '@studio-lite/shared-code';
 import { ModuleService } from '../../../../services/module.service';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
@@ -27,7 +28,7 @@ import { ModuleSelectionChange } from '../../models/module-selection-change.inte
 })
 export class VeronaModulesComponent extends ModulesDirective {
   protected readonly pageTitleKey = 'modules.title';
-  protected readonly uploadPath = 'admin/verona-modules?type=editor&type=player&type=schemer';
+  protected readonly uploadPath = 'admin/verona-modules?type=EDITOR&type=PLAYER&type=SCHEMER';
 
   protected serverUrl: string;
   protected appService: AppService;
@@ -66,7 +67,7 @@ export class VeronaModulesComponent extends ModulesDirective {
     const newSelection: VeronaModuleClass[] = [];
 
     this.selectedModules.forEach(module => {
-      if (module.metadata?.type !== selection.type) {
+      if (!veronaModuleTypesMatch(module.metadata?.type, selection.type)) {
         newSelection.push(module);
       }
     });

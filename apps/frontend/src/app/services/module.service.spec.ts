@@ -31,39 +31,39 @@ describe('ModuleService', () => {
   describe('loadList', () => {
     it('should populate editors, players, and schemers dictionaries', async () => {
       const mockModulesByType: Record<string, VeronaModuleInListDto[]> = {
-        editor: [{
+        EDITOR: [{
           key: 'e1',
           sortKey: 'e1',
           metadata: {
             id: 'e1',
             name: 'E1',
-            type: 'editor',
+            type: 'EDITOR',
             model: '',
             version: '1.0',
             specVersion: '1.0',
             isStable: true
           }
         }],
-        player: [{
+        PLAYER: [{
           key: 'p1',
           sortKey: 'p1',
           metadata: {
             id: 'p1',
             name: 'P1',
-            type: 'player',
+            type: 'PLAYER',
             model: 'speedTest',
             version: '1.0',
             specVersion: '1.0',
             isStable: true
           }
         }],
-        schemer: [{
+        SCHEMER: [{
           key: 's1',
           sortKey: 's1',
           metadata: {
             id: 's1',
             name: 'S1',
-            type: 'schemer',
+            type: 'SCHEMER',
             model: 'iqb',
             version: '1.0',
             specVersion: '1.0',
@@ -76,9 +76,9 @@ describe('ModuleService', () => {
 
       await service.loadList();
 
-      expect(mockBackendService.getModuleList).toHaveBeenCalledWith('editor');
-      expect(mockBackendService.getModuleList).toHaveBeenCalledWith('player');
-      expect(mockBackendService.getModuleList).toHaveBeenCalledWith('schemer');
+      expect(mockBackendService.getModuleList).toHaveBeenCalledWith('EDITOR');
+      expect(mockBackendService.getModuleList).toHaveBeenCalledWith('PLAYER');
+      expect(mockBackendService.getModuleList).toHaveBeenCalledWith('SCHEMER');
 
       expect(Object.keys(service.editors)).toHaveLength(1);
       // eslint-disable-next-line @typescript-eslint/dot-notation

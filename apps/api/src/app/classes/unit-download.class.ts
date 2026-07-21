@@ -806,7 +806,7 @@ export class UnitDownloadClass {
     usedPlayers: string[]
   ): Promise<void> {
     const allPlayers: VeronaModuleInListDto[] =
-      await veronaModuleService.findAll('player');
+      await veronaModuleService.findAll('PLAYER');
     const veronaKeyList = new VeronaModuleKeyCollection(
       allPlayers.map(p => p.key)
     );
