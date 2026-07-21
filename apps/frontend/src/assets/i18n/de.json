@@ -42,8 +42,8 @@
   },
   "unit-download": {
     "export-format": "Exportformat",
-    "export-format-json": "JSON",
-    "export-format-xml": "XML (Standard)",
+    "export-format-json": "JSON (Experimentell)",
+    "export-format-xml": "XML",
     "add-files": "Zusätzliche Dateien",
     "add-player": "Player hinzufügen",
     "add-comments": "Kommentare hinzufügen",
