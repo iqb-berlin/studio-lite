@@ -1,15 +1,63 @@
-mat-dialog-content{
-  padding:0!important;
+// Dialog is opened with a fixed height (80%). The flex chain below propagates
+// that height down through Material's tab structure so the table fills the
+// remaining space and stays the same height regardless of the number of rows.
+// min-width: 0 on every flex item lets them shrink below their content width,
+// so a wide table only produces ONE horizontal scrollbar (on .table-container)
+// instead of also forcing the tab containers to overflow.
+.container {
+  padding: 0 !important;
+  max-height: none; // override Material's default 65vh cap so the content fills the dialog
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.metadata-tabs {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+::ng-deep .mat-mdc-tab-body-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+::ng-deep .mat-mdc-tab-body-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.table-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 
 table {
-  width: 80%;
-  overflow: scroll;
-  padding: 0 20px;
+  width: 100%;
 }
 
 td{
   padding: 10px !important;
+}
+
+.cell-content {
+  max-height: 120px;
+  overflow-y: auto;
 }
 
 .filter{
@@ -20,4 +68,3 @@ td{
 .mat-mdc-cell {
   vertical-align: top;
 }
-
