@@ -4,6 +4,7 @@ import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profil
 import { IsArrayPipe } from '../../pipes/is-array.pipe';
 import { CastPipe } from '../../pipes/cast.pipe';
 import { IsCurrentProfilePipe } from '../../pipes/is-current-profile.pipe';
+import { FilledEntriesPipe } from '../../pipes/filled-entries.pipe';
 
 @Component({
   selector: 'studio-lite-metadata-profile-entries',
@@ -12,7 +13,8 @@ import { IsCurrentProfilePipe } from '../../pipes/is-current-profile.pipe';
   imports: [
     IsArrayPipe,
     CastPipe,
-    IsCurrentProfilePipe
+    IsCurrentProfilePipe,
+    FilledEntriesPipe
   ]
 })
 export class MetadataProfileEntriesComponent {
