@@ -4,6 +4,7 @@ import { MetadataProfileEntriesComponent } from './metadata-profile-entries.comp
 import { IsArrayPipe } from '../../pipes/is-array.pipe';
 import { CastPipe } from '../../pipes/cast.pipe';
 import { IsCurrentProfilePipe } from '../../pipes/is-current-profile.pipe';
+import { FilledEntriesPipe } from '../../pipes/filled-entries.pipe';
 
 describe('MetadataProfileEntriesComponent', () => {
   let component: MetadataProfileEntriesComponent;
@@ -40,6 +41,12 @@ describe('MetadataProfileEntriesComponent', () => {
           label: [{ lang: 'de', value: 'Eintrag 4' }],
           value: [],
           valueAsText: []
+        },
+        {
+          id: 'entry5',
+          label: [{ lang: 'de', value: 'Eintrag 5' }],
+          value: [{ lang: 'de', value: '' }],
+          valueAsText: [{ lang: 'de', value: '' }]
         }
       ]
     },
@@ -48,8 +55,8 @@ describe('MetadataProfileEntriesComponent', () => {
       order: -1,
       entries: [
         {
-          id: 'entry5',
-          label: [{ lang: 'de', value: 'Eintrag 5' }],
+          id: 'entry6',
+          label: [{ lang: 'de', value: 'Eintrag 6' }],
           value: 'Nicht sichtbar',
           valueAsText: { lang: 'de', value: 'Nicht sichtbar' }
         }
@@ -63,7 +70,8 @@ describe('MetadataProfileEntriesComponent', () => {
         MetadataProfileEntriesComponent,
         IsArrayPipe,
         CastPipe,
-        IsCurrentProfilePipe
+        IsCurrentProfilePipe,
+        FilledEntriesPipe
       ]
     }).compileComponents();
 
@@ -83,7 +91,7 @@ describe('MetadataProfileEntriesComponent', () => {
 
     const visibleEntries = fixture.nativeElement
       .querySelectorAll('.fx-row-space-between-start');
-    expect(visibleEntries.length).toBe(4); // entry1, entry2, entry3, entry4
+    expect(visibleEntries.length).toBe(3); // entry1, entry2, entry3
   });
 
   it('should render single value correctly', () => {
@@ -112,10 +120,11 @@ describe('MetadataProfileEntriesComponent', () => {
     expect(entry3.querySelector('ul')).toBeNull();
   });
 
-  it('should render "-" for empty value array', () => {
-    const entry4 = fixture.nativeElement
-      .querySelectorAll('.fx-row-space-between-start')[3];
-    expect(entry4.querySelector('.item-key').textContent).toContain('Eintrag 4');
-    expect(entry4.querySelector('span:not(.item-key)').textContent).toBe('-');
+  it('should not render entries without displayable value', () => {
+    const keys = Array.from(
+      fixture.nativeElement.querySelectorAll('.item-key')
+    ).map(element => (element as HTMLElement).textContent?.trim());
+    expect(keys).not.toContain('Eintrag 4');
+    expect(keys).not.toContain('Eintrag 5');
   });
 });
