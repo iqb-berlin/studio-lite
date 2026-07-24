@@ -431,7 +431,7 @@ describe('Workspace Unit Management', () => {
     cy.get('[data-cy="workspace-edit-unit-copy-unit"]').click();
     cy.get('mat-select').click();
     cy.get(`mat-option:contains("${ws2}")`).click();
-    cy.get(`mat-cell:contains("${unit3.shortname}")`).prev().click();
+    cy.get(`[data-cy="workspace-select-unit-list-checkbox-${unit3.shortname}"]`).click();
     cy.clickDataCyWithResponseCheck(
       '[data-cy="workspace-move-unit-button"]',
       [200, 201],

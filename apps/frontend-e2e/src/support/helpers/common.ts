@@ -25,11 +25,7 @@ export function clickSaveButtonRight(): void {
  * selectCheckBox('Unit 1');
  */
 export function selectCheckBox(name: string): void {
-  cy.get('studio-lite-select-unit-list').within(() => {
-    cy.get(`mat-cell:contains("${name}")`)
-      .prev()
-      .click();
-  });
+  cy.get(`[data-cy="workspace-select-unit-list-checkbox-${name}"]`).click();
 }
 
 /**

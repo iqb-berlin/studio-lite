@@ -174,8 +174,7 @@ describe('Unit Rich Notes', () => {
           clickIndexTabWorkspace('notes');
           cy.wait('@getRichNotes');
 
-          cy.get('.node-header')
-            .contains('mat-icon', 'add')
+          cy.get('[data-cy="rich-note-add"]')
             .first()
             .click({ force: true });
           cy.get('mat-select[formControlName="tagId"]').click();

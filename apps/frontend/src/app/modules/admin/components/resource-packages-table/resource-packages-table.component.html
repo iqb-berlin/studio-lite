@@ -38,6 +38,7 @@
     </mat-header-cell>
     <mat-cell *matCellDef="let row" class="fx-flex-row-fix-60">
       <mat-checkbox
+        [attr.data-cy]="'admin-packages-select-' + row.name"
         (change)="updateSelectedResourcePackages()">
       </mat-checkbox>
     </mat-cell>

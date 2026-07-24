@@ -69,8 +69,7 @@ export function deleteUser(user: string): void {
   cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('users');
-  cy.contains('mat-cell', user)
-    .parent()
+  cy.contains('mat-row', user)
     .find('[data-cy="admin-users-delete-user"]').click();
   cy.translate(Cypress.expose('locale')).then(json => {
     cy.clickButton(json.delete);
@@ -112,8 +111,7 @@ export function deleteGroup(group: string): void {
   cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('workspace-groups');
-  cy.contains('mat-cell', group)
-    .parent()
+  cy.contains('mat-row', group)
     .find('[data-cy="admin-workspace-groups-delete-group"]')
     .click();
   cy.translate(Cypress.expose('locale')).then(json => {
@@ -202,11 +200,7 @@ export function openWorkspaceSettingsDialog(group: string, ws:string): void {
   cy.findAdminGroupSettings(group).click();
   clickIndexTabWsgAdmin('workspaces');
   cy.contains('mat-cell', ws).click();
-  // The gear button has no data-cy; click by its mat-icon label
-  cy.get('studio-lite-workspace-menu')
-    .find('mat-icon')
-    .contains('settings')
-    .click({ force: true });
+  cy.get('[data-cy="wsg-admin-workspace-menu-settings"]').click({ force: true });
 }
 
 /**
