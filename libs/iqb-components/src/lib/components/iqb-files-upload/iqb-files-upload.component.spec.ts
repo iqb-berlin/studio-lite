@@ -79,4 +79,35 @@ describe('IqbFilesUploadComponent', () => {
     expect(component.status).toBe(UploadStatus.error);
     expect(component.statustext).toContain('Zugriff verweigert');
   });
+
+  it('should surface the message reported by the API', () => {
+    createComponent();
+    component.httpUrl = '/upload';
+    component.file = new File(['abc'], 'test.itcr.zip', { type: 'application/x-zip-compressed' });
+
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne('/upload');
+    req.flush(
+      { statusCode: 422, message: "File 'test.itcr.zip' could not be read as a zip archive" },
+      { status: 422, statusText: 'Unprocessable Entity' }
+    );
+
+    expect(component.status).toBe(UploadStatus.error);
+    expect(component.statustext).toContain('could not be read as a zip archive');
+  });
+
+  it('should fall back to the generic message when the API reports none', () => {
+    createComponent();
+    component.httpUrl = '/upload';
+    component.file = new File(['abc'], 'test.txt', { type: 'text/plain' });
+
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne('/upload');
+    req.flush(null, { status: 500, statusText: 'Internal Server Error' });
+
+    expect(component.status).toBe(UploadStatus.error);
+    expect(component.statustext).toContain('Fehler:');
+  });
 });
