@@ -41,7 +41,7 @@
     "@golevelup/ts-jest": "^0.3.4",
     "@iqb/metadata-components": "0.2.9",
     "@iqb/metadata-resolver": "0.2.1",
-    "@iqb/ngx-coding-components": "3.1.3",
+    "@iqb/ngx-coding-components": "3.2.0",
     "@iqb/responses": "5.2.2",
     "@iqb/validate-md-profile": "^0.10.0",
     "@iqbspecs/coding-scheme": "3.4.1",
