@@ -18,6 +18,7 @@ import { IsAdminGuard } from '../guards/is-admin.guard';
 import { ApiFile } from '../decorators/api-file.decorator';
 import { fileMimetypeFilter } from '../filters/file-mimetype.filter';
 import { ParseFilePipe } from '../pipes/parse-file.pipe';
+import { ZIP_MIME_TYPES } from '../constants/zip-mime-types';
 
 @Controller('admin/resource-packages')
 export class AdminResourcePackageController {
@@ -47,7 +48,7 @@ export class AdminResourcePackageController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiFile('resourcePackage', true, {
-    fileFilter: fileMimetypeFilter('application/zip')
+    fileFilter: fileMimetypeFilter(...ZIP_MIME_TYPES)
   })
   @ApiCreatedResponse({
     description: 'Sends back the id of the new resource package in database',

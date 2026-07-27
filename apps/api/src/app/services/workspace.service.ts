@@ -49,6 +49,7 @@ import { UnitCommentService } from './unit-comment.service';
 import { UnitRichNoteService } from './unit-rich-note.service';
 import User from '../entities/user.entity';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
+import { ZIP_MIME_TYPES } from '../constants/zip-mime-types';
 import {
   EXPORT_REPORT_FILENAME,
   LanguageCodedText,
@@ -959,13 +960,8 @@ export class WorkspaceService {
     functionReturn: RequestReportDto
   ): FileIo[] {
     const files: FileIo[] = [];
-    const zipMimeTypes = [
-      'application/zip',
-      'application/x-zip-compressed',
-      'multipart/x-zip'
-    ];
     originalFiles.forEach(f => {
-      if (zipMimeTypes.indexOf(f.mimetype) >= 0) {
+      if (ZIP_MIME_TYPES.indexOf(f.mimetype) >= 0) {
         try {
           const zip = new AdmZip(f.buffer);
           const zipEntries = zip.getEntries();
