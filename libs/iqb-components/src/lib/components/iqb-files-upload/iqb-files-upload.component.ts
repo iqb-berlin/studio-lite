@@ -176,7 +176,10 @@ export class IqbFilesUploadComponent implements OnInit {
           } else if (errorObj.error instanceof ErrorEvent) {
             this.requestResponseText = `Fehler: ${(<ErrorEvent>errorObj.error).message}`;
           } else {
-            this.requestResponseText = `Fehler: ${errorObj.message}`;
+            // The API reports why an upload was rejected in the response body; prefer that
+            // over Angular's generic "Http failure response for <url>: <status>".
+            const serverMessage = (errorObj.error as { message?: string } | null)?.message;
+            this.requestResponseText = `Fehler: ${serverMessage || errorObj.message}`;
           }
         });
       }

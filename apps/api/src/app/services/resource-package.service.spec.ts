@@ -1,4 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import {
+  BadRequestException, ConflictException, UnprocessableEntityException
+} from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
@@ -103,7 +106,7 @@ describe('ResourcePackageService', () => {
       expect(resourcePackageRepository.save).toHaveBeenCalled();
     });
 
-    it('should throw if package already exists', async () => {
+    it('should throw a conflict if package already exists', async () => {
       const file = {
         originalname: 'test.itcr.zip',
         buffer: Buffer.from('')
@@ -111,16 +114,30 @@ describe('ResourcePackageService', () => {
       resourcePackageRepository.findOne.mockResolvedValue(new ResourcePackage());
       (AdmZip as unknown as jest.Mock).mockImplementation(() => ({}));
 
-      await expect(service.create(file)).rejects.toThrow('Package is already installed');
+      await expect(service.create(file)).rejects.toThrow(ConflictException);
     });
 
-    it('should throw if file is not valid resource package', async () => {
+    it('should throw a bad request if file is not valid resource package', async () => {
       const file = {
         originalname: 'invalid.zip',
         buffer: Buffer.from('')
       } as Express.Multer.File;
       (AdmZip as unknown as jest.Mock).mockImplementation(() => ({}));
-      await expect(service.create(file)).rejects.toThrow('No Resource Package');
+
+      await expect(service.create(file)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw an unprocessable entity if the file is not a readable zip', async () => {
+      const file = {
+        originalname: 'broken.itcr.zip',
+        buffer: Buffer.from('not a zip')
+      } as Express.Multer.File;
+      resourcePackageRepository.findOne.mockResolvedValue(null);
+      (AdmZip as unknown as jest.Mock).mockImplementation(() => {
+        throw new Error('Invalid or unsupported zip format. No END header found');
+      });
+
+      await expect(service.create(file)).rejects.toThrow(UnprocessableEntityException);
     });
   });
 
