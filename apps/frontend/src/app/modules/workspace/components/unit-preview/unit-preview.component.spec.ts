@@ -7,6 +7,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { Router, UrlCreationOptions, UrlTree } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { Overlay } from '@angular/cdk/overlay';
@@ -205,6 +206,15 @@ describe('UnitPreviewComponent', () => {
     expect(dialogConfig.data.variableCodings).toBe(usedVariableCodings);
     expect(dialogConfig.height).toBe('80%');
     expect(dialogConfig.width).toBe('60%');
+
+    const resultsComponent = new ShowCodingResultsComponent(dialogConfig.data);
+    resultsComponent.ngOnInit();
+    resultsComponent.toggleChange({
+      source: { name: 'transformedValueView' }
+    } as unknown as MatSlideToggleChange);
+
+    expect(resultsComponent.dataSource.data[0]['transformed'])
+      .toBe('["ABC","007"]');
   });
 
   describe('handleWidgetCall', () => {
