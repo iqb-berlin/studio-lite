@@ -1,4 +1,5 @@
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Logger } from '@nestjs/common';
 import { LessThan, Repository } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -10,8 +11,13 @@ describe('SessionCleanupService', () => {
   let service: SessionCleanupService;
   let userSessionRepository: DeepMocked<Repository<UserSession>>;
   let refreshTokenRepository: DeepMocked<Repository<RefreshToken>>;
+  let loggerErrorSpy: jest.SpyInstance;
 
   beforeEach(async () => {
+    // The swallowed cleanup errors below are expected; without this the suite
+    // prints them to stderr and a green CI run looks like a failed one.
+    loggerErrorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SessionCleanupService,
@@ -33,6 +39,7 @@ describe('SessionCleanupService', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it('should be defined', () => {
@@ -57,6 +64,10 @@ describe('SessionCleanupService', () => {
       userSessionRepository.delete.mockRejectedValue(new Error('db down'));
 
       await expect(service.cleanupExpiredRows()).resolves.toBeUndefined();
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        'Cleanup of expired sessions failed.',
+        expect.stringContaining('db down')
+      );
     });
 
     it('should not throw when the refresh token delete fails', async () => {
@@ -64,6 +75,10 @@ describe('SessionCleanupService', () => {
       refreshTokenRepository.delete.mockRejectedValue(new Error('db down'));
 
       await expect(service.cleanupExpiredRows()).resolves.toBeUndefined();
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        'Cleanup of expired sessions failed.',
+        expect.stringContaining('db down')
+      );
     });
   });
 

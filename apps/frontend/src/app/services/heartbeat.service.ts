@@ -139,11 +139,7 @@ export class HeartbeatService implements OnDestroy {
     ).subscribe(() => {
       this.backendService.logout();
       // Delay redirect slightly so the user sees the fully depleted bar before redirect.
-      setTimeout(() => {
-        if (typeof window !== 'undefined') {
-          window.location.href = '/home';
-        }
-      }, AUTO_LOGOUT_REDIRECT_DELAY_MS);
+      setTimeout(() => this.redirectToHome(), AUTO_LOGOUT_REDIRECT_DELAY_MS);
     });
 
     this.activitySync$
@@ -186,6 +182,16 @@ export class HeartbeatService implements OnDestroy {
 
   stop(): void {
     this.started = false;
+  }
+
+  // Own method so tests can observe the auto-logout redirect by stubbing it:
+  // assigning window.location.href makes jsdom attempt a real navigation, which
+  // it cannot do and reports as an "Not implemented: navigation" error.
+  // eslint-disable-next-line class-methods-use-this
+  private redirectToHome(): void {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/home';
+    }
   }
 
   ngOnDestroy(): void {
