@@ -14,12 +14,18 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CodingReportDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 
+type CodingReportColumn = Exclude<keyof CodingReportDto, 'validationProblems'> |
+'validationDetails';
+
 type CodingReportRow = CodingReportDto & {
   validationDetails: string;
+  validationSeverity: 'error' | 'warning' | 'ok';
+  unstructuredValidationMessage: string | null;
 };
 
 @Component({
@@ -37,12 +43,12 @@ type CodingReportRow = CodingReportDto & {
     MatSlideToggle,
     MatFormField,
     MatInput,
-    MatLabel
+    MatLabel,
+    MatTooltipModule
   ]
 })
 export class CodingReportComponent implements OnInit {
-  // Columns to display in the table
-  displayedColumns: (keyof CodingReportRow)[] = [
+  private static readonly csvColumns: CodingReportColumn[] = [
     'unit',
     'variable',
     'variableType',
@@ -53,10 +59,23 @@ export class CodingReportComponent implements OnInit {
     'trainingEffort'
   ];
 
+  displayedColumns: CodingReportColumn[] = [
+    'unit',
+    'variable',
+    'variableType',
+    'item',
+    'validationDetails',
+    'codingType',
+    'trainingEffort'
+  ];
+
+  validationDetailColumns = ['expandedValidationDetails'];
+
   dataSource!: MatTableDataSource<CodingReportRow>; // Datasource for the table
   isLoading = false; // Indicates if data is currently loading
   codedVariablesOnly = true; // Filter: Display only coded variables
   unitDataRows: CodingReportRow[] = []; // All rows of data received from the backend
+  expandedRow: CodingReportRow | null = null;
 
   @ViewChild(MatSort) set matSort(sort: MatSort) {
     // Attach table sorting functionality to the data source
@@ -84,11 +103,27 @@ export class CodingReportComponent implements OnInit {
     this.backendService.getCodingReport(this.workspaceService.selectedWorkspaceId)
       .subscribe({
         next: (codingReport: CodingReportDto[]) => {
-          this.unitDataRows = codingReport.map(row => ({
-            ...row,
-            validationProblems: row.validationProblems || [],
-            validationDetails: this.formatValidationDetails(row)
-          }));
+          this.unitDataRows = codingReport.map(row => {
+            const validationProblems = row.validationProblems || [];
+            const unstructuredValidationMessage = validationProblems.length === 0 &&
+              row.validation?.trim() &&
+              row.validation.trim().toLowerCase() !== 'ok' ?
+              row.validation : null;
+            let validationSeverity: CodingReportRow['validationSeverity'] = 'ok';
+            if (unstructuredValidationMessage) {
+              validationSeverity = 'error';
+            } else if (validationProblems.length > 0) {
+              validationSeverity = validationProblems.some(problem => problem.breaking) ?
+                'error' : 'warning';
+            }
+            return {
+              ...row,
+              validationProblems,
+              validationDetails: this.formatValidationDetails(row),
+              validationSeverity,
+              unstructuredValidationMessage
+            };
+          });
           this.updateDataSource();
         },
         error: err => {
@@ -111,8 +146,21 @@ export class CodingReportComponent implements OnInit {
       this.unitDataRows;
 
     this.dataSource = new MatTableDataSource(filteredRows); // Refresh the data source
+    const defaultSortingDataAccessor = this.dataSource.sortingDataAccessor;
+    const validationSeveritySortOrder: Record<
+    CodingReportRow['validationSeverity'], number
+    > = {
+      error: 0,
+      warning: 1,
+      ok: 2
+    };
+    this.dataSource.sortingDataAccessor = (row, column) => (
+      column === 'validationDetails' ?
+        validationSeveritySortOrder[row.validationSeverity] :
+        defaultSortingDataAccessor(row, column)
+    );
     this.dataSource.filterPredicate = (row, filter) => (
-      this.displayedColumns
+      CodingReportComponent.csvColumns
         .map(column => String(row[column] ?? ''))
         .join(' ')
         .toLowerCase()
@@ -140,15 +188,24 @@ export class CodingReportComponent implements OnInit {
    */
   toggleChange(): void {
     this.codedVariablesOnly = !this.codedVariablesOnly;
+    this.expandedRow = null;
     this.updateDataSource();
+  }
+
+  toggleValidationDetails(row: CodingReportRow): void {
+    this.expandedRow = this.expandedRow === row ? null : row;
+  }
+
+  isValidationDetailsExpanded(row: CodingReportRow): boolean {
+    return this.expandedRow === row;
   }
 
   downloadCodingReport(): void {
     const rows = this.dataSource?.filteredData || [];
-    const headers = this.displayedColumns
+    const headers = CodingReportComponent.csvColumns
       .map(column => CodingReportComponent.getCsvHeader(column))
       .join(';');
-    const csvRows = rows.map(row => this.displayedColumns
+    const csvRows = rows.map(row => CodingReportComponent.csvColumns
       .map(column => CodingReportComponent.escapeCsvValue(CodingReportComponent.stripHtml(String(
         row[column] ?? ''
       ))))
@@ -192,14 +249,13 @@ export class CodingReportComponent implements OnInit {
       .join(' | ');
   }
 
-  private static getCsvHeader(column: keyof CodingReportRow): string {
-    const headers: Record<keyof CodingReportRow, string> = {
+  private static getCsvHeader(column: CodingReportColumn): string {
+    const headers: Record<CodingReportColumn, string> = {
       unit: 'Aufgabe',
       variable: 'Variable',
       variableType: 'Variablentyp',
       item: 'Item',
       validation: 'Validierung',
-      validationProblems: 'Validierungsprobleme (strukturiert)',
       validationDetails: 'Validierungsdetails',
       codingType: 'Kodiertyp',
       trainingEffort: 'Schulungsaufwand'

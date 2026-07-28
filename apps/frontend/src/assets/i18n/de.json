@@ -820,9 +820,17 @@
     "variableType": "Variablentyp",
     "item": "Item",
     "validation": "Validierung",
-    "validationDetails": "Validierungsdetails",
+    "validationDetails": "Validierung",
     "codingType": "Kodiertyp",
     "trainingEffort": "Schulungsaufwand",
+    "problem-count-one": "1 Problem",
+    "problem-count-many": "{{count}} Probleme",
+    "no-problems": "Keine Probleme",
+    "severity": {
+      "error": "Fehler",
+      "warning": "Warnung"
+    },
+    "technical-type": "Technischer Typ: {{type}}",
     "validation-problems": {
       "VACANT": "Ohne Codes und nicht abgeleitet",
       "SOURCE_MISSING": "Quelle fehlt",
