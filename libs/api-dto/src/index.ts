@@ -1,4 +1,7 @@
-export { CodingReportDto } from './lib/dtos/workspace/coding-report.dto';
+export {
+  CodingReportDto,
+  CodingReportValidationProblemDto
+} from './lib/dtos/workspace/coding-report.dto';
 export { MissingsProfilesDto } from './lib/dtos/setting/missings-profiles.dto';
 export { ReviewConfigDto } from './lib/dtos/review/review-config.dto';
 export { BookletConfigDto } from './lib/dtos/review/booklet-config.dto';

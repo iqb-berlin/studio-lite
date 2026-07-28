@@ -820,8 +820,22 @@
     "variableType": "Variablentyp",
     "item": "Item",
     "validation": "Validierung",
+    "validationDetails": "Validierungsdetails",
     "codingType": "Kodiertyp",
-    "trainingEffort": "Schulungsaufwand"
+    "trainingEffort": "Schulungsaufwand",
+    "validation-problems": {
+      "VACANT": "Ohne Codes und nicht abgeleitet",
+      "SOURCE_MISSING": "Quelle fehlt",
+      "INVALID_SOURCE": "Ungültige Quelle",
+      "RULE_PARAMETER_COUNT_MISMATCH": "Falsche Anzahl von Regelparametern",
+      "RULE_REGEX_INVALID": "Ungültiger regulärer Ausdruck",
+      "RULE_PARAMETER_INVALID": "Ungültiger Regelparameter",
+      "RULE_NUMERIC_RANGE_INVALID": "Ungültiger numerischer Bereich",
+      "RULESET_VALUE_ARRAY_POS_INVALID": "Ungültige Arrayposition",
+      "MORE_THAN_ONE_SOURCE": "Mehr als eine Quelle",
+      "ONLY_ONE_SOURCE": "Nur eine Quelle",
+      "VALUE_COPY_NOT_FROM_BASE": "Wert wird nicht aus einer Basisvariable kopiert"
+    }
   },
   "unit-properties": {
     "title": "Aufgaben-Eigenschaften",

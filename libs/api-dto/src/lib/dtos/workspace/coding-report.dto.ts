@@ -1,4 +1,16 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { CodingSchemeProblemType } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+
+export class CodingReportValidationProblemDto {
+  @ApiProperty()
+    type!: CodingSchemeProblemType;
+
+  @ApiProperty()
+    breaking!: boolean;
+
+  @ApiPropertyOptional()
+    code?: string;
+}
 
 export class CodingReportDto {
   @ApiProperty({ })
@@ -15,6 +27,9 @@ export class CodingReportDto {
 
   @ApiProperty()
     validation!: string;
+
+  @ApiProperty({ type: [CodingReportValidationProblemDto] })
+    validationProblems!: CodingReportValidationProblemDto[];
 
   @ApiProperty()
     codingType!: string;
