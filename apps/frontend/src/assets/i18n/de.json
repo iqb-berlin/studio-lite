@@ -309,7 +309,6 @@
     "variable-id": "Variablen Id",
     "id-assigned": "Item ID mehrfach zugewiesen",
     "description": "Notiz",
-    "weighting": "Wichtung",
     "formly-field-required": "Pflichtfeld",
     "formly-field-pattern-float-number": "Ungültiger Wert",
     "items-read-only-view": "Items nur lesbar anzeigen",
@@ -1235,7 +1234,6 @@
     "unitName": "Name (Aufgabe)",
     "workspaceId": "ID (Arbeitsbereich)",
     "workspaceName": "Name (Arbeitsbereich)",
-    "weighting": "Wichtung",
     "description": "Notiz/Beschreibung",
     "createdAt": "Erstellt am",
     "changedAt": "Geändert am"

@@ -37,7 +37,6 @@ describe('DownloadWorkspacesClass', () => {
               {
                 id: 'ITEM1',
                 variableId: 'VAR1',
-                weighting: 1,
                 description: 'Desc1',
                 profiles: [
                   {
@@ -64,7 +63,6 @@ describe('DownloadWorkspacesClass', () => {
         Aufgabe: 'UNIT1',
         'Item-Id': 'ITEM1',
         Variable: 'VAR1',
-        Wichtung: 1,
         Notiz: 'Desc1'
       });
     });

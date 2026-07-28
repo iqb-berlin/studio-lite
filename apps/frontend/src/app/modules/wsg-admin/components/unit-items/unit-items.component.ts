@@ -47,7 +47,6 @@ export class UnitItemsComponent implements OnInit, AfterViewInit, OnDestroy {
     'uuid',
     'variableId',
     'variableReadOnlyId',
-    'weighting',
     'description',
     'unitId',
     'unitKey',

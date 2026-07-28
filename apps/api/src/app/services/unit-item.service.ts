@@ -4,6 +4,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, In, Repository } from 'typeorm';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import {
   orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId
 } from '@studio-lite/shared-code';
@@ -91,9 +92,25 @@ export class UnitItemService {
     const updateItem = await this.getOneByUuid(uuid, manager);
     if (updateItem) {
       const { profiles, ...unitItem } = item;
-      await this.repo(manager).update(uuid, unitItem);
+      await this.repo(manager).update(uuid, this.toColumnValues(unitItem, manager));
       await this.reconcileItemProfiles(uuid, profiles || [], manager);
     }
+  }
+
+  // A save may carry keys that are not (or no longer) entity columns: a client
+  // still holding item objects from before a field was dropped, or a legacy
+  // metadata blob that stores the internal shape verbatim. TypeORM's update()
+  // throws EntityPropertyNotFoundError on unknown property paths, which would
+  // fail the whole metadata save, so keep only mapped columns. create() (addItem)
+  // already ignores unknown keys.
+  private toColumnValues(
+    item: Omit<UnitItemWithMetadataDto, 'profiles'>,
+    manager?: EntityManager
+  ): QueryDeepPartialEntity<UnitItem> {
+    const columnNames = new Set(this.repo(manager).metadata.columns.map(column => column.propertyName));
+    return Object.fromEntries(
+      Object.entries(item).filter(([key]) => columnNames.has(key))
+    ) as QueryDeepPartialEntity<UnitItem>;
   }
 
   // Reconcile item metadata by profileId (the profile form re-emits without the

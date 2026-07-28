@@ -23,9 +23,6 @@ export class UnitItemDto {
     variableReadOnlyId?: string | null;
 
   @ApiProperty()
-    weighting?: number;
-
-  @ApiProperty()
     description?: string;
 
   @ApiProperty()

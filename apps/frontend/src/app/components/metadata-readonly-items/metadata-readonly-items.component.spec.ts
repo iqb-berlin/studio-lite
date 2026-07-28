@@ -39,14 +39,12 @@ describe('MetadataReadonlyItemsComponent', () => {
       id: 'item-1',
       variableId: 'var-1',
       variableReadOnlyId: 'ro-var-1',
-      weighting: 1.5,
       description: 'Test Item 1',
       profiles: [{ profileId: 'p1', order: 0, entries: [] }]
     },
     {
       id: '',
       variableId: 'var-2',
-      weighting: 0,
       description: '',
       profiles: []
     }
@@ -97,10 +95,8 @@ describe('MetadataReadonlyItemsComponent', () => {
 
     // Variable ID (via pipe)
     expect(values[0].textContent).toContain('mock-var-ro-var-1');
-    // Weighting
-    expect(values[1].textContent).toContain('1.5');
     // Description
-    expect(values[2].textContent).toContain('Test Item 1');
+    expect(values[1].textContent).toContain('Test Item 1');
   });
 
   it('should render fallbacks for empty metadata fields', () => {
@@ -109,9 +105,7 @@ describe('MetadataReadonlyItemsComponent', () => {
 
     // Variable ID (via pipe)
     expect(values[0].textContent).toContain('mock-var-var-2');
-    // Weighting (0 should be falsy and show '-')
-    expect(values[1].textContent).toContain('-');
     // Description (empty should show '-')
-    expect(values[2].textContent).toContain('-');
+    expect(values[1].textContent).toContain('-');
   });
 });

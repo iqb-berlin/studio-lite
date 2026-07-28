@@ -20,7 +20,14 @@ describe('UnitItemService', () => {
     create: jest.fn(),
     save: jest.fn(),
     update: jest.fn(),
-    delete: jest.fn()
+    delete: jest.fn(),
+    // updateItem filters the payload against the mapped columns
+    metadata: {
+      columns: [
+        'uuid', 'id', 'order', 'locked', 'position', 'unitId', 'variableId',
+        'variableReadOnlyId', 'description', 'createdAt', 'changedAt'
+      ].map(propertyName => ({ propertyName }))
+    }
   };
 
   const mockUnitItemMetadataService = {
@@ -166,6 +173,26 @@ describe('UnitItemService', () => {
       expect(unitItemMetadataService.addItemMetadata)
         .toHaveBeenCalledWith(uuid, expect.objectContaining({ profileId: 'p-new' }), undefined);
       expect(unitItemMetadataService.removeItemMetadata).not.toHaveBeenCalled();
+    });
+
+    it('drops keys that are not mapped columns', async () => {
+      const uuid = 'uuid-1';
+      // a client or legacy metadata blob may still carry the dropped `weighting`
+      // field; TypeORM's update() would throw on the unknown property path
+      const inputItem = {
+        uuid,
+        description: 'Notiz',
+        weighting: 2,
+        profiles: []
+      } as unknown as UnitItemWithMetadataDto;
+
+      mockRepository.findOneBy.mockResolvedValue({ uuid } as UnitItem);
+      mockRepository.update.mockResolvedValue({ affected: 1 });
+      mockUnitItemMetadataService.getAllByItemId.mockResolvedValue([]);
+
+      await service.updateItem(uuid, inputItem);
+
+      expect(repository.update).toHaveBeenCalledWith(uuid, { uuid, description: 'Notiz' });
     });
   });
 

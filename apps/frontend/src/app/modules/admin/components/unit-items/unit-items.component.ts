@@ -43,7 +43,6 @@ export class UnitItemsComponent implements OnInit, AfterViewInit {
     'unitId',
     'variableId',
     'variableReadOnlyId',
-    'weighting',
     'description',
     'changedAt',
     'createdAt'

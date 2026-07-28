@@ -98,17 +98,14 @@ describe('ItemComponent', () => {
 
   it('should not overwrite core item fields with stale values from onMetadataChange', () => {
     component.metadata[0].description = 'current description';
-    component.metadata[0].weighting = 2;
     const newMetadata = {
       id: 'stale-id',
       description: 'stale description',
-      weighting: 1,
       profiles: [{ profileId: 'p1', entries: [] }]
     } as unknown as Parameters<typeof component.onMetadataChange>[0];
     component.onMetadataChange(newMetadata);
     expect(component.metadata[0].id).toBe('item1');
     expect(component.metadata[0].description).toBe('current description');
-    expect(component.metadata[0].weighting).toBe(2);
   });
 
   it('should get unused variables correctly', () => {
