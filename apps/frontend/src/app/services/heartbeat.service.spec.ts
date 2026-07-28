@@ -6,7 +6,7 @@ import { HeartbeatService } from './heartbeat.service';
 import { AppService } from './app.service';
 import { BackendService } from './backend.service';
 import {
-  ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS, ACTIVITY_SYNC_THROTTLE_MS
+  ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS, ACTIVITY_SYNC_THROTTLE_MS, AUTO_LOGOUT_REDIRECT_DELAY_MS
 } from '../app.constants';
 
 jest.mock('../app.constants', () => ({
@@ -52,6 +52,12 @@ describe('HeartbeatService', () => {
       ]
     });
   };
+
+  // The real implementation assigns window.location.href, which jsdom cannot
+  // perform and reports as an "Not implemented: navigation" error.
+  const stubRedirect = (): jest.SpyInstance => jest
+    .spyOn(service as unknown as { redirectToHome: () => void }, 'redirectToHome')
+    .mockImplementation();
 
   afterEach(() => {
     if (service) {
@@ -128,11 +134,32 @@ describe('HeartbeatService', () => {
     appServiceMock.authData = { userId: 1 } as AuthDataDto;
     configureTestingModule();
     service = TestBed.inject(HeartbeatService);
+    const redirectSpy = stubRedirect();
     service.start();
 
     await jest.advanceTimersByTimeAsync(ACTIVE_THRESHOLD_MS + PASSIVE_THRESHOLD_MS + 2000);
 
     expect(backendServiceMock.logout).toHaveBeenCalled();
+    expect(redirectSpy).toHaveBeenCalled();
+  });
+
+  it('should redirect only after the configured delay', async () => {
+    appServiceMock.authData = { userId: 1 } as AuthDataDto;
+    configureTestingModule();
+    service = TestBed.inject(HeartbeatService);
+    const redirectSpy = stubRedirect();
+    service.start();
+
+    // PASSIVE_THRESHOLD_MS is the total inactivity timeout, so the phases are
+    // depleted here; stop short of the redirect delay that starts at that point.
+    await jest.advanceTimersByTimeAsync(PASSIVE_THRESHOLD_MS + AUTO_LOGOUT_REDIRECT_DELAY_MS / 2);
+
+    expect(backendServiceMock.logout).toHaveBeenCalled();
+    expect(redirectSpy).not.toHaveBeenCalled();
+
+    await jest.advanceTimersByTimeAsync(AUTO_LOGOUT_REDIRECT_DELAY_MS);
+
+    expect(redirectSpy).toHaveBeenCalled();
   });
 
   it('should not log out while no user is logged in', async () => {
@@ -149,6 +176,7 @@ describe('HeartbeatService', () => {
     appServiceMock.authData = { userId: 1 } as AuthDataDto;
     configureTestingModule();
     service = TestBed.inject(HeartbeatService);
+    stubRedirect();
     service.start();
 
     appServiceMock.authData = { userId: 0 } as AuthDataDto;
