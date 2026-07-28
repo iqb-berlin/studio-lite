@@ -29,7 +29,6 @@ interface ColumnValues {
   key?: string;
   id?: string;
   variableId?: string | null,
-  weighting?: string,
   description?: string,
   [key: string]: string | null | undefined
 }
@@ -83,7 +82,6 @@ export class TableViewComponent implements OnInit {
     'key',
     'id',
     'variableId',
-    'weighting',
     'description'
   ];
 
@@ -146,7 +144,6 @@ export class TableViewComponent implements OnInit {
               key: `<a href=#/a/${this.workspaceId}/${unit.id}>${unit.key}</a>` || '–',
               id: item.id || '–',
               variableId: item.variableId,
-              weighting: item.weighting?.toString(),
               description: item.description
             });
           }

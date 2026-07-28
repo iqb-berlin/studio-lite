@@ -78,7 +78,6 @@ export class DownloadWorkspacesClass {
               if (i === 0) values.Aufgabe = unit.key || '–';
               values['Item-Id'] = item.id || '–';
               values.Variable = item.variableId || '';
-              values.Wichtung = item.weighting || '';
               values.Notiz = item.description || '';
               values.Aufgabe = unit.key || '–';
             });
@@ -88,7 +87,6 @@ export class DownloadWorkspacesClass {
               Aufgabe: unit.key || '-',
               'Item-Id': item.id || '–',
               Variable: item.variableId,
-              Wichtung: item.weighting?.toString(),
               Notiz: item.description
             });
           }
@@ -138,9 +136,6 @@ export class DownloadWorkspacesClass {
       }
       if (column === 'variableId') {
         return 'Variable';
-      }
-      if (column === 'weighting') {
-        return 'Wichtung';
       }
       if (column === 'id') {
         return 'Item-Id';

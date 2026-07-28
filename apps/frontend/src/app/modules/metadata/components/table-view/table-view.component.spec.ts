@@ -17,7 +17,6 @@ interface ColumnValues {
   key?: string;
   id?: string;
   variableId?: string | null;
-  weighting?: string;
   description?: string;
   [key: string]: string | null | undefined;
 }

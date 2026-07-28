@@ -8,7 +8,6 @@ describe('Admin Unit Items Management', () => {
       unitId: 10,
       variableId: 'var_1',
       variableReadOnlyId: 'var_ro_1',
-      weighting: 1.5,
       description: 'First item description',
       changedAt: '2023-01-02T10:00:00Z',
       createdAt: '2023-01-01T10:00:00Z'
@@ -19,7 +18,6 @@ describe('Admin Unit Items Management', () => {
       unitId: 11,
       variableId: 'var_2',
       variableReadOnlyId: 'var_ro_2',
-      weighting: 2.0,
       description: 'Second item description',
       changedAt: '2023-02-02T11:00:00Z',
       createdAt: '2023-02-01T11:00:00Z'
@@ -51,7 +49,6 @@ describe('Admin Unit Items Management', () => {
       cy.get('.cdk-column-unitId').should('contain', '10');
       cy.get('.cdk-column-variableId').should('contain', 'var_1');
       cy.get('.cdk-column-variableReadOnlyId').should('contain', 'var_ro_1');
-      cy.get('.cdk-column-weighting').should('contain', '1.5');
       cy.get('.cdk-column-description').should('contain', 'First item description');
     });
 
@@ -61,7 +58,6 @@ describe('Admin Unit Items Management', () => {
       cy.get('.cdk-column-unitId').should('contain', '11');
       cy.get('.cdk-column-variableId').should('contain', 'var_2');
       cy.get('.cdk-column-variableReadOnlyId').should('contain', 'var_ro_2');
-      cy.get('.cdk-column-weighting').should('contain', '2');
       cy.get('.cdk-column-description').should('contain', 'Second item description');
     });
   });

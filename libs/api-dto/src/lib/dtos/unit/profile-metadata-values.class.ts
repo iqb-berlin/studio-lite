@@ -27,7 +27,6 @@ export class ItemsMetadataValues extends ProfileMetadataValues {
   description?: string;
   variableId?: string | null;
   variableReadOnlyId?: string | null;
-  weighting?: number;
   [key: string]: string | number | ProfileValues[] | null | undefined | boolean | Date;
 }
 

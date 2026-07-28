@@ -750,8 +750,8 @@ export class UnitDownloadClass {
 
   // Maps internal item data onto the iqb unit-items@0.2 spec shape:
   // variableId/variableReadOnlyId become sourceVariableId/sourceVariableUuid;
-  // position/locked/unitId/weighting have no spec counterpart and are
-  // dropped. Items without the required id are skipped.
+  // unitId has no spec counterpart and is dropped. Items without the required
+  // id are skipped.
   static transformItems(items?: ItemsMetadataValues[], scope?: ExportReportScope): UnitItemJson[] {
     return (items ?? []).flatMap((item, itemIndex) => {
       if (!item?.id) {
