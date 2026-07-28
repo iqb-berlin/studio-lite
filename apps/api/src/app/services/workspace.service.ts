@@ -463,15 +463,6 @@ export class WorkspaceService {
       });
   }
 
-  static getValidationResult(
-    validationResults: CodingSchemeProblem[],
-    codingVariable: VariableCodingData
-  ): string {
-    return WorkspaceService.getValidationStatus(
-      WorkspaceService.getValidationProblems(validationResults, codingVariable)
-    );
-  }
-
   static getValidationProblems(
     validationResults: CodingSchemeProblem[],
     codingVariable: VariableCodingData

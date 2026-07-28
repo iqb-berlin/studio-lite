@@ -371,18 +371,19 @@ describe('WorkspaceService', () => {
         code: '2'
       }];
 
-      expect(WorkspaceService.getValidationProblems(
+      const validationProblems = WorkspaceService.getValidationProblems(
         validationResults,
         codingVariable
-      )).toEqual([{
+      );
+
+      expect(validationProblems).toEqual([{
         type: 'SOURCE_MISSING', breaking: true, code: '2'
       }, {
         type: 'VACANT', breaking: false
       }]);
-      expect(WorkspaceService.getValidationResult(
-        validationResults,
-        codingVariable
-      )).toBe('Fehler');
+      expect(
+        WorkspaceService.getValidationStatus(validationProblems)
+      ).toBe('Fehler');
     });
 
     it('reports warnings when no problem is breaking', () => {
