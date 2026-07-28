@@ -12,5 +12,10 @@ module.exports = {
    * Example: "nx affected --targets=test --update-snapshot"
    * More info: https://jestjs.io/docs/upgrading-to-jest29#snapshot-format
    */
-  snapshotFormat: { escapeString: true, printBasicPrototype: true }
+  snapshotFormat: { escapeString: true, printBasicPrototype: true },
+  // Jest's 5s default is measured against wall clock, so it fails on a loaded CI
+  // runner for tests that take milliseconds locally (module compilation on the
+  // first require, fake-timer advances over Angular's zone). The higher ceiling
+  // only affects how long a genuinely hanging test takes to report.
+  testTimeout: 30000
 };
