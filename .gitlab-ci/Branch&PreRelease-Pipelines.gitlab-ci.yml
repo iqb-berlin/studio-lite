@@ -503,7 +503,10 @@ test-app:
     - !reference [ .default_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
   script:
-    - npx nx affected --base=HEAD~1 --target=test --parallel=2
+    # One project at a time and a bounded number of jest workers: two projects in
+    # parallel, each defaulting to (cores - 1) workers, oversubscribes the runner
+    # so far that specs which take milliseconds locally hit the jest timeout.
+    - npx nx affected --base=HEAD~1 --target=test --parallel=1 --maxWorkers=2
 
 #test-app-e2e:
 #  stage: test-e2e

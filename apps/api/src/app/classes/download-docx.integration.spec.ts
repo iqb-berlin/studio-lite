@@ -55,7 +55,6 @@ describe('DownloadDocx integration', () => {
   let consoleWarnSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    jest.setTimeout(15000);
     consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
   });
 
