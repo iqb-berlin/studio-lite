@@ -17,3 +17,21 @@ export const mergeTranslations = (
   });
   return merged;
 };
+
+export const selectTranslationsForLanguage = (
+  language: string,
+  translationsByLanguage: Record<string, TranslationMap>,
+  fallbackLanguage = 'de'
+): TranslationMap => {
+  const normalizedLanguage = language.trim().toLowerCase();
+  const baseLanguage = normalizedLanguage.split('-')[0];
+  const candidates = [normalizedLanguage, baseLanguage, fallbackLanguage]
+    .filter((candidate, index, languages) => (
+      candidate && languages.indexOf(candidate) === index
+    ));
+  const selectedLanguage = candidates.find(candidate => (
+    Object.prototype.hasOwnProperty.call(translationsByLanguage, candidate)
+  ));
+
+  return selectedLanguage ? translationsByLanguage[selectedLanguage] : {};
+};

@@ -42,20 +42,28 @@ import { MetadataModule } from './app/modules/metadata/metadata.module';
 import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
 import { BackendService } from './app/services/backend.service';
-import { mergeTranslations } from './app/services/translation-merger';
+import {
+  mergeTranslations,
+  selectTranslationsForLanguage,
+  TranslationMap
+} from './app/services/translation-merger';
 
 // eslint-disable-next-line no-bitwise
 const hash = (str: string) => str.split('').reduce((prev, curr) => Math.imul(31, prev) + curr.charCodeAt(0) | 0, 0);
 
-export function createTranslateLoader(http: HttpClient) {
+const codingComponentsTranslations: Record<string, TranslationMap> = {
+  de: NGX_CODING_COMPONENTS_DE_TRANSLATIONS
+};
+
+export function createTranslateLoader(http: HttpClient): TranslateLoader {
   const studioLoader = new TranslateHttpLoader(http, './assets/i18n/', `.json?v=${Math
     .abs(hash(new Date().toISOString()))}`);
 
   return {
     getTranslation: (language: string) => studioLoader.getTranslation(language)
       .pipe(map(studioTranslations => mergeTranslations(
-        NGX_CODING_COMPONENTS_DE_TRANSLATIONS,
-        studioTranslations as Record<string, unknown>
+        selectTranslationsForLanguage(language, codingComponentsTranslations),
+        studioTranslations as TranslationMap
       )))
   };
 }
