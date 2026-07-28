@@ -309,7 +309,11 @@ export class UnitPreviewComponent
         this.workspaceService.codingScheme.variableCodings
       );
       this.errorDialog.open(ShowCodingResultsComponent, {
-        data: { responses: newResponses, varsWithCodes },
+        data: {
+          responses: newResponses,
+          varsWithCodes,
+          variableCodings: codingScheme.variableCodings
+        },
         height: '80%',
         width: '60%'
       });

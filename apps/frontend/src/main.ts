@@ -33,6 +33,8 @@ import { de } from 'date-fns/locale';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { NGX_CODING_COMPONENTS_DE_TRANSLATIONS } from '@iqb/ngx-coding-components/translations';
+import { map } from 'rxjs';
 import { PaginatorIntlService } from './app/services/paginator-intl.service';
 import { AuthInterceptor } from './app/interceptors/auth.interceptor';
 import { APP_ROUTES } from './app/app.routes';
@@ -40,13 +42,22 @@ import { MetadataModule } from './app/modules/metadata/metadata.module';
 import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
 import { BackendService } from './app/services/backend.service';
+import { mergeTranslations } from './app/services/translation-merger';
 
 // eslint-disable-next-line no-bitwise
 const hash = (str: string) => str.split('').reduce((prev, curr) => Math.imul(31, prev) + curr.charCodeAt(0) | 0, 0);
 
 export function createTranslateLoader(http: HttpClient) {
-  return new TranslateHttpLoader(http, './assets/i18n/', `.json?v=${Math
+  const studioLoader = new TranslateHttpLoader(http, './assets/i18n/', `.json?v=${Math
     .abs(hash(new Date().toISOString()))}`);
+
+  return {
+    getTranslation: (language: string) => studioLoader.getTranslation(language)
+      .pipe(map(studioTranslations => mergeTranslations(
+        NGX_CODING_COMPONENTS_DE_TRANSLATIONS,
+        studioTranslations as Record<string, unknown>
+      )))
+  };
 }
 if (environment.production) {
   enableProdMode();

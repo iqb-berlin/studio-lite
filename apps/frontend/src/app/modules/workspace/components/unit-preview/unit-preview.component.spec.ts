@@ -7,9 +7,14 @@ import { provideHttpClient } from '@angular/common/http';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { Router, UrlCreationOptions, UrlTree } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { Overlay } from '@angular/cdk/overlay';
+import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
+import { CodingSchemeFactory } from '@iqb/responses';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { Response } from '@iqbspecs/response/response.interface';
 import { environment } from '../../../../../environments/environment';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -163,6 +168,53 @@ describe('UnitPreviewComponent', () => {
     await component.checkCodingChanged();
 
     expect(backendServiceStub.getUnitScheme).toHaveBeenCalledWith(7, 5);
+  });
+
+  it('passes the coding variables to the coding results dialog', async () => {
+    const variableCodings = [
+      {
+        id: 'internal-id',
+        alias: 'visible-id',
+        sourceType: 'BASE',
+        fragmenting: String.raw`^([A-Z]+)-(\d+)$`,
+        codes: [{ id: 1 }]
+      } as unknown as VariableCodingData
+    ];
+    const codedResponses = [
+      {
+        id: 'visible-id',
+        value: 'ABC-007',
+        status: 'CODING_COMPLETE'
+      } as Response
+    ];
+    (backendServiceStub.getUnitScheme as jest.Mock).mockReturnValue(of({
+      scheme: JSON.stringify({ variableCodings })
+    }));
+    const codeSpy = jest.spyOn(CodingSchemeFactory, 'code')
+      .mockReturnValue(codedResponses);
+
+    await component.checkCodingChanged();
+
+    const usedVariableCodings = codeSpy.mock.calls[0][1];
+    const [dialogComponent, dialogConfig] =
+      (dialogStub.open as jest.Mock).mock.calls[0];
+
+    expect(usedVariableCodings).toEqual(variableCodings);
+    expect(dialogComponent).toBe(ShowCodingResultsComponent);
+    expect(dialogConfig.data.responses).toBe(codedResponses);
+    expect(dialogConfig.data.varsWithCodes).toEqual(['visible-id']);
+    expect(dialogConfig.data.variableCodings).toBe(usedVariableCodings);
+    expect(dialogConfig.height).toBe('80%');
+    expect(dialogConfig.width).toBe('60%');
+
+    const resultsComponent = new ShowCodingResultsComponent(dialogConfig.data);
+    resultsComponent.ngOnInit();
+    resultsComponent.toggleChange({
+      source: { name: 'transformedValueView' }
+    } as unknown as MatSlideToggleChange);
+
+    expect(resultsComponent.dataSource.data[0]['transformed'])
+      .toBe('["ABC","007"]');
   });
 
   describe('handleWidgetCall', () => {
