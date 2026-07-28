@@ -1,6 +1,6 @@
 import { CodingReportDto } from '@studio-lite-lib/api-dto';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { of, Observable } from 'rxjs';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
@@ -24,6 +24,7 @@ describe('CodingReportComponent', () => {
       variableType: 'Basisvariable',
       item: 'I1',
       validation: 'ok',
+      validationProblems: [],
       codingType: 'keine Regeln',
       trainingEffort: 'normal'
     } as CodingReportDto,
@@ -33,6 +34,9 @@ describe('CodingReportComponent', () => {
       variableType: 'abgeleitete Variable',
       item: 'I2',
       validation: 'ok',
+      validationProblems: [{
+        type: 'INVALID_SOURCE', breaking: true
+      }],
       codingType: 'REGEL',
       trainingEffort: 'erhöht'
     } as CodingReportDto
@@ -61,6 +65,16 @@ describe('CodingReportComponent', () => {
       ]
     }).compileComponents();
 
+    const translateService = TestBed.inject(TranslateService);
+    translateService.setTranslation('de', {
+      'coding-report': {
+        'validation-problems': {
+          INVALID_SOURCE: 'Ungültige Quelle'
+        }
+      }
+    });
+    translateService.use('de');
+
     fixture = TestBed.createComponent(CodingReportComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -72,19 +86,21 @@ describe('CodingReportComponent', () => {
 
   it('loads coding report and filters coded variables by default', () => {
     expect(backendService.getCodingReport).toHaveBeenCalledWith(10);
-    expect(component.unitDataRows).toEqual(rows);
-    expect(component.dataSource.data).toEqual([rows[1]]);
+    expect(component.unitDataRows[0].validationDetails).toBe('');
+    expect(component.unitDataRows[1].validationDetails)
+      .toBe('Ungültige Quelle (INVALID_SOURCE)');
+    expect(component.dataSource.data).toEqual([component.unitDataRows[1]]);
   });
 
   it('toggleChange includes all rows', () => {
     component.toggleChange();
 
     expect(component.codedVariablesOnly).toBe(false);
-    expect(component.dataSource.data).toEqual(rows);
+    expect(component.dataSource.data).toEqual(component.unitDataRows);
   });
 
   it('applyFilter updates the table filter', () => {
-    component.dataSource = new MatTableDataSource(rows);
+    component.dataSource = new MatTableDataSource(component.unitDataRows);
 
     const input = document.createElement('input');
     input.value = 'v2';
@@ -132,9 +148,12 @@ describe('CodingReportComponent', () => {
     expect(clickMock).toHaveBeenCalled();
     expect(revokeObjectURLMock).toHaveBeenCalledWith('blob:test-url');
     expect(String(blobParts[0][0])).toContain(
-      'Aufgabe;Variable;Variablentyp;Item;Validierung;Kodiertyp;Schulungsaufwand'
+      'Aufgabe;Variable;Variablentyp;Item;Validierung;Validierungsdetails;Kodiertyp;Schulungsaufwand'
     );
     expect(String(blobParts[0][0])).toContain('"abgeleitete Variable"');
+    expect(String(blobParts[0][0])).toContain(
+      '"Ungültige Quelle (INVALID_SOURCE)"'
+    );
 
     Object.defineProperty(globalThis, 'Blob', {
       value: OriginalBlob,

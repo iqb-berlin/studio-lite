@@ -6,6 +6,7 @@ import {
   CreateWorkspaceDto, UserWorkspaceAccessDto, WorkspaceSettingsDto, RenameGroupNameDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodingSchemeProblem } from '@iqb/responses';
 import { WorkspaceService } from './workspace.service';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -297,6 +298,98 @@ describe('WorkspaceService', () => {
       (unitService.findAllWithProperties as jest.Mock).mockResolvedValue([]);
       const result = await service.getCodingReport(1);
       expect(result).toEqual([]);
+    });
+
+    it('keeps activated no-value variables and alias chains free of breaking errors', async () => {
+      (unitService.findAllWithProperties as jest.Mock).mockResolvedValue([{
+        id: 10,
+        key: 'DLB007',
+        name: '',
+        schemer: 'schemer@2.8.1',
+        variables: [
+          { id: 'marking-panel_1', type: 'no-value' },
+          { id: 'id04', type: 'string' },
+          { id: '02', type: 'string' }
+        ],
+        metadata: { items: [] },
+        scheme: JSON.stringify({
+          version: '2.5',
+          variableCodings: [{
+            id: 'marking-panel_1',
+            alias: '_08_reached',
+            sourceType: 'BASE',
+            sourceParameters: {
+              processing: ['TAKE_DISPLAYED_AS_VALUE_CHANGED']
+            },
+            codes: [{
+              id: 0,
+              type: 'INTENDED_INCOMPLETE',
+              score: 0,
+              label: '',
+              manualInstruction: '',
+              ruleSetOperatorAnd: false,
+              ruleSets: []
+            }]
+          }, {
+            id: 'id04', alias: '02', sourceType: 'BASE', codes: []
+          }, {
+            id: '02', alias: '05', sourceType: 'BASE', codes: []
+          }]
+        })
+      }]);
+
+      const result = await service.getCodingReport(1);
+
+      expect(result.find(row => row.variable === '_08_reached')?.validation)
+        .toBe('OK');
+      expect(result.every(row => row.validation !== 'Fehler')).toBe(true);
+    });
+  });
+
+  describe('coding report validation aggregation', () => {
+    const codingVariable = {
+      id: 'technical-id', alias: 'public-id'
+    } as VariableCodingData;
+
+    it('deduplicates and sorts all problems with breaking problems first', () => {
+      const validationResults: CodingSchemeProblem[] = [{
+        type: 'VACANT',
+        breaking: false,
+        variableId: 'public-id',
+        variableLabel: ''
+      }, {
+        type: 'SOURCE_MISSING',
+        breaking: true,
+        variableId: 'public-id',
+        variableLabel: '',
+        code: '2'
+      }, {
+        type: 'SOURCE_MISSING',
+        breaking: true,
+        variableId: 'public-id',
+        variableLabel: '',
+        code: '2'
+      }];
+
+      expect(WorkspaceService.getValidationProblems(
+        validationResults,
+        codingVariable
+      )).toEqual([{
+        type: 'SOURCE_MISSING', breaking: true, code: '2'
+      }, {
+        type: 'VACANT', breaking: false
+      }]);
+      expect(WorkspaceService.getValidationResult(
+        validationResults,
+        codingVariable
+      )).toBe('Fehler');
+    });
+
+    it('reports warnings when no problem is breaking', () => {
+      expect(WorkspaceService.getValidationStatus([{
+        type: 'VACANT', breaking: false
+      }])).toBe('Warnung');
+      expect(WorkspaceService.getValidationStatus([])).toBe('OK');
     });
   });
 

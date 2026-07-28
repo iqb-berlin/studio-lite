@@ -12,6 +12,7 @@ import {
   UserWorkspaceAccessDto,
   UserWorkspaceFullDto,
   CodingReportDto,
+  CodingReportValidationProblemDto,
   WorkspaceInListDto,
   GroupNameDto,
   RenameGroupNameDto,
@@ -433,9 +434,12 @@ export class WorkspaceService {
     parsedUnitScheme.variableCodings
       ?.filter(vc => vc.sourceType !== 'BASE_NO_VALUE')
       .forEach((codingVariable: VariableCodingData) => {
-        const validationResultText = WorkspaceService.getValidationResult(
+        const validationProblems = WorkspaceService.getValidationProblems(
           validationResults,
           codingVariable
+        );
+        const validationResultText = WorkspaceService.getValidationStatus(
+          validationProblems
         );
         const codingType = WorkspaceService.determineCodingType(codingVariable);
         const trainingEffort = WorkspaceService.determineTrainingEffort(
@@ -452,6 +456,7 @@ export class WorkspaceService {
           variableType: WorkspaceService.determineVariableType(codingVariable),
           item: foundItem?.id || '–',
           validation: validationResultText,
+          validationProblems,
           codingType: codingType,
           trainingEffort: trainingEffort
         });
@@ -462,14 +467,43 @@ export class WorkspaceService {
     validationResults: CodingSchemeProblem[],
     codingVariable: VariableCodingData
   ): string {
-    const codingVariableId = codingVariable.alias || codingVariable.id;
-    const validationResult = validationResults.find(
-      v => v.variableId === codingVariableId
+    return WorkspaceService.getValidationStatus(
+      WorkspaceService.getValidationProblems(validationResults, codingVariable)
     );
+  }
 
-    if (validationResult) {
-      return validationResult.breaking ? 'Fehler' : 'Warnung';
-    }
+  static getValidationProblems(
+    validationResults: CodingSchemeProblem[],
+    codingVariable: VariableCodingData
+  ): CodingReportValidationProblemDto[] {
+    const codingVariableId = codingVariable.alias || codingVariable.id;
+    const seenProblems = new Set<string>();
+
+    return validationResults
+      .filter(problem => problem.variableId === codingVariableId)
+      .map(problem => ({
+        type: problem.type,
+        breaking: problem.breaking,
+        ...(problem.code ? { code: problem.code } : {})
+      }))
+      .filter(problem => {
+        const key = `${problem.type}|${problem.breaking}|${problem.code || ''}`;
+        if (seenProblems.has(key)) return false;
+        seenProblems.add(key);
+        return true;
+      })
+      .sort((problemA, problemB) => (
+        Number(problemB.breaking) - Number(problemA.breaking) ||
+        problemA.type.localeCompare(problemB.type) ||
+        (problemA.code || '').localeCompare(problemB.code || '')
+      ));
+  }
+
+  static getValidationStatus(
+    validationProblems: CodingReportValidationProblemDto[]
+  ): string {
+    if (validationProblems.some(problem => problem.breaking)) return 'Fehler';
+    if (validationProblems.length > 0) return 'Warnung';
     return 'OK';
   }
 
@@ -539,6 +573,7 @@ export class WorkspaceService {
       variableType: '',
       item: '',
       validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
+      validationProblems: [],
       codingType: '',
       trainingEffort: ''
     });
