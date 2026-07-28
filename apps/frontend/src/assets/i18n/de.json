@@ -823,6 +823,8 @@
     "validationDetails": "Validierung",
     "codingType": "Kodiertyp",
     "trainingEffort": "Schulungsaufwand",
+    "csv-validation-details": "Validierungsdetails",
+    "code-reference": "Code: {{code}}",
     "problem-count-one": "1 Problem",
     "problem-count-many": "{{count}} Probleme",
     "no-problems": "Keine Probleme",

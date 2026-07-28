@@ -96,6 +96,16 @@ describe('CodingReportComponent', () => {
     const translateService = TestBed.inject(TranslateService);
     translateService.setTranslation('de', {
       'coding-report': {
+        unit: 'Aufgabe',
+        variable: 'Variable',
+        variableType: 'Variablentyp',
+        item: 'Item',
+        validation: 'Validierung',
+        validationDetails: 'Validierung',
+        codingType: 'Kodiertyp',
+        trainingEffort: 'Schulungsaufwand',
+        'csv-validation-details': 'Validierungsdetails',
+        'code-reference': 'Code: {{code}}',
         'validation-problems': {
           INVALID_SOURCE: 'Ungültige Quelle',
           RULE_PARAMETER_INVALID: 'Ungültiger Regelparameter',

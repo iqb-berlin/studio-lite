@@ -203,7 +203,7 @@ export class CodingReportComponent implements OnInit {
   downloadCodingReport(): void {
     const rows = this.dataSource?.filteredData || [];
     const headers = CodingReportComponent.csvColumns
-      .map(column => CodingReportComponent.getCsvHeader(column))
+      .map(column => this.getCsvHeader(column))
       .join(';');
     const csvRows = rows.map(row => CodingReportComponent.csvColumns
       .map(column => CodingReportComponent.escapeCsvValue(CodingReportComponent.stripHtml(String(
@@ -243,23 +243,19 @@ export class CodingReportComponent implements OnInit {
         const label = this.translateService.instant(
           `coding-report.validation-problems.${problem.type}`
         );
-        const codeReference = problem.code ? ` [Code: ${problem.code}]` : '';
+        const codeReference = problem.code ? ` [${this.translateService.instant(
+          'coding-report.code-reference',
+          { code: problem.code }
+        )}]` : '';
         return `${label} (${problem.type})${codeReference}`;
       })
       .join(' | ');
   }
 
-  private static getCsvHeader(column: CodingReportColumn): string {
-    const headers: Record<CodingReportColumn, string> = {
-      unit: 'Aufgabe',
-      variable: 'Variable',
-      variableType: 'Variablentyp',
-      item: 'Item',
-      validation: 'Validierung',
-      validationDetails: 'Validierungsdetails',
-      codingType: 'Kodiertyp',
-      trainingEffort: 'Schulungsaufwand'
-    };
-    return headers[column];
+  private getCsvHeader(column: CodingReportColumn): string {
+    const translationKey = column === 'validationDetails' ?
+      'coding-report.csv-validation-details' :
+      `coding-report.${column}`;
+    return this.translateService.instant(translationKey);
   }
 }

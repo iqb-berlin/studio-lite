@@ -87,7 +87,9 @@
                         {{ 'coding-report.validation-problems.' + problem.type | translate }}
                       </span>
                       @if (problem.code) {
-                        <span class="validation-problem__code">Code: {{ problem.code }}</span>
+                        <span class="validation-problem__code">
+                          {{ 'coding-report.code-reference' | translate:{ code: problem.code } }}
+                        </span>
                       }
                       <span
                         class="validation-problem__technical-type"
