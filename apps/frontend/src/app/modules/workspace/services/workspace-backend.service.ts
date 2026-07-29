@@ -408,12 +408,9 @@ export class WorkspaceBackendService {
       );
   }
 
-  getCodingReport(workspaceId: number): Observable<CodingReportDto[] | []> {
+  getCodingReport(workspaceId: number): Observable<CodingReportDto[]> {
     return this.http
-      .get<CodingReportDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/scheme`)
-      .pipe(
-        catchError(() => of([]))
-      );
+      .get<CodingReportDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/scheme`);
   }
 
   getUnitItems(workspaceId: number, unitId: number): Observable <UnitItemDto[]> {

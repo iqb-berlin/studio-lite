@@ -1,7 +1,7 @@
 import { CodingReportDto } from '@studio-lite-lib/api-dto';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { of, Observable } from 'rxjs';
+import { of, Observable, throwError } from 'rxjs';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
@@ -96,6 +96,16 @@ describe('CodingReportComponent', () => {
     const translateService = TestBed.inject(TranslateService);
     translateService.setTranslation('de', {
       'coding-report': {
+        unit: 'Aufgabe',
+        variable: 'Variable',
+        variableType: 'Variablentyp',
+        item: 'Item',
+        validation: 'Validierung',
+        validationDetails: 'Validierung',
+        codingType: 'Kodiertyp',
+        trainingEffort: 'Schulungsaufwand',
+        'csv-validation-details': 'Validierungsdetails',
+        'code-reference': 'Code: {{code}}',
         'validation-problems': {
           INVALID_SOURCE: 'Ungültige Quelle',
           RULE_PARAMETER_INVALID: 'Ungültiger Regelparameter',
@@ -104,6 +114,10 @@ describe('CodingReportComponent', () => {
         'problem-count-one': '1 Problem',
         'problem-count-many': '{{count}} Probleme',
         'no-problems': 'Keine Probleme',
+        empty: 'Keine Einträge im Kodierbericht vorhanden.',
+        'no-matches': 'Keine Einträge entsprechen den aktuellen Anzeigeeinstellungen.',
+        'load-error': 'Der Kodierbericht konnte nicht geladen werden.',
+        retry: 'Erneut laden',
         severity: {
           error: 'Fehler',
           warning: 'Warnung'
@@ -217,6 +231,86 @@ describe('CodingReportComponent', () => {
       '.validation-summary--ok'
     ) as HTMLElement;
     expect(okState.textContent).toContain('Keine Probleme');
+  });
+
+  it('shows an explicit empty state for an empty report', () => {
+    backendService.getCodingReport.mockReturnValueOnce(of([]));
+
+    component.loadCodingReport();
+    fixture.detectChanges();
+
+    const emptyState = fixture.nativeElement.querySelector(
+      '[data-cy="coding-report-empty"]'
+    ) as HTMLElement;
+    expect(emptyState.textContent).toContain(
+      'Keine Einträge im Kodierbericht vorhanden.'
+    );
+    expect(component.loadError).toBe(false);
+  });
+
+  it('shows a distinct state when the text filter has no matches', () => {
+    const input = document.createElement('input');
+    input.value = 'does-not-exist';
+
+    component.applyFilter({ target: input } as unknown as Event);
+    fixture.detectChanges();
+
+    const emptyState = fixture.nativeElement.querySelector(
+      '[data-cy="coding-report-empty"]'
+    ) as HTMLElement;
+    expect(emptyState.textContent).toContain(
+      'Keine Einträge entsprechen den aktuellen Anzeigeeinstellungen.'
+    );
+    expect(emptyState.textContent).not.toContain(
+      'Keine Einträge im Kodierbericht vorhanden.'
+    );
+  });
+
+  it('shows the filtered state when only uncoded variables exist', () => {
+    backendService.getCodingReport.mockReturnValueOnce(of([rows[0]]));
+
+    component.loadCodingReport();
+    fixture.detectChanges();
+
+    const emptyState = fixture.nativeElement.querySelector(
+      '[data-cy="coding-report-empty"]'
+    ) as HTMLElement;
+    expect(component.unitDataRows).toHaveLength(1);
+    expect(component.dataSource.data).toHaveLength(0);
+    expect(emptyState.textContent).toContain(
+      'Keine Einträge entsprechen den aktuellen Anzeigeeinstellungen.'
+    );
+  });
+
+  it('shows a load error and retries successfully', () => {
+    backendService.getCodingReport.mockReturnValueOnce(
+      throwError(() => new Error('Request failed'))
+    );
+
+    component.loadCodingReport();
+    fixture.detectChanges();
+
+    const errorState = fixture.nativeElement.querySelector(
+      '[data-cy="coding-report-error"]'
+    ) as HTMLElement;
+    expect(errorState.textContent).toContain(
+      'Der Kodierbericht konnte nicht geladen werden.'
+    );
+    expect(component.loadError).toBe(true);
+    expect(component.isLoading).toBe(false);
+
+    backendService.getCodingReport.mockReturnValueOnce(of(rows));
+    const retryButton = fixture.nativeElement.querySelector(
+      '[data-cy="coding-report-retry"]'
+    ) as HTMLButtonElement;
+    retryButton.click();
+    fixture.detectChanges();
+
+    expect(component.loadError).toBe(false);
+    expect(fixture.nativeElement.querySelector(
+      '[data-cy="coding-report-error"]'
+    )).toBeNull();
+    expect(component.dataSource.data).toHaveLength(3);
   });
 
   it('shows unstructured validation errors instead of marking them as valid', () => {

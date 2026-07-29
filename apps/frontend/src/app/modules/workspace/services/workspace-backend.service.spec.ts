@@ -728,13 +728,13 @@ describe('WorkspaceBackendService', () => {
       await resultPromise;
     });
 
-    it('should return empty array on error', async () => {
-      const resultPromise = expectObservableValue(service.getCodingReport(1), []);
+    it('should propagate errors', async () => {
+      const resultPromise = firstValueFrom(service.getCodingReport(1));
 
       const req = httpMock.expectOne(`${serverUrl}workspaces/1/units/scheme`);
       req.error(new ProgressEvent('error'));
 
-      await resultPromise;
+      await expect(resultPromise).rejects.toBeTruthy();
     });
   });
 

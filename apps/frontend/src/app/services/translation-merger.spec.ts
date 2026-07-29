@@ -1,5 +1,7 @@
-import { NGX_CODING_COMPONENTS_DE_TRANSLATIONS } from '@iqb/ngx-coding-components/translations';
-import { mergeTranslations, TranslationMap } from './translation-merger';
+import {
+  mergeTranslations,
+  selectTranslationsForLanguage
+} from './translation-merger';
 
 describe('mergeTranslations', () => {
   it('keeps component-only and Studio-only translations', () => {
@@ -44,23 +46,30 @@ describe('mergeTranslations', () => {
       list: ['studio']
     });
   });
+});
 
-  it('merges the published Coding Components translations with Studio overrides', () => {
-    const merged = mergeTranslations(
-      NGX_CODING_COMPONENTS_DE_TRANSLATIONS,
-      {
-        coding: {
-          'raw-responses': 'Rohdaten anzeigen',
-          'studio-only': 'Studio'
-        }
-      }
-    );
-    const coding = (merged as {
-      coding: TranslationMap & { transformed: unknown };
-    }).coding;
+describe('selectTranslationsForLanguage', () => {
+  const translations = {
+    de: { label: 'Deutsch' },
+    en: { label: 'English' }
+  };
 
-    expect(coding.transformed).toBe('Transformiert');
-    expect(coding['studio-only']).toBe('Studio');
-    expect(coding['raw-responses']).toBe('Rohdaten anzeigen');
+  it('selects the requested language and normalizes regional language tags', () => {
+    expect(selectTranslationsForLanguage('en', translations)).toEqual({
+      label: 'English'
+    });
+    expect(selectTranslationsForLanguage('de-DE', translations)).toEqual({
+      label: 'Deutsch'
+    });
+  });
+
+  it('uses the explicit fallback when the requested language is unavailable', () => {
+    expect(selectTranslationsForLanguage('fr', translations, 'en')).toEqual({
+      label: 'English'
+    });
+  });
+
+  it('returns an empty map if neither requested nor fallback language exists', () => {
+    expect(selectTranslationsForLanguage('fr', {}, 'de')).toEqual({});
   });
 });
