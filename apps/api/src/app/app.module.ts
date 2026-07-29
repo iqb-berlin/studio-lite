@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { JWT_EXPIRES_IN } from './app.constants';
 import { AppController } from './controllers/app.controller';
@@ -22,6 +23,7 @@ import { WorkspaceUnitController } from './controllers/workspace-unit.controller
 import { WorkspaceController } from './controllers/workspace.controller';
 import { WorkspaceReviewController } from './controllers/workspace-review.controller';
 import { AuthService } from './services/auth.service';
+import { SessionCleanupService } from './services/session-cleanup.service';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import User from './entities/user.entity';
@@ -112,6 +114,7 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
       inject: [ConfigService]
     }),
     HttpModule,
+    ScheduleModule.forRoot(),
     User,
     KeycloakUser,
     Workspace,
@@ -258,6 +261,7 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
 
     AppVersionProvider,
     AuthService,
+    SessionCleanupService,
     LocalStrategy,
     JwtStrategy,
     ResourcePackageService,

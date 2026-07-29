@@ -6,6 +6,7 @@ import {
   MissingsProfilesDto
 } from '@studio-lite-lib/api-dto';
 import { ToTextFactory, CodeAsText } from '@iqb/responses';
+import { isCurrentFromOrder } from '@studio-lite/shared-code';
 import {
   VariableCodingData,
   CodeData
@@ -59,7 +60,7 @@ export class DownloadWorkspacesClass {
       if (unit.metadata.items) {
         unit.metadata.items.forEach((item, i: number) => {
           const activeProfile = item.profiles?.find(
-            profile => profile.isCurrent
+            profile => isCurrentFromOrder(profile.order)
           );
           if (activeProfile) {
             const values: Record<string, string> = {};
@@ -77,7 +78,6 @@ export class DownloadWorkspacesClass {
               if (i === 0) values.Aufgabe = unit.key || '–';
               values['Item-Id'] = item.id || '–';
               values.Variable = item.variableId || '';
-              values.Wichtung = item.weighting || '';
               values.Notiz = item.description || '';
               values.Aufgabe = unit.key || '–';
             });
@@ -87,7 +87,6 @@ export class DownloadWorkspacesClass {
               Aufgabe: unit.key || '-',
               'Item-Id': item.id || '–',
               Variable: item.variableId,
-              Wichtung: item.weighting?.toString(),
               Notiz: item.description
             });
           }
@@ -102,7 +101,7 @@ export class DownloadWorkspacesClass {
     const totalValues: Record<string, string>[] = [];
     units.forEach(unit => {
       const activeProfile = unit.metadata.profiles?.find(
-        profile => profile.isCurrent
+        profile => isCurrentFromOrder(profile.order)
       );
       if (activeProfile) {
         const values: Record<string, string> = {};
@@ -137,9 +136,6 @@ export class DownloadWorkspacesClass {
       }
       if (column === 'variableId') {
         return 'Variable';
-      }
-      if (column === 'weighting') {
-        return 'Wichtung';
       }
       if (column === 'id') {
         return 'Item-Id';

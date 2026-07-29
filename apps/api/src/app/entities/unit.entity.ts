@@ -113,6 +113,12 @@ class Unit {
     nullable: true
   })
     lastChangedMetadataUser: string;
+
+  @Column({
+    nullable: true,
+    unique: true
+  })
+    uuid: string;
 }
 
 export default Unit;

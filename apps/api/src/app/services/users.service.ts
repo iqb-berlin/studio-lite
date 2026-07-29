@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import {
   UserActivityStatus,
+  SessionActivityStatus,
   CreateUserDto,
   MyDataDto,
   UserFullDto,
@@ -436,26 +437,12 @@ export class UsersService {
   }
 
   async updateLastActivity(userId: number, sessionId?: string): Promise<void> {
+    // Defensive: without a concrete sessionId we must never touch every session of
+    // the user (that would let a single request affect all of a user's browsers).
+    if (!sessionId) return;
     const now = new Date();
     const expiresAt = new Date(Date.now() + INACTIVITY_THRESHOLD_MS);
-    const criteria = sessionId ? { userId, sessionId } : { userId };
-    await this.userSessionRepository.update(criteria, { lastActivity: now, expiresAt });
-  }
-
-  async updateSessionExpiry(userId: number, sessionId?: string): Promise<void> {
-    const criteria = sessionId ? { userId, sessionId } : { userId };
-    const sessions = await this.userSessionRepository.find({
-      where: criteria,
-      select: { id: true, lastActivity: true, expiresAt: true }
-    });
-
-    await Promise.all(sessions.map(session => {
-      const expiresAt = new Date(new Date(session.lastActivity).getTime() + INACTIVITY_THRESHOLD_MS);
-      if (new Date(session.expiresAt).getTime() === expiresAt.getTime()) {
-        return Promise.resolve();
-      }
-      return this.userSessionRepository.update({ id: session.id }, { expiresAt });
-    }));
+    await this.userSessionRepository.update({ userId, sessionId }, { lastActivity: now, expiresAt });
   }
 
   private async getSessionStatusByUser(): Promise<Map<number, {
@@ -513,7 +500,7 @@ export class UsersService {
     return sessionsByUser;
   }
 
-  private static calculateSessionStatus(lastActivity: Date, nowMs: number): UserActivityStatus {
+  private static calculateSessionStatus(lastActivity: Date, nowMs: number): SessionActivityStatus {
     const ageMs = nowMs - new Date(lastActivity).getTime();
     if (ageMs <= ACTIVE_SESSION_THRESHOLD_MS) return 'active';
     if (ageMs <= INACTIVITY_THRESHOLD_MS) return 'passive';

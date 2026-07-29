@@ -1,5 +1,6 @@
 import { UnsupportedMediaTypeException } from '@nestjs/common';
 import { fileMimetypeFilter } from './file-mimetype.filter';
+import { ZIP_MIME_TYPES } from '../constants/zip-mime-types';
 
 describe('fileMimetypeFilter', () => {
   const makeFile = (mimetype: string): Express.Multer.File => ({
@@ -30,6 +31,36 @@ describe('fileMimetypeFilter', () => {
     filter({}, makeFile('image/jpeg'), callback);
 
     expect(callback).toHaveBeenCalledWith(null, true);
+  });
+
+  it('accepts a zip uploaded from Windows', () => {
+    const filter = fileMimetypeFilter(...ZIP_MIME_TYPES);
+    const callback = jest.fn<void, [Error | null, boolean]>();
+
+    filter({}, makeFile('application/x-zip-compressed'), callback);
+
+    expect(callback).toHaveBeenCalledWith(null, true);
+  });
+
+  it('accepts a zip uploaded from Linux or macOS', () => {
+    const filter = fileMimetypeFilter(...ZIP_MIME_TYPES);
+    const callback = jest.fn<void, [Error | null, boolean]>();
+
+    filter({}, makeFile('application/zip'), callback);
+
+    expect(callback).toHaveBeenCalledWith(null, true);
+  });
+
+  it('rejects a non-zip upload when zip mimetypes are required', () => {
+    const filter = fileMimetypeFilter(...ZIP_MIME_TYPES);
+    const callback = jest.fn<void, [Error | null, boolean]>();
+
+    filter({}, makeFile('application/pdf'), callback);
+
+    expect(callback).toHaveBeenCalledWith(
+      expect.any(UnsupportedMediaTypeException),
+      false
+    );
   });
 
   it('rejects when mimetype does not match', () => {

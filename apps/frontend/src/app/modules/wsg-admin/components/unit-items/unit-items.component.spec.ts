@@ -109,7 +109,6 @@ describe('UnitItemsComponent', () => {
         order: 1,
         locked: false,
         position: '1',
-        weighting: 1,
         description: 'desc'
       }
     ];

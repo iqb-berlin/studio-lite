@@ -18,20 +18,19 @@
     [editor] = "unitProperties && (printOptions | include : 'printProperties') ?
     unitProperties.editor : ''"
     [schemer] = "unitProperties && (printOptions | include : 'printProperties') ?
-    unitProperties.schemer : ''"
-    [lastChangedDefinition] = "unitProperties && (printOptions | include : 'printProperties' ) ?
-    unitProperties.lastChangedDefinition : null"
-    [lastChangedMetadata] = "unitProperties && (printOptions | include : 'printProperties') ?
-    unitProperties.lastChangedMetadata : null"
-    [lastChangedScheme] = "unitProperties && (printOptions | include : 'printProperties') ?
-    unitProperties.lastChangedScheme : null"
-    [lastChangedDefinitionUser] = "unitProperties && (printOptions | include : 'printProperties' ) ?
-    unitProperties.lastChangedDefinitionUser : ''"
-    [lastChangedMetadataUser] = "unitProperties && (printOptions | include : 'printProperties') ?
-    unitProperties.lastChangedMetadataUser : ''"
-    [lastChangedSchemeUser] = "unitProperties && (printOptions | include : 'printProperties') ?
-    unitProperties.lastChangedSchemeUser : ''">
+    unitProperties.schemer : ''">
   </studio-lite-unit-properties>
+
+  @if (unitProperties && (printOptions | include : 'printProperties')) {
+    <studio-lite-unit-last-changes
+      [lastChangedDefinition]="unitProperties.lastChangedDefinition"
+      [lastChangedMetadata]="unitProperties.lastChangedMetadata"
+      [lastChangedScheme]="unitProperties.lastChangedScheme"
+      [lastChangedDefinitionUser]="unitProperties.lastChangedDefinitionUser"
+      [lastChangedMetadataUser]="unitProperties.lastChangedMetadataUser"
+      [lastChangedSchemeUser]="unitProperties.lastChangedSchemeUser">
+    </studio-lite-unit-last-changes>
+  }
 
   @if ((printOptions | include : 'printMetadata')) {
     <studio-lite-print-metadata

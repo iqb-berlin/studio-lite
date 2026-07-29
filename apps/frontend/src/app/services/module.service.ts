@@ -20,9 +20,9 @@ export class ModuleService {
 
   async loadList() {
     const [editorModules, playerModules, schemerModules] = await Promise.all([
-      lastValueFrom(this.backendService.getModuleList('editor')),
-      lastValueFrom(this.backendService.getModuleList('player')),
-      lastValueFrom(this.backendService.getModuleList('schemer'))
+      lastValueFrom(this.backendService.getModuleList('EDITOR')),
+      lastValueFrom(this.backendService.getModuleList('PLAYER')),
+      lastValueFrom(this.backendService.getModuleList('SCHEMER'))
     ]);
 
     this.editors = ModuleService.toModuleMap(editorModules);

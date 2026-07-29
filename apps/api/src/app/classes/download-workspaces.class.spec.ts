@@ -37,11 +37,10 @@ describe('DownloadWorkspacesClass', () => {
               {
                 id: 'ITEM1',
                 variableId: 'VAR1',
-                weighting: 1,
                 description: 'Desc1',
                 profiles: [
                   {
-                    isCurrent: true,
+                    order: 0,
                     entries: [
                       {
                         label: [{ value: 'EntryLabel' }],
@@ -64,7 +63,6 @@ describe('DownloadWorkspacesClass', () => {
         Aufgabe: 'UNIT1',
         'Item-Id': 'ITEM1',
         Variable: 'VAR1',
-        Wichtung: 1,
         Notiz: 'Desc1'
       });
     });
@@ -79,7 +77,7 @@ describe('DownloadWorkspacesClass', () => {
                 id: 'ITEM1',
                 profiles: [
                   {
-                    isCurrent: true,
+                    order: 0,
                     entries: [
                       {
                         label: [{ value: 'MultiEntry' }],
@@ -108,7 +106,7 @@ describe('DownloadWorkspacesClass', () => {
           metadata: {
             profiles: [
               {
-                isCurrent: true,
+                order: 0,
                 entries: [
                   {
                     label: [{ value: 'UnitLabel' }],

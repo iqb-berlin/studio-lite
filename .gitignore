@@ -9,6 +9,7 @@
 # Caches
 .angular
 .nx
+/.npm
 /.sass-cache
 
 # secret files
@@ -62,6 +63,7 @@ config/frontend/default.conf.template.bkp
 # Frontend-e2e files
 apps/frontend-e2e/cypress/downloads
 apps/frontend-e2e/cypress/coverage
+apps/frontend-e2e/coverage
 apps/frontend-e2e/.nyc_output
 
 # misc

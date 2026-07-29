@@ -13,6 +13,7 @@ import {
   ApiBearerAuth, ApiCreatedResponse, ApiNotAcceptableResponse, ApiOkResponse, ApiQuery, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import { VeronaModuleInListDto, VeronaModuleType } from '@studio-lite-lib/api-dto';
+import { VERONA_MODULE_TYPES, isKnownVeronaModuleType } from '@studio-lite/shared-code';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -37,23 +38,23 @@ export class AdminVeronaModuleController {
   @ApiQuery({
     name: 'type',
     type: String,
-    description: 'required, array of module types: editor, player, schemer, widget',
+    // Both the current upper-case spelling and the legacy lower-case spelling are accepted.
+    description: 'required, array of module types: EDITOR, PLAYER, SCHEMER, WIDGET',
     required: true,
     isArray: true,
-    enum: ['editor', 'player', 'schemer', 'WIDGET']
+    enum: VERONA_MODULE_TYPES
   })
   async addModuleFile(
   @UploadedFile() file,
     @Query('type', new ParseArrayPipe({ items: String, separator: ',' })) types: string[]
   ) {
-    const allowedTypes = ['editor', 'player', 'schemer', 'WIDGET'] as const;
     const normalizedTypes = types.map(type => type.trim()).filter(Boolean);
 
     if (!normalizedTypes.length) {
       throw new NotAcceptableException('Module type is required.');
     }
 
-    const invalidTypes = normalizedTypes.filter(type => !allowedTypes.includes(type as VeronaModuleType));
+    const invalidTypes = normalizedTypes.filter(type => !isKnownVeronaModuleType(type));
     if (invalidTypes.length) {
       throw new NotAcceptableException(`Unknown module type(s): ${invalidTypes.join(', ')}`);
     }

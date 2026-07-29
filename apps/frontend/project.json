@@ -119,18 +119,6 @@
         "tsConfig": "apps/frontend/tsconfig.spec.json"
       }
     },
-    "compodoc": {
-      "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/dist/compodoc/frontend"],
-      "options": {
-        "command": "compodoc -p apps/frontend/tsconfig.editor.json -d dist/compodoc/frontend"
-      },
-      "configurations": {
-        "json": {
-          "command": "compodoc -p apps/frontend/tsconfig.editor.json -d dist/compodoc/frontend -e json"
-        }
-      }
-    },
     "docker-build": {
       "executor": "nx:run-commands",
       "options": {

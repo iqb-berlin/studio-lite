@@ -550,7 +550,8 @@ test-main-pr-backend:
     - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
     - docker pull --quiet ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
-    - docker run ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test test api
+    # bounded jest workers, see test-app in Branch&PreRelease-Pipelines
+    - docker run ${BACKEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test test api --maxWorkers=2
   after_script:
     - docker logout ${CI_REGISTRY}
 
@@ -579,7 +580,8 @@ test-main-pr-frontend:
     - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
     - docker pull --quiet ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test
   script:
-    - docker run ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test test frontend
+    # bounded jest workers, see test-app in Branch&PreRelease-Pipelines
+    - docker run ${FRONTEND_IMAGE_NAME}:${CI_COMMIT_SHA}_test test frontend --maxWorkers=2
   after_script:
     - docker logout ${CI_REGISTRY}
 

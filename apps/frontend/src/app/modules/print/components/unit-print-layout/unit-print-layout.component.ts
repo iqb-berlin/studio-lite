@@ -18,13 +18,14 @@ import { UnitPrintCodingComponent } from '../unit-print-coding/unit-print-coding
 import { UnitPrintCommentsComponent } from '../unit-print-comments/unit-print-comments.component';
 import { PrintMetadataComponent } from '../print-metadata/print-metadata.component';
 import { UnitPropertiesComponent } from '../../../../components/unit-properties/unit-properties.component';
+import { UnitLastChangesComponent } from '../../../../components/unit-last-changes/unit-last-changes.component';
 
 @Component({
   selector: 'studio-lite-unit-print-layout',
   templateUrl: './unit-print-layout.component.html',
   styleUrls: ['./unit-print-layout.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [UnitPropertiesComponent, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent, UnitPrintPlayerComponent, MatFormField, MatLabel, MatInput, FormsModule, IncludePipe, TranslateModule]
+  imports: [UnitPropertiesComponent, UnitLastChangesComponent, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent, UnitPrintPlayerComponent, MatFormField, MatLabel, MatInput, FormsModule, IncludePipe, TranslateModule]
 })
 export class UnitPrintLayoutComponent implements OnInit {
   @Input() unitId!: number;

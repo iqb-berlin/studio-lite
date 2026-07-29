@@ -6,6 +6,7 @@ import {
   CreateWorkspaceDto, UserWorkspaceAccessDto, WorkspaceSettingsDto, RenameGroupNameDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodingSchemeProblem } from '@iqb/responses';
 import { WorkspaceService } from './workspace.service';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -298,6 +299,99 @@ describe('WorkspaceService', () => {
       const result = await service.getCodingReport(1);
       expect(result).toEqual([]);
     });
+
+    it('keeps activated no-value variables and alias chains free of breaking errors', async () => {
+      (unitService.findAllWithProperties as jest.Mock).mockResolvedValue([{
+        id: 10,
+        key: 'DLB007',
+        name: '',
+        schemer: 'schemer@2.8.1',
+        variables: [
+          { id: 'marking-panel_1', type: 'no-value' },
+          { id: 'id04', type: 'string' },
+          { id: '02', type: 'string' }
+        ],
+        metadata: { items: [] },
+        scheme: JSON.stringify({
+          version: '2.5',
+          variableCodings: [{
+            id: 'marking-panel_1',
+            alias: '_08_reached',
+            sourceType: 'BASE',
+            sourceParameters: {
+              processing: ['TAKE_DISPLAYED_AS_VALUE_CHANGED']
+            },
+            codes: [{
+              id: 0,
+              type: 'INTENDED_INCOMPLETE',
+              score: 0,
+              label: '',
+              manualInstruction: '',
+              ruleSetOperatorAnd: false,
+              ruleSets: []
+            }]
+          }, {
+            id: 'id04', alias: '02', sourceType: 'BASE', codes: []
+          }, {
+            id: '02', alias: '05', sourceType: 'BASE', codes: []
+          }]
+        })
+      }]);
+
+      const result = await service.getCodingReport(1);
+
+      expect(result.find(row => row.variable === '_08_reached')?.validation)
+        .toBe('OK');
+      expect(result.every(row => row.validation !== 'Fehler')).toBe(true);
+    });
+  });
+
+  describe('coding report validation aggregation', () => {
+    const codingVariable = {
+      id: 'technical-id', alias: 'public-id'
+    } as VariableCodingData;
+
+    it('deduplicates and sorts all problems with breaking problems first', () => {
+      const validationResults: CodingSchemeProblem[] = [{
+        type: 'VACANT',
+        breaking: false,
+        variableId: 'public-id',
+        variableLabel: ''
+      }, {
+        type: 'SOURCE_MISSING',
+        breaking: true,
+        variableId: 'public-id',
+        variableLabel: '',
+        code: '2'
+      }, {
+        type: 'SOURCE_MISSING',
+        breaking: true,
+        variableId: 'public-id',
+        variableLabel: '',
+        code: '2'
+      }];
+
+      const validationProblems = WorkspaceService.getValidationProblems(
+        validationResults,
+        codingVariable
+      );
+
+      expect(validationProblems).toEqual([{
+        type: 'SOURCE_MISSING', breaking: true, code: '2'
+      }, {
+        type: 'VACANT', breaking: false
+      }]);
+      expect(
+        WorkspaceService.getValidationStatus(validationProblems)
+      ).toBe('Fehler');
+    });
+
+    it('reports warnings when no problem is breaking', () => {
+      expect(WorkspaceService.getValidationStatus([{
+        type: 'VACANT', breaking: false
+      }])).toBe('Warnung');
+      expect(WorkspaceService.getValidationStatus([])).toBe('OK');
+    });
   });
 
   describe('determineCodingType', () => {
@@ -372,26 +466,624 @@ describe('WorkspaceService', () => {
     });
   });
 
-  describe('uploadFiles', () => {
-    it('should process upload', async () => {
-      const files: FileIo[] = [{
-        originalname: 'test.xml',
-        mimetype: 'text/xml',
-        buffer: Buffer.from('<Unit><Metadata><Id>1</Id><Label>l</Label></Metadata></Unit>'),
-        fieldname: 'file',
-        encoding: '7bit',
-        size: 100
-      }];
-      const user = { id: 1 } as User;
+  describe('mapImportedComment', () => {
+    it('maps spec field names (commentator/isHidden/parentComment) onto the internal DTO', () => {
+      const mapped = WorkspaceService.mapImportedComment({
+        id: 7,
+        body: 'a comment',
+        commentator: 'Jane Doe',
+        parentComment: 3,
+        isHidden: true,
+        createdAt: '2026-04-09T13:15:10.977Z',
+        changedAt: '2026-04-10T13:15:10.977Z',
+        itemUuids: ['item-uuid-1']
+      });
 
+      expect(mapped).toEqual({
+        id: 7,
+        body: 'a comment',
+        userName: 'Jane Doe',
+        userId: -1,
+        parentId: 3,
+        hidden: true,
+        createdAt: new Date('2026-04-09T13:15:10.977Z'),
+        changedAt: new Date('2026-04-10T13:15:10.977Z'),
+        itemUuids: ['item-uuid-1']
+      });
+    });
+
+    it('falls back to legacy field names (userName/hidden/parentId)', () => {
+      const mapped = WorkspaceService.mapImportedComment({
+        id: 1,
+        body: 'legacy',
+        userName: 'Old Name',
+        parentId: 5,
+        hidden: true
+      });
+
+      expect(mapped.userName).toBe('Old Name');
+      expect(mapped.parentId).toBe(5);
+      expect(mapped.hidden).toBe(true);
+    });
+
+    it('always sets userId to -1 regardless of any exported user id', () => {
+      const mapped = WorkspaceService.mapImportedComment({ id: 1, body: 'x' });
+
+      expect(mapped.userId).toBe(-1);
+    });
+
+    it('defaults parentId to null and hidden to false when absent', () => {
+      const mapped = WorkspaceService.mapImportedComment({ id: 1, body: 'root' });
+
+      expect(mapped.parentId).toBeNull();
+      expect(mapped.hidden).toBe(false);
+    });
+  });
+
+  describe('mapImportedMetadata', () => {
+    it('maps the unit-metadata@0.1 wrapper onto the internal profiles structure', () => {
+      const mapped = WorkspaceService.mapImportedMetadata({
+        changedAt: '2026-05-01T08:00:00.000Z',
+        metadata: [{
+          profileId: 'https://example.org/unit-profile.json',
+          entries: [{
+            id: 'iqb_author',
+            label: [{ lang: 'de', value: 'Entwickler:in' }],
+            value: [{ lang: 'de', value: 'Ana Maier' }]
+          }]
+        }]
+      });
+
+      expect(mapped).toEqual({
+        profiles: [{
+          profileId: 'https://example.org/unit-profile.json',
+          entries: [{
+            id: 'iqb_author',
+            label: [{ lang: 'de', value: 'Entwickler:in' }],
+            value: [{ lang: 'de', value: 'Ana Maier' }],
+            valueAsText: [{ lang: 'de', value: 'Ana Maier' }]
+          }]
+        }]
+      });
+    });
+
+    it('reconstructs value and valueAsText from a simple_value', () => {
+      const mapped = WorkspaceService.mapImportedMetadata({
+        metadata: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'a1',
+            value: { raw: 'false', asText: [{ lang: 'de', value: 'nein' }] }
+          }]
+        }]
+      });
+
+      expect(mapped.profiles[0].entries[0]).toEqual({
+        id: 'a1',
+        label: [],
+        value: 'false',
+        valueAsText: [{ lang: 'de', value: 'nein' }]
+      });
+    });
+
+    it('reconstructs internal vocabulary values ({ id, text }) from vocabulary_entries', () => {
+      const mapped = WorkspaceService.mapImportedMetadata({
+        metadata: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'w4',
+            value: [{ id: 'https://w3id.org/iqb/vocab/p2', label: [{ lang: 'de', value: 'Anwenden' }] }]
+          }]
+        }]
+      });
+
+      expect(mapped.profiles[0].entries[0]).toEqual({
+        id: 'w4',
+        label: [],
+        value: [{
+          id: 'https://w3id.org/iqb/vocab/p2', text: [{ lang: 'de', value: 'Anwenden' }], annotation: []
+        }],
+        // vocabulary valueAsText is recomputed on read, not at import time
+        valueAsText: []
+      });
+    });
+
+    it('preserves the annotation (numbering) in the value; valueAsText is filled on read', () => {
+      const mapped = WorkspaceService.mapImportedMetadata({
+        metadata: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'w5',
+            value: [{
+              id: 'https://w3id.org/iqb/vocab/p2',
+              label: [{ lang: 'de', value: 'Anwenden' }],
+              annotation: [{ lang: 'de', value: '1.2' }]
+            }]
+          }]
+        }]
+      });
+
+      expect(mapped.profiles[0].entries[0]).toEqual({
+        id: 'w5',
+        label: [],
+        value: [{
+          id: 'https://w3id.org/iqb/vocab/p2',
+          text: [{ lang: 'de', value: 'Anwenden' }],
+          annotation: [{ lang: 'de', value: '1.2' }]
+        }],
+        // recomputed by UnitService.ensureValueAsText on read (see unit.service.spec)
+        valueAsText: []
+      });
+    });
+
+    it('normalizes a legacy raw { profiles, items } blob, deriving order from isCurrent', () => {
+      const legacy = {
+        profiles: [
+          { profileId: 'p1', isCurrent: true, entries: [] },
+          { profileId: 'p2', isCurrent: false, entries: [] }
+        ],
+        items: [{ id: 'ITEM1', profiles: [{ profileId: 'ip1', isCurrent: true, entries: [] }] }]
+      };
+
+      expect(WorkspaceService.mapImportedMetadata(legacy)).toEqual({
+        profiles: [
+          { profileId: 'p1', order: 0, entries: [] },
+          { profileId: 'p2', order: -1, entries: [] }
+        ],
+        items: [{ id: 'ITEM1', profiles: [{ profileId: 'ip1', order: 0, entries: [] }] }]
+      });
+    });
+
+    it('keeps an explicit order on a legacy profile instead of deriving from isCurrent', () => {
+      const legacy = {
+        profiles: [{
+          profileId: 'p1', order: 2, isCurrent: false, entries: []
+        }],
+        items: []
+      };
+
+      expect(WorkspaceService.mapImportedMetadata(legacy)).toEqual({
+        profiles: [{ profileId: 'p1', order: 2, entries: [] }],
+        items: []
+      });
+    });
+  });
+
+  describe('mapImportedItems', () => {
+    it('maps unit-items@0.2 items onto the internal structure', () => {
+      const mapped = WorkspaceService.mapImportedItems([{
+        uuid: 'item-uuid-1',
+        id: 'ITEM1',
+        description: 'Notiz',
+        order: 3,
+        sourceVariableId: 'VAR1',
+        sourceVariableUuid: 'var-uuid-1',
+        changedAt: '2026-04-01T00:00:00.000Z',
+        metadata: [{
+          profileId: 'https://example.org/item-profile.json',
+          entries: [{
+            id: 'w4',
+            label: [{ lang: 'de', value: 'Prozess' }],
+            value: [{ lang: 'de', value: 'Anwenden' }]
+          }]
+        }]
+      }]);
+
+      expect(mapped).toEqual([{
+        uuid: 'item-uuid-1',
+        id: 'ITEM1',
+        description: 'Notiz',
+        order: 3,
+        variableId: 'VAR1',
+        variableReadOnlyId: 'var-uuid-1',
+        createdAt: undefined,
+        changedAt: new Date('2026-04-01T00:00:00.000Z'),
+        profiles: [{
+          profileId: 'https://example.org/item-profile.json',
+          entries: [{
+            id: 'w4',
+            label: [{ lang: 'de', value: 'Prozess' }],
+            value: [{ lang: 'de', value: 'Anwenden' }],
+            valueAsText: [{ lang: 'de', value: 'Anwenden' }]
+          }]
+        }]
+      }]);
+    });
+
+    it('defaults missing source variables to null', () => {
+      const mapped = WorkspaceService.mapImportedItems([{ id: 'ITEM1' }]);
+
+      expect(mapped[0].variableId).toBeNull();
+      expect(mapped[0].variableReadOnlyId).toBeNull();
+    });
+
+    it('drops items without the required id', () => {
+      const mapped = WorkspaceService.mapImportedItems([
+        { uuid: 'item-uuid-1' } as never,
+        { id: 'ITEM1' }
+      ]);
+
+      expect(mapped).toHaveLength(1);
+      expect(mapped[0].id).toBe('ITEM1');
+    });
+  });
+
+  describe('uploadFiles', () => {
+    const user = { id: 1 } as User;
+    const buildFile = (name: string, mime: string, content: string): FileIo => ({
+      originalname: name,
+      mimetype: mime,
+      buffer: Buffer.from(content),
+      fieldname: 'files',
+      encoding: '7bit',
+      size: content.length
+    });
+    const xmlUnit = (key: string) => `<Unit><Metadata><Id>${key}</Id><Label>L</Label></Metadata></Unit>`;
+    const jsonIndex = (key: string, extra: object = {}) => JSON
+      .stringify({ id: key, userInterface: { player: 'test-player' }, ...extra });
+
+    it('should process upload', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
       (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
 
-      const result = await service.uploadFiles(1, files, user);
+      const result = await service.uploadFiles(1, [
+        buildFile('test.xml', 'text/xml', xmlUnit('1'))
+      ], user);
 
       expect(result.messages).toHaveLength(0);
       expect(unitService.create).toHaveBeenCalled();
+    });
+
+    it('should prefer JSON over XML for the same unit key', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.xml', 'text/xml', xmlUnit('UNIT01')),
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01'))
+      ], user);
+
+      expect(result.messages).toHaveLength(0);
+      expect(unitService.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('should report unreferenced JSON that is not a valid unit index as ignored', async () => {
+      const result = await service.uploadFiles(1, [
+        buildFile('broken.json', 'application/json', JSON.stringify({ notId: 'something' }))
+      ], user);
+
+      expect(result.messages).toHaveLength(1);
+      expect(result.messages[0].messageKey).toBe('unit-upload.api-warning.ignore-file');
+    });
+
+    it('should not warn for companion JSON files that are not unit indices', async () => {
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.vocs.json', 'application/json', JSON.stringify({ something: 'else' }))
+      ], user);
+
+      expect(result.messages.every(m => m.messageKey !== 'unit-upload.api-warning.json-parse')).toBe(true);
+    });
+
+    it('should import companion files with arbitrary names when the index references them', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchScheme as jest.Mock).mockResolvedValue(undefined);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const schemeContent = JSON.stringify({ variableCodings: [] });
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          codingScheme: { id: 'scheme.json', type: 'iqb-coding-scheme' }
+        })),
+        buildFile('scheme.json', 'application/json', schemeContent)
+      ], user);
+
+      expect(result.messages).toHaveLength(0);
+      expect(unitService.patchScheme).toHaveBeenCalledWith(
+        10,
+        expect.objectContaining({ scheme: schemeContent }),
+        null,
+        undefined
+      );
+    });
+
+    it('should warn when definition file referenced in index is missing from upload', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const result = await service.uploadFiles(1, [
+        buildFile(
+          'unit01.json',
+          'application/json',
+          jsonIndex('UNIT01', { userInterface: { player: 'p', definition: 'unit01.voud' } })
+        )
+      ], user);
+
+      expect(result.messages.some(m => m.messageKey === 'unit-upload.api-warning.missing-file')).toBe(true);
+    });
+
+    it('should load baseVariables from vova.json before importing definition', async () => {
+      const baseVariables = [{
+        id: 'VAR1',
+        type: 'string',
+        format: 'text',
+        nullable: false,
+        multiple: false
+      }];
+      const vovaContent = JSON.stringify({ baseVariables, derivedVariables: [] });
+
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchDefinition as jest.Mock).mockResolvedValue(undefined);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          userInterface: { player: 'p', definition: 'unit01.voud' },
+          variables: { id: 'unit01.vova.json', type: 'unit-variables' }
+        })),
+        buildFile('unit01.voud', 'application/octet-stream', '<definition/>'),
+        buildFile('unit01.vova.json', 'application/json', vovaContent)
+      ], user);
+
+      expect(unitService.patchDefinition).toHaveBeenCalledWith(
+        10,
+        expect.objectContaining({ variables: baseVariables }),
+        null,
+        undefined
+      );
+    });
+
+    it('should import vomd (unit-metadata@0.1) and voit (unit-items@0.2) files', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const vomdContent = JSON.stringify({
+        changedAt: '2026-05-01T08:00:00.000Z',
+        metadata: [{
+          profileId: 'https://example.org/unit-profile.json',
+          entries: [{
+            id: 'a1',
+            label: [{ lang: 'de', value: 'Für SPF geeignet' }],
+            value: { raw: 'false', asText: [{ lang: 'de', value: 'nein' }] }
+          }]
+        }]
+      });
+      const voitContent = JSON.stringify([{
+        uuid: 'item-uuid-1',
+        id: 'ITEM1',
+        order: 0,
+        sourceVariableId: 'VAR1',
+        sourceVariableUuid: 'var-uuid-1'
+      }]);
+
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          metadata: { id: 'unit01.vomd.json', type: 'unit-metadata@0.1' },
+          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
+        })),
+        buildFile('unit01.vomd.json', 'application/json', vomdContent),
+        buildFile('unit01.voit.json', 'application/json', voitContent)
+      ], user);
+
+      expect(result.messages).toHaveLength(0);
+      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, {
+        profiles: [{
+          profileId: 'https://example.org/unit-profile.json',
+          order: -1,
+          entries: [{
+            id: 'a1',
+            label: [{ lang: 'de', value: 'Für SPF geeignet' }],
+            value: 'false',
+            valueAsText: [{ lang: 'de', value: 'nein' }]
+          }]
+        }],
+        items: [{
+          uuid: 'item-uuid-1',
+          id: 'ITEM1',
+          description: undefined,
+          order: 0,
+          variableId: 'VAR1',
+          variableReadOnlyId: 'var-uuid-1',
+          createdAt: undefined,
+          changedAt: undefined,
+          profiles: []
+        }]
+      });
+    });
+
+    it('should still import a legacy raw vomd blob with embedded items', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const legacyVomd = JSON.stringify({
+        profiles: [{ profileId: 'p1', isCurrent: true, entries: [] }],
+        items: [{ id: 'ITEM1', variableId: 'VAR1', profiles: [] }]
+      });
+
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          metadata: { id: 'unit01.vomd.json', type: 'metadata-values' }
+        })),
+        buildFile('unit01.vomd.json', 'application/json', legacyVomd)
+      ], user);
+
+      expect(result.messages).toHaveLength(0);
+      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, {
+        profiles: [{ profileId: 'p1', order: -1, entries: [] }],
+        items: [{ id: 'ITEM1', variableId: 'VAR1', profiles: [] }]
+      });
+    });
+
+    it('should adopt the unit uuid from the index when present', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', { uuid: 'imported-unit-uuid' }))
+      ], user);
+
+      expect(unitService.adoptUuidIfFree).toHaveBeenCalledWith(10, 'imported-unit-uuid');
+    });
+
+    it('should not try to adopt a uuid when the index has none', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01'))
+      ], user);
+
+      expect(unitService.adoptUuidIfFree).not.toHaveBeenCalled();
+    });
+
+    it('should warn and continue when a companion JSON file is broken', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          metadata: { id: 'unit01.vomd.json', type: 'unit-metadata@0.1' },
+          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
+        })),
+        buildFile('unit01.vomd.json', 'application/json', '{ "metadata": broken !!!'),
+        buildFile('unit01.voit.json', 'application/json', '[{ "id": "X", broken !!!')
+      ], user);
+
+      const parseWarnings = result.messages
+        .filter(m => m.messageKey === 'unit-upload.api-warning.json-parse')
+        .map(m => m.objectKey);
+      expect(parseWarnings).toEqual(expect.arrayContaining(['unit01.vomd.json', 'unit01.voit.json']));
+      expect(unitService.create).toHaveBeenCalledTimes(1);
+      expect(unitService.copyItemsWithMetadata).not.toHaveBeenCalled();
+    });
+
+    it('should import remaining blocks when only one companion file is broken', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const voitContent = JSON.stringify([{ id: 'ITEM1', sourceVariableId: 'VAR1' }]);
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          metadata: { id: 'unit01.vomd.json', type: 'unit-metadata@0.1' },
+          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
+        })),
+        buildFile('unit01.vomd.json', 'application/json', '{ broken'),
+        buildFile('unit01.voit.json', 'application/json', voitContent)
+      ], user);
+
+      expect(result.messages.map(m => m.objectKey)).toEqual(['unit01.vomd.json']);
+      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, expect.objectContaining({
+        items: [expect.objectContaining({ id: 'ITEM1', variableId: 'VAR1' })]
+      }));
+    });
+
+    it('should clear legacy items when the items file is legitimately empty', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const legacyBlob = JSON.stringify({ profiles: [], items: [{ id: 'OLD' }] });
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          metadata: { id: 'unit01.vomd.json', type: 'metadata-values' },
+          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
+        })),
+        buildFile('unit01.vomd.json', 'application/json', legacyBlob),
+        buildFile('unit01.voit.json', 'application/json', '[]')
+      ], user);
+
+      expect(result.messages).toHaveLength(0);
+      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, expect.objectContaining({
+        items: []
+      }));
+    });
+
+    it('should silently accept an export report file without creating units or warnings', async () => {
+      const result = await service.uploadFiles(1, [
+        buildFile('_export-report.json', 'application/json', JSON.stringify({
+          messages: [{ unitKey: 'U1', messageKey: 'dropped-content.metadata-not-exported' }]
+        }))
+      ], user);
+
+      expect(result.messages).toHaveLength(0);
+      expect(unitService.create).not.toHaveBeenCalled();
+    });
+
+    it('should warn when the items file referenced in the index is missing from the upload', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          items: { id: 'unit01.voit.json', type: 'unit-items@0.2' }
+        }))
+      ], user);
+
+      expect(result.messages).toEqual([{
+        objectKey: 'unit01.voit.json',
+        messageKey: 'unit-upload.api-warning.missing-file'
+      }]);
+    });
+
+    it('does not warn when imported vocabulary entries carry an annotation (it is now persisted)', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const vomdContent = JSON.stringify({
+        metadata: [{
+          profileId: 'https://example.org/unit-profile.json',
+          entries: [{
+            id: 'a1',
+            value: [{
+              id: 'https://w3id.org/iqb/vocab/p2',
+              label: [{ lang: 'de', value: 'Anwenden' }],
+              annotation: [{ lang: 'de', value: '1.2' }]
+            }]
+          }]
+        }]
+      });
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          metadata: { id: 'unit01.vomd.json', type: 'unit-metadata@0.1' }
+        })),
+        buildFile('unit01.vomd.json', 'application/json', vomdContent)
+      ], user);
+
+      expect(result.messages.some(
+        message => message.messageKey === 'unit-upload.api-warning.annotation-dropped'
+      )).toBe(false);
+    });
+
+    it('should warn when coding scheme file referenced in index is missing from upload', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          codingScheme: { id: 'unit01.vocs.json', type: 'iqb-coding-scheme' }
+        }))
+      ], user);
+
+      expect(result.messages.some(m => m.messageKey === 'unit-upload.api-warning.missing-file')).toBe(true);
     });
   });
 });

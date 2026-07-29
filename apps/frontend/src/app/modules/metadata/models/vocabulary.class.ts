@@ -1,6 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import { TextWithLanguage } from '@iqb/metadata/md-main';
-import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
+import { LanguageCodedText as TextWithLanguage, ProfileEntryParametersVocabulary } from '@iqbspecs/metadata-profile';
 import { TopConcept } from '@studio-lite-lib/api-dto';
 
 export type NotationNode = {
@@ -81,7 +80,7 @@ export class Vocab {
   url!: string;
 }
 
-export class VocabIdDictionaryValue extends ProfileEntryParametersVocabulary {
-  labels!: Record<'de', string>;
-  notation!: string[];
+export interface VocabIdDictionaryValue extends ProfileEntryParametersVocabulary {
+  labels: Record<'de', string>;
+  notation: string[];
 }

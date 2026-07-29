@@ -168,6 +168,44 @@ describe('ReviewService', () => {
       expect(reviewUnitRepository.create).toHaveBeenCalled();
       expect(reviewUnitRepository.save).toHaveBeenCalled();
     });
+
+    it('should replace the units with their list order in one save', async () => {
+      const review = { id: 1, name: 'old' } as Review;
+      reviewRepository.findOne.mockResolvedValue(review);
+      reviewUnitRepository.create.mockImplementation(entity => entity as ReviewUnit);
+
+      await service.patch(1, { id: 1, name: 'new', units: [30, 10, 20] } as ReviewFullDto);
+
+      expect(reviewUnitRepository.save).toHaveBeenCalledWith([
+        { reviewId: 1, unitId: 30, order: 0 },
+        { reviewId: 1, unitId: 10, order: 1 },
+        { reviewId: 1, unitId: 20, order: 2 }
+      ]);
+    });
+
+    it('should not resolve before the review units are persisted', async () => {
+      const review = { id: 1, name: 'old' } as Review;
+      reviewRepository.findOne.mockResolvedValue(review);
+      let unitsPersisted = false;
+      reviewUnitRepository.save.mockImplementation(async entity => {
+        await new Promise(resolve => { setTimeout(resolve, 0); });
+        unitsPersisted = true;
+        return entity as ReviewUnit;
+      });
+
+      await service.patch(1, { id: 1, name: 'new', units: [10, 20] } as ReviewFullDto);
+
+      expect(unitsPersisted).toBe(true);
+    });
+
+    it('should reject when persisting the review units fails', async () => {
+      const review = { id: 1, name: 'old' } as Review;
+      reviewRepository.findOne.mockResolvedValue(review);
+      reviewUnitRepository.save.mockRejectedValue(new Error('insert failed'));
+
+      await expect(service.patch(1, { id: 1, name: 'new', units: [10] } as ReviewFullDto))
+        .rejects.toThrow('insert failed');
+    });
   });
 
   describe('remove', () => {

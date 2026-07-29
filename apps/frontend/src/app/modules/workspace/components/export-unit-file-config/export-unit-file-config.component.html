@@ -1,4 +1,10 @@
 <mat-card class="files">
+  <div class="header">{{'unit-download.export-format' | translate}}</div>
+  <mat-radio-group [ngModel]="exportFormat"
+                   (ngModelChange)="exportFormatChange.emit($event)">
+    <mat-radio-button value="xml">{{'unit-download.export-format-xml' | translate}}</mat-radio-button>
+    <mat-radio-button value="json">{{'unit-download.export-format-json' | translate}}</mat-radio-button>
+  </mat-radio-group>
   <div class="header">{{'unit-download.add-files' | translate}}</div>
   <mat-checkbox [ngModel]="addComments"
                 (ngModelChange)="addCommentsChange.emit($event)">
@@ -20,7 +26,7 @@
 
   @if (!enablePlayerOption) {
     <div class="config-message margin-bottom">
-      {{'unit-download.no-player' | translate}}hallo
+      {{'unit-download.no-player' | translate}}
     </div>
   }
 

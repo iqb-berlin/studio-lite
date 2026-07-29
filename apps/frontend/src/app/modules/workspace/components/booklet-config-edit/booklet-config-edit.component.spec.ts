@@ -66,4 +66,45 @@ describe('BookletConfigEditComponent', () => {
 
     expect(component.bookletConfig).toEqual(config);
   });
+
+  it('should default context to review', () => {
+    expect(component.context).toBe('review');
+  });
+
+  describe('context=review', () => {
+    beforeEach(() => {
+      component.context = 'review';
+      fixture.detectChanges();
+    });
+
+    it('should render controllerDesign field', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelectorAll('mat-select').length).toBeGreaterThanOrEqual(6);
+    });
+
+    it('should not render new modern fields', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      const selects = compiled.querySelectorAll('mat-select');
+      expect(selects.length).toBe(6);
+    });
+  });
+
+  describe('context=export', () => {
+    beforeEach(() => {
+      component.context = 'export';
+      fixture.detectChanges();
+    });
+
+    it('should not render controllerDesign field', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      const selects = compiled.querySelectorAll('mat-select');
+      expect(selects.length).toBeGreaterThan(6);
+    });
+
+    it('should render new modern fields', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      const selects = compiled.querySelectorAll('mat-select');
+      expect(selects.length).toBe(22);
+    });
+  });
 });

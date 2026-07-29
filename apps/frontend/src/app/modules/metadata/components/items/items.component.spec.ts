@@ -8,14 +8,17 @@ import {
   MAT_DIALOG_DATA, MatDialog, MatDialogModule
 } from '@angular/material/dialog';
 import { ItemsMetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { ItemsComponent } from './items.component';
 import { ItemSortService } from '../../services/item-sort.service';
 import { AliasId } from '../../models/alias-id.interface';
+import { WorkspaceService } from '../../../workspace/services/workspace.service';
 
 describe('ItemsComponent', () => {
   let component: ItemsComponent;
   let fixture: ComponentFixture<ItemsComponent>;
   let mockMatDialog: Partial<MatDialog>;
+  let mockWorkspaceService: DeepMocked<WorkspaceService>;
 
   beforeEach(async () => {
     mockMatDialog = {
@@ -23,6 +26,18 @@ describe('ItemsComponent', () => {
         afterClosed: () => of(null)
       })
     };
+
+    mockWorkspaceService = createMock<WorkspaceService>({
+      workspaceSettings: {
+        itemMDProfile: 'test-profile-url',
+        unitMDProfile: '',
+        defaultEditor: '',
+        defaultPlayer: '',
+        defaultSchemer: '',
+        unitGroups: [],
+        stableModulesOnly: true
+      }
+    });
 
     await TestBed.configureTestingModule({
       imports: [
@@ -39,6 +54,7 @@ describe('ItemsComponent', () => {
           useValue: {}
         },
         { provide: MatDialog, useValue: mockMatDialog },
+        { provide: WorkspaceService, useValue: mockWorkspaceService },
         ItemSortService,
         TranslateService
       ]
@@ -92,5 +108,50 @@ describe('ItemsComponent', () => {
     expect(component.isTextOnlyView).toBe(false);
     component.togglePresentation();
     expect(component.isTextOnlyView).toBe(true);
+  });
+
+  it('should copy current profile metadata and clear non-current profile metadata when onCloseDialog is called', () => {
+    const itemToCopy = {
+      id: 'item1',
+      uuid: 'old-uuid',
+      profiles: [
+        {
+          profileId: 'test-profile-url',
+          order: -1, // fallback will match with workspaceSettings.itemMDProfile
+          entries: [{ id: 'entry1', value: 'value1' }]
+        },
+        {
+          profileId: 'other-profile-url',
+          order: -1,
+          entries: [{ id: 'entry2', value: 'value2' }]
+        }
+      ]
+    } as unknown as ItemsMetadataValues;
+
+    component.items = [itemToCopy];
+    const emitSpy = jest.spyOn(component.metadataChange, 'emit');
+
+    ((component as unknown) as { onCloseDialog: (r?: number) => void }).onCloseDialog(0);
+
+    expect(component.items.length).toBe(2);
+    const copiedItem = component.items[1];
+    expect(copiedItem.id).toBeUndefined();
+    expect(copiedItem.uuid).toBeUndefined();
+    expect(copiedItem.profiles).toBeDefined();
+    expect(copiedItem.profiles?.length).toBe(2);
+
+    // Current profile: metadata entries copied, order set to 0 (active)
+    const currentProfile = copiedItem.profiles?.[0];
+    expect(currentProfile?.profileId).toBe('test-profile-url');
+    expect(currentProfile?.order).toBe(0);
+    expect(currentProfile?.entries).toEqual([{ id: 'entry1', value: 'value1' }]);
+
+    // Non-current profile: metadata entries cleared, profileId preserved, order -1 (hidden)
+    const nonCurrentProfile = copiedItem.profiles?.[1];
+    expect(nonCurrentProfile?.profileId).toBe('other-profile-url');
+    expect(nonCurrentProfile?.order).toBe(-1);
+    expect(nonCurrentProfile?.entries).toEqual([]);
+
+    expect(emitSpy).toHaveBeenCalled();
   });
 });

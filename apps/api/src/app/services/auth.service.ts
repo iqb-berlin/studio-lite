@@ -12,8 +12,7 @@ import UserSession from '../entities/user-session.entity';
 import {
   REFRESH_TOKEN_EXPIRES_IN_MS,
   INACTIVITY_THRESHOLD_MS,
-  ACTIVE_SESSION_THRESHOLD_MS,
-  SESSION_REUSE_THRESHOLD_MS
+  ACTIVE_SESSION_THRESHOLD_MS
 } from '../app.constants';
 
 @Injectable()
@@ -97,20 +96,12 @@ export class AuthService {
     this.logger.log(AuthService.getLoginMessage(user));
 
     let sessionId = AuthService.getSessionId(existingSessionId);
-    let isNewSession = !existingSessionId;
+    const isNewSession = !existingSessionId;
 
-    // If no sessionId was provided, check for a truly simultaneous login (within 200ms)
-    // to prevent session bloat from parallel Angular initialization requests on the same page load.
-    if (isNewSession) {
-      const recentSession = await this.userSessionRepository.findOne({
-        where: { userId: user.id },
-        order: { lastActivity: 'DESC' }
-      });
-      if (recentSession && (Date.now() - new Date(recentSession.lastActivity).getTime() < SESSION_REUSE_THRESHOLD_MS)) {
-        sessionId = recentSession.sessionId;
-        isNewSession = false;
-      }
-    }
+    // No user-scoped "most recent session" reuse here: every fresh login (i.e. no
+    // client-provided sessionId) gets its own session, so distinct browsers stay
+    // independent. Same-browser continuity is handled via the explicit
+    // existingSessionId that the client derives from the JWT `sid`.
 
     // Reviews do not keep long-lived user sessions.
     if (!user.id) {
@@ -253,14 +244,23 @@ export class AuthService {
     const user = await this.usersService.findOne(refreshToken.userId);
     if (!user || !user.name) return null;
 
-    // Rotate refresh token and replace the old session with a fresh one.
-    // This ensures each browser/client gets its own independent session.
-    // The SESSION_REUSE_THRESHOLD_MS check in login() prevents duplicate
-    // sessions from parallel requests within the same page load.
+    // Keep the session identity stable across refreshes: rotate only the refresh
+    // token and refresh the session's activity/expiry, but keep the same sessionId.
+    // Re-creating the session with a new id (or latching onto another browser's
+    // most-recent session) is exactly what collapsed independent browser sessions
+    // into one.
+    const { sessionId } = userSession;
     await this.refreshTokenRepository.delete({ tokenHash: refreshToken.tokenHash });
-    await this.logoutSession(refreshToken.userId, userSession.sessionId);
+    const updateResult = await this.updateUserSession(user.id, sessionId);
+    if (updateResult.affected === 0) {
+      await this.createUserSession(user.id, sessionId);
+    }
 
-    return this.login({ id: user.id, name: user.name, reviewId: 0 });
+    const accessToken = this.jwtService.sign(
+      AuthService.getJwtPayload({ id: user.id, name: user.name, reviewId: 0 }, sessionId)
+    );
+    const newRefreshToken = await this.generateRefreshToken(user.id, sessionId);
+    return { accessToken, refreshToken: newRefreshToken };
   }
 
   async initLogin(username: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {

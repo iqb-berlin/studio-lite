@@ -20,13 +20,13 @@
                   (modelChange)="onModelChange()">
      </formly-form>
     </form>
-    <studio-lite-profile-form
-     [metadata]="metadata[itemIndex]"
-     [profile]="profile"
-     [language]="language"
-     [formlyWrapper]="''"
-     [panelExpanded]="false"
-     (metadataChange)="onMetadataChange($event)">
-  </studio-lite-profile-form>
+    <iqb-profile-form
+      [metadataValues]="iqbMetadataValues"
+      [profileData]="profile"
+      [language]="language"
+      [formlyWrapper]="''"
+      [panelExpanded]="false"
+      [vocabularyProvider]="metadataService"
+      (metadataChange)="onMetadataChange($event)">
+    </iqb-profile-form>
 </mat-expansion-panel>
-

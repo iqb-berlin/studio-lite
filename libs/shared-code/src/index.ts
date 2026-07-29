@@ -1,16 +1,28 @@
 export { VeronaModuleFactory } from './lib/helper/verona-module.factory';
 export { VeronaModuleKeyCollection } from './lib/helper/verona-module-key-collection.class';
+export { canonicalizeProfileId, profileIdsMatch, isItemProfileId } from './lib/profile-id';
+export {
+  VERONA_MODULE_TYPES,
+  normalizeVeronaModuleType,
+  veronaModuleTypesMatch,
+  isKnownVeronaModuleType
+} from './lib/verona-module-type';
+export {
+  HIDDEN_PROFILE_ORDER, ACTIVE_PROFILE_ORDER, orderFromCurrent, isCurrentFromOrder
+} from './lib/profile-order';
+export {
+  ReconcilableProfile, ProfileReconcileOps, mergeProfile, reconcileProfilesByProfileId
+} from './lib/metadata-reconcile';
 export {
   ACTIVE_THRESHOLD_MS,
   PASSIVE_THRESHOLD_MS,
-  HEARTBEAT_PING_INTERVAL_MS,
   UI_BAR_REFRESH_INTERVAL_MS,
   ADMIN_USER_LIST_POLL_INTERVAL_MS,
-  SESSION_REUSE_THRESHOLD_MS,
   ACTIVITY_SYNC_THROTTLE_MS,
   USER_ACTIVITY_THROTTLE_MS,
   POST_MESSAGE_ACTIVITY_THROTTLE_MS,
   AUTO_LOGOUT_REDIRECT_DELAY_MS,
+  SERVER_TIME_OFFSET_DEADBAND_MS,
   ACTIVE_SESSION_THRESHOLD_SEC,
   ACTIVE_SESSION_THRESHOLD_MS,
   REFRESH_TOKEN_EXPIRES_IN_SEC,

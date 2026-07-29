@@ -1,5 +1,10 @@
 import {
-  Injectable, Logger
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  UnprocessableEntityException
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -54,28 +59,50 @@ export class ResourcePackageService {
 
   async create(zippedResourcePackage: Express.Multer.File): Promise<number> {
     this.logger.log('Creating resource package');
-    const zip = new AdmZip(zippedResourcePackage.buffer);
     const packageNameArray = zippedResourcePackage.originalname.split('.itcr.zip');
-    if (packageNameArray.length === 2) {
-      const packageName = packageNameArray[0];
-      const resourcePackage = await this.resourcePackageRepository
-        .findOne({
-          where: { name: packageName }
-        });
-      if (!resourcePackage) {
-        const packageFiles = zip.getEntries()
-          .map(entry => entry.entryName);
-        const zipExtractAllToAsync = util.promisify(zip.extractAllToAsync);
-        return zipExtractAllToAsync(`${this.resourcePackagesPath}/${packageName}`, true, true)
-          .then(() => {
-            this.storeZippedResourcePackage(packageName, zippedResourcePackage);
-            return this.saveResourcePackage(packageName, packageFiles);
-          },
-          () => { throw new Error(`Creating resource package with name ${packageName} failed`); });
-      }
-      throw new Error('Package is already installed');
+    if (packageNameArray.length !== 2) {
+      throw new BadRequestException(
+        `File name '${zippedResourcePackage.originalname}' does not end with '.itcr.zip'`
+      );
     }
-    throw new Error('No Resource Package');
+    const packageName = packageNameArray[0];
+    const resourcePackage = await this.resourcePackageRepository
+      .findOne({
+        where: { name: packageName }
+      });
+    if (resourcePackage) {
+      throw new ConflictException(`Resource package '${packageName}' is already installed`);
+    }
+    const { zip, packageFiles } = this.readZipArchive(zippedResourcePackage);
+    const zipExtractAllToAsync = util.promisify(zip.extractAllToAsync);
+    return zipExtractAllToAsync(`${this.resourcePackagesPath}/${packageName}`, true, true)
+      .then(() => {
+        this.storeZippedResourcePackage(packageName, zippedResourcePackage);
+        return this.saveResourcePackage(packageName, packageFiles);
+      },
+      () => {
+        throw new InternalServerErrorException(
+          `Creating resource package with name ${packageName} failed`
+        );
+      });
+  }
+
+  private readZipArchive(
+    zippedResourcePackage: Express.Multer.File
+  ): { zip: AdmZip; packageFiles: string[] } {
+    try {
+      const zip = new AdmZip(zippedResourcePackage.buffer);
+      return {
+        zip,
+        packageFiles: zip.getEntries().map(entry => entry.entryName)
+      };
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Reading '${zippedResourcePackage.originalname}' as zip failed: ${reason}`);
+      throw new UnprocessableEntityException(
+        `File '${zippedResourcePackage.originalname}' could not be read as a zip archive`
+      );
+    }
   }
 
   private async saveResourcePackage(packageName: string, packageFiles: string[]): Promise<number> {

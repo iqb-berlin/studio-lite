@@ -20,7 +20,14 @@ describe('UnitItemService', () => {
     create: jest.fn(),
     save: jest.fn(),
     update: jest.fn(),
-    delete: jest.fn()
+    delete: jest.fn(),
+    // updateItem filters the payload against the mapped columns
+    metadata: {
+      columns: [
+        'uuid', 'id', 'order', 'locked', 'position', 'unitId', 'variableId',
+        'variableReadOnlyId', 'description', 'createdAt', 'changedAt'
+      ].map(propertyName => ({ propertyName }))
+    }
   };
 
   const mockUnitItemMetadataService = {
@@ -121,15 +128,19 @@ describe('UnitItemService', () => {
   });
 
   describe('updateItem', () => {
-    it('should update item and sync metadata', async () => {
+    it('should sync item metadata by profileId, preserving row identity', async () => {
+      // The client re-emits profiles without their row id but keeps the profileId.
       const uuid = 'uuid-1';
       const inputItem = {
         uuid,
-        profiles: [{ id: 1, unitItemUuid: uuid }]
+        profiles: [{ profileId: 'p1', unitItemUuid: uuid }]
       } as UnitItemWithMetadataDto;
 
       const existingItem = { uuid } as UnitItem;
-      const existingProfiles = [{ id: 2, unitItemUuid: uuid }] as UnitItemMetadataDto[];
+      const existingProfiles = [
+        { id: 2, profileId: 'p1', unitItemUuid: uuid },
+        { id: 3, profileId: 'p2', unitItemUuid: uuid }
+      ] as UnitItemMetadataDto[];
 
       mockRepository.findOneBy.mockResolvedValue(existingItem);
       mockRepository.update.mockResolvedValue({ affected: 1 });
@@ -138,8 +149,50 @@ describe('UnitItemService', () => {
       await service.updateItem(uuid, inputItem);
 
       expect(repository.update).toHaveBeenCalled();
-      expect(unitItemMetadataService.removeItemMetadata).toHaveBeenCalledWith(2);
-      expect(unitItemMetadataService.updateItemMetadata).toHaveBeenCalled();
+      // p1 matches an existing row -> update it (identity kept), never re-inserted
+      expect(unitItemMetadataService.updateItemMetadata)
+        .toHaveBeenCalledWith(2, expect.objectContaining({ id: 2, profileId: 'p1' }), undefined);
+      expect(unitItemMetadataService.addItemMetadata).not.toHaveBeenCalled();
+      // p2 is no longer present -> removed
+      expect(unitItemMetadataService.removeItemMetadata).toHaveBeenCalledWith(3, undefined);
+    });
+
+    it('inserts an item profile that has no stored counterpart', async () => {
+      const uuid = 'uuid-1';
+      const inputItem = {
+        uuid,
+        profiles: [{ profileId: 'p-new', unitItemUuid: uuid }]
+      } as UnitItemWithMetadataDto;
+
+      mockRepository.findOneBy.mockResolvedValue({ uuid } as UnitItem);
+      mockRepository.update.mockResolvedValue({ affected: 1 });
+      mockUnitItemMetadataService.getAllByItemId.mockResolvedValue([]);
+
+      await service.updateItem(uuid, inputItem);
+
+      expect(unitItemMetadataService.addItemMetadata)
+        .toHaveBeenCalledWith(uuid, expect.objectContaining({ profileId: 'p-new' }), undefined);
+      expect(unitItemMetadataService.removeItemMetadata).not.toHaveBeenCalled();
+    });
+
+    it('drops keys that are not mapped columns', async () => {
+      const uuid = 'uuid-1';
+      // a client or legacy metadata blob may still carry the dropped `weighting`
+      // field; TypeORM's update() would throw on the unknown property path
+      const inputItem = {
+        uuid,
+        description: 'Notiz',
+        weighting: 2,
+        profiles: []
+      } as unknown as UnitItemWithMetadataDto;
+
+      mockRepository.findOneBy.mockResolvedValue({ uuid } as UnitItem);
+      mockRepository.update.mockResolvedValue({ affected: 1 });
+      mockUnitItemMetadataService.getAllByItemId.mockResolvedValue([]);
+
+      await service.updateItem(uuid, inputItem);
+
+      expect(repository.update).toHaveBeenCalledWith(uuid, { uuid, description: 'Notiz' });
     });
   });
 

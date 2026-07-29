@@ -7,7 +7,7 @@ import {
   VeronaModuleFileDto, VeronaModuleInListDto, VeronaModuleMetadataDto, VeronaModuleType
 } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
-import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
+import { VeronaModuleKeyCollection, veronaModuleTypesMatch } from '@studio-lite/shared-code';
 import type { Response } from 'express';
 import VeronaModule from '../entities/verona-module.entity';
 import { AdminVeronaModulesNotFoundException } from '../exceptions/admin-verona-modules-not-found.exception';
@@ -60,7 +60,7 @@ export class VeronaModulesService {
       select: ['key', 'metadata', 'fileSize', 'fileDateTime']
     })) ?? [];
     return veronaModules
-      .filter(vm => !type || vm.metadata?.type === type)
+      .filter(vm => !type || veronaModuleTypesMatch(vm.metadata?.type, type))
       .map(vm => <VeronaModuleInListDto>{
         key: vm.key,
         sortKey: VeronaModuleKeyCollection.getSortKey(vm.key),
@@ -83,7 +83,8 @@ export class VeronaModulesService {
       const scriptContentAsJson = JSON.parse(scriptContentAsString);
       const veronaModuleMetadata = VeronaModuleMetadataDto.getFromJsonLd(scriptContentAsJson);
       if (veronaModuleMetadata) {
-        if (allowedTypes && !allowedTypes.includes(veronaModuleMetadata.type)) {
+        if (allowedTypes &&
+          !allowedTypes.some(t => veronaModuleTypesMatch(t, veronaModuleMetadata.type))) {
           throw new NotAcceptableException('verona module type not accepted');
         }
         const moduleKey = VeronaModuleMetadataDto.getKey(veronaModuleMetadata);

@@ -18,9 +18,15 @@ export function goToReviewAdmin(): void {
  * @param confirmKey - Optional translation key for a confirmation button in a dialog
  */
 function interactWithReview(name: string, actionButtonDataCy: string, confirmKey?: string): void {
+  // Selecting the row triggers an async GET for the review's full data. The
+  // action buttons (e.g. export) stay disabled until that data — including the
+  // unit list — has arrived, so wait for the response before clicking, otherwise
+  // the click lands on a still-disabled button and the dialog never opens.
+  cy.intercept('GET', '/api/workspaces/*/reviews/*').as('getReviewInteraction');
   cy.contains('mat-row', name)
     .should('exist')
     .click();
+  cy.wait('@getReviewInteraction');
   cy.get(`[data-cy="${actionButtonDataCy}"]`)
     .should('be.visible')
     .click();

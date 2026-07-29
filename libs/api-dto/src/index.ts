@@ -1,4 +1,8 @@
-export { CodingReportDto } from './lib/dtos/workspace/coding-report.dto';
+export {
+  CODING_SCHEME_PROBLEM_TYPES,
+  CodingReportDto,
+  CodingReportValidationProblemDto
+} from './lib/dtos/workspace/coding-report.dto';
 export { MissingsProfilesDto } from './lib/dtos/setting/missings-profiles.dto';
 export { ReviewConfigDto } from './lib/dtos/review/review-config.dto';
 export { BookletConfigDto } from './lib/dtos/review/booklet-config.dto';
@@ -12,7 +16,7 @@ export { MyDataDto } from './lib/dtos/user/my-data.dto';
 export { UnitExportConfigDto } from './lib/dtos/setting/unit-export-config.dto';
 export { ProfilesRegistryDto } from './lib/dtos/setting/profiles-registry.dto';
 export { EmailTemplateDto } from './lib/dtos/setting/email-template.dto';
-export { UnitDownloadSettingsDto } from './lib/dtos/unit/unit-download-settings.dto';
+export { UnitDownloadSettingsDto, UnitDownloadBookletSettingsDto } from './lib/dtos/unit/unit-download-settings.dto';
 export { RequestReportDto } from './lib/dtos/request-report.dto';
 export { UnitSchemeDto } from './lib/dtos/unit/unit-scheme.dto';
 export { AppLogoDto } from './lib/dtos/setting/app-logo.dto';
@@ -41,7 +45,7 @@ export { CreateWorkspaceDto } from './lib/dtos/workspace/create-workspace.dto';
 export { CreateUserDto } from './lib/dtos/user/create-user.dto';
 export { UserInListDto } from './lib/dtos/user/user-in-list.dto';
 export { UserFullDto } from './lib/dtos/user/user-full.dto';
-export { UserActivityStatus } from './lib/dtos/user/user-activity-status';
+export { UserActivityStatus, SessionActivityStatus } from './lib/dtos/user/user-activity-status';
 export { UserSessionInfoDto } from './lib/dtos/user/user-session-info.dto';
 export { IdArrayDto } from './lib/dtos/id-array.dto';
 export { MoveToDto } from './lib/dtos/move-to.dto';
@@ -55,7 +59,7 @@ export { UnitCommentVoteDto } from './lib/dtos/unit-comment/unit-comment-vote.dt
 export { UnitCommentVoterDto } from './lib/dtos/unit-comment/unit-comment-voter.dto';
 export { UpdateUnitUserDto } from './lib/dtos/unit-user/update-unit-user.dto';
 export { ProfileMetadataValues } from './lib/dtos/unit/profile-metadata-values.class';
-export { MetadataValues } from './lib/dtos/unit/profile-metadata-values.class';
+export { ProfileValues } from './lib/dtos/unit/profile-metadata-values.class';
 export { ItemsMetadataValues } from './lib/dtos/unit/profile-metadata-values.class';
 export { MetadataValuesEntry } from './lib/dtos/unit/profile-metadata-values.class';
 export { CodebookUnitDto, CodeBookVariable } from './lib/dtos/coding/coding.dto';

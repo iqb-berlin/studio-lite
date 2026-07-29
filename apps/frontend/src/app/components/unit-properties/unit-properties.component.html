@@ -1,3 +1,9 @@
+@if (key) {
+  <h2 class="unit-key">{{key}}</h2>
+}
+@if (name) {
+  <h3 class="unit-name">{{name}}</h3>
+}
 <table class="metadata">
   @if (stateLabel) {
     <tr>
@@ -25,27 +31,6 @@
       <td class="cell left-cell">{{'print.transcript' | translate}}</td>
       <td class="cell"></td>
       <td class="cell right-cell">{{transcript}}</td>
-    </tr>
-  }
-  @if (lastChangedDefinition) {
-    <tr>
-      <td class="cell left-cell">{{'print.last-changed-definition' | translate}}</td>
-      <td class="cell">{{lastChangedDefinitionUser}}</td>
-      <td class="cell right-cell">{{lastChangedDefinition | date: 'dd.MM.yyyy HH:mm'}}</td>
-    </tr>
-  }
-  @if (lastChangedMetadata) {
-    <tr>
-      <td class="cell left-cell">{{'print.last-changed-metadata' | translate}}</td>
-      <td class="cell">{{lastChangedMetadataUser}}</td>
-      <td class="cell right-cell">{{lastChangedMetadata | date: 'dd.MM.yyyy HH:mm'}}</td>
-    </tr>
-  }
-  @if (lastChangedScheme) {
-    <tr>
-      <td class="cell left-cell">{{'print.last-changed-scheme' | translate}}</td>
-      <td class="cell">{{lastChangedSchemeUser}}</td>
-      <td class="cell right-cell">{{lastChangedScheme | date: 'dd.MM.yyyy HH:mm'}}</td>
     </tr>
   }
   @if (player) {

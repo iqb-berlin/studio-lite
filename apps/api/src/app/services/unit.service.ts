@@ -1,16 +1,18 @@
 import { Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
+import {
+  EntityManager, In, Not, QueryFailedError, Repository
+} from 'typeorm';
 import {
   CreateUnitDto,
-  MetadataDto,
+  MetadataValuesEntry,
+  ProfileValues,
   RequestReportDto,
   UnitInViewDto,
   UnitDefinitionDto,
   UnitDefinitionFullDto,
   UnitFullMetadataDto,
   UnitInListDto,
-  UnitItemMetadataDto,
   UnitItemWithMetadataDto,
   UnitMetadataDto,
   UnitMetadataValues,
@@ -18,6 +20,11 @@ import {
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { LanguageCodedText } from '@iqbspecs/metadata-profile';
+import {
+  orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId
+} from '@studio-lite/shared-code';
+import { combineNotationAndLabel } from '../classes/metadata-value.util';
 import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
@@ -28,9 +35,15 @@ import User from '../entities/user.entity';
 import UnitDropBoxHistory from '../entities/unit-drop-box-history.entity';
 import { UnitMetadataService } from './unit-metadata.service';
 import { UnitItemService } from './unit-item.service';
+import { MetadataProfileService } from './metadata-profile.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
+
+// Dedupes profile lookups within a single request (a units list shares the same
+// profiles across units). Caches the pending promise so parallel unit reads
+// under Promise.all reuse one DB fetch instead of each firing its own.
+type ProfileFetchCache = Map<string, ReturnType<MetadataProfileService['getStoredMetadataProfileFromDb']>>;
 
 export class UnitService {
   private readonly logger = new Logger(UnitService.name);
@@ -52,7 +65,8 @@ export class UnitService {
     private unitCommentService: UnitCommentService,
     private unitMetadataService: UnitMetadataService,
     private unitItemService: UnitItemService,
-    private unitMetadataToDeleteService: UnitMetadataToDeleteService
+    private unitMetadataToDeleteService: UnitMetadataToDeleteService,
+    private metadataProfileService: MetadataProfileService
   ) {}
 
   async findOne(id: number): Promise<Unit> {
@@ -230,6 +244,7 @@ export class UnitService {
     const newUnit = this.unitsRepository.create(unit);
     newUnit.workspaceId = workspaceId;
     newUnit.groupName = unit.groupName;
+    newUnit.uuid = crypto.randomUUID();
     await this.unitsRepository.save(newUnit);
 
     if (unit.createFrom) {
@@ -257,14 +272,14 @@ export class UnitService {
         newUnit.lastChangedScheme = unitSourceData.lastChangedScheme || null;
         await this.unitsRepository.save(newUnit);
 
-        const metadata = await this.getMetadataOfUnit(newUnit, unit.createFrom);
+        const rawMetadata = await this.getMetadataOfUnit(newUnit, unit.createFrom);
         const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
-        UnitService.setCurrentProfiles(
+        const metadata = UnitService.setCurrentProfiles(
           workspace.settings?.unitMDProfile,
           workspace.settings?.itemMDProfile,
-          metadata as UnitFullMetadataDto
+          rawMetadata
         );
-        const itemUuidLookups = await this.copyItemsWithMetadata(newUnit.id, metadata as UnitFullMetadataDto);
+        const itemUuidLookups = await this.copyItemsWithMetadata(newUnit.id, metadata);
 
         const unitSourceDefinition = await this.findOnesDefinition(unit.createFrom);
         if (unitSourceDefinition.definition || newUnit.lastChangedDefinition) {
@@ -314,13 +329,50 @@ export class UnitService {
     return newUnit.id;
   }
 
+  // Adopts the universal id from an imported unit index so a unit keeps its
+  // identity across instances (spec: uuid helps to find variants/versions).
+  // If another unit already holds the uuid (e.g. the same export was imported
+  // twice), the unit keeps the fresh uuid assigned by create().
+  async adoptUuidIfFree(unitId: number, uuid: string): Promise<void> {
+    const existing = await this.unitsRepository.findOne({
+      where: { uuid },
+      select: ['id']
+    });
+    if (existing) return;
+    try {
+      await this.unitsRepository.update(unitId, { uuid });
+    } catch (error) {
+      const isUniqueViolation = error instanceof QueryFailedError &&
+        (error.driverError as { code?: string })?.code === '23505';
+      if (!isUniqueViolation) {
+        this.logger.warn(`Could not adopt uuid '${uuid}' for unit ${unitId}: ${error}`);
+      }
+      // on unique violation a concurrent import claimed the uuid first – keep the fresh one
+    }
+  }
+
+  async ensureUuid(unitId: number): Promise<string> {
+    return this.unitsRepository.manager.transaction(async manager => {
+      const unit = await manager.findOne(Unit, {
+        where: { id: unitId },
+        select: ['id', 'uuid'],
+        lock: { mode: 'pessimistic_write' }
+      });
+      if (!unit) throw new UnitNotFoundException(unitId, 0, 'GET');
+      if (unit.uuid) return unit.uuid;
+      unit.uuid = crypto.randomUUID();
+      await manager.save(unit);
+      return unit.uuid;
+    });
+  }
+
   async findOnesProperties(unitId: number, workspaceId: number): Promise<UnitPropertiesDto> {
     this.logger.log(`Returning metadata for unit wit id: ${unitId}`);
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId, workspaceId: workspaceId },
       select: [
         'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
-        'player', 'description', 'transcript', 'reference',
+        'player', 'description', 'transcript', 'reference', 'uuid',
         'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state',
         'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser'
       ]
@@ -346,38 +398,50 @@ export class UnitService {
         'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser'
       ]
     });
-    return Promise.all(units.map(async unit => this.getModifiedMetadataForUnit(unit, workspace)));
+    const profileCache: ProfileFetchCache = new Map();
+    return Promise.all(units.map(async unit => this.getModifiedMetadataForUnit(unit, workspace, profileCache)));
   }
 
-  private async getModifiedMetadataForUnit(unit: Unit, workspace: Workspace): Promise<Unit> {
+  private async getModifiedMetadataForUnit(
+    unit: Unit,
+    workspace: Workspace,
+    profileCache?: ProfileFetchCache
+  ): Promise<Unit> {
     const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(unit.id);
     if (unitMetadataToDelete) {
+      // findOnesMetadata already backfills valueAsText.
       unit.metadata = await this.findOnesMetadata(unit.id);
     } else {
-      unit.metadata = UnitService.setCurrentProfiles(
-        workspace.settings?.unitMDProfile,
-        workspace.settings?.itemMDProfile,
-        unit.metadata);
+      unit.metadata = await this.resolveValueAsText(
+        UnitService.setCurrentProfiles(
+          workspace.settings?.unitMDProfile,
+          workspace.settings?.itemMDProfile,
+          unit.metadata
+        ),
+        profileCache
+      );
     }
     return unit;
   }
 
   static setCurrentProfiles(
-    unitProfile: string, itemProfile: string, metadata: UnitFullMetadataDto
-  ): UnitFullMetadataDto {
-    if (metadata.profiles) {
-      metadata.profiles = metadata.profiles.map((profile => UnitService
-        .setCurrentProfile(unitProfile, profile) as UnitMetadataDto));
-    }
-    if (metadata.items) {
-      metadata.items.forEach(item => {
-        if (item.profiles) {
-          item.profiles = item.profiles.map(profile => UnitService
-            .setCurrentProfile(itemProfile, profile) as UnitItemMetadataDto);
-        }
-      });
-    }
-    return metadata;
+    unitProfile: string, itemProfile: string, metadata: UnitMetadataValues
+  ): UnitMetadataValues {
+    if (!metadata) return metadata;
+    return {
+      ...metadata,
+      ...(metadata.profiles && {
+        profiles: metadata.profiles.map(profile => UnitService.setCurrentProfile(unitProfile, profile))
+      }),
+      ...(metadata.items && {
+        items: metadata.items.map(item => ({
+          ...item,
+          ...(item.profiles && {
+            profiles: item.profiles.map(profile => UnitService.setCurrentProfile(itemProfile, profile))
+          })
+        }))
+      })
+    };
   }
 
   async getDisplayNameForUser(id: number): Promise<string> {
@@ -392,62 +456,216 @@ export class UnitService {
     return user.firstName && user.firstName.trim() ? `${displayName}, ${user.firstName.trim()}` : displayName;
   }
 
-  private static setCurrentProfile(profileId: string, profile: MetadataDto): MetadataDto {
+  private static setCurrentProfile<T extends ProfileValues>(profileId: string, profile: T): T {
     return {
       ...profile,
-      isCurrent: profile.profileId === profileId
+      order: orderFromCurrent(profileIdsMatch(profile.profileId, profileId))
     };
   }
 
-  async patchUnitMetadata(unitId: number, profiles: UnitMetadataDto[]): Promise<void> {
-    const profilesToUpdate = await this.unitMetadataService.getAllByUnitId(unitId);
-    const { unchanged, removed, added } = UnitItemService.compare(profilesToUpdate, profiles, 'id');
-    unchanged
-      .map(metadata => this.unitMetadataService.updateMetadata(metadata.id, metadata));
-    removed
-      .map(metadata => this.unitMetadataService.removeMetadata(metadata.id));
-    added
-      .map(metadata => this.unitMetadataService.addMetadata(unitId, metadata));
+  // Backfill a display text (valueAsText) for entries that have none, e.g. rows
+  // stored before valueAsText was populated. Only structured values carry their
+  // own text: vocabulary entries hold it in `text`, multilingual free text is
+  // already language-coded. A plain string cannot be resolved here (a coded value
+  // needs its vocabulary, free text carries no language), so it is left empty
+  // rather than guessed. Returns new objects; the stored entities are not mutated.
+  // hideNumbering maps profileId -> entryId -> true when that vocabulary field
+  // hides the numbering. Empty (the default) keeps the numbering everywhere,
+  // which matches the behaviour before hideNumbering was honoured server-side.
+  static ensureValueAsText(
+    metadata: UnitMetadataValues,
+    hideNumbering: Record<string, Record<string, boolean>> = {}
+  ): UnitMetadataValues {
+    if (!metadata) return metadata;
+    const forProfile = <T extends ProfileValues>(profile: T): T => UnitService.fillProfileValueAsText(
+      profile,
+      hideNumbering[profile.profileId ?? ''] ?? {}
+    );
+    return {
+      ...metadata,
+      ...(metadata.profiles && { profiles: metadata.profiles.map(forProfile) }),
+      ...(metadata.items && {
+        items: metadata.items.map(item => ({
+          ...item,
+          ...(item.profiles && { profiles: item.profiles.map(forProfile) })
+        }))
+      })
+    };
   }
 
-  async patchItemsMetadata(unitId: number, items: UnitItemWithMetadataDto[]): Promise<void> {
-    const itemsToUpdate = await this.unitItemService.getAllByUnitIdWithMetadata(unitId);
+  private static fillProfileValueAsText<T extends ProfileValues>(
+    profile: T,
+    hideNumberingByEntry: Record<string, boolean>
+  ): T {
+    if (!profile.entries) return profile;
+    return {
+      ...profile,
+      entries: profile.entries.map(
+        entry => UnitService.fillEntryValueAsText(entry, hideNumberingByEntry[entry.id] ?? false)
+      )
+    };
+  }
+
+  private static fillEntryValueAsText(entry: MetadataValuesEntry, hideNumbering: boolean): MetadataValuesEntry {
+    const { value } = entry;
+    const isVocabulary = Array.isArray(value) &&
+      value.some(item => !!item && typeof item === 'object' && 'id' in item);
+    // Vocabulary display text is always recomputed so hideNumbering applies even
+    // when a valueAsText was already stored (e.g. imported units); other value
+    // types keep their stored valueAsText and are only backfilled when empty.
+    if (isVocabulary) {
+      return { ...entry, valueAsText: UnitService.getEntryValueAsText(value, hideNumbering) };
+    }
+    const hasText = Array.isArray(entry.valueAsText) ? entry.valueAsText.length > 0 : !!entry.valueAsText;
+    if (hasText) return entry;
+    return { ...entry, valueAsText: UnitService.getEntryValueAsText(value) };
+  }
+
+  private static getEntryValueAsText(
+    value: MetadataValuesEntry['value'],
+    hideNumbering = false
+  ): MetadataValuesEntry['valueAsText'] {
+    // metadata-values@3.x simple value { raw, asText } (form-created; the legacy
+    // form stored a plain string instead and has no asText to recover).
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return (value as unknown as { asText?: MetadataValuesEntry['valueAsText'] }).asText ?? [];
+    }
+    if (!Array.isArray(value)) return [];
+    if (value.some(item => item && typeof item === 'object' && 'id' in item)) {
+      // vocabulary entries: metadata-values@3.x carries the pure label in `label`
+      // (legacy internal form in `text`) and the numbering in `annotation`; the
+      // display text combines numbering + label.
+      return value.flatMap(item => {
+        if (!item || typeof item !== 'object' || !('id' in item)) return [];
+        const vocab = item as {
+          label?: LanguageCodedText[]; text?: LanguageCodedText[]; annotation?: LanguageCodedText[];
+        };
+        const texts = vocab.label ?? vocab.text;
+        return hideNumbering ? (texts ?? []) : combineNotationAndLabel(vocab.annotation, texts);
+      }) as MetadataValuesEntry['valueAsText'];
+    }
+    // no vocabulary entries -> already multilingual free text
+    return value as MetadataValuesEntry['valueAsText'];
+  }
+
+  // Applies valueAsText (incl. hideNumbering) for display. The hideNumbering
+  // flags come from the stored profile definitions, so vocabulary numbering is
+  // suppressed consistently in every read-only view that consumes valueAsText.
+  private async resolveValueAsText(
+    metadata: UnitMetadataValues,
+    profileCache?: ProfileFetchCache
+  ): Promise<UnitMetadataValues> {
+    const hideNumbering = await this.buildHideNumberingMap(metadata, profileCache);
+    return UnitService.ensureValueAsText(metadata, hideNumbering);
+  }
+
+  // Builds profileId -> entryId -> hideNumbering from the DB-stored profile
+  // definitions of every profile referenced by the metadata (unit and item
+  // profiles). DB-only reads keep this cheap on list endpoints. Public so the
+  // XML export can fold the numbering back the same way (see toLegacyMetadataBlob).
+  async buildHideNumberingMap(
+    metadata: UnitMetadataValues | undefined,
+    profileCache: ProfileFetchCache = new Map()
+  ): Promise<Record<string, Record<string, boolean>>> {
+    if (!metadata) return {};
+    const profileIds = new Set<string>();
+    (metadata.profiles ?? []).forEach(profile => {
+      if (profile.profileId) profileIds.add(profile.profileId);
+    });
+    (metadata.items ?? []).forEach(item => (item.profiles ?? []).forEach(profile => {
+      if (profile.profileId) profileIds.add(profile.profileId);
+    }));
+    const map: Record<string, Record<string, boolean>> = {};
+    await Promise.all([...profileIds].map(async profileId => {
+      let pending = profileCache.get(profileId);
+      if (!pending) {
+        pending = this.metadataProfileService.getStoredMetadataProfileFromDb(profileId);
+        profileCache.set(profileId, pending);
+      }
+      const profile = await pending;
+      if (!profile?.groups) return;
+      const entryMap: Record<string, boolean> = {};
+      profile.groups.forEach(group => (group.entries ?? []).forEach(entry => {
+        const parameters = entry.parameters as { hideNumbering?: boolean } | null;
+        if (parameters?.hideNumbering) entryMap[entry.id] = true;
+      }));
+      map[profileId] = entryMap;
+    }));
+    return map;
+  }
+
+  // Reconcile unit metadata by profileId (the profile form re-emits without the
+  // row id), so an edit updates the existing row instead of delete + re-insert.
+  async patchUnitMetadata(unitId: number, profiles: UnitMetadataDto[], manager?: EntityManager): Promise<void> {
+    const existingProfiles = await this.unitMetadataService.getAllByUnitId(unitId, manager);
+    await reconcileProfilesByProfileId(existingProfiles, profiles, {
+      remove: id => this.unitMetadataService.removeMetadata(id, manager),
+      update: (id, metadata) => this.unitMetadataService.updateMetadata(id, metadata, manager),
+      add: metadata => this.unitMetadataService.addMetadata(unitId, metadata, manager)
+    });
+  }
+
+  async patchItemsMetadata(
+    unitId: number,
+    items: UnitItemWithMetadataDto[],
+    manager?: EntityManager
+  ): Promise<void> {
+    const itemsToUpdate = await this.unitItemService.getAllByUnitIdWithMetadata(unitId, manager);
     const { unchanged, removed, added } = UnitItemService.compare(itemsToUpdate, items, 'uuid');
-    unchanged
-      .map(item => this.unitItemService.updateItem(item.uuid, item));
-    removed
-      .map(item => this.unitItemService.removeItem(item.uuid));
-    added
-      .map(item => this.unitItemService.addItem(unitId, item));
+    await Promise.all([
+      ...unchanged.map(item => this.unitItemService.updateItem(item.uuid, item, manager)),
+      ...removed.map(item => this.unitItemService.removeItem(item.uuid, manager)),
+      ...added.map(item => this.unitItemService.addItem(unitId, item, manager))
+    ]);
   }
 
+  // Takes the internal write shape: id and unitItemUuid do not exist yet —
+  // addItem/addItemMetadata generate or discard them — hence the casts at the
+  // DTO boundary below.
   async copyItemsWithMetadata(
     unitId: number,
-    metadata: UnitFullMetadataDto
+    metadata: UnitMetadataValues
   ): Promise<ItemUuidLookup[]> {
     const profiles = metadata.profiles || [];
-    profiles
+    await Promise.all(profiles
       .map(profile => this.unitMetadataService
-        .addMetadata(unitId, profile as UnitMetadataDto));
+        .addMetadata(unitId, profile as UnitMetadataDto)));
     const items = metadata.items || [];
     const itemUuids = await Promise.all(items
       .map(async item => ({
         newUuid: await this.unitItemService
-          .addItem(unitId, item as UnitItemWithMetadataDto),
+          .addItem(unitId, item as unknown as UnitItemWithMetadataDto),
         oldUuid: item.uuid
       })));
     await this.unitMetadataToDeleteService.upsertOneForUnit(unitId);
     return itemUuids;
   }
 
+  // The whole metadata save runs in one transaction so a mid-sequence failure
+  // (e.g. a constraint error on one profile) rolls back every write instead of
+  // leaving the unit's profiles/items half-updated.
+  //
+  // The profile form re-emits profiles without `order`, so the current profile
+  // must be flagged here from the workspace settings — otherwise a newly stored
+  // profile keeps the -1 (hidden) insert default and, because the read path uses
+  // the normalized tables (permanent unit_metadata_to_delete marker) without
+  // re-deriving, it would be read back as hidden.
   async patchMetadata(unitId: number, metadata: UnitMetadataValues): Promise<void> {
-    const profiles = metadata.profiles || [];
-    await this.patchUnitMetadata(unitId, profiles as UnitMetadataDto[]);
-
-    const items = metadata.items || [];
-    await this.patchItemsMetadata(unitId, items as unknown as UnitItemWithMetadataDto[]);
-
-    await this.unitMetadataToDeleteService.upsertOneForUnit(unitId);
+    const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
+    if (!unit) throw new UnitNotFoundException(unitId, 0, 'PATCH');
+    const workspace = await this.workspaceRepository.findOne({ where: { id: unit.workspaceId } });
+    const withOrder = UnitService.setCurrentProfiles(
+      workspace?.settings?.unitMDProfile,
+      workspace?.settings?.itemMDProfile,
+      metadata
+    );
+    const profiles = withOrder.profiles || [];
+    const items = withOrder.items || [];
+    await this.unitsRepository.manager.transaction(async manager => {
+      await this.patchUnitMetadata(unitId, profiles as UnitMetadataDto[], manager);
+      await this.patchItemsMetadata(unitId, items as unknown as UnitItemWithMetadataDto[], manager);
+      await this.unitMetadataToDeleteService.upsertOneForUnit(unitId, manager);
+    });
   }
 
   async patchUnit(unitId: number, newData: UnitPropertiesDto, userName: string | null): Promise<void> {
@@ -589,11 +807,10 @@ export class UnitService {
 
   private async patchUnitMetadataCurrentProfile(unitId: number, unitProfile: string): Promise<void> {
     const profilesToUpdate: UnitMetadataDto[] = await this.unitMetadataService.getAllByUnitId(unitId);
-    profilesToUpdate.map(metadata => {
-      metadata.isCurrent = metadata.profileId === unitProfile;
-      this.unitMetadataService.updateMetadata(metadata.id, metadata);
-      return metadata;
-    });
+    await Promise.all(profilesToUpdate.map(metadata => {
+      metadata.order = orderFromCurrent(profileIdsMatch(metadata.profileId, unitProfile));
+      return this.unitMetadataService.updateMetadata(metadata.id, metadata);
+    }));
   }
 
   async copy(unitIds: number[], newWorkspace: number, user: User, addComments: boolean): Promise<RequestReportDto> {
@@ -601,7 +818,7 @@ export class UnitService {
       const unitToCopy = await this.unitsRepository.findOne({
         where: { id: unitId }
       });
-      const keysToIgnore = ['id', 'groupName', 'key', 'state'];
+      const keysToIgnore = ['id', 'groupName', 'key', 'state', 'uuid'];
       const keysToCopy = Object.keys(unitToCopy)
         .filter(key => !keysToIgnore.includes(key))
         .reduce((obj, key) => {
@@ -780,18 +997,22 @@ export class UnitService {
     await this.unitsRepository.save(unitToUpdate);
   }
 
-  private async getMetadataOfUnit(unit: Unit, createFrom: number): Promise<UnitMetadataValues | UnitFullMetadataDto> {
+  private async getMetadataOfUnit(unit: Unit, createFrom: number): Promise<UnitMetadataValues> {
     const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(createFrom);
     if (unitMetadataToDelete) {
-      return this.findOnesMetadata(createFrom);
+      // the read DTO is a runtime superset of the internal write shape; only
+      // the index signature of ItemsMetadataValues blocks direct assignment
+      return await this.findOnesMetadata(createFrom) as unknown as UnitMetadataValues;
     }
-    return unit.metadata;
+    return this.resolveValueAsText(unit.metadata as UnitMetadataValues);
   }
 
   async findOnesMetadata(unitId: number): Promise<UnitFullMetadataDto> {
-    return {
+    const metadata: UnitMetadataValues = {
       profiles: await this.unitMetadataService.getAllByUnitId(unitId),
-      items: await this.unitItemService.getAllByUnitIdWithMetadata(unitId)
+      items: await this.unitItemService
+        .getAllByUnitIdWithMetadata(unitId) as unknown as UnitMetadataValues['items']
     };
+    return await this.resolveValueAsText(metadata) as unknown as UnitFullMetadataDto;
   }
 }

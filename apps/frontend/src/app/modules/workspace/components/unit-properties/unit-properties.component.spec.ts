@@ -5,7 +5,9 @@ import { Component, Input } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { BehaviorSubject, of, Subject } from 'rxjs';
-import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { createMock } from '@golevelup/ts-jest';
+import { UnitMetadataValues, UnitPropertiesDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { UnitMetadataStore } from '../../classes/unit-metadata-store';
 import { ModuleService } from '../../../../services/module.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -127,5 +129,51 @@ describe('UnitPropertiesComponent', () => {
     component.onGroupNameChange('Group A');
 
     expect(component.unitForm.get('group')?.value).toBe('Group A');
+  });
+
+  it('merges changed profiles into the store while preserving items', () => {
+    const store = createMock<UnitMetadataStore>();
+    store.getData.mockReturnValue({
+      metadata: { profiles: [{ profileId: 'old' }], items: [{ id: 'item1' }] }
+    } as unknown as UnitPropertiesDto);
+    jest.spyOn(component.workspaceService, 'getUnitMetadataStore').mockReturnValue(store);
+
+    component.onMetadataChange({ profiles: [{ profileId: 'new' }] } as unknown as Parameters<
+    typeof component.onMetadataChange>[0]);
+
+    expect(store.setMetadata).toHaveBeenCalledWith({
+      profiles: [{ profileId: 'new' }],
+      items: [{ id: 'item1' }]
+    });
+  });
+
+  it('merges changed items into the store while preserving profiles', () => {
+    const store = createMock<UnitMetadataStore>();
+    store.getData.mockReturnValue({
+      metadata: { profiles: [{ profileId: 'p1' }], items: [{ id: 'old' }] }
+    } as unknown as UnitPropertiesDto);
+    jest.spyOn(component.workspaceService, 'getUnitMetadataStore').mockReturnValue(store);
+
+    component.onItemsMetadataChange({ profiles: [], items: [{ id: 'new' }] } as unknown as UnitMetadataValues);
+
+    expect(store.setMetadata).toHaveBeenCalledWith({
+      profiles: [{ profileId: 'p1' }],
+      items: [{ id: 'new' }]
+    });
+  });
+
+  it('does not clobber stored profiles when onMetadataChange carries no profiles slice', () => {
+    const store = createMock<UnitMetadataStore>();
+    store.getData.mockReturnValue({
+      metadata: { profiles: [{ profileId: 'p1' }], items: [{ id: 'item1' }] }
+    } as unknown as UnitPropertiesDto);
+    jest.spyOn(component.workspaceService, 'getUnitMetadataStore').mockReturnValue(store);
+
+    component.onMetadataChange({} as unknown as Parameters<typeof component.onMetadataChange>[0]);
+
+    expect(store.setMetadata).toHaveBeenCalledWith({
+      profiles: [{ profileId: 'p1' }],
+      items: [{ id: 'item1' }]
+    });
   });
 });

@@ -1,7 +1,13 @@
 import { Logger } from '@nestjs/common';
-import { UnitItemDto, UnitItemInViewDto, UnitItemWithMetadataDto } from '@studio-lite-lib/api-dto';
+import {
+  UnitItemDto, UnitItemInViewDto, UnitItemMetadataDto, UnitItemWithMetadataDto
+} from '@studio-lite-lib/api-dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import {
+  orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId
+} from '@studio-lite/shared-code';
 import UnitItem from '../entities/unit-item.entity';
 import { UnitItemMetadataService } from './unit-item-metadata.service';
 import { ItemCommentService } from './item-comment.service';
@@ -16,6 +22,12 @@ export class UnitItemService {
     private unitItemMetadataService: UnitItemMetadataService,
     private itemCommentService: ItemCommentService
   ) {}
+
+  // When a transactional manager is passed the write joins that transaction;
+  // otherwise the injected repository (default connection) is used.
+  private repo(manager?: EntityManager): Repository<UnitItem> {
+    return manager ? manager.getRepository(UnitItem) : this.unitItemRepository;
+  }
 
   async getAll(): Promise<UnitItemDto[]> {
     return this.unitItemRepository.find();
@@ -43,21 +55,22 @@ export class UnitItemService {
 
   async getAllByUnitId(unitId: number,
                        orderKey: string = 'id',
-                       direction: 'DESC' | 'ASC' = 'ASC'): Promise<UnitItemDto[]> {
-    return this.unitItemRepository
+                       direction: 'DESC' | 'ASC' = 'ASC',
+                       manager?: EntityManager): Promise<UnitItemDto[]> {
+    return this.repo(manager)
       .find(
         { where: { unitId: unitId }, order: { [orderKey]: direction } });
   }
 
-  async getOneByUuid(uuid: string): Promise<UnitItemDto> {
-    return this.unitItemRepository.findOneBy({ uuid: uuid });
+  async getOneByUuid(uuid: string, manager?: EntityManager): Promise<UnitItemDto> {
+    return this.repo(manager).findOneBy({ uuid: uuid });
   }
 
-  async getAllByUnitIdWithMetadata(unitId: number): Promise<UnitItemWithMetadataDto[]> {
-    return Promise.all((await this.getAllByUnitId(unitId))
+  async getAllByUnitIdWithMetadata(unitId: number, manager?: EntityManager): Promise<UnitItemWithMetadataDto[]> {
+    return Promise.all((await this.getAllByUnitId(unitId, 'id', 'ASC', manager))
       .map(async item => ({
         ...item,
-        profiles: await this.unitItemMetadataService.getAllByItemId(item.uuid)
+        profiles: await this.unitItemMetadataService.getAllByItemId(item.uuid, manager)
       }))
     );
   }
@@ -75,47 +88,70 @@ export class UnitItemService {
     return { unchanged, removed, added };
   }
 
-  async updateItem(uuid: string, item: UnitItemWithMetadataDto): Promise<void> {
-    const updateItem = await this.getOneByUuid(uuid);
+  async updateItem(uuid: string, item: UnitItemWithMetadataDto, manager?: EntityManager): Promise<void> {
+    const updateItem = await this.getOneByUuid(uuid, manager);
     if (updateItem) {
       const { profiles, ...unitItem } = item;
-      await this.unitItemRepository.update(uuid, unitItem);
-      const profilesToUpdate = await this.unitItemMetadataService.getAllByItemId(item.uuid);
-      const { unchanged, removed, added } = UnitItemService.compare(profilesToUpdate, profiles, 'id');
-      unchanged
-        .map(metadata => this.unitItemMetadataService.updateItemMetadata(metadata.id, metadata));
-      removed
-        .map(metadata => this.unitItemMetadataService.removeItemMetadata(metadata.id));
-      added
-        .map(metadata => this.unitItemMetadataService.addItemMetadata(uuid, metadata));
+      await this.repo(manager).update(uuid, this.toColumnValues(unitItem, manager));
+      await this.reconcileItemProfiles(uuid, profiles || [], manager);
     }
   }
 
-  async patchItemMetadataCurrentProfile(unitId: number, itemProfile: string) {
-    const itemsToUpdate: UnitItemWithMetadataDto[] = await this.getAllByUnitIdWithMetadata(unitId);
-    const profiles = itemsToUpdate.flatMap(metadata => metadata.profiles);
-    profiles.map(metadata => {
-      metadata.isCurrent = metadata.profileId === itemProfile;
-      this.unitItemMetadataService.updateItemMetadata(metadata.id, metadata);
-      return metadata;
+  // A save may carry keys that are not (or no longer) entity columns: a client
+  // still holding item objects from before a field was dropped, or a legacy
+  // metadata blob that stores the internal shape verbatim. TypeORM's update()
+  // throws EntityPropertyNotFoundError on unknown property paths, which would
+  // fail the whole metadata save, so keep only mapped columns. create() (addItem)
+  // already ignores unknown keys.
+  private toColumnValues(
+    item: Omit<UnitItemWithMetadataDto, 'profiles'>,
+    manager?: EntityManager
+  ): QueryDeepPartialEntity<UnitItem> {
+    const columnNames = new Set(this.repo(manager).metadata.columns.map(column => column.propertyName));
+    return Object.fromEntries(
+      Object.entries(item).filter(([key]) => columnNames.has(key))
+    ) as QueryDeepPartialEntity<UnitItem>;
+  }
+
+  // Reconcile item metadata by profileId (the profile form re-emits without the
+  // row id), so an edit updates the existing row instead of delete + re-insert.
+  private async reconcileItemProfiles(
+    uuid: string,
+    profiles: UnitItemMetadataDto[],
+    manager?: EntityManager
+  ): Promise<void> {
+    const existingProfiles = await this.unitItemMetadataService.getAllByItemId(uuid, manager);
+    await reconcileProfilesByProfileId(existingProfiles, profiles, {
+      remove: id => this.unitItemMetadataService.removeItemMetadata(id, manager),
+      update: (id, metadata) => this.unitItemMetadataService.updateItemMetadata(id, metadata, manager),
+      add: metadata => this.unitItemMetadataService.addItemMetadata(uuid, metadata, manager)
     });
   }
 
-  async addItem(unitId: number, item: UnitItemWithMetadataDto): Promise<string> {
+  async patchItemMetadataCurrentProfile(unitId: number, itemProfile: string): Promise<void> {
+    const itemsToUpdate: UnitItemWithMetadataDto[] = await this.getAllByUnitIdWithMetadata(unitId);
+    const profiles = itemsToUpdate.flatMap(metadata => metadata.profiles);
+    await Promise.all(profiles.map(metadata => {
+      metadata.order = orderFromCurrent(profileIdsMatch(metadata.profileId, itemProfile));
+      return this.unitItemMetadataService.updateItemMetadata(metadata.id, metadata);
+    }));
+  }
+
+  async addItem(unitId: number, item: UnitItemWithMetadataDto, manager?: EntityManager): Promise<string> {
     item.unitId = unitId;
     const { uuid, ...itemWithoutUuid } = item;
-    const newItem = this.unitItemRepository.create(itemWithoutUuid);
-    await this.unitItemRepository.save(newItem);
+    const newItem = this.repo(manager).create(itemWithoutUuid);
+    await this.repo(manager).save(newItem);
     if (item.profiles) {
-      item.profiles
-        .map(async profile => this.unitItemMetadataService
-          .addItemMetadata(newItem.uuid, profile));
+      await Promise.all(item.profiles
+        .map(profile => this.unitItemMetadataService
+          .addItemMetadata(newItem.uuid, profile, manager)));
     }
     return newItem.uuid;
   }
 
-  async removeItem(uuid: string): Promise<void> {
-    await this.unitItemRepository.delete(uuid);
+  async removeItem(uuid: string, manager?: EntityManager): Promise<void> {
+    await this.repo(manager).delete(uuid);
   }
 
   async findItemCommentsByUnitId(unitId: number): Promise<UnitCommentUnitItem[]> {

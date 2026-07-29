@@ -10,6 +10,7 @@ import { MatIcon } from '@angular/material/icon';
 import { of } from 'rxjs';
 import { ReviewService } from '../../services/review.service';
 import { UnitPropertiesComponent } from '../../../../components/unit-properties/unit-properties.component';
+import { UnitLastChangesComponent } from '../../../../components/unit-last-changes/unit-last-changes.component';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { PrintMetadataComponent } from '../../../print/components/print-metadata/print-metadata.component';
 import {
@@ -24,7 +25,7 @@ const PanelWidthOffset = 40;
   templateUrl: './unit-info.component.html',
   styleUrls: ['./unit-info.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [MatIcon, MatButton, MatTooltip, WrappedIconComponent, UnitPropertiesComponent, TranslateModule, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent]
+  imports: [MatIcon, MatButton, MatTooltip, WrappedIconComponent, UnitPropertiesComponent, UnitLastChangesComponent, TranslateModule, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent]
 })
 export class UnitInfoComponent implements AfterViewInit, OnDestroy {
   @ViewChild('infoPanelSplitter') splitterElement!: ElementRef;

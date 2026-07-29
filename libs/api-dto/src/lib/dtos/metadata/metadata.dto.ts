@@ -12,7 +12,7 @@ export class MetadataDto {
     profileId?: string;
 
   @ApiProperty()
-    isCurrent?: boolean;
+    order?: number;
 
   @ApiProperty()
     createdAt?: Date;

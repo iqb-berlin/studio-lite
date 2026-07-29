@@ -49,18 +49,6 @@
         "jestConfig": "apps/api/jest.config.ts"
       }
     },
-    "compodoc": {
-      "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/dist/compodoc/api"],
-      "options": {
-        "command": "compodoc -p apps/api/tsconfig.app.json -d dist/compodoc/api"
-      },
-      "configurations": {
-        "json": {
-          "command": "compodoc -p apps/api/tsconfig.app.json -d dist/compodoc/api -e json"
-        }
-      }
-    },
     "docker-build": {
       "executor": "nx:run-commands",
       "options": {

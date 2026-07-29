@@ -1,8 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { MetadataValues } from '@studio-lite-lib/api-dto';
-import { TextWithLanguage } from '@iqb/metadata/md-main';
+import { ProfileValues } from '@studio-lite-lib/api-dto';
+import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profile';
 import { IsArrayPipe } from '../../pipes/is-array.pipe';
 import { CastPipe } from '../../pipes/cast.pipe';
+import { IsCurrentProfilePipe } from '../../pipes/is-current-profile.pipe';
+import { FilledEntriesPipe } from '../../pipes/filled-entries.pipe';
 
 @Component({
   selector: 'studio-lite-metadata-profile-entries',
@@ -10,11 +12,13 @@ import { CastPipe } from '../../pipes/cast.pipe';
   styleUrls: ['./metadata-profile-entries.component.scss'],
   imports: [
     IsArrayPipe,
-    CastPipe
+    CastPipe,
+    IsCurrentProfilePipe,
+    FilledEntriesPipe
   ]
 })
 export class MetadataProfileEntriesComponent {
-  @Input() profiles!: MetadataValues[];
+  @Input() profiles!: ProfileValues[];
 
   TextWithLanguageArray!: TextWithLanguage[];
   TextWithLanguage!: TextWithLanguage;

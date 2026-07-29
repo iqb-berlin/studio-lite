@@ -10,7 +10,7 @@
             <mat-expansion-panel-header>
               <mat-panel-title
                 data-cy="shared-profiles-select-profile-title">
-                {{collection.profileStore.title}}
+                {{collection.profileStore | profileLabel}}
               </mat-panel-title>
             </mat-expansion-panel-header>
             @for (profile of collection.profiles; track profile) {
@@ -19,9 +19,9 @@
                   [id]="profile.id"
                   [checked]="isChecked(profile.id)"
                   (change)="changeSelection($event)"
-                  [name]="profile.label"
+                  [name]="profile | profileLabel"
                   data-cy="shared-profiles-select-profile">
-                  {{profile.label}}
+                  {{profile | profileLabel}}
                 </mat-checkbox>
               </div>
             }
@@ -36,3 +36,4 @@
     {{'metadata.error-fetching-metadata-profiles' | translate}}
   </mat-error>
 }
+

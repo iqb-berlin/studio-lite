@@ -6,6 +6,7 @@ import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
 import { WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import { isItemProfileId } from '@studio-lite/shared-code';
 import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
 import { MatSelectChange, MatSelect } from '@angular/material/select';
 import { TranslateModule } from '@ngx-translate/core';
@@ -70,13 +71,11 @@ export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
         .subscribe((res => {
           this.unitMDProfiles = (
             res && (res as WorkspaceGroupFullDto).settings && (res as WorkspaceGroupFullDto).settings?.profiles
-              ?.filter((profile: Profile) => profile.id.split('/')
-                .pop() !== 'item.json')
+              ?.filter((profile: Profile) => !isItemProfileId(profile.id))
           ) || [];
           this.itemMDProfiles = (
             res && (res as WorkspaceGroupFullDto).settings && (res as WorkspaceGroupFullDto).settings?.profiles
-              ?.filter((profile: Profile) => profile.id.split('/')
-                .pop() === 'item.json')
+              ?.filter((profile: Profile) => isItemProfileId(profile.id))
           ) || [];
         }));
       this.backendService.getWorkspaceById(this.data.selectedRow.id)

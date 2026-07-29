@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserActivityStatus } from './user-activity-status';
+import { SessionActivityStatus } from './user-activity-status';
 
 export class UserSessionInfoDto {
   @ApiProperty()
@@ -8,6 +8,6 @@ export class UserSessionInfoDto {
   @ApiProperty()
     lastActivity?: Date;
 
-  @ApiProperty({ enum: ['active', 'passive', 'inactive', 'orphaned'] })
-    activityStatus!: UserActivityStatus;
+  @ApiProperty({ enum: ['active', 'passive', 'orphaned'] })
+    activityStatus!: SessionActivityStatus;
 }

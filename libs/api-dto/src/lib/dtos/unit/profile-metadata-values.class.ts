@@ -1,26 +1,25 @@
 // eslint-disable-next-line max-classes-per-file
-import { TextsWithLanguageAndId } from '@iqb/metadata/md-values';
-import { TextWithLanguage } from '@iqb/metadata/md-main';
+import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profile';
 
 export class ProfileMetadataValues {
-  profiles?: MetadataValues[];
+  profiles?: ProfileValues[];
 }
 
 export class UnitMetadataValues extends ProfileMetadataValues {
   items?: ItemsMetadataValues[];
 }
 
-export class MetadataValues {
+export class ProfileValues {
   entries?: MetadataValuesEntry[];
   profileId?: string;
-  isCurrent?: boolean;
+  // metadata-values@3.x profile order: -1 = hidden/disabled, >= 0 = position.
+  // Replaces the legacy `isCurrent` boolean.
+  order?: number;
 }
 
 export class ItemsMetadataValues extends ProfileMetadataValues {
   uuid?: string;
   order?: number;
-  position?: string;
-  locked?: boolean;
   unitId?: number;
   createdAt?: Date;
   changedAt?: Date;
@@ -28,13 +27,23 @@ export class ItemsMetadataValues extends ProfileMetadataValues {
   description?: string;
   variableId?: string | null;
   variableReadOnlyId?: string | null;
-  weighting?: number;
-  [key: string]: string | number | MetadataValues[] | null | undefined | boolean | Date;
+  [key: string]: string | number | ProfileValues[] | null | undefined | boolean | Date;
+}
+
+// Internal vocabulary value entry. The display text lives in `label`
+// (form-created) or `text` (imported/legacy), the numbering in `annotation` —
+// the spec field `annotation` holds what the vocabulary exposes as its SKOS
+// notation.
+export interface VocabularyValueEntry {
+  id: string;
+  label?: TextWithLanguage[];
+  text?: TextWithLanguage[];
+  annotation?: TextWithLanguage[];
 }
 
 export class MetadataValuesEntry {
   id!: string;
   label!: TextWithLanguage[];
-  value!: TextsWithLanguageAndId[] | TextWithLanguage[] | string;
+  value!: VocabularyValueEntry[] | TextWithLanguage[] | string;
   valueAsText!: TextWithLanguage | TextWithLanguage[];
 }

@@ -11,7 +11,10 @@ import { MatIconButton, MatButton } from '@angular/material/button';
 
 import { ItemsMetadataValues, ProfileMetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { MatDialog } from '@angular/material/dialog';
-import { MDProfile } from '@iqb/metadata';
+import { MDProfile } from '@iqbspecs/metadata-profile';
+import {
+  ACTIVE_PROFILE_ORDER, HIDDEN_PROFILE_ORDER, isCurrentFromOrder, profileIdsMatch
+} from '@studio-lite/shared-code';
 import { FormsModule } from '@angular/forms';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { ItemComponent } from '../item/item.component';
@@ -23,6 +26,7 @@ import { NewItemComponent } from '../new-item/new-item.component';
 import { ItemSortService } from '../../services/item-sort.service';
 import { SortAscendingPipe } from '../../../comments/pipes/sort-ascending.pipe';
 import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
+import { WorkspaceService } from '../../../workspace/services/workspace.service';
 
 @Component({
   selector: 'studio-lite-items',
@@ -50,7 +54,8 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
     private addItemDialog: MatDialog,
     public itemSortService: ItemSortService,
     private translateService: TranslateService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private workspaceService: WorkspaceService
   ) {
   }
 
@@ -135,19 +140,23 @@ export class ItemsComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       const item = structuredClone(this.items[result]);
       if (item.profiles) {
+        const currentProfileId = this.workspaceService.workspaceSettings?.itemMDProfile;
         item.profiles = item.profiles
-          .map(profile => (profile.isCurrent ? profile : {}));
+          .map(profile => {
+            const isCurrent = isCurrentFromOrder(profile.order) ||
+              profileIdsMatch(profile.profileId, currentProfileId);
+            return isCurrent ?
+              { ...profile, id: undefined, order: ACTIVE_PROFILE_ORDER } :
+              { profileId: profile.profileId, order: HIDDEN_PROFILE_ORDER, entries: [] };
+          });
       }
       this.addItem({
         ...item,
         id: undefined,
         uuid: undefined,
         order: undefined,
-        position: undefined,
-        locked: undefined,
         variableId: undefined,
         variableReadOnlyId: undefined,
-        weighting: undefined,
         description: undefined,
         createdAt: undefined,
         changedAt: undefined

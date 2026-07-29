@@ -2,26 +2,137 @@
   <span>{{ 'workspace.coding-report' | translate }}</span>
   <mat-form-field class="filter">
     <mat-label>{{'filter-by' | translate}}</mat-label>
-    <input matInput (keyup)="applyFilter($event)" #input>
+    <input matInput [disabled]="isLoading || loadError" (keyup)="applyFilter($event)" #input>
   </mat-form-field>
-  <mat-slide-toggle class="toggle" [checked]="codedVariablesOnly" (toggleChange)="toggleChange()">
+  <mat-slide-toggle
+    class="toggle"
+    [checked]="codedVariablesOnly"
+    [disabled]="isLoading || loadError"
+    (toggleChange)="toggleChange()">
     nur mit Regeln kodierte Variablen
   </mat-slide-toggle>
 </div>
 <mat-dialog-content>
   @if (isLoading) {
     <mat-spinner></mat-spinner>
-  }
-  @if (!isLoading) {
-    <table mat-table [dataSource]="dataSource" matSort>
+  } @else if (loadError) {
+    <div class="report-state report-state--error" role="alert" data-cy="coding-report-error">
+      <p>{{ 'coding-report.load-error' | translate }}</p>
+      <button
+        mat-stroked-button
+        type="button"
+        data-cy="coding-report-retry"
+        (click)="loadCodingReport()">
+        {{ 'coding-report.retry' | translate }}
+      </button>
+    </div>
+  } @else {
+    <table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows>
       @for (column of displayedColumns; track column) {
         <ng-container [matColumnDef]="column">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'coding-report.' + column | translate}}</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            {{ 'coding-report.' + column | translate}}
+          </th>
+          @if (column === 'validationDetails') {
+            <td mat-cell *matCellDef="let element" class="validation-summary-cell">
+              @if (element.validationProblems.length) {
+                <button
+                  type="button"
+                  class="validation-summary"
+                  data-cy="validation-summary"
+                  [attr.aria-expanded]="isValidationDetailsExpanded(element)"
+                  (click)="toggleValidationDetails(element)">
+                  <span class="validation-summary__count">
+                    {{ (element.validationProblems.length === 1 ?
+                      'coding-report.problem-count-one' :
+                      'coding-report.problem-count-many') |
+                      translate:{ count: element.validationProblems.length } }}
+                  </span>
+                  <span
+                    class="validation-severity"
+                    [class.validation-severity--error]="element.validationSeverity === 'error'"
+                    [class.validation-severity--warning]="element.validationSeverity === 'warning'">
+                    {{ 'coding-report.severity.' + element.validationSeverity | translate }}
+                  </span>
+                  <span
+                    class="validation-summary__chevron"
+                    [class.validation-summary__chevron--expanded]="isValidationDetailsExpanded(element)"
+                    aria-hidden="true">⌄</span>
+                </button>
+              } @else if (element.unstructuredValidationMessage) {
+                <span class="validation-summary--error">
+                  <span aria-hidden="true">!</span>
+                  {{ element.unstructuredValidationMessage }}
+                </span>
+              } @else {
+                <span class="validation-summary--ok">
+                  <span aria-hidden="true">✓</span>
+                  {{ 'coding-report.no-problems' | translate }}
+                </span>
+              }
+            </td>
+          } @else {
             <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
+          }
         </ng-container>
       }
+      <ng-container matColumnDef="expandedValidationDetails">
+        <td
+          mat-cell
+          *matCellDef="let element"
+          class="validation-details-cell"
+          [attr.colspan]="displayedColumns.length">
+          @if (isValidationDetailsExpanded(element)) {
+            <div class="validation-details-panel">
+              <div class="validation-details-panel__content">
+                <ul class="validation-problem-list">
+                  @for (problem of element.validationProblems; track $index) {
+                    <li
+                      class="validation-problem"
+                      [class.validation-problem--error]="problem.breaking"
+                      [class.validation-problem--warning]="!problem.breaking">
+                      <span
+                        class="validation-problem__severity"
+                        [class.validation-problem__severity--error]="problem.breaking"
+                        [class.validation-problem__severity--warning]="!problem.breaking">
+                        {{ 'coding-report.severity.' + (problem.breaking ? 'error' : 'warning') | translate }}
+                      </span>
+                      <span class="validation-problem__label">
+                        {{ 'coding-report.validation-problems.' + problem.type | translate }}
+                      </span>
+                      @if (problem.code) {
+                        <span class="validation-problem__code">
+                          {{ 'coding-report.code-reference' | translate:{ code: problem.code } }}
+                        </span>
+                      }
+                      <span
+                        class="validation-problem__technical-type"
+                        tabindex="0"
+                        [attr.aria-label]="'coding-report.technical-type' | translate:{ type: problem.type }"
+                        [matTooltip]="'coding-report.technical-type' | translate:{ type: problem.type }">ⓘ</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            </div>
+          }
+        </td>
+      </ng-container>
       <tr mat-header-row  *matHeaderRowDef="displayedColumns;sticky:true"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns;"
+        class="coding-report-row"
+        [class.coding-report-row--expanded]="isValidationDetailsExpanded(row)"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: validationDetailColumns"
+        class="validation-detail-row"></tr>
+      <tr class="mat-row" *matNoDataRow data-cy="coding-report-empty">
+        <td class="mat-cell report-state" [attr.colspan]="displayedColumns.length">
+          {{ (unitDataRows.length === 0 ? 'coding-report.empty' : 'coding-report.no-matches') | translate }}
+        </td>
+      </tr>
     </table>
   }
 </mat-dialog-content>
@@ -30,6 +141,7 @@
           color="primary"
           type="button"
           data-cy="coding-report-download"
+          [disabled]="isLoading || loadError || !dataSource || dataSource.filteredData.length === 0"
           (click)="downloadCodingReport()">
     {{ 'download' | translate }}
   </button>
@@ -40,4 +152,3 @@
     {{ 'close' | translate }}
   </button>
 </mat-dialog-actions>
-

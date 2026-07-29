@@ -15,6 +15,8 @@ import {
   MatHeaderRow, MatRowDef, MatRow, MatTableDataSource
 } from '@angular/material/table';
 import { ItemsMetadataValues, MetadataValuesEntry, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
+import { isCurrentFromOrder } from '@studio-lite/shared-code';
+import { MetadataResolver } from '@iqb/metadata-resolver';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSort, MatSortModule } from '@angular/material/sort';
@@ -27,7 +29,6 @@ interface ColumnValues {
   key?: string;
   id?: string;
   variableId?: string | null,
-  weighting?: string,
   description?: string,
   [key: string]: string | null | undefined
 }
@@ -81,7 +82,6 @@ export class TableViewComponent implements OnInit {
     'key',
     'id',
     'variableId',
-    'weighting',
     'description'
   ];
 
@@ -125,7 +125,7 @@ export class TableViewComponent implements OnInit {
       if (unit.metadata && unit.metadata.items) {
         unit.metadata.items.forEach((item, i: number) => {
           const activeProfile = item.profiles?.find(
-            profile => profile.isCurrent
+            profile => isCurrentFromOrder(profile.order)
           );
           if (activeProfile && activeProfile.entries) {
             let values: ColumnValues = {};
@@ -144,7 +144,6 @@ export class TableViewComponent implements OnInit {
               key: `<a href=#/a/${this.workspaceId}/${unit.id}>${unit.key}</a>` || '–',
               id: item.id || '–',
               variableId: item.variableId,
-              weighting: item.weighting?.toString(),
               description: item.description
             });
           }
@@ -176,18 +175,21 @@ export class TableViewComponent implements OnInit {
     values: ColumnValues,
     entry: MetadataValuesEntry
   ): ColumnValues {
+    // Key the value under the same resolved label used for the column header
+    // (getTableUnitsColumnsDefinitions), otherwise the cell never maps to a column.
+    const columnKey = MetadataResolver.extractLabelText(entry.label);
     if (Array.isArray(entry.valueAsText)) {
       if (entry.valueAsText.length > 1) {
         const textValues: string[] = [];
         entry.valueAsText.forEach(textValue => {
           textValues.push(`${textValue.value || ''}`);
         });
-        values[entry.label[0].value] = textValues.join('<br>');
+        values[columnKey] = textValues.join('<br>');
       } else {
-        values[entry.label[0].value] = entry.valueAsText[0]?.value || '';
+        values[columnKey] = entry.valueAsText[0]?.value || '';
       }
     } else {
-      values[entry.label[0].value] = entry.valueAsText?.value || '';
+      values[columnKey] = entry.valueAsText?.value || '';
     }
     return values;
   }
@@ -197,7 +199,7 @@ export class TableViewComponent implements OnInit {
     units.forEach(unit => {
       const activeProfile =
         unit.metadata &&
-        unit.metadata.profiles?.find(profile => profile.isCurrent);
+        unit.metadata.profiles?.find(profile => isCurrentFromOrder(profile.order));
       if (activeProfile) {
         let values: ColumnValues = {};
         if (activeProfile.entries) {
@@ -223,7 +225,7 @@ export class TableViewComponent implements OnInit {
     if (!this.metadataService.itemProfileColumns) return [];
     const columnsDefinitions: string[] =
       this.metadataService.itemProfileColumns.entries?.map(
-        entry => entry.label
+        entry => MetadataResolver.extractLabelText(entry.label)
       ) || [];
     return [...this.displayedColumns, ...columnsDefinitions];
   }
@@ -232,7 +234,7 @@ export class TableViewComponent implements OnInit {
     const columnsDefinitions: string[][] = [];
     if (!this.metadataService.unitProfileColumns) return [];
     this.metadataService.unitProfileColumns.forEach(group => {
-      columnsDefinitions.push(group.entries.map(entry => entry.label));
+      columnsDefinitions.push(group.entries.map(entry => MetadataResolver.extractLabelText(entry.label)));
     });
     return ['key', ...columnsDefinitions.flat()];
   }

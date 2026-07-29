@@ -83,6 +83,23 @@ describe('UnitMetadataService', () => {
       expect(repository.save).toHaveBeenCalledWith(createdEntity);
       expect(result).toBe(123);
     });
+
+    it('sets the NOT NULL columns and default order when the client omits them', async () => {
+      // Regression: created_at/changed_at are NOT NULL without a DB default; the
+      // profile form re-emits without them, so the INSERT must fill them or
+      // Postgres rejects the row and the save crashes. `order` defaults to -1.
+      const dto = { profileId: 'profile1' } as UnitMetadataDto;
+      mockRepository.create.mockImplementation((value: UnitMetadata) => value);
+      mockRepository.save.mockResolvedValue({ id: 5 } as UnitMetadata);
+
+      await service.addMetadata(1, dto);
+
+      expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({
+        order: -1,
+        createdAt: expect.any(Date),
+        changedAt: expect.any(Date)
+      }));
+    });
   });
 
   describe('updateMetadata', () => {
@@ -96,7 +113,10 @@ describe('UnitMetadataService', () => {
 
       const result = await service.updateMetadata(id, dto);
 
-      expect(repository.update).toHaveBeenCalledWith(id, dto);
+      expect(repository.update).toHaveBeenCalledWith(
+        id,
+        expect.objectContaining({ profileId: 'p1', changedAt: expect.any(Date) })
+      );
       expect(result).toBe(id);
     });
   });

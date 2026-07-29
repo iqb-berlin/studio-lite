@@ -42,9 +42,6 @@ class UnitItem {
     variableReadOnlyId: string;
 
   @Column()
-    weighting: number;
-
-  @Column()
     description: string;
 
   @Column({

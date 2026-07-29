@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AboutComponent } from './components/about/about.component';
 import { HomeComponent } from './components/home/home.component';
 import { authGuard } from './guards/auth.guard';
+import { reviewAuthGuard } from './guards/review-auth.guard';
 
 export const APP_ROUTES: Routes = [
   { path: 'home', component: HomeComponent },
@@ -28,7 +29,9 @@ export const APP_ROUTES: Routes = [
   },
   {
     path: 'review/:review',
-    canActivate: [authGuard],
+    // Not authGuard: password-protected review links authenticate as
+    // anonymous review sessions with userId 0 (see reviewAuthGuard).
+    canActivate: [reviewAuthGuard],
     loadChildren: () => import('./modules/review/review.routes').then(m => m.REVIEW_ROUTES)
   },
   { path: '', redirectTo: 'home', pathMatch: 'full' },

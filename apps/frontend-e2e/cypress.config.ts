@@ -24,7 +24,7 @@ export default defineConfig({
     username: 'fadmin',
     password: '4445',
     locale: 'de',
-    version: '17.1.0'
+    version: '18.0.0'
   },
   e2e: {
     ...nxE2EPreset(__dirname),
@@ -43,9 +43,20 @@ export default defineConfig({
     // Please ensure you use `cy.origin()` when navigating between domains and remove this option.
     // See https://docs.cypress.io/app/references/migration-guide#Changes-to-cyorigin
     injectDocumentDomain: true,
+    // Frees renderer memory between tests; long UI specs with player/editor
+    // iframes otherwise crash the Chrome renderer (out of memory).
+    experimentalMemoryManagement: true,
     setupNodeEvents(on, config) {
       config.env = config.env || {};
       coverageTask(on, config);
+      on('before:browser:launch', (browser, launchOptions) => {
+        if (browser.family === 'chromium' && browser.name !== 'electron') {
+          // /dev/shm is only 64MB in CI job containers; without this flag
+          // Chrome places shared memory there and the renderer crashes.
+          launchOptions.args.push('--disable-dev-shm-usage');
+        }
+        return launchOptions;
+      });
       on('task', {
         async resetDatabase() {
           const client = new Client({

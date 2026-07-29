@@ -2,7 +2,7 @@ import {
   Component, Input, OnChanges, SimpleChanges
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
-import { ItemsMetadataValues, MetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
+import { ItemsMetadataValues, ProfileValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { MetadataReadonlyItemsComponent }
   from '../../../../components/metadata-readonly-items/metadata-readonly-items.component';
 import { MetadataProfileEntriesComponent }
@@ -17,7 +17,7 @@ import { MetadataProfileEntriesComponent }
 export class PrintMetadataComponent implements OnChanges {
   @Input() metadata!: UnitMetadataValues | null;
 
-  unitProfiles!: MetadataValues[];
+  unitProfiles!: ProfileValues[];
   items!: ItemsMetadataValues[];
 
   ngOnChanges(changes: SimpleChanges): void {

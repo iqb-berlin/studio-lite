@@ -6,7 +6,7 @@ import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { MDProfileGroup } from '@iqb/metadata';
+import { MDProfileGroup } from '@iqbspecs/metadata-profile';
 import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { TableViewComponent } from './table-view.component';
 import { MetadataService } from '../../services/metadata.service';
@@ -17,7 +17,6 @@ interface ColumnValues {
   key?: string;
   id?: string;
   variableId?: string | null;
-  weighting?: string;
   description?: string;
   [key: string]: string | null | undefined;
 }
@@ -93,5 +92,34 @@ describe('TableViewComponent', () => {
     const event = { target: { value: ' test ' } } as unknown as Event;
     component.applyFilter(event);
     expect(component.dataSource.filter).toBe('test');
+  });
+
+  it('keys cell values under the same resolved label as the column header', () => {
+    // 'de' deliberately NOT at index 0 to expose the label[0] vs extractLabelText mismatch
+    const label = [
+      { lang: 'en', value: 'Task time' },
+      { lang: 'de', value: 'Aufgabenzeit' }
+    ];
+    mockMetadataService.unitProfileColumns = [
+      {
+        label,
+        entries: [{
+          id: 'e1', label, type: 'text', parameters: null
+        }]
+      }
+    ] as unknown as MDProfileGroup[];
+    const unit = {
+      id: 1,
+      key: 'K1',
+      metadata: {
+        profiles: [{ order: 0, entries: [{ label, valueAsText: { value: '42' } }] }]
+      }
+    } as unknown as UnitPropertiesDto;
+
+    component.data = { units: [unit], warning: '' };
+    component.tabChanged({ index: 0, tab: null as unknown as MatTab } as MatTabChangeEvent);
+
+    expect(component.columnsToDisplay).toContain('Aufgabenzeit');
+    expect(component.dataSource.data[0]).toMatchObject({ Aufgabenzeit: '42' });
   });
 });

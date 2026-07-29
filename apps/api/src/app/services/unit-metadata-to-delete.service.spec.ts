@@ -44,7 +44,11 @@ describe('UnitMetadataToDeleteService', () => {
       await service.upsertOneForUnit(unitId);
 
       expect(repository.upsert).toHaveBeenCalledWith(
-        expect.objectContaining({ unitId }),
+        expect.objectContaining({
+          unitId,
+          createdAt: expect.any(Date),
+          changedAt: expect.any(Date)
+        }),
         ['unitId']
       );
     });

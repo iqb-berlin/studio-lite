@@ -1,6 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 import { ApiProperty } from '@nestjs/swagger';
-import { TextWithLanguage } from '@iqb/metadata/md-main';
+import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profile';
 
 export class MetadataProfileDto {
   @ApiProperty()
@@ -25,5 +25,8 @@ export class MetadataProfileGroupEntry {
   id!: string;
   label!: TextWithLanguage[];
   type!: string;
-  parameters!: Record<string, unknown>[];
+  // A single parameter object (e.g. ProfileEntryParametersVocabulary) or null —
+  // matching the metadata-profile spec, where `parameters` is one keyed object,
+  // not an array.
+  parameters!: Record<string, unknown> | null;
 }

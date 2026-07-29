@@ -6,7 +6,7 @@ import {
   catchError, firstValueFrom, map, of
 } from 'rxjs';
 import { MetadataProfileDto, MetadataVocabularyDto } from '@studio-lite-lib/api-dto';
-import { ProfileEntryParametersVocabulary } from '@iqb/metadata/md-profile-entry';
+import { ProfileEntryParametersVocabulary } from '@iqbspecs/metadata-profile';
 import MetadataProfile from '../entities/metadata-profile.entity';
 import { MetadataVocabularyService } from './metadata-vocabulary.service';
 
@@ -27,6 +27,14 @@ export class MetadataProfileService {
       return storedProfile;
     }
     return this.getMetadataProfile(url);
+  }
+
+  // DB-only read (no background network refresh). For hot read paths that only
+  // need the stored profile definition — e.g. resolving hideNumbering per entry
+  // when building the display text — so a units list does not spam the profile
+  // host with one fetch per unit.
+  getStoredMetadataProfileFromDb(url: string): Promise<MetadataProfile | null> {
+    return this.metadataProfileRepository.findOneBy({ id: url });
   }
 
   private async getMetadataProfile(url: string): Promise<MetadataProfileDto | null> {
@@ -66,8 +74,10 @@ export class MetadataProfileService {
     const vocabularyIds = profile.groups
       .map(group => group.entries)
       .flat()
-      .filter(entry => (entry.type === 'vocabulary'))
-      .map(entry => (entry.parameters as unknown as ProfileEntryParametersVocabulary).url);
+      .filter(entry => entry.type.toLowerCase() === 'vocabulary')
+      .map(
+        entry => (entry.parameters as unknown as ProfileEntryParametersVocabulary).url
+      );
     await Promise.all(vocabularyIds
       .map(async id => {
         vocabularies.push(await this.metadataVocabularyService.getStoredMetadataVocabularyById(id));

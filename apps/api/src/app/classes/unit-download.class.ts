@@ -1,27 +1,70 @@
 import {
+  ItemsMetadataValues,
+  ProfileValues,
+  UnitMetadataValues,
+  MetadataValuesEntry,
   UnitCommentDto,
   UnitDefinitionDto,
   UnitDownloadSettingsDto,
   UnitExportConfigDto,
   UnitPropertiesDto,
-  UnitSchemeDto,
+  UnitRichNoteDto,
+  UnitRichNoteLinkDto,
   UnitRichNoteTagDto,
+  UnitSchemeDto,
   VeronaModuleFileDto,
   VeronaModuleInListDto
 } from '@studio-lite-lib/api-dto';
 import * as AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
-import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
+import { HIDDEN_PROFILE_ORDER, VeronaModuleKeyCollection } from '@studio-lite/shared-code';
 import { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
 import {
   CodingSchemeData,
   VariableCodingData
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitService } from '../services/unit.service';
+import { ExportReportMessage, ExportReportScope } from './export-report.class';
+import {
+  EXPORT_REPORT_FILENAME,
+  LanguageCodedText,
+  MetadataValueJson,
+  MetadataValuesJson,
+  UnitIndexJson,
+  UnitItemJson,
+  UnitMetadataJson
+} from '../interfaces/unit-json-specs.interface';
 import { VeronaModulesService } from '../services/verona-modules.service';
+import { combineNotationAndLabel } from './metadata-value.util';
 import { SettingService } from '../services/setting.service';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitRichNoteService } from '../services/unit-rich-note.service';
+
+// Comment shape as defined by the iqb unit-comments@0.1 specification
+// (https://iqb-specifications.github.io/unit-comments/). Fields without a
+// counterpart in the spec are intentionally dropped on export.
+interface UnitCommentJson {
+  id: number;
+  body: string;
+  commentator?: string;
+  parentComment?: number;
+  isHidden?: boolean;
+  createdAt?: string;
+  changedAt?: string;
+  itemUuids?: string[];
+}
+
+// Rich note shape as defined by the iqb unit-rich-notes@0.2 specification
+// (https://github.com/iqb-specifications/unit-rich-notes). links and itemUuids
+// have minItems: 1, so they must be omitted rather than emitted empty.
+interface UnitRichNoteJson {
+  tagId: string;
+  tagLabel?: string;
+  content: string;
+  links?: UnitRichNoteLinkDto[];
+  itemUuids?: string[];
+}
 
 export class UnitDownloadClass {
   static async get(
@@ -31,29 +74,44 @@ export class UnitDownloadClass {
     veronaModuleService: VeronaModulesService,
     settingService: SettingService,
     unitRichNoteService: UnitRichNoteService,
-    unitDownloadSettings: UnitDownloadSettingsDto
+    unitDownloadSettings: UnitDownloadSettingsDto,
+    exportFormat: 'xml' | 'json' = 'xml'
   ): Promise<Buffer> {
     const zip = new AdmZip();
     const unitsMetadata: UnitPropertiesDto[] = [];
     const usedPlayers: string[] = [];
-    const unitExportConfig = await UnitDownloadClass.getUnitExportConfig(
-      settingService
-    );
+    const exportReport: ExportReportMessage[] = [];
+    const unitExportConfig = await UnitDownloadClass.getUnitExportConfig(settingService);
 
     await Promise.all(
       unitDownloadSettings.unitIdList.map(async unitId => {
-        await UnitDownloadClass.getUnitData(
-          unitService,
-          unitCommentService,
-          unitId,
-          workspaceId,
-          unitDownloadSettings,
-          unitExportConfig,
-          unitRichNoteService,
-          unitsMetadata,
-          usedPlayers,
-          zip
-        );
+        if (exportFormat === 'json') {
+          await UnitDownloadClass.getUnitDataJSON(
+            unitService,
+            unitCommentService,
+            unitId,
+            workspaceId,
+            unitDownloadSettings,
+            unitRichNoteService,
+            unitsMetadata,
+            usedPlayers,
+            zip,
+            exportReport
+          );
+        } else {
+          await UnitDownloadClass.getUnitData(
+            unitService,
+            unitCommentService,
+            unitId,
+            workspaceId,
+            unitDownloadSettings,
+            unitExportConfig,
+            unitRichNoteService,
+            unitsMetadata,
+            usedPlayers,
+            zip
+          );
+        }
       })
     );
 
@@ -79,10 +137,14 @@ export class UnitDownloadClass {
         zip
       );
     }
+    if (exportReport.length) {
+      exportReport.sort((a, b) => a.unitKey.localeCompare(b.unitKey));
+      zip.addFile(EXPORT_REPORT_FILENAME, Buffer.from(JSON.stringify({ messages: exportReport }, null, 2)));
+    }
     return zip.toBuffer();
   }
 
-  private static async getUnitExportConfig(
+  static async getUnitExportConfig(
     settingService: SettingService
   ): Promise<UnitExportConfigDto> {
     const unitExportConfig = new UnitExportConfigDto();
@@ -99,7 +161,7 @@ export class UnitDownloadClass {
     return unitExportConfig;
   }
 
-  private static async getUnitData(
+  static async getUnitData(
     unitService: UnitService,
     unitCommentService: UnitCommentService,
     unitId: number,
@@ -119,7 +181,8 @@ export class UnitDownloadClass {
       unitExportConfig,
       unitMetadata
     );
-    UnitDownloadClass.addMetadata(unitMetadata, zip);
+    const hideNumbering = await unitService.buildHideNumberingMap(unitMetadata.metadata);
+    UnitDownloadClass.addMetadata(unitMetadata, zip, hideNumbering);
     const definitionData = await unitService.findOnesDefinition(unitId);
     UnitDownloadClass.addUnitDefinition(
       definitionData,
@@ -152,7 +215,7 @@ export class UnitDownloadClass {
     if (usedPlayers.indexOf(unitMetadata.player) < 0) usedPlayers.push(unitMetadata.player);
   }
 
-  private static createUnitXML(
+  static createUnitXML(
     unitExportConfig: UnitExportConfigDto,
     unitMetadata: UnitPropertiesDto
   ): XMLBuilder {
@@ -163,7 +226,7 @@ export class UnitDownloadClass {
           '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
           '@xsi:noNamespaceSchemaLocation': unitExportConfig.unitXsdUrl,
           Metadata: {
-            '@lastChange': unitMetadata.lastChangedMetadata.toISOString(),
+            '@lastChange': unitMetadata.lastChangedMetadata?.toISOString(),
             Id: unitMetadata.key,
             Label: unitMetadata.name,
             Description: unitMetadata.description,
@@ -177,19 +240,93 @@ export class UnitDownloadClass {
     );
   }
 
-  private static addMetadata(
+  static addMetadata(
     unitMetadata: UnitPropertiesDto,
-    zip: AdmZip
+    zip: AdmZip,
+    hideNumbering: Record<string, Record<string, boolean>> = {}
   ): void {
     if (Object.keys(unitMetadata.metadata).length !== 0) {
       zip.addFile(
         `${unitMetadata.key}.vomd`,
-        Buffer.from(JSON.stringify(unitMetadata.metadata))
+        Buffer.from(JSON.stringify(UnitDownloadClass.toLegacyMetadataBlob(unitMetadata.metadata, hideNumbering)))
       );
     }
   }
 
-  private static addUnitDefinition(
+  // The legacy XML export writes the internal metadata blob (`${key}.vomd`) as-is.
+  // metadata-values@3.x split the vocabulary numbering off the label into a
+  // separate `annotation` field — a JSON-export concern. To keep the .vomd blob
+  // exactly as legacy consumers expect, fold the split back before serializing:
+  // when the field shows numbering, merge it into the display text; when it hides
+  // numbering (hideNumbering), keep the pure label — matching the shape the old
+  // form baked at save time. Only vocabulary values are touched.
+  static toLegacyMetadataBlob(
+    metadata: UnitMetadataValues,
+    hideNumbering: Record<string, Record<string, boolean>> = {}
+  ): UnitMetadataValues {
+    if (!metadata || typeof metadata !== 'object') return metadata;
+    const foldProfile = <T extends ProfileValues>(profile: T): T => UnitDownloadClass.foldProfileAnnotations(
+      profile,
+      hideNumbering[profile.profileId ?? ''] ?? {}
+    );
+    return {
+      ...metadata,
+      ...(metadata.profiles && { profiles: metadata.profiles.map(foldProfile) }),
+      ...(metadata.items && {
+        items: metadata.items.map(item => ({
+          ...item,
+          ...(item.profiles && { profiles: item.profiles.map(foldProfile) })
+        }))
+      })
+    };
+  }
+
+  private static foldProfileAnnotations<T extends ProfileValues>(
+    profile: T,
+    hideNumberingByEntry: Record<string, boolean>
+  ): T {
+    if (!profile?.entries) return profile;
+    return {
+      ...profile,
+      entries: profile.entries.map(
+        entry => UnitDownloadClass.foldEntryAnnotation(entry, hideNumberingByEntry[entry.id] ?? false)
+      )
+    };
+  }
+
+  private static foldEntryAnnotation(entry: MetadataValuesEntry, hideNumbering: boolean): MetadataValuesEntry {
+    const { value } = entry;
+    if (!Array.isArray(value) || !value.some(item => !!item && typeof item === 'object' && 'id' in item)) {
+      return entry;
+    }
+    return {
+      ...entry,
+      value: value.map(item => UnitDownloadClass.foldVocabValueToLegacy(item, hideNumbering)) as
+        MetadataValuesEntry['value']
+    };
+  }
+
+  // Restores the pre-split shape: form-created entries kept the text in `label`
+  // (with an empty `annotation`), imported entries in `text` (without
+  // `annotation`). The numbering is merged back only when it is shown; with
+  // hideNumbering the pure label is kept, exactly as the old form stored it.
+  private static foldVocabValueToLegacy(item: unknown, hideNumbering: boolean): unknown {
+    if (!item || typeof item !== 'object' || !('id' in item)) return item;
+    const entry = item as {
+      id: string; label?: LanguageCodedText[]; text?: LanguageCodedText[]; annotation?: LanguageCodedText[];
+    };
+    if (entry.label !== undefined) {
+      const label = hideNumbering ? entry.label : combineNotationAndLabel(entry.annotation, entry.label);
+      return { id: entry.id, label, annotation: [] };
+    }
+    if (entry.text !== undefined) {
+      const text = hideNumbering ? entry.text : combineNotationAndLabel(entry.annotation, entry.text);
+      return { id: entry.id, text };
+    }
+    return item;
+  }
+
+  static addUnitDefinition(
     definitionData: UnitDefinitionDto,
     unitXml: XMLBuilder,
     unitMetadata: UnitPropertiesDto,
@@ -223,7 +360,7 @@ export class UnitDownloadClass {
     }
   }
 
-  private static addVariables(
+  static addVariables(
     definitionData: UnitDefinitionDto,
     unitXml: XMLBuilder
   ): void {
@@ -268,7 +405,7 @@ export class UnitDownloadClass {
     }
   }
 
-  private static getDerivedVariableType(coding: VariableCodingData): string {
+  static getDerivedVariableType(coding: VariableCodingData): string {
     switch (coding.sourceType) {
       case 'SUM_CODE':
       case 'SUM_SCORE':
@@ -285,21 +422,24 @@ export class UnitDownloadClass {
     }
   }
 
-  private static addDerivedVariables(
-    schemeData: UnitSchemeDto,
-    unitXml: XMLBuilder
-  ): void {
-    if (!schemeData?.scheme) return;
+  static parseDerivedCodings(schemeData: UnitSchemeDto): VariableCodingData[] {
+    if (!schemeData?.scheme) return [];
     let codingScheme: CodingSchemeData;
     try {
       codingScheme = JSON.parse(schemeData.scheme) as CodingSchemeData;
     } catch {
-      return;
+      return [];
     }
-    if (!codingScheme?.variableCodings) return;
-    const derivedCodings = codingScheme.variableCodings.filter(
+    return codingScheme?.variableCodings?.filter(
       vc => vc.sourceType !== 'BASE' && vc.sourceType !== 'BASE_NO_VALUE'
-    );
+    ) ?? [];
+  }
+
+  static addDerivedVariables(
+    schemeData: UnitSchemeDto,
+    unitXml: XMLBuilder
+  ): void {
+    const derivedCodings = UnitDownloadClass.parseDerivedCodings(schemeData);
     if (derivedCodings.length === 0) return;
     const derivedVariablesElement = unitXml.root().ele('DerivedVariables');
     derivedCodings.forEach(coding => {
@@ -316,7 +456,7 @@ export class UnitDownloadClass {
     });
   }
 
-  private static addComments(
+  static addComments(
     comments: UnitCommentDto[],
     unitXml: XMLBuilder,
     unitMetadata: UnitPropertiesDto,
@@ -335,7 +475,7 @@ export class UnitDownloadClass {
     }
   }
 
-  private static addScheme(
+  static addScheme(
     schemeData: UnitSchemeDto,
     unitXml: XMLBuilder,
     unitMetadata: UnitPropertiesDto,
@@ -361,7 +501,7 @@ export class UnitDownloadClass {
     }
   }
 
-  private static findTag(
+  static findTag(
     tags: UnitRichNoteTagDto[],
     tagId: string
   ): UnitRichNoteTagDto | null {
@@ -401,7 +541,7 @@ export class UnitDownloadClass {
     ).tag;
   }
 
-  private static getLabelString(
+  static getLabelString(
     labels: { lang: string; value: string }[] | null | undefined
   ): string | null {
     if (!labels || labels.length === 0) return null;
@@ -412,7 +552,232 @@ export class UnitDownloadClass {
     return labels[0].value;
   }
 
-  private static async addRichNotes(
+  // Maps internal rich note DTOs onto the iqb unit-rich-notes@0.2 spec shape.
+  // links and itemUuids are only emitted when non-empty: the spec requires
+  // minItems: 1, so an empty/null array would make the file schema-invalid.
+  static transformRichNotes(
+    notes: UnitRichNoteDto[],
+    tags: UnitRichNoteTagDto[]
+  ): UnitRichNoteJson[] {
+    return notes.map(note => {
+      const tag = UnitDownloadClass.findTag(tags, note.tagId);
+      const transformed: UnitRichNoteJson = {
+        tagId: tag ? tag.id : note.tagId,
+        content: note.content
+      };
+      const tagLabel = UnitDownloadClass.getLabelString(tag?.label);
+      if (tagLabel) transformed.tagLabel = tagLabel;
+      if (note.links?.length) transformed.links = note.links;
+      if (note.itemReferences?.length) transformed.itemUuids = note.itemReferences;
+      return transformed;
+    });
+  }
+
+  // Maps internal comment DTOs onto the iqb unit-comments@0.1 spec shape.
+  // userId/unitId/upVotes/downVotes/userVote have no spec counterpart and are
+  // dropped without information loss: they are overwritten or ignored on import.
+  static transformComments(comments: UnitCommentDto[]): UnitCommentJson[] {
+    return comments.map(comment => {
+      const transformed: UnitCommentJson = {
+        id: comment.id,
+        body: comment.body
+      };
+      if (comment.userName) transformed.commentator = comment.userName;
+      if (comment.parentId !== null && comment.parentId !== undefined) {
+        transformed.parentComment = comment.parentId;
+      }
+      if (comment.hidden) transformed.isHidden = comment.hidden;
+      if (comment.createdAt) transformed.createdAt = new Date(comment.createdAt).toISOString();
+      if (comment.changedAt) transformed.changedAt = new Date(comment.changedAt).toISOString();
+      if (comment.itemUuids?.length) transformed.itemUuids = comment.itemUuids;
+      return transformed;
+    });
+  }
+
+  // The one place that decides whether a text fits the language_coded_texts
+  // shape of metadata-values@3.0 (lang pattern ^[a-z]{2}$) — keeping the
+  // "kept" and "reported dropped" sets exact complements.
+  private static isValidLanguageCodedText(text: unknown): text is LanguageCodedText {
+    return !!text &&
+      typeof (text as LanguageCodedText).lang === 'string' &&
+      /^[a-z]{2}$/.test((text as LanguageCodedText).lang) &&
+      typeof (text as LanguageCodedText).value === 'string';
+  }
+
+  // Normalizes internal text data (single object or array, e.g. label or
+  // valueAsText) to the language_coded_texts shape of metadata-values@3.0.
+  // Items without a valid two-letter language code have no spec counterpart
+  // and are dropped; empty lists become undefined since the spec requires
+  // minItems: 1.
+  static toLanguageCodedTexts(texts: unknown): LanguageCodedText[] | undefined {
+    const list = Array.isArray(texts) ? texts : [texts];
+    const valid = list
+      .filter(UnitDownloadClass.isValidLanguageCodedText)
+      .map(text => ({ lang: text.lang, value: text.value }));
+    return valid.length ? valid : undefined;
+  }
+
+  // True when an entry carries actual content (a non-empty simple value or a
+  // non-empty value list) — the bar for reporting a drop; entries with empty
+  // values vanish silently by design since nothing is lost.
+  private static entryHasContent(entry?: MetadataValuesEntry): boolean {
+    if (!entry) return false;
+    if (typeof entry.value === 'string') return entry.value !== '';
+    return Array.isArray(entry.value) && entry.value.length > 0;
+  }
+
+  // True when stored metadata holds content the spec transform cannot carry
+  // over: profile entries with content, or keys of a pre-profile legacy
+  // shape. knownMetadataKeys is checked against UnitMetadataValues so a new
+  // field on the internal shape fails compilation here instead of producing
+  // false warnings.
+  private static hasUnexportedMetadata(metadata?: { profiles?: ProfileValues[] }): boolean {
+    if (!metadata) return false;
+    if (metadata.profiles?.some(
+      profile => (profile?.entries ?? []).some(entry => UnitDownloadClass.entryHasContent(entry))
+    )) return true;
+    const knownMetadataKeys = { profiles: true, items: true } satisfies Record<keyof UnitMetadataValues, boolean>;
+    return Object.keys(metadata).some(k => !(k in knownMetadataKeys));
+  }
+
+  // Reports every text that carried actual content but was dropped because
+  // it does not fit the language_coded_texts shape.
+  private static reportDroppedTexts(
+    texts: unknown, entryId: string, scope?: ExportReportScope
+  ): void {
+    const list = Array.isArray(texts) ? texts : [texts];
+    list
+      .filter(text => !!text &&
+        typeof (text as LanguageCodedText).value === 'string' &&
+        (text as LanguageCodedText).value !== '' &&
+        !UnitDownloadClass.isValidLanguageCodedText(text))
+      .forEach(text => scope?.report('dropped-content.invalid-language-code', {
+        entryId,
+        lang: typeof (text as LanguageCodedText).lang === 'string' ? (text as LanguageCodedText).lang : '',
+        value: (text as LanguageCodedText).value
+      }));
+  }
+
+  // Maps an internal entry value onto one of the three value forms of
+  // metadata-values@3.0: simple_value (internal plain string plus valueAsText),
+  // vocabulary_entries (internal { id, text } lists) or language_coded_texts.
+  // Returns undefined for empty values since the spec requires `value`.
+  static transformEntryValue(entry: MetadataValuesEntry, scope?: ExportReportScope): MetadataValueJson | undefined {
+    const { value } = entry;
+    // metadata-values@3.x simple value { raw, asText } (form-created). The legacy
+    // form stored the raw value as a plain string, handled just below.
+    if (value && typeof value === 'object' && !Array.isArray(value) && 'raw' in value) {
+      const simple = value as unknown as { raw?: string; asText?: unknown };
+      if (!simple.raw) return undefined;
+      const asText = UnitDownloadClass.toLanguageCodedTexts(simple.asText ?? entry.valueAsText);
+      return { raw: simple.raw, ...(asText && { asText }) };
+    }
+    if (typeof value === 'string') {
+      if (!value) return undefined;
+      const asText = UnitDownloadClass.toLanguageCodedTexts(entry.valueAsText);
+      return { raw: value, ...(asText && { asText }) };
+    }
+    if (Array.isArray(value) && value.length) {
+      const vocabularyEntries = value
+        .filter(entryValue => !!entryValue && typeof (entryValue as { id?: unknown }).id === 'string')
+        .map(entryValue => {
+          const vocabularyEntry = entryValue as {
+            id: string; label?: unknown; text?: unknown; annotation?: unknown;
+          };
+          // metadata-values@3.x carries the vocab text in `label`, the legacy form in
+          // `text`; the numbering (SKOS notation) travels in `annotation`.
+          const texts = vocabularyEntry.label ?? vocabularyEntry.text;
+          UnitDownloadClass.reportDroppedTexts(texts, entry.id, scope);
+          const label = UnitDownloadClass.toLanguageCodedTexts(texts);
+          const annotation = UnitDownloadClass.toLanguageCodedTexts(vocabularyEntry.annotation);
+          return {
+            id: vocabularyEntry.id,
+            ...(label && { label }),
+            ...(annotation && { annotation })
+          };
+        });
+      if (vocabularyEntries.length) {
+        const presentValues = value.filter(entryValue => !!entryValue).length;
+        if (vocabularyEntries.length < presentValues) {
+          scope?.report('dropped-content.mixed-value-dropped', {
+            entryId: entry.id,
+            droppedCount: String(presentValues - vocabularyEntries.length)
+          });
+        }
+        return vocabularyEntries;
+      }
+      UnitDownloadClass.reportDroppedTexts(value, entry.id, scope);
+      return UnitDownloadClass.toLanguageCodedTexts(value);
+    }
+    return undefined;
+  }
+
+  // Maps internal profile values onto metadata-values@3.0. The profile `order`
+  // (-1 = hidden/disabled, >= 0 = position) is emitted per spec; the internal-only
+  // `valueAsText` is dropped. Profiles without profileId or without any exportable
+  // entry are omitted since the spec requires profileId and entries with
+  // minItems: 1. Every dropped piece that carried content is reported through the
+  // scope.
+  static transformProfilesToMetadataValues(
+    profiles?: ProfileValues[], scope?: ExportReportScope
+  ): MetadataValuesJson[] {
+    return (profiles ?? []).flatMap(profile => {
+      if (!profile?.profileId) {
+        if (profile?.entries?.length) {
+          scope?.report('dropped-content.profile-not-exported', {
+            entryCount: String(profile.entries.length)
+          });
+        }
+        return [];
+      }
+      const profileScope = scope?.forProfile(profile.profileId);
+      const entries = (profile.entries ?? []).flatMap(entry => {
+        if (!entry?.id) {
+          if (UnitDownloadClass.entryHasContent(entry)) {
+            profileScope?.report('dropped-content.entry-not-exported');
+          }
+          return [];
+        }
+        const value = UnitDownloadClass.transformEntryValue(entry, profileScope);
+        if (!value) return [];
+        const label = UnitDownloadClass.toLanguageCodedTexts(entry.label);
+        return [{ id: entry.id, ...(label && { label }), value }];
+      });
+      if (!entries.length) return [];
+      return [{ profileId: profile.profileId, order: profile.order ?? HIDDEN_PROFILE_ORDER, entries }];
+    });
+  }
+
+  // Maps internal item data onto the iqb unit-items@0.2 spec shape:
+  // variableId/variableReadOnlyId become sourceVariableId/sourceVariableUuid;
+  // unitId has no spec counterpart and is dropped. Items without the required
+  // id are skipped.
+  static transformItems(items?: ItemsMetadataValues[], scope?: ExportReportScope): UnitItemJson[] {
+    return (items ?? []).flatMap((item, itemIndex) => {
+      if (!item?.id) {
+        if (item) {
+          scope?.report(
+            'dropped-content.item-not-exported',
+            item.uuid ? { uuid: item.uuid } : undefined
+          );
+        }
+        return [];
+      }
+      const transformed: UnitItemJson = { id: item.id };
+      if (item.uuid) transformed.uuid = item.uuid;
+      if (item.description) transformed.description = item.description;
+      transformed.order = typeof item.order === 'number' ? item.order : itemIndex;
+      if (item.variableId) transformed.sourceVariableId = item.variableId;
+      if (item.variableReadOnlyId) transformed.sourceVariableUuid = item.variableReadOnlyId;
+      if (item.createdAt) transformed.createdAt = new Date(item.createdAt).toISOString();
+      if (item.changedAt) transformed.changedAt = new Date(item.changedAt).toISOString();
+      const metadata = UnitDownloadClass.transformProfilesToMetadataValues(item.profiles, scope);
+      if (metadata.length) transformed.metadata = metadata;
+      return [transformed];
+    });
+  }
+
+  static async addRichNotes(
     unitRichNoteService: UnitRichNoteService,
     unitId: number,
     unitXml: XMLBuilder,
@@ -421,16 +786,7 @@ export class UnitDownloadClass {
   ): Promise<void> {
     const { notes, tags } = await unitRichNoteService.findNotes(unitId);
     if (notes && notes.length) {
-      const transformedNotes = notes.map(note => {
-        const tag = UnitDownloadClass.findTag(tags, note.tagId);
-        return {
-          tagId: tag ? tag.id : note.tagId,
-          tagLabel: UnitDownloadClass.getLabelString(tag?.label),
-          content: note.content,
-          links: note.links,
-          itemUuids: note.itemReferences
-        };
-      });
+      const transformedNotes = UnitDownloadClass.transformRichNotes(notes, tags);
       const fileName = `${unitMetadata.key}.vorn`;
       unitXml.root().ele({
         UnitRichNotesRef: {
@@ -444,13 +800,13 @@ export class UnitDownloadClass {
     }
   }
 
-  private static async addPlayers(
+  static async addPlayers(
     veronaModuleService: VeronaModulesService,
     zip: AdmZip,
     usedPlayers: string[]
   ): Promise<void> {
     const allPlayers: VeronaModuleInListDto[] =
-      await veronaModuleService.findAll('player');
+      await veronaModuleService.findAll('PLAYER');
     const veronaKeyList = new VeronaModuleKeyCollection(
       allPlayers.map(p => p.key)
     );
@@ -470,8 +826,10 @@ export class UnitDownloadClass {
     );
   }
 
-  private static createBookletXml(
-    unitExportConfig: UnitExportConfigDto
+  static createBookletXml(
+    unitExportConfig: UnitExportConfigDto,
+    bookletId: string = 'booklet1',
+    bookletLabel: string = ''
   ): XMLBuilder {
     return XmlBuilder.create(
       { version: '1.0' },
@@ -480,21 +838,27 @@ export class UnitDownloadClass {
           '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
           '@xsi:noNamespaceSchemaLocation': unitExportConfig.bookletXsdUrl,
           Metadata: {
-            Id: 'booklet1',
-            Label: 'Testheft 1'
+            Id: bookletId,
+            Label: bookletLabel
           }
         }
       }
     );
   }
 
-  private static addBooklet(
+  static safeBookletId(raw: string | undefined): string {
+    return (raw || 'booklet1').replace(/[^A-Za-z0-9_-]/g, '_');
+  }
+
+  static addBooklet(
     unitExportConfig: UnitExportConfigDto,
     unitDownloadSettings: UnitDownloadSettingsDto,
     unitsMetadata: UnitPropertiesDto[],
     zip: AdmZip
   ): void {
-    const bookletXml = UnitDownloadClass.createBookletXml(unitExportConfig);
+    const bookletId = UnitDownloadClass.safeBookletId(unitDownloadSettings.bookletId);
+    const bookletLabel = unitDownloadSettings.bookletLabel ?? '';
+    const bookletXml = UnitDownloadClass.createBookletXml(unitExportConfig, bookletId, bookletLabel);
     const configElement = bookletXml.root().ele('BookletConfig');
     unitDownloadSettings.bookletSettings.forEach(bc => {
       configElement.ele({
@@ -504,25 +868,23 @@ export class UnitDownloadClass {
         }
       });
     });
-    let unitCount = 1;
     const unitsElement = bookletXml.root().ele('Units');
-    unitsMetadata.forEach(u => {
+    unitsMetadata.forEach((u, i) => {
       unitsElement.ele({
         Unit: {
           '@id': u.key,
-          '@label': u.name || `Aufgabe ${unitCount}`,
-          '@labelshort': `${unitCount}`
+          '@label': u.name || `Aufgabe ${i + 1}`,
+          '@labelshort': `${i + 1}`
         }
       });
-      unitCount += 1;
     });
     zip.addFile(
-      'booklet1.xml',
+      `${bookletId}.xml`,
       Buffer.from(bookletXml.toString({ prettyPrint: true }))
     );
   }
 
-  private static createTestTakersXml(
+  static createTestTakersXml(
     unitExportConfig: UnitExportConfigDto
   ): XMLBuilder {
     return XmlBuilder.create(
@@ -531,24 +893,19 @@ export class UnitDownloadClass {
         Testtakers: {
           '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
           '@xsi:noNamespaceSchemaLocation': unitExportConfig.testTakersXsdUrl,
-          Metadata: {},
-          CustomTexts: {
-            CustomText: {
-              '@key': 'login_testEndButtonText',
-              '#': 'Test beenden'
-            }
-          }
+          Metadata: {}
         }
       }
     );
   }
 
-  private static addTestTakers(
+  static addTestTakers(
     unitExportConfig: UnitExportConfigDto,
     unitDownloadSettings: UnitDownloadSettingsDto,
     loginCount: number,
     zip: AdmZip
   ): void {
+    const bookletId = UnitDownloadClass.safeBookletId(unitDownloadSettings.bookletId);
     const testTakerXml =
       UnitDownloadClass.createTestTakersXml(unitExportConfig);
     let codeLen = loginCount > 1000 ? 8 : 5;
@@ -564,13 +921,14 @@ export class UnitDownloadClass {
         loginCount
       );
     let loginIndex = 0;
+    const groupLabel = unitDownloadSettings.groupLabel ?? '';
     const groupElement = testTakerXml.root().ele({
       Group: {
-        '@id': `TestTakerGroup_${loginNames[loginIndex]}`,
-        '@label': 'Login-Gruppe A'
+        '@id': `${bookletId}_group`,
+        '@label': groupLabel
       }
     });
-    for (let i = 0; i < unitDownloadSettings.addTestTakersHot; i++) {
+    Array.from({ length: unitDownloadSettings.addTestTakersHot }).forEach((_, i) => {
       loginIndex += 1;
       const prefix =
         unitDownloadSettings.addTestTakersMonitor > 0 ?
@@ -585,11 +943,11 @@ export class UnitDownloadClass {
       if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex - 1]);
       loginElement.ele({
         Booklet: {
-          '#': 'booklet1'
+          '#': bookletId
         }
       });
-    }
-    for (let i = 0; i < unitDownloadSettings.addTestTakersReview; i++) {
+    });
+    Array.from({ length: unitDownloadSettings.addTestTakersReview }).forEach(() => {
       loginIndex += 1;
       const loginElement = groupElement.ele({
         Login: {
@@ -600,11 +958,11 @@ export class UnitDownloadClass {
       if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex - 1]);
       loginElement.ele({
         Booklet: {
-          '#': 'booklet1'
+          '#': bookletId
         }
       });
-    }
-    for (let i = 0; i < unitDownloadSettings.addTestTakersMonitor; i++) {
+    });
+    Array.from({ length: unitDownloadSettings.addTestTakersMonitor }).forEach((_, i) => {
       loginIndex += 1;
       const prefix =
         unitDownloadSettings.addTestTakersMonitor > 1 ?
@@ -617,18 +975,156 @@ export class UnitDownloadClass {
         }
       });
       if (!unitDownloadSettings.passwordLess) loginElement.att('pw', loginPasswords[loginIndex - 1]);
-    }
+      if (unitDownloadSettings.monitorBookletVisibility) {
+        loginElement.ele({
+          ViewSettings: {
+            monitorBookletVisibility: unitDownloadSettings.monitorBookletVisibility
+          }
+        });
+      }
+    });
     zip.addFile(
-      'testtaker1.xml',
+      `${bookletId}_testtaker.xml`,
       Buffer.from(testTakerXml.toString({ prettyPrint: true }))
     );
+  }
+
+  static async getUnitDataJSON(
+    unitService: UnitService,
+    unitCommentService: UnitCommentService,
+    unitId: number,
+    workspaceId: number,
+    unitDownloadSettings: UnitDownloadSettingsDto,
+    unitRichNoteService: UnitRichNoteService,
+    unitsMetadata: UnitPropertiesDto[],
+    usedPlayers: string[],
+    zip: AdmZip,
+    exportReport: ExportReportMessage[] = []
+  ): Promise<void> {
+    const unitMetadata = await unitService.findOnesProperties(unitId, workspaceId);
+    const uuid = await unitService.ensureUuid(unitId);
+    const key = unitMetadata.key;
+
+    const index: UnitIndexJson = {
+      id: key,
+      uuid,
+      modifiedAt: unitMetadata.lastChangedMetadata?.toISOString(),
+      label: unitMetadata.name || undefined,
+      description: unitMetadata.description || undefined,
+      userInterface: { player: unitMetadata.player || '' }
+    };
+
+    const definitionData = await unitService.findOnesDefinition(unitId);
+    if (unitMetadata.editor) index.userInterface.editor = unitMetadata.editor;
+    if (definitionData?.definition?.length > 0) {
+      zip.addFile(`${key}.voud`, Buffer.from(definitionData.definition));
+      index.userInterface.definition = `${key}.voud`;
+      index.userInterface.isDefinitionInline = false;
+    }
+    if (unitMetadata.lastChangedDefinition) {
+      index.userInterface.modifiedAt = unitMetadata.lastChangedDefinition.toISOString();
+    }
+
+    const schemeData = await unitService.findOnesScheme(unitId);
+    if (schemeData?.scheme) {
+      zip.addFile(`${key}.vocs.json`, Buffer.from(schemeData.scheme));
+      index.codingScheme = {
+        id: `${key}.vocs.json`,
+        type: 'iqb-coding-scheme',
+        ...(unitMetadata.lastChangedScheme && { modifiedAt: unitMetadata.lastChangedScheme.toISOString() })
+      };
+    }
+
+    if (unitDownloadSettings.addComments) {
+      const comments = await unitCommentService.findOnesComments(unitId);
+      if (comments?.length) {
+        const transformedComments = UnitDownloadClass.transformComments(comments);
+        zip.addFile(`${key}.voco.json`, Buffer.from(JSON.stringify(transformedComments, null, 2)));
+        index.comments = { id: `${key}.voco.json`, type: 'iqb-unit-comments' };
+      }
+    }
+
+    if (unitDownloadSettings.addRichNotes) {
+      const { notes, tags } = await unitRichNoteService.findNotes(unitId);
+      if (notes?.length) {
+        const transformedNotes = UnitDownloadClass.transformRichNotes(notes, tags);
+        zip.addFile(`${key}.vorn.json`, Buffer.from(JSON.stringify(transformedNotes, null, 2)));
+        index.richNotes = { id: `${key}.vorn.json`, type: 'iqb-unit-rich-notes' };
+      }
+    }
+
+    const metadataScope = new ExportReportScope(key, `${key}.vomd.json`, exportReport);
+    const reportedBefore = exportReport.length;
+    const metadataValues = UnitDownloadClass
+      .transformProfilesToMetadataValues(unitMetadata.metadata?.profiles, metadataScope);
+    if (metadataValues.length) {
+      const unitMetadataJson: UnitMetadataJson = {
+        ...(unitMetadata.lastChangedMetadata && { changedAt: unitMetadata.lastChangedMetadata.toISOString() }),
+        metadata: metadataValues
+      };
+      zip.addFile(`${key}.vomd.json`, Buffer.from(JSON.stringify(unitMetadataJson, null, 2)));
+      index.metadata = {
+        id: `${key}.vomd.json`,
+        type: 'unit-metadata@0.1',
+        ...(unitMetadata.lastChangedMetadata && { modifiedAt: unitMetadata.lastChangedMetadata.toISOString() })
+      };
+    } else if (
+      exportReport.length === reportedBefore &&
+      UnitDownloadClass.hasUnexportedMetadata(unitMetadata.metadata)
+    ) {
+      // stored metadata exists but none of it fits the spec and the
+      // transform reported nothing specific (e.g. a legacy shape without
+      // profileId) — before the spec export this was written verbatim, so
+      // the omission must not stay silent
+      metadataScope.report('dropped-content.metadata-not-exported');
+    }
+
+    const itemsScope = new ExportReportScope(key, `${key}.voit.json`, exportReport);
+    const items = UnitDownloadClass.transformItems(unitMetadata.metadata?.items, itemsScope);
+    if (items.length) {
+      zip.addFile(`${key}.voit.json`, Buffer.from(JSON.stringify(items, null, 2)));
+      index.items = {
+        id: `${key}.voit.json`,
+        type: 'unit-items@0.2',
+        ...(unitMetadata.lastChangedMetadata && { modifiedAt: unitMetadata.lastChangedMetadata.toISOString() })
+      };
+    }
+
+    const variables = UnitDownloadClass.buildVariablesJSON(definitionData, schemeData);
+    if (variables) {
+      zip.addFile(`${key}.vova.json`, Buffer.from(JSON.stringify(variables, null, 2)));
+      index.variables = {
+        id: `${key}.vova.json`,
+        type: 'unit-variables',
+        ...(unitMetadata.lastChangedDefinition && { modifiedAt: unitMetadata.lastChangedDefinition.toISOString() })
+      };
+    }
+
+    zip.addFile(`${key}.json`, Buffer.from(JSON.stringify(index, null, 2)));
+    unitsMetadata.push(unitMetadata);
+    if (usedPlayers.indexOf(unitMetadata.player) < 0) usedPlayers.push(unitMetadata.player);
+  }
+
+  static buildVariablesJSON(
+    definitionData: UnitDefinitionDto,
+    schemeData: UnitSchemeDto
+  ): { baseVariables: VariableInfo[]; derivedVariables: { id: string; basedOn: string[] }[] } | null {
+    const baseVariables: VariableInfo[] = definitionData?.variables ?? [];
+    const derivedVariables: { id: string; basedOn: string[] }[] = UnitDownloadClass
+      .parseDerivedCodings(schemeData)
+      .map(coding => ({
+        id: coding.alias || coding.id,
+        basedOn: coding.deriveSources ?? []
+      }));
+
+    if (baseVariables.length === 0 && derivedVariables.length === 0) return null;
+    return { baseVariables, derivedVariables };
   }
 
   static generateCodeList(codeLen: number, codeCount: number): string[] {
     const codeCharacters = 'abcdefghprqstuvxyz';
     const codeNumbers = '2345679';
-    const codeList: string[] = [];
-    for (let i = 0; i < codeCount; i++) {
+    return Array.from({ length: codeCount }).reduce<string[]>(list => {
       let newCode = '';
       do {
         newCode = '';
@@ -645,9 +1141,8 @@ export class UnitDownloadClass {
             );
           isNumber = !isNumber;
         } while (newCode.length < codeLen);
-      } while (codeList.indexOf(newCode) >= 0);
-      codeList.push(newCode);
-    }
-    return codeList;
+      } while (list.indexOf(newCode) >= 0);
+      return [...list, newCode];
+    }, []);
   }
 }

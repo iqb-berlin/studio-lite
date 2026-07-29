@@ -49,7 +49,7 @@ describe('WidgetOverlayComponent', () => {
     } as AppService;
 
     const mockBackendService = createMock<BackendService>({
-      ping: jest.fn(),
+      activity: jest.fn(),
       logout: jest.fn()
     });
 

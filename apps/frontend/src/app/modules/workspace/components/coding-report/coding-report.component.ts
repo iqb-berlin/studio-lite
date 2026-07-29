@@ -5,7 +5,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -14,9 +14,19 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CodingReportDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
+
+type CodingReportColumn = Exclude<keyof CodingReportDto, 'validationProblems'> |
+'validationDetails';
+
+type CodingReportRow = CodingReportDto & {
+  validationDetails: string;
+  validationSeverity: 'error' | 'warning' | 'ok';
+  unstructuredValidationMessage: string | null;
+};
 
 @Component({
   selector: 'studio-lite-coding-report',
@@ -33,25 +43,40 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
     MatSlideToggle,
     MatFormField,
     MatInput,
-    MatLabel
+    MatLabel,
+    MatTooltipModule
   ]
 })
 export class CodingReportComponent implements OnInit {
-  // Columns to display in the table
-  displayedColumns: string[] = [
+  private static readonly csvColumns: CodingReportColumn[] = [
     'unit',
     'variable',
     'variableType',
     'item',
     'validation',
+    'validationDetails',
     'codingType',
     'trainingEffort'
   ];
 
-  dataSource!: MatTableDataSource<CodingReportDto>; // Datasource for the table
+  displayedColumns: CodingReportColumn[] = [
+    'unit',
+    'variable',
+    'variableType',
+    'item',
+    'validationDetails',
+    'codingType',
+    'trainingEffort'
+  ];
+
+  validationDetailColumns = ['expandedValidationDetails'];
+
+  dataSource!: MatTableDataSource<CodingReportRow>; // Datasource for the table
   isLoading = false; // Indicates if data is currently loading
+  loadError = false;
   codedVariablesOnly = true; // Filter: Display only coded variables
-  unitDataRows: CodingReportDto[] = []; // All rows of data received from the backend
+  unitDataRows: CodingReportRow[] = []; // All rows of data received from the backend
+  expandedRow: CodingReportRow | null = null;
 
   @ViewChild(MatSort) set matSort(sort: MatSort) {
     // Attach table sorting functionality to the data source
@@ -63,7 +88,8 @@ export class CodingReportComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { units: number[] },
     public workspaceService: WorkspaceService,
-    public backendService: WorkspaceBackendService
+    public backendService: WorkspaceBackendService,
+    private translateService: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -73,17 +99,40 @@ export class CodingReportComponent implements OnInit {
   /**
    * Fetches the coding report from the backend and initializes the data source.
    */
-  private loadCodingReport(): void {
+  loadCodingReport(): void {
     this.isLoading = true;
+    this.loadError = false;
     this.backendService.getCodingReport(this.workspaceService.selectedWorkspaceId)
       .subscribe({
         next: (codingReport: CodingReportDto[]) => {
-          this.unitDataRows = codingReport;
+          this.unitDataRows = codingReport.map(row => {
+            const validationProblems = row.validationProblems || [];
+            const unstructuredValidationMessage = validationProblems.length === 0 &&
+              row.validation?.trim() &&
+              row.validation.trim().toLowerCase() !== 'ok' ?
+              row.validation : null;
+            let validationSeverity: CodingReportRow['validationSeverity'] = 'ok';
+            if (unstructuredValidationMessage) {
+              validationSeverity = 'error';
+            } else if (validationProblems.length > 0) {
+              validationSeverity = validationProblems.some(problem => problem.breaking) ?
+                'error' : 'warning';
+            }
+            return {
+              ...row,
+              validationProblems,
+              validationDetails: this.formatValidationDetails(row),
+              validationSeverity,
+              unstructuredValidationMessage
+            };
+          });
           this.updateDataSource();
         },
-        error: err => {
-          // eslint-disable-next-line no-console
-          console.error('Error loading the coding report:', err);
+        error: () => {
+          this.unitDataRows = [];
+          this.updateDataSource();
+          this.loadError = true;
+          this.isLoading = false;
         },
         complete: () => {
           this.isLoading = false;
@@ -97,10 +146,30 @@ export class CodingReportComponent implements OnInit {
    */
   private updateDataSource(): void {
     const filteredRows = this.codedVariablesOnly ?
-      this.unitDataRows.filter((row: CodingReportDto) => row.codingType !== 'keine Regeln') :
+      this.unitDataRows.filter((row: CodingReportRow) => row.codingType !== 'keine Regeln') :
       this.unitDataRows;
 
     this.dataSource = new MatTableDataSource(filteredRows); // Refresh the data source
+    const defaultSortingDataAccessor = this.dataSource.sortingDataAccessor;
+    const validationSeveritySortOrder: Record<
+    CodingReportRow['validationSeverity'], number
+    > = {
+      error: 0,
+      warning: 1,
+      ok: 2
+    };
+    this.dataSource.sortingDataAccessor = (row, column) => (
+      column === 'validationDetails' ?
+        validationSeveritySortOrder[row.validationSeverity] :
+        defaultSortingDataAccessor(row, column)
+    );
+    this.dataSource.filterPredicate = (row, filter) => (
+      CodingReportComponent.csvColumns
+        .map(column => String(row[column] ?? ''))
+        .join(' ')
+        .toLowerCase()
+        .includes(filter)
+    );
   }
 
   /**
@@ -123,17 +192,26 @@ export class CodingReportComponent implements OnInit {
    */
   toggleChange(): void {
     this.codedVariablesOnly = !this.codedVariablesOnly;
+    this.expandedRow = null;
     this.updateDataSource();
+  }
+
+  toggleValidationDetails(row: CodingReportRow): void {
+    this.expandedRow = this.expandedRow === row ? null : row;
+  }
+
+  isValidationDetailsExpanded(row: CodingReportRow): boolean {
+    return this.expandedRow === row;
   }
 
   downloadCodingReport(): void {
     const rows = this.dataSource?.filteredData || [];
-    const headers = this.displayedColumns
-      .map(column => CodingReportComponent.getCsvHeader(column as keyof CodingReportDto))
+    const headers = CodingReportComponent.csvColumns
+      .map(column => this.getCsvHeader(column))
       .join(';');
-    const csvRows = rows.map(row => this.displayedColumns
+    const csvRows = rows.map(row => CodingReportComponent.csvColumns
       .map(column => CodingReportComponent.escapeCsvValue(CodingReportComponent.stripHtml(String(
-        row[column as keyof CodingReportDto] ?? ''
+        row[column] ?? ''
       ))))
       .join(';')
     );
@@ -163,16 +241,25 @@ export class CodingReportComponent implements OnInit {
     return sanitized;
   }
 
-  private static getCsvHeader(column: keyof CodingReportDto): string {
-    const headers: Record<keyof CodingReportDto, string> = {
-      unit: 'Aufgabe',
-      variable: 'Variable',
-      variableType: 'Variablentyp',
-      item: 'Item',
-      validation: 'Validierung',
-      codingType: 'Kodiertyp',
-      trainingEffort: 'Schulungsaufwand'
-    };
-    return headers[column];
+  private formatValidationDetails(row: CodingReportDto): string {
+    return (row.validationProblems || [])
+      .map(problem => {
+        const label = this.translateService.instant(
+          `coding-report.validation-problems.${problem.type}`
+        );
+        const codeReference = problem.code ? ` [${this.translateService.instant(
+          'coding-report.code-reference',
+          { code: problem.code }
+        )}]` : '';
+        return `${label} (${problem.type})${codeReference}`;
+      })
+      .join(' | ');
+  }
+
+  private getCsvHeader(column: CodingReportColumn): string {
+    const translationKey = column === 'validationDetails' ?
+      'coding-report.csv-validation-details' :
+      `coding-report.${column}`;
+    return this.translateService.instant(translationKey);
   }
 }

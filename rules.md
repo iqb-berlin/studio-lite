@@ -97,6 +97,16 @@
 - **Rule**: Do NOT use `HttpClientTestingModule`.
   - **Rationale**: Use `provideHttpClient()` and `provideHttpClientTesting()` instead.
 
+### Line Length
+- **Rule**: Lines must not exceed 120 characters (`max-len`).
+- **Rationale**: Enforced by ESLint; JetBrains and CI both flag violations.
+- **Preferred Solution**: When a function call exceeds 120 characters, place **each argument on its own line** — grouping multiple arguments per line violates `function-call-argument-newline` (all-or-nothing rule). For imports, use the multiline form:
+  ```typescript
+  import {
+    TokenA, TokenB, TokenC
+  } from 'some-module';
+  ```
+
 ### CSS & Styling
 - **Rule**: Avoid using element or attribute selectors (e.g., `button[mat-stroked-button]`, `mat-icon`) in SCSS files.
 - **Preferred Solution**: Use explicit, descriptive classes (e.g., `.add-url-button`, `.button-icon`) to target elements.

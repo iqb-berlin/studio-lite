@@ -2,9 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { of } from 'rxjs';
-import { MDProfile } from '@iqb/metadata';
+import { MDProfile } from '@iqbspecs/metadata-profile';
 import {
-  MetadataVocabularyDto, TopConcept, UnitPropertiesDto
+  MetadataProfileDto, MetadataVocabularyDto, TopConcept, UnitPropertiesDto
 } from '@studio-lite-lib/api-dto';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { MetadataService } from './metadata.service';
@@ -138,6 +138,85 @@ describe('MetadataService', () => {
 
       const req = httpMock.expectOne(`${serverUrl}workspaces/123/units/properties`);
       req.error(new ErrorEvent('Network error'));
+    });
+  });
+
+  describe('VocabularyProvider bridge', () => {
+    it('getVocabularies should return the vocabularies array', () => {
+      const vocabularies = [{ id: 'voc1', label: 'Voc 1' }] as unknown as MetadataService['vocabularies'];
+      service.vocabularies = vocabularies;
+      expect(service.getVocabularies()).toBe(vocabularies);
+    });
+
+    it('getVocabularyDictionary should map id, label, notation and text', () => {
+      service.vocabulariesIdDictionary = {
+        id1: {
+          labels: { de: 'Label DE' },
+          notation: ['n1', 'n2']
+        } as unknown as MetadataService['vocabulariesIdDictionary']['id1']
+      };
+
+      const dictionary = service.getVocabularyDictionary();
+
+      expect(dictionary).toEqual({
+        id1: {
+          id: 'id1',
+          name: 'Label DE',
+          notation: ['n1', 'n2'],
+          text: [{ lang: 'de', value: 'Label DE' }]
+        }
+      });
+    });
+
+    it('getVocabularyDictionary should fall back to empty name/notation when missing', () => {
+      service.vocabulariesIdDictionary = {
+        id2: {} as unknown as MetadataService['vocabulariesIdDictionary']['id2']
+      };
+
+      const dictionary = service.getVocabularyDictionary();
+
+      expect(dictionary).toEqual({
+        id2: {
+          id: 'id2',
+          name: '',
+          notation: [],
+          text: []
+        }
+      });
+    });
+  });
+
+  describe('loadProfileColumns', () => {
+    it('populates unit and item profile columns from the configured profiles', async () => {
+      const unitProfile = {
+        id: 'unit-url',
+        groups: [{ label: [], entries: [] }, { label: [], entries: [] }]
+      };
+      const itemProfile = { id: 'item-url', groups: [{ label: [], entries: [] }] };
+      backendServiceMock.getMetadataProfile.mockImplementation(
+        (url: string) => of((url === 'unit-url' ? unitProfile : itemProfile) as unknown as MetadataProfileDto)
+      );
+      backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of(true));
+
+      await service.loadProfileColumns('unit-url', 'item-url');
+
+      expect(service.unitProfileColumns).toHaveLength(2);
+      expect(service.itemProfileColumns).toBe(itemProfile.groups[0]);
+    });
+
+    it('clears the columns and skips fetching when no profile url is provided', async () => {
+      service.unitProfileColumns = [
+        { label: [], entries: [] }
+      ] as unknown as MetadataService['unitProfileColumns'];
+      service.itemProfileColumns = {
+        label: [], entries: []
+      } as unknown as MetadataService['itemProfileColumns'];
+
+      await service.loadProfileColumns(undefined, undefined);
+
+      expect(backendServiceMock.getMetadataProfile).not.toHaveBeenCalled();
+      expect(service.unitProfileColumns).toEqual([]);
+      expect(service.itemProfileColumns).toEqual({});
     });
   });
 });

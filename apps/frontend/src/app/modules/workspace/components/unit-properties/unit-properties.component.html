@@ -272,14 +272,15 @@
                 </mat-card-title>
               </mat-card-header>
               <mat-card-content>
-                <studio-lite-profile-form
-                  [metadata]="metadata"
-                  [profile]="unitProfile"
+                <iqb-profile-form
+                  [metadataValues]="iqbMetadataValues"
+                  [profileData]="unitProfile"
                   [language]="'de'"
                   [formlyWrapper]="'panel'"
                   [panelExpanded]="true"
+                  [vocabularyProvider]="metadataService"
                   (metadataChange)="onMetadataChange($event)">
-                </studio-lite-profile-form>
+                </iqb-profile-form>
               </mat-card-content>
             </mat-card>
           } @else {
@@ -304,7 +305,7 @@
                   [metadata]="metadata"
                   [language]="'de'"
                   [variablesLoader]="variablesLoader"
-                  (metadataChange)="onMetadataChange($event)">
+                  (metadataChange)="onItemsMetadataChange($event)">
                 </studio-lite-items>
               </mat-card-content>
             </mat-card>

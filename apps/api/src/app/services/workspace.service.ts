@@ -12,13 +12,17 @@ import {
   UserWorkspaceAccessDto,
   UserWorkspaceFullDto,
   CodingReportDto,
+  CodingReportValidationProblemDto,
   WorkspaceInListDto,
   GroupNameDto,
   RenameGroupNameDto,
-  UnitFullMetadataDto,
   ItemsMetadataValues,
-  UnitCommentDto
+  MetadataValuesEntry,
+  ProfileValues,
+  UnitCommentDto,
+  UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
+import { orderFromCurrent } from '@studio-lite/shared-code';
 import * as AdmZip from 'adm-zip';
 import {
   VariableCodingData,
@@ -26,6 +30,7 @@ import {
   CodeData,
   CodingSchemeData
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
@@ -33,6 +38,7 @@ import WorkspaceGroup from '../entities/workspace-group.entity';
 import Unit from '../entities/unit.entity';
 import { FileIo } from '../interfaces/file-io.interface';
 import { UnitImportData } from '../classes/unit-import-data.class';
+import { UnitImportJsonData } from '../classes/unit-import-json-data.class';
 import { UnitService } from './unit.service';
 import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
@@ -44,7 +50,33 @@ import { UnitCommentService } from './unit-comment.service';
 import { UnitRichNoteService } from './unit-rich-note.service';
 import User from '../entities/user.entity';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
+import { ZIP_MIME_TYPES } from '../constants/zip-mime-types';
+import {
+  EXPORT_REPORT_FILENAME,
+  LanguageCodedText,
+  MetadataEntryJson,
+  MetadataValuesJson,
+  UnitItemJson,
+  UnitMetadataJson,
+  VocabularyEntryJson
+} from '../interfaces/unit-json-specs.interface';
 import { GroupAdminUnprocessableWorkspaceException } from '../exceptions/group-admin-unprocessable-workspace.exception';
+
+// A comment as found in an exported *.voco.json file. Supports both the iqb
+// unit-comments@0.1 spec field names and the legacy ones for backwards compat.
+interface ImportedComment {
+  id: number;
+  body: string;
+  commentator?: string;
+  userName?: string;
+  parentComment?: number | null;
+  parentId?: number | null;
+  isHidden?: boolean;
+  hidden?: boolean;
+  createdAt?: string;
+  changedAt?: string;
+  itemUuids?: string[];
+}
 
 @Injectable()
 export class WorkspaceService {
@@ -379,7 +411,9 @@ export class WorkspaceService {
     scheme: string | undefined,
     schemer: string
   ): boolean {
-    return !!scheme && !!schemer && schemer.split('@')[1] >= '1.5';
+    if (!scheme) return false;
+    if (!schemer) return true; // JSON format: schemer is no longer explicitly assigned per spec
+    return schemer.split('@')[1] >= '1.5';
   }
 
   private static parseScheme(scheme: string): CodingSchemeData | null {
@@ -400,9 +434,12 @@ export class WorkspaceService {
     parsedUnitScheme.variableCodings
       ?.filter(vc => vc.sourceType !== 'BASE_NO_VALUE')
       .forEach((codingVariable: VariableCodingData) => {
-        const validationResultText = WorkspaceService.getValidationResult(
+        const validationProblems = WorkspaceService.getValidationProblems(
           validationResults,
           codingVariable
+        );
+        const validationResultText = WorkspaceService.getValidationStatus(
+          validationProblems
         );
         const codingType = WorkspaceService.determineCodingType(codingVariable);
         const trainingEffort = WorkspaceService.determineTrainingEffort(
@@ -419,24 +456,45 @@ export class WorkspaceService {
           variableType: WorkspaceService.determineVariableType(codingVariable),
           item: foundItem?.id || '–',
           validation: validationResultText,
+          validationProblems,
           codingType: codingType,
           trainingEffort: trainingEffort
         });
       });
   }
 
-  static getValidationResult(
+  static getValidationProblems(
     validationResults: CodingSchemeProblem[],
     codingVariable: VariableCodingData
-  ): string {
+  ): CodingReportValidationProblemDto[] {
     const codingVariableId = codingVariable.alias || codingVariable.id;
-    const validationResult = validationResults.find(
-      v => v.variableId === codingVariableId
-    );
+    const seenProblems = new Set<string>();
 
-    if (validationResult) {
-      return validationResult.breaking ? 'Fehler' : 'Warnung';
-    }
+    return validationResults
+      .filter(problem => problem.variableId === codingVariableId)
+      .map(problem => ({
+        type: problem.type,
+        breaking: problem.breaking,
+        ...(problem.code ? { code: problem.code } : {})
+      }))
+      .filter(problem => {
+        const key = `${problem.type}|${problem.breaking}|${problem.code || ''}`;
+        if (seenProblems.has(key)) return false;
+        seenProblems.add(key);
+        return true;
+      })
+      .sort((problemA, problemB) => (
+        Number(problemB.breaking) - Number(problemA.breaking) ||
+        problemA.type.localeCompare(problemB.type) ||
+        (problemA.code || '').localeCompare(problemB.code || '')
+      ));
+  }
+
+  static getValidationStatus(
+    validationProblems: CodingReportValidationProblemDto[]
+  ): string {
+    if (validationProblems.some(problem => problem.breaking)) return 'Fehler';
+    if (validationProblems.length > 0) return 'Warnung';
     return 'OK';
   }
 
@@ -506,6 +564,7 @@ export class WorkspaceService {
       variableType: '',
       item: '',
       validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
+      validationProblems: [],
       codingType: '',
       trainingEffort: ''
     });
@@ -705,18 +764,47 @@ export class WorkspaceService {
     files: FileIo[],
     functionReturn: RequestReportDto
   ): {
-      unitData: UnitImportData[];
+      unitData: (UnitImportData | UnitImportJsonData)[];
       notXmlFiles: { [fName: string]: FileIo };
       usedFiles: string[];
     } {
-    const unitData: UnitImportData[] = [];
+    const processedKeys = new Set<string>();
+    const unitData: (UnitImportData | UnitImportJsonData)[] = [];
     const notXmlFiles: { [fName: string]: FileIo } = {};
     const usedFiles: string[] = [];
+    const xmlCandidates: UnitImportData[] = [];
+
     files.forEach(f => {
-      if (f.mimetype === 'text/xml') {
+      if (f.mimetype === 'application/json') {
+        // the export report file is informational output of the JSON export;
+        // silently accept it instead of flagging it as a broken unit file
+        if (f.originalname === EXPORT_REPORT_FILENAME ||
+          f.originalname.endsWith(`/${EXPORT_REPORT_FILENAME}`)) {
+          usedFiles.push(f.originalname);
+          return;
+        }
+        // Only the unit index shape is recognized here. Every other JSON file
+        // becomes a lookup candidate regardless of its name: the index decides
+        // what is a companion file, so spec-conform exports of third-party
+        // systems (arbitrary companion names) import cleanly. Broken referenced
+        // files are reported by parseCompanionJson; files no unit references
+        // fall into the final ignore-file check.
         try {
-          unitData.push(new UnitImportData(f));
-        } catch (e) {
+          const parsed = JSON.parse(f.buffer.toString()) as Record<string, unknown>;
+          if (parsed.id && parsed.userInterface) {
+            const jsonData = new UnitImportJsonData(f);
+            unitData.push(jsonData);
+            processedKeys.add(jsonData.key);
+          } else {
+            notXmlFiles[f.originalname] = f;
+          }
+        } catch {
+          notXmlFiles[f.originalname] = f;
+        }
+      } else if (f.mimetype === 'text/xml') {
+        try {
+          xmlCandidates.push(new UnitImportData(f));
+        } catch {
           functionReturn.messages.push({
             objectKey: f.originalname,
             messageKey: 'unit-upload.api-warning.xml-parse'
@@ -727,16 +815,22 @@ export class WorkspaceService {
         notXmlFiles[f.originalname] = f;
       }
     });
-    return {
-      unitData,
-      notXmlFiles,
-      usedFiles
-    };
+
+    xmlCandidates.forEach(xmlData => {
+      if (processedKeys.has(xmlData.key)) {
+        usedFiles.push(xmlData.fileName);
+      } else {
+        unitData.push(xmlData);
+        processedKeys.add(xmlData.key);
+      }
+    });
+
+    return { unitData, notXmlFiles, usedFiles };
   }
 
   private async uploadFile(
     usedFiles: string[],
-    unitImportData: UnitImportData,
+    unitImportData: UnitImportData | UnitImportJsonData,
     workspaceId: number,
     user: User,
     functionReturn: RequestReportDto,
@@ -750,26 +844,66 @@ export class WorkspaceService {
       true
     );
     if (newUnitId > 0) {
-      if (
-        unitImportData.definitionFileName &&
-        notXmlFiles[unitImportData.definitionFileName]
-      ) {
-        unitImportData.definition =
-          notXmlFiles[unitImportData.definitionFileName].buffer.toString();
-        usedFiles.push(unitImportData.definitionFileName);
-        if (unitImportData.definition || unitImportData.lastChangedDefinition) {
-          await this.importDefinition(newUnitId, unitImportData);
+      if (unitImportData.uuid) {
+        await this.unitService.adoptUuidIfFree(newUnitId, unitImportData.uuid);
+      }
+
+      if (unitImportData.variablesFileName) {
+        if (notXmlFiles[unitImportData.variablesFileName]) {
+          const variablesData = WorkspaceService.parseCompanionJson<{ baseVariables?: VariableInfo[] }>(
+            notXmlFiles[unitImportData.variablesFileName], functionReturn
+          );
+          if (variablesData) unitImportData.baseVariables = variablesData.baseVariables ?? [];
+          usedFiles.push(unitImportData.variablesFileName);
+        } else {
+          WorkspaceService.warnMissingFile(unitImportData.variablesFileName, functionReturn);
         }
       }
 
-      if (
-        unitImportData.metadataFileName &&
-        notXmlFiles[unitImportData.metadataFileName]
-      ) {
-        unitImportData.metadata = JSON.parse(
-          notXmlFiles[unitImportData.metadataFileName].buffer.toString()
-        );
-        usedFiles.push(unitImportData.metadataFileName);
+      if (unitImportData.definitionFileName) {
+        if (notXmlFiles[unitImportData.definitionFileName]) {
+          unitImportData.definition =
+            notXmlFiles[unitImportData.definitionFileName].buffer.toString();
+          usedFiles.push(unitImportData.definitionFileName);
+          if (unitImportData.definition || unitImportData.lastChangedDefinition) {
+            await this.importDefinition(newUnitId, unitImportData);
+          }
+        } else {
+          WorkspaceService.warnMissingFile(unitImportData.definitionFileName, functionReturn);
+        }
+      }
+
+      if (unitImportData.metadataFileName) {
+        if (notXmlFiles[unitImportData.metadataFileName]) {
+          const parsedMetadata = WorkspaceService.parseCompanionJson<unknown>(
+            notXmlFiles[unitImportData.metadataFileName], functionReturn
+          );
+          if (parsedMetadata !== undefined) {
+            unitImportData.metadata = WorkspaceService.mapImportedMetadata(parsedMetadata);
+          }
+          usedFiles.push(unitImportData.metadataFileName);
+        } else {
+          WorkspaceService.warnMissingFile(unitImportData.metadataFileName, functionReturn);
+        }
+      }
+
+      if (unitImportData.itemsFileName) {
+        if (notXmlFiles[unitImportData.itemsFileName]) {
+          const parsedItems = WorkspaceService.parseCompanionJson<UnitItemJson[]>(
+            notXmlFiles[unitImportData.itemsFileName], functionReturn
+          );
+          if (parsedItems !== undefined) {
+            // the items file is the authority on items: an empty list also
+            // overrides items embedded in a legacy metadata blob
+            unitImportData.metadata = {
+              ...(unitImportData.metadata ?? {}),
+              items: WorkspaceService.mapImportedItems(parsedItems)
+            };
+          }
+          usedFiles.push(unitImportData.itemsFileName);
+        } else {
+          WorkspaceService.warnMissingFile(unitImportData.itemsFileName, functionReturn);
+        }
       }
 
       const itemUuidLookups = await this.importUnitProperties(
@@ -778,34 +912,41 @@ export class WorkspaceService {
         unitImportData
       );
 
-      if (
-        unitImportData.commentsFileName &&
-        notXmlFiles[unitImportData.commentsFileName]
-      ) {
-        const comments =
-          notXmlFiles[unitImportData.commentsFileName].buffer.toString();
-        usedFiles.push(unitImportData.commentsFileName);
-        await this.importComments(newUnitId, comments, itemUuidLookups);
+      if (unitImportData.commentsFileName) {
+        if (notXmlFiles[unitImportData.commentsFileName]) {
+          const comments = WorkspaceService.parseCompanionJson<ImportedComment[]>(
+            notXmlFiles[unitImportData.commentsFileName], functionReturn
+          );
+          usedFiles.push(unitImportData.commentsFileName);
+          if (comments) await this.importComments(newUnitId, comments, itemUuidLookups);
+        } else {
+          WorkspaceService.warnMissingFile(unitImportData.commentsFileName, functionReturn);
+        }
       }
 
-      if (
-        unitImportData.richNotesFileName &&
-        notXmlFiles[unitImportData.richNotesFileName]
-      ) {
-        const richNotes =
-          notXmlFiles[unitImportData.richNotesFileName].buffer.toString();
-        usedFiles.push(unitImportData.richNotesFileName);
-        await this.unitRichNoteService.importNotes(JSON.parse(richNotes), newUnitId, itemUuidLookups);
+      if (unitImportData.richNotesFileName) {
+        if (notXmlFiles[unitImportData.richNotesFileName]) {
+          const richNotes = WorkspaceService.parseCompanionJson<Record<string, unknown>[]>(
+            notXmlFiles[unitImportData.richNotesFileName], functionReturn
+          );
+          usedFiles.push(unitImportData.richNotesFileName);
+          if (richNotes) {
+            await this.unitRichNoteService.importNotes(richNotes, newUnitId, itemUuidLookups);
+          }
+        } else {
+          WorkspaceService.warnMissingFile(unitImportData.richNotesFileName, functionReturn);
+        }
       }
 
-      if (
-        unitImportData.codingSchemeFileName &&
-        notXmlFiles[unitImportData.codingSchemeFileName]
-      ) {
-        unitImportData.codingScheme =
-          notXmlFiles[unitImportData.codingSchemeFileName].buffer.toString();
-        usedFiles.push(unitImportData.codingSchemeFileName);
-        await this.importScheme(newUnitId, unitImportData);
+      if (unitImportData.codingSchemeFileName) {
+        if (notXmlFiles[unitImportData.codingSchemeFileName]) {
+          unitImportData.codingScheme =
+            notXmlFiles[unitImportData.codingSchemeFileName].buffer.toString();
+          usedFiles.push(unitImportData.codingSchemeFileName);
+          await this.importScheme(newUnitId, unitImportData);
+        } else {
+          WorkspaceService.warnMissingFile(unitImportData.codingSchemeFileName, functionReturn);
+        }
       }
     } else {
       functionReturn.messages.push({
@@ -815,27 +956,49 @@ export class WorkspaceService {
     }
   }
 
+  private static warnMissingFile(fileName: string, functionReturn: RequestReportDto): void {
+    functionReturn.messages.push({
+      objectKey: fileName,
+      messageKey: 'unit-upload.api-warning.missing-file'
+    });
+  }
+
+  // Parses a companion JSON file (vocs/voco/vorn/vomd/voit/vova). A broken
+  // file must not abort the whole upload: report a json-parse warning for
+  // the file and import the unit without this block.
+  private static parseCompanionJson<T>(
+    file: FileIo,
+    functionReturn: RequestReportDto
+  ): T | undefined {
+    try {
+      return JSON.parse(file.buffer.toString()) as T;
+    } catch {
+      functionReturn.messages.push({
+        objectKey: file.originalname,
+        messageKey: 'unit-upload.api-warning.json-parse'
+      });
+      return undefined;
+    }
+  }
+
   private static getZippedFiles(
     originalFiles: FileIo[],
     functionReturn: RequestReportDto
   ): FileIo[] {
     const files: FileIo[] = [];
-    const zipMimeTypes = [
-      'application/zip',
-      'application/x-zip-compressed',
-      'multipart/x-zip'
-    ];
     originalFiles.forEach(f => {
-      if (zipMimeTypes.indexOf(f.mimetype) >= 0) {
+      if (ZIP_MIME_TYPES.indexOf(f.mimetype) >= 0) {
         try {
           const zip = new AdmZip(f.buffer);
           const zipEntries = zip.getEntries();
           zipEntries.forEach(zipEntry => {
             const isXmlFile = /\.xml$/i.test(zipEntry.entryName);
+            const isJsonFile = /\.json$/i.test(zipEntry.entryName);
             const fileContent = zipEntry.getData();
             files.push({
               originalname: `${f.originalname}/${zipEntry.entryName}`,
-              mimetype: isXmlFile ? 'text/xml' : 'application/octet-stream',
+              // eslint-disable-next-line no-nested-ternary
+              mimetype: isXmlFile ? 'text/xml' : isJsonFile ? 'application/json' : 'application/octet-stream',
               fieldname: f.fieldname,
               encoding: f.encoding,
               buffer: fileContent,
@@ -858,7 +1021,7 @@ export class WorkspaceService {
   private async importUnitProperties(
     workspaceId: number,
     newUnitId: number,
-    unitImportData: UnitImportData
+    unitImportData: UnitImportData | UnitImportJsonData
   ): Promise<ItemUuidLookup[]> {
     let itemUuidLookups: ItemUuidLookup[] = [];
     await this.unitService.patchUnitProperties(
@@ -886,7 +1049,7 @@ export class WorkspaceService {
       const metadata = UnitService.setCurrentProfiles(
         workspace.settings?.unitMDProfile,
         workspace.settings?.itemMDProfile,
-        unitImportData.metadata as UnitFullMetadataDto
+        unitImportData.metadata
       );
       itemUuidLookups = await this.unitService.copyItemsWithMetadata(
         newUnitId,
@@ -898,7 +1061,7 @@ export class WorkspaceService {
 
   private async importDefinition(
     newUnitId: number,
-    unitImportData: UnitImportData
+    unitImportData: UnitImportData | UnitImportJsonData
   ) {
     await this.unitService.patchDefinition(
       newUnitId,
@@ -913,7 +1076,7 @@ export class WorkspaceService {
 
   private async importScheme(
     newUnitId: number,
-    unitImportData: UnitImportData
+    unitImportData: UnitImportData | UnitImportJsonData
   ) {
     await this.unitService.patchScheme(
       newUnitId,
@@ -928,21 +1091,146 @@ export class WorkspaceService {
 
   private async importComments(
     unitId: number,
-    comments: string,
+    comments: ImportedComment[],
     itemUuidLookups: ItemUuidLookup[]
   ) {
-    const parsedComments: UnitCommentDto[] = JSON.parse(comments);
-    // User IDs from another instance are unreliable and could randomly collide with local IDs.
-    // We therefore set them to -1 during import to ensure comments are marked as unread for all local users.
-    const sanitizedComments = parsedComments.map(c => ({
-      ...c,
-      userId: -1
-    }));
+    const mappedComments = comments.map(c => WorkspaceService.mapImportedComment(c));
     await this.unitCommentService.createComments(
-      sanitizedComments,
+      mappedComments,
       unitId,
       itemUuidLookups
     );
+  }
+
+  // Maps metadata from an exported *.vomd.json back onto the internal
+  // structure. Detects the iqb unit-metadata@0.1 wrapper ({ metadata: [...] })
+  // and falls back to the legacy raw { profiles, items } blob for backwards
+  // compatibility.
+  static mapImportedMetadata(parsed: unknown): UnitMetadataValues {
+    const wrapper = parsed as UnitMetadataJson;
+    if (Array.isArray(wrapper?.metadata)) {
+      return {
+        profiles: WorkspaceService.mapMetadataValuesJson(wrapper.metadata)
+      };
+    }
+    return WorkspaceService.normalizeLegacyProfileOrder((parsed ?? {}) as UnitMetadataValues);
+  }
+
+  // Legacy raw-blob exports predate the metadata-values@3.x `order` field and
+  // carry the obsolete boolean `isCurrent` on each profile. Derive `order` from
+  // it (true -> 0, false -> -1) and drop the flag so the imported structure
+  // matches the current model. A profile that already carries `order` keeps it.
+  private static normalizeLegacyProfileOrder(metadata: UnitMetadataValues): UnitMetadataValues {
+    if (!metadata || typeof metadata !== 'object') return metadata;
+    const mapProfile = (profile: ProfileValues & { isCurrent?: boolean }): ProfileValues => {
+      const { isCurrent, ...rest } = profile;
+      return { ...rest, order: profile.order ?? orderFromCurrent(!!isCurrent) };
+    };
+    return {
+      ...metadata,
+      ...(metadata.profiles && { profiles: metadata.profiles.map(mapProfile) }),
+      ...(metadata.items && {
+        items: metadata.items.map(item => ({
+          ...item,
+          ...(item.profiles && { profiles: item.profiles.map(mapProfile) })
+        }))
+      })
+    };
+  }
+
+  // Maps metadata-values@3.0 profiles back onto the internal structure. The
+  // profile `order` is carried through; setCurrentProfiles reasserts it against
+  // the workspace profile settings during import.
+  static mapMetadataValuesJson(
+    values: MetadataValuesJson[]
+  ): { profileId: string; order?: number; entries: MetadataValuesEntry[] }[] {
+    return (values ?? [])
+      .filter(profile => !!profile?.profileId)
+      .map(profile => ({
+        profileId: profile.profileId,
+        order: profile.order,
+        entries: (profile.entries ?? [])
+          .filter(entry => !!entry?.id)
+          .map(entry => WorkspaceService.mapMetadataEntryJson(entry))
+      }));
+  }
+
+  // Reconstructs the internal entry shape (value/valueAsText) from the three
+  // metadata-values@3.0 value forms: simple_value, vocabulary_entries and
+  // language_coded_texts. Vocabulary labels become both the internal `text`
+  // and the display texts in valueAsText.
+  private static mapMetadataEntryJson(entry: MetadataEntryJson): MetadataValuesEntry {
+    const { value } = entry;
+    let internalValue: MetadataValuesEntry['value'] = '';
+    let valueAsText: LanguageCodedText[] = [];
+    if (Array.isArray(value)) {
+      if (value.some(entryValue => !!entryValue && typeof (entryValue as VocabularyEntryJson).id === 'string')) {
+        const vocabularyEntries = value as VocabularyEntryJson[];
+        // Preserve the spec field `annotation` (the numbering / SKOS notation);
+        // the pure label stays in `text`. valueAsText is left empty here because
+        // the read path (UnitService.ensureValueAsText) always recomputes the
+        // vocabulary display text, honouring hideNumbering — computing it now
+        // would only be overwritten.
+        internalValue = vocabularyEntries.map(vocabularyEntry => ({
+          id: vocabularyEntry.id,
+          text: vocabularyEntry.label ?? [],
+          annotation: vocabularyEntry.annotation ?? []
+        }));
+        valueAsText = [];
+      } else {
+        internalValue = value as LanguageCodedText[];
+        valueAsText = value as LanguageCodedText[];
+      }
+    } else if (value && typeof value === 'object' && typeof value.raw === 'string') {
+      internalValue = value.raw;
+      valueAsText = value.asText ?? [];
+    }
+    return {
+      id: entry.id,
+      label: entry.label ?? [],
+      value: internalValue,
+      valueAsText
+    };
+  }
+
+  // Maps items from the iqb unit-items@0.2 spec shape back onto the internal
+  // structure: sourceVariableId/sourceVariableUuid become
+  // variableId/variableReadOnlyId. Items without the required id are dropped
+  // (mirrors transformItems on export); they would otherwise end up as
+  // unaddressable NULL-id rows in unit_item.
+  static mapImportedItems(items: UnitItemJson[]): ItemsMetadataValues[] {
+    return (Array.isArray(items) ? items : [])
+      .filter(item => !!item?.id)
+      .map(item => ({
+        uuid: item.uuid,
+        id: item.id,
+        description: item.description,
+        order: item.order,
+        variableId: item.sourceVariableId ?? null,
+        variableReadOnlyId: item.sourceVariableUuid ?? null,
+        createdAt: item.createdAt ? new Date(item.createdAt) : undefined,
+        changedAt: item.changedAt ? new Date(item.changedAt) : undefined,
+        profiles: WorkspaceService.mapMetadataValuesJson(item.metadata ?? [])
+      }));
+  }
+
+  // Maps a comment from the iqb unit-comments@0.1 spec shape (commentator/
+  // isHidden/parentComment) back onto the internal DTO, accepting the legacy
+  // field names (userName/hidden/parentId) for backwards compatibility.
+  static mapImportedComment(comment: ImportedComment): UnitCommentDto {
+    return {
+      id: comment.id,
+      body: comment.body,
+      userName: comment.commentator ?? comment.userName ?? '',
+      // User IDs from another instance are unreliable and could randomly collide with local IDs.
+      // We therefore set them to -1 during import to ensure comments are marked as unread for all local users.
+      userId: -1,
+      parentId: comment.parentComment ?? comment.parentId ?? null,
+      hidden: comment.isHidden ?? comment.hidden ?? false,
+      createdAt: comment.createdAt ? new Date(comment.createdAt) : undefined,
+      changedAt: comment.changedAt ? new Date(comment.changedAt) : undefined,
+      itemUuids: comment.itemUuids
+    };
   }
 
   private async checkForProfileUpdate(

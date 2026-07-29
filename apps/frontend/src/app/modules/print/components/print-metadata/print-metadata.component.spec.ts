@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SimpleChange } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
-import { ItemsMetadataValues, MetadataValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
+import { ItemsMetadataValues, ProfileValues, UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { PrintMetadataComponent } from './print-metadata.component';
 
 describe('PrintMetadataComponent', () => {
@@ -26,7 +26,7 @@ describe('PrintMetadataComponent', () => {
 
   describe('ngOnChanges', () => {
     it('should update unitProfiles and items when metadata changes', () => {
-      const mockProfiles: MetadataValues[] = [
+      const mockProfiles: ProfileValues[] = [
         {
           profileId: 'profile1'
         }
@@ -52,7 +52,7 @@ describe('PrintMetadataComponent', () => {
     });
 
     it('should update unitProfiles when only profiles exist', () => {
-      const mockProfiles: MetadataValues[] = [
+      const mockProfiles: ProfileValues[] = [
         {
           profileId: 'profile1'
         }
@@ -91,7 +91,7 @@ describe('PrintMetadataComponent', () => {
     });
 
     it('should not update properties if metadata is null', () => {
-      const previousProfiles: MetadataValues[] = [
+      const previousProfiles: ProfileValues[] = [
         {
           profileId: 'old'
         }
@@ -106,7 +106,7 @@ describe('PrintMetadataComponent', () => {
     });
 
     it('should not update if changes do not include metadata', () => {
-      const previousProfiles: MetadataValues[] = [
+      const previousProfiles: ProfileValues[] = [
         {
           profileId: 'old'
         }

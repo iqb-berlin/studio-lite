@@ -1,10 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Logger } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import {
   CreateUnitDto,
-  UnitFullMetadataDto,
+  UnitMetadataDto,
+  UnitMetadataValues,
   UnitPropertiesDto,
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
@@ -20,6 +22,7 @@ import UnitDropBoxHistory from '../entities/unit-drop-box-history.entity';
 import { UnitMetadataService } from './unit-metadata.service';
 import { UnitItemService } from './unit-item.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
+import { MetadataProfileService } from './metadata-profile.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
 
 describe('UnitService', () => {
@@ -34,6 +37,7 @@ describe('UnitService', () => {
   let unitMetadataService: DeepMocked<UnitMetadataService>;
   let unitItemService: DeepMocked<UnitItemService>;
   let unitMetadataToDeleteService: DeepMocked<UnitMetadataToDeleteService>;
+  let metadataProfileService: DeepMocked<MetadataProfileService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -58,6 +62,10 @@ describe('UnitService', () => {
         {
           provide: UnitMetadataToDeleteService,
           useValue: createMock<UnitMetadataToDeleteService>()
+        },
+        {
+          provide: MetadataProfileService,
+          useValue: createMock<MetadataProfileService>()
         },
         {
           provide: getRepositoryToken(Unit),
@@ -97,6 +105,7 @@ describe('UnitService', () => {
     unitMetadataService = module.get(UnitMetadataService);
     unitItemService = module.get(UnitItemService);
     unitMetadataToDeleteService = module.get(UnitMetadataToDeleteService);
+    metadataProfileService = module.get(MetadataProfileService);
   });
 
   it('should be defined', () => {
@@ -172,6 +181,21 @@ describe('UnitService', () => {
       const result = await service.create(1, { key: 'u1' } as CreateUnitDto, { id: 1 } as User, false);
       expect(result).toBe(0);
     });
+
+    it('should assign a uuid to the new unit', async () => {
+      const newUnit: Partial<Unit> = { id: 2 };
+      unitsRepository.findOne.mockResolvedValue(null);
+      unitsRepository.create.mockReturnValue(newUnit as Unit);
+      unitsRepository.save.mockResolvedValue(newUnit as Unit);
+      workspaceUserRepository.find.mockResolvedValue([]);
+      usersRepository.findOne.mockResolvedValue({ lastName: 'Doe' } as User);
+
+      await service.create(1, { key: 'u1' } as CreateUnitDto, { id: 1 } as User, false);
+
+      expect(newUnit.uuid).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      );
+    });
   });
 
   describe('findOnesProperties', () => {
@@ -213,6 +237,33 @@ describe('UnitService', () => {
       await service.patchUnitMetadata(1, []);
       expect(unitMetadataService.getAllByUnitId).toHaveBeenCalled();
     });
+
+    it('updates the matching stored profile by profileId instead of re-inserting', async () => {
+      // The incoming profile has no row id (the profile form drops it) but keeps
+      // its profileId; it must update the stored row, not delete + re-insert.
+      unitMetadataService.getAllByUnitId.mockResolvedValue([
+        { id: 7, profileId: 'p1' },
+        { id: 8, profileId: 'p2' }
+      ] as UnitMetadataDto[]);
+
+      await service.patchUnitMetadata(1, [{ profileId: 'p1' } as UnitMetadataDto]);
+
+      expect(unitMetadataService.updateMetadata)
+        .toHaveBeenCalledWith(7, expect.objectContaining({ id: 7, profileId: 'p1' }), undefined);
+      expect(unitMetadataService.addMetadata).not.toHaveBeenCalled();
+      // p2 is gone from the incoming payload -> removed
+      expect(unitMetadataService.removeMetadata).toHaveBeenCalledWith(8, undefined);
+    });
+
+    it('inserts a profile that has no stored counterpart', async () => {
+      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
+
+      await service.patchUnitMetadata(1, [{ profileId: 'p-new' } as UnitMetadataDto]);
+
+      expect(unitMetadataService.addMetadata)
+        .toHaveBeenCalledWith(1, expect.objectContaining({ profileId: 'p-new' }), undefined);
+      expect(unitMetadataService.removeMetadata).not.toHaveBeenCalled();
+    });
   });
 
   describe('patchItemsMetadata', () => {
@@ -220,6 +271,59 @@ describe('UnitService', () => {
       unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
       await service.patchItemsMetadata(1, []);
       expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalled();
+    });
+  });
+
+  describe('patchMetadata', () => {
+    it('runs the whole save in one transaction and threads the manager through', async () => {
+      const manager = createMock<EntityManager>();
+      const transaction = jest.fn().mockImplementation(
+        (runInTransaction: (m: EntityManager) => Promise<unknown>) => runInTransaction(manager)
+      );
+      Object.defineProperty(unitsRepository, 'manager', {
+        value: { transaction } as unknown as EntityManager,
+        configurable: true
+      });
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 10 } as Unit);
+      workspaceRepository.findOne.mockResolvedValue({ id: 10, settings: {} } as unknown as Workspace);
+      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
+      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
+
+      await service.patchMetadata(1, { profiles: [], items: [] });
+
+      expect(transaction).toHaveBeenCalled();
+      expect(unitMetadataService.getAllByUnitId).toHaveBeenCalledWith(1, manager);
+      expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalledWith(1, manager);
+      expect(unitMetadataToDeleteService.upsertOneForUnit).toHaveBeenCalledWith(1, manager);
+    });
+
+    it('flags the current profile as order 0 from the workspace settings on save', async () => {
+      const manager = createMock<EntityManager>();
+      const transaction = jest.fn().mockImplementation(
+        (runInTransaction: (m: EntityManager) => Promise<unknown>) => runInTransaction(manager)
+      );
+      Object.defineProperty(unitsRepository, 'manager', {
+        value: { transaction } as unknown as EntityManager,
+        configurable: true
+      });
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 10 } as Unit);
+      workspaceRepository.findOne.mockResolvedValue({
+        id: 10,
+        settings: { unitMDProfile: 'profile-a', itemMDProfile: 'profile-b' }
+      } as unknown as Workspace);
+      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
+      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
+
+      const patchUnitMetadataSpy = jest.spyOn(service, 'patchUnitMetadata').mockResolvedValue();
+      jest.spyOn(service, 'patchItemsMetadata').mockResolvedValue();
+
+      await service.patchMetadata(1, {
+        profiles: [{ profileId: 'profile-a' }, { profileId: 'other' }]
+      });
+
+      const savedProfiles = patchUnitMetadataSpy.mock.calls[0][1];
+      expect(savedProfiles[0]).toMatchObject({ profileId: 'profile-a', order: 0 });
+      expect(savedProfiles[1]).toMatchObject({ profileId: 'other', order: -1 });
     });
   });
 
@@ -280,6 +384,35 @@ describe('UnitService', () => {
 
       await service.copy([1], 2, { id: 1, name: 'u' } as User, false);
       expect(unitsRepository.create).toHaveBeenCalled();
+    });
+
+    it('should not copy uuid to the new unit', async () => {
+      const sourceUnit = {
+        id: 1,
+        key: 'k',
+        uuid: 'original-uuid',
+        scheme: '{"variableCodings": []}',
+        variables: []
+      } as unknown as Unit;
+
+      unitsRepository.findOne
+        .mockResolvedValueOnce(sourceUnit)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValue(sourceUnit);
+
+      const capturedCreateArg: Partial<Unit> = {};
+      unitsRepository.create.mockImplementation((dto: Partial<Unit>) => {
+        Object.assign(capturedCreateArg, dto);
+        return { id: 2 } as Unit;
+      });
+      unitsRepository.save.mockResolvedValue({ id: 2 } as Unit);
+      workspaceUserRepository.find.mockResolvedValue([]);
+      usersRepository.findOne.mockResolvedValue({ firstName: 'F', lastName: 'L', name: 'N' } as User);
+      unitDefinitionsRepository.findOne.mockResolvedValue({ data: 'xml' } as UnitDefinition);
+
+      await service.copy([1], 2, { id: 1, name: 'u' } as User, false);
+
+      expect(capturedCreateArg.uuid).toBeUndefined();
     });
   });
 
@@ -352,10 +485,223 @@ describe('UnitService', () => {
       const metadata = {
         profiles: [{ profileId: 'p1' }, { profileId: 'p2' }],
         items: []
-      } as UnitFullMetadataDto;
+      } as UnitMetadataValues;
       const result = UnitService.setCurrentProfiles('p1', 'p2', metadata);
-      expect(result.profiles[0].isCurrent).toBe(true);
-      expect(result.profiles[1].isCurrent).toBe(false);
+      expect(result.profiles[0].order).toBe(0);
+      expect(result.profiles[1].order).toBe(-1);
+    });
+  });
+
+  describe('ensureValueAsText', () => {
+    it('derives valueAsText from vocabulary entries (text, not label)', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [{ lang: 'de', value: 'Prozess' }],
+            value: [{ id: 'https://w3id.org/iqb/vocab/p2', text: [{ lang: 'de', value: 'Anwenden' }] }],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
+    });
+
+    it('combines the annotation (numbering) into valueAsText by default', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [{ lang: 'de', value: 'Prozess' }],
+            value: [{
+              id: 'https://w3id.org/iqb/vocab/p2',
+              label: [{ lang: 'de', value: 'Anwenden' }],
+              annotation: [{ lang: 'de', value: '1.2' }]
+            }],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: '1.2 Anwenden' }]);
+    });
+
+    it('drops the numbering when the entry hideNumbering flag is set', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [{ lang: 'de', value: 'Prozess' }],
+            value: [{
+              id: 'https://w3id.org/iqb/vocab/p2',
+              label: [{ lang: 'de', value: 'Anwenden' }],
+              annotation: [{ lang: 'de', value: '1.2' }]
+            }],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata, { p1: { e1: true } });
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
+    });
+
+    it('recomputes vocabulary valueAsText even when one was already stored (hideNumbering applies to imports)', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [{ lang: 'de', value: 'Prozess' }],
+            value: [{
+              id: 'https://w3id.org/iqb/vocab/p2',
+              text: [{ lang: 'de', value: 'Anwenden' }],
+              annotation: [{ lang: 'de', value: '1.2' }]
+            }],
+            valueAsText: [{ lang: 'de', value: '1.2 Anwenden' }]
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata, { p1: { e1: true } });
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
+    });
+
+    it('derives valueAsText from form-created vocabulary entries that carry label', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [],
+            value: [{ id: 'https://w3id.org/iqb/v24/kh/r5f', label: [{ lang: 'de', value: 'nein' }] }],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'nein' }]);
+    });
+
+    it('derives valueAsText from a form-created simple value object { raw, asText }', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1', label: [], value: { raw: 'true', asText: [{ lang: 'de', value: 'ja' }] }, valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'ja' }]);
+    });
+
+    it('tolerates a null element in a vocabulary value array without crashing', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [],
+            value: [{ id: 'v', text: [{ lang: 'de', value: 'Anwenden' }] }, null],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
+    });
+
+    it('keeps multilingual free text arrays as valueAsText', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [],
+            value: [{ lang: 'de', value: 'Freitext' }],
+            valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Freitext' }]);
+    });
+
+    it('leaves valueAsText empty for a plain string value (not derivable)', () => {
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1', label: [], value: 'false', valueAsText: []
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([]);
+    });
+
+    it('does not overwrite an existing valueAsText for non-vocabulary values', () => {
+      // Vocabulary display text is always recomputed (so hideNumbering applies),
+      // but other value types keep a stored valueAsText.
+      const metadata = {
+        profiles: [{
+          profileId: 'p1',
+          entries: [{
+            id: 'e1',
+            label: [],
+            value: [{ lang: 'de', value: 'Neu' }],
+            valueAsText: [{ lang: 'de', value: 'Alt' }]
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Alt' }]);
+    });
+
+    it('fills item profile entries and does not mutate the input', () => {
+      const metadata = {
+        items: [{
+          id: 'ITEM1',
+          profiles: [{
+            profileId: 'ip1',
+            entries: [{
+              id: 'e1',
+              label: [],
+              value: [{ id: 'v', text: [{ lang: 'de', value: 'Anwenden' }] }],
+              valueAsText: []
+            }]
+          }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.ensureValueAsText(metadata);
+
+      expect(result.items[0].profiles[0].entries[0].valueAsText).toEqual([{ lang: 'de', value: 'Anwenden' }]);
+      // input untouched
+      expect(metadata.items[0].profiles[0].entries[0].valueAsText).toEqual([]);
     });
   });
 
@@ -366,6 +712,141 @@ describe('UnitService', () => {
 
       await service.findOnesMetadata(1);
       expect(unitMetadataService.getAllByUnitId).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('ensureUuid', () => {
+    const setupTransaction = (unit: Unit | null) => {
+      const mockManager = createMock<EntityManager>();
+      mockManager.findOne.mockResolvedValue(unit);
+      const transaction = jest.fn().mockImplementation(
+        (cb: (manager: EntityManager) => Promise<string>) => cb(mockManager)
+      );
+      Object.defineProperty(unitsRepository, 'manager', {
+        value: { transaction },
+        configurable: true
+      });
+      return mockManager;
+    };
+
+    it('should return existing uuid without saving', async () => {
+      const mockManager = setupTransaction({ id: 1, uuid: 'existing-uuid' } as Unit);
+
+      const result = await service.ensureUuid(1);
+
+      expect(result).toBe('existing-uuid');
+      expect(mockManager.save).not.toHaveBeenCalled();
+    });
+
+    it('should generate, persist and return uuid when none exists', async () => {
+      const mockManager = setupTransaction({ id: 1, uuid: null } as Unit);
+      mockManager.save.mockResolvedValue({ id: 1 } as Unit);
+
+      const result = await service.ensureUuid(1);
+
+      expect(result).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      );
+      expect(mockManager.save).toHaveBeenCalled();
+    });
+
+    it('should throw UnitNotFoundException when unit does not exist', async () => {
+      setupTransaction(null);
+
+      await expect(service.ensureUuid(999)).rejects.toThrow(UnitNotFoundException);
+    });
+  });
+
+  describe('adoptUuidIfFree', () => {
+    it('should adopt the uuid when no other unit holds it', async () => {
+      (unitsRepository.findOne as jest.Mock).mockResolvedValue(null);
+
+      await service.adoptUuidIfFree(1, 'imported-uuid');
+
+      expect(unitsRepository.update).toHaveBeenCalledWith(1, { uuid: 'imported-uuid' });
+    });
+
+    it('should keep none when another unit already holds the uuid', async () => {
+      (unitsRepository.findOne as jest.Mock).mockResolvedValue({ id: 2 } as Unit);
+
+      await service.adoptUuidIfFree(1, 'taken-uuid');
+
+      expect(unitsRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('should silently swallow a unique constraint violation from a concurrent import', async () => {
+      const warnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+      (unitsRepository.findOne as jest.Mock).mockResolvedValue(null);
+      (unitsRepository.update as jest.Mock).mockRejectedValue(
+        new QueryFailedError('UPDATE', [], Object.assign(new Error('duplicate key'), { code: '23505' }))
+      );
+
+      await expect(service.adoptUuidIfFree(1, 'raced-uuid')).resolves.toBeUndefined();
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
+    });
+
+    it('should warn about other update failures instead of hiding them', async () => {
+      const warnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+      (unitsRepository.findOne as jest.Mock).mockResolvedValue(null);
+      (unitsRepository.update as jest.Mock).mockRejectedValue(new Error('connection lost'));
+
+      await expect(service.adoptUuidIfFree(1, 'imported-uuid')).resolves.toBeUndefined();
+
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('connection lost'));
+      warnSpy.mockRestore();
+    });
+  });
+
+  describe('buildHideNumberingMap', () => {
+    it('extracts hideNumbering per entry from the stored profile definition', async () => {
+      metadataProfileService.getStoredMetadataProfileFromDb.mockResolvedValue({
+        id: 'p1',
+        groups: [{
+          entries: [
+            { id: 'e1', parameters: { hideNumbering: true } },
+            { id: 'e2', parameters: { hideNumbering: false } },
+            { id: 'e3', parameters: null }
+          ]
+        }]
+      } as never);
+
+      const metadata = {
+        profiles: [{ profileId: 'p1', entries: [] }],
+        items: [{ id: 'i1', profiles: [{ profileId: 'p1', entries: [] }] }]
+      } as unknown as UnitMetadataValues;
+
+      const map = await service.buildHideNumberingMap(metadata);
+
+      // only the flagged entry is recorded; false/null yield no entry
+      expect(map).toEqual({ p1: { e1: true } });
+      // the profile is looked up once even though two profiles reference it
+      expect(metadataProfileService.getStoredMetadataProfileFromDb).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns an empty map when the profile is not stored', async () => {
+      metadataProfileService.getStoredMetadataProfileFromDb.mockResolvedValue(null);
+      const metadata = { profiles: [{ profileId: 'p1', entries: [] }] } as unknown as UnitMetadataValues;
+      await expect(service.buildHideNumberingMap(metadata)).resolves.toEqual({});
+    });
+
+    it('returns an empty map for undefined metadata', async () => {
+      await expect(service.buildHideNumberingMap(undefined)).resolves.toEqual({});
+    });
+
+    it('reuses a shared profile cache across units so the profile is fetched once', async () => {
+      metadataProfileService.getStoredMetadataProfileFromDb.mockResolvedValue({
+        id: 'p1',
+        groups: [{ entries: [{ id: 'e1', parameters: { hideNumbering: true } }] }]
+      } as never);
+      const cache = new Map();
+      const metadata = { profiles: [{ profileId: 'p1', entries: [] }] } as unknown as UnitMetadataValues;
+
+      await service.buildHideNumberingMap(metadata, cache);
+      await service.buildHideNumberingMap(metadata, cache);
+
+      expect(metadataProfileService.getStoredMetadataProfileFromDb).toHaveBeenCalledTimes(1);
     });
   });
 });
