@@ -73,6 +73,7 @@ export class CodingReportComponent implements OnInit {
 
   dataSource!: MatTableDataSource<CodingReportRow>; // Datasource for the table
   isLoading = false; // Indicates if data is currently loading
+  loadError = false;
   codedVariablesOnly = true; // Filter: Display only coded variables
   unitDataRows: CodingReportRow[] = []; // All rows of data received from the backend
   expandedRow: CodingReportRow | null = null;
@@ -98,8 +99,9 @@ export class CodingReportComponent implements OnInit {
   /**
    * Fetches the coding report from the backend and initializes the data source.
    */
-  private loadCodingReport(): void {
+  loadCodingReport(): void {
     this.isLoading = true;
+    this.loadError = false;
     this.backendService.getCodingReport(this.workspaceService.selectedWorkspaceId)
       .subscribe({
         next: (codingReport: CodingReportDto[]) => {
@@ -126,9 +128,11 @@ export class CodingReportComponent implements OnInit {
           });
           this.updateDataSource();
         },
-        error: err => {
-          // eslint-disable-next-line no-console
-          console.error('Error loading the coding report:', err);
+        error: () => {
+          this.unitDataRows = [];
+          this.updateDataSource();
+          this.loadError = true;
+          this.isLoading = false;
         },
         complete: () => {
           this.isLoading = false;

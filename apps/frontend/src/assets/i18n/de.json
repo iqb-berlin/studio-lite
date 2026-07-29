@@ -828,6 +828,10 @@
     "problem-count-one": "1 Problem",
     "problem-count-many": "{{count}} Probleme",
     "no-problems": "Keine Probleme",
+    "empty": "Keine Einträge im Kodierbericht vorhanden.",
+    "no-matches": "Keine Einträge entsprechen den aktuellen Anzeigeeinstellungen.",
+    "load-error": "Der Kodierbericht konnte nicht geladen werden.",
+    "retry": "Erneut laden",
     "severity": {
       "error": "Fehler",
       "warning": "Warnung"

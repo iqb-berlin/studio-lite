@@ -21,6 +21,19 @@ mat-dialog-actions {
   gap: 10px;
 }
 
+.report-state {
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.report-state--error {
+  color: #8e1b14;
+}
+
+.report-state--error p {
+  margin-top: 0;
+}
+
 .validation-summary-cell {
   min-width: 190px;
 }

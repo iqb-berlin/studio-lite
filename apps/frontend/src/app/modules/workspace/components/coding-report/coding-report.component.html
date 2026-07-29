@@ -2,17 +2,31 @@
   <span>{{ 'workspace.coding-report' | translate }}</span>
   <mat-form-field class="filter">
     <mat-label>{{'filter-by' | translate}}</mat-label>
-    <input matInput (keyup)="applyFilter($event)" #input>
+    <input matInput [disabled]="isLoading || loadError" (keyup)="applyFilter($event)" #input>
   </mat-form-field>
-  <mat-slide-toggle class="toggle" [checked]="codedVariablesOnly" (toggleChange)="toggleChange()">
+  <mat-slide-toggle
+    class="toggle"
+    [checked]="codedVariablesOnly"
+    [disabled]="isLoading || loadError"
+    (toggleChange)="toggleChange()">
     nur mit Regeln kodierte Variablen
   </mat-slide-toggle>
 </div>
 <mat-dialog-content>
   @if (isLoading) {
     <mat-spinner></mat-spinner>
-  }
-  @if (!isLoading) {
+  } @else if (loadError) {
+    <div class="report-state report-state--error" role="alert" data-cy="coding-report-error">
+      <p>{{ 'coding-report.load-error' | translate }}</p>
+      <button
+        mat-stroked-button
+        type="button"
+        data-cy="coding-report-retry"
+        (click)="loadCodingReport()">
+        {{ 'coding-report.retry' | translate }}
+      </button>
+    </div>
+  } @else {
     <table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows>
       @for (column of displayedColumns; track column) {
         <ng-container [matColumnDef]="column">
@@ -114,6 +128,11 @@
         mat-row
         *matRowDef="let row; columns: validationDetailColumns"
         class="validation-detail-row"></tr>
+      <tr class="mat-row" *matNoDataRow data-cy="coding-report-empty">
+        <td class="mat-cell report-state" [attr.colspan]="displayedColumns.length">
+          {{ (unitDataRows.length === 0 ? 'coding-report.empty' : 'coding-report.no-matches') | translate }}
+        </td>
+      </tr>
     </table>
   }
 </mat-dialog-content>
@@ -122,6 +141,7 @@
           color="primary"
           type="button"
           data-cy="coding-report-download"
+          [disabled]="isLoading || loadError || !dataSource || dataSource.filteredData.length === 0"
           (click)="downloadCodingReport()">
     {{ 'download' | translate }}
   </button>
