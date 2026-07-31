@@ -1,8 +1,12 @@
 export enum IqbProfile {
-  MA = 'Mathematik Primar',
-  DE = 'Deutsch Primar',
-  EN = 'Englisch Sek I',
-  FR = 'Französisch Sek I'
+  MAu = 'IQB Mathematik Primar - Aufgabe',
+  MAi = 'IQB Mathematik Primar - Item',
+  DEu = 'IQB Deutsch Primar - Aufgabe',
+  DEi = 'IQB Deutsch Primar - Item',
+  ENu = 'IQB Englisch Sek I - Aufgabe',
+  ENi = 'IQB Englisch Sek I - Item',
+  FRu = 'IQB Französisch Sek I - Aufgabe',
+  FRi = 'IQB Französisch Sek I - Item'
 }
 // eslint-disable-next-line
 export const IqbProfileExamples = new Map <string, any>([
