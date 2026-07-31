@@ -240,9 +240,10 @@ describe('Admin Settings Tab Configuration', () => {
 
   // -------------------------------------------------------------------------
   describe('Profiles Registry card', () => {
-    const testUrl = 'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/refs/heads/master/test-registry.csv';
+    const testUrl =
+      'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/refs/heads/master/metadata-registry-test.csv';
     const originalUrl =
-      'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv';
+      'https://www.w3id.org/iqb/metadata-registry';
     it('displays the Profiles Registry CSV URL field', () => {
       goToSettings();
       cy.get('[formcontrolname="csvUrl"]').should('exist');

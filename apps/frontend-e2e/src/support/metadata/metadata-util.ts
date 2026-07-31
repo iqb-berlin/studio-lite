@@ -96,32 +96,44 @@ export function selectProfileForAreaFromGroup(profile: IqbProfile, area: string,
 
 export function checkProfile(profile: string): void {
   const alias = `load${profile}`;
+  // TODO
+  // It should be updated once we replace internally the profile Url
+  // url=https://w3id.org/iqb/p11/item/
   cy.intercept(
     'GET',
-    '/api/metadata/profiles?url=https://raw.githubusercontent.com/iqb-vocabs/p99/master/item.json'
+    '/api/metadata/profiles?url=https://raw.githubusercontent.com/iqb-vocabs/p11/master/item.json'
   ).as(alias);
   cy.wait(`@${alias}`)
     .its('response.statusCode')
     .should('to.be.oneOf', [200, 304]);
-  cy.get('[data-cy="shared-profiles-select-profile-title"]').contains(profile).click();
-  cy.get('[data-cy="shared-profiles-select-profile"]')
-    .filter(`:contains(${profile})`).eq(0)
+  cy.get('[data-cy="shared-profiles-select-profile-title"]')
+    .contains(profile)
     .click();
   cy.get('[data-cy="shared-profiles-select-profile"]')
-    .filter(`:contains(${profile})`).eq(1)
+    .filter(`:contains(${profile})`)
+    .eq(0)
+    .click();
+  cy.get('[data-cy="shared-profiles-select-profile"]')
+    .filter(`:contains(${profile})`)
+    .eq(1)
     .click();
 }
 
 export function checkMultipleProfiles(profiles: string[]): void {
+  // TODO
+  // It should be updated once we replace internally the profile Url
+  // url=https://w3id.org/iqb/p11/item/
   cy.intercept(
     'GET',
-    '/api/metadata/profiles?url=https://raw.githubusercontent.com/iqb-vocabs/p99/master/item.json'
+    '/api/metadata/profiles?url=https://raw.githubusercontent.com/iqb-vocabs/p11/master/item.json'
   ).as('selectedProfiles');
   cy.wait('@selectedProfiles')
     .its('response.statusCode')
     .should('to.be.oneOf', [200, 304]);
   profiles.forEach(profile => {
-    cy.get('[data-cy="shared-profiles-select-profile-title"]').contains(profile).click();
+    cy.get('[data-cy="shared-profiles-select-profile-title"]')
+      .contains(profile)
+      .click();
     cy.get('[data-cy="shared-profiles-select-profile"]')
       .filter(`:contains(${profile})`)
       .eq(0)

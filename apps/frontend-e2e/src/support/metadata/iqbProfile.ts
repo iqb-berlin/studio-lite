@@ -65,3 +65,16 @@ export const RegistryProfile = new Map<string, string>([
   ['iEN', 'https://raw.githubusercontent.com/iqb-vocabs/p52/master/item.json'],
   ['iFR', 'https://raw.githubusercontent.com/iqb-vocabs/p53/master/item.json']
 ]);
+
+/*
+TODO
+ It should be updated once we replace internally the profile Url
+  ['uMA', 'https://w3id.org/iqb/p11/unit/'],
+  ['uDE', 'https://w3id.org/iqb/p12/unit/'],
+  ['uEN', 'https://w3id.org/iqb/p53/unit/'],
+  ['uFR', 'https://w3id.org/iqb/p52/unit/'],
+  ['iMA', 'https://w3id.org/iqb/p11/item/'],
+  ['iDE', 'https://w3id.org/iqb/p12/item/'],
+  ['iEN', 'https://w3id.org/iqb/p53/item/'],
+  ['iFR', 'https://w3id.org/iqb/p52/item/']
+ */
