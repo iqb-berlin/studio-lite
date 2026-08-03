@@ -21,8 +21,12 @@
 // so a self-hosted copy of a profile is never silently equated with — or rewritten
 // to — the official one. Scheme and the `www.` alias are accepted as variants of
 // the same id and normalized away by toW3idProfileId.
+// `refs/heads/master` is the spelling github's "copy raw file" button produces; it
+// serves the same document as the shorter `master` form and is therefore accepted
+// as the same id — the registry url an admin pasted by hand is regularly in that form.
 const W3ID_PROFILE = /^https?:\/\/(?:www\.)?w3id\.org\/iqb\/(p\d+)\/([a-z]+)\/?$/i;
-const GITHUB_PROFILE = /^https?:\/\/raw\.githubusercontent\.com\/iqb-vocabs\/(p\d+)\/master\/([a-z]+)\.json$/i;
+const GITHUB_PROFILE =
+  /^https?:\/\/raw\.githubusercontent\.com\/iqb-vocabs\/(p\d+)\/(?:refs\/heads\/)?master\/([a-z]+)\.json$/i;
 const CANONICAL_PROFILE_KEY = /^iqb:(p\d+):([a-z]+)$/;
 
 export function canonicalizeProfileId(profileId: string): string {
@@ -61,7 +65,13 @@ export function profileIdsMatch(
  */
 export function toW3idProfileId(profileId: string): string {
   if (!profileId) return profileId;
-  const key = CANONICAL_PROFILE_KEY.exec(canonicalizeProfileId(profileId));
+  const canonical = canonicalizeProfileId(profileId);
+  // Only a value canonicalizeProfileId actually RECOGNIZED may be rewritten. It
+  // returns anything else unchanged — including a string that happens to be spelled
+  // like the internal key (`iqb:p11:unit`), which a client could otherwise post to
+  // have it promoted into the official profile url.
+  if (canonical === profileId) return profileId;
+  const key = CANONICAL_PROFILE_KEY.exec(canonical);
   return key ? `https://w3id.org/iqb/${key[1]}/${key[2]}/` : profileId;
 }
 

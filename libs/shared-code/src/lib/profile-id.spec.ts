@@ -21,6 +21,12 @@ describe('profile-id', () => {
       expect(canonicalizeProfileId(w3id)).not.toBe('iqb:p11:item');
     });
 
+    it('recognizes the refs/heads/master spelling of the raw github url', () => {
+      // what github's "copy raw file" button produces; it serves the same document
+      expect(canonicalizeProfileId('https://raw.githubusercontent.com/iqb-vocabs/p11/refs/heads/master/unit.json'))
+        .toBe('iqb:p11:unit');
+    });
+
     it('returns unknown url forms unchanged', () => {
       const other = 'https://example.org/some/profile.json';
       expect(canonicalizeProfileId(other)).toBe(other);
@@ -88,6 +94,16 @@ describe('profile-id', () => {
       // the classic store url is not a profile and must not be rewritten
       const store = 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/profile-config.json';
       expect(toW3idProfileId(store)).toBe(store);
+    });
+
+    it('rewrites the refs/heads/master spelling as well', () => {
+      expect(toW3idProfileId('https://raw.githubusercontent.com/iqb-vocabs/p11/refs/heads/master/unit.json'))
+        .toBe(w3id);
+    });
+
+    it('does not promote the internal key spelling into an official profile url', () => {
+      // a client could otherwise post `iqb:p11:unit` and have it stored as p11
+      expect(toW3idProfileId('iqb:p11:unit')).toBe('iqb:p11:unit');
     });
 
     it('keeps empty values unchanged', () => {
