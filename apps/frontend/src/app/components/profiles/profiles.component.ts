@@ -4,7 +4,7 @@ import {
 import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
 import { MDProfile } from '@iqbspecs/metadata-profile';
 import { MDProfileStore } from '@iqbspecs/metadata-store/metadata-store.interface';
-import { profileIdsMatch } from '@studio-lite/shared-code';
+import { toW3idProfileId } from '@studio-lite/shared-code';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatError } from '@angular/material/form-field';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
@@ -17,6 +17,7 @@ import { ProfileStoreWithProfiles, WsgAdminService } from '../../modules/wsg-adm
 import { Profile } from '../../models/profile.type';
 import { MetadataBackendService } from '../../modules/metadata/services/metadata-backend.service';
 import { ProfileLabelPipe } from '../../pipes/profile-label.pipe';
+import { IsProfileSelectedPipe } from '../../pipes/is-profile-selected.pipe';
 
 export type CoreProfile = Profile;
 
@@ -24,8 +25,8 @@ export type CoreProfile = Profile;
   selector: 'studio-lite-profiles',
   templateUrl: './profiles.component.html',
   styleUrls: ['./profiles.component.scss'],
-  imports: [MatProgressSpinner, FormsModule, MatExpansionPanel,
-    MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule, ProfileLabelPipe]
+  imports: [MatProgressSpinner, FormsModule, MatExpansionPanel, MatExpansionPanelHeader,
+    MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule, ProfileLabelPipe, IsProfileSelectedPipe]
 })
 export class ProfilesComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
@@ -134,18 +135,18 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     return null;
   }
 
-  // Canonical comparison: a selection stored in the github spelling still
-  // checks the box of the same profile listed by the registry as w3id (#1570).
-  isChecked(id:string):boolean {
-    return !!this.profilesSelected?.find((profile: { id: string; }) => profileIdsMatch(profile.id, id));
-  }
-
+  // Ids are canonicalized on both sides (here and in the isProfileSelected pipe),
+  // so adding and removing agree on what "the same profile" is even when the
+  // stored selection still uses the retired github spelling (#1570). Selecting
+  // also rewrites the stored id, so the group settings come back canonical.
+  // The array is replaced rather than mutated: the pure pipe in the template only
+  // re-evaluates when the reference changes.
   changeSelection(checkbox:MatCheckboxChange) {
-    checkbox.checked ?
-      this.profilesSelected.push(
-        { id: checkbox.source.id || '', label: checkbox.source.name || '' }) :
-      this.profilesSelected = this.profilesSelected
-        .filter((profile: CoreProfile) => profile.id !== checkbox.source.id);
+    const id = toW3idProfileId(checkbox.source.id || '');
+    this.profilesSelected = checkbox.checked ?
+      [...this.profilesSelected, { id, label: checkbox.source.name || '' }] :
+      this.profilesSelected
+        .filter((profile: CoreProfile) => toW3idProfileId(profile.id) !== id);
     this.hasChanged.emit(this.profilesSelected);
   }
 

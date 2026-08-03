@@ -17,7 +17,7 @@
               <div>
                 <mat-checkbox
                   [id]="profile.id"
-                  [checked]="isChecked(profile.id)"
+                  [checked]="profile.id | isProfileSelected:profilesSelected"
                   (change)="changeSelection($event)"
                   [name]="profile | profileLabel"
                   data-cy="shared-profiles-select-profile">

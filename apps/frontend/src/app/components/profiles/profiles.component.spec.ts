@@ -130,21 +130,6 @@ describe('ProfilesComponent', () => {
     expect(component.isLoading).toBe(false);
   });
 
-  it('isChecked should return true if profile is selected', () => {
-    component.profilesSelected = [{ id: 'p1', label: 'P1' }];
-    expect(component.isChecked('p1')).toBe(true);
-    expect(component.isChecked('p2')).toBe(false);
-  });
-
-  it('isChecked matches a selection stored in the github spelling against the registry w3id', () => {
-    component.profilesSelected = [
-      { id: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json', label: 'MA unit' }
-    ];
-    expect(component.isChecked('https://w3id.org/iqb/p11/unit/')).toBe(true);
-    expect(component.isChecked('https://w3id.org/iqb/p11/item/')).toBe(false);
-    expect(component.isChecked('https://w3id.org/iqb/p12/unit/')).toBe(false);
-  });
-
   it('changeSelection should add profile if checked', () => {
     jest.spyOn(component.hasChanged, 'emit');
     const event = {
@@ -171,6 +156,46 @@ describe('ProfilesComponent', () => {
     expect(component.profilesSelected.length).toBe(1);
     expect(component.profilesSelected[0].id).toBe('p2');
     expect(component.hasChanged.emit).toHaveBeenCalledWith(component.profilesSelected);
+  });
+
+  // #1570: adding and removing must agree on identity even when the stored
+  // selection still carries the retired github spelling.
+  it('changeSelection removes a selection stored in the github spelling', () => {
+    const github = 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json';
+    component.profilesSelected = [{ id: github, label: 'MA unit' }];
+    const event = {
+      checked: false,
+      source: { id: 'https://w3id.org/iqb/p11/unit/', name: 'MA unit' }
+    } as unknown as MatCheckboxChange;
+
+    component.changeSelection(event);
+
+    expect(component.profilesSelected).toEqual([]);
+  });
+
+  it('changeSelection stores the canonical id when a profile is selected', () => {
+    component.profilesSelected = [];
+    const event = {
+      checked: true,
+      source: {
+        id: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json',
+        name: 'MA unit'
+      }
+    } as unknown as MatCheckboxChange;
+
+    component.changeSelection(event);
+
+    expect(component.profilesSelected[0].id).toBe('https://w3id.org/iqb/p11/unit/');
+  });
+
+  it('changeSelection replaces the array so the pure pipe re-evaluates', () => {
+    const before = component.profilesSelected;
+    component.changeSelection({
+      checked: true,
+      source: { id: 'p9', name: 'P9' }
+    } as unknown as MatCheckboxChange);
+
+    expect(component.profilesSelected).not.toBe(before);
   });
 
   describe('Template rendering', () => {
