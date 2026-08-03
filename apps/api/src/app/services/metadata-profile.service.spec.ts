@@ -91,6 +91,44 @@ describe('MetadataProfileService', () => {
       const result = await service.getStoredMetadataProfile('url');
       expect(result).toEqual(profileDto);
     });
+
+    it('caches and returns a fetched profile under the requested url, not its self-declared id', async () => {
+      // real iqb-vocabs profiles still declare the github spelling as their id
+      // while the app references them by w3id (#1570)
+      const w3id = 'https://w3id.org/iqb/p11/unit/';
+      const github = 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json';
+      metadataProfileRepository.findOneBy.mockResolvedValue(null);
+      mockHttpGet(httpService, { id: github, groups: [], label: [] } as unknown as MetadataProfileDto);
+      metadataProfileRepository.create.mockImplementation(
+        profile => profile as MetadataProfile
+      );
+
+      const result = await service.getStoredMetadataProfile(w3id);
+
+      expect((result as MetadataProfileDto).id).toBe(w3id);
+      expect(metadataProfileRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({ id: w3id })
+      );
+    });
+
+    it('refreshes the row keyed by the requested url instead of inserting under the self-declared id',
+      async () => {
+        const w3id = 'https://w3id.org/iqb/p11/unit/';
+        const github = 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json';
+        const storedProfile = new MetadataProfile();
+        storedProfile.id = w3id;
+        metadataProfileRepository.findOneBy.mockResolvedValue(storedProfile);
+        mockHttpGet(httpService, { id: github, groups: [], label: [] } as unknown as MetadataProfileDto);
+
+        await service.getStoredMetadataProfile(w3id);
+        // let the fire-and-forget background refresh finish
+        await new Promise(process.nextTick);
+
+        expect(metadataProfileRepository.save).toHaveBeenCalledWith(
+          expect.objectContaining({ id: w3id })
+        );
+        expect(metadataProfileRepository.create).not.toHaveBeenCalled();
+      });
   });
 
   describe('getProfileVocabularies', () => {

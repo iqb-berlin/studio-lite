@@ -92,12 +92,16 @@ export class RegisteredMetadataProfileService {
   // instead of a profile store ({ id, title, creator, maintainer, profiles }). Fill the
   // store fields with sensible defaults so both shapes can be persisted without hitting
   // the NOT NULL constraints (notably `creator`) on registered_metadata_profile.
+  // Rows are keyed by the url the registry lists (the w3id) instead of the
+  // document's self-declared id, which iqb-vocabs profiles still spell in the
+  // github form (#1570) — the self-id must not leak back into the database.
   private static normalizeRegisteredProfile(
-    profile: RegisteredMetadataProfile
+    profile: RegisteredMetadataProfile, url: string
   ): RegisteredMetadataProfile {
     const directProfile = profile as RegisteredMetadataProfile & { label?: LanguageCodedText[] };
     return {
       ...profile,
+      id: url,
       title: profile.title?.length ? profile.title : (directProfile.label ?? []),
       creator: profile.creator ?? '',
       maintainer: profile.maintainer ?? '',
@@ -108,7 +112,7 @@ export class RegisteredMetadataProfileService {
   private async storeRegisteredMetadataProfile(
     rawProfile: RegisteredMetadataProfile, url: string
   ): Promise<RegisteredMetadataProfile> {
-    const profile = RegisteredMetadataProfileService.normalizeRegisteredProfile(rawProfile);
+    const profile = RegisteredMetadataProfileService.normalizeRegisteredProfile(rawProfile, url);
     const storedProfile = await this.registeredMetadataProfileRepository
       .findOneBy({ id: profile.id });
     if (storedProfile) {

@@ -184,5 +184,34 @@ describe('RegisteredMetadataProfileService', () => {
         })
       );
     });
+
+    it('registers a profile under the registry url even when its self-declared id differs', async () => {
+      // real iqb-vocabs profiles still declare the github spelling as their id
+      // while the registry lists them by w3id (#1570)
+      const w3id = 'https://w3id.org/iqb/p11/unit/';
+      const github = 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json';
+      const csvContent = [
+        'title,description,target,url',
+        `"t","d","UNIT",${w3id}`
+      ].join('\n');
+      settingsService.findUnitProfilesRegistry.mockResolvedValue({ csvUrl: 'csv-url' } as ProfilesRegistryDto);
+      metadataProfileRegistryRepository.findOneBy.mockResolvedValue({ csv: csvContent } as MetadataProfileRegistry);
+      registeredMetadataProfileRepository.findOneBy.mockResolvedValue(null);
+      mockHttpGet(httpService, {
+        id: github,
+        label: [{ lang: 'de', value: 'Aufgabe' }],
+        groups: []
+      } as unknown as RegisteredMetadataProfile);
+      registeredMetadataProfileRepository.create
+        .mockImplementation(input => input as RegisteredMetadataProfile);
+      registeredMetadataProfileRepository.save
+        .mockImplementation(async input => input as RegisteredMetadataProfile);
+
+      await service.getRegisteredMetadataProfiles();
+
+      expect(registeredMetadataProfileRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({ id: w3id, url: w3id })
+      );
+    });
   });
 });

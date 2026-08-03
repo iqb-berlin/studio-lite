@@ -37,6 +37,10 @@ export class MetadataProfileService {
     return this.metadataProfileRepository.findOneBy({ id: url });
   }
 
+  // The profile is cached and returned under the url it was requested by, not
+  // under its self-declared id: iqb-vocabs profiles still declare the github
+  // spelling while the app references them by w3id (#1570). Keying by the
+  // self-id would leave the w3id row stale forever and pile up duplicates.
   private async getMetadataProfile(url: string): Promise<MetadataProfileDto | null> {
     const profile = await firstValueFrom(
       this.http.get<MetadataProfileDto>(url)
@@ -46,14 +50,16 @@ export class MetadataProfileService {
         )
     );
     if (profile) {
-      await this.storeProfile(profile, url);
+      const keyedProfile = { ...profile, id: url };
+      await this.storeProfile(keyedProfile);
+      return keyedProfile;
     }
     return profile;
   }
 
-  private async storeProfile(profile: MetadataProfileDto, url: string): Promise<void> {
+  private async storeProfile(profile: MetadataProfileDto): Promise<void> {
     const metadataProfile = await this.metadataProfileRepository
-      .findOneBy({ id: url });
+      .findOneBy({ id: profile.id });
     if (metadataProfile) {
       await this.metadataProfileRepository
         .save({ ...profile, modifiedAt: new Date() });
