@@ -9,6 +9,16 @@
 -- that rule is loss-free: every produced w3id resolves to the same document the
 -- stored github url pointed to. Only ids matching the iqb-vocabs github pattern
 -- are touched; foreign profile hosts stay as they are.
+--
+-- ROLLBACK: the data-rewriting changesets below are deliberately NOT invertible.
+-- The w3id spelling was already valid before 19.0.0 (profileIdsMatch/W3ID_PROFILE
+-- ship since 18.0.0), so after the fact a w3id-spelled row is indistinguishable
+-- from one this migration produced. A "rollback" that rewrote every w3id back to
+-- github would therefore corrupt rows that were never migrated. Reverting the
+-- data requires a dump taken before the upgrade; reverting the CODE alone is
+-- safe, because 18.0.0 already canonicalizes both spellings when matching a
+-- profile. The changesets are marked with an explicit empty rollback so liquibase
+-- can still roll the changelog back without touching the data.
 
 -- changeset jojohoch:1
 -- Unit and item metadata blocks. The UPDATE targets the parent table
@@ -20,12 +30,7 @@ UPDATE "public"."metadata"
     '^https://raw\.githubusercontent\.com/iqb-vocabs/(p\d+)/master/([a-z]+)\.json$',
     'https://w3id.org/iqb/\1/\2/')
   WHERE "profile_id" ~ '^https://raw\.githubusercontent\.com/iqb-vocabs/p\d+/master/[a-z]+\.json$';
--- rollback UPDATE "public"."metadata"
--- rollback   SET "profile_id" = regexp_replace(
--- rollback     "profile_id",
--- rollback     '^https://w3id\.org/iqb/(p\d+)/([a-z]+)/$',
--- rollback     'https://raw.githubusercontent.com/iqb-vocabs/\1/master/\2.json')
--- rollback   WHERE "profile_id" ~ '^https://w3id\.org/iqb/p\d+/[a-z]+/$';
+-- rollback SELECT 1;
 
 -- changeset jojohoch:2
 -- Workspace settings: the configured unit and item metadata profile urls.
@@ -43,18 +48,7 @@ UPDATE "public"."workspace"
       'https://w3id.org/iqb/\1/\2/')))
   WHERE "settings"->>'itemMDProfile'
     ~ '^https://raw\.githubusercontent\.com/iqb-vocabs/p\d+/master/[a-z]+\.json$';
--- rollback UPDATE "public"."workspace"
--- rollback   SET "settings" = jsonb_set("settings", '{unitMDProfile}',
--- rollback     to_jsonb(regexp_replace("settings"->>'unitMDProfile',
--- rollback       '^https://w3id\.org/iqb/(p\d+)/([a-z]+)/$',
--- rollback       'https://raw.githubusercontent.com/iqb-vocabs/\1/master/\2.json')))
--- rollback   WHERE "settings"->>'unitMDProfile' ~ '^https://w3id\.org/iqb/p\d+/[a-z]+/$';
--- rollback UPDATE "public"."workspace"
--- rollback   SET "settings" = jsonb_set("settings", '{itemMDProfile}',
--- rollback     to_jsonb(regexp_replace("settings"->>'itemMDProfile',
--- rollback       '^https://w3id\.org/iqb/(p\d+)/([a-z]+)/$',
--- rollback       'https://raw.githubusercontent.com/iqb-vocabs/\1/master/\2.json')))
--- rollback   WHERE "settings"->>'itemMDProfile' ~ '^https://w3id\.org/iqb/p\d+/[a-z]+/$';
+-- rollback SELECT 1;
 
 -- changeset jojohoch:3
 -- Workspace group settings: the ids of the profiles selected for the group
@@ -80,26 +74,7 @@ UPDATE "public"."workspace_group" AS wg
     GROUP BY wg2."id"
   ) AS sub
   WHERE wg."id" = sub.group_id;
--- rollback UPDATE "public"."workspace_group" AS wg
--- rollback   SET "settings" = jsonb_set(wg."settings", '{profiles}', sub."profiles")
--- rollback   FROM (
--- rollback     SELECT wg2."id" AS group_id,
--- rollback       jsonb_agg(
--- rollback         CASE
--- rollback           WHEN entries.profile_entry->>'id' ~ '^https://w3id\.org/iqb/p\d+/[a-z]+/$'
--- rollback             THEN jsonb_set(entries.profile_entry, '{id}',
--- rollback               to_jsonb(regexp_replace(entries.profile_entry->>'id',
--- rollback                 '^https://w3id\.org/iqb/(p\d+)/([a-z]+)/$',
--- rollback                 'https://raw.githubusercontent.com/iqb-vocabs/\1/master/\2.json')))
--- rollback           ELSE entries.profile_entry
--- rollback         END ORDER BY entries.profile_index) AS "profiles"
--- rollback     FROM "public"."workspace_group" AS wg2,
--- rollback       jsonb_array_elements(wg2."settings"->'profiles')
--- rollback         WITH ORDINALITY AS entries(profile_entry, profile_index)
--- rollback     WHERE jsonb_typeof(wg2."settings"->'profiles') = 'array'
--- rollback     GROUP BY wg2."id"
--- rollback   ) AS sub
--- rollback   WHERE wg."id" = sub.group_id;
+-- rollback SELECT 1;
 
 -- changeset jojohoch:4
 -- Cached profile definitions are keyed by profile id. Where a profile is
@@ -107,7 +82,7 @@ UPDATE "public"."workspace_group" AS wg
 -- then rewrite the remaining github-keyed rows. Kept (instead of truncated) so
 -- the db-only read path keeps serving profile definitions right after the
 -- upgrade. The dropped duplicates are plain cache rows and are re-fetched on
--- demand, so the rollback only reverts the rewrite.
+-- demand.
 DELETE FROM "public"."metadata_profile" AS mp
   WHERE mp."id" ~ '^https://raw\.githubusercontent\.com/iqb-vocabs/p\d+/master/[a-z]+\.json$'
     AND EXISTS (
@@ -121,19 +96,7 @@ UPDATE "public"."metadata_profile"
     '^https://raw\.githubusercontent\.com/iqb-vocabs/(p\d+)/master/([a-z]+)\.json$',
     'https://w3id.org/iqb/\1/\2/')
   WHERE "id" ~ '^https://raw\.githubusercontent\.com/iqb-vocabs/p\d+/master/[a-z]+\.json$';
--- rollback DELETE FROM "public"."metadata_profile" AS mp
--- rollback   WHERE mp."id" ~ '^https://w3id\.org/iqb/p\d+/[a-z]+/$'
--- rollback     AND EXISTS (
--- rollback       SELECT 1 FROM "public"."metadata_profile" AS mp2
--- rollback       WHERE mp2."id" = regexp_replace(mp."id",
--- rollback         '^https://w3id\.org/iqb/(p\d+)/([a-z]+)/$',
--- rollback         'https://raw.githubusercontent.com/iqb-vocabs/\1/master/\2.json'));
--- rollback UPDATE "public"."metadata_profile"
--- rollback   SET "id" = regexp_replace(
--- rollback     "id",
--- rollback     '^https://w3id\.org/iqb/(p\d+)/([a-z]+)/$',
--- rollback     'https://raw.githubusercontent.com/iqb-vocabs/\1/master/\2.json')
--- rollback   WHERE "id" ~ '^https://w3id\.org/iqb/p\d+/[a-z]+/$';
+-- rollback SELECT 1;
 
 -- changeset jojohoch:5
 -- The registered-profile rows cache what the registry csv listed. From 19.0.0
@@ -161,9 +124,4 @@ UPDATE "public"."setting"
     'https://w3id.org/iqb/metadata-registry')
   WHERE "key" = 'profiles-registry'
     AND "content" LIKE '%https://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv%';
--- rollback UPDATE "public"."setting"
--- rollback   SET "content" = replace("content",
--- rollback     'https://w3id.org/iqb/metadata-registry',
--- rollback     'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv')
--- rollback   WHERE "key" = 'profiles-registry'
--- rollback     AND "content" LIKE '%https://w3id.org/iqb/metadata-registry%';
+-- rollback SELECT 1;
