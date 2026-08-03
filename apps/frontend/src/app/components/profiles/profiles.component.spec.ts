@@ -136,6 +136,15 @@ describe('ProfilesComponent', () => {
     expect(component.isChecked('p2')).toBe(false);
   });
 
+  it('isChecked matches a selection stored in the github spelling against the registry w3id', () => {
+    component.profilesSelected = [
+      { id: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json', label: 'MA unit' }
+    ];
+    expect(component.isChecked('https://w3id.org/iqb/p11/unit/')).toBe(true);
+    expect(component.isChecked('https://w3id.org/iqb/p11/item/')).toBe(false);
+    expect(component.isChecked('https://w3id.org/iqb/p12/unit/')).toBe(false);
+  });
+
   it('changeSelection should add profile if checked', () => {
     jest.spyOn(component.hasChanged, 'emit');
     const event = {

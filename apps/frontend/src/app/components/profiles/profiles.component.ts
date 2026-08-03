@@ -4,6 +4,7 @@ import {
 import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
 import { MDProfile } from '@iqbspecs/metadata-profile';
 import { MDProfileStore } from '@iqbspecs/metadata-store/metadata-store.interface';
+import { profileIdsMatch } from '@studio-lite/shared-code';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatError } from '@angular/material/form-field';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
@@ -133,8 +134,10 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     return null;
   }
 
+  // Canonical comparison: a selection stored in the github spelling still
+  // checks the box of the same profile listed by the registry as w3id (#1570).
   isChecked(id:string):boolean {
-    return !!this.profilesSelected?.find((profile: { id: string; }) => profile.id === id);
+    return !!this.profilesSelected?.find((profile: { id: string; }) => profileIdsMatch(profile.id, id));
   }
 
   changeSelection(checkbox:MatCheckboxChange) {
