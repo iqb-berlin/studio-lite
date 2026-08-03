@@ -72,7 +72,14 @@ export class WorkspaceGroupService {
 
   async create(workspaceGroup: CreateWorkspaceGroupDto): Promise<number> {
     this.logger.log(`Creating workspace group with name: ${workspaceGroup.name}`);
-    const newWorkspaceGroup = await this.workspaceGroupsRepository.create(workspaceGroup);
+    // Same canonicalization as patch(): a group can be created with a profile
+    // selection in one request, and there is no global ValidationPipe that would
+    // strip it, so this path must not be the one that puts the retired spelling back.
+    const newWorkspaceGroup = await this.workspaceGroupsRepository.create({
+      ...workspaceGroup,
+      settings: WorkspaceGroupService
+        .normalizeProfileSelection(workspaceGroup.settings as WorkspaceGroupSettingsDto)
+    });
     await this.workspaceGroupsRepository.save(newWorkspaceGroup);
     return newWorkspaceGroup.id;
   }

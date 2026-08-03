@@ -45,7 +45,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this._profiles = value;
     if (value) {
       this.fetchedProfiles = value;
-      this.profilesSelected = [...this.fetchedProfiles];
+      this.profilesSelected = ProfilesComponent.canonicalizeSelection(this.fetchedProfiles);
       this.changeDetectorRef.detectChanges();
     }
   }
@@ -62,6 +62,23 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     this.loadProfiles();
+  }
+
+  // A selection loaded from the group settings is canonicalized before anything
+  // compares or saves it, so a group that still holds the retired github spelling
+  // is written back as w3id on the next save instead of carrying it forward. Two
+  // entries denoting the same profile collapse into one — otherwise unchecking
+  // would remove only one of them and leave the other invisible in the blob.
+  private static canonicalizeSelection(profiles: CoreProfile[]): CoreProfile[] {
+    const seen = new Set<string>();
+    return (profiles || [])
+      .filter(profile => !!profile)
+      .map(profile => ({ ...profile, id: toW3idProfileId(profile.id) }))
+      .filter(profile => {
+        if (seen.has(profile.id)) return false;
+        seen.add(profile.id);
+        return true;
+      });
   }
 
   private loadProfiles(): void {
@@ -113,7 +130,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
             const currentSettings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
             this.fetchedProfiles = this._profiles !== undefined ?
               (this._profiles || []) : (currentSettings.profiles || []);
-            this.profilesSelected = [...this.fetchedProfiles];
+            this.profilesSelected = ProfilesComponent.canonicalizeSelection(this.fetchedProfiles);
           }
 
           this.changeDetectorRef.detectChanges();
@@ -132,7 +149,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       .subscribe(settings => {
         if (settings && this._profiles === undefined) {
           this.fetchedProfiles = settings.profiles || [];
-          this.profilesSelected = [...this.fetchedProfiles];
+          this.profilesSelected = ProfilesComponent.canonicalizeSelection(this.fetchedProfiles);
           this.changeDetectorRef.detectChanges();
         }
       });
@@ -158,10 +175,11 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   // re-evaluates when the reference changes.
   changeSelection(checkbox:MatCheckboxChange) {
     const id = toW3idProfileId(checkbox.source.id || '');
+    const withoutProfile = this.profilesSelected
+      .filter((profile: CoreProfile) => toW3idProfileId(profile.id) !== id);
     this.profilesSelected = checkbox.checked ?
-      [...this.profilesSelected, { id, label: checkbox.source.name || '' }] :
-      this.profilesSelected
-        .filter((profile: CoreProfile) => toW3idProfileId(profile.id) !== id);
+      [...withoutProfile, { id, label: checkbox.source.name || '' }] :
+      withoutProfile;
     this.hasChanged.emit(this.profilesSelected);
   }
 

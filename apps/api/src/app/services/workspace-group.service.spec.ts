@@ -100,6 +100,36 @@ describe('WorkspaceGroupService', () => {
     });
   });
 
+  describe('create', () => {
+    // #1570: a group can be created with a profile selection in the same request,
+    // so this path must canonicalize just like patch does.
+    it('canonicalizes the profile selection ids of a new group', async () => {
+      mockRepository.create.mockImplementation(group => group as WorkspaceGroup);
+      mockRepository.save.mockResolvedValue({ id: 7 } as WorkspaceGroup);
+
+      await service.create({
+        name: 'neu',
+        settings: {
+          profiles: [
+            { id: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json', label: 'MA unit' },
+            { id: 'https://example.org/own/profile.json', label: 'eigenes' }
+          ]
+        }
+      } as CreateWorkspaceGroupDto);
+
+      expect(groupRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          settings: expect.objectContaining({
+            profiles: [
+              { id: 'https://w3id.org/iqb/p11/unit/', label: 'MA unit' },
+              { id: 'https://example.org/own/profile.json', label: 'eigenes' }
+            ]
+          })
+        })
+      );
+    });
+  });
+
   describe('patch', () => {
     it('should update group', async () => {
       const group = { id: 1, name: 'old' } as WorkspaceGroup;

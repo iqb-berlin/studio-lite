@@ -218,6 +218,40 @@ describe('ProfilesComponent', () => {
     expect(component.profilesSelected[0].id).toBe('https://w3id.org/iqb/p11/unit/');
   });
 
+  // #1570: the goal is that no github spelling survives. A selection loaded from
+  // the group settings is therefore canonicalized before it can be saved back.
+  it('canonicalizes a selection loaded from the group settings', () => {
+    component.profiles = [
+      { id: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json', label: 'MA unit' },
+      { id: 'https://example.org/own/profile.json', label: 'eigenes' }
+    ];
+
+    expect(component.profilesSelected.map(profile => profile.id)).toEqual([
+      'https://w3id.org/iqb/p11/unit/',
+      'https://example.org/own/profile.json'
+    ]);
+  });
+
+  it('collapses two spellings of the same loaded profile into one entry', () => {
+    component.profiles = [
+      { id: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json', label: 'MA unit' },
+      { id: 'https://w3id.org/iqb/p11/unit', label: 'MA unit' }
+    ];
+
+    expect(component.profilesSelected).toHaveLength(1);
+  });
+
+  it('does not add a second entry when the profile is already selected', () => {
+    component.profilesSelected = [{ id: 'https://w3id.org/iqb/p11/unit/', label: 'MA unit' }];
+
+    component.changeSelection({
+      checked: true,
+      source: { id: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json', name: 'MA unit' }
+    } as unknown as MatCheckboxChange);
+
+    expect(component.profilesSelected).toHaveLength(1);
+  });
+
   it('changeSelection replaces the array so the pure pipe re-evaluates', () => {
     const before = component.profilesSelected;
     component.changeSelection({
