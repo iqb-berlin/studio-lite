@@ -111,33 +111,39 @@ DELETE FROM "public"."registered_metadata_profile";
 -- rollback SELECT 1;
 
 -- changeset jojohoch:6
--- Registry csv rows are keyed by the registry url, so repointing the setting in
--- changeset 7 would leave the read path without any cached csv: on an instance
--- that cannot reach w3id.org (air-gapped, restrictive proxy, or a hiccup during
--- rollout) the registry read then fails outright and no profile is selectable
--- for any workspace group. Re-key the cached row onto the new url instead of
--- dropping it, so the retired csv keeps serving as an offline fallback until the
--- first successful fetch overwrites it — the same property changeset 4
--- deliberately preserves for the profile definitions. If a row for the new url
--- somehow exists already, it wins and the stale one is dropped.
+-- The cached registry csv is keyed by the url it was fetched from, so once
+-- changeset 7 repoints the setting, every row written under a retired url is
+-- unreachable clutter. Drop them: the cache is one http GET away from being
+-- refilled, and keeping a row would be worse than losing it — the two registries
+-- are different documents, not two names for one. The retired registry.csv lists
+-- stores (profile-config.json, github urls) in a three-column layout, the current
+-- one lists profiles directly (w3id urls) and carries an extra "target" column.
+-- Filing the old csv under the new url would make the next read parse the retired
+-- format and re-register exactly the github-keyed rows changeset 5 just deleted.
 DELETE FROM "public"."metadata_profile_registry"
-  WHERE "id" = 'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv'
-    AND EXISTS (
-      SELECT 1 FROM "public"."metadata_profile_registry" AS existing
-      WHERE existing."id" = 'https://w3id.org/iqb/metadata-registry');
-UPDATE "public"."metadata_profile_registry"
-  SET "id" = 'https://w3id.org/iqb/metadata-registry'
-  WHERE "id" = 'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv';
+  WHERE "id" ~
+    '^https?://raw\.githubusercontent\.com/iqb-vocabs/profile-registry/(refs/heads/)?master/(metadata-)?registry\.csv$';
 -- rollback SELECT 1;
 
 -- changeset jojohoch:7
--- If an admin stored the old default registry url in the settings, move it to
--- the new w3id registry (new csv format, w3id profile urls). A deliberately
--- customized registry url stays untouched.
+-- Point a stored registry url at the w3id form, which is the whole objective of
+-- #1570: no github path may survive the upgrade. Two populations need it, and a
+-- literal comparison against the old default would only catch the first:
+--   * instances never switched, still on the retired store registry (registry.csv).
+--     These matter most — reading it re-registers profiles under github urls and
+--     undoes this migration on every request.
+--   * instances an admin switched by hand at the last release. They already read
+--     the current registry, but through raw.githubusercontent.com/…/metadata-registry.csv
+--     instead of the permanent identifier that resolves to it.
+-- The pattern is anchored on the iqb-vocabs/profile-registry path, so a registry
+-- url deliberately pointed somewhere else stays untouched, and it accepts the
+-- refs/heads/master spelling github's "copy raw file" button produces.
 UPDATE "public"."setting"
-  SET "content" = replace("content",
-    'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv',
-    'https://w3id.org/iqb/metadata-registry')
+  SET "content" = regexp_replace("content",
+    'https?://raw\.githubusercontent\.com/iqb-vocabs/profile-registry/(refs/heads/)?master/(metadata-)?registry\.csv',
+    'https://w3id.org/iqb/metadata-registry',
+    'g')
   WHERE "key" = 'profiles-registry'
-    AND "content" LIKE '%https://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv%';
+    AND "content" ~
+      'https?://raw\.githubusercontent\.com/iqb-vocabs/profile-registry/(refs/heads/)?master/(metadata-)?registry\.csv';
 -- rollback SELECT 1;
