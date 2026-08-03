@@ -121,6 +121,13 @@ UPDATE "public"."metadata_profile"
     '^https://raw\.githubusercontent\.com/iqb-vocabs/(p\d+)/master/([a-z]+)\.json$',
     'https://w3id.org/iqb/\1/\2/')
   WHERE "id" ~ '^https://raw\.githubusercontent\.com/iqb-vocabs/p\d+/master/[a-z]+\.json$';
+-- rollback DELETE FROM "public"."metadata_profile" AS mp
+-- rollback   WHERE mp."id" ~ '^https://w3id\.org/iqb/p\d+/[a-z]+/$'
+-- rollback     AND EXISTS (
+-- rollback       SELECT 1 FROM "public"."metadata_profile" AS mp2
+-- rollback       WHERE mp2."id" = regexp_replace(mp."id",
+-- rollback         '^https://w3id\.org/iqb/(p\d+)/([a-z]+)/$',
+-- rollback         'https://raw.githubusercontent.com/iqb-vocabs/\1/master/\2.json'));
 -- rollback UPDATE "public"."metadata_profile"
 -- rollback   SET "id" = regexp_replace(
 -- rollback     "id",
@@ -129,14 +136,12 @@ UPDATE "public"."metadata_profile"
 -- rollback   WHERE "id" ~ '^https://w3id\.org/iqb/p\d+/[a-z]+/$';
 
 -- changeset jojohoch:5
--- The registered-profile rows cache what the registry csv listed. The entries
--- of the retired github registry (profile stores referencing profile-config
--- files) do not exist in the new w3id registry format; drop the iqb-vocabs
--- rows and let the next registry read repopulate the cache. Custom registries
--- on other hosts stay untouched.
-DELETE FROM "public"."registered_metadata_profile"
-  WHERE "url" LIKE 'https://raw.githubusercontent.com/iqb-vocabs/%'
-     OR "id" LIKE 'https://raw.githubusercontent.com/iqb-vocabs/%';
+-- The registered-profile rows cache what the registry csv listed. From 19.0.0
+-- on they are keyed by the registry url instead of the profile's self-declared
+-- id, so every existing row sits under a potentially wrong key (and the retired
+-- github registry entries do not exist in the new format at all). Clear the
+-- cache; the next registry read repopulates it under the new keying.
+DELETE FROM "public"."registered_metadata_profile";
 -- rollback SELECT 1;
 
 -- changeset jojohoch:6
