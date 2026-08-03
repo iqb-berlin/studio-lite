@@ -647,6 +647,43 @@ describe('WorkspaceService', () => {
         items: []
       });
     });
+
+    it('rewrites github profile ids of a wrapper export to the w3id form (#1570)', () => {
+      const mapped = WorkspaceService.mapImportedMetadata({
+        metadata: [{
+          profileId: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json',
+          entries: []
+        }]
+      });
+
+      expect(mapped.profiles[0].profileId).toBe('https://w3id.org/iqb/p11/unit/');
+    });
+
+    it('rewrites github profile ids of a legacy blob export to the w3id form (#1570)', () => {
+      const legacy = {
+        profiles: [{
+          profileId: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json',
+          isCurrent: true,
+          entries: []
+        }],
+        items: [{
+          id: 'ITEM1',
+          profiles: [{
+            profileId: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/item.json',
+            isCurrent: true,
+            entries: []
+          }]
+        }]
+      };
+
+      expect(WorkspaceService.mapImportedMetadata(legacy)).toEqual({
+        profiles: [{ profileId: 'https://w3id.org/iqb/p11/unit/', order: 0, entries: [] }],
+        items: [{
+          id: 'ITEM1',
+          profiles: [{ profileId: 'https://w3id.org/iqb/p11/item/', order: 0, entries: [] }]
+        }]
+      });
+    });
   });
 
   describe('mapImportedItems', () => {

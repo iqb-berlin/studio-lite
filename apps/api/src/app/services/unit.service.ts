@@ -22,7 +22,7 @@ import {
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { LanguageCodedText } from '@iqbspecs/metadata-profile';
 import {
-  orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId
+  orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId, toW3idProfileId
 } from '@studio-lite/shared-code';
 import { combineNotationAndLabel } from '../classes/metadata-value.util';
 import Workspace from '../entities/workspace.entity';
@@ -641,6 +641,27 @@ export class UnitService {
     return itemUuids;
   }
 
+  // Profile ids enter here straight from clients; rewrite the legacy github
+  // spelling to the canonical w3id form so only w3ids reach the database, even
+  // when a client still holds pre-#1570 state.
+  private static normalizeProfileIds(metadata: UnitMetadataValues): UnitMetadataValues {
+    if (!metadata || typeof metadata !== 'object') return metadata;
+    const mapProfile = (profile: ProfileValues): ProfileValues => ({
+      ...profile,
+      ...(profile.profileId && { profileId: toW3idProfileId(profile.profileId) })
+    });
+    return {
+      ...metadata,
+      ...(metadata.profiles && { profiles: metadata.profiles.map(mapProfile) }),
+      ...(metadata.items && {
+        items: metadata.items.map(item => ({
+          ...item,
+          ...(item.profiles && { profiles: item.profiles.map(mapProfile) })
+        }))
+      })
+    };
+  }
+
   // The whole metadata save runs in one transaction so a mid-sequence failure
   // (e.g. a constraint error on one profile) rolls back every write instead of
   // leaving the unit's profiles/items half-updated.
@@ -657,7 +678,7 @@ export class UnitService {
     const withOrder = UnitService.setCurrentProfiles(
       workspace?.settings?.unitMDProfile,
       workspace?.settings?.itemMDProfile,
-      metadata
+      UnitService.normalizeProfileIds(metadata)
     );
     const profiles = withOrder.profiles || [];
     const items = withOrder.items || [];

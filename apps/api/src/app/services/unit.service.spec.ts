@@ -325,6 +325,47 @@ describe('UnitService', () => {
       expect(savedProfiles[0]).toMatchObject({ profileId: 'profile-a', order: 0 });
       expect(savedProfiles[1]).toMatchObject({ profileId: 'other', order: -1 });
     });
+
+    it('rewrites a github profile id from the client to w3id and still flags it as current (#1570)', async () => {
+      const manager = createMock<EntityManager>();
+      const transaction = jest.fn().mockImplementation(
+        (runInTransaction: (m: EntityManager) => Promise<unknown>) => runInTransaction(manager)
+      );
+      Object.defineProperty(unitsRepository, 'manager', {
+        value: { transaction } as unknown as EntityManager,
+        configurable: true
+      });
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 10 } as Unit);
+      workspaceRepository.findOne.mockResolvedValue({
+        id: 10,
+        settings: {
+          unitMDProfile: 'https://w3id.org/iqb/p11/unit/',
+          itemMDProfile: 'https://w3id.org/iqb/p11/item/'
+        }
+      } as unknown as Workspace);
+      unitMetadataService.getAllByUnitId.mockResolvedValue([]);
+      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
+
+      const patchUnitMetadataSpy = jest.spyOn(service, 'patchUnitMetadata').mockResolvedValue();
+      const patchItemsMetadataSpy = jest.spyOn(service, 'patchItemsMetadata').mockResolvedValue();
+
+      // a client still holding pre-#1570 state sends the github spelling
+      await service.patchMetadata(1, {
+        profiles: [{ profileId: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json' }],
+        items: [{
+          uuid: 'u-1',
+          profiles: [{ profileId: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/item.json' }]
+        }]
+      });
+
+      const savedProfiles = patchUnitMetadataSpy.mock.calls[0][1];
+      expect(savedProfiles[0]).toMatchObject({ profileId: 'https://w3id.org/iqb/p11/unit/', order: 0 });
+      const savedItems = patchItemsMetadataSpy.mock.calls[0][1];
+      expect(savedItems[0].profiles[0]).toMatchObject({
+        profileId: 'https://w3id.org/iqb/p11/item/',
+        order: 0
+      });
+    });
   });
 
   describe('patchUnit', () => {
