@@ -71,6 +71,9 @@ UPDATE "public"."workspace_group" AS wg
       jsonb_array_elements(wg2."settings"->'profiles')
         WITH ORDINALITY AS entries(profile_entry, profile_index)
     WHERE jsonb_typeof(wg2."settings"->'profiles') = 'array'
+      -- cheap prefilter: without it every group's settings blob is rewritten,
+      -- including groups holding only w3id or foreign ids
+      AND wg2."settings"->>'profiles' LIKE '%raw.githubusercontent.com/iqb-vocabs/%'
     GROUP BY wg2."id"
   ) AS sub
   WHERE wg."id" = sub.group_id;
@@ -108,9 +111,22 @@ DELETE FROM "public"."registered_metadata_profile";
 -- rollback SELECT 1;
 
 -- changeset jojohoch:6
--- Drop the cached csv of the retired github registry (rows are keyed by the
--- registry url). The new registry csv is cached on first use.
+-- Registry csv rows are keyed by the registry url, so repointing the setting in
+-- changeset 7 would leave the read path without any cached csv: on an instance
+-- that cannot reach w3id.org (air-gapped, restrictive proxy, or a hiccup during
+-- rollout) the registry read then fails outright and no profile is selectable
+-- for any workspace group. Re-key the cached row onto the new url instead of
+-- dropping it, so the retired csv keeps serving as an offline fallback until the
+-- first successful fetch overwrites it — the same property changeset 4
+-- deliberately preserves for the profile definitions. If a row for the new url
+-- somehow exists already, it wins and the stale one is dropped.
 DELETE FROM "public"."metadata_profile_registry"
+  WHERE "id" = 'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv'
+    AND EXISTS (
+      SELECT 1 FROM "public"."metadata_profile_registry" AS existing
+      WHERE existing."id" = 'https://w3id.org/iqb/metadata-registry');
+UPDATE "public"."metadata_profile_registry"
+  SET "id" = 'https://w3id.org/iqb/metadata-registry'
   WHERE "id" = 'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv';
 -- rollback SELECT 1;
 
