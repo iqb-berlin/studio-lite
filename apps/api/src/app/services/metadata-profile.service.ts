@@ -57,21 +57,10 @@ export class MetadataProfileService {
     return profile;
   }
 
+  // `save` upserts on the primary key (`id`), so it covers both the first fetch
+  // and every background refresh — no separate existence check is needed.
   private async storeProfile(profile: MetadataProfileDto): Promise<void> {
-    const metadataProfile = await this.metadataProfileRepository
-      .findOneBy({ id: profile.id });
-    if (metadataProfile) {
-      await this.metadataProfileRepository
-        .save({ ...profile, modifiedAt: new Date() });
-    } else {
-      await this.createMetadataProfile(profile);
-    }
-  }
-
-  private async createMetadataProfile(profile: MetadataProfileDto) {
-    const newMetadataProfile = this.metadataProfileRepository
-      .create({ ...profile, modifiedAt: new Date() });
-    await this.metadataProfileRepository.save(newMetadataProfile);
+    await this.metadataProfileRepository.save({ ...profile, modifiedAt: new Date() });
   }
 
   async getProfileVocabularies(url: string): Promise<MetadataVocabularyDto[]> {

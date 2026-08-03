@@ -100,7 +100,6 @@ describe('RegisteredMetadataProfileService', () => {
       // Mock http get call for getting profile to register
       mockHttpGet(httpService, newProfile);
 
-      registeredMetadataProfileRepository.create.mockReturnValue(newProfile);
       registeredMetadataProfileRepository.save.mockResolvedValue(newProfile);
 
       const result = await service.getRegisteredMetadataProfiles();
@@ -166,14 +165,12 @@ describe('RegisteredMetadataProfileService', () => {
         groups: []
       };
       mockHttpGet(httpService, directProfile as unknown as RegisteredMetadataProfile);
-      registeredMetadataProfileRepository.create
-        .mockImplementation(input => input as RegisteredMetadataProfile);
       registeredMetadataProfileRepository.save
         .mockImplementation(async input => input as RegisteredMetadataProfile);
 
       await service.getRegisteredMetadataProfiles();
 
-      expect(registeredMetadataProfileRepository.create).toHaveBeenCalledWith(
+      expect(registeredMetadataProfileRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'https://w3id.org/iqb/p100/unit/',
           url: 'https://w3id.org/iqb/p100/unit/',
@@ -197,20 +194,43 @@ describe('RegisteredMetadataProfileService', () => {
       settingsService.findUnitProfilesRegistry.mockResolvedValue({ csvUrl: 'csv-url' } as ProfilesRegistryDto);
       metadataProfileRegistryRepository.findOneBy.mockResolvedValue({ csv: csvContent } as MetadataProfileRegistry);
       registeredMetadataProfileRepository.findOneBy.mockResolvedValue(null);
-      mockHttpGet(httpService, {
+      mockHttpGet(httpService, createMock<RegisteredMetadataProfile>({
         id: github,
         label: [{ lang: 'de', value: 'Aufgabe' }],
         groups: []
-      } as unknown as RegisteredMetadataProfile);
-      registeredMetadataProfileRepository.create
-        .mockImplementation(input => input as RegisteredMetadataProfile);
+      } as unknown as RegisteredMetadataProfile));
       registeredMetadataProfileRepository.save
         .mockImplementation(async input => input as RegisteredMetadataProfile);
 
       await service.getRegisteredMetadataProfiles();
 
-      expect(registeredMetadataProfileRepository.create).toHaveBeenCalledWith(
+      expect(registeredMetadataProfileRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({ id: w3id, url: w3id })
+      );
+    });
+
+    it('writes the refreshed document instead of only bumping the timestamp', async () => {
+      const url = 'https://w3id.org/iqb/p100/unit/';
+      const csvContent = ['title,description,target,url', `"t","d","UNIT",${url}`].join('\n');
+      settingsService.findUnitProfilesRegistry.mockResolvedValue({ csvUrl: 'csv-url' } as ProfilesRegistryDto);
+      metadataProfileRegistryRepository.findOneBy.mockResolvedValue({ csv: csvContent } as MetadataProfileRegistry);
+      // the row is already cached — the refresh path
+      const staleRow = createMock<RegisteredMetadataProfile>({
+        id: url, url, title: [{ lang: 'de', value: 'alter Titel' }]
+      });
+      registeredMetadataProfileRepository.findOneBy.mockResolvedValue(staleRow);
+      mockHttpGet(httpService, createMock<RegisteredMetadataProfile>({
+        id: url, label: [{ lang: 'de', value: 'neuer Titel' }], groups: []
+      } as unknown as RegisteredMetadataProfile));
+      registeredMetadataProfileRepository.save
+        .mockImplementation(async input => input as RegisteredMetadataProfile);
+
+      await service.getRegisteredMetadataProfiles();
+      // the refresh runs without await
+      await new Promise(process.nextTick);
+
+      expect(registeredMetadataProfileRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ title: [{ lang: 'de', value: 'neuer Titel' }] })
       );
     });
   });

@@ -55,7 +55,9 @@ export class RegisteredMetadataProfileService {
     const registry = await this.metadataProfileRegistryRepository
       .findOneBy({ id: profileRegistry.csvUrl });
     if (registry) {
-      this.updateRegistry();
+      // Refreshed in the background: a transient fetch failure must not turn the
+      // cache hit into an unhandled rejection (storeRegistry throws on a null csv).
+      this.updateRegistry().catch(() => undefined);
       return registry.csv;
     }
     const registryCsv = await this.getRegistryCsv();
@@ -102,6 +104,7 @@ export class RegisteredMetadataProfileService {
     return {
       ...profile,
       id: url,
+      url,
       title: profile.title?.length ? profile.title : (directProfile.label ?? []),
       creator: profile.creator ?? '',
       maintainer: profile.maintainer ?? '',
@@ -109,25 +112,17 @@ export class RegisteredMetadataProfileService {
     };
   }
 
+  // A refresh has to write the document it just fetched, not merely bump the
+  // timestamp: otherwise upstream changes to a profile's label, title or groups
+  // never reach the database, and a row written under a stale key (e.g. by an
+  // instance from before #1570 during a rolling upgrade) could never be corrected.
+  // `save` upserts on the primary key, so one call covers the first registration
+  // and every later refresh alike.
   private async storeRegisteredMetadataProfile(
     rawProfile: RegisteredMetadataProfile, url: string
   ): Promise<RegisteredMetadataProfile> {
     const profile = RegisteredMetadataProfileService.normalizeRegisteredProfile(rawProfile, url);
-    const storedProfile = await this.registeredMetadataProfileRepository
-      .findOneBy({ id: profile.id });
-    if (storedProfile) {
-      await this.registeredMetadataProfileRepository
-        .save({ ...storedProfile, modifiedAt: new Date() });
-    } else {
-      return this.createRegisteredMetadataProfile(profile, url);
-    }
-    return storedProfile;
-  }
-
-  private async createRegisteredMetadataProfile(profile: RegisteredMetadataProfile, url: string) {
-    const newProfile = this.registeredMetadataProfileRepository
-      .create({ ...profile, url, modifiedAt: new Date() });
-    return this.registeredMetadataProfileRepository.save(newProfile);
+    return this.registeredMetadataProfileRepository.save({ ...profile, modifiedAt: new Date() });
   }
 
   private async storeRegistry(csv: string | null): Promise<void> {
