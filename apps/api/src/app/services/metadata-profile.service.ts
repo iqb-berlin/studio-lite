@@ -22,8 +22,9 @@ export class MetadataProfileService {
     const storedProfile = await this.metadataProfileRepository
       .findOneBy({ id: url });
     if (storedProfile) {
-      // without await to update the profile in the background
-      this.getMetadataProfile(url);
+      // without await to update the profile in the background; a failed fetch or
+      // a failed write must not escape as an unhandled rejection on a read path
+      this.getMetadataProfile(url).catch(() => undefined);
       return storedProfile;
     }
     return this.getMetadataProfile(url);

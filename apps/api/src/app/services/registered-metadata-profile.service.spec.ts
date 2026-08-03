@@ -124,7 +124,7 @@ describe('RegisteredMetadataProfileService', () => {
       const result = await service.getRegisteredMetadataProfiles();
 
       expect(registeredMetadataProfileRepository.findOneBy)
-        .toHaveBeenCalledWith({ url: 'https://example.org/p111/profile-config.json' });
+        .toHaveBeenCalledWith({ id: 'https://example.org/p111/profile-config.json' });
       expect(result).toHaveLength(1);
     });
 
@@ -143,7 +143,7 @@ describe('RegisteredMetadataProfileService', () => {
       const result = await service.getRegisteredMetadataProfiles();
 
       expect(registeredMetadataProfileRepository.findOneBy)
-        .toHaveBeenCalledWith({ url: 'https://w3id.org/iqb/p100/unit/' });
+        .toHaveBeenCalledWith({ id: 'https://w3id.org/iqb/p100/unit/' });
       expect(result).toHaveLength(1);
     });
 

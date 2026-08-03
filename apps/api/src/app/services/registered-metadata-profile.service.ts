@@ -30,11 +30,17 @@ export class RegisteredMetadataProfileService {
       return Promise
         .all(profileUrls
           .map(async url => {
+            // Looked up by the primary key, which is the registry url the row was
+            // written under. Reading by `url` instead would key reads differently
+            // from writes: `url` carries no unique constraint, so a row left behind
+            // under a stale id (by an instance from before #1570) would match here
+            // forever while every refresh wrote a second row next to it.
             const storedProfile = await this.registeredMetadataProfileRepository
-              .findOneBy({ url: url });
+              .findOneBy({ id: url });
             if (storedProfile) {
-              // without await to update the profile in the background
-              this.updateRegisteredMetadataProfiles(url);
+              // without await to update the profile in the background; a failed
+              // refresh must not escape as an unhandled rejection
+              this.updateRegisteredMetadataProfiles(url).catch(() => undefined);
               return storedProfile;
             }
             const profile = await this.getProfileToRegister(url);
@@ -47,7 +53,7 @@ export class RegisteredMetadataProfileService {
 
   private async updateRegisteredMetadataProfiles(url: string): Promise<void> {
     const profile = await this.getProfileToRegister(url);
-    if (profile) this.storeRegisteredMetadataProfile(profile, url);
+    if (profile) await this.storeRegisteredMetadataProfile(profile, url);
   }
 
   private async getRegisteredMetadataProfilesAsCSV(): Promise<string> {
