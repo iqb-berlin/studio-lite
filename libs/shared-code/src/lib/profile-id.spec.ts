@@ -1,4 +1,6 @@
-import { canonicalizeProfileId, isItemProfileId, profileIdsMatch } from './profile-id';
+import {
+  canonicalizeProfileId, isItemProfileId, profileIdsMatch, toW3idProfileId
+} from './profile-id';
 
 describe('profile-id', () => {
   const github = 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json';
@@ -49,6 +51,36 @@ describe('profile-id', () => {
     it('treats nullish ids with strict equality', () => {
       expect(profileIdsMatch(undefined, undefined)).toBe(true);
       expect(profileIdsMatch(github, undefined)).toBe(false);
+    });
+  });
+
+  describe('toW3idProfileId', () => {
+    it('rewrites the github spelling to the w3id form', () => {
+      expect(toW3idProfileId(github)).toBe(w3id);
+      expect(toW3idProfileId('https://raw.githubusercontent.com/iqb-vocabs/p111/master/item.json'))
+        .toBe('https://w3id.org/iqb/p111/item/');
+    });
+
+    it('keeps an already-w3id id unchanged', () => {
+      expect(toW3idProfileId(w3id)).toBe(w3id);
+    });
+
+    it('keeps foreign or unknown forms unchanged', () => {
+      const other = 'https://example.org/some/profile.json';
+      expect(toW3idProfileId(other)).toBe(other);
+      // the classic store url is not a profile and must not be rewritten
+      const store = 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/profile-config.json';
+      expect(toW3idProfileId(store)).toBe(store);
+    });
+
+    it('keeps empty values unchanged', () => {
+      expect(toW3idProfileId('')).toBe('');
+    });
+
+    it('produces an id the comparison helpers treat as the same profile', () => {
+      expect(profileIdsMatch(toW3idProfileId(github), github)).toBe(true);
+      expect(isItemProfileId(toW3idProfileId('https://raw.githubusercontent.com/iqb-vocabs/p11/master/item.json')))
+        .toBe(true);
     });
   });
 

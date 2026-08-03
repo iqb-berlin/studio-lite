@@ -9,8 +9,9 @@
  * A profile's stored `profileId` can therefore use a different spelling than a
  * workspace's configured profile URL even though both denote the same profile
  * (e.g. after a profile switches its self-id from the github to the w3id form).
- * Without canonicalization the exact-string comparison used for `isCurrent` would
- * treat them as different and orphan the existing metadata.
+ * Without canonicalization the exact-string comparison used when deriving a
+ * profile's `order` (active vs. hidden) would treat them as different and
+ * orphan the existing metadata.
  *
  * canonicalizeProfileId reduces both known spellings of the SAME profile to one
  * stable key. Unknown URL forms are returned unchanged, so any other comparison
@@ -34,6 +35,27 @@ export function profileIdsMatch(
 ): boolean {
   if (!a || !b) return a === b;
   return canonicalizeProfileId(a) === canonicalizeProfileId(b);
+}
+
+/**
+ * Rewrites the github spelling of an IQB profile id into its canonical w3id form
+ * (the exact inverse of the w3id rewrite rule above), e.g.
+ *
+ *   https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json
+ *     -> https://w3id.org/iqb/p11/unit/
+ *
+ * Any other value — already-w3id ids, foreign hosts, empty strings — is returned
+ * unchanged. Apply this wherever profile ids enter persistence (unit imports,
+ * metadata patches), so the database only ever stores the w3id spelling even
+ * when the source still carries the legacy github form (#1570).
+ */
+const GITHUB_PROFILE_URL = /^https:\/\/raw\.githubusercontent\.com\/iqb-vocabs\/(p\d+)\/master\/([a-z]+)\.json$/i;
+
+export function toW3idProfileId(profileId: string): string {
+  if (!profileId) return profileId;
+  const github = GITHUB_PROFILE_URL.exec(profileId);
+  if (github) return `https://w3id.org/iqb/${github[1].toLowerCase()}/${github[2].toLowerCase()}/`;
+  return profileId;
 }
 
 /**
