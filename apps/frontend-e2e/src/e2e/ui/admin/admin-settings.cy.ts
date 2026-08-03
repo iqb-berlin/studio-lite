@@ -241,8 +241,10 @@ describe('Admin Settings Tab Configuration', () => {
   // -------------------------------------------------------------------------
   describe('Profiles Registry card', () => {
     const testUrl = 'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/refs/heads/master/test-registry.csv';
-    const originalUrl =
-      'https://raw.githubusercontent.com/iqb-vocabs/profile-registry/master/registry.csv';
+    // Must stay in sync with ProfilesRegistryDto.csvUrl: the last test in this
+    // block writes it back, so a stale value here would pin the environment to
+    // the retired registry and undo the 19.0.0 migration (#1570).
+    const originalUrl = 'https://w3id.org/iqb/metadata-registry';
     it('displays the Profiles Registry CSV URL field', () => {
       goToSettings();
       cy.get('[formcontrolname="csvUrl"]').should('exist');
