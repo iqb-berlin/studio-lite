@@ -22,7 +22,7 @@ import {
   UnitCommentDto,
   UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
-import { orderFromCurrent, toW3idProfileId } from '@studio-lite/shared-code';
+import { orderFromCurrent } from '@studio-lite/shared-code';
 import * as AdmZip from 'adm-zip';
 import {
   VariableCodingData,
@@ -1120,16 +1120,13 @@ export class WorkspaceService {
   // carry the obsolete boolean `isCurrent` on each profile. Derive `order` from
   // it (true -> 0, false -> -1) and drop the flag so the imported structure
   // matches the current model. A profile that already carries `order` keeps it.
-  // Their profile ids also predate #1570 (github spelling); rewrite to w3id.
+  // Profile ids are left as imported; UnitService.setCurrentProfiles rewrites the
+  // legacy github spelling to w3id on the way to persistence (#1570).
   private static normalizeLegacyProfileOrder(metadata: UnitMetadataValues): UnitMetadataValues {
     if (!metadata || typeof metadata !== 'object') return metadata;
     const mapProfile = (profile: ProfileValues & { isCurrent?: boolean }): ProfileValues => {
       const { isCurrent, ...rest } = profile;
-      return {
-        ...rest,
-        ...(profile.profileId && { profileId: toW3idProfileId(profile.profileId) }),
-        order: profile.order ?? orderFromCurrent(!!isCurrent)
-      };
+      return { ...rest, order: profile.order ?? orderFromCurrent(!!isCurrent) };
     };
     return {
       ...metadata,
@@ -1152,8 +1149,7 @@ export class WorkspaceService {
     return (values ?? [])
       .filter(profile => !!profile?.profileId)
       .map(profile => ({
-        // exports created before #1570 carry the github spelling; store w3ids only
-        profileId: toW3idProfileId(profile.profileId),
+        profileId: profile.profileId,
         order: profile.order,
         entries: (profile.entries ?? [])
           .filter(entry => !!entry?.id)

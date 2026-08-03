@@ -326,7 +326,7 @@ describe('UnitService', () => {
       expect(savedProfiles[1]).toMatchObject({ profileId: 'other', order: -1 });
     });
 
-    it('rewrites a github profile id from the client to w3id and still flags it as current (#1570)', async () => {
+    it('canonicalizes a github profile id from the client to w3id and still flags it current (#1570)', async () => {
       const manager = createMock<EntityManager>();
       const transaction = jest.fn().mockImplementation(
         (runInTransaction: (m: EntityManager) => Promise<unknown>) => runInTransaction(manager)
@@ -530,6 +530,41 @@ describe('UnitService', () => {
       const result = UnitService.setCurrentProfiles('p1', 'p2', metadata);
       expect(result.profiles[0].order).toBe(0);
       expect(result.profiles[1].order).toBe(-1);
+    });
+
+    // This is the single place that canonicalizes profile ids (#1570); it sits on
+    // the units read (incl. the legacy unit.metadata blob the migration cannot
+    // reach), the save, the unit copy and the import.
+    it('rewrites github-spelled profile ids to w3id on unit and item level', () => {
+      const metadata = {
+        profiles: [{ profileId: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json' }],
+        items: [{
+          uuid: 'u-1',
+          profiles: [{ profileId: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/item.json' }]
+        }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.setCurrentProfiles(
+        'https://w3id.org/iqb/p11/unit/',
+        'https://w3id.org/iqb/p11/item/',
+        metadata
+      );
+
+      expect(result.profiles[0].profileId).toBe('https://w3id.org/iqb/p11/unit/');
+      expect(result.items[0].profiles[0].profileId).toBe('https://w3id.org/iqb/p11/item/');
+      // the canonical comparison still recognizes them as the configured profiles
+      expect(result.profiles[0].order).toBe(0);
+      expect(result.items[0].profiles[0].order).toBe(0);
+    });
+
+    it('leaves foreign profile ids untouched', () => {
+      const metadata = {
+        profiles: [{ profileId: 'https://example.org/own/profile.json' }]
+      } as unknown as UnitMetadataValues;
+
+      const result = UnitService.setCurrentProfiles('https://w3id.org/iqb/p11/unit/', '', metadata);
+
+      expect(result.profiles[0].profileId).toBe('https://example.org/own/profile.json');
     });
   });
 

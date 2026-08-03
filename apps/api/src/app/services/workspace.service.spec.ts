@@ -648,41 +648,16 @@ describe('WorkspaceService', () => {
       });
     });
 
-    it('rewrites github profile ids of a wrapper export to the w3id form (#1570)', () => {
+    // Profile ids are deliberately NOT rewritten here: UnitService.setCurrentProfiles
+    // canonicalizes them on the way to persistence, and the profile_id column
+    // transformer backstops every writer (#1570).
+    it('passes imported profile ids through unchanged', () => {
+      const github = 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json';
       const mapped = WorkspaceService.mapImportedMetadata({
-        metadata: [{
-          profileId: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json',
-          entries: []
-        }]
+        metadata: [{ profileId: github, entries: [] }]
       });
 
-      expect(mapped.profiles[0].profileId).toBe('https://w3id.org/iqb/p11/unit/');
-    });
-
-    it('rewrites github profile ids of a legacy blob export to the w3id form (#1570)', () => {
-      const legacy = {
-        profiles: [{
-          profileId: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json',
-          isCurrent: true,
-          entries: []
-        }],
-        items: [{
-          id: 'ITEM1',
-          profiles: [{
-            profileId: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/item.json',
-            isCurrent: true,
-            entries: []
-          }]
-        }]
-      };
-
-      expect(WorkspaceService.mapImportedMetadata(legacy)).toEqual({
-        profiles: [{ profileId: 'https://w3id.org/iqb/p11/unit/', order: 0, entries: [] }],
-        items: [{
-          id: 'ITEM1',
-          profiles: [{ profileId: 'https://w3id.org/iqb/p11/item/', order: 0, entries: [] }]
-        }]
-      });
+      expect(mapped.profiles[0].profileId).toBe(github);
     });
   });
 

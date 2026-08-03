@@ -456,9 +456,16 @@ export class UnitService {
     return user.firstName && user.firstName.trim() ? `${displayName}, ${user.firstName.trim()}` : displayName;
   }
 
+  // Also canonicalizes the profile id to its w3id form (#1570). setCurrentProfiles
+  // sits on every path that reads or writes a metadata block — the units read
+  // (including the legacy unit.metadata blob, which the 19.0.0 migration cannot
+  // reach), the metadata save, the unit copy and the import — so a single rewrite
+  // here is what makes the form, hideNumbering and the export agree on one
+  // spelling even for units whose metadata was never re-saved.
   private static setCurrentProfile<T extends ProfileValues>(profileId: string, profile: T): T {
     return {
       ...profile,
+      profileId: toW3idProfileId(profile.profileId),
       order: orderFromCurrent(profileIdsMatch(profile.profileId, profileId))
     };
   }
@@ -641,27 +648,6 @@ export class UnitService {
     return itemUuids;
   }
 
-  // Profile ids enter here straight from clients; rewrite the legacy github
-  // spelling to the canonical w3id form so only w3ids reach the database, even
-  // when a client still holds pre-#1570 state.
-  private static normalizeProfileIds(metadata: UnitMetadataValues): UnitMetadataValues {
-    if (!metadata || typeof metadata !== 'object') return metadata;
-    const mapProfile = (profile: ProfileValues): ProfileValues => ({
-      ...profile,
-      ...(profile.profileId && { profileId: toW3idProfileId(profile.profileId) })
-    });
-    return {
-      ...metadata,
-      ...(metadata.profiles && { profiles: metadata.profiles.map(mapProfile) }),
-      ...(metadata.items && {
-        items: metadata.items.map(item => ({
-          ...item,
-          ...(item.profiles && { profiles: item.profiles.map(mapProfile) })
-        }))
-      })
-    };
-  }
-
   // The whole metadata save runs in one transaction so a mid-sequence failure
   // (e.g. a constraint error on one profile) rolls back every write instead of
   // leaving the unit's profiles/items half-updated.
@@ -678,7 +664,7 @@ export class UnitService {
     const withOrder = UnitService.setCurrentProfiles(
       workspace?.settings?.unitMDProfile,
       workspace?.settings?.itemMDProfile,
-      UnitService.normalizeProfileIds(metadata)
+      metadata
     );
     const profiles = withOrder.profiles || [];
     const items = withOrder.items || [];
