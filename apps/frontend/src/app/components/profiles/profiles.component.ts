@@ -75,7 +75,13 @@ export class ProfilesComponent implements OnInit, OnDestroy {
             return of([]);
           }
           this.isError = false;
-          const storeObsList = registeredProfiles.map(registeredProfile => {
+          // The backend yields a null entry for every registry url it could not
+          // fetch, and an empty registry (or one whose csv could not be parsed)
+          // yields an empty list — forkJoin([]) would never emit and leave the
+          // panel spinning forever. Both are guarded here.
+          const fetchedProfiles = registeredProfiles.filter(Boolean);
+          if (!fetchedProfiles.length) return of([]);
+          const storeObsList = fetchedProfiles.map(registeredProfile => {
             const profileFiles = registeredProfile.profiles ?? [];
             // Newer registry entries are direct profiles (empty profiles list): the
             // registered url is the profile itself. Classic stores instead list the
@@ -97,19 +103,28 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           return forkJoin(storeObsList);
         })
       )
-      .subscribe(profileStoresWithProfiles => {
-        this.profileStoresWithProfiles = profileStoresWithProfiles;
-        this.wsgAdminService.profileStores = this.profileStoresWithProfiles;
-        this.isLoading = false;
+      .subscribe({
+        next: profileStoresWithProfiles => {
+          this.profileStoresWithProfiles = profileStoresWithProfiles;
+          this.wsgAdminService.profileStores = this.profileStoresWithProfiles;
+          this.isLoading = false;
 
-        if (this.profilesSelected.length === 0) {
-          const currentSettings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
-          this.fetchedProfiles = this._profiles !== undefined ?
-            (this._profiles || []) : (currentSettings.profiles || []);
-          this.profilesSelected = [...this.fetchedProfiles];
+          if (this.profilesSelected.length === 0) {
+            const currentSettings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
+            this.fetchedProfiles = this._profiles !== undefined ?
+              (this._profiles || []) : (currentSettings.profiles || []);
+            this.profilesSelected = [...this.fetchedProfiles];
+          }
+
+          this.changeDetectorRef.detectChanges();
+        },
+        // Without this the panel would keep spinning with no message on any
+        // unexpected stream error instead of showing the error state.
+        error: () => {
+          this.isLoading = false;
+          this.isError = true;
+          this.changeDetectorRef.detectChanges();
         }
-
-        this.changeDetectorRef.detectChanges();
       });
 
     this.wsgAdminService.selectedWorkspaceGroupSettings
