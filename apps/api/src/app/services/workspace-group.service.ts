@@ -4,9 +4,11 @@ import { Repository } from 'typeorm';
 import {
   CreateWorkspaceGroupDto,
   WorkspaceGroupFullDto,
-  WorkspaceGroupInListDto
+  WorkspaceGroupInListDto,
+  WorkspaceGroupSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { ArgumentOutOfRangeError } from 'rxjs';
+import { toW3idProfileId } from '@studio-lite/shared-code';
 import WorkspaceGroup from '../entities/workspace-group.entity';
 import { AdminWorkspaceGroupNotFoundException } from '../exceptions/admin-workspace-group-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
@@ -75,6 +77,21 @@ export class WorkspaceGroupService {
     return newWorkspaceGroup.id;
   }
 
+  // The group's profile selection is what every workspace in it picks its unit and
+  // item profile from, and those picks are compared exactly. Canonicalize the ids
+  // on the way in so a client still holding the retired github spelling cannot
+  // undo what the 19.0.0 migration did to this column (#1570).
+  static normalizeProfileSelection(settings: WorkspaceGroupSettingsDto): WorkspaceGroupSettingsDto {
+    if (!settings?.profiles?.length) return settings;
+    return {
+      ...settings,
+      profiles: settings.profiles.map(profile => ({
+        ...profile,
+        id: toW3idProfileId(profile.id)
+      }))
+    };
+  }
+
   async patch(id: number, workspaceGroupData: WorkspaceGroupFullDto): Promise<void> {
     this.logger.log(`Updating workspace group with id: ${workspaceGroupData.id}`);
     if (id) {
@@ -85,7 +102,7 @@ export class WorkspaceGroupService {
       if (workspaceGroupData.settings !== undefined) {
         workspaceGroupToUpdate.settings = {
           ...workspaceGroupToUpdate.settings,
-          ...workspaceGroupData.settings
+          ...WorkspaceGroupService.normalizeProfileSelection(workspaceGroupData.settings)
         };
       }
       await this.workspaceGroupsRepository.save(workspaceGroupToUpdate);

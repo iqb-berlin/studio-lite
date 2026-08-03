@@ -112,6 +112,45 @@ describe('WorkspaceGroupService', () => {
       expect(group.name).toBe('new');
       expect(groupRepository.save).toHaveBeenCalled();
     });
+
+    // #1570: the group's profile selection feeds every workspace's profile pick,
+    // and those are compared exactly.
+    it('canonicalizes the profile selection ids before storing them', async () => {
+      const group = { id: 1, name: 'g' } as WorkspaceGroup;
+      mockRepository.findOne.mockResolvedValue(group);
+
+      const settings: WorkspaceGroupSettingsDto = {
+        defaultEditor: '',
+        defaultPlayer: '',
+        defaultSchemer: '',
+        profiles: [
+          { id: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json', label: 'MA unit' },
+          { id: 'https://w3id.org/iqb/p11/item', label: 'MA item' },
+          { id: 'https://example.org/own/profile.json', label: 'eigenes' }
+        ]
+      };
+
+      await service.patch(1, { id: 1, name: 'g', settings } as WorkspaceGroupFullDto);
+
+      expect((group.settings as WorkspaceGroupSettingsDto).profiles).toEqual([
+        { id: 'https://w3id.org/iqb/p11/unit/', label: 'MA unit' },
+        { id: 'https://w3id.org/iqb/p11/item/', label: 'MA item' },
+        { id: 'https://example.org/own/profile.json', label: 'eigenes' }
+      ]);
+    });
+
+    it('leaves settings without a profile selection untouched', async () => {
+      const group = { id: 1, name: 'g' } as WorkspaceGroup;
+      mockRepository.findOne.mockResolvedValue(group);
+
+      const settings: WorkspaceGroupSettingsDto = {
+        defaultEditor: 'e', defaultPlayer: 'p', defaultSchemer: 's'
+      };
+
+      await service.patch(1, { id: 1, name: 'g', settings } as WorkspaceGroupFullDto);
+
+      expect(group.settings).toMatchObject({ defaultEditor: 'e' });
+    });
   });
 
   describe('remove', () => {
