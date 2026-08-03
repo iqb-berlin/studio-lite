@@ -61,8 +61,25 @@ describe('profile-id', () => {
         .toBe('https://w3id.org/iqb/p111/item/');
     });
 
-    it('keeps an already-w3id id unchanged', () => {
+    it('keeps an already-canonical w3id id unchanged', () => {
       expect(toW3idProfileId(w3id)).toBe(w3id);
+    });
+
+    it('normalizes the w3id variants onto the one canonical spelling', () => {
+      // without these, an exact comparison would treat the same profile as two
+      expect(toW3idProfileId('https://w3id.org/iqb/p11/unit')).toBe(w3id);
+      expect(toW3idProfileId('https://www.w3id.org/iqb/p11/unit/')).toBe(w3id);
+      expect(toW3idProfileId('http://w3id.org/iqb/p11/unit/')).toBe(w3id);
+    });
+
+    it('is idempotent', () => {
+      expect(toW3idProfileId(toW3idProfileId(github))).toBe(w3id);
+    });
+
+    it('does not rewrite a self-hosted copy to the official profile', () => {
+      const selfHosted = 'https://example.org/mirror/iqb-vocabs/p11/master/unit.json';
+      expect(toW3idProfileId(selfHosted)).toBe(selfHosted);
+      expect(profileIdsMatch(selfHosted, w3id)).toBe(false);
     });
 
     it('keeps foreign or unknown forms unchanged', () => {

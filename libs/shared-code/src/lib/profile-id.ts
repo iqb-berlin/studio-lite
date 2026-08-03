@@ -17,8 +17,13 @@
  * stable key. Unknown URL forms are returned unchanged, so any other comparison
  * falls back to an exact match — this never equates two different profiles.
  */
-const W3ID_PROFILE = /w3id\.org\/iqb\/(p\d+)\/([a-z]+)\/?$/i;
-const GITHUB_PROFILE = /iqb-vocabs\/(p\d+)\/master\/([a-z]+)\.json$/i;
+// Both spellings are anchored on the hosts the w3id rewrite rule actually names,
+// so a self-hosted copy of a profile is never silently equated with — or rewritten
+// to — the official one. Scheme and the `www.` alias are accepted as variants of
+// the same id and normalized away by toW3idProfileId.
+const W3ID_PROFILE = /^https?:\/\/(?:www\.)?w3id\.org\/iqb\/(p\d+)\/([a-z]+)\/?$/i;
+const GITHUB_PROFILE = /^https?:\/\/raw\.githubusercontent\.com\/iqb-vocabs\/(p\d+)\/master\/([a-z]+)\.json$/i;
+const CANONICAL_PROFILE_KEY = /^iqb:(p\d+):([a-z]+)$/;
 
 export function canonicalizeProfileId(profileId: string): string {
   if (!profileId) return profileId;
@@ -38,24 +43,26 @@ export function profileIdsMatch(
 }
 
 /**
- * Rewrites the github spelling of an IQB profile id into its canonical w3id form
- * (the exact inverse of the w3id rewrite rule above), e.g.
+ * Rewrites any recognized spelling of an IQB profile id into the ONE canonical
+ * w3id form — the exact inverse of the w3id rewrite rule above:
  *
  *   https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json
  *     -> https://w3id.org/iqb/p11/unit/
+ *   https://w3id.org/iqb/p11/unit  (no trailing slash, www., http)
+ *     -> https://w3id.org/iqb/p11/unit/
  *
- * Any other value — already-w3id ids, foreign hosts, empty strings — is returned
- * unchanged. Apply this wherever profile ids enter persistence (unit imports,
- * metadata patches), so the database only ever stores the w3id spelling even
- * when the source still carries the legacy github form (#1570).
+ * Anything canonicalizeProfileId does not recognize — foreign hosts, self-hosted
+ * copies, store urls, empty values — is returned unchanged. Built on top of
+ * canonicalizeProfileId so exactly one pair of patterns defines what an IQB
+ * profile id is: comparison and rewriting can never drift apart.
+ *
+ * Because this produces a single spelling, downstream comparisons can stay exact
+ * (===) as long as both sides pass through here (#1570).
  */
-const GITHUB_PROFILE_URL = /^https:\/\/raw\.githubusercontent\.com\/iqb-vocabs\/(p\d+)\/master\/([a-z]+)\.json$/i;
-
 export function toW3idProfileId(profileId: string): string {
   if (!profileId) return profileId;
-  const github = GITHUB_PROFILE_URL.exec(profileId);
-  if (github) return `https://w3id.org/iqb/${github[1].toLowerCase()}/${github[2].toLowerCase()}/`;
-  return profileId;
+  const key = CANONICAL_PROFILE_KEY.exec(canonicalizeProfileId(profileId));
+  return key ? `https://w3id.org/iqb/${key[1]}/${key[2]}/` : profileId;
 }
 
 /**
