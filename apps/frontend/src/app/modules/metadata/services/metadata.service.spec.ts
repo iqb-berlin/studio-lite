@@ -54,7 +54,7 @@ describe('MetadataService', () => {
           {
             entries: [
               {
-                type: 'vocabulary',
+                type: 'VOCABULARY',
                 parameters: { url: 'v1' }
               }
             ]
@@ -103,8 +103,8 @@ describe('MetadataService', () => {
         groups: [
           {
             entries: [
-              { type: 'vocabulary', parameters: { url: 'v1' } },
-              { type: 'vocabulary', parameters: { url: 'v2' } }
+              { type: 'VOCABULARY', parameters: { url: 'v1' } },
+              { type: 'VOCABULARY', parameters: { url: 'v2' } }
             ]
           }
         ]
@@ -130,6 +130,42 @@ describe('MetadataService', () => {
       expect(service.vocabularies[0].url).toBe('v2');
       // eslint-disable-next-line @typescript-eslint/dot-notation
       expect(service.idLabelDictionary['c2']).toBeDefined();
+    });
+
+    /**
+     * The fixtures above carry the spelling real profiles use, 'VOCABULARY' — the only one
+     * the metadata-profile schema allows since spec 0.10. This case guards the other
+     * direction: a document from before that spec must still map, because the upstream
+     * `type: string` cannot rule it out and a silent miss here empties every dictionary.
+     */
+    it('should also map entries that spell the type in the pre-0.10 lower case', async () => {
+      const mockProfile = {
+        id: 'p1',
+        groups: [
+          {
+            entries: [
+              { type: 'vocabulary', parameters: { url: 'v1' } }
+            ]
+          }
+        ]
+      } as unknown as MDProfile;
+
+      const mockVocabs = [
+        {
+          id: 'v1',
+          hasTopConcept: [
+            { id: 'c1', prefLabel: { de: 'Label 1' } } as TopConcept
+          ]
+        } as MetadataVocabularyDto
+      ];
+
+      backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of(mockVocabs));
+
+      const result = await service.loadProfileVocabularies(mockProfile);
+
+      expect(result).toBe(true);
+      // eslint-disable-next-line @typescript-eslint/dot-notation
+      expect(service.vocabulariesIdDictionary['c1']).toBeDefined();
     });
 
     it('should ignore a vocabulary without an id', async () => {
