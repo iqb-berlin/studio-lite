@@ -96,6 +96,53 @@ describe('MetadataService', () => {
       const result = await service.loadProfileVocabularies({ id: 'p1', groups: [] } as unknown as MDProfile);
       expect(result).toBe(false);
     });
+
+    it('should keep the vocabularies that loaded when one of them is null', async () => {
+      const mockProfile = {
+        id: 'p1',
+        groups: [
+          {
+            entries: [
+              { type: 'vocabulary', parameters: { url: 'v1' } },
+              { type: 'vocabulary', parameters: { url: 'v2' } }
+            ]
+          }
+        ]
+      } as unknown as MDProfile;
+
+      const mockVocabs = [
+        {
+          id: 'v2',
+          hasTopConcept: [
+            { id: 'c2', prefLabel: { de: 'Label 2' } } as TopConcept
+          ]
+        } as MetadataVocabularyDto,
+        null
+      ] as MetadataVocabularyDto[];
+
+      backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of(mockVocabs));
+
+      const result = await service.loadProfileVocabularies(mockProfile);
+
+      // false reports the gap, but what did load stays usable
+      expect(result).toBe(false);
+      expect(service.vocabularies.length).toBe(1);
+      expect(service.vocabularies[0].url).toBe('v2');
+      // eslint-disable-next-line @typescript-eslint/dot-notation
+      expect(service.idLabelDictionary['c2']).toBeDefined();
+    });
+
+    it('should ignore a vocabulary without an id', async () => {
+      const mockVocabs = [
+        { hasTopConcept: [] } as unknown as MetadataVocabularyDto
+      ];
+      backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of(mockVocabs));
+
+      const result = await service.loadProfileVocabularies({ id: 'p1', groups: [] } as unknown as MDProfile);
+
+      expect(result).toBe(false);
+      expect(service.vocabularies.length).toBe(0);
+    });
   });
 
   describe('downloadMetadataReport', () => {
