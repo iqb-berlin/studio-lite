@@ -28,7 +28,7 @@ export function deleteUnit(shortname: string): void {
     .should('exist')
     .click()
     .type(shortname);
-  cy.get(`mat-cell:contains("${shortname}")`).prev().click();
+  cy.get(`[data-cy="workspace-select-unit-list-checkbox-${shortname}"]`).click();
   cy.get('[data-cy="workspace-select-unit-button"]').click();
   cy.translate(Cypress.expose('locale')).then(json => {
     cy.contains('button', json.delete).click();
@@ -75,7 +75,7 @@ export function addUnitPred(unit: UnitData): void {
         .clear()
         .type(unit.group);
     } else {
-      cy.get('mat-dialog-content').find('svg').click();
+      cy.get('[data-cy="workspace-new-unit-group"]').click();
       cy.get('body').then($body1 => {
         if ($body1.find(`mat-option:contains("${unit.group}")`).length > 0) {
           cy.get(`mat-option:contains("${unit.group}")`).click();
@@ -109,7 +109,7 @@ export function addUnitFromExisting(ws: string, unit1: UnitData, newUnit: UnitDa
   cy.get('[data-cy="workspace-add-unit-from-existing"]').click();
   cy.get('mat-select').click();
   cy.get(`mat-option:contains("${ws}")`).click();
-  cy.get(`mat-cell:contains("${unit1.shortname}")`).prev().click();
+  cy.get(`[data-cy="workspace-select-unit-list-checkbox-${unit1.shortname}"]`).click();
   cy.translate(Cypress.expose('locale')).then(json => {
     cy.clickDialogButton(json.continue);
   });
@@ -121,7 +121,7 @@ export function addUnitFromExisting(ws: string, unit1: UnitData, newUnit: UnitDa
         .clear()
         .type(newUnit.group);
     } else {
-      cy.get('mat-dialog-content').find('svg').click();
+      cy.get('[data-cy="workspace-new-unit-group"]').click();
       cy.get('body').then($body1 => {
         if ($body1.find(`mat-option:contains("${unit1.group}")`).length > 0) {
           cy.get(`mat-option:contains("${unit1.group}")`).click();
@@ -157,7 +157,7 @@ export function moveUnit(wsorigin: string, wsdestination: string, unit: UnitData
   cy.get('[data-cy="workspace-edit-unit-move-unit"]').click();
   cy.get('mat-select').click();
   cy.get(`mat-option:contains("${wsdestination}")`).click();
-  cy.get(`mat-cell:contains("${unit.shortname}")`).prev().click();
+  cy.get(`[data-cy="workspace-select-unit-list-checkbox-${unit.shortname}"]`).click();
   cy.clickDataCyWithResponseCheck(
     '[data-cy="workspace-move-unit-button"]',
     [200],
@@ -192,10 +192,7 @@ export function importExercise(filename: string): void {
 export function selectListUnits(unitNames: string[]): void {
   cy.get('[data-cy="workspace-select-unit-list-key"]').should('exist');
   unitNames.forEach(name => {
-    cy.get(`mat-cell:contains("${name}")`)
-      .parent()
-      .find('mat-checkbox')
-      .click();
+    cy.get(`[data-cy="workspace-select-unit-list-checkbox-${name}"]`).click();
   });
 }
 
@@ -209,7 +206,7 @@ export function selectListUnits(unitNames: string[]): void {
  * createRichNote('Note linked to 01', -1, '01');
  */
 export function createRichNote(content: string, optionIndex: number = -1, linkItemName?: string): void {
-  cy.get('.node-header').contains('mat-icon', 'add').first().click({ force: true });
+  cy.get('[data-cy="rich-note-add"]').first().click({ force: true });
   cy.get('mat-select[formControlName="tagId"]').click();
   if (optionIndex === -1) {
     cy.get('mat-option').last().click();
@@ -223,7 +220,7 @@ export function createRichNote(content: string, optionIndex: number = -1, linkIt
     cy.get('[data-cy="comment-editor-link-to-item"]').click();
     cy.contains('mat-option', linkItemName).click();
   }
-  cy.get('mat-dialog-actions button[color="primary"]').click({ force: true });
+  cy.get('[data-cy="rich-note-dialog-save"]').click({ force: true });
 }
 
 /**
@@ -233,9 +230,9 @@ export function createRichNote(content: string, optionIndex: number = -1, linkIt
  * editRichNote(' (bearbeitet)');
  */
 export function editRichNote(addedContent: string): void {
-  cy.get('.note-item-actions').last().contains('mat-icon', 'edit').click({ force: true });
+  cy.get('[data-cy="rich-note-edit"]').last().click({ force: true });
   cy.get('tiptap-editor .ProseMirror').type(addedContent);
-  cy.get('mat-dialog-actions button[color="primary"]').click({ force: true });
+  cy.get('[data-cy="rich-note-dialog-save"]').click({ force: true });
 }
 
 /**

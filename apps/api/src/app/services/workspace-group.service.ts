@@ -4,9 +4,11 @@ import { Repository } from 'typeorm';
 import {
   CreateWorkspaceGroupDto,
   WorkspaceGroupFullDto,
-  WorkspaceGroupInListDto
+  WorkspaceGroupInListDto,
+  WorkspaceGroupSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { ArgumentOutOfRangeError } from 'rxjs';
+import { toW3idProfileId } from '@studio-lite/shared-code';
 import WorkspaceGroup from '../entities/workspace-group.entity';
 import { AdminWorkspaceGroupNotFoundException } from '../exceptions/admin-workspace-group-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
@@ -70,9 +72,31 @@ export class WorkspaceGroupService {
 
   async create(workspaceGroup: CreateWorkspaceGroupDto): Promise<number> {
     this.logger.log(`Creating workspace group with name: ${workspaceGroup.name}`);
-    const newWorkspaceGroup = await this.workspaceGroupsRepository.create(workspaceGroup);
+    // Same canonicalization as patch(): a group can be created with a profile
+    // selection in one request, and there is no global ValidationPipe that would
+    // strip it, so this path must not be the one that puts the retired spelling back.
+    const newWorkspaceGroup = await this.workspaceGroupsRepository.create({
+      ...workspaceGroup,
+      settings: WorkspaceGroupService
+        .normalizeProfileSelection(workspaceGroup.settings as WorkspaceGroupSettingsDto)
+    });
     await this.workspaceGroupsRepository.save(newWorkspaceGroup);
     return newWorkspaceGroup.id;
+  }
+
+  // The group's profile selection is what every workspace in it picks its unit and
+  // item profile from, and those picks are compared exactly. Canonicalize the ids
+  // on the way in so a client still holding the retired github spelling cannot
+  // undo what the 19.0.0 migration did to this column (#1570).
+  static normalizeProfileSelection(settings: WorkspaceGroupSettingsDto): WorkspaceGroupSettingsDto {
+    if (!settings?.profiles?.length) return settings;
+    return {
+      ...settings,
+      profiles: settings.profiles.map(profile => ({
+        ...profile,
+        id: toW3idProfileId(profile.id)
+      }))
+    };
   }
 
   async patch(id: number, workspaceGroupData: WorkspaceGroupFullDto): Promise<void> {
@@ -85,7 +109,7 @@ export class WorkspaceGroupService {
       if (workspaceGroupData.settings !== undefined) {
         workspaceGroupToUpdate.settings = {
           ...workspaceGroupToUpdate.settings,
-          ...workspaceGroupData.settings
+          ...WorkspaceGroupService.normalizeProfileSelection(workspaceGroupData.settings)
         };
       }
       await this.workspaceGroupsRepository.save(workspaceGroupToUpdate);

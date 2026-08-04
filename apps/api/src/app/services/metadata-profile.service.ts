@@ -22,8 +22,9 @@ export class MetadataProfileService {
     const storedProfile = await this.metadataProfileRepository
       .findOneBy({ id: url });
     if (storedProfile) {
-      // without await to update the profile in the background
-      this.getMetadataProfile(url);
+      // without await to update the profile in the background; a failed fetch or
+      // a failed write must not escape as an unhandled rejection on a read path
+      this.getMetadataProfile(url).catch(() => undefined);
       return storedProfile;
     }
     return this.getMetadataProfile(url);
@@ -37,6 +38,10 @@ export class MetadataProfileService {
     return this.metadataProfileRepository.findOneBy({ id: url });
   }
 
+  // The profile is cached and returned under the url it was requested by, not
+  // under its self-declared id: iqb-vocabs profiles still declare the github
+  // spelling while the app references them by w3id (#1570). Keying by the
+  // self-id would leave the w3id row stale forever and pile up duplicates.
   private async getMetadataProfile(url: string): Promise<MetadataProfileDto | null> {
     const profile = await firstValueFrom(
       this.http.get<MetadataProfileDto>(url)
@@ -46,26 +51,17 @@ export class MetadataProfileService {
         )
     );
     if (profile) {
-      await this.storeProfile(profile, url);
+      const keyedProfile = { ...profile, id: url };
+      await this.storeProfile(keyedProfile);
+      return keyedProfile;
     }
     return profile;
   }
 
-  private async storeProfile(profile: MetadataProfileDto, url: string): Promise<void> {
-    const metadataProfile = await this.metadataProfileRepository
-      .findOneBy({ id: url });
-    if (metadataProfile) {
-      await this.metadataProfileRepository
-        .save({ ...profile, modifiedAt: new Date() });
-    } else {
-      await this.createMetadataProfile(profile);
-    }
-  }
-
-  private async createMetadataProfile(profile: MetadataProfileDto) {
-    const newMetadataProfile = this.metadataProfileRepository
-      .create({ ...profile, modifiedAt: new Date() });
-    await this.metadataProfileRepository.save(newMetadataProfile);
+  // `save` upserts on the primary key (`id`), so it covers both the first fetch
+  // and every background refresh — no separate existence check is needed.
+  private async storeProfile(profile: MetadataProfileDto): Promise<void> {
+    await this.metadataProfileRepository.save({ ...profile, modifiedAt: new Date() });
   }
 
   async getProfileVocabularies(url: string): Promise<MetadataVocabularyDto[]> {

@@ -284,6 +284,36 @@ describe('WorkspaceService', () => {
       await service.patchSettings(1, { defaultEditor: 'e' } as WorkspaceSettingsDto);
       expect(ws.settings.defaultEditor).toBe('e');
     });
+
+    // #1570: a client still holding the retired spelling must not undo the
+    // migration of this column.
+    it('canonicalizes the configured profile urls before storing them', async () => {
+      const ws = { id: 1, settings: {} as WorkspaceSettingsDto };
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
+      (unitService.getUnitIdsByWorkspaceId as jest.Mock).mockResolvedValue([]);
+
+      await service.patchSettings(1, {
+        unitMDProfile: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json',
+        itemMDProfile: 'https://w3id.org/iqb/p11/item',
+        defaultEditor: 'e'
+      } as WorkspaceSettingsDto);
+
+      expect(ws.settings.unitMDProfile).toBe('https://w3id.org/iqb/p11/unit/');
+      expect(ws.settings.itemMDProfile).toBe('https://w3id.org/iqb/p11/item/');
+    });
+
+    it('leaves a foreign profile url and absent profile keys alone', async () => {
+      const ws = { id: 1, settings: {} as WorkspaceSettingsDto };
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
+      (unitService.getUnitIdsByWorkspaceId as jest.Mock).mockResolvedValue([]);
+
+      await service.patchSettings(1, {
+        unitMDProfile: 'https://example.org/own/profile.json'
+      } as WorkspaceSettingsDto);
+
+      expect(ws.settings.unitMDProfile).toBe('https://example.org/own/profile.json');
+      expect(ws.settings.itemMDProfile).toBeUndefined();
+    });
   });
 
   describe('remove', () => {
@@ -646,6 +676,18 @@ describe('WorkspaceService', () => {
         profiles: [{ profileId: 'p1', order: 2, entries: [] }],
         items: []
       });
+    });
+
+    // Profile ids are deliberately NOT rewritten here: UnitService.setCurrentProfiles
+    // canonicalizes them on the way to persistence, and the profile_id column
+    // transformer backstops every writer (#1570).
+    it('passes imported profile ids through unchanged', () => {
+      const github = 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json';
+      const mapped = WorkspaceService.mapImportedMetadata({
+        metadata: [{ profileId: github, entries: [] }]
+      });
+
+      expect(mapped.profiles[0].profileId).toBe(github);
     });
   });
 

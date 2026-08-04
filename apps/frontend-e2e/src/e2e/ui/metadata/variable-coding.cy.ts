@@ -44,9 +44,10 @@ describe('Variable and Item Metadata Coherence', () => {
     createGroup(group);
     createWs(mathArea, group);
     grantRemovePrivilegeAtWs([Cypress.expose('username')], mathArea, [AccessLevel.Admin]);
-    selectProfileForGroup(group, IqbProfile.MA);
+    selectProfileForGroup(group, IqbProfile.MAu);
+    selectProfileForGroup(group, IqbProfile.MAi);
     setModuleWithoutVerification(mathArea, 'Aspect', 'Aspect', 'Schemer');
-    selectProfileForArea(IqbProfile.MA);
+    selectProfileForArea([IqbProfile.MAu, IqbProfile.MAi]);
     importExercise('variable_metadata.zip');
   });
 

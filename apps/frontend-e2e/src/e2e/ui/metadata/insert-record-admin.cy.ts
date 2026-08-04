@@ -26,8 +26,10 @@ describe('Metadata Profile Management from Admin', () => {
     grantRemovePrivilegeAtWs([Cypress.expose('username')], mathArea, [AccessLevel.Admin]);
   });
   it('assigns metadata profiles to group from admin settings', () => {
-    selectProfileForGroupFromAdmin(group, IqbProfile.DE);
-    selectProfileForGroupFromAdmin(group, IqbProfile.MA);
+    selectProfileForGroupFromAdmin(group, IqbProfile.DEu);
+    selectProfileForGroupFromAdmin(group, IqbProfile.DEi);
+    selectProfileForGroupFromAdmin(group, IqbProfile.MAu);
+    selectProfileForGroupFromAdmin(group, IqbProfile.MAi);
   });
 
   it('cleans up test data', () => {

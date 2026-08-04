@@ -97,5 +97,5 @@
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()" type="button">{{ 'workspace.cancel' | translate }}</button>
-  <button mat-raised-button color="primary" (click)="onSave()" type="button" [disabled]="isSaveDisabled">{{ saveButtonLabel | translate }}</button>
+  <button mat-raised-button color="primary" (click)="onSave()" type="button" [disabled]="isSaveDisabled" data-cy="rich-note-dialog-save">{{ saveButtonLabel | translate }}</button>
 </mat-dialog-actions>

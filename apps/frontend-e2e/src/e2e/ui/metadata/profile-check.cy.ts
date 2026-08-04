@@ -1,4 +1,4 @@
-import { checkMultipleProfiles, checkProfile } from '../../../support/metadata/metadata-util';
+import { checkMultipleProfiles } from '../../../support/metadata/metadata-util';
 import { newUser, testGroups } from '../../../support/testData';
 import {
   addFirstUser,
@@ -29,33 +29,44 @@ describe('Metadata Profile Management', () => {
   });
 
   it('loads metadata profile from admin settings', () => {
-    const searchProfile: string = 'Deutsch';
+    const searchProfiles: string[] = [
+      'IQB Deutsch Primar - Aufgabe',
+      'IQB Deutsch Primar - Item'
+    ];
     clickIndexTabAdmin('workspace-groups');
     cy.get('mat-table')
       .contains(groups[1])
       .click();
     cy.get('[data-cy="workspaces-groups-menu-edit"]').click();
-    checkProfile(searchProfile);
+    checkMultipleProfiles(searchProfiles);
     cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
   });
 
   it('loads and reverts metadata profile from group admin', () => {
-    const searchProfile: string = 'Deutsch';
+    const searchProfiles: string[] = [
+      'IQB Deutsch Primar - Aufgabe',
+      'IQB Deutsch Primar - Item'
+    ];
     cy.visit('/');
-    cy.get(`div>div>div:contains("${searchProfile}")`)
+    cy.get(`div>div>div:contains("${testGroups.metadata.german}")`)
       .next()
       .click();
     clickIndexTabWsgAdmin('settings');
-    checkProfile(searchProfile);
+    checkMultipleProfiles(searchProfiles);
     cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
   });
 
   it('loads multiple metadata profiles', () => {
-    const searchProfiles: string[] = ['Englisch', 'Mathematik'];
+    const searchProfiles: string[] = [
+      'IQB Mathematik Primar - Aufgabe',
+      'IQB Mathematik Primar - Item',
+      'IQB Deutsch Primar - Aufgabe',
+      'IQB Deutsch Primar - Item'
+    ];
     cy.findAdminSettings().click();
     clickIndexTabAdmin('workspace-groups');
     cy.get('mat-table')
-      .contains(groups[0])
+      .contains(testGroups.metadata.math)
       .click();
     cy.get('mat-icon')
       .contains('settings')

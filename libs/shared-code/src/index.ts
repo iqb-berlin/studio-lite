@@ -1,6 +1,8 @@
 export { VeronaModuleFactory } from './lib/helper/verona-module.factory';
 export { VeronaModuleKeyCollection } from './lib/helper/verona-module-key-collection.class';
-export { canonicalizeProfileId, profileIdsMatch, isItemProfileId } from './lib/profile-id';
+export {
+  canonicalizeProfileId, profileIdsMatch, isItemProfileId, toW3idProfileId
+} from './lib/profile-id';
 export {
   VERONA_MODULE_TYPES,
   normalizeVeronaModuleType,

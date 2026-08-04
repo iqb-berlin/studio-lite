@@ -36,6 +36,7 @@
       <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">
         <mat-checkbox [disabled]="disabledUnits | include : row.id"
                       [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length"
+                      [attr.data-cy]="'workspace-select-unit-list-checkbox-' + row.key"
                       (change)="$event ? tableSelectionCheckboxes.toggle(row) : null"
                       (click)="$event.stopPropagation()">
         </mat-checkbox>

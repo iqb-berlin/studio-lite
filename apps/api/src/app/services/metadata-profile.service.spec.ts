@@ -91,6 +91,53 @@ describe('MetadataProfileService', () => {
       const result = await service.getStoredMetadataProfile('url');
       expect(result).toEqual(profileDto);
     });
+
+    // Real iqb-vocabs profiles still declare the github spelling as their own id
+    // while the app references them by w3id (#1570), so the cache key must come
+    // from the request, not from the document.
+    describe('keying by the requested url (#1570)', () => {
+      const w3id = 'https://w3id.org/iqb/p11/unit/';
+      const github = 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json';
+      const selfIdMismatchProfile = createMock<MetadataProfileDto>({
+        id: github, groups: [], label: []
+      });
+
+      it('returns a fetched profile under the requested url, not its self-declared id', async () => {
+        metadataProfileRepository.findOneBy.mockResolvedValue(null);
+        mockHttpGet(httpService, selfIdMismatchProfile);
+
+        const result = await service.getStoredMetadataProfile(w3id);
+
+        expect((result as MetadataProfileDto).id).toBe(w3id);
+      });
+
+      it('stores it under the requested url on the first fetch', async () => {
+        metadataProfileRepository.findOneBy.mockResolvedValue(null);
+        mockHttpGet(httpService, selfIdMismatchProfile);
+
+        await service.getStoredMetadataProfile(w3id);
+
+        expect(metadataProfileRepository.save).toHaveBeenCalledWith(
+          expect.objectContaining({ id: w3id })
+        );
+      });
+
+      it('refreshes that same row instead of adding one under the self-declared id', async () => {
+        const storedProfile = new MetadataProfile();
+        storedProfile.id = w3id;
+        metadataProfileRepository.findOneBy.mockResolvedValue(storedProfile);
+        mockHttpGet(httpService, selfIdMismatchProfile);
+
+        await service.getStoredMetadataProfile(w3id);
+        // let the fire-and-forget background refresh finish
+        await new Promise(process.nextTick);
+
+        expect(metadataProfileRepository.save).toHaveBeenCalledTimes(1);
+        expect(metadataProfileRepository.save).toHaveBeenCalledWith(
+          expect.objectContaining({ id: w3id })
+        );
+      });
+    });
   });
 
   describe('getProfileVocabularies', () => {

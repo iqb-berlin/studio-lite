@@ -14,7 +14,8 @@
               <a mat-button
                  class="admin-button"
                  [routerLink]="['/wsg-admin/' + wsg.id]"
-                 [matTooltip]="'home.goto-wsg-admin' | translate">
+                 [matTooltip]="'home.goto-wsg-admin' | translate"
+                 [attr.data-cy]="'home-group-settings-' + wsg.name">
                 <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>
               </a>
             }

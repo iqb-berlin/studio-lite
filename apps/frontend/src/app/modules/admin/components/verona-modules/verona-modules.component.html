@@ -11,7 +11,8 @@
               [disabled]="!selectedModules.length"
               matTooltip="Markierte löschen"
               matTooltipPosition="above"
-              (click)="fileUploadQueue.removeAll(); deleteFiles()">
+              (click)="fileUploadQueue.removeAll(); deleteFiles()"
+              data-cy="delete-modules-button">
         <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
       </button>
 

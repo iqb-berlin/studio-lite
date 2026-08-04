@@ -22,7 +22,7 @@ import {
   UnitCommentDto,
   UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
-import { orderFromCurrent } from '@studio-lite/shared-code';
+import { orderFromCurrent, toW3idProfileId } from '@studio-lite/shared-code';
 import * as AdmZip from 'adm-zip';
 import {
   VariableCodingData,
@@ -702,6 +702,20 @@ export class WorkspaceService {
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
+  // The configured profile urls are canonicalized before anything else looks at
+  // them: checkForProfileUpdate and the mat-select in the settings dialog compare
+  // them exactly against the ids stored on the metadata, so a client still
+  // holding the retired github spelling must not put it back into the column the
+  // 19.0.0 migration just rewrote (#1570).
+  static normalizeProfileSettings(settings: WorkspaceSettingsDto): WorkspaceSettingsDto {
+    if (!settings) return settings;
+    return {
+      ...settings,
+      ...(settings.unitMDProfile && { unitMDProfile: toW3idProfileId(settings.unitMDProfile) }),
+      ...(settings.itemMDProfile && { itemMDProfile: toW3idProfileId(settings.itemMDProfile) })
+    };
+  }
+
   async patchSettings(
     id: number,
     settings: WorkspaceSettingsDto
@@ -709,8 +723,9 @@ export class WorkspaceService {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
-    await this.checkForProfileUpdate(workspaceToUpdate, settings);
-    workspaceToUpdate.settings = settings;
+    const normalizedSettings = WorkspaceService.normalizeProfileSettings(settings);
+    await this.checkForProfileUpdate(workspaceToUpdate, normalizedSettings);
+    workspaceToUpdate.settings = normalizedSettings;
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
@@ -1120,6 +1135,8 @@ export class WorkspaceService {
   // carry the obsolete boolean `isCurrent` on each profile. Derive `order` from
   // it (true -> 0, false -> -1) and drop the flag so the imported structure
   // matches the current model. A profile that already carries `order` keeps it.
+  // Profile ids are left as imported; UnitService.setCurrentProfiles rewrites the
+  // legacy github spelling to w3id on the way to persistence (#1570).
   private static normalizeLegacyProfileOrder(metadata: UnitMetadataValues): UnitMetadataValues {
     if (!metadata || typeof metadata !== 'object') return metadata;
     const mapProfile = (profile: ProfileValues & { isCurrent?: boolean }): ProfileValues => {

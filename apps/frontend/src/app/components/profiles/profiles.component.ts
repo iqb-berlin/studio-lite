@@ -4,6 +4,7 @@ import {
 import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
 import { MDProfile } from '@iqbspecs/metadata-profile';
 import { MDProfileStore } from '@iqbspecs/metadata-store/metadata-store.interface';
+import { toW3idProfileId } from '@studio-lite/shared-code';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatError } from '@angular/material/form-field';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
@@ -16,6 +17,7 @@ import { ProfileStoreWithProfiles, WsgAdminService } from '../../modules/wsg-adm
 import { Profile } from '../../models/profile.type';
 import { MetadataBackendService } from '../../modules/metadata/services/metadata-backend.service';
 import { ProfileLabelPipe } from '../../pipes/profile-label.pipe';
+import { IsProfileSelectedPipe } from '../../pipes/is-profile-selected.pipe';
 
 export type CoreProfile = Profile;
 
@@ -23,8 +25,8 @@ export type CoreProfile = Profile;
   selector: 'studio-lite-profiles',
   templateUrl: './profiles.component.html',
   styleUrls: ['./profiles.component.scss'],
-  imports: [MatProgressSpinner, FormsModule, MatExpansionPanel,
-    MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule, ProfileLabelPipe]
+  imports: [MatProgressSpinner, FormsModule, MatExpansionPanel, MatExpansionPanelHeader,
+    MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule, ProfileLabelPipe, IsProfileSelectedPipe]
 })
 export class ProfilesComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
@@ -43,7 +45,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this._profiles = value;
     if (value) {
       this.fetchedProfiles = value;
-      this.profilesSelected = [...this.fetchedProfiles];
+      this.profilesSelected = ProfilesComponent.canonicalizeSelection(this.fetchedProfiles);
       this.changeDetectorRef.detectChanges();
     }
   }
@@ -62,6 +64,23 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.loadProfiles();
   }
 
+  // A selection loaded from the group settings is canonicalized before anything
+  // compares or saves it, so a group that still holds the retired github spelling
+  // is written back as w3id on the next save instead of carrying it forward. Two
+  // entries denoting the same profile collapse into one — otherwise unchecking
+  // would remove only one of them and leave the other invisible in the blob.
+  private static canonicalizeSelection(profiles: CoreProfile[]): CoreProfile[] {
+    const seen = new Set<string>();
+    return (profiles || [])
+      .filter(profile => !!profile)
+      .map(profile => ({ ...profile, id: toW3idProfileId(profile.id) }))
+      .filter(profile => {
+        if (seen.has(profile.id)) return false;
+        seen.add(profile.id);
+        return true;
+      });
+  }
+
   private loadProfiles(): void {
     this.isLoading = true;
     this.backendService.getRegisteredProfiles()
@@ -73,7 +92,13 @@ export class ProfilesComponent implements OnInit, OnDestroy {
             return of([]);
           }
           this.isError = false;
-          const storeObsList = registeredProfiles.map(registeredProfile => {
+          // The backend yields a null entry for every registry url it could not
+          // fetch, and an empty registry (or one whose csv could not be parsed)
+          // yields an empty list — forkJoin([]) would never emit and leave the
+          // panel spinning forever. Both are guarded here.
+          const fetchedProfiles = registeredProfiles.filter(Boolean);
+          if (!fetchedProfiles.length) return of([]);
+          const storeObsList = fetchedProfiles.map(registeredProfile => {
             const profileFiles = registeredProfile.profiles ?? [];
             // Newer registry entries are direct profiles (empty profiles list): the
             // registered url is the profile itself. Classic stores instead list the
@@ -95,19 +120,28 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           return forkJoin(storeObsList);
         })
       )
-      .subscribe(profileStoresWithProfiles => {
-        this.profileStoresWithProfiles = profileStoresWithProfiles;
-        this.wsgAdminService.profileStores = this.profileStoresWithProfiles;
-        this.isLoading = false;
+      .subscribe({
+        next: profileStoresWithProfiles => {
+          this.profileStoresWithProfiles = profileStoresWithProfiles;
+          this.wsgAdminService.profileStores = this.profileStoresWithProfiles;
+          this.isLoading = false;
 
-        if (this.profilesSelected.length === 0) {
-          const currentSettings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
-          this.fetchedProfiles = this._profiles !== undefined ?
-            (this._profiles || []) : (currentSettings.profiles || []);
-          this.profilesSelected = [...this.fetchedProfiles];
+          if (this.profilesSelected.length === 0) {
+            const currentSettings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
+            this.fetchedProfiles = this._profiles !== undefined ?
+              (this._profiles || []) : (currentSettings.profiles || []);
+            this.profilesSelected = ProfilesComponent.canonicalizeSelection(this.fetchedProfiles);
+          }
+
+          this.changeDetectorRef.detectChanges();
+        },
+        // Without this the panel would keep spinning with no message on any
+        // unexpected stream error instead of showing the error state.
+        error: () => {
+          this.isLoading = false;
+          this.isError = true;
+          this.changeDetectorRef.detectChanges();
         }
-
-        this.changeDetectorRef.detectChanges();
       });
 
     this.wsgAdminService.selectedWorkspaceGroupSettings
@@ -115,7 +149,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       .subscribe(settings => {
         if (settings && this._profiles === undefined) {
           this.fetchedProfiles = settings.profiles || [];
-          this.profilesSelected = [...this.fetchedProfiles];
+          this.profilesSelected = ProfilesComponent.canonicalizeSelection(this.fetchedProfiles);
           this.changeDetectorRef.detectChanges();
         }
       });
@@ -133,16 +167,19 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     return null;
   }
 
-  isChecked(id:string):boolean {
-    return !!this.profilesSelected?.find((profile: { id: string; }) => profile.id === id);
-  }
-
+  // Ids are canonicalized on both sides (here and in the isProfileSelected pipe),
+  // so adding and removing agree on what "the same profile" is even when the
+  // stored selection still uses the retired github spelling (#1570). Selecting
+  // also rewrites the stored id, so the group settings come back canonical.
+  // The array is replaced rather than mutated: the pure pipe in the template only
+  // re-evaluates when the reference changes.
   changeSelection(checkbox:MatCheckboxChange) {
-    checkbox.checked ?
-      this.profilesSelected.push(
-        { id: checkbox.source.id || '', label: checkbox.source.name || '' }) :
-      this.profilesSelected = this.profilesSelected
-        .filter((profile: CoreProfile) => profile.id !== checkbox.source.id);
+    const id = toW3idProfileId(checkbox.source.id || '');
+    const withoutProfile = this.profilesSelected
+      .filter((profile: CoreProfile) => toW3idProfileId(profile.id) !== id);
+    this.profilesSelected = checkbox.checked ?
+      [...withoutProfile, { id, label: checkbox.source.name || '' }] :
+      withoutProfile;
     this.hasChanged.emit(this.profilesSelected);
   }
 

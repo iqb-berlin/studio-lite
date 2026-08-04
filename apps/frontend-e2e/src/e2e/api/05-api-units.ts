@@ -230,12 +230,10 @@ describe('Unit API tests', () => {
             Cypress.expose(`token_${Cypress.expose('username')}`)
           ).then(resp => {
             expect(resp.status).to.equal(200);
-            const profile1 =
-              resp.body[0].url.replace('profile-config.json', '') +
-              resp.body[0].profiles[0];
-            const profile2 =
-              resp.body[0].url.replace('profile-config.json', '') +
-              resp.body[0].profiles[1];
+            // New registry format: each entry's url IS the direct profile URL;
+            // profiles[] is empty because there are no sub-files to resolve.
+            const profile1 = resp.body[0].url;
+            const profile2 = resp.body[1].url;
             Cypress.expose('profile1', profile1);
             Cypress.expose('profile2', profile2);
           });

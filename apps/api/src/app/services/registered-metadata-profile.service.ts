@@ -30,11 +30,17 @@ export class RegisteredMetadataProfileService {
       return Promise
         .all(profileUrls
           .map(async url => {
+            // Looked up by the primary key, which is the registry url the row was
+            // written under. Reading by `url` instead would key reads differently
+            // from writes: `url` carries no unique constraint, so a row left behind
+            // under a stale id (by an instance from before #1570) would match here
+            // forever while every refresh wrote a second row next to it.
             const storedProfile = await this.registeredMetadataProfileRepository
-              .findOneBy({ url: url });
+              .findOneBy({ id: url });
             if (storedProfile) {
-              // without await to update the profile in the background
-              this.updateRegisteredMetadataProfiles(url);
+              // without await to update the profile in the background; a failed
+              // refresh must not escape as an unhandled rejection
+              this.updateRegisteredMetadataProfiles(url).catch(() => undefined);
               return storedProfile;
             }
             const profile = await this.getProfileToRegister(url);
@@ -47,7 +53,7 @@ export class RegisteredMetadataProfileService {
 
   private async updateRegisteredMetadataProfiles(url: string): Promise<void> {
     const profile = await this.getProfileToRegister(url);
-    if (profile) this.storeRegisteredMetadataProfile(profile, url);
+    if (profile) await this.storeRegisteredMetadataProfile(profile, url);
   }
 
   private async getRegisteredMetadataProfilesAsCSV(): Promise<string> {
@@ -55,7 +61,9 @@ export class RegisteredMetadataProfileService {
     const registry = await this.metadataProfileRegistryRepository
       .findOneBy({ id: profileRegistry.csvUrl });
     if (registry) {
-      this.updateRegistry();
+      // Refreshed in the background: a transient fetch failure must not turn the
+      // cache hit into an unhandled rejection (storeRegistry throws on a null csv).
+      this.updateRegistry().catch(() => undefined);
       return registry.csv;
     }
     const registryCsv = await this.getRegistryCsv();
@@ -92,12 +100,17 @@ export class RegisteredMetadataProfileService {
   // instead of a profile store ({ id, title, creator, maintainer, profiles }). Fill the
   // store fields with sensible defaults so both shapes can be persisted without hitting
   // the NOT NULL constraints (notably `creator`) on registered_metadata_profile.
+  // Rows are keyed by the url the registry lists (the w3id) instead of the
+  // document's self-declared id, which iqb-vocabs profiles still spell in the
+  // github form (#1570) — the self-id must not leak back into the database.
   private static normalizeRegisteredProfile(
-    profile: RegisteredMetadataProfile
+    profile: RegisteredMetadataProfile, url: string
   ): RegisteredMetadataProfile {
     const directProfile = profile as RegisteredMetadataProfile & { label?: LanguageCodedText[] };
     return {
       ...profile,
+      id: url,
+      url,
       title: profile.title?.length ? profile.title : (directProfile.label ?? []),
       creator: profile.creator ?? '',
       maintainer: profile.maintainer ?? '',
@@ -105,25 +118,17 @@ export class RegisteredMetadataProfileService {
     };
   }
 
+  // A refresh has to write the document it just fetched, not merely bump the
+  // timestamp: otherwise upstream changes to a profile's label, title or groups
+  // never reach the database, and a row written under a stale key (e.g. by an
+  // instance from before #1570 during a rolling upgrade) could never be corrected.
+  // `save` upserts on the primary key, so one call covers the first registration
+  // and every later refresh alike.
   private async storeRegisteredMetadataProfile(
     rawProfile: RegisteredMetadataProfile, url: string
   ): Promise<RegisteredMetadataProfile> {
-    const profile = RegisteredMetadataProfileService.normalizeRegisteredProfile(rawProfile);
-    const storedProfile = await this.registeredMetadataProfileRepository
-      .findOneBy({ id: profile.id });
-    if (storedProfile) {
-      await this.registeredMetadataProfileRepository
-        .save({ ...storedProfile, modifiedAt: new Date() });
-    } else {
-      return this.createRegisteredMetadataProfile(profile, url);
-    }
-    return storedProfile;
-  }
-
-  private async createRegisteredMetadataProfile(profile: RegisteredMetadataProfile, url: string) {
-    const newProfile = this.registeredMetadataProfileRepository
-      .create({ ...profile, url, modifiedAt: new Date() });
-    return this.registeredMetadataProfileRepository.save(newProfile);
+    const profile = RegisteredMetadataProfileService.normalizeRegisteredProfile(rawProfile, url);
+    return this.registeredMetadataProfileRepository.save({ ...profile, modifiedAt: new Date() });
   }
 
   private async storeRegistry(csv: string | null): Promise<void> {
