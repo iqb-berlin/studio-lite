@@ -101,10 +101,16 @@ export class MetadataService implements VocabularyProvider {
               this.vocabularies.push(vocabulary);
             }
           });
+          // The profiles spell the entry type in upper case — the metadata-profile schema
+          // allows nothing else since spec 0.10. Compared strictly against 'vocabulary',
+          // this filter matched nothing, so no vocabulary field of any profile ever got
+          // its value list. The comparison stays tolerant because the upstream type is a
+          // plain `string` rather than the union the schema describes, which is what let
+          // the wrong spelling through the compiler in the first place (#1580).
           const vocabularyEntryParams = profile.groups
             .map(group => group.entries)
             .flat()
-            .filter(entry => (entry.type === 'vocabulary'))
+            .filter(entry => entry.type?.toUpperCase() === 'VOCABULARY')
             .map(entry => (entry.parameters as unknown as ProfileEntryParametersVocabulary));
           this.vocabularies.forEach(vocabulary => {
             vocabularyEntryParams.forEach(entryParam => {
