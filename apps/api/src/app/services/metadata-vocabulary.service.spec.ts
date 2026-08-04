@@ -78,8 +78,6 @@ describe('MetadataVocabularyService', () => {
       metadataVocabularyRepository.findOneBy.mockResolvedValue(null);
       const vocabDto = { id: 'id' } as MetadataVocabularyDto;
       mockHttpGet(httpService, vocabDto);
-      metadataVocabularyRepository.create.mockReturnValue(new MetadataVocabulary());
-      metadataVocabularyRepository.save.mockResolvedValue(new MetadataVocabulary());
 
       const result = await service.getStoredMetadataVocabularyById('id');
       expect(result).toEqual(vocabDto);
@@ -91,8 +89,6 @@ describe('MetadataVocabularyService', () => {
       const attempts = mockHttpAttempts(httpService, attempt => (
         attempt === 1 ? throwError(() => ({ message: 'socket hang up' })) : of({ data: vocabDto })
       ));
-      metadataVocabularyRepository.create.mockReturnValue(new MetadataVocabulary());
-      metadataVocabularyRepository.save.mockResolvedValue(new MetadataVocabulary());
 
       const result = await service.getStoredMetadataVocabularyById('id');
       expect(result).toEqual(vocabDto);
@@ -109,6 +105,26 @@ describe('MetadataVocabularyService', () => {
       const result = await service.getStoredMetadataVocabularyById('id');
       expect(result).toBeNull();
       expect(attempts()).toBe(3);
+      expect(metadataVocabularyRepository.upsert).not.toHaveBeenCalled();
+    });
+
+    /**
+     * The table carries no unique index in the entity alone -- the primary key added in
+     * changelog 19.0.0 is what makes "id" a conflict target. Storing through a single
+     * upsert is what keeps two parallel requests for the same vocabulary from racing:
+     * one of them would otherwise fail on the duplicate key.
+     */
+    it('should store a fetched vocabulary with one upsert keyed on the id', async () => {
+      metadataVocabularyRepository.findOneBy.mockResolvedValue(null);
+      const vocabDto = { id: 'id' } as MetadataVocabularyDto;
+      mockHttpGet(httpService, vocabDto);
+
+      await service.getStoredMetadataVocabularyById('id');
+
+      expect(metadataVocabularyRepository.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'id', modifiedAt: expect.any(Date) }),
+        ['id']
+      );
       expect(metadataVocabularyRepository.save).not.toHaveBeenCalled();
     });
   });

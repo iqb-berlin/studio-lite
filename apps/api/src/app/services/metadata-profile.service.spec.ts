@@ -117,8 +117,9 @@ describe('MetadataProfileService', () => {
 
         await service.getStoredMetadataProfile(w3id);
 
-        expect(metadataProfileRepository.save).toHaveBeenCalledWith(
-          expect.objectContaining({ id: w3id })
+        expect(metadataProfileRepository.upsert).toHaveBeenCalledWith(
+          expect.objectContaining({ id: w3id }),
+          ['id']
         );
       });
 
@@ -132,10 +133,12 @@ describe('MetadataProfileService', () => {
         // let the fire-and-forget background refresh finish
         await new Promise(process.nextTick);
 
-        expect(metadataProfileRepository.save).toHaveBeenCalledTimes(1);
-        expect(metadataProfileRepository.save).toHaveBeenCalledWith(
-          expect.objectContaining({ id: w3id })
+        expect(metadataProfileRepository.upsert).toHaveBeenCalledTimes(1);
+        expect(metadataProfileRepository.upsert).toHaveBeenCalledWith(
+          expect.objectContaining({ id: w3id }),
+          ['id']
         );
+        expect(metadataProfileRepository.save).not.toHaveBeenCalled();
       });
     });
   });
