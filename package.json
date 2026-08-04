@@ -43,7 +43,6 @@
     "@iqb/metadata-resolver": "0.2.1",
     "@iqb/ngx-coding-components": "3.4.0",
     "@iqb/responses": "5.2.2",
-    "@iqb/validate-md-profile": "^0.10.0",
     "@iqbspecs/coding-scheme": "3.4.1",
     "@iqbspecs/metadata-profile": "^0.11.1",
     "@iqbspecs/metadata-store": "^0.4.0",

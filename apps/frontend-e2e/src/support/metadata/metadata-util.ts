@@ -6,19 +6,14 @@ import {
 } from '../helpers';
 
 function getCheckBoxByName(name: string) {
-  cy.log(typeof name);
-  if (typeof name !== 'undefined') {
-    cy.get('mat-tree-node>div>span').contains(name).prev().then($actualElem => {
-      if ($actualElem.is('mat-checkbox')) {
-        cy.wrap($actualElem).click();
-      } else {
-        cy.wrap($actualElem).prev().click();
-      }
-    });
-    cy.get('[data-cy="metadata-nested-tree-confirm-button"]').click();
-  } else {
-    cy.get('[data-cy="metadata-nested-tree-cancel-button"]').click();
-  }
+  cy.get('mat-tree-node>div>span').contains(name).prev().then($actualElem => {
+    if ($actualElem.is('mat-checkbox')) {
+      cy.wrap($actualElem).click();
+    } else {
+      cy.wrap($actualElem).prev().click();
+    }
+  });
+  cy.get('[data-cy="metadata-nested-tree-confirm-button"]').click();
 }
 
 function getTimeNumber(time: string, propName: string, profile: string) {
@@ -139,28 +134,29 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
     body.groups.forEach((group: any) => group.entries.forEach((entry: any) => unitMap
       .set(entry.label[0].value, entry.type)));
     unitMap.forEach((type: string, fieldName: string) => {
-      if (IqbProfileExamples.get(profile).get(fieldName) !== ('')) {
-        switch (type) {
+      const example = IqbProfileExamples.get(profile).get(fieldName);
+      // A field the example data says nothing about is skipped, not filled with `undefined`.
+      if (typeof example === 'string' && example !== '') {
+        switch (type.toUpperCase()) {
           case 'NUMBER': {
-            getTimeNumber(IqbProfileExamples.get(profile).get(fieldName), fieldName, profile);
+            getTimeNumber(example, fieldName, profile);
             break;
           }
           case 'VOCABULARY': {
             if (moreThanOne) cy.get(`mat-label:contains("${fieldName}")`).eq(-1).click();
             else cy.get(`mat-label:contains("${fieldName}")`).click();
-            getCheckBoxByName(IqbProfileExamples.get(profile).get(fieldName));
+            getCheckBoxByName(example);
             break;
           }
           case 'BOOLEAN': {
-            if (IqbProfileExamples.get(profile).get(fieldName) === 'true') {
+            if (example === 'true') {
               cy.get('mat-slide-toggle button').click();
             }
             break;
           }
           default: {
-            // eslint-disable-next-line max-len
-            if (moreThanOne) cy.get(`mat-label:contains("${fieldName}")`).eq(-1).type(IqbProfileExamples.get(profile).get(fieldName));
-            else cy.get(`mat-label:contains("${fieldName}")`).type(IqbProfileExamples.get(profile).get(fieldName));
+            if (moreThanOne) cy.get(`mat-label:contains("${fieldName}")`).eq(-1).type(example);
+            else cy.get(`mat-label:contains("${fieldName}")`).type(example);
             break;
           }
         }
