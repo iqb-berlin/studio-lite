@@ -147,3 +147,70 @@ UPDATE "public"."setting"
     AND "content" ~
       'https?://raw\.githubusercontent\.com/iqb-vocabs/profile-registry/(refs/heads/)?master/(metadata-)?registry\.csv';
 -- rollback SELECT 1;
+
+-- Five tables were created without a PRIMARY KEY although their entities declare
+-- one, so nothing stopped duplicate rows from accumulating and TypeORM's save()
+-- on a supposedly single row updated every copy of it (#1581).
+--
+-- The three cache tables (metadata_profile, metadata_profile_registry,
+-- metadata_vocabulary) are filled by a read-then-write path that two concurrent
+-- requests could both take, so they are deduplicated before the key is added --
+-- newest row per "id" wins, "ctid" breaks ties so the choice is deterministic.
+-- The DELETEs are one-time cleanups and are not undone on rollback; dropping the
+-- constraint is enough to return to the previous schema.
+--
+-- These changesets run after the w3id rewrites above on purpose: changesets 1-7
+-- rewrite and delete rows keyed by "id", so deduplicating first would keep a copy
+-- the rewrite then turns into a duplicate again.
+--
+-- unit_metadata and unit_item_metadata need no cleanup: they are Postgres
+-- inheritance children of "metadata", and while a PRIMARY KEY on the parent does
+-- not propagate to a child, the inherited "id" default does. Both draw from the
+-- parent's "metadata_id_seq", so their ids are unique already and "id" is the
+-- key their shared entity base class has claimed all along.
+
+-- changeset jojohoch:8
+DELETE FROM "public"."metadata_profile" p
+WHERE p."ctid" <> (
+  SELECT k."ctid" FROM "public"."metadata_profile" k
+  WHERE k."id" = p."id"
+  ORDER BY k."modified_at" DESC NULLS LAST, k."ctid" DESC
+  LIMIT 1
+);
+ALTER TABLE "public"."metadata_profile"
+  ADD CONSTRAINT "metadata_profile_pkey" PRIMARY KEY ("id");
+-- rollback ALTER TABLE "public"."metadata_profile" DROP CONSTRAINT "metadata_profile_pkey";
+
+-- changeset jojohoch:9
+DELETE FROM "public"."metadata_profile_registry" r
+WHERE r."ctid" <> (
+  SELECT k."ctid" FROM "public"."metadata_profile_registry" k
+  WHERE k."id" = r."id"
+  ORDER BY k."modified_at" DESC NULLS LAST, k."ctid" DESC
+  LIMIT 1
+);
+ALTER TABLE "public"."metadata_profile_registry"
+  ADD CONSTRAINT "metadata_profile_registry_pkey" PRIMARY KEY ("id");
+-- rollback ALTER TABLE "public"."metadata_profile_registry" DROP CONSTRAINT "metadata_profile_registry_pkey";
+
+-- changeset jojohoch:10
+DELETE FROM "public"."metadata_vocabulary" v
+WHERE v."ctid" <> (
+  SELECT k."ctid" FROM "public"."metadata_vocabulary" k
+  WHERE k."id" = v."id"
+  ORDER BY k."modified_at" DESC NULLS LAST, k."ctid" DESC
+  LIMIT 1
+);
+ALTER TABLE "public"."metadata_vocabulary"
+  ADD CONSTRAINT "metadata_vocabulary_pkey" PRIMARY KEY ("id");
+-- rollback ALTER TABLE "public"."metadata_vocabulary" DROP CONSTRAINT "metadata_vocabulary_pkey";
+
+-- changeset jojohoch:11
+ALTER TABLE "public"."unit_metadata"
+  ADD CONSTRAINT "unit_metadata_pkey" PRIMARY KEY ("id");
+-- rollback ALTER TABLE "public"."unit_metadata" DROP CONSTRAINT "unit_metadata_pkey";
+
+-- changeset jojohoch:12
+ALTER TABLE "public"."unit_item_metadata"
+  ADD CONSTRAINT "unit_item_metadata_pkey" PRIMARY KEY ("id");
+-- rollback ALTER TABLE "public"."unit_item_metadata" DROP CONSTRAINT "unit_item_metadata_pkey";
