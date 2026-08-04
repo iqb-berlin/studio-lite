@@ -56,10 +56,7 @@ Cypress.Commands.add('clickDialogButtonWithResponseCheck',
 
 Cypress.Commands.add('findAdminGroupSettings', (group: string): Chainable<JQuery<HTMLElement>> => {
   cy.visit('/');
-  return cy.get('studio-lite-user-workspaces-groups')
-    .get(`div>div>div>div:contains("${group}")`)
-    .parent()
-    .contains('mat-icon', 'settings');
+  return cy.get(`[data-cy="home-group-settings-${group}"]`);
 });
 
 Cypress.Commands.add('findAdminSettings', (): Chainable<JQuery<HTMLElement>> => cy.get('[data-cy="goto-admin"]'));
@@ -74,10 +71,9 @@ Cypress.Commands.add('loadModule', (filename: string) => {
 });
 
 Cypress.Commands.add('selectModule', (name: string) => {
-  cy.get(`span:contains("${name}")`)
-    .parent()
-    .parent()
-    .prev()
+  cy.get('mat-row')
+    .filter(`:contains("${name}")`)
+    .find('mat-checkbox')
     .click({ multiple: true });
 });
 

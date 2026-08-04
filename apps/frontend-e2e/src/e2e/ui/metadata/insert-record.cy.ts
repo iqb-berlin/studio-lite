@@ -34,20 +34,22 @@ describe('Metadata Management', () => {
   });
 
   it('selects metadata profiles for group', () => {
-    selectProfileForGroup(group, IqbProfile.DE);
-    selectProfileForGroup(group, IqbProfile.MA);
+    selectProfileForGroup(group, IqbProfile.DEu);
+    selectProfileForGroup(group, IqbProfile.DEi);
+    selectProfileForGroup(group, IqbProfile.MAu);
+    selectProfileForGroup(group, IqbProfile.MAi);
   });
 
   it('assigns profiles to workspaces from group settings', () => {
-    selectProfileForAreaFromGroup(IqbProfile.DE, ws1, group);
-    selectProfileForAreaFromGroup(IqbProfile.MA, ws2, group);
+    selectProfileForAreaFromGroup([IqbProfile.DEu, IqbProfile.DEi], ws1, group);
+    selectProfileForAreaFromGroup([IqbProfile.MAu, IqbProfile.DEi], ws2, group);
   });
 
   it('assigns profile from workspace settings', () => {
     cy.visitWs(ws1);
-    selectProfileForArea(IqbProfile.DE);
+    selectProfileForArea([IqbProfile.DEu, IqbProfile.DEi]);
     cy.visitWs(ws2);
-    selectProfileForArea(IqbProfile.MA);
+    selectProfileForArea([IqbProfile.MAu, IqbProfile.MAi]);
   });
 
   it('creates unit in workspace', () => {
@@ -64,6 +66,7 @@ describe('Metadata Management', () => {
 
   it('adds metadata to math unit', () => {
     cy.visitWs(ws2);
+    cy.pause();
     cy.contains('M1_001').should('exist').click();
     getStructure('uMA', false);
     getItem('iMA', false);

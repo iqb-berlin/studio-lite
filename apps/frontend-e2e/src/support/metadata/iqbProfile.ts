@@ -1,8 +1,12 @@
 export enum IqbProfile {
-  MA = 'Mathematik Primar',
-  DE = 'Deutsch Primar',
-  EN = 'Englisch Sek I',
-  FR = 'Französisch Sek I'
+  MAu = 'IQB Mathematik Primar - Aufgabe',
+  MAi = 'IQB Mathematik Primar - Item',
+  DEu = 'IQB Deutsch Primar - Aufgabe',
+  DEi = 'IQB Deutsch Primar - Item',
+  ENu = 'IQB Englisch Sek I - Aufgabe',
+  ENi = 'IQB Englisch Sek I - Item',
+  FRu = 'IQB Französisch Sek I - Aufgabe',
+  FRi = 'IQB Französisch Sek I - Item'
 }
 // eslint-disable-next-line
 export const IqbProfileExamples = new Map <string, any>([
@@ -65,3 +69,16 @@ export const RegistryProfile = new Map<string, string>([
   ['iEN', 'https://raw.githubusercontent.com/iqb-vocabs/p52/master/item.json'],
   ['iFR', 'https://raw.githubusercontent.com/iqb-vocabs/p53/master/item.json']
 ]);
+
+/*
+TODO
+ It should be updated once we replace internally the profile Url
+  ['uMA', 'https://w3id.org/iqb/p11/unit/'],
+  ['uDE', 'https://w3id.org/iqb/p12/unit/'],
+  ['uEN', 'https://w3id.org/iqb/p53/unit/'],
+  ['uFR', 'https://w3id.org/iqb/p52/unit/'],
+  ['iMA', 'https://w3id.org/iqb/p11/item/'],
+  ['iDE', 'https://w3id.org/iqb/p12/item/'],
+  ['iEN', 'https://w3id.org/iqb/p53/item/'],
+  ['iFR', 'https://w3id.org/iqb/p52/item/']
+ */

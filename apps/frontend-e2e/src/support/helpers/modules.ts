@@ -35,7 +35,7 @@ export function deleteAllModules(): void {
   cy.selectModule('IQB-Schemer');
   cy.selectModule('IQB-Player');
   cy.selectModule('IQB-Editor');
-  cy.get('div > mat-icon').contains('delete').click();
+  cy.get('[data-cy="delete-modules-button"]').click();
   cy.translate(Cypress.expose('locale')).then(json => {
     cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/verona-modules*', 'DELETE', 'deleteModule');
   });
@@ -71,14 +71,8 @@ export function deleteResource(): void {
   cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('packages');
-  cy.get('mat-cell:contains("GeoGebra")')
-    .parent()
-    .prev()
-    .click();
-  cy.get('mat-checkbox').eq(1).click(); // clicks the checkbox
-  cy.get('div > mat-icon')
-    .contains('delete')
-    .click();
+  cy.get('[data-cy="admin-packages-select-GeoGebra"]').click();
+  cy.get('[data-cy="admin-packages-delete-selected"]').click();
   cy.translate(Cypress.expose('locale')).then(json => {
     cy.clickButtonWithResponseCheck(json.delete, [200], '/api/resource-packages', 'GET', 'deleteResource');
   });

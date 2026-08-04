@@ -64,17 +64,17 @@ export function selectProfileForGroup(group: string, profile: IqbProfile) {
   cy.get('mat-icon:contains("save")').click();
 }
 
-export function selectProfileForArea(profile: IqbProfile) {
+export function selectProfileForArea(profiles: IqbProfile[]) {
   goToWsMenu();
   cy.get('[data-cy="workspace-edit-unit-settings"]').click();
   cy.get('[data-cy="edit-workspace-settings-select-unit-profile"]').click();
-  cy.get('[data-cy="edit-workspace-settings-unit-profile"]').contains(profile).click();
+  cy.get('[data-cy="edit-workspace-settings-unit-profile"]').contains(profiles[0]).click();
   cy.get('[data-cy="edit-workspace-settings-select-item-profile"]').click();
-  cy.get('[data-cy="edit-workspace-settings-item-profile"]').contains(profile).click();
+  cy.get('[data-cy="edit-workspace-settings-item-profile"]').contains(profiles[1]).click();
   cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
 }
 
-export function selectProfileForAreaFromGroup(profile: IqbProfile, area: string, group: string) {
+export function selectProfileForAreaFromGroup(profiles: IqbProfile[], area: string, group: string) {
   cy.visit('/');
   cy.findAdminGroupSettings(group).click();
   cy.get('[data-cy="wsg-admin-routes-workspaces"]').should('be.visible');
@@ -82,9 +82,9 @@ export function selectProfileForAreaFromGroup(profile: IqbProfile, area: string,
   cy.get('mat-table').contains(area).click();
   cy.get('mat-icon').contains('settings').click();
   cy.get('mat-select').eq(0).should('be.visible').click();
-  cy.get('[data-cy="edit-workspace-settings-unit-profile"]').contains(profile).click();
+  cy.get('[data-cy="edit-workspace-settings-unit-profile"]').contains(profiles[0]).click();
   cy.get('mat-select').eq(1).should('be.visible').click();
-  cy.get('[data-cy="edit-workspace-settings-item-profile"]').contains(profile).click();
+  cy.get('[data-cy="edit-workspace-settings-item-profile"]').contains(profiles[1]).click();
   cy.clickDataCyWithResponseCheck(
     '[data-cy="edit-workspace-settings-submit-button"]',
     [200],
@@ -98,37 +98,30 @@ export function checkProfile(profile: string): void {
   const alias = `load${profile}`;
   cy.intercept(
     'GET',
-    '/api/metadata/profiles?url=https://raw.githubusercontent.com/iqb-vocabs/p99/master/item.json'
+    '/api/metadata/profiles?url=https://w3id.org/iqb/p99/item/'
   ).as(alias);
-  cy.wait(`@${alias}`)
-    .its('response.statusCode')
-    .should('to.be.oneOf', [200, 304]);
-  cy.get('[data-cy="shared-profiles-select-profile-title"]').contains(profile).click();
-  cy.get('[data-cy="shared-profiles-select-profile"]')
-    .filter(`:contains(${profile})`).eq(0)
+  cy.get('[data-cy="shared-profiles-select-profile-title"]')
+    .contains(profile)
     .click();
   cy.get('[data-cy="shared-profiles-select-profile"]')
-    .filter(`:contains(${profile})`).eq(1)
+    .filter(`:contains(${profile})`)
     .click();
 }
 
 export function checkMultipleProfiles(profiles: string[]): void {
   cy.intercept(
     'GET',
-    '/api/metadata/profiles?url=https://raw.githubusercontent.com/iqb-vocabs/p99/master/item.json'
+    '/api/metadata/profiles?url=https://w3id.org/iqb/p99/item/'
   ).as('selectedProfiles');
   cy.wait('@selectedProfiles')
     .its('response.statusCode')
     .should('to.be.oneOf', [200, 304]);
   profiles.forEach(profile => {
-    cy.get('[data-cy="shared-profiles-select-profile-title"]').contains(profile).click();
-    cy.get('[data-cy="shared-profiles-select-profile"]')
-      .filter(`:contains(${profile})`)
-      .eq(0)
+    cy.get('[data-cy="shared-profiles-select-profile-title"]')
+      .contains(profile)
       .click();
     cy.get('[data-cy="shared-profiles-select-profile"]')
       .filter(`:contains(${profile})`)
-      .eq(1)
       .click();
   });
 }
@@ -148,17 +141,17 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
     unitMap.forEach((type: string, fieldName: string) => {
       if (IqbProfileExamples.get(profile).get(fieldName) !== ('')) {
         switch (type) {
-          case 'number': {
+          case 'NUMBER': {
             getTimeNumber(IqbProfileExamples.get(profile).get(fieldName), fieldName, profile);
             break;
           }
-          case 'vocabulary': {
+          case 'VOCABULARY': {
             if (moreThanOne) cy.get(`mat-label:contains("${fieldName}")`).eq(-1).click();
             else cy.get(`mat-label:contains("${fieldName}")`).click();
             getCheckBoxByName(IqbProfileExamples.get(profile).get(fieldName));
             break;
           }
-          case 'boolean': {
+          case 'BOOLEAN': {
             if (IqbProfileExamples.get(profile).get(fieldName) === 'true') {
               cy.get('mat-slide-toggle button').click();
             }

@@ -113,7 +113,7 @@
         @if (userWorkspaces.checkedCount > 0 && index === userWorkspaces.checkedCount) {
           <studio-lite-entries-divider class="divider"></studio-lite-entries-divider>
         }
-        <div class="fx-row-start-center">
+        <div class="fx-row-start-center" data-cy="access-rights-row">
           <div class="fx-row-start-center fx-flex-fill fx-gap-15">
             <div class="fx-row-start-center">
               @for (level of [1,2,4]; track level) {
@@ -121,11 +121,12 @@
                   [checked]="!!selectedUser && (ws.accessLevel === level) && ws.isChecked"
                   [disabled]="!selectedUser"
                   [matTooltip]="'access-rights.access-level-'+level | translate"
+                  [attr.data-cy]="'access-rights-checkbox-' + level"
                   (change)="changeAccessLevel($event.checked, ws, level)">
                 </mat-checkbox>
               }
             </div>
-            <div>{{ws.name}}</div>
+            <div data-cy="access-rights">{{ws.name}}</div>
           </div>
         </div>
       }

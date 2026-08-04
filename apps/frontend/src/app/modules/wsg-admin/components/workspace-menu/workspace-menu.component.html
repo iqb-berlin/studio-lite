@@ -26,6 +26,7 @@
   <button mat-button
           [disabled]="!selectedWorkspaceId"
           [matTooltip]="'wsg-admin.change-workspace-settings' | translate"
+          data-cy="wsg-admin-workspace-menu-settings"
           (click)="changeObject()">
     <studio-lite-wrapped-icon icon="settings"></studio-lite-wrapped-icon>
   </button>
