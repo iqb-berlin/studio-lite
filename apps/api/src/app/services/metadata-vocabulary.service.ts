@@ -48,25 +48,19 @@ export class MetadataVocabularyService {
         )
     );
     if (vocabulary) {
-      await this.storeVocabulary(vocabulary, id);
+      await this.storeVocabulary(vocabulary);
     }
     return vocabulary;
   }
 
-  private async storeVocabulary(vocabulary: MetadataVocabularyDto, id: string): Promise<void> {
-    const metadataVocabulary = await this.metadataVocabularyRepository
-      .findOneBy({ id: id });
-    if (metadataVocabulary) {
-      await this.metadataVocabularyRepository
-        .save({ ...vocabulary, modifiedAt: new Date() });
-    } else {
-      await this.createMetadataVocabulary(vocabulary);
-    }
-  }
-
-  private async createMetadataVocabulary(vocabulary: MetadataVocabularyDto) {
-    const newMetadataVocabulary = this.metadataVocabularyRepository
-      .create({ ...vocabulary, modifiedAt: new Date() });
-    await this.metadataVocabularyRepository.save(newMetadataVocabulary);
+  // One upsert rather than a lookup followed by an insert or a save: two parallel
+  // requests for the same vocabulary both saw nothing and both inserted. That is the
+  // normal case, not a rare one -- getProfileVocabularies resolves a profile's
+  // vocabularies with Promise.all and the item profiles name the same vocabulary
+  // more than once. Now that the table has its primary key, the loser of that race
+  // would fail on the duplicate key instead of quietly adding another row.
+  private async storeVocabulary(vocabulary: MetadataVocabularyDto): Promise<void> {
+    await this.metadataVocabularyRepository
+      .upsert({ ...vocabulary, modifiedAt: new Date() }, ['id']);
   }
 }

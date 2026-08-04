@@ -136,21 +136,10 @@ export class RegisteredMetadataProfileService {
       throw new ProfilesRegistryNotAcceptableException('csv', 'storeRegistry');
     }
     const profileRegistry: ProfilesRegistryDto = await this.settingsService.findUnitProfilesRegistry();
-    const registry = await this.metadataProfileRegistryRepository
-      .findOneBy({ id: profileRegistry.csvUrl });
-    if (registry) {
-      await this.metadataProfileRegistryRepository
-        .save({ ...registry, csv: csv, modifiedAt: new Date() });
-    } else {
-      await this.createMetadataProfileRegistry(csv);
-    }
-  }
-
-  private async createMetadataProfileRegistry(csv: string) {
-    const profileRegistry: ProfilesRegistryDto = await this.settingsService.findUnitProfilesRegistry();
-    const registry = this.metadataProfileRegistryRepository
-      .create({ id: profileRegistry.csvUrl, csv, modifiedAt: new Date() });
-    await this.metadataProfileRegistryRepository.save(registry);
+    // See MetadataVocabularyService.storeVocabulary: the same lookup-then-write race
+    // applies here, and the table's new primary key turns its loser into an error.
+    await this.metadataProfileRegistryRepository
+      .upsert({ id: profileRegistry.csvUrl, csv: csv, modifiedAt: new Date() }, ['id']);
   }
 
   // Extracts the profile URLs from the registry CSV. Resolves the "url" column by

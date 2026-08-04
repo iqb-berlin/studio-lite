@@ -58,10 +58,14 @@ export class MetadataProfileService {
     return profile;
   }
 
-  // `save` upserts on the primary key (`id`), so it covers both the first fetch
-  // and every background refresh — no separate existence check is needed.
+  // One statement covers both the first fetch and every background refresh — no
+  // separate existence check is needed. See MetadataVocabularyService.storeVocabulary:
+  // `upsert` writes INSERT … ON CONFLICT, which is what makes the lookup-then-write
+  // race between two concurrent refreshes harmless now that the table has a primary
+  // key that would turn the loser of that race into an error.
   private async storeProfile(profile: MetadataProfileDto): Promise<void> {
-    await this.metadataProfileRepository.save({ ...profile, modifiedAt: new Date() });
+    await this.metadataProfileRepository
+      .upsert({ ...profile, modifiedAt: new Date() }, ['id']);
   }
 
   async getProfileVocabularies(url: string): Promise<MetadataVocabularyDto[]> {
