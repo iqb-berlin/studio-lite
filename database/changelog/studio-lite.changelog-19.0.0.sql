@@ -111,8 +111,8 @@ DELETE FROM "public"."registered_metadata_profile";
 -- rollback SELECT 1;
 
 -- changeset jojohoch:6
--- The cached registry csv is keyed by the url it was fetched from, so once
--- changeset 7 repoints the setting, every row written under a retired url is
+-- The cached registry csv is keyed by the url it was fetched from, so once the
+-- setting is repointed further down, every row written under a retired url is
 -- unreachable clutter. Drop them: the cache is one http GET away from being
 -- refilled, and keeping a row would be worse than losing it — the two registries
 -- are different documents, not two names for one. The retired registry.csv lists
