@@ -1,15 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import {
-  catchError, firstValueFrom, map, of
+  catchError, firstValueFrom, map, of, retry
 } from 'rxjs';
 import { MetadataVocabularyDto } from '@studio-lite-lib/api-dto';
 import MetadataVocabulary from '../entities/metadata-vocabulary.entity';
 
+// The vocabulary hosts answer a burst of parallel requests with an occasional
+// connection reset. One lost vocabulary costs the caller the whole profile, so
+// a transport error is worth a second and third try before giving up.
+const FETCH_RETRIES = 2;
+const FETCH_RETRY_DELAY_MS = 300;
+
 @Injectable()
 export class MetadataVocabularyService {
+  private readonly logger = new Logger(MetadataVocabularyService.name);
+
   constructor(
     @InjectRepository(MetadataVocabulary)
     private metadataVocabularyRepository: Repository<MetadataVocabulary>,
@@ -31,7 +39,11 @@ export class MetadataVocabularyService {
     const vocabulary = await firstValueFrom(
       this.http.get<MetadataVocabularyDto>(url)
         .pipe(
-          catchError(() => of({ data: null })),
+          retry({ count: FETCH_RETRIES, delay: FETCH_RETRY_DELAY_MS }),
+          catchError(error => {
+            this.logger.warn(`Could not load vocabulary ${url}: ${error?.message ?? error}`);
+            return of({ data: null });
+          }),
           map(result => result.data)
         )
     );
