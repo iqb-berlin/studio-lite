@@ -57,11 +57,15 @@ describe('Workspace Unit Management', () => {
   });
 
   it('selects metadata profile from workspace settings', () => {
-    selectProfileForGroup(group1, IqbProfile.DE);
+    // Both profiles of the subject, as insert-record.cy.ts does: the unit and the item
+    // profile are enabled one by one, and the workspace below can only pick what the
+    // group offers.
+    selectProfileForGroup(group1, IqbProfile.DEu);
+    selectProfileForGroup(group1, IqbProfile.DEi);
   });
 
   it('selects metadata profile from group settings', () => {
-    selectProfileForAreaFromGroup(IqbProfile.DE, ws1, group1);
+    selectProfileForAreaFromGroup([IqbProfile.DEu, IqbProfile.DEi], ws1, group1);
   });
 
   it('adds custom states to workspace', () => {
