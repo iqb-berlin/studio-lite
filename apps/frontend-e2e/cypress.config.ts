@@ -59,12 +59,20 @@ export default defineConfig({
       });
       on('task', {
         async resetDatabase() {
+          // Destructured instead of accessed: process.env is an index signature,
+          // so tsconfig's noPropertyAccessFromIndexSignature forbids the dot while
+          // eslint's dot-notation forbids the bracket -- destructuring is the one
+          // spelling both accept (#1590).
+          const {
+            DB_HOST, POSTGRES_HOST, DB_PORT, POSTGRES_PORT, DB_USER,
+            POSTGRES_USER, DB_PASSWORD, POSTGRES_PASSWORD, DB_NAME, POSTGRES_DB
+          } = process.env;
           const client = new Client({
-            host: process.env.DB_HOST || process.env.POSTGRES_HOST || 'db',
-            port: Number(process.env.DB_PORT || process.env.POSTGRES_PORT || 5432),
-            user: process.env.DB_USER || process.env.POSTGRES_USER || 'root',
-            password: process.env.DB_PASSWORD || process.env.POSTGRES_PASSWORD || 'root-password',
-            database: process.env.DB_NAME || process.env.POSTGRES_DB || 'studio-lite'
+            host: DB_HOST || POSTGRES_HOST || 'db',
+            port: Number(DB_PORT || POSTGRES_PORT || 5432),
+            user: DB_USER || POSTGRES_USER || 'root',
+            password: DB_PASSWORD || POSTGRES_PASSWORD || 'root-password',
+            database: DB_NAME || POSTGRES_DB || 'studio-lite'
           });
 
           await client.connect();
