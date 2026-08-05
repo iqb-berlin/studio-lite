@@ -21,6 +21,20 @@ stages:
 
 image: ${DOCKER_HUB_PROXY}${BASE_IMAGE}
 
+# The HU dependency proxy intermittently answers image pulls with a 404 and the
+# job dies as runner_system_failure before a single line of our code has run --
+# four pipelines went down that way on 2026-08-04/05 alone (98094, 98161, 98228,
+# and the six-job outage documented in #1587). Nothing in this repo can fix the
+# proxy; what we can do is stop hand-retrying it. Retries are limited to failure
+# classes that are infrastructure by definition -- a red test or lint job is
+# NEVER retried, those reasons are script_failure.
+default:
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - api_failure
+
 variables:
   REGISTRY: "${CI_REGISTRY}"
   REGISTRY_USER: "${CI_REGISTRY_USER}"
