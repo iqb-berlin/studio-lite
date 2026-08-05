@@ -24,21 +24,31 @@ USER node
 WORKDIR /usr/src/studio-lite-${PROJECT}
 RUN mkdir packages
 
-# Install dependencies.
-# --legacy-peer-deps: the generated package.json comes without a lockfile, so this
-# install resolves against the registry every time. ioredis 6.0.0 (2026-07-31) is
-# reachable through @nestjs/core's optional peer @nestjs/microservices, which allows
-# any version, while typeorm's optional peer pins ^5.0.4 -- npm's strict peer
-# resolution then fails the build although we use no Redis at all and neither package
-# is a dependency of ours. Not installing optional peers is the npm 6 behaviour and
-# the right one for a pruned production image (#1587).
-COPY --chown=node:node --from=base /usr/src/studio-lite/dist/apps/${PROJECT}/package.json .
+# Install the runtime dependencies from the committed, fully pinned pair
+# (apps/api/runtime-package.json + runtime-package-lock.json, #1587). npm ci
+# resolves nothing against the registry, so a new major of some transitive
+# optional peer can no longer break the image build the way ioredis 6.0.0 did.
+# pg is part of the pair: typeorm loads its driver dynamically, which is why nx
+# never lists it in the generated package.json.
+#
+# The generated package.json still arrives from the build -- as the drift
+# guard: if its dependencies are not contained in the committed pair with the
+# same versions, the build stops here. Fix: node scripts/update-api-runtime-deps.mjs
+COPY --chown=node:node --from=base /usr/src/studio-lite/dist/apps/${PROJECT}/package.json generated-package.json
+COPY --chown=node:node apps/${PROJECT}/runtime-package.json package.json
+COPY --chown=node:node apps/${PROJECT}/runtime-package-lock.json package-lock.json
+RUN node -e ' \
+    const generated = require("./generated-package.json").dependencies || {}; \
+    const committed = require("./package.json").dependencies || {}; \
+    const drift = Object.entries(generated).filter(function (e) { return committed[e[0]] !== e[1]; }); \
+    if (drift.length) { \
+      console.error("Runtime dependencies drifted from the committed pair:"); \
+      drift.forEach(function (e) { console.error("  " + e[0] + ": generated " + e[1] + ", committed " + (committed[e[0]] || "missing")); }); \
+      console.error("Run: node scripts/update-api-runtime-deps.mjs"); \
+      process.exit(1); \
+    }' && rm generated-package.json
 RUN --mount=type=cache,target=~/.npm \
-    npm install --omit=dev --no-fund --legacy-peer-deps
-
-# Install PostgreSQL client (missing in dist/apps/api/package.json - nx bug?)
-RUN --mount=type=cache,target=~/.npm \
-    npm install pg --save --no-fund --legacy-peer-deps
+    npm ci --omit=dev --no-fund
 
 EXPOSE 3333
 
