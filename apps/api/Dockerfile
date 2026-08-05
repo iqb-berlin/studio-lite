@@ -24,14 +24,21 @@ USER node
 WORKDIR /usr/src/studio-lite-${PROJECT}
 RUN mkdir packages
 
-# Install dependencies
+# Install dependencies.
+# --legacy-peer-deps: the generated package.json comes without a lockfile, so this
+# install resolves against the registry every time. ioredis 6.0.0 (2026-07-31) is
+# reachable through @nestjs/core's optional peer @nestjs/microservices, which allows
+# any version, while typeorm's optional peer pins ^5.0.4 -- npm's strict peer
+# resolution then fails the build although we use no Redis at all and neither package
+# is a dependency of ours. Not installing optional peers is the npm 6 behaviour and
+# the right one for a pruned production image (#1587).
 COPY --chown=node:node --from=base /usr/src/studio-lite/dist/apps/${PROJECT}/package.json .
 RUN --mount=type=cache,target=~/.npm \
-    npm install --omit=dev --no-fund
+    npm install --omit=dev --no-fund --legacy-peer-deps
 
 # Install PostgreSQL client (missing in dist/apps/api/package.json - nx bug?)
 RUN --mount=type=cache,target=~/.npm \
-    npm install pg --save --no-fund
+    npm install pg --save --no-fund --legacy-peer-deps
 
 EXPOSE 3333
 
