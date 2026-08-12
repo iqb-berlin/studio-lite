@@ -84,6 +84,35 @@ describe('VeronaModuleMetadataDto', () => {
       });
     });
 
+    it('carries metadataVersion through when the module declares it', () => {
+      const result = VeronaModuleMetadataDto.getFromJsonLd(asJsonLdInput({
+        type: 'PLAYER',
+        model: 'iqb',
+        id: 'module-e',
+        version: '1.0.0',
+        specVersion: '6.3',
+        metadataVersion: '3.1',
+        name: []
+      }));
+
+      expect(result?.metadataVersion).toBe('3.1');
+    });
+
+    it('omits metadataVersion for modules built against older specs', () => {
+      const result = VeronaModuleMetadataDto.getFromJsonLd(asJsonLdInput({
+        type: 'PLAYER',
+        model: 'iqb',
+        id: 'module-f',
+        version: '1.0.0',
+        specVersion: '5.0',
+        name: []
+      }));
+
+      // Absent, not '' — "not declared" has to stay distinguishable from a declared value.
+      expect(result).not.toBeNull();
+      expect(Object.keys(result as VeronaModuleMetadataDto)).not.toContain('metadataVersion');
+    });
+
     it('returns null when no type information is provided', () => {
       const result = VeronaModuleMetadataDto.getFromJsonLd(asJsonLdInput({}));
       expect(result).toBeNull();
@@ -136,6 +165,7 @@ type JsonLdInput = {
   id: string;
   version: string;
   specVersion: string;
+  metadataVersion?: string;
   name: { lang: string; value: string }[] | { [x: string]: string };
   apiVersion: string;
   '@id': string;
