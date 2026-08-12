@@ -1,6 +1,5 @@
 import {
   group1,
-  modules,
   UnitData,
   ws1,
   ws2
@@ -27,12 +26,6 @@ import {
   verifyModuleConfiguration
 } from '../../../support/helpers';
 import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
-
-// The module dropdowns list every uploaded module of that type, so the expected counts have to follow
-// the fixture list. As literals they went stale the moment a module was added to `modules`, and the
-// failure surfaced here rather than at the list it describes.
-const uploadedModulesOfType = (type: 'editor' | 'player' | 'schemer'): number => modules
-  .filter(m => m.startsWith(`iqb-${type}-`)).length;
 
 describe('Workspace Unit Management', () => {
   const unit1: UnitData = {
@@ -91,19 +84,19 @@ describe('Workspace Unit Management', () => {
     // Verify editor options
     cy.get('[data-cy="edit-workspace-settings-editor"]')
       .find('mat-select').click();
-    cy.get('mat-option').should('have.length', uploadedModulesOfType('editor'));
+    cy.get('mat-option').should('have.length', 2);
     cy.get('.cdk-overlay-backdrop').last().click({ force: true });
 
     // Verify player options
     cy.get('[data-cy="edit-workspace-settings-player"]')
       .find('mat-select').click();
-    cy.get('mat-option').should('have.length', uploadedModulesOfType('player'));
+    cy.get('mat-option').should('have.length', 3);
     cy.get('.cdk-overlay-backdrop').last().click({ force: true });
 
     // Verify schemer options
     cy.get('[data-cy="edit-workspace-settings-schemer"]')
       .find('mat-select').click();
-    cy.get('mat-option').should('have.length', uploadedModulesOfType('schemer'));
+    cy.get('mat-option').should('have.length', 1);
     cy.get('.cdk-overlay-backdrop').last().click({ force: true });
 
     cy.translate(Cypress.expose('locale')).then(json => {

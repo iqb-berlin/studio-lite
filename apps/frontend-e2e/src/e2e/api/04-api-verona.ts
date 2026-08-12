@@ -25,9 +25,7 @@ describe('Admin verona API tests', () => {
       cy.getModulesAPI(Cypress.expose(`token_${Cypress.expose('username')}`)).then(
         resp => {
           expect(resp.status).to.be.oneOf([200, 304]);
-          // Derived from the list uploaded above, not a literal: the count silently went stale the
-          // moment a module was added to `modules`, and the failure pointed here instead of there.
-          expect(resp.body.length).equal(modules.length);
+          expect(resp.body.length).equal(6);
         }
       );
     });
