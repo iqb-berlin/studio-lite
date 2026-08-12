@@ -309,6 +309,34 @@ describe('UnitPlayerComponent', () => {
       );
     });
 
+    it('should send stateReportPolicy to players below spec version 5', () => {
+      const componentWithPrivates = component as {
+        postMessageTarget: Window | undefined;
+        playerApiVersion: number;
+      };
+      componentWithPrivates.playerApiVersion = 3;
+      const postMessageSpy = jest.spyOn(componentWithPrivates.postMessageTarget!, 'postMessage');
+
+      component.postStore('test definition');
+
+      expect((postMessageSpy.mock.calls[0][0] as { playerConfig: object }).playerConfig)
+        .toHaveProperty('stateReportPolicy', 'eager');
+    });
+
+    it('should omit stateReportPolicy from spec version 5 on', () => {
+      const componentWithPrivates = component as {
+        postMessageTarget: Window | undefined;
+        playerApiVersion: number;
+      };
+      componentWithPrivates.playerApiVersion = 6;
+      const postMessageSpy = jest.spyOn(componentWithPrivates.postMessageTarget!, 'postMessage');
+
+      component.postStore('test definition');
+
+      expect((postMessageSpy.mock.calls[0][0] as { playerConfig: object }).playerConfig)
+        .not.toHaveProperty('stateReportPolicy');
+    });
+
     it('should handle empty definition string', () => {
       const componentWithPrivates = component as {
         postMessageTarget: Window | undefined;

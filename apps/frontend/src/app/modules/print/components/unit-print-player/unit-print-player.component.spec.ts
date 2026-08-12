@@ -258,6 +258,42 @@ describe('UnitPrintPlayerComponent', () => {
       );
     });
 
+    // Player spec 5.0 dropped stateReportPolicy. Players below it fall back to 'none' when it is
+    // missing -- the aspect 1.x line does -- and then report no state at all, so they keep getting it.
+    const playerConfigOf = (mockWindow: { postMessage: jest.Mock }) => mockWindow.postMessage.mock
+      .calls[0][0].playerConfig;
+
+    it('should send stateReportPolicy to players below spec version 5', () => {
+      const mockWindow = { postMessage: jest.fn() };
+      component.postMessageTarget = mockWindow as never;
+      component.playerApiVersion = 3;
+
+      component.postStore('test-definition');
+
+      expect(playerConfigOf(mockWindow)).toHaveProperty('stateReportPolicy', 'eager');
+    });
+
+    it('should omit stateReportPolicy from spec version 5 on', () => {
+      const mockWindow = { postMessage: jest.fn() };
+      component.postMessageTarget = mockWindow as never;
+      component.playerApiVersion = 5;
+
+      component.postStore('test-definition');
+
+      expect(playerConfigOf(mockWindow)).not.toHaveProperty('stateReportPolicy');
+    });
+
+    it('should keep stateReportPolicy when the version could not be detected', () => {
+      const mockWindow = { postMessage: jest.fn() };
+      component.postMessageTarget = mockWindow as never;
+      // detectApiVersion falls back to 2 for an unreadable version -- the safe direction.
+      component.playerApiVersion = 2;
+
+      component.postStore('test-definition');
+
+      expect(playerConfigOf(mockWindow)).toHaveProperty('stateReportPolicy', 'eager');
+    });
+
     it('should emit unitLoaded after posting', () => {
       const mockWindow = { postMessage: jest.fn() };
       component.postMessageTarget = mockWindow as never;

@@ -355,4 +355,31 @@ describe('UnitPreviewComponent', () => {
       expect(fakeInstance.overlayRef).toBe(fakeOverlayRef);
     }));
   });
+
+  describe('postStore', () => {
+    const store = { getData: () => ({ definition: 'def' }) } as never;
+
+    const playerConfigOf = (target: { postMessage: jest.Mock }) => target.postMessage.mock
+      .calls[0][0].playerConfig;
+
+    it('should send stateReportPolicy to players below spec version 5', () => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.playerApiVersion = 3;
+
+      component.postStore(store);
+
+      expect(playerConfigOf(target)).toHaveProperty('stateReportPolicy', 'eager');
+    });
+
+    it('should omit stateReportPolicy from spec version 5 on', () => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.playerApiVersion = 6;
+
+      component.postStore(store);
+
+      expect(playerConfigOf(target)).not.toHaveProperty('stateReportPolicy');
+    });
+  });
 });

@@ -25,6 +25,20 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
   editorApiVersion = 1;
 
+  // Editor spec 4.0 dropped definitionReportPolicy together with voeGetDefinitionRequest: the editor
+  // always reports the full definition from then on. EditorConfig is additionalProperties: false in
+  // the current spec, so a strictly validating editor rejects a start command that still carries it.
+  private static readonly DEFINITION_REPORT_POLICY_DROPPED_IN = 4;
+
+  // Editors below that spec version may still read it, and the pre-4.0 default is 'on-demand' -- they
+  // would wait for a voeGetDefinitionRequest that this app never sends, so no change would ever be
+  // reported. Version detection below falls back to 2, keeping the property for anything unrecognized.
+  private legacyDefinitionReportPolicy(): { definitionReportPolicy?: 'eager' } {
+    return this.editorApiVersion < UnitEditorComponent.DEFINITION_REPORT_POLICY_DROPPED_IN ?
+      { definitionReportPolicy: 'eager' } :
+      {};
+  }
+
   constructor(
     public backendService: WorkspaceBackendService,
     public workspaceService: WorkspaceService,
@@ -187,7 +201,7 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
             type: 'voeStartCommand',
             sessionId: this.sessionId,
             editorConfig: {
-              definitionReportPolicy: 'eager',
+              ...this.legacyDefinitionReportPolicy(),
               directDownloadUrl: this.backendService.getDirectDownloadLink(),
               role: new RolePipe().transform(
                 this.workspaceService.userAccessLevel
