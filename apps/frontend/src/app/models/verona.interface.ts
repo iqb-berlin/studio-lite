@@ -5,7 +5,7 @@ export type PagingMode =
   | 'buttons'
   | 'concat-scroll'
   | 'concat-scroll-snap';
-export type PrintMode = 'off' | 'on' | 'on-with-ids';
+export type PrintMode = 'off' | 'on' | 'on-with-ids' | 'selected-elements-only';
 
 export interface SharedParameter {
   key: string;
@@ -14,9 +14,13 @@ export interface SharedParameter {
 
 export interface PlayerConfig {
   printMode?: PrintMode;
+  // With printMode 'selected-elements-only' the player drops everything not listed here; otherwise it
+  // scrolls the listed elements into view and accentuates them. Either way 'startPage' is ignored.
+  elementsToHighlight?: string[];
   unitNumber?: number;
-  unitTitle?: number;
-  unitId?: number;
+  // Spec: strings, not numbers — unitTitle up to 50, unitId up to 20 characters.
+  unitTitle?: string;
+  unitId?: string;
   pagingMode?: PagingMode;
   logPolicy?: 'lean' | 'rich' | 'debug' | 'disabled';
   startPage?: string;

@@ -28,6 +28,12 @@ export class VeronaModuleMetadataDto {
   @ApiProperty()
     specVersion!: string;
 
+  // Required since Metadata 3.1, but modules built against older specs do not carry it, and neither do
+  // module rows stored before this field was read. Absent therefore means "not declared" and has to stay
+  // distinguishable from a declared value — do not default it to an empty string.
+  @ApiProperty({ required: false })
+    metadataVersion?: string;
+
   @ApiProperty()
     isStable!: boolean;
 
@@ -37,6 +43,7 @@ export class VeronaModuleMetadataDto {
     id: string;
     version: string;
     specVersion: string;
+    metadataVersion?: string;
     name: { lang: string; value: string; }[] | { [x: string]: string };
     apiVersion: string;
     '@id': string;
@@ -61,6 +68,7 @@ export class VeronaModuleMetadataDto {
         name: nameDe || (nameEn || jsonMetadata.id),
         version: jsonMetadata.version,
         specVersion: jsonMetadata.specVersion,
+        ...(jsonMetadata.metadataVersion && { metadataVersion: jsonMetadata.metadataVersion }),
         isStable: !VeronaModuleMetadataDto.isPreStableVersion(jsonMetadata.version)
       };
     } else if (jsonMetadata['@type']) {
