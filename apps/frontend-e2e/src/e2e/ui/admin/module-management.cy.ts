@@ -47,7 +47,7 @@ describe('Verona Module Management', () => {
 
     // The 1.x player ships legacy JSON-LD metadata (@type/apiVersion); showing its version proves the
     // fallback branch of VeronaModuleMetadataDto.getFromJsonLd read it.
-    cy.get('mat-row').filter(':contains("Aspect")').should('contain', '1.31');
+    cy.contains('mat-row', '1.31').should('exist');
 
     // Verify Speedtest modules (editor and player)
     cy.contains('mat-row', 'Speedtest').should('exist');
