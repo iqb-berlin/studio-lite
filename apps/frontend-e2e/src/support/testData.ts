@@ -214,7 +214,12 @@ export const modules: string[] = [
   'iqb-editor-speedtest-3.2.0.html',
   'iqb-player-aspect-2.12.5.html',
   'iqb-player-speedtest-3.3.0.html',
-  'iqb-player-stars-0.6.26.html'
+  'iqb-player-stars-0.6.26.html',
+  // The only module here below player spec 5.0, and the only one carrying the legacy JSON-LD metadata
+  // (@type and apiVersion instead of specVersion). It is what keeps the "old module" branches covered:
+  // the fallback in VeronaModuleMetadataDto.getFromJsonLd, and the start command still carrying
+  // stateReportPolicy -- without which this player reports no state at all.
+  'iqb-player-aspect-1.31.html'
 ];
 
 /**

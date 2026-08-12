@@ -190,7 +190,7 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
             responseProgress: 'none'
           },
           playerConfig: {
-            stateReportPolicy: 'eager',
+            ...this.legacyStateReportPolicy(),
             pagingMode: this.reviewService.bookletConfig?.pagingMode,
             enabledNavigationTargets: [
               'next',

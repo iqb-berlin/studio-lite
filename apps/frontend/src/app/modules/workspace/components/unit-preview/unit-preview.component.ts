@@ -177,7 +177,7 @@ export class UnitPreviewComponent
               responseProgress: 'none'
             },
             playerConfig: {
-              stateReportPolicy: 'eager',
+              ...this.legacyStateReportPolicy(),
               pagingMode: this.previewService.pagingMode.value,
               directDownloadUrl: this.backendService.getDirectDownloadLink(),
               sharedParameters: this.sharedParameters

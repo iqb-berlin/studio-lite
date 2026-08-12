@@ -41,9 +41,13 @@ describe('Verona Module Management', () => {
       cy.contains('2.7.0').should('exist');
     });
 
-    // Verify Aspect modules (editor and player)
+    // Verify Aspect modules (editor, player, and the 1.x player kept for the old-module branches)
     cy.contains('mat-row', 'Aspect').should('exist');
-    cy.get('mat-row').filter(':contains("Aspect")').should('have.length', 2);
+    cy.get('mat-row').filter(':contains("Aspect")').should('have.length', 3);
+
+    // The 1.x player ships legacy JSON-LD metadata (@type/apiVersion); showing its version proves the
+    // fallback branch of VeronaModuleMetadataDto.getFromJsonLd read it.
+    cy.get('mat-row').filter(':contains("Aspect")').should('contain', '1.31');
 
     // Verify Speedtest modules (editor and player)
     cy.contains('mat-row', 'Speedtest').should('exist');
