@@ -180,5 +180,17 @@ describe('UnitEditorComponent', () => {
 
       expect(editorConfigOf(target)).not.toHaveProperty('definitionReportPolicy');
     });
+
+    it('should keep definitionReportPolicy when the version could not be detected', () => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      // handleIncomingMessage falls back to 2 for an unreadable version -- the safe direction, and the
+      // lowest value that still reaches this branch (1 takes the legacy DataTransfer path instead).
+      component.editorApiVersion = 2;
+
+      component.postStore(store);
+
+      expect(editorConfigOf(target)).toHaveProperty('definitionReportPolicy', 'eager');
+    });
   });
 });
