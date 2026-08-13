@@ -70,7 +70,7 @@
       "xml-key-monitor-booklet-visibility": "ViewSettings/monitorBookletVisibility",
       "desc-group-label": "Bezeichnung der Testgruppe in der Testtaker-Datei (optional)",
       "desc-monitor-booklet-visibility": "Sichtbarkeit des Testhefts für Beobachter · Standard: (kein Eintrag)",
-      "desc-booklet-id": "Eindeutige technische ID des Testhefts (Pflichtfeld) · zugleich Dateiname der Testheft- und der Testtaker-XML · Standard: booklet1",
+      "desc-booklet-id": "Eindeutige technische ID des Testhefts (Pflichtfeld) · zugleich Dateiname der Testheft- und der Testtaker-XML",
       "desc-booklet-label": "Anzeigename des Testhefts (optional)"
     }
   },
