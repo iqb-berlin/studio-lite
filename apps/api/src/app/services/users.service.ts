@@ -514,9 +514,9 @@ export class UsersService {
   }
 
   // Orphaned is decided first and on lastSeen alone: without a tab behind it a session is
-  // verwaist no matter how recently someone worked in it -- that is precisely the row left
-  // behind by a browser closed moments after the last click. Only for a session that is
-  // still alive does it make sense to ask how long ago that click was.
+  // abandoned no matter how recently someone worked in it -- that is precisely the row
+  // left behind by a browser closed moments after the last click. Only for a session that
+  // is still alive does it make sense to ask how long ago that click was.
   private static calculateSessionStatus(
     lastActivity: Date,
     lastSeen: Date,

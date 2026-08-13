@@ -224,15 +224,26 @@ ALTER TABLE "public"."unit_item_metadata"
 -- the delete endpoint guarded by it were therefore unreachable.
 --
 -- "last_seen" carries the missing signal: every open tab pings it on a timer regardless
--- of user interaction, so a row without recent pings has no browser behind it. It is
--- backfilled from "last_activity" -- the best evidence available for rows written before
--- the upgrade -- which makes pre-existing sessions look alive for one ping interval after
--- the deployment and then settle into their true state.
+-- of user interaction, so a row without recent pings has no browser behind it.
+--
+-- Existing rows are backfilled with now(), not with "last_activity", which would look
+-- like the more faithful value but is the wrong way to be wrong. No row carries evidence
+-- either way at this point, so the choice is which error to make for the one ping interval
+-- until every open tab has reported in:
+--   now()          -- a genuinely abandoned row keeps looking alive for up to one ping
+--                     interval, then turns orphaned by itself. That is the status quo this
+--                     migration inherits, extended by a minute.
+--   last_activity  -- a live session whose user last clicked longer than
+--                     ORPHANED_SESSION_THRESHOLD_MS ago is reported orphaned immediately.
+--                     logoutOrphanedSession accepts it, so an admin looking at the list
+--                     right after the upgrade can delete a session someone is working in.
+-- Overstating liveness for a minute costs nothing; understating it costs a stranger their
+-- session. Hence now().
 
 -- changeset jojohoch:13
 ALTER TABLE "public"."user_session"
   ADD COLUMN "last_seen" TIMESTAMP WITH TIME ZONE;
-UPDATE "public"."user_session" SET "last_seen" = "last_activity" WHERE "last_seen" IS NULL;
+UPDATE "public"."user_session" SET "last_seen" = now() WHERE "last_seen" IS NULL;
 ALTER TABLE "public"."user_session"
   ALTER COLUMN "last_seen" SET NOT NULL;
 -- rollback ALTER TABLE "public"."user_session" DROP COLUMN "last_seen";

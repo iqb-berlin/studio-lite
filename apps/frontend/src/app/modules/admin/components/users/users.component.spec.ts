@@ -354,6 +354,36 @@ describe('UsersComponent', () => {
     });
   });
 
+  // The menu decides whether to offer the clear action from the selected row's sessions.
+  // CDK's SelectionModel caches its selected array, so that only reaches the menu if the
+  // poll really replaces the selection -- which it does by re-selecting the fresh DTO.
+  it('should hand on a fresh selection when a poll changes the selected sessions', () => {
+    const initial = [{
+      id: 1, name: 'u', isLoggedIn: true, sessions: [{ sessionId: 's1', activityStatus: 'active' }]
+    }] as UserFullDto[];
+    (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of(initial));
+    component.updateUserList();
+    component.tableSelectionRow.select(component.objectsDatasource.data[0]);
+    const selectionBefore = component.tableSelectionRow.selected;
+    expect(selectionBefore[0].sessions?.map(s => s.activityStatus)).toEqual(['active']);
+
+    const polled = [{
+      id: 1,
+      name: 'u',
+      isLoggedIn: true,
+      sessions: [
+        { sessionId: 's1', activityStatus: 'active' },
+        { sessionId: 's2', activityStatus: 'orphaned' }
+      ]
+    }] as UserFullDto[];
+    (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of(polled));
+    component.updateUserList(false, true);
+
+    expect(component.tableSelectionRow.selected).not.toBe(selectionBefore);
+    expect(component.tableSelectionRow.selected[0].sessions?.map(s => s.activityStatus))
+      .toEqual(['active', 'orphaned']);
+  });
+
   it('should handle delete users failure', () => {
     (mockBackendService.deleteUsers as jest.Mock).mockReturnValue(of(false));
     const users = [{ id: 1 }] as UserFullDto[];

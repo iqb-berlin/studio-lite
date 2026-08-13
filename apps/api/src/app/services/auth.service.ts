@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { LessThan, Repository } from 'typeorm';
+import { In, LessThan, Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import { UsersService } from './users.service';
 import { ReviewService } from './review.service';
@@ -219,13 +219,17 @@ export class AuthService {
     if (orphanedSessions.length === 0) {
       return 0;
     }
+    // Delete exactly the rows that were found, not everything still matching the
+    // threshold: a backgrounded tab that wakes and pings between the two statements gets
+    // a fresh lastSeen, and a second predicate would spare its row after its refresh
+    // tokens are already gone -- logging that user out and leaving the row behind.
     const ids = orphanedSessions.map(s => s.sessionId);
     await this.refreshTokenRepository
       .createQueryBuilder()
       .delete()
       .where('userId = :userId AND sessionId IN (:...ids)', { userId, ids })
       .execute();
-    const result = await this.userSessionRepository.delete({ userId, lastSeen: LessThan(threshold) });
+    const result = await this.userSessionRepository.delete({ userId, sessionId: In(ids) });
     return result.affected || 0;
   }
 

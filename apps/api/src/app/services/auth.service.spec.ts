@@ -2,7 +2,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
@@ -390,6 +390,22 @@ describe('AuthService', () => {
       expect(userSessionRepository.find).toHaveBeenCalledWith(
         expect.objectContaining({ where: expect.objectContaining({ userId: 7, lastSeen: expect.anything() }) })
       );
+    });
+
+    // Deleting by a second lastSeen predicate would spare a row that got pinged between
+    // the two statements, after its refresh tokens were already gone.
+    it('should delete exactly the sessions it found rather than re-testing lastSeen', async () => {
+      userSessionRepository.find.mockResolvedValue([
+        { sessionId: 'sid-1' }, { sessionId: 'sid-2' }
+      ] as UserSession[]);
+      userSessionRepository.delete.mockResolvedValue({ affected: 2, raw: [] });
+
+      await service.deleteOrphanedSessions(7);
+
+      expect(userSessionRepository.delete).toHaveBeenCalledWith({
+        userId: 7,
+        sessionId: In(['sid-1', 'sid-2'])
+      });
     });
 
     it('should do nothing when the user has no orphaned sessions', async () => {
