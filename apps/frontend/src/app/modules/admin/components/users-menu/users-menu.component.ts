@@ -23,11 +23,29 @@ import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrappe
 })
 export class UsersMenuComponent {
   @Input() selectedUser!: number;
-  @Input() selectedRows: UserFullDto[] = [];
+
+  // Counted on input instead of in the template: the admin list polls, so a template
+  // expression over the session lists would re-run on every change detection cycle.
+  @Input() set selectedRows(rows: UserFullDto[]) {
+    this.rows = rows;
+    this.orphanedSessionCount = rows.length === 1 ?
+      (rows[0].sessions || []).filter(session => session.activityStatus === 'orphaned').length :
+      0;
+  }
+
+  get selectedRows(): UserFullDto[] {
+    return this.rows;
+  }
+
+  orphanedSessionCount = 0;
+
+  private rows: UserFullDto[] = [];
 
   @Output() userAdded: EventEmitter<UntypedFormGroup> = new EventEmitter<UntypedFormGroup>();
   @Output() userEdited: EventEmitter<{ selection: UserFullDto[], user: UntypedFormGroup }> =
     new EventEmitter<{ selection: UserFullDto[], user: UntypedFormGroup }>();
+
+  @Output() orphanedSessionsCleared: EventEmitter<void> = new EventEmitter<void>();
 
   constructor(private editUserDialog: MatDialog,
               private messsageDialog: MatDialog,
@@ -49,6 +67,10 @@ export class UsersMenuComponent {
         }
       }
     });
+  }
+
+  clearOrphanedSessions(): void {
+    this.orphanedSessionsCleared.emit();
   }
 
   editUser(): void {

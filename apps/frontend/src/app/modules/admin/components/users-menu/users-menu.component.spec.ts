@@ -110,4 +110,51 @@ describe('UsersMenuComponent', () => {
     }));
     expect(emitSpy).toHaveBeenCalledWith({ selection: [mockUser], user: mockFormGroup });
   });
+
+  describe('orphaned session count', () => {
+    it('should count the orphaned sessions of a single selected user', () => {
+      component.selectedRows = [{
+        id: 1,
+        name: 'test',
+        sessions: [
+          { sessionId: 's1', activityStatus: 'orphaned' },
+          { sessionId: 's2', activityStatus: 'active' },
+          { sessionId: 's3', activityStatus: 'orphaned' }
+        ]
+      } as UserFullDto];
+
+      expect(component.orphanedSessionCount).toBe(2);
+    });
+
+    it('should report no orphaned sessions when the selected user has none', () => {
+      component.selectedRows = [{
+        id: 1,
+        name: 'test',
+        sessions: [{ sessionId: 's1', activityStatus: 'active' }]
+      } as UserFullDto];
+
+      expect(component.orphanedSessionCount).toBe(0);
+    });
+
+    // The action clears one user's sessions, so it has no meaning without exactly one row.
+    it('should report no orphaned sessions when nothing is selected', () => {
+      component.selectedRows = [];
+
+      expect(component.orphanedSessionCount).toBe(0);
+    });
+
+    it('should tolerate a selected user without a session list', () => {
+      component.selectedRows = [{ id: 1, name: 'test' } as UserFullDto];
+
+      expect(component.orphanedSessionCount).toBe(0);
+    });
+
+    it('should emit when the clear action is triggered', () => {
+      const emitSpy = jest.spyOn(component.orphanedSessionsCleared, 'emit');
+
+      component.clearOrphanedSessions();
+
+      expect(emitSpy).toHaveBeenCalled();
+    });
+  });
 });

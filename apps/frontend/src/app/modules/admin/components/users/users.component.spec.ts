@@ -67,6 +67,7 @@ describe('UsersComponent', () => {
       changeUserData: jest.fn().mockReturnValue(of(true)),
       deleteUsers: jest.fn().mockReturnValue(of(true)),
       deleteUserSession: jest.fn().mockReturnValue(of(true)),
+      deleteUserOrphanedSessions: jest.fn().mockReturnValue(of(true)),
       getWorkspaceGroupsByAdmin: jest.fn().mockReturnValue(of([])),
       setWorkspaceGroupsByAdmin: jest.fn().mockReturnValue(of(true))
     };
@@ -290,28 +291,67 @@ describe('UsersComponent', () => {
   });
 
   it('should delete a specific session and refresh the user list', () => {
-    component.tableSelectionRow.select({
+    const user = {
       id: 1,
       name: 'user1',
       sessions: [{ sessionId: 's1', activityStatus: 'orphaned' }]
-    } as UserFullDto);
+    } as UserFullDto;
 
-    component.deleteSession({ sessionId: 's1', activityStatus: 'orphaned' });
+    component.deleteSession(user, { sessionId: 's1', activityStatus: 'orphaned' });
 
     expect(mockBackendService.deleteUserSession).toHaveBeenCalledWith(1, 's1');
     expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
   });
 
+  // The dot swallows the click, so the row never becomes selected -- deletion must work
+  // from the row it was clicked in.
+  it('should delete a session of an unselected row', () => {
+    const user = {
+      id: 4,
+      name: 'user4',
+      sessions: [{ sessionId: 's4', activityStatus: 'orphaned' }]
+    } as UserFullDto;
+
+    component.deleteSession(user, { sessionId: 's4', activityStatus: 'orphaned' });
+
+    expect(component.tableSelectionRow.isEmpty()).toBe(true);
+    expect(mockBackendService.deleteUserSession).toHaveBeenCalledWith(4, 's4');
+  });
+
   it('should not delete non-orphaned sessions', () => {
-    component.tableSelectionRow.select({
+    const user = {
       id: 1,
       name: 'user1',
       sessions: [{ sessionId: 's1', activityStatus: 'active' }]
-    } as UserFullDto);
+    } as UserFullDto;
 
-    component.deleteSession({ sessionId: 's1', activityStatus: 'active' });
+    component.deleteSession(user, { sessionId: 's1', activityStatus: 'active' });
 
     expect(mockBackendService.deleteUserSession).not.toHaveBeenCalled();
+  });
+
+  describe('deleteOrphanedSessions', () => {
+    it('should clear the orphaned sessions of the selected user and refresh the list', () => {
+      component.tableSelectionRow.select({
+        id: 1,
+        name: 'user1',
+        sessions: [
+          { sessionId: 's1', activityStatus: 'orphaned' },
+          { sessionId: 's2', activityStatus: 'active' }
+        ]
+      } as UserFullDto);
+
+      component.deleteOrphanedSessions();
+
+      expect(mockBackendService.deleteUserOrphanedSessions).toHaveBeenCalledWith(1);
+      expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
+    });
+
+    it('should do nothing without a selected user', () => {
+      component.deleteOrphanedSessions();
+
+      expect(mockBackendService.deleteUserOrphanedSessions).not.toHaveBeenCalled();
+    });
   });
 
   it('should handle delete users failure', () => {
@@ -372,14 +412,17 @@ describe('UsersComponent', () => {
     expect(component.tableSelectionRow.isSelected(user)).toBe(false);
   });
 
-  it('should calculate active and logged-in counts from activityStatus', () => {
+  it('should calculate session and logged-in counts from activityStatus', () => {
     const users = [
       {
         id: 1,
         name: 'a',
         activityStatus: 'active',
         isLoggedIn: true,
-        sessions: [{ sessionId: 's1', activityStatus: 'active' }]
+        sessions: [
+          { sessionId: 's1', activityStatus: 'active' },
+          { sessionId: 's5', activityStatus: 'orphaned' }
+        ]
       },
       {
         id: 2,
@@ -403,10 +446,10 @@ describe('UsersComponent', () => {
     (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of(users));
     component.updateUserList();
 
-    expect(component.activeUserCount).toBe(1);
     expect(component.loggedInUserCount).toBe(2);
     expect(component.activeSessionCount).toBe(2);
     expect(component.passiveSessionCount).toBe(1);
+    expect(component.orphanedSessionCount).toBe(1);
   });
 
   it('should not treat logged-in users as logged-out when activityStatus is missing', () => {
@@ -427,7 +470,7 @@ describe('UsersComponent', () => {
     component.updateUserList();
 
     expect(component.loggedInUserCount).toBe(1);
-    expect(component.activeUserCount).toBe(0);
+    expect(component.activeSessionCount).toBe(0);
   });
   describe('custom sorting logic', () => {
     it('should sort users by lastActivity (activityStatus category weight, then date, then name)', () => {

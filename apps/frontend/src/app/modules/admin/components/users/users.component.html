@@ -3,7 +3,8 @@
     <studio-lite-users-menu [selectedUser]="selectedUser"
       [selectedRows]="tableSelectionRow.selected"
       (userAdded)="addUser($event)"
-      (userEdited)="editUser($event)">
+      (userEdited)="editUser($event)"
+      (orphanedSessionsCleared)="deleteOrphanedSessions()">
     </studio-lite-users-menu>
 
     @if (objectsDatasource.data.length) {
@@ -14,7 +15,8 @@
         {{ 'admin.users-logged-in' | translate: { count: loggedInUserCount } }}
         <span>{{ 'admin.users-sessions-status' | translate: {
           activeSessions: activeSessionCount,
-          passiveSessions: passiveSessionCount
+          passiveSessions: passiveSessionCount,
+          orphanedSessions: orphanedSessionCount
         } }}</span>
       </div>
 
@@ -34,7 +36,7 @@
           {{'user.sessions' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (!UsersComponent.hasStatus('active', element.sessions)) {
+          @if ((element.sessions | countSessionsWithStatus: 'active') === 0) {
             <span class="inactive-dot" [matTooltip]="'user.inactive' | translate"></span>
           } @else {
             @for (session of element.sessions; track session.sessionId) {
@@ -47,7 +49,7 @@
             @if (session.activityStatus === 'orphaned') {
               <span class="orphaned-dot"
                     [matTooltip]="'admin.orphaned-session-delete-tooltip' | translate"
-                    (click)="$event.stopPropagation(); deleteSession(session)"></span>
+                    (click)="$event.stopPropagation(); deleteSession(element, session)"></span>
             }
           }
         </mat-cell>
