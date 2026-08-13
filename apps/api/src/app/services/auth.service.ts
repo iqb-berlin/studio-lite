@@ -102,6 +102,11 @@ export class AuthService {
     // client-provided sessionId) gets its own session, so distinct browsers stay
     // independent. Same-browser continuity is handled via the explicit
     // existingSessionId that the client derives from the JWT `sid`.
+    //
+    // A session is therefore scoped to one localStorage, not to one browser: two windows
+    // of the same instance share it, while separate instances, private windows and
+    // container tabs each get their own row. Rows left behind by a storage scope nobody
+    // uses any more are what lastSeen exists to expose.
 
     // Reviews do not keep long-lived user sessions.
     if (!user.id) {
@@ -254,14 +259,12 @@ export class AuthService {
       return null;
     }
 
+    // The expiry check inside findActiveUserSession is the inactivity gate: expiresAt is
+    // always lastActivity plus INACTIVITY_THRESHOLD_MS, so a session that outlives its
+    // inactivity window is exactly a session whose row has expired. A second comparison
+    // against lastActivity used to sit here and could not ever be true.
     const userSession = await this.findActiveUserSession(refreshToken);
     if (!userSession) {
-      return null;
-    }
-
-    const inactivityAge = Date.now() - new Date(userSession.lastActivity).getTime();
-    if (inactivityAge > INACTIVITY_THRESHOLD_MS) {
-      this.logger.log(`Denying refresh for user '${refreshToken.userId}' due to inactivity (${inactivityAge}ms).`);
       return null;
     }
 
