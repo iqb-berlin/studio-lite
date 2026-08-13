@@ -178,9 +178,9 @@ export class BackendService {
       );
   }
 
-  deleteUserPassiveSessions(userId: number): Observable<boolean> {
+  deleteUserOrphanedSessions(userId: number): Observable<boolean> {
     return this.http
-      .delete(`${this.serverUrl}admin/users/${userId}/passive-sessions`)
+      .delete(`${this.serverUrl}admin/users/${userId}/orphaned-sessions`)
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -203,6 +203,10 @@ export class BackendService {
 
   activity(): Observable<void> {
     return this.http.post<void>(`${this.serverUrl}activity`, {});
+  }
+
+  sessionPing(): Observable<void> {
+    return this.http.post<void>(`${this.serverUrl}session-ping`, {});
   }
 
   private static getSessionIdFromToken(): string | undefined {

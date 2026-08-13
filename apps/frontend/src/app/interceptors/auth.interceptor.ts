@@ -31,6 +31,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
     const isBackgroundRequest = req.url.includes('/refresh') ||
                                 req.url.includes('/activity') ||
+                                req.url.includes('/session-ping') ||
                                 req.url.includes('/logout');
 
     return next.handle(this.addToken(req, idToken))

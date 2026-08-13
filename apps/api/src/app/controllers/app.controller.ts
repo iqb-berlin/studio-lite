@@ -190,4 +190,16 @@ export class AppController {
   async activity(@Request() req): Promise<void> {
     await this.userService.updateLastActivity(req.user.id, req.user.sessionId);
   }
+
+  // Liveness only: the client sends this on a timer for as long as a tab is open, even
+  // when nobody is interacting. It must not count as activity, or a forgotten open tab
+  // would stay logged in forever.
+  @Post('session-ping')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiTags('auth')
+  @ApiOkResponse({ description: 'Session liveness recorded.' })
+  async sessionPing(@Request() req): Promise<void> {
+    await this.userService.updateLastSeen(req.user.id, req.user.sessionId);
+  }
 }

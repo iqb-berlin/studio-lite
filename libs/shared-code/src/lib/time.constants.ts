@@ -9,6 +9,14 @@ export const PASSIVE_THRESHOLD_MS = 7 * DAY_MS;
 
 export const UI_BAR_REFRESH_INTERVAL_MS = SECOND_MS;
 export const ADMIN_USER_LIST_POLL_INTERVAL_MS = 15 * SECOND_MS;
+
+// Liveness ("is a tab still open?"), which is a different question from activity
+// ("did someone interact?"). Every open tab pings on this interval regardless of
+// user interaction, so a session without pings has no browser behind it any more.
+export const SESSION_PING_INTERVAL_MS = MINUTE_MS;
+// Browsers throttle timers in background tabs to at most one run per minute, so a
+// single missed ping means nothing. Tolerate two before calling a session orphaned.
+export const ORPHANED_SESSION_THRESHOLD_MS = 3 * SESSION_PING_INTERVAL_MS;
 export const ACTIVITY_SYNC_THROTTLE_MS = 5 * SECOND_MS;
 export const USER_ACTIVITY_THROTTLE_MS = SECOND_MS;
 export const POST_MESSAGE_ACTIVITY_THROTTLE_MS = SECOND_MS;
@@ -61,5 +69,25 @@ export const assertTimeConfig = (): void => {
 
   if (ADMIN_USER_LIST_POLL_INTERVAL_MS >= INACTIVITY_THRESHOLD_MS) {
     fail('ADMIN_USER_LIST_POLL_INTERVAL_MS must stay below INACTIVITY_THRESHOLD_MS');
+  }
+
+  if (SESSION_PING_INTERVAL_MS <= 0) {
+    fail('SESSION_PING_INTERVAL_MS must be > 0');
+  }
+
+  // With less headroom a background tab throttled to one ping per minute would be
+  // reported orphaned while it is still open.
+  if (ORPHANED_SESSION_THRESHOLD_MS < 2 * SESSION_PING_INTERVAL_MS) {
+    fail('ORPHANED_SESSION_THRESHOLD_MS must allow at least two missed pings');
+  }
+
+  // An orphaned session must be detectable while its row still exists, otherwise the
+  // status is unreachable and neither the admin display nor the delete path can act.
+  if (ORPHANED_SESSION_THRESHOLD_MS >= INACTIVITY_THRESHOLD_MS) {
+    fail('ORPHANED_SESSION_THRESHOLD_MS must stay below INACTIVITY_THRESHOLD_MS');
+  }
+
+  if (ADMIN_USER_LIST_POLL_INTERVAL_MS >= ORPHANED_SESSION_THRESHOLD_MS) {
+    fail('ADMIN_USER_LIST_POLL_INTERVAL_MS must stay below ORPHANED_SESSION_THRESHOLD_MS');
   }
 };

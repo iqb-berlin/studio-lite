@@ -579,4 +579,29 @@ describe('BackendService', () => {
       req.flush(null);
     });
   });
+
+  describe('sessionPing', () => {
+    it('should post to the liveness endpoint, not to the activity one', done => {
+      service.sessionPing().subscribe(() => {
+        done();
+      });
+
+      const req = httpMock.expectOne(`${serverUrl}session-ping`);
+      expect(req.request.method).toBe('POST');
+      req.flush(null);
+    });
+  });
+
+  describe('deleteUserOrphanedSessions', () => {
+    it('should delete every orphaned session of the user', done => {
+      service.deleteUserOrphanedSessions(4).subscribe(result => {
+        expect(result).toBe(true);
+        done();
+      });
+
+      const req = httpMock.expectOne(`${serverUrl}admin/users/4/orphaned-sessions`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null);
+    });
+  });
 });
