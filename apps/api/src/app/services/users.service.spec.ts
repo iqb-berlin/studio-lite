@@ -12,7 +12,7 @@ import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import Workspace from '../entities/workspace.entity';
 import UserSession from '../entities/user-session.entity';
 import {
-  ACTIVE_SESSION_THRESHOLD_MS, INACTIVITY_THRESHOLD_MS, ORPHANED_SESSION_THRESHOLD_MS
+  ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS, ORPHANED_SESSION_THRESHOLD_MS
 } from '../app.constants';
 import Unit from '../entities/unit.entity';
 import { UnitService } from './unit.service';
@@ -223,7 +223,7 @@ describe('UsersService', () => {
 
   describe('isUserLoggedIn', () => {
     // Rows are built the way the API writes them: expiresAt is always
-    // lastActivity + INACTIVITY_THRESHOLD_MS, and lastSeen moves independently.
+    // lastActivity + PASSIVE_THRESHOLD_MS, and lastSeen moves independently.
     const sessionRow = (agesMs: { activity: number, seen: number }): UserSession => {
       const nowMs = Date.now();
       const lastActivity = new Date(nowMs - agesMs.activity);
@@ -231,7 +231,7 @@ describe('UsersService', () => {
         userId: 1,
         lastActivity,
         lastSeen: new Date(nowMs - agesMs.seen),
-        expiresAt: new Date(lastActivity.getTime() + INACTIVITY_THRESHOLD_MS)
+        expiresAt: new Date(lastActivity.getTime() + PASSIVE_THRESHOLD_MS)
       } as UserSession;
     };
 
@@ -284,7 +284,7 @@ describe('UsersService', () => {
         userSessionRepository: Repository<UserSession>
       }).userSessionRepository;
       jest.spyOn(userSessionRepository, 'find').mockResolvedValue([
-        sessionRow({ activity: ACTIVE_SESSION_THRESHOLD_MS + 1000, seen: 0 })
+        sessionRow({ activity: ACTIVE_THRESHOLD_MS + 1000, seen: 0 })
       ]);
 
       const result = await service.isUserLoggedIn(1);
@@ -320,7 +320,7 @@ describe('UsersService', () => {
       await service.updateLastActivity(1, 'session-1');
 
       const values = updateSpy.mock.calls[0][1] as { lastActivity: Date, expiresAt: Date };
-      expect(values.expiresAt.getTime() - values.lastActivity.getTime()).toBe(INACTIVITY_THRESHOLD_MS);
+      expect(values.expiresAt.getTime() - values.lastActivity.getTime()).toBe(PASSIVE_THRESHOLD_MS);
     });
 
     it('should never touch any session when no sessionId is provided', async () => {
