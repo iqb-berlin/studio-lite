@@ -11,7 +11,7 @@ import { ReviewService } from './review.service';
 import { RefreshToken } from '../entities/refresh-token.entity';
 import UserSession from '../entities/user-session.entity';
 import User from '../entities/user.entity';
-import { INACTIVITY_THRESHOLD_MS, ORPHANED_SESSION_THRESHOLD_MS } from '../app.constants';
+import { PASSIVE_THRESHOLD_MS, ORPHANED_SESSION_THRESHOLD_MS } from '../app.constants';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -327,7 +327,7 @@ describe('AuthService', () => {
         sessionId: 'sid-7',
         lastActivity,
         lastSeen: new Date(nowMs - agesMs.seen),
-        expiresAt: new Date(lastActivity.getTime() + INACTIVITY_THRESHOLD_MS)
+        expiresAt: new Date(lastActivity.getTime() + PASSIVE_THRESHOLD_MS)
       } as UserSession;
     };
 
@@ -356,7 +356,7 @@ describe('AuthService', () => {
     // and taking the session away would log them out of what they are looking at.
     it('should not delete a session that is idle but still being seen', async () => {
       userSessionRepository.findOne.mockResolvedValue(
-        sessionRow({ activity: INACTIVITY_THRESHOLD_MS / 2, seen: 0 })
+        sessionRow({ activity: PASSIVE_THRESHOLD_MS / 2, seen: 0 })
       );
 
       const result = await service.logoutOrphanedSession(7, 'sid-7');
@@ -367,7 +367,7 @@ describe('AuthService', () => {
 
     it('should not delete a session whose row has already expired', async () => {
       userSessionRepository.findOne.mockResolvedValue(
-        sessionRow({ activity: INACTIVITY_THRESHOLD_MS + 1000, seen: INACTIVITY_THRESHOLD_MS + 1000 })
+        sessionRow({ activity: PASSIVE_THRESHOLD_MS + 1000, seen: PASSIVE_THRESHOLD_MS + 1000 })
       );
 
       const result = await service.logoutOrphanedSession(7, 'sid-7');

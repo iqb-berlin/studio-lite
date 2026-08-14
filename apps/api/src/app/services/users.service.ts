@@ -25,8 +25,8 @@ import { UnitService } from './unit.service';
 import { UnitUserService } from './unit-user.service';
 import UserSession from '../entities/user-session.entity';
 import {
-  ACTIVE_SESSION_THRESHOLD_MS,
-  INACTIVITY_THRESHOLD_MS,
+  ACTIVE_THRESHOLD_MS,
+  PASSIVE_THRESHOLD_MS,
   ORPHANED_SESSION_THRESHOLD_MS
 } from '../app.constants';
 
@@ -442,7 +442,7 @@ export class UsersService {
     // the user (that would let a single request affect all of a user's browsers).
     if (!sessionId) return;
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + INACTIVITY_THRESHOLD_MS);
+    const expiresAt = new Date(now.getTime() + PASSIVE_THRESHOLD_MS);
     await this.userSessionRepository.update(
       { userId, sessionId },
       { lastActivity: now, lastSeen: now, expiresAt }
@@ -524,7 +524,7 @@ export class UsersService {
   ): SessionActivityStatus {
     if ((nowMs - new Date(lastSeen).getTime()) > ORPHANED_SESSION_THRESHOLD_MS) return 'orphaned';
     const ageMs = nowMs - new Date(lastActivity).getTime();
-    if (ageMs <= ACTIVE_SESSION_THRESHOLD_MS) return 'active';
+    if (ageMs <= ACTIVE_THRESHOLD_MS) return 'active';
     return 'passive';
   }
 

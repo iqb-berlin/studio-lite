@@ -3,7 +3,17 @@ const MINUTE_MS = 60 * SECOND_MS;
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
 
-// Core session and UI timing values shared by frontend and backend.
+// Two durations carry the whole session model, and each has exactly one name here.
+//
+// ACTIVE_THRESHOLD_MS is how long a session counts as active after the last interaction.
+// It is also the access-token lifetime, which is why JWT_EXPIRES_IN is derived from it: a
+// token that outlived the active phase would let a passive session act as an active one.
+//
+// PASSIVE_THRESHOLD_MS is how long a session survives without any interaction at all. It
+// is simultaneously the inactivity window (past it, a refresh is denied and the row is
+// expired) and the refresh-token lifetime, because a refresh token that outlived the
+// window would be a key to a session the server already considers gone. Those are not
+// three coincidentally equal values -- they are one duration seen from three sides.
 export const ACTIVE_THRESHOLD_MS = 30 * MINUTE_MS;
 export const PASSIVE_THRESHOLD_MS = 7 * DAY_MS;
 
@@ -25,15 +35,13 @@ export const AUTO_LOGOUT_REDIRECT_DELAY_MS = SECOND_MS;
 // measurements jitter by up to ±1s; only offsets beyond this deadband are real skew.
 export const SERVER_TIME_OFFSET_DEADBAND_MS = 2 * SECOND_MS;
 
-export const ACTIVE_SESSION_THRESHOLD_SEC = ACTIVE_THRESHOLD_MS / SECOND_MS;
-export const ACTIVE_SESSION_THRESHOLD_MS = ACTIVE_SESSION_THRESHOLD_SEC * SECOND_MS;
-export const REFRESH_TOKEN_EXPIRES_IN_SEC = PASSIVE_THRESHOLD_MS / SECOND_MS;
-export const INACTIVITY_THRESHOLD_SEC = REFRESH_TOKEN_EXPIRES_IN_SEC;
-export const REFRESH_TOKEN_EXPIRES_IN_MS = REFRESH_TOKEN_EXPIRES_IN_SEC * SECOND_MS;
-export const INACTIVITY_THRESHOLD_MS = INACTIVITY_THRESHOLD_SEC * SECOND_MS;
-
+// The only value the codebase needs in seconds: @nestjs/jwt takes signOptions.expiresIn
+// as a number of seconds.
 export const JWT_EXPIRES_IN = ACTIVE_THRESHOLD_MS / SECOND_MS;
 
+// Only invariants that a wrong edit above can actually violate. Checks comparing a value
+// against something it is derived from cannot fail and are therefore not checks at all --
+// they used to make this function look like validation while validating nothing.
 export const assertTimeConfig = (): void => {
   const fail = (message: string): never => {
     throw new Error(`Invalid time config: ${message}`);
@@ -51,24 +59,15 @@ export const assertTimeConfig = (): void => {
     fail('ACTIVE_THRESHOLD_MS must be <= PASSIVE_THRESHOLD_MS');
   }
 
-  if (ACTIVE_SESSION_THRESHOLD_MS !== ACTIVE_THRESHOLD_MS) {
-    fail('ACTIVE_SESSION_THRESHOLD_MS must match ACTIVE_THRESHOLD_MS');
+  // A sub-second active threshold would make the access-token lifetime fractional, which
+  // @nestjs/jwt does not take in seconds.
+  if (!Number.isInteger(JWT_EXPIRES_IN)) {
+    fail('ACTIVE_THRESHOLD_MS must be a whole number of seconds');
   }
 
-  if (JWT_EXPIRES_IN * SECOND_MS !== ACTIVE_THRESHOLD_MS) {
-    fail('JWT_EXPIRES_IN must match ACTIVE_THRESHOLD_MS');
-  }
-
-  if (REFRESH_TOKEN_EXPIRES_IN_MS !== PASSIVE_THRESHOLD_MS) {
-    fail('REFRESH_TOKEN_EXPIRES_IN_MS must match PASSIVE_THRESHOLD_MS');
-  }
-
-  if (INACTIVITY_THRESHOLD_MS !== REFRESH_TOKEN_EXPIRES_IN_MS) {
-    fail('INACTIVITY_THRESHOLD_MS must match REFRESH_TOKEN_EXPIRES_IN_MS');
-  }
-
-  if (ADMIN_USER_LIST_POLL_INTERVAL_MS >= INACTIVITY_THRESHOLD_MS) {
-    fail('ADMIN_USER_LIST_POLL_INTERVAL_MS must stay below INACTIVITY_THRESHOLD_MS');
+  // The admin list has to be able to observe a session before it expires underneath it.
+  if (ADMIN_USER_LIST_POLL_INTERVAL_MS >= PASSIVE_THRESHOLD_MS) {
+    fail('ADMIN_USER_LIST_POLL_INTERVAL_MS must stay below PASSIVE_THRESHOLD_MS');
   }
 
   // With less headroom a background tab throttled to one ping per minute would be
@@ -79,7 +78,7 @@ export const assertTimeConfig = (): void => {
 
   // An orphaned session must be detectable while its row still exists, otherwise the
   // status is unreachable and neither the admin display nor the delete path can act.
-  if (ORPHANED_SESSION_THRESHOLD_MS >= INACTIVITY_THRESHOLD_MS) {
-    fail('ORPHANED_SESSION_THRESHOLD_MS must stay below INACTIVITY_THRESHOLD_MS');
+  if (ORPHANED_SESSION_THRESHOLD_MS >= PASSIVE_THRESHOLD_MS) {
+    fail('ORPHANED_SESSION_THRESHOLD_MS must stay below PASSIVE_THRESHOLD_MS');
   }
 };

@@ -23,7 +23,7 @@ class UserSession {
   @Column({ name: 'last_seen', type: 'timestamptz' })
     lastSeen: Date;
 
-  // Always lastActivity + INACTIVITY_THRESHOLD_MS: a session dies from missing
+  // Always lastActivity + PASSIVE_THRESHOLD_MS: a session dies from missing
   // interaction, not from missing pings. SessionCleanupService drops it afterwards.
   @Column({ name: 'expires_at', type: 'timestamptz' })
     expiresAt: Date;

@@ -10,8 +10,7 @@ import { ReviewService } from './review.service';
 import { RefreshToken } from '../entities/refresh-token.entity';
 import UserSession from '../entities/user-session.entity';
 import {
-  REFRESH_TOKEN_EXPIRES_IN_MS,
-  INACTIVITY_THRESHOLD_MS,
+  PASSIVE_THRESHOLD_MS,
   ORPHANED_SESSION_THRESHOLD_MS
 } from '../app.constants';
 
@@ -153,7 +152,7 @@ export class AuthService {
 
   private async createUserSession(userId: number, sessionId: string): Promise<void> {
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + INACTIVITY_THRESHOLD_MS);
+    const expiresAt = new Date(now.getTime() + PASSIVE_THRESHOLD_MS);
     const session = this.userSessionRepository.create({
       sessionId,
       userId,
@@ -172,7 +171,7 @@ export class AuthService {
       {
         lastActivity: now,
         lastSeen: now,
-        expiresAt: new Date(now.getTime() + INACTIVITY_THRESHOLD_MS)
+        expiresAt: new Date(now.getTime() + PASSIVE_THRESHOLD_MS)
       }
     );
   }
@@ -189,7 +188,7 @@ export class AuthService {
 
   private async generateRefreshToken(userId: number, sessionId: string): Promise<string> {
     const token = crypto.randomBytes(64).toString('hex');
-    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN_MS);
+    const expiresAt = new Date(Date.now() + PASSIVE_THRESHOLD_MS);
     const tokenHash = AuthService.hashToken(token);
     const refreshToken = this.refreshTokenRepository.create({
       tokenHash,
@@ -264,7 +263,7 @@ export class AuthService {
     }
 
     // The expiry check inside findActiveUserSession is the inactivity gate: expiresAt is
-    // always lastActivity plus INACTIVITY_THRESHOLD_MS, so a session that outlives its
+    // always lastActivity plus PASSIVE_THRESHOLD_MS, so a session that outlives its
     // inactivity window is exactly a session whose row has expired. A second comparison
     // against lastActivity used to sit here and could not ever be true.
     const userSession = await this.findActiveUserSession(refreshToken);
