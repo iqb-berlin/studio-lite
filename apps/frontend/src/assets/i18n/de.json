@@ -214,7 +214,7 @@
     "users-not-deleted": "Nutzer:in(en) konnten nicht gelöscht werden",
     "users-active": "{{count}} aktiv.",
     "users-logged-in": "{{count}} angemeldet.",
-    "users-sessions-status": "{{activeSessions}} aktive Sessions, {{passiveSessions}} passive Sessions.",
+    "users-sessions-status": "{{activeSessions}} aktive Sessions, {{passiveSessions}} passive Sessions, {{orphanedSessions}} verwaist.",
     "workspace-groups": "Bereichsgruppen",
     "workspaces": "Arbeitsbereiche",
     "v-modules": "Module",
@@ -234,7 +234,9 @@
     "delete-user": "Soll Nutzer:in \"{{name}}\" gelöscht werden?",
     "delete-users": "Sollen {{count}} Nutzer:innen gelöscht werden?",
     "delete-orphaned-session": "Soll die verwaiste Session \"{{session}}\" von Nutzer:in \"{{name}}\" gelöscht werden?",
-    "orphaned-session-delete-tooltip": "Verwaiste Session (klicken zum Löschen)",
+    "delete-orphaned-sessions": "Sollen alle verwaisten Sessions von Nutzer:in \"{{name}}\" gelöscht werden? Angemeldete Sessions bleiben bestehen.",
+    "orphaned-session-delete-tooltip": "Verwaiste Session – kein Browser mehr geöffnet (klicken zum Löschen)",
+    "clear-orphaned-sessions": "{{count}} verwaiste Session(s) der markierten Nutzer:in entfernen",
     "new-user": "Neue/r Nutzer:in",
     "edit-user": "Nutzer:innen-Daten bearbeiten",
     "password": "Kennwort",
@@ -282,8 +284,6 @@
     "issue-count-info": "Das System verfügt über {{count}} {{issue}}.",
     "generate_password": "Kennwort generieren",
     "and-send-mail": "und E-Mail senden",
-    "delete-passive-sessions": "Alle passiven Sitzungen dieses Nutzers löschen",
-    "delete-passive-sessions-confirm": "Sollen alle passiven Sitzungen von Nutzer:in \"{{name}}\" gelöscht werden?",
     "model": "Model"
   },
   "metadata": {

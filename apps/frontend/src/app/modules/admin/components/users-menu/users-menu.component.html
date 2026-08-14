@@ -11,4 +11,12 @@
           (click)="editUser()">
     <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
   </button>
+  @if (orphanedSessionCount > 0) {
+    <button mat-button
+            [matTooltip]="'admin.clear-orphaned-sessions' | translate: { count: orphanedSessionCount }"
+            (click)="clearOrphanedSessions()"
+            data-cy="admin-users-menu-clear-orphaned-sessions">
+      <studio-lite-wrapped-icon icon="link_off"></studio-lite-wrapped-icon>
+    </button>
+  }
 </div>

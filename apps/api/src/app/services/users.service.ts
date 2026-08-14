@@ -26,7 +26,8 @@ import { UnitUserService } from './unit-user.service';
 import UserSession from '../entities/user-session.entity';
 import {
   ACTIVE_SESSION_THRESHOLD_MS,
-  INACTIVITY_THRESHOLD_MS
+  INACTIVITY_THRESHOLD_MS,
+  ORPHANED_SESSION_THRESHOLD_MS
 } from '../app.constants';
 
 @Injectable()
@@ -441,8 +442,19 @@ export class UsersService {
     // the user (that would let a single request affect all of a user's browsers).
     if (!sessionId) return;
     const now = new Date();
-    const expiresAt = new Date(Date.now() + INACTIVITY_THRESHOLD_MS);
-    await this.userSessionRepository.update({ userId, sessionId }, { lastActivity: now, expiresAt });
+    const expiresAt = new Date(now.getTime() + INACTIVITY_THRESHOLD_MS);
+    await this.userSessionRepository.update(
+      { userId, sessionId },
+      { lastActivity: now, lastSeen: now, expiresAt }
+    );
+  }
+
+  // Counterpart to updateLastActivity for the client's session ping: it proves a tab is
+  // still open, which must not be mistaken for someone interacting with the app. Only
+  // lastSeen moves, so the inactivity gate keeps counting from the last real interaction.
+  async updateLastSeen(userId: number, sessionId?: string): Promise<void> {
+    if (!sessionId) return;
+    await this.userSessionRepository.update({ userId, sessionId }, { lastSeen: new Date() });
   }
 
   private async getSessionStatusByUser(): Promise<Map<number, {
@@ -460,7 +472,8 @@ export class UsersService {
         const sessionInfo: UserSessionInfoDto = {
           sessionId: session.sessionId,
           lastActivity: session.lastActivity,
-          activityStatus: UsersService.calculateSessionStatus(session.lastActivity, nowMs)
+          lastSeen: session.lastSeen,
+          activityStatus: UsersService.calculateSessionStatus(session.lastActivity, session.lastSeen, nowMs)
         };
         const existing = sessionInfosByUser.get(session.userId) || [];
         existing.push(sessionInfo);
@@ -500,11 +513,19 @@ export class UsersService {
     return sessionsByUser;
   }
 
-  private static calculateSessionStatus(lastActivity: Date, nowMs: number): SessionActivityStatus {
+  // Orphaned is decided first and on lastSeen alone: without a tab behind it a session is
+  // abandoned no matter how recently someone worked in it -- that is precisely the row
+  // left behind by a browser closed moments after the last click. Only for a session that
+  // is still alive does it make sense to ask how long ago that click was.
+  private static calculateSessionStatus(
+    lastActivity: Date,
+    lastSeen: Date,
+    nowMs: number
+  ): SessionActivityStatus {
+    if ((nowMs - new Date(lastSeen).getTime()) > ORPHANED_SESSION_THRESHOLD_MS) return 'orphaned';
     const ageMs = nowMs - new Date(lastActivity).getTime();
     if (ageMs <= ACTIVE_SESSION_THRESHOLD_MS) return 'active';
-    if (ageMs <= INACTIVITY_THRESHOLD_MS) return 'passive';
-    return 'orphaned';
+    return 'passive';
   }
 
   private static isSessionStillValid(expiresAt: Date, nowMs: number): boolean {

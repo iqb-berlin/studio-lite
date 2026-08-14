@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { LessThan, Repository } from 'typeorm';
+import { In, LessThan, Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import { UsersService } from './users.service';
 import { ReviewService } from './review.service';
@@ -12,7 +12,7 @@ import UserSession from '../entities/user-session.entity';
 import {
   REFRESH_TOKEN_EXPIRES_IN_MS,
   INACTIVITY_THRESHOLD_MS,
-  ACTIVE_SESSION_THRESHOLD_MS
+  ORPHANED_SESSION_THRESHOLD_MS
 } from '../app.constants';
 
 @Injectable()
@@ -102,6 +102,11 @@ export class AuthService {
     // client-provided sessionId) gets its own session, so distinct browsers stay
     // independent. Same-browser continuity is handled via the explicit
     // existingSessionId that the client derives from the JWT `sid`.
+    //
+    // A session is therefore scoped to one localStorage, not to one browser: two windows
+    // of the same instance share it, while separate instances, private windows and
+    // container tabs each get their own row. Rows left behind by a storage scope nobody
+    // uses any more are what lastSeen exists to expose.
 
     // Reviews do not keep long-lived user sessions.
     if (!user.id) {
@@ -147,23 +152,38 @@ export class AuthService {
   }
 
   private async createUserSession(userId: number, sessionId: string): Promise<void> {
-    const expiresAt = new Date(Date.now() + INACTIVITY_THRESHOLD_MS);
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + INACTIVITY_THRESHOLD_MS);
     const session = this.userSessionRepository.create({
       sessionId,
       userId,
-      lastActivity: new Date(),
+      lastActivity: now,
+      lastSeen: now,
       expiresAt
     });
     await this.userSessionRepository.save(session);
   }
 
+  // A login counts as interaction, so it moves all three timestamps.
   private async updateUserSession(userId: number, sessionId: string): Promise<{ affected?: number }> {
+    const now = new Date();
     return this.userSessionRepository.update(
       { userId, sessionId },
       {
-        lastActivity: new Date(),
-        expiresAt: new Date(Date.now() + INACTIVITY_THRESHOLD_MS)
+        lastActivity: now,
+        lastSeen: now,
+        expiresAt: new Date(now.getTime() + INACTIVITY_THRESHOLD_MS)
       }
+    );
+  }
+
+  // A refresh proves a client is alive, not that anyone interacted: the session ping
+  // triggers one every time the access token has expired. Moving lastActivity here
+  // would keep a forgotten open tab logged in forever and defeat the inactivity gate.
+  private async touchUserSession(userId: number, sessionId: string): Promise<{ affected?: number }> {
+    return this.userSessionRepository.update(
+      { userId, sessionId },
+      { lastSeen: new Date() }
     );
   }
 
@@ -186,22 +206,31 @@ export class AuthService {
     await this.userSessionRepository.delete({ userId, sessionId });
   }
 
-  async deletePassiveSessions(userId: number): Promise<void> {
-    const now = new Date();
-    const threshold = new Date(now.getTime() - ACTIVE_SESSION_THRESHOLD_MS);
-    const passiveSessions = await this.userSessionRepository.find({
-      where: { userId, lastActivity: LessThan(threshold) },
+  // Bulk counterpart to logoutOrphanedSession, for a user who has collected several
+  // rows without a browser behind them. Deliberately keyed on lastSeen and not on
+  // lastActivity: a tab that is open but idle for hours is a working session, and
+  // clearing it out would log someone out of the app they are looking at.
+  async deleteOrphanedSessions(userId: number): Promise<number> {
+    const threshold = new Date(Date.now() - ORPHANED_SESSION_THRESHOLD_MS);
+    const orphanedSessions = await this.userSessionRepository.find({
+      where: { userId, lastSeen: LessThan(threshold) },
       select: { sessionId: true }
     });
-    if (passiveSessions.length > 0) {
-      const ids = passiveSessions.map(s => s.sessionId);
-      await this.refreshTokenRepository
-        .createQueryBuilder()
-        .delete()
-        .where('userId = :userId AND sessionId IN (:...ids)', { userId, ids })
-        .execute();
-      await this.userSessionRepository.delete({ userId, lastActivity: LessThan(threshold) });
+    if (orphanedSessions.length === 0) {
+      return 0;
     }
+    // Delete exactly the rows that were found, not everything still matching the
+    // threshold: a backgrounded tab that wakes and pings between the two statements gets
+    // a fresh lastSeen, and a second predicate would spare its row after its refresh
+    // tokens are already gone -- logging that user out and leaving the row behind.
+    const ids = orphanedSessions.map(s => s.sessionId);
+    await this.refreshTokenRepository
+      .createQueryBuilder()
+      .delete()
+      .where('userId = :userId AND sessionId IN (:...ids)', { userId, ids })
+      .execute();
+    const result = await this.userSessionRepository.delete({ userId, sessionId: In(ids) });
+    return result.affected || 0;
   }
 
   async logoutOrphanedSession(userId: number, sessionId: string): Promise<boolean> {
@@ -212,9 +241,13 @@ export class AuthService {
       return false;
     }
 
+    // Orphaned is judged on lastSeen, not lastActivity: a session whose tab is open but
+    // idle must stay, a session whose browser is gone may go. Judging it on lastActivity
+    // made the condition unsatisfiable, because expiresAt is lastActivity plus the very
+    // threshold it was compared against.
     const nowMs = Date.now();
     const isSessionStillValid = new Date(session.expiresAt).getTime() > nowMs;
-    const isOrphaned = (nowMs - new Date(session.lastActivity).getTime()) > INACTIVITY_THRESHOLD_MS;
+    const isOrphaned = (nowMs - new Date(session.lastSeen).getTime()) > ORPHANED_SESSION_THRESHOLD_MS;
     if (!isSessionStillValid || !isOrphaned) {
       return false;
     }
@@ -230,14 +263,12 @@ export class AuthService {
       return null;
     }
 
+    // The expiry check inside findActiveUserSession is the inactivity gate: expiresAt is
+    // always lastActivity plus INACTIVITY_THRESHOLD_MS, so a session that outlives its
+    // inactivity window is exactly a session whose row has expired. A second comparison
+    // against lastActivity used to sit here and could not ever be true.
     const userSession = await this.findActiveUserSession(refreshToken);
     if (!userSession) {
-      return null;
-    }
-
-    const inactivityAge = Date.now() - new Date(userSession.lastActivity).getTime();
-    if (inactivityAge > INACTIVITY_THRESHOLD_MS) {
-      this.logger.log(`Denying refresh for user '${refreshToken.userId}' due to inactivity (${inactivityAge}ms).`);
       return null;
     }
 
@@ -245,16 +276,14 @@ export class AuthService {
     if (!user || !user.name) return null;
 
     // Keep the session identity stable across refreshes: rotate only the refresh
-    // token and refresh the session's activity/expiry, but keep the same sessionId.
-    // Re-creating the session with a new id (or latching onto another browser's
-    // most-recent session) is exactly what collapsed independent browser sessions
-    // into one.
+    // token and record the liveness sign, but keep the same sessionId. Re-creating the
+    // session with a new id (or latching onto another browser's most-recent session) is
+    // exactly what collapsed independent browser sessions into one.
+    // A row that vanished between the lookup above and here was deleted by a logout or
+    // by an admin while this refresh was in flight; re-creating it would undo that.
     const { sessionId } = userSession;
     await this.refreshTokenRepository.delete({ tokenHash: refreshToken.tokenHash });
-    const updateResult = await this.updateUserSession(user.id, sessionId);
-    if (updateResult.affected === 0) {
-      await this.createUserSession(user.id, sessionId);
-    }
+    await this.touchUserSession(user.id, sessionId);
 
     const accessToken = this.jwtService.sign(
       AuthService.getJwtPayload({ id: user.id, name: user.name, reviewId: 0 }, sessionId)

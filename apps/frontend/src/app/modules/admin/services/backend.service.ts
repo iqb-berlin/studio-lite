@@ -145,9 +145,9 @@ export class BackendService {
       );
   }
 
-  deleteUserPassiveSessions(userId: number): Observable<boolean> {
+  deleteUserOrphanedSessions(userId: number): Observable<boolean> {
     return this.http
-      .delete(`${this.serverUrl}admin/users/${userId}/passive-sessions`)
+      .delete(`${this.serverUrl}admin/users/${userId}/orphaned-sessions`)
       .pipe(
         map(() => true),
         catchError(() => of(false))

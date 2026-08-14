@@ -17,7 +17,8 @@ import {
   ACTIVITY_SYNC_THROTTLE_MS,
   USER_ACTIVITY_THROTTLE_MS,
   POST_MESSAGE_ACTIVITY_THROTTLE_MS,
-  AUTO_LOGOUT_REDIRECT_DELAY_MS
+  AUTO_LOGOUT_REDIRECT_DELAY_MS,
+  SESSION_PING_INTERVAL_MS
 } from '../app.constants';
 
 @Injectable({
@@ -152,6 +153,21 @@ export class HeartbeatService implements OnDestroy {
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe();
+
+    // Liveness ping: tells the server that this tab still exists, which no activity
+    // signal can express -- an open but idle tab produces no events at all, so without
+    // this the backend cannot tell it apart from a closed browser and every abandoned
+    // session keeps counting as a working one. Deliberately not gated on
+    // document.visibilityState: a backgrounded tab is still a session someone will come
+    // back to. Browsers throttle background timers to about one run per minute, which
+    // ORPHANED_SESSION_THRESHOLD_MS accounts for.
+    timer(0, SESSION_PING_INTERVAL_MS).pipe(
+      filter(() => (this.appService.authData?.userId || 0) > 0),
+      switchMap(() => this.backendService.sessionPing().pipe(
+        catchError(() => of(null))
+      )),
+      takeUntil(this.ngUnsubscribe)
+    ).subscribe();
 
     this.ngZone.runOutsideAngular(() => {
       merge(

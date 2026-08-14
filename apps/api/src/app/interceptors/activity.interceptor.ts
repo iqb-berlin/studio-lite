@@ -20,7 +20,11 @@ export class ActivityInterceptor implements NestInterceptor {
       (Array.isArray(activityIntentHeader) && activityIntentHeader.includes('user'));
 
     // Ignore background requests that must not extend inactivity windows by default.
+    // /session-ping belongs here above all: it arrives on a timer for as long as a tab is
+    // open, so counting it as activity would keep any forgotten tab logged in forever.
+    // Note that /activity excludes /session-ping's sibling by prefix, not this route.
     const isBackgroundRequest = request.url.includes('/refresh') ||
+                                request.url.includes('/session-ping') ||
                                 request.url.includes('/activity');
 
     // The admin users polling endpoint only counts as activity when explicitly flagged.
