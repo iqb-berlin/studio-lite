@@ -51,6 +51,8 @@ describe('ActivityInterceptor (integration)', () => {
 
     it.each([
       ['refresh', AppController.prototype.refresh],
+      ['logout', AppController.prototype.logout],
+      ['logoutSilent', AppController.prototype.logoutSilent],
       ['activity', AppController.prototype.activity],
       ['sessionPing', AppController.prototype.sessionPing]
     ])('should mark %s as always background', (_name, handler) => {

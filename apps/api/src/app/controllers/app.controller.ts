@@ -61,6 +61,9 @@ export class AppController {
     return tokens;
   }
 
+  // The session row is deleted a moment later; recording interaction on it first is a
+  // write that races its own delete. Also matches how the frontend classifies it.
+  @BackgroundRequest()
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -78,6 +81,8 @@ export class AppController {
     await this.authService.logout(userId);
   }
 
+  // Unauthenticated sibling of logout: never carries a user, marked for symmetry.
+  @BackgroundRequest()
   @Post('logout-silent')
   @ApiTags('auth')
   @ApiOkResponse({ description: 'Session logout handled silently.' })
