@@ -192,8 +192,19 @@ export class AppController {
   }
 
   // Liveness only: the client sends this on a timer for as long as a tab is open, even
-  // when nobody is interacting. It must not count as activity, or a forgotten open tab
-  // would stay logged in forever.
+  // when nobody is interacting.
+  //
+  // There was an earlier /ping endpoint, removed on purpose in #1516 because its job was
+  // to KEEP A SESSION ALIVE and the admin list's own poll already did that. This one has
+  // the opposite job: it reports that a tab exists and must never extend anything. It
+  // writes lastSeen alone -- not lastActivity, not expiresAt -- so the inactivity window
+  // keeps counting from the last real interaction and a forgotten open tab still expires
+  // on schedule. Two places have to cooperate for that to hold: refreshAccessToken must
+  // not move lastActivity (a ping triggers a refresh once the access token expires), and
+  // ActivityInterceptor must exempt this route from counting as activity.
+  //
+  // Do not reuse this route to prolong a session. If something needs that, it needs a
+  // different endpoint and a decision about the inactivity model first (#1516, point 1).
   @Post('session-ping')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

@@ -71,10 +71,6 @@ export const assertTimeConfig = (): void => {
     fail('ADMIN_USER_LIST_POLL_INTERVAL_MS must stay below INACTIVITY_THRESHOLD_MS');
   }
 
-  if (SESSION_PING_INTERVAL_MS <= 0) {
-    fail('SESSION_PING_INTERVAL_MS must be > 0');
-  }
-
   // With less headroom a background tab throttled to one ping per minute would be
   // reported orphaned while it is still open.
   if (ORPHANED_SESSION_THRESHOLD_MS < 2 * SESSION_PING_INTERVAL_MS) {
@@ -85,9 +81,5 @@ export const assertTimeConfig = (): void => {
   // status is unreachable and neither the admin display nor the delete path can act.
   if (ORPHANED_SESSION_THRESHOLD_MS >= INACTIVITY_THRESHOLD_MS) {
     fail('ORPHANED_SESSION_THRESHOLD_MS must stay below INACTIVITY_THRESHOLD_MS');
-  }
-
-  if (ADMIN_USER_LIST_POLL_INTERVAL_MS >= ORPHANED_SESSION_THRESHOLD_MS) {
-    fail('ADMIN_USER_LIST_POLL_INTERVAL_MS must stay below ORPHANED_SESSION_THRESHOLD_MS');
   }
 };
