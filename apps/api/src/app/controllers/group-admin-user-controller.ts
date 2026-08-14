@@ -14,6 +14,7 @@ import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../services/workspace.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
+import { BackgroundRequest } from '../decorators/background-request.decorator';
 
 @Controller('group-admin/users')
 export class GroupAdminUserController {
@@ -22,6 +23,10 @@ export class GroupAdminUserController {
     private workspaceService: WorkspaceService
   ) {}
 
+  // Polled every 15 s by the admin user list; an open list must not keep its own
+  // session alive. The same route serves the user-triggered refresh, which declares
+  // intent per request -- a route marking alone cannot tell the two apart.
+  @BackgroundRequest('unless-user-intent')
   @Get()
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()

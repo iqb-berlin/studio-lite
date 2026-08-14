@@ -22,6 +22,7 @@ import { UserId } from '../decorators/user-id.decorator';
 import { UserName } from '../decorators/user-name.decorator';
 import { ReviewService } from '../services/review.service';
 import { AppVersionGuard } from '../guards/app-version.guard';
+import { BackgroundRequest } from '../decorators/background-request.decorator';
 
 @Controller()
 export class AppController {
@@ -48,6 +49,8 @@ export class AppController {
     return this.authService.login(req.user, sessionId);
   }
 
+  // Token rotation, no interaction.
+  @BackgroundRequest()
   @Post('refresh')
   @ApiTags('auth')
   @ApiCreatedResponse({ description: 'Token successfully refreshed.' })
@@ -58,6 +61,9 @@ export class AppController {
     return tokens;
   }
 
+  // The session row is deleted a moment later; recording interaction on it first is a
+  // write that races its own delete. Also matches how the frontend classifies it.
+  @BackgroundRequest()
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -75,6 +81,8 @@ export class AppController {
     await this.authService.logout(userId);
   }
 
+  // Unauthenticated sibling of logout: never carries a user, marked for symmetry.
+  @BackgroundRequest()
   @Post('logout-silent')
   @ApiTags('auth')
   @ApiOkResponse({ description: 'Session logout handled silently.' })
@@ -182,6 +190,8 @@ export class AppController {
     return true;
   }
 
+  // The handler itself records the interaction; the interceptor must not write twice.
+  @BackgroundRequest()
   @Post('activity')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -205,6 +215,8 @@ export class AppController {
   //
   // Do not reuse this route to prolong a session. If something needs that, it needs a
   // different endpoint and a decision about the inactivity model first (#1516, point 1).
+  // Liveness only -- see the note on the handler below.
+  @BackgroundRequest()
   @Post('session-ping')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

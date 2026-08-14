@@ -14,6 +14,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 import { AppService } from './app.service';
+import { IS_BACKGROUND_REQUEST, SKIP_TOKEN_REFRESH } from '../interceptors/request-classification';
 
 describe('BackendService', () => {
   let service: BackendService;
@@ -588,6 +589,58 @@ describe('BackendService', () => {
 
       const req = httpMock.expectOne(`${serverUrl}session-ping`);
       expect(req.request.method).toBe('POST');
+      req.flush(null);
+    });
+  });
+
+  // The interceptor reads these from the request context; guessing them from the URL is
+  // what #1517 removed. A method that forgets to declare itself is the failure mode, so
+  // each background and auth call is pinned here.
+  describe('request classification at the call site', () => {
+    it('should mark the activity sync as a background request', done => {
+      service.activity().subscribe(() => done());
+
+      const req = httpMock.expectOne(`${serverUrl}activity`);
+      expect(req.request.context.get(IS_BACKGROUND_REQUEST)).toBe(true);
+      expect(req.request.context.get(SKIP_TOKEN_REFRESH)).toBe(false);
+      req.flush(null);
+    });
+
+    it('should mark the session ping as a background request', done => {
+      service.sessionPing().subscribe(() => done());
+
+      const req = httpMock.expectOne(`${serverUrl}session-ping`);
+      expect(req.request.context.get(IS_BACKGROUND_REQUEST)).toBe(true);
+      expect(req.request.context.get(SKIP_TOKEN_REFRESH)).toBe(false);
+      req.flush(null);
+    });
+
+    it('should keep the login out of the token refresh', () => {
+      service.login('user', 'pw', false).subscribe();
+
+      const req = httpMock.expectOne(`${serverUrl}login`);
+      expect(req.request.context.get(SKIP_TOKEN_REFRESH)).toBe(true);
+      req.flush({ accessToken: 'a', refreshToken: 'r' });
+      httpMock.expectOne(`${serverUrl}auth-data`).flush({});
+    });
+
+    it('should keep the token refresh out of the token refresh', () => {
+      service.refresh('old').subscribe();
+
+      const req = httpMock.expectOne(`${serverUrl}refresh`);
+      expect(req.request.context.get(SKIP_TOKEN_REFRESH)).toBe(true);
+      expect(req.request.context.get(IS_BACKGROUND_REQUEST)).toBe(true);
+      req.flush({ accessToken: 'a', refreshToken: 'r' });
+    });
+
+    it('should mark the logout as background and refresh-free', () => {
+      localStorage.setItem('refresh_token', 'r');
+
+      service.logout();
+
+      const req = httpMock.expectOne(`${serverUrl}logout`);
+      expect(req.request.context.get(IS_BACKGROUND_REQUEST)).toBe(true);
+      expect(req.request.context.get(SKIP_TOKEN_REFRESH)).toBe(true);
       req.flush(null);
     });
   });
