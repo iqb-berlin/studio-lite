@@ -1,96 +1,129 @@
 import { ExecutionContext, CallHandler } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { createMock } from '@golevelup/ts-jest';
 import { of } from 'rxjs';
 import { ActivityInterceptor } from './activity.interceptor';
 import { UsersService } from '../services/users.service';
+import { BACKGROUND_REQUEST_KEY, BackgroundRequestMode } from '../decorators/background-request.decorator';
 
 describe('ActivityInterceptor', () => {
   let interceptor: ActivityInterceptor;
   let usersService: jest.Mocked<Pick<UsersService, 'updateLastActivity'>>;
+  let reflector: jest.Mocked<Pick<Reflector, 'getAllAndOverride'>>;
 
   const contextFor = (
-    url: string,
     user: { id: number, sessionId: string } | undefined,
     headers: Record<string, string | string[]> = {}
   ): ExecutionContext => createMock<ExecutionContext>({
     switchToHttp: () => createMock<ReturnType<ExecutionContext['switchToHttp']>>({
-      getRequest: () => ({ url, user, headers })
+      getRequest: () => ({ user, headers })
     })
   });
 
-  const nextHandler = (): CallHandler => createMock<CallHandler>({
-    handle: () => of(null)
-  });
+  const nextHandler = (): CallHandler => createMock<CallHandler>({ handle: () => of(null) });
+
+  // What the route marking says. undefined = the route carries no marking at all.
+  const markedAs = (mode: BackgroundRequestMode | undefined): void => {
+    reflector.getAllAndOverride.mockReturnValue(mode);
+  };
 
   beforeEach(() => {
     usersService = { updateLastActivity: jest.fn().mockResolvedValue(undefined) };
-    interceptor = new ActivityInterceptor(usersService as unknown as UsersService);
+    reflector = { getAllAndOverride: jest.fn() };
+    interceptor = new ActivityInterceptor(
+      usersService as unknown as UsersService,
+      reflector as unknown as Reflector
+    );
   });
 
-  it('should count an ordinary authenticated request as activity', () => {
-    interceptor.intercept(contextFor('/api/units/1', { id: 1, sessionId: 'sid-1' }), nextHandler());
+  const user = { id: 1, sessionId: 'sid-1' };
+
+  // Both targets are passed so a whole controller can be marked; the handler wins.
+  it('should look the marking up on the handler and the controller', () => {
+    markedAs(undefined);
+
+    interceptor.intercept(contextFor(user), nextHandler());
+
+    const [key, targets] = reflector.getAllAndOverride.mock.calls[0];
+    expect(key).toBe(BACKGROUND_REQUEST_KEY);
+    expect(targets).toHaveLength(2);
+  });
+
+  // An unmarked route is interaction. This is the direction that matters: forgetting a
+  // marking makes a background request count, which is visible, rather than silently
+  // exempting a route nobody meant to exempt.
+  it('should count an unmarked route as activity', () => {
+    markedAs(undefined);
+
+    interceptor.intercept(contextFor(user), nextHandler());
 
     expect(usersService.updateLastActivity).toHaveBeenCalledWith(1, 'sid-1');
   });
 
   it('should ignore unauthenticated requests', () => {
-    interceptor.intercept(contextFor('/api/units/1', undefined), nextHandler());
+    markedAs(undefined);
+
+    interceptor.intercept(contextFor(undefined), nextHandler());
 
     expect(usersService.updateLastActivity).not.toHaveBeenCalled();
   });
 
-  // The liveness ping arrives on a timer for as long as a tab is open. Counting it as
-  // activity would extend the inactivity window forever and keep a forgotten tab
-  // logged in -- which is the whole reason the ping is separate from /activity.
-  it('should not count a session ping as activity', () => {
-    interceptor.intercept(contextFor('/api/session-ping', { id: 1, sessionId: 'sid-1' }), nextHandler());
+  describe("a route marked 'always'", () => {
+    it('should never count as activity', () => {
+      markedAs('always');
 
-    expect(usersService.updateLastActivity).not.toHaveBeenCalled();
-  });
-
-  it('should not count a token refresh as activity', () => {
-    interceptor.intercept(contextFor('/api/refresh', { id: 1, sessionId: 'sid-1' }), nextHandler());
-
-    expect(usersService.updateLastActivity).not.toHaveBeenCalled();
-  });
-
-  it('should not count the activity endpoint itself twice', () => {
-    interceptor.intercept(contextFor('/api/activity', { id: 1, sessionId: 'sid-1' }), nextHandler());
-
-    expect(usersService.updateLastActivity).not.toHaveBeenCalled();
-  });
-
-  describe('the admin users poll', () => {
-    it('should not count as activity without an explicit intent header', () => {
-      interceptor.intercept(
-        contextFor('/api/group-admin/users', { id: 1, sessionId: 'sid-1' }),
-        nextHandler()
-      );
+      interceptor.intercept(contextFor(user), nextHandler());
 
       expect(usersService.updateLastActivity).not.toHaveBeenCalled();
     });
 
-    it('should count as activity when flagged as user intent', () => {
-      interceptor.intercept(
-        contextFor('/api/group-admin/users', { id: 1, sessionId: 'sid-1' }, { 'x-activity-intent': 'user' }),
-        nextHandler()
-      );
+    // A claimed intent must not be able to turn the liveness ping or a token refresh into
+    // interaction -- that would be the forgotten-open-tab-lives-forever bug from #1569.
+    it('should not count even when the caller claims user intent', () => {
+      markedAs('always');
+
+      interceptor.intercept(contextFor(user, { 'x-activity-intent': 'user' }), nextHandler());
+
+      expect(usersService.updateLastActivity).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("a route marked 'unless-user-intent'", () => {
+    it('should not count without an intent header', () => {
+      markedAs('unless-user-intent');
+
+      interceptor.intercept(contextFor(user), nextHandler());
+
+      expect(usersService.updateLastActivity).not.toHaveBeenCalled();
+    });
+
+    it('should count when the request declares user intent', () => {
+      markedAs('unless-user-intent');
+
+      interceptor.intercept(contextFor(user, { 'x-activity-intent': 'user' }), nextHandler());
 
       expect(usersService.updateLastActivity).toHaveBeenCalledWith(1, 'sid-1');
     });
 
     it('should accept the intent flag from a repeated header', () => {
-      interceptor.intercept(
-        contextFor('/api/group-admin/users', { id: 1, sessionId: 'sid-1' }, { 'x-activity-intent': ['other', 'user'] }),
-        nextHandler()
-      );
+      markedAs('unless-user-intent');
+
+      interceptor.intercept(contextFor(user, { 'x-activity-intent': ['other', 'user'] }), nextHandler());
 
       expect(usersService.updateLastActivity).toHaveBeenCalledWith(1, 'sid-1');
+    });
+
+    it('should ignore an intent header with another value', () => {
+      markedAs('unless-user-intent');
+
+      interceptor.intercept(contextFor(user, { 'x-activity-intent': 'poll' }), nextHandler());
+
+      expect(usersService.updateLastActivity).not.toHaveBeenCalled();
     });
   });
 
   it('should pass the request through', done => {
-    interceptor.intercept(contextFor('/api/units/1', { id: 1, sessionId: 'sid-1' }), nextHandler())
-      .subscribe(() => done());
+    markedAs(undefined);
+    interceptor.intercept(contextFor(user), nextHandler()).subscribe(() => done());
   });
 });

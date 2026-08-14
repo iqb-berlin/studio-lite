@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import {
   HttpClient,
+  HttpContext,
   HTTP_INTERCEPTORS,
   provideHttpClient,
   withInterceptorsFromDi
@@ -12,6 +13,9 @@ import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 import { AppHttpError } from '../classes/app-http-error.class';
 import { AuthInterceptor } from './auth.interceptor';
+import {
+  authRequestContext, backgroundRequestContext, logoutContext, tokenRefreshContext
+} from './request-classification';
 
 describe('AuthInterceptor', () => {
   let httpClient: HttpClient;
@@ -69,7 +73,11 @@ describe('AuthInterceptor', () => {
 
   afterEach(() => {
     httpMock.verify();
+    // The interceptor coordinates refreshes across tabs through localStorage; leaving
+    // either key behind makes the next test take the "another tab is refreshing" branch.
     localStorage.removeItem('id_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('st_refresh_lock');
     jest.clearAllMocks();
   });
 
@@ -168,5 +176,78 @@ describe('AuthInterceptor', () => {
 
     expect(backendServiceSpy.logout).toHaveBeenCalled();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
+  });
+
+  // The classification comes from the call site, not from the URL. Every case below uses
+  // the same neutral URL on purpose: a URL-matching interceptor would have to fail these.
+  describe('request classification', () => {
+    const expire = (context?: HttpContext): void => {
+      httpClient.post('/neutral', {}, context ? { context } : {}).subscribe({ error: () => {} });
+      httpMock.expectOne('/neutral').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    };
+
+    it('should refresh the token for an unmarked request that expires', () => {
+      localStorage.setItem('refresh_token', 'old-refresh');
+      backendServiceSpy.refresh.mockReturnValue(of(null));
+
+      expire();
+
+      expect(backendServiceSpy.refresh).toHaveBeenCalled();
+    });
+
+    // A background request is not exempt from the refresh: the liveness ping runs on a
+    // timer past the access token's lifetime, and its 401 is exactly what has to renew it.
+    it('should refresh the token for a background request that expires', () => {
+      localStorage.setItem('refresh_token', 'old-refresh');
+      backendServiceSpy.refresh.mockReturnValue(of({ accessToken: 'new', refreshToken: 'new-r' }));
+
+      httpClient.post('/neutral', {}, { context: backgroundRequestContext() }).subscribe();
+      httpMock.expectOne('/neutral').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+      expect(backendServiceSpy.refresh).toHaveBeenCalled();
+      httpMock.expectOne('/neutral').flush({});
+      expect(appServiceSpy.addErrorMessage).not.toHaveBeenCalled();
+    });
+
+    // Errors other than 401 are faults, not expiry, and stay visible.
+    it('should report a background request that fails for another reason', () => {
+      httpClient.post('/neutral', {}, { context: backgroundRequestContext() })
+        .subscribe({ error: () => {} });
+
+      httpMock.expectOne('/neutral').flush('boom', { status: 500, statusText: 'Server Error' });
+
+      expect(appServiceSpy.addErrorMessage).toHaveBeenCalled();
+    });
+
+    it('should not try to refresh a token for an auth request', () => {
+      localStorage.setItem('refresh_token', 'old-refresh');
+
+      expire(authRequestContext());
+
+      expect(backendServiceSpy.refresh).not.toHaveBeenCalled();
+      // A rejected login is a real answer, so the user has to see it.
+      expect(appServiceSpy.addErrorMessage).toHaveBeenCalled();
+    });
+
+    // Both flags together are the only combination the 401 suppression can reach: the
+    // request skips the refresh, so it falls through to the error path, and being
+    // unattended it must not raise a message there.
+    it('should neither refresh nor report for the token refresh itself', () => {
+      localStorage.setItem('refresh_token', 'old-refresh');
+
+      expire(tokenRefreshContext());
+
+      expect(backendServiceSpy.refresh).not.toHaveBeenCalled();
+      expect(appServiceSpy.addErrorMessage).not.toHaveBeenCalled();
+    });
+
+    it('should neither refresh nor report for a logout', () => {
+      localStorage.setItem('refresh_token', 'old-refresh');
+
+      expire(logoutContext());
+
+      expect(backendServiceSpy.refresh).not.toHaveBeenCalled();
+      expect(appServiceSpy.addErrorMessage).not.toHaveBeenCalled();
+    });
   });
 });
