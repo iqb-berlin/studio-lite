@@ -218,10 +218,10 @@ ALTER TABLE "public"."unit_item_metadata"
 -- A user_session row said when someone last interacted ("last_activity"), but never
 -- whether a browser is still open behind it (#1569). Both questions were answered from
 -- the one column, and since every write set "last_activity" and "expires_at" together,
--- "now - last_activity > INACTIVITY_THRESHOLD" (the "orphaned" state) could only ever be
--- true for a row whose "expires_at" had already passed -- i.e. for a row the display
--- filters out and the cleanup job deletes. The status, its marker in the admin list and
--- the delete endpoint guarded by it were therefore unreachable.
+-- "the last interaction is older than the inactivity window" (the "orphaned" state) could
+-- only ever be true for a row whose "expires_at" had already passed -- i.e. for a row the
+-- display filters out and the cleanup job deletes. The status, its marker in the admin
+-- list and the delete endpoint guarded by it were therefore unreachable.
 --
 -- "last_seen" carries the missing signal: every open tab pings it on a timer regardless
 -- of user interaction, so a row without recent pings has no browser behind it.
