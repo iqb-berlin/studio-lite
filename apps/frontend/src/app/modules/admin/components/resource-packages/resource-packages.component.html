@@ -13,6 +13,7 @@
           [disabled]="!selectedResourcePackages.value.length"
           [matTooltip]="'admin.delete-selected' | translate"
           matTooltipPosition="above"
+          data-cy="admin-packages-delete-selected"
           (click)="deleteSelected()">
     <studio-lite-wrapped-icon icon="delete"></studio-lite-wrapped-icon>
   </button>

@@ -28,6 +28,12 @@
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p apps/frontend-e2e/tsconfig.json --noEmit"
+      }
     }
   },
   "tags": [],

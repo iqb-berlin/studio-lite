@@ -151,4 +151,46 @@ describe('UnitEditorComponent', () => {
 
     expect(store.setData).not.toHaveBeenCalled();
   });
+
+  // Editor spec 4.0 dropped definitionReportPolicy, and EditorConfig is additionalProperties: false
+  // from then on. Editors below that spec version default to 'on-demand' and would wait for a
+  // voeGetDefinitionRequest that this app never sends, so they keep getting the property.
+  describe('postStore', () => {
+    const store = { getData: () => ({ definition: 'def' }) } as unknown as UnitDefinitionStore;
+
+    const editorConfigOf = (target: { postMessage: jest.Mock }) => target.postMessage.mock
+      .calls[0][0].editorConfig;
+
+    it('should send definitionReportPolicy to editors below spec version 4', () => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.editorApiVersion = 3;
+
+      component.postStore(store);
+
+      expect(editorConfigOf(target)).toHaveProperty('definitionReportPolicy', 'eager');
+    });
+
+    it('should omit definitionReportPolicy from spec version 4 on', () => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.editorApiVersion = 4;
+
+      component.postStore(store);
+
+      expect(editorConfigOf(target)).not.toHaveProperty('definitionReportPolicy');
+    });
+
+    it('should keep definitionReportPolicy when the version could not be detected', () => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      // handleIncomingMessage falls back to 2 for an unreadable version -- the safe direction, and the
+      // lowest value that still reaches this branch (1 takes the legacy DataTransfer path instead).
+      component.editorApiVersion = 2;
+
+      component.postStore(store);
+
+      expect(editorConfigOf(target)).toHaveProperty('definitionReportPolicy', 'eager');
+    });
+  });
 });

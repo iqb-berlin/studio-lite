@@ -234,6 +234,22 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
     return major ? Number(major[0]) : 2;
   }
 
+  // Player spec 5.0 dropped stateReportPolicy together with vopGetStateRequest: from then on a player
+  // always sends the full payload, so the property is meaningless -- and the current PlayerConfig
+  // schema no longer lists it.
+  private static readonly STATE_REPORT_POLICY_DROPPED_IN = 5;
+
+  // Players below that spec version still read it, and not sending it is not a no-op for them: the
+  // aspect players of the 1.x line (all declaring apiVersion 3.0.0) fall back to 'none' and then send
+  // no vopStateChangedNotification at all, which leaves the preview without responses or progress.
+  // detectApiVersion falls back to 2 when it cannot read a version, so an unrecognized player keeps
+  // getting the property -- the failure direction that preserves today's behaviour.
+  protected legacyStateReportPolicy(): { stateReportPolicy?: 'eager' } {
+    return this.playerApiVersion < PreviewDirective.STATE_REPORT_POLICY_DROPPED_IN ?
+      { stateReportPolicy: 'eager' } :
+      {};
+  }
+
   handleWidgetCall(data: WidgetCallData): void {
     const loadWidgets$ = Object.keys(this.widgetModuleService.widgets).length === 0 ?
       from(this.widgetModuleService.loadWidgets()) :

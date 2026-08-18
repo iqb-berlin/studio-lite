@@ -10,6 +10,7 @@ import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 import { AppHttpError } from '../classes/app-http-error.class';
 import { SERVER_TIME_OFFSET_DEADBAND_MS } from '../app.constants';
+import { IS_BACKGROUND_REQUEST, SKIP_TOKEN_REFRESH } from './request-classification';
 
 @Injectable({
   providedIn: 'root'
@@ -29,9 +30,7 @@ export class AuthInterceptor implements HttpInterceptor {
     const idToken = localStorage.getItem('id_token');
     let httpErrorInfo: AppHttpError | null = null;
 
-    const isBackgroundRequest = req.url.includes('/refresh') ||
-                                req.url.includes('/activity') ||
-                                req.url.includes('/logout');
+    const isBackgroundRequest = req.context.get(IS_BACKGROUND_REQUEST);
 
     return next.handle(this.addToken(req, idToken))
       .pipe(
@@ -49,10 +48,7 @@ export class AuthInterceptor implements HttpInterceptor {
           }
         }),
         catchError(error => {
-          if (error.status === 401 &&
-              !req.url.includes('login') &&
-              !req.url.includes('refresh') &&
-              !req.url.includes('logout')) {
+          if (error.status === 401 && !req.context.get(SKIP_TOKEN_REFRESH)) {
             return this.handle401Error(req, next, idToken);
           }
           httpErrorInfo = new AppHttpError(error);

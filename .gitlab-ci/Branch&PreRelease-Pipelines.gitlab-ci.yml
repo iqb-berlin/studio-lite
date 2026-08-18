@@ -886,6 +886,22 @@ lint-app:
   script:
     - npx nx affected --base=HEAD~1 --target=lint --parallel=2
 
+# Deliberately NOT allow_failure: the e2e sources are transpiled without type
+# checking (Cypress' webpack) and eslint does not know whether an enum member
+# exists, so a broken call site surfaces nowhere else -- two e2e tests called a
+# renamed IqbProfile member for weeks while tsc had reported the exact lines all
+# along, unheard because nothing ran it (#1586, #1590). This check is fast and
+# deterministic; if it is red, a spec cannot run as written.
+typecheck-app:
+  stage: lint
+  extends: .distributed
+  interruptible: true
+  rules:
+    - !reference [ .default_rules, rules ]
+  image: ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
+  script:
+    - npx nx run frontend-e2e:typecheck
+
 audit-app:
   stage: audit
   interruptible: true

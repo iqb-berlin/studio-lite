@@ -284,6 +284,127 @@ describe('WorkspaceService', () => {
       await service.patchSettings(1, { defaultEditor: 'e' } as WorkspaceSettingsDto);
       expect(ws.settings.defaultEditor).toBe('e');
     });
+
+    // #1570: a client still holding the retired spelling must not undo the
+    // migration of this column.
+    it('canonicalizes the configured profile urls before storing them', async () => {
+      const ws = { id: 1, settings: {} as WorkspaceSettingsDto };
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
+      (unitService.getUnitIdsByWorkspaceId as jest.Mock).mockResolvedValue([]);
+
+      await service.patchSettings(1, {
+        unitMDProfile: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json',
+        itemMDProfile: 'https://w3id.org/iqb/p11/item',
+        defaultEditor: 'e'
+      } as WorkspaceSettingsDto);
+
+      expect(ws.settings.unitMDProfile).toBe('https://w3id.org/iqb/p11/unit/');
+      expect(ws.settings.itemMDProfile).toBe('https://w3id.org/iqb/p11/item/');
+    });
+
+    it('leaves a foreign profile url and absent profile keys alone', async () => {
+      const ws = { id: 1, settings: {} as WorkspaceSettingsDto };
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
+      (unitService.getUnitIdsByWorkspaceId as jest.Mock).mockResolvedValue([]);
+
+      await service.patchSettings(1, {
+        unitMDProfile: 'https://example.org/own/profile.json'
+      } as WorkspaceSettingsDto);
+
+      expect(ws.settings.unitMDProfile).toBe('https://example.org/own/profile.json');
+      expect(ws.settings.itemMDProfile).toBeUndefined();
+    });
+
+    // #1576: replacing the settings blob made every partial PATCH a profile
+    // removal, which hid the metadata of every unit in the workspace.
+    describe('profile reclassification (#1576)', () => {
+      const unitProfile = 'https://w3id.org/iqb/p11/unit/';
+      const itemProfile = 'https://w3id.org/iqb/p11/item/';
+      const storedSettings = () => ({
+        defaultEditor: 'old-editor',
+        unitMDProfile: unitProfile,
+        itemMDProfile: itemProfile
+      } as WorkspaceSettingsDto);
+
+      it('keeps the stored profiles and does not reclassify when the PATCH does not carry the profile keys', async () => {
+        const ws = { id: 1, settings: storedSettings() };
+        (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
+        (unitService.getUnitIdsByWorkspaceId as jest.Mock).mockResolvedValue([7, 8]);
+
+        await service.patchSettings(1, { defaultEditor: 'new-editor' } as WorkspaceSettingsDto);
+
+        expect(ws.settings.defaultEditor).toBe('new-editor');
+        expect(ws.settings.unitMDProfile).toBe(unitProfile);
+        expect(ws.settings.itemMDProfile).toBe(itemProfile);
+        expect(unitService.patchMetadataCurrentProfile).not.toHaveBeenCalled();
+      });
+
+      it('treats an explicitly emptied profile key as removal and reclassifies', async () => {
+        const ws = { id: 1, settings: storedSettings() };
+        (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
+        (unitService.getUnitIdsByWorkspaceId as jest.Mock).mockResolvedValue([7]);
+
+        await service.patchSettings(1, {
+          unitMDProfile: '', itemMDProfile: ''
+        } as WorkspaceSettingsDto);
+
+        expect(ws.settings.unitMDProfile).toBe('');
+        expect(unitService.patchMetadataCurrentProfile).toHaveBeenCalledWith(7, '', '');
+      });
+
+      it('does not reclassify when the same profile arrives in the retired spelling', async () => {
+        const ws = { id: 1, settings: storedSettings() };
+        (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
+        (unitService.getUnitIdsByWorkspaceId as jest.Mock).mockResolvedValue([7]);
+
+        await service.patchSettings(1, {
+          unitMDProfile: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json',
+          itemMDProfile: itemProfile
+        } as WorkspaceSettingsDto);
+
+        expect(unitService.patchMetadataCurrentProfile).not.toHaveBeenCalled();
+        // ...but the stored spelling is still canonicalized
+        expect(ws.settings.unitMDProfile).toBe(unitProfile);
+      });
+
+      it('reclassifies every unit and awaits it before saving on a real profile change', async () => {
+        const calls: string[] = [];
+        const ws = { id: 1, settings: storedSettings() };
+        (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
+        (unitService.getUnitIdsByWorkspaceId as jest.Mock).mockResolvedValue([7, 8]);
+        (unitService.patchMetadataCurrentProfile as jest.Mock).mockImplementation(async () => {
+          calls.push('reclassify');
+        });
+        (workspaceRepository.save as jest.Mock).mockImplementation(async () => {
+          calls.push('save');
+        });
+        const newUnitProfile = 'https://w3id.org/iqb/p12/unit/';
+
+        await service.patchSettings(1, { unitMDProfile: newUnitProfile } as WorkspaceSettingsDto);
+
+        expect(unitService.patchMetadataCurrentProfile).toHaveBeenCalledTimes(2);
+        // The item profile was not part of the request: the kept value is passed
+        // on, so the unchanged side is not reclassified against ''.
+        expect(unitService.patchMetadataCurrentProfile).toHaveBeenCalledWith(7, newUnitProfile, itemProfile);
+        expect(unitService.patchMetadataCurrentProfile).toHaveBeenCalledWith(8, newUnitProfile, itemProfile);
+        expect(calls).toEqual(['reclassify', 'reclassify', 'save']);
+      });
+
+      it('fails the request and does not save the settings when a reclassification fails', async () => {
+        const ws = { id: 1, settings: storedSettings() };
+        (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
+        (unitService.getUnitIdsByWorkspaceId as jest.Mock).mockResolvedValue([7, 8]);
+        (unitService.patchMetadataCurrentProfile as jest.Mock)
+          .mockResolvedValueOnce(undefined)
+          .mockRejectedValueOnce(new Error('db gone'));
+
+        await expect(service.patchSettings(1, {
+          unitMDProfile: 'https://w3id.org/iqb/p12/unit/'
+        } as WorkspaceSettingsDto)).rejects.toThrow('db gone');
+
+        expect(workspaceRepository.save).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('remove', () => {
@@ -646,6 +767,18 @@ describe('WorkspaceService', () => {
         profiles: [{ profileId: 'p1', order: 2, entries: [] }],
         items: []
       });
+    });
+
+    // Profile ids are deliberately NOT rewritten here: UnitService.setCurrentProfiles
+    // canonicalizes them on the way to persistence, and the profile_id column
+    // transformer backstops every writer (#1570).
+    it('passes imported profile ids through unchanged', () => {
+      const github = 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json';
+      const mapped = WorkspaceService.mapImportedMetadata({
+        metadata: [{ profileId: github, entries: [] }]
+      });
+
+      expect(mapped.profiles[0].profileId).toBe(github);
     });
   });
 

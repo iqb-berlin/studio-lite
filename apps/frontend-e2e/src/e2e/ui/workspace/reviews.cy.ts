@@ -276,12 +276,15 @@ describe('Unit Reviews', () => {
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments').should('have.css', 'opacity', '1');
     });
+    // Wait on the request that actually stores the seen-state instead of a
+    // fixed 100ms: under CI load the PATCH regularly took longer, the tab
+    // switch happened first, and the dot legitimately stayed on (#1597).
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/comments').as('markCommentsSeen');
     cy.get('mat-row').contains('M6_AK0012').click();
     clickIndexTabWorkspace('comments');
     cy.get('studio-lite-comments', { timeout: 15000 }).should('be.visible');
-    cy.wait(100);
+    cy.wait('@markCommentsSeen').its('response.statusCode').should('be.within', 200, 299);
     clickIndexTabWorkspace('properties');
-    cy.wait(100);
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments', { timeout: 15000 }).should('have.css', 'opacity', '0');
     });

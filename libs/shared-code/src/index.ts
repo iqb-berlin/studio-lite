@@ -1,6 +1,8 @@
 export { VeronaModuleFactory } from './lib/helper/verona-module.factory';
 export { VeronaModuleKeyCollection } from './lib/helper/verona-module-key-collection.class';
-export { canonicalizeProfileId, profileIdsMatch, isItemProfileId } from './lib/profile-id';
+export {
+  canonicalizeProfileId, profileIdsMatch, isItemProfileId, toW3idProfileId
+} from './lib/profile-id';
 export {
   VERONA_MODULE_TYPES,
   normalizeVeronaModuleType,
@@ -23,12 +25,8 @@ export {
   POST_MESSAGE_ACTIVITY_THROTTLE_MS,
   AUTO_LOGOUT_REDIRECT_DELAY_MS,
   SERVER_TIME_OFFSET_DEADBAND_MS,
-  ACTIVE_SESSION_THRESHOLD_SEC,
-  ACTIVE_SESSION_THRESHOLD_MS,
-  REFRESH_TOKEN_EXPIRES_IN_SEC,
-  INACTIVITY_THRESHOLD_SEC,
-  REFRESH_TOKEN_EXPIRES_IN_MS,
-  INACTIVITY_THRESHOLD_MS,
+  SESSION_PING_INTERVAL_MS,
+  ORPHANED_SESSION_THRESHOLD_MS,
   JWT_EXPIRES_IN,
   assertTimeConfig
 } from './lib/time.constants';

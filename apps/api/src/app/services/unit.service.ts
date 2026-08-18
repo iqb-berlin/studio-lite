@@ -22,7 +22,7 @@ import {
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { LanguageCodedText } from '@iqbspecs/metadata-profile';
 import {
-  orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId
+  orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId, toW3idProfileId
 } from '@studio-lite/shared-code';
 import { combineNotationAndLabel } from '../classes/metadata-value.util';
 import Workspace from '../entities/workspace.entity';
@@ -456,9 +456,19 @@ export class UnitService {
     return user.firstName && user.firstName.trim() ? `${displayName}, ${user.firstName.trim()}` : displayName;
   }
 
+  // Also canonicalizes the profile id to its w3id form (#1570). setCurrentProfiles
+  // sits on every path that reads or writes a metadata block — the units read
+  // (including the legacy unit.metadata blob, which the 19.0.0 migration deliberately
+  // leaves alone: rewriting its two nested profile arrays in jsonb would be the
+  // riskiest statement of the changelog, for data that is canonical on every read
+  // anyway and moves into the normalized tables on the next save), the metadata
+  // save, the unit copy and the import — so a single rewrite
+  // here is what makes the form, hideNumbering and the export agree on one
+  // spelling even for units whose metadata was never re-saved.
   private static setCurrentProfile<T extends ProfileValues>(profileId: string, profile: T): T {
     return {
       ...profile,
+      profileId: toW3idProfileId(profile.profileId),
       order: orderFromCurrent(profileIdsMatch(profile.profileId, profileId))
     };
   }

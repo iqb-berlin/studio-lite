@@ -9,15 +9,25 @@
  * A profile's stored `profileId` can therefore use a different spelling than a
  * workspace's configured profile URL even though both denote the same profile
  * (e.g. after a profile switches its self-id from the github to the w3id form).
- * Without canonicalization the exact-string comparison used for `isCurrent` would
- * treat them as different and orphan the existing metadata.
+ * Without canonicalization the exact-string comparison used when deriving a
+ * profile's `order` (active vs. hidden) would treat them as different and
+ * orphan the existing metadata.
  *
  * canonicalizeProfileId reduces both known spellings of the SAME profile to one
  * stable key. Unknown URL forms are returned unchanged, so any other comparison
  * falls back to an exact match — this never equates two different profiles.
  */
-const W3ID_PROFILE = /w3id\.org\/iqb\/(p\d+)\/([a-z]+)\/?$/i;
-const GITHUB_PROFILE = /iqb-vocabs\/(p\d+)\/master\/([a-z]+)\.json$/i;
+// Both spellings are anchored on the hosts the w3id rewrite rule actually names,
+// so a self-hosted copy of a profile is never silently equated with — or rewritten
+// to — the official one. Scheme and the `www.` alias are accepted as variants of
+// the same id and normalized away by toW3idProfileId.
+// `refs/heads/master` is the spelling github's "copy raw file" button produces; it
+// serves the same document as the shorter `master` form and is therefore accepted
+// as the same id — the registry url an admin pasted by hand is regularly in that form.
+const W3ID_PROFILE = /^https?:\/\/(?:www\.)?w3id\.org\/iqb\/(p\d+)\/([a-z]+)\/?$/i;
+const GITHUB_PROFILE =
+  /^https?:\/\/raw\.githubusercontent\.com\/iqb-vocabs\/(p\d+)\/(?:refs\/heads\/)?master\/([a-z]+)\.json$/i;
+const CANONICAL_PROFILE_KEY = /^iqb:(p\d+):([a-z]+)$/;
 
 export function canonicalizeProfileId(profileId: string): string {
   if (!profileId) return profileId;
@@ -34,6 +44,35 @@ export function profileIdsMatch(
 ): boolean {
   if (!a || !b) return a === b;
   return canonicalizeProfileId(a) === canonicalizeProfileId(b);
+}
+
+/**
+ * Rewrites any recognized spelling of an IQB profile id into the ONE canonical
+ * w3id form — the exact inverse of the w3id rewrite rule above:
+ *
+ *   https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json
+ *     -> https://w3id.org/iqb/p11/unit/
+ *   https://w3id.org/iqb/p11/unit  (no trailing slash, www., http)
+ *     -> https://w3id.org/iqb/p11/unit/
+ *
+ * Anything canonicalizeProfileId does not recognize — foreign hosts, self-hosted
+ * copies, store urls, empty values — is returned unchanged. Built on top of
+ * canonicalizeProfileId so exactly one pair of patterns defines what an IQB
+ * profile id is: comparison and rewriting can never drift apart.
+ *
+ * Because this produces a single spelling, downstream comparisons can stay exact
+ * (===) as long as both sides pass through here (#1570).
+ */
+export function toW3idProfileId(profileId: string): string {
+  if (!profileId) return profileId;
+  const canonical = canonicalizeProfileId(profileId);
+  // Only a value canonicalizeProfileId actually RECOGNIZED may be rewritten. It
+  // returns anything else unchanged — including a string that happens to be spelled
+  // like the internal key (`iqb:p11:unit`), which a client could otherwise post to
+  // have it promoted into the official profile url.
+  if (canonical === profileId) return profileId;
+  const key = CANONICAL_PROFILE_KEY.exec(canonical);
+  return key ? `https://w3id.org/iqb/${key[1]}/${key[2]}/` : profileId;
 }
 
 /**

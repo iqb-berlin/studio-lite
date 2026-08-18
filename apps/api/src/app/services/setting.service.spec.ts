@@ -165,6 +165,15 @@ describe('SettingService', () => {
       const result = await service.findUnitProfilesRegistry();
       expect(result).toBeInstanceOf(ProfilesRegistryDto);
     });
+
+    // Pins the default: it is the w3id permanent identifier of the registry, not
+    // the redirect target, and changeset 7 of the 19.0.0 migration moves stored
+    // settings onto exactly this value (#1570).
+    it('defaults to the canonical w3id registry url', async () => {
+      settingsRepository.findOne.mockResolvedValue(null);
+      const result = await service.findUnitProfilesRegistry();
+      expect(result.csvUrl).toBe('https://w3id.org/iqb/metadata-registry');
+    });
   });
 
   describe('patchProfilesRegistry', () => {

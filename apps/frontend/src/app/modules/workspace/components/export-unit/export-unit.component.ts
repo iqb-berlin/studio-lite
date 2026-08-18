@@ -44,6 +44,7 @@ export class ExportUnitComponent {
     addTestTakersMonitor: 0,
     addTestTakersHot: 0,
     passwordLess: false,
+    bookletId: 'booklet1',
     bookletLabel: 'Testheft 1',
     groupLabel: 'Gruppe 1',
     bookletSettings: []

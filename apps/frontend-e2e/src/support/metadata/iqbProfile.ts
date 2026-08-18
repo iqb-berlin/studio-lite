@@ -1,21 +1,27 @@
 export enum IqbProfile {
-  MA = 'Mathematik Primar',
-  DE = 'Deutsch Primar',
-  EN = 'Englisch Sek I',
-  FR = 'Französisch Sek I'
+  MAu = 'IQB Mathematik Primar - Aufgabe',
+  MAi = 'IQB Mathematik Primar - Item',
+  DEu = 'IQB Deutsch Primar - Aufgabe',
+  DEi = 'IQB Deutsch Primar - Item',
+  ENu = 'IQB Englisch Sek I - Aufgabe',
+  ENi = 'IQB Englisch Sek I - Item',
+  FRu = 'IQB Französisch Sek I - Aufgabe',
+  FRi = 'IQB Französisch Sek I - Item'
 }
 // eslint-disable-next-line
 export const IqbProfileExamples = new Map <string, any>([
-  ['uMA', new Map<string, string>([['Entwickler:in', 'Elsa Mignon'], ['Für SPF geeignet', 'true'],
+  ['uMA', new Map<string, string>([['Entwickler:in', 'Elsa Mignon'], ['Klassenstufe', '4'],
+    ['Für SPF geeignet', 'true'],
     ['Kopfhörereinsatz', 'nein'], ['Leitidee', 'Größen und Messen'], ['Aufgabenzeit', '1:30'],
-    ['Stimuluszeit', '1:00'], ['Quellenangaben', 'Es war einmal Mathe'], ['Unverträgliche Aufgaben', 'Ja'],
-    ['Techinische Besonderheiten der Antwortoptionen', 'Bild']])],
-  ['uDE', new Map<string, string>([['Entwickler:in', 'Elsa Magna'], ['Für SPF geeignet', 'true'],
+    ['Stimuluszeit', '1:00'], ['Quellenangaben', 'Es war einmal Mathe'],
+    ['Unverträgliche Aufgaben', 'Ja']])],
+  ['uDE', new Map<string, string>([['Entwickler:in', 'Elsa Magna'], ['Klassenstufe', '4'],
+    ['Für SPF geeignet', 'true'],
     ['Kopfhörereinsatz', 'optional'],
     ['Kompetenzbereich', 'Schreiben'], ['Aufgabenzeit', '2:30'], ['Quellenangaben', 'Es war einmal Deutsch'],
     ['Textsorte', 'expositorisch'], ['Wortanzahl', '100'], ['Stimuluszeit', '2:00'],
-    ['Hörsequenz Transkript', 'Die Gesichte vom...'], ['Unverträgliche Aufgaben', 'Ja'],
-    ['Techinische Besonderheiten der Antwortoptionen', 'Bild']])],
+    ['Hörsequenz Transkript', 'Die Gesichte vom...'],
+    ['Unverträgliche Aufgaben', 'Ja']])],
   ['uEN', new Map<string, string>([['Textniveau (GeR)', 'A1'],
     ['Lexiko-Grammatik', 'einzelne komplexe Elemente'], ['Abstraktionsgrad', 'einzelne abstrakte Elemente'],
     ['Thematischer Vertrautheitsgrad', 'weitestgehend vertraut'], ['Textsorte', 'Bookstagram'],
@@ -34,10 +40,12 @@ export const IqbProfileExamples = new Map <string, any>([
     ['Transkript zur Aufgabe', 'Französich transkript']])],
   ['iMA', new Map<string, string>([['Item ID', '01'], ['Notiz', 'etwas Mathe'],
     ['Itemformat', 'Zuordnen'], ['Anforderungsbereich', '2'], ['Itemzeit', '1:00'],
-    ['Geschätzte Schwierigkeit', 'hoch']])],
+    ['Geschätzte Schwierigkeit', 'hoch'],
+    ['Technische Besonderheiten der Antwortoptionen', 'Bild']])],
   ['iDE', new Map<string, string>([['Item ID', '02'], ['Notiz', 'etwas Deutsch'],
     ['Itemformat', 'Markieren'], ['Anforderungsbereich', '1'], ['Itemzeit', '2:00'],
-    ['Geschätzte Schwierigkeit', 'mittel']])],
+    ['Geschätzte Schwierigkeit', 'mittel'],
+    ['Technische Besonderheiten der Antwortoptionen', 'Bild']])],
   ['iEN', new Map<string, string>([['Item ID', '01'], ['Notiz', 'etwas Englisch'],
     ['Lese-/Hörstil', 'selektiv'], ['Geschätzte GeR Niveaustufe (a priori)', 'B2'],
     ['Empirisch ermittelte GeR Niveaustufe', 'B1.1'], ['Itemformat', 'Table Completion(TC)'], ['Bildungsstandards ESA',
@@ -65,3 +73,16 @@ export const RegistryProfile = new Map<string, string>([
   ['iEN', 'https://raw.githubusercontent.com/iqb-vocabs/p52/master/item.json'],
   ['iFR', 'https://raw.githubusercontent.com/iqb-vocabs/p53/master/item.json']
 ]);
+
+/*
+TODO
+ It should be updated once we replace internally the profile Url
+  ['uMA', 'https://w3id.org/iqb/p11/unit/'],
+  ['uDE', 'https://w3id.org/iqb/p12/unit/'],
+  ['uEN', 'https://w3id.org/iqb/p53/unit/'],
+  ['uFR', 'https://w3id.org/iqb/p52/unit/'],
+  ['iMA', 'https://w3id.org/iqb/p11/item/'],
+  ['iDE', 'https://w3id.org/iqb/p12/item/'],
+  ['iEN', 'https://w3id.org/iqb/p53/item/'],
+  ['iFR', 'https://w3id.org/iqb/p52/item/']
+ */

@@ -193,8 +193,8 @@ describe('ExportUnitComponent', () => {
     expect(component.unitExportSettings.bookletSettings.map(s => s.key)).toContain('toolbar_show_unit_title');
   });
 
-  it('should initialize bookletId as undefined and prefill bookletLabel and groupLabel', () => {
-    expect(component.unitExportSettings.bookletId).toBeUndefined();
+  it('should prefill bookletId, bookletLabel and groupLabel', () => {
+    expect(component.unitExportSettings.bookletId).toBe('booklet1');
     expect(component.unitExportSettings.bookletLabel).toBe('Testheft 1');
     expect(component.unitExportSettings.groupLabel).toBe('Gruppe 1');
   });

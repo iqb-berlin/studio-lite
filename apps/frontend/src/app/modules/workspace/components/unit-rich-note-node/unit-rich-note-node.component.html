@@ -5,7 +5,7 @@
       <h3>{{ node.label | getLocalizedValue }}</h3>
     </div>
     @if (canWrite && node.tagId !== 'unassigned') {
-      <button mat-icon-button (click)="addNote.emit(node.tagId)" [title]="'workspace.add-rich-note' | translate">
+      <button mat-icon-button (click)="addNote.emit(node.tagId)" [title]="'workspace.add-rich-note' | translate" data-cy="rich-note-add">
         <mat-icon>add</mat-icon>
       </button>
     }
@@ -18,10 +18,10 @@
           <div class="note-item">
             @if (canWrite) {
               <div class="note-item-actions">
-                <button mat-icon-button (click)="editNote.emit(note)" [title]="'edit' | translate">
+                <button mat-icon-button (click)="editNote.emit(note)" [title]="'edit' | translate" data-cy="rich-note-edit">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" (click)="deleteNote.emit(note.id)" [title]="'delete' | translate">
+                <button mat-icon-button color="warn" (click)="deleteNote.emit(note.id)" [title]="'delete' | translate" data-cy="rich-note-delete">
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>

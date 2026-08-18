@@ -15,6 +15,9 @@ import {
   EmailTemplateDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
+import {
+  authRequestContext, backgroundRequestContext, logoutContext, tokenRefreshContext
+} from '../interceptors/request-classification';
 
 @Injectable({
   providedIn: 'root'
@@ -30,11 +33,13 @@ export class BackendService {
   login(name: string, password: string, initLoginMode: boolean): Observable<boolean> {
     const sessionId = BackendService.getSessionIdFromToken();
     return this.http.post<{ accessToken: string, refreshToken: string }>(
-      `${this.serverUrl}${initLoginMode ? 'init-login' : 'login'}`, {
+      `${this.serverUrl}${initLoginMode ? 'init-login' : 'login'}`,
+      {
         username: name,
         password: password,
         sessionId
-      }
+      },
+      { context: authRequestContext() }
     )
       .pipe(
         catchError(() => of(false)),
@@ -63,7 +68,8 @@ export class BackendService {
   refresh(refreshToken: string): Observable<{ accessToken: string, refreshToken: string } | null> {
     return this.http.post<{ accessToken: string, refreshToken: string }>(
       `${this.serverUrl}refresh`,
-      { refreshToken }
+      { refreshToken },
+      { context: tokenRefreshContext() }
     ).pipe(
       catchError(() => of(null))
     );
@@ -91,14 +97,16 @@ export class BackendService {
   logout(): void {
     const refreshToken = localStorage.getItem('refresh_token');
     if (refreshToken) {
-      this.http.post(`${this.serverUrl}logout`, { refreshToken }).subscribe({
+      this.http.post(`${this.serverUrl}logout`, { refreshToken }, { context: logoutContext() }).subscribe({
         error: () => {
           // If JWT is expired, try silent logout with refresh token
-          this.http.post(`${this.serverUrl}logout-silent`, { refreshToken }).subscribe();
+          this.http
+            .post(`${this.serverUrl}logout-silent`, { refreshToken }, { context: logoutContext() })
+            .subscribe();
         }
       });
     } else {
-      this.http.post(`${this.serverUrl}logout`, {}).subscribe();
+      this.http.post(`${this.serverUrl}logout`, {}, { context: logoutContext() }).subscribe();
     }
     localStorage.removeItem('id_token');
     localStorage.removeItem('refresh_token');
@@ -178,9 +186,9 @@ export class BackendService {
       );
   }
 
-  deleteUserPassiveSessions(userId: number): Observable<boolean> {
+  deleteUserOrphanedSessions(userId: number): Observable<boolean> {
     return this.http
-      .delete(`${this.serverUrl}admin/users/${userId}/passive-sessions`)
+      .delete(`${this.serverUrl}admin/users/${userId}/orphaned-sessions`)
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -202,7 +210,11 @@ export class BackendService {
   }
 
   activity(): Observable<void> {
-    return this.http.post<void>(`${this.serverUrl}activity`, {});
+    return this.http.post<void>(`${this.serverUrl}activity`, {}, { context: backgroundRequestContext() });
+  }
+
+  sessionPing(): Observable<void> {
+    return this.http.post<void>(`${this.serverUrl}session-ping`, {}, { context: backgroundRequestContext() });
   }
 
   private static getSessionIdFromToken(): string | undefined {

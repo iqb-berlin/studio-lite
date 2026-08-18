@@ -54,7 +54,7 @@ describe('MetadataService', () => {
           {
             entries: [
               {
-                type: 'vocabulary',
+                type: 'VOCABULARY',
                 parameters: { url: 'v1' }
               }
             ]
@@ -95,6 +95,89 @@ describe('MetadataService', () => {
       backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of(true));
       const result = await service.loadProfileVocabularies({ id: 'p1', groups: [] } as unknown as MDProfile);
       expect(result).toBe(false);
+    });
+
+    it('should keep the vocabularies that loaded when one of them is null', async () => {
+      const mockProfile = {
+        id: 'p1',
+        groups: [
+          {
+            entries: [
+              { type: 'VOCABULARY', parameters: { url: 'v1' } },
+              { type: 'VOCABULARY', parameters: { url: 'v2' } }
+            ]
+          }
+        ]
+      } as unknown as MDProfile;
+
+      const mockVocabs = [
+        {
+          id: 'v2',
+          hasTopConcept: [
+            { id: 'c2', prefLabel: { de: 'Label 2' } } as TopConcept
+          ]
+        } as MetadataVocabularyDto,
+        null
+      ] as MetadataVocabularyDto[];
+
+      backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of(mockVocabs));
+
+      const result = await service.loadProfileVocabularies(mockProfile);
+
+      // false reports the gap, but what did load stays usable
+      expect(result).toBe(false);
+      expect(service.vocabularies.length).toBe(1);
+      expect(service.vocabularies[0].url).toBe('v2');
+      // eslint-disable-next-line @typescript-eslint/dot-notation
+      expect(service.idLabelDictionary['c2']).toBeDefined();
+    });
+
+    /**
+     * The fixtures above carry the spelling real profiles use, 'VOCABULARY' — the only one
+     * the metadata-profile schema allows since spec 0.10. This case guards the other
+     * direction: a document from before that spec must still map, because the upstream
+     * `type: string` cannot rule it out and a silent miss here empties every dictionary.
+     */
+    it('should also map entries that spell the type in the pre-0.10 lower case', async () => {
+      const mockProfile = {
+        id: 'p1',
+        groups: [
+          {
+            entries: [
+              { type: 'vocabulary', parameters: { url: 'v1' } }
+            ]
+          }
+        ]
+      } as unknown as MDProfile;
+
+      const mockVocabs = [
+        {
+          id: 'v1',
+          hasTopConcept: [
+            { id: 'c1', prefLabel: { de: 'Label 1' } } as TopConcept
+          ]
+        } as MetadataVocabularyDto
+      ];
+
+      backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of(mockVocabs));
+
+      const result = await service.loadProfileVocabularies(mockProfile);
+
+      expect(result).toBe(true);
+      // eslint-disable-next-line @typescript-eslint/dot-notation
+      expect(service.vocabulariesIdDictionary['c1']).toBeDefined();
+    });
+
+    it('should ignore a vocabulary without an id', async () => {
+      const mockVocabs = [
+        { hasTopConcept: [] } as unknown as MetadataVocabularyDto
+      ];
+      backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of(mockVocabs));
+
+      const result = await service.loadProfileVocabularies({ id: 'p1', groups: [] } as unknown as MDProfile);
+
+      expect(result).toBe(false);
+      expect(service.vocabularies.length).toBe(0);
     });
   });
 

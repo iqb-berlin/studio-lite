@@ -113,4 +113,15 @@ describe('AdminUserController', () => {
       await expect(controller.removeSession(1, 'session-1')).rejects.toThrow('Only orphaned sessions can be deleted.');
     });
   });
+
+  describe('removeOrphanedSessions', () => {
+    it('should clear every orphaned session of the user and report the count', async () => {
+      authService.deleteOrphanedSessions.mockResolvedValue(3);
+
+      const result = await controller.removeOrphanedSessions(1);
+
+      expect(authService.deleteOrphanedSessions).toHaveBeenCalledWith(1);
+      expect(result).toBe(3);
+    });
+  });
 });

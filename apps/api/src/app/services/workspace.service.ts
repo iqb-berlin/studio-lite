@@ -22,7 +22,7 @@ import {
   UnitCommentDto,
   UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
-import { orderFromCurrent } from '@studio-lite/shared-code';
+import { orderFromCurrent, profileIdsMatch, toW3idProfileId } from '@studio-lite/shared-code';
 import * as AdmZip from 'adm-zip';
 import {
   VariableCodingData,
@@ -702,6 +702,29 @@ export class WorkspaceService {
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
+  // The configured profile urls are canonicalized before anything else looks at
+  // them: checkForProfileUpdate and the mat-select in the settings dialog compare
+  // them exactly against the ids stored on the metadata, so a client still
+  // holding the retired github spelling must not put it back into the column the
+  // 19.0.0 migration just rewrote (#1570).
+  static normalizeProfileSettings(settings: WorkspaceSettingsDto): WorkspaceSettingsDto {
+    if (!settings) return settings;
+    return {
+      ...settings,
+      ...(settings.unitMDProfile && { unitMDProfile: toW3idProfileId(settings.unitMDProfile) }),
+      ...(settings.itemMDProfile && { itemMDProfile: toW3idProfileId(settings.itemMDProfile) })
+    };
+  }
+
+  // PATCH, not PUT: a key the request does not carry keeps its stored value.
+  // Replacing the whole blob turned every partial request into a removal — a
+  // PATCH that only changed defaultEditor arrived without the profile keys,
+  // counted as "profile removed", and hid the metadata of every unit in the
+  // workspace (order = -1, gone from the export) (#1576). Removing a profile
+  // deliberately still works: send the key with null or ''. The distinction is
+  // reliable because no ValidationPipe instantiates the DTO — the body arrives
+  // as parsed JSON, where an absent key is undefined and JSON cannot encode
+  // undefined explicitly.
   async patchSettings(
     id: number,
     settings: WorkspaceSettingsDto
@@ -709,9 +732,27 @@ export class WorkspaceService {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
-    await this.checkForProfileUpdate(workspaceToUpdate, settings);
-    workspaceToUpdate.settings = settings;
+    const normalizedSettings = WorkspaceService.normalizeProfileSettings(settings);
+    const mergedSettings: WorkspaceSettingsDto = {
+      ...workspaceToUpdate.settings,
+      ...WorkspaceService.definedSettings(normalizedSettings)
+    };
+    // Reclassify first, save after: if a unit update fails, the request fails
+    // visibly and the stored settings still name the profile the metadata was
+    // classified under. The reverse order would commit settings whose
+    // reclassification never happened — silently, since nothing awaited it.
+    await this.checkForProfileUpdate(workspaceToUpdate, mergedSettings);
+    workspaceToUpdate.settings = mergedSettings;
     await this.workspacesRepository.save(workspaceToUpdate);
+  }
+
+  // Guards the merge above against non-JSON callers (tests, future internal
+  // use) that could pass explicitly-undefined keys: spreading those would
+  // overwrite stored values with undefined.
+  private static definedSettings(settings: WorkspaceSettingsDto): Partial<WorkspaceSettingsDto> {
+    return Object.fromEntries(
+      Object.entries(settings ?? {}).filter(([, value]) => value !== undefined)
+    ) as Partial<WorkspaceSettingsDto>;
   }
 
   async remove(id: number | number[]): Promise<void> {
@@ -1120,6 +1161,8 @@ export class WorkspaceService {
   // carry the obsolete boolean `isCurrent` on each profile. Derive `order` from
   // it (true -> 0, false -> -1) and drop the flag so the imported structure
   // matches the current model. A profile that already carries `order` keeps it.
+  // Profile ids are left as imported; UnitService.setCurrentProfiles rewrites the
+  // legacy github spelling to w3id on the way to persistence (#1570).
   private static normalizeLegacyProfileOrder(metadata: UnitMetadataValues): UnitMetadataValues {
     if (!metadata || typeof metadata !== 'object') return metadata;
     const mapProfile = (profile: ProfileValues & { isCurrent?: boolean }): ProfileValues => {
@@ -1233,27 +1276,38 @@ export class WorkspaceService {
     };
   }
 
+  // Compared via profileIdsMatch, not string equality: a stored github spelling
+  // and an incoming w3id of the same profile are the same configuration, and
+  // reclassifying on a spelling change would be wrong — patchMetadataCurrentProfile
+  // matches by the same canonicalization downstream. Both sides coalesce to ''
+  // so that "never configured" (undefined) and "explicitly removed" (null/'')
+  // count as the same absent state instead of as a change.
   private async checkForProfileUpdate(
     workspace: Workspace,
     newSettings: WorkspaceSettingsDto
-  ) {
-    if (
-      (workspace.settings?.itemMDProfile &&
-        workspace.settings?.itemMDProfile !== newSettings?.itemMDProfile) ||
-      (workspace.settings?.unitMDProfile &&
-        workspace.settings?.unitMDProfile !== newSettings?.unitMDProfile) ||
-      (!workspace.settings?.itemMDProfile && newSettings?.itemMDProfile) ||
-      (!workspace.settings?.unitMDProfile && newSettings?.unitMDProfile)
-    ) {
-      const unitIds = await this.unitService.getUnitIdsByWorkspaceId(
-        workspace.id
-      );
-      unitIds.map(async unitId => this.unitService.patchMetadataCurrentProfile(
+  ): Promise<void> {
+    const unitProfileChanged = !profileIdsMatch(
+      workspace.settings?.unitMDProfile ?? '',
+      newSettings?.unitMDProfile ?? ''
+    );
+    const itemProfileChanged = !profileIdsMatch(
+      workspace.settings?.itemMDProfile ?? '',
+      newSettings?.itemMDProfile ?? ''
+    );
+    if (!unitProfileChanged && !itemProfileChanged) return;
+    const unitIds = await this.unitService.getUnitIdsByWorkspaceId(
+      workspace.id
+    );
+    // Awaited on purpose. Fire-and-forget left the reclassification racing the
+    // settings save with no error path at all — a failure mid-way meant settings
+    // on the new profile, part of the units still classified under the old one,
+    // and an unhandled rejection as the only trace (#1576).
+    await Promise.all(
+      unitIds.map(unitId => this.unitService.patchMetadataCurrentProfile(
         unitId,
-        newSettings.unitMDProfile,
-        newSettings.itemMDProfile
-      )
-      );
-    }
+        newSettings?.unitMDProfile,
+        newSettings?.itemMDProfile
+      ))
+    );
   }
 }

@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, TestBed, fakeAsync, tick
+} from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatCheckboxModule, MatCheckboxChange } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -130,11 +132,33 @@ describe('ProfilesComponent', () => {
     expect(component.isLoading).toBe(false);
   });
 
-  it('isChecked should return true if profile is selected', () => {
-    component.profilesSelected = [{ id: 'p1', label: 'P1' }];
-    expect(component.isChecked('p1')).toBe(true);
-    expect(component.isChecked('p2')).toBe(false);
+  // The backend yields a null entry for every registry url it could not fetch.
+  // Dereferencing it used to throw inside the stream and leave the panel spinning
+  // with no message — likely right after an upgrade, when the cache is empty.
+  // fakeAsync/tick does not settle the nested Promise.all in loadProfiles, so this
+  // follows the pattern the neighbouring async tests in this file already use.
+  it('skips registry entries the backend could not fetch instead of hanging', async () => {
+    (mockMetadataBackendService.getRegisteredProfiles as jest.Mock)
+      .mockReturnValue(of([null, ...mockRegisteredProfiles]));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await new Promise<void>(resolve => { setTimeout(() => resolve(), 10); });
+    fixture.detectChanges();
+
+    expect(component.isLoading).toBe(false);
+    expect(component.profileStoresWithProfiles.length).toBe(1);
   });
+
+  it('stops loading when the registry lists no profiles at all', fakeAsync(() => {
+    (mockMetadataBackendService.getRegisteredProfiles as jest.Mock).mockReturnValue(of([]));
+    fixture.detectChanges();
+    tick(10);
+    fixture.detectChanges();
+
+    expect(component.isLoading).toBe(false);
+    expect(component.isError).toBe(false);
+    expect(component.profileStoresWithProfiles).toEqual([]);
+  }));
 
   it('changeSelection should add profile if checked', () => {
     jest.spyOn(component.hasChanged, 'emit');
@@ -162,6 +186,80 @@ describe('ProfilesComponent', () => {
     expect(component.profilesSelected.length).toBe(1);
     expect(component.profilesSelected[0].id).toBe('p2');
     expect(component.hasChanged.emit).toHaveBeenCalledWith(component.profilesSelected);
+  });
+
+  // #1570: adding and removing must agree on identity even when the stored
+  // selection still carries the retired github spelling.
+  it('changeSelection removes a selection stored in the github spelling', () => {
+    const github = 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json';
+    component.profilesSelected = [{ id: github, label: 'MA unit' }];
+    const event = {
+      checked: false,
+      source: { id: 'https://w3id.org/iqb/p11/unit/', name: 'MA unit' }
+    } as unknown as MatCheckboxChange;
+
+    component.changeSelection(event);
+
+    expect(component.profilesSelected).toEqual([]);
+  });
+
+  it('changeSelection stores the canonical id when a profile is selected', () => {
+    component.profilesSelected = [];
+    const event = {
+      checked: true,
+      source: {
+        id: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json',
+        name: 'MA unit'
+      }
+    } as unknown as MatCheckboxChange;
+
+    component.changeSelection(event);
+
+    expect(component.profilesSelected[0].id).toBe('https://w3id.org/iqb/p11/unit/');
+  });
+
+  // #1570: the goal is that no github spelling survives. A selection loaded from
+  // the group settings is therefore canonicalized before it can be saved back.
+  it('canonicalizes a selection loaded from the group settings', () => {
+    component.profiles = [
+      { id: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json', label: 'MA unit' },
+      { id: 'https://example.org/own/profile.json', label: 'eigenes' }
+    ];
+
+    expect(component.profilesSelected.map(profile => profile.id)).toEqual([
+      'https://w3id.org/iqb/p11/unit/',
+      'https://example.org/own/profile.json'
+    ]);
+  });
+
+  it('collapses two spellings of the same loaded profile into one entry', () => {
+    component.profiles = [
+      { id: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json', label: 'MA unit' },
+      { id: 'https://w3id.org/iqb/p11/unit', label: 'MA unit' }
+    ];
+
+    expect(component.profilesSelected).toHaveLength(1);
+  });
+
+  it('does not add a second entry when the profile is already selected', () => {
+    component.profilesSelected = [{ id: 'https://w3id.org/iqb/p11/unit/', label: 'MA unit' }];
+
+    component.changeSelection({
+      checked: true,
+      source: { id: 'https://raw.githubusercontent.com/iqb-vocabs/p11/master/unit.json', name: 'MA unit' }
+    } as unknown as MatCheckboxChange);
+
+    expect(component.profilesSelected).toHaveLength(1);
+  });
+
+  it('changeSelection replaces the array so the pure pipe re-evaluates', () => {
+    const before = component.profilesSelected;
+    component.changeSelection({
+      checked: true,
+      source: { id: 'p9', name: 'P9' }
+    } as unknown as MatCheckboxChange);
+
+    expect(component.profilesSelected).not.toBe(before);
   });
 
   describe('Template rendering', () => {

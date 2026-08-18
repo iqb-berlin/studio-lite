@@ -77,7 +77,7 @@ export class UnitPrintPlayerComponent extends PreviewDirective implements AfterV
           responseProgress: 'none'
         },
         playerConfig: {
-          stateReportPolicy: 'eager',
+          ...this.legacyStateReportPolicy(),
           pagingMode: 'concat-scroll',
           printMode: this.printElementIds ? 'on-with-ids' : 'on',
           directDownloadUrl: this.backendService.getDirectDownloadLink(),

@@ -35,32 +35,10 @@ export function grantRemovePrivilegeAtWs(users: string[], ws: string, rights: Ac
     .contains(`${ws}`)
     .click();
   users.forEach((user, index) => {
-    switch (rights[index]) {
-      case AccessLevel.Basic: {
-        cy.get(`[data-cy="access-rights"]:contains( (${user}))`)
-          .prev()
-          .within(() => {
-            cy.get('mat-checkbox').eq(0).click();
-          });
-        break;
-      }
-      case AccessLevel.Developer: {
-        cy.get(`[data-cy="access-rights"]:contains( (${user}))`)
-          .prev()
-          .within(() => {
-            cy.get('mat-checkbox').eq(1).click();
-          });
-        break;
-      }
-      default: {
-        cy.get(`[data-cy="access-rights"]:contains( (${user}))`)
-          .prev()
-          .within(() => {
-            cy.get('mat-checkbox').eq(2).click();
-          });
-        break;
-      }
-    }
+    cy.contains('[data-cy="access-rights"]', ` (${user})`)
+      .closest('[data-cy="access-rights-row"]')
+      .find(`[data-cy="access-rights-checkbox-${rights[index]}"]`)
+      .click();
   });
   clickSaveButtonRight();
 }
@@ -79,32 +57,10 @@ export function grantRemovePrivilegeAtUser(user: string, wss: string[], rights: 
     .should('exist')
     .click();
   wss.forEach((ws, index) => {
-    switch (rights[index]) {
-      case AccessLevel.Basic: {
-        cy.get(`div>div>div>div>div:contains(${ws})`)
-          .prev()
-          .within(() => {
-            cy.get('mat-checkbox').eq(0).click();
-          });
-        break;
-      }
-      case AccessLevel.Developer: {
-        cy.get(`div>div>div>div>div:contains(${ws})`)
-          .prev()
-          .within(() => {
-            cy.get('mat-checkbox').eq(1).click();
-          });
-        break;
-      }
-      default: {
-        cy.get(`div>div>div>div>div:contains(${ws})`)
-          .prev()
-          .within(() => {
-            cy.get('mat-checkbox').eq(2).click();
-          });
-        break;
-      }
-    }
+    cy.contains('[data-cy="access-rights"]', ws)
+      .closest('[data-cy="access-rights-row"]')
+      .find(`[data-cy="access-rights-checkbox-${rights[index]}"]`)
+      .click();
   });
   clickSaveButtonRight();
 }
@@ -118,7 +74,7 @@ export function grantRemovePrivilegeAtUser(user: string, wss: string[], rights: 
  */
 export function configureDropBox(sourceWs: string, targetWs: string): void {
   clickIndexTabWsgAdmin('workspaces');
-  cy.get('mat-row').contains(sourceWs).click();
+  cy.contains('mat-row', sourceWs).click();
   // Click the select-drop-box button (folder_special icon)
   cy.get('button[mat-button], button[mat-mdc-button]')
     .find('mat-icon')
@@ -134,9 +90,7 @@ export function configureDropBox(sourceWs: string, targetWs: string): void {
       .click();
   });
   // Verify check_circle icon appears in the row
-  cy.get('mat-row')
-    .contains(sourceWs)
-    .parent()
+  cy.contains('mat-row', sourceWs)
     .find('mat-icon')
     .contains('check_circle')
     .should('exist');

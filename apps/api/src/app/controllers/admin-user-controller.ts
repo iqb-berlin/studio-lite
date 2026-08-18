@@ -108,14 +108,14 @@ export class AdminUserController {
     }
   }
 
-  @Delete(':id/passive-sessions')
+  @Delete(':id/orphaned-sessions')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiTags('admin user')
-  @ApiOkResponse({ description: 'Passive sessions deleted successfully.' })
+  @ApiOkResponse({ description: 'Orphaned sessions deleted successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
   @ApiParam({ name: 'id', type: Number })
-  async removePassiveSessions(@Param('id') id: number): Promise<void> {
-    return this.authService.deletePassiveSessions(id);
+  async removeOrphanedSessions(@Param('id') id: number): Promise<number> {
+    return this.authService.deleteOrphanedSessions(id);
   }
 }

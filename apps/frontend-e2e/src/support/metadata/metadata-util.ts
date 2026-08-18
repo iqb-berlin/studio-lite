@@ -6,19 +6,14 @@ import {
 } from '../helpers';
 
 function getCheckBoxByName(name: string) {
-  cy.log(typeof name);
-  if (typeof name !== 'undefined') {
-    cy.get('mat-tree-node>div>span').contains(name).prev().then($actualElem => {
-      if ($actualElem.is('mat-checkbox')) {
-        cy.wrap($actualElem).click();
-      } else {
-        cy.wrap($actualElem).prev().click();
-      }
-    });
-    cy.get('[data-cy="metadata-nested-tree-confirm-button"]').click();
-  } else {
-    cy.get('[data-cy="metadata-nested-tree-cancel-button"]').click();
-  }
+  cy.get('mat-tree-node>div>span').contains(name).prev().then($actualElem => {
+    if ($actualElem.is('mat-checkbox')) {
+      cy.wrap($actualElem).click();
+    } else {
+      cy.wrap($actualElem).prev().click();
+    }
+  });
+  cy.get('[data-cy="metadata-nested-tree-confirm-button"]').click();
 }
 
 function getTimeNumber(time: string, propName: string, profile: string) {
@@ -64,17 +59,17 @@ export function selectProfileForGroup(group: string, profile: IqbProfile) {
   cy.get('mat-icon:contains("save")').click();
 }
 
-export function selectProfileForArea(profile: IqbProfile) {
+export function selectProfileForArea(profiles: IqbProfile[]) {
   goToWsMenu();
   cy.get('[data-cy="workspace-edit-unit-settings"]').click();
   cy.get('[data-cy="edit-workspace-settings-select-unit-profile"]').click();
-  cy.get('[data-cy="edit-workspace-settings-unit-profile"]').contains(profile).click();
+  cy.get('[data-cy="edit-workspace-settings-unit-profile"]').contains(profiles[0]).click();
   cy.get('[data-cy="edit-workspace-settings-select-item-profile"]').click();
-  cy.get('[data-cy="edit-workspace-settings-item-profile"]').contains(profile).click();
+  cy.get('[data-cy="edit-workspace-settings-item-profile"]').contains(profiles[1]).click();
   cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
 }
 
-export function selectProfileForAreaFromGroup(profile: IqbProfile, area: string, group: string) {
+export function selectProfileForAreaFromGroup(profiles: IqbProfile[], area: string, group: string) {
   cy.visit('/');
   cy.findAdminGroupSettings(group).click();
   cy.get('[data-cy="wsg-admin-routes-workspaces"]').should('be.visible');
@@ -82,9 +77,9 @@ export function selectProfileForAreaFromGroup(profile: IqbProfile, area: string,
   cy.get('mat-table').contains(area).click();
   cy.get('mat-icon').contains('settings').click();
   cy.get('mat-select').eq(0).should('be.visible').click();
-  cy.get('[data-cy="edit-workspace-settings-unit-profile"]').contains(profile).click();
+  cy.get('[data-cy="edit-workspace-settings-unit-profile"]').contains(profiles[0]).click();
   cy.get('mat-select').eq(1).should('be.visible').click();
-  cy.get('[data-cy="edit-workspace-settings-item-profile"]').contains(profile).click();
+  cy.get('[data-cy="edit-workspace-settings-item-profile"]').contains(profiles[1]).click();
   cy.clickDataCyWithResponseCheck(
     '[data-cy="edit-workspace-settings-submit-button"]',
     [200],
@@ -98,37 +93,30 @@ export function checkProfile(profile: string): void {
   const alias = `load${profile}`;
   cy.intercept(
     'GET',
-    '/api/metadata/profiles?url=https://raw.githubusercontent.com/iqb-vocabs/p99/master/item.json'
+    '/api/metadata/profiles?url=https://w3id.org/iqb/p99/item/'
   ).as(alias);
-  cy.wait(`@${alias}`)
-    .its('response.statusCode')
-    .should('to.be.oneOf', [200, 304]);
-  cy.get('[data-cy="shared-profiles-select-profile-title"]').contains(profile).click();
-  cy.get('[data-cy="shared-profiles-select-profile"]')
-    .filter(`:contains(${profile})`).eq(0)
+  cy.get('[data-cy="shared-profiles-select-profile-title"]')
+    .contains(profile)
     .click();
   cy.get('[data-cy="shared-profiles-select-profile"]')
-    .filter(`:contains(${profile})`).eq(1)
+    .filter(`:contains(${profile})`)
     .click();
 }
 
 export function checkMultipleProfiles(profiles: string[]): void {
   cy.intercept(
     'GET',
-    '/api/metadata/profiles?url=https://raw.githubusercontent.com/iqb-vocabs/p99/master/item.json'
+    '/api/metadata/profiles?url=https://w3id.org/iqb/p99/item/'
   ).as('selectedProfiles');
   cy.wait('@selectedProfiles')
     .its('response.statusCode')
     .should('to.be.oneOf', [200, 304]);
   profiles.forEach(profile => {
-    cy.get('[data-cy="shared-profiles-select-profile-title"]').contains(profile).click();
-    cy.get('[data-cy="shared-profiles-select-profile"]')
-      .filter(`:contains(${profile})`)
-      .eq(0)
+    cy.get('[data-cy="shared-profiles-select-profile-title"]')
+      .contains(profile)
       .click();
     cy.get('[data-cy="shared-profiles-select-profile"]')
       .filter(`:contains(${profile})`)
-      .eq(1)
       .click();
   });
 }
@@ -146,28 +134,29 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
     body.groups.forEach((group: any) => group.entries.forEach((entry: any) => unitMap
       .set(entry.label[0].value, entry.type)));
     unitMap.forEach((type: string, fieldName: string) => {
-      if (IqbProfileExamples.get(profile).get(fieldName) !== ('')) {
-        switch (type) {
-          case 'number': {
-            getTimeNumber(IqbProfileExamples.get(profile).get(fieldName), fieldName, profile);
+      const example = IqbProfileExamples.get(profile).get(fieldName);
+      // A field the example data says nothing about is skipped, not filled with `undefined`.
+      if (typeof example === 'string' && example !== '') {
+        switch (type.toUpperCase()) {
+          case 'NUMBER': {
+            getTimeNumber(example, fieldName, profile);
             break;
           }
-          case 'vocabulary': {
+          case 'VOCABULARY': {
             if (moreThanOne) cy.get(`mat-label:contains("${fieldName}")`).eq(-1).click();
             else cy.get(`mat-label:contains("${fieldName}")`).click();
-            getCheckBoxByName(IqbProfileExamples.get(profile).get(fieldName));
+            getCheckBoxByName(example);
             break;
           }
-          case 'boolean': {
-            if (IqbProfileExamples.get(profile).get(fieldName) === 'true') {
+          case 'BOOLEAN': {
+            if (example === 'true') {
               cy.get('mat-slide-toggle button').click();
             }
             break;
           }
           default: {
-            // eslint-disable-next-line max-len
-            if (moreThanOne) cy.get(`mat-label:contains("${fieldName}")`).eq(-1).type(IqbProfileExamples.get(profile).get(fieldName));
-            else cy.get(`mat-label:contains("${fieldName}")`).type(IqbProfileExamples.get(profile).get(fieldName));
+            if (moreThanOne) cy.get(`mat-label:contains("${fieldName}")`).eq(-1).type(example);
+            else cy.get(`mat-label:contains("${fieldName}")`).type(example);
             break;
           }
         }

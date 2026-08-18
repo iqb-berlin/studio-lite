@@ -36,25 +36,25 @@ import {
 import { AppService } from '../../../../services/app.service';
 import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
+import { CountSessionsWithStatusPipe } from '../../../../pipes/count-sessions-with-status.pipe';
 
 @Component({
   selector: 'studio-lite-users',
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
   // eslint-disable-next-line max-len
-  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent, DatePipe]
+  imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent, DatePipe, CountSessionsWithStatusPipe]
 })
 export class UsersComponent implements OnInit, OnDestroy {
-  readonly UsersComponent = UsersComponent;
   objectsDatasource = new MatTableDataSource<UserFullDto>();
   displayedColumns = ['active', 'name', 'displayName', 'isAdmin', 'email', 'id', 'description', 'delete'];
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
   userWorkspaceGroups = new WorkspaceGroupToCheckCollection([]);
-  activeUserCount = 0;
   loggedInUserCount = 0;
   activeSessionCount = 0;
   passiveSessionCount = 0;
+  orphanedSessionCount = 0;
   private pollingSubscription: Subscription | null = null;
   private readonly ngUnsubscribe = new Subject<void>();
 
@@ -213,9 +213,11 @@ export class UsersComponent implements OnInit, OnDestroy {
     });
   }
 
-  deleteSession(session: UserSessionInfoDto): void {
-    const selectedUser = this.tableSelectionRow.selected[0];
-    if (!selectedUser || session.activityStatus !== 'orphaned') {
+  // The user comes from the clicked row, not from the table selection: the dot stops the
+  // click from reaching the row, so requiring a selection made the only way to remove an
+  // orphaned session depend on having selected that row beforehand.
+  deleteSession(user: UserFullDto, session: UserSessionInfoDto): void {
+    if (session.activityStatus !== 'orphaned') {
       return;
     }
 
@@ -225,7 +227,7 @@ export class UsersComponent implements OnInit, OnDestroy {
         title: this.translateService.instant('delete'),
         content: this.translateService.instant('admin.delete-orphaned-session', {
           session: session.sessionId,
-          name: selectedUser.name
+          name: user.name
         })
       }
     });
@@ -233,7 +235,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
       if (result) {
         this.appService.dataLoading = true;
-        this.backendService.deleteUserSession(selectedUser.id, session.sessionId)
+        this.backendService.deleteUserSession(user.id, session.sessionId)
           .pipe(takeUntil(this.ngUnsubscribe)).subscribe(respOk => {
             this.appService.dataLoading = false;
             if (respOk) {
@@ -244,8 +246,34 @@ export class UsersComponent implements OnInit, OnDestroy {
     });
   }
 
-  static hasStatus(status: string, sessions: UserSessionInfoDto[] = []): boolean {
-    return sessions.some(s => s.activityStatus === status);
+  deleteOrphanedSessions(): void {
+    const selectedUser = this.tableSelectionRow.selected[0];
+    if (!selectedUser) {
+      return;
+    }
+
+    const dialogRef = this.deleteConfirmDialog.open(DeleteDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translateService.instant('delete'),
+        content: this.translateService.instant('admin.delete-orphaned-sessions', {
+          name: selectedUser.name
+        })
+      }
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
+      if (result) {
+        this.appService.dataLoading = true;
+        this.backendService.deleteUserOrphanedSessions(selectedUser.id)
+          .pipe(takeUntil(this.ngUnsubscribe)).subscribe(respOk => {
+            this.appService.dataLoading = false;
+            if (respOk) {
+              this.updateUserList(false, true);
+            }
+          });
+      }
+    });
   }
 
   updateWorkspaceGroupList(): void {
@@ -354,14 +382,11 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   private setObjectsDatasource(users: UserFullDto[], forceRecreate = false): void {
-    this.activeUserCount = users.filter(u => u.activityStatus === 'active').length;
     this.loggedInUserCount = users.filter(u => u.isLoggedIn).length;
-    this.activeSessionCount = users
-      .flatMap(user => user.sessions || [])
-      .filter(session => session.activityStatus === 'active').length;
-    this.passiveSessionCount = users
-      .flatMap(user => user.sessions || [])
-      .filter(session => session.activityStatus === 'passive').length;
+    const allSessions = users.flatMap(user => user.sessions || []);
+    this.activeSessionCount = allSessions.filter(session => session.activityStatus === 'active').length;
+    this.passiveSessionCount = allSessions.filter(session => session.activityStatus === 'passive').length;
+    this.orphanedSessionCount = allSessions.filter(session => session.activityStatus === 'orphaned').length;
 
     const canUpdateInPlace = !forceRecreate &&
       this.objectsDatasource?.data?.length === users.length;

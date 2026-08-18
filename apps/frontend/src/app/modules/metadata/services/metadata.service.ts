@@ -82,36 +82,48 @@ export class MetadataService implements VocabularyProvider {
     return new Promise(resolve => {
       this.backendService.getMetadataVocabulariesForProfile(profile.id)
         .subscribe(metadataVocabularies => {
-          if (metadataVocabularies && metadataVocabularies !== true &&
-            !metadataVocabularies.some(vocabulary => vocabulary === null)) {
-            const vocabularies: Vocab[] = metadataVocabularies
-              .map(vocabulary => ({
-                data: vocabulary,
-                url: vocabulary.id
-              }));
-            vocabularies.forEach(vocabulary => {
-              if (!this.vocabularies.find(v => v.url === vocabulary.url)) {
-                this.vocabularies.push(vocabulary);
+          if (!metadataVocabularies || metadataVocabularies === true) {
+            resolve(false);
+            return;
+          }
+          // A vocabulary the backend could not load arrives as null. Keep the ones that
+          // did load rather than dropping the profile's whole set — otherwise a single
+          // failed fetch leaves every vocabulary field of the profile without a value
+          // list. Entries without an id are unusable too, since they are matched by it.
+          const loaded: Vocab[] = metadataVocabularies
+            .filter(vocabulary => !!vocabulary?.id)
+            .map(vocabulary => ({
+              data: vocabulary,
+              url: vocabulary.id
+            }));
+          loaded.forEach(vocabulary => {
+            if (!this.vocabularies.find(v => v.url === vocabulary.url)) {
+              this.vocabularies.push(vocabulary);
+            }
+          });
+          // The profiles spell the entry type in upper case — the metadata-profile schema
+          // allows nothing else since spec 0.10. Compared strictly against 'vocabulary',
+          // this filter matched nothing, so no vocabulary field of any profile ever got
+          // its value list. The comparison stays tolerant because the upstream type is a
+          // plain `string` rather than the union the schema describes, which is what let
+          // the wrong spelling through the compiler in the first place (#1580).
+          const vocabularyEntryParams = profile.groups
+            .map(group => group.entries)
+            .flat()
+            .filter(entry => entry.type?.toUpperCase() === 'VOCABULARY')
+            .map(entry => (entry.parameters as unknown as ProfileEntryParametersVocabulary));
+          this.vocabularies.forEach(vocabulary => {
+            vocabularyEntryParams.forEach(entryParam => {
+              if (entryParam.url === vocabulary.url) {
+                this.vocabulariesIdDictionary = {
+                  ...this.vocabulariesIdDictionary,
+                  ...this.mapVocabularyIds(vocabulary.data, entryParam)
+                };
               }
             });
-            const vocabularyEntryParams = profile.groups
-              .map(group => group.entries)
-              .flat()
-              .filter(entry => (entry.type === 'vocabulary'))
-              .map(entry => (entry.parameters as unknown as ProfileEntryParametersVocabulary));
-            this.vocabularies.forEach(vocabulary => {
-              vocabularyEntryParams.forEach(entryParam => {
-                if (entryParam.url === vocabulary.url) {
-                  this.vocabulariesIdDictionary = {
-                    ...this.vocabulariesIdDictionary,
-                    ...this.mapVocabularyIds(vocabulary.data, entryParam)
-                  };
-                }
-              });
-            });
-            resolve(true);
-          }
-          resolve(false);
+          });
+          // false tells the caller the profile is only partially usable
+          resolve(loaded.length === metadataVocabularies.length);
         });
     });
   }

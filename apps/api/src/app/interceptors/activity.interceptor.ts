@@ -4,30 +4,38 @@ import {
   ExecutionContext,
   CallHandler
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { UsersService } from '../services/users.service';
+import { BACKGROUND_REQUEST_KEY, BackgroundRequestMode } from '../decorators/background-request.decorator';
 
 @Injectable()
 export class ActivityInterceptor implements NestInterceptor {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly reflector: Reflector
+  ) {}
+
+  private static hasUserIntent(request: { headers?: Record<string, string | string[] | undefined> }): boolean {
+    const header = request.headers?.['x-activity-intent'];
+    return header === 'user' || (Array.isArray(header) && header.includes('user'));
+  }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    const activityIntentHeader = request.headers?.['x-activity-intent'];
-    const hasExplicitUserActivityIntent = activityIntentHeader === 'user' ||
-      (Array.isArray(activityIntentHeader) && activityIntentHeader.includes('user'));
+    // Read from the handler first, then the controller, so a whole controller can be
+    // marked if that ever makes sense.
+    const mode = this.reflector.getAllAndOverride<BackgroundRequestMode>(
+      BACKGROUND_REQUEST_KEY,
+      [context.getHandler(), context.getClass()]
+    );
 
-    // Ignore background requests that must not extend inactivity windows by default.
-    const isBackgroundRequest = request.url.includes('/refresh') ||
-                                request.url.includes('/activity');
+    const isBackgroundRequest = mode === 'always' ||
+      (mode === 'unless-user-intent' && !ActivityInterceptor.hasUserIntent(request));
 
-    // The admin users polling endpoint only counts as activity when explicitly flagged.
-    const isUnflaggedGroupAdminUsersRequest = request.url.includes('/group-admin/users') &&
-      !hasExplicitUserActivityIntent;
-
-    if (user && user.id && !isBackgroundRequest && !isUnflaggedGroupAdminUsersRequest) {
+    if (user && user.id && !isBackgroundRequest) {
       this.usersService.updateLastActivity(user.id, user.sessionId).catch(() => {
         /* ignore errors */
       });
