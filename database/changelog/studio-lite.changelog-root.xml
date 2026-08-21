@@ -32,5 +32,6 @@
   <include file="studio-lite.changelog-17.0.0.sql"/>
   <include file="studio-lite.changelog-18.0.0.sql"/>
   <include file="studio-lite.changelog-19.0.0.sql"/>
+  <include file="studio-lite.changelog-20.0.0.sql"/>
 </databaseChangeLog>
 

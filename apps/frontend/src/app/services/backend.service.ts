@@ -213,10 +213,6 @@ export class BackendService {
     return this.http.post<void>(`${this.serverUrl}activity`, {}, { context: backgroundRequestContext() });
   }
 
-  sessionPing(): Observable<void> {
-    return this.http.post<void>(`${this.serverUrl}session-ping`, {}, { context: backgroundRequestContext() });
-  }
-
   private static getSessionIdFromToken(): string | undefined {
     const token = localStorage.getItem('id_token');
     if (!token) return undefined;

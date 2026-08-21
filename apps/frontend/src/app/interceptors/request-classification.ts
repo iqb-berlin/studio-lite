@@ -15,7 +15,7 @@ import { HttpContext, HttpContextToken } from '@angular/common/http';
 // Note where this actually bites: the interceptor only records an error for the message
 // path when the failure did NOT go into the token refresh, so the 401 suppression is
 // reachable only together with SKIP_TOKEN_REFRESH. On a request that refreshes -- the
-// liveness ping, the activity sync -- a 401 is handled by renewing the token, and a
+// activity sync -- a 401 is handled by renewing the token, and a
 // failed renewal logs out rather than reporting. Marking those as background is therefore
 // a statement of intent for the non-401 path, not a way to silence expiry.
 export const IS_BACKGROUND_REQUEST = new HttpContextToken<boolean>(() => false);

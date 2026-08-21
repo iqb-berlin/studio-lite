@@ -14,19 +14,15 @@ const DAY_MS = 24 * HOUR_MS;
 // expired) and the refresh-token lifetime, because a refresh token that outlived the
 // window would be a key to a session the server already considers gone. Those are not
 // three coincidentally equal values -- they are one duration seen from three sides.
+//
+// The session status in the admin list is read off these two keys and nothing else: a
+// session is active while an access token issued for it can still be valid, passive while
+// an unexpired refresh token can still resume it, and orphaned once neither is left.
 export const ACTIVE_THRESHOLD_MS = 30 * MINUTE_MS;
 export const PASSIVE_THRESHOLD_MS = 7 * DAY_MS;
 
 export const UI_BAR_REFRESH_INTERVAL_MS = SECOND_MS;
 export const ADMIN_USER_LIST_POLL_INTERVAL_MS = 15 * SECOND_MS;
-
-// Liveness ("is a tab still open?"), which is a different question from activity
-// ("did someone interact?"). Every open tab pings on this interval regardless of
-// user interaction, so a session without pings has no browser behind it any more.
-export const SESSION_PING_INTERVAL_MS = MINUTE_MS;
-// Browsers throttle timers in background tabs to at most one run per minute, so a
-// single missed ping means nothing. Tolerate two before calling a session orphaned.
-export const ORPHANED_SESSION_THRESHOLD_MS = 3 * SESSION_PING_INTERVAL_MS;
 export const ACTIVITY_SYNC_THROTTLE_MS = 5 * SECOND_MS;
 export const USER_ACTIVITY_THROTTLE_MS = SECOND_MS;
 export const POST_MESSAGE_ACTIVITY_THROTTLE_MS = SECOND_MS;
@@ -68,17 +64,5 @@ export const assertTimeConfig = (): void => {
   // The admin list has to be able to observe a session before it expires underneath it.
   if (ADMIN_USER_LIST_POLL_INTERVAL_MS >= PASSIVE_THRESHOLD_MS) {
     fail('ADMIN_USER_LIST_POLL_INTERVAL_MS must stay below PASSIVE_THRESHOLD_MS');
-  }
-
-  // With less headroom a background tab throttled to one ping per minute would be
-  // reported orphaned while it is still open.
-  if (ORPHANED_SESSION_THRESHOLD_MS < 2 * SESSION_PING_INTERVAL_MS) {
-    fail('ORPHANED_SESSION_THRESHOLD_MS must allow at least two missed pings');
-  }
-
-  // An orphaned session must be detectable while its row still exists, otherwise the
-  // status is unreachable and neither the admin display nor the delete path can act.
-  if (ORPHANED_SESSION_THRESHOLD_MS >= PASSIVE_THRESHOLD_MS) {
-    fail('ORPHANED_SESSION_THRESHOLD_MS must stay below PASSIVE_THRESHOLD_MS');
   }
 };

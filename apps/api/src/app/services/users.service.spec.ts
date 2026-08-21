@@ -11,9 +11,8 @@ import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import Workspace from '../entities/workspace.entity';
 import UserSession from '../entities/user-session.entity';
-import {
-  ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS, ORPHANED_SESSION_THRESHOLD_MS
-} from '../app.constants';
+import { RefreshToken } from '../entities/refresh-token.entity';
+import { ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS } from '../app.constants';
 import Unit from '../entities/unit.entity';
 import { UnitService } from './unit.service';
 import { UnitUserService } from './unit-user.service';
@@ -52,6 +51,7 @@ describe('UsersService', () => {
         { provide: getRepositoryToken(WorkspaceGroupAdmin), useFactory: mockRepository },
         { provide: getRepositoryToken(Workspace), useFactory: mockRepository },
         { provide: getRepositoryToken(UserSession), useFactory: mockRepository },
+        { provide: getRepositoryToken(RefreshToken), useFactory: mockRepository },
         { provide: UnitService, useValue: mockUnitService },
         { provide: UnitUserService, useValue: mockUnitUserService }
       ]
@@ -223,72 +223,64 @@ describe('UsersService', () => {
 
   describe('isUserLoggedIn', () => {
     // Rows are built the way the API writes them: expiresAt is always
-    // lastActivity + PASSIVE_THRESHOLD_MS, and lastSeen moves independently.
-    const sessionRow = (agesMs: { activity: number, seen: number }): UserSession => {
-      const nowMs = Date.now();
-      const lastActivity = new Date(nowMs - agesMs.activity);
+    // lastActivity + PASSIVE_THRESHOLD_MS.
+    const sessionRow = (activityAgeMs: number): UserSession => {
+      const lastActivity = new Date(Date.now() - activityAgeMs);
       return {
         userId: 1,
+        sessionId: 'sid-1',
         lastActivity,
-        lastSeen: new Date(nowMs - agesMs.seen),
         expiresAt: new Date(lastActivity.getTime() + PASSIVE_THRESHOLD_MS)
       } as UserSession;
     };
 
-    it('should return true if there is a valid unrevoked token', async () => {
-      const userSessionRepository = (service as unknown as {
-        userSessionRepository: Repository<UserSession>
-      }).userSessionRepository;
-      jest.spyOn(userSessionRepository, 'find').mockResolvedValue([
-        sessionRow({ activity: 0, seen: 0 })
-      ]);
+    const givenSessions = (sessions: UserSession[], liveTokenSessionIds: string[] = []): void => {
+      const repositories = service as unknown as {
+        userSessionRepository: Repository<UserSession>,
+        refreshTokenRepository: Repository<RefreshToken>
+      };
+      jest.spyOn(repositories.userSessionRepository, 'find').mockResolvedValue(sessions);
+      jest.spyOn(repositories.refreshTokenRepository, 'find').mockResolvedValue(
+        liveTokenSessionIds.map(sessionId => ({ sessionId } as RefreshToken))
+      );
+    };
+
+    it('should return true while someone is interacting with the session', async () => {
+      givenSessions([sessionRow(0)]);
 
       const result = await service.isUserLoggedIn(1);
       expect(result).toBe(true);
     });
 
-    it('should return false if tokens are expired or revoked', async () => {
-      const userSessionRepository = (service as unknown as {
-        userSessionRepository: Repository<UserSession>
-      }).userSessionRepository;
+    it('should return false if the session row has expired', async () => {
       const expiresAt = new Date();
       expiresAt.setMinutes(expiresAt.getMinutes() - 10);
-      jest.spyOn(userSessionRepository, 'find').mockResolvedValue([
+      givenSessions([
         {
-          userId: 1, expiresAt, lastActivity: new Date(), lastSeen: new Date()
+          userId: 1, sessionId: 'sid-1', expiresAt, lastActivity: new Date()
         } as UserSession
-      ]);
+      ], ['sid-1']);
 
       const result = await service.isUserLoggedIn(1);
       expect(result).toBe(false);
     });
 
-    // The row a closed browser leaves behind: someone worked in it moments ago, but
-    // nothing has reported the tab as open since. It must not count as a login.
-    it('should return false if the session has not been seen within the orphan threshold', async () => {
-      const userSessionRepository = (service as unknown as {
-        userSessionRepository: Repository<UserSession>
-      }).userSessionRepository;
-      jest.spyOn(userSessionRepository, 'find').mockResolvedValue([
-        sessionRow({ activity: 1000, seen: ORPHANED_SESSION_THRESHOLD_MS + 1000 })
-      ]);
-
-      const result = await service.isUserLoggedIn(1);
-      expect(result).toBe(false);
-    });
-
-    // The counterpart: a tab left open without interaction is still a session someone
-    // will come back to, so pings alone keep it counted as a login.
-    it('should return true for a session that is idle but still being seen', async () => {
-      const userSessionRepository = (service as unknown as {
-        userSessionRepository: Repository<UserSession>
-      }).userSessionRepository;
-      jest.spyOn(userSessionRepository, 'find').mockResolvedValue([
-        sessionRow({ activity: ACTIVE_THRESHOLD_MS + 1000, seen: 0 })
-      ]);
+    // The ordinary closed browser: unused for hours, but its refresh token still opens it,
+    // so this is a login someone can return to and not an orphaned row.
+    it('should return true for an idle session an unexpired refresh token can resume', async () => {
+      givenSessions([sessionRow(ACTIVE_THRESHOLD_MS + 1000)], ['sid-1']);
 
       const result = await service.isUserLoggedIn(1);
       expect(result).toBe(true);
+    });
+
+    // Nothing can reach this session any more: too long since the last interaction for an
+    // access token, and no unexpired refresh token left.
+    it('should return false for a session no token can resume', async () => {
+      givenSessions([sessionRow(ACTIVE_THRESHOLD_MS + 1000)], []);
+
+      const result = await service.isUserLoggedIn(1);
+      expect(result).toBe(false);
     });
   });
 
@@ -305,7 +297,6 @@ describe('UsersService', () => {
         { userId: 1, sessionId: 'session-1' },
         expect.objectContaining({
           lastActivity: expect.any(Date),
-          lastSeen: expect.any(Date),
           expiresAt: expect.any(Date)
         })
       );
@@ -330,35 +321,6 @@ describe('UsersService', () => {
       const updateSpy = jest.spyOn(userSessionRepository, 'update');
 
       await service.updateLastActivity(1);
-
-      expect(updateSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('updateLastSeen', () => {
-    // A ping is liveness, not interaction: moving lastActivity or expiresAt here would
-    // keep a forgotten open tab logged in past the inactivity window.
-    it('should only move lastSeen', async () => {
-      const userSessionRepository = (service as unknown as {
-        userSessionRepository: Repository<UserSession>
-      }).userSessionRepository;
-      const updateSpy = jest.spyOn(userSessionRepository, 'update');
-
-      await service.updateLastSeen(1, 'session-1');
-
-      expect(updateSpy).toHaveBeenCalledWith(
-        { userId: 1, sessionId: 'session-1' },
-        { lastSeen: expect.any(Date) }
-      );
-    });
-
-    it('should never touch any session when no sessionId is provided', async () => {
-      const userSessionRepository = (service as unknown as {
-        userSessionRepository: Repository<UserSession>
-      }).userSessionRepository;
-      const updateSpy = jest.spyOn(userSessionRepository, 'update');
-
-      await service.updateLastSeen(1);
 
       expect(updateSpy).not.toHaveBeenCalled();
     });
