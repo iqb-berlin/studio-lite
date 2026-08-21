@@ -3,16 +3,15 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { In, LessThan, Repository } from 'typeorm';
+import {
+  In, LessThan, MoreThan, Repository
+} from 'typeorm';
 import * as crypto from 'crypto';
 import { UsersService } from './users.service';
 import { ReviewService } from './review.service';
 import { RefreshToken } from '../entities/refresh-token.entity';
 import UserSession from '../entities/user-session.entity';
-import {
-  PASSIVE_THRESHOLD_MS,
-  ORPHANED_SESSION_THRESHOLD_MS
-} from '../app.constants';
+import { ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS } from '../app.constants';
 
 @Injectable()
 export class AuthService {
@@ -104,8 +103,8 @@ export class AuthService {
     //
     // A session is therefore scoped to one localStorage, not to one browser: two windows
     // of the same instance share it, while separate instances, private windows and
-    // container tabs each get their own row. Rows left behind by a storage scope nobody
-    // uses any more are what lastSeen exists to expose.
+    // container tabs each get their own row. A row left behind by a storage scope nobody
+    // uses any more stays usable until its refresh token expires, and expires with it.
 
     // Reviews do not keep long-lived user sessions.
     if (!user.id) {
@@ -157,32 +156,20 @@ export class AuthService {
       sessionId,
       userId,
       lastActivity: now,
-      lastSeen: now,
       expiresAt
     });
     await this.userSessionRepository.save(session);
   }
 
-  // A login counts as interaction, so it moves all three timestamps.
+  // A login counts as interaction, so it moves both timestamps.
   private async updateUserSession(userId: number, sessionId: string): Promise<{ affected?: number }> {
     const now = new Date();
     return this.userSessionRepository.update(
       { userId, sessionId },
       {
         lastActivity: now,
-        lastSeen: now,
         expiresAt: new Date(now.getTime() + PASSIVE_THRESHOLD_MS)
       }
-    );
-  }
-
-  // A refresh proves a client is alive, not that anyone interacted: the session ping
-  // triggers one every time the access token has expired. Moving lastActivity here
-  // would keep a forgotten open tab logged in forever and defeat the inactivity gate.
-  private async touchUserSession(userId: number, sessionId: string): Promise<{ affected?: number }> {
-    return this.userSessionRepository.update(
-      { userId, sessionId },
-      { lastSeen: new Date() }
     );
   }
 
@@ -205,24 +192,47 @@ export class AuthService {
     await this.userSessionRepository.delete({ userId, sessionId });
   }
 
-  // Bulk counterpart to logoutOrphanedSession, for a user who has collected several
-  // rows without a browser behind them. Deliberately keyed on lastSeen and not on
-  // lastActivity: a tab that is open but idle for hours is a working session, and
-  // clearing it out would log someone out of the app they are looking at.
-  async deleteOrphanedSessions(userId: number): Promise<number> {
-    const threshold = new Date(Date.now() - ORPHANED_SESSION_THRESHOLD_MS);
-    const orphanedSessions = await this.userSessionRepository.find({
-      where: { userId, lastSeen: LessThan(threshold) },
+  // The sessions of this user that nobody can return to: not usable with an access token
+  // (nothing interacted with them for longer than the active phase) and not renewable,
+  // because no unexpired refresh token is left. Expired rows are excluded -- those belong
+  // to SessionCleanupService, not to a delete the admin has to trigger by hand.
+  //
+  // Read order matters. Sessions first, tokens second: a refresh that lands in between
+  // shows up as a live token and spares its session. The other order would let the same
+  // refresh hide the token from us and take the session with it.
+  private async findOrphanedSessionIds(userId: number, sessionId?: string): Promise<string[]> {
+    const nowMs = Date.now();
+    const now = new Date(nowMs);
+    const candidates = await this.userSessionRepository.find({
+      where: {
+        userId,
+        ...(sessionId ? { sessionId } : {}),
+        expiresAt: MoreThan(now),
+        lastActivity: LessThan(new Date(nowMs - ACTIVE_THRESHOLD_MS))
+      },
       select: { sessionId: true }
     });
-    if (orphanedSessions.length === 0) {
+    if (candidates.length === 0) {
+      return [];
+    }
+    const candidateIds = candidates.map(session => session.sessionId);
+    const liveTokens = await this.refreshTokenRepository.find({
+      where: { userId, sessionId: In(candidateIds), expiresAt: MoreThan(now) },
+      select: { sessionId: true }
+    });
+    const resumableIds = new Set(liveTokens.map(token => token.sessionId));
+    return candidateIds.filter(id => !resumableIds.has(id));
+  }
+
+  // Bulk counterpart to logoutOrphanedSession, for a user who has collected several rows
+  // that can no longer be continued. Deletes exactly the ids that were found rather than
+  // re-evaluating the condition: between the two statements a session can acquire a fresh
+  // token, and a second predicate would spare its row after its tokens are already gone.
+  async deleteOrphanedSessions(userId: number): Promise<number> {
+    const ids = await this.findOrphanedSessionIds(userId);
+    if (ids.length === 0) {
       return 0;
     }
-    // Delete exactly the rows that were found, not everything still matching the
-    // threshold: a backgrounded tab that wakes and pings between the two statements gets
-    // a fresh lastSeen, and a second predicate would spare its row after its refresh
-    // tokens are already gone -- logging that user out and leaving the row behind.
-    const ids = orphanedSessions.map(s => s.sessionId);
     await this.refreshTokenRepository
       .createQueryBuilder()
       .delete()
@@ -233,21 +243,8 @@ export class AuthService {
   }
 
   async logoutOrphanedSession(userId: number, sessionId: string): Promise<boolean> {
-    const session = await this.userSessionRepository.findOne({
-      where: { userId, sessionId }
-    });
-    if (!session) {
-      return false;
-    }
-
-    // Orphaned is judged on lastSeen, not lastActivity: a session whose tab is open but
-    // idle must stay, a session whose browser is gone may go. Judging it on lastActivity
-    // made the condition unsatisfiable, because expiresAt is lastActivity plus the very
-    // threshold it was compared against.
-    const nowMs = Date.now();
-    const isSessionStillValid = new Date(session.expiresAt).getTime() > nowMs;
-    const isOrphaned = (nowMs - new Date(session.lastSeen).getTime()) > ORPHANED_SESSION_THRESHOLD_MS;
-    if (!isSessionStillValid || !isOrphaned) {
+    const orphanedIds = await this.findOrphanedSessionIds(userId, sessionId);
+    if (orphanedIds.length === 0) {
       return false;
     }
 
@@ -274,20 +271,22 @@ export class AuthService {
     const user = await this.usersService.findOne(refreshToken.userId);
     if (!user || !user.name) return null;
 
-    // Keep the session identity stable across refreshes: rotate only the refresh
-    // token and record the liveness sign, but keep the same sessionId. Re-creating the
-    // session with a new id (or latching onto another browser's most-recent session) is
-    // exactly what collapsed independent browser sessions into one.
+    // Keep the session identity stable across refreshes: rotate only the refresh token,
+    // but keep the same sessionId. Re-creating the session with a new id (or latching onto
+    // another browser's most-recent session) is exactly what collapsed independent browser
+    // sessions into one.
     // A row that vanished between the lookup above and here was deleted by a logout or
     // by an admin while this refresh was in flight; re-creating it would undo that.
+    // The new token is written before the old one is dropped, so the session is never
+    // without a key: a session with no unexpired refresh token is reported as orphaned and
+    // may be deleted, and the row being rotated belongs to someone who is working.
     const { sessionId } = userSession;
+    const newRefreshToken = await this.generateRefreshToken(user.id, sessionId);
     await this.refreshTokenRepository.delete({ tokenHash: refreshToken.tokenHash });
-    await this.touchUserSession(user.id, sessionId);
 
     const accessToken = this.jwtService.sign(
       AuthService.getJwtPayload({ id: user.id, name: user.name, reviewId: 0 }, sessionId)
     );
-    const newRefreshToken = await this.generateRefreshToken(user.id, sessionId);
     return { accessToken, refreshToken: newRefreshToken };
   }
 

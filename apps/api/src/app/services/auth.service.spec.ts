@@ -2,7 +2,9 @@ import { ForbiddenException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { In, Repository } from 'typeorm';
+import {
+  In, LessThan, MoreThan, Repository
+} from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
@@ -11,7 +13,7 @@ import { ReviewService } from './review.service';
 import { RefreshToken } from '../entities/refresh-token.entity';
 import UserSession from '../entities/user-session.entity';
 import User from '../entities/user.entity';
-import { PASSIVE_THRESHOLD_MS, ORPHANED_SESSION_THRESHOLD_MS } from '../app.constants';
+import { ACTIVE_THRESHOLD_MS } from '../app.constants';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -180,13 +182,32 @@ describe('AuthService', () => {
       expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ tokenHash: 'token-hash' });
       // ... but the session itself is preserved (not deleted) and its identity kept.
       expect(userSessionRepository.delete).not.toHaveBeenCalled();
-      // A refresh records liveness only. Moving lastActivity here would make every
-      // forgotten open tab immortal, because its ping refreshes the token on a timer.
-      expect(userSessionRepository.update).toHaveBeenCalledWith(
-        { userId: 1, sessionId: 'session-1' },
-        { lastSeen: expect.any(Date) }
-      );
+      // A refresh is not an interaction and no longer a liveness sign either: it leaves
+      // the session row alone, so the inactivity window keeps counting from the last click.
+      expect(userSessionRepository.update).not.toHaveBeenCalled();
       expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sid: 'session-1' }));
+    });
+
+    // A session with no unexpired refresh token is reported as orphaned and may be
+    // deleted. Dropping the old token before writing the new one would put every rotating
+    // session into that state for the width of one statement.
+    it('should write the new refresh token before deleting the old one', async () => {
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+      refreshTokenRepository.findOne.mockResolvedValue({
+        tokenHash: 'token-hash', userId: 1, sessionId: 'session-1', expiresAt
+      } as RefreshToken);
+      userSessionRepository.findOne.mockResolvedValue({
+        userId: 1, sessionId: 'session-1', lastActivity: new Date(), expiresAt
+      } as UserSession);
+      usersService.findOne.mockResolvedValue({ id: 1, name: 'user' } as User);
+      jwtService.sign.mockReturnValue('new-atoken');
+
+      await service.refreshAccessToken('valid-token');
+
+      const saveOrder = refreshTokenRepository.save.mock.invocationCallOrder[0];
+      const deleteOrder = refreshTokenRepository.delete.mock.invocationCallOrder[0];
+      expect(saveOrder).toBeLessThan(deleteOrder);
     });
 
     // The row was deleted by a logout or an admin while this refresh was in flight;
@@ -198,7 +219,7 @@ describe('AuthService', () => {
         tokenHash: 'token-hash', userId: 1, sessionId: 'session-1', expiresAt
       } as RefreshToken);
       userSessionRepository.findOne.mockResolvedValue({
-        userId: 1, sessionId: 'session-1', lastActivity: new Date(), lastSeen: new Date(), expiresAt
+        userId: 1, sessionId: 'session-1', lastActivity: new Date(), expiresAt
       } as UserSession);
       userSessionRepository.update.mockResolvedValue({ affected: 0, raw: [], generatedMaps: [] });
       usersService.findOne.mockResolvedValue({ id: 1, name: 'user' } as User);
@@ -315,26 +336,22 @@ describe('AuthService', () => {
   });
 
   describe('logoutOrphanedSession', () => {
-    // Rows are built the way the API writes them -- expiresAt always one inactivity
-    // window past lastActivity. The previous fixture paired a fresh expiresAt with a
-    // week-old lastActivity, a combination no code path can produce, and so passed while
-    // the production condition was in fact unsatisfiable.
-    const sessionRow = (agesMs: { activity: number, seen: number }): UserSession => {
-      const nowMs = Date.now();
-      const lastActivity = new Date(nowMs - agesMs.activity);
-      return {
-        userId: 7,
-        sessionId: 'sid-7',
-        lastActivity,
-        lastSeen: new Date(nowMs - agesMs.seen),
-        expiresAt: new Date(lastActivity.getTime() + PASSIVE_THRESHOLD_MS)
-      } as UserSession;
+    // Orphaned means "no key left": the last interaction is older than the active phase,
+    // so no access token can still be valid, and no unexpired refresh token remains. The
+    // candidate query answers the first half, the token query the second.
+    const candidateFound = (): void => {
+      userSessionRepository.find.mockResolvedValue([{ sessionId: 'sid-7' }] as UserSession[]);
+    };
+    const noLiveToken = (): void => {
+      refreshTokenRepository.find.mockResolvedValue([]);
+    };
+    const liveTokenFor = (sessionId: string): void => {
+      refreshTokenRepository.find.mockResolvedValue([{ sessionId }] as RefreshToken[]);
     };
 
-    it('should delete a session that has not been seen within the orphan threshold', async () => {
-      userSessionRepository.findOne.mockResolvedValue(
-        sessionRow({ activity: 1000, seen: ORPHANED_SESSION_THRESHOLD_MS + 1000 })
-      );
+    it('should delete a session that has no unexpired refresh token left', async () => {
+      candidateFound();
+      noLiveToken();
 
       const result = await service.logoutOrphanedSession(7, 'sid-7');
 
@@ -343,8 +360,11 @@ describe('AuthService', () => {
       expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'sid-7' });
     });
 
-    it('should not delete a session that is still being seen', async () => {
-      userSessionRepository.findOne.mockResolvedValue(sessionRow({ activity: 1000, seen: 0 }));
+    // The ordinary closed browser: nobody is working in it, but the refresh token still
+    // opens it, so whoever comes back continues in this very session.
+    it('should not delete a session a refresh token can still resume', async () => {
+      candidateFound();
+      liveTokenFor('sid-7');
 
       const result = await service.logoutOrphanedSession(7, 'sid-7');
 
@@ -352,12 +372,11 @@ describe('AuthService', () => {
       expect(userSessionRepository.delete).not.toHaveBeenCalledWith({ userId: 7, sessionId: 'sid-7' });
     });
 
-    // Idleness is not abandonment: while pings arrive someone can come back to the tab,
-    // and taking the session away would log them out of what they are looking at.
-    it('should not delete a session that is idle but still being seen', async () => {
-      userSessionRepository.findOne.mockResolvedValue(
-        sessionRow({ activity: PASSIVE_THRESHOLD_MS / 2, seen: 0 })
-      );
+    // Someone interacted moments ago, so an access token issued for this session can still
+    // be valid -- whatever the token table says, this session is in use.
+    it('should not delete a session that is still within its active phase', async () => {
+      userSessionRepository.find.mockResolvedValue([]);
+      noLiveToken();
 
       const result = await service.logoutOrphanedSession(7, 'sid-7');
 
@@ -365,39 +384,76 @@ describe('AuthService', () => {
       expect(userSessionRepository.delete).not.toHaveBeenCalledWith({ userId: 7, sessionId: 'sid-7' });
     });
 
-    it('should not delete a session whose row has already expired', async () => {
-      userSessionRepository.findOne.mockResolvedValue(
-        sessionRow({ activity: PASSIVE_THRESHOLD_MS + 1000, seen: PASSIVE_THRESHOLD_MS + 1000 })
+    it('should ask only about the given session, unexpired and past its active phase', async () => {
+      candidateFound();
+      noLiveToken();
+
+      await service.logoutOrphanedSession(7, 'sid-7');
+
+      const now = new Date(Date.now());
+      expect(userSessionRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            userId: 7,
+            sessionId: 'sid-7',
+            expiresAt: MoreThan(now),
+            lastActivity: LessThan(new Date(now.getTime() - ACTIVE_THRESHOLD_MS))
+          })
+        })
       );
-
-      const result = await service.logoutOrphanedSession(7, 'sid-7');
-
-      expect(result).toBe(false);
-      expect(userSessionRepository.delete).not.toHaveBeenCalledWith({ userId: 7, sessionId: 'sid-7' });
+      expect(refreshTokenRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            userId: 7,
+            sessionId: In(['sid-7']),
+            expiresAt: MoreThan(now)
+          })
+        })
+      );
     });
   });
 
   describe('deleteOrphanedSessions', () => {
-    it('should delete every session of the user that stopped being seen', async () => {
+    it('should delete every session of the user that no token can resume', async () => {
       userSessionRepository.find.mockResolvedValue([
         { sessionId: 'sid-1' }, { sessionId: 'sid-2' }
       ] as UserSession[]);
+      refreshTokenRepository.find.mockResolvedValue([]);
       userSessionRepository.delete.mockResolvedValue({ affected: 2, raw: [] });
 
       const result = await service.deleteOrphanedSessions(7);
 
       expect(result).toBe(2);
       expect(userSessionRepository.find).toHaveBeenCalledWith(
-        expect.objectContaining({ where: expect.objectContaining({ userId: 7, lastSeen: expect.anything() }) })
+        expect.objectContaining({
+          where: expect.objectContaining({ userId: 7, expiresAt: expect.anything() })
+        })
       );
     });
 
-    // Deleting by a second lastSeen predicate would spare a row that got pinged between
-    // the two statements, after its refresh tokens were already gone.
-    it('should delete exactly the sessions it found rather than re-testing lastSeen', async () => {
+    // The one session of the batch that is still resumable has to survive the bulk delete.
+    it('should spare the sessions a refresh token can still resume', async () => {
       userSessionRepository.find.mockResolvedValue([
         { sessionId: 'sid-1' }, { sessionId: 'sid-2' }
       ] as UserSession[]);
+      refreshTokenRepository.find.mockResolvedValue([{ sessionId: 'sid-2' }] as RefreshToken[]);
+      userSessionRepository.delete.mockResolvedValue({ affected: 1, raw: [] });
+
+      await service.deleteOrphanedSessions(7);
+
+      expect(userSessionRepository.delete).toHaveBeenCalledWith({
+        userId: 7,
+        sessionId: In(['sid-1'])
+      });
+    });
+
+    // Deleting by the condition again would spare a row that acquired a token between the
+    // two statements, after its old tokens were already gone.
+    it('should delete exactly the sessions it found rather than re-testing the condition', async () => {
+      userSessionRepository.find.mockResolvedValue([
+        { sessionId: 'sid-1' }, { sessionId: 'sid-2' }
+      ] as UserSession[]);
+      refreshTokenRepository.find.mockResolvedValue([]);
       userSessionRepository.delete.mockResolvedValue({ affected: 2, raw: [] });
 
       await service.deleteOrphanedSessions(7);

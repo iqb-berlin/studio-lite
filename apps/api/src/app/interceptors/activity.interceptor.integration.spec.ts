@@ -14,7 +14,7 @@ import { BACKGROUND_REQUEST_KEY } from '../decorators/background-request.decorat
  * things that can only fail outside it: whether the container can build the interceptor at
  * all now that it takes a Reflector, and whether the production routes carry the markings
  * the interceptor expects. Both were invisible to unit tests in #1569 as well -- the
- * missing exemption for /session-ping only surfaced against a running API.
+ * missing exemption for the session ping only surfaced against a running API.
  *
  * So this runs the real Reflector against the real controller methods.
  */
@@ -53,8 +53,7 @@ describe('ActivityInterceptor (integration)', () => {
       ['refresh', AppController.prototype.refresh],
       ['logout', AppController.prototype.logout],
       ['logoutSilent', AppController.prototype.logoutSilent],
-      ['activity', AppController.prototype.activity],
-      ['sessionPing', AppController.prototype.sessionPing]
+      ['activity', AppController.prototype.activity]
     ])('should mark %s as always background', (_name, handler) => {
       expect(modeOf(handler, AppController)).toBe('always');
     });
@@ -96,8 +95,8 @@ describe('ActivityInterceptor (integration)', () => {
 
     const next = (): CallHandler => createMock<CallHandler>({ handle: () => of(null) });
 
-    it('should not record activity for the session ping', () => {
-      interceptor.intercept(contextFor(AppController.prototype.sessionPing, AppController), next());
+    it('should not record activity for the activity sync itself', () => {
+      interceptor.intercept(contextFor(AppController.prototype.activity, AppController), next());
 
       expect(usersService.updateLastActivity).not.toHaveBeenCalled();
     });
