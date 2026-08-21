@@ -1,6 +1,8 @@
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Logger } from '@nestjs/common';
-import { LessThan, Repository } from 'typeorm';
+import {
+  In, LessThan, MoreThan, Repository
+} from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SessionCleanupService } from './session-cleanup.service';
@@ -51,6 +53,7 @@ describe('SessionCleanupService', () => {
       jest.useFakeTimers().setSystemTime(1000000);
       userSessionRepository.delete.mockResolvedValue({ affected: 2, raw: [] });
       refreshTokenRepository.delete.mockResolvedValue({ affected: 3, raw: [] });
+      userSessionRepository.find.mockResolvedValue([]);
 
       await service.cleanupExpiredRows();
 
@@ -60,7 +63,48 @@ describe('SessionCleanupService', () => {
         .toHaveBeenCalledWith({ expiresAt: LessThan(new Date(1000000)) });
     });
 
+    // A row that outlived its last refresh token cannot be reached by anyone, and expiry
+    // alone never catches it: expiresAt counts from the last interaction, the token's
+    // lifetime from the last rotation.
+    it('should delete the sessions no token can resume', async () => {
+      jest.useFakeTimers().setSystemTime(1000000);
+      userSessionRepository.delete.mockResolvedValue({ affected: 1, raw: [] });
+      refreshTokenRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
+      userSessionRepository.find.mockResolvedValue([
+        { sessionId: 'sid-1' }, { sessionId: 'sid-2' }
+      ] as UserSession[]);
+      refreshTokenRepository.find.mockResolvedValue([{ sessionId: 'sid-2' }] as RefreshToken[]);
+
+      await service.cleanupExpiredRows();
+
+      // Only the row without a live token, and only among rows that have not expired yet.
+      expect(userSessionRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ expiresAt: MoreThan(new Date(1000000)) })
+        })
+      );
+      expect(userSessionRepository.delete).toHaveBeenCalledWith({ sessionId: In(['sid-1']) });
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ sessionId: In(['sid-1']) });
+    });
+
+    // The bootstrap and hourly runs must not touch a session someone is working in, so a
+    // sweep that finds nothing orphaned deletes by expiry alone.
+    it('should delete nothing extra when every session is resumable', async () => {
+      userSessionRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
+      refreshTokenRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
+      userSessionRepository.find.mockResolvedValue([{ sessionId: 'sid-1' }] as UserSession[]);
+      refreshTokenRepository.find.mockResolvedValue([{ sessionId: 'sid-1' }] as RefreshToken[]);
+
+      await service.cleanupExpiredRows();
+
+      expect(userSessionRepository.delete).toHaveBeenCalledTimes(1);
+      expect(userSessionRepository.delete).not.toHaveBeenCalledWith(
+        expect.objectContaining({ sessionId: expect.anything() })
+      );
+    });
+
     it('should not throw when the session delete fails', async () => {
+      userSessionRepository.find.mockResolvedValue([]);
       userSessionRepository.delete.mockRejectedValue(new Error('db down'));
 
       await expect(service.cleanupExpiredRows()).resolves.toBeUndefined();
@@ -71,6 +115,7 @@ describe('SessionCleanupService', () => {
     });
 
     it('should not throw when the refresh token delete fails', async () => {
+      userSessionRepository.find.mockResolvedValue([]);
       userSessionRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
       refreshTokenRepository.delete.mockRejectedValue(new Error('db down'));
 
@@ -84,6 +129,7 @@ describe('SessionCleanupService', () => {
 
   describe('onApplicationBootstrap', () => {
     it('should run a catch-up cleanup on startup', async () => {
+      userSessionRepository.find.mockResolvedValue([]);
       userSessionRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
       refreshTokenRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
 
@@ -96,6 +142,7 @@ describe('SessionCleanupService', () => {
 
   describe('handleScheduledCleanup', () => {
     it('should run the cleanup', async () => {
+      userSessionRepository.find.mockResolvedValue([]);
       userSessionRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
       refreshTokenRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
 

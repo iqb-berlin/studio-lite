@@ -3,15 +3,14 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-  In, LessThan, MoreThan, Repository
-} from 'typeorm';
+import { In, LessThan, Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import { UsersService } from './users.service';
 import { ReviewService } from './review.service';
 import { RefreshToken } from '../entities/refresh-token.entity';
 import UserSession from '../entities/user-session.entity';
-import { ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS } from '../app.constants';
+import { findOrphanedSessionIds } from '../utils/orphaned-sessions';
+import { PASSIVE_THRESHOLD_MS } from '../app.constants';
 
 @Injectable()
 export class AuthService {
@@ -192,44 +191,16 @@ export class AuthService {
     await this.userSessionRepository.delete({ userId, sessionId });
   }
 
-  // The sessions of this user that nobody can return to: not usable with an access token
-  // (nothing interacted with them for longer than the active phase) and not renewable,
-  // because no unexpired refresh token is left. Expired rows are excluded -- those belong
-  // to SessionCleanupService, not to a delete the admin has to trigger by hand.
-  //
-  // Read order matters. Sessions first, tokens second: a refresh that lands in between
-  // shows up as a live token and spares its session. The other order would let the same
-  // refresh hide the token from us and take the session with it.
-  private async findOrphanedSessionIds(userId: number, sessionId?: string): Promise<string[]> {
-    const nowMs = Date.now();
-    const now = new Date(nowMs);
-    const candidates = await this.userSessionRepository.find({
-      where: {
-        userId,
-        ...(sessionId ? { sessionId } : {}),
-        expiresAt: MoreThan(now),
-        lastActivity: LessThan(new Date(nowMs - ACTIVE_THRESHOLD_MS))
-      },
-      select: { sessionId: true }
-    });
-    if (candidates.length === 0) {
-      return [];
-    }
-    const candidateIds = candidates.map(session => session.sessionId);
-    const liveTokens = await this.refreshTokenRepository.find({
-      where: { userId, sessionId: In(candidateIds), expiresAt: MoreThan(now) },
-      select: { sessionId: true }
-    });
-    const resumableIds = new Set(liveTokens.map(token => token.sessionId));
-    return candidateIds.filter(id => !resumableIds.has(id));
-  }
-
-  // Bulk counterpart to logoutOrphanedSession, for a user who has collected several rows
-  // that can no longer be continued. Deletes exactly the ids that were found rather than
-  // re-evaluating the condition: between the two statements a session can acquire a fresh
-  // token, and a second predicate would spare its row after its tokens are already gone.
+  // Bulk counterpart to logoutOrphanedSession, for a user whose rows the hourly cleanup has
+  // not reached yet. Deletes exactly the ids that were found rather than re-evaluating the
+  // condition: between the two statements a session can acquire a fresh token, and a second
+  // predicate would spare its row after its tokens are already gone.
   async deleteOrphanedSessions(userId: number): Promise<number> {
-    const ids = await this.findOrphanedSessionIds(userId);
+    const ids = await findOrphanedSessionIds(
+      this.userSessionRepository,
+      this.refreshTokenRepository,
+      { userId }
+    );
     if (ids.length === 0) {
       return 0;
     }
@@ -243,7 +214,11 @@ export class AuthService {
   }
 
   async logoutOrphanedSession(userId: number, sessionId: string): Promise<boolean> {
-    const orphanedIds = await this.findOrphanedSessionIds(userId, sessionId);
+    const orphanedIds = await findOrphanedSessionIds(
+      this.userSessionRepository,
+      this.refreshTokenRepository,
+      { userId, sessionId }
+    );
     if (orphanedIds.length === 0) {
       return false;
     }

@@ -401,10 +401,11 @@ describe('AuthService', () => {
           })
         })
       );
+      // The token query is keyed on the candidate ids alone: those are already this user's
+      // sessions, and a sessionId belongs to exactly one of them.
       expect(refreshTokenRepository.find).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            userId: 7,
             sessionId: In(['sid-7']),
             expiresAt: MoreThan(now)
           })
