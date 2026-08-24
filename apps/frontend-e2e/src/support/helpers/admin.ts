@@ -72,16 +72,10 @@ export function deleteUser(user: string): void {
   cy.contains('mat-row', user)
     .find('[data-cy="admin-users-delete-user"]').click();
   cy.translate(Cypress.expose('locale')).then(json => {
+    cy.intercept('DELETE', '/api/admin/users*').as('deleteUserReq');
     cy.clickButton(json.delete);
-    // cy.clickDialogButtonWithResponseCheck(
-    //   json.delete,
-    //   [200],
-    //   '/api/admin/users*',
-    //   'DELETE',
-    //   'deleteUser'
-    // );
+    cy.wait('@deleteUserReq').its('response.statusCode').should('be.oneOf', [200, 204]);
   });
-  cy.wait(100);
 }
 
 /**

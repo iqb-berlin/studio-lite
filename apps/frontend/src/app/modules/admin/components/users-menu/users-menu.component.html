@@ -8,7 +8,8 @@
   <button mat-button
           [disabled]="selectedRows.length !== 1"
           [matTooltip]="'admin.edit-user-data' | translate"
-          (click)="editUser()">
+          (click)="editUser()"
+          data-cy="admin-users-menu-edit-user">
     <studio-lite-wrapped-icon icon="edit"></studio-lite-wrapped-icon>
   </button>
   @if (orphanedSessionCount > 0) {
