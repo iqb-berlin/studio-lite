@@ -270,3 +270,93 @@ export function returnSubmittedUnits(unitNames: string[]): void {
       .click();
   });
 }
+
+/**
+ * Opens the group management dialog from the workspace menu
+ * @example
+ * openGroupManagementDialog();
+ */
+export function openGroupManagementDialog(): void {
+  goToWsMenu();
+  cy.get('[data-cy="workspace-edit-unit-manage-unit-groups"]').click();
+  cy.get('studio-lite-group-manage').should('exist');
+}
+
+/**
+ * Adds a new group from the group management dialog
+ * @param groupName - Name of the new group
+ * @example
+ * addGroupFromManagement('New Group');
+ */
+export function addGroupFromManagement(groupName: string): void {
+  cy.get('studio-lite-group-menu').find('mat-icon').contains('add').click();
+  cy.get('mat-dialog-container input[formControlName="text"]').type(groupName);
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.clickDialogButton(json.save);
+  });
+}
+
+/**
+ * Renames a group from the group management dialog
+ * @param oldGroupName - The name of the group to select and rename
+ * @param newGroupName - The new name of the group
+ * @example
+ * renameGroupFromManagement('Old Name', 'New Name');
+ */
+export function renameGroupFromManagement(oldGroupName: string, newGroupName: string): void {
+  cy.get('studio-lite-group-manage .group-row').contains(oldGroupName).click();
+  cy.get('studio-lite-group-menu').find('mat-icon').contains('edit').click();
+  cy.get('mat-dialog-container input[formControlName="text"]').clear().type(newGroupName);
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.clickDialogButton(json.save);
+  });
+}
+
+/**
+ * Deletes a group from the group management dialog
+ * @param groupName - The name of the group to select and delete
+ * @example
+ * deleteGroupFromManagement('Group to Delete');
+ */
+export function deleteGroupFromManagement(groupName: string): void {
+  cy.get('studio-lite-group-manage .group-row').contains(groupName).click();
+  cy.get('studio-lite-group-menu').find('mat-icon').contains('delete').click();
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.clickDialogButton(json.delete);
+  });
+}
+
+/**
+ * Closes the group management dialog
+ * @example
+ * closeGroupManagementDialog();
+ */
+export function closeGroupManagementDialog(): void {
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.clickDialogButton(json.close);
+  });
+  cy.get('studio-lite-group-manage').should('not.exist');
+}
+
+/**
+ * Opens the user list dialog from the workspace menu
+ * @example
+ * openWorkspaceUserListDialog();
+ */
+export function openWorkspaceUserListDialog(): void {
+  goToWsMenu();
+  cy.get('[data-cy="workspace-edit-unit-user-list"]').click();
+  cy.get('studio-lite-workspace-user-list').should('exist');
+}
+
+/**
+ * Closes the user list dialog
+ * @example
+ * closeWorkspaceUserListDialog();
+ */
+export function closeWorkspaceUserListDialog(): void {
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.clickDialogButton(json.close);
+  });
+  cy.get('studio-lite-workspace-user-list').should('not.exist');
+}

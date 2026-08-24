@@ -283,6 +283,62 @@ describe('Workspace Unit Management', () => {
     );
   });
 
+  it('export dialog shows file-config checkboxes', () => {
+    cy.visitWs(ws1);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
+    // export-unit-file-config: definition, coding, resources, notes checkboxes
+    cy.get('mat-card.files mat-checkbox, studio-lite-export-unit-file-config mat-checkbox')
+      .should('have.length.greaterThan', 0);
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.clickDialogButton(json.cancel || json.close);
+    });
+  });
+
+  it('export dialog search filter narrows the unit list', () => {
+    cy.visitWs(ws1);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
+    cy.get('[data-cy="workspace-select-unit-list-filter-units"]')
+      .type(unit3.shortname);
+    cy.get(`[data-cy="workspace-select-unit-list-checkbox-${unit3.shortname}"]`)
+      .should('be.visible');
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.clickDialogButton(json.cancel || json.close);
+    });
+  });
+
+  it('export dialog definition checkbox can be toggled', () => {
+    cy.visitWs(ws1);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
+    cy.get('mat-card.files mat-checkbox, studio-lite-export-unit-file-config mat-checkbox')
+      .first()
+      .find('input')
+      .then($chk => {
+        const wasChecked = $chk.prop('checked');
+        cy.wrap($chk).click({ force: true });
+        cy.wrap($chk).should(wasChecked ? 'not.be.checked' : 'be.checked');
+      });
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.clickDialogButton(json.cancel || json.close);
+    });
+  });
+
+  it('performs unit download/export successfully', () => {
+    cy.visitWs(ws1);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
+    selectListUnits([unit3.shortname]);
+    cy.get('mat-radio-button[value="json"]').click();
+    cy.intercept('POST', '/api/workspaces/*/download-units', {
+      statusCode: 200,
+      body: {}
+    }).as('downloadReq');
+    cy.get('[data-cy="workspace-export-unit-button"]').click();
+    cy.wait('@downloadReq').its('response.statusCode').should('eq', 200);
+  });
+
   it('displays metadata report', () => {
     cy.visitWs(ws1);
     goToWsMenu();
@@ -294,7 +350,9 @@ describe('Workspace Unit Management', () => {
       '/api/workspaces/*/units/properties',
       'GET',
       'summaryMetadata');
-    cy.get('[data-cy="metadata-table-view-download"]');
+    cy.get('[data-cy="metadata-table-view-download"]').should('be.visible');
+    cy.get('[data-cy="metadata-table-view-close"]').should('be.visible').click();
+    cy.get('[data-cy="metadata-table-view-close"]').should('not.exist');
   });
 
   it('displays coding report', () => {
@@ -302,9 +360,14 @@ describe('Workspace Unit Management', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-coding-report"]').click();
+    // coding-report component must be rendered inside the dialog
+    cy.get('mat-mdc-dialog-container, mat-dialog-container').within(() => {
+      cy.get('studio-lite-coding-report, mat-table, table, p').should('exist');
+    });
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickDialogButton(json.close);
     });
+    cy.get('mat-mdc-dialog-container, mat-dialog-container').should('not.exist');
   });
 
   it('exports codebook for selected units', () => {
@@ -322,6 +385,19 @@ describe('Workspace Unit Management', () => {
         'codebook'
       );
     });
+  });
+
+  it('coding book export dialog can be cancelled without a selection', () => {
+    cy.visitWs(ws1);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-reports"]').click();
+    cy.get('[data-cy="workspace-edit-unit-export-coding-book"]').click();
+    // with nothing selected the dialog should still render the unit list
+    cy.get('[data-cy="workspace-select-unit-list-key"]').should('exist');
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.clickDialogButton(json.cancel || json.close);
+    });
+    cy.get('mat-mdc-dialog-container, mat-dialog-container').should('not.exist');
   });
 
   it('displays print preview for units with coding and comments', () => {

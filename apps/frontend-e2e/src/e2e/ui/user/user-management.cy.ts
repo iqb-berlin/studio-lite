@@ -2,14 +2,17 @@ import { newUser, UserData } from '../../../support/testData';
 import {
   addFirstUser,
   changePassword,
+  clearUserFilter,
   createNewUser,
   deleteFirstUser,
   deleteUser,
+  filterUsers,
+  goToAdminUsers,
   login,
   loginWithUser,
   logout,
-  updatePersonalData,
-  clickIndexTabAdmin
+  selectUserRow,
+  updatePersonalData
 } from '../../../support/helpers';
 
 describe('UI User Management', () => {
@@ -18,11 +21,14 @@ describe('UI User Management', () => {
     createNewUser(newUser);
     logout();
   });
+
   after(() => {
     login(Cypress.expose('username'), Cypress.expose('password'));
     deleteUser(newUser.username);
     deleteFirstUser();
   });
+
+  // ─── Self-service (logged in as normal user) ─────────────────────────────────
 
   describe('User options', () => {
     it('logs in with valid credentials', () => {
@@ -61,11 +67,13 @@ describe('UI User Management', () => {
       });
     });
   });
+
+  // ─── Admin view of the user table ─────────────────────────────────────────────
+
   describe('Administrative User Management', () => {
     beforeEach(() => {
       login(Cypress.expose('username'), Cypress.expose('password'));
-      cy.findAdminSettings().click();
-      clickIndexTabAdmin('users');
+      goToAdminUsers();
     });
 
     afterEach(() => {
@@ -74,13 +82,20 @@ describe('UI User Management', () => {
 
     it('displays the users table and filters by name', () => {
       cy.get('mat-table').should('be.visible');
-      cy.get('[data-cy="search-filter-input"]').type(newUser.username);
+      filterUsers(newUser.username);
       cy.get('mat-row').should('have.length.at.least', 1);
       cy.get('mat-row').should('contain', newUser.username);
     });
 
+    it('clears the filter and shows all users again', () => {
+      filterUsers(newUser.username);
+      clearUserFilter();
+      cy.contains('mat-row', Cypress.expose('username')).should('be.visible');
+      cy.contains('mat-row', newUser.username).should('be.visible');
+    });
+
     it('shows access rights when a user is selected', () => {
-      cy.get('mat-row').contains(newUser.username).click();
+      selectUserRow(newUser.username);
       cy.translate(Cypress.expose('locale')).then(json => {
         const expectedHeader = json['access-rights']['for-user'].replace('{{user}}', newUser.username);
         cy.get('.object-header').should('contain', expectedHeader);
@@ -88,7 +103,7 @@ describe('UI User Management', () => {
     });
 
     it('toggles edit user dialog', () => {
-      cy.get('mat-row').contains(newUser.username).click();
+      selectUserRow(newUser.username);
       cy.translate(Cypress.expose('locale')).then(json => {
         cy.get('button:contains("edit")').click();
         cy.get('mat-dialog-container').should('be.visible');
