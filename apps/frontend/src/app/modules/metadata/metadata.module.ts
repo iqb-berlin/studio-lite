@@ -30,7 +30,8 @@ import {
   FormlyToggleComponent,
   FormlyDurationComponent,
   ProfileFormComponent,
-  NestedTreeComponent
+  NestedTreeComponent,
+  FormlyInlineComponent
 } from '@iqb/metadata-components';
 import { ItemsComponent } from './components/items/items.component';
 import { ItemComponent } from './components/item/item.component';
@@ -114,6 +115,17 @@ export function IdValidator(control: AbstractControl, field: FormlyFieldConfig):
           }
         },
         {
+          name: 'vocabInline',
+          wrappers: ['form-field'],
+          component: FormlyInlineComponent,
+          defaultOptions: {
+            defaultValue: [],
+            props: {
+              maxLevel: 0
+            }
+          }
+        },
+        {
           name: 'formlyToggle',
           wrappers: ['form-field'],
           component: FormlyToggleComponent,
@@ -141,6 +153,7 @@ export function IdValidator(control: AbstractControl, field: FormlyFieldConfig):
     FormlyWrapperPanel,
     FormlyToggleComponent,
     FormlyDurationComponent,
+    FormlyInlineComponent,
     ItemsComponent,
     ItemComponent,
     ProfileFormComponent,
