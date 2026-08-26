@@ -39,7 +39,7 @@
     "@angular/platform-browser-dynamic": "20.3.25",
     "@angular/router": "20.3.25",
     "@golevelup/ts-jest": "^0.3.4",
-    "@iqb/metadata-components": "0.2.9",
+    "@iqb/metadata-components": "^0.3.3",
     "@iqb/metadata-resolver": "0.2.1",
     "@iqb/ngx-coding-components": "3.4.0",
     "@iqb/responses": "5.2.2",
