@@ -17,7 +17,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { MatRadioButton } from '@angular/material/radio';
 import { MatIcon } from '@angular/material/icon';
 import { Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
@@ -48,7 +48,7 @@ import { EntriesDividerComponent } from '../../../../components/entries-divider/
   templateUrl: './workspaces.component.html',
   styleUrls: ['./workspaces.component.scss'],
   imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
-    MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
+    MatHeaderCell, MatRadioButton, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
     MatTooltip, FormsModule, EntriesDividerComponent,
     IsSelectedIdPipe, TranslateModule, MatIcon, RolesHeaderComponent, WorkspaceNamePipe, MatIconButton, MatFabButton,
     RouterLink]
@@ -111,13 +111,14 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
         });
   }
 
-  changeAccessLevel(checked: boolean, user: WorkspaceUserChecked, level: number): void {
-    if (checked) {
-      user.accessLevel = level;
-      user.isChecked = true;
-    } else {
+  onRoleClick(user: WorkspaceUserChecked, level: number): void {
+    if (!this.selectedWorkspaceId) return;
+    if (user.isChecked && user.accessLevel === level) {
       user.accessLevel = 0;
       user.isChecked = false;
+    } else {
+      user.accessLevel = level;
+      user.isChecked = true;
     }
     this.workspaceUsers.updateHasChanged();
   }

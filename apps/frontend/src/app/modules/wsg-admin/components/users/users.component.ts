@@ -14,7 +14,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { MatRadioButton } from '@angular/material/radio';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -36,7 +36,7 @@ import { EntriesDividerComponent } from '../../../../components/entries-divider/
   imports: [
     SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
     MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, EntriesDividerComponent,
-    MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule,
+    MatRadioButton, FormsModule, IsSelectedIdPipe, TranslateModule,
     RolesHeaderComponent, MatFabButton, MatIcon
   ]
 })
@@ -76,13 +76,14 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.createWorkspaceList();
   }
 
-  changeAccessLevel(checked: boolean, workspace: WorkspaceChecked, level: number): void {
-    if (checked) {
-      workspace.accessLevel = level;
-      workspace.isChecked = true;
-    } else {
+  onRoleClick(workspace: WorkspaceChecked, level: number): void {
+    if (!this.selectedUser) return;
+    if (workspace.isChecked && workspace.accessLevel === level) {
       workspace.accessLevel = 0;
       workspace.isChecked = false;
+    } else {
+      workspace.accessLevel = level;
+      workspace.isChecked = true;
     }
     this.userWorkspaces.updateHasChanged();
   }
