@@ -30,11 +30,12 @@
         </p>
       }
       <mat-form-field>
+        <!-- No (keyup.enter) here: the form submits itself on Enter, and a handler on the
+             field would run in addition to that submit -- two logins, two sessions. -->
         <input matInput #pw
           type="password"
           formControlName="pw"
           [placeholder]="'home.password' | translate"
-          (keyup.enter)="login()"
           data-cy="home-password">
       </mat-form-field>
     </div>
@@ -47,7 +48,7 @@
     <button class="submit-button"
             mat-raised-button
             type="submit"
-            [disabled]="loginForm.invalid"
+            [disabled]="loginForm.invalid || isSubmitting"
             color="primary"
             data-cy="home-submit-button">{{ 'home.login' | translate }}
     </button>
