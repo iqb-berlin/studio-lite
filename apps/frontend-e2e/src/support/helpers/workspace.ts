@@ -4,7 +4,7 @@
  */
 
 import { UnitData } from '../testData';
-import { goToWsMenu } from './navigation';
+import { clickIndexTabWorkspace, goToWsMenu } from './navigation';
 
 /**
  * Selects a unit by name
@@ -360,3 +360,51 @@ export function closeWorkspaceUserListDialog(): void {
   });
   cy.get('studio-lite-workspace-user-list').should('not.exist');
 }
+
+/**
+ * Selects a unit and navigates to its properties tab
+ * @param shortname - Unit shortname or key
+ * @example
+ * openUnitProperties('UNIT_1');
+ */
+export function openUnitProperties(shortname: string): void {
+  selectUnit(shortname);
+  clickIndexTabWorkspace('properties');
+  cy.get('input[formControlName="key"]').should('be.visible');
+}
+
+/**
+ * Clicks the unit properties save button and waits for the PATCH API response
+ * @example
+ * clickUnitPropertiesSaveButton();
+ */
+export function clickUnitPropertiesSaveButton(): void {
+  cy.get('[data-cy="workspace-unit-save-button"]').should('not.be.disabled').click();
+  cy.wait('@saveProps').its('response.statusCode').should('eq', 200);
+}
+
+/**
+ * Navigates to unit properties, registers PATCH intercept, executes modify action, saves, reloads, and runs verification
+ * @param ws - Workspace name
+ * @param shortname - Unit shortname
+ * @param modify - Function performing form edits
+ * @param verify - Function performing assertions after reload
+ * @example
+ * editUnitPropertiesAndVerify(ws1, 'U1', () => cy.get(...).type('New'), () => cy.get(...).should('have.value', 'New'));
+ */
+export function editUnitPropertiesAndVerify(
+  ws: string,
+  shortname: string,
+  modify: () => void,
+  verify: () => void
+): void {
+  cy.visitWs(ws);
+  openUnitProperties(shortname);
+  cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveProps');
+  modify();
+  clickUnitPropertiesSaveButton();
+  cy.visitWs(ws);
+  openUnitProperties(shortname);
+  verify();
+}
+
