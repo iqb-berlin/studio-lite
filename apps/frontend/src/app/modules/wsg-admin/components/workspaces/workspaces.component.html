@@ -192,7 +192,7 @@
                   [checked]="!!selectedWorkspaceId && u.accessLevel === level && u.isChecked"
                   [disabled]="!selectedWorkspaceId"
                   [matTooltip]="'access-rights.access-level-'+level | translate"
-                  [attr.data-cy]="'access-rights-checkbox-' + level"
+                  [attr.data-cy]="'access-rights-radio-button-' + level"
                   (click)="onRoleClick(u, level)">
                 </mat-radio-button>
               }

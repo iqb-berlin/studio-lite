@@ -122,7 +122,7 @@
                   [checked]="!!selectedUser && (ws.accessLevel === level) && ws.isChecked"
                   [disabled]="!selectedUser"
                   [matTooltip]="'access-rights.access-level-'+level | translate"
-                  [attr.data-cy]="'access-rights-checkbox-' + level"
+                  [attr.data-cy]="'access-rights-radio-button-' + level"
                   (click)="onRoleClick(ws, level)">
                 </mat-radio-button>
               }
