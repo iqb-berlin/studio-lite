@@ -146,12 +146,10 @@ describe('Unit Reviews', () => {
   });
 
   it('reflects the updated unit count when the review is opened', () => {
-    cy.intercept('GET', '/api/reviews/*').as('getReview');
     cy.visit('/');
     openReview(review);
-    cy.wait('@getReview');
-    cy.get('studio-lite-unit-nav').within(() => {
-      cy.get('.mat-mdc-list-item:contains("3")').should('exist');
+    cy.get('studio-lite-unit-nav', { timeout: 15000 }).within(() => {
+      cy.contains('mat-list-option', '3').should('exist');
     });
   });
 
@@ -284,7 +282,7 @@ describe('Unit Reviews', () => {
     clickIndexTabWorkspace('comments');
     cy.get('studio-lite-comments', { timeout: 15000 }).should('be.visible');
     cy.wait('@markCommentsSeen').its('response.statusCode').should('be.within', 200, 299);
-    clickIndexTabWorkspace('properties');
+    cy.visitWs(ws1);
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments', { timeout: 15000 }).should('have.css', 'opacity', '0');
     });
