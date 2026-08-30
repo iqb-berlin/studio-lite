@@ -7,6 +7,14 @@ import UnitItem from '../entities/unit-item.entity';
 import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-found.exception';
 import { UnitItemNotFoundException } from '../exceptions/unit-item-not-found.exception';
 
+/**
+ * Which items a comment is about -- the rows of {@link UnitCommentUnitItem}. Kept apart from
+ * {@link UnitCommentService} because the connection is its own thing: a comment can be moved from
+ * item to item without the comment changing.
+ *
+ * {@link updateCommentItems} takes the whole set a comment should point at and works out what to
+ * add and what to remove, so callers can hand over the state they want rather than the difference.
+ */
 @Injectable()
 export class ItemCommentService {
   private readonly logger = new Logger(ItemCommentService.name);

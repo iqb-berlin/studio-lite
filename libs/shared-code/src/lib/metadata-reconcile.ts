@@ -7,16 +7,25 @@
  * most one metadata row per profile, so the profileId is a stable natural key.
  */
 
+/** The four fields the reconciliation needs of a metadata row; everything else stays opaque to it. */
 export interface ReconcilableProfile {
+  /** The persisted row id. Set on stored rows, absent on what the form re-emits. */
   id: number;
+  /** The natural key rows are matched by. A unit or item holds at most one row per profile. */
   profileId?: string;
+  /** Kept from the stored row when it is updated, so an edit does not look like a new entry. */
   createdAt?: Date;
+  /** The profile's position; see `profile-order.ts`. Inherited when the payload omits it. */
   order?: number;
 }
 
+/** The three writes the reconciliation performs, supplied by the caller's repository. */
 export interface ProfileReconcileOps<T> {
+  /** Delete the stored row with this id — its profile is gone from the payload. */
   remove: (id: number) => Promise<unknown>;
+  /** Overwrite the stored row with this id, keeping its identity. */
   update: (id: number, metadata: T) => Promise<unknown>;
+  /** Insert a profile that has no stored row yet. */
   add: (metadata: T) => Promise<unknown>;
 }
 

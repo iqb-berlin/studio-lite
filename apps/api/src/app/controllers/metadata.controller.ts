@@ -10,6 +10,13 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { MetadataProfileService } from '../services/metadata-profile.service';
 import { RegisteredMetadataProfileService } from '../services/registered-metadata-profile.service';
 
+/**
+ * `metadata` -- the profiles and vocabularies the metadata forms are built from, served from the
+ * studio's own cache rather than from w3id, so the form works while the outside is unreachable and
+ * every user sees the same version.
+ *
+ * Read-only and not workspace-bound: which profile a workspace uses is part of its settings.
+ */
 @Controller('metadata')
 @UseFilters(HttpExceptionFilter)
 export class MetadataController {

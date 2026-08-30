@@ -17,18 +17,29 @@
  * stable key. Unknown URL forms are returned unchanged, so any other comparison
  * falls back to an exact match — this never equates two different profiles.
  */
-// Both spellings are anchored on the hosts the w3id rewrite rule actually names,
-// so a self-hosted copy of a profile is never silently equated with — or rewritten
-// to — the official one. Scheme and the `www.` alias are accepted as variants of
-// the same id and normalized away by toW3idProfileId.
-// `refs/heads/master` is the spelling github's "copy raw file" button produces; it
-// serves the same document as the shorter `master` form and is therefore accepted
-// as the same id — the registry url an admin pasted by hand is regularly in that form.
+/**
+ * The w3id spelling. Anchored on the host the rewrite rule actually names, so a self-hosted
+ * copy of a profile is never silently equated with — or rewritten to — the official one.
+ * Scheme and the `www.` alias are accepted as variants of the same id and normalized away by
+ * {@link toW3idProfileId}.
+ */
 const W3ID_PROFILE = /^https?:\/\/(?:www\.)?w3id\.org\/iqb\/(p\d+)\/([a-z]+)\/?$/i;
+/**
+ * The github spelling the rewrite rule redirects to. `refs/heads/master` is what github's
+ * "copy raw file" button produces; it serves the same document as the shorter `master` form and
+ * is therefore accepted as the same id — the registry url an admin pasted by hand is regularly
+ * in that form.
+ */
 const GITHUB_PROFILE =
   /^https?:\/\/raw\.githubusercontent\.com\/iqb-vocabs\/(p\d+)\/(?:refs\/heads\/)?master\/([a-z]+)\.json$/i;
+/** The internal key both spellings are reduced to, and the only input {@link toW3idProfileId} rewrites. */
 const CANONICAL_PROFILE_KEY = /^iqb:(p\d+):([a-z]+)$/;
 
+/**
+ * Reduces both known spellings of the SAME profile to one stable key. Unknown URL forms are
+ * returned unchanged, so any other comparison falls back to an exact match — this never equates
+ * two different profiles.
+ */
 export function canonicalizeProfileId(profileId: string): string {
   if (!profileId) return profileId;
   const w3id = W3ID_PROFILE.exec(profileId);
@@ -38,6 +49,11 @@ export function canonicalizeProfileId(profileId: string): string {
   return profileId;
 }
 
+/**
+ * Whether two profile ids denote the same profile, regardless of which spelling each uses.
+ * Two empty values only match if both are the same kind of empty, so a missing id never
+ * matches a missing one on the other side.
+ */
 export function profileIdsMatch(
   a: string | undefined | null,
   b: string | undefined | null

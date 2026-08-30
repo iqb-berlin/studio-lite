@@ -56,6 +56,20 @@ import { WorkspaceService } from '../services/workspace.service';
 import { SettingService } from '../services/setting.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 
+/**
+ * `workspaces/:workspace_id/units` -- the largest surface of the API: the units of a workspace,
+ * each part of them addressable on its own (properties, definition, scheme, metadata), plus what
+ * is done to them as a set -- moving them to another workspace, submitting them to a drop box,
+ * grouping them, and the coding report and coding book over them.
+ *
+ * The parts are separate routes because they are read and written separately: a unit list needs the
+ * properties and nothing else, while the definition is the large part nobody wants along by
+ * accident.
+ *
+ * The guards rise with what a route does: reading takes access to the workspace, changing a unit
+ * takes write access, grouping takes manage access, and moving or deleting takes the top level --
+ * with one exception, deleting a single unit, which is the group admin's.
+ */
 @Controller('workspaces/:workspace_id/units')
 export class WorkspaceUnitController {
   constructor(
@@ -64,6 +78,12 @@ export class WorkspaceUnitController {
     private settingsService: SettingService
   ) {}
 
+  /**
+   * The units of the workspace, in the shape the list needs. The queries add what only some views
+   * want: the timestamp of the comments each reader has already seen, and the drop-box relation to
+   * another workspace -- `targetWorkspaceId` adds it, and `filterTargetWorkspaceId` then keeps
+   * only the units submitted to this workspace, which is what a drop box shows.
+   */
   @Get()
   @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
@@ -109,6 +129,11 @@ export class WorkspaceUnitController {
     return this.workspaceService.getCodingReport(workspaceId);
   }
 
+  /**
+   * The coding book over the units named in `id`, as docx or json. The many boolean queries are
+   * the content settings the dialog offers -- which variables and which parts of a coding scheme
+   * end up in the document -- and are gathered into one settings object here.
+   */
   @Get('coding-book')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
@@ -160,6 +185,11 @@ export class WorkspaceUnitController {
     return new StreamableFile(file as unknown as Uint8Array);
   }
 
+  /**
+   * The properties of the workspace's units -- or, for `type` `unit` or `item`, the xlsx metadata
+   * report over them, narrowed to the given units and metadata columns. Two answers on one route:
+   * the report is the same data in a form to hand on.
+   */
   @Get('properties')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
@@ -262,6 +292,11 @@ export class WorkspaceUnitController {
     return this.unitService.findOnesScheme(unitId);
   }
 
+  /**
+   * Writes the unit's properties, and its metadata along with them when the body carries any. The
+   * user's display name is resolved here because it is stored on the unit as "last changed by" --
+   * the unit keeps the name, not the id.
+   */
   @Patch(':id/properties')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
@@ -290,6 +325,11 @@ export class WorkspaceUnitController {
     return this.unitService.patchWorkspace(body.ids, body.targetId, user, workspaceId, 'moveTo');
   }
 
+  /**
+   * Submits units to a drop box, or sends submitted ones back -- which of the two follows from the
+   * body: with a `targetId` it is a submission, without it a return. Both move the units and record
+   * the move in {@link UnitDropBoxHistory}.
+   */
   @Patch('drop-box-history')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
@@ -359,6 +399,10 @@ export class WorkspaceUnitController {
       new Date());
   }
 
+  /**
+   * Creates a unit, or copies existing ones -- which of the two follows from the body: a body that
+   * says whether to take the comments along is a copy.
+   */
   @Post()
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
@@ -398,6 +442,10 @@ export class WorkspaceUnitController {
     return this.unitService.remove(ids);
   }
 
+  /**
+   * Deletes a single unit. Unlike {@link remove}, which takes delete access in the workspace, this
+   * one is for the group admin, who has no access level in it.
+   */
   @Delete(':unitId')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()

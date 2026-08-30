@@ -1,5 +1,10 @@
 import { UnsupportedMediaTypeException } from '@nestjs/common';
 
+/**
+ * A multer file filter that accepts an upload only if its mime type contains one of the given
+ * strings, and answers 415 otherwise. Matching by substring rather than equality is what lets a
+ * single `application/zip` cover the spellings browsers actually send (see `ZIP_MIME_TYPES`).
+ */
 export function fileMimetypeFilter(...mimetypes: string[]) {
   return (
     req: unknown,

@@ -25,6 +25,16 @@ import { UnitUserService } from '../services/unit-user.service';
 import { ItemCommentService } from '../services/item-comment.service';
 import { UnitId } from '../decorators/unit-id.decorator';
 
+/**
+ * `workspaces/:workspace_id/units/:unit_id/comments` -- the discussion on a unit from inside its
+ * workspace: reading it, writing and revising comments, tying one to single items, voting, and the
+ * timestamp of what the reader has already seen, which the "new comments" marking is built on.
+ *
+ * Commenting takes the comment access level ({@link CommentAccessGuard}), and changing a comment
+ * takes being its author on top of that ({@link CommentWriteGuard}). Only reading the last-seen
+ * timestamp settles for plain access to the workspace: it says nothing about the comments
+ * themselves.
+ */
 @Controller('workspaces/:workspace_id/units/:unit_id/comments')
 export class WorkspaceUnitCommentController {
   constructor(

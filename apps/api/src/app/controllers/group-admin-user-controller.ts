@@ -16,6 +16,13 @@ import { WorkspaceService } from '../services/workspace.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { BackgroundRequest } from '../decorators/background-request.decorator';
 
+/**
+ * `group-admin/users` -- what a group admin does with people: see the users and set which
+ * workspaces of their group each may work in, and at which access level.
+ *
+ * The user list is served whole here, not narrowed to the group: a group admin has to be able to
+ * pick anyone to add. What is theirs to change is the assignment, and that is written per group.
+ */
 @Controller('group-admin/users')
 export class GroupAdminUserController {
   constructor(

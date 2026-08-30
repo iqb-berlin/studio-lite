@@ -1,5 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
+/** The `workspace_group_id` route parameter, parsed to a number. */
 export const WorkspaceGroupId = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();

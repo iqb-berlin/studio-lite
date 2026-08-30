@@ -23,6 +23,12 @@ export const profileIdTransformer: ValueTransformer = {
   from: (value?: string): string | undefined => (value ? toW3idProfileId(value) : value)
 };
 
+/**
+ * What every metadata row has, whatever it is attached to: the profile it follows, the entries
+ * filled in under that profile, and the profile's `order` (see `profile-order.ts`). Not a table of
+ * its own -- {@link UnitMetadata} and {@link UnitItemMetadata} inherit it and each add the column
+ * that says what the row belongs to.
+ */
 class Metadata {
   @PrimaryGeneratedColumn()
     id: number;

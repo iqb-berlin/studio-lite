@@ -15,6 +15,13 @@ import Workspace from '../entities/workspace.entity';
 import { UnitService } from './unit.service';
 import { ReviewUnprocessableException } from '../exceptions/review-unprocessable.exception';
 
+/**
+ * The reviews of a workspace: what they contain, who may open them, and what a reviewer is served.
+ *
+ * A review is reached by a link -- a generated uuid -- and a password, which is how someone without
+ * a studio account gets in. That is also why the read paths here resolve the review's workspace
+ * first: a reviewer names a unit id, and only the review says which workspace it may come from.
+ */
 @Injectable()
 export class ReviewService {
   private readonly logger = new Logger(ReviewService.name);

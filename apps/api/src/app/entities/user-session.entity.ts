@@ -3,6 +3,14 @@ import {
 } from 'typeorm';
 import User from './user.entity';
 
+/**
+ * One login of one user, kept apart from the tokens issued for it: several browsers of the same
+ * person are several sessions and expire independently.
+ *
+ * A session's state is read off the two thresholds in `time.constants.ts` and the tokens that still
+ * exist for it -- active while an access token can be valid, passive while a refresh token can
+ * resume it, orphaned once neither is left (see `findOrphanedSessionIds`).
+ */
 @Entity({ name: 'user_session' })
 class UserSession {
   @PrimaryGeneratedColumn()

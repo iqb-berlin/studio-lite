@@ -4,6 +4,14 @@ import {
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
 
+/**
+ * Guards the group-admin area: the requesting user has to administer the workspace group the route
+ * is about. A full administrator passes without further questions.
+ *
+ * The group is taken from whichever parameter the route carries -- `workspace_group_id` names it
+ * directly, `workspace_id` names a workspace whose group is looked up. A route with neither leaves
+ * the group unresolved, and the check then runs against no group at all, which no one administers.
+ */
 @Injectable()
 export class IsWorkspaceGroupAdminGuard implements CanActivate {
   constructor(
@@ -11,6 +19,7 @@ export class IsWorkspaceGroupAdminGuard implements CanActivate {
     private workspaceService: WorkspaceService
   ) {}
 
+  /** Passes for an administrator, or for an admin of the group the route belongs to. */
   async canActivate(
     context: ExecutionContext
   ) {

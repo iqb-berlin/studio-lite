@@ -17,6 +17,11 @@ import * as util from 'util';
 import { ResourcePackageNotFoundException } from '../exceptions/resource-package-not-found.exception';
 import ResourcePackage from '../entities/resource-package.entity';
 
+/**
+ * Resource packages: a zip is unpacked into `./packages` on disk, and the database keeps only the
+ * package's name, the files it unpacked to, and when it arrived. The zip itself is kept as well, so
+ * a package can be handed back out unchanged.
+ */
 @Injectable()
 export class ResourcePackageService {
   private readonly logger = new Logger(ResourcePackageService.name);

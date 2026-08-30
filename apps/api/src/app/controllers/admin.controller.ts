@@ -11,6 +11,11 @@ import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
 import { UnitItemService } from '../services/unit-item.service';
 
+/**
+ * `admin` -- the unfiltered lists an administrator needs to see across the whole installation:
+ * every workspace, every unit, every item, with no workspace assignment involved. Behind
+ * {@link IsAdminGuard} for that reason.
+ */
 @Controller('admin')
 export class AdminController {
   constructor(

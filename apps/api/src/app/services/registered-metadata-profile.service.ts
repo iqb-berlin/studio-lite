@@ -13,6 +13,13 @@ import MetadataProfileRegistry from '../entities/metadata-profile-registry.entit
 import { SettingService } from './setting.service';
 import { ProfilesRegistryNotAcceptableException } from '../exceptions/profiles-registry-not-acceptable.exception';
 
+/**
+ * The registry of metadata profiles: a CSV somewhere out there lists the profile sets that may be
+ * chosen, and this service keeps both the CSV and the sets it names in the database.
+ *
+ * What a workspace group later picks from is these entries, so the registry has to be readable even
+ * when its source is not -- which is why it is cached rather than fetched per request.
+ */
 @Injectable()
 export class RegisteredMetadataProfileService {
   constructor(

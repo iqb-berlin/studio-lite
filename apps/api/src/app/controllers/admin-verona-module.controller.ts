@@ -19,12 +19,21 @@ import { VeronaModulesService } from '../services/verona-modules.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 
+/**
+ * `admin/verona-modules` -- installing and removing modules, for administrators only. The types a
+ * module is installed as are given by the caller rather than read from the module, and are checked
+ * here: an unknown type is refused with 406 instead of ending up in the database.
+ */
 @Controller('admin/verona-modules')
 export class AdminVeronaModuleController {
   constructor(
     private veronaModulesService: VeronaModulesService
   ) {}
 
+  /**
+   * Installs an uploaded module under the given types. Types are trimmed, checked against the four
+   * known ones in either spelling, and de-duplicated before the module is stored.
+   */
   @Post()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()

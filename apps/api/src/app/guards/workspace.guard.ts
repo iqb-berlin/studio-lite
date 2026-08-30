@@ -3,12 +3,18 @@ import {
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 
+/**
+ * Whether the user may enter this workspace at all. Unlike {@link WorkspaceAccessGuard}, which
+ * asks the assignment table alone, this one also lets the admin of the workspace's group through,
+ * who is not assigned to the workspace but administers it.
+ */
 @Injectable()
 export class WorkspaceGuard implements CanActivate {
   constructor(
     private authService: AuthService
   ) {}
 
+  /** Passes when the user may reach the workspace in `route.params.workspace_id`. */
   async canActivate(
     context: ExecutionContext
   ) {

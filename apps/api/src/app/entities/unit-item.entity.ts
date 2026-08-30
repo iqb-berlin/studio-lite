@@ -3,6 +3,12 @@ import {
 } from 'typeorm';
 import Unit from './unit.entity';
 
+/**
+ * A single item of a unit -- the level below the unit at which metadata, comments and notes can be
+ * attached. `uuid` is the primary key the rest of the API addresses an item by; `id` is the name it
+ * carries inside its unit, and `variableId` ties it to the variable of the unit's definition it is
+ * answered through.
+ */
 @Entity()
 class UnitItem {
   @PrimaryGeneratedColumn()

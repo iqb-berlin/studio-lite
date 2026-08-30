@@ -25,6 +25,13 @@ import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
 
+/**
+ * `workspace-groups/:workspace_group_id` -- a group as its members see it, plus the group settings,
+ * which only its admin may change.
+ *
+ * The GET has a second shape: with `download` it answers with the xlsx report over all workspaces
+ * of the group instead of the group itself.
+ */
 @Controller('workspace-groups/:workspace_group_id')
 export class WorkspaceGroupController {
   constructor(

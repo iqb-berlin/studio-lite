@@ -78,6 +78,21 @@ interface ImportedComment {
   itemUuids?: string[];
 }
 
+/**
+ * The workspaces: creating and deleting them, moving them between groups, their settings, their
+ * unit groups, and who works in them.
+ *
+ * The settings are the part that reaches furthest -- they decide the default modules and the
+ * metadata profiles of every unit in the workspace, so a change here is felt by units that are
+ * never touched themselves.
+ *
+ * A unit group is not a table: it is a name in the settings and the same name on each unit, which
+ * is why creating, renaming and removing one all write both sides.
+ *
+ * The coding report over a workspace lives here as well -- a block of static helpers that read the
+ * coding schemes of its units and judge them. It belongs to the workspace only in that it is asked
+ * for one, and it is the one part of this service that touches no repository.
+ */
 @Injectable()
 export class WorkspaceService {
   private readonly logger = new Logger(WorkspaceService.name);
@@ -375,6 +390,12 @@ export class WorkspaceService {
     }
   }
 
+  /**
+   * One row per coding variable of every unit in the workspace: what is coded, how, and what the
+   * validation of the scheme against the unit's variables says. A unit whose scheme cannot be used
+   * -- missing, unparsable, or written by a schemer too old for it -- still gets a row, so the
+   * report shows the gap instead of leaving the unit out.
+   */
   async getCodingReport(id: number): Promise<CodingReportDto[]> {
     const unitDataRows: CodingReportDto[] = [];
     const unitListWithMetadata = await this.unitService.findAllWithProperties(
@@ -407,6 +428,10 @@ export class WorkspaceService {
     return unitDataRows;
   }
 
+  /**
+   * Whether a unit's coding scheme can be read at all. A scheme without a schemer is the current
+   * JSON format, which no longer names one; an older scheme is only usable from schemer 1.5 on.
+   */
   private static isValidScheme(
     scheme: string | undefined,
     schemer: string

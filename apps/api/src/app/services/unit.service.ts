@@ -45,6 +45,19 @@ import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 // under Promise.all reuse one DB fetch instead of each firing its own.
 type ProfileFetchCache = Map<string, ReturnType<MetadataProfileService['getStoredMetadataProfileFromDb']>>;
 
+/**
+ * The units and everything a unit is made of: properties, definition, scheme, metadata, items --
+ * plus copying a unit, moving it to another workspace, and submitting it to a drop box.
+ *
+ * Metadata has two homes and this service knows which one holds the truth for a given unit: the
+ * older jsonb column on {@link Unit}, or the normalized tables, once the unit carries the marker
+ * {@link UnitMetadataToDelete}. Reads ask the marker first; the write path fills the tables and
+ * sets the marker in the same transaction.
+ *
+ * Copying is the operation with the most to keep straight: a copy needs new items with new uuids,
+ * and comments and notes that pointed at the old ones have to be rewritten to the new -- hence the
+ * uuid lookups handed around between here and the comment and note services.
+ */
 export class UnitService {
   private readonly logger = new Logger(UnitService.name);
 

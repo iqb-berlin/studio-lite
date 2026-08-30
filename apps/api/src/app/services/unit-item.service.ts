@@ -13,6 +13,13 @@ import { UnitItemMetadataService } from './unit-item-metadata.service';
 import { ItemCommentService } from './item-comment.service';
 import UnitCommentUnitItem from '../entities/unit-comment-unit-item.entity';
 
+/**
+ * The items of a unit: reading them (with or without their metadata, which is much the more
+ * expensive read), adding, updating and removing one, and the item metadata that hangs off them.
+ *
+ * {@link compare} is what a save is built on: incoming items are sorted into unchanged, removed and
+ * added, so an edit keeps the uuids of the items that stayed -- comments and notes point at them.
+ */
 export class UnitItemService {
   private readonly logger = new Logger(UnitItemService.name);
 

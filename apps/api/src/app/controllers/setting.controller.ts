@@ -14,6 +14,17 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { AppVersionGuard } from '../guards/app-version.guard';
 
+/**
+ * `admin/settings` -- the installation-wide settings: the config, the logo, the export
+ * configuration, the profile registry, the mail template, the missings profiles, the rich-note
+ * tags. Every one of them is read as a pair, GET and PATCH.
+ *
+ * The prefix says admin and every PATCH is one, but the GETs are not all. `config` and `app-logo`
+ * have to answer before anyone has logged in and therefore carry no token guard -- `config` is
+ * guarded by the app version alone, which is what makes it the route that sends a stale frontend
+ * to reload. The settings only an administrator ever reads, the mail template and the tag
+ * configuration, are guarded on the way in as well.
+ */
 @Controller('admin/settings')
 export class SettingController {
   constructor(

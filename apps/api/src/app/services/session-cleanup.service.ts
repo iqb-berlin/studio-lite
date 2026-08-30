@@ -8,6 +8,13 @@ import { RefreshToken } from '../entities/refresh-token.entity';
 import UserSession from '../entities/user-session.entity';
 import { findOrphanedSessionIds } from '../utils/orphaned-sessions';
 
+/**
+ * Sweeps up what login and logout leave behind: sessions past their expiry, refresh tokens past
+ * theirs, and sessions nobody can return to any more (see `findOrphanedSessionIds`).
+ *
+ * Runs every hour and once at start-up, because a server that was down over the expiry of a row
+ * would otherwise carry it until the next tick.
+ */
 @Injectable()
 export class SessionCleanupService implements OnApplicationBootstrap {
   private readonly logger = new Logger(SessionCleanupService.name);

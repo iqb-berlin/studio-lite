@@ -15,6 +15,11 @@ import { UnitService } from './unit.service';
 import { SettingService } from './setting.service';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 
+/**
+ * The rich notes of a unit. Reading them brings the tags along, and which tags exist depends on the
+ * unit's workspace group -- so a note is always answered together with the vocabulary that gives
+ * its tag a name.
+ */
 @Injectable()
 export class UnitRichNoteService {
   private readonly logger = new Logger(UnitRichNoteService.name);

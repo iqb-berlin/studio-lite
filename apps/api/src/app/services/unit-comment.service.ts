@@ -13,6 +13,14 @@ import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-fou
 import { ItemCommentService } from './item-comment.service';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 
+/**
+ * The comments on units: the discussion tree, hiding a comment, votes, and the copy that goes along
+ * when a unit is copied.
+ *
+ * Copying is the part with a catch: a copied comment has to point at the ITEMS of the new unit, so
+ * the copy is handed a lookup from old to new item uuid ({@link ItemUuidLookup}) and rewrites its
+ * connections with it.
+ */
 @Injectable()
 export class UnitCommentService {
   private readonly logger = new Logger(UnitCommentService.name);

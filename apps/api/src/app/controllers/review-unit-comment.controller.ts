@@ -21,6 +21,14 @@ import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitId } from '../decorators/unit-id.decorator';
 import { ItemCommentService } from '../services/item-comment.service';
 
+/**
+ * `reviews/:review_id/units/:unit_id/comments` -- the discussion on a unit as a reviewer conducts
+ * it: writing, revising and deleting comments, tying one to single items, hiding one, and voting.
+ *
+ * The same ground as {@link WorkspaceUnitCommentController}, reached with a review login. That is
+ * why the guards stop at the token: a reviewer holds no access level in the workspace, and what
+ * they may see follows from the review they are logged into.
+ */
 @Controller('reviews/:review_id/units/:unit_id/comments')
 export class ReviewUnitCommentController {
   constructor(

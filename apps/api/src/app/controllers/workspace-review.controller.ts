@@ -20,6 +20,14 @@ import { WorkspaceGuard } from '../guards/workspace.guard';
 import { WorkspaceId } from '../decorators/workspace.decorator';
 import { ReviewService } from '../services/review.service';
 
+/**
+ * `workspaces/:workspace_id/reviews` -- managing the reviews of a workspace: which units they
+ * contain, what a reviewer may do in them, and the link they are reached by. What the reviewer
+ * themselves then calls is in {@link ReviewController} and its neighbours.
+ *
+ * Access to the workspace is all these routes ask for, no access level: whoever is in the workspace
+ * may set up a review of it.
+ */
 @Controller('workspaces/:workspace_id/reviews')
 export class WorkspaceReviewController {
   constructor(

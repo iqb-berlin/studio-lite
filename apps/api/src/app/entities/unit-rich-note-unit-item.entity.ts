@@ -1,5 +1,6 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
+/** Ties a rich note to the items it is about, as {@link UnitCommentUnitItem} does for comments. */
 @Entity('unit_rich_note_unit_item')
 class UnitRichNoteUnitItem {
   @PrimaryColumn({

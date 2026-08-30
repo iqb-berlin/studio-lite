@@ -5,6 +5,14 @@ import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import { UnitUserService } from './unit-user.service';
 
+/**
+ * The access ladder in one place: whether a user is assigned to a workspace at all, and whether
+ * their level is enough to comment, write, manage or delete. The guards in `guards/` are thin
+ * wrappers around exactly these questions.
+ *
+ * A user with no row counts as level 0, so an unassigned user fails every question but the bare
+ * `hasAccess`, which asks for the row itself.
+ */
 @Injectable()
 export class WorkspaceUserService {
   private readonly logger = new Logger(WorkspaceUserService.name);
