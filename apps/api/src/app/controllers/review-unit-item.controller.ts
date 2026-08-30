@@ -13,6 +13,7 @@ import {
 } from '@nestjs/swagger';
 import { UnitItemDto, UnitItemWithMetadataDto } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { ReviewGuard } from '../guards/review.guard';
 import { UnitItemService } from '../services/unit-item.service';
 import { UnitId } from '../decorators/unit-id.decorator';
 
@@ -29,7 +30,7 @@ export class ReviewUnitItemController {
 
   /** All items of the unit. `withoutMetadata` leaves the metadata out, which is much the cheaper read. */
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })

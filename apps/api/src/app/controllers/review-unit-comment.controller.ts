@@ -17,6 +17,7 @@ import {
   UpdateUnitCommentVisibilityDto, UnitCommentVoteDto, UnitCommentVoterDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { ReviewGuard } from '../guards/review.guard';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitId } from '../decorators/unit-id.decorator';
 import { ItemCommentService } from '../services/item-comment.service';
@@ -39,7 +40,7 @@ export class ReviewUnitCommentController {
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges to retrieve comments for the unit.' })
@@ -49,7 +50,7 @@ export class ReviewUnitCommentController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
     description: 'Sends back the id of the new comment in database',
@@ -62,7 +63,7 @@ export class ReviewUnitCommentController {
   }
 
   @Patch(':comment_id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
@@ -74,7 +75,7 @@ export class ReviewUnitCommentController {
   }
 
   @Patch(':comment_id/hidden')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
@@ -86,7 +87,7 @@ export class ReviewUnitCommentController {
   }
 
   @Delete(':comment_id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
@@ -97,7 +98,7 @@ export class ReviewUnitCommentController {
   }
 
   @Patch(':comment_id/items')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -113,7 +114,7 @@ export class ReviewUnitCommentController {
   }
 
   @Post(':comment_id/vote')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -129,7 +130,7 @@ export class ReviewUnitCommentController {
   }
 
   @Get(':comment_id/votes')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })

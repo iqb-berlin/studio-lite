@@ -192,6 +192,18 @@ export class ReviewService {
     await this.reviewRepository.delete(id);
   }
 
+  /**
+   * Whether this unit is part of this review. What the review routes are narrowed by: they are
+   * addressed with a unit id from the path, and only the review says which units that may be.
+   */
+  async isUnitInReview(reviewId: number, unitId: number): Promise<boolean> {
+    const reviewUnit = await this.reviewUnitRepository.findOne({
+      where: { reviewId: reviewId, unitId: unitId },
+      select: { unitId: true }
+    });
+    return !!reviewUnit;
+  }
+
   async getReviewByKeyAndPassword(name: string, password: string): Promise<number | null> {
     const review = await this.reviewRepository.findOne({
       where: { link: name, password: password },

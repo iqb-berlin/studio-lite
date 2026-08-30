@@ -13,6 +13,7 @@ import {
   ReviewFullDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { ReviewGuard } from '../guards/review.guard';
 import { ReviewService } from '../services/review.service';
 
 /**
@@ -26,7 +27,7 @@ export class ReviewController {
   ) {}
 
   @Get(':review_id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Review retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges to retrieve review.' })
