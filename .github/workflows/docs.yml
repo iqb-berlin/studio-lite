@@ -67,8 +67,11 @@ jobs:
           mkdir -p dist/docs/coverage
           cp -r coverage/. dist/docs/coverage/
       - uses: actions/configure-pages@v6
-        # Turns the Pages site on if it is not on yet, so the first run needs no click in the
-        # repository settings.
+        # The site itself was created once by hand (`gh api --method POST repos/<owner>/<repo>/pages
+        # -f build_type=workflow`), because creating one needs repository admin and GITHUB_TOKEN
+        # does not have it -- the first run of this workflow died here with "Resource not accessible
+        # by integration". enablement stays on all the same: with a site in place the action only
+        # reads it, and should someone ever turn Pages off, the error names the step again.
         with:
           enablement: true
       - uses: actions/upload-pages-artifact@v5
