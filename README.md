@@ -8,7 +8,8 @@ Mit dieser Web-Anwendung werden Aufgaben und einzelne Seiten für die Verwendung
 Testsystem erstellt.
 Die Dokumentation dazu finden Sie [hier](https://iqb-berlin.github.io/tba-info/).
 
-**API-Dokumentation und Testabdeckung: [iqb-berlin.github.io/studio-lite](https://iqb-berlin.github.io/studio-lite/)**
+**API-Dokumentation und Abdeckung durch die Unit-Tests:
+[iqb-berlin.github.io/studio-lite](https://iqb-berlin.github.io/studio-lite/)**
 
 
 
@@ -35,56 +36,6 @@ This repository follows the Git Flow branching model:
 - Hotfix branches 
   - Created from main to resolve critical production issues
   - Merged into both main and development after verification to maintain consistency
-
-### Dokumentation
-
-Die API-Dokumentation wird bei jedem Merge nach `develop` aus dem Quelltext neu gebaut und
-veröffentlicht. Sie umfasst beide Anwendungen und die Bibliotheken in einem Dokument:
-Angular-Komponenten, -Services und -Pipes ebenso wie die NestJS-Controller, -Guards und die
-Entities mit ihren Spalten und Relationen.
-
-| Wo | Was |
-| --- | --- |
-| [iqb-berlin.github.io/studio-lite](https://iqb-berlin.github.io/studio-lite/) | API-Dokumentation von `apps/` und `libs/` |
-| [`rules.md`](rules.md) | Verbindliche Konventionen dieses Repositorys. Vor der ersten Änderung lesen |
-| [iqb-berlin.github.io/tba-info](https://iqb-berlin.github.io/tba-info/) | Anwenderdokumentation (nicht Teil dieses Repositorys) |
-
-Lokal erzeugt `npm run docs` dieselbe Seite unter `dist/docs`.
-
-#### Testabdeckung
-
-Wird zusammen mit der API-Dokumentation veröffentlicht. Eine Seite je Testprojekt und eine über
-alle zusammen — bis hinunter zur einzelnen Zeile jeder Datei.
-
-| Seite | Wessen Abdeckung |
-| --- | --- |
-| [`coverage/all/`](https://iqb-berlin.github.io/studio-lite/coverage/all/) | **Alle Projekte zusammen** |
-| [`coverage/by-project/api/`](https://iqb-berlin.github.io/studio-lite/coverage/by-project/api/) | Unit-Tests von `apps/api` |
-| [`coverage/by-project/frontend/`](https://iqb-berlin.github.io/studio-lite/coverage/by-project/frontend/) | Unit-Tests von `apps/frontend` |
-| [`coverage/by-project/iqb-components/`](https://iqb-berlin.github.io/studio-lite/coverage/by-project/iqb-components/) | Unit-Tests von `libs/iqb-components` |
-| [`coverage/by-project/shared-code/`](https://iqb-berlin.github.io/studio-lite/coverage/by-project/shared-code/) | Unit-Tests von `libs/shared-code` |
-
-**Was die Zahlen bedeuten.** Jedes Projekt misst ausschließlich seine eigenen Quellen — auch dann,
-wenn seine Specs Code einer Bibliothek ausführen. Die zusammengeführte Seite ist deshalb die Zahl
-für den Arbeitsbereich als Ganzes und der einzige Ort, an dem die vier Teile nach ihrer Größe
-gegeneinander gewichtet sind; sie sagt aber nichts, was die Einzelseiten nicht sagen. Wer
-entscheiden will, ob etwas noch einen Test braucht, liest die Einzelseite.
-
-Gezählt werden nur TypeScript-Dateien. `jest-preset-angular` instrumentiert auch die Templates der
-Komponenten; deren Zeilen sagen aus, ob eine Komponente je gerendert wurde, nicht ob etwas an ihr
-geprüft wurde, und sie bleiben deshalb draußen.
-
-Die e2e-Suite ist nicht enthalten: Sie braucht eine Datenbank und wird deshalb nicht im selben
-Lauf erhoben.
-
-Nach einem roten Testlauf trägt die Seite **gar keine** Abdeckung, bis der nächste Lauf grün ist —
-die Veröffentlichung ersetzt jedes Mal die gesamte Seite, der vorherige Bericht bleibt also nicht
-stehen. Die Dokumentation selbst wird auch dann veröffentlicht.
-
-Lokal schreibt `npm run test-app-coverage` alle Berichte nach `coverage/` und führt sie zusammen.
-Der Lauf ist bewusst gedrosselt (`--parallel=1 --maxWorkers=2`), weil sich die Testprojekte sonst
-gegenseitig die Kerne wegnehmen und Specs, die lokal Millisekunden brauchen, in den Jest-Timeout
-laufen.
 
 ### Prerequisites
 
@@ -205,6 +156,59 @@ make dev-test-e2e
 
 * The `scripts/make` directory contains extra Makefile commands.
 * The `package.json` file includes additional npm scripts.
+
+
+## Dokumentation
+
+Die API-Dokumentation wird bei jedem Merge nach `develop` aus dem Quelltext neu gebaut und
+veröffentlicht. Sie umfasst beide Anwendungen und die Bibliotheken in einem Dokument:
+Angular-Komponenten, -Services und -Pipes ebenso wie die NestJS-Controller, -Guards und die
+Entities mit ihren Spalten und Relationen.
+
+| Wo | Was |
+| --- | --- |
+| [iqb-berlin.github.io/studio-lite](https://iqb-berlin.github.io/studio-lite/) | API-Dokumentation von `apps/` und `libs/` |
+| [`rules.md`](rules.md) | Verbindliche Konventionen dieses Repositorys. Vor der ersten Änderung lesen |
+| [iqb-berlin.github.io/tba-info](https://iqb-berlin.github.io/tba-info/) | Anwenderdokumentation (nicht Teil dieses Repositorys) |
+
+Lokal erzeugt `npm run docs` dieselbe Seite unter `dist/docs`.
+
+### Abdeckung durch die Unit-Tests
+
+Gemessen wird **ausschließlich, was die Unit-Tests (Jest) erreichen** — die e2e-Suite ist nicht
+enthalten. Eine Seite je Testprojekt und eine über alle zusammen, bis hinunter zur einzelnen Zeile
+jeder Datei. Veröffentlicht wird sie zusammen mit der API-Dokumentation.
+
+| Seite | Abdeckung durch die Unit-Tests von |
+| --- | --- |
+| [`coverage/all/`](https://iqb-berlin.github.io/studio-lite/coverage/all/) | **allen vier Projekten zusammen** |
+| [`coverage/by-project/api/`](https://iqb-berlin.github.io/studio-lite/coverage/by-project/api/) | `apps/api` |
+| [`coverage/by-project/frontend/`](https://iqb-berlin.github.io/studio-lite/coverage/by-project/frontend/) | `apps/frontend` |
+| [`coverage/by-project/iqb-components/`](https://iqb-berlin.github.io/studio-lite/coverage/by-project/iqb-components/) | `libs/iqb-components` |
+| [`coverage/by-project/shared-code/`](https://iqb-berlin.github.io/studio-lite/coverage/by-project/shared-code/) | `libs/shared-code` |
+
+**Was die Zahlen bedeuten.** Jedes Projekt misst ausschließlich seine eigenen Quellen — auch dann,
+wenn seine Specs Code einer Bibliothek ausführen. Die zusammengeführte Seite ist deshalb die Zahl
+für den Arbeitsbereich als Ganzes und der einzige Ort, an dem die vier Teile nach ihrer Größe
+gegeneinander gewichtet sind; sie sagt aber nichts, was die Einzelseiten nicht sagen. Wer
+entscheiden will, ob etwas noch einen Test braucht, liest die Einzelseite.
+
+Gezählt werden nur TypeScript-Dateien. `jest-preset-angular` instrumentiert auch die Templates der
+Komponenten; deren Zeilen sagen aus, ob eine Komponente je gerendert wurde, nicht ob etwas an ihr
+geprüft wurde, und sie bleiben deshalb draußen.
+
+Warum die e2e-Suite fehlt: Sie braucht eine Datenbank und einen laufenden Server und wird deshalb
+nicht im selben Lauf erhoben. Was die Seiten zeigen, sagt also nichts darüber aus, ob ein Ablauf
+im Browser geprüft ist — nur darüber, was die Unit-Tests ausführen.
+
+Nach einem roten Testlauf trägt die Seite **gar keine** Abdeckung, bis der nächste Lauf grün ist —
+die Veröffentlichung ersetzt jedes Mal die gesamte Seite, der vorherige Bericht bleibt also nicht
+stehen. Die Dokumentation selbst wird auch dann veröffentlicht.
+
+Lokal schreibt `npm run test-app-coverage` alle Berichte nach `coverage/` und führt sie zusammen.
+Der Lauf ist bewusst gedrosselt (`--parallel=1 --maxWorkers=2`), weil sich die Testprojekte sonst
+gegenseitig die Kerne wegnehmen und Specs, die lokal Millisekunden brauchen, in den Jest-Timeout
+laufen.
 
 
 ## Installation (Produktivumgebung)
