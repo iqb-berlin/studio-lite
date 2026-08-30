@@ -12,6 +12,14 @@ import { UsersService } from './users.service';
 import { MetadataVocabularyService } from './metadata-vocabulary.service';
 
 /**
+ * The settings key the missings profiles are stored under. Written out once because reading and
+ * writing used two spellings of it -- the update looked under `missings-profiles-…` while
+ * everything else used `missings-profile-…`, so the update never found a row and always took the
+ * insert branch. That worked only because `key` is the primary key and `save` upserts.
+ */
+const MISSINGS_PROFILES_KEY = 'missings-profile-iqb-standard';
+
+/**
  * The installation-wide settings, all of them rows of {@link Setting} whose content is JSON kept as
  * text: the config, the logo, the export configuration, the profile registry, the mail template,
  * the missings profiles, the rich-note tags.
@@ -117,19 +125,19 @@ export class SettingService {
 
   async findMissingsProfiles(): Promise<MissingsProfilesDto[] | null> {
     this.logger.log('Returning settings missings profiles config.');
-    const missingsProfiles = await this.settingsRepository.findOne({ where: { key: 'missings-profile-iqb-standard' } });
+    const missingsProfiles = await this.settingsRepository.findOne({ where: { key: MISSINGS_PROFILES_KEY } });
     return missingsProfiles ? JSON.parse(missingsProfiles.content) : [];
   }
 
   async patchMissingsProfiles(newMissingsProfiles: MissingsProfilesDto): Promise<void> {
     this.logger.log('Updating settings missings profiles config.');
-    const settingToUpdate = await this.settingsRepository.findOne({ where: { key: 'missings-profiles-iqb-standard' } });
+    const settingToUpdate = await this.settingsRepository.findOne({ where: { key: MISSINGS_PROFILES_KEY } });
     if (settingToUpdate) {
       settingToUpdate.content = JSON.stringify(newMissingsProfiles);
       await this.settingsRepository.save(settingToUpdate);
     } else {
       const newSetting = this.settingsRepository.create({
-        key: 'missings-profile-iqb-standard',
+        key: MISSINGS_PROFILES_KEY,
         content: JSON.stringify(newMissingsProfiles)
       });
       await this.settingsRepository.save(newSetting);

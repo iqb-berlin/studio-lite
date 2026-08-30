@@ -40,8 +40,9 @@ export class MetadataVocabularyService {
     const storedVocabulary = await this.metadataVocabularyRepository
       .findOneBy({ id: id });
     if (storedVocabulary) {
-      // without await to update the stored vocabulary in the background
-      this.getMetadataVocabulary(id);
+      // without await to update the stored vocabulary in the background; a failed fetch or a failed
+      // write must not escape as an unhandled rejection on a read path (as in MetadataProfileService)
+      this.getMetadataVocabulary(id).catch(() => undefined);
       return storedVocabulary;
     }
     return this.getMetadataVocabulary(id);
