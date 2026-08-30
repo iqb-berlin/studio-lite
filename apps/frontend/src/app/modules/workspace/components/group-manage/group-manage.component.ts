@@ -25,6 +25,10 @@ import { SaveChangesComponent } from '../save-changes/save-changes.component';
 import { GroupMenuComponent } from '../group-menu/group-menu.component';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 
+/**
+ * The dialog for the unit groups of a workspace: creating and renaming them, and moving units in and
+ * out. A group is a name on the units, so what is edited here is which units carry it.
+ */
 @Component({
   selector: 'studio-lite-group-manage',
   templateUrl: './group-manage.component.html',

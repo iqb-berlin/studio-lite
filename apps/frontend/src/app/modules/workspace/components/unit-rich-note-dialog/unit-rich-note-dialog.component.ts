@@ -21,6 +21,7 @@ import { RichNoteEditorComponent } from '../rich-note-editor/rich-note-editor.co
 import { CastPipe } from '../../../../pipes/cast.pipe';
 import { GetRichNoteLinkTypeLabelPipe } from '../../../../pipes/get-rich-note-link-type-label.pipe';
 
+/** What the dialog is opened with; without a `note` it writes a new one. */
 export interface UnitRichNoteDialogData {
   note?: UnitRichNoteDto;
   workspaceId: number;
@@ -29,6 +30,10 @@ export interface UnitRichNoteDialogData {
   items: UnitItemDto[];
 }
 
+/**
+ * The dialog a rich note is written in: its tag, its text, the items it refers to, and its links.
+ * Opened for a new note as well as for an existing one -- the note it is given decides which.
+ */
 @Component({
   selector: 'studio-lite-unit-rich-note-dialog',
   templateUrl: './unit-rich-note-dialog.component.html',

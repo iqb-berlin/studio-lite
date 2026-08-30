@@ -17,6 +17,11 @@ import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 
 import { BackendService } from '../../services/backend.service';
 
+/**
+ * The editor for the rich-note tags: either the tags themselves, or the URL of a vocabulary they are
+ * read from. Used both for the installation-wide setting and for a single workspace group, which is
+ * why it is a component and not part of either page.
+ */
 @Component({
   selector: 'studio-lite-unit-rich-note-tags-config',
   templateUrl: './unit-rich-note-tags-config.component.html',

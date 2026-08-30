@@ -2,6 +2,10 @@ import {
   Component, EventEmitter, HostListener, Input, Output
 } from '@angular/core';
 
+/**
+ * The draggable divider between two panes. The line drawn and the area that reacts to the pointer
+ * are sized separately, so a thin line can still be easy to catch.
+ */
 @Component({
   selector: 'studio-lite-splitter-gutter',
   templateUrl: './splitter-gutter.component.html',
