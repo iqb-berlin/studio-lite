@@ -12,5 +12,11 @@ export default {
     ]
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../coverage/libs/shared-code'
+  coverageDirectory: '../../coverage/libs/shared-code',
+  // See apps/api/jest.config.ts: without this only the files a spec imports are counted.
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/**/*.spec.ts',
+    '!src/index.ts'
+  ]
 };

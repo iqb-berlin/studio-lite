@@ -1,0 +1,19 @@
+/* Entry point for Compodoc: one pass over the two applications and the libraries. See `npm run docs`.
+ *
+ * One pass rather than one per project, although Angular and NestJS meet here: Compodoc reads the
+ * decorators, and it sorts an @NgModule under modules and a @Controller under controllers without
+ * being told which project a file came from. Where a class name occurs twice, the second page gets
+ * a numeric suffix. */
+{
+  "extends": "./tsconfig.base.json",
+  "include": [
+    "apps/api/src/**/*.ts",
+    "apps/frontend/src/**/*.ts",
+    "libs/*/src/**/*.ts"
+  ],
+  "exclude": [
+    "**/*.spec.ts",
+    "**/test-setup.ts",
+    "node_modules"
+  ]
+}
