@@ -14,6 +14,11 @@ import { AppService } from '../../../services/app.service';
 import { Comment } from '../../comments/models/comment.interface';
 import { I18nService } from '../../../services/i18n.service';
 
+/**
+ * The state of the review currently open: which unit of it is shown, what the reviewer may see, and
+ * the header the pages carry. The counterpart of the workspace's own service, for people who reach
+ * a unit through a review link instead of through a workspace.
+ */
 @Injectable({
   providedIn: 'root'
 })

@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { format } from 'date-fns';
 
+/** The full date and time of a comment, for the tooltip behind the relative time. */
 @Pipe({
   name: 'fullTimestamp',
   standalone: true

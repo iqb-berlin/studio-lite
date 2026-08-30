@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { StringUtils } from '../classes/string-utils';
 
+/** The translation key for a rich-note link type; the type's own spelling is not shown to anyone. */
 @Pipe({
   name: 'getRichNoteLinkTypeLabel',
   standalone: true,

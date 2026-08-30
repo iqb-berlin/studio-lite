@@ -19,6 +19,11 @@ import { ModulesDirective } from '../../directives/modules.directive';
 import { VeronaModuleClass } from '../../../../models/verona-module.class';
 import { ModuleSelectionChange } from '../../models/module-selection-change.interface';
 
+/**
+ * The installed editors, players and schemers, and the upload that adds one. Widgets are the same
+ * view again ({@link WidgetsComponent}) -- both are {@link ModulesDirective}, which differ only in
+ * the types they upload under and the title they carry.
+ */
 @Component({
   selector: 'studio-lite-verona-modules',
   templateUrl: './verona-modules.component.html',

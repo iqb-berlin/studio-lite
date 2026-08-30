@@ -21,6 +21,13 @@ import { IsProfileSelectedPipe } from '../../pipes/is-profile-selected.pipe';
 
 export type CoreProfile = Profile;
 
+/**
+ * Picking metadata profiles out of the registry: the profile sets it lists, each with the profiles
+ * it contains, and a checkbox per profile.
+ *
+ * A stored selection may be spelled in a retired form, so the comparison goes through the canonical
+ * id ({@link IsProfileSelectedPipe}) instead of matching strings.
+ */
 @Component({
   selector: 'studio-lite-profiles',
   templateUrl: './profiles.component.html',

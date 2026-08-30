@@ -1,6 +1,11 @@
 import { UnitSchemeDto } from '@studio-lite-lib/api-dto';
 import { EventEmitter } from '@angular/core';
 
+/**
+ * The unit's coding scheme while it is being edited. Unlike the other two stores it does not compare
+ * against what was loaded: the schemer reports the whole scheme, so any report is taken as a change
+ * and {@link isChanged} only asks whether one has arrived.
+ */
 export class UnitSchemeStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();
   private originalData: UnitSchemeDto;

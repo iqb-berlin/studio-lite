@@ -16,6 +16,11 @@ import { Image } from '@tiptap/extension-image';
 import { Placeholder } from '@tiptap/extension-placeholder';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 
+/**
+ * What every rich-text editor in the studio shares -- the comment editor and the note editor: the
+ * tiptap instance, the formatting commands its toolbar buttons call, and the item references that
+ * can be dropped into the text.
+ */
 @Directive()
 export abstract class RichTextEditorDirective implements OnInit, OnDestroy {
   @Input() initialHTML = '';

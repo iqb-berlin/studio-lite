@@ -28,6 +28,13 @@ import { SortAscendingPipe } from '../../../comments/pipes/sort-ascending.pipe';
 import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 
+/**
+ * The items of a unit with their metadata: one {@link ItemComponent} per item, plus adding and
+ * removing items and the read-only view of them.
+ *
+ * An item's metadata follows the item profile the workspace has chosen, which is why profiles are
+ * compared here by their canonical spelling rather than as strings (see `profile-id.ts`).
+ */
 @Component({
   selector: 'studio-lite-items',
   templateUrl: './items.component.html',

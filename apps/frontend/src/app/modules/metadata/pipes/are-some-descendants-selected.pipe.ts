@@ -4,6 +4,11 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { VocabFlatNode } from '../models/vocabulary.class';
 import { AreAllDescendantsSelectedPipe } from './are-all-descendants-selected.pipe';
 
+/**
+ * Whether some but not all nodes below this one are selected -- the indeterminate state of a parent
+ * checkbox, which is why "all" is excluded here. See {@link AreAllDescendantsSelectedPipe} for the
+ * `trigger` argument.
+ */
 @Pipe({
   name: 'areSomeDescendantsSelected',
   standalone: true

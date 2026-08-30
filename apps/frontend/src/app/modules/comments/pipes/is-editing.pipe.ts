@@ -2,6 +2,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { Comment } from '../models/comment.interface';
 import { ActiveComment, ActiveCommentType } from '../models/active-comment.interface';
 
+/**
+ * Whether this comment is the one currently being edited. Only one comment in the list is active at
+ * a time, and its id and mode are held in a single object -- so both have to match.
+ */
 @Pipe({
   name: 'isEditing',
   standalone: true

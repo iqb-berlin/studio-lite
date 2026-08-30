@@ -15,6 +15,12 @@ import {
   UnitItemInViewDto
 } from '@studio-lite-lib/api-dto';
 
+/**
+ * Every call the group administration makes: the workspaces of a group, who works in them and at
+ * which level, and the units and items across the group.
+ *
+ * The group admin's counterpart to the administrator's backend service of the same name.
+ */
 @Injectable({
   providedIn: 'root'
 })

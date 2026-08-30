@@ -16,6 +16,11 @@ import {
 import { RolePipe } from '../../pipes/role.pipe';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
+/**
+ * Hosts the SCHEMER a unit names -- where the coding scheme is built. It follows the definition
+ * store as the editor does, because the scheme is written against the unit's variables and has to
+ * see them change.
+ */
 @Component({
   selector: 'studio-lite-unit-schemer',
   templateUrl: './unit-schemer.component.html',

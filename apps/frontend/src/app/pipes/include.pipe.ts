@@ -1,5 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+/**
+ * Whether an array contains a value. A pipe because `array.includes(x)` written in a template runs
+ * on every change-detection cycle, which the project's rules forbid.
+ */
 @Pipe({
   name: 'include',
   standalone: true

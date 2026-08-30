@@ -5,6 +5,13 @@ import {
   DialogData, NotationNode, VocabNode, Vocabulary
 } from '../models/vocabulary.class';
 
+/**
+ * The tree behind the vocabulary dialog: it turns the concepts of a vocabulary into the flat nodes
+ * the tree control shows and keeps track of what is selected while the dialog is open.
+ *
+ * Provided by the dialog, not by the application: it takes the dialog's data in its constructor and
+ * lives exactly as long as the dialog does.
+ */
 @Injectable()
 export class VocabNodeChangeService {
   dataChange = new BehaviorSubject<VocabNode[]>([]);

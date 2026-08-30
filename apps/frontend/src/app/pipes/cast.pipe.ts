@@ -1,5 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+/**
+ * Narrows a value to a subtype for the template's benefit, and does nothing at runtime. The typed
+ * alternative to `$any()`, which this project does not allow: a cast that names the target type
+ * still fails to compile when that type changes.
+ */
 @Pipe({
   name: 'cast',
   standalone: true

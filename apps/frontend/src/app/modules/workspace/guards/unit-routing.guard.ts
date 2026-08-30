@@ -8,6 +8,14 @@ import { SaveOrDiscardComponent } from '../components/save-or-discard/save-or-di
 import { WorkspaceService } from '../services/workspace.service';
 import { ConfirmDialogData } from '../models/confirm-dialog.interface';
 
+/**
+ * Stops unsaved work from being lost when a unit is left: it asks whether to save, discard or stay,
+ * and only lets the navigation through once that is answered. Saving from here reports its outcome,
+ * so a failed save keeps the user on the unit rather than dropping the changes silently.
+ *
+ * Only asked of someone who may write; a reader has nothing to save. A form the studio considers
+ * incomplete is offered with a warning rather than refused -- the unit may be saved half-finished.
+ */
 @Injectable({
   providedIn: 'root'
 })

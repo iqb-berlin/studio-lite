@@ -2,6 +2,14 @@ import { UnitDefinitionDto } from '@studio-lite-lib/api-dto';
 import { EventEmitter } from '@angular/core';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 
+/**
+ * The unit's definition while it is being worked on: what was loaded, and beside it only what has
+ * actually changed. A value edited back to what it was is removed again, so "is there anything to
+ * save" is answered by whether that second object holds anything at all.
+ *
+ * Only the changed part is sent when the unit is saved, which is why a definition and its variables
+ * are tracked separately here.
+ */
 export class UnitDefinitionStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();
   private originalData: UnitDefinitionDto;

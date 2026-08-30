@@ -14,6 +14,13 @@ import { RolePipe } from '../../pipes/role.pipe';
 import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
+/**
+ * Hosts the EDITOR a unit names and keeps the definition store in step with what it reports.
+ *
+ * The editor is talked to in the spec version it declares: what the current spec dropped is still
+ * sent to an older editor, which would otherwise report no change at all -- see
+ * {@link legacyDefinitionReportPolicy}.
+ */
 @Component({
   selector: 'studio-lite-unit-editor',
   templateUrl: './unit-editor.component.html',

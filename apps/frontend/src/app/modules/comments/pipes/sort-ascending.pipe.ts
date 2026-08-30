@@ -1,5 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+/**
+ * Sorts by one property, ascending, with empty values last. Sorts the array in place, so the caller
+ * must not hand in one it needs in its original order.
+ */
 @Pipe({
   name: 'sortAscending',
   standalone: true

@@ -15,6 +15,17 @@ import { WidgetCallData } from '../modules/workspace/models/widget-call-data.int
 import { ModuleService } from '../services/module.service';
 import { WidgetOverlayComponent } from '../modules/workspace/components/widget-overlay/widget-overlay.component';
 
+/**
+ * Hosting a PLAYER, on top of {@link VeronaModuleDirective}: it speaks the player's half of the
+ * Verona protocol -- the pages a unit has and which one is shown, how far presentation and
+ * responses have got, whether the unit has the focus -- and keeps that state for the surrounding
+ * controls to read.
+ *
+ * Both spellings of the protocol are answered, the current `vop…` messages and the historical
+ * `vo.FromPlayer…` ones, so a unit written for an older player still runs.
+ *
+ * A player may also ask for a widget; the overlay that then opens is built here as well.
+ */
 @Directive({
   selector: '[preview]',
   standalone: true

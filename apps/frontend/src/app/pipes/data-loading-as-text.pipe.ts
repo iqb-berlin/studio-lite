@@ -1,6 +1,11 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
+/**
+ * The progress of a running load as text: a percentage while the value can be one, a size in kB or
+ * MB once it is plainly a byte count, and the general waiting message when there is no number at
+ * all.
+ */
 @Pipe({
   name: 'dataLoadingAsText',
   standalone: true

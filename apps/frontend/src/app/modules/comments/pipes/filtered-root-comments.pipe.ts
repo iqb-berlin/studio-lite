@@ -2,6 +2,11 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { Comment } from '../models/comment.interface';
 import { RootCommentWithReplies } from '../models/root-comment-with-replies.interface';
 
+/**
+ * {@link FilteredCommentsPipe} for whole threads: a thread stays when its root comment matches the
+ * filters or any of its replies does. A reply is never shown without the comment it answers, so the
+ * thread is what the filter has to decide over.
+ */
 @Pipe({
   name: 'filteredRootComments',
   pure: false,

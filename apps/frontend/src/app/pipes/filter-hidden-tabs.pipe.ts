@@ -1,5 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+/**
+ * The tabs left after the routes a workspace hides are taken out. A pure pipe rather than a method
+ * in the template, so the filtering does not run on every change-detection cycle.
+ */
 @Pipe({
   name: 'filterHiddenTabs',
   standalone: true,

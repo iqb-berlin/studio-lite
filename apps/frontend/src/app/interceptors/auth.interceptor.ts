@@ -12,6 +12,17 @@ import { AppHttpError } from '../classes/app-http-error.class';
 import { SERVER_TIME_OFFSET_DEADBAND_MS } from '../app.constants';
 import { IS_BACKGROUND_REQUEST, SKIP_TOKEN_REFRESH } from './request-classification';
 
+/**
+ * Everything that happens to every request on its way out and back: the bearer token and the app
+ * version go on it, a 401 is answered by refreshing the token once and repeating the request, and a
+ * failure that is nobody's doing is kept out of the error messages.
+ *
+ * Which of those a request wants is declared at the call site through the contexts in
+ * `request-classification.ts`, not guessed from its URL.
+ *
+ * The server's `Date` header is read along the way and becomes the clock skew every time-based
+ * decision in the frontend is then measured against.
+ */
 @Injectable({
   providedIn: 'root'
 })

@@ -23,6 +23,13 @@ import { UserMenuComponent } from './components/user-menu/user-menu.component';
 import { WrappedIconComponent } from './components/wrapped-icon/wrapped-icon.component';
 import { HeartbeatService } from './services/heartbeat.service';
 
+/**
+ * The shell around everything: the bar with the session's remaining time and the user menu, the
+ * loading and error display, and the outlet the areas are routed into.
+ *
+ * It is also where the application starts: the config and the logo are fetched before anything else
+ * -- they decide what the studio is called and looks like -- and the locale is set once here.
+ */
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',

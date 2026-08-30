@@ -29,6 +29,11 @@ import { PreviewDirective } from '../../../../directives/preview.directive';
 import { UnitState } from '../../../../models/verona.interface';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
+/**
+ * The preview in the workspace: the unit as a test taker would see it, running in the player the
+ * unit names. It follows the definition store, so an edit next door is shown without a save, and it
+ * keeps the responses the player reports for the state display beside it.
+ */
 @Component({
   templateUrl: './unit-preview.component.html',
   styleUrls: ['./unit-preview.component.scss'],

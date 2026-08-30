@@ -10,6 +10,11 @@ import {
   RegisteredMetadataProfileDto
 } from '@studio-lite-lib/api-dto';
 
+/**
+ * The three metadata reads: a profile, the vocabularies it uses, and the registry of profiles that
+ * may be chosen. All of them are answered from the studio's own cache, so none of them reach out to
+ * w3id from the browser.
+ */
 @Injectable({
   providedIn: 'root'
 })

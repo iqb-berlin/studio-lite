@@ -6,6 +6,11 @@ import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { BackendService } from '../services/backend.service';
 
+/**
+ * Logs out after a confirmation. The navigation away happens first and the logout only once it has:
+ * a page that is still open would otherwise fire requests with a token that has just been thrown
+ * away.
+ */
 @Directive({
   selector: '[studioLiteLogout]',
   standalone: true

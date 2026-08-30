@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+/** Whether an id is among the given ones -- {@link IncludePipe} for the common case of numbers. */
 @Pipe({
   name: 'isInArray',
   standalone: true

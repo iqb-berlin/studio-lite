@@ -6,6 +6,11 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 
 import { MatButton } from '@angular/material/button';
 
+/**
+ * The yes/no dialog the whole studio asks its questions with. Title and button label fall back to
+ * translated defaults when the caller leaves them out, so a simple confirmation needs no more than
+ * its text.
+ */
 @Component({
   selector: 'tc-confirm-dialog',
   template: `
@@ -50,6 +55,7 @@ export class ConfirmDialogComponent implements OnInit {
   }
 }
 
+/** What {@link ConfirmDialogComponent} is opened with; everything but the content may be left empty. */
 export interface ConfirmDialogData {
   title: string;
   content: string;

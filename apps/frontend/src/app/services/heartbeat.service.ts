@@ -20,6 +20,18 @@ import {
   AUTO_LOGOUT_REDIRECT_DELAY_MS
 } from '../app.constants';
 
+/**
+ * Keeps the session's clock in the frontend: it collects the signs that someone is working -- input
+ * in the studio, messages from a hosted module -- reports them to the server at a throttled pace,
+ * and drives the bar that shows how much of the active and the passive phase is left.
+ *
+ * The pulse is also written to localStorage, so several tabs of the same browser share one session
+ * rather than each keeping its own idea of when it was last used.
+ *
+ * The two phases are the thresholds from `time.constants.ts` seen from the client: while the last
+ * pulse is younger than the active threshold someone may still be working; after it only a refresh
+ * can resume the session, and once that window is gone too the user is sent back to the start page.
+ */
 @Injectable({
   providedIn: 'root'
 })

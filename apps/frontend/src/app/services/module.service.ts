@@ -4,6 +4,11 @@ import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import { VeronaModuleClass } from '../models/verona-module.class';
 import { ModuleBackendService } from './module-backend.service';
 
+/**
+ * The Verona modules the installation has, kept by kind and looked up by key. Loaded once and held,
+ * because every unit names the editor, player and schemer it is opened with and the list would
+ * otherwise be fetched again for each of them.
+ */
 @Injectable({
   providedIn: 'root'
 })
