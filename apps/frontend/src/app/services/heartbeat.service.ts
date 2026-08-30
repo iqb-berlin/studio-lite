@@ -196,9 +196,11 @@ export class HeartbeatService implements OnDestroy {
     this.started = false;
   }
 
-  // Own method so tests can observe the auto-logout redirect by stubbing it:
-  // assigning window.location.href makes jsdom attempt a real navigation, which
-  // it cannot do and reports as an "Not implemented: navigation" error.
+  /**
+   * Own method so tests can observe the auto-logout redirect by stubbing it: assigning
+   * window.location.href makes jsdom attempt a real navigation, which it cannot do and reports as a
+   * "Not implemented: navigation" error.
+   */
   // eslint-disable-next-line class-methods-use-this
   private redirectToHome(): void {
     if (typeof window !== 'undefined') {

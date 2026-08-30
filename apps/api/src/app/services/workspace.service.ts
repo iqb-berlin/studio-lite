@@ -727,11 +727,12 @@ export class WorkspaceService {
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
-  // The configured profile urls are canonicalized before anything else looks at
-  // them: checkForProfileUpdate and the mat-select in the settings dialog compare
-  // them exactly against the ids stored on the metadata, so a client still
-  // holding the retired github spelling must not put it back into the column the
-  // 19.0.0 migration just rewrote (#1570).
+  /**
+   * The configured profile urls are canonicalized before anything else looks at them:
+   * checkForProfileUpdate and the mat-select in the settings dialog compare them exactly against
+   * the ids stored on the metadata, so a client still holding the retired github spelling must not
+   * put it back into the column the 19.0.0 migration just rewrote (#1570).
+   */
   static normalizeProfileSettings(settings: WorkspaceSettingsDto): WorkspaceSettingsDto {
     if (!settings) return settings;
     return {
@@ -741,15 +742,16 @@ export class WorkspaceService {
     };
   }
 
-  // PATCH, not PUT: a key the request does not carry keeps its stored value.
-  // Replacing the whole blob turned every partial request into a removal — a
-  // PATCH that only changed defaultEditor arrived without the profile keys,
-  // counted as "profile removed", and hid the metadata of every unit in the
-  // workspace (order = -1, gone from the export) (#1576). Removing a profile
-  // deliberately still works: send the key with null or ''. The distinction is
-  // reliable because no ValidationPipe instantiates the DTO — the body arrives
-  // as parsed JSON, where an absent key is undefined and JSON cannot encode
-  // undefined explicitly.
+  /**
+   * PATCH, not PUT: a key the request does not carry keeps its stored value.
+   *
+   * Replacing the whole blob turned every partial request into a removal — a PATCH that only
+   * changed defaultEditor arrived without the profile keys, counted as "profile removed", and hid
+   * the metadata of every unit in the workspace (order = -1, gone from the export) (#1576).
+   * Removing a profile deliberately still works: send the key with null or ''. The distinction is
+   * reliable because no ValidationPipe instantiates the DTO — the body arrives as parsed JSON,
+   * where an absent key is undefined and JSON cannot encode undefined explicitly.
+   */
   async patchSettings(
     id: number,
     settings: WorkspaceSettingsDto
@@ -1168,10 +1170,11 @@ export class WorkspaceService {
     );
   }
 
-  // Maps metadata from an exported *.vomd.json back onto the internal
-  // structure. Detects the iqb unit-metadata@0.1 wrapper ({ metadata: [...] })
-  // and falls back to the legacy raw { profiles, items } blob for backwards
-  // compatibility.
+  /**
+   * Maps metadata from an exported *.vomd.json back onto the internal structure. Detects the iqb
+   * unit-metadata@0.1 wrapper ({ metadata: [...] }) and falls back to the legacy raw
+   * { profiles, items } blob for backwards compatibility.
+   */
   static mapImportedMetadata(parsed: unknown): UnitMetadataValues {
     const wrapper = parsed as UnitMetadataJson;
     if (Array.isArray(wrapper?.metadata)) {
@@ -1261,11 +1264,12 @@ export class WorkspaceService {
     };
   }
 
-  // Maps items from the iqb unit-items@0.2 spec shape back onto the internal
-  // structure: sourceVariableId/sourceVariableUuid become
-  // variableId/variableReadOnlyId. Items without the required id are dropped
-  // (mirrors transformItems on export); they would otherwise end up as
-  // unaddressable NULL-id rows in unit_item.
+  /**
+   * Maps items from the iqb unit-items@0.2 spec shape back onto the internal structure:
+   * sourceVariableId/sourceVariableUuid become variableId/variableReadOnlyId. Items without the
+   * required id are dropped (mirrors transformItems on export); they would otherwise end up as
+   * unaddressable NULL-id rows in unit_item.
+   */
   static mapImportedItems(items: UnitItemJson[]): ItemsMetadataValues[] {
     return (Array.isArray(items) ? items : [])
       .filter(item => !!item?.id)

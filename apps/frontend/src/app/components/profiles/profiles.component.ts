@@ -174,12 +174,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     return null;
   }
 
-  // Ids are canonicalized on both sides (here and in the isProfileSelected pipe),
-  // so adding and removing agree on what "the same profile" is even when the
-  // stored selection still uses the retired github spelling (#1570). Selecting
-  // also rewrites the stored id, so the group settings come back canonical.
-  // The array is replaced rather than mutated: the pure pipe in the template only
-  // re-evaluates when the reference changes.
+  /**
+   * Ids are canonicalized on both sides (here and in the isProfileSelected pipe), so adding and
+   * removing agree on what "the same profile" is even when the stored selection still uses the
+   * retired github spelling (#1570). Selecting also rewrites the stored id, so the group settings
+   * come back canonical.
+   *
+   * The array is replaced rather than mutated: the pure pipe in the template only re-evaluates when
+   * the reference changes.
+   */
   changeSelection(checkbox:MatCheckboxChange) {
     const id = toW3idProfileId(checkbox.source.id || '');
     const withoutProfile = this.profilesSelected

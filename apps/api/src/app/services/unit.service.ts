@@ -342,10 +342,11 @@ export class UnitService {
     return newUnit.id;
   }
 
-  // Adopts the universal id from an imported unit index so a unit keeps its
-  // identity across instances (spec: uuid helps to find variants/versions).
-  // If another unit already holds the uuid (e.g. the same export was imported
-  // twice), the unit keeps the fresh uuid assigned by create().
+  /**
+   * Adopts the universal id from an imported unit index so a unit keeps its identity across
+   * instances (spec: uuid helps to find variants/versions). If another unit already holds the uuid
+   * (e.g. the same export was imported twice), the unit keeps the fresh uuid assigned by create().
+   */
   async adoptUuidIfFree(unitId: number, uuid: string): Promise<void> {
     const existing = await this.unitsRepository.findOne({
       where: { uuid },
@@ -486,15 +487,17 @@ export class UnitService {
     };
   }
 
-  // Backfill a display text (valueAsText) for entries that have none, e.g. rows
-  // stored before valueAsText was populated. Only structured values carry their
-  // own text: vocabulary entries hold it in `text`, multilingual free text is
-  // already language-coded. A plain string cannot be resolved here (a coded value
-  // needs its vocabulary, free text carries no language), so it is left empty
-  // rather than guessed. Returns new objects; the stored entities are not mutated.
-  // hideNumbering maps profileId -> entryId -> true when that vocabulary field
-  // hides the numbering. Empty (the default) keeps the numbering everywhere,
-  // which matches the behaviour before hideNumbering was honoured server-side.
+  /**
+   * Backfill a display text (valueAsText) for entries that have none, e.g. rows stored before
+   * valueAsText was populated. Only structured values carry their own text: vocabulary entries hold
+   * it in `text`, multilingual free text is already language-coded. A plain string cannot be
+   * resolved here (a coded value needs its vocabulary, free text carries no language), so it is
+   * left empty rather than guessed. Returns new objects; the stored entities are not mutated.
+   *
+   * `hideNumbering` maps profileId -> entryId -> true when that vocabulary field hides the
+   * numbering. Empty (the default) keeps the numbering everywhere, which matches the behaviour
+   * before hideNumbering was honoured server-side.
+   */
   static ensureValueAsText(
     metadata: UnitMetadataValues,
     hideNumbering: Record<string, Record<string, boolean>> = {}
@@ -582,10 +585,12 @@ export class UnitService {
     return UnitService.ensureValueAsText(metadata, hideNumbering);
   }
 
-  // Builds profileId -> entryId -> hideNumbering from the DB-stored profile
-  // definitions of every profile referenced by the metadata (unit and item
-  // profiles). DB-only reads keep this cheap on list endpoints. Public so the
-  // XML export can fold the numbering back the same way (see toLegacyMetadataBlob).
+  /**
+   * Builds profileId -> entryId -> hideNumbering from the DB-stored profile definitions of every
+   * profile referenced by the metadata (unit and item profiles). DB-only reads keep this cheap on
+   * list endpoints. Public so the XML export can fold the numbering back the same way (see
+   * toLegacyMetadataBlob).
+   */
   async buildHideNumberingMap(
     metadata: UnitMetadataValues | undefined,
     profileCache: ProfileFetchCache = new Map()
@@ -664,15 +669,16 @@ export class UnitService {
     return itemUuids;
   }
 
-  // The whole metadata save runs in one transaction so a mid-sequence failure
-  // (e.g. a constraint error on one profile) rolls back every write instead of
-  // leaving the unit's profiles/items half-updated.
-  //
-  // The profile form re-emits profiles without `order`, so the current profile
-  // must be flagged here from the workspace settings — otherwise a newly stored
-  // profile keeps the -1 (hidden) insert default and, because the read path uses
-  // the normalized tables (permanent unit_metadata_to_delete marker) without
-  // re-deriving, it would be read back as hidden.
+  /**
+   * The whole metadata save runs in one transaction so a mid-sequence failure (e.g. a constraint
+   * error on one profile) rolls back every write instead of leaving the unit's profiles/items
+   * half-updated.
+   *
+   * The profile form re-emits profiles without `order`, so the current profile must be flagged here
+   * from the workspace settings — otherwise a newly stored profile keeps the -1 (hidden) insert
+   * default and, because the read path uses the normalized tables (permanent
+   * unit_metadata_to_delete marker) without re-deriving, it would be read back as hidden.
+   */
   async patchMetadata(unitId: number, metadata: UnitMetadataValues): Promise<void> {
     const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
     if (!unit) throw new UnitNotFoundException(unitId, 0, 'PATCH');

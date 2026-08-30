@@ -203,10 +203,12 @@ export class AuthService {
     await this.userSessionRepository.delete({ userId, sessionId });
   }
 
-  // Bulk counterpart to logoutOrphanedSession, for a user whose rows the hourly cleanup has
-  // not reached yet. Deletes exactly the ids that were found rather than re-evaluating the
-  // condition: between the two statements a session can acquire a fresh token, and a second
-  // predicate would spare its row after its tokens are already gone.
+  /**
+   * Bulk counterpart to logoutOrphanedSession, for a user whose rows the hourly cleanup has not
+   * reached yet. Deletes exactly the ids that were found rather than re-evaluating the condition:
+   * between the two statements a session can acquire a fresh token, and a second predicate would
+   * spare its row after its tokens are already gone.
+   */
   async deleteOrphanedSessions(userId: number): Promise<number> {
     const ids = await findOrphanedSessionIds(
       this.userSessionRepository,

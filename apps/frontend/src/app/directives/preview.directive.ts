@@ -250,11 +250,13 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
   // schema no longer lists it.
   private static readonly STATE_REPORT_POLICY_DROPPED_IN = 5;
 
-  // Players below that spec version still read it, and not sending it is not a no-op for them: the
-  // aspect players of the 1.x line (all declaring apiVersion 3.0.0) fall back to 'none' and then send
-  // no vopStateChangedNotification at all, which leaves the preview without responses or progress.
-  // detectApiVersion falls back to 2 when it cannot read a version, so an unrecognized player keeps
-  // getting the property -- the failure direction that preserves today's behaviour.
+  /**
+   * Players below that spec version still read it, and not sending it is not a no-op for them: the
+   * aspect players of the 1.x line (all declaring apiVersion 3.0.0) fall back to 'none' and then
+   * send no vopStateChangedNotification at all, which leaves the preview without responses or
+   * progress. detectApiVersion falls back to 2 when it cannot read a version, so an unrecognized
+   * player keeps getting the property -- the failure direction that preserves today's behaviour.
+   */
   protected legacyStateReportPolicy(): { stateReportPolicy?: 'eager' } {
     return this.playerApiVersion < PreviewDirective.STATE_REPORT_POLICY_DROPPED_IN ?
       { stateReportPolicy: 'eager' } :

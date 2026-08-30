@@ -104,12 +104,13 @@ export class UnitItemService {
     }
   }
 
-  // A save may carry keys that are not (or no longer) entity columns: a client
-  // still holding item objects from before a field was dropped, or a legacy
-  // metadata blob that stores the internal shape verbatim. TypeORM's update()
-  // throws EntityPropertyNotFoundError on unknown property paths, which would
-  // fail the whole metadata save, so keep only mapped columns. create() (addItem)
-  // already ignores unknown keys.
+  /**
+   * A save may carry keys that are not (or no longer) entity columns: a client still holding item
+   * objects from before a field was dropped, or a legacy metadata blob that stores the internal
+   * shape verbatim. TypeORM's update() throws EntityPropertyNotFoundError on unknown property
+   * paths, which would fail the whole metadata save, so keep only mapped columns. create()
+   * (addItem) already ignores unknown keys.
+   */
   private toColumnValues(
     item: Omit<UnitItemWithMetadataDto, 'profiles'>,
     manager?: EntityManager

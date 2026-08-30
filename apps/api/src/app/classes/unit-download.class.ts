@@ -253,13 +253,14 @@ export class UnitDownloadClass {
     }
   }
 
-  // The legacy XML export writes the internal metadata blob (`${key}.vomd`) as-is.
-  // metadata-values@3.x split the vocabulary numbering off the label into a
-  // separate `annotation` field — a JSON-export concern. To keep the .vomd blob
-  // exactly as legacy consumers expect, fold the split back before serializing:
-  // when the field shows numbering, merge it into the display text; when it hides
-  // numbering (hideNumbering), keep the pure label — matching the shape the old
-  // form baked at save time. Only vocabulary values are touched.
+  /**
+   * The legacy XML export writes the internal metadata blob (`${key}.vomd`) as-is.
+   * metadata-values@3.x split the vocabulary numbering off the label into a separate `annotation`
+   * field — a JSON-export concern. To keep the .vomd blob exactly as legacy consumers expect, fold
+   * the split back before serializing: when the field shows numbering, merge it into the display
+   * text; when it hides numbering (hideNumbering), keep the pure label — matching the shape the old
+   * form baked at save time. Only vocabulary values are touched.
+   */
   static toLegacyMetadataBlob(
     metadata: UnitMetadataValues,
     hideNumbering: Record<string, Record<string, boolean>> = {}
@@ -552,9 +553,11 @@ export class UnitDownloadClass {
     return labels[0].value;
   }
 
-  // Maps internal rich note DTOs onto the iqb unit-rich-notes@0.2 spec shape.
-  // links and itemUuids are only emitted when non-empty: the spec requires
-  // minItems: 1, so an empty/null array would make the file schema-invalid.
+  /**
+   * Maps internal rich note DTOs onto the iqb unit-rich-notes@0.2 spec shape. links and itemUuids
+   * are only emitted when non-empty: the spec requires minItems: 1, so an empty/null array would
+   * make the file schema-invalid.
+   */
   static transformRichNotes(
     notes: UnitRichNoteDto[],
     tags: UnitRichNoteTagDto[]
@@ -573,9 +576,11 @@ export class UnitDownloadClass {
     });
   }
 
-  // Maps internal comment DTOs onto the iqb unit-comments@0.1 spec shape.
-  // userId/unitId/upVotes/downVotes/userVote have no spec counterpart and are
-  // dropped without information loss: they are overwritten or ignored on import.
+  /**
+   * Maps internal comment DTOs onto the iqb unit-comments@0.1 spec shape.
+   * userId/unitId/upVotes/downVotes/userVote have no spec counterpart and are dropped without
+   * information loss: they are overwritten or ignored on import.
+   */
   static transformComments(comments: UnitCommentDto[]): UnitCommentJson[] {
     return comments.map(comment => {
       const transformed: UnitCommentJson = {
@@ -604,11 +609,12 @@ export class UnitDownloadClass {
       typeof (text as LanguageCodedText).value === 'string';
   }
 
-  // Normalizes internal text data (single object or array, e.g. label or
-  // valueAsText) to the language_coded_texts shape of metadata-values@3.0.
-  // Items without a valid two-letter language code have no spec counterpart
-  // and are dropped; empty lists become undefined since the spec requires
-  // minItems: 1.
+  /**
+   * Normalizes internal text data (single object or array, e.g. label or valueAsText) to the
+   * language_coded_texts shape of metadata-values@3.0. Items without a valid two-letter language
+   * code have no spec counterpart and are dropped; empty lists become undefined since the spec
+   * requires minItems: 1.
+   */
   static toLanguageCodedTexts(texts: unknown): LanguageCodedText[] | undefined {
     const list = Array.isArray(texts) ? texts : [texts];
     const valid = list
@@ -658,10 +664,12 @@ export class UnitDownloadClass {
       }));
   }
 
-  // Maps an internal entry value onto one of the three value forms of
-  // metadata-values@3.0: simple_value (internal plain string plus valueAsText),
-  // vocabulary_entries (internal { id, text } lists) or language_coded_texts.
-  // Returns undefined for empty values since the spec requires `value`.
+  /**
+   * Maps an internal entry value onto one of the three value forms of metadata-values@3.0:
+   * simple_value (internal plain string plus valueAsText), vocabulary_entries (internal
+   * { id, text } lists) or language_coded_texts. Returns undefined for empty values since the spec
+   * requires `value`.
+   */
   static transformEntryValue(entry: MetadataValuesEntry, scope?: ExportReportScope): MetadataValueJson | undefined {
     const { value } = entry;
     // metadata-values@3.x simple value { raw, asText } (form-created). The legacy
@@ -712,12 +720,13 @@ export class UnitDownloadClass {
     return undefined;
   }
 
-  // Maps internal profile values onto metadata-values@3.0. The profile `order`
-  // (-1 = hidden/disabled, >= 0 = position) is emitted per spec; the internal-only
-  // `valueAsText` is dropped. Profiles without profileId or without any exportable
-  // entry are omitted since the spec requires profileId and entries with
-  // minItems: 1. Every dropped piece that carried content is reported through the
-  // scope.
+  /**
+   * Maps internal profile values onto metadata-values@3.0. The profile `order` (-1 =
+   * hidden/disabled, >= 0 = position) is emitted per spec; the internal-only `valueAsText` is
+   * dropped. Profiles without profileId or without any exportable entry are omitted since the spec
+   * requires profileId and entries with minItems: 1. Every dropped piece that carried content is
+   * reported through the scope.
+   */
   static transformProfilesToMetadataValues(
     profiles?: ProfileValues[], scope?: ExportReportScope
   ): MetadataValuesJson[] {
@@ -748,10 +757,11 @@ export class UnitDownloadClass {
     });
   }
 
-  // Maps internal item data onto the iqb unit-items@0.2 spec shape:
-  // variableId/variableReadOnlyId become sourceVariableId/sourceVariableUuid;
-  // unitId has no spec counterpart and is dropped. Items without the required
-  // id are skipped.
+  /**
+   * Maps internal item data onto the iqb unit-items@0.2 spec shape: variableId/variableReadOnlyId
+   * become sourceVariableId/sourceVariableUuid; unitId has no spec counterpart and is dropped.
+   * Items without the required id are skipped.
+   */
   static transformItems(items?: ItemsMetadataValues[], scope?: ExportReportScope): UnitItemJson[] {
     return (items ?? []).flatMap((item, itemIndex) => {
       if (!item?.id) {
