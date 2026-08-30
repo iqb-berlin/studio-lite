@@ -13,6 +13,11 @@ module.exports = {
    * More info: https://jestjs.io/docs/upgrading-to-jest29#snapshot-format
    */
   snapshotFormat: { escapeString: true, printBasicPrototype: true },
+  // The nx preset writes html only. The json report is what nyc reads to build one
+  // report over all four projects (scripts/merge-coverage.sh); without it there is
+  // nothing to merge. Both are written only when a run is asked for coverage, so a
+  // plain `nx test` is unaffected.
+  coverageReporters: ['html', 'json'],
   // Jest's 5s default is measured against wall clock, so it fails on a loaded CI
   // runner for tests that take milliseconds locally (module compilation on the
   // first require, fake-timer advances over Angular's zone). The higher ceiling

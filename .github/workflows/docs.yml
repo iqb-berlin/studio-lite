@@ -1,0 +1,78 @@
+# Publishes the Compodoc documentation of `develop` to GitHub Pages, together with the
+# coverage report of the unit tests.
+#
+# Deliberately a GitHub Actions workflow and not a GitLab job: the GitLab pipeline is the one
+# that gates a merge, and it stays as it is -- nothing here touches .gitlab-ci.yml or
+# .gitlab-ci/. The output -- around 42 MB of documentation plus the coverage report -- is
+# deployed as a Pages artifact, not committed to a /docs folder, so it never enters the
+# repository history.
+#
+# It runs after the merge, so nothing here is on the waiting time of a pull request. For the
+# same reason the tests are not a gate: a red run must not keep the documentation from being
+# published. What a red run does cost is the coverage report, all of it -- `deploy-pages`
+# replaces the whole site, so the previous report is not kept, and the coverage links in the
+# README answer with 404 until the next green run. That is the trade taken here: the
+# documentation always matches `develop`, and a coverage report is either from this commit or
+# not there at all.
+name: Documentation
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  # Let a running deployment finish: cancelling `deploy-pages` mid-flight can leave the Pages
+  # deployment abandoned.
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          # The major that `node:lts-bookworm-slim` resolves to, which is what the GitLab
+          # pipeline runs on.
+          node-version: 24
+          cache: npm
+      # Nothing here runs Cypress, and its binary is a 300 MB download on every cache miss.
+      # Only that one install script is skipped; the rest run, because nx needs its own.
+      - run: npm ci
+        env:
+          CYPRESS_INSTALL_BINARY: 0
+      # Compodoc reads the sources, so no build step is needed.
+      - run: npm run docs
+      - id: coverage
+        continue-on-error: true
+        # The four suites take about three minutes between them; the limit is there for a
+        # hanging one, which would otherwise hold up every later publication until GitHub's
+        # six hour default. They run as one command, so a single red spec anywhere costs the
+        # coverage of all four -- the merge needs every part to build the page over them.
+        timeout-minutes: 30
+        run: npm run test-app-coverage
+      - name: Put the coverage report next to the documentation
+        if: steps.coverage.outcome == 'success'
+        run: |
+          mkdir -p dist/docs/coverage
+          cp -r coverage/. dist/docs/coverage/
+      - uses: actions/configure-pages@v6
+        # Turns the Pages site on if it is not on yet, so the first run needs no click in the
+        # repository settings.
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist/docs
+      - id: deployment
+        uses: actions/deploy-pages@v5
