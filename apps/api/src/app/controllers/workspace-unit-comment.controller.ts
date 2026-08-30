@@ -30,10 +30,15 @@ import { UnitId } from '../decorators/unit-id.decorator';
  * workspace: reading it, writing and revising comments, tying one to single items, voting, and the
  * timestamp of what the reader has already seen, which the "new comments" marking is built on.
  *
- * Commenting takes the comment access level ({@link CommentAccessGuard}), and changing a comment
- * takes being its author on top of that ({@link CommentWriteGuard}). Only reading the last-seen
- * timestamp settles for plain access to the workspace: it says nothing about the comments
+ * Most of it takes the comment access level ({@link CommentAccessGuard}); reading the last-seen
+ * timestamp settles for plain access to the workspace, since it says nothing about the comments
  * themselves.
+ *
+ * What the guards do NOT establish is ownership. {@link CommentWriteGuard} on the two PATCH routes
+ * only checks that the body names the sender as its author -- it never loads the comment being
+ * changed -- and deleting is guarded by the access level alone (see {@link CommentDeleteGuard},
+ * which no route carries). Hiding a comment (`:comment_id/hidden`) asks for nothing but a valid
+ * token.
  */
 @Controller('workspaces/:workspace_id/units/:unit_id/comments')
 export class WorkspaceUnitCommentController {

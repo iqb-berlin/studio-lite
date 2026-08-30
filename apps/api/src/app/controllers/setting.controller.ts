@@ -17,7 +17,8 @@ import { AppVersionGuard } from '../guards/app-version.guard';
 /**
  * `admin/settings` -- the installation-wide settings: the config, the logo, the export
  * configuration, the profile registry, the mail template, the missings profiles, the rich-note
- * tags. Every one of them is read as a pair, GET and PATCH.
+ * tags. Each is a GET and a PATCH; the tags have a second GET, which answers the configuration
+ * itself rather than the tags it resolves to.
  *
  * The prefix says admin and every PATCH is one, but the GETs are not all. `config` and `app-logo`
  * have to answer before anyone has logged in and therefore carry no token guard -- `config` is

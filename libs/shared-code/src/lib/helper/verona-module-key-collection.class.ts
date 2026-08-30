@@ -88,8 +88,9 @@ export class VeronaModuleKeyCollection {
 
   /**
    * The keys ordered by name and version, newest last. Built over a lookup keyed by
-   * {@link getSortKey}, so two keys with the same sort key collapse into one -- which cannot
-   * happen for distinct module keys.
+   * {@link getSortKey}, so two keys with the same sort key collapse into one -- and that does
+   * happen: the sort key carries only name, major and minor, so `x@2.8.1` and `x@2.8.2` share one
+   * and only the last of them survives. Nothing calls this at present.
    */
   getSorted(): string[] {
     const newList: { [key: string]: string } = {};

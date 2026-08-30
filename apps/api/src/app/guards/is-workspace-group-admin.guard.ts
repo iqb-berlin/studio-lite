@@ -9,8 +9,12 @@ import { WorkspaceService } from '../services/workspace.service';
  * is about. A full administrator passes without further questions.
  *
  * The group is taken from whichever parameter the route carries -- `workspace_group_id` names it
- * directly, `workspace_id` names a workspace whose group is looked up. A route with neither leaves
- * the group unresolved, and the check then runs against no group at all, which no one administers.
+ * directly, `workspace_id` names a workspace whose group is looked up.
+ *
+ * Careful with a route that carries neither, or a `workspace_id` that names no workspace: the group
+ * stays unresolved, and the check then asks whether the user administers ANY group at all
+ * ({@link UsersService.isWorkspaceGroupAdmin} without an id). It fails open, so a route guarded by
+ * this must name the group it is about.
  */
 @Injectable()
 export class IsWorkspaceGroupAdminGuard implements CanActivate {

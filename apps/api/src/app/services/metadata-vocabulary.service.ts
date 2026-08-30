@@ -15,13 +15,17 @@ const FETCH_RETRIES = 2;
 const FETCH_RETRY_DELAY_MS = 300;
 
 /**
- * The controlled vocabularies a profile's fields draw their values from, cached like the profiles
- * themselves ({@link MetadataProfileService}): read from the database, refreshed in the background,
- * fetched on first use.
+ * The controlled vocabularies a profile's fields draw their values from, cached much like the
+ * profiles themselves ({@link MetadataProfileService}): read from the database, refreshed in the
+ * background, fetched on first use.
  *
  * A vocabulary is addressed by its URL, and one that does not name a document itself is asked for
  * its `index.jsonld`. A fetch that fails is retried and then given up on with a warning: the studio
  * keeps working with the copy it has.
+ *
+ * One difference from the profile service: the background refresh is started without a `catch`, so
+ * a rejection from the write -- not from the fetch, which is handled -- escapes the read path as an
+ * unhandled rejection.
  */
 @Injectable()
 export class MetadataVocabularyService {

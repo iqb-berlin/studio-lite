@@ -8,8 +8,10 @@ import UnitMetadataToDelete from '../entities/unit-metadata-to-delete.entity';
  * one to ask for it. A unit that carries it has its metadata in the normalized tables, and the read
  * path takes them instead of the older jsonb column on the unit.
  *
- * Both take an optional EntityManager so the marker can be set inside the transaction that writes
- * the metadata -- it must not appear before the rows it vouches for.
+ * Setting the marker takes an optional EntityManager so it can be written inside the transaction
+ * that writes the metadata -- it must not appear before the rows it vouches for. Reading it does
+ * not: {@link getOneByUnit} always goes through the injected repository and therefore cannot see a
+ * marker that transaction has not committed yet.
  */
 @Injectable()
 export class UnitMetadataToDeleteService {

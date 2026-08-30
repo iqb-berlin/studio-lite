@@ -32,7 +32,11 @@ const W3ID_PROFILE = /^https?:\/\/(?:www\.)?w3id\.org\/iqb\/(p\d+)\/([a-z]+)\/?$
  */
 const GITHUB_PROFILE =
   /^https?:\/\/raw\.githubusercontent\.com\/iqb-vocabs\/(p\d+)\/(?:refs\/heads\/)?master\/([a-z]+)\.json$/i;
-/** The internal key both spellings are reduced to, and the only input {@link toW3idProfileId} rewrites. */
+/**
+ * The internal key both spellings are reduced to. {@link toW3idProfileId} reads its parts to build
+ * the w3id url -- but only for a value it recognized as a profile url first: a string a client
+ * spelled like this key is never rewritten (see the note in that function).
+ */
 const CANONICAL_PROFILE_KEY = /^iqb:(p\d+):([a-z]+)$/;
 
 /**
@@ -50,9 +54,10 @@ export function canonicalizeProfileId(profileId: string): string {
 }
 
 /**
- * Whether two profile ids denote the same profile, regardless of which spelling each uses.
- * Two empty values only match if both are the same kind of empty, so a missing id never
- * matches a missing one on the other side.
+ * Whether two profile ids denote the same profile, regardless of which spelling each uses. A
+ * missing id never matches a present one; two identically empty values (both `undefined`, both
+ * `''`) do match, so a caller that must not treat "no profile" as a match has to check for one
+ * first.
  */
 export function profileIdsMatch(
   a: string | undefined | null,

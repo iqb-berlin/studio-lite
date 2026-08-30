@@ -25,9 +25,11 @@ import { ItemCommentService } from '../services/item-comment.service';
  * `reviews/:review_id/units/:unit_id/comments` -- the discussion on a unit as a reviewer conducts
  * it: writing, revising and deleting comments, tying one to single items, hiding one, and voting.
  *
- * The same ground as {@link WorkspaceUnitCommentController}, reached with a review login. That is
- * why the guards stop at the token: a reviewer holds no access level in the workspace, and what
- * they may see follows from the review they are logged into.
+ * The same ground as {@link WorkspaceUnitCommentController}, reached with a review login. The
+ * guards stop at the token because a reviewer holds no access level in any workspace -- and nothing
+ * takes their place: neither the `review_id` in the route nor the unit it is asked about is checked
+ * against the review the token was issued for, so these routes answer for any unit whose id is
+ * known.
  */
 @Controller('reviews/:review_id/units/:unit_id/comments')
 export class ReviewUnitCommentController {

@@ -66,9 +66,11 @@ import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.g
  * properties and nothing else, while the definition is the large part nobody wants along by
  * accident.
  *
- * The guards rise with what a route does: reading takes access to the workspace, changing a unit
- * takes write access, grouping takes manage access, and moving or deleting takes the top level --
- * with one exception, deleting a single unit, which is the group admin's.
+ * The guards mostly rise with what a route does: reading takes access to the workspace, changing a
+ * unit takes write access, grouping takes manage access, and moving units to another workspace or
+ * deleting them takes the top level. Two routes step out of that order: deleting a single unit is
+ * the group admin's, and submitting units to a drop box ({@link patchDropBoxHistory}) moves them
+ * out of the workspace on nothing more than comment access.
  */
 @Controller('workspaces/:workspace_id/units')
 export class WorkspaceUnitController {
