@@ -168,7 +168,7 @@ describe('Workspace API tests', () => {
             expect(resp2.status).to.equal(200);
           });
           cy.loginAPI(user3.username, user3.password).then(resp3 => {
-            Cypress.expose(`token_${user3.username}`, resp.body);
+            Cypress.expose(`token_${user3.username}`, resp3.body.accessToken);
             expect(resp3.status).to.equal(201);
           });
         });
