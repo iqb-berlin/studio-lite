@@ -12,14 +12,15 @@ Verona editor module, played in a Verona player module, and Studio Lite is where
 organised, reviewed, given metadata and coding schemes, and exported.
 
 The repository is an Nx workspace: an Angular frontend and a NestJS API against a PostgreSQL
-database, plus three libraries both sides use. A release ships them as Docker images, which is
-also how a server runs them — see [Installation on a server](#installation-on-a-server).
+database, plus three libraries — `api-dto` and `shared-code` on both sides, `iqb-components` in the
+frontend. A release ships the applications as Docker images, which is also how a server runs them —
+see [Installation on a server](#installation-on-a-server).
 
 ## Documentation
 
 | Where | What |
 | --- | --- |
-| [iqb-berlin.github.io/studio-lite](https://iqb-berlin.github.io/studio-lite/) | API documentation of `apps/` and `libs/`, rebuilt from `develop` on every merge |
+| [iqb-berlin.github.io/studio-lite](https://iqb-berlin.github.io/studio-lite/) | API documentation of both applications and the libraries, rebuilt from `develop` on every merge |
 | [`rules.md`](rules.md) | Binding conventions for this repository. Read before the first change |
 | [iqb-berlin.github.io/tba-info](https://iqb-berlin.github.io/tba-info/) | User documentation (not part of this repository) |
 
@@ -68,8 +69,9 @@ cores from each other and specs that take milliseconds locally run into the Jest
 - **Node.js 24**, the major that `node:lts-bookworm` resolves to — the image the pipeline builds on
   and the version the documentation workflow pins. There is no `.nvmrc` and no `engines` field, so
   nothing enforces it locally.
-- **npm**, **Docker**, **Docker Compose** and **Make**. Every `make` target reads `.env.dev`, so
-  none of them works before that file exists.
+- **npm**, **Docker**, **Docker Compose** and **Make**. Every `dev-*` target reads `.env.dev` — the
+  `studio-lite-*` targets of a server installation read `.env.studio-lite` — so none of them works
+  before that file exists.
 
 ```bash
 cp .env.dev.template .env.dev
@@ -86,7 +88,7 @@ Two ways to run the application. Both need `.env.dev` and the installed dependen
 **Everything in Docker** — closest to what a server runs:
 
 ```bash
-make dev-build   # database, backend, frontend
+make dev-build   # base image, then database, Liquibase, backend, frontend
 make dev-up
 ```
 
@@ -102,18 +104,20 @@ npm run start-backend
 
 `npm run start-app` serves both at once.
 
-**Everything is reached through [http://localhost:4200](http://localhost:4200)**, the API
-included: the Angular dev server proxies `/api` to the backend
-(`apps/frontend/proxy.conf.json`), and in the Docker variant the frontend's Nginx does the same
-(`config/frontend/default.conf.template`). `api` is the API's global prefix, and the Swagger UI sits
-on it: [http://localhost:4200/api](http://localhost:4200/api). It is built only when
-`environment.production` is false — on a server `/api` answers as the API and there is no UI behind
-it.
+**Everything is reached through [http://localhost:4200](http://localhost:4200)**, the API included:
+the Angular dev server proxies `/api` to the backend (`apps/frontend/proxy.conf.json`). Both ways
+run that same dev server — the container only has the proxy target rewritten from `127.0.0.1:3333`
+to `backend:3333` while its image is built (`apps/frontend/Dockerfile`, stage `dev`). The Nginx of
+`config/frontend/` is in the production image and in no development run.
 
-The backend does listen on `http://localhost:3333` as well, and `make dev-up` publishes that port,
-but nothing needs it: it is the way past the frontend, useful when you want to know whether an
-answer came from the API or from the proxy in front of it. Both ports come from `HTTP_PORT` and
-`API_PORT` in `.env.dev`.
+`api` is the API's global prefix, and the Swagger UI sits on it:
+[http://localhost:4200/api](http://localhost:4200/api). It is built only when
+`environment.production` is false, so a server has no UI there — and it routes differently as well:
+Traefik sends everything under `/api` straight to the backend, past the frontend.
+
+The backend also listens on `http://localhost:3333`, and `make dev-up` publishes that port, but
+nothing needs it: it is the way past the proxy, useful when you want to know which of the two
+answered. Both ports come from `HTTP_PORT` and `API_PORT` in `.env.dev`.
 
 **On a fresh database no account exists.** The application asks for one on the first call, and that
 account carries the administrator rights — from there on,
@@ -143,7 +147,8 @@ the `-mobile` variants are the same suite in another browser or viewport.
 
 ### Where to reach when you want to change something
 
-- `apps/frontend` — the Angular application: modules under `modules/`, everything shared beside it
+- `apps/frontend` — the Angular application: feature modules under `src/app/modules`, everything
+  they share beside it
 - `apps/api` — the NestJS API: controllers, guards, services and the TypeORM entities
 - `libs/api-dto` — the DTOs both sides speak; a change here is a change to the contract
 - `database/changelog` — the Liquibase changelog; the schema is migrated from here, not by TypeORM
@@ -161,7 +166,7 @@ policy.
 | `npm run start-app` | Serves frontend and backend together |
 | `npm run start-frontend` | Serves the Angular application on http://localhost:4200, `/api` proxied to the backend |
 | `npm run start-backend` | Serves the NestJS API; reachable through the proxy and directly on http://localhost:3333 |
-| `npm run build-app` | Builds every project; `build-frontend` and `build-backend` build one |
+| `npm run build-app` | Builds both applications; `build-frontend` and `build-backend` build one |
 | `npm run docs` | Builds the Compodoc documentation into `dist/docs`. Open `dist/docs/index.html` to read the state of your working tree; the published state of `develop` is at the link at the top |
 
 ### Test
@@ -176,6 +181,7 @@ policy.
 | `npm run test-e2e-live` | Opens the Cypress UI and watches |
 | `npm run test-e2e-api`, `npm run test-e2e-ui` | One half of the suite |
 | `npm run test-e2e-ui-mobile` | The UI half in a 375 × 667 viewport |
+| `npm run test-e2e-coverage` | The suite against the instrumented build. Nothing publishes that report: `scripts/merge-coverage.sh` merges an e2e report in when one lies at `coverage/by-project/e2e/`, and no run puts it there yet (#1624) |
 
 The npm e2e scripts bring the frontend up themselves — Nx serves it as their dev server target —
 but not the rest: the API and the database have to be running, and the database has to be empty.
@@ -211,8 +217,8 @@ up; the targets below run the same commands by hand.
 | `make dev-db-generate-docs` | Generates the changelog documentation into `database/changelogDocs` |
 
 `scripts/make/` holds these files and a few more — `audit.mk`, `scan.mk`, `push.mk`,
-`prod-test.mk`. Every target in them is reachable from the root `Makefile`, and each carries a
-comment above it.
+`prod-test.mk`. Every target in them carries a comment above it, and the root `Makefile` forwards to
+all of them but one (`prod-test-e2e-electron`, which has to be called through its `mk` file).
 
 ## Repository layout
 
@@ -224,7 +230,7 @@ libs/api-dto         the DTOs frontend and API share
 libs/shared-code     logic both sides use
 libs/iqb-components  reusable Angular components
 database             Postgres and Liquibase images, changelog, generated changelog docs
-config/frontend      Nginx templates of the production frontend image
+config/frontend      Nginx configuration of the production frontend, mounted into the container
 scripts              install.sh, update.sh, make targets, migration helpers
 .gitlab-ci           the pipeline: branch and pre-release jobs, release jobs
 ```
@@ -260,16 +266,17 @@ A branch name carries the issue it belongs to: `fix/1629-group-admin-guard`.
    from. Referencing is fine, keywords are not.
 3. **Open a pull request against `develop`.**
 4. **The pipeline runs on GitLab**, mirrored from GitHub — that is what the badge at the top points
-   at, and GitHub Actions only builds the documentation. A push to a branch runs `build-app`,
-   `test-app`, `lint-app`, `typecheck-app` and `audit-app`; the database jobs come in when
-   `database/` changed. **The e2e suite runs only on a pull request against `develop`**, and there
-   only the API specs and Chrome automatically — Firefox, Edge and the mobile viewports are manual
-   jobs on the pipeline page.
+   at. The only workflow in `.github/workflows` builds the documentation; besides it GitHub runs
+   CodeQL and Dependabot from their default setups, and nothing of that gates a merge. A push to a
+   branch runs `build-app`, `test-app`, `lint-app`, `typecheck-app` and `audit-app`; the database
+   jobs come in when `database/` changed, and on a pull request they run either way. **The e2e
+   suite runs only on a pull request against `develop`**, and there only the API specs and Chrome
+   automatically — Firefox, Edge and the mobile viewports are manual jobs on the pipeline page.
 5. **Read the jobs, not only the badge.** `test-app`, `lint-app`, `audit-app` and every e2e job are
    `allow_failure: true`: a red unit test leaves the pipeline green with a warning. What actually
-   gates a merge is `build-app`, `test-db` and `typecheck-app` — the last one deliberately, because
-   Cypress transpiles the e2e sources without type checking and a renamed member surfaces nowhere
-   else (#1586, #1590).
+   gates a merge is the build jobs, `test-db` and `typecheck-app` — the last one deliberately,
+   because Cypress transpiles the e2e sources without type checking and a renamed member surfaces
+   nowhere else (#1586, #1590).
 6. **Rebase when `develop` moves**, then force-push with `--force-with-lease`. A pipeline result
    belongs to a commit, not to a pull request.
 7. **Merge as a merge commit** once the pipeline is green.
@@ -286,9 +293,10 @@ A release is `develop` merged into `main` and tagged there. The version number i
 `release/X.Y.Z` branch off `develop` and stands in five places: `package.json`,
 `apps/frontend/src/main.ts` (`APP_VERSION`), `apps/frontend-e2e/cypress.config.ts` (`env.version`),
 `apps/api/src/app/guards/app-version.guard.ts` and its spec. That branch goes to `main` as a pull
-request; the tag is created by publishing the GitHub release, and the mirror then builds the four
-Docker images and pushes them to Docker Hub as `:X.Y.Z` and `:latest`. Afterwards the same branch
-is merged into `develop`, so the bump is not missing there.
+request; the tag is created by publishing the GitHub release. The tag job does not build anything —
+it pulls the four images the `main` pipeline built for that commit and pushes them to Docker Hub as
+`:X.Y.Z` and `:latest`, which is why that pipeline has to be green for exactly that SHA first.
+Afterwards the same branch is merged into `develop`, so the bump is not missing there.
 
 ## Installation on a server
 
@@ -326,9 +334,10 @@ answer it with a **security warning**.
 
 ### Running the application
 
-The targets live in `scripts/*.mk` and are bundled by the `Makefile` of the installation directory.
-Everything about the infrastructure is prefixed `traefik-`, everything about the application
-`studio-lite-`. Start the infrastructure first, if it is not up already:
+The installation directory gets `scripts/make/studio-lite.mk` — this repository's `prod.mk` under
+another name — and a `Makefile` that includes it; the `traefik-` targets come from the
+infrastructure's own Makefile, which is why they exist only where it is installed. Everything about
+the application is prefixed `studio-lite-`. Start the infrastructure first, if it is not up already:
 
 ```bash
 make traefik-up
@@ -384,12 +393,14 @@ hand, which is also how a pre-release is pinned; the
 **Make a backup before every update** — a snapshot of the server, for instance. And restore one at
 least once before you need to: a backup you have never restored is a hope, not a plan.
 
-An update is `make studio-lite-up` again: the running containers are stopped, the new images are
-pulled, and everything starts back up. That takes about a minute. The data is not part of the
+An update is `make studio-lite-up` again: the target pulls the images `TAG` names and then recreates
+every container whose image changed. That takes about a minute. The data is not part of the
 containers — it lives in volumes on the server — so only the program is exchanged and work can
-continue immediately. `make studio-lite-update` is the other half: it fetches newer versions of
-Studio Lite or of the IQB infrastructure, renews an expired self-signed certificate, and changes the
-infrastructure's login data.
+continue immediately. `make studio-lite-update` is the other half — it asks whether to update the
+application or the infrastructure, and the second is where an expired self-signed certificate is
+renewed and the infrastructure's login data changed. The application path offers a backup of its own
+before it touches anything: a dump of the database and an export of the backend volume, into
+`backup/<date>` of the installation directory. Take it.
 
 **Schema changes are applied automatically**, but forward only. Going back to a version older than
 the installed one can leave the database in a state the old code cannot work with, and the old
@@ -401,5 +412,7 @@ What is actually tested is what the e2e suite runs against: **Chrome, Firefox an
 them at 1600 × 900 and at 375 × 667. Chrome at 1600 × 900 runs on every pull request against
 `develop`, the other five combinations are manual jobs on the pipeline page. Safari is in no run.
 
-For the CSS, `apps/frontend/src/assets/.browserslistrc` (`> 0.5%`, `last 2 versions`, `Firefox ESR`,
-`not dead`) is what autoprefixer reads.
+There is a `.browserslistrc` (`> 0.5%`, `last 2 versions`, `Firefox ESR`, `not dead`), but it sits
+in `apps/frontend/src/assets/` — not in the project root, where the build looks for it — and
+`package.json` has no `browserslist` entry either. So nothing reads it, and Angular prefixes the CSS
+for its own defaults.
