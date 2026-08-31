@@ -1,7 +1,9 @@
 import { CustomDecorator, SetMetadata } from '@nestjs/common';
 
+/** Metadata key under which {@link BackgroundRequest} stores its mode for the interceptor to read. */
 export const BACKGROUND_REQUEST_KEY = 'backgroundRequest';
 
+/** How a marked route is treated when {@link ActivityInterceptor} decides what counts as activity. */
 export type BackgroundRequestMode =
   // Never counts as user interaction, whatever the caller claims.
   'always' |

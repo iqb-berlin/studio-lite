@@ -3,6 +3,10 @@ import {
 } from '@angular/core';
 import { IqbFilesUploadQueueComponent } from '@studio-lite-lib/iqb-components';
 
+/**
+ * Hands the files a file input receives to an upload queue. The input is cleared afterwards, so
+ * choosing the same file again is noticed as a new choice rather than as no change at all.
+ */
 @Directive({
   selector: 'input[iqbFilesUploadInputFor], div[iqbFilesUploadInputFor]',
   standalone: true

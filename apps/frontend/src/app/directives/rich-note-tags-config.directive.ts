@@ -4,6 +4,11 @@ import { Subject } from 'rxjs';
 import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 import { StudioValidators } from '../validators/studio-validators.validator';
 
+/**
+ * The form behind the rich-note tag configuration, shared by the two places that offer it -- the
+ * installation's settings and a workspace group's. The tags are edited as JSON and validated as
+ * such, so a broken configuration is caught before it is saved.
+ */
 @Directive()
 export abstract class RichNoteTagsConfigDirective implements OnDestroy {
   configForm: FormGroup;

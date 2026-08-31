@@ -22,6 +22,15 @@ export const defaultAppConfig = <ConfigDto>{
   hasUsers: true
 };
 
+/**
+ * What the whole application shares: who is logged in and what they may reach, the appearance the
+ * installation has been given, the error messages waiting to be shown, and the messages arriving
+ * from hosted modules.
+ *
+ * It also holds the clock skew against the server, and {@link getServerTime} is what every
+ * time-based decision in the frontend asks -- a browser whose clock is off must not decide when a
+ * session ends.
+ */
 @Injectable({
   providedIn: 'root'
 })

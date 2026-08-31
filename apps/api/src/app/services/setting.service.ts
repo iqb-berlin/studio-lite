@@ -11,6 +11,15 @@ import WorkspaceGroup from '../entities/workspace-group.entity';
 import { UsersService } from './users.service';
 import { MetadataVocabularyService } from './metadata-vocabulary.service';
 
+/**
+ * The installation-wide settings, all of them rows of {@link Setting} whose content is JSON kept as
+ * text: the config, the logo, the export configuration, the profile registry, the mail template,
+ * the missings profiles, the rich-note tags.
+ *
+ * The rich-note tags are the one setting that is not simply read back: they may be configured as a
+ * vocabulary URL, and are then resolved through {@link MetadataVocabularyService} into the tags a
+ * workspace group actually offers.
+ */
 @Injectable()
 export class SettingService {
   private readonly logger = new Logger(SettingService.name);
@@ -169,6 +178,16 @@ export class SettingService {
     }
   }
 
+  /**
+   * The tags a unit's notes may be filed under, resolved through three sources in order: what the
+   * workspace group configures, the global setting, and failing both the IQB vocabulary this
+   * service falls back to.
+   *
+   * Whatever the source, it may be a list of tags or one or more vocabulary URLs; a URL is looked
+   * up through {@link MetadataVocabularyService} and its top concepts become the tags. A vocabulary
+   * that cannot be resolved yields no tags rather than an error -- notes stay readable, they just
+   * lose the names of their tags.
+   */
   async findUnitRichNoteTags(workspaceGroupId?: number): Promise<UnitRichNoteTagDto[]> {
     this.logger.log(`Returning unit rich note tags settings${
       workspaceGroupId ? ` for group ${workspaceGroupId}` : ''}`);

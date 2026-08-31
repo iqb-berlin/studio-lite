@@ -22,6 +22,13 @@ import { WriteOrGroupAdminAccessGuard } from '../guards/write-or-group-admin-acc
 import { UnitId } from '../decorators/unit-id.decorator';
 import { ItemRichNoteService } from '../services/item-rich-note.service';
 
+/**
+ * `workspaces/:workspace_id/units/:unit_id/rich-notes` -- the formatted notes on a unit, and which
+ * items each of them is about (`:note_id/items`).
+ *
+ * Reading and writing both let the group admin through, so someone administering the workspace
+ * from outside can read and correct notes without being assigned to it.
+ */
 @Controller('workspaces/:workspace_id/units/:unit_id/rich-notes')
 export class WorkspaceUnitRichNoteController {
   constructor(

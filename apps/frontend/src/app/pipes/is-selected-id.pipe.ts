@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+/** Whether an element carries the selected id -- the row highlight in a list. */
 @Pipe({
   name: 'isSelectedId',
   standalone: true

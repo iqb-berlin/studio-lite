@@ -13,6 +13,10 @@ import { UnitMetadataStore } from '../../classes/unit-metadata-store';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 
+/**
+ * Saves the open unit -- definition, scheme and properties together -- and is enabled only while one
+ * of the stores actually holds a change, which is what it subscribes to all three of them for.
+ */
 @Component({
   selector: 'studio-lite-unit-save-button',
   templateUrl: './unit-save-button.component.html',

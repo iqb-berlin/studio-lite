@@ -27,6 +27,14 @@ import UserSession from '../entities/user-session.entity';
 import { RefreshToken } from '../entities/refresh-token.entity';
 import { ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS } from '../app.constants';
 
+/**
+ * The accounts, their assignments and what the admin list shows about them: who exists, who may
+ * reach which workspace, who administers which group, and the session status of each.
+ *
+ * The session status is derived here, not stored: a session is active while an access token issued
+ * for it can still be valid, passive while an unexpired refresh token can still resume it, and
+ * orphaned once neither is left. Both thresholds come from `time.constants.ts`.
+ */
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
@@ -512,8 +520,10 @@ export class UsersService {
     return sessionsByUser;
   }
 
-  // The sessionIds a refresh token can still resume. An expired token is no key at all,
-  // so a session left with nothing but expired ones can no longer be continued.
+  /**
+   * The sessionIds a refresh token can still resume. An expired token is no key at all, so a
+   * session left with nothing but expired ones can no longer be continued.
+   */
   private async findResumableSessionIds(now: Date): Promise<Set<string>> {
     const liveTokens = await this.refreshTokenRepository.find({
       where: { expiresAt: MoreThan(now) },
@@ -522,19 +532,19 @@ export class UsersService {
     return new Set(liveTokens.map(token => token.sessionId));
   }
 
-  // A session is what its keys make it, and there are exactly two. While the last
-  // interaction is younger than ACTIVE_THRESHOLD_MS an access token issued for it can
-  // still be valid, so someone can be working in it right now: 'active'. After that only
-  // the refresh token is left, and while an unexpired one exists the session is merely
-  // unused -- whoever opens that browser again continues in it: 'passive'. Only when
-  // neither key is left is the session 'orphaned': nobody can return to it, and it should
-  // have gone when its last token did.
-  //
-  // Deliberately not decided by liveness ("is a tab still open?"). A closed browser is
-  // the ordinary way to leave a session, not an anomaly, and reporting it as orphaned made
-  // that label mean nothing (#1615). Active is asked first so that the moment between a
-  // fresh login writing its session row and writing its first refresh token cannot make a
-  // brand-new session look orphaned.
+  /**
+   * A session is what its keys make it, and there are exactly two. While the last interaction is
+   * younger than ACTIVE_THRESHOLD_MS an access token issued for it can still be valid, so someone
+   * can be working in it right now: 'active'. After that only the refresh token is left, and while
+   * an unexpired one exists the session is merely unused -- whoever opens that browser again
+   * continues in it: 'passive'. Only when neither key is left is the session 'orphaned': nobody can
+   * return to it, and it should have gone when its last token did.
+   *
+   * Deliberately not decided by liveness ("is a tab still open?"). A closed browser is the ordinary
+   * way to leave a session, not an anomaly, and reporting it as orphaned made that label mean
+   * nothing (#1615). Active is asked first so that the moment between a fresh login writing its
+   * session row and writing its first refresh token cannot make a brand-new session look orphaned.
+   */
   private static calculateSessionStatus(
     lastActivity: Date,
     isResumable: boolean,

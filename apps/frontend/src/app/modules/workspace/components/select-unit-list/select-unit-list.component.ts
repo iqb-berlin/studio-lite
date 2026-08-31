@@ -21,6 +21,10 @@ import { IncludePipe } from '../../../../pipes/include.pipe';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { ScrollIntoViewDirective } from '../../directives/scroll-into-view.directive';
 
+/**
+ * A tickable list of units, used wherever a selection has to be made outside the workspace itself --
+ * putting units into a review, into a group, into an export.
+ */
 @Component({
   selector: 'studio-lite-select-unit-list',
   templateUrl: './select-unit-list.component.html',

@@ -7,7 +7,9 @@ import { IqbFilesUploadComponent } from '../iqb-files-upload/iqb-files-upload.co
 import { UploadStatus } from '../../enums/upload-status.enum';
 
 /**
- * A material design file upload queue component.
+ * A queue of files to upload, one {@link IqbFilesUploadComponent} per file. It holds the request
+ * settings all of them share -- URL, headers, field name -- so a caller configures the upload once
+ * and then only adds files, which {@link IqbFilesUploadInputForDirective} does for a file input.
  */
 @Component({
   selector: 'iqb-files-upload-queue',

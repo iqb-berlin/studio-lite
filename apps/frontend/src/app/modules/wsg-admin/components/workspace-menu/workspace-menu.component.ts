@@ -19,6 +19,10 @@ import {
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { SelectDropBoxComponent } from '../select-drop-box/select-drop-box.component';
 
+/**
+ * The actions on the selected workspaces of a group: creating, renaming, deleting, moving them to
+ * another group, and opening their settings.
+ */
 @Component({
   selector: 'studio-lite-workspace-menu',
   templateUrl: './workspace-menu.component.html',

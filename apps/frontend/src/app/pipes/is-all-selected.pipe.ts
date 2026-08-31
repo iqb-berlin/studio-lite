@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+/** Whether every row of a table is selected -- what the header checkbox shows. */
 @Pipe({
   name: 'isAllSelected',
   standalone: true

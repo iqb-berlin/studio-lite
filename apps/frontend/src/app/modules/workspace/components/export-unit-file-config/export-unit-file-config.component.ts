@@ -12,6 +12,13 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { WorkspaceService } from '../../services/workspace.service';
 import { ModuleService } from '../../../../services/module.service';
 
+/**
+ * The file half of the export dialog: the format (XML or JSON) and what travels with the units --
+ * players, definitions, coding schemes, comments.
+ *
+ * Units without a player are named here, because an export that is meant to run elsewhere is
+ * incomplete without one.
+ */
 @Component({
   selector: 'studio-lite-export-unit-file-config',
   templateUrl: './export-unit-file-config.component.html',

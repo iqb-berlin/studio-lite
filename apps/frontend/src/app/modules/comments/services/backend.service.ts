@@ -5,6 +5,11 @@ import { catchError, map } from 'rxjs/operators';
 import { UpdateUnitCommentUnitItemsDto, UpdateUnitUserDto, UnitCommentVoterDto } from '@studio-lite-lib/api-dto';
 import { Comment } from '../models/comment.interface';
 
+/**
+ * The comment calls, for both places comments are written: a workspace and a review. Which of the
+ * two a call goes to follows from the review id -- zero means the workspace -- so the components of
+ * the comment module can be used in either without knowing where they are.
+ */
 @Injectable()
 export class BackendService {
   constructor(

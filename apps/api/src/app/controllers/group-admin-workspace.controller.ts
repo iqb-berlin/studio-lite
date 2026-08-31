@@ -24,6 +24,14 @@ import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { User } from '../decorators/user.decorator';
 import UserEntity from '../entities/user.entity';
 
+/**
+ * `group-admin/workspaces` -- what a group admin does with the workspaces of their group: create
+ * and delete them, move one into another group, and decide who works in each and at which access
+ * level.
+ *
+ * Working IN a workspace is {@link WorkspaceController}; this is the level above it, and it is
+ * reached without being assigned to any of the workspaces it acts on.
+ */
 @Controller('group-admin/workspaces')
 @UseFilters(HttpExceptionFilter)
 export class GroupAdminWorkspaceController {
@@ -81,6 +89,10 @@ export class GroupAdminWorkspaceController {
     return this.workspaceService.remove(ids);
   }
 
+  /**
+   * Moves workspaces into another group. The user is passed on because the service checks the
+   * group they are moved OUT of as well -- the guard only established the one they are moved into.
+   */
   @Patch('group-id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()

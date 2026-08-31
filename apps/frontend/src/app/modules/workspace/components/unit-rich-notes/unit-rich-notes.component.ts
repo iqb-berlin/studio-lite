@@ -19,6 +19,15 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { UnitRichNoteDialogComponent } from '../unit-rich-note-dialog/unit-rich-note-dialog.component';
 import { RichNoteNode, UnitRichNoteNodeComponent } from '../unit-rich-note-node/unit-rich-note-node.component';
 
+/**
+ * The notes on a unit, arranged under the tags the workspace group offers. Every top-level tag is
+ * shown whether or not it holds a note, so the tags a unit is meant to be described under are
+ * visible before anything has been written; a tag further down appears only when there is something
+ * under it.
+ *
+ * A note whose tag is no longer in the vocabulary is collected under "unassigned" rather than
+ * dropped -- a changed tag list must not make written notes disappear.
+ */
 @Component({
   selector: 'studio-lite-unit-rich-notes',
   templateUrl: './unit-rich-notes.component.html',

@@ -24,6 +24,16 @@ import { ReviewService } from '../services/review.service';
 import { AppVersionGuard } from '../guards/app-version.guard';
 import { BackgroundRequest } from '../decorators/background-request.decorator';
 
+/**
+ * The routes with no prefix of their own: logging in and out, refreshing a token, the very first
+ * login of a fresh installation, and what the frontend needs about the person at the keyboard --
+ * what they may reach (`auth-data`) and their own account data (`my-data`).
+ *
+ * Almost everything here is marked {@link BackgroundRequest}: a token rotation, a logout and the
+ * activity report are not interactions, and letting them count as one would keep an unattended
+ * browser logged in for as long as it stays open. The reason each carries the marking is written
+ * at the route.
+ */
 @Controller()
 export class AppController {
   constructor(
@@ -34,6 +44,11 @@ export class AppController {
   ) {
   }
 
+  /**
+   * Issues the token pair for credentials {@link LocalAuthGuard} has already accepted. A
+   * `sessionId` from the client continues that session instead of opening another, which is what
+   * keeps a reload from leaving a second session behind.
+   */
   @Post('login')
   @UseGuards(LocalAuthGuard, AppVersionGuard)
   @ApiTags('auth')

@@ -25,6 +25,11 @@ import {
   RichTextEditorDirective
 } from '../../../../directives/rich-text-editor.directive';
 
+/**
+ * The editor for a rich note -- the same rich text as a comment, with the item references and links
+ * a note carries. Unlike the comment editor it reports as it is typed, because a note is saved by
+ * the view around it rather than by a button of its own.
+ */
 @Component({
   selector: 'studio-lite-rich-note-editor',
   templateUrl: './rich-note-editor.component.html',

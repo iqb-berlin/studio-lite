@@ -15,6 +15,11 @@ import { VeronaModulesTableComponent } from '../components/verona-modules-table/
 import { VeronaModuleClass } from '../../../models/verona-module.class';
 import { ModuleSelectionChange } from '../models/module-selection-change.interface';
 
+/**
+ * What the two module pages share: the upload, the selection over the tables, and deleting what is
+ * selected. Only two things differ between them and both are left abstract -- the page's title and
+ * the path an upload goes to, which carries the types the module is installed under.
+ */
 @Directive()
 export abstract class ModulesDirective implements OnInit {
   @ViewChildren(VeronaModulesTableComponent) moduleTables!: QueryList<VeronaModulesTableComponent>;

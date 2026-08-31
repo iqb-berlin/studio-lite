@@ -3,12 +3,17 @@ import {
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 
+/**
+ * The whole administration area behind one flag: only a user marked as an administrator gets past.
+ * Unrelated to any workspace, so it asks no route parameter.
+ */
 @Injectable()
 export class IsAdminGuard implements CanActivate {
   constructor(
     private authService: AuthService
   ) {}
 
+  /** Passes only for an administrator. */
   async canActivate(
     context: ExecutionContext
   ) {

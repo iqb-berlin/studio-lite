@@ -13,6 +13,10 @@ import { WidgetCallData } from '../../models/widget-call-data.interface';
 import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
+/**
+ * The overlay a widget runs in when a player asks for one -- a second hosted module on top of the
+ * unit, with its own iframe and its own postMessage conversation.
+ */
 @Component({
   selector: 'studio-lite-widget-overlay',
   templateUrl: './widget-overlay.component.html',

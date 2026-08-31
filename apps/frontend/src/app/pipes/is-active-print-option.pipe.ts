@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { PrintOptions } from '../modules/print/models/print-options.interface';
 
+/** Whether the print option with this key is switched on; an unknown key counts as off. */
 @Pipe({
   name: 'isActivePrintOption',
   standalone: true

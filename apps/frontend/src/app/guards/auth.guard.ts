@@ -7,6 +7,14 @@ import {
 } from 'rxjs';
 import { AppService } from '../services/app.service';
 
+/**
+ * Lets a logged-in user through and sends everyone else to the start page, remembering where they
+ * were headed.
+ *
+ * It waits for the authentication to have settled before deciding: at start-up the token is checked
+ * against the server, and answering before that is done would throw a returning user out of the page
+ * they opened.
+ */
 export const authGuard = (
   route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot

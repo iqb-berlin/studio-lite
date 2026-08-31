@@ -11,6 +11,11 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ReviewService } from '../services/review.service';
 import { UnitService } from '../services/unit.service';
 
+/**
+ * `reviews/:review_id/units` -- a unit as a reviewer sees it: its properties, its definition, its
+ * scheme. The properties go through the review service, which resolves the review's workspace and
+ * asks for the unit within it -- so a unit id from another workspace comes back as not found.
+ */
 @Controller('reviews/:review_id/units')
 export class ReviewUnitController {
   constructor(

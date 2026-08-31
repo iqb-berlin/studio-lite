@@ -38,6 +38,13 @@ import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
 import { CountSessionsWithStatusPipe } from '../../../../pipes/count-sessions-with-status.pipe';
 
+/**
+ * The user administration: every account with its sessions and what it may administer, and the acts
+ * on a selected user -- create, change, delete, and clear sessions nobody can return to.
+ *
+ * The list reloads itself on a timer so the session states do not go stale while it is open. That
+ * poll is marked as a background request, so an open list does not keep its own session alive.
+ */
 @Component({
   selector: 'studio-lite-users',
   templateUrl: './users.component.html',

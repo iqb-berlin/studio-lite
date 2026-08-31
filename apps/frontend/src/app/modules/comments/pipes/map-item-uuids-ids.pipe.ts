@@ -2,6 +2,11 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { TranslateService } from '@ngx-translate/core';
 
+/**
+ * Pairs the item uuids a comment points at with the ids those items carry in their unit, so the
+ * comment can name them the way the unit does. An item without an id is shown as such rather than
+ * as a bare uuid.
+ */
 @Pipe({
   name: 'mapItemUuidsIds',
   standalone: true

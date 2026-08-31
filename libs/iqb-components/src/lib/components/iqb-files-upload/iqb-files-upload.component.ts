@@ -12,6 +12,11 @@ import { MatCard } from '@angular/material/card';
 import { BytesPipe } from '../../pipes/bytes.pipe';
 import { UploadStatus } from '../../enums/upload-status.enum';
 
+/**
+ * One file on its way to the server: it holds the request, reports its progress, and shows the
+ * outcome. Several of them sit in an {@link IqbFilesUploadQueueComponent}, which is where the
+ * request settings come from.
+ */
 @Component({
   selector: 'iqb-files-upload',
   templateUrl: './iqb-files-upload.component.html',

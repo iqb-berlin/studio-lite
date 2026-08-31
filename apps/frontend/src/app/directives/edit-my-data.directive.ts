@@ -9,6 +9,11 @@ import { EditMyDataComponent } from '../components/edit-my-data/edit-my-data.com
 import { BackendService } from '../services/backend.service';
 import { AppService } from '../services/app.service';
 
+/**
+ * Opens the dialog for the user's own data and saves what changed in it -- only the fields that
+ * actually differ are sent, so an untouched field is never overwritten with what the dialog
+ * happened to show.
+ */
 @Directive({
   selector: '[studioLiteEditMyData]',
   standalone: true

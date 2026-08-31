@@ -22,6 +22,13 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
 
+/**
+ * `admin/users` -- the accounts themselves: creating, changing and deleting them, saying who
+ * administers which workspace group, and clearing sessions that are stuck.
+ *
+ * Assigning users to single workspaces is one level down, in
+ * {@link GroupAdminWorkspaceController} and {@link GroupAdminUserController}.
+ */
 @Controller('admin/users')
 export class AdminUserController {
   constructor(
@@ -93,6 +100,11 @@ export class AdminUserController {
     return this.usersService.patch(userId, userFullDto);
   }
 
+  /**
+   * Deletes one session -- but only an orphaned one, and answers 400 otherwise. An administrator is
+   * not meant to throw a colleague out of a session they are working in; what this clears is a row
+   * no one can return to (see `findOrphanedSessionIds`).
+   */
   @Delete(':userId/sessions/:sessionId')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
@@ -108,6 +120,7 @@ export class AdminUserController {
     }
   }
 
+  /** Clears every orphaned session of one user at once and answers how many rows went. */
   @Delete(':id/orphaned-sessions')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()

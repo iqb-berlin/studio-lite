@@ -19,6 +19,15 @@ import { SplitterComponent } from '../../../splitter/components/splitter/splitte
 import { RoutingHelperService } from '../../services/routing-helper.service';
 import { FilterHiddenTabsPipe } from '../../../../pipes/filter-hidden-tabs.pipe';
 
+/**
+ * The workspace itself: the unit list on one side and the views of the selected unit on the other,
+ * split by a draggable gutter.
+ *
+ * The views -- properties, editor, preview, schemer, comments, notes -- are tabs over two router
+ * outlets: a tab can be pinned beside another, which is what "duplicable" means, so a unit can be
+ * edited and previewed at once. Which of them a workspace offers is part of its settings, and the
+ * hidden ones are filtered out of the tab bar.
+ */
 @Component({
   selector: 'studio-lite-workspace',
   templateUrl: './workspace.component.html',

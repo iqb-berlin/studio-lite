@@ -17,6 +17,10 @@ import { HasNewCommentsPipe } from '../../pipes/has-new-comments.pipe';
 import { UnitDropBoxTooltipPipe } from '../../pipes/unit-dropbox-tooltip.pipe';
 import { ScrollIntoViewDirective } from '../../directives/scroll-into-view.directive';
 
+/**
+ * The unit list of a workspace as a sortable table, with what a row has to say at a glance: its
+ * state, whether it carries unseen comments, and where it went or came from in a drop box.
+ */
 @Component({
   selector: 'studio-lite-unit-table',
   templateUrl: './unit-table.component.html',

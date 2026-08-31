@@ -12,6 +12,15 @@ import type { Response } from 'express';
 import VeronaModule from '../entities/verona-module.entity';
 import { AdminVeronaModulesNotFoundException } from '../exceptions/admin-verona-modules-not-found.exception';
 
+/**
+ * The installed Verona modules: listing them by type, handing out a module's file, and taking a
+ * new one in.
+ *
+ * An upload is an HTML file carrying its own metadata as JSON-LD, so the upload path reads the
+ * document (cheerio) for the module's key and type rather than believing the caller. The types the
+ * caller names are only the set the module's own type has to fall into; a module that declares
+ * something else is refused with 406.
+ */
 @Injectable()
 export class VeronaModulesService {
   private readonly logger = new Logger(VeronaModulesService.name);

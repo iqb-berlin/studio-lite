@@ -42,6 +42,14 @@ import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrappe
 import { RequestMessageDirective } from '../../directives/request-message.directive';
 import { SelectUnitComponent, SelectUnitData } from '../select-unit/select-unit.component';
 
+/**
+ * The menu of everything that can be done to the selected units: moving and copying them, changing
+ * their group and state, submitting them to a drop box, exporting them, and the workspace settings.
+ *
+ * Most of those act on many units at once and report back per unit, which is what
+ * {@link RequestMessageDirective} underneath handles -- an act can succeed for some units and fail
+ * for others.
+ */
 @Component({
   selector: 'studio-lite-edit-unit-button',
   templateUrl: './edit-unit-button.component.html',

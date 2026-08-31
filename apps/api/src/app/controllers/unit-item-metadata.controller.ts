@@ -18,6 +18,13 @@ import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { UnitItemMetadataService } from '../services/unit-item-metadata.service';
 import { ItemUuid } from '../decorators/item-uuid.decorator';
 
+/**
+ * `workspaces/:workspace_id/units/:unit_id/items/:item_uuid/metadata` -- the metadata rows of one
+ * item, one per profile. Reading takes access to the workspace, writing takes write access.
+ *
+ * These routes address a single row; the whole metadata of a unit and all its items is saved in
+ * one transaction through {@link WorkspaceUnitController}, which is what the metadata form uses.
+ */
 @Controller('workspaces/:workspace_id/units/:unit_id/items/:item_uuid/metadata')
 export class UnitItemMetadataController {
   constructor(

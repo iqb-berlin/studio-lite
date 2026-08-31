@@ -59,6 +59,14 @@ import { MetadataBackendService } from '../../../metadata/services/metadata-back
 import { MetadataService } from '../../../metadata/services/metadata.service';
 import { I18nService } from '../../../../services/i18n.service';
 
+/**
+ * Everything about a unit that is not its content: name and key, the modules it is opened with, its
+ * state and group, its transcript and reference -- and its metadata, which is edited in the profile
+ * form below the rest.
+ *
+ * The form writes into the unit's stores rather than to the server; saving is a separate act, and
+ * leaving the unit with unsaved changes is what the guard asks about.
+ */
 @Component({
   templateUrl: './unit-properties.component.html',
   styleUrls: ['unit-properties.component.scss'],
@@ -450,11 +458,13 @@ export class UnitPropertiesComponent
     return [];
   }
 
-  // Profiles and items are edited by two independent child components. Each change
-  // must update only its own slice of the stored metadata: merging into the store's
-  // current value (rather than replacing it, or rebuilding `this.metadata` which
-  // would retrigger the items editor and drop in-flight item edits) keeps both the
-  // unit profiles and the item metadata when either side changes.
+  /**
+   * Profiles and items are edited by two independent child components. Each change must update only
+   * its own slice of the stored metadata: merging into the store's current value (rather than
+   * replacing it, or rebuilding `this.metadata` which would retrigger the items editor and drop
+   * in-flight item edits) keeps both the unit profiles and the item metadata when either side
+   * changes.
+   */
   onMetadataChange(metadata: Partial<IqbUnitMetadataValues>): void {
     const store = this.workspaceService.getUnitMetadataStore();
     if (!store) return;

@@ -10,6 +10,10 @@ export type ProfileStoreWithProfiles = {
   profileStore:MDProfileStore,
   profiles: MDProfile[]
 };
+/**
+ * The state of the workspace group being administered: its settings, and the metadata profiles its
+ * workspaces may choose from. What a group admin edits here reaches every unit in the group.
+ */
 @Injectable({
   providedIn: 'root'
 })

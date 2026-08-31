@@ -1,6 +1,13 @@
 import { DomSanitizer, SafeUrl, Title } from '@angular/platform-browser';
 import { ConfigDto } from '@studio-lite-lib/api-dto';
 
+/**
+ * How the installation presents itself: its name, the intro and imprint texts, the address a
+ * contact mail goes to, and the warning that can be shown to everyone until a given day and hour.
+ *
+ * The HTML texts are configured by an administrator, so they pass the sanitizer once here rather
+ * than at each place they are rendered.
+ */
 export class AppConfig {
   readonly appTitle: string;
   pageTitle: string;

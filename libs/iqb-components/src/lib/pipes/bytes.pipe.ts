@@ -1,5 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+/**
+ * A file size in the largest unit that leaves a readable number, to one decimal. Nothing sensible
+ * to show becomes a dash, and zero stays a plain zero rather than "0.0 B".
+ */
 @Pipe({
   name: 'bytes',
   standalone: true

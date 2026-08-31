@@ -1,5 +1,10 @@
 import { Injectable } from '@angular/core';
 
+/**
+ * The widths of the split panes, remembered while the studio is open so a view keeps the layout the
+ * user dragged it into. Panes that no longer fit the window are dropped from the end -- a stored
+ * layout from a wider screen must not push content out of sight.
+ */
 @Injectable({
   providedIn: 'root'
 })

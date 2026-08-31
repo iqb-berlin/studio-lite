@@ -17,6 +17,13 @@ import { BackendService } from '../../services/backend.service';
 import { WarningComponent } from '../warning/warning.component';
 import { AreaTitleComponent } from '../area-title/area-title.component';
 
+/**
+ * The login form, for both kinds of login the studio has: an account, and a review link with its
+ * password. After it, the page the user was sent away from is opened again.
+ *
+ * Every login creates a session, so it has to be fired exactly once per attempt -- the note in the
+ * class says what a second call would leave behind.
+ */
 @Component({
   selector: 'studio-lite-login',
   templateUrl: './login.component.html',

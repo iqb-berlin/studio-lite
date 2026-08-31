@@ -1,6 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Duration } from '../models/duration.interface';
 
+/**
+ * Turns a duration in seconds into the minutes and seconds a metadata field shows, both padded to
+ * two digits so the field does not jump as the value changes.
+ */
 @Injectable({
   providedIn: 'root'
 })

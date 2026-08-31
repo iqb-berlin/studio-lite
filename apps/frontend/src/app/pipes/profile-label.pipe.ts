@@ -3,6 +3,11 @@ import { MetadataResolver } from '@iqb/metadata-resolver';
 
 type LabelText = string | Array<{ lang: string; value: string }>;
 
+/**
+ * The readable name of a metadata profile, whatever shape it arrives in: a plain string, a `label`,
+ * or a `title` -- and each of those either as text or as a list of translations. Always through
+ * `MetadataResolver.extractLabelText`, so a label is read the same way everywhere.
+ */
 @Pipe({
   name: 'profileLabel',
   standalone: true

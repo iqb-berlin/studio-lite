@@ -1,6 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { RootCommentWithReplies } from '../models/root-comment-with-replies.interface';
 
+/**
+ * How many comments are hidden from the review, replies included -- a hidden root comment takes its
+ * whole thread with it. What the "n hidden" line above the list counts.
+ */
 @Pipe({
   name: 'hiddenCommentsCount',
   pure: false,

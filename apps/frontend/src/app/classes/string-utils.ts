@@ -1,3 +1,8 @@
+/**
+ * Conversions between the spellings that meet in this application: camelCase in the code,
+ * UPPER_SNAKE_CASE in values from the API, kebab-case in the translation keys. Every one of them
+ * hands an empty value straight back, so a missing string never becomes an exception.
+ */
 export class StringUtils {
   // camelCase conversions
   static camelCaseToUpperSnakeCase(str: string): string {

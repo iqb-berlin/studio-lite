@@ -20,12 +20,21 @@ import { WriteOrGroupAdminAccessGuard } from '../guards/write-or-group-admin-acc
 import { UnitId } from '../decorators/unit-id.decorator';
 import UnitCommentUnitItem from '../entities/unit-comment-unit-item.entity';
 
+/**
+ * `workspaces/:workspace_id/units/:unit_id/items` -- the items of a unit: listing them, adding
+ * one, removing one, and the comment links of all of them at once.
+ *
+ * Reading takes access to the workspace, writing takes write access, and deleting also lets the
+ * group admin through -- an item may have to be removed by someone who administers the workspace
+ * from outside.
+ */
 @Controller('workspaces/:workspace_id/units/:unit_id/items')
 export class WorkspaceUnitItemController {
   constructor(
     private unitItemsService: UnitItemService
   ) {}
 
+  /** All items of the unit. `withoutMetadata` leaves the metadata out, which is much the cheaper read. */
   @Get()
   @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()

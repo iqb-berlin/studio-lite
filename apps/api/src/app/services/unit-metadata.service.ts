@@ -5,6 +5,14 @@ import { EntityManager, Repository } from 'typeorm';
 import { HIDDEN_PROFILE_ORDER } from '@studio-lite/shared-code';
 import UnitMetadata from '../entities/unit-metadata.entity';
 
+/**
+ * The metadata rows of units, one per unit and profile. Plain CRUD over {@link UnitMetadata}; which
+ * rows to add, update or drop for an incoming payload is decided by `reconcileProfilesByProfileId`
+ * in the caller.
+ *
+ * Every call takes an optional EntityManager, because the whole metadata of a unit is written in
+ * one transaction. What the write has to supply itself is written at {@link addMetadata}.
+ */
 export class UnitMetadataService {
   private readonly logger = new Logger(UnitMetadataService.name);
 

@@ -5,12 +5,17 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 
+/** Which icon the dialog wears; the template compares against the numbers behind these names. */
 export enum MessageType {
   error,
   warning,
   info
 }
 
+/**
+ * A dialog that only says something -- error, warning or notice, with the matching icon and a single
+ * button to close it. {@link ConfirmDialogComponent} is the one that asks.
+ */
 @Component({
   selector: 'iqb-message-dialog',
   template: `
@@ -63,6 +68,7 @@ export class MessageDialogComponent implements OnInit {
   }
 }
 
+/** What {@link MessageDialogComponent} is opened with; title and button label have defaults per type. */
 export interface MessageDialogData {
   type: MessageType;
   title: string;

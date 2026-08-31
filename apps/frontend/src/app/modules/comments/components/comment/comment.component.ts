@@ -23,6 +23,12 @@ import { ItemBadgeComponent } from '../item-badge/item-badge.component';
 import { MapItemUuidsIdsPipe } from '../../pipes/map-item-uuids-ids.pipe';
 import { SortAscendingPipe } from '../../pipes/sort-ascending.pipe';
 
+/**
+ * One comment with its replies. It decides nothing itself: what a click means -- delete, reply,
+ * vote, hide -- is passed up to {@link CommentsComponent}, which owns the discussion and the calls.
+ *
+ * Replies are the same component again, one level down, which is what makes the thread a tree.
+ */
 @Component({
   selector: 'studio-lite-comment',
   templateUrl: './comment.component.html',

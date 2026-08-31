@@ -6,6 +6,11 @@ import { Subject, takeUntil } from 'rxjs';
 import { BackendService } from '../services/backend.service';
 import { ChangePasswordComponent } from '../components/change-password/change-password.component';
 
+/**
+ * Makes whatever it sits on open the change-password dialog and carry the change through to the
+ * server. The whole action hangs on a directive so that a menu entry or a button only has to
+ * declare what it does, not how.
+ */
 @Directive({
   selector: '[studioLiteChangePassword]',
   standalone: true

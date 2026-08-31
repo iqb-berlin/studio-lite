@@ -15,6 +15,10 @@ import {
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ReviewService } from '../services/review.service';
 
+/**
+ * `reviews/:review_id` -- what a reviewer needs about the review they are logged into. Managing
+ * reviews happens from inside their workspace, in {@link WorkspaceReviewController}.
+ */
 @Controller('reviews')
 export class ReviewController {
   constructor(

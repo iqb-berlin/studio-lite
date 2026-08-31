@@ -13,21 +13,23 @@
  * `@nestjs/swagger`.
  */
 
-// Canonical (upper-case) module types as defined by the current Verona module metadata spec.
+/** Canonical (upper-case) module types as defined by the current Verona module metadata spec. */
 export const VERONA_MODULE_TYPES = ['EDITOR', 'PLAYER', 'SCHEMER', 'WIDGET'] as const;
 
-// Reduces a module type to its canonical (upper-case, trimmed) form so that the historical
-// lower-case spelling and the current upper-case spec spelling can be compared interchangeably.
+/**
+ * Reduces a module type to its canonical (upper-case, trimmed) form so that the historical
+ * lower-case spelling and the current upper-case spec spelling can be compared interchangeably.
+ */
 export function normalizeVeronaModuleType(type?: string | null): string {
   return (type ?? '').trim().toUpperCase();
 }
 
-// Case-insensitive comparison of two module types (e.g. 'editor' matches 'EDITOR').
+/** Case-insensitive comparison of two module types (e.g. 'editor' matches 'EDITOR'). */
 export function veronaModuleTypesMatch(a?: string | null, b?: string | null): boolean {
   return normalizeVeronaModuleType(a) === normalizeVeronaModuleType(b);
 }
 
-// Whether the given type is one of the four known Verona module types (in any casing).
+/** Whether the given type is one of the four known Verona module types (in any casing). */
 export function isKnownVeronaModuleType(type?: string | null): boolean {
   return VERONA_MODULE_TYPES.some(known => veronaModuleTypesMatch(known, type));
 }

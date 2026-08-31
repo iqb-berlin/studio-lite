@@ -16,6 +16,10 @@ import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
 
+/**
+ * Deletes the selected units after a confirmation, and leaves the unit that was open -- the view
+ * beside the list would otherwise show a unit that is gone.
+ */
 @Component({
   selector: 'studio-lite-delete-unit-button',
   templateUrl: './delete-unit-button.component.html',

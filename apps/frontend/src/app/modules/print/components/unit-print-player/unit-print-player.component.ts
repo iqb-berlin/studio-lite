@@ -13,6 +13,11 @@ import { UnitState } from '../../../../models/verona.interface';
 import { WidgetCallData } from '../../../workspace/models/widget-call-data.interface';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
+/**
+ * A unit rendered for printing: the same player as the preview, but laid out for paper -- it reports
+ * the height it needs so the page can grow to it, and it takes the print options (element ids,
+ * automatic height) that only the print view knows.
+ */
 @Component({
   selector: 'studio-lite-unit-print-player',
   templateUrl: './unit-print-player.component.html',

@@ -2,6 +2,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { TranslateService } from '@ngx-translate/core';
 
+/**
+ * The tooltip on a unit's drop-box marking: whether it was submitted or sent back. A unit that was
+ * never submitted has no marking and no tooltip.
+ */
 @Pipe({
   name: 'unitDropBoxTooltip',
   standalone: true

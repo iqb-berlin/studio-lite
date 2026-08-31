@@ -2,6 +2,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 import { VocabFlatNode } from '../models/vocabulary.class';
 
+/**
+ * Whether this vocabulary node is selected. See {@link AreAllDescendantsSelectedPipe} for why a
+ * `trigger` is passed in.
+ */
 @Pipe({
   name: 'isNodeSelected',
   standalone: true

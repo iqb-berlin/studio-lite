@@ -1,5 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 
+/** No resource package with this id in the workspace it was asked for. */
 export class ResourcePackageNotFoundException extends NotFoundException {
   constructor(id: number, method: string) {
     const description = `ResourcePackage with id ${id} not found`;

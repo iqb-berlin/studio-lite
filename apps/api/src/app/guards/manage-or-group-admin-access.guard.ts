@@ -5,6 +5,10 @@ import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
 
+/**
+ * Managing a workspace, for the assigned user with manage access and for whoever administers the
+ * workspace from outside -- see {@link ReadOrGroupAdminAccessGuard} for why this pair exists.
+ */
 @Injectable()
 export class ManageOrGroupAdminAccessGuard implements CanActivate {
   constructor(
@@ -13,6 +17,10 @@ export class ManageOrGroupAdminAccessGuard implements CanActivate {
     private workspaceUserService: WorkspaceUserService
   ) {}
 
+  /**
+   * Passes for manage access, for an administrator, or for the group admin. A route without
+   * `workspace_id` never passes.
+   */
   async canActivate(
     context: ExecutionContext
   ) {

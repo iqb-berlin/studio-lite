@@ -35,6 +35,14 @@ import { UnitService } from '../services/unit.service';
 import { UnitItemService } from '../services/unit-item.service';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 
+/**
+ * `admin/workspace-groups` -- the groups themselves: creating and deleting them, and saying who
+ * administers each. What happens inside a group is {@link GroupAdminWorkspaceController}.
+ *
+ * The two levels meet in this one controller: creating, deleting, renaming a group and appointing
+ * its admins are an administrator's, while reading a single group and what is in it -- its
+ * workspaces, units and items -- is open to its own admin as well.
+ */
 @Controller('admin/workspace-groups')
 export class AdminWorkspaceGroupController {
   constructor(
@@ -45,6 +53,11 @@ export class AdminWorkspaceGroupController {
     private unitItemService: UnitItemService
   ) {}
 
+  /**
+   * All groups -- or, with `download`, the xlsx report over every workspace of the installation.
+   * The group id 0 handed to the report is what stands for "no group in particular"; the same
+   * report narrowed to one group is served by {@link WorkspaceGroupController}.
+   */
   @Get()
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()

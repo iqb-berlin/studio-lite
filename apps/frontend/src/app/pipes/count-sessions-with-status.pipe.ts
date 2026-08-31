@@ -1,9 +1,11 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { SessionActivityStatus, UserSessionInfoDto } from '@studio-lite-lib/api-dto';
 
-// Counting in a pure pipe instead of a template expression: session lists are re-read on
-// every change detection cycle while the admin list polls, and array methods in a
-// template would run each time.
+/**
+ * How many of a user's sessions are in a given state. Counting in a pure pipe instead of a template
+ * expression: session lists are re-read on every change detection cycle while the admin list polls,
+ * and array methods in a template would run each time.
+ */
 @Pipe({
   name: 'countSessionsWithStatus',
   standalone: true

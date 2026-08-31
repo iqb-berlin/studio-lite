@@ -50,6 +50,17 @@ import { WorkspaceGuard } from '../guards/workspace.guard';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { ManageOrGroupAdminAccessGuard } from '../guards/manage-or-group-admin-access.guard';
 
+/**
+ * `workspaces/:workspace_id` -- the workspace itself: reading it, its people and its unit groups,
+ * exporting its units, renaming it, and setting its drop box and its settings.
+ *
+ * The units in it have their own controller ({@link WorkspaceUnitController}), as do its reviews,
+ * comments, notes and items. What is decided here is the frame around them.
+ *
+ * The guards are not uniform, and each says who the route is for: reading and exporting also admit
+ * the group admin, changing unit groups takes manage access, and the settings -- which decide the
+ * modules and metadata profiles of every unit in the workspace -- are the group admin's alone.
+ */
 @Controller('workspaces/:workspace_id')
 export class WorkspaceController {
   constructor(
@@ -62,6 +73,11 @@ export class WorkspaceController {
     private usersService: UsersService
   ) {}
 
+  /**
+   * The workspace -- or, with `download`, a zip of its units in the XML format, whose settings
+   * come along as a JSON string in the query. The JSON export is a route of its own
+   * ({@link downloadUnitsJson}) and takes the same settings in a body instead.
+   */
   @Get()
   @UseGuards(JwtAuthGuard, ReadOrGroupAdminAccessGuard)
   @ApiBearerAuth()
@@ -113,6 +129,10 @@ export class WorkspaceController {
     return this.workspaceService.findOne(workspaceId);
   }
 
+  /**
+   * The same export as the `download` variant of {@link find}, in the JSON format and with the
+   * settings in the body. A POST although it changes nothing -- what it needs is a request body.
+   */
   @Post('download-units')
   @UseGuards(JwtAuthGuard, ReadOrGroupAdminAccessGuard)
   @ApiBearerAuth()
@@ -184,6 +204,12 @@ export class WorkspaceController {
     return this.workspaceService.findAllWorkspaceGroups(workspaceId);
   }
 
+  /**
+   * Creates, renames or removes a unit group; the body's `operation` says which, and the method's
+   * name says only the last of the three. A group is not a table of its own -- it is a name in the
+   * workspace settings and the same name on each unit -- so every one of the three writes both
+   * sides, and removing a group leaves its units with no group rather than deleting them.
+   */
   @Patch('group-name')
   @UseGuards(JwtAuthGuard, ManageOrGroupAdminAccessGuard)
   @ApiBearerAuth()

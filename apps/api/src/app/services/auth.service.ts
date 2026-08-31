@@ -12,6 +12,18 @@ import UserSession from '../entities/user-session.entity';
 import { findOrphanedSessionIds } from '../utils/orphaned-sessions';
 import { PASSIVE_THRESHOLD_MS } from '../app.constants';
 
+/**
+ * Everything about being logged in: checking credentials, issuing the token pair, renewing it, and
+ * ending a session.
+ *
+ * A session is a row of its own ({@link UserSession}) and is not the same as a token. The access
+ * token carries the session id and expires with the active phase; the refresh token is stored as a
+ * hash and lives as long as the inactivity window. Both lifetimes come from `time.constants.ts`, so
+ * "how long may a session be resumed" is answered in one place.
+ *
+ * Every login gets its own session unless the client hands back the id of one, which is what keeps
+ * two browsers of the same person independent while a reload continues where it left off.
+ */
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -191,10 +203,12 @@ export class AuthService {
     await this.userSessionRepository.delete({ userId, sessionId });
   }
 
-  // Bulk counterpart to logoutOrphanedSession, for a user whose rows the hourly cleanup has
-  // not reached yet. Deletes exactly the ids that were found rather than re-evaluating the
-  // condition: between the two statements a session can acquire a fresh token, and a second
-  // predicate would spare its row after its tokens are already gone.
+  /**
+   * Bulk counterpart to logoutOrphanedSession, for a user whose rows the hourly cleanup has not
+   * reached yet. Deletes exactly the ids that were found rather than re-evaluating the condition:
+   * between the two statements a session can acquire a fresh token, and a second predicate would
+   * spare its row after its tokens are already gone.
+   */
   async deleteOrphanedSessions(userId: number): Promise<number> {
     const ids = await findOrphanedSessionIds(
       this.userSessionRepository,

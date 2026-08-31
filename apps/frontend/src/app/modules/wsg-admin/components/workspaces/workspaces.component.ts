@@ -39,6 +39,10 @@ import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
 import { I18nService } from '../../../../services/i18n.service';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 
+/**
+ * The workspaces of a group as their admin sees them: creating, renaming, moving and deleting them,
+ * setting a drop box, and saying who works in each and at which level.
+ */
 @Component({
   selector: 'studio-lite-workspaces',
   templateUrl: './workspaces.component.html',

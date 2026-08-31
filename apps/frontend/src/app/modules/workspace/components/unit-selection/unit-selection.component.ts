@@ -19,6 +19,10 @@ import { UnitGroupComponent } from '../unit-group/unit-group.component';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { UnitGroupsComponent } from '../unit-groups/unit-groups.component';
 
+/**
+ * The unit list beside the workspace: the units by group, the filter over them, and the selection
+ * the action buttons above work on.
+ */
 @Component({
   selector: 'studio-lite-unit-selection',
   templateUrl: './unit-selection.component.html',

@@ -2,6 +2,13 @@ import {
   Column, Entity, PrimaryGeneratedColumn, Unique
 } from 'typeorm';
 
+/**
+ * Remembers that a unit was submitted from one workspace into another's drop box, and whether it
+ * has since been sent back (`returned`). That is what lets both sides see where a unit came from
+ * and where it went, once the unit itself has moved on.
+ *
+ * Moving a unit outside the drop box removes its history: it is then no longer a submission.
+ */
 @Entity()
 @Unique('unit_source_target', ['unitId', 'sourceWorkspaceId', 'targetWorkspaceId'])
 class UnitDropBoxHistory {

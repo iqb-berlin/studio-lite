@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { UnitRichNoteDto } from '@studio-lite-lib/api-dto';
 
+/** Whether a rich note has anything to show in its footer -- item references or links. */
 @Pipe({
   name: 'isNoteFooterVisible',
   standalone: true

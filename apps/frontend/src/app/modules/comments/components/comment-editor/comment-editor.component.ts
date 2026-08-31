@@ -16,6 +16,11 @@ import {
   RichTextEditorDirective
 } from '../../../../directives/rich-text-editor.directive';
 
+/**
+ * The editor for a comment, used for writing a new one, replying and revising alike -- the label of
+ * its button is what tells them apart. Beside the formatted text it carries the items the comment is
+ * about.
+ */
 @Component({
   selector: 'studio-lite-comment-editor',
   templateUrl: './comment-editor.component.html',

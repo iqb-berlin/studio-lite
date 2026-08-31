@@ -16,6 +16,16 @@ import { WorkspaceBackendService } from '../modules/workspace/services/workspace
 import { WorkspaceService } from '../modules/workspace/services/workspace.service';
 import { AppService } from '../services/app.service';
 
+/**
+ * The base every component that hosts a Verona module builds on -- editor, player, schemer, the
+ * print view. It owns the iframe the module runs in and the postMessage conversation with it:
+ * which module to load, handing the unit over once the module says it is ready, and taking what
+ * comes back.
+ *
+ * A module runs in a page of its own and can only be talked to by messages, so the parts that
+ * cannot be shared -- what a message means, what to do with a changed unit -- are left abstract for
+ * the hosting component to answer.
+ */
 @Directive({
   selector: '[veronaModule]',
   standalone: true

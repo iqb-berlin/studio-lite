@@ -5,6 +5,10 @@ import { UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
 import UnitUser from '../entities/unit-user.entity';
 import Unit from '../entities/unit.entity';
 
+/**
+ * What each user has already seen of each unit -- the timestamp behind the "new comments" marking
+ * in the unit list, and nothing else.
+ */
 @Injectable()
 export class UnitUserService {
   private readonly logger = new Logger(UnitUserService.name);
