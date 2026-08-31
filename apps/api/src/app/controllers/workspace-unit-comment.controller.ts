@@ -21,6 +21,7 @@ import { WorkspaceGuard } from '../guards/workspace.guard';
 import { CommentAccessGuard } from '../guards/comment-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { CommentWriteGuard } from '../guards/comment-write.guard';
+import { CommentDeleteGuard } from '../guards/comment-delete.guard';
 import { UnitUserService } from '../services/unit-user.service';
 import { ItemCommentService } from '../services/item-comment.service';
 import { UnitId } from '../decorators/unit-id.decorator';
@@ -131,9 +132,8 @@ export class WorkspaceUnitCommentController {
     return this.itemCommentService.updateCommentItems(unitId, commentId, comment.unitItemUuids);
   }
 
-  // todo CommentDeleteGuard: but include workspacegroupadmin
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentDeleteGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comment successfully updated.' })
@@ -146,7 +146,7 @@ export class WorkspaceUnitCommentController {
   }
 
   @Patch(':comment_id/hidden')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })

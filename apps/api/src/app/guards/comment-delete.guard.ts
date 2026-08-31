@@ -2,35 +2,49 @@ import {
   CanActivate, ExecutionContext, Injectable, UnauthorizedException
 } from '@nestjs/common';
 import { UnitCommentService } from '../services/unit-comment.service';
+import { AuthService } from '../services/auth.service';
+import { WorkspaceService } from '../services/workspace.service';
 
 /**
- * Would let only the author of a comment delete it -- ownership rather than access level, which is
- * why it asks the comment and not the workspace.
+ * A comment may be deleted by whoever wrote it, and by whoever administers the workspace it is in --
+ * the admin of its group, or an administrator. Comment access alone is not enough: it lets a user
+ * write in the discussion, not remove what others wrote.
  *
- * Not in use: no route carries it. `DELETE …/comments/:id` guards with `CommentAccessGuard`
- * instead, so anyone who may comment in the workspace may delete any comment in it. The todo above
- * that route says what the open question is -- a group admin has to be able to delete as well, and
- * this guard does not let them.
+ * The two halves are why the guard existed but was never used (the todo at the delete route asked
+ * for exactly this): checking authorship alone would have shut out the group admin, who is the one
+ * expected to clear a discussion up.
+ *
+ * A review session passes neither half -- its comments carry no user id and it administers nothing.
  */
 @Injectable()
 export class CommentDeleteGuard implements CanActivate {
   constructor(
-    private unitCommentService: UnitCommentService
+    private unitCommentService: UnitCommentService,
+    private authService: AuthService,
+    private workspaceService: WorkspaceService
   ) {}
 
-  /** Passes when the comment named in `route.params.id` belongs to the requesting user. */
-  // eslint-disable-next-line class-methods-use-this
-  async canActivate(
-    context: ExecutionContext
-  ) {
+  /** Passes for the author of the comment, for an administrator, and for the group's admin. */
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
-    const userId = req.user.id;
-    const commentId = req.params.id;
+    const userId = Number(req.user?.id) || 0;
+    const commentId = Number(req.params.id ?? req.params.comment_id) || 0;
+    if (!userId || !commentId) throw new UnauthorizedException();
+
     const comment = await this.unitCommentService.findOneComment(commentId);
-    const canAccess = userId === comment.userId;
-    if (!canAccess) {
-      throw new UnauthorizedException();
-    }
-    return true;
+    if (comment.userId === userId) return true;
+
+    if (await this.authService.isAdminUser(userId)) return true;
+    if (await this.isGroupAdminOfWorkspace(userId, Number(req.params.workspace_id) || 0)) return true;
+
+    throw new UnauthorizedException();
+  }
+
+  /** Whether the user administers the group the workspace belongs to. False without a workspace. */
+  private async isGroupAdminOfWorkspace(userId: number, workspaceId: number): Promise<boolean> {
+    if (!workspaceId) return false;
+    const workspace = await this.workspaceService.findOne(workspaceId);
+    if (!workspace) return false;
+    return this.authService.isWorkspaceGroupAdmin(userId, workspace.groupId);
   }
 }

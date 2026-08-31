@@ -14,6 +14,7 @@ import { UnitCommentService } from '../services/unit-comment.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
 import { WorkspaceUnitCommentController } from './workspace-unit-comment.controller';
 import { ItemCommentService } from '../services/item-comment.service';
+import { WorkspaceService } from '../services/workspace.service';
 
 describe('WorkspaceUnitCommentController', () => {
   let controller: WorkspaceUnitCommentController;
@@ -48,6 +49,10 @@ describe('WorkspaceUnitCommentController', () => {
         {
           provide: ItemCommentService,
           useValue: createMock<ItemCommentService>()
+        },
+        {
+          provide: WorkspaceService,
+          useValue: createMock<WorkspaceService>()
         }
       ]
     }).compile();
