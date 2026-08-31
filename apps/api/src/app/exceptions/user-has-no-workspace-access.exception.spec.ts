@@ -1,4 +1,4 @@
-import { UserHasNoWorkspaceAccessException } from './user-has no-workspace-access.exception';
+import { UserHasNoWorkspaceAccessException } from './user-has-no-workspace-access.exception';
 
 describe('UserHasNoWorkspaceAccessException', () => {
   it('should be defined', () => {
