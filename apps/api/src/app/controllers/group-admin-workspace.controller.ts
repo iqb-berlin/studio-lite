@@ -23,6 +23,7 @@ import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.g
 import { HttpExceptionFilter } from '../exceptions/http-exception.filter';
 import { User } from '../decorators/user.decorator';
 import UserEntity from '../entities/user.entity';
+import { AnyWorkspaceGroupAdmin } from '../decorators/any-workspace-group-admin.decorator';
 
 /**
  * `group-admin/workspaces` -- what a group admin does with the workspaces of their group: create
@@ -42,6 +43,7 @@ export class GroupAdminWorkspaceController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @AnyWorkspaceGroupAdmin()
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
@@ -53,6 +55,7 @@ export class GroupAdminWorkspaceController {
 
   @Get(':id/users')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @AnyWorkspaceGroupAdmin()
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace users retrieved successfully.' })
   @ApiNotFoundResponse({ description: 'Admin workspace not found.' }) // TODO: not implemented in userService.findAll
@@ -63,6 +66,7 @@ export class GroupAdminWorkspaceController {
 
   @Patch(':id/users')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @AnyWorkspaceGroupAdmin()
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace users updated successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
@@ -75,6 +79,7 @@ export class GroupAdminWorkspaceController {
 
   @Delete()
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @AnyWorkspaceGroupAdmin()
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspaces deleted successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
@@ -95,6 +100,7 @@ export class GroupAdminWorkspaceController {
    */
   @Patch('group-id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @AnyWorkspaceGroupAdmin()
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace moved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
@@ -107,6 +113,7 @@ export class GroupAdminWorkspaceController {
 
   @Post()
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @AnyWorkspaceGroupAdmin()
   @ApiBearerAuth()
   @ApiCreatedResponse({
     description: 'Sends back the id of the new Workspace in database',

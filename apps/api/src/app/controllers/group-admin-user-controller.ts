@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceService } from '../services/workspace.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { BackgroundRequest } from '../decorators/background-request.decorator';
+import { AnyWorkspaceGroupAdmin } from '../decorators/any-workspace-group-admin.decorator';
 
 /**
  * `group-admin/users` -- what a group admin does with people: see the users and set which
@@ -36,6 +37,7 @@ export class GroupAdminUserController {
   @BackgroundRequest('unless-user-intent')
   @Get()
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @AnyWorkspaceGroupAdmin()
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Group admin users retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No group-admin privileges.' })
@@ -55,6 +57,7 @@ export class GroupAdminUserController {
 
   @Patch(':id/workspaces')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @AnyWorkspaceGroupAdmin()
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Group admin user workspaces updated successfully.' })
   @ApiUnauthorizedResponse({ description: 'No group-admin privileges.' })
@@ -68,6 +71,7 @@ export class GroupAdminUserController {
 
   @Get(':id/workspaces')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @AnyWorkspaceGroupAdmin()
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Group admin user workspaces retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No group-admin privileges. ' })
