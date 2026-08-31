@@ -9,6 +9,7 @@ import { ReviewUnitController } from './review-unit.controller';
 import { ReviewService } from '../services/review.service';
 import { UnitService } from '../services/unit.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { ReviewGuard } from '../guards/review.guard';
 
 describe('ReviewUnitController', () => {
   let controller: ReviewUnitController;
@@ -30,6 +31,8 @@ describe('ReviewUnitController', () => {
       ]
     })
       .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(ReviewGuard)
       .useValue({ canActivate: () => true })
       .compile();
 

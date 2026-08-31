@@ -4,6 +4,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { ReviewController } from './review.controller';
 import { ReviewService } from '../services/review.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { ReviewGuard } from '../guards/review.guard';
 
 describe('ReviewController', () => {
   let controller: ReviewController;
@@ -20,6 +21,8 @@ describe('ReviewController', () => {
       ]
     })
       .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(ReviewGuard)
       .useValue({ canActivate: () => true })
       .compile();
 
