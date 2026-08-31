@@ -66,7 +66,7 @@ cores from each other and specs that take milliseconds locally run into the Jest
 
 ## Requirements
 
-- **Node.js 24**, the major that `node:lts-bookworm` resolves to — the image the pipeline builds on
+- **Node.js 24**, the major that `node:lts-bookworm-slim` resolves to — the pipeline's base image,
   and the version the documentation workflow pins. There is no `.nvmrc` and no `engines` field, so
   nothing enforces it locally.
 - **npm**, **Docker**, **Docker Compose** and **Make**. Every `dev-*` target reads `.env.dev` — the
@@ -117,7 +117,9 @@ Traefik sends everything under `/api` straight to the backend, past the frontend
 
 The backend also listens on `http://localhost:3333`, and `make dev-up` publishes that port, but
 nothing needs it: it is the way past the proxy, useful when you want to know which of the two
-answered. Both ports come from `HTTP_PORT` and `API_PORT` in `.env.dev`.
+answered. `HTTP_PORT` and `API_PORT` in `.env.dev` move those two ports for the containers only —
+`npm run start-frontend` serves on 4200 whatever the file says, and `apps/api/src/main.ts` has 3333
+hardcoded.
 
 **On a fresh database no account exists.** The application asks for one on the first call, and that
 account carries the administrator rights — from there on,
@@ -142,8 +144,9 @@ make dev-test-build-e2e   # after an nx workspace update
 make dev-test-e2e
 ```
 
-`make dev-test-e2e-api` and `make dev-test-e2e-ui-chrome` run one half each; `-firefox`, `-edge` and
-the `-mobile` variants are the same suite in another browser or viewport.
+`make dev-test-e2e-api` and `make dev-test-e2e-ui-chrome` run one half each;
+`dev-test-e2e-ui-firefox`, `-ui-edge` and the `-mobile` variants of all three are the same suite in
+another browser or viewport.
 
 ### Where to reach when you want to change something
 
@@ -195,7 +198,8 @@ The `make dev-test-e2e*` targets are the containerised variant of the same suite
 | `make dev-start`, `make dev-stop`, `make dev-status`, `make dev-logs` | Work on the running containers; `SERVICE=db make dev-logs` narrows it to one |
 | `make dev-db-build`, `make dev-db-up` | Build and start database and Liquibase alone, for the npm path |
 | `make dev-db-down` | `docker compose down` — despite the name it takes the whole stack down, not only the database |
-| `make dev-volumes-clean`, `make dev-images-clean`, `make dev-clean-all` | Throw away volumes, images, or both. The data is in the volumes |
+| `make dev-volumes-clean`, `make dev-images-clean` | Throw away this project's volumes or images — filtered by name. The data is in the volumes |
+| `make dev-clean-all` | **Not the sum of those two:** a bare `docker system prune --all --volumes`, which takes every unused image, volume, container and network on the machine, including other projects' |
 | `make dev-test-app` | Runs the unit tests inside the running containers |
 
 ### Database
@@ -265,18 +269,21 @@ A branch name carries the issue it belongs to: `fix/1629-group-admin-guard`.
    in the pull request: it closes the ticket on merge and skips the board column the team works
    from. Referencing is fine, keywords are not.
 3. **Open a pull request against `develop`.**
-4. **The pipeline runs on GitLab**, mirrored from GitHub — that is what the badge at the top points
-   at. The only workflow in `.github/workflows` builds the documentation; besides it GitHub runs
-   CodeQL and Dependabot from their default setups, and nothing of that gates a merge. A push to a
-   branch runs `build-app`, `test-app`, `lint-app`, `typecheck-app` and `audit-app`; the database
-   jobs come in when `database/` changed, and on a pull request they run either way. **The e2e
-   suite runs only on a pull request against `develop`**, and there only the API specs and Chrome
+4. **The pipeline runs on GitLab**, mirrored from GitHub. The only workflow in `.github/workflows`
+   builds the documentation; besides it GitHub runs CodeQL and Dependabot from their default
+   setups, and nothing of that gates a merge. A push to a branch runs `build-app`, `test-app`,
+   `lint-app`, `typecheck-app` and `audit-app`. On a pull request the database jobs come along; on
+   a plain branch push they wait for a change to `database/*`, and that glob does not reach into
+   `database/changelog/`, so a new changeset alone does not bring them out. **The e2e suite runs
+   only on a pull request against `develop`**, and there only the API specs and Chrome
    automatically — Firefox, Edge and the mobile viewports are manual jobs on the pipeline page.
-5. **Read the jobs, not only the badge.** `test-app`, `lint-app`, `audit-app` and every e2e job are
-   `allow_failure: true`: a red unit test leaves the pipeline green with a warning. What actually
-   gates a merge is the build jobs, `test-db` and `typecheck-app` — the last one deliberately,
-   because Cypress transpiles the e2e sources without type checking and a renamed member surfaces
-   nowhere else (#1586, #1590).
+5. **Read the jobs, not the badge.** The badge at the top of this file is `main`'s last pipeline,
+   not yours. And in the pipeline, `test-app`, `lint-app`, `audit-app` and every e2e job are
+   `allow_failure: true`: a red unit test leaves the run green with a warning. What gates a merge
+   is `build-app`, `test-db` and `typecheck-app` — the last one deliberately, because Cypress
+   transpiles the e2e sources without type checking and a renamed member surfaces nowhere else
+   (#1586, #1590). `build-app` is `nx affected --base=HEAD~1`, so it builds what the last commit
+   touched, not the branch.
 6. **Rebase when `develop` moves**, then force-push with `--force-with-lease`. A pipeline result
    belongs to a commit, not to a pull request.
 7. **Merge as a merge commit** once the pipeline is green.
@@ -327,10 +334,12 @@ configured by hand — in the Docker Compose files and in the Nginx configuratio
 
 **HTTPS.** The IQB infrastructure redirects incoming HTTP requests to HTTPS. If you have a
 certificate and a key, put both into `secrets/traefik` in the infrastructure's installation
-directory and rename them to `certificate.pem` and `privkey.pem`. Without one, the install and
-update scripts can generate a self-signed certificate, and Traefik replaces an invalid one with a
-fresh self-signed certificate on its own. A self-signed certificate is a stopgap: browsers will
-answer it with a **security warning**.
+directory and rename them to `certificate.pem` and `privkey.pem`. Certificates are the
+infrastructure's business, not this repository's: nothing here reads those files, and it is
+[iqb-berlin/traefik](https://github.com/iqb-berlin/traefik) whose install and update scripts
+generate a self-signed certificate when there is none — `make studio-lite-update` only calls them.
+Traefik also replaces an invalid certificate with a fresh self-signed one on its own. That is a
+stopgap: browsers answer it with a **security warning**.
 
 ### Running the application
 
