@@ -16,6 +16,7 @@ import {
   clickIndexTabWorkspace,
   clickIndexTabWsgAdmin,
   deleteUnit,
+  ensureUnitExists,
   goToWsMenu,
   importExercise,
   moveUnit,
@@ -270,6 +271,8 @@ describe('Workspace Unit Management', () => {
   });
 
   it('exports selected units', () => {
+    ensureUnitExists(ws1, unit3);
+    ensureUnitExists(ws1, newUnit);
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
@@ -296,6 +299,7 @@ describe('Workspace Unit Management', () => {
   });
 
   it('export dialog search filter narrows the unit list', () => {
+    ensureUnitExists(ws1, unit3);
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
@@ -326,6 +330,7 @@ describe('Workspace Unit Management', () => {
   });
 
   it('performs unit download/export successfully', () => {
+    ensureUnitExists(ws1, unit3);
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
@@ -371,6 +376,7 @@ describe('Workspace Unit Management', () => {
   });
 
   it('exports codebook for selected units', () => {
+    ensureUnitExists(ws1, newUnit);
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
@@ -401,6 +407,7 @@ describe('Workspace Unit Management', () => {
   });
 
   it('displays print preview for units with coding and comments', () => {
+    ensureUnitExists(ws1, unit3);
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-preview-units"]').click();
@@ -509,6 +516,7 @@ describe('Workspace Unit Management', () => {
   });
 
   it('copies unit to another workspace', () => {
+    ensureUnitExists(ws1, unit3);
     cy.visitWs(ws1);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-copy-unit"]').click();
