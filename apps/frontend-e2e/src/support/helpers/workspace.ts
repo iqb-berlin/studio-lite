@@ -97,6 +97,24 @@ export function addUnitPred(unit: UnitData): void {
 }
 
 /**
+ * Ensures a unit exists in a workspace. If not found, creates it.
+ * @param ws - Workspace name
+ * @param unit - Unit data object
+ * @example
+ * ensureUnitExists(ws1, unit3);
+ */
+export function ensureUnitExists(ws: string, unit: UnitData): void {
+  cy.visitWs(ws);
+  cy.get('body').then($body => {
+    const unitFound = $body.find(`[data-cy="workspace-select-unit-list-checkbox-${unit.shortname}"]`).length > 0 ||
+      $body.text().includes(unit.shortname);
+    if (!unitFound) {
+      addUnitPred(unit);
+    }
+  });
+}
+
+/**
  * Creates a unit from an existing unit
  * @param ws - Source workspace (format: "Group: Workspace")
  * @param unit1 - Source unit to copy from
@@ -384,7 +402,8 @@ export function clickUnitPropertiesSaveButton(): void {
 }
 
 /**
- * Navigates to unit properties, registers PATCH intercept, executes modify action, saves, reloads, and runs verification
+ * Navigates to unit properties, registers PATCH intercept, executes modify action, saves,
+ * reloads, and runs verification
  * @param ws - Workspace name
  * @param shortname - Unit shortname
  * @param modify - Function performing form edits
@@ -407,4 +426,3 @@ export function editUnitPropertiesAndVerify(
   openUnitProperties(shortname);
   verify();
 }
-
