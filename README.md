@@ -412,7 +412,6 @@ What is actually tested is what the e2e suite runs against: **Chrome, Firefox an
 them at 1600 × 900 and at 375 × 667. Chrome at 1600 × 900 runs on every pull request against
 `develop`, the other five combinations are manual jobs on the pipeline page. Safari is in no run.
 
-There is a `.browserslistrc` (`> 0.5%`, `last 2 versions`, `Firefox ESR`, `not dead`), but it sits
-in `apps/frontend/src/assets/` — not in the project root, where the build looks for it — and
-`package.json` has no `browserslist` entry either. So nothing reads it, and Angular prefixes the CSS
-for its own defaults.
+For the CSS, no `browserslist` of this repository reaches the build: Angular prefixes for its own
+defaults, and that is the better state to be in. Those defaults move with every Angular release,
+while a list of ours would only ever be as current as the last time someone remembered it (#1639).
