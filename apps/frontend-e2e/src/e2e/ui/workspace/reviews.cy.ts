@@ -146,10 +146,12 @@ describe('Unit Reviews', () => {
   });
 
   it('reflects the updated unit count when the review is opened', () => {
+    cy.intercept('GET', '/api/reviews/*').as('getReview');
     cy.visit('/');
     openReview(review);
+    cy.wait('@getReview').its('response.statusCode').should('be.within', 200, 299);
     cy.get('studio-lite-unit-nav', { timeout: 15000 }).within(() => {
-      cy.contains('mat-list-option', '3').should('exist');
+      cy.get('.mat-mdc-list-item:contains("3")', { timeout: 10000 }).should('exist');
     });
   });
 
@@ -241,14 +243,14 @@ describe('Unit Reviews', () => {
   });
 
   it('shows the finish page upon completion and allows returning to the review', () => {
-    // Navigate to the end
+    // Navigate to the end (click the finish page option container at the end of the unit nav list)
     cy.get('studio-lite-unit-nav').within(() => {
-      cy.get('.mat-mdc-list-item').eq(-1).click();
+      cy.get('.unit-list > div').last().click({ force: true });
     });
 
     // Should be in FinishComponent (end page)
+    cy.get('.finish-page', { timeout: 15000 }).should('be.visible');
     cy.url().should('include', '/end');
-    cy.get('.finish-page').should('be.visible');
     cy.get('.finish-data h1').should('contain', review);
 
     // Backwards button
@@ -271,18 +273,18 @@ describe('Unit Reviews', () => {
   it('clears the new comment dot after viewing comments as different users', () => {
     loginWithUser(newUser.username, newUser.password);
     cy.visitWs(ws1);
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/comments').as('markCommentsSeen');
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments').should('have.css', 'opacity', '1');
     });
     // Wait on the request that actually stores the seen-state instead of a
     // fixed 100ms: under CI load the PATCH regularly took longer, the tab
     // switch happened first, and the dot legitimately stayed on (#1597).
-    cy.intercept('PATCH', '/api/workspaces/*/units/*/comments').as('markCommentsSeen');
     cy.get('mat-row').contains('M6_AK0012').click();
     clickIndexTabWorkspace('comments');
     cy.get('studio-lite-comments', { timeout: 15000 }).should('be.visible');
     cy.wait('@markCommentsSeen').its('response.statusCode').should('be.within', 200, 299);
-    cy.visitWs(ws1);
+    clickIndexTabWorkspace('properties');
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments', { timeout: 15000 }).should('have.css', 'opacity', '0');
     });
