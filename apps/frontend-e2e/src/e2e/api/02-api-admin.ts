@@ -293,4 +293,90 @@ describe('Admin API tests', () => {
         });
     });
   });
+
+  // What a session is worth is read from its tokens, not from whether a browser is still there:
+  // while an unexpired refresh token exists, someone can return to the session, and it is nobody's
+  // to clear away (#1615). The administrator opens a second session here that nothing touches
+  // again -- the closed browser of the ticket -- and it stays usable all the same.
+  describe('sessions are worth what their tokens are (#1615)', () => {
+    type SessionRow = { sessionId: string, activityStatus: string };
+    type UserRow = { id: number, sessions?: SessionRow[] };
+
+    // The session a token belongs to; the login answers with the pair only, the id rides in the JWT.
+    const sessionIdOf = (accessToken: string): string => JSON.parse(atob(accessToken.split('.')[1])).sid;
+
+    const findQuietSession = (users: UserRow[]): SessionRow | undefined => users
+      .find(user => user.id === Number(Cypress.expose(`id_${Cypress.expose('username')}`)))
+      ?.sessions
+      ?.find(session => session.sessionId === Cypress.expose('quietSessionId'));
+
+    before(() => {
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(resp => {
+        expect(resp.status).to.equal(201);
+        Cypress.expose('quietSessionToken', resp.body.accessToken);
+        Cypress.expose('quietSessionRefresh', resp.body.refreshToken);
+        Cypress.expose('quietSessionId', sessionIdOf(resp.body.accessToken));
+      });
+    });
+
+    it('200 positive test: should report a session nobody is using as active, not as orphaned', () => {
+      cy.getUsersFullAPI(true, Cypress.expose(`token_${Cypress.expose('username')}`)).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(findQuietSession(resp.body as UserRow[])?.activityStatus).to.equal('active');
+      });
+    });
+
+    it('400 negative test: should refuse to delete a session that can still be continued', () => {
+      // The heart of the ticket: an administrator clears rows nobody can return to, and this is
+      // not one of them -- however long ago its browser last said anything.
+      cy.deleteSessionAPI(
+        Cypress.expose(`id_${Cypress.expose('username')}`),
+        Cypress.expose('quietSessionId'),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(400);
+      });
+    });
+
+    it('200 positive test: should find nothing to clear while every session is resumable', () => {
+      cy.deleteOrphanedSessionsAPI(
+        Cypress.expose(`id_${Cypress.expose('username')}`),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+        // The count comes back as text, not as a number; the admin area reads it as "it worked".
+        expect(resp.body).to.equal('0');
+      });
+    });
+
+    it('201 positive test: should let the untouched session continue under a new pair of tokens', () => {
+      cy.refreshTokenAPI(Cypress.expose('quietSessionRefresh')).then(resp => {
+        expect(resp.status).to.equal(201);
+        // Same session, new keys -- the rotation must not cost the session its row.
+        expect(sessionIdOf(resp.body.accessToken)).to.equal(Cypress.expose('quietSessionId'));
+        Cypress.expose('quietSessionToken', resp.body.accessToken);
+        Cypress.expose('quietSessionRefresh', resp.body.refreshToken);
+      });
+    });
+
+    it('201 positive test: should leave no row behind when that session logs out', () => {
+      // There should be no orphaned sessions to find in the first place: a session goes when its
+      // last token goes.
+      cy.logoutAPI(
+        Cypress.expose('quietSessionToken'),
+        Cypress.expose('quietSessionRefresh')
+      ).then(resp => {
+        expect(resp.status).to.equal(201);
+        cy.getUsersFullAPI(true, Cypress.expose(`token_${Cypress.expose('username')}`)).then(list => {
+          expect(findQuietSession(list.body as UserRow[])).to.equal(undefined);
+        });
+      });
+    });
+
+    it('401 negative test: should refuse to continue a session that has logged out', () => {
+      cy.refreshTokenAPI(Cypress.expose('quietSessionRefresh')).then(resp => {
+        expect(resp.status).to.equal(401);
+      });
+    });
+  });
 });
