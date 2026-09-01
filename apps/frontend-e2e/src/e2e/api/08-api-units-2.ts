@@ -436,8 +436,11 @@ describe('Unit API tests part II', () => {
       }
     );
 
-    it('401/200 negative test: should deny a group administrator from modifying' +
-      'access in a group they does not manage', () => {
+    // The case this test was written for has arrived: it answered 200 until #1005. The group
+    // stands in the body and the path names a user, so the guard had nothing to read and asked
+    // only whether the caller administers any group at all.
+    it('403 negative test: should deny a group administrator from modifying ' +
+      'access in a group they do not manage', () => {
       cy.updateWsByUserAPI(
         Cypress.expose(`id_${Cypress.expose('username')}`),
         Cypress.expose(group2.id),
@@ -445,8 +448,21 @@ describe('Unit API tests part II', () => {
         [Cypress.expose(ws3.id)],
         Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
-        expect(resp.status).to.equal(200);
-        // expect(resp.status).to.equal(401); //should
+        expect(resp.status).to.equal(403);
+      });
+    });
+
+    it('403 negative test: should deny a workspace that belongs to another group', () => {
+      // The ids ride in the same body: administering groupVera must not become the key to ws3,
+      // which is group2's.
+      cy.updateWsByUserAPI(
+        Cypress.expose(`id_${user3.username}`),
+        Cypress.expose(groupVera.id),
+        [1],
+        [Cypress.expose(ws3.id)],
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(403);
       });
     });
 
