@@ -16,7 +16,8 @@ import {
   makeAdminOfGroup,
   clickIndexTabWsgAdmin,
   openWsTab,
-  openUsersTab
+  openUsersTab,
+  clickSaveButtonRight
 } from '../../../support/helpers';
 import {
   createWs,
@@ -71,7 +72,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
 
     it('shows exactly 3 radio buttons (level 1, 2, 4) per row in the Workspaces panel', () => {
       openWsTab(ws1);
-      cy.get('[data-cy="access-rights-row"]').each($row => {
+      cy.get('[data-cy="access-rights-row"]').should('have.length.greaterThan', 0).each($row => {
         cy.wrap($row).find('[data-cy^="access-rights-radio-button-"]').should('have.length', 3);
         cy.wrap($row).find('[data-cy="access-rights-radio-button-1"]').should('exist');
         cy.wrap($row).find('[data-cy="access-rights-radio-button-2"]').should('exist');
@@ -82,7 +83,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
     it('all radio buttons are disabled when no workspace is selected', () => {
       clickIndexTabWsgAdmin('workspaces');
       // Rows are always rendered; only the radio inputs become disabled when nothing is selected
-      cy.get('[data-cy="access-rights-row"]').each($row => {
+      cy.get('[data-cy="access-rights-row"]').should('have.length.greaterThan', 0).each($row => {
         cy.wrap($row).find('input[type="radio"]').each($radio => {
           cy.wrap($radio).should('be.disabled');
         });
@@ -92,7 +93,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
     it('all radio buttons are disabled when no user is selected', () => {
       clickIndexTabWsgAdmin('users');
       // Rows are always rendered; only the radio inputs become disabled when nothing is selected
-      cy.get('[data-cy="access-rights-row"]').each($row => {
+      cy.get('[data-cy="access-rights-row"]').should('have.length.greaterThan', 0).each($row => {
         cy.wrap($row).find('input[type="radio"]').each($radio => {
           cy.wrap($radio).should('be.disabled');
         });
@@ -205,7 +206,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveUsers');
       openWsTab(ws1);
       selectRoleAtWs(newUser.username, AccessLevel.Basic);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@saveUsers').its('response.statusCode').should('eq', 200);
 
       // Reload and verify the radio is still checked
@@ -217,7 +218,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       // Cleanup: deselect and save
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('cleanupSave');
       deselectRoleAtWs(newUser.username, AccessLevel.Basic);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@cleanupSave');
     });
 
@@ -225,7 +226,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveUsers');
       openWsTab(ws1);
       selectRoleAtWs(newUser.username, AccessLevel.Developer);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@saveUsers').its('response.statusCode').should('eq', 200);
 
       cy.visit('/');
@@ -235,7 +236,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
 
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('cleanupSave');
       deselectRoleAtWs(newUser.username, AccessLevel.Developer);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@cleanupSave');
     });
 
@@ -243,7 +244,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveUsers');
       openWsTab(ws1);
       selectRoleAtWs(newUser.username, AccessLevel.Admin);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@saveUsers').its('response.statusCode').should('eq', 200);
 
       cy.visit('/');
@@ -253,7 +254,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
 
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('cleanupSave');
       deselectRoleAtWs(newUser.username, AccessLevel.Admin);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@cleanupSave');
     });
 
@@ -262,7 +263,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveFirst');
       openWsTab(ws1);
       selectRoleAtWs(newUser.username, AccessLevel.Basic);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@saveFirst').its('response.statusCode').should('eq', 200);
 
       // Now deselect and save
@@ -271,7 +272,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveUsers');
       openWsTab(ws1);
       deselectRoleAtWs(newUser.username, AccessLevel.Basic);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@saveUsers').its('response.statusCode').should('eq', 200);
 
       // Reload and verify unchecked
@@ -288,7 +289,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveFirst');
       openWsTab(ws1);
       selectRoleAtWs(newUser.username, AccessLevel.Basic);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@saveFirst').its('response.statusCode').should('eq', 200);
 
       // Switch to Admin
@@ -297,7 +298,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveSwitch');
       openWsTab(ws1);
       selectRoleAtWs(newUser.username, AccessLevel.Admin);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@saveSwitch').its('response.statusCode').should('eq', 200);
 
       // Reload and verify Admin is checked, Basic is not
@@ -310,7 +311,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       // Cleanup
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('cleanupSave');
       deselectRoleAtWs(newUser.username, AccessLevel.Admin);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@cleanupSave');
     });
   });
@@ -400,7 +401,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('saveWorkspaces');
       openUsersTab(newUser.username);
       selectRoleAtUser(ws1, AccessLevel.Basic);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@saveWorkspaces').its('response.statusCode').should('eq', 200);
 
       cy.visit('/');
@@ -411,7 +412,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       // Cleanup
       cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('cleanupSave');
       deselectRoleAtUser(ws1, AccessLevel.Basic);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@cleanupSave');
     });
 
@@ -420,7 +421,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('saveFirst');
       openUsersTab(newUser.username);
       selectRoleAtUser(ws1, AccessLevel.Developer);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@saveFirst').its('response.statusCode').should('eq', 200);
 
       // Deselect
@@ -429,7 +430,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('saveWorkspaces');
       openUsersTab(newUser.username);
       deselectRoleAtUser(ws1, AccessLevel.Developer);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@saveWorkspaces').its('response.statusCode').should('eq', 200);
 
       cy.visit('/');
@@ -451,7 +452,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveUsers');
       openWsTab(ws1);
       selectRoleAtWs(newUser.username, AccessLevel.Developer);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@saveUsers').its('response.statusCode').should('eq', 200);
 
       // Verify via Users panel
@@ -465,7 +466,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       // Cleanup
       cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('cleanupSave');
       deselectRoleAtUser(ws1, AccessLevel.Developer);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@cleanupSave');
     });
 
@@ -474,7 +475,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('saveWs');
       openUsersTab(newUser.username);
       selectRoleAtUser(ws1, AccessLevel.Admin);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@saveWs').its('response.statusCode').should('eq', 200);
 
       // Verify via Workspaces panel
@@ -488,7 +489,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       // Cleanup
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('cleanupSave');
       deselectRoleAtWs(newUser.username, AccessLevel.Admin);
-      cy.get('button.save-button').should('not.be.disabled').click();
+      clickSaveButtonRight();
       cy.wait('@cleanupSave');
     });
   });

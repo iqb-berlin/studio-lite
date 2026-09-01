@@ -95,6 +95,7 @@
       }
       <button mat-fab
               class="save-button"
+              data-cy="wsg-admin-access-rights-save-button"
               [matTooltip]="'save' | translate"
               matTooltipPosition="above"
               [color]="'primary'"
@@ -123,6 +124,7 @@
                   [disabled]="!selectedUser"
                   [matTooltip]="'access-rights.access-level-'+level | translate"
                   [attr.data-cy]="'access-rights-radio-button-' + level"
+                  (change)="onRoleChange(ws, level)"
                   (click)="onRoleClick(ws, level)">
                 </mat-radio-button>
               }

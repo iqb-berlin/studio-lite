@@ -164,6 +164,7 @@
       <div class="fx-row-start-stretch fx-gap-10">
         <button mat-fab
                 class="save-button"
+                data-cy="wsg-admin-access-rights-save-button"
                 [matTooltip]="'save' | translate"
                 matTooltipPosition="above"
                 [color]="'primary'"
@@ -193,6 +194,7 @@
                   [disabled]="!selectedWorkspaceId"
                   [matTooltip]="'access-rights.access-level-'+level | translate"
                   [attr.data-cy]="'access-rights-radio-button-' + level"
+                  (change)="onRoleChange(u, level)"
                   (click)="onRoleClick(u, level)">
                 </mat-radio-button>
               }

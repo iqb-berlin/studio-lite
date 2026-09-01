@@ -212,4 +212,54 @@ describe('WorkspacesComponent', () => {
       expect(component.isRouteHidden(ws, 'editor')).toBe(false);
     });
   });
+
+  describe('onRoleChange and onRoleClick', () => {
+    let userEntry: { id: number; name: string; isChecked: boolean; accessLevel: number };
+
+    beforeEach(() => {
+      userEntry = { id: 1, name: 'user1', isChecked: false, accessLevel: 0 };
+      component.selectedWorkspaceId = 1;
+      jest.spyOn(component.workspaceUsers, 'updateHasChanged');
+    });
+
+    it('should select role level on role change', () => {
+      component.onRoleChange(userEntry as never, 2);
+
+      expect(userEntry.accessLevel).toBe(2);
+      expect(userEntry.isChecked).toBe(true);
+      expect(component.workspaceUsers.updateHasChanged).toHaveBeenCalled();
+    });
+
+    it('should switch role level on role change to a different level', () => {
+      userEntry.isChecked = true;
+      userEntry.accessLevel = 1;
+
+      component.onRoleChange(userEntry as never, 4);
+
+      expect(userEntry.accessLevel).toBe(4);
+      expect(userEntry.isChecked).toBe(true);
+      expect(component.workspaceUsers.updateHasChanged).toHaveBeenCalled();
+    });
+
+    it('should deselect role when clicking on the active role level', () => {
+      userEntry.isChecked = true;
+      userEntry.accessLevel = 2;
+
+      component.onRoleClick(userEntry as never, 2);
+
+      expect(userEntry.accessLevel).toBe(0);
+      expect(userEntry.isChecked).toBe(false);
+      expect(component.workspaceUsers.updateHasChanged).toHaveBeenCalled();
+    });
+
+    it('should not deselect role when clicking on a different role level', () => {
+      userEntry.isChecked = true;
+      userEntry.accessLevel = 1;
+
+      component.onRoleClick(userEntry as never, 2);
+
+      expect(userEntry.accessLevel).toBe(1);
+      expect(userEntry.isChecked).toBe(true);
+    });
+  });
 });

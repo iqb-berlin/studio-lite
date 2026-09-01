@@ -28,7 +28,7 @@ export function getRoleRadio(label: string, level: AccessLevel): Cypress.Chainab
 
 /**
  * Asserts whether a radio button for a given label + level is checked or unchecked.
- * Uses the `mat-mdc-radio-checked` class that Angular Material adds to the host element.
+ * Asserts state on the internal native `input[type="radio"]`.
  * @param label - Row label
  * @param level - AccessLevel
  * @param shouldBeChecked - true to assert checked, false to assert unchecked
@@ -120,10 +120,7 @@ export function grantRemovePrivilegeAtWs(users: string[], ws: string, rights: Ac
     .contains(`${ws}`)
     .click();
   users.forEach((user, index) => {
-    cy.contains('[data-cy="access-rights"]', ` (${user})`)
-      .closest('[data-cy="access-rights-row"]')
-      .find(`[data-cy="access-rights-radio-button-${rights[index]}"]`)
-      .click();
+    selectRoleAtWs(user, rights[index]);
   });
   clickSaveButtonRight();
 }
@@ -142,10 +139,7 @@ export function grantRemovePrivilegeAtUser(user: string, wss: string[], rights: 
     .should('exist')
     .click();
   wss.forEach((ws, index) => {
-    cy.contains('[data-cy="access-rights"]', ws)
-      .closest('[data-cy="access-rights-row"]')
-      .find(`[data-cy="access-rights-radio-button-${rights[index]}"]`)
-      .click();
+    selectRoleAtUser(ws, rights[index]);
   });
   clickSaveButtonRight();
 }

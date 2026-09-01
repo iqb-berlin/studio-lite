@@ -9,11 +9,17 @@
  * clickSaveButtonRight();
  */
 export function clickSaveButtonRight(): void {
-  cy.get('mat-icon:contains("save")').then($elements => {
-    if ($elements.length === 1) {
-      cy.get('mat-icon:contains("save")').click();
+  cy.get('body').then($body => {
+    if ($body.find('[data-cy="wsg-admin-access-rights-save-button"]').length > 0) {
+      cy.get('[data-cy="wsg-admin-access-rights-save-button"]').should('not.be.disabled').click();
     } else {
-      cy.get('mat-icon:contains("save")').eq(1).click();
+      cy.get('mat-icon:contains("save")').then($elements => {
+        if ($elements.length === 1) {
+          cy.get('mat-icon:contains("save")').click();
+        } else {
+          cy.get('mat-icon:contains("save")').eq(1).click();
+        }
+      });
     }
   });
 }

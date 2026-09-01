@@ -111,16 +111,20 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
         });
   }
 
+  onRoleChange(user: WorkspaceUserChecked, level: number): void {
+    if (!this.selectedWorkspaceId) return;
+    user.accessLevel = level;
+    user.isChecked = true;
+    this.workspaceUsers.updateHasChanged();
+  }
+
   onRoleClick(user: WorkspaceUserChecked, level: number): void {
     if (!this.selectedWorkspaceId) return;
     if (user.isChecked && user.accessLevel === level) {
       user.accessLevel = 0;
       user.isChecked = false;
-    } else {
-      user.accessLevel = level;
-      user.isChecked = true;
+      this.workspaceUsers.updateHasChanged();
     }
-    this.workspaceUsers.updateHasChanged();
   }
 
   updateUserList(): void {

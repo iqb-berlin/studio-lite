@@ -169,4 +169,54 @@ describe('UsersComponent', () => {
     expect(mockBackendService.setWorkspacesByUser).toHaveBeenCalled();
     expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.not-changed', 'error', { duration: 3000 });
   });
+
+  describe('onRoleChange and onRoleClick', () => {
+    let wsEntry: { id: number; name: string; isChecked: boolean; accessLevel: number };
+
+    beforeEach(() => {
+      wsEntry = { id: 1, name: 'ws1', isChecked: false, accessLevel: 0 };
+      component.selectedUser = 1;
+      jest.spyOn(component.userWorkspaces, 'updateHasChanged');
+    });
+
+    it('should select role level on role change', () => {
+      component.onRoleChange(wsEntry as never, 2);
+
+      expect(wsEntry.accessLevel).toBe(2);
+      expect(wsEntry.isChecked).toBe(true);
+      expect(component.userWorkspaces.updateHasChanged).toHaveBeenCalled();
+    });
+
+    it('should switch role level on role change to a different level', () => {
+      wsEntry.isChecked = true;
+      wsEntry.accessLevel = 1;
+
+      component.onRoleChange(wsEntry as never, 4);
+
+      expect(wsEntry.accessLevel).toBe(4);
+      expect(wsEntry.isChecked).toBe(true);
+      expect(component.userWorkspaces.updateHasChanged).toHaveBeenCalled();
+    });
+
+    it('should deselect role when clicking on the active role level', () => {
+      wsEntry.isChecked = true;
+      wsEntry.accessLevel = 2;
+
+      component.onRoleClick(wsEntry as never, 2);
+
+      expect(wsEntry.accessLevel).toBe(0);
+      expect(wsEntry.isChecked).toBe(false);
+      expect(component.userWorkspaces.updateHasChanged).toHaveBeenCalled();
+    });
+
+    it('should not deselect role when clicking on a different role level', () => {
+      wsEntry.isChecked = true;
+      wsEntry.accessLevel = 1;
+
+      component.onRoleClick(wsEntry as never, 2);
+
+      expect(wsEntry.accessLevel).toBe(1);
+      expect(wsEntry.isChecked).toBe(true);
+    });
+  });
 });
