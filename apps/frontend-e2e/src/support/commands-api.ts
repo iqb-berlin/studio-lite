@@ -1521,6 +1521,28 @@ Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:
   }
 });
 
+// 64a: the password of a review, which updateReviewAPI does not send. A review login authenticates
+// with the link as the user name and this password (see LocalStrategy), and the token it hands back
+// carries the review -- the only way to reach the review side of ReviewGuard from a test.
+Cypress.Commands.add('setReviewPasswordAPI', (wsId: string, review: ReviewData, password: string, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspaces/${wsId}/reviews/${review.id}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    body: {
+      id: review.id,
+      link: review.link,
+      name: review.name,
+      password: password
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 65
 Cypress.Commands.add('getAllReviewAPI', (wsId:string, token:string) => {
   const authorization = `bearer ${token}`;
