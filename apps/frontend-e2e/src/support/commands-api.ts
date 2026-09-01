@@ -1423,6 +1423,40 @@ Cypress.Commands.add('deleteCommentAPI',
     });
   });
 
+// 61a
+Cypress.Commands.add('patchCommentVisibilityAPI',
+  (wsId: string, unitId: string, commentId: string, hidden: boolean, userId: string, token: string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'PATCH',
+      url: `/api/workspaces/${wsId}/units/${unitId}/comments/${commentId}/hidden`,
+      headers: {
+        'app-version': Cypress.expose('version'),
+        authorization
+      },
+      body: {
+        hidden,
+        userId: parseInt(userId, 10)
+      },
+      failOnStatusCode: false
+    });
+  });
+
+// 19b: the whole user list of a workspace, however many. updateUserListOfWsAPI takes exactly two.
+Cypress.Commands.add('setUsersOfWsAPI', (wsId: string, users: AccessUser[], token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/group-admin/workspaces/${wsId}/users`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    body: users.map(user => ({ accessLevel: user.access, id: user.id })),
+    failOnStatusCode: false
+  });
+});
+
 // 62
 Cypress.Commands.add('addReviewAPI', (wsId:string, reviewName: string, token:string) => {
   const authorization = `bearer ${token}`;
