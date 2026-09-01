@@ -174,7 +174,9 @@ describe('UsersComponent', () => {
     let wsEntry: { id: number; name: string; isChecked: boolean; accessLevel: number };
 
     beforeEach(() => {
-      wsEntry = { id: 1, name: 'ws1', isChecked: false, accessLevel: 0 };
+      wsEntry = {
+        id: 1, name: 'ws1', isChecked: false, accessLevel: 0
+      };
       component.selectedUser = 1;
       jest.spyOn(component.userWorkspaces, 'updateHasChanged');
     });
