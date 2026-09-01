@@ -5,7 +5,6 @@ import {
   ws1
 } from '../../../support/testData';
 
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 import {
   clickIndexTabWorkspace,
   clickIndexTabWsgAdmin,
@@ -26,21 +25,7 @@ import {
 import { grantRemovePrivilegeAtWs } from '../../../support/helpers/group-admin';
 
 describe('Unit Reviews', () => {
-  before(() => {
-    createBasicSpecCy();
-  });
-
-  after(() => {
-    deleteBasicSpecCy();
-  });
-
   const review: string = 'Review1';
-
-  it('imports test units successfully into the workspace', () => {
-    cy.visitWs(ws1);
-    importExercise('test_studio_units_download.zip');
-    cy.contains('M6_AK0011', { timeout: 15000 }).should('exist');
-  });
 
   it('allows an admin to create a new review with specific unit selection and configuration', () => {
     cy.visitWs(ws1);

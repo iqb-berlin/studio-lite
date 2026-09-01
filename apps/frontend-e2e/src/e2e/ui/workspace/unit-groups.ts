@@ -1,4 +1,3 @@
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 import { ws1, group1 } from '../../../support/testData';
 import {
   addUnitPred,
@@ -18,20 +17,12 @@ import {
 } from '../../../support/helpers';
 
 describe('Unit Groups and Group Management', () => {
-  before(() => {
-    createBasicSpecCy();
-  });
-
-  after(() => {
-    deleteBasicSpecCy();
-  });
-
   it('imports test units', () => {
     cy.visitWs(ws1);
     importExercise('test_studio_units_download.zip');
   });
 
-  // ─── new-group-button ────────────────────────────────────────────────────────
+  // ─── new-group-button ───────────────
 
   it('creates a new unit group via the add-unit dialog', () => {
     cy.visitWs(ws1);
@@ -64,7 +55,7 @@ describe('Unit Groups and Group Management', () => {
     addUnitPred({ shortname: 'GRP_TEST_02', name: 'Second in group', group: 'Neue Testgruppe' });
   });
 
-  // ─── unit-group / unit-groups ────────────────────────────────────────────────
+  // ─── unit-group / unit-groups ───────
 
   it('groups are visible in the unit list sidebar', () => {
     cy.visitWs(ws1);
@@ -87,7 +78,7 @@ describe('Unit Groups and Group Management', () => {
     cy.get('input[formControlName="name"]').should('exist');
   });
 
-  // ─── group-menu and group-manage dialog ──────────────────────────────────────
+  // ─── group-menu and group-manage ────
 
   it('opens the group management dialog from the workspace menu', () => {
     cy.visitWs(ws1);
@@ -130,7 +121,7 @@ describe('Unit Groups and Group Management', () => {
     closeGroupManagementDialog();
   });
 
-  // ─── workspace-user-list ─────────────────────────────────────────────────────
+  // ─── workspace-user-list ────────────
 
   it('opens the user list dialog from the workspace menu', () => {
     cy.visitWs(ws1);
@@ -153,7 +144,7 @@ describe('Unit Groups and Group Management', () => {
     closeWorkspaceUserListDialog();
   });
 
-  // ─── Custom states (wsg-admin settings — addStatus) ─────────────────────────
+  // ─── Custom states ──────────────────
 
   it('adds custom unit states from workspace group settings', () => {
     cy.findAdminGroupSettings(group1).click();

@@ -6,12 +6,10 @@ import {
 } from '../../../support/testData';
 import {
   addUnitFromExisting,
-  addUnitPred,
   ensureUnitExists,
   goToWsMenu,
   moveUnit
 } from '../../../support/helpers';
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 
 describe('Workspace Unit Move & Copy Operations', () => {
   const unit1: UnitData = {
@@ -34,14 +32,6 @@ describe('Workspace Unit Move & Copy Operations', () => {
     name: 'New MoveCopy Unit',
     group: 'Group D'
   };
-
-  before(() => {
-    createBasicSpecCy();
-  });
-
-  after(() => {
-    deleteBasicSpecCy();
-  });
 
   it('creates unit from existing unit within same workspace', () => {
     ensureUnitExists(ws1, unit1);
