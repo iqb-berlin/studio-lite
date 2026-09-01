@@ -37,14 +37,26 @@ describe('Workspace API tests', () => {
       });
     });
 
-    it('401/201 negative test: should unexpectedly allow a user to create a workspace in a group ' +
-      'they are not member of', () => {
+    // The case this test was written for has arrived: it answered 201 until #1005, because the
+    // group stands in the body where the guard does not look, so administering one group was
+    // enough to create a workspace in every other one.
+    it('403 negative test: should deny a group admin a workspace in a group they do not administer', () => {
       cy.createWsAPI(
         Cypress.expose(group2.id),
         ws3,
         Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
-        // expect(resp.status).to.equal(401); should
+        expect(resp.status).to.equal(403);
+      });
+    });
+
+    it('201 positive test: should let an administrator create that same workspace', () => {
+      // The refusal above left ws3 uncreated, and the sections below work with it.
+      cy.createWsAPI(
+        Cypress.expose(group2.id),
+        ws3,
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
         Cypress.expose(ws3.id, resp.body);
         expect(resp.status).to.equal(201);
       });
@@ -387,6 +399,50 @@ describe('Workspace API tests', () => {
         Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
+      });
+    });
+  });
+
+  // The other two routes that name their group in the query or the body, and through which a group
+  // admin reached every other group until #1005. userGroupAdmin administers groupVera; group2
+  // belongs to the main administrator alone since 17.
+  describe('the group-admin area with a group the user does not administer (#1005)', () => {
+    it('403 negative test: should deny deleting a workspace of a group the user does not administer', () => {
+      cy.deleteWsAPI(
+        [Cypress.expose(ws3.id)],
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(403);
+      });
+    });
+
+    it('403 negative test: should deny moving a workspace into a group the user does not administer', () => {
+      // The move was only ever asked about the group the workspace comes FROM, which is groupVera
+      // and is the user's own: the target was nobody's business.
+      cy.moveWsAPI(
+        Cypress.expose(ws1.id),
+        Cypress.expose(group2.id),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(403);
+      });
+    });
+
+    it('200 positive test: should let the administrator move the same workspace there and back', () => {
+      // The counterpart, so the refusals above are not read as "the route is broken".
+      cy.moveWsAPI(
+        Cypress.expose(ws1.id),
+        Cypress.expose(group2.id),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+        cy.moveWsAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(groupVera.id),
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).then(resp2 => {
+          expect(resp2.status).to.equal(200);
+        });
       });
     });
   });

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import {
   CreateWorkspaceDto,
   WorkspaceGroupDto,
@@ -263,6 +263,19 @@ export class WorkspaceService {
         ).length
       }))
     );
+  }
+
+  /**
+   * The groups these workspaces belong to, each named once, in a single query. Ids that belong to
+   * no workspace are simply absent: a caller deciding whether someone may touch this list wants
+   * the groups it actually reaches, not a failure over an id that has gone in the meantime.
+   */
+  async findGroupIdsOfWorkspaces(ids: number[]): Promise<number[]> {
+    const workspaces = await this.workspacesRepository.find({
+      where: { id: In(ids) },
+      select: { groupId: true }
+    });
+    return [...new Set(workspaces.map(workspace => workspace.groupId))];
   }
 
   async findOne(id: number): Promise<WorkspaceFullDto> {
