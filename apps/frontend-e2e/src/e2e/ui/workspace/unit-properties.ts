@@ -7,7 +7,6 @@ import {
   openUnitProperties,
   selectUnit
 } from '../../../support/helpers';
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 import { addState } from '../../../support/helpers/group-admin';
 
 // ---------------------------------------------------------------------------
@@ -24,14 +23,6 @@ const GROUP_NAME = 'TestGrp';
 // ---------------------------------------------------------------------------
 
 describe('Unit Properties Panel', () => {
-  before(() => {
-    createBasicSpecCy();
-  });
-
-  after(() => {
-    deleteBasicSpecCy();
-  });
-
   // -------------------------------------------------------------------------
   // Setup
   // -------------------------------------------------------------------------

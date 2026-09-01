@@ -7,7 +7,6 @@ import {
   goToWsMenu,
   selectListUnits
 } from '../../../support/helpers';
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 
 describe('Workspace Unit Export & Reports', () => {
   const unit3: UnitData = {
@@ -20,14 +19,6 @@ describe('Workspace Unit Export & Reports', () => {
     name: 'Export Unit 2',
     group: 'Group D'
   };
-
-  before(() => {
-    createBasicSpecCy();
-  });
-
-  after(() => {
-    deleteBasicSpecCy();
-  });
 
   it('exports selected units (default format)', () => {
     ensureUnitExists(ws1, unit3);

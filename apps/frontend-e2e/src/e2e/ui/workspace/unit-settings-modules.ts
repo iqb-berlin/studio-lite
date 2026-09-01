@@ -13,19 +13,12 @@ import {
   clickIndexTabWsgAdmin,
   clickSaveButtonRight,
   goToWsMenu,
+  importExercise,
   setModuleWithoutVerification,
   verifyModuleConfiguration
 } from '../../../support/helpers';
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 
 describe('Workspace Settings & Verona Modules', () => {
-  before(() => {
-    createBasicSpecCy();
-  });
-
-  after(() => {
-    deleteBasicSpecCy();
-  });
 
   it('selects metadata profile from workspace settings', () => {
     selectProfileForGroup(group1, IqbProfile.DEu);

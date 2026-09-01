@@ -1,27 +1,12 @@
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
-import { ws1 } from '../../../support/testData';
 import {
   clickIndexTabWorkspace,
-  importExercise,
   selectUnit
 } from '../../../support/helpers';
+import { ws1 } from '../../../support/testData';
 
 describe('Unit Definitions', () => {
-  before(() => {
-    createBasicSpecCy();
-  });
-
-  after(() => {
-    deleteBasicSpecCy();
-  });
-
-  it('imports test units', () => {
-    cy.visitWs(ws1);
-    importExercise('test_studio_units_download.zip');
-  });
-
   it('opens unit definition editor', () => {
-    cy.get('.cdk-overlay-backdrop').eq(0).click();
+    cy.visitWs(ws1);
     selectUnit('M6_AK0012');
     clickIndexTabWorkspace('editor');
     cy.wait(100);

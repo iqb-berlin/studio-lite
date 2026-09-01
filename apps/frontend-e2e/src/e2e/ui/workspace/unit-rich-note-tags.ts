@@ -2,10 +2,6 @@ import {
   ws1, group1, lightUnit, AccessLevel
 } from '../../../support/testData';
 import {
-  createBasicData,
-  deleteBasicData
-} from '../shared/basic.spec.cy';
-import {
   clickIndexTabWorkspace,
   importExercise,
   selectUnit,
@@ -22,23 +18,15 @@ import {
   createWs,
   grantRemovePrivilegeAtWs
 } from '../../../support/helpers/group-admin';
+import { deleteBasicSpecCy } from '../shared/basic.spec.cy';
 
 describe('Unit Rich Notes', () => {
-  before(() => {
-    createBasicData();
-  });
-
   beforeEach(() => {
     cy.intercept('GET', '/api/workspaces/*/units/*/rich-notes').as('getRichNotes');
   });
 
   after(() => {
-    deleteBasicData();
-  });
-
-  it('imports test units', () => {
-    cy.visitWs(ws1);
-    importExercise('test_studio_units_download.zip');
+    deleteBasicSpecCy();
   });
 
   it('activates Rückmeldung in ws1', () => {

@@ -2,33 +2,19 @@ import {
   importedUnit, newUser,
   ws1
 } from '../../../support/testData';
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 import {
   clickIndexTabWorkspace,
-  importExercise,
   loginWithUser,
   selectUnit
 } from '../../../support/helpers';
 
 describe('Unit Comments', () => {
-  before(() => {
-    createBasicSpecCy();
-  });
-
   beforeEach(() => {
     cy.intercept('GET', '/api/workspaces/*/units/*/comments').as('getComments');
   });
 
-  after(() => {
-    deleteBasicSpecCy();
-  });
-
-  it('imports test units', () => {
-    cy.visitWs(ws1);
-    importExercise('test_studio_units_download.zip');
-  });
-
   it('creates multiple general comments', () => {
+    cy.visitWs(ws1);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.wait('@getComments');
