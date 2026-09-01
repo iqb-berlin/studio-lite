@@ -64,8 +64,18 @@ describe('Workspace Unit Management', () => {
     selectProfileForGroup(group1, IqbProfile.DEi);
   });
 
-  it('selects metadata profile from group settings', () => {
+  it('selects metadata profile from group settings and verifies in workspace settings', () => {
     selectProfileForAreaFromGroup([IqbProfile.DEu, IqbProfile.DEi], ws1, group1);
+    cy.visitWs(ws1);
+    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+    cy.get('[data-cy="edit-workspace-settings-select-unit-profile"]').should(
+      'contain.text',
+      'Deu'
+    );
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.clickDialogButton(json.cancel || json.close);
+    });
   });
 
   it('adds custom states to workspace', () => {
@@ -154,6 +164,61 @@ describe('Workspace Unit Management', () => {
     setModuleWithoutVerification(ws1, 'Aspect', 'Speedtest', 'Schemer');
     // Switch to Stars player (already verified by setModuleWithVerification)
     setModuleWithoutVerification(ws1, 'Aspect', 'Stars', 'Schemer');
+  });
+
+  it('saves default Verona editor selection and persists after reload', () => {
+    cy.visitWs(ws2);
+    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+
+    cy.get('[data-cy="edit-workspace-settings-editor"]').find('mat-select').click();
+    cy.get('mat-option').should('have.length.at.least', 1).first().click();
+
+    cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+
+    cy.visitWs(ws2);
+    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+    cy.get('[data-cy="edit-workspace-settings-editor"]').should('be.visible');
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.clickDialogButton(json.cancel || json.close);
+    });
+  });
+
+  it('hides a route tab (Begleitmaterial / notes) when unchecked in settings', () => {
+    ensureUnitExists(ws1, unit1);
+    cy.visitWs(ws1);
+    selectUnit(unit1.shortname);
+
+    cy.get('[data-cy="workspace-routes-notes"]').should('be.visible');
+
+    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+
+    cy.get('studio-lite-edit-workspace-settings mat-checkbox')
+      .contains('Begleitmaterial')
+      .click();
+
+    cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+
+    cy.get('[data-cy="workspace-routes-notes"]').should('not.exist');
+  });
+
+  it('restores route tab when checked back on in settings', () => {
+    ensureUnitExists(ws1, unit1);
+    cy.visitWs(ws1);
+    selectUnit(unit1.shortname);
+
+    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+
+    cy.get('studio-lite-edit-workspace-settings mat-checkbox')
+      .contains('Begleitmaterial')
+      .click();
+
+    cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+
+    cy.get('[data-cy="workspace-routes-notes"]').should('be.visible');
   });
 
   it('creates new units', () => {
