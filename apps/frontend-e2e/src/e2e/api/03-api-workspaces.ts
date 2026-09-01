@@ -327,4 +327,67 @@ describe('Workspace API tests', () => {
       });
     });
   });
+
+  // The routes of the group-admin area whose path names no group -- the lists, and creating a
+  // workspace, which carries its group in the body -- ask whether the user administers any group
+  // at all. user3 administers none and is refused.
+  //
+  // This is the closed half of IsWorkspaceGroupAdminGuard, and nothing measured it: the fixture's
+  // plain user carries a user list where a token belongs (see 18.), so every request with it dies
+  // at JwtAuthGuard, several routes short of the guard. Measured against the guard before #1629
+  // (f66c147f^), these three answer the same as they do now -- the unresolved branch already asked
+  // "any group at all". What #1629 changed is that a route has to say so with
+  // @AnyWorkspaceGroupAdmin(); an unmarked one is refused instead of falling back silently.
+  //
+  // The open half is not here: whoever administers ANY group still reaches every other group
+  // through these routes, because the target group arrives in the body or the query where the
+  // guard does not look. That is #1005.
+  describe('the group-admin area without a group in the path', () => {
+    before(() => {
+      // `token_${user3.username}` holds the user list that 18. read a line earlier, not a token,
+      // and a request with it never reaches the guard under test.
+      cy.loginAPI(user3.username, user3.password).then(resp => {
+        expect(resp.status).to.equal(201);
+        Cypress.expose('tokenOfPlainUser', resp.body.accessToken);
+      });
+    });
+
+    it('401 negative test: should deny a user who administers no group the creation of a workspace', () => {
+      // The route a group admin uses to create a workspace in any group at all (#1005). It is at
+      // least closed to someone who administers none.
+      cy.createWsAPI(
+        Cypress.expose(groupVera.id),
+        ws3,
+        Cypress.expose('tokenOfPlainUser')
+      ).then(resp => {
+        expect(resp.status).to.equal(401);
+      });
+    });
+
+    it('401 negative test: should deny a user who administers no group the group-admin user list', () => {
+      cy.getUsersFullAPI(false, Cypress.expose('tokenOfPlainUser')).then(resp => {
+        expect(resp.status).to.equal(401);
+      });
+    });
+
+    it('401 negative test: should deny a user who administers no group the workspaces of another user', () => {
+      cy.getWsByUserAPI(
+        Cypress.expose(`id_${userGroupAdmin.username}`),
+        Cypress.expose('tokenOfPlainUser')
+      ).then(resp => {
+        expect(resp.status).to.equal(401);
+      });
+    });
+
+    it('200 positive test: should let an admin of any group read the same list', () => {
+      // The counterpart: same route, a user who administers a group. It also shows the refusals
+      // above are the guard's answer and not a broken token.
+      cy.getUsersFullAPI(
+        false,
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+      });
+    });
+  });
 });
