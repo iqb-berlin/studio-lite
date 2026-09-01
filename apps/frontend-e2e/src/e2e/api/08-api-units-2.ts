@@ -257,9 +257,11 @@ describe('Unit API tests part II', () => {
         });
       });
 
-      it('401 negative test: should deny personal data retrieval to a user with insufficient privileges', () => {
+      it('200 positive test: should let a user without any privileges read their own account data', () => {
+        // Nothing about this route is privileged -- it answers with the account of whoever the
+        // token belongs to. It read 401 while `token_${user3.username}` held no token at all.
         cy.getMyData(Cypress.expose(`token_${user3.username}`)).then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(200);
         });
       });
 
