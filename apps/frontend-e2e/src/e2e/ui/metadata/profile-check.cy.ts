@@ -1,5 +1,5 @@
 import { checkMultipleProfiles } from '../../../support/metadata/metadata-util';
-import { newUser, testGroups } from '../../../support/testData';
+import { standardUser, metadataMathGroup, metadataGermanGroup } from '../../../support/testData';
 import {
   addFirstUser,
   clickIndexTabAdmin,
@@ -12,7 +12,7 @@ import {
 } from '../../../support/helpers';
 
 describe('Metadata Profile Management', () => {
-  const groups = [testGroups.metadata.math, testGroups.metadata.german];
+  const groups = [metadataMathGroup, metadataGermanGroup];
   before(() => {
     addFirstUser();
   });
@@ -21,7 +21,7 @@ describe('Metadata Profile Management', () => {
   });
 
   it('sets up groups and users', () => {
-    createNewUser(newUser);
+    createNewUser(standardUser);
     groups.forEach(area => {
       createGroup(area);
     });
@@ -48,7 +48,7 @@ describe('Metadata Profile Management', () => {
       'IQB Deutsch Primar - Item'
     ];
     cy.visit('/');
-    cy.get(`div>div>div:contains("${testGroups.metadata.german}")`)
+    cy.get(`div>div>div:contains("${metadataGermanGroup}")`)
       .next()
       .click();
     clickIndexTabWsgAdmin('settings');
@@ -66,7 +66,7 @@ describe('Metadata Profile Management', () => {
     cy.findAdminSettings().click();
     clickIndexTabAdmin('workspace-groups');
     cy.get('mat-table')
-      .contains(testGroups.metadata.math)
+      .contains(metadataMathGroup)
       .click();
     cy.get('mat-icon')
       .contains('settings')
@@ -76,7 +76,7 @@ describe('Metadata Profile Management', () => {
   });
 
   it('cleans up test data', () => {
-    deleteUser(newUser.username);
+    deleteUser(standardUser.username);
     deleteGroup(groups[0]);
     deleteGroup(groups[1]);
   });

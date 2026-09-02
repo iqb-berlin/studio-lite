@@ -1,4 +1,4 @@
-import { ws1, group1 } from '../../../support/testData';
+import { primaryWorkspace, baseGroup, groupTestNames } from '../../../support/testData';
 import {
   addUnitPred,
   clickIndexTabWsgAdmin,
@@ -18,27 +18,23 @@ import {
 
 describe('Unit Groups and Group Management', () => {
   it('imports test units', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     importExercise('test_studio_units_download.zip');
   });
 
-  // ─── new-group-button ───────────────
-
   it('creates a new unit group via the add-unit dialog', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     cy.get('[data-cy="workspace-add-units"]').click();
     cy.get('[data-cy="workspace-add-unit-new-empty-unit"]').click();
-    // Type a key
-    cy.get('[data-cy="workspace-new-unit-unit-key"]').type('GRP_TEST_01');
-    // Create a brand-new group by clicking "add new group"
+    cy.get('[data-cy="workspace-new-unit-unit-key"]').type('GRP_U1');
     cy.get('body').then($body => {
       if ($body.find('[data-cy="workspace-new-unit-new-group"]').length > 0) {
-        cy.get('[data-cy="workspace-new-unit-new-group"]').clear().type('Neue Testgruppe');
+        cy.get('[data-cy="workspace-new-unit-new-group"]').clear().type(groupTestNames.newGroup);
       } else {
         cy.get('[data-cy="workspace-new-unit-group"]').click();
         cy.get('.cdk-overlay-transparent-backdrop').click({ force: true });
         cy.get('[data-cy="workspace-new-unit-add-new-group"]').click();
-        cy.get('[data-cy="workspace-new-unit-new-group"]').clear().type('Neue Testgruppe');
+        cy.get('[data-cy="workspace-new-unit-new-group"]').clear().type(groupTestNames.newGroup);
       }
     });
     cy.clickDataCyWithResponseCheck(
@@ -51,69 +47,59 @@ describe('Unit Groups and Group Management', () => {
   });
 
   it('creates a second unit in the same new group', () => {
-    cy.visitWs(ws1);
-    addUnitPred({ shortname: 'GRP_TEST_02', name: 'Second in group', group: 'Neue Testgruppe' });
+    cy.visitWs(primaryWorkspace);
+    addUnitPred({ shortname: 'GRP_U2', name: 'Group Test Unit 2', group: groupTestNames.newGroup });
   });
 
-  // ─── unit-group / unit-groups ───────
-
   it('groups are visible in the unit list sidebar', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     cy.get('studio-lite-unit-groups').should('exist');
     cy.get('studio-lite-unit-group').should('have.length.greaterThan', 0);
   });
 
   it('expands and collapses a unit group', () => {
-    cy.visitWs(ws1);
-    // Click the group header to collapse it
+    cy.visitWs(primaryWorkspace);
     cy.get('studio-lite-unit-group').first().find('.header').click({ force: true });
-    // Click again to expand
     cy.get('studio-lite-unit-group').first().find('.header').click({ force: true });
   });
 
   it('selects a unit from within a group', () => {
-    cy.visitWs(ws1);
-    selectUnit('GRP_TEST_01');
+    cy.visitWs(primaryWorkspace);
+    selectUnit('GRP_U1');
     clickIndexTabWorkspace('properties');
     cy.get('input[formControlName="name"]').should('exist');
   });
 
-  // ─── group-menu and group-manage ────
-
   it('opens the group management dialog from the workspace menu', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     openGroupManagementDialog();
   });
 
   it('group management dialog lists existing groups', () => {
     cy.get('studio-lite-group-manage').within(() => {
-      // It is a mat-table with class groups and rows with class group-row
       cy.get('.group-row').should('have.length.greaterThan', 0);
     });
   });
 
   it('adds a new unit group from the group management dialog', () => {
-    addGroupFromManagement('Dialog Testgruppe');
-    // Check if the group was added to the list
+    addGroupFromManagement(groupTestNames.dialogGroup);
     cy.get('studio-lite-group-manage').within(() => {
-      cy.get('.group-row').contains('Dialog Testgruppe').should('exist');
+      cy.get('.group-row').contains(groupTestNames.dialogGroup).should('exist');
     });
   });
 
   it('renames a unit group from the group management dialog', () => {
-    renameGroupFromManagement('Dialog Testgruppe', 'Dialog Testgruppe Umbenannt');
-    // Check if renamed
+    renameGroupFromManagement(groupTestNames.dialogGroup, groupTestNames.dialogGroupRenamed);
     cy.get('studio-lite-group-manage').within(() => {
-      cy.get('.group-row').contains('Dialog Testgruppe Umbenannt').should('exist');
+      cy.get('.group-row').contains(groupTestNames.dialogGroupRenamed).should('exist');
       cy.get('.group-row').contains('Dialog Testgruppe$').should('not.exist');
     });
   });
 
   it('deletes a unit group from the group management dialog', () => {
-    deleteGroupFromManagement('Dialog Testgruppe Umbenannt');
-    // Check if deleted
+    deleteGroupFromManagement(groupTestNames.dialogGroupRenamed);
     cy.get('studio-lite-group-manage').within(() => {
-      cy.get('.group-row').contains('Dialog Testgruppe Umbenannt').should('not.exist');
+      cy.get('.group-row').contains(groupTestNames.dialogGroupRenamed).should('not.exist');
     });
   });
 
@@ -121,10 +107,8 @@ describe('Unit Groups and Group Management', () => {
     closeGroupManagementDialog();
   });
 
-  // ─── workspace-user-list ────────────
-
   it('opens the user list dialog from the workspace menu', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     openWorkspaceUserListDialog();
   });
 
@@ -144,13 +128,10 @@ describe('Unit Groups and Group Management', () => {
     closeWorkspaceUserListDialog();
   });
 
-  // ─── Custom states ──────────────────
-
   it('adds custom unit states from workspace group settings', () => {
-    cy.findAdminGroupSettings(group1).click();
+    cy.findAdminGroupSettings(baseGroup).click();
     clickIndexTabWsgAdmin('settings');
-    addStatus('In Bearbeitung', 0);
-    // Verify existing states are visible if already added
+    addStatus(groupTestNames.customState, 0);
     cy.get('[data-cy="wsg-admin-settings-save-button"]').should('exist');
     clickSaveButtonRight();
   });

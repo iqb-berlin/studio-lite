@@ -1,11 +1,11 @@
 import {
   AccessLevel,
-  group1,
+  baseGroup,
   modules,
-  newUser,
+  standardUser,
   resource,
-  ws1,
-  ws2
+  primaryWorkspace,
+  secondaryWorkspace
 } from '../../../support/testData';
 import {
   addFirstUser,
@@ -30,20 +30,20 @@ export function createBasicSpecCy() {
     addFirstUser();
 
     // admin can add new user
-    createNewUser(newUser);
+    createNewUser(standardUser);
 
     // admin can create a group (Bereichsgruppe)
-    createGroup(group1);
+    createGroup(baseGroup);
 
     // admin can create a workspace (Arbeitsbereich) within its Bereichsgruppe
-    createWs(ws1, group1);
-    grantRemovePrivilegeAtWs([Cypress.expose('username'), newUser.username],
-      ws1,
+    createWs(primaryWorkspace, baseGroup);
+    grantRemovePrivilegeAtWs([Cypress.expose('username'), standardUser.username],
+      primaryWorkspace,
       [AccessLevel.Admin, AccessLevel.Developer]);
-    createWs(ws2, group1);
+    createWs(secondaryWorkspace, baseGroup);
     grantRemovePrivilegeAtWs(
-      [Cypress.expose('username'), newUser.username],
-      ws2,
+      [Cypress.expose('username'), standardUser.username],
+      secondaryWorkspace,
       [AccessLevel.Admin, AccessLevel.Developer]
     );
     // admin can Modules upload',
@@ -60,11 +60,11 @@ export function createBasicData() {
     addFirstUser();
 
     // admin can create a group (Bereichsgruppe)
-    createGroup(group1);
+    createGroup(baseGroup);
 
     // admin can create a workspace (Arbeitsbereich) within its Bereichsgruppe
-    createWs(ws1, group1);
-    grantRemovePrivilegeAtWs([Cypress.expose('username')], ws1, [
+    createWs(primaryWorkspace, baseGroup);
+    grantRemovePrivilegeAtWs([Cypress.expose('username')], primaryWorkspace, [
       AccessLevel.Admin]);
   });
 }
@@ -72,10 +72,10 @@ export function createBasicData() {
 export function deleteBasicSpecCy() {
   describe('Delete test base:', () => {
     // admin can deletes groups
-    deleteGroup(group1);
+    deleteGroup(baseGroup);
 
     // admin can delete a user
-    deleteUser(newUser.username);
+    deleteUser(standardUser.username);
 
     // admin deletes Modules
     deleteAllModules();
@@ -91,7 +91,7 @@ export function deleteBasicSpecCy() {
 export function deleteBasicData() {
   describe('Delete test base:', () => {
     // admin can deletes groups
-    deleteGroup(group1);
+    deleteGroup(baseGroup);
     // deletes first user
     deleteFirstUser();
   });

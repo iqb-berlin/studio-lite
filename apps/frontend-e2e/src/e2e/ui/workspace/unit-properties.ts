@@ -1,4 +1,4 @@
-import { UnitData, group1, ws1 } from '../../../support/testData';
+import { baseGroup, primaryWorkspace, propertiesUnits, propertiesTestNames } from '../../../support/testData';
 import {
   addUnitPred,
   clickIndexTabWsgAdmin,
@@ -10,15 +10,6 @@ import {
 import { addState } from '../../../support/helpers/group-admin';
 
 // ---------------------------------------------------------------------------
-// Test data
-// ---------------------------------------------------------------------------
-
-const unit1: UnitData = { shortname: 'PROP_U1', name: 'Properties Unit 1', group: 'Gruppe A' };
-const unit2: UnitData = { shortname: 'PROP_U2', name: 'Properties Unit 2', group: 'Gruppe B' };
-const STATE_NAME = 'Fertig';
-const GROUP_NAME = 'TestGrp';
-
-// ---------------------------------------------------------------------------
 // Suite
 // ---------------------------------------------------------------------------
 
@@ -28,16 +19,16 @@ describe('Unit Properties Panel', () => {
   // -------------------------------------------------------------------------
 
   it('creates test units', () => {
-    cy.visitWs(ws1);
-    addUnitPred(unit1);
-    cy.visitWs(ws1);
-    addUnitPred(unit2);
+    cy.visitWs(primaryWorkspace);
+    addUnitPred(propertiesUnits.propUnit1);
+    cy.visitWs(primaryWorkspace);
+    addUnitPred(propertiesUnits.propUnit2);
   });
 
   it('adds a custom state to the group for state-field tests', () => {
-    cy.findAdminGroupSettings(group1).click();
+    cy.findAdminGroupSettings(baseGroup).click();
     clickIndexTabWsgAdmin('settings');
-    addState(STATE_NAME);
+    addState(propertiesTestNames.stateName);
   });
 
   // -------------------------------------------------------------------------
@@ -46,8 +37,8 @@ describe('Unit Properties Panel', () => {
 
   describe('Properties panel rendering', () => {
     before(() => {
-      cy.visitWs(ws1);
-      openUnitProperties(unit1.shortname);
+      cy.visitWs(primaryWorkspace);
+      openUnitProperties(propertiesUnits.propUnit1.shortname);
     });
 
     it('shows key, name, state, group and description fields', () => {
@@ -59,11 +50,11 @@ describe('Unit Properties Panel', () => {
     });
 
     it('key field is pre-filled with the unit short name', () => {
-      cy.get('input[formControlName="key"]').should('have.value', unit1.shortname);
+      cy.get('input[formControlName="key"]').should('have.value', propertiesUnits.propUnit1.shortname);
     });
 
     it('name field is pre-filled with the unit name', () => {
-      cy.get('input[formControlName="name"]').should('have.value', unit1.name);
+      cy.get('input[formControlName="name"]').should('have.value', propertiesUnits.propUnit1.name);
     });
 
     it('save button is disabled when no changes have been made', () => {
@@ -80,21 +71,20 @@ describe('Unit Properties Panel', () => {
 
     it('saves the updated name and it persists after reload', () => {
       editUnitPropertiesAndVerify(
-        ws1,
-        unit1.shortname,
+        primaryWorkspace,
+        propertiesUnits.propUnit1.shortname,
         () => cy.get('input[formControlName="name"]').clear().type(updatedName),
         () => cy.get('input[formControlName="name"]').should('have.value', updatedName)
       );
     });
 
     it('save button is disabled again immediately after saving', () => {
-      // still on the properties page from editUnitPropertiesAndVerify's final openUnitProperties
       cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
     });
 
     it('restores original name', () => {
       cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveProps');
-      cy.get('input[formControlName="name"]').clear().type(unit1.name);
+      cy.get('input[formControlName="name"]').clear().type(propertiesUnits.propUnit1.name);
       clickUnitPropertiesSaveButton();
     });
   });
@@ -108,8 +98,8 @@ describe('Unit Properties Panel', () => {
 
     it('saves updated key and it persists after reload', () => {
       editUnitPropertiesAndVerify(
-        ws1,
-        unit1.shortname,
+        primaryWorkspace,
+        propertiesUnits.propUnit1.shortname,
         () => cy.get('input[formControlName="key"]').clear().type(updatedKey),
         () => cy.get('input[formControlName="key"]').should('have.value', updatedKey)
       );
@@ -117,7 +107,7 @@ describe('Unit Properties Panel', () => {
 
     it('restores original key', () => {
       cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveProps');
-      cy.get('input[formControlName="key"]').clear().type(unit1.shortname);
+      cy.get('input[formControlName="key"]').clear().type(propertiesUnits.propUnit1.shortname);
       clickUnitPropertiesSaveButton();
     });
   });
@@ -131,8 +121,8 @@ describe('Unit Properties Panel', () => {
 
     it('saves description and it persists after reload', () => {
       editUnitPropertiesAndVerify(
-        ws1,
-        unit1.shortname,
+        primaryWorkspace,
+        propertiesUnits.propUnit1.shortname,
         () => cy.get('textarea[formControlName="description"]').clear().type(description),
         () => cy.get('textarea[formControlName="description"]').should('have.value', description)
       );
@@ -143,8 +133,8 @@ describe('Unit Properties Panel', () => {
       cy.get('textarea[formControlName="description"]').clear();
       clickUnitPropertiesSaveButton();
 
-      cy.visitWs(ws1);
-      openUnitProperties(unit1.shortname);
+      cy.visitWs(primaryWorkspace);
+      openUnitProperties(propertiesUnits.propUnit1.shortname);
       cy.get('textarea[formControlName="description"]').should('have.value', '');
     });
   });
@@ -156,25 +146,27 @@ describe('Unit Properties Panel', () => {
   describe('Unit state – select and persist', () => {
     it('saves state selection and it persists after reload', () => {
       editUnitPropertiesAndVerify(
-        ws1,
-        unit1.shortname,
+        primaryWorkspace,
+        propertiesUnits.propUnit1.shortname,
         () => {
           cy.get('mat-select[formControlName="state"]').click();
-          cy.get(`mat-option:contains("${STATE_NAME}")`).click();
+          cy.get(`mat-option:contains("${propertiesTestNames.stateName}")`).click();
         },
-        () => cy.get('mat-select[formControlName="state"]').should('contain.text', STATE_NAME)
+        () => cy.get('mat-select[formControlName="state"]')
+          .should('contain.text', propertiesTestNames.stateName)
       );
     });
 
     it('clearing state (back to empty) persists after reload', () => {
       cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveProps');
       cy.get('mat-select[formControlName="state"]').click();
-      cy.get('mat-option').first().click(); // the empty option
+      cy.get('mat-option').first().click();
       clickUnitPropertiesSaveButton();
 
-      cy.visitWs(ws1);
-      openUnitProperties(unit1.shortname);
-      cy.get('mat-select[formControlName="state"]').should('not.contain.text', STATE_NAME);
+      cy.visitWs(primaryWorkspace);
+      openUnitProperties(propertiesUnits.propUnit1.shortname);
+      cy.get('mat-select[formControlName="state"]')
+        .should('not.contain.text', propertiesTestNames.stateName);
     });
   });
 
@@ -184,40 +176,40 @@ describe('Unit Properties Panel', () => {
 
   describe('Unit group – create and persist', () => {
     it('creates a new group via the + button and it persists after reload', () => {
-      cy.visitWs(ws1);
-      openUnitProperties(unit1.shortname);
+      cy.visitWs(primaryWorkspace);
+      openUnitProperties(propertiesUnits.propUnit1.shortname);
       cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveProps');
 
-      // Click the add_circle button inside studio-lite-new-group-button
       cy.get('studio-lite-new-group-button button[mat-icon-button]').click();
 
-      // The dialog is InputTextComponent — type the group name and click the primary button
-      cy.get('mat-dialog-content input[formControlName="text"]').type(GROUP_NAME);
+      cy.get('mat-dialog-content input[formControlName="text"]')
+        .type(propertiesTestNames.groupName);
       cy.get('mat-dialog-actions button[type="submit"]').click();
 
-      // The group is now selected in the dropdown
-      cy.get('mat-select[formControlName="group"]').should('contain.text', GROUP_NAME);
+      cy.get('mat-select[formControlName="group"]')
+        .should('contain.text', propertiesTestNames.groupName);
       cy.get('[data-cy="workspace-unit-save-button"]').should('not.be.disabled');
       clickUnitPropertiesSaveButton();
 
-      // Verify persistence
-      cy.visitWs(ws1);
-      openUnitProperties(unit1.shortname);
-      cy.get('mat-select[formControlName="group"]').should('contain.text', GROUP_NAME);
+      cy.visitWs(primaryWorkspace);
+      openUnitProperties(propertiesUnits.propUnit1.shortname);
+      cy.get('mat-select[formControlName="group"]')
+        .should('contain.text', propertiesTestNames.groupName);
     });
 
     it('can assign another unit to the existing group via dropdown', () => {
-      cy.visitWs(ws1);
-      openUnitProperties(unit2.shortname);
+      cy.visitWs(primaryWorkspace);
+      openUnitProperties(propertiesUnits.propUnit2.shortname);
       cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveProps');
 
       cy.get('mat-select[formControlName="group"]').click();
-      cy.get(`mat-option:contains("${GROUP_NAME}")`).click();
+      cy.get(`mat-option:contains("${propertiesTestNames.groupName}")`).click();
       clickUnitPropertiesSaveButton();
 
-      cy.visitWs(ws1);
-      openUnitProperties(unit2.shortname);
-      cy.get('mat-select[formControlName="group"]').should('contain.text', GROUP_NAME);
+      cy.visitWs(primaryWorkspace);
+      openUnitProperties(propertiesUnits.propUnit2.shortname);
+      cy.get('mat-select[formControlName="group"]')
+        .should('contain.text', propertiesTestNames.groupName);
     });
   });
 
@@ -229,20 +221,16 @@ describe('Unit Properties Panel', () => {
     const tempName = 'Temp Edited Name';
 
     it('saves via dialog Save button and persists', () => {
-      cy.visitWs(ws1);
-      openUnitProperties(unit1.shortname);
+      cy.visitWs(primaryWorkspace);
+      openUnitProperties(propertiesUnits.propUnit1.shortname);
 
-      // Make an unsaved change
       cy.get('input[formControlName="name"]').clear().type(tempName);
 
-      // Navigate away to trigger the dialog
       cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('dialogSave');
-      selectUnit(unit2.shortname);
+      selectUnit(propertiesUnits.propUnit2.shortname);
 
-      // Dialog should appear
       cy.get('studio-lite-save-or-discard, mat-dialog-container').should('be.visible');
 
-      // Click the Save button in the dialog (identified by the PATCH intercept firing)
       cy.translate(Cypress.expose('locale')).then(json => {
         cy.get('studio-lite-save-or-discard button, mat-dialog-actions button')
           .contains(json.workspace?.save || json.save)
@@ -250,15 +238,14 @@ describe('Unit Properties Panel', () => {
       });
       cy.wait('@dialogSave').its('response.statusCode').should('eq', 200);
 
-      // Verify the name persisted
-      cy.visitWs(ws1);
-      openUnitProperties(unit1.shortname);
+      cy.visitWs(primaryWorkspace);
+      openUnitProperties(propertiesUnits.propUnit1.shortname);
       cy.get('input[formControlName="name"]').should('have.value', tempName);
     });
 
     it('restores original name', () => {
       cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveProps');
-      cy.get('input[formControlName="name"]').clear().type(unit1.name);
+      cy.get('input[formControlName="name"]').clear().type(propertiesUnits.propUnit1.name);
       clickUnitPropertiesSaveButton();
     });
   });
@@ -270,26 +257,23 @@ describe('Unit Properties Panel', () => {
   describe('Unit key – validation', () => {
     it('shows validation error for forbidden key and clears error once key is valid', () => {
       const validKey = 'PROP_U1_VALID';
-      cy.visitWs(ws1);
-      openUnitProperties(unit1.shortname);
+      cy.visitWs(primaryWorkspace);
+      openUnitProperties(propertiesUnits.propUnit1.shortname);
 
-      // 1. Type invalid key with space/special chars
       cy.get('input[formControlName="key"]').clear().type('invalid key!').blur();
       cy.get('mat-error').should('be.visible');
       cy.get('input[formControlName="key"]').should('have.class', 'ng-invalid');
 
-      // 2. Clear and type valid new key
       cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveProps');
       cy.get('input[formControlName="key"]').clear().type(validKey);
       cy.get('mat-error').should('not.exist');
       cy.get('input[formControlName="key"]').should('have.class', 'ng-valid');
       clickUnitPropertiesSaveButton();
 
-      // 3. Restore original key
-      cy.visitWs(ws1);
+      cy.visitWs(primaryWorkspace);
       openUnitProperties(validKey);
       cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveProps');
-      cy.get('input[formControlName="key"]').clear().type(unit1.shortname);
+      cy.get('input[formControlName="key"]').clear().type(propertiesUnits.propUnit1.shortname);
       clickUnitPropertiesSaveButton();
     });
   });
@@ -304,8 +288,8 @@ describe('Unit Properties Panel', () => {
 
     it('saves name and description changed together, both persist after reload', () => {
       editUnitPropertiesAndVerify(
-        ws1,
-        unit2.shortname,
+        primaryWorkspace,
+        propertiesUnits.propUnit2.shortname,
         () => {
           cy.get('input[formControlName="name"]').clear().type(multiName);
           cy.get('textarea[formControlName="description"]').clear().type(multiDesc);
