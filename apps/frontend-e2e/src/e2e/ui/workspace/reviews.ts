@@ -1,8 +1,9 @@
 import {
   AccessLevel,
-  group1,
-  newUser,
-  ws1
+  baseGroup,
+  standardUser,
+  reviewTestNames,
+  primaryWorkspace
 } from '../../../support/testData';
 
 import {
@@ -25,10 +26,10 @@ import {
 import { grantRemovePrivilegeAtWs } from '../../../support/helpers/group-admin';
 
 describe('Unit Reviews', () => {
-  const review: string = 'Review1';
+  const review: string = reviewTestNames.reviewName;
 
   it('allows an admin to create a new review with specific unit selection and configuration', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     createReview(review, ['M6_AK0011', 'M6_AK0012']);
 
@@ -98,11 +99,11 @@ describe('Unit Reviews', () => {
   });
 
   it('permits users with basic access to view and enter the review', () => {
-    cy.findAdminGroupSettings(group1).click();
+    cy.findAdminGroupSettings(baseGroup).click();
     clickIndexTabWsgAdmin('workspaces');
-    grantRemovePrivilegeAtWs([newUser.username], ws1, [AccessLevel.Basic]);
+    grantRemovePrivilegeAtWs([standardUser.username], primaryWorkspace, [AccessLevel.Basic]);
     logout();
-    login(newUser.username, newUser.password);
+    login(standardUser.username, standardUser.password);
     cy.get('studio-lite-user-reviews-area').within(() => {
       cy.get(`a:contains("${review}")`).should('exist');
     });
@@ -111,21 +112,21 @@ describe('Unit Reviews', () => {
   });
 
   it('exports the review configuration via the admin menu', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     exportReview(review);
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 
   it('prints the review summary via the admin menu', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     printReview(review);
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 
   it('allows modifying the unit selection for an existing review', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     modifyReviewUnits(review, ['M6_AK0013']);
   });
@@ -144,7 +145,7 @@ describe('Unit Reviews', () => {
     cy.visit('/');
 
     openReview(review);
-    verifyReviewStartPage(review, ws1);
+    verifyReviewStartPage(review, primaryWorkspace);
 
     // Check BookletConfigShowComponent
     cy.translate(Cypress.expose('locale')).then(json => {
@@ -244,7 +245,7 @@ describe('Unit Reviews', () => {
   });
 
   it('shows no dot for comments inserted by himself in the workspace unit list: ', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments').should('have.css', 'opacity', '0');
     });
@@ -256,8 +257,8 @@ describe('Unit Reviews', () => {
   });
 
   it('clears the new comment dot after viewing comments as different users', () => {
-    loginWithUser(newUser.username, newUser.password);
-    cy.visitWs(ws1);
+    loginWithUser(standardUser.username, standardUser.password);
+    cy.visitWs(primaryWorkspace);
     cy.intercept('PATCH', '/api/workspaces/*/units/*/comments').as('markCommentsSeen');
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments').should('have.css', 'opacity', '1');
@@ -277,7 +278,7 @@ describe('Unit Reviews', () => {
 
   it('grants anonymous access to a password-protected review link', () => {
     loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     cy.intercept('GET', '/api/workspaces/*/reviews/*').as('getReviewData');
     cy.contains('mat-row', review).click();
@@ -332,7 +333,7 @@ describe('Unit Reviews', () => {
 
   it('allows an admin to permanently delete a review', () => {
     loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     deleteReview(review);
     cy.get('[data-cy="workspace-review-close"]').click();

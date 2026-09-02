@@ -1,7 +1,7 @@
 import {
-  group1,
-  ws1,
-  ws2
+  baseGroup,
+  primaryWorkspace,
+  secondaryWorkspace
 } from '../../../support/testData';
 import {
   selectProfileForAreaFromGroup,
@@ -21,13 +21,13 @@ import {
 describe('Workspace Settings & Verona Modules', () => {
 
   it('selects metadata profile from workspace settings', () => {
-    selectProfileForGroup(group1, IqbProfile.DEu);
-    selectProfileForGroup(group1, IqbProfile.DEi);
+    selectProfileForGroup(baseGroup, IqbProfile.DEu);
+    selectProfileForGroup(baseGroup, IqbProfile.DEi);
   });
 
   it('selects metadata profile from group settings and verifies in workspace settings', () => {
-    selectProfileForAreaFromGroup([IqbProfile.DEu, IqbProfile.DEi], ws1, group1);
-    cy.visitWs(ws1);
+    selectProfileForAreaFromGroup([IqbProfile.DEu, IqbProfile.DEi], primaryWorkspace, baseGroup);
+    cy.visitWs(primaryWorkspace);
     cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
     cy.get('[data-cy="workspace-edit-unit-settings"]').click();
     cy.get('[data-cy="edit-workspace-settings-select-unit-profile"]').should(
@@ -40,7 +40,7 @@ describe('Workspace Settings & Verona Modules', () => {
   });
 
   it('adds custom states to workspace', () => {
-    cy.findAdminGroupSettings(group1).click();
+    cy.findAdminGroupSettings(baseGroup).click();
     clickIndexTabWsgAdmin('settings');
     addStatus('In Bearbeitung', 0);
     addStatus('Finale', 1);
@@ -48,7 +48,7 @@ describe('Workspace Settings & Verona Modules', () => {
   });
 
   it('displays available modules in dropdowns', () => {
-    cy.visitWs(ws2);
+    cy.visitWs(secondaryWorkspace);
     cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
     cy.get('[data-cy="workspace-edit-unit-settings"]').click();
 
@@ -76,19 +76,19 @@ describe('Workspace Settings & Verona Modules', () => {
   });
 
   it('configures Verona modules for workspace', () => {
-    setModuleWithoutVerification(ws1, 'Aspect', 'Aspect', 'Schemer');
+    setModuleWithoutVerification(primaryWorkspace, 'Aspect', 'Aspect', 'Schemer');
   });
 
   it('verifies module configuration persists after page reload', () => {
     cy.visit('/');
-    cy.visitWs(ws1);
-    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
+    cy.visitWs(primaryWorkspace);
+    verifyModuleConfiguration(primaryWorkspace, 'Aspect', 'Aspect', 'Schemer');
   });
 
   it('validates module settings are workspace-specific', () => {
-    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
+    verifyModuleConfiguration(primaryWorkspace, 'Aspect', 'Aspect', 'Schemer');
 
-    cy.visitWs(ws2);
+    cy.visitWs(secondaryWorkspace);
     cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
     cy.get('[data-cy="workspace-edit-unit-settings"]').click();
 
@@ -105,17 +105,17 @@ describe('Workspace Settings & Verona Modules', () => {
   });
 
   it('configures workspace with alternative module combinations', () => {
-    setModuleWithoutVerification(ws2, 'Aspect', 'Stars', 'Schemer');
-    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
+    setModuleWithoutVerification(secondaryWorkspace, 'Aspect', 'Stars', 'Schemer');
+    verifyModuleConfiguration(primaryWorkspace, 'Aspect', 'Aspect', 'Schemer');
   });
 
   it('allows switching between different player modules', () => {
-    setModuleWithoutVerification(ws1, 'Aspect', 'Speedtest', 'Schemer');
-    setModuleWithoutVerification(ws1, 'Aspect', 'Stars', 'Schemer');
+    setModuleWithoutVerification(primaryWorkspace, 'Aspect', 'Speedtest', 'Schemer');
+    setModuleWithoutVerification(primaryWorkspace, 'Aspect', 'Stars', 'Schemer');
   });
 
   it('saves default Verona editor selection and persists after reload', () => {
-    cy.visitWs(ws2);
+    cy.visitWs(secondaryWorkspace);
     cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
     cy.get('[data-cy="workspace-edit-unit-settings"]').click();
 
@@ -124,7 +124,7 @@ describe('Workspace Settings & Verona Modules', () => {
 
     cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
 
-    cy.visitWs(ws2);
+    cy.visitWs(secondaryWorkspace);
     cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
     cy.get('[data-cy="workspace-edit-unit-settings"]').click();
     cy.get('[data-cy="edit-workspace-settings-editor"]').should('be.visible');
@@ -134,7 +134,7 @@ describe('Workspace Settings & Verona Modules', () => {
   });
 
   it('hides a route tab (Begleitmaterial / notes) when unchecked in settings', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
 
     cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
     cy.get('[data-cy="workspace-edit-unit-settings"]').click();
@@ -149,7 +149,7 @@ describe('Workspace Settings & Verona Modules', () => {
   });
 
   it('restores route tab when checked back on in settings', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
 
     cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
     cy.get('[data-cy="workspace-edit-unit-settings"]').click();
@@ -164,7 +164,7 @@ describe('Workspace Settings & Verona Modules', () => {
   });
 
   it('displays group management dialog', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-manage-unit-groups"]').click();
     cy.get('studio-lite-group-manage').should('exist');
@@ -174,7 +174,7 @@ describe('Workspace Settings & Verona Modules', () => {
   });
 
   it('displays workspace user list dialog', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-user-list"]').click();
     cy.get('studio-lite-workspace-user-list').should('exist');

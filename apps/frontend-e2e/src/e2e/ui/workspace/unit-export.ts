@@ -1,6 +1,6 @@
 import {
-  UnitData,
-  ws1
+  primaryWorkspace,
+  exportUnits
 } from '../../../support/testData';
 import {
   ensureUnitExists,
@@ -9,24 +9,13 @@ import {
 } from '../../../support/helpers';
 
 describe('Workspace Unit Export & Reports', () => {
-  const unit3: UnitData = {
-    shortname: 'AUF_EXP1',
-    name: 'Export Unit 1',
-    group: 'Gruppe D'
-  };
-  const newUnit: UnitData = {
-    shortname: 'Neu_Ex_EXP2',
-    name: 'Export Unit 2',
-    group: 'Group D'
-  };
-
   it('exports selected units (default format)', () => {
-    ensureUnitExists(ws1, unit3);
-    ensureUnitExists(ws1, newUnit);
-    cy.visitWs(ws1);
+    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
+    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit2);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
-    selectListUnits([unit3.shortname, newUnit.shortname]);
+    selectListUnits([exportUnits.exportUnit1.shortname, exportUnits.exportUnit2.shortname]);
     cy.clickDataCyWithResponseCheck(
       '[data-cy="workspace-export-unit-button"]',
       [200, 304],
@@ -37,7 +26,7 @@ describe('Workspace Unit Export & Reports', () => {
   });
 
   it('export dialog shows file-config checkboxes', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
     cy.get('mat-card.files mat-checkbox, studio-lite-export-unit-file-config mat-checkbox')
@@ -48,13 +37,13 @@ describe('Workspace Unit Export & Reports', () => {
   });
 
   it('export dialog search filter narrows the unit list', () => {
-    ensureUnitExists(ws1, unit3);
-    cy.visitWs(ws1);
+    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
     cy.get('[data-cy="workspace-select-unit-list-filter-units"]')
-      .type(unit3.shortname);
-    cy.get(`[data-cy="workspace-select-unit-list-checkbox-${unit3.shortname}"]`)
+      .type(exportUnits.exportUnit1.shortname);
+    cy.get(`[data-cy="workspace-select-unit-list-checkbox-${exportUnits.exportUnit1.shortname}"]`)
       .should('be.visible');
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickDialogButton(json.cancel || json.close);
@@ -62,7 +51,7 @@ describe('Workspace Unit Export & Reports', () => {
   });
 
   it('export dialog definition checkbox can be toggled', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
     cy.get('mat-card.files mat-checkbox, studio-lite-export-unit-file-config mat-checkbox')
@@ -79,11 +68,11 @@ describe('Workspace Unit Export & Reports', () => {
   });
 
   it('exports selected units as XML (Testcenter zip format)', () => {
-    ensureUnitExists(ws1, unit3);
-    cy.visitWs(ws1);
+    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
-    selectListUnits([unit3.shortname]);
+    selectListUnits([exportUnits.exportUnit1.shortname]);
     cy.get('mat-radio-button[value="xml"]').click();
     cy.intercept('GET', '/api/workspaces/*?download=true*').as('downloadXmlReq');
     cy.get('[data-cy="workspace-export-unit-button"]').click();
@@ -91,11 +80,11 @@ describe('Workspace Unit Export & Reports', () => {
   });
 
   it('exports selected units as JSON format', () => {
-    ensureUnitExists(ws1, unit3);
-    cy.visitWs(ws1);
+    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
-    selectListUnits([unit3.shortname]);
+    selectListUnits([exportUnits.exportUnit1.shortname]);
     cy.get('mat-radio-button[value="json"]').click();
     cy.intercept('POST', '/api/workspaces/*/download-units').as('downloadJsonReq');
     cy.get('[data-cy="workspace-export-unit-button"]').click();
@@ -103,11 +92,11 @@ describe('Workspace Unit Export & Reports', () => {
   });
 
   it('exports selected units with comments and rich notes options toggled', () => {
-    ensureUnitExists(ws1, unit3);
-    cy.visitWs(ws1);
+    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
-    selectListUnits([unit3.shortname]);
+    selectListUnits([exportUnits.exportUnit1.shortname]);
 
     cy.get('studio-lite-export-unit-file-config mat-checkbox').eq(0).click({ force: true });
     cy.get('studio-lite-export-unit-file-config mat-checkbox').eq(1).click({ force: true });
@@ -118,7 +107,7 @@ describe('Workspace Unit Export & Reports', () => {
   });
 
   it('displays metadata report', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-metadata"]').click();
@@ -134,7 +123,7 @@ describe('Workspace Unit Export & Reports', () => {
   });
 
   it('displays coding report', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-coding-report"]').click();
@@ -148,12 +137,12 @@ describe('Workspace Unit Export & Reports', () => {
   });
 
   it('exports codebook for selected units', () => {
-    ensureUnitExists(ws1, newUnit);
-    cy.visitWs(ws1);
+    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit2);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-export-coding-book"]').click();
-    selectListUnits([newUnit.shortname]);
+    selectListUnits([exportUnits.exportUnit2.shortname]);
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickButtonWithResponseCheck(
         json.export,
@@ -166,7 +155,7 @@ describe('Workspace Unit Export & Reports', () => {
   });
 
   it('coding book export dialog can be cancelled without a selection', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-export-coding-book"]').click();

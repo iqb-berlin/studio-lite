@@ -9,7 +9,7 @@ import {
   login,
   createGroup, deleteGroup
 } from '../../../support/helpers';
-import { group1 } from '../../../support/testData';
+import { baseGroup } from '../../../support/testData';
 
 describe('Admin Settings Tab Configuration', () => {
   before(() => addFirstUser());
@@ -279,10 +279,10 @@ describe('Admin Settings Tab Configuration', () => {
     // (now @iqb/metadata-components based) before removing .skip.
     it.skip('checks that the we have only two registry stores with the test registry', () => {
       // create a group workspace
-      createGroup(group1);
+      createGroup(baseGroup);
 
       // checks that we have only two profiles
-      cy.get('mat-table').contains(group1).click();
+      cy.get('mat-table').contains(baseGroup).click();
       cy.get('[data-cy="workspaces-groups-menu-edit"]').click();
       cy.get('studio-lite-profiles')
         .get('mat-expansion-panel').should('have.length', 2);
@@ -291,7 +291,7 @@ describe('Admin Settings Tab Configuration', () => {
       });
 
       // deletes group
-      deleteGroup(group1);
+      deleteGroup(baseGroup);
     });
 
     it('restores the original profile registry CSV URL', () => {

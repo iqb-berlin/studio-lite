@@ -2,11 +2,11 @@ import {
   clickIndexTabWorkspace,
   selectUnit
 } from '../../../support/helpers';
-import { ws1 } from '../../../support/testData';
+import { primaryWorkspace } from '../../../support/testData';
 
 describe('Unit Definitions', () => {
   it('opens unit definition editor', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     selectUnit('M6_AK0012');
     clickIndexTabWorkspace('editor');
     cy.wait(100);

@@ -15,7 +15,7 @@ import {
   saveUserEdit,
   selectUserRow
 } from '../../../support/helpers';
-import { testUsers } from '../../../support/testData';
+import { secondaryUser } from '../../../support/testData';
 
 // ---------------------------------------------------------------------------
 // Covers (all previously < 70 % e2e coverage):
@@ -25,7 +25,7 @@ import { testUsers } from '../../../support/testData';
 //   - admin/components/workspace-groups-menu (was 50 %)
 // ---------------------------------------------------------------------------
 describe('Admin User Management', () => {
-  const editTarget = testUsers.another;
+  const editTarget = secondaryUser;
 
   before(() => {
     cy.clearLocalStorage();

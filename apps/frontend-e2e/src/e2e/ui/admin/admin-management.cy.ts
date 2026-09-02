@@ -1,10 +1,10 @@
 import {
   AccessLevel,
   modules,
-  newUser,
+  standardUser,
   resource,
-  testGroups,
-  testWorkspaces
+  adminGroup,
+  adminMathWorkspace
 } from '../../../support/testData';
 import {
   addFirstUser,
@@ -24,8 +24,8 @@ import {
 } from '../../../support/helpers/group-admin';
 
 describe('UI Administration Management', () => {
-  const group1 = testGroups.admin;
-  const ws1 = testWorkspaces.admin.math1;
+  const group1 = adminGroup;
+  const ws1 = adminMathWorkspace;
   before(() => {
     addFirstUser();
   });
@@ -38,11 +38,11 @@ describe('UI Administration Management', () => {
   });
 
   it('creates a new user', () => {
-    createNewUser(newUser);
+    createNewUser(standardUser);
   });
 
   it('deletes a user', () => {
-    deleteUser(newUser.username);
+    deleteUser(standardUser.username);
   });
 
   it('creates a workspace group', () => {

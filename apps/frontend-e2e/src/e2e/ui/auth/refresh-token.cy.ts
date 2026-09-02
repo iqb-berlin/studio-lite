@@ -1,4 +1,4 @@
-import { newUser } from '../../../support/testData';
+import { standardUser } from '../../../support/testData';
 import {
   addFirstUser,
   createNewUser,
@@ -13,7 +13,7 @@ describe('Token Refresh UI Logic', () => {
   before(() => {
     addFirstUser();
     cy.findAdminSettings().click();
-    createNewUser(newUser);
+    createNewUser(standardUser);
   });
 
   after(() => {
@@ -23,7 +23,7 @@ describe('Token Refresh UI Logic', () => {
   it('successfully refreshes the token and retries the failed request', () => {
     const newAccessToken = 'new-access-token-123';
     const newRefreshToken = 'new-refresh-token-456';
-    loginWithUser(newUser.username, newUser.password);
+    loginWithUser(standardUser.username, standardUser.password);
     // 1. Intercept the initial data fetch to return 401
     // Using a counter to only return 401 once, so the retry can succeed
     let authDataCallCount = 0;
@@ -37,7 +37,7 @@ describe('Token Refresh UI Logic', () => {
       } else {
         req.reply({
           statusCode: 200,
-          body: { name: newUser.username, isAdmin: false }
+          body: { name: standardUser.username, isAdmin: false }
         });
       }
     }).as('authDataFetch');
@@ -64,7 +64,7 @@ describe('Token Refresh UI Logic', () => {
   });
 
   it('logs out and redirects to home if token refresh fails', () => {
-    login(newUser.username, newUser.password);
+    login(standardUser.username, standardUser.password);
     // 1. Intercept an API call to return 401
     cy.intercept('GET', '/api/auth-data', {
       statusCode: 401,
@@ -95,7 +95,7 @@ describe('Token Refresh UI Logic', () => {
   });
 
   it('only calls the refresh endpoint once for multiple concurrent 401 requests', () => {
-    login(newUser.username, newUser.password);
+    login(standardUser.username, standardUser.password);
     // 1. Mock multiple concurrent requests to return 401
     cy.intercept('GET', '/api/auth-data', {
       statusCode: 401,
@@ -213,6 +213,6 @@ describe('Token Refresh UI Logic', () => {
 
   it('deletes user', () => {
     cy.findAdminSettings().click();
-    deleteUser(newUser.username);
+    deleteUser(standardUser.username);
   });
 });
