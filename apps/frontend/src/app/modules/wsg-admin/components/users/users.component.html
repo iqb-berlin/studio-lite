@@ -117,7 +117,7 @@
         <div class="fx-row-start-center" data-cy="access-rights-row">
           <div class="fx-row-start-center fx-flex-fill fx-gap-15">
             <div class="fx-row-start-center">
-              @for (level of [1,2,4]; track level) {
+              @for (level of accessLevels; track level) {
                 <mat-radio-button
                   class="access-rights-radio"
                   [name]="'ws-role-' + ws.id"

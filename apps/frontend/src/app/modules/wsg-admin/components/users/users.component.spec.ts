@@ -111,6 +111,19 @@ describe('UsersComponent', () => {
     expect(component.objectsDatasource.data).toEqual(users);
   });
 
+  it('should render one radio button per access level in each row', () => {
+    mockBackendService.getWorkspaces.mockReturnValue(of([{ id: 1, name: 'ws1', groupId: 1 }]));
+
+    fixture.detectChanges();
+
+    const rows = fixture.nativeElement.querySelectorAll('[data-cy="access-rights-row"]');
+    expect(rows).toHaveLength(1);
+    expect(rows[0].querySelectorAll('mat-radio-button.access-rights-radio')).toHaveLength(3);
+    expect(rows[0].querySelector('[data-cy="access-rights-radio-button-1"]')).toBeTruthy();
+    expect(rows[0].querySelector('[data-cy="access-rights-radio-button-2"]')).toBeTruthy();
+    expect(rows[0].querySelector('[data-cy="access-rights-radio-button-4"]')).toBeTruthy();
+  });
+
   it('should load user workspaces on selection', () => {
     fixture.detectChanges();
     const user: UserFullDto = {

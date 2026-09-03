@@ -25,6 +25,7 @@ import { WsgAdminService } from '../../services/wsg-admin.service';
 import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { WorkspaceChecked } from '../../models/workspace-checked.class';
+import { ACCESS_LEVELS } from '../../models/access-levels';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 
@@ -48,6 +49,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
   userWorkspaces = new WorkspaceToCheckCollection([]);
+  readonly accessLevels = ACCESS_LEVELS;
 
   @ViewChild(MatSort) sort = new MatSort();
 

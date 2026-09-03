@@ -157,6 +157,23 @@ describe('WorkspacesComponent', () => {
     expect(component.displayedColumns).toContain('notes');
   });
 
+  it('should render one radio button per access level in each row', () => {
+    mockBackendService.getUsers.mockReturnValue(of([
+      {
+        id: 1, name: 'user1', isAdmin: false, description: ''
+      }
+    ]));
+
+    fixture.detectChanges();
+
+    const rows = fixture.nativeElement.querySelectorAll('[data-cy="access-rights-row"]');
+    expect(rows).toHaveLength(1);
+    expect(rows[0].querySelectorAll('mat-radio-button.access-rights-radio')).toHaveLength(3);
+    expect(rows[0].querySelector('[data-cy="access-rights-radio-button-1"]')).toBeTruthy();
+    expect(rows[0].querySelector('[data-cy="access-rights-radio-button-2"]')).toBeTruthy();
+    expect(rows[0].querySelector('[data-cy="access-rights-radio-button-4"]')).toBeTruthy();
+  });
+
   it('should handle workspace selection', () => {
     fixture.detectChanges();
     const ws = {

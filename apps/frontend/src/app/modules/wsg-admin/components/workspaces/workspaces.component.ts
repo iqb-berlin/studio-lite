@@ -34,6 +34,7 @@ import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
 import { WorkspaceMenuComponent } from '../workspace-menu/workspace-menu.component';
 import { WorkspaceUserToCheckCollection } from '../../models/workspace-users-to-check-collection.class';
 import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class';
+import { ACCESS_LEVELS } from '../../models/access-levels';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
 import { I18nService } from '../../../../services/i18n.service';
@@ -63,6 +64,7 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
   selectedWorkspaceId = 0;
   workspaceUsers = new WorkspaceUserToCheckCollection([]);
+  readonly accessLevels = ACCESS_LEVELS;
   isWorkspaceGroupAdmin = false;
   isBackUpWorkspaceGroup = false;
   maxWorkspaceCount = 5;
