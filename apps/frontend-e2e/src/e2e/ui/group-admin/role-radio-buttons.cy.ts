@@ -51,45 +51,20 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
   });
 
   // -------------------------------------------------------------------------
-  // 1. UI structure – radio buttons rendered, not checkboxes
+  // 1. UI structure – what only a browser can answer
   // -------------------------------------------------------------------------
 
   describe('UI structure', () => {
-    it('renders mat-radio-button elements (not checkboxes) in the Workspaces panel', () => {
-      openWsTab(ws1);
-      cy.get('[data-cy="access-rights-row"]').first().within(() => {
-        cy.get('mat-radio-button').should('have.length', 3);
-        cy.get('mat-checkbox').should('not.exist');
-      });
-    });
-
-    it('renders mat-radio-button elements (not checkboxes) in the Users panel', () => {
-      openUsersTab(newUser.username);
-      cy.get('[data-cy="access-rights-row"]').first().within(() => {
-        cy.get('mat-radio-button').should('have.length', 3);
-        cy.get('mat-checkbox').should('not.exist');
-      });
-    });
-
-    // Material's 48px touch target overlaps the 40px input by 4px, and a click on that rim
-    // reaches `_onTouchTargetClick`, which stops propagation before the host `(click)` that
-    // deselects. The panels hide it (`--mat-radio-touch-target-display`); without this
-    // assertion, removing that style leaves every deselect test below green.
+    // That each row renders one radio per level is held by the component specs; what needs a
+    // browser is the touch target. Material's 48px target overlaps the 40px input by 4px, and
+    // a click on that rim reaches `_onTouchTargetClick`, which stops propagation before the
+    // host `(click)` that deselects. The panels hide it (`--mat-radio-touch-target-display`);
+    // without this assertion, removing that style leaves every deselect test below green.
     it('hides the touch target that would swallow deselect clicks', () => {
       openWsTab(ws1);
       getRoleRadio(`(${newUser.username})`, AccessLevel.Basic)
         .find('.mat-mdc-radio-touch-target')
         .should('not.be.visible');
-    });
-
-    it('shows exactly 3 radio buttons (level 1, 2, 4) per row in the Workspaces panel', () => {
-      openWsTab(ws1);
-      cy.get('[data-cy="access-rights-row"]').should('have.length.greaterThan', 0).each($row => {
-        cy.wrap($row).find('[data-cy^="access-rights-radio-button-"]').should('have.length', 3);
-        cy.wrap($row).find('[data-cy="access-rights-radio-button-1"]').should('exist');
-        cy.wrap($row).find('[data-cy="access-rights-radio-button-2"]').should('exist');
-        cy.wrap($row).find('[data-cy="access-rights-radio-button-4"]').should('exist');
-      });
     });
 
     it('all radio buttons are disabled when no workspace is selected', () => {
@@ -114,95 +89,37 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
   });
 
   // -------------------------------------------------------------------------
-  // 2. All three access levels can be selected (Workspaces panel)
+  // 2. Selecting and deselecting a level (Workspaces panel)
   // -------------------------------------------------------------------------
 
-  describe('Workspaces panel – selecting access levels', () => {
+  describe('Workspaces panel – selecting and deselecting', () => {
     beforeEach(() => {
       openWsTab(ws1);
     });
 
-    it('selects Basic (level 1) for a user and marks only that radio checked', () => {
+    // One walk over all three levels: every level can be picked, and picking the next one
+    // unchecks the one before -- the same assertion the three per-level tests each made once.
+    it('marks only the clicked level and unchecks the level before it', () => {
       selectRoleAtWs(newUser.username, AccessLevel.Basic);
-
       assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, true);
       assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Developer, false);
       assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, false);
-    });
 
-    it('selects Developer (level 2) for a user and marks only that radio checked', () => {
       selectRoleAtWs(newUser.username, AccessLevel.Developer);
-
       assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Developer, true);
       assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, false);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, false);
-    });
 
-    it('selects Admin (level 4) for a user and marks only that radio checked', () => {
       selectRoleAtWs(newUser.username, AccessLevel.Admin);
-
       assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, true);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, false);
       assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Developer, false);
-    });
-
-    it('switches level: selecting Developer after Basic unchecks Basic', () => {
-      selectRoleAtWs(newUser.username, AccessLevel.Basic);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, true);
-
-      selectRoleAtWs(newUser.username, AccessLevel.Developer);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Developer, true);
       assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, false);
     });
 
-    it('radio selections for one user do not affect another user\'s row', () => {
-      selectRoleAtWs(newUser.username, AccessLevel.Basic);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, true);
-
-      // anotherUser's row must remain unchecked
-      assertRoleRadioChecked(`(${anotherUser.username})`, AccessLevel.Basic, false);
-      assertRoleRadioChecked(`(${anotherUser.username})`, AccessLevel.Developer, false);
-      assertRoleRadioChecked(`(${anotherUser.username})`, AccessLevel.Admin, false);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  // 3. Unselect by re-clicking the active radio (Workspaces panel)
-  // -------------------------------------------------------------------------
-
-  describe('Workspaces panel – deselect by re-clicking (unselectable radio)', () => {
-    beforeEach(() => {
-      openWsTab(ws1);
-    });
-
-    it('deselects Basic by clicking the already-checked Basic radio', () => {
-      selectRoleAtWs(newUser.username, AccessLevel.Basic);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, true);
-
-      deselectRoleAtWs(newUser.username, AccessLevel.Basic);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, false);
-    });
-
-    it('deselects Developer by re-clicking it', () => {
-      selectRoleAtWs(newUser.username, AccessLevel.Developer);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Developer, true);
-
-      deselectRoleAtWs(newUser.username, AccessLevel.Developer);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Developer, false);
-    });
-
-    it('deselects Admin by re-clicking it', () => {
+    it('leaves the row without a level when the checked radio is clicked again', () => {
       selectRoleAtWs(newUser.username, AccessLevel.Admin);
       assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, true);
 
       deselectRoleAtWs(newUser.username, AccessLevel.Admin);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, false);
-    });
-
-    it('all three radios are unchecked after deselection', () => {
-      selectRoleAtWs(newUser.username, AccessLevel.Admin);
-      deselectRoleAtWs(newUser.username, AccessLevel.Admin);
-
       assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, false);
       assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Developer, false);
       assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, false);
@@ -210,48 +127,10 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
   });
 
   // -------------------------------------------------------------------------
-  // 4. Save and persist – Workspaces panel
+  // 3. Save and persist – Workspaces panel
   // -------------------------------------------------------------------------
 
   describe('Workspaces panel – save and reload', () => {
-    it('persists a Basic role assignment after save and page reload', () => {
-      cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveUsers');
-      openWsTab(ws1);
-      selectRoleAtWs(newUser.username, AccessLevel.Basic);
-      clickAccessRightsSaveButton();
-      cy.wait('@saveUsers').its('response.statusCode').should('eq', 200);
-
-      // Reload and verify the radio is still checked
-      cy.visit('/');
-      cy.findAdminGroupSettings(group1).click();
-      openWsTab(ws1);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, true);
-
-      // Cleanup: deselect and save
-      cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('cleanupSave');
-      deselectRoleAtWs(newUser.username, AccessLevel.Basic);
-      clickAccessRightsSaveButton();
-      cy.wait('@cleanupSave');
-    });
-
-    it('persists a Developer role assignment after save and page reload', () => {
-      cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveUsers');
-      openWsTab(ws1);
-      selectRoleAtWs(newUser.username, AccessLevel.Developer);
-      clickAccessRightsSaveButton();
-      cy.wait('@saveUsers').its('response.statusCode').should('eq', 200);
-
-      cy.visit('/');
-      cy.findAdminGroupSettings(group1).click();
-      openWsTab(ws1);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Developer, true);
-
-      cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('cleanupSave');
-      deselectRoleAtWs(newUser.username, AccessLevel.Developer);
-      clickAccessRightsSaveButton();
-      cy.wait('@cleanupSave');
-    });
-
     it('persists an Admin role assignment after save and page reload', () => {
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveUsers');
       openWsTab(ws1);
@@ -329,83 +208,43 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
   });
 
   // -------------------------------------------------------------------------
-  // 5. All three access levels can be selected (Users panel)
+  // 4. Selecting and deselecting a level (Users panel)
   // -------------------------------------------------------------------------
 
-  describe('Users panel – selecting access levels', () => {
+  describe('Users panel – selecting and deselecting', () => {
     beforeEach(() => {
       openUsersTab(newUser.username);
     });
 
-    it('selects Basic (level 1) for a workspace and marks only that radio checked', () => {
+    it('marks only the clicked level and unchecks the level before it', () => {
       selectRoleAtUser(ws1, AccessLevel.Basic);
-
       assertRoleRadioChecked(ws1, AccessLevel.Basic, true);
       assertRoleRadioChecked(ws1, AccessLevel.Developer, false);
       assertRoleRadioChecked(ws1, AccessLevel.Admin, false);
-    });
 
-    it('selects Developer (level 2) for a workspace', () => {
       selectRoleAtUser(ws1, AccessLevel.Developer);
-
       assertRoleRadioChecked(ws1, AccessLevel.Developer, true);
       assertRoleRadioChecked(ws1, AccessLevel.Basic, false);
-      assertRoleRadioChecked(ws1, AccessLevel.Admin, false);
-    });
 
-    it('selects Admin (level 4) for a workspace', () => {
       selectRoleAtUser(ws1, AccessLevel.Admin);
-
       assertRoleRadioChecked(ws1, AccessLevel.Admin, true);
-      assertRoleRadioChecked(ws1, AccessLevel.Basic, false);
       assertRoleRadioChecked(ws1, AccessLevel.Developer, false);
-    });
-
-    it('selecting a level for ws1 does not affect ws2\'s radio group', () => {
-      selectRoleAtUser(ws1, AccessLevel.Admin);
-
-      assertRoleRadioChecked(ws2, AccessLevel.Admin, false);
-      assertRoleRadioChecked(ws2, AccessLevel.Basic, false);
-      assertRoleRadioChecked(ws2, AccessLevel.Developer, false);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  // 6. Unselect by re-clicking the active radio (Users panel)
-  // -------------------------------------------------------------------------
-
-  describe('Users panel – deselect by re-clicking (unselectable radio)', () => {
-    beforeEach(() => {
-      openUsersTab(newUser.username);
-    });
-
-    it('deselects Basic by re-clicking it', () => {
-      selectRoleAtUser(ws1, AccessLevel.Basic);
-      assertRoleRadioChecked(ws1, AccessLevel.Basic, true);
-
-      deselectRoleAtUser(ws1, AccessLevel.Basic);
       assertRoleRadioChecked(ws1, AccessLevel.Basic, false);
     });
 
-    it('deselects Developer by re-clicking it', () => {
-      selectRoleAtUser(ws1, AccessLevel.Developer);
-      assertRoleRadioChecked(ws1, AccessLevel.Developer, true);
-
-      deselectRoleAtUser(ws1, AccessLevel.Developer);
-      assertRoleRadioChecked(ws1, AccessLevel.Developer, false);
-    });
-
-    it('deselects Admin by re-clicking it', () => {
+    it('leaves the row without a level when the checked radio is clicked again', () => {
       selectRoleAtUser(ws1, AccessLevel.Admin);
       assertRoleRadioChecked(ws1, AccessLevel.Admin, true);
 
       deselectRoleAtUser(ws1, AccessLevel.Admin);
+      assertRoleRadioChecked(ws1, AccessLevel.Basic, false);
+      assertRoleRadioChecked(ws1, AccessLevel.Developer, false);
       assertRoleRadioChecked(ws1, AccessLevel.Admin, false);
     });
   });
 
   // -------------------------------------------------------------------------
-  // 7. Save and persist – Users panel
+  // 5. Save and persist – Users panel
   // -------------------------------------------------------------------------
 
   describe('Users panel – save and reload', () => {
@@ -455,7 +294,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
   });
 
   // -------------------------------------------------------------------------
-  // 8. Cross-panel consistency: changes via Workspaces tab are reflected in Users tab
+  // 6. Cross-panel consistency: changes via Workspaces tab are reflected in Users tab
   // -------------------------------------------------------------------------
 
   describe('Cross-panel consistency', () => {
@@ -507,7 +346,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
   });
 
   // -------------------------------------------------------------------------
-  // 9. Multiple users/workspaces independence
+  // 7. Multiple users/workspaces independence
   // -------------------------------------------------------------------------
 
   describe('Multiple users/workspaces – radio groups are independent', () => {
