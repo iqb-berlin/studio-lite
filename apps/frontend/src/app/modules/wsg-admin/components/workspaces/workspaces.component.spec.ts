@@ -18,6 +18,7 @@ import { WsgAdminService } from '../../services/wsg-admin.service';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 import { WorkspaceMenuComponent } from '../workspace-menu/workspace-menu.component';
 import { WorkspacesComponent } from './workspaces.component';
+import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 
 @Component({ selector: 'studio-lite-workspace-menu', template: '', standalone: true })
@@ -156,6 +157,23 @@ describe('WorkspacesComponent', () => {
     expect(component.displayedColumns).toContain('notes');
   });
 
+  it('should render one radio button per access level in each row', () => {
+    mockBackendService.getUsers.mockReturnValue(of([
+      {
+        id: 1, name: 'user1', isAdmin: false, description: ''
+      }
+    ]));
+
+    fixture.detectChanges();
+
+    const rows = fixture.nativeElement.querySelectorAll('[data-cy="access-rights-row"]');
+    expect(rows).toHaveLength(1);
+    expect(rows[0].querySelectorAll('mat-radio-button.access-rights-radio')).toHaveLength(3);
+    expect(rows[0].querySelector('[data-cy="access-rights-radio-button-1"]')).toBeTruthy();
+    expect(rows[0].querySelector('[data-cy="access-rights-radio-button-2"]')).toBeTruthy();
+    expect(rows[0].querySelector('[data-cy="access-rights-radio-button-4"]')).toBeTruthy();
+  });
+
   it('should handle workspace selection', () => {
     fixture.detectChanges();
     const ws = {
@@ -210,6 +228,81 @@ describe('WorkspacesComponent', () => {
 
       ws.settings = undefined;
       expect(component.isRouteHidden(ws, 'editor')).toBe(false);
+    });
+  });
+
+  describe('onRoleChange and onRoleClick', () => {
+    let userEntry: WorkspaceUserChecked;
+
+    beforeEach(() => {
+      userEntry = {
+        id: 1, name: 'user1', displayName: 'User 1', description: undefined, isChecked: false, accessLevel: 0
+      };
+      component.selectedWorkspaceId = 1;
+      jest.spyOn(component.workspaceUsers, 'updateHasChanged');
+    });
+
+    it('should select role level on role change', () => {
+      component.onRoleChange(userEntry, 2);
+
+      expect(userEntry.accessLevel).toBe(2);
+      expect(userEntry.isChecked).toBe(true);
+      expect(component.workspaceUsers.updateHasChanged).toHaveBeenCalled();
+    });
+
+    it('should switch role level on role change to a different level', () => {
+      userEntry.isChecked = true;
+      userEntry.accessLevel = 1;
+
+      component.onRoleChange(userEntry, 4);
+
+      expect(userEntry.accessLevel).toBe(4);
+      expect(userEntry.isChecked).toBe(true);
+      expect(component.workspaceUsers.updateHasChanged).toHaveBeenCalled();
+    });
+
+    it('should deselect role when clicking on the active role level', () => {
+      userEntry.isChecked = true;
+      userEntry.accessLevel = 2;
+
+      component.onRoleClick(userEntry, 2);
+
+      expect(userEntry.accessLevel).toBe(0);
+      expect(userEntry.isChecked).toBe(false);
+      expect(component.workspaceUsers.updateHasChanged).toHaveBeenCalled();
+    });
+
+    it('should not deselect role when clicking on a different role level', () => {
+      userEntry.isChecked = true;
+      userEntry.accessLevel = 1;
+
+      component.onRoleClick(userEntry, 2);
+
+      expect(userEntry.accessLevel).toBe(1);
+      expect(userEntry.isChecked).toBe(true);
+      expect(component.workspaceUsers.updateHasChanged).not.toHaveBeenCalled();
+    });
+
+    it('should ignore a role change while no workspace is selected', () => {
+      component.selectedWorkspaceId = 0;
+
+      component.onRoleChange(userEntry, 2);
+
+      expect(userEntry.accessLevel).toBe(0);
+      expect(userEntry.isChecked).toBe(false);
+      expect(component.workspaceUsers.updateHasChanged).not.toHaveBeenCalled();
+    });
+
+    it('should ignore a role click while no workspace is selected', () => {
+      component.selectedWorkspaceId = 0;
+      userEntry.isChecked = true;
+      userEntry.accessLevel = 2;
+
+      component.onRoleClick(userEntry, 2);
+
+      expect(userEntry.accessLevel).toBe(2);
+      expect(userEntry.isChecked).toBe(true);
+      expect(component.workspaceUsers.updateHasChanged).not.toHaveBeenCalled();
     });
   });
 });

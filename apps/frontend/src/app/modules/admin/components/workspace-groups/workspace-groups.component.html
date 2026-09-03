@@ -79,12 +79,13 @@
       }
       <button mat-fab
               class="save-button"
+              data-cy="admin-workspace-groups-save-button"
               [matTooltip]="'save' | translate"
               matTooltipPosition="above"
               [color]="'primary'"
               [disabled]="!workspaceUsers.hasChanged"
               (click)="saveUsers()">
-        <mat-icon>save></mat-icon>
+        <mat-icon>save</mat-icon>
       </button>
     </div>
 

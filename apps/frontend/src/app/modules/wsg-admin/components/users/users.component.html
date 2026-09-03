@@ -95,6 +95,7 @@
       }
       <button mat-fab
               class="save-button"
+              data-cy="wsg-admin-access-rights-save-button"
               [matTooltip]="'save' | translate"
               matTooltipPosition="above"
               [color]="'primary'"
@@ -116,14 +117,17 @@
         <div class="fx-row-start-center" data-cy="access-rights-row">
           <div class="fx-row-start-center fx-flex-fill fx-gap-15">
             <div class="fx-row-start-center">
-              @for (level of [1,2,4]; track level) {
-                <mat-checkbox
+              @for (level of accessLevels; track level) {
+                <mat-radio-button
+                  class="access-rights-radio"
+                  [name]="'ws-role-' + ws.id"
                   [checked]="!!selectedUser && (ws.accessLevel === level) && ws.isChecked"
                   [disabled]="!selectedUser"
                   [matTooltip]="'access-rights.access-level-'+level | translate"
-                  [attr.data-cy]="'access-rights-checkbox-' + level"
-                  (change)="changeAccessLevel($event.checked, ws, level)">
-                </mat-checkbox>
+                  [attr.data-cy]="'access-rights-radio-button-' + level"
+                  (change)="onRoleChange(ws, level)"
+                  (click)="onRoleClick(ws, level)">
+                </mat-radio-button>
               }
             </div>
             <div data-cy="access-rights">{{ws.name}}</div>

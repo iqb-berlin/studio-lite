@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { RolesMatrixComponent } from '../roles-matrix/roles-matrix.component';
 import { RolesHeaderComponent } from './roles-header.component';
 
@@ -18,8 +17,7 @@ describe('RolesHeaderComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         RolesHeaderComponent,
-        TranslateModule.forRoot(),
-        MatCheckboxModule
+        TranslateModule.forRoot()
       ],
       providers: [
         { provide: MatDialog, useValue: mockMatDialog }

@@ -14,6 +14,7 @@ import { UsersComponent } from './users.component';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
+import { WorkspaceChecked } from '../../models/workspace-checked.class';
 
 // Mock components
 @Component({ selector: 'studio-lite-search-filter', template: '', standalone: true })
@@ -110,6 +111,19 @@ describe('UsersComponent', () => {
     expect(component.objectsDatasource.data).toEqual(users);
   });
 
+  it('should render one radio button per access level in each row', () => {
+    mockBackendService.getWorkspaces.mockReturnValue(of([{ id: 1, name: 'ws1', groupId: 1 }]));
+
+    fixture.detectChanges();
+
+    const rows = fixture.nativeElement.querySelectorAll('[data-cy="access-rights-row"]');
+    expect(rows).toHaveLength(1);
+    expect(rows[0].querySelectorAll('mat-radio-button.access-rights-radio')).toHaveLength(3);
+    expect(rows[0].querySelector('[data-cy="access-rights-radio-button-1"]')).toBeTruthy();
+    expect(rows[0].querySelector('[data-cy="access-rights-radio-button-2"]')).toBeTruthy();
+    expect(rows[0].querySelector('[data-cy="access-rights-radio-button-4"]')).toBeTruthy();
+  });
+
   it('should load user workspaces on selection', () => {
     fixture.detectChanges();
     const user: UserFullDto = {
@@ -168,5 +182,80 @@ describe('UsersComponent', () => {
 
     expect(mockBackendService.setWorkspacesByUser).toHaveBeenCalled();
     expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.not-changed', 'error', { duration: 3000 });
+  });
+
+  describe('onRoleChange and onRoleClick', () => {
+    let wsEntry: WorkspaceChecked;
+
+    beforeEach(() => {
+      wsEntry = {
+        id: 1, name: 'ws1', isChecked: false, accessLevel: 0
+      };
+      component.selectedUser = 1;
+      jest.spyOn(component.userWorkspaces, 'updateHasChanged');
+    });
+
+    it('should select role level on role change', () => {
+      component.onRoleChange(wsEntry, 2);
+
+      expect(wsEntry.accessLevel).toBe(2);
+      expect(wsEntry.isChecked).toBe(true);
+      expect(component.userWorkspaces.updateHasChanged).toHaveBeenCalled();
+    });
+
+    it('should switch role level on role change to a different level', () => {
+      wsEntry.isChecked = true;
+      wsEntry.accessLevel = 1;
+
+      component.onRoleChange(wsEntry, 4);
+
+      expect(wsEntry.accessLevel).toBe(4);
+      expect(wsEntry.isChecked).toBe(true);
+      expect(component.userWorkspaces.updateHasChanged).toHaveBeenCalled();
+    });
+
+    it('should deselect role when clicking on the active role level', () => {
+      wsEntry.isChecked = true;
+      wsEntry.accessLevel = 2;
+
+      component.onRoleClick(wsEntry, 2);
+
+      expect(wsEntry.accessLevel).toBe(0);
+      expect(wsEntry.isChecked).toBe(false);
+      expect(component.userWorkspaces.updateHasChanged).toHaveBeenCalled();
+    });
+
+    it('should not deselect role when clicking on a different role level', () => {
+      wsEntry.isChecked = true;
+      wsEntry.accessLevel = 1;
+
+      component.onRoleClick(wsEntry, 2);
+
+      expect(wsEntry.accessLevel).toBe(1);
+      expect(wsEntry.isChecked).toBe(true);
+      expect(component.userWorkspaces.updateHasChanged).not.toHaveBeenCalled();
+    });
+
+    it('should ignore a role change while no user is selected', () => {
+      component.selectedUser = 0;
+
+      component.onRoleChange(wsEntry, 2);
+
+      expect(wsEntry.accessLevel).toBe(0);
+      expect(wsEntry.isChecked).toBe(false);
+      expect(component.userWorkspaces.updateHasChanged).not.toHaveBeenCalled();
+    });
+
+    it('should ignore a role click while no user is selected', () => {
+      component.selectedUser = 0;
+      wsEntry.isChecked = true;
+      wsEntry.accessLevel = 2;
+
+      component.onRoleClick(wsEntry, 2);
+
+      expect(wsEntry.accessLevel).toBe(2);
+      expect(wsEntry.isChecked).toBe(true);
+      expect(component.userWorkspaces.updateHasChanged).not.toHaveBeenCalled();
+    });
   });
 });

@@ -14,7 +14,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { MatRadioButton } from '@angular/material/radio';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -25,6 +25,7 @@ import { WsgAdminService } from '../../services/wsg-admin.service';
 import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { WorkspaceChecked } from '../../models/workspace-checked.class';
+import { ACCESS_LEVELS } from '../../models/access-levels';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 
@@ -36,7 +37,7 @@ import { EntriesDividerComponent } from '../../../../components/entries-divider/
   imports: [
     SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
     MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, EntriesDividerComponent,
-    MatCheckbox, FormsModule, IsSelectedIdPipe, TranslateModule,
+    MatRadioButton, FormsModule, IsSelectedIdPipe, TranslateModule,
     RolesHeaderComponent, MatFabButton, MatIcon
   ]
 })
@@ -48,6 +49,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
   userWorkspaces = new WorkspaceToCheckCollection([]);
+  readonly accessLevels = ACCESS_LEVELS;
 
   @ViewChild(MatSort) sort = new MatSort();
 
@@ -76,15 +78,20 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.createWorkspaceList();
   }
 
-  changeAccessLevel(checked: boolean, workspace: WorkspaceChecked, level: number): void {
-    if (checked) {
-      workspace.accessLevel = level;
-      workspace.isChecked = true;
-    } else {
+  onRoleChange(workspace: WorkspaceChecked, level: number): void {
+    if (!this.selectedUser) return;
+    workspace.accessLevel = level;
+    workspace.isChecked = true;
+    this.userWorkspaces.updateHasChanged();
+  }
+
+  onRoleClick(workspace: WorkspaceChecked, level: number): void {
+    if (!this.selectedUser) return;
+    if (workspace.isChecked && workspace.accessLevel === level) {
       workspace.accessLevel = 0;
       workspace.isChecked = false;
+      this.userWorkspaces.updateHasChanged();
     }
-    this.userWorkspaces.updateHasChanged();
   }
 
   updateWorkspaceList(): void {

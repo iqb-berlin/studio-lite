@@ -4,21 +4,6 @@
  */
 
 /**
- * Clicks the save button (handles single or multiple save buttons)
- * @example
- * clickSaveButtonRight();
- */
-export function clickSaveButtonRight(): void {
-  cy.get('mat-icon:contains("save")').then($elements => {
-    if ($elements.length === 1) {
-      cy.get('mat-icon:contains("save")').click();
-    } else {
-      cy.get('mat-icon:contains("save")').eq(1).click();
-    }
-  });
-}
-
-/**
  * Selects a checkbox for a unit in the unit list
  * @param name - Unit name to select
  * @example

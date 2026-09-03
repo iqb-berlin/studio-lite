@@ -5,7 +5,7 @@
 
 import { UserData } from '../testData';
 import { clickIndexTabAdmin, clickIndexTabWsgAdmin } from './navigation';
-import { clickSaveButtonRight, editInput } from './common';
+import { editInput } from './common';
 
 /**
  * Adds the first admin user and logs in
@@ -143,7 +143,9 @@ export function makeAdminOfGroup(group: string, admins: string[]): void {
       .find('label')
       .click();
   });
-  clickSaveButtonRight();
+  cy.get('[data-cy="admin-workspace-groups-save-button"]')
+    .should('not.be.disabled')
+    .click();
 }
 
 // ---------------------------------------------------------------------------
