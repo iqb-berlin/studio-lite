@@ -5,7 +5,9 @@ import {
   selectProfileForAreaFromGroup,
   selectProfileForGroup
 } from '../../../support/metadata/metadata-util';
-import { AccessLevel, metadataBistaIGroup, metadataGermanWorkspace, metadataMathWorkspace } from '../../../support/testData';
+import {
+  AccessLevel, metadataBistaIGroup, metadataGermanWorkspace, metadataMathWorkspace
+} from '../../../support/testData';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
 import {
   addFirstUser,

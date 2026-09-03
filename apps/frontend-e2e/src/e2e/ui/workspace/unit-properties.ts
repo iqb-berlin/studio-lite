@@ -1,4 +1,6 @@
-import { baseGroup, primaryWorkspace, propertiesUnits, propertiesTestNames } from '../../../support/testData';
+import {
+  baseGroup, primaryWorkspace, propertiesUnits, propertiesTestNames
+} from '../../../support/testData';
 import {
   addUnitPred,
   clickIndexTabWsgAdmin,

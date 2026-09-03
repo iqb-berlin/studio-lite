@@ -17,7 +17,6 @@ import {
 } from '../../../support/helpers';
 
 describe('Workspace Settings & Verona Modules', () => {
-
   it('selects metadata profile from workspace settings', () => {
     selectProfileForGroup(baseGroup, IqbProfile.DEu);
     selectProfileForGroup(baseGroup, IqbProfile.DEi);
