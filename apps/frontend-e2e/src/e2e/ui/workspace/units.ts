@@ -1,11 +1,7 @@
-import {
-  UnitData,
-  ws1
-} from '../../../support/testData';
+import { primaryWorkspace, unitCrudUnits } from '../../../support/testData';
 import {
   addUnitPred,
   clickIndexTabWorkspace,
-  clickIndexTabWsgAdmin,
   deleteUnit,
   ensureUnitExists,
   goToWsMenu,
@@ -13,213 +9,26 @@ import {
   selectListUnits,
   selectUnit
 } from '../../../support/helpers';
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
+import { createBasicSpecCy } from '../shared/basic.spec.cy';
 
 describe('Workspace Unit Management (Core CRUD)', () => {
-  const unit1: UnitData = {
-    shortname: 'AUF_D1',
-    name: 'Name Auf 1',
-    group: 'Gruppe D'
-  };
-  const unit2: UnitData = {
-    shortname: 'AUF_E1',
-    name: 'Name Auf 2',
-    group: 'Gruppe E'
-  };
-  const unit3: UnitData = {
-    shortname: 'AUF_D2',
-    name: 'Name Auf 2',
-    group: 'Gruppe D'
-  };
-
   before(() => {
     createBasicSpecCy();
   });
 
-  after(() => {
-    deleteBasicSpecCy();
-    // cy.resetDb();
-  });
-
-  it('selects metadata profile from workspace settings', () => {
-    // Both profiles of the subject, as insert-record.cy.ts does: the unit and the item
-    // profile are enabled one by one, and the workspace below can only pick what the
-    // group offers.
-    selectProfileForGroup(group1, IqbProfile.DEu);
-    selectProfileForGroup(group1, IqbProfile.DEi);
-  });
-
-  it('selects metadata profile from group settings and verifies in workspace settings', () => {
-    selectProfileForAreaFromGroup([IqbProfile.DEu, IqbProfile.DEi], ws1, group1);
-    cy.visitWs(ws1);
-    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
-    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
-    cy.get('[data-cy="edit-workspace-settings-select-unit-profile"]').should(
-      'contain.text',
-      'Deu'
-    );
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.clickDialogButton(json.cancel || json.close);
-    });
-  });
-
-  it('adds custom states to workspace', () => {
-    cy.findAdminGroupSettings(group1).click();
-    clickIndexTabWsgAdmin('settings');
-    addStatus('In Bearbeitung', 0);
-    addStatus('Finale', 1);
-    cy.intercept('PATCH', '/api/workspace-groups/*').as('saveStates');
-    cy.get('[data-cy="wsg-admin-settings-save-button"]')
-      .should('not.be.disabled')
-      .click();
-    cy.wait('@saveStates').its('response.statusCode').should('eq', 200);
-  });
-
-  it('displays available modules in dropdowns', () => {
-    cy.visitWs(ws2);
-    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
-    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
-
-    // Verify editor options
-    cy.get('[data-cy="edit-workspace-settings-editor"]')
-      .find('mat-select').click();
-    cy.get('mat-option').should('have.length', 2);
-    cy.get('.cdk-overlay-backdrop').last().click({ force: true });
-
-    // Verify player options
-    cy.get('[data-cy="edit-workspace-settings-player"]')
-      .find('mat-select').click();
-    cy.get('mat-option').should('have.length', 3);
-    cy.get('.cdk-overlay-backdrop').last().click({ force: true });
-
-    // Verify schemer options
-    cy.get('[data-cy="edit-workspace-settings-schemer"]')
-      .find('mat-select').click();
-    cy.get('mat-option').should('have.length', 1);
-    cy.get('.cdk-overlay-backdrop').last().click({ force: true });
-
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.clickDialogButton(json.cancel || json.close);
-    });
-  });
-
-  it('configures Verona modules for workspace', () => {
-    setModuleWithoutVerification(ws1, 'Aspect', 'Aspect', 'Schemer');
-  });
-
-  it('verifies module configuration persists after page reload', () => {
-    cy.visit('/');
-    cy.visitWs(ws1);
-    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
-  });
-
-  it('validates module settings are workspace-specific', () => {
-    // Verify ws1 has configured modules
-    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
-
-    // Verify ws2 has independent configuration
-    cy.visitWs(ws2);
-    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
-    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
-
-    // ws2 should have module dropdowns available (even if not configured yet)
-    cy.get('[data-cy="edit-workspace-settings-editor"]')
-      .find('mat-select').should('have.class', 'mat-mdc-select-empty');
-    cy.get('[data-cy="edit-workspace-settings-player"]')
-      .find('mat-select').should('have.class', 'mat-mdc-select-empty');
-    cy.get('[data-cy="edit-workspace-settings-schemer"]')
-      .find('mat-select').should('have.class', 'mat-mdc-select-empty');
-
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.clickDialogButton(json.cancel || json.close);
-    });
-  });
-
-  it('configures workspace with alternative module combinations', () => {
-    // Configure ws2 with different modules (Speedtest editor, Stars player)
-    // setModuleWithVerification already verifies the configuration
-    setModuleWithoutVerification(ws2, 'Aspect', 'Stars', 'Schemer');
-
-    // Verify ws1 still has original configuration
-    verifyModuleConfiguration(ws1, 'Aspect', 'Aspect', 'Schemer');
-  });
-
-  it('allows switching between different player modules', () => {
-    // Switch to Speedtest player
-    setModuleWithoutVerification(ws1, 'Aspect', 'Speedtest', 'Schemer');
-    // Switch to Stars player (already verified by setModuleWithVerification)
-    setModuleWithoutVerification(ws1, 'Aspect', 'Stars', 'Schemer');
-  });
-
-  it('saves default Verona editor selection and persists after reload', () => {
-    cy.visitWs(ws2);
-    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
-    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
-
-    cy.get('[data-cy="edit-workspace-settings-editor"]').find('mat-select').click();
-    cy.get('mat-option').should('have.length.at.least', 1).first().click();
-
-    cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
-
-    cy.visitWs(ws2);
-    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
-    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
-    cy.get('[data-cy="edit-workspace-settings-editor"]').should('be.visible');
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.clickDialogButton(json.cancel || json.close);
-    });
-  });
-
-  it('hides a route tab (Begleitmaterial / notes) when unchecked in settings', () => {
-    ensureUnitExists(ws1, unit1);
-    cy.visitWs(ws1);
-    selectUnit(unit1.shortname);
-
-    cy.get('[data-cy="workspace-routes-notes"]').should('be.visible');
-
-    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
-    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
-
-    cy.get('studio-lite-edit-workspace-settings mat-checkbox')
-      .contains('Begleitmaterial')
-      .click();
-
-    cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
-
-    cy.get('[data-cy="workspace-routes-notes"]').should('not.exist');
-  });
-
-  it('restores route tab when checked back on in settings', () => {
-    ensureUnitExists(ws1, unit1);
-    cy.visitWs(ws1);
-    selectUnit(unit1.shortname);
-
-    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
-    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
-
-    cy.get('studio-lite-edit-workspace-settings mat-checkbox')
-      .contains('Begleitmaterial')
-      .click();
-
-    cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
-
-    cy.get('[data-cy="workspace-routes-notes"]').should('be.visible');
+  it('imports test units', () => {
+    cy.visitWs(primaryWorkspace);
+    importExercise('test_studio_units_download.zip');
+    cy.contains('M6_AK0011').should('exist');
   });
 
   it('creates new units', () => {
-    cy.visitWs(ws1);
-    addUnitPred(unit1);
-    cy.visitWs(ws1);
-    addUnitPred(unit2);
-    cy.visitWs(ws1);
-    addUnitPred(unit3);
-  });
-
-  it('imports units from zip file', () => {
-    cy.visitWs(ws1);
-    importExercise('test_studio_units_download.zip');
-    cy.contains('M6_AK0011')
-      .should('exist');
+    cy.visitWs(primaryWorkspace);
+    addUnitPred(unitCrudUnits.crud1);
+    cy.visitWs(primaryWorkspace);
+    addUnitPred(unitCrudUnits.crud2);
+    cy.visitWs(primaryWorkspace);
+    addUnitPred(unitCrudUnits.crudPrint);
   });
 
   it('navigates to unit preview and verifies iframe', () => {
@@ -301,11 +110,11 @@ describe('Workspace Unit Management (Core CRUD)', () => {
   });
 
   it('displays print preview for units with coding and comments', () => {
-    ensureUnitExists(ws1, unit3);
-    cy.visitWs(ws1);
+    ensureUnitExists(primaryWorkspace, unitCrudUnits.crudPrint);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-preview-units"]').click();
-    selectListUnits([unit3.shortname]);
+    selectListUnits([unitCrudUnits.crudPrint.shortname]);
 
     cy.intercept('GET', '/api/workspaces/*/units/*/scheme', {
       body: {
@@ -384,12 +193,12 @@ describe('Workspace Unit Management (Core CRUD)', () => {
   });
 
   it('deletes a unit', () => {
-    cy.visitWs(ws1);
-    deleteUnit(unit1.shortname);
+    cy.visitWs(primaryWorkspace);
+    deleteUnit(unitCrudUnits.crud1.shortname);
   });
 
   it('verifies save-or-discard dialog when navigating with unsaved changes', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     selectUnit('M6_AK0011');
     clickIndexTabWorkspace('properties');
 

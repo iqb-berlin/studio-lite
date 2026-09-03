@@ -11,9 +11,7 @@ import { IqbProfile } from '../../../support/metadata/iqbProfile';
 import {
   addStatus,
   clickIndexTabWsgAdmin,
-  clickSaveButtonRight,
   goToWsMenu,
-  importExercise,
   setModuleWithoutVerification,
   verifyModuleConfiguration
 } from '../../../support/helpers';
@@ -44,7 +42,7 @@ describe('Workspace Settings & Verona Modules', () => {
     clickIndexTabWsgAdmin('settings');
     addStatus('In Bearbeitung', 0);
     addStatus('Finale', 1);
-    clickSaveButtonRight();
+    cy.get('mat-icon:contains("save")').click();
   });
 
   it('displays available modules in dropdowns', () => {

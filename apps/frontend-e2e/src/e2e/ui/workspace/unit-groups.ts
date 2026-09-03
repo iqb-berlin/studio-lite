@@ -2,7 +2,6 @@ import { primaryWorkspace, baseGroup, groupTestNames } from '../../../support/te
 import {
   addUnitPred,
   clickIndexTabWsgAdmin,
-  clickSaveButtonRight,
   importExercise,
   selectUnit,
   clickIndexTabWorkspace,
@@ -133,6 +132,6 @@ describe('Unit Groups and Group Management', () => {
     clickIndexTabWsgAdmin('settings');
     addStatus(groupTestNames.customState, 0);
     cy.get('[data-cy="wsg-admin-settings-save-button"]').should('exist');
-    clickSaveButtonRight();
+    cy.get('mat-icon:contains("save")').click();
   });
 });
