@@ -9,16 +9,13 @@ describe('Unit Definitions', () => {
     cy.visitWs(primaryWorkspace);
     selectUnit('M6_AK0012');
     clickIndexTabWorkspace('editor');
-    cy.wait(100);
+    cy.get('iframe.unitHost').should('exist');
   });
 
   it.skip('clicks between two units and saves the unit M6_AK0011', () => {
     selectUnit('M6_AK0011');
-    cy.wait(30);
     selectUnit('M6_AK0012');
-    cy.wait(30);
     selectUnit('M6_AK0011');
-    cy.wait(30);
     cy.getIFrameBody('iframe.unitHost').within(() => {
       cy.get('aspect-element-model-properties-component', { timeout: 10000 })
         .should('be.visible')
@@ -37,7 +34,7 @@ describe('Unit Definitions', () => {
 
   it('preserves unit definition when switching between units', () => {
     selectUnit('M6_AK0011');
-    cy.wait(100);
+    cy.get('iframe.unitHost').should('exist');
     cy.getIFrameBody('iframe.unitHost').within(() => {
       cy.get('aspect-editor-dynamic-overlay')
         .eq(2)

@@ -218,10 +218,8 @@ describe('Unit Reviews', () => {
     // Open info panel
     cy.get('studio-lite-unit-info').within(() => {
       cy.contains('button', 'chevron_right').click();
-      cy.wait(500);
       cy.get('.infoPanel').should('not.be.visible');
       cy.contains('button', 'chevron_left').click();
-      cy.wait(500);
       cy.get('.infoPanel').should('be.visible');
       cy.get('.infoPanel h2').should('not.be.empty');
     });
@@ -289,7 +287,6 @@ describe('Unit Reviews', () => {
       // against the form being replaced
       cy.translate(Cypress.expose('locale')).then(json => {
         cy.get(`input[placeholder="${json.workspace['review-password']}"]`).should('be.visible');
-        cy.wait(300);
         cy.get(`input[placeholder="${json.workspace['review-password']}"]`).clear();
         cy.get(`input[placeholder="${json.workspace['review-password']}"]`).type('rev-1234');
         cy.get('studio-lite-save-changes').within(() => {
@@ -303,7 +300,6 @@ describe('Unit Reviews', () => {
         // config load replace the input right after page load)
         cy.visit(`/#/${reviewLink}`);
         cy.get('[data-cy="home-password"]').should('be.visible');
-        cy.wait(500);
         cy.get('[data-cy="home-password"]').type('rev-1234');
         cy.clickButtonWithResponseCheck(
           json.home.login,

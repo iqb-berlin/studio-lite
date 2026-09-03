@@ -208,7 +208,6 @@ describe('Token Refresh UI Logic', () => {
       .parent()
       .find('.inactive-dot')
       .should('exist');
-    cy.pause();
   });
 
   it('deletes user', () => {

@@ -72,7 +72,6 @@ describe('Metadata Management', () => {
   it('adds metadata to math unit', () => {
     cy.intercept({ method: 'GET', pathname: '/api/metadata/vocabularies' }).as('vocabs');
     cy.visitWs(ws2);
-    cy.pause();
     cy.contains('M1_001').should('exist').click();
     cy.wait('@vocabs');
     cy.wait('@vocabs');

@@ -46,23 +46,23 @@ export function createBasicSpecCy() {
       secondaryWorkspace,
       [AccessLevel.Admin, AccessLevel.Developer]
     );
-    // admin can Modules upload',
+    // admin can upload modules
     addModules(modules);
 
-    // admin can upload the resource package',
+    // admin can upload the resource package
     addResourcePackage(resource);
   });
 }
 
 export function deleteBasicSpecCy() {
   describe('Delete test base:', () => {
-    // admin can deletes groups
+    // admin can delete groups
     deleteGroup(baseGroup);
 
     // admin can delete a user
     deleteUser(standardUser.username);
 
-    // admin deletes Modules
+    // admin deletes modules
     deleteAllModules();
 
     // admin deletes package resource
