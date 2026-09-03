@@ -528,7 +528,6 @@ test-main-pr-db:
 test-main-pr-backend:
   stage: test-units
   interruptible: true
-  allow_failure: true
   rules:
     - !reference [ .main_pr_rules, rules ]
   needs:
@@ -558,7 +557,6 @@ test-main-pr-backend:
 test-main-pr-frontend:
   stage: test-units
   interruptible: true
-  allow_failure: true
   rules:
     - !reference [ .main_pr_rules, rules ]
   needs:
@@ -643,7 +641,6 @@ test-main-pr-frontend:
 test-main-pr-e2e-api:
   stage: test-e2e
   interruptible: true
-  allow_failure: true
   rules:
     - !reference [ .main_pr_rules, rules ]
   needs:
@@ -699,7 +696,6 @@ test-main-pr-e2e-api:
 test-main-pr-e2e-ui-chrome:
   stage: test-e2e
   interruptible: true
-  allow_failure: true
   rules:
     - !reference [ .main_pr_rules, rules ]
   needs:
@@ -1037,7 +1033,6 @@ test-main-pr-e2e-ui-edge-mobile:
 lint-main-pr-backend:
   stage: lint
   interruptible: true
-  allow_failure: true
   rules:
     - !reference [ .main_pr_rules, rules ]
   needs:
@@ -1070,7 +1065,6 @@ lint-main-pr-backend:
 lint-main-pr-frontend:
   stage: lint
   interruptible: true
-  allow_failure: true
   rules:
     - !reference [ .main_pr_rules, rules ]
   needs:
@@ -1099,7 +1093,6 @@ lint-main-pr-frontend:
 lint-main-pr-frontend-e2e:
   stage: lint
   interruptible: true
-  allow_failure: true
   rules:
     - !reference [ .main_pr_rules, rules ]
   needs:
