@@ -14,6 +14,7 @@ import { UsersComponent } from './users.component';
 import { BackendService } from '../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { WsgAdminService } from '../../services/wsg-admin.service';
+import { WorkspaceChecked } from '../../models/workspace-checked.class';
 
 // Mock components
 @Component({ selector: 'studio-lite-search-filter', template: '', standalone: true })
@@ -171,7 +172,7 @@ describe('UsersComponent', () => {
   });
 
   describe('onRoleChange and onRoleClick', () => {
-    let wsEntry: { id: number; name: string; isChecked: boolean; accessLevel: number };
+    let wsEntry: WorkspaceChecked;
 
     beforeEach(() => {
       wsEntry = {
@@ -182,7 +183,7 @@ describe('UsersComponent', () => {
     });
 
     it('should select role level on role change', () => {
-      component.onRoleChange(wsEntry as never, 2);
+      component.onRoleChange(wsEntry, 2);
 
       expect(wsEntry.accessLevel).toBe(2);
       expect(wsEntry.isChecked).toBe(true);
@@ -193,7 +194,7 @@ describe('UsersComponent', () => {
       wsEntry.isChecked = true;
       wsEntry.accessLevel = 1;
 
-      component.onRoleChange(wsEntry as never, 4);
+      component.onRoleChange(wsEntry, 4);
 
       expect(wsEntry.accessLevel).toBe(4);
       expect(wsEntry.isChecked).toBe(true);
@@ -204,7 +205,7 @@ describe('UsersComponent', () => {
       wsEntry.isChecked = true;
       wsEntry.accessLevel = 2;
 
-      component.onRoleClick(wsEntry as never, 2);
+      component.onRoleClick(wsEntry, 2);
 
       expect(wsEntry.accessLevel).toBe(0);
       expect(wsEntry.isChecked).toBe(false);
@@ -215,10 +216,33 @@ describe('UsersComponent', () => {
       wsEntry.isChecked = true;
       wsEntry.accessLevel = 1;
 
-      component.onRoleClick(wsEntry as never, 2);
+      component.onRoleClick(wsEntry, 2);
 
       expect(wsEntry.accessLevel).toBe(1);
       expect(wsEntry.isChecked).toBe(true);
+      expect(component.userWorkspaces.updateHasChanged).not.toHaveBeenCalled();
+    });
+
+    it('should ignore a role change while no user is selected', () => {
+      component.selectedUser = 0;
+
+      component.onRoleChange(wsEntry, 2);
+
+      expect(wsEntry.accessLevel).toBe(0);
+      expect(wsEntry.isChecked).toBe(false);
+      expect(component.userWorkspaces.updateHasChanged).not.toHaveBeenCalled();
+    });
+
+    it('should ignore a role click while no user is selected', () => {
+      component.selectedUser = 0;
+      wsEntry.isChecked = true;
+      wsEntry.accessLevel = 2;
+
+      component.onRoleClick(wsEntry, 2);
+
+      expect(wsEntry.accessLevel).toBe(2);
+      expect(wsEntry.isChecked).toBe(true);
+      expect(component.userWorkspaces.updateHasChanged).not.toHaveBeenCalled();
     });
   });
 });

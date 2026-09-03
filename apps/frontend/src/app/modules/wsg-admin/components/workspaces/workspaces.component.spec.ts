@@ -18,6 +18,7 @@ import { WsgAdminService } from '../../services/wsg-admin.service';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 import { WorkspaceMenuComponent } from '../workspace-menu/workspace-menu.component';
 import { WorkspacesComponent } from './workspaces.component';
+import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 
 @Component({ selector: 'studio-lite-workspace-menu', template: '', standalone: true })
@@ -214,18 +215,18 @@ describe('WorkspacesComponent', () => {
   });
 
   describe('onRoleChange and onRoleClick', () => {
-    let userEntry: { id: number; name: string; isChecked: boolean; accessLevel: number };
+    let userEntry: WorkspaceUserChecked;
 
     beforeEach(() => {
       userEntry = {
-        id: 1, name: 'user1', isChecked: false, accessLevel: 0
+        id: 1, name: 'user1', displayName: 'User 1', description: undefined, isChecked: false, accessLevel: 0
       };
       component.selectedWorkspaceId = 1;
       jest.spyOn(component.workspaceUsers, 'updateHasChanged');
     });
 
     it('should select role level on role change', () => {
-      component.onRoleChange(userEntry as never, 2);
+      component.onRoleChange(userEntry, 2);
 
       expect(userEntry.accessLevel).toBe(2);
       expect(userEntry.isChecked).toBe(true);
@@ -236,7 +237,7 @@ describe('WorkspacesComponent', () => {
       userEntry.isChecked = true;
       userEntry.accessLevel = 1;
 
-      component.onRoleChange(userEntry as never, 4);
+      component.onRoleChange(userEntry, 4);
 
       expect(userEntry.accessLevel).toBe(4);
       expect(userEntry.isChecked).toBe(true);
@@ -247,7 +248,7 @@ describe('WorkspacesComponent', () => {
       userEntry.isChecked = true;
       userEntry.accessLevel = 2;
 
-      component.onRoleClick(userEntry as never, 2);
+      component.onRoleClick(userEntry, 2);
 
       expect(userEntry.accessLevel).toBe(0);
       expect(userEntry.isChecked).toBe(false);
@@ -258,10 +259,33 @@ describe('WorkspacesComponent', () => {
       userEntry.isChecked = true;
       userEntry.accessLevel = 1;
 
-      component.onRoleClick(userEntry as never, 2);
+      component.onRoleClick(userEntry, 2);
 
       expect(userEntry.accessLevel).toBe(1);
       expect(userEntry.isChecked).toBe(true);
+      expect(component.workspaceUsers.updateHasChanged).not.toHaveBeenCalled();
+    });
+
+    it('should ignore a role change while no workspace is selected', () => {
+      component.selectedWorkspaceId = 0;
+
+      component.onRoleChange(userEntry, 2);
+
+      expect(userEntry.accessLevel).toBe(0);
+      expect(userEntry.isChecked).toBe(false);
+      expect(component.workspaceUsers.updateHasChanged).not.toHaveBeenCalled();
+    });
+
+    it('should ignore a role click while no workspace is selected', () => {
+      component.selectedWorkspaceId = 0;
+      userEntry.isChecked = true;
+      userEntry.accessLevel = 2;
+
+      component.onRoleClick(userEntry, 2);
+
+      expect(userEntry.accessLevel).toBe(2);
+      expect(userEntry.isChecked).toBe(true);
+      expect(component.workspaceUsers.updateHasChanged).not.toHaveBeenCalled();
     });
   });
 });
