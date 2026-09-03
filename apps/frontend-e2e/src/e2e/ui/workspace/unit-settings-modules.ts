@@ -41,7 +41,7 @@ describe('Workspace Settings & Verona Modules', () => {
     clickIndexTabWsgAdmin('settings');
     addStatus('In Bearbeitung', 0);
     addStatus('Finale', 1);
-    cy.get('mat-icon:contains("save")').click();
+    cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
   });
 
   it('displays available modules in dropdowns', () => {
@@ -53,19 +53,19 @@ describe('Workspace Settings & Verona Modules', () => {
     cy.get('[data-cy="edit-workspace-settings-editor"]')
       .find('mat-select').click();
     cy.get('mat-option').should('have.length', 2);
-    cy.get('.cdk-overlay-backdrop').last().click({ force: true });
+    cy.get('body').type('{esc}');
 
     // Verify player options
     cy.get('[data-cy="edit-workspace-settings-player"]')
       .find('mat-select').click();
     cy.get('mat-option').should('have.length', 3);
-    cy.get('.cdk-overlay-backdrop').last().click({ force: true });
+    cy.get('body').type('{esc}');
 
     // Verify schemer options
     cy.get('[data-cy="edit-workspace-settings-schemer"]')
       .find('mat-select').click();
     cy.get('mat-option').should('have.length', 1);
-    cy.get('.cdk-overlay-backdrop').last().click({ force: true });
+    cy.get('body').type('{esc}');
 
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickDialogButton(json.cancel || json.close);
