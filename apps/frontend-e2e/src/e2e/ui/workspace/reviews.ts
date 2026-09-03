@@ -9,7 +9,6 @@ import {
 import {
   clickIndexTabWorkspace,
   clickIndexTabWsgAdmin,
-  importExercise,
   login,
   loginWithUser,
   logout,
