@@ -189,6 +189,7 @@
             <div class="fx-row-start-center">
               @for (level of [1,2,4]; track level) {
                 <mat-radio-button
+                  class="access-rights-radio"
                   [name]="'u-role-' + u.id"
                   [checked]="!!selectedWorkspaceId && u.accessLevel === level && u.isChecked"
                   [disabled]="!selectedWorkspaceId"

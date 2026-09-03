@@ -1,4 +1,6 @@
-mat-radio-button {
+// Without this the 48px touch target overlaps the 40px input by 4px, and clicks
+// on that rim reach Material only, which stops their propagation to (click).
+.access-rights-radio {
   --mat-radio-touch-target-display: none;
 }
 

@@ -119,6 +119,7 @@
             <div class="fx-row-start-center">
               @for (level of [1,2,4]; track level) {
                 <mat-radio-button
+                  class="access-rights-radio"
                   [name]="'ws-role-' + ws.id"
                   [checked]="!!selectedUser && (ws.accessLevel === level) && ws.isChecked"
                   [disabled]="!selectedUser"
