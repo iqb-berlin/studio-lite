@@ -1,5 +1,8 @@
 import {
-  baseGroup, primaryWorkspace, propertiesUnits, propertiesTestNames
+  baseGroup,
+  primaryWorkspace,
+  propertiesUnits,
+  propertiesTestNames
 } from '../../../support/testData';
 import {
   addUnitPred,
