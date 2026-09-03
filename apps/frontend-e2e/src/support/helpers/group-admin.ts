@@ -1,6 +1,22 @@
 import { clickIndexTabWsgAdmin } from './navigation';
 import { AccessLevel } from '../testData';
-import { clickSaveButtonRight } from './common';
+
+// ---------------------------------------------------------------------------
+// Access-rights panel
+// ---------------------------------------------------------------------------
+
+/**
+ * Clicks the save button above the access-rights list, in both the Workspaces
+ * and the Users panel of wsg-admin. Fails if the button is disabled, so a
+ * selection that never reached the model cannot pass as a saved one.
+ * @example
+ * clickAccessRightsSaveButton();
+ */
+export function clickAccessRightsSaveButton(): void {
+  cy.get('[data-cy="wsg-admin-access-rights-save-button"]')
+    .should('not.be.disabled')
+    .click();
+}
 
 // ---------------------------------------------------------------------------
 // Low-level radio-button selectors
@@ -122,7 +138,7 @@ export function grantRemovePrivilegeAtWs(users: string[], ws: string, rights: Ac
   users.forEach((user, index) => {
     selectRoleAtWs(user, rights[index]);
   });
-  clickSaveButtonRight();
+  clickAccessRightsSaveButton();
 }
 
 /**
@@ -141,7 +157,7 @@ export function grantRemovePrivilegeAtUser(user: string, wss: string[], rights: 
   wss.forEach((ws, index) => {
     selectRoleAtUser(ws, rights[index]);
   });
-  clickSaveButtonRight();
+  clickAccessRightsSaveButton();
 }
 
 /**
