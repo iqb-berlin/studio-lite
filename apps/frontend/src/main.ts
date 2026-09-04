@@ -142,7 +142,7 @@ bootstrapApplication(AppComponent, {
     },
     {
       provide: 'APP_VERSION',
-      useValue: '19.0.0'
+      useValue: '20.0.0'
     }
   ]
 });
