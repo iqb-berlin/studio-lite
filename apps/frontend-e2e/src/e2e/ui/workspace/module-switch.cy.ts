@@ -1,4 +1,4 @@
-import { ws1 } from '../../../support/testData';
+import { primaryWorkspace } from '../../../support/testData';
 import {
   addUnit,
   clickIndexTabWorkspace,
@@ -33,7 +33,6 @@ describe('Workspace Module Switch', () => {
   // database and its login then goes to /api/login and fails. Reset here rather than depend on the
   // spec that ran before.
   before(() => {
-    cy.resetDb();
     createBasicSpecCy();
   });
 
@@ -61,9 +60,9 @@ describe('Workspace Module Switch', () => {
   // follows would cancel the request -- hence the wait here.
   function addUnitWithPlayer(unitKey: string, player: string): void {
     cy.intercept('PATCH', '**/api/workspaces/*/settings').as('saveSettings');
-    setModuleWithoutVerification(ws1, 'Aspect', player, 'Schemer');
+    setModuleWithoutVerification(primaryWorkspace, 'Aspect', player, 'Schemer');
     cy.wait('@saveSettings').its('response.statusCode').should('be.oneOf', [200, 201, 204]);
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     addUnit(unitKey);
   }
 
@@ -73,7 +72,7 @@ describe('Workspace Module Switch', () => {
   });
 
   it('shows the player of a unit that was open before', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
 
     selectUnit(aspectUnit);
     clickIndexTabWorkspace('preview');
