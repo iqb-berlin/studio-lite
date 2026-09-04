@@ -160,6 +160,13 @@ export abstract class VeronaModuleDirective implements OnDestroy {
     );
   }
 
+  /**
+   * The frame is emptied only when there is no module to show. It must not be emptied on the way to
+   * a module: the module HTML is held after its first load, so the two assignments would then fall
+   * into the same task, and Chrome 152 keeps the empty document and drops the module -- the frame
+   * stays blank until the page is reloaded (#1662). Setting srcdoc once navigates the frame away
+   * from the previous module by itself.
+   */
   protected buildVeronaModule(
     moduleId: string | undefined,
     moduleType: 'player' | 'editor' | 'schemer'
@@ -168,9 +175,14 @@ export abstract class VeronaModuleDirective implements OnDestroy {
       return;
     }
 
-    this.iFrameElement.srcdoc = '';
+    // The module being replaced must not be able to talk to the studio any more. It cannot be
+    // told apart by its window -- srcdoc navigation keeps one and the same contentWindow -- so the
+    // session id is what distinguishes it from its successor, and the outgoing one stops counting
+    // here. The successor draws a new one when it reports ready.
+    this.sessionId = '';
 
     if (!moduleId) {
+      this.clearIFrame();
       this.lastVeronaModuleId = '';
       return;
     }
@@ -186,6 +198,7 @@ export abstract class VeronaModuleDirective implements OnDestroy {
           this.lastVeronaModuleId = moduleId;
           this.message = '';
         } else {
+          this.clearIFrame();
           this.message = this.translateService.instant(
             `workspace.${moduleType}-not-loaded`,
             { id: moduleId }
@@ -193,6 +206,12 @@ export abstract class VeronaModuleDirective implements OnDestroy {
           this.lastVeronaModuleId = '';
         }
       });
+  }
+
+  private clearIFrame(): void {
+    if (this.iFrameElement) {
+      this.iFrameElement.srcdoc = '';
+    }
   }
 
   private setupIFrame(editorHtml: string): void {

@@ -152,6 +152,35 @@ describe('UnitEditorComponent', () => {
     expect(store.setData).not.toHaveBeenCalled();
   });
 
+  // The module being replaced keeps its window: srcdoc navigation leaves contentWindow untouched, so
+  // the source check passes for a message the outgoing editor sends while the next one is being
+  // fetched. The session id is what rejects it, and a rebuild empties it.
+  it('should ignore a definition change from the module being replaced', () => {
+    const frame = document.createElement('iframe');
+    document.body.appendChild(frame);
+    component.iFrameElement = frame;
+    component.sessionId = '';
+
+    const store = {
+      setData: jest.fn()
+    } as unknown as UnitDefinitionStore;
+    jest.spyOn(workspaceServiceMock, 'getUnitDefinitionStore').mockReturnValue(store);
+
+    const message = new MessageEvent('message', {
+      data: {
+        type: 'voeDefinitionChangedNotification',
+        sessionId: 'session-of-the-old-module',
+        variables: { v: 1 },
+        unitDefinition: '<xml />'
+      },
+      source: frame.contentWindow as Window
+    });
+
+    component.handleIncomingMessage(message);
+
+    expect(store.setData).not.toHaveBeenCalled();
+  });
+
   // Editor spec 4.0 dropped definitionReportPolicy, and EditorConfig is additionalProperties: false
   // from then on. Editors below that spec version default to 'on-demand' and would wait for a
   // voeGetDefinitionRequest that this app never sends, so they keep getting the property.
