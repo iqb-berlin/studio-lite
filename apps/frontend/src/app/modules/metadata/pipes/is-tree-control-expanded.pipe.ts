@@ -2,6 +2,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { VocabFlatNode } from '../models/vocabulary.class';
 
+/**
+ * Whether this node of the vocabulary tree is unfolded. See {@link AreAllDescendantsSelectedPipe}
+ * for why a `trigger` is passed in.
+ */
 @Pipe({
   name: 'isTreeControlExpanded',
   standalone: true

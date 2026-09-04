@@ -5,6 +5,10 @@ import { EntityManager, Repository } from 'typeorm';
 import { HIDDEN_PROFILE_ORDER } from '@studio-lite/shared-code';
 import UnitItemMetadata from '../entities/unit-item-metadata.entity';
 
+/**
+ * The metadata rows of items -- the same CRUD as {@link UnitMetadataService} one level down, over
+ * {@link UnitItemMetadata}, and equally transaction-aware.
+ */
 export class UnitItemMetadataService {
   private readonly logger = new Logger(UnitItemMetadataService.name);
 

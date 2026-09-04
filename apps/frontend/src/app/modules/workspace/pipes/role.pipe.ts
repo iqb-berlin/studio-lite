@@ -1,5 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+/**
+ * The name of an access level: guest, commenter, developer, maintainer, super -- the same ladder
+ * the API's guards ask about, here by its position.
+ */
 @Pipe({
   name: 'role',
   standalone: true

@@ -1,6 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 
+/**
+ * Whether a unit can be sent back: it has to have been submitted from somewhere and not have been
+ * returned already.
+ */
 @Pipe({
   name: 'canReturnUnit',
   standalone: true

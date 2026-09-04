@@ -10,6 +10,10 @@ import { UserReviewsAreaComponent } from '../user-reviews-area/user-reviews-area
 import { UserWorkspacesAreaComponent } from '../user-workspaces-area/user-workspaces-area.component';
 import { LoginComponent } from '../login/login.component';
 
+/**
+ * The start page: the login for whoever is not logged in, and for whoever is, the workspaces and
+ * reviews they can reach. Both live on the same page, so a login does not need a route of its own.
+ */
 @Component({
   selector: 'studio-lite-home',
   templateUrl: './home.component.html',

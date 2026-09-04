@@ -33,6 +33,11 @@ type SelectedRow = {
   unitsCount:number,
 };
 
+/**
+ * The settings dialog of a workspace: the default modules its units are opened with, the metadata
+ * profiles they are described under, and which views the workspace offers. What is decided here
+ * applies to every unit in it.
+ */
 @Component({
   selector: 'studio-lite-edit-workspace-settings',
   templateUrl: './edit-workspace-settings.component.html',

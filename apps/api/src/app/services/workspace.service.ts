@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import {
   CreateWorkspaceDto,
   WorkspaceGroupDto,
@@ -78,6 +78,21 @@ interface ImportedComment {
   itemUuids?: string[];
 }
 
+/**
+ * The workspaces: creating and deleting them, moving them between groups, their settings, their
+ * unit groups, and who works in them.
+ *
+ * The settings are the part that reaches furthest -- they decide the default modules and the
+ * metadata profiles of every unit in the workspace, so a change here is felt by units that are
+ * never touched themselves.
+ *
+ * A unit group is not a table: it is a name in the settings and the same name on each unit, which
+ * is why creating, renaming and removing one all write both sides.
+ *
+ * The coding report over a workspace lives here as well -- a block of static helpers that read the
+ * coding schemes of its units and judge them. It belongs to the workspace only in that it is asked
+ * for one, and it is the one part of this service that touches no repository.
+ */
 @Injectable()
 export class WorkspaceService {
   private readonly logger = new Logger(WorkspaceService.name);
@@ -250,6 +265,19 @@ export class WorkspaceService {
     );
   }
 
+  /**
+   * The groups these workspaces belong to, each named once, in a single query. Ids that belong to
+   * no workspace are simply absent: a caller deciding whether someone may touch this list wants
+   * the groups it actually reaches, not a failure over an id that has gone in the meantime.
+   */
+  async findGroupIdsOfWorkspaces(ids: number[]): Promise<number[]> {
+    const workspaces = await this.workspacesRepository.find({
+      where: { id: In(ids) },
+      select: { groupId: true }
+    });
+    return [...new Set(workspaces.map(workspace => workspace.groupId))];
+  }
+
   async findOne(id: number): Promise<WorkspaceFullDto> {
     this.logger.log(`Returning workspace with id: ${id}`);
     const workspace = await this.workspacesRepository.findOne({
@@ -375,6 +403,12 @@ export class WorkspaceService {
     }
   }
 
+  /**
+   * One row per coding variable of every unit in the workspace: what is coded, how, and what the
+   * validation of the scheme against the unit's variables says. A unit whose scheme cannot be used
+   * -- missing, unparsable, or written by a schemer too old for it -- still gets a row, so the
+   * report shows the gap instead of leaving the unit out.
+   */
   async getCodingReport(id: number): Promise<CodingReportDto[]> {
     const unitDataRows: CodingReportDto[] = [];
     const unitListWithMetadata = await this.unitService.findAllWithProperties(
@@ -407,6 +441,10 @@ export class WorkspaceService {
     return unitDataRows;
   }
 
+  /**
+   * Whether a unit's coding scheme can be read at all. A scheme without a schemer is the current
+   * JSON format, which no longer names one; an older scheme is only usable from schemer 1.5 on.
+   */
   private static isValidScheme(
     scheme: string | undefined,
     schemer: string
@@ -702,11 +740,12 @@ export class WorkspaceService {
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
-  // The configured profile urls are canonicalized before anything else looks at
-  // them: checkForProfileUpdate and the mat-select in the settings dialog compare
-  // them exactly against the ids stored on the metadata, so a client still
-  // holding the retired github spelling must not put it back into the column the
-  // 19.0.0 migration just rewrote (#1570).
+  /**
+   * The configured profile urls are canonicalized before anything else looks at them:
+   * checkForProfileUpdate and the mat-select in the settings dialog compare them exactly against
+   * the ids stored on the metadata, so a client still holding the retired github spelling must not
+   * put it back into the column the 19.0.0 migration just rewrote (#1570).
+   */
   static normalizeProfileSettings(settings: WorkspaceSettingsDto): WorkspaceSettingsDto {
     if (!settings) return settings;
     return {
@@ -716,15 +755,16 @@ export class WorkspaceService {
     };
   }
 
-  // PATCH, not PUT: a key the request does not carry keeps its stored value.
-  // Replacing the whole blob turned every partial request into a removal — a
-  // PATCH that only changed defaultEditor arrived without the profile keys,
-  // counted as "profile removed", and hid the metadata of every unit in the
-  // workspace (order = -1, gone from the export) (#1576). Removing a profile
-  // deliberately still works: send the key with null or ''. The distinction is
-  // reliable because no ValidationPipe instantiates the DTO — the body arrives
-  // as parsed JSON, where an absent key is undefined and JSON cannot encode
-  // undefined explicitly.
+  /**
+   * PATCH, not PUT: a key the request does not carry keeps its stored value.
+   *
+   * Replacing the whole blob turned every partial request into a removal — a PATCH that only
+   * changed defaultEditor arrived without the profile keys, counted as "profile removed", and hid
+   * the metadata of every unit in the workspace (order = -1, gone from the export) (#1576).
+   * Removing a profile deliberately still works: send the key with null or ''. The distinction is
+   * reliable because no ValidationPipe instantiates the DTO — the body arrives as parsed JSON,
+   * where an absent key is undefined and JSON cannot encode undefined explicitly.
+   */
   async patchSettings(
     id: number,
     settings: WorkspaceSettingsDto
@@ -1143,10 +1183,11 @@ export class WorkspaceService {
     );
   }
 
-  // Maps metadata from an exported *.vomd.json back onto the internal
-  // structure. Detects the iqb unit-metadata@0.1 wrapper ({ metadata: [...] })
-  // and falls back to the legacy raw { profiles, items } blob for backwards
-  // compatibility.
+  /**
+   * Maps metadata from an exported *.vomd.json back onto the internal structure. Detects the iqb
+   * unit-metadata@0.1 wrapper ({ metadata: [...] }) and falls back to the legacy raw
+   * { profiles, items } blob for backwards compatibility.
+   */
   static mapImportedMetadata(parsed: unknown): UnitMetadataValues {
     const wrapper = parsed as UnitMetadataJson;
     if (Array.isArray(wrapper?.metadata)) {
@@ -1236,11 +1277,12 @@ export class WorkspaceService {
     };
   }
 
-  // Maps items from the iqb unit-items@0.2 spec shape back onto the internal
-  // structure: sourceVariableId/sourceVariableUuid become
-  // variableId/variableReadOnlyId. Items without the required id are dropped
-  // (mirrors transformItems on export); they would otherwise end up as
-  // unaddressable NULL-id rows in unit_item.
+  /**
+   * Maps items from the iqb unit-items@0.2 spec shape back onto the internal structure:
+   * sourceVariableId/sourceVariableUuid become variableId/variableReadOnlyId. Items without the
+   * required id are dropped (mirrors transformItems on export); they would otherwise end up as
+   * unaddressable NULL-id rows in unit_item.
+   */
   static mapImportedItems(items: UnitItemJson[]): ItemsMetadataValues[] {
     return (Array.isArray(items) ? items : [])
       .filter(item => !!item?.id)

@@ -7,10 +7,14 @@ import {
 } from 'rxjs';
 import { AppService } from '../services/app.service';
 
-// Access to a review is granted to logged-in users AND to anonymous
-// review sessions (password-protected review links): those authenticate
-// with userId 0 and carry their single review in authData.reviews, so
-// the generic authGuard's userId check must not be applied here.
+/**
+ * Access to a review is granted to logged-in users AND to anonymous review sessions
+ * (password-protected review links): those authenticate with userId 0 and carry their single review
+ * in authData.reviews, so the generic {@link authGuard}'s userId check must not be applied here.
+ *
+ * A review session reaches its own review and no other -- the id in the route has to be the one it
+ * was logged in for.
+ */
 export const reviewAuthGuard = (
   route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot

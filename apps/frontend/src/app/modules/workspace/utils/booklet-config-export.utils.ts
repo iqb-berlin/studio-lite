@@ -1,5 +1,6 @@
 import { BookletConfigDto, UnitDownloadBookletSettingsDto } from '@studio-lite-lib/api-dto';
 
+/** Which header content each of the retired `unitScreenHeader` values stood for. */
 const unitScreenHeaderToContentMap: Record<string, string> = {
   OFF: 'NONE',
   WITH_UNIT_TITLE: 'UNIT_LABEL',
@@ -8,6 +9,15 @@ const unitScreenHeaderToContentMap: Record<string, string> = {
   EMPTY: 'NONE'
 };
 
+/**
+ * Rewrites a stored booklet configuration into the keys the current testcenter understands. The
+ * older keys said in one value what is now split over several -- a navigation setting decides both
+ * what the navbar shows and whether its controls are there -- so each of them is translated into
+ * the whole set it stood for and then dropped.
+ *
+ * A key that is already there is never overwritten: what was configured deliberately wins over what
+ * a legacy value implies.
+ */
 export function normalizeLegacyBookletConfig(config: BookletConfigDto): BookletConfigDto {
   const result: BookletConfigDto = { ...config };
 
@@ -62,6 +72,11 @@ export function normalizeLegacyBookletConfig(config: BookletConfigDto): BookletC
   return result;
 }
 
+/**
+ * The booklet configuration as the key/value pairs an exported booklet carries, in the snake_case
+ * spelling the testcenter reads. Legacy keys contribute the whole set they stand for; a key that
+ * several sources produce is kept once, with the last contribution winning.
+ */
 export function mapBookletConfigToModernKeys(config: BookletConfigDto): UnitDownloadBookletSettingsDto[] {
   const all = [
     ...pagingModeEntries(config),
@@ -75,11 +90,13 @@ export function mapBookletConfigToModernKeys(config: BookletConfigDto): UnitDown
   return [...deduped.entries()].map(([key, value]) => ({ key, value }));
 }
 
+/** How a unit is paged, taken over as it stands. */
 function pagingModeEntries(config: BookletConfigDto): UnitDownloadBookletSettingsDto[] {
   if (!config.pagingMode) return [];
   return [{ key: 'pagingMode', value: config.pagingMode }];
 }
 
+/** The header, from the retired `unitScreenHeader` value; an unknown value contributes nothing. */
 function headerEntries(config: BookletConfigDto): UnitDownloadBookletSettingsDto[] {
   if (!config.unitScreenHeader) return [];
   const content = unitScreenHeaderToContentMap[config.unitScreenHeader];
@@ -87,12 +104,18 @@ function headerEntries(config: BookletConfigDto): UnitDownloadBookletSettingsDto
   return [{ key: 'header_content', value: content }];
 }
 
+/** Whether the toolbar shows the unit's title, from the retired on/off switch. */
 function unitTitleEntries(config: BookletConfigDto): UnitDownloadBookletSettingsDto[] {
   if (config.unitTitle === 'ON') return [{ key: 'toolbar_show_unit_title', value: 'TRUE' }];
   if (config.unitTitle === 'OFF') return [{ key: 'toolbar_show_unit_title', value: 'FALSE' }];
   return [];
 }
 
+/**
+ * The unit navigation, from the retired three-way switch: each of its values decides the navbar's
+ * label, whether its controls are shown, and -- for the two that offer a list -- the toolbar's unit
+ * list as well.
+ */
 function unitNaviEntries(config: BookletConfigDto): UnitDownloadBookletSettingsDto[] {
   if (config.unitNaviButtons === 'OFF') {
     return [
@@ -117,6 +140,7 @@ function unitNaviEntries(config: BookletConfigDto): UnitDownloadBookletSettingsD
   return [];
 }
 
+/** The page navigation, from the retired switch -- the same arrangement as {@link unitNaviEntries}. */
 function pageNaviEntries(config: BookletConfigDto): UnitDownloadBookletSettingsDto[] {
   if (config.pageNaviButtons === 'OFF') {
     return [
@@ -133,6 +157,10 @@ function pageNaviEntries(config: BookletConfigDto): UnitDownloadBookletSettingsD
   return [];
 }
 
+/**
+ * The settings that only need renaming: the studio's camelCase field on the left, the testcenter's
+ * key on the right. `logPolicy` is the exception the testcenter spells in camelCase itself.
+ */
 const directKeyMap: Partial<Record<keyof BookletConfigDto, string>> = {
   loadingMode: 'loading_mode',
   logPolicy: 'logPolicy',
@@ -161,6 +189,7 @@ const directKeyMap: Partial<Record<keyof BookletConfigDto, string>> = {
   forceResponseComplete: 'force_response_complete'
 };
 
+/** Everything in {@link directKeyMap} that is actually set, renamed and handed on unchanged. */
 function directStringEntries(config: BookletConfigDto): UnitDownloadBookletSettingsDto[] {
   return (Object.keys(directKeyMap) as (keyof BookletConfigDto)[])
     .filter(field => !!config[field])

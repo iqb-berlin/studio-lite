@@ -19,6 +19,13 @@ import {
   authRequestContext, backgroundRequestContext, logoutContext, tokenRefreshContext
 } from '../interceptors/request-classification';
 
+/**
+ * The API calls that belong to no single area: logging in and out, the token refresh, the user's own
+ * data and password, the installation's config and logo, and the activity report.
+ *
+ * Each module has a backend service of its own for its own routes; what is here is what the shell
+ * of the application needs.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -211,10 +218,6 @@ export class BackendService {
 
   activity(): Observable<void> {
     return this.http.post<void>(`${this.serverUrl}activity`, {}, { context: backgroundRequestContext() });
-  }
-
-  sessionPing(): Observable<void> {
-    return this.http.post<void>(`${this.serverUrl}session-ping`, {}, { context: backgroundRequestContext() });
   }
 
   private static getSessionIdFromToken(): string | undefined {

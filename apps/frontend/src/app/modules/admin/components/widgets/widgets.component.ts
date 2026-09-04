@@ -20,6 +20,10 @@ import { VeronaModuleClass } from '../../../../models/verona-module.class';
 import { ModuleSelectionChange } from '../../models/module-selection-change.interface';
 import { UpperSnakeCaseToKebabCasePipe } from '../../pipes/upper-snake-case-to-kebab-case.pipe';
 
+/**
+ * The installed widgets and the upload that adds one -- {@link VeronaModulesComponent} for the other
+ * three module types, with the same {@link ModulesDirective} underneath.
+ */
 @Component({
   selector: 'studio-lite-widgets',
   templateUrl: './widgets.component.html',

@@ -3,6 +3,11 @@ import {
 } from 'typeorm';
 import Workspace from './workspace.entity';
 
+/**
+ * Who may do what in a workspace. The row's existence is the read permission; `accessLevel` raises
+ * it from there -- commenting, writing, managing, and at the top deleting. The guards in `guards/`
+ * each name the level they require.
+ */
 @Entity()
 class WorkspaceUser {
   @PrimaryColumn({

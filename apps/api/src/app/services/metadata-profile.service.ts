@@ -10,6 +10,13 @@ import { ProfileEntryParametersVocabulary } from '@iqbspecs/metadata-profile';
 import MetadataProfile from '../entities/metadata-profile.entity';
 import { MetadataVocabularyService } from './metadata-vocabulary.service';
 
+/**
+ * Metadata profiles, served from the studio's own copy: a profile that is not stored yet is fetched
+ * from its URL and kept ({@link MetadataProfile}). Later requests are answered from the database
+ * and start a refresh in the background, so the metadata form works while w3id is unreachable and
+ * everyone sees the same version of a profile -- at the price of the copy trailing the source by
+ * one request.
+ */
 @Injectable()
 export class MetadataProfileService {
   constructor(
@@ -30,18 +37,21 @@ export class MetadataProfileService {
     return this.getMetadataProfile(url);
   }
 
-  // DB-only read (no background network refresh). For hot read paths that only
-  // need the stored profile definition — e.g. resolving hideNumbering per entry
-  // when building the display text — so a units list does not spam the profile
-  // host with one fetch per unit.
+  /**
+   * DB-only read (no background network refresh). For hot read paths that only need the stored
+   * profile definition — e.g. resolving hideNumbering per entry when building the display text —
+   * so a units list does not spam the profile host with one fetch per unit.
+   */
   getStoredMetadataProfileFromDb(url: string): Promise<MetadataProfile | null> {
     return this.metadataProfileRepository.findOneBy({ id: url });
   }
 
-  // The profile is cached and returned under the url it was requested by, not
-  // under its self-declared id: iqb-vocabs profiles still declare the github
-  // spelling while the app references them by w3id (#1570). Keying by the
-  // self-id would leave the w3id row stale forever and pile up duplicates.
+  /**
+   * The profile is cached and returned under the url it was requested by, not under its
+   * self-declared id: iqb-vocabs profiles still declare the github spelling while the app
+   * references them by w3id (#1570). Keying by the self-id would leave the w3id row stale forever
+   * and pile up duplicates.
+   */
   private async getMetadataProfile(url: string): Promise<MetadataProfileDto | null> {
     const profile = await firstValueFrom(
       this.http.get<MetadataProfileDto>(url)

@@ -28,6 +28,13 @@ import {
   UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 
+/**
+ * Every call the workspace area makes: the units and their parts, the exports (units, coding book,
+ * metadata report), the drop box, and what the workspace itself says about states and profiles.
+ *
+ * The downloads answer with a blob rather than JSON, and the export dialogs read their progress
+ * from the request -- which is why they go through here and not through a plain link.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -145,6 +152,11 @@ export class WorkspaceBackendService {
       );
   }
 
+  /**
+   * Turns the stream of a download into what a caller can bind to: a percentage while it runs (or
+   * the bytes so far when the size is unknown), the blob when it arrives, and -1 for nothing at all.
+   * An export can take minutes, so the dialog has to be able to show that something is happening.
+   */
   private static mapDownloadEvent(event: HttpEvent<Blob>): Blob | number | null {
     if (event) {
       if (event.type === HttpEventType.DownloadProgress) {

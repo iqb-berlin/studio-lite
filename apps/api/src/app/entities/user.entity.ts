@@ -1,5 +1,12 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
+/**
+ * A studio account. `isAdmin` is the one flag that opens the whole administration; everything else
+ * a user may do follows from workspace assignments and group administrations.
+ *
+ * `identity` and `issuer` are set for an account that logs in through Keycloak instead of with the
+ * password stored here; see {@link KeycloakUser}.
+ */
 @Entity()
 class User {
   @PrimaryGeneratedColumn()

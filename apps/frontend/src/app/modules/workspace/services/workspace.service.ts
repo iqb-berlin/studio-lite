@@ -20,6 +20,15 @@ import { UnitDefinitionStore } from '../classes/unit-definition-store';
 import { State } from '../../admin/models/state.type';
 import { RichNoteTagsService } from './rich-note-tags.service';
 
+/**
+ * The state of the workspace currently open: which unit is selected, what the user may do in it,
+ * and the stores that hold the unit's parts while they are being edited -- definition, scheme and
+ * metadata each in one of their own.
+ *
+ * The stores are what keeps unsaved work: a component that shows a unit reads from them and writes
+ * back into them, and only the save writes to the server. That is also why leaving a unit asks the
+ * stores whether anything is unsaved.
+ */
 @Injectable({
   providedIn: 'root'
 })

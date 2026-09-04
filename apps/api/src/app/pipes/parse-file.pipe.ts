@@ -5,8 +5,14 @@ import {
   BadRequestException
 } from '@nestjs/common';
 
+/**
+ * Turns "no file was uploaded" into a 400 before the handler runs. Without it an upload route with
+ * an empty body reaches the service, which then fails on an undefined file somewhere deeper, where
+ * the cause is no longer visible.
+ */
 @Injectable()
 export class ParseFilePipe implements PipeTransform {
+  /** Passes the upload through, or rejects a missing file and an empty array of files. */
   // eslint-disable-next-line class-methods-use-this
   transform(
     files: Express.Multer.File | Express.Multer.File[],

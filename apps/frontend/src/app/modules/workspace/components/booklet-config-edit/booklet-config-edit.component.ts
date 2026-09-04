@@ -9,6 +9,14 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { TranslateModule } from '@ngx-translate/core';
 
+/**
+ * The booklet configuration an export is given: how the test is paged and navigated, what the
+ * header and toolbar show, how responses are buffered.
+ *
+ * The options are the values the testcenter accepts, listed here rather than fetched -- including
+ * the retired ones a stored configuration may still hold, which the export then translates (see
+ * `booklet-config-export.utils.ts`).
+ */
 @Component({
   selector: 'studio-lite-booklet-config-edit',
   templateUrl: './booklet-config-edit.component.html',

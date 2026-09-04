@@ -1,15 +1,19 @@
+/**
+ * The CSS colour names and their hex values, for turning a colour a user picked by name into
+ * something a generated document can paint with.
+ */
 export class WebColors {
-  static hex: string;
+  /**
+   * The hex value for a CSS colour name, or an empty string when the name is unknown. The name has
+   * to be given in lower case -- the table is compared against it as it comes in.
+   */
   static getHexFromWebColor(colorName: string) {
     const foundColor = WebColors.colors
       .find(color => color.name.toLowerCase() === colorName);
-    if (foundColor) {
-      WebColors.hex = foundColor.hex;
-      return foundColor.hex;
-    }
-    return '';
+    return foundColor ? foundColor.hex : '';
   }
 
+  /** The table itself: name, hex and rgb for every CSS colour. */
   static colors = [
     {
       name: 'Lavender',

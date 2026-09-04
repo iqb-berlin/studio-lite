@@ -1,6 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { State } from '../../admin/models/state.type';
 
+/**
+ * The label or the colour of a unit state. The states themselves are configured per workspace
+ * group, so they are handed in rather than known here; an unknown state yields an empty string.
+ */
 @Pipe({
   name: 'state',
   standalone: true

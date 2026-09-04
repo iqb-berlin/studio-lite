@@ -9,6 +9,10 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { Comment } from '../../comments/models/comment.interface';
 
+/**
+ * The review's own calls: a unit's properties, definition, scheme, items and comments, all under
+ * the review's routes. The same data a workspace serves, fetched with a review login.
+ */
 @Injectable({
   providedIn: 'root'
 })

@@ -21,10 +21,26 @@ import { WorkspaceGuard } from '../guards/workspace.guard';
 import { CommentAccessGuard } from '../guards/comment-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { CommentWriteGuard } from '../guards/comment-write.guard';
+import { CommentDeleteGuard } from '../guards/comment-delete.guard';
 import { UnitUserService } from '../services/unit-user.service';
 import { ItemCommentService } from '../services/item-comment.service';
 import { UnitId } from '../decorators/unit-id.decorator';
 
+/**
+ * `workspaces/:workspace_id/units/:unit_id/comments` -- the discussion on a unit from inside its
+ * workspace: reading it, writing and revising comments, tying one to single items, voting, and the
+ * timestamp of what the reader has already seen, which the "new comments" marking is built on.
+ *
+ * Most of it takes the comment access level ({@link CommentAccessGuard}); reading the last-seen
+ * timestamp settles for plain access to the workspace, since it says nothing about the comments
+ * themselves.
+ *
+ * What the guards do NOT establish is ownership. {@link CommentWriteGuard} on the two PATCH routes
+ * only checks that the body names the sender as its author -- it never loads the comment being
+ * changed -- and deleting is guarded by the access level alone (see {@link CommentDeleteGuard},
+ * which no route carries). Hiding a comment (`:comment_id/hidden`) asks for nothing but a valid
+ * token.
+ */
 @Controller('workspaces/:workspace_id/units/:unit_id/comments')
 export class WorkspaceUnitCommentController {
   constructor(
@@ -116,9 +132,8 @@ export class WorkspaceUnitCommentController {
     return this.itemCommentService.updateCommentItems(unitId, commentId, comment.unitItemUuids);
   }
 
-  // todo CommentDeleteGuard: but include workspacegroupadmin
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentDeleteGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comment successfully updated.' })
@@ -131,7 +146,7 @@ export class WorkspaceUnitCommentController {
   }
 
   @Patch(':comment_id/hidden')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })

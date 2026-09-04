@@ -151,6 +151,27 @@ describe('WorkspaceService', () => {
     });
   });
 
+  describe('findGroupIdsOfWorkspaces', () => {
+    it('should name each group once and ignore ids that belong to no workspace', async () => {
+      // Two of the three ids share a group and the third belongs to nothing: the caller wants the
+      // groups this list reaches, not one answer per id.
+      (workspaceRepository.find as jest.Mock).mockResolvedValue([{ groupId: 7 }, { groupId: 7 }, { groupId: 8 }]);
+
+      const result = await service.findGroupIdsOfWorkspaces([1, 2, 3, 999]);
+
+      expect(result).toEqual([7, 8]);
+      expect(workspaceRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({ select: { groupId: true } })
+      );
+    });
+
+    it('should return nothing for an empty list', async () => {
+      (workspaceRepository.find as jest.Mock).mockResolvedValue([]);
+
+      expect(await service.findGroupIdsOfWorkspaces([])).toEqual([]);
+    });
+  });
+
   describe('findOne', () => {
     it('should return workspace', async () => {
       const ws = { id: 1, groupId: 2 };

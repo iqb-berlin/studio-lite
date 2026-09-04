@@ -4,6 +4,7 @@ import {
 // eslint-disable-next-line import/no-cycle
 import Review from './review.entity';
 
+/** Which units a review shows, and in which order. */
 @Entity()
 class ReviewUnit {
   @PrimaryColumn({

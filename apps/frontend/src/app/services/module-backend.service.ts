@@ -7,6 +7,10 @@ import {
   VeronaModuleFileDto
 } from '@studio-lite-lib/api-dto';
 
+/**
+ * The two module routes: the list, and a module's HTML. Kept apart from {@link ModuleService},
+ * which holds what has been loaded, so the caching and the fetching do not share a class.
+ */
 @Injectable({
   providedIn: 'root'
 })

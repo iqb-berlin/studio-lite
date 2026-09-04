@@ -13,8 +13,13 @@ import {
   ReviewFullDto
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { ReviewGuard } from '../guards/review.guard';
 import { ReviewService } from '../services/review.service';
 
+/**
+ * `reviews/:review_id` -- what a reviewer needs about the review they are logged into. Managing
+ * reviews happens from inside their workspace, in {@link WorkspaceReviewController}.
+ */
 @Controller('reviews')
 export class ReviewController {
   constructor(
@@ -22,7 +27,7 @@ export class ReviewController {
   ) {}
 
   @Get(':review_id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Review retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No privileges to retrieve review.' })

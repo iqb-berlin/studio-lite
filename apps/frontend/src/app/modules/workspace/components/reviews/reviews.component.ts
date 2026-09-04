@@ -27,6 +27,11 @@ import { ReviewMenuComponent } from '../review-menu/review-menu.component';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { I18nService } from '../../../../services/i18n.service';
 
+/**
+ * The reviews of a workspace: which units each contains, what a reviewer may do in it, and the
+ * booklet configuration it is presented with. It warns before leaving with unsaved changes, which is
+ * what {@link CheckForChangesDirective} underneath it provides.
+ */
 @Component({
   selector: 'studio-lite-reviews',
   templateUrl: './reviews.component.html',

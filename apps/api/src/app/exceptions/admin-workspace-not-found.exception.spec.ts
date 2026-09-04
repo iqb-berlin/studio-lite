@@ -7,7 +7,7 @@ describe('AdminWorkspaceNotFoundException', () => {
     expect(exception.getStatus()).toBe(404);
     expect(exception.getResponse()).toEqual({
       id: 1,
-      controller: 'admin/workspace-groups',
+      controller: 'group-admin/workspaces',
       method: 'GET',
       description: 'Admin workspace with id 1 not found'
     });

@@ -1,5 +1,9 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
+/**
+ * Ties a comment to the items it is about, so a remark can be aimed at single items of a unit
+ * rather than at the whole of it. A comment with no row here is about the unit.
+ */
 @Entity()
 class UnitCommentUnitItem {
   @PrimaryColumn({

@@ -3,10 +3,15 @@ import {
 } from '@nestjs/common';
 import { WorkspaceUserService } from '../services/workspace-user.service';
 
+/**
+ * Changing what is in a workspace -- units, their definitions, their metadata -- takes an access
+ * level above commenting. See {@link WorkspaceAccessGuard} for the whole ladder.
+ */
 @Injectable()
 export class WriteAccessGuard implements CanActivate {
   constructor(private workspaceUserService: WorkspaceUserService) {}
 
+  /** Forbidden unless the user's access level in this workspace allows writing. */
   async canActivate(
     context: ExecutionContext
   ) {

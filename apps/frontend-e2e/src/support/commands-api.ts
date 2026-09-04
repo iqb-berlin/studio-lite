@@ -49,6 +49,35 @@ Cypress.Commands.add('loginAPI', (username: string, password:string) => {
   });
 });
 
+// 2a: token rotation. The session goes on under a new pair, the old refresh token is spent. This
+// is what makes a session "resumable" -- the property the session status is read from (#1615).
+Cypress.Commands.add('refreshTokenAPI', (refreshToken: string) => {
+  cy.request({
+    method: 'POST',
+    url: '/api/refresh',
+    headers: {
+      'app-version': Cypress.expose('version')
+    },
+    body: { refreshToken },
+    failOnStatusCode: false
+  });
+});
+
+// 2b: ends the one session the refresh token belongs to, not every session of the user.
+Cypress.Commands.add('logoutAPI', (token: string, refreshToken: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'POST',
+    url: '/api/logout',
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    body: { refreshToken },
+    failOnStatusCode: false
+  });
+});
+
 // 3
 // ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('getUserIdAPI', (token: string) => {
@@ -174,6 +203,35 @@ Cypress.Commands.add('updateUserAPI',
       failOnStatusCode: false
     });
   });
+
+// 9a: deletes one session of a user -- but only an orphaned one. A session someone can still
+// return to answers 400, so an administrator cannot throw a colleague out of their work (#1615).
+Cypress.Commands.add('deleteSessionAPI', (userId: string, sessionId: string, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/admin/users/${userId}/sessions/${sessionId}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 9b: clears every orphaned session of one user and answers how many rows went.
+Cypress.Commands.add('deleteOrphanedSessionsAPI', (userId: string, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'DELETE',
+    url: `/api/admin/users/${userId}/orphaned-sessions`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
 
 // 10
 Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string) => {
@@ -1423,6 +1481,40 @@ Cypress.Commands.add('deleteCommentAPI',
     });
   });
 
+// 61a
+Cypress.Commands.add('patchCommentVisibilityAPI',
+  (wsId: string, unitId: string, commentId: string, hidden: boolean, userId: string, token: string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'PATCH',
+      url: `/api/workspaces/${wsId}/units/${unitId}/comments/${commentId}/hidden`,
+      headers: {
+        'app-version': Cypress.expose('version'),
+        authorization
+      },
+      body: {
+        hidden,
+        userId: parseInt(userId, 10)
+      },
+      failOnStatusCode: false
+    });
+  });
+
+// 19b: the whole user list of a workspace, however many. updateUserListOfWsAPI takes exactly two.
+Cypress.Commands.add('setUsersOfWsAPI', (wsId: string, users: AccessUser[], token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/group-admin/workspaces/${wsId}/users`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    body: users.map(user => ({ accessLevel: user.access, id: user.id })),
+    failOnStatusCode: false
+  });
+});
+
 // 62
 Cypress.Commands.add('addReviewAPI', (wsId:string, reviewName: string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1485,6 +1577,28 @@ Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:
       failOnStatusCode: false
     });
   }
+});
+
+// 64a: the password of a review, which updateReviewAPI does not send. A review login authenticates
+// with the link as the user name and this password (see LocalStrategy), and the token it hands back
+// carries the review -- the only way to reach the review side of ReviewGuard from a test.
+Cypress.Commands.add('setReviewPasswordAPI', (wsId: string, review: ReviewData, password: string, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspaces/${wsId}/reviews/${review.id}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    body: {
+      id: review.id,
+      link: review.link,
+      name: review.name,
+      password: password
+    },
+    failOnStatusCode: false
+  });
 });
 
 // 65

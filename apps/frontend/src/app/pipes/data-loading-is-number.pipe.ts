@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+/** Whether a loading state carries a number, i.e. whether a progress bar can show it. */
 @Pipe({
   name: 'dataLoadingIsNumber',
   standalone: true

@@ -13,6 +13,11 @@ import { MatFormField } from '@angular/material/form-field';
 
 import { VeronaModuleClass } from '../../models/verona-module.class';
 
+/**
+ * The chooser for a Verona module. It offers the stable modules by default, but keeps the one
+ * already selected in the list even when it is not stable -- a unit must not silently lose the
+ * module it was written with.
+ */
 @Component({
   selector: 'studio-lite-select-module',
   templateUrl: './select-module.component.html',

@@ -198,10 +198,12 @@ export class UnitImportData {
     return '';
   }
 
-  // Resolve a companion file reference to a folder-qualified name. An empty
-  // reference (e.g. an empty <CodingSchemeRef/>) means the unit points at no
-  // companion file, so it must yield '' rather than the bare folder prefix -
-  // otherwise the import would report a missing file that was never referenced.
+  /**
+   * Resolve a companion file reference to a folder-qualified name. An empty reference (e.g. an
+   * empty `<CodingSchemeRef/>`) means the unit points at no companion file, so it must yield ''
+   * rather than the bare folder prefix - otherwise the import would report a missing file that was
+   * never referenced.
+   */
   private resolveCompanionFile(refText: string): string {
     return refText.trim().length > 0 ? this.getFolder() + refText : '';
   }

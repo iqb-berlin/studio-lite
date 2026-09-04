@@ -20,6 +20,11 @@ import { WorkspaceService } from '../../../workspace/services/workspace.service'
 import { UnitState } from '../../../../models/verona.interface';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
+/**
+ * The unit as a reviewer sees it: the player, the unit's information, and the page navigation. Which
+ * unit is shown follows the route, so paging through a review is a navigation and can be linked to
+ * and returned to.
+ */
 @Component({
   selector: 'studio-lite-unit-player',
   templateUrl: './unit-player.component.html',

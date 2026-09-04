@@ -3,6 +3,19 @@ import {
 } from 'typeorm';
 import Workspace from './workspace.entity';
 
+/**
+ * A task ("Aufgabe") in a workspace -- the central record of the studio. It holds the properties
+ * around the task, while the parts that grow large or are edited on their own live in tables of
+ * their own: the definition in `UnitDefinition`, comments, rich notes, items, and the metadata in
+ * `UnitMetadata` / `UnitItemMetadata`.
+ *
+ * The three editing tools a unit is worked on with -- player, editor, schemer -- are stored as
+ * module keys, so a unit stays bound to the module version it was written with.
+ *
+ * `metadata` is the older jsonb column. For a unit whose metadata has been taken into the
+ * normalized tables, {@link UnitMetadataToDelete} carries the marker, and the column is no longer
+ * the truth for it.
+ */
 @Entity()
 class Unit {
   @PrimaryGeneratedColumn()

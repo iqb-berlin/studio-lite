@@ -37,14 +37,26 @@ describe('Workspace API tests', () => {
       });
     });
 
-    it('401/201 negative test: should unexpectedly allow a user to create a workspace in a group ' +
-      'they are not member of', () => {
+    // The case this test was written for has arrived: it answered 201 until #1005, because the
+    // group stands in the body where the guard does not look, so administering one group was
+    // enough to create a workspace in every other one.
+    it('403 negative test: should deny a group admin a workspace in a group they do not administer', () => {
       cy.createWsAPI(
         Cypress.expose(group2.id),
         ws3,
         Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
-        // expect(resp.status).to.equal(401); should
+        expect(resp.status).to.equal(403);
+      });
+    });
+
+    it('201 positive test: should let an administrator create that same workspace', () => {
+      // The refusal above left ws3 uncreated, and the sections below work with it.
+      cy.createWsAPI(
+        Cypress.expose(group2.id),
+        ws3,
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
         Cypress.expose(ws3.id, resp.body);
         expect(resp.status).to.equal(201);
       });
@@ -168,7 +180,7 @@ describe('Workspace API tests', () => {
             expect(resp2.status).to.equal(200);
           });
           cy.loginAPI(user3.username, user3.password).then(resp3 => {
-            Cypress.expose(`token_${user3.username}`, resp.body);
+            Cypress.expose(`token_${user3.username}`, resp3.body.accessToken);
             expect(resp3.status).to.equal(201);
           });
         });
@@ -324,6 +336,113 @@ describe('Workspace API tests', () => {
         Cypress.expose(`id_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(401);
+      });
+    });
+  });
+
+  // The routes of the group-admin area whose path names no group -- the lists, and creating a
+  // workspace, which carries its group in the body -- ask whether the user administers any group
+  // at all. user3 administers none and is refused.
+  //
+  // This is the closed half of IsWorkspaceGroupAdminGuard, and nothing measured it: the fixture's
+  // plain user carries a user list where a token belongs (see 18.), so every request with it dies
+  // at JwtAuthGuard, several routes short of the guard. Measured against the guard before #1629
+  // (f66c147f^), these three answer the same as they do now -- the unresolved branch already asked
+  // "any group at all". What #1629 changed is that a route has to say so with
+  // @AnyWorkspaceGroupAdmin(); an unmarked one is refused instead of falling back silently.
+  //
+  // The open half is not here: whoever administers ANY group still reaches every other group
+  // through these routes, because the target group arrives in the body or the query where the
+  // guard does not look. That is #1005.
+  describe('the group-admin area without a group in the path', () => {
+    before(() => {
+      // `token_${user3.username}` holds the user list that 18. read a line earlier, not a token,
+      // and a request with it never reaches the guard under test.
+      cy.loginAPI(user3.username, user3.password).then(resp => {
+        expect(resp.status).to.equal(201);
+        Cypress.expose('tokenOfPlainUser', resp.body.accessToken);
+      });
+    });
+
+    it('401 negative test: should deny a user who administers no group the creation of a workspace', () => {
+      // The route a group admin uses to create a workspace in any group at all (#1005). It is at
+      // least closed to someone who administers none.
+      cy.createWsAPI(
+        Cypress.expose(groupVera.id),
+        ws3,
+        Cypress.expose('tokenOfPlainUser')
+      ).then(resp => {
+        expect(resp.status).to.equal(401);
+      });
+    });
+
+    it('401 negative test: should deny a user who administers no group the group-admin user list', () => {
+      cy.getUsersFullAPI(false, Cypress.expose('tokenOfPlainUser')).then(resp => {
+        expect(resp.status).to.equal(401);
+      });
+    });
+
+    it('401 negative test: should deny a user who administers no group the workspaces of another user', () => {
+      cy.getWsByUserAPI(
+        Cypress.expose(`id_${userGroupAdmin.username}`),
+        Cypress.expose('tokenOfPlainUser')
+      ).then(resp => {
+        expect(resp.status).to.equal(401);
+      });
+    });
+
+    it('200 positive test: should let an admin of any group read the same list', () => {
+      // The counterpart: same route, a user who administers a group. It also shows the refusals
+      // above are the guard's answer and not a broken token.
+      cy.getUsersFullAPI(
+        false,
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+      });
+    });
+  });
+
+  // The other two routes that name their group in the query or the body, and through which a group
+  // admin reached every other group until #1005. userGroupAdmin administers groupVera; group2
+  // belongs to the main administrator alone since 17.
+  describe('the group-admin area with a group the user does not administer (#1005)', () => {
+    it('403 negative test: should deny deleting a workspace of a group the user does not administer', () => {
+      cy.deleteWsAPI(
+        [Cypress.expose(ws3.id)],
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(403);
+      });
+    });
+
+    it('403 negative test: should deny moving a workspace into a group the user does not administer', () => {
+      // The move was only ever asked about the group the workspace comes FROM, which is groupVera
+      // and is the user's own: the target was nobody's business.
+      cy.moveWsAPI(
+        Cypress.expose(ws1.id),
+        Cypress.expose(group2.id),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(403);
+      });
+    });
+
+    it('200 positive test: should let the administrator move the same workspace there and back', () => {
+      // The counterpart, so the refusals above are not read as "the route is broken".
+      cy.moveWsAPI(
+        Cypress.expose(ws1.id),
+        Cypress.expose(group2.id),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+        cy.moveWsAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(groupVera.id),
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).then(resp2 => {
+          expect(resp2.status).to.equal(200);
+        });
       });
     });
   });

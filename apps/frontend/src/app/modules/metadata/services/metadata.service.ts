@@ -11,6 +11,14 @@ import {
   VocabData, VocabIdDictionaryValue
 } from '../models/vocabulary.class';
 
+/**
+ * The metadata profiles and vocabularies the forms and the table view are built from: which fields
+ * a unit and an item profile has, and the vocabulary each of them draws its values from.
+ *
+ * It is the studio's own metadata service, not the one the metadata-components package brings with
+ * it -- the two are separate on purpose, this one supplies the fields while the package's holds the
+ * values being edited.
+ */
 @Injectable({
   providedIn: 'root'
 })

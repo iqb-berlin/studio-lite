@@ -23,6 +23,10 @@ import { IsSelectedPipe } from '../../../../pipes/is-selected.pipe';
 import { I18nService } from '../../../../services/i18n.service';
 import { ModuleSelectionChange } from '../../models/module-selection-change.interface';
 
+/**
+ * The installed modules as a table: name, version, size and date, with a download link per module
+ * and a selection for deleting them. Used for both the editors/players/schemers and the widgets.
+ */
 @Component({
   selector: 'studio-lite-verona-modules-table',
   templateUrl: './verona-modules-table.component.html',

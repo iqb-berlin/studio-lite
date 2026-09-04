@@ -21,6 +21,13 @@ import {
   UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 
+/**
+ * Every call the administration area makes: users and their sessions, workspace groups and their
+ * admins, the installation-wide settings, and the lists that span the whole installation.
+ *
+ * One of three backend services with this name -- each area has its own, and this is the
+ * administrator's.
+ */
 @Injectable({
   providedIn: 'root'
 })

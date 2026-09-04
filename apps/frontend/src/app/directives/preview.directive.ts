@@ -15,6 +15,17 @@ import { WidgetCallData } from '../modules/workspace/models/widget-call-data.int
 import { ModuleService } from '../services/module.service';
 import { WidgetOverlayComponent } from '../modules/workspace/components/widget-overlay/widget-overlay.component';
 
+/**
+ * Hosting a PLAYER, on top of {@link VeronaModuleDirective}: it speaks the player's half of the
+ * Verona protocol -- the pages a unit has and which one is shown, how far presentation and
+ * responses have got, whether the unit has the focus -- and keeps that state for the surrounding
+ * controls to read.
+ *
+ * Both spellings of the protocol are answered, the current `vop…` messages and the historical
+ * `vo.FromPlayer…` ones, so a unit written for an older player still runs.
+ *
+ * A player may also ask for a widget; the overlay that then opens is built here as well.
+ */
 @Directive({
   selector: '[preview]',
   standalone: true
@@ -239,11 +250,13 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
   // schema no longer lists it.
   private static readonly STATE_REPORT_POLICY_DROPPED_IN = 5;
 
-  // Players below that spec version still read it, and not sending it is not a no-op for them: the
-  // aspect players of the 1.x line (all declaring apiVersion 3.0.0) fall back to 'none' and then send
-  // no vopStateChangedNotification at all, which leaves the preview without responses or progress.
-  // detectApiVersion falls back to 2 when it cannot read a version, so an unrecognized player keeps
-  // getting the property -- the failure direction that preserves today's behaviour.
+  /**
+   * Players below that spec version still read it, and not sending it is not a no-op for them: the
+   * aspect players of the 1.x line (all declaring apiVersion 3.0.0) fall back to 'none' and then
+   * send no vopStateChangedNotification at all, which leaves the preview without responses or
+   * progress. detectApiVersion falls back to 2 when it cannot read a version, so an unrecognized
+   * player keeps getting the property -- the failure direction that preserves today's behaviour.
+   */
   protected legacyStateReportPolicy(): { stateReportPolicy?: 'eager' } {
     return this.playerApiVersion < PreviewDirective.STATE_REPORT_POLICY_DROPPED_IN ?
       { stateReportPolicy: 'eager' } :

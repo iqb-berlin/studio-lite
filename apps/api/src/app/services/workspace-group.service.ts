@@ -13,6 +13,14 @@ import WorkspaceGroup from '../entities/workspace-group.entity';
 import { AdminWorkspaceGroupNotFoundException } from '../exceptions/admin-workspace-group-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 
+/**
+ * The workspace groups and who administers them. {@link findAll} answers either every group or, for
+ * a user id, only the groups that user administers -- the same call serves the administrator's view
+ * and the group admin's.
+ *
+ * The group settings name the metadata profiles its workspaces use, which is why the profile ids
+ * are brought into their canonical form on the way in (see `profile-id.ts`).
+ */
 @Injectable()
 export class WorkspaceGroupService {
   private readonly logger = new Logger(WorkspaceGroupService.name);
@@ -84,10 +92,12 @@ export class WorkspaceGroupService {
     return newWorkspaceGroup.id;
   }
 
-  // The group's profile selection is what every workspace in it picks its unit and
-  // item profile from, and those picks are compared exactly. Canonicalize the ids
-  // on the way in so a client still holding the retired github spelling cannot
-  // undo what the 19.0.0 migration did to this column (#1570).
+  /**
+   * The group's profile selection is what every workspace in it picks its unit and item profile
+   * from, and those picks are compared exactly. Canonicalizes the ids on the way in so a client
+   * still holding the retired github spelling cannot undo what the 19.0.0 migration did to this
+   * column (#1570).
+   */
   static normalizeProfileSelection(settings: WorkspaceGroupSettingsDto): WorkspaceGroupSettingsDto {
     if (!settings?.profiles?.length) return settings;
     return {

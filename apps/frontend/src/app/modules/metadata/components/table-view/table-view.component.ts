@@ -33,6 +33,10 @@ interface ColumnValues {
   [key: string]: string | null | undefined
 }
 
+/**
+ * The metadata of a workspace's units and items as a table, one column per profile field -- the view
+ * that makes gaps visible across many units at once, and the shape the xlsx report is exported in.
+ */
 @Component({
   selector: 'studio-lite-table-view',
   templateUrl: './table-view.component.html',

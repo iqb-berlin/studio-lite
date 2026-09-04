@@ -6,8 +6,7 @@ import { HeartbeatService } from './heartbeat.service';
 import { AppService } from './app.service';
 import { BackendService } from './backend.service';
 import {
-  ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS, ACTIVITY_SYNC_THROTTLE_MS, AUTO_LOGOUT_REDIRECT_DELAY_MS,
-  SESSION_PING_INTERVAL_MS
+  ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS, ACTIVITY_SYNC_THROTTLE_MS, AUTO_LOGOUT_REDIRECT_DELAY_MS
 } from '../app.constants';
 
 jest.mock('../app.constants', () => ({
@@ -18,8 +17,7 @@ jest.mock('../app.constants', () => ({
   ACTIVITY_SYNC_THROTTLE_MS: 5000,
   USER_ACTIVITY_THROTTLE_MS: 1000,
   POST_MESSAGE_ACTIVITY_THROTTLE_MS: 1000,
-  AUTO_LOGOUT_REDIRECT_DELAY_MS: 1000,
-  SESSION_PING_INTERVAL_MS: 10000
+  AUTO_LOGOUT_REDIRECT_DELAY_MS: 1000
 }));
 
 describe('HeartbeatService', () => {
@@ -36,7 +34,6 @@ describe('HeartbeatService', () => {
     postMessage$ = new Subject<MessageEvent>();
     backendServiceMock = createMock<BackendService>({
       activity: jest.fn().mockReturnValue(of(true)),
-      sessionPing: jest.fn().mockReturnValue(of(undefined)),
       logout: jest.fn()
     });
     appServiceMock = createMock<AppService>({
@@ -110,6 +107,27 @@ describe('HeartbeatService', () => {
     expect(backendServiceMock.activity).toHaveBeenCalledTimes(2);
   });
 
+  // The sync is now the only session traffic this service produces, so it has to survive
+  // its own failures: a dropped request must not tear down the subscription and leave the
+  // session ageing while someone is working.
+  it('should keep syncing activity after a failed sync', () => {
+    appServiceMock.authData = { userId: 1 } as AuthDataDto;
+    backendServiceMock.activity = jest.fn()
+      .mockReturnValueOnce(throwError(() => new Error('offline')))
+      .mockReturnValue(of(true));
+    configureTestingModule();
+    service = TestBed.inject(HeartbeatService);
+    service.start();
+
+    service.registerUserActivity();
+    jest.advanceTimersByTime(100);
+    jest.advanceTimersByTime(ACTIVITY_SYNC_THROTTLE_MS);
+    service.registerUserActivity();
+    jest.advanceTimersByTime(100);
+
+    expect(backendServiceMock.activity).toHaveBeenCalledTimes(2);
+  });
+
   it('should not sync activity when no user is logged in', () => {
     appServiceMock.authData = { userId: 0 } as AuthDataDto;
     configureTestingModule();
@@ -121,47 +139,17 @@ describe('HeartbeatService', () => {
     expect(backendServiceMock.activity).not.toHaveBeenCalled();
   });
 
-  // The ping is what tells the backend a tab still exists. It must not depend on user
-  // interaction, otherwise an open but idle tab is indistinguishable from a closed one.
-  it('should ping the session on its own interval without any user interaction', () => {
+  // Nothing pings on a timer any more: the session status is read off the tokens, not off
+  // the liveness of a tab (#1615). A logged-in tab that nobody touches must therefore make
+  // no requests at all -- and still age honestly towards its inactivity timeout.
+  it('should send nothing while nobody interacts', () => {
     appServiceMock.authData = { userId: 1 } as AuthDataDto;
     configureTestingModule();
     service = TestBed.inject(HeartbeatService);
 
-    jest.advanceTimersByTime(100);
-    expect(backendServiceMock.sessionPing).toHaveBeenCalledTimes(1);
-
-    jest.advanceTimersByTime(SESSION_PING_INTERVAL_MS);
-    expect(backendServiceMock.sessionPing).toHaveBeenCalledTimes(2);
-
-    jest.advanceTimersByTime(SESSION_PING_INTERVAL_MS);
-    expect(backendServiceMock.sessionPing).toHaveBeenCalledTimes(3);
+    jest.advanceTimersByTime(ACTIVE_THRESHOLD_MS * 2);
 
     expect(backendServiceMock.activity).not.toHaveBeenCalled();
-  });
-
-  it('should not ping the session when no user is logged in', () => {
-    appServiceMock.authData = { userId: 0 } as AuthDataDto;
-    configureTestingModule();
-    service = TestBed.inject(HeartbeatService);
-
-    jest.advanceTimersByTime(SESSION_PING_INTERVAL_MS * 3);
-
-    expect(backendServiceMock.sessionPing).not.toHaveBeenCalled();
-  });
-
-  it('should keep pinging after a failed ping', () => {
-    appServiceMock.authData = { userId: 1 } as AuthDataDto;
-    backendServiceMock.sessionPing = jest.fn()
-      .mockReturnValueOnce(throwError(() => new Error('offline')))
-      .mockReturnValue(of(undefined));
-    configureTestingModule();
-    service = TestBed.inject(HeartbeatService);
-
-    jest.advanceTimersByTime(100);
-    jest.advanceTimersByTime(SESSION_PING_INTERVAL_MS);
-
-    expect(backendServiceMock.sessionPing).toHaveBeenCalledTimes(2);
   });
 
   it('should refresh the pulse when a postMessage is received', () => {

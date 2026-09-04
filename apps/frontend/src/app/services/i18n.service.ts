@@ -5,6 +5,11 @@ import { TranslateService } from '@ngx-translate/core';
 import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
 
+/**
+ * The locale the studio runs in, in one place: language, time zone and the date formats everything
+ * else formats by. Fixed to German -- the interface is translated, the formats are not chosen by
+ * the browser.
+ */
 @Injectable({
   providedIn: 'root'
 })

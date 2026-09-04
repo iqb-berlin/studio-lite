@@ -113,19 +113,6 @@ describe('AppController', () => {
     });
   });
 
-  describe('sessionPing', () => {
-    // A ping says "this tab is still open", nothing more. Routing it through
-    // updateLastActivity would make every open tab look like someone working in it.
-    it('should record liveness without touching the activity timestamp', async () => {
-      usersService.updateLastSeen.mockResolvedValue(undefined);
-
-      await controller.sessionPing({ user: { id: 1, sessionId: 'sid-1' } });
-
-      expect(usersService.updateLastSeen).toHaveBeenCalledWith(1, 'sid-1');
-      expect(usersService.updateLastActivity).not.toHaveBeenCalled();
-    });
-  });
-
   describe('findCanDos', () => {
     it('should return auth data for a user', async () => {
       usersService.getLongName.mockResolvedValue('Long Name');

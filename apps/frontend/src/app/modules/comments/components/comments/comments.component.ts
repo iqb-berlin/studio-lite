@@ -25,6 +25,13 @@ import { HiddenCommentsCountPipe } from '../../pipes/hidden-comments-count.pipe'
 import { CommentService } from '../../services/comment.service';
 import { VoterOverviewComponent } from '../voter-overview/voter-overview.component';
 
+/**
+ * The discussion on a unit: the threads, the filters over them, and the editor for a new comment.
+ *
+ * Used in both places comments are written -- a workspace and a review -- and told which by the
+ * review id it is given. It brings its own service instances, so two of these side by side keep
+ * their own state.
+ */
 @Component({
   selector: 'studio-lite-comments',
   templateUrl: './comments.component.html',

@@ -3,6 +3,13 @@ import { FlatTreeControl } from '@angular/cdk/tree';
 import { SelectionModel } from '@angular/cdk/collections';
 import { VocabFlatNode } from '../models/vocabulary.class';
 
+/**
+ * Whether every node below this one in the vocabulary tree is selected -- the checked state of a
+ * parent checkbox. A leaf has no descendants and is never "all selected".
+ *
+ * The `trigger` argument is not read: the tree control and the selection are mutated in place, so a
+ * pure pipe needs a value that changes to re-run at all.
+ */
 @Pipe({
   name: 'areAllDescendantsSelected',
   standalone: true

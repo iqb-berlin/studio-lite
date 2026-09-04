@@ -15,7 +15,6 @@ import {
   addUnitPred,
   clickIndexTabWorkspace,
   clickIndexTabWsgAdmin,
-  clickSaveButtonRight,
   deleteUnit,
   goToWsMenu,
   importExercise,
@@ -73,7 +72,11 @@ describe('Workspace Unit Management', () => {
     clickIndexTabWsgAdmin('settings');
     addStatus('In Bearbeitung', 0);
     addStatus('Finale', 1);
-    clickSaveButtonRight();
+    cy.intercept('PATCH', '/api/workspace-groups/*').as('saveStates');
+    cy.get('[data-cy="wsg-admin-settings-save-button"]')
+      .should('not.be.disabled')
+      .click();
+    cy.wait('@saveStates').its('response.statusCode').should('eq', 200);
   });
 
   it('displays available modules in dropdowns', () => {

@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { formatDistanceToNow } from 'date-fns';
 
+/** How long ago something happened, in words ("about 2 hours"); {@link FullTimestampPipe} for the date. */
 @Pipe({
   name: 'fromNow',
   standalone: true

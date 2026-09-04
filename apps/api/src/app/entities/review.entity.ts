@@ -5,6 +5,12 @@ import { ReviewSettingsDto } from '@studio-lite-lib/api-dto';
 // eslint-disable-next-line import/no-cycle
 import ReviewUnit from './review-unit.entity';
 
+/**
+ * A review: a selection of units from one workspace, reachable through a link and a password by
+ * people who have no studio account. The link is what a reviewer logs in with -- see
+ * `LocalStrategy`, which authenticates a review rather than a user -- and `settings` decides what
+ * the reviewer gets to see and do.
+ */
 @Entity()
 class Review {
   @PrimaryGeneratedColumn()

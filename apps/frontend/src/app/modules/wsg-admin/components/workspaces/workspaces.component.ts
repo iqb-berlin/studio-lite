@@ -17,7 +17,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { MatRadioButton } from '@angular/material/radio';
 import { MatIcon } from '@angular/material/icon';
 import { Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
@@ -34,17 +34,22 @@ import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
 import { WorkspaceMenuComponent } from '../workspace-menu/workspace-menu.component';
 import { WorkspaceUserToCheckCollection } from '../../models/workspace-users-to-check-collection.class';
 import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class';
+import { ACCESS_LEVELS } from '../../models/access-levels';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
 import { I18nService } from '../../../../services/i18n.service';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 
+/**
+ * The workspaces of a group as their admin sees them: creating, renaming, moving and deleting them,
+ * setting a drop box, and saying who works in each and at which level.
+ */
 @Component({
   selector: 'studio-lite-workspaces',
   templateUrl: './workspaces.component.html',
   styleUrls: ['./workspaces.component.scss'],
   imports: [WorkspaceMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef,
-    MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
+    MatHeaderCell, MatRadioButton, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
     MatTooltip, FormsModule, EntriesDividerComponent,
     IsSelectedIdPipe, TranslateModule, MatIcon, RolesHeaderComponent, WorkspaceNamePipe, MatIconButton, MatFabButton,
     RouterLink]
@@ -59,6 +64,7 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
   selectedWorkspaceId = 0;
   workspaceUsers = new WorkspaceUserToCheckCollection([]);
+  readonly accessLevels = ACCESS_LEVELS;
   isWorkspaceGroupAdmin = false;
   isBackUpWorkspaceGroup = false;
   maxWorkspaceCount = 5;
@@ -107,15 +113,20 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
         });
   }
 
-  changeAccessLevel(checked: boolean, user: WorkspaceUserChecked, level: number): void {
-    if (checked) {
-      user.accessLevel = level;
-      user.isChecked = true;
-    } else {
+  onRoleChange(user: WorkspaceUserChecked, level: number): void {
+    if (!this.selectedWorkspaceId) return;
+    user.accessLevel = level;
+    user.isChecked = true;
+    this.workspaceUsers.updateHasChanged();
+  }
+
+  onRoleClick(user: WorkspaceUserChecked, level: number): void {
+    if (!this.selectedWorkspaceId) return;
+    if (user.isChecked && user.accessLevel === level) {
       user.accessLevel = 0;
       user.isChecked = false;
+      this.workspaceUsers.updateHasChanged();
     }
-    this.workspaceUsers.updateHasChanged();
   }
 
   updateUserList(): void {

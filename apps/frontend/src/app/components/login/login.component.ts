@@ -17,6 +17,13 @@ import { BackendService } from '../../services/backend.service';
 import { WarningComponent } from '../warning/warning.component';
 import { AreaTitleComponent } from '../area-title/area-title.component';
 
+/**
+ * The login form, for both kinds of login the studio has: an account, and a review link with its
+ * password. After it, the page the user was sent away from is opened again.
+ *
+ * Every login creates a session, so it has to be fired exactly once per attempt -- the note in the
+ * class says what a second call would leave behind.
+ */
 @Component({
   selector: 'studio-lite-login',
   templateUrl: './login.component.html',
@@ -29,6 +36,12 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginNamePreset = '';
   redirectTo = '';
   errorMessage = '';
+  // A login without a sessionId creates a session row, so every extra call creates a
+  // second session nobody can reach: the frontend keeps the tokens of the last response
+  // and the earlier row lives out the inactivity window without a client that could log
+  // it out (#1617). The template disables the submit button while this is true, and the
+  // guard in login() catches the click that lands before that rendering does.
+  isSubmitting = false;
   private routingSubscription: Subscription | null = null;
 
   constructor(private fb: UntypedFormBuilder,
@@ -59,9 +72,11 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   login(): void {
+    if (this.isSubmitting) return;
     this.errorMessage = '';
     this.appService.clearErrorMessages();
     if (this.loginForm.valid) {
+      this.isSubmitting = true;
       this.appService.dataLoading = true;
       this.appService.errorMessagesDisabled = true;
       const initLoginMode = !this.appService.appConfig.hasUsers;
@@ -74,6 +89,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   async validLoginCheck(ok: boolean, initLoginMode: boolean) {
+    this.isSubmitting = false;
     this.appService.dataLoading = false;
     if (ok) {
       if (this.redirectTo) {

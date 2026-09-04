@@ -24,12 +24,17 @@ import Workspace from '../entities/workspace.entity';
 import { UnitService } from './unit.service';
 import { UnitUserService } from './unit-user.service';
 import UserSession from '../entities/user-session.entity';
-import {
-  ACTIVE_THRESHOLD_MS,
-  PASSIVE_THRESHOLD_MS,
-  ORPHANED_SESSION_THRESHOLD_MS
-} from '../app.constants';
+import { RefreshToken } from '../entities/refresh-token.entity';
+import { ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS } from '../app.constants';
 
+/**
+ * The accounts, their assignments and what the admin list shows about them: who exists, who may
+ * reach which workspace, who administers which group, and the session status of each.
+ *
+ * The session status is derived here, not stored: a session is active while an access token issued
+ * for it can still be valid, passive while an unexpired refresh token can still resume it, and
+ * orphaned once neither is left. Both thresholds come from `time.constants.ts`.
+ */
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
@@ -46,7 +51,9 @@ export class UsersService {
     private unitService: UnitService,
     private unitUserService: UnitUserService,
     @InjectRepository(UserSession)
-    private userSessionRepository: Repository<UserSession>
+    private userSessionRepository: Repository<UserSession>,
+    @InjectRepository(RefreshToken)
+    private refreshTokenRepository: Repository<RefreshToken>
   ) {
   }
 
@@ -445,16 +452,8 @@ export class UsersService {
     const expiresAt = new Date(now.getTime() + PASSIVE_THRESHOLD_MS);
     await this.userSessionRepository.update(
       { userId, sessionId },
-      { lastActivity: now, lastSeen: now, expiresAt }
+      { lastActivity: now, expiresAt }
     );
-  }
-
-  // Counterpart to updateLastActivity for the client's session ping: it proves a tab is
-  // still open, which must not be mistaken for someone interacting with the app. Only
-  // lastSeen moves, so the inactivity gate keeps counting from the last real interaction.
-  async updateLastSeen(userId: number, sessionId?: string): Promise<void> {
-    if (!sessionId) return;
-    await this.userSessionRepository.update({ userId, sessionId }, { lastSeen: new Date() });
   }
 
   private async getSessionStatusByUser(): Promise<Map<number, {
@@ -466,14 +465,22 @@ export class UsersService {
     const nowMs = Date.now();
     const sessionInfosByUser = new Map<number, UserSessionInfoDto[]>();
 
-    (await this.userSessionRepository.find())
+    // Sessions first, tokens second: a session created between the two reads is missing
+    // from the token set, and only its own lastActivity keeps it out of 'orphaned'.
+    const allSessions = await this.userSessionRepository.find();
+    const resumableSessionIds = await this.findResumableSessionIds(new Date(nowMs));
+
+    allSessions
       .filter(session => UsersService.isSessionStillValid(session.expiresAt, nowMs))
       .forEach(session => {
         const sessionInfo: UserSessionInfoDto = {
           sessionId: session.sessionId,
           lastActivity: session.lastActivity,
-          lastSeen: session.lastSeen,
-          activityStatus: UsersService.calculateSessionStatus(session.lastActivity, session.lastSeen, nowMs)
+          activityStatus: UsersService.calculateSessionStatus(
+            session.lastActivity,
+            resumableSessionIds.has(session.sessionId),
+            nowMs
+          )
         };
         const existing = sessionInfosByUser.get(session.userId) || [];
         existing.push(sessionInfo);
@@ -513,19 +520,39 @@ export class UsersService {
     return sessionsByUser;
   }
 
-  // Orphaned is decided first and on lastSeen alone: without a tab behind it a session is
-  // abandoned no matter how recently someone worked in it -- that is precisely the row
-  // left behind by a browser closed moments after the last click. Only for a session that
-  // is still alive does it make sense to ask how long ago that click was.
+  /**
+   * The sessionIds a refresh token can still resume. An expired token is no key at all, so a
+   * session left with nothing but expired ones can no longer be continued.
+   */
+  private async findResumableSessionIds(now: Date): Promise<Set<string>> {
+    const liveTokens = await this.refreshTokenRepository.find({
+      where: { expiresAt: MoreThan(now) },
+      select: { sessionId: true }
+    });
+    return new Set(liveTokens.map(token => token.sessionId));
+  }
+
+  /**
+   * A session is what its keys make it, and there are exactly two. While the last interaction is
+   * younger than ACTIVE_THRESHOLD_MS an access token issued for it can still be valid, so someone
+   * can be working in it right now: 'active'. After that only the refresh token is left, and while
+   * an unexpired one exists the session is merely unused -- whoever opens that browser again
+   * continues in it: 'passive'. Only when neither key is left is the session 'orphaned': nobody can
+   * return to it, and it should have gone when its last token did.
+   *
+   * Deliberately not decided by liveness ("is a tab still open?"). A closed browser is the ordinary
+   * way to leave a session, not an anomaly, and reporting it as orphaned made that label mean
+   * nothing (#1615). Active is asked first so that the moment between a fresh login writing its
+   * session row and writing its first refresh token cannot make a brand-new session look orphaned.
+   */
   private static calculateSessionStatus(
     lastActivity: Date,
-    lastSeen: Date,
+    isResumable: boolean,
     nowMs: number
   ): SessionActivityStatus {
-    if ((nowMs - new Date(lastSeen).getTime()) > ORPHANED_SESSION_THRESHOLD_MS) return 'orphaned';
     const ageMs = nowMs - new Date(lastActivity).getTime();
     if (ageMs <= ACTIVE_THRESHOLD_MS) return 'active';
-    return 'passive';
+    return isResumable ? 'passive' : 'orphaned';
   }
 
   private static isSessionStillValid(expiresAt: Date, nowMs: number): boolean {

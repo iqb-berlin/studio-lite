@@ -1,6 +1,11 @@
 import { UnitMetadataValues, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { EventEmitter } from '@angular/core';
 
+/**
+ * The unit's properties and metadata while they are being edited, in the same shape as
+ * {@link UnitDefinitionStore}: the loaded state, and beside it the fields that differ from it. The
+ * id is always carried, since it names what is to be patched.
+ */
 export class UnitMetadataStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();
   private originalData: UnitPropertiesDto;

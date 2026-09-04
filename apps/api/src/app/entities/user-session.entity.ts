@@ -3,6 +3,14 @@ import {
 } from 'typeorm';
 import User from './user.entity';
 
+/**
+ * One login of one user, kept apart from the tokens issued for it: several browsers of the same
+ * person are several sessions and expire independently.
+ *
+ * A session's state is read off the two thresholds in `time.constants.ts` and the tokens that still
+ * exist for it -- active while an access token can be valid, passive while a refresh token can
+ * resume it, orphaned once neither is left (see `findOrphanedSessionIds`).
+ */
 @Entity({ name: 'user_session' })
 class UserSession {
   @PrimaryGeneratedColumn()
@@ -14,17 +22,12 @@ class UserSession {
   @Column({ name: 'user_id' })
     userId: number;
 
-  // Last user interaction. Drives the active/passive status and the inactivity gate.
+  // Last user interaction. Drives the active status and the inactivity gate.
   @Column({ name: 'last_activity', type: 'timestamptz' })
     lastActivity: Date;
 
-  // Last sign of a still-open tab, kept fresh by the client's session ping even while
-  // nobody interacts. Drives the orphaned status; see ORPHANED_SESSION_THRESHOLD_MS.
-  @Column({ name: 'last_seen', type: 'timestamptz' })
-    lastSeen: Date;
-
   // Always lastActivity + PASSIVE_THRESHOLD_MS: a session dies from missing
-  // interaction, not from missing pings. SessionCleanupService drops it afterwards.
+  // interaction. SessionCleanupService drops the row afterwards.
   @Column({ name: 'expires_at', type: 'timestamptz' })
     expiresAt: Date;
 

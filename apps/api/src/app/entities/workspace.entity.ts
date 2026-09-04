@@ -4,6 +4,14 @@ import {
 import { WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import WorkspaceGroup from './workspace-group.entity';
 
+/**
+ * A workspace: the place units live in and the unit of access control. Every user reaches a unit
+ * through their assignment to its workspace ({@link WorkspaceUser}), and the workspace's settings
+ * decide which modules and metadata profiles apply to the units in it.
+ *
+ * `dropBoxId` names the workspace units from here are submitted to, if there is one; the submission
+ * itself is recorded in {@link UnitDropBoxHistory}.
+ */
 @Entity()
 class Workspace {
   @PrimaryGeneratedColumn()

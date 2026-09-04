@@ -1,5 +1,9 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
+/**
+ * What a single user has already seen of a single unit. Only the timestamp of the last comment
+ * they looked at, which is what the "new comments" marking in the unit list is derived from.
+ */
 @Entity()
 class UnitUser {
   @PrimaryColumn({

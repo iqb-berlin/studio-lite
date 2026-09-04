@@ -2,6 +2,10 @@ import { TranslateParser, TranslateService } from '@ngx-translate/core';
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { Injectable } from '@angular/core';
 
+/**
+ * The German labels of Material's paginator. Angular Material ships them in English only, so they
+ * are taken from the translation files here and refreshed when the language changes.
+ */
 @Injectable()
 export class PaginatorIntlService extends MatPaginatorIntl {
   private rangeLabelIntl!: string;

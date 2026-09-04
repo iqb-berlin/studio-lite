@@ -1,6 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 
+/**
+ * Whether a row is selected. Like {@link HasSelectionValuePipe} it takes the selection count as
+ * well, which is what makes the pure pipe re-run when the model is mutated in place.
+ */
 @Pipe({
   name: 'isSelected',
   standalone: true

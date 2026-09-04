@@ -8,6 +8,10 @@ import {
 } from '@angular/router';
 import { WorkspaceService } from '../services/workspace.service';
 
+/**
+ * Keeps the views a workspace has switched off out of reach, even when their URL is entered or
+ * bookmarked: such a route is redirected to the unit's properties, which every workspace has.
+ */
 @Injectable({
   providedIn: 'root'
 })

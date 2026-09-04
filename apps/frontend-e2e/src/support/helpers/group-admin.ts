@@ -1,6 +1,107 @@
 import { clickIndexTabWsgAdmin } from './navigation';
 import { AccessLevel } from '../testData';
-import { clickSaveButtonRight } from './common';
+
+// ---------------------------------------------------------------------------
+// Access-rights panel
+// ---------------------------------------------------------------------------
+
+/**
+ * Clicks the save button above the access-rights list, in both the Workspaces
+ * and the Users panel of wsg-admin. Fails if the button is disabled, so a
+ * selection that never reached the model cannot pass as a saved one.
+ * @example
+ * clickAccessRightsSaveButton();
+ */
+export function clickAccessRightsSaveButton(): void {
+  cy.get('[data-cy="wsg-admin-access-rights-save-button"]')
+    .should('not.be.disabled')
+    .click();
+}
+
+// ---------------------------------------------------------------------------
+// Low-level radio-button selectors
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the `[data-cy="access-rights-row"]` for a given display label.
+ * Works for both the Workspaces panel (username in parens) and the Users panel (ws name).
+ * @param label - Partial text of the `[data-cy="access-rights"]` cell
+ */
+export function getAccessRightsRow(label: string): Cypress.Chainable<JQuery<HTMLElement>> {
+  return cy.contains('[data-cy="access-rights"]', label)
+    .closest('[data-cy="access-rights-row"]');
+}
+
+/**
+ * Returns the `mat-radio-button` for a specific access level within a row.
+ * @param label - Row label (workspace name or username)
+ * @param level - AccessLevel (1 = Basic, 2 = Developer, 4 = Admin)
+ */
+export function getRoleRadio(label: string, level: AccessLevel): Cypress.Chainable<JQuery<HTMLElement>> {
+  return getAccessRightsRow(label)
+    .find(`[data-cy="access-rights-radio-button-${level}"]`);
+}
+
+/**
+ * Asserts whether a radio button for a given label + level is checked or unchecked.
+ * Asserts state on the internal native `input[type="radio"]`.
+ * @param label - Row label
+ * @param level - AccessLevel
+ * @param shouldBeChecked - true to assert checked, false to assert unchecked
+ */
+export function assertRoleRadioChecked(label: string, level: AccessLevel, shouldBeChecked: boolean): void {
+  getRoleRadio(label, level)
+    .find('input[type="radio"]')
+    .should(shouldBeChecked ? 'be.checked' : 'not.be.checked');
+}
+
+// ---------------------------------------------------------------------------
+// Workspaces panel (right panel when a workspace row is selected)
+// ---------------------------------------------------------------------------
+
+/**
+ * Selects a role level for a user in the Workspaces → right-panel users list.
+ * The workspace row must already be selected before calling this.
+ * @param username - The username shown in parentheses, e.g. "normaluser"
+ * @param level - AccessLevel to select
+ */
+export function selectRoleAtWs(username: string, level: AccessLevel): void {
+  getRoleRadio(`(${username})`, level).click();
+}
+
+/**
+ * Deselects the currently active role for a user in the Workspaces panel
+ * by clicking the already-checked radio button (toggle off).
+ * @param username - The username shown in parentheses
+ * @param level - The currently active AccessLevel to deselect
+ */
+export function deselectRoleAtWs(username: string, level: AccessLevel): void {
+  getRoleRadio(`(${username})`, level).click();
+}
+
+// ---------------------------------------------------------------------------
+// Users panel (right panel when a user row is selected)
+// ---------------------------------------------------------------------------
+
+/**
+ * Selects a role level for a workspace in the Users → right-panel workspace list.
+ * The user row must already be selected before calling this.
+ * @param wsName - The workspace name
+ * @param level - AccessLevel to select
+ */
+export function selectRoleAtUser(wsName: string, level: AccessLevel): void {
+  getRoleRadio(wsName, level).click();
+}
+
+/**
+ * Deselects the currently active role for a workspace in the Users panel
+ * by clicking the already-checked radio button (toggle off).
+ * @param wsName - The workspace name
+ * @param level - The currently active AccessLevel to deselect
+ */
+export function deselectRoleAtUser(wsName: string, level: AccessLevel): void {
+  getRoleRadio(wsName, level).click();
+}
 /**
  * Creates a workspace within a group
  * @param ws - Workspace name
@@ -35,12 +136,9 @@ export function grantRemovePrivilegeAtWs(users: string[], ws: string, rights: Ac
     .contains(`${ws}`)
     .click();
   users.forEach((user, index) => {
-    cy.contains('[data-cy="access-rights"]', ` (${user})`)
-      .closest('[data-cy="access-rights-row"]')
-      .find(`[data-cy="access-rights-checkbox-${rights[index]}"]`)
-      .click();
+    selectRoleAtWs(user, rights[index]);
   });
-  clickSaveButtonRight();
+  clickAccessRightsSaveButton();
 }
 
 /**
@@ -57,12 +155,9 @@ export function grantRemovePrivilegeAtUser(user: string, wss: string[], rights: 
     .should('exist')
     .click();
   wss.forEach((ws, index) => {
-    cy.contains('[data-cy="access-rights"]', ws)
-      .closest('[data-cy="access-rights-row"]')
-      .find(`[data-cy="access-rights-checkbox-${rights[index]}"]`)
-      .click();
+    selectRoleAtUser(ws, rights[index]);
   });
-  clickSaveButtonRight();
+  clickAccessRightsSaveButton();
 }
 
 /**

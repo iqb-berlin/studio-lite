@@ -1,5 +1,10 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
+/**
+ * A user as Keycloak describes them. Registered with TypeORM but read by no service at the moment:
+ * the fields a Keycloak login actually needs -- `identity` and `issuer` -- sit on {@link User}
+ * itself.
+ */
 @Entity()
 class KeycloakUser {
   @PrimaryGeneratedColumn()

@@ -1,5 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+/**
+ * Whether a review was created within the last three days, and is therefore marked as new. Compared
+ * by day, not by the hour: a review from yesterday evening is not older than one from this morning.
+ */
 @Pipe({
   name: 'isNewReview',
   standalone: true

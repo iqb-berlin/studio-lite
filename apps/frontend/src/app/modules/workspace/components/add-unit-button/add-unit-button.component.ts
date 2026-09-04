@@ -25,6 +25,10 @@ import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { NewUnitData } from '../../models/new-unit.interface';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 
+/**
+ * Adding units: a new one, a copy of an existing one, or units imported from a file. All three end
+ * in the same list, which is why they sit in one menu.
+ */
 @Component({
   selector: 'studio-lite-add-unit-button',
   templateUrl: './add-unit-button.component.html',

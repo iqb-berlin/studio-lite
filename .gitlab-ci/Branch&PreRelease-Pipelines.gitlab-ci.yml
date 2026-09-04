@@ -310,6 +310,23 @@ build-e2e-base-image:
       - node_modules/.cache/nx
       - cache/Cypress
 
+# The e2e jobs run the API on the runner instead of through compose, which skips the compose
+# `backend` service -- and with it the `liquibase: condition: service_completed_successfully`
+# that waits for the migration. Nest binds 3333 whether the schema is there or not, so both
+# waits are needed: first that liquibase finished, then that the port answers. Neither is
+# theoretical -- the migration runs in its own container, and in job 451110 the port took 30
+# seconds. Since these jobs block the pipeline (#1657), a lost start-up race would fail a
+# pull request for a reason that has nothing to do with it.
+.start_backend:
+  script:
+    - migration=$(docker wait $(docker compose --env-file .env.dev ps -aq liquibase))
+    - test "$migration" = "0" ||
+      ( echo "liquibase update failed with exit code $migration"; exit 1 )
+    - npx nx run api:serve --output-style=static --watch=false &  # start backend in background
+    - for i in $(seq 1 90); do curl --silent --max-time 5 --output /dev/null 127.0.0.1:3333/api && break; sleep 2; done
+    - curl --silent --max-time 5 --output /dev/null 127.0.0.1:3333/api ||
+      ( echo "API did not answer on 127.0.0.1:3333 within 180 seconds"; pkill -f 'nx run api:serve'; exit 1 )
+
 build-db-image:
   stage: build
   interruptible: true
@@ -497,7 +514,6 @@ test-db:
 test-app:
   stage: test-units
   interruptible: true
-  allow_failure: true
   extends: .distributed
   rules:
     - !reference [ .default_rules, rules ]
@@ -553,7 +569,6 @@ test-app:
 test-app-e2e-api:
   stage: test-e2e
   interruptible: true
-  allow_failure: true
   extends: .distributed
   rules:
     - !reference [ .develop_pr_rules, rules ]
@@ -580,15 +595,12 @@ test-app-e2e-api:
     - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
-    - npx nx run api:serve --output-style=static --watch=false &  # start backend in background
-    #    - while curl --silent --write-out "%{response_code}\n" --output /dev/null 127.0.0.1:3333/api != 200;
-    #      do sleep 1;
-    #      done
+    - !reference [ .start_backend, script ]
     - npx nx e2e frontend-e2e
         --prod
         --browser chrome
         --spec "./apps/frontend-e2e/src/e2e/api/**/*" ||
-      ( pkill npx && exit 1 )
+      ( pkill -f 'nx run api:serve'; exit 1 )
   after_script:
     - docker logout ${REGISTRY}
   artifacts:
@@ -599,7 +611,6 @@ test-app-e2e-api:
 test-app-e2e-ui-chrome:
   stage: test-e2e
   interruptible: true
-  allow_failure: true
   extends: .distributed
   rules:
     - !reference [ .develop_pr_rules, rules ]
@@ -626,15 +637,12 @@ test-app-e2e-ui-chrome:
     - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
-    - npx nx run api:serve --output-style=static --watch=false &  # start backend in background
-    #    - while curl --silent --write-out "%{response_code}\n" --output /dev/null 127.0.0.1:3333/api != 200;
-    #      do sleep 1;
-    #      done
+    - !reference [ .start_backend, script ]
     - npx nx e2e frontend-e2e
         --prod
         --browser chrome
         --spec "./apps/frontend-e2e/src/e2e/ui/**/*" ||
-      ( pkill npx && exit 1 )
+      ( pkill -f 'nx run api:serve'; exit 1 )
   after_script:
     - docker logout ${REGISTRY}
   artifacts:
@@ -672,16 +680,13 @@ test-app-e2e-ui-chrome-mobile:
     - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
-    - npx nx run api:serve --output-style=static --watch=false &  # start backend in background
-    #    - while curl --silent --write-out "%{response_code}\n" --output /dev/null 127.0.0.1:3333/api != 200;
-    #      do sleep 1;
-    #      done
+    - !reference [ .start_backend, script ]
     - npx nx e2e frontend-e2e
         --prod
         --browser chrome
         --spec "./apps/frontend-e2e/src/e2e/ui/**/*"
         --config "viewportWidth=375,viewportHeight=667" ||
-      ( pkill npx && exit 1 )
+      ( pkill -f 'nx run api:serve'; exit 1 )
   after_script:
     - docker logout ${REGISTRY}
   artifacts:
@@ -719,15 +724,12 @@ test-app-e2e-ui-firefox:
     - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
-    - npx nx run api:serve --output-style=static --watch=false &  # start backend in background
-    #    - while curl --silent --write-out "%{response_code}\n" --output /dev/null 127.0.0.1:3333/api != 200;
-    #      do sleep 1;
-    #      done
+    - !reference [ .start_backend, script ]
     - npx nx e2e frontend-e2e
         --prod
         --browser firefox
         --spec "./apps/frontend-e2e/src/e2e/ui/**/*" ||
-      ( pkill npx && exit 1 )
+      ( pkill -f 'nx run api:serve'; exit 1 )
   after_script:
     - docker logout ${REGISTRY}
   artifacts:
@@ -765,16 +767,13 @@ test-app-e2e-ui-firefox-mobile:
     - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
-    - npx nx run api:serve --output-style=static --watch=false &  # start backend in background
-    #    - while curl --silent --write-out "%{response_code}\n" --output /dev/null 127.0.0.1:3333/api != 200;
-    #      do sleep 1;
-    #      done
+    - !reference [ .start_backend, script ]
     - npx nx e2e frontend-e2e
         --prod
         --browser firefox
         --spec "./apps/frontend-e2e/src/e2e/ui/**/*"
         --config "viewportWidth=375,viewportHeight=667" ||
-      ( pkill npx && exit 1 )
+      ( pkill -f 'nx run api:serve'; exit 1 )
   after_script:
     - docker logout ${REGISTRY}
   artifacts:
@@ -812,15 +811,12 @@ test-app-e2e-ui-edge:
     - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
-    - npx nx run api:serve --output-style=static --watch=false &  # start backend in background
-    #    - while curl --silent --write-out "%{response_code}\n" --output /dev/null 127.0.0.1:3333/api != 200;
-    #      do sleep 1;
-    #      done
+    - !reference [ .start_backend, script ]
     - npx nx e2e frontend-e2e
         --prod
         --browser edge
         --spec "./apps/frontend-e2e/src/e2e/ui/**/*" ||
-      ( pkill npx && exit 1 )
+      ( pkill -f 'nx run api:serve'; exit 1 )
   after_script:
     - docker logout ${REGISTRY}
   artifacts:
@@ -858,16 +854,13 @@ test-app-e2e-ui-edge-mobile:
     - npx cypress verify
     - export POSTGRES_HOST=docker
   script:
-    - npx nx run api:serve --output-style=static --watch=false &  # start backend in background
-    #    - while curl --silent --write-out "%{response_code}\n" --output /dev/null 127.0.0.1:3333/api != 200;
-    #      do sleep 1;
-    #      done
+    - !reference [ .start_backend, script ]
     - npx nx e2e frontend-e2e
         --prod
         --browser edge
         --spec "./apps/frontend-e2e/src/e2e/ui/**/*"
         --config "viewportWidth=375,viewportHeight=667" ||
-      ( pkill npx && exit 1 )
+      ( pkill -f 'nx run api:serve'; exit 1 )
   after_script:
     - docker logout ${REGISTRY}
   artifacts:
@@ -879,7 +872,6 @@ lint-app:
   stage: lint
   extends: .distributed
   interruptible: true
-  allow_failure: true
   rules:
     - !reference [ .default_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}

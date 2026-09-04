@@ -91,6 +91,29 @@
 - **Rule**: These component directories MUST be located within the `components` subdirectory of their respective Angular module.
 - **Rationale**: This ensures a clean separation of concerns, consistent project structure, and improved maintainability.
 
+### Responsibility: Work That Is Not the Class's Job
+- **Rule**: A service, component or directive holds the work its name promises. A body that answers a different question — an algorithm, a file format, a set of domain rules — becomes a class or function of its own beside it and is called by name. What stays behind is the seam: the few lines that decide when the other one is asked and what is done with its answer.
+- **Marks** (any one is enough):
+  - The body needs nothing from the class it sits in: no `this`, no injected dependency, no field, no template, no host element.
+  - You can say what it does without naming its host's job.
+  - Private members exist only to serve one public method — they are that unit's insides, and only private to the wrong class.
+- **Not this**: a helper of a few lines that reads the state around it. The rule is aimed at the body that grew until it needs explaining, not at "one method per class".
+- **Preferred Solution**:
+  - Computation without dependencies → a class or function in `utils/` (both the frontend and the API have one).
+  - Needs injection or holds shared state → its own service.
+  - A value computed for a template → a **pure pipe** (see *Performance: Template Bindings*).
+  - Each of them gets its own `.spec.ts` (see *Unit Testing Policy*), and the caller keeps a test that it actually reaches for it.
+- **Rationale**: A class that answers two questions can only be tested through both, and its two halves rarely change at the same time — every change to one of them re-reads a class it has no business in.
+
+### Splitting a Component: Child, Directive, Base Class
+- **Rule**: Foreign work leaves first (see above). What remains is view work, and it is split in this order — cheapest and most reversible first, inheritance last:
+  1. **Too much view → a child component.** The plainest case is the body of a `@for`: what the loop renders per entry already is one thing with a name, its data already arrives as one value per pass (its inputs) and its events already have to travel upwards (its outputs). `CommentsComponent` renders one `<studio-lite-comment>` per root comment, and `CommentComponent` renders its replies with itself, one level down; it decides nothing — delete, reply, vote, hide all go back up to the component that owns the discussion.
+  2. **Behaviour at the host element → an applied directive**, with a selector: `ScrollCommentIntoViewDirective`, `ScrollIntoViewDirective`, `TrackIframeActivityDirective`. The mark is that it hangs on an element rather than on the data flow, and that a second element should be able to have it by writing an attribute — without touching that element's class, which is exactly what a base class would demand.
+  3. **A shared role → an abstract base class**, written `@Directive()` **without a selector**, and only for "is a" — never merely to share code. Everything the base holds must be something every subclass needs; where only some of them need it, add a step rather than a member: `VeronaModuleDirective` → `UnitDefinitionDirective` → `PreviewDirective`, inherited by `UnitPreviewComponent`, `UnitPlayerComponent` and `UnitPrintPlayerComponent`.
+- **Not this**: length alone. A loop body of one element with two bindings stays where it is, and a child that holds nothing but a stretch of markup, with nothing crossing the boundary but the parent's own fields, spreads one view over two places without separating anything. A child costs four files (see *Component Structure*) and an entry in the parent's `imports`.
+- **Note**: four bases here (`PreviewDirective`, `UnitDefinitionDirective`, `VeronaModuleDirective`, `CheckForChangesDirective`) still carry a selector that no template uses and that could not do anything anyway, since an abstract class is never instantiated. Do not copy that — a base class gets no selector.
+- **Rationale**: The reflex is a helper class, and it leaves untouched what is usually too big about a component: its view. Inheritance is last because it is the one split that cannot be undone in a single file.
+
 ### Deprecations
 - **Rule**: Do NOT use `NoopAnimationsModule` or `BrowserAnimationsModule`.
   - **Rationale**: They are deprecated in this project and can be removed from component tests without replacement.
@@ -118,3 +141,12 @@
 - **Rule**: Prefer TypeORM's built-in Repository methods (e.g., `find`, `save`, `queryBuilder`) over raw SQL queries.
 - **Rationale**: Using the ORM's abstraction layer ensures better type safety, prevents SQL injection, and makes the code more readable and maintainable. Raw SQL should ONLY be used for extremely complex queries where the ORM reaches its limits.
 - **Implementation**: Ensure that entities have proper relations (e.g., `@ManyToOne`, `@OneToMany`) defined to use the `relations` option in repository methods.
+
+### Controllers and Services: Where the Work Goes
+- **Rule**: A controller takes the request, applies its guards and calls a service. The business logic belongs in the service, not in the controller.
+- **Rule**: A task that is not the service's own subject — producing a file format, parsing an import, a question two callers have to answer identically — becomes a class in `classes/` or a function in `utils/`, and the service or controller calls it by name. This is the backend half of *Responsibility: Work That Is Not the Class's Job*.
+- **Examples**:
+  - `UnitDownloadClass`, `DownloadWorkspacesClass` and `DownloadDocx` build what is downloaded; the controllers hand them the data and return the result.
+  - `UnitImportData` and `UnitImportJsonData` read the import formats for `WorkspaceService`.
+  - `findOrphanedSessionIds` in `utils/` is asked by both `admin-user-controller.ts` (which displays them) and `SessionCleanupService` (which deletes them), so the two cannot drift into asking it in different words.
+- **Rationale**: The services here run to a thousand lines and more, and what can be named on its own is what leaves without a fight. Once out, it is testable without the service's dependencies — and a second caller can have it.

@@ -2,6 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { ActiveComment, ActiveCommentType } from '../models/active-comment.interface';
 import { Comment } from '../models/comment.interface';
 
+/** Whether this comment is the one currently being replied to; see {@link IsEditingPipe}. */
 @Pipe({
   name: 'isReplying',
   standalone: true

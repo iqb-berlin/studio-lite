@@ -20,6 +20,10 @@ import { PrintMetadataComponent } from '../print-metadata/print-metadata.compone
 import { UnitPropertiesComponent } from '../../../../components/unit-properties/unit-properties.component';
 import { UnitLastChangesComponent } from '../../../../components/unit-last-changes/unit-last-changes.component';
 
+/**
+ * One unit on paper: which of its parts are printed -- the rendered unit, its properties, metadata,
+ * comments, coding -- follows the print options the dialog collected.
+ */
 @Component({
   selector: 'studio-lite-unit-print-layout',
   templateUrl: './unit-print-layout.component.html',

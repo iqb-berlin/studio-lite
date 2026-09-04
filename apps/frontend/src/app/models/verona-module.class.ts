@@ -1,5 +1,9 @@
 import { VeronaModuleInListDto, VeronaModuleMetadataDto, VeronaModuleType } from '@studio-lite-lib/api-dto';
 
+/**
+ * An installed Verona module as the frontend holds it: what the API listed about it, plus its HTML
+ * once it has been fetched -- a module is only loaded when it is actually opened.
+ */
 export class VeronaModuleClass {
   key: string;
   sortKey: string;
@@ -21,6 +25,10 @@ export class VeronaModuleClass {
   }
 }
 
+/**
+ * The same module with its metadata pulled up to the top level, for the table that shows one field
+ * per column and cannot reach into a nested object.
+ */
 export interface FlattenedVeronaModuleClass {
   key: string;
   sortKey: string;

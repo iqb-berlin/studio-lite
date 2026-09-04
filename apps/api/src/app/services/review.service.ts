@@ -15,6 +15,13 @@ import Workspace from '../entities/workspace.entity';
 import { UnitService } from './unit.service';
 import { ReviewUnprocessableException } from '../exceptions/review-unprocessable.exception';
 
+/**
+ * The reviews of a workspace: what they contain, who may open them, and what a reviewer is served.
+ *
+ * A review is reached by a link -- a generated uuid -- and a password, which is how someone without
+ * a studio account gets in. That is also why the read paths here resolve the review's workspace
+ * first: a reviewer names a unit id, and only the review says which workspace it may come from.
+ */
 @Injectable()
 export class ReviewService {
   private readonly logger = new Logger(ReviewService.name);
@@ -183,6 +190,18 @@ export class ReviewService {
 
   async remove(id: number): Promise<void> {
     await this.reviewRepository.delete(id);
+  }
+
+  /**
+   * Whether this unit is part of this review. What the review routes are narrowed by: they are
+   * addressed with a unit id from the path, and only the review says which units that may be.
+   */
+  async isUnitInReview(reviewId: number, unitId: number): Promise<boolean> {
+    const reviewUnit = await this.reviewUnitRepository.findOne({
+      where: { reviewId: reviewId, unitId: unitId },
+      select: { unitId: true }
+    });
+    return !!reviewUnit;
   }
 
   async getReviewByKeyAndPassword(name: string, password: string): Promise<number | null> {

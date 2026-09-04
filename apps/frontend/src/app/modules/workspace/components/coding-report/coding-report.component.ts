@@ -28,6 +28,11 @@ type CodingReportRow = CodingReportDto & {
   unstructuredValidationMessage: string | null;
 };
 
+/**
+ * The coding report over a workspace: one row per coding variable, with what the validation of the
+ * scheme against the unit's variables found. The severity is derived here, so a unit whose scheme
+ * cannot be read at all is told apart from one with a warning in it.
+ */
 @Component({
   selector: 'studio-lite-coding-report',
   templateUrl: './coding-report.component.html',

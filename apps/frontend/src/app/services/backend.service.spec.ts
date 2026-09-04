@@ -581,18 +581,6 @@ describe('BackendService', () => {
     });
   });
 
-  describe('sessionPing', () => {
-    it('should post to the liveness endpoint, not to the activity one', done => {
-      service.sessionPing().subscribe(() => {
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}session-ping`);
-      expect(req.request.method).toBe('POST');
-      req.flush(null);
-    });
-  });
-
   // The interceptor reads these from the request context; guessing them from the URL is
   // what #1517 removed. A method that forgets to declare itself is the failure mode, so
   // each background and auth call is pinned here.
@@ -601,15 +589,6 @@ describe('BackendService', () => {
       service.activity().subscribe(() => done());
 
       const req = httpMock.expectOne(`${serverUrl}activity`);
-      expect(req.request.context.get(IS_BACKGROUND_REQUEST)).toBe(true);
-      expect(req.request.context.get(SKIP_TOKEN_REFRESH)).toBe(false);
-      req.flush(null);
-    });
-
-    it('should mark the session ping as a background request', done => {
-      service.sessionPing().subscribe(() => done());
-
-      const req = httpMock.expectOne(`${serverUrl}session-ping`);
       expect(req.request.context.get(IS_BACKGROUND_REQUEST)).toBe(true);
       expect(req.request.context.get(SKIP_TOKEN_REFRESH)).toBe(false);
       req.flush(null);

@@ -38,6 +38,10 @@ import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace
 import { Profile } from '../../../../models/profile.type';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
 
+/**
+ * The workspace groups of the installation: creating, renaming and deleting them, appointing their
+ * admins, and choosing the metadata profiles their workspaces may use.
+ */
 @Component({
   selector: 'studio-lite-workspace-groups',
   templateUrl: './workspace-groups.component.html',

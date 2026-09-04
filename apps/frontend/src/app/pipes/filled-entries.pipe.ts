@@ -2,9 +2,11 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { MetadataValuesEntry } from '@studio-lite-lib/api-dto';
 import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profile';
 
-// Unfilled profile keys are intentionally hidden in the read-only metadata
-// views: stored placeholder entries with empty values (editor-saved units)
-// must render exactly like absent entries (JSON-imported units).
+/**
+ * Keeps only the metadata entries that actually carry a value. Unfilled profile keys are
+ * intentionally hidden in the read-only metadata views: stored placeholder entries with empty
+ * values (editor-saved units) must render exactly like absent entries (JSON-imported units).
+ */
 @Pipe({
   name: 'filledEntries',
   standalone: true

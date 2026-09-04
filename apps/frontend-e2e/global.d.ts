@@ -36,6 +36,8 @@ declare namespace Cypress {
     // commands-api.ts
     addFirstUserAPI(username: string, password: string): Chainable<Response>; // 1
     loginAPI(username: string, password: string): Chainable<Response>; // 2
+    refreshTokenAPI(refreshToken: string): Chainable<Response>; // 2a
+    logoutAPI(token: string, refreshToken: string): Chainable<Response>; // 2b
     getUserIdAPI(token: string): Chainable<Response>; // 3
     updatePasswordAPI(token: string, oldPass: string, newPass: string): Chainable<Response>; // 4
     loginWithKeycloakAPI(user: UserData): Chainable<Response>; // 5
@@ -43,6 +45,8 @@ declare namespace Cypress {
     getUsersAPI(token: string): Chainable<Response>; // 7
     getUsersFullAPI(full: boolean, token: string): Chainable<Response>; // 8
     updateUserAPI(id:string, user: UserData, credentials: boolean, token: string): Chainable<Response>; // 9
+    deleteSessionAPI(userId: string, sessionId: string, token: string): Chainable<Response>; // 9a
+    deleteOrphanedSessionsAPI(userId: string, token: string): Chainable<Response>; // 9b
     createGroupAPI(group: GroupData, token: string): Chainable<Response>; // 10
     getGroupByIdAPI(groupId: string, token: string): Chainable<Response>; // 11
     getWsGroupsAPI(token: string): Chainable<Response>; // 12
@@ -94,9 +98,14 @@ declare namespace Cypress {
     updateCommentAPI(wsId: string, unitId: string, commentId:string, comment: CommentData, token:string):
     Chainable<Response>; // 60
     deleteCommentAPI(wsId: string, unitId: string, commentId:string, token:string): Chainable<Response>; // 61
+    patchCommentVisibilityAPI(wsId: string, unitId: string, commentId: string, hidden: boolean, userId: string,
+      token: string): Chainable<Response>; // 61a
+    setUsersOfWsAPI(wsId: string, users: AccessUser[], token: string): Chainable<Response>; // 19b
     addReviewAPI(wsId:string, reviewName: string, token:string): Chainable<Response>; // 62
     getReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response>; // 63
     updateReviewAPI(wsId:string, review: ReviewData, token:string): Chainable<Response>; // 64
+    setReviewPasswordAPI(wsId: string, review: ReviewData, password: string, token: string):
+    Chainable<Response>; // 64a
     getAllReviewAPI(wsId:string, token:string): Chainable<Response>; // 65
     getReviewWindowAPI(reviewId:string, token:string): Chainable<Response>; // 66
     getReviewPropertiesAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 67

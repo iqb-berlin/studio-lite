@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
 import { DefaultUrlSerializer } from '@angular/router';
 
+/**
+ * Reads which route is showing in a named outlet nested inside another. The workspace puts its
+ * views into secondary outlets, and what is open there cannot be read off the activated route --
+ * so the URL is parsed for it.
+ */
 @Injectable({
   providedIn: 'root'
 })

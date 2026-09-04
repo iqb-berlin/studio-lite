@@ -20,6 +20,12 @@ import { fileMimetypeFilter } from '../filters/file-mimetype.filter';
 import { ParseFilePipe } from '../pipes/parse-file.pipe';
 import { ZIP_MIME_TYPES } from '../constants/zip-mime-types';
 
+/**
+ * `admin/resource-packages` -- installing and removing resource packages, which is an
+ * installation-wide act and therefore an administrator's. An upload is a zip and is refused with
+ * 415 if it is not; reading the installed packages is open to everyone
+ * ({@link ResourcePackageController}).
+ */
 @Controller('admin/resource-packages')
 export class AdminResourcePackageController {
   constructor(

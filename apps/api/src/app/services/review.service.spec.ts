@@ -215,6 +215,22 @@ describe('ReviewService', () => {
     });
   });
 
+  describe('isUnitInReview', () => {
+    it('should be true for a unit the review contains', async () => {
+      reviewUnitRepository.findOne.mockResolvedValue({ unitId: 10 } as ReviewUnit);
+      expect(await service.isUnitInReview(1, 10)).toBe(true);
+      expect(reviewUnitRepository.findOne).toHaveBeenCalledWith({
+        where: { reviewId: 1, unitId: 10 },
+        select: { unitId: true }
+      });
+    });
+
+    it('should be false for a unit the review does not contain', async () => {
+      reviewUnitRepository.findOne.mockResolvedValue(null);
+      expect(await service.isUnitInReview(1, 999)).toBe(false);
+    });
+  });
+
   describe('getReviewByKeyAndPassword', () => {
     it('should return id if found', async () => {
       reviewRepository.findOne.mockResolvedValue({ id: 1 } as Review);

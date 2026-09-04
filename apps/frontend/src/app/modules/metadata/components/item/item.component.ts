@@ -17,6 +17,11 @@ import { MetadataService } from '../../services/metadata.service';
 import { AliasId } from '../../models/alias-id.interface';
 import { ItemModel } from '../../models/item-model.interface';
 
+/**
+ * One item and the profile form for its metadata. The form itself comes from the metadata-components
+ * package; what is done here is keeping it in step with the item -- the variables it may refer to,
+ * the language it is shown in, and reporting what was edited back to {@link ItemsComponent}.
+ */
 @Component({
   selector: 'studio-lite-item',
   templateUrl: './item.component.html',

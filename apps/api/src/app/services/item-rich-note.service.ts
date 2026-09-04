@@ -6,6 +6,10 @@ import UnitRichNote from '../entities/unit-rich-note.entity';
 import UnitItem from '../entities/unit-item.entity';
 import { UnitItemNotFoundException } from '../exceptions/unit-item-not-found.exception';
 
+/**
+ * Which items a rich note is about -- the same arrangement as {@link ItemCommentService}, for
+ * notes instead of comments.
+ */
 @Injectable()
 export class ItemRichNoteService {
   private readonly logger = new Logger(ItemRichNoteService.name);

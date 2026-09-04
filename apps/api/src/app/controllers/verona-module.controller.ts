@@ -13,6 +13,11 @@ import type { Response } from 'express';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
+/**
+ * `verona-modules` -- reading the installed modules: the list a chooser offers, and the module file
+ * itself, which the frontend loads to open a unit. Every logged-in user may read them; installing
+ * and deleting is administration ({@link AdminVeronaModuleController}).
+ */
 @Controller('verona-modules')
 export class VeronaModuleController {
   constructor(
@@ -35,6 +40,10 @@ export class VeronaModuleController {
     return this.veronaModulesService.findAll(type);
   }
 
+  /**
+   * The module behind this key. `download` decides the form: a file stream to save, or the module
+   * wrapped in a DTO for the frontend to run.
+   */
   @Get(':key')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

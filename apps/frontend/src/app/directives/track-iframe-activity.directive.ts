@@ -6,6 +6,13 @@ import {
 } from 'rxjs';
 import { HeartbeatService } from '../services/heartbeat.service';
 
+/**
+ * Counts work inside an iframe as activity. Input in a hosted module reaches no listener of the
+ * studio's own, so someone editing a unit for an hour would look idle and be logged out; this
+ * listens inside the frame and pulses the heartbeat.
+ *
+ * Re-attached on every load of the frame, since a new document has no listeners of the old one.
+ */
 @Directive({
   selector: 'iframe[studioLiteTrackIframeActivity]',
   standalone: true

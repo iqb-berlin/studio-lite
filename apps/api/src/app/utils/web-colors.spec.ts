@@ -1,20 +1,14 @@
 import { WebColors } from './web-colors';
 
 describe('WebColors', () => {
-  beforeEach(() => {
-    WebColors.hex = '';
-  });
-
   it('returns the hex value for a lowercase color name', () => {
     const hex = WebColors.getHexFromWebColor('lavender');
 
     expect(hex).toBe('E6E6FA');
   });
 
-  it('updates the cached hex value when a color is found', () => {
-    WebColors.getHexFromWebColor('lime');
-
-    expect(WebColors.hex).toBe('00FF00');
+  it('returns the hex value of every colour it knows', () => {
+    expect(WebColors.getHexFromWebColor('lime')).toBe('00FF00');
   });
 
   it('returns an empty string for unknown colors', () => {

@@ -4,6 +4,11 @@ import { map } from 'rxjs/operators';
 import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceBackendService } from './workspace-backend.service';
 
+/**
+ * The rich-note tags of the workspace group currently open, loaded once and then read from here.
+ * They come from a vocabulary, so a note may be rendered before its tag has a name -- which is why
+ * they are offered as an observable as well as a value.
+ */
 @Injectable({
   providedIn: 'root'
 })

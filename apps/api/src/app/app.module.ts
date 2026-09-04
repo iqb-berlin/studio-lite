@@ -54,7 +54,6 @@ import { UsersService } from './services/users.service';
 import { WorkspaceService } from './services/workspace.service';
 import { WorkspaceGroupService } from './services/workspace-group.service';
 import { WorkspaceUserService } from './services/workspace-user.service';
-import { WorkspaceGroupAdminService } from './services/workspace-group-admin.service';
 import { UnitService } from './services/unit.service';
 import { UnitCommentService } from './services/unit-comment.service';
 import { MetadataProfileService } from './services/metadata-profile.service';
@@ -269,7 +268,6 @@ import { WorkspaceUnitRichNoteController } from './controllers/workspace-unit-ri
     WorkspaceService,
     WorkspaceGroupService,
     WorkspaceUserService,
-    WorkspaceGroupAdminService,
     UnitService,
     UnitCommentService,
     UnitRichNoteService,
