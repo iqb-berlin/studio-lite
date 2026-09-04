@@ -27,7 +27,13 @@ describe('Workspace Module Switch', () => {
   const aspectPlayerTitle = 'Verona Player Aspect';
   const speedtestPlayerTitle = 'Verona Speedtest Player';
 
+  // createBasicSpecCy creates the first user through /api/init-login, which the API only offers while
+  // no user exists -- so it needs an empty database. Every spec of this suite leaves one behind by
+  // deleting its base afterwards, but a spec whose teardown fails hands the next one a populated
+  // database and its login then goes to /api/login and fails. Reset here rather than depend on the
+  // spec that ran before.
   before(() => {
+    cy.resetDb();
     createBasicSpecCy();
   });
 
