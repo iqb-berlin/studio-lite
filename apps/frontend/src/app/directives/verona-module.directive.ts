@@ -175,6 +175,12 @@ export abstract class VeronaModuleDirective implements OnDestroy {
       return;
     }
 
+    // The module being replaced must not be able to talk to the studio any more. It cannot be
+    // told apart by its window -- srcdoc navigation keeps one and the same contentWindow -- so the
+    // session id is what distinguishes it from its successor, and the outgoing one stops counting
+    // here. The successor draws a new one when it reports ready.
+    this.sessionId = '';
+
     if (!moduleId) {
       this.clearIFrame();
       this.lastVeronaModuleId = '';

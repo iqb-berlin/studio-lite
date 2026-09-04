@@ -344,6 +344,26 @@ describe('VeronaModuleDirective', () => {
     }
   );
 
+  it('forgets the session id of the module being replaced', async () => {
+    const { directive, moduleService } = createDirective();
+
+    const iframe = document.createElement('iframe');
+    document.body.appendChild(iframe);
+    directive.iFrameElement = iframe;
+    directive.sessionId = 'session-of-the-old-module';
+
+    provideModule(moduleService, 'player', createModule('module-5'));
+    moduleService.getModuleHtml = jest.fn().mockResolvedValue('<html lang=""></html>');
+
+    directive.buildModule('module-5', 'player');
+
+    expect(directive.sessionId).toBe('');
+
+    await Promise.resolve();
+
+    document.body.removeChild(iframe);
+  });
+
   it('clears module state when module id is missing', () => {
     const { directive } = createDirective();
 
