@@ -115,13 +115,13 @@ describe('VeronaModuleDirective', () => {
     };
   };
 
-  const createPlayerModule = (key: string) => new VeronaModuleClass({
+  const createModule = (key: string, type: 'player' | 'editor' | 'schemer' = 'player') => new VeronaModuleClass({
     key,
     sortKey: key,
     metadata: {
-      type: 'player',
-      id: 'player-id',
-      name: 'Player',
+      type,
+      id: `${type}-id`,
+      name: type,
       version: '1.0.0',
       specVersion: '3.0',
       isStable: true
@@ -129,6 +129,16 @@ describe('VeronaModuleDirective', () => {
     fileSize: 0,
     fileDateTime: 0
   });
+
+  const provideModule = (
+    moduleService: ModuleService,
+    type: 'player' | 'editor' | 'schemer',
+    module: VeronaModuleClass
+  ): void => {
+    if (type === 'player') moduleService.players = { [module.key]: module };
+    else if (type === 'editor') moduleService.editors = { [module.key]: module };
+    else moduleService.schemers = { [module.key]: module };
+  };
 
   // Every value the directive assigns to srcdoc, in order, so a test can tell a single navigation
   // from a navigation preceded by an emptying one.
@@ -275,7 +285,7 @@ describe('VeronaModuleDirective', () => {
     document.body.appendChild(iframe);
     directive.iFrameElement = iframe;
 
-    moduleService.players = { 'module-2': createPlayerModule('module-2') };
+    moduleService.players = { 'module-2': createModule('module-2') };
     moduleService.getModuleHtml = jest.fn().mockResolvedValue('<html lang=""></html>');
 
     directive.buildModule('module-2', 'player');
@@ -297,7 +307,7 @@ describe('VeronaModuleDirective', () => {
     iframe.srcdoc = 'the module shown so far';
     directive.iFrameElement = iframe;
 
-    moduleService.players = { 'module-3': createPlayerModule('module-3') };
+    moduleService.players = { 'module-3': createModule('module-3') };
     moduleService.getModuleHtml = jest.fn().mockResolvedValue('');
 
     directive.buildModule('module-3', 'player');
@@ -311,25 +321,28 @@ describe('VeronaModuleDirective', () => {
     document.body.removeChild(iframe);
   });
 
-  it('navigates the frame once, without emptying it, when a module is built', async () => {
-    const { directive, moduleService } = createDirective();
+  it.each(['player', 'editor', 'schemer'] as const)(
+    'navigates the frame once, without emptying it, when a %s is built',
+    async moduleType => {
+      const { directive, moduleService } = createDirective();
 
-    const iframe = document.createElement('iframe');
-    document.body.appendChild(iframe);
-    directive.iFrameElement = iframe;
-    const assigned = recordSrcdocAssignments(iframe);
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+      directive.iFrameElement = iframe;
+      const assigned = recordSrcdocAssignments(iframe);
 
-    moduleService.players = { 'module-4': createPlayerModule('module-4') };
-    moduleService.getModuleHtml = jest.fn().mockResolvedValue('<html lang=""></html>');
+      provideModule(moduleService, moduleType, createModule('module-4', moduleType));
+      moduleService.getModuleHtml = jest.fn().mockResolvedValue('<html lang=""></html>');
 
-    directive.buildModule('module-4', 'player');
+      directive.buildModule('module-4', moduleType);
 
-    await Promise.resolve();
+      await Promise.resolve();
 
-    expect(assigned).toEqual(['<html lang=""></html>']);
+      expect(assigned).toEqual(['<html lang=""></html>']);
 
-    document.body.removeChild(iframe);
-  });
+      document.body.removeChild(iframe);
+    }
+  );
 
   it('clears module state when module id is missing', () => {
     const { directive } = createDirective();
