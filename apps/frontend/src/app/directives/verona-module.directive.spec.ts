@@ -115,6 +115,33 @@ describe('VeronaModuleDirective', () => {
     };
   };
 
+  const createPlayerModule = (key: string) => new VeronaModuleClass({
+    key,
+    sortKey: key,
+    metadata: {
+      type: 'player',
+      id: 'player-id',
+      name: 'Player',
+      version: '1.0.0',
+      specVersion: '3.0',
+      isStable: true
+    } as VeronaModuleMetadataDto,
+    fileSize: 0,
+    fileDateTime: 0
+  });
+
+  // Every value the directive assigns to srcdoc, in order, so a test can tell a single navigation
+  // from a navigation preceded by an emptying one.
+  const recordSrcdocAssignments = (iframe: HTMLIFrameElement): string[] => {
+    const assigned: string[] = [];
+    Object.defineProperty(iframe, 'srcdoc', {
+      configurable: true,
+      get: () => (assigned.length ? assigned[assigned.length - 1] : ''),
+      set: (value: string) => { assigned.push(value); }
+    });
+    return assigned;
+  };
+
   it('sets iframe element from hosting element', () => {
     const { directive, hostingIframe } = createDirective();
 
@@ -248,22 +275,7 @@ describe('VeronaModuleDirective', () => {
     document.body.appendChild(iframe);
     directive.iFrameElement = iframe;
 
-    const module = new VeronaModuleClass({
-      key: 'module-2',
-      sortKey: 'module-2',
-      metadata: {
-        type: 'player',
-        id: 'player-id',
-        name: 'Player',
-        version: '1.0.0',
-        specVersion: '3.0',
-        isStable: true
-      } as VeronaModuleMetadataDto,
-      fileSize: 0,
-      fileDateTime: 0
-    });
-
-    moduleService.players = { 'module-2': module };
+    moduleService.players = { 'module-2': createPlayerModule('module-2') };
     moduleService.getModuleHtml = jest.fn().mockResolvedValue('<html lang=""></html>');
 
     directive.buildModule('module-2', 'player');
@@ -282,24 +294,10 @@ describe('VeronaModuleDirective', () => {
 
     const iframe = document.createElement('iframe');
     document.body.appendChild(iframe);
+    iframe.srcdoc = 'the module shown so far';
     directive.iFrameElement = iframe;
 
-    const module = new VeronaModuleClass({
-      key: 'module-3',
-      sortKey: 'module-3',
-      metadata: {
-        type: 'player',
-        id: 'player-id',
-        name: 'Player',
-        version: '1.0.0',
-        specVersion: '3.0',
-        isStable: true
-      } as VeronaModuleMetadataDto,
-      fileSize: 0,
-      fileDateTime: 0
-    });
-
-    moduleService.players = { 'module-3': module };
+    moduleService.players = { 'module-3': createPlayerModule('module-3') };
     moduleService.getModuleHtml = jest.fn().mockResolvedValue('');
 
     directive.buildModule('module-3', 'player');
@@ -308,6 +306,27 @@ describe('VeronaModuleDirective', () => {
 
     expect(translateService.instant).toHaveBeenCalledWith('workspace.player-not-loaded', { id: 'module-3' });
     expect(directive.lastVeronaModuleId).toBe('');
+    expect(iframe.srcdoc).toBe('');
+
+    document.body.removeChild(iframe);
+  });
+
+  it('navigates the frame once, without emptying it, when a module is built', async () => {
+    const { directive, moduleService } = createDirective();
+
+    const iframe = document.createElement('iframe');
+    document.body.appendChild(iframe);
+    directive.iFrameElement = iframe;
+    const assigned = recordSrcdocAssignments(iframe);
+
+    moduleService.players = { 'module-4': createPlayerModule('module-4') };
+    moduleService.getModuleHtml = jest.fn().mockResolvedValue('<html lang=""></html>');
+
+    directive.buildModule('module-4', 'player');
+
+    await Promise.resolve();
+
+    expect(assigned).toEqual(['<html lang=""></html>']);
 
     document.body.removeChild(iframe);
   });
