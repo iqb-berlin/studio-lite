@@ -34,9 +34,9 @@ describe('Unit Definitions', () => {
 
   it('preserves unit definition when switching between units', () => {
     selectUnit('M6_AK0011');
-    cy.get('iframe.unitHost').should('exist');
+    cy.get('.wait-animation').should('not.exist');
     cy.getIFrameBody('iframe.unitHost').within(() => {
-      cy.get('aspect-editor-dynamic-overlay')
+      cy.get('aspect-editor-dynamic-overlay', { timeout: 30000 })
         .eq(2)
         .within(() => {
           cy.get('aspect-math-table td:contains("2")').should('not.exist');

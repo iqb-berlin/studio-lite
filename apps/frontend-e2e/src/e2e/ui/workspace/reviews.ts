@@ -330,7 +330,7 @@ describe('Unit Reviews', () => {
 
   it('creates a review with coding (Kodierung) enabled', () => {
     loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     createReview(codingReviewName, ['M6_AK0011', 'M6_AK0012']);
 
