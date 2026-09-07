@@ -39,7 +39,8 @@ export class UnitPrintCodingComponent implements OnChanges, OnDestroy {
   }
 
   private fetchCodings(service: WorkspaceBackendService | ReviewBackendService): void {
-    service.getUnitScheme(this.workspaceId, this.unitId)
+    const parentId = this.workspaceId || this.reviewId;
+    service.getUnitScheme(parentId, this.unitId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(unitScheme => {
         if (unitScheme?.scheme) {
