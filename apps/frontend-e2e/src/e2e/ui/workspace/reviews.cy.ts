@@ -345,6 +345,51 @@ describe('Unit Reviews', () => {
     });
   });
 
+  const codingReviewName = 'CodingReviewTest';
+
+  it('creates a review with coding (Kodierung) enabled', () => {
+    loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
+    cy.visitWs(ws1);
+    goToReviewAdmin();
+    createReview(codingReviewName, ['M6_AK0011', 'M6_AK0012']);
+
+    goToReviewAdmin();
+    cy.intercept('GET', '/api/workspaces/*/reviews/*').as('getReviewConfigData');
+    cy.contains('mat-row', codingReviewName).click();
+    cy.wait('@getReviewConfigData');
+
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('studio-lite-review-config').within(() => {
+        cy.contains('mat-checkbox', json.workspace['review-show-codes'])
+          .find('input')
+          .check({ force: true });
+      });
+
+      cy.intercept('PATCH', '/api/workspaces/*/reviews/*').as('saveCodingReviewConfig');
+      cy.get('studio-lite-save-changes').within(() => {
+        cy.get('button').contains(json.workspace.save).click();
+      });
+      cy.wait('@saveCodingReviewConfig').its('response.statusCode').should('be.within', 200, 299);
+      cy.get('[data-cy="workspace-review-close"]').click();
+    });
+  });
+
+  it('opens the coding review, and click the continue button, and wait until the content with coding', () => {
+    cy.visit('/');
+    openReview(codingReviewName);
+    cy.get('.start-data').should('exist');
+    cy.get('studio-lite-unit-nav').within(() => {
+      cy.get('i:contains("chevron_left")').should('exist');
+      cy.get('i:contains("chevron_right")').should('exist');
+      cy.get('.mat-mdc-list-item:contains("1")').should('exist');
+    });
+    // Click continue button
+    cy.get('studio-lite-start').within(() => {
+      cy.get('i:contains("chevron_right")').click({ force: true });
+    });
+    cy.get('studio-lite-unit-print-coding').should('exist');
+  });
+
   it('allows an admin to permanently delete a review', () => {
     loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
     cy.visitWs(ws1);
