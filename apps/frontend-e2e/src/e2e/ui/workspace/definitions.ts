@@ -6,9 +6,12 @@ import { primaryWorkspace } from '../../../support/testData';
 
 describe('Unit Definitions', () => {
   it('opens unit definition editor', () => {
+    cy.pause();
     cy.visitWs(primaryWorkspace);
     selectUnit('M6_AK0012');
+    cy.get('.unit-row.selected').should('contain.text', 'M6_AK0012');
     clickIndexTabWorkspace('editor');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
     cy.get('iframe.unitHost').should('exist');
   });
 
@@ -34,7 +37,8 @@ describe('Unit Definitions', () => {
 
   it('preserves unit definition when switching between units', () => {
     selectUnit('M6_AK0011');
-    cy.get('.wait-animation').should('not.exist');
+    cy.get('.unit-row.selected').should('contain.text', 'M6_AK0011');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
     cy.getIFrameBody('iframe.unitHost').within(() => {
       cy.get('aspect-editor-dynamic-overlay', { timeout: 30000 })
         .eq(2)

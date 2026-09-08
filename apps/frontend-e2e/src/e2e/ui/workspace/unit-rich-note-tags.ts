@@ -29,7 +29,7 @@ describe('Unit Rich Notes', () => {
     deleteBasicSpecCy();
   });
 
-  it('activates Rückmeldung in ws1', () => {
+  it('activates Rückmeldung in primaryWorkspace', () => {
     openWorkspaceSettingsDialog(baseGroup, primaryWorkspace);
     setRouteVisibility('notes', true);
     saveWorkspaceSettings();
