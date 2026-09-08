@@ -125,7 +125,7 @@ describe('UnitPrintCodingComponent', () => {
         reviewId: new SimpleChange(null, 5, true)
       });
 
-      expect(mockReviewBackendService.getUnitScheme).toHaveBeenCalled();
+      expect(mockReviewBackendService.getUnitScheme).toHaveBeenCalledWith(5, 10);
       expect(mockWorkspaceBackendService.getUnitScheme).not.toHaveBeenCalled();
     });
 
