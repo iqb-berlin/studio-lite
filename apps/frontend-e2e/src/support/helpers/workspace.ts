@@ -260,6 +260,7 @@ export function editRichNote(addedContent: string): void {
  * submitUnits(['Unit 1', 'Unit 2']);
  */
 export function submitUnits(unitNames: string[]): void {
+  cy.intercept('PATCH', '**/workspaces/*/units/drop-box-history').as('submitUnitsReq');
   cy.get('[data-cy="workspace-edit-unit-menu"]').click();
   cy.get('[data-cy="workspace-edit-unit-submit-units"]').click();
   cy.get('mat-mdc-dialog-container, mat-dialog-container').should('be.visible');
@@ -269,6 +270,7 @@ export function submitUnits(unitNames: string[]): void {
       .contains(json.workspace['submit-units'])
       .click();
   });
+  cy.wait('@submitUnitsReq').its('response.statusCode').should('be.oneOf', [200, 201, 204]);
 }
 
 /**
@@ -278,6 +280,7 @@ export function submitUnits(unitNames: string[]): void {
  * returnSubmittedUnits(['Unit 1', 'Unit 2']);
  */
 export function returnSubmittedUnits(unitNames: string[]): void {
+  cy.intercept('PATCH', '**/workspaces/*/units/drop-box-history').as('returnUnitsReq');
   cy.get('[data-cy="workspace-edit-unit-menu"]').click();
   cy.get('[data-cy="workspace-edit-unit-return-submitted-units"]').click();
   cy.get('mat-mdc-dialog-container, mat-dialog-container').should('be.visible');
@@ -287,6 +290,8 @@ export function returnSubmittedUnits(unitNames: string[]): void {
       .contains(json.workspace['return-submitted-units'])
       .click();
   });
+  // Wait for backend reponse
+  cy.wait('@returnUnitsReq').its('response.statusCode').should('be.oneOf', [200, 201, 204]);
 }
 
 /**

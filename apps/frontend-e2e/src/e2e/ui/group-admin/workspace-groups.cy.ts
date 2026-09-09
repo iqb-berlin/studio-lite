@@ -114,6 +114,8 @@ describe('Workspace Group Administration', () => {
   it('returns a unit from the drop-box secondaryWorkspace back to primaryWorkspace', () => {
     cy.visitWs(secondaryWorkspace);
     returnSubmittedUnits(['M6_AK0011']);
+    // Verify successful return (removed from drop-box)
+    cy.contains('mat-row', 'M6_AK0011').should('not.exist');
 
     // Verify it is back in primaryWorkspace
     cy.visitWs(primaryWorkspace);
