@@ -7,4 +7,5 @@ import './unit-properties';
 import './unit-groups';
 import './definitions';
 import './comments';
+import './unit-print';
 import './unit-rich-note-tags';

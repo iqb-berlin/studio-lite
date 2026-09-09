@@ -411,3 +411,11 @@ export const reviewTestNames = {
   /** The single review created and exercised in the reviews suite */
   reviewName: 'Review1'
 } as const;
+
+/**
+ * Test names used in `unit-print.ts` – print preview for unit properties & last changes.
+ */
+export const printTestNames = {
+  description: 'Test description for print preview unit',
+  transcript: 'Test transcript content for print preview'
+} as const;

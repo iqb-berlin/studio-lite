@@ -107,8 +107,8 @@ describe('Workspace Settings & Verona Modules', () => {
   });
 
   it('allows switching between different player modules', () => {
-    setModuleWithoutVerification(primaryWorkspace, 'Aspect', 'Speedtest', 'Schemer');
-    setModuleWithoutVerification(primaryWorkspace, 'Aspect', 'Stars', 'Schemer');
+    setModuleWithoutVerification(secondaryWorkspace, 'Aspect', 'Speedtest', 'Schemer');
+    setModuleWithoutVerification(secondaryWorkspace, 'Aspect', 'Stars', 'Schemer');
   });
 
   it('saves default Verona editor selection and persists after reload', () => {
