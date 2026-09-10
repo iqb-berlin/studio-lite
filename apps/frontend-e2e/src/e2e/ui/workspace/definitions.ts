@@ -6,7 +6,6 @@ import { primaryWorkspace } from '../../../support/testData';
 
 describe('Unit Definitions', () => {
   it('opens unit definition editor', () => {
-    cy.pause();
     cy.visitWs(primaryWorkspace);
     selectUnit('M6_AK0012');
     cy.get('.unit-row.selected').should('contain.text', 'M6_AK0012');

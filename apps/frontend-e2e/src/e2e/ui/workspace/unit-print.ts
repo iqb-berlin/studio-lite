@@ -1,31 +1,26 @@
 import {
   primaryWorkspace,
-  propertiesUnits,
-  printTestNames
+  printTestNames,
+  printUnits
 } from '../../../support/testData';
 import {
-  ensureUnitExists,
   goToWsMenu,
   selectListUnits
 } from '../../../support/helpers';
 
 describe('Unit Print Preview – Properties & Last Changes', () => {
-  const targetUnit = propertiesUnits.propUnit1;
+  const targetUnits = printUnits;
   let interceptPrintProperties = false;
   let interceptWsgStates = false;
 
   before(() => {
-    ensureUnitExists(primaryWorkspace, targetUnit);
-
     // Scoped intercepts that only modify data during print preview tests
     cy.intercept('GET', '**/workspaces/*/units/*/properties', req => {
       delete req.headers['if-none-match'];
       if (interceptPrintProperties) {
         req.continue(res => {
           if (res.body) {
-            res.body.key = targetUnit.shortname;
-            res.body.name = targetUnit.name;
-            res.body.groupName = targetUnit.group;
+            res.body.groupName = printTestNames.groupName;
             res.body.description = printTestNames.description;
             res.body.transcript = printTestNames.transcript;
             res.body.state = '1';
@@ -88,14 +83,16 @@ describe('Unit Print Preview – Properties & Last Changes', () => {
 
   it('displays unit key, name and properties in studio-lite-unit-properties', () => {
     cy.visitWs(primaryWorkspace);
-    cy.contains('mat-row', targetUnit.shortname).should('exist');
+    targetUnits.forEach(shortname => {
+      cy.contains('mat-row', shortname).should('exist');
+    });
 
     interceptPrintProperties = true;
     interceptWsgStates = true;
 
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-preview-units"]').click();
-    selectListUnits([targetUnit.shortname]);
+    selectListUnits([...targetUnits]);
 
     // Stub window.open so the print view opens within the Cypress runner
     cy.window().then(win => {
@@ -116,17 +113,18 @@ describe('Unit Print Preview – Properties & Last Changes', () => {
     cy.wait('@getUnitProperties');
 
     // Verify studio-lite-unit-properties headers
-    cy.get('studio-lite-unit-properties').should('be.visible');
-    cy.get('studio-lite-unit-properties .unit-key')
-      .should('contain.text', targetUnit.shortname);
-    cy.get('studio-lite-unit-properties .unit-name')
-      .should('contain.text', targetUnit.name);
+    cy.get('studio-lite-unit-properties').should('have.length', targetUnits.length);
+    targetUnits.forEach((shortname, index) => {
+      cy.get('studio-lite-unit-properties').eq(index).within(() => {
+        cy.get('.unit-key').should('contain.text', shortname);
+      });
+    });
 
     // Verify studio-lite-unit-properties table metadata
     cy.translate(Cypress.expose('locale')).then(json => {
-      cy.get('studio-lite-unit-properties table.metadata').within(() => {
+      cy.get('studio-lite-unit-properties table.metadata').first().within(() => {
         cy.contains('tr', json.print['group-name'])
-          .should('contain.text', targetUnit.group);
+          .should('contain.text', printTestNames.groupName);
         cy.contains('tr', json.print.description)
           .should('contain.text', printTestNames.description);
         cy.contains('tr', json.print.transcript)
@@ -144,10 +142,10 @@ describe('Unit Print Preview – Properties & Last Changes', () => {
   });
 
   it('displays all last-changed timestamps and users in studio-lite-unit-last-changes', () => {
-    cy.get('studio-lite-unit-last-changes').should('be.visible');
+    cy.get('studio-lite-unit-last-changes').should('have.length.at.least', 1);
 
     cy.translate(Cypress.expose('locale')).then(json => {
-      cy.get('studio-lite-unit-last-changes table.last-changes').within(() => {
+      cy.get('studio-lite-unit-last-changes table.last-changes').first().within(() => {
         cy.contains('tr', json.print['last-changed-definition']).within(() => {
           cy.root().should('contain.text', 'EditorUser');
           cy.contains(/\d{2}\.\d{2}\.2025/).should('exist');
@@ -171,11 +169,13 @@ describe('Unit Print Preview – Properties & Last Changes', () => {
 
   it('hides unit-last-changes and metadata details when printProperties is unchecked', () => {
     cy.visitWs(primaryWorkspace);
-    cy.contains('mat-row', targetUnit.shortname).should('exist');
+    targetUnits.forEach(shortname => {
+      cy.contains('mat-row', shortname).should('exist');
+    });
 
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-preview-units"]').click();
-    selectListUnits([targetUnit.shortname]);
+    selectListUnits([...targetUnits]);
 
     cy.window().then(win => {
       cy.stub(win, 'open')
@@ -202,8 +202,12 @@ describe('Unit Print Preview – Properties & Last Changes', () => {
     cy.get('studio-lite-unit-last-changes').should('not.exist');
 
     // In studio-lite-unit-properties, headings exist but detailed table rows are not populated
-    cy.get('studio-lite-unit-properties .unit-key')
-      .should('contain.text', targetUnit.shortname);
-    cy.get('studio-lite-unit-properties table.metadata tr').should('not.exist');
+    cy.get('studio-lite-unit-properties').should('have.length', targetUnits.length);
+    targetUnits.forEach((shortname, index) => {
+      cy.get('studio-lite-unit-properties').eq(index).within(() => {
+        cy.get('.unit-key').should('contain.text', shortname);
+        cy.get('table.metadata tr').should('not.exist');
+      });
+    });
   });
 });

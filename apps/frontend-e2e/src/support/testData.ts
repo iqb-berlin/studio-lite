@@ -416,6 +416,9 @@ export const reviewTestNames = {
  * Test names used in `unit-print.ts` – print preview for unit properties & last changes.
  */
 export const printTestNames = {
+  groupName: 'Testgruppe',
   description: 'Test description for print preview unit',
   transcript: 'Test transcript content for print preview'
 } as const;
+
+export const printUnits = ['M6_AK0011', 'M6_AK0012'] as const;
