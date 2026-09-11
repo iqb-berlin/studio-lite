@@ -6,6 +6,7 @@ import { CommentDeleteGuard } from './comment-delete.guard';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
+import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-found.exception';
 
 describe('CommentDeleteGuard', () => {
   let guard: CommentDeleteGuard;
@@ -20,8 +21,8 @@ describe('CommentDeleteGuard', () => {
     })
   });
 
-  const ownComment = { id: 42, userId: 1 } as UnitCommentDto;
-  const foreignComment = { id: 42, userId: 2 } as UnitCommentDto;
+  const ownComment = { id: 42, userId: 1, unitId: 10 } as UnitCommentDto;
+  const foreignComment = { id: 42, userId: 2, unitId: 10 } as UnitCommentDto;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -94,5 +95,18 @@ describe('CommentDeleteGuard', () => {
   it('should throw UnauthorizedException without a comment in the route', async () => {
     await expect(guard.canActivate(contextFor(1, { workspace_id: '3' })))
       .rejects.toThrow(UnauthorizedException);
+  });
+
+  it('should throw UnitCommentNotFoundException when unit_id in route does not match comment.unitId', async () => {
+    unitCommentService.findOneComment.mockResolvedValue(ownComment);
+
+    await expect(guard.canActivate(contextFor(1, { id: '42', unit_id: '99', workspace_id: '3' })))
+      .rejects.toThrow(UnitCommentNotFoundException);
+  });
+
+  it('should pass when unit_id in route matches comment.unitId', async () => {
+    unitCommentService.findOneComment.mockResolvedValue(ownComment);
+
+    expect(await guard.canActivate(contextFor(1, { id: '42', unit_id: '10', workspace_id: '3' }))).toBe(true);
   });
 });
