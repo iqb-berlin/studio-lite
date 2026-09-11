@@ -1,39 +1,23 @@
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
-import { ws1 } from '../../../support/testData';
 import {
   clickIndexTabWorkspace,
-  importExercise,
   selectUnit
 } from '../../../support/helpers';
+import { primaryWorkspace } from '../../../support/testData';
 
 describe('Unit Definitions', () => {
-  before(() => {
-    createBasicSpecCy();
-  });
-
-  after(() => {
-    deleteBasicSpecCy();
-  });
-
-  it('imports test units', () => {
-    cy.visitWs(ws1);
-    importExercise('test_studio_units_download.zip');
-  });
-
   it('opens unit definition editor', () => {
-    cy.get('.cdk-overlay-backdrop').eq(0).click();
+    cy.visitWs(primaryWorkspace);
     selectUnit('M6_AK0012');
+    cy.get('.unit-row.selected').should('contain.text', 'M6_AK0012');
     clickIndexTabWorkspace('editor');
-    cy.get('.wait-animation').should('not.exist');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
+    cy.get('iframe.unitHost').should('exist');
   });
 
   it.skip('clicks between two units and saves the unit M6_AK0011', () => {
     selectUnit('M6_AK0011');
-    cy.wait(30);
     selectUnit('M6_AK0012');
-    cy.wait(30);
     selectUnit('M6_AK0011');
-    cy.wait(30);
     cy.getIFrameBody('iframe.unitHost').within(() => {
       cy.get('aspect-element-model-properties-component', { timeout: 10000 })
         .should('be.visible')
@@ -52,7 +36,8 @@ describe('Unit Definitions', () => {
 
   it('preserves unit definition when switching between units', () => {
     selectUnit('M6_AK0011');
-    cy.get('.wait-animation').should('not.exist');
+    cy.get('.unit-row.selected').should('contain.text', 'M6_AK0011');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
     cy.getIFrameBody('iframe.unitHost').within(() => {
       cy.get('aspect-editor-dynamic-overlay', { timeout: 30000 })
         .eq(2)

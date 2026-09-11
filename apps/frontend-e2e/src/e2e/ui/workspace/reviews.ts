@@ -1,15 +1,14 @@
 import {
   AccessLevel,
-  group1,
-  newUser,
-  ws1
+  baseGroup,
+  standardUser,
+  reviewTestNames,
+  primaryWorkspace
 } from '../../../support/testData';
 
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 import {
   clickIndexTabWorkspace,
   clickIndexTabWsgAdmin,
-  importExercise,
   login,
   loginWithUser,
   logout,
@@ -26,24 +25,10 @@ import {
 import { grantRemovePrivilegeAtWs } from '../../../support/helpers/group-admin';
 
 describe('Unit Reviews', () => {
-  before(() => {
-    createBasicSpecCy();
-  });
-
-  after(() => {
-    deleteBasicSpecCy();
-  });
-
-  const review: string = 'Review1';
-
-  it('imports test units successfully into the workspace', () => {
-    cy.visitWs(ws1);
-    importExercise('test_studio_units_download.zip');
-    cy.contains('M6_AK0011', { timeout: 15000 }).should('exist');
-  });
+  const review: string = reviewTestNames.reviewName;
 
   it('allows an admin to create a new review with specific unit selection and configuration', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     createReview(review, ['M6_AK0011', 'M6_AK0012']);
 
@@ -113,11 +98,11 @@ describe('Unit Reviews', () => {
   });
 
   it('permits users with basic access to view and enter the review', () => {
-    cy.findAdminGroupSettings(group1).click();
+    cy.findAdminGroupSettings(baseGroup).click();
     clickIndexTabWsgAdmin('workspaces');
-    grantRemovePrivilegeAtWs([newUser.username], ws1, [AccessLevel.Basic]);
+    grantRemovePrivilegeAtWs([standardUser.username], primaryWorkspace, [AccessLevel.Basic]);
     logout();
-    login(newUser.username, newUser.password);
+    login(standardUser.username, standardUser.password);
     cy.get('studio-lite-user-reviews-area').within(() => {
       cy.get(`a:contains("${review}")`).should('exist');
     });
@@ -126,21 +111,21 @@ describe('Unit Reviews', () => {
   });
 
   it('exports the review configuration via the admin menu', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     exportReview(review);
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 
   it('prints the review summary via the admin menu', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     printReview(review);
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 
   it('allows modifying the unit selection for an existing review', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     modifyReviewUnits(review, ['M6_AK0013']);
   });
@@ -149,9 +134,9 @@ describe('Unit Reviews', () => {
     cy.intercept('GET', '/api/reviews/*').as('getReview');
     cy.visit('/');
     openReview(review);
-    cy.wait('@getReview');
-    cy.get('studio-lite-unit-nav').within(() => {
-      cy.get('.mat-mdc-list-item:contains("3")').should('exist');
+    cy.wait('@getReview').its('response.statusCode').should('be.within', 200, 299);
+    cy.get('studio-lite-unit-nav', { timeout: 15000 }).within(() => {
+      cy.get('.mat-mdc-list-item:contains("3")', { timeout: 10000 }).should('exist');
     });
   });
 
@@ -159,7 +144,7 @@ describe('Unit Reviews', () => {
     cy.visit('/');
 
     openReview(review);
-    verifyReviewStartPage(review, ws1);
+    verifyReviewStartPage(review, primaryWorkspace);
 
     // Check BookletConfigShowComponent
     cy.translate(Cypress.expose('locale')).then(json => {
@@ -233,24 +218,22 @@ describe('Unit Reviews', () => {
     // Open info panel
     cy.get('studio-lite-unit-info').within(() => {
       cy.contains('button', 'chevron_right').click();
-      cy.wait(500);
       cy.get('.infoPanel').should('not.be.visible');
       cy.contains('button', 'chevron_left').click();
-      cy.wait(500);
       cy.get('.infoPanel').should('be.visible');
       cy.get('.infoPanel h2').should('not.be.empty');
     });
   });
 
   it('shows the finish page upon completion and allows returning to the review', () => {
-    // Navigate to the end
+    // Navigate to the end (click the finish page option container at the end of the unit nav list)
     cy.get('studio-lite-unit-nav').within(() => {
-      cy.get('.mat-mdc-list-item').eq(-1).click();
+      cy.get('.unit-list > div').last().click({ force: true });
     });
 
     // Should be in FinishComponent (end page)
+    cy.get('.finish-page', { timeout: 15000 }).should('be.visible');
     cy.url().should('include', '/end');
-    cy.get('.finish-page').should('be.visible');
     cy.get('.finish-data h1').should('contain', review);
 
     // Backwards button
@@ -259,7 +242,7 @@ describe('Unit Reviews', () => {
   });
 
   it('shows no dot for comments inserted by himself in the workspace unit list: ', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments').should('have.css', 'opacity', '0');
     });
@@ -271,15 +254,15 @@ describe('Unit Reviews', () => {
   });
 
   it('clears the new comment dot after viewing comments as different users', () => {
-    loginWithUser(newUser.username, newUser.password);
-    cy.visitWs(ws1);
+    loginWithUser(standardUser.username, standardUser.password);
+    cy.visitWs(primaryWorkspace);
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/comments').as('markCommentsSeen');
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments').should('have.css', 'opacity', '1');
     });
     // Wait on the request that actually stores the seen-state instead of a
     // fixed 100ms: under CI load the PATCH regularly took longer, the tab
     // switch happened first, and the dot legitimately stayed on (#1597).
-    cy.intercept('PATCH', '/api/workspaces/*/units/*/comments').as('markCommentsSeen');
     cy.get('mat-row').contains('M6_AK0012').click();
     clickIndexTabWorkspace('comments');
     cy.get('studio-lite-comments', { timeout: 15000 }).should('be.visible');
@@ -292,7 +275,7 @@ describe('Unit Reviews', () => {
 
   it('grants anonymous access to a password-protected review link', () => {
     loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     cy.intercept('GET', '/api/workspaces/*/reviews/*').as('getReviewData');
     cy.contains('mat-row', review).click();
@@ -304,7 +287,6 @@ describe('Unit Reviews', () => {
       // against the form being replaced
       cy.translate(Cypress.expose('locale')).then(json => {
         cy.get(`input[placeholder="${json.workspace['review-password']}"]`).should('be.visible');
-        cy.wait(300);
         cy.get(`input[placeholder="${json.workspace['review-password']}"]`).clear();
         cy.get(`input[placeholder="${json.workspace['review-password']}"]`).type('rev-1234');
         cy.get('studio-lite-save-changes').within(() => {
@@ -318,7 +300,6 @@ describe('Unit Reviews', () => {
         // config load replace the input right after page load)
         cy.visit(`/#/${reviewLink}`);
         cy.get('[data-cy="home-password"]').should('be.visible');
-        cy.wait(500);
         cy.get('[data-cy="home-password"]').type('rev-1234');
         cy.clickButtonWithResponseCheck(
           json.home.login,
@@ -349,7 +330,7 @@ describe('Unit Reviews', () => {
 
   it('creates a review with coding (Kodierung) enabled', () => {
     loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     createReview(codingReviewName, ['M6_AK0011', 'M6_AK0012']);
 
@@ -392,7 +373,7 @@ describe('Unit Reviews', () => {
 
   it('allows an admin to permanently delete a review', () => {
     loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     deleteReview(review);
     cy.get('[data-cy="workspace-review-close"]').click();

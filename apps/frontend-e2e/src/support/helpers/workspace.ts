@@ -4,7 +4,7 @@
  */
 
 import { UnitData } from '../testData';
-import { goToWsMenu } from './navigation';
+import { clickIndexTabWorkspace, goToWsMenu } from './navigation';
 
 /**
  * Selects a unit by name
@@ -94,6 +94,24 @@ export function addUnitPred(unit: UnitData): void {
     '/api/workspaces/*/units',
     'POST',
     'addUnit');
+}
+
+/**
+ * Ensures a unit exists in a workspace. If not found, creates it.
+ * @param ws - Workspace name
+ * @param unit - Unit data object
+ * @example
+ * ensureUnitExists(ws1, unit3);
+ */
+export function ensureUnitExists(ws: string, unit: UnitData): void {
+  cy.visitWs(ws);
+  cy.get('body').then($body => {
+    const unitFound = $body.find(`[data-cy="workspace-select-unit-list-checkbox-${unit.shortname}"]`).length > 0 ||
+      $body.text().includes(unit.shortname);
+    if (!unitFound) {
+      addUnitPred(unit);
+    }
+  });
 }
 
 /**
@@ -242,6 +260,7 @@ export function editRichNote(addedContent: string): void {
  * submitUnits(['Unit 1', 'Unit 2']);
  */
 export function submitUnits(unitNames: string[]): void {
+  cy.intercept('PATCH', '**/workspaces/*/units/drop-box-history').as('submitUnitsReq');
   cy.get('[data-cy="workspace-edit-unit-menu"]').click();
   cy.get('[data-cy="workspace-edit-unit-submit-units"]').click();
   cy.get('mat-mdc-dialog-container, mat-dialog-container').should('be.visible');
@@ -251,6 +270,7 @@ export function submitUnits(unitNames: string[]): void {
       .contains(json.workspace['submit-units'])
       .click();
   });
+  cy.wait('@submitUnitsReq').its('response.statusCode').should('be.oneOf', [200, 201, 204]);
 }
 
 /**
@@ -260,6 +280,7 @@ export function submitUnits(unitNames: string[]): void {
  * returnSubmittedUnits(['Unit 1', 'Unit 2']);
  */
 export function returnSubmittedUnits(unitNames: string[]): void {
+  cy.intercept('PATCH', '**/workspaces/*/units/drop-box-history').as('returnUnitsReq');
   cy.get('[data-cy="workspace-edit-unit-menu"]').click();
   cy.get('[data-cy="workspace-edit-unit-return-submitted-units"]').click();
   cy.get('mat-mdc-dialog-container, mat-dialog-container').should('be.visible');
@@ -269,4 +290,144 @@ export function returnSubmittedUnits(unitNames: string[]): void {
       .contains(json.workspace['return-submitted-units'])
       .click();
   });
+  // Wait for backend reponse
+  cy.wait('@returnUnitsReq').its('response.statusCode').should('be.oneOf', [200, 201, 204]);
+}
+
+/**
+ * Opens the group management dialog from the workspace menu
+ * @example
+ * openGroupManagementDialog();
+ */
+export function openGroupManagementDialog(): void {
+  goToWsMenu();
+  cy.get('[data-cy="workspace-edit-unit-manage-unit-groups"]').click();
+  cy.get('studio-lite-group-manage').should('exist');
+}
+
+/**
+ * Adds a new group from the group management dialog
+ * @param groupName - Name of the new group
+ * @example
+ * addGroupFromManagement('New Group');
+ */
+export function addGroupFromManagement(groupName: string): void {
+  cy.get('studio-lite-group-menu').find('mat-icon').contains('add').click();
+  cy.get('mat-dialog-container input[formControlName="text"]').type(groupName);
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.clickDialogButton(json.save);
+  });
+}
+
+/**
+ * Renames a group from the group management dialog
+ * @param oldGroupName - The name of the group to select and rename
+ * @param newGroupName - The new name of the group
+ * @example
+ * renameGroupFromManagement('Old Name', 'New Name');
+ */
+export function renameGroupFromManagement(oldGroupName: string, newGroupName: string): void {
+  cy.get('studio-lite-group-manage .group-row').contains(oldGroupName).click();
+  cy.get('studio-lite-group-menu').find('mat-icon').contains('edit').click();
+  cy.get('mat-dialog-container input[formControlName="text"]').clear().type(newGroupName);
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.clickDialogButton(json.save);
+  });
+}
+
+/**
+ * Deletes a group from the group management dialog
+ * @param groupName - The name of the group to select and delete
+ * @example
+ * deleteGroupFromManagement('Group to Delete');
+ */
+export function deleteGroupFromManagement(groupName: string): void {
+  cy.get('studio-lite-group-manage .group-row').contains(groupName).click();
+  cy.get('studio-lite-group-menu').find('mat-icon').contains('delete').click();
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.clickDialogButton(json.delete);
+  });
+}
+
+/**
+ * Closes the group management dialog
+ * @example
+ * closeGroupManagementDialog();
+ */
+export function closeGroupManagementDialog(): void {
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.clickDialogButton(json.close);
+  });
+  cy.get('studio-lite-group-manage').should('not.exist');
+}
+
+/**
+ * Opens the user list dialog from the workspace menu
+ * @example
+ * openWorkspaceUserListDialog();
+ */
+export function openWorkspaceUserListDialog(): void {
+  goToWsMenu();
+  cy.get('[data-cy="workspace-edit-unit-user-list"]').click();
+  cy.get('studio-lite-workspace-user-list').should('exist');
+}
+
+/**
+ * Closes the user list dialog
+ * @example
+ * closeWorkspaceUserListDialog();
+ */
+export function closeWorkspaceUserListDialog(): void {
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.clickDialogButton(json.close);
+  });
+  cy.get('studio-lite-workspace-user-list').should('not.exist');
+}
+
+/**
+ * Selects a unit and navigates to its properties tab
+ * @param shortname - Unit shortname or key
+ * @example
+ * openUnitProperties('UNIT_1');
+ */
+export function openUnitProperties(shortname: string): void {
+  selectUnit(shortname);
+  clickIndexTabWorkspace('properties');
+  cy.get('input[formControlName="key"]').should('be.visible');
+}
+
+/**
+ * Clicks the unit properties save button and waits for the PATCH API response
+ * @example
+ * clickUnitPropertiesSaveButton();
+ */
+export function clickUnitPropertiesSaveButton(): void {
+  cy.get('[data-cy="workspace-unit-save-button"]').should('not.be.disabled').click();
+  cy.wait('@saveProps').its('response.statusCode').should('eq', 200);
+}
+
+/**
+ * Navigates to unit properties, registers PATCH intercept, executes modify action, saves,
+ * reloads, and runs verification
+ * @param ws - Workspace name
+ * @param shortname - Unit shortname
+ * @param modify - Function performing form edits
+ * @param verify - Function performing assertions after reload
+ * @example
+ * editUnitPropertiesAndVerify(ws1, 'U1', () => cy.get(...).type('New'), () => cy.get(...).should('have.value', 'New'));
+ */
+export function editUnitPropertiesAndVerify(
+  ws: string,
+  shortname: string,
+  modify: () => void,
+  verify: () => void
+): void {
+  cy.visitWs(ws);
+  openUnitProperties(shortname);
+  cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveProps');
+  modify();
+  clickUnitPropertiesSaveButton();
+  cy.visitWs(ws);
+  openUnitProperties(shortname);
+  verify();
 }

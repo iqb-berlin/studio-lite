@@ -353,9 +353,9 @@ describe('Unit API tests', () => {
       let newSettings: WsSettings;
       before(() => {
         newSettings = {
-          defaultEditor: 'iqb-editor-aspect@2.12',
-          defaultPlayer: 'iqb-player-aspect@2.12',
-          defaultSchemer: 'iqb-schemer@2.7',
+          defaultEditor: 'iqb-editor-aspect@3.0',
+          defaultPlayer: 'iqb-player-aspect@3.0',
+          defaultSchemer: 'iqb-schemer@2.8',
           stableModulesOnly: false,
           unitMDProfile: Cypress.expose('profile1'),
           itemMDProfile: Cypress.expose('profile2')
@@ -1291,7 +1291,7 @@ describe('Unit API tests', () => {
     describe('52. PATCH /api/workspaces/{workspace_id}/units/{id}/properties ', () => {
       it('200 positive test: should allow assigning a specific workflow state target to a unit', () => {
         cy.updateUnitStateAPI(
-          Cypress.expose(groupVera.id),
+          Cypress.expose(ws1.id),
           Cypress.expose(unit3.shortname),
           '1',
           Cypress.expose(`token_${Cypress.expose('username')}`)
@@ -1302,7 +1302,7 @@ describe('Unit API tests', () => {
 
       it('401 negative test: should deny unit state updates when no valid credentials are provided', () => {
         cy.updateUnitStateAPI(
-          Cypress.expose(groupVera.id),
+          Cypress.expose(ws1.id),
           Cypress.expose(unit3.shortname),
           '0',
           noId
@@ -1314,7 +1314,7 @@ describe('Unit API tests', () => {
 
       it('500/200 negative test: should return success despite attempting to assign a non-existent state ID', () => {
         cy.updateUnitStateAPI(
-          Cypress.expose(groupVera.id),
+          Cypress.expose(ws1.id),
           Cypress.expose(unit3.shortname),
           '5',
           Cypress.expose(`token_${Cypress.expose('username')}`)
@@ -1329,7 +1329,7 @@ describe('Unit API tests', () => {
           ' an unit state without a valid unit ID',
         () => {
           cy.updateUnitStateAPI(
-            Cypress.expose(groupVera.id),
+            Cypress.expose(ws1.id),
             noId,
             '0',
             Cypress.expose(`token_${Cypress.expose('username')}`)

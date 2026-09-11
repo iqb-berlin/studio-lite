@@ -5,7 +5,12 @@ import {
   selectProfileForAreaFromGroup,
   selectProfileForGroup
 } from '../../../support/metadata/metadata-util';
-import { AccessLevel, testGroups, testWorkspaces } from '../../../support/testData';
+import {
+  AccessLevel,
+  metadataBistaIGroup,
+  metadataGermanWorkspace,
+  metadataMathWorkspace
+} from '../../../support/testData';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
 import {
   addFirstUser,
@@ -20,9 +25,9 @@ import {
 } from '../../../support/helpers/group-admin';
 
 describe('Metadata Management', () => {
-  const ws1 = testWorkspaces.metadata.german1;
-  const ws2 = testWorkspaces.metadata.math1;
-  const group = testGroups.metadata.bista1;
+  const ws1 = metadataGermanWorkspace;
+  const ws2 = metadataMathWorkspace;
+  const group = metadataBistaIGroup;
 
   it('sets up workspaces with metadata profiles', () => {
     addFirstUser();
@@ -67,7 +72,6 @@ describe('Metadata Management', () => {
   it('adds metadata to math unit', () => {
     cy.intercept({ method: 'GET', pathname: '/api/metadata/vocabularies' }).as('vocabs');
     cy.visitWs(ws2);
-    cy.pause();
     cy.contains('M1_001').should('exist').click();
     cy.wait('@vocabs');
     cy.wait('@vocabs');

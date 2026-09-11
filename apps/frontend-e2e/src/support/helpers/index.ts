@@ -34,3 +34,6 @@ export * from './review';
 
 // Widget management helpers
 export * from './widgets';
+
+// Admin user-table helpers (shared between user-management and admin-user-management specs)
+export * from './admin-users';

@@ -1,6 +1,6 @@
 import { selectProfileForGroupFromAdmin } from '../../../support/metadata/metadata-util';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
-import { AccessLevel, testWorkspaces } from '../../../support/testData';
+import { AccessLevel, metadataMathIIWorkspace } from '../../../support/testData';
 import {
   addFirstUser,
   createGroup,
@@ -14,7 +14,7 @@ import {
 
 describe('Metadata Profile Management from Admin', () => {
   const area = 'Deutsch II';
-  const mathArea = testWorkspaces.metadata.math2;
+  const mathArea = metadataMathIIWorkspace;
   const group = 'Bista II';
 
   it('sets up workspaces in group', () => {

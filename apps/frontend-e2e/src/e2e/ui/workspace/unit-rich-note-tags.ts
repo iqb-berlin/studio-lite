@@ -1,10 +1,6 @@
 import {
-  ws1, group1, lightUnit, AccessLevel
+  primaryWorkspace, baseGroup, lightUnit, AccessLevel, richNotesTestNames
 } from '../../../support/testData';
-import {
-  createBasicData,
-  deleteBasicData
-} from '../shared/basic.spec.cy';
 import {
   clickIndexTabWorkspace,
   importExercise,
@@ -22,33 +18,25 @@ import {
   createWs,
   grantRemovePrivilegeAtWs
 } from '../../../support/helpers/group-admin';
+import { deleteBasicSpecCy } from '../shared/basic.spec.cy';
 
 describe('Unit Rich Notes', () => {
-  before(() => {
-    createBasicData();
-  });
-
   beforeEach(() => {
     cy.intercept('GET', '/api/workspaces/*/units/*/rich-notes').as('getRichNotes');
   });
 
   after(() => {
-    deleteBasicData();
+    deleteBasicSpecCy();
   });
 
-  it('imports test units', () => {
-    cy.visitWs(ws1);
-    importExercise('test_studio_units_download.zip');
-  });
-
-  it('activates Rückmeldung in ws1', () => {
-    openWorkspaceSettingsDialog(group1, ws1);
+  it('activates Rückmeldung in primaryWorkspace', () => {
+    openWorkspaceSettingsDialog(baseGroup, primaryWorkspace);
     setRouteVisibility('notes', true);
     saveWorkspaceSettings();
   });
 
   it('creates multiple rich notes', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     selectUnit(lightUnit.shortname);
     clickIndexTabWorkspace('notes');
     cy.wait('@getRichNotes');
@@ -64,7 +52,7 @@ describe('Unit Rich Notes', () => {
   });
 
   it('creates rich note linked to specific item', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     selectUnit(lightUnit.shortname);
     clickIndexTabWorkspace('notes');
     cy.wait('@getRichNotes');
@@ -73,17 +61,15 @@ describe('Unit Rich Notes', () => {
   });
 
   it('exports unit with rich notes', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
 
-    // Select the unit we just added notes to
     cy.get(`mat-cell:contains("${lightUnit.shortname}")`)
       .parent()
       .find('mat-checkbox')
       .click();
 
-    // Check the "add rich notes" checkbox (it's the second checkbox in the files card)
     cy.get('mat-card.files mat-checkbox').eq(1).find('input').check({ force: true });
 
     cy.intercept('GET', '/api/workspaces/*?download=true*').as('exportDownload');
@@ -92,21 +78,17 @@ describe('Unit Rich Notes', () => {
     cy.wait('@exportDownload').then(interception => {
       expect(interception.response?.statusCode).to.eq(200);
 
-      // Convert the binary ZIP response to string to check for the .vorn filename and content
       const bodyStr = Buffer.from(interception.response?.body, 'binary').toString('utf8');
-
-      // The zip file should contain the rich notes file for this unit
       expect(bodyStr).to.include(`${lightUnit.shortname}.vorn`);
     });
   });
 
   it('deletes a rich note', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     selectUnit(lightUnit.shortname);
     clickIndexTabWorkspace('notes');
     cy.wait('@getRichNotes');
 
-    // Note: there are 3 notes total now.
     cy.get('.note-item-actions')
       .eq(0)
       .contains('mat-icon', 'delete')
@@ -124,22 +106,18 @@ describe('Unit Rich Notes', () => {
   });
 
   describe('Block configures personalised rich note tags', () => {
-    const testGroup = 'richNoteGroup2';
-    const testWs = 'Ws2';
-
     it('creates new group, workspace and grants rights', () => {
-      createGroup(testGroup);
-      createWs(testWs, testGroup);
-      grantRemovePrivilegeAtWs([Cypress.expose('username')], testWs, [
+      createGroup(richNotesTestNames.customGroup);
+      createWs(richNotesTestNames.customWs, richNotesTestNames.customGroup);
+      grantRemovePrivilegeAtWs([Cypress.expose('username')], richNotesTestNames.customWs, [
         AccessLevel.Admin
       ]);
     });
 
     it('sets rich note config', () => {
       cy.visit('/');
-      cy.findAdminGroupSettings(testGroup).click();
+      cy.findAdminGroupSettings(richNotesTestNames.customGroup).click();
       clickIndexTabWsgAdmin('settings');
-      // cy.intercept('PATCH', '/api/group-admin/*/settings').as('saveWsgSettings');
       cy.get('studio-lite-unit-rich-note-tags-config .add-tag-button').click();
 
       cy.get('studio-lite-unit-rich-note-tags-config input')
@@ -148,23 +126,21 @@ describe('Unit Rich Notes', () => {
         .type('https://w3id.org/iqb/v06/t1/index.json', { force: true });
 
       cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
-      // cy.wait('@saveWsgSettings');
     });
 
     it('imports unit', () => {
-      cy.visitWs(`${testWs}`);
-
+      cy.visitWs(`${richNotesTestNames.customWs}`);
       importExercise('test2_studio_units_download.zip');
     });
 
     it('activates Rückmeldung in the new workspace', () => {
-      openWorkspaceSettingsDialog(testGroup, testWs);
+      openWorkspaceSettingsDialog(richNotesTestNames.customGroup, richNotesTestNames.customWs);
       setRouteVisibility('notes', true);
       saveWorkspaceSettings();
     });
 
     it('verifies the rich notes config is applied', () => {
-      cy.visitWs(`${testWs}`);
+      cy.visitWs(`${richNotesTestNames.customWs}`);
 
       cy.get('mat-cell.mat-column-key')
         .first()
@@ -190,7 +166,7 @@ describe('Unit Rich Notes', () => {
     });
 
     it('cleans up the custom group', () => {
-      deleteGroup(testGroup);
+      deleteGroup(richNotesTestNames.customGroup);
     });
   });
 });
