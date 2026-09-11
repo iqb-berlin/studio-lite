@@ -386,24 +386,16 @@ describe('Comments API tests', () => {
         });
       });
 
-      it(
-        '404/200 negative test: should return success despite providing an invalid ' +
-          'unit ID for comment deletion',
-        () => {
-          // This test get 200, but maybe should be 500, because we are using a no existent unit.
-          // It does not need the unit.
-          // to delete the comment. The check was only the right workspace and have the credentials
-          cy.deleteCommentAPI(
-            Cypress.expose(ws2.id),
-            noId,
-            Cypress.expose('comment2'),
-            Cypress.expose(`token_${userGroupAdmin.username}`)
-          ).then(resp => {
-            expect(resp.status).to.be.equal(200);
-            //  expect(resp.status).to.be.equal(404);
-          });
-        }
-      );
+      it('404 negative test: should refuse deletion of a comment when providing an invalid unit ID', () => {
+        cy.deleteCommentAPI(
+          Cypress.expose(ws2.id),
+          noId,
+          Cypress.expose('comment2'),
+          Cypress.expose(`token_${userGroupAdmin.username}`)
+        ).then(resp => {
+          expect(resp.status).to.be.equal(404);
+        });
+      });
 
       it('200 positive test: should allow an administrator to successfully delete comments', () => {
         cy.deleteCommentAPI(
