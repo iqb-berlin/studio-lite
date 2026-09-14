@@ -143,12 +143,17 @@ export function makeAdminOfGroup(group: string, admins: string[]): void {
 }
 
 // ---------------------------------------------------------------------------
-// Helper: navigate to the admin Settings tab
-// ---------------------------------------------------------------------------
+/**
+ * Navigates to the admin Settings tab.
+ * Waits for the initial missings-profiles GET request to complete, ensuring
+ * form fields are populated before tests interact with them (#1619).
+ */
 export function goToSettings(): void {
+  cy.intercept('GET', '/api/admin/settings/missings-profiles').as('getMissingsProfiles');
   cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('settings');
+  cy.wait('@getMissingsProfiles');
 }
 
 // ---------------------------------------------------------------------------
