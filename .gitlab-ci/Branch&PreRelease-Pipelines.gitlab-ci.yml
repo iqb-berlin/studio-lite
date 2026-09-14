@@ -608,7 +608,7 @@ test-app-e2e-api:
       - dist/cypress/apps/*
     expire_in: 60 minutes
 
-test-app-e2e-ui-chrome:
+test-app-e2e-ui-chrome-1:
   stage: test-e2e
   interruptible: true
   extends: .distributed
@@ -641,7 +641,49 @@ test-app-e2e-ui-chrome:
     - npx nx e2e frontend-e2e
         --prod
         --browser chrome
-        --spec "./apps/frontend-e2e/src/e2e/ui/**/*" ||
+        --spec "./apps/frontend-e2e/src/e2e/ui/workspace/**/*" ||
+      ( pkill -f 'nx run api:serve'; exit 1 )
+  after_script:
+    - docker logout ${REGISTRY}
+  artifacts:
+    paths:
+      - dist/cypress/apps/*
+    expire_in: 60 minutes
+
+test-app-e2e-ui-chrome-2:
+  stage: test-e2e
+  interruptible: true
+  extends: .distributed
+  rules:
+    - !reference [ .develop_pr_rules, rules ]
+  image: ${CI_REGISTRY_IMAGE}/${E2E_BASE_IMAGE}
+  services:
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
+      alias: docker
+  before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
+    - docker network create app-net
+    - echo "${REGISTRY_PASSWORD}" | docker login -u ${REGISTRY_USER} --password-stdin ${REGISTRY}
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA}
+    - docker pull --quiet ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA}
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-db:${CI_COMMIT_SHA} studio-lite-db:latest
+    - docker tag ${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-liquibase:${CI_COMMIT_SHA} studio-lite-liquibase:latest
+    - mv .env.dev.template .env.dev
+    - docker compose --env-file .env.dev up -d --no-build --pull never db liquibase
+    - npx cypress cache path # show where the Cypress test runner binaries are cached
+    - npx cypress cache list # show all installed versions of Cypress binary
+    - npx cypress verify
+    - export POSTGRES_HOST=docker
+  script:
+    - !reference [ .start_backend, script ]
+    - npx nx e2e frontend-e2e
+        --prod
+        --browser chrome
+        --spec "./apps/frontend-e2e/src/e2e/ui/{admin,auth,core,group-admin,metadata,shared,user}/**/*" ||
       ( pkill -f 'nx run api:serve'; exit 1 )
   after_script:
     - docker logout ${REGISTRY}

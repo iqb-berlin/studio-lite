@@ -48,6 +48,32 @@ services:
     networks:
       - application-network
 
+  test-e2e-ui-chrome-1:
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
+    command:
+      - "e2e"
+      - "frontend-e2e"
+      - "--baseUrl=http://frontend:8080"
+      - "--browser=chrome"
+      - "--spec=\"./apps/frontend-e2e/src/e2e/ui/workspace/**/*\""
+    volumes:
+      - "./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e"
+    networks:
+      - application-network
+
+  test-e2e-ui-chrome-2:
+    image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
+    command:
+      - "e2e"
+      - "frontend-e2e"
+      - "--baseUrl=http://frontend:8080"
+      - "--browser=chrome"
+      - "--spec=\"./apps/frontend-e2e/src/e2e/ui/{admin,auth,core,group-admin,metadata,shared,user}/**/*\""
+    volumes:
+      - "./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e"
+    networks:
+      - application-network
+
   test-e2e-ui-chrome-mobile:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
     command:
