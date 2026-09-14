@@ -11,6 +11,8 @@
     "test-e2e": "nx e2e frontend-e2e --prod --browser chromium",
     "test-e2e-api": "nx e2e frontend-e2e --prod --browser chromium --spec \"./apps/frontend-e2e/src/e2e/api/**/*\"",
     "test-e2e-ui": "nx e2e frontend-e2e --prod --browser chromium --spec \"./apps/frontend-e2e/src/e2e/ui/**/*\"",
+    "test-e2e-ui-1": "nx e2e frontend-e2e --prod --browser chromium --spec \"./apps/frontend-e2e/src/e2e/ui/workspace/**/*\"",
+    "test-e2e-ui-2": "nx e2e frontend-e2e --prod --browser chromium --spec \"./apps/frontend-e2e/src/e2e/ui/{admin,auth,core,group-admin,metadata,shared,user}/**/*\"",
     "test-e2e-ui-mobile": "nx e2e frontend-e2e --prod --browser chromium --spec \"./apps/frontend-e2e/src/e2e/ui/**/*\" --config \"viewportWidth=375,viewportHeight=667\"",
     "test-e2e-coverage": "nx run frontend-e2e:e2e-coverage --browser chromium",
     "test-app": "nx run-many --target=test --all --parallel",
