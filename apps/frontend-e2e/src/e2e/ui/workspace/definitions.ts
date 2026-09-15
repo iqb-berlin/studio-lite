@@ -1,6 +1,9 @@
 import {
+  addUnitPred,
   clickIndexTabWorkspace,
-  selectUnit
+  deleteUnit,
+  selectUnit,
+  setModuleWithoutVerification
 } from '../../../support/helpers';
 import { primaryWorkspace } from '../../../support/testData';
 
@@ -43,5 +46,140 @@ describe('Unit Definitions', () => {
           cy.get('aspect-math-table td:contains("2")').should('exist');
         });
     });
+  });
+});
+
+describe('Aspect Editor Elements Creation', () => {
+  const definitionAllElementsUnit = {
+    shortname: 'DEF_ALL1',
+    name: 'Definition All Elements',
+    group: 'Gruppe D'
+  };
+
+  it('creates a new unit and opens definition editor', () => {
+    setModuleWithoutVerification(primaryWorkspace, 'Aspect', 'Aspect', 'Schemer');
+    cy.visitWs(primaryWorkspace);
+    addUnitPred(definitionAllElementsUnit);
+    cy.visitWs(primaryWorkspace);
+    selectUnit(definitionAllElementsUnit.shortname);
+    clickIndexTabWorkspace('editor');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
+    cy.get('iframe.unitHost').should('exist');
+  });
+
+  it('adds text element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Text').click();
+      cy.get('aspect-text', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds text-field element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Eingabefeld').click();
+      cy.get('aspect-text-field', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds text-area element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Eingabebereich').click();
+      cy.get('aspect-text-area', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds spell-correct element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Wort korrigieren').click();
+      cy.get('aspect-spell-correct', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds math-table element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Rechenkästchen').click();
+      cy.get('aspect-math-table', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds checkbox element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Kontrollkästchen').click();
+      cy.get('aspect-checkbox', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds dropdown element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Klappliste').click();
+      cy.get('aspect-dropdown', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds likert element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Optionentabelle').click();
+      cy.get('aspect-likert', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds slider element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Schieberegler').click();
+      cy.get('aspect-slider', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds drop-list element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('mat-expansion-panel-header', '(Zu)Ordnung').click();
+      cy.get('aspect-ui-element-toolbox button').contains('Ablegeliste').click();
+      cy.get('aspect-drop-list', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds cloze element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('mat-expansion-panel-header', 'Verbund').click();
+      cy.get('aspect-ui-element-toolbox button').contains('Lückentext').click();
+      cy.get('aspect-cloze', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds table element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Tabelle').click();
+      cy.get('aspect-table', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds button element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('mat-expansion-panel-header', 'Sonstige').click();
+      cy.get('aspect-ui-element-toolbox button').contains('Knopf').click();
+      cy.get('aspect-button', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds frame element ', () => {
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/definition').as('saveUnit');
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Rahmen').click({ force: true });
+      cy.get('aspect-frame', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('saves the unit definition with all added element', () => {
+    cy.get('[data-cy="workspace-unit-save-button"]', { timeout: 10000 })
+      .should('not.be.disabled')
+      .click();
+    cy.wait('@saveUnit').its('response.statusCode').should('eq', 200);
+    cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
+  });
+
+  it('cleans up the test unit', () => {
+    cy.visitWs(primaryWorkspace);
+    deleteUnit(definitionAllElementsUnit.shortname);
+    cy.contains(definitionAllElementsUnit.shortname).should('not.exist');
   });
 });
