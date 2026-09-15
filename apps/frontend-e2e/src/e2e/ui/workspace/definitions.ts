@@ -14,27 +14,11 @@ describe('Unit Definitions', () => {
     cy.get('iframe.unitHost').should('exist');
   });
 
-  it.skip('clicks between two units and saves the unit M6_AK0011', () => {
+  it('clicks rapidly between units and preserves the correct unit definition', () => {
     selectUnit('M6_AK0011');
+    cy.wait(50);
     selectUnit('M6_AK0012');
-    selectUnit('M6_AK0011');
-    cy.getIFrameBody('iframe.unitHost').within(() => {
-      cy.get('aspect-element-model-properties-component', { timeout: 10000 })
-        .should('be.visible')
-        .within(() => {
-          cy.contains('mat-form-field', 'Beschriftung')
-            .should('be.visible')
-            .find('textarea')
-            .should('be.visible')
-            .click()
-            .clear()
-            .type('Neue Text');
-        });
-    });
-    cy.get('[data-cy="workspace-unit-save-button"]').click();
-  });
-
-  it('preserves unit definition when switching between units', () => {
+    cy.wait(50);
     selectUnit('M6_AK0011');
     cy.get('.unit-row.selected').should('contain.text', 'M6_AK0011');
     cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
@@ -43,6 +27,20 @@ describe('Unit Definitions', () => {
         .eq(2)
         .within(() => {
           cy.get('aspect-math-table td:contains("2")').should('not.exist');
+          cy.get('aspect-math-table td:contains("1")').should('exist');
+        });
+    });
+  });
+
+  it('preserves unit definition when switching back to previous unit', () => {
+    selectUnit('M6_AK0012');
+    cy.get('.unit-row.selected').should('contain.text', 'M6_AK0012');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-editor-dynamic-overlay', { timeout: 30000 })
+        .eq(2)
+        .within(() => {
+          cy.get('aspect-math-table td:contains("2")').should('exist');
         });
     });
   });
