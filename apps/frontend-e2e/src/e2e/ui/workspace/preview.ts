@@ -51,6 +51,39 @@ describe('Unit Preview (Vorschau)', () => {
     });
   });
 
+  it('verifies that coding exists for this element checkbox', () => {
+    cy.get('[data-cy="preview-bar-check-coding"]').click();
+    cy.get('mat-dialog-content', { timeout: 10000 }).within(() => {
+      cy.contains('checkbox_1').should('exist');
+      cy.contains('text-field_1').should('not.exist');
+      cy.contains('text-area_1').should('not.exist');
+      cy.contains('dropdown_1').should('not.exist');
+    });
+    cy.contains('mat-slide-toggle', 'Nur Variablen mit Codes').click();
+    cy.get('mat-dialog-content').within(() => {
+      cy.contains('checkbox_1').should('exist');
+      cy.contains('text-field_1').should('exist');
+      cy.contains('text-area_1').should('exist');
+      cy.contains('dropdown_1').should('exist');
+    });
+    cy.contains('mat-dialog-actions button', 'Schließen').click();
+    cy.get('mat-dialog-container').should('not.exist');
+  });
+
+  it('verifies that element checkbox has state coding_complete', () => {
+    cy.getIFrameBody('[data-cy="unit-preview-iframe"]').within(() => {
+      cy.get('aspect-checkbox').contains('Beschriftung').click();
+      cy.get('aspect-checkbox input[type="checkbox"]').should('be.checked');
+    });
+    cy.get('[data-cy="preview-bar-check-coding"]').click();
+    cy.get('mat-dialog-content', { timeout: 10000 }).within(() => {
+      cy.contains('checkbox_1').should('exist');
+      cy.contains('tr', 'checkbox_1').should('contain.text', 'CODING_COMPLETE');
+    });
+    cy.contains('mat-dialog-actions button', 'Schließen').click();
+    cy.get('mat-dialog-container').should('not.exist');
+  });
+
   it('verifies dropdown element in preview', () => {
     cy.getIFrameBody('[data-cy="unit-preview-iframe"]').within(() => {
       cy.get('aspect-dropdown', { timeout: 10000 }).should('exist');
