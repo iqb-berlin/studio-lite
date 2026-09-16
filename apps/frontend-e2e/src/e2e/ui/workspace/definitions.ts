@@ -1,11 +1,10 @@
 import {
   addUnitPred,
   clickIndexTabWorkspace,
-  deleteUnit,
   selectUnit,
   setModuleWithoutVerification
 } from '../../../support/helpers';
-import { primaryWorkspace } from '../../../support/testData';
+import { definitionAllElementsUnit, primaryWorkspace } from '../../../support/testData';
 
 describe('Unit Definitions', () => {
   it('opens unit definition editor', () => {
@@ -50,12 +49,6 @@ describe('Unit Definitions', () => {
 });
 
 describe('Aspect Editor Elements Creation', () => {
-  const definitionAllElementsUnit = {
-    shortname: 'DEF_ALL1',
-    name: 'Definition All Elements',
-    group: 'Gruppe D'
-  };
-
   it('creates a new unit and opens definition editor', () => {
     setModuleWithoutVerification(primaryWorkspace, 'Aspect', 'Aspect', 'Schemer');
     cy.visitWs(primaryWorkspace);
@@ -162,7 +155,6 @@ describe('Aspect Editor Elements Creation', () => {
   });
 
   it('adds frame element ', () => {
-    cy.intercept('PATCH', '/api/workspaces/*/units/*/definition').as('saveUnit');
     cy.getIFrameBody('iframe.unitHost').within(() => {
       cy.get('aspect-ui-element-toolbox button').contains('Rahmen').click({ force: true });
       cy.get('aspect-frame', { timeout: 10000 }).should('exist');
@@ -170,16 +162,13 @@ describe('Aspect Editor Elements Creation', () => {
   });
 
   it('saves the unit definition with all added element', () => {
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/definition').as(
+      'saveUnit'
+    );
     cy.get('[data-cy="workspace-unit-save-button"]', { timeout: 10000 })
       .should('not.be.disabled')
       .click();
     cy.wait('@saveUnit').its('response.statusCode').should('eq', 200);
     cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
-  });
-
-  it('cleans up the test unit', () => {
-    cy.visitWs(primaryWorkspace);
-    deleteUnit(definitionAllElementsUnit.shortname);
-    cy.contains(definitionAllElementsUnit.shortname).should('not.exist');
   });
 });
