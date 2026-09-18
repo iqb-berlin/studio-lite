@@ -28,7 +28,9 @@ export function deleteUnit(shortname: string): void {
     .should('exist')
     .click()
     .type(shortname);
-  cy.get(`[data-cy="workspace-select-unit-list-checkbox-${shortname}"]`).click();
+  cy.get(
+    `[data-cy="workspace-select-unit-list-checkbox-${shortname}"]`
+  ).click();
   cy.get('[data-cy="workspace-select-unit-button"]').click();
   cy.translate(Cypress.expose('locale')).then(json => {
     cy.contains('button', json.delete).click();
