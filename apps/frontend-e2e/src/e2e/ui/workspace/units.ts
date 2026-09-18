@@ -32,9 +32,12 @@ describe('Workspace Unit Management (Core CRUD)', () => {
   });
 
   it('navigates to unit preview and verifies iframe', () => {
+    cy.visitWs(primaryWorkspace);
     selectUnit('M6_AK0011');
+    cy.get('.unit-row.selected').should('contain.text', 'M6_AK0011');
     clickIndexTabWorkspace('preview');
-    cy.get('[data-cy="unit-preview-iframe"]').should('be.visible');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
+    cy.get('[data-cy="unit-preview-iframe"]', { timeout: 30000 }).should('be.visible');
   });
 
   it('verifies coding check functionality', () => {
@@ -61,27 +64,29 @@ describe('Workspace Unit Management (Core CRUD)', () => {
       }
     }).as('getUnitScheme');
 
-    cy.get('[data-cy="unit-preview-iframe"]').then($iframe => {
-      const iframeWindow = ($iframe[0] as HTMLIFrameElement).contentWindow;
-      cy.window().then(win => {
-        const messageEvent = new MessageEvent('message', {
-          data: {
-            type: 'vopStateChangedNotification',
-            sessionId: 'test-session',
-            unitState: {
-              dataParts: { all: '[]' },
-              unitStateDataType: 'iqb-standard@1.0',
-              presentationProgress: 'complete',
-              responseProgress: 'complete'
-            }
-          },
-          source: iframeWindow
+    cy.get('[data-cy="unit-preview-iframe"]', { timeout: 30000 })
+      .should('be.visible')
+      .then($iframe => {
+        const iframeWindow = ($iframe[0] as HTMLIFrameElement).contentWindow;
+        cy.window().then(win => {
+          const messageEvent = new MessageEvent('message', {
+            data: {
+              type: 'vopStateChangedNotification',
+              sessionId: 'test-session',
+              unitState: {
+                dataParts: { all: '[]' },
+                unitStateDataType: 'iqb-standard@1.0',
+                presentationProgress: 'complete',
+                responseProgress: 'complete'
+              }
+            },
+            source: iframeWindow
+          });
+          win.dispatchEvent(messageEvent);
         });
-        win.dispatchEvent(messageEvent);
       });
-    });
 
-    cy.get('[data-cy="preview-bar-check-coding"]').click();
+    cy.get('[data-cy="preview-bar-check-coding"]', { timeout: 30000 }).click();
     cy.wait('@getUnitScheme');
 
     cy.get('mat-mdc-dialog-container, mat-dialog-container', {
@@ -93,10 +98,11 @@ describe('Workspace Unit Management (Core CRUD)', () => {
         .contains('button', json.close)
         .click({ force: true });
     });
+    cy.get('mat-mdc-dialog-container, mat-dialog-container').should('not.exist');
   });
 
   it('verifies print options dialog opens', () => {
-    cy.get('[data-cy="preview-bar-print"]').click();
+    cy.get('[data-cy="preview-bar-print"]', { timeout: 30000 }).should('be.visible').click();
 
     cy.get('mat-mdc-dialog-container, mat-dialog-container', {
       timeout: 15000
@@ -107,6 +113,7 @@ describe('Workspace Unit Management (Core CRUD)', () => {
         .contains('button', json.cancel || json.close)
         .click({ force: true });
     });
+    cy.get('mat-mdc-dialog-container, mat-dialog-container').should('not.exist');
   });
 
   it('displays print preview for units with coding and comments', () => {
@@ -200,6 +207,7 @@ describe('Workspace Unit Management (Core CRUD)', () => {
   it('verifies save-or-discard dialog when navigating with unsaved changes', () => {
     cy.visitWs(primaryWorkspace);
     selectUnit('M6_AK0011');
+    cy.get('.unit-row.selected').should('contain.text', 'M6_AK0011');
     clickIndexTabWorkspace('properties');
 
     cy.get('input[formControlName="name"]').type(' New Title');
