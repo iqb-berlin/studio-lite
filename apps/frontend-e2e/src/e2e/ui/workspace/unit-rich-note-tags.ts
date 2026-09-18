@@ -147,10 +147,12 @@ describe('Unit Rich Notes', () => {
         .invoke('text')
         .then(shortname => {
           selectUnit(shortname.trim());
+          cy.get('.unit-row.selected').should('contain.text', shortname.trim());
           clickIndexTabWorkspace('notes');
           cy.wait('@getRichNotes');
+          cy.get('.loading-spinner', { timeout: 15000 }).should('not.exist');
 
-          cy.get('[data-cy="rich-note-add"]')
+          cy.get('[data-cy="rich-note-add"]', { timeout: 20000 })
             .first()
             .click({ force: true });
           cy.get('mat-select[formControlName="tagId"]').click();
