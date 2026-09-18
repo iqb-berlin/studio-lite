@@ -51,12 +51,12 @@ describe('Unit Preview (Vorschau)', () => {
     });
   });
 
-  it('verifies that coding exists for this element checkbox', () => {
+  it('verifies that coding exists for coded elements', () => {
     cy.get('[data-cy="preview-bar-check-coding"]').click();
     cy.get('mat-dialog-content', { timeout: 10000 }).within(() => {
       cy.contains('checkbox_1').should('exist');
-      cy.contains('text-field_1').should('not.exist');
-      cy.contains('text-area_1').should('not.exist');
+      cy.contains('text-field_1').should('exist');
+      cy.contains('text-area_1').should('exist');
       cy.contains('dropdown_1').should('not.exist');
     });
     cy.contains('mat-slide-toggle', 'Nur Variablen mit Codes').click();
@@ -79,6 +79,32 @@ describe('Unit Preview (Vorschau)', () => {
     cy.get('mat-dialog-content', { timeout: 10000 }).within(() => {
       cy.contains('checkbox_1').should('exist');
       cy.contains('tr', 'checkbox_1').should('contain.text', 'CODING_COMPLETE');
+    });
+    cy.contains('mat-dialog-actions button', 'Schließen').click();
+    cy.get('mat-dialog-container').should('not.exist');
+  });
+
+  it('verifies that element text-field has state coding_complete', () => {
+    cy.getIFrameBody('[data-cy="unit-preview-iframe"]').within(() => {
+      cy.get('aspect-text-field input', { timeout: 10000 }).type('Eingabe Text');
+    });
+    cy.get('[data-cy="preview-bar-check-coding"]').click();
+    cy.get('mat-dialog-content', { timeout: 10000 }).within(() => {
+      cy.contains('text-field_1').should('exist');
+      cy.contains('tr', 'text-field_1').should('contain.text', 'CODING_COMPLETE');
+    });
+    cy.contains('mat-dialog-actions button', 'Schließen').click();
+    cy.get('mat-dialog-container').should('not.exist');
+  });
+
+  it('verifies that element text-area has state coding_complete', () => {
+    cy.getIFrameBody('[data-cy="unit-preview-iframe"]').within(() => {
+      cy.get('aspect-text-area textarea', { timeout: 10000 }).type('Langer Antworttext');
+    });
+    cy.get('[data-cy="preview-bar-check-coding"]').click();
+    cy.get('mat-dialog-content', { timeout: 10000 }).within(() => {
+      cy.contains('text-area_1').should('exist');
+      cy.contains('tr', 'text-area_1').should('contain.text', 'CODING_COMPLETE');
     });
     cy.contains('mat-dialog-actions button', 'Schließen').click();
     cy.get('mat-dialog-container').should('not.exist');
@@ -140,7 +166,9 @@ describe('Unit Preview (Vorschau)', () => {
 
   it('cleans up the test unit', () => {
     cy.visitWs(primaryWorkspace);
+    cy.intercept('DELETE', '/api/workspaces/*/units*').as('delUnits');
     deleteUnit(definitionAllElementsUnit.shortname);
+    cy.wait('@delUnits');
     cy.contains(definitionAllElementsUnit.shortname).should('not.exist');
   });
 });

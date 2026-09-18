@@ -23,14 +23,52 @@ describe('Aspect Coding Scheme (Kodierung)', () => {
 
   it('verifies coding variable for text-field element', () => {
     cy.getIFrameBody('iframe.unitHost').within(() => {
-      cy.contains('.var-list-entry', 'text-field_1', { timeout: 10000 }).should('exist');
+      cy.contains('.var-list-entry', 'text-field_1', { timeout: 10000 })
+        .should('exist')
+        .click();
+      cy.get('var-coding', { timeout: 10000 }).should('exist');
+      cy.get('var-coding button')
+        .filter((_, el) => el.querySelector('svg[viewBox="0 0 24 24"]') !== null ||
+          (el.getAttribute('mattooltip') || '').includes('Kodierung generieren'))
+        .first()
+        .click();
+      cy.get('mat-dialog-content textarea', { timeout: 10000 })
+        .type('Eingabe Text');
+      cy.contains('mat-dialog-actions button', 'Generiere Kodierung')
+        .click();
+      cy.get('mat-dialog-container').should('not.exist');
     });
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/scheme').as('saveScheme');
+    cy.get('[data-cy="workspace-unit-save-button"]', { timeout: 10000 })
+      .should('not.be.disabled')
+      .click();
+    cy.wait('@saveScheme').its('response.statusCode').should('eq', 200);
+    cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
   });
 
   it('verifies coding variable for text-area element', () => {
     cy.getIFrameBody('iframe.unitHost').within(() => {
-      cy.contains('.var-list-entry', 'text-area_1', { timeout: 10000 }).should('exist');
+      cy.contains('.var-list-entry', 'text-area_1', { timeout: 10000 })
+        .should('exist')
+        .click();
+      cy.get('var-coding', { timeout: 10000 }).should('exist');
+      cy.get('var-coding button')
+        .filter((_, el) => el.querySelector('svg[viewBox="0 0 24 24"]') !== null ||
+          (el.getAttribute('mattooltip') || '').includes('Kodierung generieren'))
+        .first()
+        .click();
+      cy.get('mat-dialog-content textarea', { timeout: 10000 })
+        .type('Langer Antworttext');
+      cy.contains('mat-dialog-actions button', 'Generiere Kodierung')
+        .click();
+      cy.get('mat-dialog-container').should('not.exist');
     });
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/scheme').as('saveScheme');
+    cy.get('[data-cy="workspace-unit-save-button"]', { timeout: 10000 })
+      .should('not.be.disabled')
+      .click();
+    cy.wait('@saveScheme').its('response.statusCode').should('eq', 200);
+    cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
   });
 
   it('verifies coding variable for spell-correct element', () => {
@@ -93,7 +131,6 @@ describe('Aspect Coding Scheme (Kodierung)', () => {
       cy.contains('.var-list-entry', 'text-field_1').click();
       cy.get('var-coding', { timeout: 10000 }).should('exist');
     });
-    cy.pause();
   });
 
   it('verifies coding scheme save button functionality', () => {
