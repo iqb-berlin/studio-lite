@@ -416,3 +416,12 @@ export const reviewTestNames = {
  * Test units used in `unit-print.ts` – print preview for unit properties & last changes.
  */
 export const printUnits = ['M6_AK0011', 'M6_AK0012'] as const;
+
+/**
+ * Unit used in `definitions.ts`, `coding.ts`, and `preview.ts` – tests all Aspect elements, coding, and preview.
+ */
+export const definitionAllElementsUnit: UnitData = {
+  shortname: 'DEF_ALL1',
+  name: 'Definition All Elements',
+  group: 'Gruppe D'
+};
