@@ -23,18 +23,25 @@ export function selectUnit(unitName: string): void {
  * deleteUnit('M6_AK0011');
  */
 export function deleteUnit(shortname: string): void {
+  cy.intercept('DELETE', '**/workspaces/*/units*').as('deleteUnits');
   cy.get('[data-cy="workspace-delete-unit-button"]').click();
   cy.get('[data-cy="workspace-select-unit-list-filter-units"]')
     .should('exist')
     .click()
     .type(shortname);
-  cy.get(
-    `[data-cy="workspace-select-unit-list-checkbox-${shortname}"]`
-  ).click();
-  cy.get('[data-cy="workspace-select-unit-button"]').click();
-  cy.translate(Cypress.expose('locale')).then(json => {
-    cy.contains('button', json.delete).click();
+  cy.get(`[data-cy="workspace-select-unit-list-checkbox-${shortname}"]`).then($cb => {
+    const isChecked = $cb.hasClass('mat-mdc-checkbox-checked') ||
+      $cb.hasClass('mat-checkbox-checked') ||
+      $cb.find('input[type="checkbox"]').prop('checked');
+    if (!isChecked) {
+      cy.wrap($cb).click();
+    }
   });
+  cy.get('[data-cy="workspace-select-unit-button"]').click();
+  cy.get('studio-lite-delete-dialog').should('exist');
+  cy.get('studio-lite-delete-dialog button[color="primary"]').should('be.visible').click();
+  cy.wait('@deleteUnits');
+  cy.get('studio-lite-delete-dialog').should('not.exist');
 }
 
 /**

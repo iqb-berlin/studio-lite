@@ -148,13 +148,7 @@ describe('Unit Print Preview', () => {
   });
 
   it('displays print preview for units with coding and comments', () => {
-    ensureUnitExists(primaryWorkspace, unitCrudUnits.crudPrint);
-    cy.visitWs(primaryWorkspace);
-    goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-preview-units"]').click();
-    selectListUnits([unitCrudUnits.crudPrint.shortname]);
-
-    cy.intercept('GET', '/api/workspaces/*/units/*/scheme', {
+    cy.intercept('GET', '**/workspaces/*/units/*/scheme', {
       body: {
         scheme: JSON.stringify({
           variableCodings: [
@@ -187,7 +181,7 @@ describe('Unit Print Preview', () => {
       }
     }).as('getUnitScheme');
 
-    cy.intercept('GET', '/api/workspaces/*/units/*/comments*', {
+    cy.intercept('GET', '**/workspaces/*/units/*/comments*', {
       body: [
         {
           id: 1,
@@ -198,6 +192,13 @@ describe('Unit Print Preview', () => {
       ]
     }).as('getComments');
 
+    ensureUnitExists(primaryWorkspace, unitCrudUnits.crudPrint);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-preview-units"]').click();
+    cy.get('[data-cy="workspace-select-unit-list-filter-units"]')
+      .type(unitCrudUnits.crudPrint.shortname);
+    selectListUnits([unitCrudUnits.crudPrint.shortname]);
+
     cy.window().then(win => {
       cy.stub(win, 'open')
         .callsFake((url: string) => {
@@ -207,11 +208,17 @@ describe('Unit Print Preview', () => {
     });
 
     cy.translate(Cypress.expose('locale')).then(json => {
-      cy.get('button[type="submit"]').contains(json.construct).click();
+      cy.get('button[type="submit"]')
+        .contains(json.construct)
+        .should('not.be.disabled')
+        .click();
     });
 
     cy.get('@windowOpen').should('be.called');
     cy.url().should('include', '/print');
+
+    cy.wait('@getUnitScheme');
+    cy.wait('@getComments');
 
     cy.get('studio-lite-unit-print-coding').should('exist');
     cy.get('studio-lite-unit-print-coding')

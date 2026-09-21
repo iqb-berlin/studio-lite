@@ -75,6 +75,9 @@ describe('Unit Preview (Vorschau)', () => {
       cy.get('aspect-checkbox').contains('Beschriftung').click();
       cy.get('aspect-checkbox input[type="checkbox"]').should('be.checked');
     });
+    cy.get('studio-lite-status-indication span.label:contains("R")')
+      .parent()
+      .should('not.have.class', 'none');
     cy.get('[data-cy="preview-bar-check-coding"]').click();
     // cy.get('mat-dialog-content', { timeout: 10000 }).within(() => {
     //   cy.pause();
