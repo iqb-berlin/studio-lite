@@ -1,6 +1,5 @@
 import {
   AccessLevel,
-  modules,
   standardUser,
   resource,
   adminGroup,
@@ -8,13 +7,11 @@ import {
 } from '../../../support/testData';
 import {
   addFirstUser,
-  addModules,
   addResourcePackage,
   createGroup,
   createNewUser,
   deleteFirstUser,
   deleteGroup,
-  deleteAllModules,
   deleteResource,
   deleteUser
 } from '../../../support/helpers';
@@ -54,21 +51,11 @@ describe('UI Administration Management', () => {
     grantRemovePrivilegeAtWs([Cypress.expose('username')], 'Mathematik I', [AccessLevel.Basic]);
   });
 
-  it('uploads Verona modules',
-    { defaultCommandTimeout: 100000 },
-    () => {
-      addModules(modules);
-    });
-
   it('uploads a resource package',
     { defaultCommandTimeout: 200000 },
     () => {
       addResourcePackage(resource);
     });
-
-  it('deletes Verona modules', () => {
-    deleteAllModules();
-  });
 
   it('deletes a resource package', () => {
     deleteResource();
