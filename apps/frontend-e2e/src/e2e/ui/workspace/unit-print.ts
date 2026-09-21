@@ -1,13 +1,17 @@
 import {
   primaryWorkspace,
-  printUnits
+  printUnits,
+  unitCrudUnits
 } from '../../../support/testData';
 import {
+  clickIndexTabWorkspace,
+  ensureUnitExists,
   goToWsMenu,
-  selectListUnits
+  selectListUnits,
+  selectUnit
 } from '../../../support/helpers';
 
-describe('Unit Print Preview – Properties & Last Changes', () => {
+describe('Unit Print Preview', () => {
   after(() => {
     cy.visitWs(primaryWorkspace);
   });
@@ -123,5 +127,106 @@ describe('Unit Print Preview – Properties & Last Changes', () => {
         cy.get('table.metadata tr').should('not.exist');
       });
     });
+  });
+
+  it('verifies print options dialog opens from preview bar', () => {
+    cy.visitWs(primaryWorkspace);
+    selectUnit(printUnits[0]);
+    clickIndexTabWorkspace('preview');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
+    cy.get('[data-cy="preview-bar-print"]', { timeout: 30000 }).should('be.visible').click();
+    cy.get('mat-mdc-dialog-container, mat-dialog-container', {
+      timeout: 15000
+    }).should('be.visible');
+
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('mat-dialog-actions, .mat-mdc-dialog-actions')
+        .contains('button', json.cancel || json.close)
+        .click({ force: true });
+    });
+    cy.get('mat-mdc-dialog-container, mat-dialog-container').should('not.exist');
+  });
+
+  it('displays print preview for units with coding and comments', () => {
+    ensureUnitExists(primaryWorkspace, unitCrudUnits.crudPrint);
+    cy.visitWs(primaryWorkspace);
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-preview-units"]').click();
+    selectListUnits([unitCrudUnits.crudPrint.shortname]);
+
+    cy.intercept('GET', '/api/workspaces/*/units/*/scheme', {
+      body: {
+        scheme: JSON.stringify({
+          variableCodings: [
+            {
+              id: 'var1',
+              alias: 'Variable_1',
+              sourceType: 'BASE',
+              codes: [
+                {
+                  id: 111,
+                  type: 'FULL_CREDIT',
+                  score: 1,
+                  ruleSetOperatorAnd: true,
+                  ruleSets: [
+                    {
+                      ruleOperatorAnd: false,
+                      rules: [
+                        {
+                          method: 'MATCH',
+                          parameters: ['adios']
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        })
+      }
+    }).as('getUnitScheme');
+
+    cy.intercept('GET', '/api/workspaces/*/units/*/comments*', {
+      body: [
+        {
+          id: 1,
+          body: '<p>Test comment</p>',
+          userName: 'tester',
+          changedAt: new Date().toISOString()
+        }
+      ]
+    }).as('getComments');
+
+    cy.window().then(win => {
+      cy.stub(win, 'open')
+        .callsFake((url: string) => {
+          win.location.hash = url.replace(/^#/, '');
+        })
+        .as('windowOpen');
+    });
+
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('button[type="submit"]').contains(json.construct).click();
+    });
+
+    cy.get('@windowOpen').should('be.called');
+    cy.url().should('include', '/print');
+
+    cy.get('studio-lite-unit-print-coding').should('exist');
+    cy.get('studio-lite-unit-print-coding')
+      .contains('Variable_1')
+      .should('exist');
+
+    cy.get('studio-lite-unit-print-code').should('exist');
+    cy.get('studio-lite-unit-print-code').contains('111').should('exist');
+
+    cy.get('studio-lite-unit-print-comments').should('exist');
+    cy.get('studio-lite-unit-print-comments')
+      .contains('Test comment')
+      .should('exist');
+    cy.get('studio-lite-unit-print-comments')
+      .contains('tester')
+      .should('exist');
   });
 });

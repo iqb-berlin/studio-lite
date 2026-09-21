@@ -318,7 +318,7 @@ export const lightUnit: UnitData = {
 // =============================================================================
 
 /**
- * Units used in `units.ts` – core CRUD operations (create, delete, preview,
+ * Units used in `basic-unit.ts` – core CRUD operations (create, from-existing, delete,
  * save-or-discard dialog).
  */
 export const unitCrudUnits = {
@@ -327,7 +327,9 @@ export const unitCrudUnits = {
   /** Second unit created: tests multi-unit creation */
   crud2: { shortname: 'CRUD_E1', name: 'CRUD Unit 2', group: 'Gruppe E' } as UnitData,
   /** Third unit: used for print preview with coding & comments */
-  crudPrint: { shortname: 'CRUD_D2', name: 'CRUD Print Unit', group: 'Gruppe D' } as UnitData
+  crudPrint: { shortname: 'CRUD_D2', name: 'CRUD Print Unit', group: 'Gruppe D' } as UnitData,
+  /** Unit created from an existing unit */
+  crudFromExisting: { shortname: 'CRUD_EX1', name: 'CRUD Unit From Existing', group: 'Gruppe D' } as UnitData
 };
 
 /**
