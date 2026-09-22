@@ -2,7 +2,6 @@ import { primaryWorkspace, baseGroup, groupTestNames } from '../../../support/te
 import {
   addUnitPred,
   clickIndexTabWsgAdmin,
-  importExercise,
   selectUnit,
   clickIndexTabWorkspace,
   addStatus,
@@ -16,11 +15,6 @@ import {
 } from '../../../support/helpers';
 
 describe('Unit Groups and Group Management', () => {
-  it('imports test units', () => {
-    cy.visitWs(primaryWorkspace);
-    importExercise('test_studio_units_download.zip');
-  });
-
   it('creates a new unit group via the add-unit dialog', () => {
     cy.visitWs(primaryWorkspace);
     cy.get('[data-cy="workspace-add-units"]').click();
