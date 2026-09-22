@@ -79,12 +79,8 @@ describe('Unit Preview (Vorschau)', () => {
       .parent()
       .should('not.have.class', 'none');
     cy.get('[data-cy="preview-bar-check-coding"]').click();
-    // cy.get('mat-dialog-content', { timeout: 10000 }).within(() => {
-    //   cy.pause();
-    //   cy.contains('checkbox_1').should('exist');
-    //   cy.contains('tr', 'checkbox_1').should('contain.text', 'CODING_COMPLETE');
-    // });
-    cy.get('td:contains("checkbox_1")').next().next().should('contain.text', 'CODING_COMPLETE');
+    cy.get('td:contains("checkbox_1")').should('exist').next().next()
+      .should('contain.text', 'CODING_COMPLETE');
     cy.contains('mat-dialog-actions button', 'Schließen').click();
     cy.get('mat-dialog-container').should('not.exist');
   });
@@ -94,11 +90,8 @@ describe('Unit Preview (Vorschau)', () => {
       cy.get('aspect-text-field input', { timeout: 10000 }).type('Eingabe Text');
     });
     cy.get('[data-cy="preview-bar-check-coding"]').click();
-    // cy.get('mat-dialog-content', { timeout: 10000 }).within(() => {
-    //   cy.contains('text-field_1').should('exist');
-    //   cy.contains('tr', 'text-field_1').should('contain.text', 'CODING_COMPLETE');
-    // });
     cy.get('td:contains("text-field_1")')
+      .should('exist')
       .next()
       .next()
       .should('contain.text', 'CODING_COMPLETE');
@@ -110,12 +103,8 @@ describe('Unit Preview (Vorschau)', () => {
     cy.getIFrameBody('[data-cy="unit-preview-iframe"]').within(() => {
       cy.get('aspect-text-area textarea', { timeout: 10000 }).type('Langer Antworttext');
     });
-    // cy.get('[data-cy="preview-bar-check-coding"]').click();
-    // cy.get('mat-dialog-content', { timeout: 10000 }).within(() => {
-    //   cy.contains('text-area_1').should('exist');
-    //   cy.contains('tr', 'text-area_1').should('contain.text', 'CODING_COMPLETE');
-    // });
-    cy.get('td:contains("text-area_1")')
+    cy.get('[data-cy="preview-bar-check-coding"]').click();
+    cy.get('td:contains("text-area_1")').should('exist')
       .next()
       .next()
       .should('contain.text', 'CODING_COMPLETE');
