@@ -137,6 +137,22 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
     }
   }
 
+  /**
+   * The page list belongs to the unit that is shown, so it goes when that unit goes. Only the host
+   * knows that a unit has been replaced, which is why this cannot be left to {@link setPageList}:
+   * a player that names no pages is not reporting a unit change. aspect sends an empty list before
+   * it has counted its pages, while verona-player-simple leaves `validPages` out entirely for a
+   * unit that really has none -- the same two shapes, meaning opposite things (#1531).
+   */
+  clearPageList(): void {
+    this.pageList = [];
+  }
+
+  /**
+   * What the player last said about its pages. A list of more than one page replaces what is held;
+   * anything else is taken as "nothing new about the pages" and only moves the marker, because that
+   * is the shape in which a player reports an ordinary page change.
+   */
   setPageList(validPages?: string[], currentPage?: string): void {
     if (Array.isArray(validPages) && validPages.length > 1) {
       const newPageList: PageData[] = [];

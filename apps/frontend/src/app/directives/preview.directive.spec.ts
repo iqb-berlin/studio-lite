@@ -309,6 +309,41 @@ describe('PreviewDirective', () => {
     expect(active?.id).toBe('p2');
   });
 
+  it('empties the page list on clearPageList', () => {
+    const directive = createDirective();
+
+    directive.setPageList(['p1', 'p2', 'p3'], 'p1');
+    expect(directive.pageList.length).toBe(5);
+
+    directive.clearPageList();
+
+    expect(directive.pageList).toEqual([]);
+  });
+
+  it('keeps the page list empty when the next unit reports a single page', () => {
+    const directive = createDirective();
+
+    directive.setPageList(['p1', 'p2', 'p3'], 'p1');
+    directive.clearPageList();
+
+    directive.setPageList([], '0');
+    directive.setPageList(['0'], '0');
+
+    expect(directive.pageList).toEqual([]);
+  });
+
+  it('builds the page list again when the next unit reports several pages', () => {
+    const directive = createDirective();
+
+    directive.setPageList(['p1', 'p2', 'p3'], 'p1');
+    directive.clearPageList();
+
+    directive.setPageList([], '0');
+    directive.setPageList(['0', '1'], '0');
+
+    expect(directive.pageList.filter(p => p.type === '#goto').map(p => p.id)).toEqual(['0', '1']);
+  });
+
   it('sends page navigation commands based on api version', () => {
     const directive = createDirective();
     const postMessageTarget = { postMessage: jest.fn() } as unknown as Window;
