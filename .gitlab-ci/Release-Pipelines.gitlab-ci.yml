@@ -740,8 +740,8 @@ test-main-pr-e2e-ui-workspace-chrome:
               --classpath=changelog
             history
     - docker compose --file docker-compose.e2e.yaml
-        up --quiet-pull --exit-code-from test-e2e-ui-chrome-1
-          test-e2e-ui-chrome-1
+        up --quiet-pull --exit-code-from test-e2e-ui-workspace-chrome
+          test-e2e-ui-workspace-chrome
   after_script:
     - docker logout ${CI_REGISTRY}
   artifacts:
@@ -796,8 +796,8 @@ test-main-pr-e2e-ui-admin-chrome:
               --classpath=changelog
             history
     - docker compose --file docker-compose.e2e.yaml
-        up --quiet-pull --exit-code-from test-e2e-ui-chrome-2
-          test-e2e-ui-chrome-2
+        up --quiet-pull --exit-code-from test-e2e-ui-admin-chrome
+          test-e2e-ui-admin-chrome
   after_script:
     - docker logout ${CI_REGISTRY}
   artifacts:

@@ -88,9 +88,9 @@ dev-test-e2e-api:
 	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
 dev-test-e2e-ui-chrome:
 	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
-dev-test-e2e-ui-chrome-1:
+dev-test-e2e-ui-workspace-chrome:
 	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
-dev-test-e2e-ui-chrome-2:
+dev-test-e2e-ui-admin-chrome:
 	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
 dev-test-e2e-ui-chrome-mobile:
 	$(MAKE) -f $(MK_FILE_DIR)/dev-test.mk -C $(MK_FILE_DIR) $@
@@ -173,9 +173,9 @@ prod-test-e2e-api:
 	$(MAKE) -f $(MK_FILE_DIR)/prod-test.mk -C $(MK_FILE_DIR) $@
 prod-test-e2e-ui-chrome:
 	$(MAKE) -f $(MK_FILE_DIR)/prod-test.mk -C $(MK_FILE_DIR) $@
-prod-test-e2e-ui-chrome-1:
+prod-test-e2e-ui-workspace-chrome:
 	$(MAKE) -f $(MK_FILE_DIR)/prod-test.mk -C $(MK_FILE_DIR) $@
-prod-test-e2e-ui-chrome-2:
+prod-test-e2e-ui-admin-chrome:
 	$(MAKE) -f $(MK_FILE_DIR)/prod-test.mk -C $(MK_FILE_DIR) $@
 prod-test-e2e-ui-chrome-mobile:
 	$(MAKE) -f $(MK_FILE_DIR)/prod-test.mk -C $(MK_FILE_DIR) $@

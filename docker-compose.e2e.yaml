@@ -48,7 +48,7 @@ services:
     networks:
       - application-network
 
-  test-e2e-ui-chrome-1:
+  test-e2e-ui-workspace-chrome:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
     command:
       - "e2e"
@@ -61,7 +61,7 @@ services:
     networks:
       - application-network
 
-  test-e2e-ui-chrome-2:
+  test-e2e-ui-admin-chrome:
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend-e2e:${TAG}
     command:
       - "e2e"

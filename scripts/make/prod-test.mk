@@ -7,7 +7,7 @@ include $(STUDIO_BASE_DIR)/.env.studio-lite
 
 # prevents collisions of make target names with possible file names
 .PHONY: prod-registry-login prod-registry-logout prod-test-build prod-test-up prod-test-down prod-test-logs\
-	prod-test-e2e prod-test-e2e-api prod-test-e2e-ui-chrome prod-test-e2e-ui-chrome-1 prod-test-e2e-ui-chrome-2\
+	prod-test-e2e prod-test-e2e-api prod-test-e2e-ui-chrome prod-test-e2e-ui-workspace-chrome prod-test-e2e-ui-admin-chrome\
 	prod-test-e2e-ui-chrome-mobile prod-test-e2e-ui-firefox prod-test-e2e-ui-firefox-mobile prod-test-e2e-ui-edge\
 	prod-test-e2e-ui-edge-mobile
 
@@ -141,21 +141,21 @@ prod-test-e2e-ui-chrome:
 		up --no-build --pull never test-e2e-ui-chrome
 	docker rm studio-lite-test-e2e-ui-chrome-1
 
-# Run e2e ui workspace tests (set 1) with chrome in prod environment (only in combination with 'make prod-test-up')
-prod-test-e2e-ui-chrome-1:
+# Run e2e ui workspace tests with chrome in prod environment (only in combination with 'make prod-test-up')
+prod-test-e2e-ui-workspace-chrome:
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.e2e.yaml\
 			--env-file $(STUDIO_BASE_DIR)/.env.studio-lite\
-		up --no-build --pull never test-e2e-ui-chrome-1
-	docker rm studio-lite-test-e2e-ui-chrome-1-1
+		up --no-build --pull never test-e2e-ui-workspace-chrome
+	docker rm studio-lite-test-e2e-ui-workspace-chrome-1
 
-# Run e2e ui admin & general tests (set 2) in prod environment (only in combination with 'make prod-test-up')
-prod-test-e2e-ui-chrome-2:
+# Run e2e ui admin & general tests in prod environment (only in combination with 'make prod-test-up')
+prod-test-e2e-ui-admin-chrome:
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.e2e.yaml\
 			--env-file $(STUDIO_BASE_DIR)/.env.studio-lite\
-		up --no-build --pull never test-e2e-ui-chrome-2
-	docker rm studio-lite-test-e2e-ui-chrome-2-1
+		up --no-build --pull never test-e2e-ui-admin-chrome
+	docker rm studio-lite-test-e2e-ui-admin-chrome-1
 
 # Run all e2e ui tests with chrome browser for mobiles in production environment (only in combination with 'make prod-test-up')
 prod-test-e2e-ui-chrome-mobile:
