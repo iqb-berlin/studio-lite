@@ -693,7 +693,7 @@ test-main-pr-e2e-api:
       - dist/cypress/apps/*
     expire_in: 60 minutes
 
-test-main-pr-e2e-ui-chrome-1:
+test-main-pr-e2e-ui-workspace-chrome:
   stage: test-e2e
   interruptible: true
   rules:
@@ -749,7 +749,7 @@ test-main-pr-e2e-ui-chrome-1:
       - dist/cypress/apps/*
     expire_in: 60 minutes
 
-test-main-pr-e2e-ui-chrome-2:
+test-main-pr-e2e-ui-admin-chrome:
   stage: test-e2e
   interruptible: true
   rules:
