@@ -1118,6 +1118,42 @@ lint-main-pr-frontend-e2e:
   after_script:
     - docker logout ${CI_REGISTRY}
 
+# The counterpart of `typecheck-app`, whose comment in
+# Branch&PreRelease-Pipelines.gitlab-ci.yml says why it must not be allow_failure: the e2e
+# sources are transpiled without type checking, so a broken call site surfaces nowhere else.
+# Every develop-targeted pull request has been held to that since #1586/#1590 -- the gate
+# before a release was the one that was not (#1661).
+typecheck-main-pr-frontend-e2e:
+  stage: lint
+  interruptible: true
+  rules:
+    - !reference [ .main_pr_rules, rules ]
+  needs:
+    - build-main-pr-frontend-e2e-test-image
+  image: ${DOCKER_IMAGE}
+  services:
+    - name: ${DOCKER_SERVICE}
+      variables:
+        HEALTHCHECK_TCP_PORT: "2375"
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh ${DOCKER_DAEMON_OPTIONS}" ]
+      alias: docker
+  variables:
+    FRONTEND_E2E_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/iqbberlin/studio-lite-frontend-e2e"
+  before_script:
+    - docker --version
+    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
+    - ip a | grep mtu
+    - docker network inspect bridge | grep mtu
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
+    - docker pull --quiet ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA}
+  script:
+    - docker run ${FRONTEND_E2E_IMAGE_NAME}:${CI_COMMIT_SHA} typecheck frontend-e2e
+  after_script:
+    - docker logout ${CI_REGISTRY}
+
+# Stricter than `audit-app` on develop-targeted pull requests, which is allow_failure: these
+# two block, so a new critical advisory holds the release until it is dealt with. That is
+# deliberate (#1661) -- a release ships the dependency tree, a feature branch does not.
 audit-main-pr-backend:
   stage: audit
   interruptible: true
