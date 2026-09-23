@@ -137,6 +137,43 @@ describe('WidgetOverlayComponent', () => {
       .toBe('new-state');
   });
 
+  describe('a state change that clears or keeps the state (#1685)', () => {
+    const notifyState = (data: object): void => {
+      const fakeSource = fixture.nativeElement.querySelector('iframe').contentWindow;
+      expect(fakeSource).toBeTruthy();
+      postMessage$.next({
+        data: { type: 'vowStateChangedNotification', ...data },
+        source: fakeSource
+      } as never as MessageEvent);
+    };
+
+    // The periodic table sends '' once every symbol is deselected, and the player has to get
+    // exactly that back, not the selection before it.
+    it('takes an empty state and returns it to the player', () => {
+      notifyState({ state: '' });
+      component.continue();
+
+      expect(playerPostMessageTarget.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'vopWidgetReturn', state: '' }),
+        '*'
+      );
+    });
+
+    it('keeps the state when the notification carries none', () => {
+      notifyState({});
+
+      expect((component as never as WidgetOverlayTestAccess).widgetState)
+        .toBe('initial-state');
+    });
+
+    it('keeps the state when the notification carries null', () => {
+      notifyState({ state: null });
+
+      expect((component as never as WidgetOverlayTestAccess).widgetState)
+        .toBe('initial-state');
+    });
+  });
+
   it('ignores messages from unknown sources', () => {
     const otherWindow = {} as never;
 

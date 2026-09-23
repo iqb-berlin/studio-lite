@@ -80,7 +80,9 @@ export class WidgetOverlayComponent implements AfterViewInit, OnDestroy {
         break;
 
       case 'vowStateChangedNotification':
-        if (msgData.state) {
+        // `state` is an optional string in the widget API, and an empty one is a state like any
+        // other: the periodic table sends '' once every symbol is deselected (#1685).
+        if (typeof msgData.state === 'string') {
           this.widgetState = msgData.state;
         }
         break;
