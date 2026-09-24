@@ -13,6 +13,7 @@ describe('Workspace Unit Export & Reports', () => {
     ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
     ensureUnitExists(primaryWorkspace, exportUnits.exportUnit2);
     cy.visitWs(primaryWorkspace);
+    cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
     selectListUnits([exportUnits.exportUnit1.shortname, exportUnits.exportUnit2.shortname]);
@@ -27,6 +28,7 @@ describe('Workspace Unit Export & Reports', () => {
 
   it('export dialog shows file-config checkboxes', () => {
     cy.visitWs(primaryWorkspace);
+    cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
     cy.get('mat-card.files mat-checkbox, studio-lite-export-unit-file-config mat-checkbox')
@@ -38,7 +40,7 @@ describe('Workspace Unit Export & Reports', () => {
 
   it('export dialog search filter narrows the unit list', () => {
     ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
-    cy.visitWs(primaryWorkspace);
+    cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
     cy.get('[data-cy="workspace-select-unit-list-filter-units"]')
@@ -52,6 +54,7 @@ describe('Workspace Unit Export & Reports', () => {
 
   it('export dialog definition checkbox can be toggled', () => {
     cy.visitWs(primaryWorkspace);
+    cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
     cy.get('mat-card.files mat-checkbox, studio-lite-export-unit-file-config mat-checkbox')
@@ -69,7 +72,7 @@ describe('Workspace Unit Export & Reports', () => {
 
   it('exports selected units as XML (Testcenter zip format)', () => {
     ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
-    cy.visitWs(primaryWorkspace);
+    cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
     selectListUnits([exportUnits.exportUnit1.shortname]);
@@ -81,7 +84,7 @@ describe('Workspace Unit Export & Reports', () => {
 
   it('exports selected units as JSON format', () => {
     ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
-    cy.visitWs(primaryWorkspace);
+    cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
     selectListUnits([exportUnits.exportUnit1.shortname]);
@@ -93,7 +96,7 @@ describe('Workspace Unit Export & Reports', () => {
 
   it('exports selected units with comments and rich notes options toggled', () => {
     ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
-    cy.visitWs(primaryWorkspace);
+    cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
     selectListUnits([exportUnits.exportUnit1.shortname]);
@@ -138,7 +141,7 @@ describe('Workspace Unit Export & Reports', () => {
 
   it('exports codebook for selected units', () => {
     ensureUnitExists(primaryWorkspace, exportUnits.exportUnit2);
-    cy.visitWs(primaryWorkspace);
+    cy.contains('.unit-row, mat-row', exportUnits.exportUnit2.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-export-coding-book"]').click();
@@ -156,6 +159,7 @@ describe('Workspace Unit Export & Reports', () => {
 
   it('coding book export dialog can be cancelled without a selection', () => {
     cy.visitWs(primaryWorkspace);
+    cy.contains('.unit-row, mat-row', exportUnits.exportUnit2.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-export-coding-book"]').click();

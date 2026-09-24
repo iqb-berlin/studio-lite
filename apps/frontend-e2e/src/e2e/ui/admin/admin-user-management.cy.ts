@@ -17,13 +17,6 @@ import {
 } from '../../../support/helpers';
 import { secondaryUser } from '../../../support/testData';
 
-// ---------------------------------------------------------------------------
-// Covers (all previously < 70 % e2e coverage):
-//   - admin/components/users          (was 67 %)
-//   - admin/components/users-menu     (was 57 %)
-//   - admin/components/edit-user      (was 42 %)
-//   - admin/components/workspace-groups-menu (was 50 %)
-// ---------------------------------------------------------------------------
 describe('Admin User Management', () => {
   const editTarget = secondaryUser;
 

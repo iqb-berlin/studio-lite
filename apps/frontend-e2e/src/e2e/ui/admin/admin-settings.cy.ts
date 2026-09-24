@@ -276,7 +276,7 @@ describe('Admin Settings Tab Configuration', () => {
       );
     });
 
-    it('checks that the we have only two registry stores with the test registry', () => {
+    it('checks that the we have only 23 registry stores with the test registry', () => {
       // create a group workspace
       createGroup(baseGroup);
 
