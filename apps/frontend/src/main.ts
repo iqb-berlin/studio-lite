@@ -1,4 +1,6 @@
-import { enableProdMode, ApplicationModule, importProvidersFrom } from '@angular/core';
+import {
+  enableProdMode, ApplicationModule, importProvidersFrom, provideZoneChangeDetection
+} from '@angular/core';
 
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -73,7 +75,7 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideRouter(APP_ROUTES, withRouterConfig({ onSameUrlNavigation: 'reload' })),
+    provideZoneChangeDetection(), provideRouter(APP_ROUTES, withRouterConfig({ onSameUrlNavigation: 'reload' })),
     provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(
       ApplicationModule,
