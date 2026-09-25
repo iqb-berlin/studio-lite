@@ -5,7 +5,8 @@ import {
   standardUser,
   resource,
   primaryWorkspace,
-  secondaryWorkspace
+  secondaryWorkspace,
+  widgets as widgetFiles
 } from '../../../support/testData';
 import {
   addFirstUser,
@@ -17,7 +18,7 @@ import {
   deleteGroup,
   deleteAllModules,
   deleteResource,
-  deleteUser
+  deleteUser, addWidgets
 } from '../../../support/helpers';
 import {
   createWs,
@@ -48,7 +49,8 @@ export function createBasicSpecCy() {
     );
     // admin can upload modules
     addModules(modules);
-
+    // admin can upload widgets
+    addWidgets(widgetFiles);
     // admin can upload the resource package
     addResourcePackage(resource);
   });
