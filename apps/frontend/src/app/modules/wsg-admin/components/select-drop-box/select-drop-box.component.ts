@@ -15,7 +15,7 @@ import { MatFormField, MatLabel, MatSelect } from '@angular/material/select';
 
 @Component({
   selector: 'studio-lite-select-drop-box',
-  // eslint-disable-next-line max-len
+
   imports: [MatButton, MatDialogActions, MatDialogContent, MatDialogTitle, TranslateModule, MatDialogClose, MatOption, MatSelect, MatLabel, MatFormField],
   templateUrl: './select-drop-box.component.html',
   styleUrl: './select-drop-box.component.scss'

@@ -157,7 +157,7 @@ export class CodingReportComponent implements OnInit {
     this.dataSource = new MatTableDataSource(filteredRows); // Refresh the data source
     const defaultSortingDataAccessor = this.dataSource.sortingDataAccessor;
     const validationSeveritySortOrder: Record<
-    CodingReportRow['validationSeverity'], number
+      CodingReportRow['validationSeverity'], number
     > = {
       error: 0,
       warning: 1,

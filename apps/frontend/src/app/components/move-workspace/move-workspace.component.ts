@@ -14,7 +14,7 @@ import { WsgAdminService } from '../../modules/wsg-admin/services/wsg-admin.serv
 
 export interface MoveComponentData {
   title: string,
-  warning:string,
+  warning: string,
   content: string,
   default: string,
   okButtonLabel: string,
@@ -24,13 +24,13 @@ export interface MoveComponentData {
 @Component({
   templateUrl: './move-workspace.component.html',
   styleUrls: ['./move-workspace.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatDialogTitle, MatDialogContent, FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatDialogActions, NgClass, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class MoveWorkspaceComponent {
   typedData: MoveComponentData;
-  selectedValue:string = '';
+  selectedValue: string = '';
   constructor(@Inject(MAT_DIALOG_DATA) data: unknown, private wsg_admin_service:WsgAdminService) {
     this.typedData = data as MoveComponentData;
     this.typedData.workspaceGroups = this.typedData.workspaceGroups && this.typedData.workspaceGroups

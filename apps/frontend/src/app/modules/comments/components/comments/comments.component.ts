@@ -36,7 +36,7 @@ import { VoterOverviewComponent } from '../voter-overview/voter-overview.compone
   selector: 'studio-lite-comments',
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, FilteredCommentsPipe, FormsModule, FilteredRootCommentsPipe, CommentFilterComponent, HiddenCommentsCountPipe],
   providers: [CommentService, BackendService]
 })

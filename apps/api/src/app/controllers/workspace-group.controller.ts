@@ -56,8 +56,8 @@ export class WorkspaceGroupController {
   @ApiTags('workspace-group')
   async findOne(
     @WorkspaceGroupId() id: number,
-      @Query('download') download: boolean,
-      @Res({ passthrough: true }) res: Response
+    @Query('download') download: boolean,
+    @Res({ passthrough: true }) res: Response
   ): Promise<WorkspaceGroupFullDto | StreamableFile> {
     if (download) {
       const file = await DownloadWorkspacesClass.getWorkspaceReport(

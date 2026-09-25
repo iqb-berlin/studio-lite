@@ -28,7 +28,7 @@ import { UpperSnakeCaseToKebabCasePipe } from '../../pipes/upper-snake-case-to-k
   selector: 'studio-lite-widgets',
   templateUrl: './widgets.component.html',
   styleUrls: ['./widgets.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, VeronaModulesTableComponent, TranslateModule, UpperSnakeCaseToKebabCasePipe]
 })
 export class WidgetsComponent extends ModulesDirective {

@@ -83,7 +83,7 @@ export class WorkspaceUnitCommentController {
   @ApiTags('workspace unit comment')
   async patchOnesUnitUserLastSeen(
     @Param('unit_id', ParseIntPipe) unitId: number,
-      @Body() updateUnitUser: UpdateUnitUserDto
+    @Body() updateUnitUser: UpdateUnitUserDto
   ): Promise<void> {
     return this.unitUserService.patchUnitUserCommentsLastSeen(unitId, updateUnitUser);
   }
@@ -167,8 +167,8 @@ export class WorkspaceUnitCommentController {
   @ApiTags('workspace unit comment')
   async toggleVote(
     @Req() request,
-      @Param('comment_id', ParseIntPipe) commentId: number,
-      @Body() body: UnitCommentVoteDto
+    @Param('comment_id', ParseIntPipe) commentId: number,
+    @Body() body: UnitCommentVoteDto
   ): Promise<void> {
     return this.unitCommentService.toggleVote(commentId, request.user.id, body.vote);
   }

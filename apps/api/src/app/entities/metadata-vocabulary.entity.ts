@@ -10,10 +10,10 @@ import { TopConcept } from '@studio-lite-lib/api-dto';
 @Entity()
 class MetadataVocabulary {
   @PrimaryColumn()
-    id: string;
+  id: string;
 
   @Column()
-    type: string;
+  type: string;
 
   @Column({
     type: 'jsonb',
@@ -21,7 +21,7 @@ class MetadataVocabulary {
     default: () => "'null'",
     nullable: true
   })
-    description: Record<string, string> = null;
+  description: Record<string, string> = null;
 
   @Column({
     type: 'jsonb',
@@ -29,7 +29,7 @@ class MetadataVocabulary {
     default: () => "'{}'",
     nullable: false
   })
-    title: Record<string, string> = {};
+  title: Record<string, string> = {};
 
   @Column({
     type: 'jsonb',
@@ -37,7 +37,7 @@ class MetadataVocabulary {
     default: () => "'null'",
     nullable: true
   })
-    hasTopConcept: TopConcept[] = null;
+  hasTopConcept: TopConcept[] = null;
 
   @Column({
     type: 'jsonb',
@@ -45,13 +45,13 @@ class MetadataVocabulary {
     default: () => "'{}'",
     nullable: false
   })
-    '@context': Record<string, never> = {};
+  '@context': Record<string, never> = {};
 
   @Column({
     type: 'timestamp with time zone',
     name: 'modified_at'
   })
-    modifiedAt: Date;
+  modifiedAt: Date;
 }
 
 export default MetadataVocabulary;

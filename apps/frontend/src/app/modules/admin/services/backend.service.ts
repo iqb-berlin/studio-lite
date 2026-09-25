@@ -241,9 +241,9 @@ export class BackendService {
   changeWorkspaceGroup(workspaceGroupData: WorkspaceGroupFullDto): Observable<boolean> {
     return this.http
       .patch<boolean>(
-      `${this.serverUrl}admin/workspace-groups/${workspaceGroupData.id}`,
-      workspaceGroupData
-    )
+        `${this.serverUrl}admin/workspace-groups/${workspaceGroupData.id}`,
+        workspaceGroupData
+      )
       .pipe(
         map(() => true),
         catchError(() => of(false))

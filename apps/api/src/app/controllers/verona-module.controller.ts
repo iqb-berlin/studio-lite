@@ -58,8 +58,8 @@ export class VeronaModuleController {
   })
   async findFileById(
     @Param('key') key: string,
-      @Res({ passthrough: true }) res: Response,
-      @Query('download') download: boolean
+    @Res({ passthrough: true }) res: Response,
+    @Query('download') download: boolean
   ): Promise<StreamableFile | VeronaModuleFileDto> {
     return this.veronaModulesService.getVeronaModule(key, res, download);
   }

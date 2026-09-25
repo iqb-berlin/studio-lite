@@ -14,7 +14,7 @@ import { AppService } from '../../services/app.service';
   selector: 'studio-lite-user-menu',
   templateUrl: './user-menu.component.html',
   styleUrls: ['./user-menu.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatButton, MatMenuTrigger, MatTooltip, WrappedIconComponent, MatMenu, AccountActionComponent, ChangePasswordDirective, EditMyDataDirective, LogoutDirective, TranslateModule]
 })
 export class UserMenuComponent {

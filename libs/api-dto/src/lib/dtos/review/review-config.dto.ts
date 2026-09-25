@@ -2,14 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ReviewConfigDto {
   @ApiProperty()
-    canComment? = true;
+  canComment? = true;
 
   @ApiProperty()
-    showOthersComments? = false;
+  showOthersComments? = false;
 
   @ApiProperty()
-    showCoding? = false;
+  showCoding? = false;
 
   @ApiProperty()
-    showMetadata? = true;
+  showMetadata? = true;
 }

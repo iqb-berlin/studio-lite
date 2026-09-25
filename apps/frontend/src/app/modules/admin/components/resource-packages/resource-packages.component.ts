@@ -23,7 +23,7 @@ import { DeleteDialogComponent } from '../../../../components/delete-dialog/dele
   selector: 'studio-lite-resource-packages',
   templateUrl: './resource-packages.component.html',
   styleUrls: ['./resource-packages.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [IqbFilesUploadInputForDirective, MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadQueueComponent, ResourcePackagesTableComponent, AsyncPipe, TranslateModule, TableDataSourcePipe]
 })
 

@@ -497,17 +497,17 @@ export class UsersService {
     sessionInfosByUser.forEach((sessions, userId) => {
       const latestSession = sessions
         .reduce<UserSessionInfoDto | undefined>(
-        (latest, current) => (UsersService
-          .isNewerSession(current.lastActivity as Date, latest?.lastActivity) ? current : latest),
-        undefined
-      );
+          (latest, current) => (UsersService
+            .isNewerSession(current.lastActivity as Date, latest?.lastActivity) ? current : latest),
+          undefined
+        );
       const latestNonOrphanedSession = sessions
         .filter(session => session.activityStatus !== 'orphaned')
         .reduce<UserSessionInfoDto | undefined>(
-        (latest, current) => (UsersService
-          .isNewerSession(current.lastActivity as Date, latest?.lastActivity) ? current : latest),
-        undefined
-      );
+          (latest, current) => (UsersService
+            .isNewerSession(current.lastActivity as Date, latest?.lastActivity) ? current : latest),
+          undefined
+        );
 
       sessionsByUser.set(userId, {
         isLoggedIn: !!latestNonOrphanedSession,

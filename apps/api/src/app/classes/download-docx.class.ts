@@ -933,7 +933,6 @@ export class DownloadDocx {
       value = value.trim();
 
       if (value.endsWith('%')) {
-        // eslint-disable-next-line no-bitwise,no-mixed-operators
         return Math.min((Number.parseFloat(value) * max) / 100, max);
       }
       return Math.min(Number.parseFloat(value), max);
@@ -947,6 +946,6 @@ export class DownloadDocx {
   }
 
   // Convert RGB color to HEX https://github.com/sindresorhus/rgb-hex
-  // eslint-disable-next-line no-bitwise,no-mixed-operators
+  // eslint-disable-next-line no-bitwise
   private static toHex = (red, green, blue) => (blue | (green << 8) | (red << 16) | (1 << 24)).toString(16).slice(1);
 }

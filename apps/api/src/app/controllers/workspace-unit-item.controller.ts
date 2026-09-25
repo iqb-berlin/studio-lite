@@ -44,7 +44,7 @@ export class WorkspaceUnitItemController {
   @ApiTags('workspace unit item')
   async findAll(
     @UnitId() unitId: number,
-      @Query('withoutMetadata', new ParseBoolPipe({ optional: true })) withoutMetadata: boolean
+    @Query('withoutMetadata', new ParseBoolPipe({ optional: true })) withoutMetadata: boolean
   ): Promise<UnitItemDto[] | UnitItemWithMetadataDto[]> {
     if (withoutMetadata) {
       return this.unitItemsService.getAllByUnitId(unitId);

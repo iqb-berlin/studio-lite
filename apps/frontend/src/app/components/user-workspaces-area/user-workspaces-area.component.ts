@@ -9,7 +9,7 @@ import { AreaTitleComponent } from '../area-title/area-title.component';
   selector: 'studio-lite-user-workspaces-area',
   templateUrl: './user-workspaces-area.component.html',
   styleUrls: ['./user-workspaces-area.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [AreaTitleComponent, WarningComponent, UserWorkspacesGroupsComponent, TranslateModule]
 })
 export class UserWorkspacesAreaComponent {

@@ -7,15 +7,15 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 class UnitDefinition {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column()
-    data: string;
+  data: string;
 
   @Column({
     name: 'unit_id'
   })
-    unitId: number;
+  unitId: number;
 }
 
 export default UnitDefinition;

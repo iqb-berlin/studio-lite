@@ -25,7 +25,7 @@ interface RoleAccess {
 
 @Component({
   selector: 'studio-lite-roles-matrix',
-  // eslint-disable-next-line max-len
+
   imports: [MatIcon, TranslateModule, MatTooltip, MatButton, MatDialogActions, MatDialogClose, MatDialogTitle, MatDialogContent, MatTable, MatTableModule, MatHeaderCellDef, MatCellDef, MatHeaderRowDef, MatRowDef],
   templateUrl: './roles-matrix.component.html',
   styleUrl: './roles-matrix.component.scss'

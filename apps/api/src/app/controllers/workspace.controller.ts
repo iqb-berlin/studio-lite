@@ -99,9 +99,9 @@ export class WorkspaceController {
   @ApiTags('workspace')
   async find(
     @WorkspaceId() workspaceId: number,
-      @Query('download') download: boolean,
-      @Query('settings') settings: string,
-      @Res({ passthrough: true }) res: Response
+    @Query('download') download: boolean,
+    @Query('settings') settings: string,
+    @Res({ passthrough: true }) res: Response
   ): Promise<WorkspaceFullDto | StreamableFile> {
     if (download) {
       let unitDownloadSettings: UnitDownloadSettingsDto;
@@ -144,8 +144,8 @@ export class WorkspaceController {
   @ApiTags('workspace')
   async downloadUnitsJson(
     @WorkspaceId() workspaceId: number,
-      @Body() settings: UnitDownloadSettingsDto,
-      @Res({ passthrough: true }) res: Response
+    @Body() settings: UnitDownloadSettingsDto,
+    @Res({ passthrough: true }) res: Response
   ): Promise<StreamableFile> {
     const file = await UnitDownloadClass.get(
       workspaceId,
@@ -219,7 +219,7 @@ export class WorkspaceController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async deleteUnitGroup(
-  @WorkspaceId() workspaceId: number,
+    @WorkspaceId() workspaceId: number,
     @Body() body: GroupNameDto | RenameGroupNameDto
   ) {
     return this.workspaceService.patchGroupName(workspaceId, body);

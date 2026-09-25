@@ -35,7 +35,7 @@ export class ReviewUnitController {
   @ApiTags('review unit')
   async findUnitProperties(
     @Param('review_id', ParseIntPipe) reviewId: number,
-      @Param('unit_id', ParseIntPipe) unitId: number
+    @Param('unit_id', ParseIntPipe) unitId: number
   ): Promise<UnitPropertiesDto> {
     return this.reviewService.findUnitProperties(unitId, reviewId);
   }

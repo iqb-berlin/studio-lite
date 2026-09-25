@@ -2,32 +2,32 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UnitInListDto {
   @ApiProperty()
-    id!: number;
+  id!: number;
 
   @ApiProperty()
-    key!: string;
+  key!: string;
 
   @ApiProperty()
-    name?: string;
+  name?: string;
 
   @ApiProperty()
-    state?: string;
+  state?: string;
 
   @ApiProperty()
-    groupName?: string;
+  groupName?: string;
 
   @ApiProperty()
-    sourceWorkspaceId?: number;
+  sourceWorkspaceId?: number;
 
   @ApiProperty()
-    targetWorkspaceId?: number;
+  targetWorkspaceId?: number;
 
   @ApiProperty()
-    returned?: boolean;
+  returned?: boolean;
 
   @ApiProperty()
-    lastCommentChangedAt?: Date;
+  lastCommentChangedAt?: Date;
 
   @ApiProperty()
-    lastSeenCommentChangedAt?: Date;
+  lastSeenCommentChangedAt?: Date;
 }

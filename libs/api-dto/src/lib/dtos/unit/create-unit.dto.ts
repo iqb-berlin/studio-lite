@@ -4,38 +4,38 @@ import { UnitMetadataValues } from './profile-metadata-values.class';
 
 export class CreateUnitDto {
   @ApiProperty({ example: 'EL2443' })
-    key!: string;
+  key!: string;
 
   @ApiPropertyOptional()
-    name?: string;
+  name?: string;
 
   @ApiPropertyOptional()
-    groupName?: string;
+  groupName?: string;
 
   @ApiProperty()
-    createFrom?: number;
+  createFrom?: number;
 
   @ApiProperty()
-    createFromKey?: string;
+  createFromKey?: string;
 
   @ApiProperty()
-    player?: string;
+  player?: string;
 
   @ApiProperty()
-    editor?: string;
+  editor?: string;
 
   @ApiProperty()
-    schemer?: string;
+  schemer?: string;
 
   @ApiProperty()
-    schemeType?: string;
+  schemeType?: string;
 
   @ApiProperty()
-    scheme?: string;
+  scheme?: string;
 
   @ApiProperty()
-    metadata?: UnitMetadataValues;
+  metadata?: UnitMetadataValues;
 
   @ApiProperty()
-    variables?: VariableInfo[];
+  variables?: VariableInfo[];
 }

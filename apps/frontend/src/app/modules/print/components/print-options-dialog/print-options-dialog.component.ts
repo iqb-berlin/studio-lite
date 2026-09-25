@@ -10,7 +10,7 @@ import { PrintOptionsComponent } from '../../../../components/print-options/prin
   selector: 'studio-lite-print-options-dialog',
   templateUrl: './print-options-dialog.component.html',
   styleUrls: ['./print-options-dialog.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatDialogTitle, MatDialogContent, PrintOptionsComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class PrintOptionsDialogComponent {

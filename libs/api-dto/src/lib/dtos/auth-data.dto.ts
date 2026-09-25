@@ -4,20 +4,20 @@ import { WorkspaceGroupDto } from './workspace-group/workspace-group.dto';
 
 export class AuthDataDto {
   @ApiProperty()
-    userId!: number;
+  userId!: number;
 
   @ApiProperty()
-    userName!: string;
+  userName!: string;
 
   @ApiProperty()
-    userLongName!: string;
+  userLongName!: string;
 
   @ApiProperty()
-    isAdmin!: boolean;
+  isAdmin!: boolean;
 
   @ApiProperty()
-    workspaces!: WorkspaceGroupDto[];
+  workspaces!: WorkspaceGroupDto[];
 
   @ApiProperty()
-    reviews!: ReviewDto[];
+  reviews!: ReviewDto[];
 }

@@ -11,21 +11,21 @@ import User from './user.entity';
 @Entity()
 export class RefreshToken {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column({ name: 'token_hash' })
-    tokenHash: string;
+  tokenHash: string;
 
   @Column({ name: 'user_id' })
-    userId: number;
+  userId: number;
 
   @Column({ name: 'session_id' })
-    sessionId: string;
+  sessionId: string;
 
   @Column({ name: 'expires_at', type: 'timestamptz' })
-    expiresAt: Date;
+  expiresAt: Date;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-    user: User;
+  user: User;
 }

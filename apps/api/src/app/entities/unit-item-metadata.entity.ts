@@ -10,7 +10,7 @@ class UnitItemMetadata extends Metadata {
   @Column({
     name: 'unit_item_uuid'
   })
-    unitItemUuid: string;
+  unitItemUuid: string;
 }
 
 export default UnitItemMetadata;

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/lines-between-class-members */
-/* eslint-disable lines-between-class-members */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /* eslint-disable max-classes-per-file */
 /* eslint-disable class-methods-use-this */
 import { ComponentFixture, TestBed } from '@angular/core/testing';

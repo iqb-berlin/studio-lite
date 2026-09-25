@@ -30,7 +30,7 @@ import { I18nService } from '../../../../services/i18n.service';
   selector: 'studio-lite-workspaces',
   templateUrl: './workspaces.component.html',
   styleUrls: ['./workspaces.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, MatPaginator, WorkspacesMenuComponent, MatIcon, MatTooltip]
 })
 

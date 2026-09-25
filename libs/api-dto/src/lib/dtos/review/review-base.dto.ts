@@ -2,14 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ReviewBaseDto {
   @ApiProperty()
-    id!: number;
+  id!: number;
 
   @ApiProperty()
-    name?: string;
+  name?: string;
 
   @ApiProperty()
-    createdAt?: Date;
+  createdAt?: Date;
 
   @ApiProperty()
-    changedAt?: Date;
+  changedAt?: Date;
 }

@@ -41,7 +41,7 @@ export class UnitPrintCommentsComponent implements OnChanges, OnDestroy {
   private fetchComments(): void {
     this.backendService
       .getComments(this.workspaceId, this.unitId, this.reviewId)
-      // eslint-disable-next-line no-return-assign
+
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(comments => this.setComments(comments));
   }

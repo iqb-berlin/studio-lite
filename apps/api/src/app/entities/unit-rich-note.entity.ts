@@ -9,35 +9,35 @@ import { UnitRichNoteLinkDto } from '@studio-lite-lib/api-dto';
 @Entity('unit_rich_note')
 class UnitRichNote {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column({
     name: 'unit_id'
   })
-    unitId: number;
+  unitId: number;
 
   @Column({
     name: 'tag_id'
   })
-    tagId: string;
+  tagId: string;
 
   @Column('text')
-    content: string;
+  content: string;
 
   @Column('jsonb', { nullable: true })
-    links: UnitRichNoteLinkDto[];
+  links: UnitRichNoteLinkDto[];
 
   @Column({
     type: 'timestamp with time zone',
     name: 'created_at'
   })
-    createdAt: Date;
+  createdAt: Date;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'changed_at'
   })
-    changedAt: Date;
+  changedAt: Date;
 }
 
 export default UnitRichNote;

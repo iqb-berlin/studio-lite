@@ -6,29 +6,29 @@ class UnitRichNoteUnitItem {
   @PrimaryColumn({
     name: 'unit_item_uuid'
   })
-    unitItemUuid: string;
+  unitItemUuid: string;
 
   @PrimaryColumn({
     name: 'unit_rich_note_id'
   })
-    unitRichNoteId: number;
+  unitRichNoteId: number;
 
   @Column({
     name: 'unit_id'
   })
-    unitId: number;
+  unitId: number;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'created_at'
   })
-    createdAt: Date;
+  createdAt: Date;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'changed_at'
   })
-    changedAt: Date;
+  changedAt: Date;
 }
 
 export default UnitRichNoteUnitItem;

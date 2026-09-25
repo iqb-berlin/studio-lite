@@ -2,7 +2,7 @@ import {
   Component, Inject, Input, OnChanges, QueryList, SimpleChanges, ViewChild, ViewChildren
 } from '@angular/core';
 import {
-  // eslint-disable-next-line max-len
+
   MatTableDataSource, MatTable, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell
 } from '@angular/material/table';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
@@ -19,7 +19,7 @@ import { I18nService } from '../../../../services/i18n.service';
   selector: 'studio-lite-resource-packages-table',
   templateUrl: './resource-packages-table.component.html',
   styleUrls: ['./resource-packages-table.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatTable, MatSort, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, DatePipe, TranslateModule, SafeUrlPipe, SearchFilterComponent]
 })
 export class ResourcePackagesTableComponent implements OnChanges {

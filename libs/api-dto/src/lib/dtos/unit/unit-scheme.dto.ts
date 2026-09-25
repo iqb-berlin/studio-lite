@@ -3,11 +3,11 @@ import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 
 export class UnitSchemeDto {
   @ApiProperty()
-    scheme = '';
+  scheme = '';
 
   @ApiProperty()
-    schemeType = '';
+  schemeType = '';
 
   @ApiProperty()
-    variables?: VariableInfo[] = [];
+  variables?: VariableInfo[] = [];
 }

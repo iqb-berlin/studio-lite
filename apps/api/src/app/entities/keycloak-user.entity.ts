@@ -8,29 +8,29 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 class KeycloakUser {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column()
-    identity: string;
+  identity: string;
 
   @Column()
-    issuer: string;
+  issuer: string;
 
   @Column()
-    username: string;
+  username: string;
 
   @Column({
     name: 'last_name'
   })
-    lastName: string | null;
+  lastName: string | null;
 
   @Column({
     name: 'first_name'
   })
-    firstName: string | null;
+  firstName: string | null;
 
   @Column()
-    email: string | null;
+  email: string | null;
 }
 
 export default KeycloakUser;

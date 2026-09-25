@@ -27,8 +27,8 @@ export class MetadataService implements VocabularyProvider {
   idLabelDictionary: Record<string, VocabIdDictionaryValue> = {};
   vocabulariesIdDictionary: Record<string, VocabIdDictionaryValue> = {};
   vocabularies: Vocab[] = [];
-  unitProfileColumns:MDProfileGroup[] = [];
-  itemProfileColumns:MDProfileGroup = {} as MDProfileGroup;
+  unitProfileColumns: MDProfileGroup[] = [];
+  itemProfileColumns: MDProfileGroup = {} as MDProfileGroup;
 
   getVocabularies(): Vocab[] {
     return this.vocabularies;
@@ -175,11 +175,10 @@ export class MetadataService implements VocabularyProvider {
   }
 
   createMetadataReport(): Observable<boolean | UnitPropertiesDto[]> {
-    // eslint-disable-next-line max-len
     return this.http
       .get<UnitPropertiesDto[]>(
-      `${this.serverUrl}workspaces/${this.workspaceService.selectedWorkspaceId}/units/properties`
-    )
+        `${this.serverUrl}workspaces/${this.workspaceService.selectedWorkspaceId}/units/properties`
+      )
       .pipe(
         map(report => report),
         catchError(() => of(false))

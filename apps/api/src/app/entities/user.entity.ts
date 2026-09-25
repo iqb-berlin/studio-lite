@@ -10,45 +10,45 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 class User {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column()
-    name: string;
+  name: string;
 
   @Column()
-    password: string;
+  password: string;
 
   @Column()
-    description: string | null;
+  description: string | null;
 
   @Column()
-    identity: string | null;
+  identity: string | null;
 
   @Column()
-    issuer: string | null;
+  issuer: string | null;
 
   @Column({
     name: 'is_admin'
   })
-    isAdmin: boolean;
+  isAdmin: boolean;
 
   @Column({
     name: 'last_name'
   })
-    lastName: string | null;
+  lastName: string | null;
 
   @Column({
     name: 'first_name'
   })
-    firstName: string | null;
+  firstName: string | null;
 
   @Column()
-    email: string | null;
+  email: string | null;
 
   @Column({
     name: 'email_publish_approved'
   })
-    emailPublishApproved: boolean;
+  emailPublishApproved: boolean;
 }
 
 export default User;

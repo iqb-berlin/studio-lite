@@ -13,31 +13,31 @@ import {
 @Unique('unit_source_target', ['unitId', 'sourceWorkspaceId', 'targetWorkspaceId'])
 class UnitDropBoxHistory {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column({
     name: 'unit_id'
   })
-    unitId: number;
+  unitId: number;
 
   @Column({
     name: 'source_workspace_id'
   })
-    sourceWorkspaceId: number;
+  sourceWorkspaceId: number;
 
   @Column({
     name: 'target_workspace_id'
   })
-    targetWorkspaceId: number;
+  targetWorkspaceId: number;
 
   @Column()
-    returned: boolean;
+  returned: boolean;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'changed_at'
   })
-    changedAt: Date;
+  changedAt: Date;
 }
 
 export default UnitDropBoxHistory;

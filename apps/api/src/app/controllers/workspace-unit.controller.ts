@@ -94,14 +94,14 @@ export class WorkspaceUnitController {
   @ApiTags('workspace unit')
   async findAll(
     @Req() request,
-      @WorkspaceId(ParseIntPipe) workspaceId: number,
-      @Query('filterTargetWorkspaceId', new ParseBoolPipe({ optional: true }))
+    @WorkspaceId(ParseIntPipe) workspaceId: number,
+    @Query('filterTargetWorkspaceId', new ParseBoolPipe({ optional: true }))
            filterTargetWorkspaceId: boolean,
-      @Query('withLastSeenCommentTimeStamp', new ParseBoolPipe({ optional: true }))
+    @Query('withLastSeenCommentTimeStamp', new ParseBoolPipe({ optional: true }))
            withLastSeenCommentTimeStamp: boolean,
-      @Query('targetWorkspaceId', new ParseIntPipe({ optional: true }))
+    @Query('targetWorkspaceId', new ParseIntPipe({ optional: true }))
            targetWorkspaceId: number):
-      Promise<UnitInListDto[]> {
+  Promise<UnitInListDto[]> {
     return this.unitService.findAllForWorkspace(
       workspaceId,
       request.user.id,
@@ -153,7 +153,7 @@ export class WorkspaceUnitController {
     required: true
   })
   async downloadCodingBook(
-  @WorkspaceId() workspaceId: number,
+    @WorkspaceId() workspaceId: number,
     @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[],
     @Query('format')exportFormat: 'json' | 'docx',
     @Query('missingsProfile')missingsProfile: string,
@@ -218,10 +218,10 @@ export class WorkspaceUnitController {
   @ApiTags('workspace unit')
   async findAllWithProperties(
     @WorkspaceId() workspaceId: number,
-      @Query('column') columns: string[],
-      @Query('id') units: number[],
-      @Query('type') type: string,
-      @Res({ passthrough: true }) res: Response
+    @Query('column') columns: string[],
+    @Query('id') units: number[],
+    @Query('type') type: string,
+    @Res({ passthrough: true }) res: Response
   ): Promise<UnitPropertiesDto[] | StreamableFile> {
     if (type === 'unit' || type === 'item') {
       const file = await DownloadWorkspacesClass.getWorkspaceMetadataReport(
@@ -356,7 +356,7 @@ export class WorkspaceUnitController {
   @ApiTags('workspace unit')
   @ApiOkResponse({ description: 'Unit group name changed' })
   async patchUnitsGroup(
-  @WorkspaceId() workspaceId: number,
+    @WorkspaceId() workspaceId: number,
     @Body() body: NewNameDto
   ) {
     return this.unitService
@@ -414,7 +414,7 @@ export class WorkspaceUnitController {
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace unit')
   async create(
-  @WorkspaceId() workspaceId: number,
+    @WorkspaceId() workspaceId: number,
     @Body() body: CreateUnitDto | CopyUnitDto,
     @User() user: UserEntity
   ) {

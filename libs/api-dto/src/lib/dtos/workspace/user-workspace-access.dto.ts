@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UserWorkspaceAccessDto {
   @ApiProperty()
-    id!: number;
+  id!: number;
 
   @ApiProperty()
-    accessLevel!: number;
+  accessLevel!: number;
 }

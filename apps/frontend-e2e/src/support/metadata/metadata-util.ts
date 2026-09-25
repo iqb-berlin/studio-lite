@@ -125,7 +125,7 @@ export function getStructure(profile: string, moreThanOne: boolean): void {
   cy.request({
     method: 'GET',
     url: RegistryProfile.get(profile)
-    // eslint-disable-next-line @typescript-eslint/no-shadow
+
   }).then(response => {
     const unitMap = new Map<string, string>();
     expect(response).property('status').to.equal(200);

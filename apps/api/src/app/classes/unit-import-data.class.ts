@@ -152,7 +152,7 @@ export class UnitImportData {
             multiple: variableRecord.attribs['multiple'] ? variableRecord.attribs['multiple'] === 'true' : false,
             // eslint-disable-next-line @typescript-eslint/dot-notation
             page: variableRecord.attribs['page'],
-            // eslint-disable-next-line @typescript-eslint/dot-notation
+
             valuePositionLabels: UnitImportData.getValuePositionLabelsForVariable(valuePositionLabelsElement),
             valuesComplete: valuesElement.length ? valuesElement.attr('complete') as unknown as boolean : false,
             values: UnitImportData.getValuesForVariable(valuesElement)

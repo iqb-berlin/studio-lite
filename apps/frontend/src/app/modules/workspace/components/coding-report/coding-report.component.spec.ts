@@ -73,8 +73,8 @@ describe('CodingReportComponent', () => {
   beforeEach(async () => {
     backendService = {
       getCodingReport: jest.fn<
-      Observable<CodingReportDto[]>,
-      [number]
+        Observable<CodingReportDto[]>,
+        [number]
       >(() => of(rows))
     };
     workspaceService = {

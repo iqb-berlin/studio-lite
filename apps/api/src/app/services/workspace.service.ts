@@ -845,10 +845,10 @@ export class WorkspaceService {
     files: FileIo[],
     functionReturn: RequestReportDto
   ): {
-      unitData: (UnitImportData | UnitImportJsonData)[];
-      notXmlFiles: { [fName: string]: FileIo };
-      usedFiles: string[];
-    } {
+    unitData: (UnitImportData | UnitImportJsonData)[];
+    notXmlFiles: { [fName: string]: FileIo };
+    usedFiles: string[];
+  } {
     const processedKeys = new Set<string>();
     const unitData: (UnitImportData | UnitImportJsonData)[] = [];
     const notXmlFiles: { [fName: string]: FileIo } = {};

@@ -14,21 +14,21 @@ import ReviewUnit from './review-unit.entity';
 @Entity()
 class Review {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column({
     name: 'workspace_id'
   })
-    workspaceId: number;
+  workspaceId: number;
 
   @Column()
-    name: string;
+  name: string;
 
   @Column()
-    link: string;
+  link: string;
 
   @Column()
-    password: string;
+  password: string;
 
   @Column({
     type: 'jsonb',
@@ -36,24 +36,24 @@ class Review {
     default: () => "'{}'",
     nullable: false
   })
-    settings: ReviewSettingsDto;
+  settings: ReviewSettingsDto;
 
   @OneToMany(() => ReviewUnit, unit => unit.review)
-    units: ReviewUnit[];
+  units: ReviewUnit[];
 
   @Column({
     type: 'timestamp with time zone',
     nullable: true,
     name: 'created_at'
   })
-    createdAt: Date;
+  createdAt: Date;
 
   @Column({
     type: 'timestamp with time zone',
     nullable: true,
     name: 'changed_at'
   })
-    changedAt: Date;
+  changedAt: Date;
 }
 
 export default Review;

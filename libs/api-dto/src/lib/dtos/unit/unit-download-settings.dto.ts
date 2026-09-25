@@ -3,52 +3,52 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UnitDownloadSettingsDto {
   @ApiProperty()
-    unitIdList!: number[];
+  unitIdList!: number[];
 
   @ApiProperty()
-    exportFormat: 'xml' | 'json' = 'xml';
+  exportFormat: 'xml' | 'json' = 'xml';
 
   @ApiProperty()
-    addPlayers = false;
+  addPlayers = false;
 
   @ApiProperty()
-    addComments = false;
+  addComments = false;
 
   @ApiProperty()
-    addRichNotes = false;
+  addRichNotes = false;
 
   @ApiProperty()
-    addTestTakersReview = 0;
+  addTestTakersReview = 0;
 
   @ApiProperty()
-    addTestTakersMonitor = 0;
+  addTestTakersMonitor = 0;
 
   @ApiProperty()
-    addTestTakersHot = 0;
+  addTestTakersHot = 0;
 
   @ApiProperty()
-    passwordLess = false;
+  passwordLess = false;
 
   @ApiProperty()
-    bookletId?: string;
+  bookletId?: string;
 
   @ApiProperty()
-    bookletLabel?: string;
+  bookletLabel?: string;
 
   @ApiProperty()
-    groupLabel?: string;
+  groupLabel?: string;
 
   @ApiProperty()
-    monitorBookletVisibility?: 'visible' | 'collapsed' | 'hidden';
+  monitorBookletVisibility?: 'visible' | 'collapsed' | 'hidden';
 
   @ApiProperty()
-    bookletSettings: UnitDownloadBookletSettingsDto[] = [];
+  bookletSettings: UnitDownloadBookletSettingsDto[] = [];
 }
 
 export class UnitDownloadBookletSettingsDto {
   @ApiProperty()
-    key!: string;
+  key!: string;
 
   @ApiProperty()
-    value!: string;
+  value!: string;
 }
