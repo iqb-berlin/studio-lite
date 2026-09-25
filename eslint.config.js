@@ -50,12 +50,18 @@ module.exports = [
     }
   },
   {
-    // Cypress-Spezifikationen: `expect(...).to.be.true` ist ein Ausdruck ohne Wirkung,
-    // und Ketten von `cy`-Aufrufen sind hier die übliche Schreibweise.
-    files: ['apps/frontend-e2e/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-unused-expressions': ['error', { allowTaggedTemplates: true }],
-      'newline-per-chained-call': 'off'
-    }
+    // Build- und Jest-Konfigurationen liegen als CommonJS vor. Der TypeScript-Teil des
+    // Regelsatzes braucht Typinformationen und damit die tsconfig, in der diese Dateien
+    // nicht stehen -- sie bekommen deshalb den Teil, der ohne Typen auskommt.
+    files: ['**/*.js'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: { ...globals.node }
+    },
+    plugins: { '@stylistic': stylistic },
+    rules: Object.fromEntries(
+      Object.entries(rules).filter(([name]) => !name.startsWith('@typescript-eslint/') &&
+        !name.startsWith('import-x/'))
+    )
   }
 ];
