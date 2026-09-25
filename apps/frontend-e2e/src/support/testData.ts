@@ -221,8 +221,8 @@ export const modules: string[] = [
  * Widgets for testing
  */
 export const widgets: string[] = [
-  'molecule-editor-widget-0.2.0.html',
-  'periodic-system-select-widget-0.2.0.html'
+  'verona-widget-molecule-editor-1.0.0.html',
+  'verona-widget-periodic-table-1.0.0.html'
 ];
 
 // =============================================================================

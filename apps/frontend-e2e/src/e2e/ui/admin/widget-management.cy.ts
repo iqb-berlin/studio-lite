@@ -23,13 +23,13 @@ describe('Widget Management', () => {
     // Verify upload for Molecule Editor
     cy.contains('mat-row', 'IQB-Widget Molekül-Editor').within(() => {
       cy.get('.cdk-column-id').should('contain', 'molecule-editor-widget');
-      cy.get('.cdk-column-version').should('contain', '0.2.0');
+      cy.get('.cdk-column-version').should('contain', '1.0.0');
     });
 
     // Verify upload for Periodic System Select
     cy.contains('mat-row', 'IQB Widget Periodensystem Auswahl').within(() => {
       cy.get('.cdk-column-id').should('contain', 'periodic-system-select-widget');
-      cy.get('.cdk-column-version').should('contain', '0.2.0');
+      cy.get('.cdk-column-version').should('contain', '1.0.0');
     });
   });
 
