@@ -26,7 +26,7 @@ import { ItemModel } from '../../models/item-model.interface';
   selector: 'studio-lite-item',
   templateUrl: './item.component.html',
   styleUrls: ['./item.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, FormlyModule, ProfileFormComponent, TranslateModule, MatIcon, AsyncPipe]
 })
 export class ItemComponent implements OnInit, OnChanges, OnDestroy {

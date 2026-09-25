@@ -11,7 +11,7 @@
 export * from './navigation';
 
 // Admin management helpers
-// eslint-disable-next-line import/export
+
 export * from './admin';
 
 // Common utilities

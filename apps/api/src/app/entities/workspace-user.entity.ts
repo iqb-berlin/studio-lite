@@ -13,23 +13,23 @@ class WorkspaceUser {
   @PrimaryColumn({
     name: 'workspace_id'
   })
-    workspaceId: number;
+  workspaceId: number;
 
   @PrimaryColumn({
     name: 'user_id'
   })
-    userId: number;
+  userId: number;
 
   @Column({
     name: 'access_level'
   })
-    accessLevel: number = 0; // default
+  accessLevel: number = 0; // default
 
   @OneToOne(() => Workspace)
   @JoinColumn({
     name: 'workspace_id'
   })
-    workspace: Workspace;
+  workspace: Workspace;
 }
 
 export default WorkspaceUser;

@@ -71,7 +71,7 @@ export class AdminWorkspaceGroupController {
   @ApiTags('admin workspace-group')
   async findAll(
     @Query('download') download: boolean,
-      @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response
   ): Promise<WorkspaceGroupInListDto[] | StreamableFile> {
     if (download) {
       const file = await DownloadWorkspacesClass.getWorkspaceReport(

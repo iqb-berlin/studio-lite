@@ -28,7 +28,7 @@ import { ModuleSelectionChange } from '../../models/module-selection-change.inte
   selector: 'studio-lite-verona-modules',
   templateUrl: './verona-modules.component.html',
   styleUrls: ['./verona-modules.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatButton, MatTooltip, WrappedIconComponent, IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, VeronaModulesTableComponent, TranslateModule]
 })
 export class VeronaModulesComponent extends ModulesDirective {

@@ -246,7 +246,6 @@ describe('Admin settings API tests', () => {
   describe('107. UPDATE /api/admin/settings/missings-profiles ', () => {
     it('200 positive test: should allow an authorized administrator to successfully ' +
       'update the missing value profile definitions', () => {
-      // eslint-disable-next-line max-len
       const profile = '[{"id":"missing_by_intention","label":"missing by intention","description":"(1) Item wurde gesehen (2a) Item wurde nicht bearbeitet oder (2b) wurde bearbeitet, aber wieder zurückgesetzt und (3) es gibt nachfolgend Items, die bearbeitet wurden","code":-99},{"id":"missing_not_reached","label":"missing not reached","description":"(1a) Item wurde nicht gesehen oder (1b) Item wurde gesehen und nicht bearbeitet und (2) es folgen nur Items mit demselben Status","code":-96},{"id":"missing_invalid_response","label":"missing invalid response","description":"(1) Item wurde bearbeitet und (2a) leere Antwort oder (2b) sonstwie ungültige (Spaß-)Antwort","code":-98},{"id":"missing_coding_impossible","label":"missing coding impossible","description":"(1) Item müsste/könnte bearbeitet worden sein und (2) Antwort ist aufgrund technischer Probleme nicht auswertbar","code":-97},{"id":"missing_by_design","label":"missing by design","description":"Antwort liegt nicht vor, weil das Item der Testperson planmäßig nicht präsentiert wurde","code":-94}]';
       cy.updateSettingMissingProfilesAPI(Cypress.expose(`token_${Cypress.expose('username')}`), profile)
         .then(resp => {

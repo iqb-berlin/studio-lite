@@ -15,7 +15,7 @@ describe('CommentDeleteGuard', () => {
   let workspaceService: DeepMocked<WorkspaceService>;
 
   const contextFor = (userId: number, params: Record<string, string>): ExecutionContext => createMock<
-  ExecutionContext>({
+    ExecutionContext>({
     switchToHttp: () => ({
       getRequest: () => ({ user: { id: userId }, params })
     })

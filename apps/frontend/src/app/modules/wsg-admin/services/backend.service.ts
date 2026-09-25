@@ -175,8 +175,8 @@ export class BackendService {
   getWorkspaceGroupData(workspaceGroupId: number): Observable<WorkspaceGroupFullDto | null> {
     return this.http
       .get<WorkspaceGroupFullDto>(
-      `${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`
-    )
+        `${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`
+      )
       .pipe(
         catchError(() => of(null))
       );
@@ -185,8 +185,8 @@ export class BackendService {
   getWorkspaceGroupsByUser(userId: number): Observable<WorkspaceGroupFullDto[] | null> {
     return this.http
       .get<WorkspaceGroupFullDto[]>(
-      `${this.serverUrl}admin/users/${userId}/workspace-groups`
-    )
+        `${this.serverUrl}admin/users/${userId}/workspace-groups`
+      )
       .pipe(
         catchError(() => of(null))
       );

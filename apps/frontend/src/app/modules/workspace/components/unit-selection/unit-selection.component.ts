@@ -35,7 +35,7 @@ export class UnitSelectionComponent extends SelectUnitDirective implements OnIni
   numberOfUnits!: number;
   expandedGroups!: number;
   groupsInfo: string = '';
-  unitList!:{ [p: string]: UnitInListDto[] };
+  unitList!: { [p: string]: UnitInListDto[] };
   ngUnsubscribe = new Subject<void>();
   @ViewChildren(UnitTableComponent) unitTables!: UnitTableComponent[];
   @Input() selectedUnitId!: number;

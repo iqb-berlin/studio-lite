@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class GroupNameDto {
   @ApiProperty({ example: 'name' })
-    groupName!: string;
+  groupName!: string;
 
   @ApiProperty({ example: 'new name' })
-    operation!: 'remove' | 'rename' | 'add';
+  operation!: 'remove' | 'rename' | 'add';
 }

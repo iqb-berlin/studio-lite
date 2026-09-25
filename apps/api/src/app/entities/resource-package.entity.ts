@@ -8,19 +8,19 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 class ResourcePackage {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column()
-    name: string;
+  name: string;
 
   @Column('text', { array: true })
-    elements;
+  elements;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'created_at'
   })
-    createdAt: Date;
+  createdAt: Date;
 }
 
 export default ResourcePackage;

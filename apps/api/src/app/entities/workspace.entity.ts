@@ -15,21 +15,21 @@ import WorkspaceGroup from './workspace-group.entity';
 @Entity()
 class Workspace {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column()
-    name: string;
+  name: string;
 
   @Column({
     name: 'group_id'
   })
-    groupId: number;
+  groupId: number;
 
   @Column({
     name: 'drop_box_id',
     nullable: true
   })
-    dropBoxId: number;
+  dropBoxId: number;
 
   @Column({
     type: 'jsonb',
@@ -37,13 +37,13 @@ class Workspace {
     default: () => "'{}'",
     nullable: false
   })
-    settings: WorkspaceSettingsDto;
+  settings: WorkspaceSettingsDto;
 
   @OneToOne(() => WorkspaceGroup)
   @JoinColumn({
     name: 'group_id'
   })
-    workspaceGroup: WorkspaceGroup;
+  workspaceGroup: WorkspaceGroup;
 }
 
 export default Workspace;

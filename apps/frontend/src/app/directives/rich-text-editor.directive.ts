@@ -5,6 +5,8 @@ import {
   OnInit
 } from '@angular/core';
 import { AnyExtension, Editor } from '@tiptap/core';
+// tiptap exportiert StarterKit als Default UND unter gleichem Namen; der Default ist die dokumentierte Form.
+// eslint-disable-next-line import-x/no-named-as-default
 import StarterKit from '@tiptap/starter-kit';
 import { Underline } from '@tiptap/extension-underline';
 import { Superscript } from '@tiptap/extension-superscript';

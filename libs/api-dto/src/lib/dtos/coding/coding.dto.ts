@@ -4,91 +4,91 @@ import { ItemsMetadataValues } from '../unit/profile-metadata-values.class';
 
 export class CodebookUnitDto {
   @ApiProperty()
-    key!: string;
+  key!: string;
 
   @ApiProperty()
-    name!: string;
+  name!: string;
 
   @ApiProperty()
-    variables?: CodeBookVariable[];
+  variables?: CodeBookVariable[];
 
   @ApiProperty()
-    missings?: Missing[];
+  missings?: Missing[];
 
   @ApiProperty()
-    items?: ItemsMetadataValues[];
+  items?: ItemsMetadataValues[];
 }
 
 export class CodeBookVariable {
   @ApiProperty()
-    id!: string;
+  id!: string;
 
   @ApiProperty()
-    label!: string;
+  label!: string;
 
   @ApiProperty()
-    generalInstruction!: string;
+  generalInstruction!: string;
 
   @ApiProperty()
-    codes!: CodeBookCode[];
+  codes!: CodeBookCode[];
 }
 
 export class CodeBookCode {
   @ApiProperty()
-    id!: string;
+  id!: string;
 
   @ApiProperty()
-    label!: string;
+  label!: string;
 
   @ApiProperty()
-    score?: string;
+  score?: string;
 
   @ApiProperty()
-    description!: string;
+  description!: string;
 }
 
 export class CodeBookContentSetting {
   @ApiProperty()
-    exportFormat!: 'json' | 'docx';
+  exportFormat!: 'json' | 'docx';
 
   @ApiProperty()
-    missingsProfile!: string;
+  missingsProfile!: string;
 
   @ApiProperty()
-    hasClosedVars!: boolean;
+  hasClosedVars!: boolean;
 
   @ApiProperty()
-    hasOnlyManualCoding!: boolean;
+  hasOnlyManualCoding!: boolean;
 
   @ApiProperty()
-    hasDerivedVars!: boolean;
+  hasDerivedVars!: boolean;
 
   @ApiProperty()
-    hasGeneralInstructions!: boolean;
+  hasGeneralInstructions!: boolean;
 
   @ApiProperty()
-    codeLabelToUpper!: boolean;
+  codeLabelToUpper!: boolean;
 
   @ApiProperty()
-    showScore!: boolean;
+  showScore!: boolean;
 
   @ApiProperty()
-    hideItemVarRelation!: boolean;
+  hideItemVarRelation!: boolean;
 
   @ApiProperty()
-    hasOnlyVarsWithCodes!: boolean;
+  hasOnlyVarsWithCodes!: boolean;
 }
 
 export class Missing {
   @ApiProperty()
-    id!: string;
+  id!: string;
 
   @ApiProperty()
-    label!: string;
+  label!: string;
 
   @ApiProperty()
-    description!: string;
+  description!: string;
 
   @ApiProperty()
-    code!: number;
+  code!: number;
 }

@@ -65,7 +65,7 @@ export class WorkspaceMenuComponent implements OnDestroy {
   ) {}
 
   workspaceGroupsByUser: WorkspaceGroupFullDto[] | null = [];
-  userId:number = 0;
+  userId: number = 0;
 
   addObject(): void {
     if (this.isBackUpWorkspaceGroup && this.workspaces.length >= this.maxWorkspaceCount) {

@@ -3,20 +3,20 @@ import { MetadataValuesEntry } from '@studio-lite-lib/api-dto';
 
 export class MetadataDto {
   @ApiProperty()
-    id!: number;
+  id!: number;
 
   @ApiProperty()
-    entries?: MetadataValuesEntry[];
+  entries?: MetadataValuesEntry[];
 
   @ApiProperty()
-    profileId?: string;
+  profileId?: string;
 
   @ApiProperty()
-    order?: number;
+  order?: number;
 
   @ApiProperty()
-    createdAt?: Date;
+  createdAt?: Date;
 
   @ApiProperty()
-    changedAt?: Date;
+  changedAt?: Date;
 }

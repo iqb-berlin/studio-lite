@@ -1,7 +1,7 @@
 import {
   Column, Entity, JoinColumn, ManyToOne, PrimaryColumn
 } from 'typeorm';
-// eslint-disable-next-line import/no-cycle
+
 import Review from './review.entity';
 
 /** Which units a review shows, and in which order. */
@@ -10,21 +10,21 @@ class ReviewUnit {
   @PrimaryColumn({
     name: 'unit_id'
   })
-    unitId: number;
+  unitId: number;
 
   @PrimaryColumn({
     name: 'review_id'
   })
-    reviewId: number;
+  reviewId: number;
 
   @Column()
-    order: number;
+  order: number;
 
   @ManyToOne(() => Review, review => review.units)
   @JoinColumn({
     name: 'review_id'
   })
-    review: Review;
+  review: Review;
 }
 
 export default ReviewUnit;

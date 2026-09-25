@@ -58,7 +58,7 @@ export class AdminVeronaModuleController {
     enum: VERONA_MODULE_TYPES
   })
   async addModuleFile(
-  @UploadedFile() file,
+    @UploadedFile() file,
     @Query('type', new ParseArrayPipe({ items: String, separator: ',' })) types: string[]
   ) {
     const normalizedTypes = types.map(type => type.trim()).filter(Boolean);

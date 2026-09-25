@@ -4,16 +4,16 @@ import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profil
 
 export class MetadataProfileDto {
   @ApiProperty()
-    id!: string;
+  id!: string;
 
   @ApiProperty()
-    label!: TextWithLanguage[];
+  label!: TextWithLanguage[];
 
   @ApiProperty()
-    groups!: MetadataProfileGroup[];
+  groups!: MetadataProfileGroup[];
 
   @ApiProperty()
-    modifiedAt!: Date;
+  modifiedAt!: Date;
 }
 
 export class MetadataProfileGroup {

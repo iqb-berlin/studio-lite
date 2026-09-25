@@ -4,77 +4,77 @@ import { UnitMetadataValues } from './profile-metadata-values.class';
 
 export class UnitPropertiesDto {
   @ApiProperty()
-    id!: number;
+  id!: number;
 
   @ApiProperty()
-    uuid?: string;
+  uuid?: string;
 
   @ApiProperty()
-    key?: string;
+  key?: string;
 
   @ApiProperty()
-    name?: string;
+  name?: string;
 
   @ApiProperty()
-    state?: string;
+  state?: string;
 
   @ApiProperty()
-    description?: string;
+  description?: string;
 
   @ApiProperty()
-    transcript?: string;
+  transcript?: string;
 
   @ApiProperty()
-    reference?: string;
+  reference?: string;
 
   @ApiProperty()
-    groupName?: string;
+  groupName?: string;
 
   @ApiProperty()
-    metadata?: UnitMetadataValues;
+  metadata?: UnitMetadataValues;
 
   @ApiProperty()
-    player?: string;
+  player?: string;
 
   @ApiProperty()
-    editor?: string;
+  editor?: string;
 
   @ApiProperty()
-    schemer?: string;
+  schemer?: string;
 
   @ApiProperty()
-    schemeType?: string;
+  schemeType?: string;
 
   @ApiProperty()
-    scheme?: string;
+  scheme?: string;
 
   @ApiProperty()
-    variables?: VariableInfo[];
+  variables?: VariableInfo[];
 
   @ApiProperty({
     type: 'string',
     format: 'date-time'
   })
-    lastChangedMetadata?: Date;
+  lastChangedMetadata?: Date;
 
   @ApiProperty({
     type: 'string',
     format: 'date-time'
   })
-    lastChangedDefinition?: Date;
+  lastChangedDefinition?: Date;
 
   @ApiProperty({
     type: 'string',
     format: 'date-time'
   })
-    lastChangedScheme?: Date;
+  lastChangedScheme?: Date;
 
   @ApiProperty()
-    lastChangedMetadataUser?: string;
+  lastChangedMetadataUser?: string;
 
   @ApiProperty()
-    lastChangedDefinitionUser?: string;
+  lastChangedDefinitionUser?: string;
 
   @ApiProperty()
-    lastChangedSchemeUser?: string;
+  lastChangedSchemeUser?: string;
 }

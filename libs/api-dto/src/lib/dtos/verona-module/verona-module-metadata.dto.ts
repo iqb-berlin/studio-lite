@@ -4,38 +4,38 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 // SCHEMER, WIDGET). Older modules still ship the historical lower-case spelling, so both casings
 // stay valid internally and are compared case-insensitively via veronaModuleTypesMatch (shared-code).
 export type VeronaModuleType =
-  | 'EDITOR' | 'PLAYER' | 'SCHEMER' | 'WIDGET'
-  | 'editor' | 'player' | 'schemer' | 'widget';
+  | 'EDITOR' | 'PLAYER' | 'SCHEMER' | 'WIDGET' |
+  'editor' | 'player' | 'schemer' | 'widget';
 
 export class VeronaModuleMetadataDto {
   [index: string]: unknown;
 
   @ApiProperty()
-    type!: VeronaModuleType;
+  type!: VeronaModuleType;
 
   @ApiProperty()
-    model!: string;
+  model!: string;
 
   @ApiProperty()
-    id!: string;
+  id!: string;
 
   @ApiProperty()
-    name!: string;
+  name!: string;
 
   @ApiProperty()
-    version!: string;
+  version!: string;
 
   @ApiProperty()
-    specVersion!: string;
+  specVersion!: string;
 
   // Required since Metadata 3.1, but modules built against older specs do not carry it, and neither do
   // module rows stored before this field was read. Absent therefore means "not declared" and has to stay
   // distinguishable from a declared value — do not default it to an empty string.
   @ApiPropertyOptional()
-    metadataVersion?: string;
+  metadataVersion?: string;
 
   @ApiProperty()
-    isStable!: boolean;
+  isStable!: boolean;
 
   static getFromJsonLd(jsonMetadata: {
     type: VeronaModuleType;

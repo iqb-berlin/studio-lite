@@ -1,4 +1,3 @@
-// eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';

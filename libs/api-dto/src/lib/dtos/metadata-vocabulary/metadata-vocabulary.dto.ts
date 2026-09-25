@@ -10,23 +10,23 @@ export class TopConcept {
 
 export class MetadataVocabularyDto {
   @ApiProperty()
-    id!: string;
+  id!: string;
 
   @ApiProperty()
-    type!: string;
+  type!: string;
 
   @ApiProperty()
-    description!: Record<string, string>;
+  description!: Record<string, string>;
 
   @ApiProperty()
-    title!: Record<string, string>;
+  title!: Record<string, string>;
 
   @ApiProperty()
-    hasTopConcept!: TopConcept[];
+  hasTopConcept!: TopConcept[];
 
   @ApiProperty()
-    '@context'!: Record<string, never>;
+  '@context'!: Record<string, never>;
 
   @ApiProperty()
-    modifiedAt!: Date;
+  modifiedAt!: Date;
 }

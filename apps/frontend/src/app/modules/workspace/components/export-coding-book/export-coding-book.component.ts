@@ -45,8 +45,8 @@ export class ExportCodingBookComponent implements OnInit {
   }
 
   unitList: number[] = [];
-  selectedMissingsProfile:string = '';
-  missingsProfiles:string[] = [''];
+  selectedMissingsProfile: string = '';
+  missingsProfiles: string[] = [''];
   workspaceChanges = this.workspaceService.isChanged();
 
   ngOnInit() {
@@ -86,7 +86,7 @@ export class ExportCodingBookComponent implements OnInit {
         if (data) {
           const datePipe = new DatePipe(this.i18nService.fullLocale);
           const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
-          // eslint-disable-next-line max-len
+
           saveAs(data, `${thisDate} Codebook ${this.workspaceService.selectedWorkspaceName}${(this.contentOptions.exportFormat === 'json') ? '.json' : '.docx'}`);
           this.appService.dataLoading = false;
         }

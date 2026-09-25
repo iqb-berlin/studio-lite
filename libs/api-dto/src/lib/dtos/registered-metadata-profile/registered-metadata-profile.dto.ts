@@ -3,23 +3,23 @@ import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profil
 
 export class RegisteredMetadataProfileDto {
   @ApiProperty()
-    id!: string;
+  id!: string;
 
   @ApiProperty()
-    url!: string;
+  url!: string;
 
   @ApiProperty()
-    title!: TextWithLanguage[];
+  title!: TextWithLanguage[];
 
   @ApiProperty()
-    creator!: string;
+  creator!: string;
 
   @ApiProperty()
-    maintainer?: string;
+  maintainer?: string;
 
   @ApiProperty()
-    profiles!: string[];
+  profiles!: string[];
 
   @ApiProperty()
-    modifiedAt!: Date;
+  modifiedAt!: Date;
 }

@@ -70,7 +70,7 @@ export class WorkspaceReviewController {
   @ApiTags('workspace review')
   async patchReview(
     @Param('id', ParseIntPipe) reviewId: number,
-      @Body() updateReview: ReviewFullDto
+    @Body() updateReview: ReviewFullDto
   ): Promise<void> {
     return this.reviewService.patch(reviewId, updateReview);
   }

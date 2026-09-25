@@ -3,14 +3,14 @@ import { WorkspaceDto } from '../workspace/workspace.dto';
 
 export class WorkspaceGroupDto {
   @ApiProperty()
-    id!: number;
+  id!: number;
 
   @ApiProperty()
-    name!: string;
+  name!: string;
 
   @ApiProperty()
-    isAdmin!: boolean;
+  isAdmin!: boolean;
 
   @ApiProperty()
-    workspaces!: WorkspaceDto[];
+  workspaces!: WorkspaceDto[];
 }

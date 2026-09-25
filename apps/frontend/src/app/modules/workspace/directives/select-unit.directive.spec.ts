@@ -64,21 +64,21 @@ describe('SelectUnitDirective', () => {
       selectedWorkspaceId: 5,
       workspaceSettings: { unitGroups: [] as string[] },
       resetUnitList: jest.fn<
-      ReturnType<WorkspaceService['resetUnitList']>,
-      Parameters<WorkspaceService['resetUnitList']>
+        ReturnType<WorkspaceService['resetUnitList']>,
+        Parameters<WorkspaceService['resetUnitList']>
       >(),
       selectedUnit$: new BehaviorSubject<number>(0),
       hasDroppedUnits: false
     };
 
     const getUnitGroupsMock = jest.fn<
-    ReturnType<WorkspaceBackendService['getUnitGroups']>,
-    Parameters<WorkspaceBackendService['getUnitGroups']>
+      ReturnType<WorkspaceBackendService['getUnitGroups']>,
+      Parameters<WorkspaceBackendService['getUnitGroups']>
     >().mockReturnValue(of(['group-a']));
 
     const getUnitListMock = jest.fn<
-    ReturnType<WorkspaceBackendService['getUnitList']>,
-    Parameters<WorkspaceBackendService['getUnitList']>
+      ReturnType<WorkspaceBackendService['getUnitList']>,
+      Parameters<WorkspaceBackendService['getUnitList']>
     >().mockReturnValue(of([
       { id: 10, targetWorkspaceId: 5 } as UnitInListDto
     ]));
@@ -90,8 +90,8 @@ describe('SelectUnitDirective', () => {
 
     routerMock = {
       navigate: jest.fn<
-      ReturnType<Router['navigate']>,
-      Parameters<Router['navigate']>
+        ReturnType<Router['navigate']>,
+        Parameters<Router['navigate']>
       >().mockResolvedValue(true),
       routerState: { snapshot: { url: '/a/5/second' } }
     };

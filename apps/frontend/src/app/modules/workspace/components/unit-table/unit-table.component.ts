@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import {
-  // eslint-disable-next-line max-len
+
   MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
@@ -42,9 +42,9 @@ export class UnitTableComponent implements AfterViewInit, OnChanges {
     sortState: Sort,
     table: UnitTableComponent
   }> = new EventEmitter<{
-      sortState: Sort,
-      table: UnitTableComponent
-    }>();
+    sortState: Sort,
+    table: UnitTableComponent
+  }>();
 
   dataSource!: MatTableDataSource<UnitInListDto>;
   displayedColumns: string[] = ['key', 'name'];

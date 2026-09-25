@@ -3,8 +3,8 @@ import { UserWorkspaceAccessDto } from '@studio-lite-lib/api-dto';
 
 export class UserWorkspaceAccessForGroupDto {
   @ApiProperty()
-    groupId!: number;
+  groupId!: number;
 
   @ApiProperty()
-    workspaces!: UserWorkspaceAccessDto[];
+  workspaces!: UserWorkspaceAccessDto[];
 }

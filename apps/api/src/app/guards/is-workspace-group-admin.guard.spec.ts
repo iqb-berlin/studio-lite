@@ -14,7 +14,7 @@ describe('IsWorkspaceGroupAdminGuard', () => {
   let reflector: DeepMocked<Reflector>;
 
   const contextFor = (userId: number, params: Record<string, unknown>): ExecutionContext => createMock<
-  ExecutionContext>({
+    ExecutionContext>({
     switchToHttp: () => ({
       getRequest: () => ({
         user: { id: userId },

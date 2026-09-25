@@ -28,7 +28,7 @@ import { UnitLastChangesComponent } from '../../../../components/unit-last-chang
   selector: 'studio-lite-unit-print-layout',
   templateUrl: './unit-print-layout.component.html',
   styleUrls: ['./unit-print-layout.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [UnitPropertiesComponent, UnitLastChangesComponent, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent, UnitPrintPlayerComponent, MatFormField, MatLabel, MatInput, FormsModule, IncludePipe, TranslateModule]
 })
 export class UnitPrintLayoutComponent implements OnInit {

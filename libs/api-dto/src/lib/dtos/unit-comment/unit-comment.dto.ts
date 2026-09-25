@@ -2,41 +2,41 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UnitCommentDto {
   @ApiProperty()
-    id!: number;
+  id!: number;
 
   @ApiProperty()
-    body!: string;
+  body!: string;
 
   @ApiProperty()
-    userName!: string;
+  userName!: string;
 
   @ApiProperty()
-    userId!: number;
+  userId!: number;
 
   @ApiProperty()
-    itemUuids?: string[];
+  itemUuids?: string[];
 
   @ApiProperty()
-    parentId?: number | null;
+  parentId?: number | null;
 
   @ApiProperty()
-    unitId?: number;
+  unitId?: number;
 
   @ApiProperty()
-    hidden!: boolean;
+  hidden!: boolean;
 
   @ApiProperty()
-    createdAt?: Date;
+  createdAt?: Date;
 
   @ApiProperty()
-    changedAt?: Date;
+  changedAt?: Date;
 
   @ApiProperty({ required: false })
-    upVotes?: number;
+  upVotes?: number;
 
   @ApiProperty({ required: false })
-    downVotes?: number;
+  downVotes?: number;
 
   @ApiProperty({ required: false, enum: ['up', 'down', null] })
-    userVote?: 'up' | 'down' | null;
+  userVote?: 'up' | 'down' | null;
 }

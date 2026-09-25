@@ -473,7 +473,7 @@ export class DownloadWorkspacesClass {
                 } else {
                   returnData.latestChange = null;
                 }
-                // eslint-disable-next-line max-len
+
                 if (returnData.latestChange < u.lastChangedDefinition) returnData.latestChange = u.lastChangedDefinition;
                 if (returnData.latestChange < u.lastChangedScheme) returnData.latestChange = u.lastChangedScheme;
                 if (returnData.editors[u.editor]) {

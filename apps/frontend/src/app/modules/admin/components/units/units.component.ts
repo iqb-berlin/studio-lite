@@ -28,7 +28,7 @@ import { UnitsMenuComponent } from '../units-menu/units-menu.component';
   selector: 'studio-lite-units',
   templateUrl: './units.component.html',
   styleUrls: ['./units.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, DatePipe, MatPaginator, UnitsMenuComponent]
 })
 
@@ -122,7 +122,7 @@ export class UnitsComponent implements OnInit, AfterViewInit {
           }
           this.appService.dataLoading = false;
         });
-    } catch (e) {
+    } catch {
       this.appService.dataLoading = false;
     }
   }

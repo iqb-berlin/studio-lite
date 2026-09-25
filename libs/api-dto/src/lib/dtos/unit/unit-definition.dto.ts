@@ -3,8 +3,8 @@ import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 
 export class UnitDefinitionDto {
   @ApiProperty()
-    variables?: VariableInfo[] = [];
+  variables?: VariableInfo[] = [];
 
   @ApiProperty()
-    definition?: string;
+  definition?: string;
 }

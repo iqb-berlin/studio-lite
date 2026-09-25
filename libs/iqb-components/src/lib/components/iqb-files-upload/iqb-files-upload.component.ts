@@ -63,32 +63,32 @@ export class IqbFilesUploadComponent implements OnInit {
 
   /* Http request input bindings */
   @Input()
-    httpUrl: string | undefined = 'http://127.0.0.1:8080';
+  httpUrl: string | undefined = 'http://127.0.0.1:8080';
 
   @Input()
-    httpRequestHeaders: HttpHeaders | {
+  httpRequestHeaders: HttpHeaders | {
     [header: string]: string | string[];
   } = new HttpHeaders().set('Content-Type', 'multipart/form-data');
 
   @Input()
-    httpRequestParams: HttpParams | {
+  httpRequestParams: HttpParams | {
     [param: string]: string | string[];
   } = new HttpParams();
 
   @Input()
-    fileAlias: string | undefined = 'file';
+  fileAlias: string | undefined = 'file';
 
   @Input()
-    tokenName: string | undefined = '';
+  tokenName: string | undefined = '';
 
   @Input()
-    token: string | undefined = '';
+  token: string | undefined = '';
 
   @Input()
-    folderName: string | undefined = '';
+  folderName: string | undefined = '';
 
   @Input()
-    folder: string | undefined = '';
+  folder: string | undefined = '';
 
   @Input()
   get file(): File {
@@ -152,8 +152,7 @@ export class IqbFilesUploadComponent implements OnInit {
           responseType: 'json'
         }).subscribe((event: HttpEvent<unknown>) => {
           if (event.type === HttpEventType.UploadProgress) {
-            // eslint-disable-next-line no-mixed-operators
-            this.progressPercentage = event.total ? Math.floor(event.loaded * 100 / event.total) : 0;
+            this.progressPercentage = event.total ? Math.floor((event.loaded * 100) / event.total) : 0;
             this.loaded = event.loaded;
             this.total = event.total ? event.total : 0;
             this.status = UploadStatus.busy;

@@ -4,109 +4,109 @@ export class BookletConfigDto {
   @ApiProperty({
     examples: ['separate', 'buttons', 'concat-scroll', 'concat-scroll-snap']
   })
-    pagingMode? = 'separate';
+  pagingMode? = 'separate';
 
   @ApiProperty({
     examples: ['OFF', 'SEPARATE_BOTTOM'],
     deprecated: true
   })
-    pageNaviButtons? = 'SEPARATE_BOTTOM';
+  pageNaviButtons? = 'SEPARATE_BOTTOM';
 
   @ApiProperty({
     examples: ['OFF', 'ARROWS_ONLY', 'FULL'],
     deprecated: true
   })
-    unitNaviButtons? = 'FULL';
+  unitNaviButtons? = 'FULL';
 
   @ApiProperty({
     examples: ['2018', '2022']
   })
-    controllerDesign? = '2022';
+  controllerDesign? = '2022';
 
   @ApiProperty({
     examples: ['OFF', 'WITH_UNIT_TITLE', 'WITH_BOOKLET_TITLE', 'WITH_BLOCK_TITLE', 'EMPTY'],
     deprecated: true
   })
-    unitScreenHeader? = 'WITH_BOOKLET_TITLE';
+  unitScreenHeader? = 'WITH_BOOKLET_TITLE';
 
   @ApiProperty({
     examples: ['OFF', 'ON'],
     deprecated: true
   })
-    unitTitle? = 'ON';
+  unitTitle? = 'ON';
 
   @ApiProperty({ examples: ['LAZY', 'EAGER'] })
-    loadingMode?: string;
+  loadingMode?: string;
 
   @ApiProperty({ examples: ['disabled', 'lean', 'rich', 'debug'] })
-    logPolicy?: string;
+  logPolicy?: string;
 
   @ApiProperty({ examples: ['OFF', 'ON'] })
-    restoreCurrentPageOnReturn?: string;
+  restoreCurrentPageOnReturn?: string;
 
   @ApiProperty({ examples: ['ON', 'OFF'] })
-    lockTestOnTermination?: string;
+  lockTestOnTermination?: string;
 
   @ApiProperty({ examples: ['ON', 'OFF'] })
-    askForFullscreen?: string;
+  askForFullscreen?: string;
 
   @ApiProperty({ description: 'Comma-separated minutes, e.g. 5,1' })
-    unitTimeLeftWarnings?: string;
+  unitTimeLeftWarnings?: string;
 
   @ApiProperty({ description: 'Milliseconds' })
-    unitResponsesBufferTime?: string;
+  unitResponsesBufferTime?: string;
 
   @ApiProperty({ description: 'Milliseconds' })
-    unitStateBufferTime?: string;
+  unitStateBufferTime?: string;
 
   @ApiProperty({ description: 'Milliseconds' })
-    testStateBufferTime?: string;
+  testStateBufferTime?: string;
 
   @ApiProperty({ examples: ['NONE', 'BOOKLET_LABEL', 'BLOCK_LABEL', 'UNIT_LABEL'] })
-    headerContent?: string;
+  headerContent?: string;
 
   @ApiProperty({ examples: ['HIDDEN', 'INDEX', 'LABEL'] })
-    navbarUnitLabel?: string;
+  navbarUnitLabel?: string;
 
   @ApiProperty({ examples: ['FALSE', 'TRUE'] })
-    navbarUnitControlsHidden?: string;
+  navbarUnitControlsHidden?: string;
 
   @ApiProperty({ examples: ['HIDDEN', 'INDEX', 'LABEL', 'LIST'] })
-    navbarPageLabel?: string;
+  navbarPageLabel?: string;
 
   @ApiProperty({ examples: ['FALSE', 'TRUE'] })
-    navbarPageControlsHidden?: string;
+  navbarPageControlsHidden?: string;
 
   @ApiProperty({ examples: ['HIDDEN', 'DYNAMIC', 'UNITS', 'PAGES'] })
-    navbarBackwardButton?: string;
+  navbarBackwardButton?: string;
 
   @ApiProperty({ examples: ['HIDDEN', 'DYNAMIC', 'UNITS', 'PAGES'] })
-    navbarForwardButton?: string;
+  navbarForwardButton?: string;
 
   @ApiProperty({ examples: ['FALSE', 'TRUE'] })
-    toolbarShowUnitTitle?: string;
+  toolbarShowUnitTitle?: string;
 
   @ApiProperty({ examples: ['FALSE', 'TRUE'] })
-    toolbarShowUnitList?: string;
+  toolbarShowUnitList?: string;
 
   @ApiProperty({ examples: ['FALSE', 'TRUE'] })
-    toolbarShowFullscreenButton?: string;
+  toolbarShowFullscreenButton?: string;
 
   @ApiProperty({ examples: ['FALSE', 'TRUE'] })
-    toolbarShowReloadButton?: string;
+  toolbarShowReloadButton?: string;
 
   @ApiProperty({ examples: ['FALSE', 'TRUE'] })
-    toolbarShowTimeLeft?: string;
+  toolbarShowTimeLeft?: string;
 
   @ApiProperty({ examples: ['FALSE', 'TRUE'] })
-    silentMode?: string;
+  silentMode?: string;
 
   @ApiProperty({ examples: ['standard', 'preventNav'] })
-    browserBehaviour?: string;
+  browserBehaviour?: string;
 
   @ApiProperty({ examples: ['OFF', 'ON', 'ALWAYS'] })
-    forcePresentationComplete?: string;
+  forcePresentationComplete?: string;
 
   @ApiProperty({ examples: ['OFF', 'ON', 'ALWAYS'] })
-    forceResponseComplete?: string;
+  forceResponseComplete?: string;
 }

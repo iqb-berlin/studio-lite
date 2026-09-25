@@ -3,23 +3,23 @@ import { WorkspaceSettingsDto } from './workspace-settings.dto';
 
 export class UsersWorkspaceInListDto {
   @ApiProperty()
-    id!: number;
+  id!: number;
 
   @ApiProperty()
-    name!: string;
+  name!: string;
 
   @ApiProperty({ example: 463 })
-    groupId!: number;
+  groupId!: number;
 
   @ApiProperty()
-    dropBoxId!: number;
+  dropBoxId!: number;
 
   @ApiProperty()
-    userAccessLevel!: number;
+  userAccessLevel!: number;
 
   @ApiProperty()
-    unitsCount!: number;
+  unitsCount!: number;
 
   @ApiProperty()
-    settings?: WorkspaceSettingsDto;
+  settings?: WorkspaceSettingsDto;
 }
