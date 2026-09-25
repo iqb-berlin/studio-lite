@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class UnitExportConfigDto {
   @ApiProperty()
     unitXsdUrl =
-      'https://github.com/iqb-berlin/testcenter/blob/master/definitions/vo_Unit.xsd';
+      'https://w3id.org/iqb/spec/unit-xml/17.6';
 
   @ApiProperty()
     bookletXsdUrl =

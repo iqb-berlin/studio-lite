@@ -3,9 +3,9 @@ import { noId, userGroupAdmin } from '../../support/util-api';
 
 describe('Admin settings API tests', () => {
   const unitExport: UnitExport = {
-    unitXsdUrl: 'https://github.com/iqb-berlin/testcenter/blob/master/definitions/vo_Unit.xsd',
-    bookletXsdUrl: 'https://github.com/iqb-berlin/testcenter/blob/master/definitions/vo_Booklet.xsd',
-    testTakersXsdUrl: 'https://github.com/iqb-berlin/testcenter/blob/master/definitions/vo_Testtakers.xsd'
+    unitXsdUrl: 'https://w3id.org/iqb/spec/unit-xml/17.6',
+    bookletXsdUrl: 'https://w3id.org/iqb/spec/testcenter-booklet-xml/18.0',
+    testTakersXsdUrl: 'https://w3id.org/iqb/spec/testcenter-testtaker-xml/18.0'
   };
   before(() => {
     cy.addFirstUserAPI(Cypress.expose('username'), Cypress.expose('password'))
@@ -187,12 +187,12 @@ describe('Admin settings API tests', () => {
   describe('105. UPDATE /api/admin/settings/unit-export-config', () => {
     it('200 positive test: should allow an authorized administrator to update unit ' +
       'export validation parameters', () => {
-      unitExport.unitXsdUrl = 'https://github.com/iqb-berlin/testcenter/blob/master/vo_Unit.xsd';
+      unitExport.unitXsdUrl = 'https://w3id.org/iqb/spec/unit-xml/17.4';
       cy.updateSettingUnitExportAPI(Cypress.expose(`token_${Cypress.expose('username')}`), unitExport)
         .then(resp => {
           expect(resp.status).to.equal(200);
         });
-      unitExport.unitXsdUrl = 'https://github.com/iqb-berlin/testcenter/blob/master/definitions/vo_Unit.xsd';
+      unitExport.unitXsdUrl = 'https://w3id.org/iqb/spec/unit-xml/17.6';
       cy.updateSettingUnitExportAPI(Cypress.expose(`token_${Cypress.expose('username')}`), unitExport)
         .then(resp => {
           expect(resp.status).to.equal(200);
@@ -200,7 +200,7 @@ describe('Admin settings API tests', () => {
     });
 
     it('401 negative test: should deny unit export configuration updates to a user with regular permissions', () => {
-      unitExport.unitXsdUrl = 'https://github.com/iqb-berlin/testcenter/blob/master/vo_Unit.xsd';
+      unitExport.unitXsdUrl = 'https://w3id.org/iqb/spec/unit-xml/17.4';
       cy.updateSettingUnitExportAPI(Cypress.expose(`token_${userGroupAdmin.username}`), unitExport)
         .then(resp => {
           expect(resp.status).to.equal(401);
@@ -209,7 +209,7 @@ describe('Admin settings API tests', () => {
 
     it('401 negative test: should deny unit export configuration updates ' +
       'when providing an invalid user identifier', () => {
-      unitExport.unitXsdUrl = 'https://github.com/iqb-berlin/testcenter/blob/master/vo_Unit.xsd';
+      unitExport.unitXsdUrl = 'https://w3id.org/iqb/spec/unit-xml/17.4';
       cy.updateSettingUnitExportAPI(noId, unitExport)
         .then(resp => {
           expect(resp.status).to.equal(401);

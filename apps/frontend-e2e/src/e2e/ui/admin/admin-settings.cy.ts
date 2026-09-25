@@ -200,11 +200,11 @@ describe('Admin Settings Tab Configuration', () => {
 
   describe('Unit Export Config card', () => {
     const unitXsdUrl =
-      'https://github.com/iqb-berlin/testcenter/blob/master/definitions/vo_Unit.xsd';
+      'https://w3id.org/iqb/spec/unit-xml/17.6';
     const bookletXsdUrl =
-      'https://github.com/iqb-berlin/testcenter/blob/master/definitions/vo_Booklet.xsd';
+      'https://w3id.org/iqb/spec/testcenter-booklet-xml/18.0';
     const testTakersXsdUrl =
-      'https://github.com/iqb-berlin/testcenter/blob/master/definitions/vo_Testtakers.xsd';
+      'https://w3id.org/iqb/spec/testcenter-testtaker-xml/18.0';
 
     it('displays the Unit Export Config fields', () => {
       goToSettings();
