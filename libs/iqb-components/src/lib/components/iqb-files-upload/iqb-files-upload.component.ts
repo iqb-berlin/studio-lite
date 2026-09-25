@@ -152,7 +152,7 @@ export class IqbFilesUploadComponent implements OnInit {
           responseType: 'json'
         }).subscribe((event: HttpEvent<unknown>) => {
           if (event.type === HttpEventType.UploadProgress) {
-            this.progressPercentage = event.total ? Math.floor(event.loaded * 100 / event.total) : 0;
+            this.progressPercentage = event.total ? Math.floor((event.loaded * 100) / event.total) : 0;
             this.loaded = event.loaded;
             this.total = event.total ? event.total : 0;
             this.status = UploadStatus.busy;

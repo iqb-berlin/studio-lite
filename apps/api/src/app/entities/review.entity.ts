@@ -2,7 +2,7 @@ import {
   Column, Entity, OneToMany, PrimaryGeneratedColumn
 } from 'typeorm';
 import { ReviewSettingsDto } from '@studio-lite-lib/api-dto';
-// eslint-disable-next-line import/no-cycle
+
 import ReviewUnit from './review-unit.entity';
 
 /**

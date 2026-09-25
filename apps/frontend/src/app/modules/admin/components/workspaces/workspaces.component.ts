@@ -78,7 +78,7 @@ export class WorkspacesComponent implements OnInit, AfterViewInit {
         saveAs(b, `${thisDate} ${this.translateService.instant('wsg-admin.report-workspaces')}.xlsx`);
         this.appService.dataLoading = false;
       });
-    } catch (e) {
+    } catch {
       this.appService.dataLoading = false;
     }
   }

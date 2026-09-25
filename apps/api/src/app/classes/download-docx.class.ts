@@ -28,9 +28,9 @@ import * as cheerio from 'cheerio';
 import { FileChild } from 'docx/build/file/file-child';
 import type { Element, AnyNode } from 'domhandler';
 import { BasicAcceptedElems } from 'cheerio';
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import { imageSize } from 'image-size';
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import * as katex from 'katex';
 import { mml2omml } from 'mathml2omml';
@@ -847,7 +847,7 @@ export class DownloadDocx {
             )
           );
         }
-      } catch (e) {
+      } catch {
         elements.push(
           new Paragraph({
             text: 'HTML konnte nicht verarbeitet werden.'

@@ -122,7 +122,7 @@ export class UnitsComponent implements OnInit, AfterViewInit {
           }
           this.appService.dataLoading = false;
         });
-    } catch (e) {
+    } catch {
       this.appService.dataLoading = false;
     }
   }

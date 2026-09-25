@@ -233,7 +233,7 @@ export class BackendService {
           .join('')
       );
       return (JSON.parse(jsonPayload) as { sid: string }).sid;
-    } catch (e) {
+    } catch {
       return undefined;
     }
   }
