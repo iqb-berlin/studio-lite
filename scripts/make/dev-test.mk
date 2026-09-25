@@ -7,8 +7,9 @@ include $(STUDIO_BASE_DIR)/.env.dev
 
 # prevents collisions of make target names with possible file names
 .PHONY: dev-test-app dev-test-backend dev-test-frontend dev-test-registry-login dev-test-registry-logout\
-dev-test-build-e2e dev-test-e2e dev-test-e2e-api dev-test-e2e-ui-chrome dev-test-e2e-ui-chrome-mobile\
-dev-test-e2e-ui-firefox dev-test-e2e-ui-firefox-mobile dev-test-e2e-ui-edge dev-test-e2e-ui-edge-mobile
+dev-test-build-e2e dev-test-e2e dev-test-e2e-api dev-test-e2e-ui-chrome dev-test-e2e-ui-workspace-chrome\
+dev-test-e2e-ui-admin-chrome dev-test-e2e-ui-chrome-mobile dev-test-e2e-ui-firefox dev-test-e2e-ui-firefox-mobile\
+dev-test-e2e-ui-edge dev-test-e2e-ui-edge-mobile
 
 # Run all tests (only in combination with 'make dev-up')
 dev-test-app: dev-test-backend dev-test-frontend
@@ -76,6 +77,30 @@ dev-test-e2e-ui-chrome:
 			studio-lite-frontend-e2e:$(TAG) e2e frontend-e2e --baseUrl=http://frontend:8080\
 				--browser=chrome\
 				--spec="./apps/frontend-e2e/src/e2e/ui/**/*"
+
+# Run e2e ui workspace tests with chrome browser in dev environment (only in combination with 'make dev-up')
+dev-test-e2e-ui-workspace-chrome:
+	cd $(STUDIO_BASE_DIR) &&\
+		docker run\
+				--rm\
+				--pull never\
+				-v ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e\
+				--network app-net\
+			studio-lite-frontend-e2e:$(TAG) e2e frontend-e2e --baseUrl=http://frontend:8080\
+				--browser=chrome\
+				--spec="./apps/frontend-e2e/src/e2e/ui/workspace/**/*"
+
+# Run e2e ui admin & general tests with chrome in dev environment (only in combination with 'make dev-up')
+dev-test-e2e-ui-admin-chrome:
+	cd $(STUDIO_BASE_DIR) &&\
+		docker run\
+				--rm\
+				--pull never\
+				-v ./apps/frontend-e2e:/studio-lite/apps/frontend-e2e\
+				--network app-net\
+			studio-lite-frontend-e2e:$(TAG) e2e frontend-e2e --baseUrl=http://frontend:8080\
+				--browser=chrome\
+				--spec="./apps/frontend-e2e/src/e2e/ui/{admin,auth,core,group-admin,metadata,shared,user}/**/*"
 
 # Run all e2e ui tests with chrome browser for mobiles in dev environment (only in combination with 'make dev-up')
 dev-test-e2e-ui-chrome-mobile:
