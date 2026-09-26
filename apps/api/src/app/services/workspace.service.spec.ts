@@ -903,6 +903,44 @@ describe('WorkspaceService', () => {
       expect(unitService.create).toHaveBeenCalledTimes(1);
     });
 
+    // An export with test takers carries the Testcenter's booklet and test-taker files. Imported
+    // back, the booklet became an empty unit and the test-taker file raised a warning (#1710).
+    it('should pass over the booklet and test-taker files of an export', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const result = await service.uploadFiles(1, [
+        buildFile('export.zip/UNIT01.xml', 'text/xml', xmlUnit('UNIT01')),
+        buildFile(
+          'export.zip/booklet1.xml',
+          'text/xml',
+          '<Booklet><Metadata><Id>booklet1</Id><Label/></Metadata><Units><Unit id="UNIT01"/></Units></Booklet>'
+        ),
+        buildFile(
+          'export.zip/booklet1_testtaker.xml',
+          'text/xml',
+          '<Testtakers><Metadata/><Group id="booklet1_group"/></Testtakers>'
+        )
+      ], user);
+
+      expect(result.messages).toHaveLength(0);
+      expect(unitService.create).toHaveBeenCalledTimes(1);
+      expect(unitService.create).toHaveBeenCalledWith(1, { key: 'UNIT01', name: 'L' }, user, true);
+    });
+
+    it('should still warn about an XML file that is neither a unit nor a Testcenter file', async () => {
+      const result = await service.uploadFiles(1, [
+        buildFile('other.xml', 'text/xml', '<Something><Metadata><Id>X</Id></Metadata></Something>')
+      ], user);
+
+      expect(unitService.create).not.toHaveBeenCalled();
+      expect(result.messages).toEqual([{
+        objectKey: 'other.xml',
+        messageKey: 'unit-upload.api-warning.xml-parse'
+      }]);
+    });
+
     it('should report unreferenced JSON that is not a valid unit index as ignored', async () => {
       const result = await service.uploadFiles(1, [
         buildFile('broken.json', 'application/json', JSON.stringify({ notId: 'something' }))
