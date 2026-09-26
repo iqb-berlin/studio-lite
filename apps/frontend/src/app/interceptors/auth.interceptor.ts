@@ -3,7 +3,8 @@ import {
   HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpResponse
 } from '@angular/common/http';
 import {
-  finalize, Observable, throwError, BehaviorSubject, filter, take, switchMap, catchError, tap, fromEvent, timeout
+  finalize, Observable, throwError, BehaviorSubject, filter, take, switchMap, catchError, tap, fromEvent, timeout,
+  map, of
 } from 'rxjs';
 import { Router } from '@angular/router';
 import { AppService } from '../services/app.service';
@@ -72,12 +73,41 @@ export class AuthInterceptor implements HttpInterceptor {
             if (isBackgroundRequest && httpErrorInfo.status === 401) {
               return;
             }
-            httpErrorInfo.method = req.method;
-            httpErrorInfo.urlWithParams = req.urlWithParams;
-            this.appService.addErrorMessage(httpErrorInfo);
+            this.report(req, httpErrorInfo);
           }
         })
       );
+  }
+
+  private report(request: HttpRequest<unknown>, httpErrorInfo: AppHttpError): void {
+    httpErrorInfo.method = request.method;
+    httpErrorInfo.urlWithParams = request.urlWithParams;
+    this.appService.addErrorMessage(httpErrorInfo);
+  }
+
+  /**
+   * Sends a request again under a renewed token. Its failure has to be reported here: the
+   * repetition replaces the original stream, so the catchError in intercept() never sees it.
+   *
+   * A 401 that survives a fresh token cannot mean "not logged in" -- the session was renewed a
+   * moment ago. It is what the API still answers for a workspace the user has no access to, and
+   * is shown as the missing permission it is (#1694). The caller gets the original error.
+   */
+  private repeat(
+    request: HttpRequest<unknown>,
+    next: HttpHandler,
+    token: string
+  ): Observable<HttpEvent<unknown>> {
+    return next.handle(this.addToken(request, token)).pipe(
+      catchError(error => {
+        const httpErrorInfo = new AppHttpError(error);
+        if (httpErrorInfo.status === 401) {
+          httpErrorInfo.status = 403;
+        }
+        this.report(request, httpErrorInfo);
+        return throwError(() => error);
+      })
+    );
   }
 
   private addToken(request: HttpRequest<unknown>, token: string | null): HttpRequest<unknown> {
@@ -98,9 +128,9 @@ export class AuthInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<unknown>> {
     if (this.isRefreshing) {
       return this.refreshTokenSubject.pipe(
-        filter(token => token !== null),
+        filter((token): token is string => token !== null),
         take(1),
-        switchMap(jwt => next.handle(this.addToken(request, jwt)))
+        switchMap(jwt => this.repeat(request, next, jwt))
       );
     }
 
@@ -111,10 +141,12 @@ export class AuthInterceptor implements HttpInterceptor {
     if (isLocked) {
       if (currentToken && currentToken !== failedToken) {
         // Another tab refreshed it just now. Retry immediately.
-        return next.handle(this.addToken(request, currentToken));
+        return this.repeat(request, next, currentToken);
       }
 
-      // Wait for another tab to finish refreshing
+      // Wait for another tab to finish refreshing. If it times out or brings no token, refresh
+      // ourselves. That fallback covers the waiting only: were it to sit behind the repetition,
+      // a request failing for its own reason would set off a second refresh (#1694).
       return fromEvent<StorageEvent>(window, 'storage').pipe(
         filter(event => event.key === 'id_token'),
         take(1),
@@ -122,15 +154,11 @@ export class AuthInterceptor implements HttpInterceptor {
           each: 5000,
           with: () => throwError(() => new Error('Storage event timeout'))
         }),
-        switchMap(event => {
-          const newToken = event.newValue;
-          if (newToken) {
-            return next.handle(this.addToken(request, newToken));
-          }
-          return throwError(() => new Error('Refresh by other tab failed'));
-        }),
-        // Timeout or error reached - fallback: try refreshing ourselves!
-        catchError(() => this.performRefresh(request, next))
+        map(event => event.newValue),
+        catchError(() => of(null)),
+        switchMap(newToken => (newToken ?
+          this.repeat(request, next, newToken) :
+          this.performRefresh(request, next)))
       );
     }
 
@@ -148,6 +176,17 @@ export class AuthInterceptor implements HttpInterceptor {
     const refreshToken = localStorage.getItem('refresh_token');
     if (refreshToken) {
       return this.backendService.refresh(refreshToken).pipe(
+        // Only a failed refresh ends the session, so this catchError has to stay in front of the
+        // switchMap. Behind it, it also caught the repeated request: when that failed too -- as it
+        // does for a workspace the user has no access to, which the API also answers with 401 --
+        // a session that had just been renewed was logged out (#1694).
+        catchError(err => {
+          this.isRefreshing = false;
+          localStorage.removeItem('st_refresh_lock');
+          this.backendService.logout();
+          this.router.navigate(['/home']);
+          return throwError(() => err);
+        }),
         switchMap(tokenData => {
           this.isRefreshing = false;
           localStorage.removeItem('st_refresh_lock');
@@ -157,18 +196,11 @@ export class AuthInterceptor implements HttpInterceptor {
             localStorage.setItem('refresh_token', newRefreshToken);
             this.refreshTokenSubject.next(accessToken);
 
-            return next.handle(this.addToken(request, accessToken));
+            return this.repeat(request, next, accessToken);
           }
           this.backendService.logout();
           this.router.navigate(['/home']);
           return throwError(() => new Error('Refresh failed'));
-        }),
-        catchError(err => {
-          this.isRefreshing = false;
-          localStorage.removeItem('st_refresh_lock');
-          this.backendService.logout();
-          this.router.navigate(['/home']);
-          return throwError(() => err);
         })
       );
     }

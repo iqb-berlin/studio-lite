@@ -7,7 +7,7 @@ import {
   withInterceptorsFromDi
 } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
@@ -176,6 +176,89 @@ describe('AuthInterceptor', () => {
 
     expect(backendServiceSpy.logout).toHaveBeenCalled();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
+  });
+
+  // A refresh that worked says the session is fine. If the repeated request still fails, that
+  // failure belongs to the request, not to the session: the API answers missing workspace access
+  // with 401 as well, and opening a unit in a foreign workspace used to log the user out (#1694).
+  describe('when the refresh succeeds but the repeated request fails', () => {
+    // A 401 that outlives a fresh token cannot mean "not logged in", so it is shown as the
+    // missing permission it is; any other status is shown as it came.
+    [
+      {
+        status: 401, statusText: 'Unauthorized', shownAs: 403, reason: 'no access to the workspace'
+      },
+      {
+        status: 500, statusText: 'Server Error', shownAs: 500, reason: 'an unrelated server error'
+      }
+    ].forEach(({
+      status, statusText, shownAs, reason
+    }) => {
+      it(`should keep the session, hand the ${status} to the caller and show a ${shownAs} (${reason})`, () => {
+        localStorage.setItem('refresh_token', 'old-refresh');
+        backendServiceSpy.refresh.mockReturnValue(of({ accessToken: 'new-access', refreshToken: 'new-refresh' }));
+        let receivedStatus: number | undefined;
+
+        httpClient.get('/data').subscribe({ error: err => { receivedStatus = err.status; } });
+        httpMock.expectOne('/data').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+        httpMock.expectOne('/data').flush('failed again', { status, statusText });
+
+        expect(backendServiceSpy.refresh).toHaveBeenCalledTimes(1);
+        expect(backendServiceSpy.logout).not.toHaveBeenCalled();
+        expect(routerSpy.navigate).not.toHaveBeenCalled();
+        expect(receivedStatus).toBe(status);
+        expect(localStorage.getItem('id_token')).toBe('new-access');
+        expect(appServiceSpy.addErrorMessage).toHaveBeenCalledTimes(1);
+        const shown = appServiceSpy.addErrorMessage.mock.calls[0][0] as AppHttpError;
+        expect(shown.status).toBe(shownAs);
+        expect(shown.method).toBe('GET');
+        expect(shown.urlWithParams).toBe('/data');
+      });
+    });
+
+    // Several requests fail at once when a page opens. Only the first refreshes; the others wait
+    // for its token and are repeated from a different branch, which has to behave the same.
+    it('should keep the session for a request that waited for the refresh of another', () => {
+      localStorage.setItem('refresh_token', 'old-refresh');
+      const refresh$ = new Subject<{ accessToken: string, refreshToken: string }>();
+      backendServiceSpy.refresh.mockReturnValue(refresh$);
+
+      httpClient.get('/first').subscribe({ error: () => {} });
+      httpClient.get('/second').subscribe({ error: () => {} });
+      httpMock.expectOne('/first').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+      httpMock.expectOne('/second').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+      refresh$.next({ accessToken: 'new-access', refreshToken: 'new-refresh' });
+      refresh$.complete();
+      httpMock.expectOne('/first').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+      httpMock.expectOne('/second').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+      expect(backendServiceSpy.refresh).toHaveBeenCalledTimes(1);
+      expect(backendServiceSpy.logout).not.toHaveBeenCalled();
+      expect(appServiceSpy.addErrorMessage).toHaveBeenCalledTimes(2);
+      appServiceSpy.addErrorMessage.mock.calls
+        .forEach(([shown]: [AppHttpError]) => expect(shown.status).toBe(403));
+    });
+
+    // Another tab holds the lock and hands over its token through a storage event. If the request
+    // then still fails, that is the request's doing -- falling back to a refresh of our own would
+    // only rotate the token again and send the same request a third time.
+    it('should not refresh on its own when the token of another tab does not help either', () => {
+      localStorage.setItem('id_token', 'old-access');
+      localStorage.setItem('refresh_token', 'old-refresh');
+      localStorage.setItem('st_refresh_lock', Date.now().toString());
+
+      httpClient.get('/data').subscribe({ error: () => {} });
+      httpMock.expectOne('/data').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+      window.dispatchEvent(new StorageEvent('storage', { key: 'id_token', newValue: 'other-tab-access' }));
+      const repeated = httpMock.expectOne('/data');
+      expect(repeated.request.headers.get('Authorization')).toBe('Bearer other-tab-access');
+      repeated.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+      expect(backendServiceSpy.refresh).not.toHaveBeenCalled();
+      expect(backendServiceSpy.logout).not.toHaveBeenCalled();
+      expect(appServiceSpy.addErrorMessage).toHaveBeenCalledTimes(1);
+      expect((appServiceSpy.addErrorMessage.mock.calls[0][0] as AppHttpError).status).toBe(403);
+    });
   });
 
   // The classification comes from the call site, not from the URL. Every case below uses
