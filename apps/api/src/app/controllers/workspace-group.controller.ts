@@ -4,6 +4,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -21,6 +22,7 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
 import { WorkspaceGroupId } from '../decorators/workspace-group.decorator';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
+import { WorkspaceGroupAccessGuard } from '../guards/workspace-group-access.guard';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
@@ -30,7 +32,8 @@ import { UnitService } from '../services/unit.service';
  * which only its admin may change.
  *
  * The GET has a second shape: with `download` it answers with the xlsx report over all workspaces
- * of the group instead of the group itself.
+ * of the group instead of the group itself. The group passes for its members, the report only for
+ * its admin -- see {@link WorkspaceGroupAccessGuard}.
  */
 @Controller('workspace-groups/:workspace_group_id')
 export class WorkspaceGroupController {
@@ -41,7 +44,7 @@ export class WorkspaceGroupController {
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGroupAccessGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace-group retrieved successfully.' })
   @ApiQuery({
@@ -49,7 +52,10 @@ export class WorkspaceGroupController {
     type: Boolean,
     required: false
   })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace-group' })
+  @ApiUnauthorizedResponse({ description: 'Authentication is required.' })
+  @ApiForbiddenResponse({
+    description: 'No workspace in the group, or the report without being the group\'s admin.'
+  })
   @ApiNotFoundResponse({ description: 'Workspace-group not found.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'workspace_group_id', type: Number })

@@ -15,6 +15,7 @@ describe('WorkspaceUserService', () => {
   const mockRepository = {
     find: jest.fn(),
     findOne: jest.fn(),
+    exists: jest.fn(),
     delete: jest.fn()
   };
 
@@ -80,6 +81,17 @@ describe('WorkspaceUserService', () => {
     it('hasAccess', async () => {
       mockRepository.findOne.mockResolvedValue({ userId } as WorkspaceUser);
       expect(await service.hasAccess(userId, workspaceId)).toBe(true);
+    });
+
+    it('hasAccessToWorkspaceGroup asks for an assignment to any workspace of the group', async () => {
+      mockRepository.exists.mockResolvedValue(true);
+      expect(await service.hasAccessToWorkspaceGroup(userId, 7)).toBe(true);
+      expect(workspaceUserRepository.exists).toHaveBeenCalledWith({
+        where: { userId, workspace: { groupId: 7 } }
+      });
+
+      mockRepository.exists.mockResolvedValue(false);
+      expect(await service.hasAccessToWorkspaceGroup(userId, 7)).toBe(false);
     });
 
     it('canComment', async () => {

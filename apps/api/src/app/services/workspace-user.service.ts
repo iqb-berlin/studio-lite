@@ -49,6 +49,19 @@ export class WorkspaceUserService {
     return !!workspaceUser;
   }
 
+  /**
+   * Whether the user is assigned to at least one workspace of the group -- what a member needs to
+   * read the group's settings, such as its unit states, from inside their workspace (#1712).
+   */
+  async hasAccessToWorkspaceGroup(userId: number, workspaceGroupId: number): Promise<boolean> {
+    return this.workspaceUserRepository.exists({
+      where: {
+        userId: userId,
+        workspace: { groupId: workspaceGroupId }
+      }
+    });
+  }
+
   async canComment(userId: number, workspaceId: number) {
     const workspaceUser = await this.workspaceUserRepository.findOne({
       where: {
