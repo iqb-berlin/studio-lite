@@ -1,21 +1,26 @@
-import { applyDecorators, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes } from '@nestjs/swagger';
-import { ApiFile } from './api-file.decorator';
+import { jest } from '@jest/globals';
 
-jest.mock('@nestjs/common', () => ({
+// ESM module namespaces are frozen, so `jest.mock()` cannot replace exports after the fact.
+// `unstable_mockModule` registers the replacement before the module is pulled in, which means
+// every import below has to be dynamic and come after these calls.
+jest.unstable_mockModule('@nestjs/common', () => ({
   applyDecorators: jest.fn(),
   UseInterceptors: jest.fn()
 }));
 
-jest.mock('@nestjs/platform-express', () => ({
+jest.unstable_mockModule('@nestjs/platform-express', () => ({
   FileInterceptor: jest.fn()
 }));
 
-jest.mock('@nestjs/swagger', () => ({
+jest.unstable_mockModule('@nestjs/swagger', () => ({
   ApiBody: jest.fn(),
   ApiConsumes: jest.fn()
 }));
+
+const { applyDecorators, UseInterceptors } = await import('@nestjs/common');
+const { FileInterceptor } = await import('@nestjs/platform-express');
+const { ApiBody, ApiConsumes } = await import('@nestjs/swagger');
+const { ApiFile } = await import('./api-file.decorator');
 
 describe('ApiFileDecorator', () => {
   it('should call applyDecorators with correct interceptors and swagger decorators', () => {

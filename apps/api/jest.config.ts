@@ -2,8 +2,10 @@ export default {
   displayName: 'api',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
+  extensionsToTreatAsEsm: ['.ts'],
+  setupFiles: ['<rootDir>/jest.setup.esm.ts'],
   transform: {
-    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }]
+    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json', useESM: true }]
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   transformIgnorePatterns: [

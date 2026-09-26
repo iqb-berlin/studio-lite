@@ -23,7 +23,9 @@ import {
   UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
 import { orderFromCurrent, profileIdsMatch, toW3idProfileId } from '@studio-lite/shared-code';
-import * as AdmZip from 'adm-zip';
+// adm-zip is CommonJS with no statically detectable named exports -- see the note on the katex
+// import in download-docx.class.ts.
+import AdmZip from 'adm-zip';
 import {
   VariableCodingData,
   RuleSet,

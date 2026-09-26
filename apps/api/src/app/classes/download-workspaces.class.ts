@@ -1,4 +1,6 @@
-import * as Excel from 'exceljs';
+// exceljs is CommonJS with no statically detectable named exports -- see the note on the katex
+// import in download-docx.class.ts.
+import Excel from 'exceljs';
 import {
   UnitPropertiesDto,
   CodebookUnitDto,

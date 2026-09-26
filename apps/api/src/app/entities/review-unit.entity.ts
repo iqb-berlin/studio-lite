@@ -1,5 +1,5 @@
 import {
-  Column, Entity, JoinColumn, ManyToOne, PrimaryColumn
+  Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Relation
 } from 'typeorm';
 
 import Review from './review.entity';
@@ -24,7 +24,10 @@ class ReviewUnit {
   @JoinColumn({
     name: 'review_id'
   })
-  review: Review;
+  // `Relation` keeps `emitDecoratorMetadata` from writing a runtime reference to Review here.
+  // Review and ReviewUnit import each other, and under ESM that reference is read before the
+  // other module has finished evaluating -- "Cannot access 'Review' before initialization".
+  review: Relation<Review>;
 }
 
 export default ReviewUnit;

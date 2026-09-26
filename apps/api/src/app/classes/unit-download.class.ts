@@ -15,10 +15,13 @@ import {
   VeronaModuleFileDto,
   VeronaModuleInListDto
 } from '@studio-lite-lib/api-dto';
-import * as AdmZip from 'adm-zip';
+// adm-zip is CommonJS with no statically detectable named exports -- see the note on the katex
+// import in download-docx.class.ts.
+import AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
 import { HIDDEN_PROFILE_ORDER, VeronaModuleKeyCollection } from '@studio-lite/shared-code';
-import { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
+// Type-only -- see the note on the deep docx import in download-docx.class.ts.
+import type { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
 import {
   CodingSchemeData,
   VariableCodingData

@@ -1,11 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+// `unstable_mockModule` is missing from the global `jest` object's type, so it comes from here.
+// It is aliased because the global `jest` -- used for `jest.fn()` below -- types its mocks
+// loosely, and importing over that name would make every `mockReturnValue` a type error.
+import { jest as jestEsm } from '@jest/globals';
 import {
   CreateUserDto, UserFullDto, UserWorkspaceAccessDto
 } from '@studio-lite-lib/api-dto';
-import { UsersService } from './users.service';
+// The class itself arrives through the dynamic import below; this keeps its name usable as a
+// type, which a `const` from `await import()` cannot be.
+import type { UsersService } from './users.service';
 import User from '../entities/user.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
@@ -16,6 +21,16 @@ import { ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS } from '../app.constants';
 import Unit from '../entities/unit.entity';
 import { UnitService } from './unit.service';
 import { UnitUserService } from './unit-user.service';
+
+// ESM module namespaces are frozen, so `jest.spyOn(bcrypt, …)` cannot replace an export after
+// the fact. The two members the service uses are mocked before it is pulled in.
+jestEsm.unstable_mockModule('bcrypt', () => ({
+  hashSync: jest.fn(),
+  compareSync: jest.fn()
+}));
+
+const bcrypt = await import('bcrypt');
+const { UsersService: UsersServiceClass } = await import('./users.service');
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -45,7 +60,7 @@ describe('UsersService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        UsersService,
+        UsersServiceClass,
         { provide: getRepositoryToken(User), useFactory: mockRepository },
         { provide: getRepositoryToken(WorkspaceUser), useFactory: mockRepository },
         { provide: getRepositoryToken(WorkspaceGroupAdmin), useFactory: mockRepository },
@@ -57,7 +72,7 @@ describe('UsersService', () => {
       ]
     }).compile();
 
-    service = module.get<UsersService>(UsersService);
+    service = module.get<UsersService>(UsersServiceClass);
     usersRepository = module.get<Repository<User>>(getRepositoryToken(User));
     workspaceUsersRepository = module.get<Repository<WorkspaceUser>>(getRepositoryToken(WorkspaceUser));
     workspaceGroupAdminRepository = module
