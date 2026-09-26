@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { WriteOrGroupAdminAccessGuard } from './write-or-group-admin-access.guard';
 import { AuthService } from '../services/auth.service';
@@ -91,7 +91,7 @@ describe('WriteOrGroupAdminAccessGuard', () => {
     expect(authService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(1, 5);
   });
 
-  it('should throw UnauthorizedException if all checks fail', async () => {
+  it('should throw ForbiddenException if all checks fail', async () => {
     workspaceUserService.canWrite.mockResolvedValue(false);
     authService.isAdminUser.mockResolvedValue(false);
     workspaceService.findOne.mockResolvedValue({ id: 10, groupId: 5 } as unknown as never);
@@ -105,10 +105,10 @@ describe('WriteOrGroupAdminAccessGuard', () => {
       })
     });
 
-    await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+    await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
   });
 
-  it('should throw UnauthorizedException if workspace_id is missing', async () => {
+  it('should throw ForbiddenException if workspace_id is missing', async () => {
     const context = createMock<ExecutionContext>({
       switchToHttp: () => ({
         getRequest: () => ({
@@ -118,6 +118,6 @@ describe('WriteOrGroupAdminAccessGuard', () => {
       })
     });
 
-    await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+    await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
   });
 });

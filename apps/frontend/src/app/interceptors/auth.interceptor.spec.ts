@@ -178,6 +178,21 @@ describe('AuthInterceptor', () => {
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
   });
 
+  // Since #1706 the API answers missing access with 403, so the refresh and the second attempt that
+  // a 401 set off (#1694) no longer happen at all.
+  it('should report a 403 as it is, without refreshing the token or repeating the request', () => {
+    localStorage.setItem('refresh_token', 'old-refresh');
+
+    httpClient.get('/workspaces/7').subscribe({ error: () => {} });
+    httpMock.expectOne('/workspaces/7').flush('Forbidden', { status: 403, statusText: 'Forbidden' });
+
+    httpMock.expectNone('/workspaces/7');
+    expect(backendServiceSpy.refresh).not.toHaveBeenCalled();
+    expect(backendServiceSpy.logout).not.toHaveBeenCalled();
+    expect(appServiceSpy.addErrorMessage).toHaveBeenCalledTimes(1);
+    expect((appServiceSpy.addErrorMessage.mock.calls[0][0] as AppHttpError).status).toBe(403);
+  });
+
   // A refresh that worked says the session is fine. If the repeated request still fails, that
   // failure belongs to the request, not to the session: the API answers missing workspace access
   // with 401 as well, and opening a unit in a foreign workspace used to log the user out (#1694).

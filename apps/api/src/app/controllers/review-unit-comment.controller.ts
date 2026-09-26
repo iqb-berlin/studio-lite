@@ -3,7 +3,7 @@ import {
   Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards, Req
 } from '@nestjs/common';
 import {
-  ApiUnauthorizedResponse,
+  ApiForbiddenResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiNotFoundResponse,
@@ -43,7 +43,7 @@ export class ReviewUnitCommentController {
   @UseGuards(JwtAuthGuard, ReviewGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges to retrieve comments for the unit.' })
+  @ApiForbiddenResponse({ description: 'No privileges to retrieve comments for the unit.' })
   @ApiTags('review unit comment')
   async findOnesComments(@Req() request, @Param('unit_id', ParseIntPipe) unitId: number): Promise<UnitCommentDto[]> {
     return this.unitCommentService.findOnesComments(unitId, request.user.id);
@@ -56,7 +56,7 @@ export class ReviewUnitCommentController {
     description: 'Sends back the id of the new comment in database',
     type: Number
   })
-  @ApiUnauthorizedResponse({ description: 'No privileges to post comment for the unit.' })
+  @ApiForbiddenResponse({ description: 'No privileges to post comment for the unit.' })
   @ApiTags('review unit comment')
   async createComment(@Body() createUnitCommentDto: CreateUnitCommentDto) {
     return this.unitCommentService.createComment(createUnitCommentDto);
@@ -67,7 +67,7 @@ export class ReviewUnitCommentController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
-  @ApiUnauthorizedResponse({ description: 'Not authorized to update comment.' })
+  @ApiForbiddenResponse({ description: 'Not authorized to update comment.' })
   @ApiTags('review unit comment')
   async patchCommentBody(@Param('comment_id', ParseIntPipe) id: number,
     @Body() comment: UpdateUnitCommentDto) {
@@ -79,7 +79,7 @@ export class ReviewUnitCommentController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
-  @ApiUnauthorizedResponse({ description: 'Not authorized to update comment.' })
+  @ApiForbiddenResponse({ description: 'Not authorized to update comment.' })
   @ApiTags('review unit comment')
   async patchCommentVisibility(@Param('comment_id', ParseIntPipe) id: number,
     @Body() comment: UpdateUnitCommentVisibilityDto) {
@@ -91,7 +91,7 @@ export class ReviewUnitCommentController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
-  @ApiUnauthorizedResponse({ description: 'Not authorized to delete comment.' })
+  @ApiForbiddenResponse({ description: 'Not authorized to delete comment.' })
   @ApiTags('review unit comment')
   async removeComment(@Param('comment_id', ParseIntPipe) id: number) {
     return this.unitCommentService.removeComment(id);
@@ -105,7 +105,7 @@ export class ReviewUnitCommentController {
   @ApiParam({ name: 'comment_id', type: Number })
   @ApiOkResponse({ description: 'Comment item connections for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
-  @ApiUnauthorizedResponse({ description: 'Not authorized to update comment.' })
+  @ApiForbiddenResponse({ description: 'Not authorized to update comment.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   async patchCommentItems(@Param('comment_id', ParseIntPipe) commentId: number,
     @UnitId() unitId: number,

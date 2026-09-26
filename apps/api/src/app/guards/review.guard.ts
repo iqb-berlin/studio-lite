@@ -1,5 +1,5 @@
 import {
-  CanActivate, ExecutionContext, Injectable, UnauthorizedException
+  CanActivate, ExecutionContext, ForbiddenException, Injectable
 } from '@nestjs/common';
 import { ReviewService } from '../services/review.service';
 
@@ -23,14 +23,14 @@ export class ReviewGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
     const reviewId = Number(req.params.review_id);
-    if (!reviewId) throw new UnauthorizedException();
+    if (!reviewId) throw new ForbiddenException();
 
     const tokenReviewId = Number(req.user?.reviewId) || 0;
-    if (tokenReviewId && tokenReviewId !== reviewId) throw new UnauthorizedException();
+    if (tokenReviewId && tokenReviewId !== reviewId) throw new ForbiddenException();
 
     const unitId = Number(req.params.unit_id) || 0;
     if (unitId && !await this.reviewService.isUnitInReview(reviewId, unitId)) {
-      throw new UnauthorizedException();
+      throw new ForbiddenException();
     }
     return true;
   }

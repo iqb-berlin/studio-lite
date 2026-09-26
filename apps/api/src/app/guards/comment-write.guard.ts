@@ -1,5 +1,5 @@
 import {
-  CanActivate, ExecutionContext, Injectable, UnauthorizedException
+  CanActivate, ExecutionContext, ForbiddenException, Injectable
 } from '@nestjs/common';
 import { UnitCommentService } from '../services/unit-comment.service';
 
@@ -23,9 +23,9 @@ export class CommentWriteGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const userId = Number(req.user?.id) || 0;
     const commentId = Number(req.params.id ?? req.params.comment_id) || 0;
-    if (!userId || !commentId) throw new UnauthorizedException();
+    if (!userId || !commentId) throw new ForbiddenException();
     const comment = await this.unitCommentService.findOneComment(commentId);
-    if (comment.userId !== userId) throw new UnauthorizedException();
+    if (comment.userId !== userId) throw new ForbiddenException();
     return true;
   }
 }

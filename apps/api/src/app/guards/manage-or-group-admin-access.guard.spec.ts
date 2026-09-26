@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { ManageOrGroupAdminAccessGuard } from './manage-or-group-admin-access.guard';
 import { AuthService } from '../services/auth.service';
@@ -39,7 +39,7 @@ describe('ManageOrGroupAdminAccessGuard', () => {
   });
 
   describe('canActivate', () => {
-    it('should throw UnauthorizedException if no params', async () => {
+    it('should throw ForbiddenException if no params', async () => {
       const mockContext = createMock<ExecutionContext>({
         switchToHttp: () => ({
           getRequest: () => ({
@@ -48,7 +48,7 @@ describe('ManageOrGroupAdminAccessGuard', () => {
           })
         })
       });
-      await expect(guard.canActivate(mockContext)).rejects.toThrow(UnauthorizedException);
+      await expect(guard.canActivate(mockContext)).rejects.toThrow(ForbiddenException);
     });
 
     it('should allow if workspaceUser has manage access', async () => {

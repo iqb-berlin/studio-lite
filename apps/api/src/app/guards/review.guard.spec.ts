@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { ReviewGuard } from './review.guard';
 import { ReviewService } from '../services/review.service';
@@ -44,9 +44,9 @@ describe('ReviewGuard', () => {
     expect(await guard.canActivate(contextFor(reviewSession, { review_id: '2' }))).toBe(true);
   });
 
-  it('should throw UnauthorizedException for a review session on another review', async () => {
+  it('should throw ForbiddenException for a review session on another review', async () => {
     await expect(guard.canActivate(contextFor(reviewSession, { review_id: '3' })))
-      .rejects.toThrow(UnauthorizedException);
+      .rejects.toThrow(ForbiddenException);
   });
 
   it('should let a logged-in user pass, since their token carries no review', async () => {
@@ -58,22 +58,22 @@ describe('ReviewGuard', () => {
     expect(reviewService.isUnitInReview).toHaveBeenCalledWith(2, 5);
   });
 
-  it('should throw UnauthorizedException for a unit the review does not contain', async () => {
+  it('should throw ForbiddenException for a unit the review does not contain', async () => {
     reviewService.isUnitInReview.mockResolvedValue(false);
 
     await expect(guard.canActivate(contextFor(reviewSession, { review_id: '2', unit_id: '999' })))
-      .rejects.toThrow(UnauthorizedException);
+      .rejects.toThrow(ForbiddenException);
   });
 
   it('should check the unit for a logged-in user as well', async () => {
     reviewService.isUnitInReview.mockResolvedValue(false);
 
     await expect(guard.canActivate(contextFor(loggedInUser, { review_id: '2', unit_id: '999' })))
-      .rejects.toThrow(UnauthorizedException);
+      .rejects.toThrow(ForbiddenException);
   });
 
-  it('should throw UnauthorizedException without a review in the route', async () => {
+  it('should throw ForbiddenException without a review in the route', async () => {
     await expect(guard.canActivate(contextFor(reviewSession, {})))
-      .rejects.toThrow(UnauthorizedException);
+      .rejects.toThrow(ForbiddenException);
   });
 });

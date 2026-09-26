@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { UnitCommentDto, WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import { CommentDeleteGuard } from './comment-delete.guard';
@@ -78,23 +78,23 @@ describe('CommentDeleteGuard', () => {
     expect(authService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(1, 9);
   });
 
-  it('should throw UnauthorizedException for another commenter of the workspace', async () => {
+  it('should throw ForbiddenException for another commenter of the workspace', async () => {
     unitCommentService.findOneComment.mockResolvedValue(foreignComment);
     workspaceService.findOne.mockResolvedValue({ groupId: 9 } as WorkspaceFullDto);
 
     await expect(guard.canActivate(contextFor(1, { id: '42', workspace_id: '3' })))
-      .rejects.toThrow(UnauthorizedException);
+      .rejects.toThrow(ForbiddenException);
   });
 
-  it('should throw UnauthorizedException for a review session', async () => {
+  it('should throw ForbiddenException for a review session', async () => {
     await expect(guard.canActivate(contextFor(0, { id: '42', workspace_id: '3' })))
-      .rejects.toThrow(UnauthorizedException);
+      .rejects.toThrow(ForbiddenException);
     expect(unitCommentService.findOneComment).not.toHaveBeenCalled();
   });
 
-  it('should throw UnauthorizedException without a comment in the route', async () => {
+  it('should throw ForbiddenException without a comment in the route', async () => {
     await expect(guard.canActivate(contextFor(1, { workspace_id: '3' })))
-      .rejects.toThrow(UnauthorizedException);
+      .rejects.toThrow(ForbiddenException);
   });
 
   it('should throw UnitCommentNotFoundException when unit_id in route does not match comment.unitId', async () => {

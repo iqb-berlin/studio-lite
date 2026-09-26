@@ -16,7 +16,7 @@ import {
   ApiParam,
   ApiQuery,
   ApiTags,
-  ApiUnauthorizedResponse
+  ApiForbiddenResponse
 } from '@nestjs/swagger';
 import {
   CreateWorkspaceGroupDto, UnitInViewDto, UserInListDto,
@@ -62,7 +62,7 @@ export class AdminWorkspaceGroupController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace-groups retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiQuery({
     name: 'download',
     type: Boolean,
@@ -90,7 +90,7 @@ export class AdminWorkspaceGroupController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Units retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiTags('admin workspace-group')
   async findAllUnits(): Promise<UnitInViewDto[]> {
     return this.unitService.findAll();
@@ -100,7 +100,7 @@ export class AdminWorkspaceGroupController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace-group retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiNotFoundResponse({ description: 'Admin workspace-group not found.' })
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiTags('admin workspace-group')
@@ -113,7 +113,7 @@ export class AdminWorkspaceGroupController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiOkResponse({ description: 'Workspaces of workspace-group retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiTags('admin workspace-group')
   async findOnesWorkspaces(@WorkspaceGroupId() id: number): Promise<WorkspaceInListDto[]> {
     return this.workspaceService.findAllByGroup(id);
@@ -123,7 +123,7 @@ export class AdminWorkspaceGroupController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace-group deleted successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   // @ApiNotFoundResponse({ description: 'Admin workspace group not found.' }) // TODO: not implemented
   @ApiTags('admin workspace-group')
   @ApiQuery({
@@ -141,7 +141,7 @@ export class AdminWorkspaceGroupController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiOkResponse({ description: 'Units of workspace-group retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiTags('admin workspace-group')
   async findWorkspaceGroupUnits(@WorkspaceGroupId() id: number): Promise<UnitInViewDto[]> {
     return this.unitService.findAllForGroup(id);
@@ -152,7 +152,7 @@ export class AdminWorkspaceGroupController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiOkResponse({ description: 'Unit items of workspace-group retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiTags('admin workspace-group')
   async findWorkspaceGroupUnitItems(@WorkspaceGroupId() id: number): Promise<UnitItemInViewDto[]> {
     return this.unitItemService.findAllForGroup(id);
@@ -163,7 +163,7 @@ export class AdminWorkspaceGroupController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiOkResponse({ description: 'Workspace-group updated successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('admin workspace-group')
   async patch(@WorkspaceGroupId() id: number, @Body() workspaceGroupFullDto: WorkspaceGroupFullDto) {
@@ -177,7 +177,7 @@ export class AdminWorkspaceGroupController {
     description: 'Sends back the id of the new workspace group in database',
     type: Number
   })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiTags('admin workspace-group')
   async create(@Body() createWorkspaceGroupDto: CreateWorkspaceGroupDto) {
     return this.workspaceGroupService.create(createWorkspaceGroupDto);
@@ -188,7 +188,7 @@ export class AdminWorkspaceGroupController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'List of admins for workspace-group retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiTags('admin workspace-group')
   async findOnesAdmins(@WorkspaceGroupId() id: number): Promise<UserInListDto[]> {
     return this.userService.findAllWorkspaceGroupAdmins(id);
@@ -199,7 +199,7 @@ export class AdminWorkspaceGroupController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'List of admins for workspace-group updated successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('admin workspace-group')
   async patchOnesAdmins(@WorkspaceGroupId() id: number,

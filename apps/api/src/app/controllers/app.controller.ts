@@ -1,5 +1,5 @@
 import {
-  Controller, Request, Get, Post, UseGuards, Patch, Body, UnauthorizedException
+  Controller, Request, Get, Post, UseGuards, Patch, Body, ForbiddenException, UnauthorizedException
 } from '@nestjs/common';
 
 import {
@@ -197,10 +197,10 @@ export class AppController {
   @ApiBearerAuth()
   // TODO: Exception & Return Value entfernen
   @ApiOkResponse({ description: 'User personal data successfully updated.' })
-  @ApiUnauthorizedResponse({ description: 'The token, and user_id do not match.' })
+  @ApiForbiddenResponse({ description: 'The token, and user_id do not match.' })
   @ApiTags('home')
   async setMyData(@Request() req, @Body() myNewData: MyDataDto): Promise<boolean> {
-    if (req.user.id !== myNewData.id) throw new UnauthorizedException();
+    if (req.user.id !== myNewData.id) throw new ForbiddenException();
     await this.userService.patchMyData(myNewData);
     return true;
   }

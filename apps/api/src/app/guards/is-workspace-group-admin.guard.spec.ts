@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
@@ -82,22 +82,22 @@ describe('IsWorkspaceGroupAdminGuard', () => {
     expect(authService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(userId, 2);
   });
 
-  it('should throw UnauthorizedException if user is not group admin', async () => {
+  it('should throw ForbiddenException if user is not group admin', async () => {
     const userId = 1;
     authService.isAdminUser.mockResolvedValue(false);
     authService.isWorkspaceGroupAdmin.mockResolvedValue(false);
 
     await expect(guard.canActivate(contextFor(userId, { workspace_group_id: '2' })))
-      .rejects.toThrow(UnauthorizedException);
+      .rejects.toThrow(ForbiddenException);
   });
 
-  it('should throw UnauthorizedException if the route names no group and is not marked', async () => {
+  it('should throw ForbiddenException if the route names no group and is not marked', async () => {
     const userId = 1;
     authService.isAdminUser.mockResolvedValue(false);
     // The admin of some other group: before the marking was required, this passed.
     authService.isWorkspaceGroupAdmin.mockResolvedValue(true);
 
-    await expect(guard.canActivate(contextFor(userId, {}))).rejects.toThrow(UnauthorizedException);
+    await expect(guard.canActivate(contextFor(userId, {}))).rejects.toThrow(ForbiddenException);
     expect(authService.isWorkspaceGroupAdmin).not.toHaveBeenCalled();
   });
 
@@ -111,12 +111,12 @@ describe('IsWorkspaceGroupAdminGuard', () => {
     expect(authService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(userId);
   });
 
-  it('should throw UnauthorizedException on a marked route if the user administers no group', async () => {
+  it('should throw ForbiddenException on a marked route if the user administers no group', async () => {
     const userId = 1;
     authService.isAdminUser.mockResolvedValue(false);
     authService.isWorkspaceGroupAdmin.mockResolvedValue(false);
     reflector.getAllAndOverride.mockReturnValue(true);
 
-    await expect(guard.canActivate(contextFor(userId, {}))).rejects.toThrow(UnauthorizedException);
+    await expect(guard.canActivate(contextFor(userId, {}))).rejects.toThrow(ForbiddenException);
   });
 });
