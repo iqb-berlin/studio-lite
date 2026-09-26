@@ -33,13 +33,13 @@ describe('Review API tests', () => {
         });
     });
 
-    it('500 negative test: should return a server error when attempting to create ' +
+    it('403 negative test: should be refused when attempting to create ' +
       'a review without a valid workspace ID', () => {
       cy.addReviewAPI(noId,
         reviewName2,
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.be.equal(500);
+          expect(resp.status).to.be.equal(403);
         });
     });
 
@@ -71,12 +71,12 @@ describe('Review API tests', () => {
         });
     });
 
-    it('500 negative test: should return a server error when requesting reviews without a valid workspace ID', () => {
+    it('403 negative test: should be refused when requesting reviews without a valid workspace ID', () => {
       cy.getReviewAPI(noId,
         Cypress.expose('id_review1'),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.be.equal(500);
+          expect(resp.status).to.be.equal(403);
         });
     });
 
@@ -110,13 +110,13 @@ describe('Review API tests', () => {
         });
     });
 
-    it('500 negative test: should return a server error when attempting to update ' +
+    it('403 negative test: should be refused when attempting to update ' +
       'a review without a workspace ID', () => {
       cy.updateReviewAPI(noId,
         review1,
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -140,12 +140,12 @@ describe('Review API tests', () => {
         });
     });
 
-    it('500 negative test: should return a server error when attempting to list ' +
+    it('403 negative test: should be refused when attempting to list ' +
       'all reviews without a workspace ID', () => {
       cy.getAllReviewAPI(noId,
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -624,22 +624,22 @@ describe('Review API tests', () => {
         });
     });
 
-    it('500 negative test: should return a server error when attempting to delete an already deleted review', () => {
+    it('403 negative test: should be refused when attempting to delete an already deleted review', () => {
       cy.deleteReviewAPI(noId,
         Cypress.expose('id_review2'),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('500 negative test: should return a server error when attempting to delete' +
+    it('403 negative test: should be refused when attempting to delete' +
       ' a review without a workspace ID', () => {
       cy.deleteReviewAPI(noId,
         Cypress.expose('id_review2'),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(403);
         });
     });
 

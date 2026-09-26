@@ -177,6 +177,76 @@ describe('Unit API tests part II', () => {
     });
   });
 
+  // System administrators open every unit as commenters without an individual assignment, and
+  // none is written for it -- a row would list them among the workspace's users (#1571).
+  describe('a system administrator without an assignment (#1571)', () => {
+    before(() => {
+      cy.setUsersOfWsAPI(
+        Cypress.expose(ws2.id),
+        [{ id: Cypress.expose(`id_${userGroupAdmin.username}`), access: AccessLevel.Admin }],
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+      });
+    });
+
+    after(() => {
+      // ws2 goes back to the two users the following specs count on.
+      cy.setUsersOfWsAPI(
+        Cypress.expose(ws2.id),
+        [
+          { id: Cypress.expose(`id_${Cypress.expose('username')}`), access: AccessLevel.Admin },
+          { id: Cypress.expose(`id_${userGroupAdmin.username}`), access: AccessLevel.Admin }
+        ],
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+      });
+    });
+
+    it('200 positive test: should open the workspace with the commenter level', () => {
+      // This answered "workspace not found" before, and the frontend showed nothing.
+      cy.getUserWorkspaceAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(`id_${Cypress.expose('username')}`),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body.userAccessLevel).to.equal(AccessLevel.Basic);
+      });
+    });
+
+    it('200 positive test: should list the units of the workspace', () => {
+      cy.getUnitsByWsAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+      });
+    });
+
+    it('200 positive test: should leave the administrator out of the workspace\'s users', () => {
+      cy.getUsersOfWsAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body.map((user: { id: number }) => user.id))
+          .not.to.include(Cypress.expose(`id_${Cypress.expose('username')}`));
+      });
+    });
+
+    it('403 negative test: should not let the administrator write without an assignment that allows it', () => {
+      cy.createUnitAPI(
+        Cypress.expose(ws2.id),
+        unit3,
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(403);
+      });
+    });
+  });
+
   // ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
   describe('78. GET /api/workspaces/{workspace_id} download=true', () => {
     it('200 positive test: should allow downloading unit data from a workspace by ID', () => {
@@ -268,7 +338,7 @@ describe('Unit API tests part II', () => {
     });
 
     it(
-      '500 negative test: should return a server error when attempting to delete units ' +
+      '403 negative test: should be refused when attempting to delete units ' +
         'from a non-existent workspace',
       () => {
         cy.deleteUnitsAPI(
@@ -276,7 +346,7 @@ describe('Unit API tests part II', () => {
           noId,
           Cypress.expose(`token_${userGroupAdmin.username}`)
         ).then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(403);
         });
       }
     );

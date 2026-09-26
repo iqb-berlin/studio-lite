@@ -21,6 +21,7 @@ import { UnitCommentService } from './unit-comment.service';
 import { UnitRichNoteService } from './unit-rich-note.service';
 import User from '../entities/user.entity';
 import { FileIo } from '../interfaces/file-io.interface';
+import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
 
 describe('WorkspaceService', () => {
   let service: WorkspaceService;
@@ -187,11 +188,33 @@ describe('WorkspaceService', () => {
   describe('findOneByUser', () => {
     it('should return workspace for user', async () => {
       (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, groupId: 2 });
-      (workspaceUsersRepository.findOne as jest.Mock).mockResolvedValue({ accessLevel: 1 });
+      (workspaceUserService.accessLevel as jest.Mock).mockResolvedValue(2);
       (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ name: 'g' });
 
       const result = await service.findOneByUser(1, 1);
       expect(result.id).toBe(1);
+      expect(result.userAccessLevel).toBe(2);
+    });
+
+    // The frontend opens a workspace with this level; for an unassigned administrator it is the
+    // implicit one, where there used to be "workspace not found" (#1571).
+    it('should hand on the level WorkspaceUserService grants, the implicit one of an administrator included',
+      async () => {
+        (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, groupId: 2 });
+        (workspaceUserService.accessLevel as jest.Mock).mockResolvedValue(1);
+        (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ name: 'g' });
+
+        const result = await service.findOneByUser(1, 5);
+
+        expect(workspaceUserService.accessLevel).toHaveBeenCalledWith(5, 1);
+        expect(result.userAccessLevel).toBe(1);
+      });
+
+    it('should refuse a user who holds no level in the workspace', async () => {
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, groupId: 2 });
+      (workspaceUserService.accessLevel as jest.Mock).mockResolvedValue(null);
+
+      await expect(service.findOneByUser(1, 5)).rejects.toThrow(AdminWorkspaceNotFoundException);
     });
   });
 

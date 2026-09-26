@@ -311,10 +311,10 @@ export class WorkspaceService {
     const workspace = await this.workspacesRepository.findOne({
       where: { id: id }
     });
-    const workspaceUser = await this.workspaceUsersRepository.findOne({
-      where: { workspaceId: id, userId: userId }
-    });
-    if (workspace && workspaceUser) {
+    // The level includes the one an administrator holds without being assigned (#1571); the
+    // frontend opens the workspace with it, so an unassigned administrator sees it as commenter.
+    const userAccessLevel = await this.workspaceUserService.accessLevel(userId, id);
+    if (workspace && userAccessLevel !== null) {
       const workspaceGroup = await this.workspaceGroupRepository.findOne({
         where: { id: workspace.groupId }
       });
@@ -324,7 +324,7 @@ export class WorkspaceService {
         groupId: workspace.groupId,
         dropBoxId: workspace.dropBoxId,
         groupName: workspaceGroup.name,
-        userAccessLevel: workspaceUser.accessLevel,
+        userAccessLevel: userAccessLevel,
         settings: workspace.settings
       };
     }

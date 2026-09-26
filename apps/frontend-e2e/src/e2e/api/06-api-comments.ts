@@ -90,8 +90,8 @@ describe('Comments API tests', () => {
         }
       );
 
-      it('500 negative test: should return a server error when trying to add a comment without a workspace ID', () => {
-        // Passing the wrong workspace doesn't affect to insert comment if we pass a valid unit
+      it('403 negative test: should be refused when trying to add a comment without a workspace ID', () => {
+        // A workspace that does not exist is refused before the unit is looked at (#1571)
         const comment3: CommentData = {
           body: '<p>Kommentare 3 zur Aufgabe 1</p>',
           userName: `${userGroupAdmin.username}`,
@@ -107,7 +107,7 @@ describe('Comments API tests', () => {
           comment3,
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(403);
         });
       });
 
@@ -161,7 +161,7 @@ describe('Comments API tests', () => {
       });
 
       it(
-        '500 negative test: should return a server error when attempting to retrieve comments' +
+        '403 negative test: should be refused when attempting to retrieve comments' +
           ' without a valid workspace ID',
         () => {
           cy.getCommentsAPI(
@@ -169,7 +169,7 @@ describe('Comments API tests', () => {
             Cypress.expose(unit1.shortname),
             Cypress.expose(`token_${Cypress.expose('username')}`)
           ).then(resp => {
-            expect(resp.status).to.be.equal(500);
+            expect(resp.status).to.be.equal(403);
           });
         }
       );
@@ -201,7 +201,7 @@ describe('Comments API tests', () => {
       });
 
       it(
-        '500 negative test: should return a server error when attempting to update timestamp' +
+        '403 negative test: should be refused when attempting to update timestamp' +
           ' with invalid request data',
         () => {
           comment.lastSeenCommentChangedAt = new Date();
@@ -211,7 +211,7 @@ describe('Comments API tests', () => {
             comment,
             Cypress.expose(`token_${Cypress.expose('username')}`)
           ).then(resp => {
-            expect(resp.status).to.be.equal(500);
+            expect(resp.status).to.be.equal(403);
           });
         }
       );
@@ -247,7 +247,7 @@ describe('Comments API tests', () => {
       );
 
       it(
-        '500 negative test: should return a server error when attempting to retrieve last seen timestamp' +
+        '403 negative test: should be refused when attempting to retrieve last seen timestamp' +
           ' without a valid workspace ID',
         () => {
           cy.getCommentTimeAPI(
@@ -255,7 +255,7 @@ describe('Comments API tests', () => {
             Cypress.expose(unit1.shortname),
             Cypress.expose(`token_${Cypress.expose('username')}`)
           ).then(resp => {
-            expect(resp.status).to.be.equal(500);
+            expect(resp.status).to.be.equal(403);
           });
         }
       );
@@ -276,7 +276,7 @@ describe('Comments API tests', () => {
       });
 
       it(
-        '500 negative test: should return a server error when attempting to update a comment' +
+        '403 negative test: should be refused when attempting to update a comment' +
           ' using an invalid workspace ID',
         () => {
           comment.body = '<p>Kommentare 4 zur Aufgabe 1</p>';
@@ -287,7 +287,7 @@ describe('Comments API tests', () => {
             comment,
             Cypress.expose(`token_${userGroupAdmin.username}`)
           ).then(resp => {
-            expect(resp.status).to.be.equal(500);
+            expect(resp.status).to.be.equal(403);
           });
         }
       );
@@ -358,7 +358,7 @@ describe('Comments API tests', () => {
       });
 
       it(
-        '500 negative test: should return a server error when attempting to delete a comment' +
+        '403 negative test: should be refused when attempting to delete a comment' +
           ' using an invalid workspace ID',
         () => {
           cy.deleteCommentAPI(
@@ -367,7 +367,7 @@ describe('Comments API tests', () => {
             Cypress.expose('comment2'),
             Cypress.expose(`token_${userGroupAdmin.username}`)
           ).then(resp => {
-            expect(resp.status).to.be.equal(500);
+            expect(resp.status).to.be.equal(403);
           });
         }
       );

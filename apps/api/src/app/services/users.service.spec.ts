@@ -37,6 +37,7 @@ describe('UsersService', () => {
   let usersRepository: Repository<User>;
   let workspaceUsersRepository: Repository<WorkspaceUser>;
   let workspaceGroupAdminRepository: Repository<WorkspaceGroupAdmin>;
+  let workspaceRepository: Repository<Workspace>;
 
   const mockRepository = () => ({
     find: jest.fn(),
@@ -77,6 +78,7 @@ describe('UsersService', () => {
     workspaceUsersRepository = module.get<Repository<WorkspaceUser>>(getRepositoryToken(WorkspaceUser));
     workspaceGroupAdminRepository = module
       .get<Repository<WorkspaceGroupAdmin>>(getRepositoryToken(WorkspaceGroupAdmin));
+    workspaceRepository = module.get<Repository<Workspace>>(getRepositoryToken(Workspace));
   });
 
   afterEach(() => {
@@ -199,6 +201,33 @@ describe('UsersService', () => {
       jest.spyOn(workspaceUsersRepository, 'findOne').mockResolvedValue({} as WorkspaceUser);
       const result = await service.canAccessWorkSpace(1, 1);
       expect(result).toBe(true);
+    });
+
+    // An administrator enters every workspace without being assigned to it (#1571).
+    it('should let an unassigned administrator in', async () => {
+      jest.spyOn(workspaceUsersRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(workspaceRepository, 'findOne').mockResolvedValue({ groupId: 3 } as Workspace);
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue({ isAdmin: true } as User);
+
+      expect(await service.canAccessWorkSpace(5, 1)).toBe(true);
+    });
+
+    // It used to read `groupId` of a missing workspace and fail with a 500.
+    it('should refuse a workspace that does not exist, to an administrator as well', async () => {
+      jest.spyOn(workspaceUsersRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(workspaceRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue({ isAdmin: true } as User);
+
+      expect(await service.canAccessWorkSpace(5, 9988)).toBe(false);
+    });
+
+    it('should refuse an unassigned user who neither administers nor admins the group', async () => {
+      jest.spyOn(workspaceUsersRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue({ isAdmin: false } as User);
+      jest.spyOn(workspaceRepository, 'findOne').mockResolvedValue({ groupId: 3 } as Workspace);
+      jest.spyOn(workspaceGroupAdminRepository, 'findOne').mockResolvedValue(null);
+
+      expect(await service.canAccessWorkSpace(5, 1)).toBe(false);
     });
   });
 
