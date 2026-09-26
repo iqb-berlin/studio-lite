@@ -641,6 +641,20 @@ Cypress.Commands.add('getUnitsByWsAPI', (wsId:string, token:string) => {
   });
 });
 
+// The workspace as a user sees it, with their access level -- what the frontend loads to open it
+Cypress.Commands.add('getUserWorkspaceAPI', (wsId:string, userId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/users/${userId}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 38
 Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitId:string, token:string) => {
   // TO DO replace the unitId by an array of Ids
