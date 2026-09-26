@@ -1,5 +1,8 @@
 import { createMock } from '@golevelup/ts-jest';
-import * as Excel from 'exceljs';
+// `unstable_mockModule` is missing from the global `jest` object's type, so it comes from here.
+// It is aliased because the global `jest` -- used for `jest.fn()` below -- types its mocks
+// loosely, and importing over that name would make every `mockResolvedValue` a type error.
+import { jest as jestEsm } from '@jest/globals';
 import {
   UnitPropertiesDto,
   CodeBookContentSetting,
@@ -8,23 +11,30 @@ import {
   MissingsProfilesDto
 } from '@studio-lite-lib/api-dto';
 import { Logger } from '@nestjs/common';
-import { DownloadWorkspacesClass } from './download-workspaces.class';
-import { DownloadDocx } from './download-docx.class';
-import { UnitService } from '../services/unit.service';
-import { SettingService } from '../services/setting.service';
-import { WorkspaceService } from '../services/workspace.service';
+import type { UnitService } from '../services/unit.service';
+import type { SettingService } from '../services/setting.service';
+import type { WorkspaceService } from '../services/workspace.service';
 
-jest.mock('exceljs');
-jest.mock('./download-docx.class', () => ({
+// ESM module namespaces are frozen, so a replacement has to be registered before the module is
+// pulled in -- which is why everything that sees a mock is imported dynamically below.
+jestEsm.unstable_mockModule('exceljs', () => ({
+  default: { Workbook: jest.fn() }
+}));
+
+jestEsm.unstable_mockModule('./download-docx.class', () => ({
   DownloadDocx: {
     getDocXCodebook: jest.fn().mockReturnValue(Buffer.from('docx-data'))
   }
 }));
 
-jest.mock('@iqbspecs/coding-scheme', () => ({
+jestEsm.unstable_mockModule('@iqbspecs/coding-scheme', () => ({
   CodingScheme: jest.fn()
     .mockImplementation(schemeData => (typeof schemeData === 'string' ? JSON.parse(schemeData) : schemeData))
 }));
+
+const Excel = (await import('exceljs')).default;
+const { DownloadDocx } = await import('./download-docx.class');
+const { DownloadWorkspacesClass } = await import('./download-workspaces.class');
 
 describe('DownloadWorkspacesClass', () => {
   describe('setUnitsItemsDataRows', () => {

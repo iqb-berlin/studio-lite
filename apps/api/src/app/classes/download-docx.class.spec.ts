@@ -1,12 +1,15 @@
+// `unstable_mockModule` is missing from the global `jest` object's type, so it comes from here.
+// It is aliased because the global `jest` -- used for `jest.fn()` below -- types its mocks
+// loosely, and importing over that name would make every `mockResolvedValue` a type error.
+import { jest as jestEsm } from '@jest/globals';
 import {
   CodebookUnitDto,
   CodeBookContentSetting
 } from '@studio-lite-lib/api-dto';
-import { Packer } from 'docx';
-import * as imageSizeModule from 'image-size';
-import { DownloadDocx } from './download-docx.class';
 
-jest.mock('docx', () => ({
+// ESM module namespaces are frozen, so a replacement has to be registered before the module is
+// pulled in -- which is why everything that sees a mock is imported dynamically below.
+jestEsm.unstable_mockModule('docx', () => ({
   Packer: {
     toBase64String: jest.fn().mockResolvedValue('base64string')
   },
@@ -33,15 +36,26 @@ jest.mock('docx', () => ({
   }
 }));
 
-jest.mock('image-size');
-
-jest.mock('katex', () => ({
-  renderToString: jest.fn().mockReturnValue('<math>mocked-mathml</math>')
+jestEsm.unstable_mockModule('image-size', () => ({
+  imageSize: jest.fn()
 }));
 
-jest.mock('mathml2omml', () => ({
+// katex has no named exports of its own, so the source imports it as a default -- the mock has
+// to have the same shape.
+jestEsm.unstable_mockModule('katex', () => ({
+  default: {
+    renderToString: jest.fn().mockReturnValue('<math>mocked-mathml</math>')
+  }
+}));
+
+jestEsm.unstable_mockModule('mathml2omml', () => ({
   mml2omml: jest.fn().mockReturnValue('<oml:mocked-omml/>')
 }));
+
+const { Packer, ImportedXmlComponent } = await import('docx');
+const imageSizeModule = await import('image-size');
+const { mml2omml } = await import('mathml2omml');
+const { DownloadDocx } = await import('./download-docx.class');
 
 describe('DownloadDocx', () => {
   describe('getDocXCodebook', () => {
@@ -163,16 +177,10 @@ describe('DownloadDocx', () => {
     });
 
     it('should sanitize OMML before creating ImportedXmlComponent', () => {
-      const fromXmlString = (
-        jest.requireMock('docx') as {
-          ImportedXmlComponent: { fromXmlString: jest.Mock };
-        }
-      ).ImportedXmlComponent.fromXmlString;
+      const fromXmlString = ImportedXmlComponent.fromXmlString as unknown as jest.Mock;
       fromXmlString.mockClear();
 
-      const mml2ommlMock = (
-        jest.requireMock('mathml2omml') as { mml2omml: jest.Mock }
-      ).mml2omml;
+      const mml2ommlMock = mml2omml as unknown as jest.Mock;
       mml2ommlMock.mockReturnValueOnce(
         '<m:oMath><m:r><m:t xml:space="preserve">a<b & c</m:t></m:r></m:oMath>'
       );
