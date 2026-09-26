@@ -22,7 +22,7 @@ import {
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { LanguageCodedText } from '@iqbspecs/metadata-profile';
 import {
-  orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId, toW3idProfileId
+  orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId, toVariableInfoListV1, toW3idProfileId
 } from '@studio-lite/shared-code';
 import { combineNotationAndLabel } from '../classes/metadata-value.util';
 import Workspace from '../entities/workspace.entity';
@@ -960,7 +960,10 @@ export class UnitService {
       await this.unitDefinitionsRepository.save(newUnitDefinition);
     }
     if (unitDefinitionDto.variables) {
-      unitToUpdate.variables = unitDefinitionDto.variables;
+      // Stored in the VariableInfo 1.x spelling whatever the editor or the imported file used: the
+      // schemer and coding-box, which get the list from here, still read only that one (#1606).
+      // Saving from the editor and importing both come through this method.
+      unitToUpdate.variables = toVariableInfoListV1(unitDefinitionDto.variables);
       const aliasIds = unitDefinitionDto.variables.map(item => ({
         id: item.id,
         alias: item.alias || item.id

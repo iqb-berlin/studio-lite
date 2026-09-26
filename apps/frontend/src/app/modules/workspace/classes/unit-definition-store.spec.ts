@@ -85,4 +85,59 @@ describe('UnitDefinitionStore', () => {
     expect(store.getChangedData()).toEqual({});
     expect(emitSpy).toHaveBeenCalledTimes(2);
   });
+
+  // An editor following VariableInfo 2.0 writes type and format in upper case and leaves out
+  // `page`. Studio stores and hands on the 1.x spelling, which the schemer and coding-box read (#1606).
+  describe('with an editor in the VariableInfo 2.0 spelling', () => {
+    /** A stored entry as a 1.x editor wrote it, `page` in the middle as aspect has it. */
+    const storedV1 = (): VariableInfo => ({
+      id: 'v1',
+      alias: 'a1',
+      type: 'no-value',
+      format: '',
+      multiple: false,
+      nullable: false,
+      values: [],
+      valuePositionLabels: [],
+      page: '',
+      valuesComplete: false
+    });
+    /** The same entry from a 2.0 editor: upper case, no `page`. */
+    const sentV2 = (type = 'NO_VALUE') => ({
+      id: 'v1',
+      alias: 'a1',
+      type,
+      format: '',
+      multiple: false,
+      nullable: false,
+      values: [],
+      valuePositionLabels: [],
+      valuesComplete: false
+    });
+
+    it('does not mark a unit as changed when the editor reports its unchanged list', () => {
+      const store = new UnitDefinitionStore(1, { variables: [storedV1()], definition: 'def-a' });
+
+      store.setData([sentV2()], 'def-a');
+
+      expect(store.isChanged()).toBe(false);
+      expect(store.getChangedData()).toEqual({});
+    });
+
+    it('keeps a changed list in the 1.x spelling, with the page restored', () => {
+      const store = new UnitDefinitionStore(1, { variables: [storedV1()], definition: 'def-a' });
+
+      store.setData([sentV2('STRING')], 'def-a');
+
+      expect(store.getChangedData().variables).toEqual([{ ...storedV1(), type: 'string' }]);
+    });
+
+    it('still tells a missing list from an empty one', () => {
+      const store = new UnitDefinitionStore(1, { variables: [], definition: 'def-a' });
+
+      store.setData(undefined as unknown as VariableInfo[], 'def-a');
+
+      expect(store.isChanged()).toBe(true);
+    });
+  });
 });

@@ -1,6 +1,8 @@
 import { UnitDefinitionDto } from '@studio-lite-lib/api-dto';
 import { EventEmitter } from '@angular/core';
-import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import {
+  sameVariableLists, toVariableInfoListV1, VariableInfoInEitherSpelling
+} from '@studio-lite/shared-code';
 
 /**
  * The unit's definition while it is being worked on: what was loaded, and beside it only what has
@@ -22,11 +24,18 @@ export class UnitDefinitionStore {
     this.changedData = <UnitDefinitionDto>{};
   }
 
-  setData(newVariables: VariableInfo[], newDefinition: string) {
-    if (JSON.stringify(newVariables) === JSON.stringify(this.originalData.variables)) {
+  /**
+   * Takes what the editor reports. Its variable list is brought into the VariableInfo 1.x spelling
+   * first, the one studio stores and hands on (see `toVariableInfoV1`), and compared regardless of
+   * spelling and key order: an editor following 2.0 would otherwise mark every unit as changed the
+   * moment it reports its unchanged list (#1606).
+   */
+  setData(newVariables: VariableInfoInEitherSpelling[], newDefinition: string) {
+    const variables = newVariables ? toVariableInfoListV1(newVariables) : newVariables;
+    if (sameVariableLists(variables, this.originalData.variables)) {
       if (this.changedData.variables) delete this.changedData.variables;
     } else {
-      this.changedData.variables = newVariables;
+      this.changedData.variables = variables;
     }
     if (newDefinition === this.originalData.definition) {
       if (this.changedData.definition) delete this.changedData.definition;
