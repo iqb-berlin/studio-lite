@@ -107,6 +107,74 @@ describe('Unit API tests part II', () => {
         // It downloads an empty file with only headers
       });
     });
+
+    // Until #1712 this route asked for nothing but a valid token: anyone logged in could read any
+    // group and download the report over all its workspaces.
+    it('200 positive test: should let the admin of the group download its report', () => {
+      cy.downloadWsAPI(
+        Cypress.expose(groupVera.id),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+      });
+    });
+
+    it('403 negative test: should deny the group to a user with no workspace in it', () => {
+      cy.getGroupPropertiesAPI(
+        Cypress.expose(groupVera.id),
+        Cypress.expose(`token_${user3.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(403);
+      });
+    });
+
+    describe('a member of a workspace in the group (#1712)', () => {
+      before(() => {
+        cy.setUsersOfWsAPI(
+          Cypress.expose(ws2.id),
+          [
+            { id: Cypress.expose(`id_${Cypress.expose('username')}`), access: AccessLevel.Admin },
+            { id: Cypress.expose(`id_${userGroupAdmin.username}`), access: AccessLevel.Admin },
+            { id: Cypress.expose(`id_${user3.username}`), access: AccessLevel.Developer }
+          ],
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+      });
+
+      after(() => {
+        // ws2 goes back to the two users the following specs count on.
+        cy.setUsersOfWsAPI(
+          Cypress.expose(ws2.id),
+          [
+            { id: Cypress.expose(`id_${Cypress.expose('username')}`), access: AccessLevel.Admin },
+            { id: Cypress.expose(`id_${userGroupAdmin.username}`), access: AccessLevel.Admin }
+          ],
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+      });
+
+      it('200 positive test: should let a member read the group, which the workspace needs for its states', () => {
+        cy.getGroupPropertiesAPI(
+          Cypress.expose(groupVera.id),
+          Cypress.expose(`token_${user3.username}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+      });
+
+      it('403 negative test: should deny the report to a member who does not administer the group', () => {
+        cy.downloadWsAPI(
+          Cypress.expose(groupVera.id),
+          Cypress.expose(`token_${user3.username}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(403);
+        });
+      });
+    });
   });
 
   // ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************

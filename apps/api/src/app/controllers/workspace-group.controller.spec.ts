@@ -9,6 +9,7 @@ import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
+import { WorkspaceGroupAccessGuard } from '../guards/workspace-group-access.guard';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 
 describe('WorkspaceGroupController', () => {
@@ -29,6 +30,8 @@ describe('WorkspaceGroupController', () => {
       .overrideGuard(JwtAuthGuard).useValue({ canActivate: () => true })
       .overrideGuard(IsWorkspaceGroupAdminGuard)
       .useValue({ canActivate: () => true })
+      .overrideGuard(WorkspaceGroupAccessGuard)
+      .useValue({ canActivate: () => true })
       .compile();
 
     controller = module.get<WorkspaceGroupController>(WorkspaceGroupController);
@@ -42,6 +45,13 @@ describe('WorkspaceGroupController', () => {
   });
 
   describe('findOne', () => {
+    // The route asked for nothing but a valid token until #1712: any user could read any group
+    // and download its report.
+    it('should be guarded by WorkspaceGroupAccessGuard', () => {
+      const guards = Reflect.getMetadata('__guards__', WorkspaceGroupController.prototype.findOne);
+      expect(guards).toEqual([JwtAuthGuard, WorkspaceGroupAccessGuard]);
+    });
+
     it('should return a workspace group', async () => {
       const result: WorkspaceGroupFullDto = { id: 1, name: 'Group 1' };
       jest.spyOn(workspaceGroupService, 'findOne').mockResolvedValue(result);
