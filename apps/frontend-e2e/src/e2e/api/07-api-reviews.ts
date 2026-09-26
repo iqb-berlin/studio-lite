@@ -193,23 +193,23 @@ describe('Review API tests', () => {
         });
     });
 
-    it('401 negative test: should deny unit properties under a review the unit is not part of', () => {
+    it('403 negative test: should deny unit properties under a review the unit is not part of', () => {
       // Was 500 before #1630: nothing compared the unit in the path with the review in it, and the
       // answer depended on whether the id happened to exist.
       cy.getReviewPropertiesAPI(noId,
         Cypress.expose(unit4.shortname),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny review properties for a unit id the review does not contain', () => {
+    it('403 negative test: should deny review properties for a unit id the review does not contain', () => {
       cy.getReviewDefinitionAPI(Cypress.expose('id_review1'),
         noId,
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -234,22 +234,22 @@ describe('Review API tests', () => {
         });
     });
 
-    it('401 negative test: should deny a unit definition under a review that does not contain it', () => {
+    it('403 negative test: should deny a unit definition under a review that does not contain it', () => {
       // Handed out the definition with 200 before #1630, for any review id at all.
       cy.getReviewDefinitionAPI(noId,
         Cypress.expose(unit4.shortname),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny a unit definition for a unit id the review does not contain', () => {
+    it('403 negative test: should deny a unit definition for a unit id the review does not contain', () => {
       cy.getReviewDefinitionAPI(Cypress.expose('id_review1'),
         noId,
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -276,22 +276,22 @@ describe('Review API tests', () => {
         });
     });
 
-    it('401 negative test: should deny a coding scheme under a review that does not contain the unit', () => {
+    it('403 negative test: should deny a coding scheme under a review that does not contain the unit', () => {
       // The coding scheme of any unit, for any review id, with 200 -- until #1630.
       cy.getReviewSchemeAPI(noId,
         Cypress.expose(unit4.shortname),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny a coding scheme for a unit id the review does not contain', () => {
+    it('403 negative test: should deny a coding scheme for a unit id the review does not contain', () => {
       cy.getReviewSchemeAPI(Cypress.expose('id_review1'),
         noId,
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -318,7 +318,7 @@ describe('Review API tests', () => {
       };
     });
 
-    it('401 negative test: should deny writing a comment into a review that does not contain the unit', () => {
+    it('403 negative test: should deny writing a comment into a review that does not contain the unit', () => {
       // This wrote a comment into the database before #1630 -- attached to a unit, under a review
       // id that had nothing to do with it.
       cd.body = 'New comment review created without review id in the path';
@@ -327,18 +327,18 @@ describe('Review API tests', () => {
         cd,
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny writing a comment for a unit id the review does not contain', () => {
+    it('403 negative test: should deny writing a comment for a unit id the review does not contain', () => {
       cd.body = 'New comment review created without unit id in the path';
       cy.createCommentReviewAPI(Cypress.expose('id_review1'),
         noId,
         cd,
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -366,22 +366,22 @@ describe('Review API tests', () => {
   });
 
   describe('71. GET /api/reviews/{review_id}/units/{unit_id}/comments}', () => {
-    it('401 negative test: should deny reading comments under a review that does not contain the unit', () => {
+    it('403 negative test: should deny reading comments under a review that does not contain the unit', () => {
       // Handed out the unit's comments for any review id before #1630.
       cy.getCommentReviewAPI(noId,
         Cypress.expose(unit4.shortname),
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny reading comments for a unit id the review does not contain', () => {
+    it('403 negative test: should deny reading comments for a unit id the review does not contain', () => {
       cy.getCommentReviewAPI(Cypress.expose('id_review1'),
         noId,
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -415,7 +415,7 @@ describe('Review API tests', () => {
         userId: parseInt(Cypress.expose(`id_${Cypress.expose('username')}`), 10)
       };
     });
-    it('401 negative test: should deny updating a comment under a review that does not contain the unit', () => {
+    it('403 negative test: should deny updating a comment under a review that does not contain the unit', () => {
       // Reached the comment and wrote to it before #1630, review id notwithstanding.
       mcd.body = 'Update comment review created without review id in the path';
       cy.updateCommentReviewAPI(noId,
@@ -424,11 +424,11 @@ describe('Review API tests', () => {
         mcd,
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny updating a comment for a unit id the review does not contain', () => {
+    it('403 negative test: should deny updating a comment for a unit id the review does not contain', () => {
       mcd.body = 'Update comment review created without unit id in the path';
       cy.updateCommentReviewAPI(Cypress.expose('id_review1'),
         noId,
@@ -436,7 +436,7 @@ describe('Review API tests', () => {
         mcd,
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -489,24 +489,24 @@ describe('Review API tests', () => {
   });
 
   describe('73. DELETE /api/reviews/{review_id}/units/{unit_id}/comments/{id}', () => {
-    it('401 negative test: should deny deleting a comment under a review that does not contain the unit', () => {
+    it('403 negative test: should deny deleting a comment under a review that does not contain the unit', () => {
       // Deleted the row before #1630, whatever review the path named.
       cy.deleteCommentReviewAPI(noId,
         Cypress.expose(unit4.shortname),
         Cypress.expose('id_commentReview'),
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny deleting a comment for a unit id the review does not contain', () => {
+    it('403 negative test: should deny deleting a comment for a unit id the review does not contain', () => {
       cy.deleteCommentReviewAPI(Cypress.expose('id_review1'),
         noId,
         Cypress.expose('id_commentReview'),
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -583,33 +583,33 @@ describe('Review API tests', () => {
         });
     });
 
-    it('401 negative test: should deny a review login the review it was not issued for', () => {
+    it('403 negative test: should deny a review login the review it was not issued for', () => {
       // Same token, another review of the same workspace. This answered before #1630.
       cy.getReviewPropertiesAPI(Cypress.expose('id_review2'),
         Cypress.expose(unit4.shortname),
         Cypress.expose('tokenOfReview1'))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny a unit of another workspace under a review that has it not', () => {
+    it('403 negative test: should deny a unit of another workspace under a review that has it not', () => {
       // unit1 exists and is not in review1. Knowing its id was enough before #1630.
       cy.getReviewPropertiesAPI(Cypress.expose('id_review1'),
         Cypress.expose(unit1.shortname),
         Cypress.expose('tokenOfReview1'))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny the same foreign unit to a logged-in user as well', () => {
+    it('403 negative test: should deny the same foreign unit to a logged-in user as well', () => {
       // The unit half of the guard does not depend on how one is logged in.
       cy.getReviewPropertiesAPI(Cypress.expose('id_review1'),
         Cypress.expose(unit1.shortname),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
   });

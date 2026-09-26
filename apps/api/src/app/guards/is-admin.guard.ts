@@ -1,5 +1,5 @@
 import {
-  CanActivate, ExecutionContext, Injectable, UnauthorizedException
+  CanActivate, ExecutionContext, ForbiddenException, Injectable
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 
@@ -21,7 +21,7 @@ export class IsAdminGuard implements CanActivate {
     const userId = req.user.id;
     const isAdmin = await this.authService.isAdminUser(userId);
     if (!isAdmin) {
-      throw new UnauthorizedException();
+      throw new ForbiddenException();
     }
     return true;
   }

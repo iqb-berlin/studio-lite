@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { ChangePasswordDto, MyDataDto } from '@studio-lite-lib/api-dto';
@@ -196,11 +196,11 @@ describe('AppController', () => {
       expect(usersService.patchMyData).toHaveBeenCalledWith(dto);
     });
 
-    it('should throw UnauthorizedException if IDs do not match', async () => {
+    it('should throw ForbiddenException if IDs do not match', async () => {
       const dto: MyDataDto = { id: 2, lastName: 'New' } as MyDataDto;
 
       await expect(controller.setMyData({ user: { id: 1 } }, dto))
-        .rejects.toThrow(UnauthorizedException);
+        .rejects.toThrow(ForbiddenException);
     });
   });
 });

@@ -58,13 +58,13 @@ describe('Unit API tests', () => {
       });
     });
 
-    it('401 negative test: should deny unit creation for a user without workspace permissions', () => {
+    it('403 negative test: should deny unit creation for a user without workspace permissions', () => {
       cy.createUnitAPI(
         Cypress.expose(ws1.id),
         unit2,
         Cypress.expose(`token_${user3.username}`)
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 
@@ -89,10 +89,10 @@ describe('Unit API tests', () => {
       });
     });
 
-    it('401 negative test: should deny unit listing to a non-administrator user', () => {
+    it('403 negative test: should deny unit listing to a non-administrator user', () => {
       cy.getUnitsAPI(Cypress.expose(`token_${userGroupAdmin.username}`)).then(
         resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         }
       );
     });
@@ -309,12 +309,12 @@ describe('Unit API tests', () => {
         );
       });
 
-      it('401 negative test: should deny group metadata updates to a user without administrative privileges', () => {
+      it('403 negative test: should deny group metadata updates to a user without administrative privileges', () => {
         cy.updateGroupMetadataAPI(
           Cypress.expose(groupVera.id),
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
       });
     });
@@ -362,13 +362,13 @@ describe('Unit API tests', () => {
         };
       });
 
-      it('401 negative test: should deny metadata settings update to a user with insufficient privileges', () => {
+      it('403 negative test: should deny metadata settings update to a user with insufficient privileges', () => {
         cy.updateWsMetadataAPI(
           Cypress.expose(ws1.id),
           newSettings,
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
       });
 
@@ -524,14 +524,14 @@ describe('Unit API tests', () => {
       });
     });
 
-    it('401 negative test: should deny unit properties update for a user without workspace permissions', () => {
+    it('403 negative test: should deny unit properties update for a user without workspace permissions', () => {
       cy.updateUnitPropertiesAPI(
         Cypress.expose(ws1.id),
         Cypress.expose(unit1.shortname),
         entry1,
         Cypress.expose(`token_${user3.username}`)
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
   });
@@ -571,7 +571,7 @@ describe('Unit API tests', () => {
 
   describe('38. PATCH /api/workspaces/{workspace_id}/units/workspace-id', () => {
     it(
-      '401 negative test: should deny unit relocation for a user without sufficient' +
+      '403 negative test: should deny unit relocation for a user without sufficient' +
         ' permissions in the workspace',
       () => {
         cy.moveToAPI(
@@ -580,7 +580,7 @@ describe('Unit API tests', () => {
           Cypress.expose(unit1.shortname),
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
-          expect(resp.status).to.be.equal(401);
+          expect(resp.status).to.be.equal(403);
         });
       }
     );
@@ -920,7 +920,7 @@ describe('Unit API tests', () => {
     });
 
     it(
-      '401 negative test: should deny unit definition updates for a user ' +
+      '403 negative test: should deny unit definition updates for a user ' +
         'with insufficient workspace privileges',
       () => {
         cy.updateUnitDefinitionAPI(
@@ -928,7 +928,7 @@ describe('Unit API tests', () => {
           Cypress.expose(ws1.id),
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
       }
     );
@@ -988,13 +988,13 @@ describe('Unit API tests', () => {
       });
     });
 
-    it('401 positive test: should deny access to the unit definition for a user without sufficient privileges', () => {
+    it('403 negative test: should deny access to the unit definition for a user without sufficient privileges', () => {
       cy.getUnitDefinitionAPI(
         Cypress.expose(unit4.shortname),
         Cypress.expose(ws1.id),
         Cypress.expose(`token_${user3.username}`)
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 
@@ -1049,7 +1049,7 @@ describe('Unit API tests', () => {
     });
 
     it(
-      '401 negative test: should deny variable coding updates for a user with ' +
+      '403 negative test: should deny variable coding updates for a user with ' +
         'insufficient workspace permissions',
       () => {
         cy.updateUnitSchemeAPI(
@@ -1057,7 +1057,7 @@ describe('Unit API tests', () => {
           Cypress.expose(ws1.id),
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
       }
     );
@@ -1100,12 +1100,12 @@ describe('Unit API tests', () => {
       }
     );
 
-    it('401 negative test: should deny metadata report generation for an unauthorized user', () => {
+    it('403 negative test: should deny metadata report generation for an unauthorized user', () => {
       cy.generateMetadataReportAPI(
         Cypress.expose(ws1.id),
         Cypress.expose(`token_${user3.username}`)
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 
@@ -1146,14 +1146,14 @@ describe('Unit API tests', () => {
     });
 
     it(
-      '401 negative test: should deny variable coding report generation for a user' +
+      '403 negative test: should deny variable coding report generation for a user' +
         ' without sufficient privileges',
       () => {
         cy.getWsSchemeAPI(
           Cypress.expose(ws1.id),
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
       }
     );
@@ -1199,13 +1199,13 @@ describe('Unit API tests', () => {
       });
     });
 
-    it('401 negative test: should deny coding book generation for an unauthorized user', () => {
+    it('403 negative test: should deny coding book generation for an unauthorized user', () => {
       cy.getWsCodingBookAPI(
         [Cypress.expose(unit3.shortname), Cypress.expose(unit4.shortname)],
         Cypress.expose(ws1.id),
         Cypress.expose(`token_${user3.username}`)
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 

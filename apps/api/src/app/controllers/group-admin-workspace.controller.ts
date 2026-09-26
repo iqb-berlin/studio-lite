@@ -8,7 +8,7 @@ import {
   ApiOkResponse,
   ApiQuery,
   ApiTags,
-  ApiUnauthorizedResponse, ApiUnprocessableEntityResponse
+  ApiUnprocessableEntityResponse
 } from '@nestjs/swagger';
 import {
   CreateWorkspaceDto,
@@ -47,7 +47,7 @@ export class GroupAdminWorkspaceController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
+  @ApiForbiddenResponse({ description: 'No privileges in group-admin.' })
   @ApiNotFoundResponse({ description: 'Admin Workspace not found.' })
   @ApiTags('group-admin workspace')
   async findOne(@Param('workspace_id') id: number): Promise<WorkspaceFullDto> {
@@ -68,7 +68,7 @@ export class GroupAdminWorkspaceController {
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace users updated successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
+  @ApiForbiddenResponse({ description: 'No privileges in group-admin.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('group-admin workspace')
   async patchOnesUsers(@Param('workspace_id') id: number,
@@ -81,7 +81,6 @@ export class GroupAdminWorkspaceController {
   @AnyWorkspaceGroupAdmin()
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspaces deleted successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
   @ApiForbiddenResponse({ description: 'Forbidden. No privileges in the group of one of the workspaces' })
   @ApiTags('group-admin workspace')
   @ApiQuery({
@@ -106,7 +105,6 @@ export class GroupAdminWorkspaceController {
   @AnyWorkspaceGroupAdmin()
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace moved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
   @ApiForbiddenResponse({ description: 'Forbidden. No privileges in the origin or the target group' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('group-admin workspace')
@@ -124,7 +122,6 @@ export class GroupAdminWorkspaceController {
     type: Number
   })
   @ApiUnprocessableEntityResponse({ description: 'Creating of workspace in group is forbidden' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in group-admin.' })
   @ApiForbiddenResponse({ description: 'Forbidden. No privileges in the group the workspace goes into' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('group-admin workspace')

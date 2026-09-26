@@ -315,12 +315,12 @@ describe('Workspace API tests', () => {
       });
     });
 
-    it('401 negative test: should deny listing workspaces if providing an unauthorized user token', () => {
+    it('403 negative test: should deny listing workspaces if providing an unauthorized user token', () => {
       cy.getWsByGroupAPI(
         Cypress.expose(groupVera.id),
         Cypress.expose(`token_${user3.username}`)
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 
@@ -364,7 +364,7 @@ describe('Workspace API tests', () => {
       });
     });
 
-    it('401 negative test: should deny a user who administers no group the creation of a workspace', () => {
+    it('403 negative test: should deny a user who administers no group the creation of a workspace', () => {
       // The route a group admin uses to create a workspace in any group at all (#1005). It is at
       // least closed to someone who administers none.
       cy.createWsAPI(
@@ -372,22 +372,22 @@ describe('Workspace API tests', () => {
         ws3,
         Cypress.expose('tokenOfPlainUser')
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 
-    it('401 negative test: should deny a user who administers no group the group-admin user list', () => {
+    it('403 negative test: should deny a user who administers no group the group-admin user list', () => {
       cy.getUsersFullAPI(false, Cypress.expose('tokenOfPlainUser')).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 
-    it('401 negative test: should deny a user who administers no group the workspaces of another user', () => {
+    it('403 negative test: should deny a user who administers no group the workspaces of another user', () => {
       cy.getWsByUserAPI(
         Cypress.expose(`id_${userGroupAdmin.username}`),
         Cypress.expose('tokenOfPlainUser')
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 

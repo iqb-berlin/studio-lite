@@ -22,7 +22,7 @@ import {
   ApiParam,
   ApiQuery,
   ApiTags,
-  ApiUnauthorizedResponse
+  ApiForbiddenResponse
 } from '@nestjs/swagger';
 import {
   CodeBookContentSetting,
@@ -123,7 +123,7 @@ export class WorkspaceUnitController {
     description: 'Successfully retrieves the coding report.',
     type: [CodingReportDto]
   })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   async getCodingReport(
     @WorkspaceId(ParseIntPipe) workspaceId: number
@@ -141,7 +141,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @Header('Content-Disposition', 'attachment; filename="iqb-studio-coding-book.docx"')
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
@@ -197,7 +197,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiQuery({
     name: 'column',
@@ -242,7 +242,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiNotFoundResponse()
   @ApiTags('workspace unit')
@@ -257,7 +257,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit')
   async findOnesMetadata(
@@ -271,7 +271,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace unit')
   async findOnesDefinition(
@@ -285,7 +285,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit')
   async findOnesScheme(
@@ -303,7 +303,7 @@ export class WorkspaceUnitController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
@@ -318,7 +318,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Unit moved' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit')
   async moveUnits(@Body() body: MoveToDto,
@@ -337,7 +337,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Unit moved' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit')
   async patchDropBoxHistory(@User() user: UserEntity,
@@ -368,7 +368,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
@@ -387,7 +387,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
@@ -410,7 +410,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({ description: 'Unit created' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace unit')
   async create(
@@ -430,7 +430,7 @@ export class WorkspaceUnitController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiQuery({
     name: 'id',
@@ -454,7 +454,7 @@ export class WorkspaceUnitController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No admin privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   async removeUnit(
     @Param('unitId', ParseIntPipe) unitId: number

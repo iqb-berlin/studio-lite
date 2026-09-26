@@ -40,25 +40,25 @@ describe('Comments API tests', () => {
         });
       });
 
-      it('401 negative test: should deny comment creation for a user without sufficient workspace permissions', () => {
+      it('403 negative test: should deny comment creation for a user without sufficient workspace permissions', () => {
         cy.postCommentAPI(
           Cypress.expose(ws2.id),
           Cypress.expose(unit1.shortname),
           comment,
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
       });
 
-      it('401 negative test: should deny comment creation when both workspace ID and credentials are invalid', () => {
+      it('403 negative test: should deny comment creation when both workspace ID and credentials are invalid', () => {
         cy.postCommentAPI(
           Cypress.expose(ws2.id),
           Cypress.expose(unit1.shortname),
           comment,
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
       });
 
@@ -262,7 +262,7 @@ describe('Comments API tests', () => {
     });
 
     describe('60. PATCH /api/workspaces/{workspace_id}/units/{id}/comments/{id}', () => {
-      it('401 negative test: should deny comment updates even for an administrator if they are not the author', () => {
+      it('403 negative test: should deny comment updates even for an administrator if they are not the author', () => {
         comment.body = '<p>Kommentare 4 zur Aufgabe 1</p>';
         cy.updateCommentAPI(
           Cypress.expose(ws2.id),
@@ -271,7 +271,7 @@ describe('Comments API tests', () => {
           comment,
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
-          expect(resp.status).to.be.equal(401);
+          expect(resp.status).to.be.equal(403);
         });
       });
 
@@ -346,14 +346,14 @@ describe('Comments API tests', () => {
     });
 
     describe('61. DELETE /api/workspaces/{workspace_id}/units/{id}/comments/{id}', () => {
-      it('401 negative test: should deny comment deletion for a user without sufficient privileges', () => {
+      it('403 negative test: should deny comment deletion for a user without sufficient privileges', () => {
         cy.deleteCommentAPI(
           Cypress.expose(ws2.id),
           Cypress.expose(unit1.shortname),
           Cypress.expose('comment2'),
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
-          expect(resp.status).to.be.equal(401);
+          expect(resp.status).to.be.equal(403);
         });
       });
 
@@ -458,11 +458,11 @@ describe('Comments API tests', () => {
       });
     });
 
-    it('401 negative test: should deny hiding a comment to a user without access to the workspace', () => {
+    it('403 negative test: should deny hiding a comment to a user without access to the workspace', () => {
       // user3 is in no workspace here. Before #1628 the route asked for nothing but a valid token,
       // so this call hid a comment in a workspace the caller has never been part of. The refusal
-      // comes from WorkspaceGuard, which runs ahead of CommentAccessGuard and answers 401; that
-      // the token itself is good is what the 200 further down shows.
+      // comes from WorkspaceGuard, which runs ahead of CommentAccessGuard and answers 403 (401
+      // until #1706); that the token itself is good is what the 200 further down shows.
       cy.patchCommentVisibilityAPI(
         Cypress.expose(ws2.id),
         Cypress.expose(unit1.shortname),
@@ -471,11 +471,11 @@ describe('Comments API tests', () => {
         Cypress.expose(`id_${user3.username}`),
         Cypress.expose('tokenOfMember')
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 
-    it('401 negative test: should deny deleting another user\'s comment to a plain member of the workspace', () => {
+    it('403 negative test: should deny deleting another user\'s comment to a plain member of the workspace', () => {
       cy.setUsersOfWsAPI(
         Cypress.expose(ws2.id),
         [
@@ -495,7 +495,7 @@ describe('Comments API tests', () => {
         Cypress.expose('commentOfAuthor'),
         Cypress.expose('tokenOfMember')
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 

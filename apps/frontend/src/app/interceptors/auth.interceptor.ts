@@ -90,8 +90,9 @@ export class AuthInterceptor implements HttpInterceptor {
    * repetition replaces the original stream, so the catchError in intercept() never sees it.
    *
    * A 401 that survives a fresh token cannot mean "not logged in" -- the session was renewed a
-   * moment ago. It is what the API still answers for a workspace the user has no access to, and
-   * is shown as the missing permission it is (#1694). The caller gets the original error.
+   * moment ago. The API used to answer a workspace the user has no access to that way; it sends a
+   * 403 since #1706, but a 401 that still gets here is shown as the missing permission it must be
+   * (#1694). The caller gets the original error.
    */
   private repeat(
     request: HttpRequest<unknown>,
@@ -178,8 +179,8 @@ export class AuthInterceptor implements HttpInterceptor {
       return this.backendService.refresh(refreshToken).pipe(
         // Only a failed refresh ends the session, so this catchError has to stay in front of the
         // switchMap. Behind it, it also caught the repeated request: when that failed too -- as it
-        // does for a workspace the user has no access to, which the API also answers with 401 --
-        // a session that had just been renewed was logged out (#1694).
+        // did for a workspace the user has no access to, which the API answered with 401 until
+        // #1706 -- a session that had just been renewed was logged out (#1694).
         catchError(err => {
           this.isRefreshing = false;
           localStorage.removeItem('st_refresh_lock');

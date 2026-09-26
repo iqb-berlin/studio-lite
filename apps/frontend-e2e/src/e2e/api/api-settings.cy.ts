@@ -91,11 +91,11 @@ describe('Admin settings API tests', () => {
         });
     });
 
-    it('401 negative test: should deny configuration updates to a user ' +
+    it('403 negative test: should deny configuration updates to a user ' +
       'without administrator privileges', () => {
       cy.updateSettingConfigAPI(Cypress.expose(`token_${userGroupAdmin.username}`), 17)
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
   });
@@ -149,11 +149,11 @@ describe('Admin settings API tests', () => {
         });
     });
 
-    it('401 negative test: should deny brand setting updates to a user ' +
+    it('403 negative test: should deny brand setting updates to a user ' +
       'with regular account permissions', () => {
       cy.updateSettingLogoAPI(Cypress.expose(`token_${userGroupAdmin.username}`), 'Gelb')
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
   });
@@ -199,11 +199,11 @@ describe('Admin settings API tests', () => {
         });
     });
 
-    it('401 negative test: should deny unit export configuration updates to a user with regular permissions', () => {
+    it('403 negative test: should deny unit export configuration updates to a user with regular permissions', () => {
       unitExport.unitXsdUrl = 'https://w3id.org/iqb/spec/unit-xml/17.4';
       cy.updateSettingUnitExportAPI(Cypress.expose(`token_${userGroupAdmin.username}`), unitExport)
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -253,10 +253,10 @@ describe('Admin settings API tests', () => {
         });
     });
 
-    it('401 negative test: should deny profile definition updates to a regular user account', () => {
+    it('403 negative test: should deny profile definition updates to a regular user account', () => {
       cy.updateSettingMissingProfilesAPI(Cypress.expose(`token_${userGroupAdmin.username}`), '')
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 

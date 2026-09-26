@@ -66,10 +66,10 @@ describe('Unit API tests part II', () => {
       });
     });
 
-    it('401 negative test: should deny workspace report retrieval to a regular user', () => {
+    it('403 negative test: should deny workspace report retrieval to a regular user', () => {
       cy.getReportAPI(Cypress.expose(`token_${userGroupAdmin.username}`)).then(
         resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         }
       );
     });
@@ -166,26 +166,26 @@ describe('Unit API tests part II', () => {
       }
     );
 
-    it('401 negative test: should deny access to workspace downloads for a user without sufficient permissions', () => {
+    it('403 negative test: should deny access to workspace downloads for a user without sufficient permissions', () => {
       const unitIds: string[] = [];
       cy.downloadWsUnitsAPI(
         Cypress.expose(ws3.id),
         buildDownloadQuery(unitIds),
         Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
   });
 
   describe('79. DELETE /api/workspaces/{workspace_id}/units/{ids}', () => {
-    it("401 negative test: should deny unit deletion when attempting to delete another user's unit", () => {
+    it("403 negative test: should deny unit deletion when attempting to delete another user's unit", () => {
       cy.deleteUnitsAPI(
         [Cypress.expose(unit1.shortname)],
         Cypress.expose(ws1.id),
         Cypress.expose(`token_${user3.username}`)
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 
@@ -213,13 +213,13 @@ describe('Unit API tests part II', () => {
       }
     );
 
-    it('401 negative test: should deny unit deletion when providing the wrong workspace for a specific unit', () => {
+    it('403 negative test: should deny unit deletion when providing the wrong workspace for a specific unit', () => {
       cy.deleteUnitsAPI(
         [Cypress.expose(unit2.shortname)],
         Cypress.expose(ws1.id),
         Cypress.expose(`token_${user3.username}`)
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 
@@ -306,22 +306,22 @@ describe('Unit API tests part II', () => {
         });
       });
 
-      it('401 negative test: should deny a superadmin from updating data belonging to another account', () => {
+      it('403 negative test: should deny a superadmin from updating data belonging to another account', () => {
         cy.updateMyData(
           Cypress.expose(`token_${Cypress.expose('username')}`),
           data1
         ).then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
       });
 
-      it('401 negative test: should deny data updates when attempting to modify a non-existent user record', () => {
+      it('403 negative test: should deny data updates when attempting to modify a non-existent user record', () => {
         data.id = noId;
         cy.updateMyData(
           Cypress.expose(`token_${Cypress.expose('username')}`),
           data
         ).then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
       });
 
@@ -367,7 +367,7 @@ describe('Unit API tests part II', () => {
     });
 
     it(
-      '401/200 negative test: should return error or empty data when requesting ' +
+      '403/200 negative test: should return error or empty data when requesting ' +
         "workspaces for a user you don't manage",
       () => {
         cy.getWsByUserAPI(
@@ -376,7 +376,7 @@ describe('Unit API tests part II', () => {
         ).then(resp => {
           expect(resp.status).to.equal(200);
           expect(resp.body.length).to.equal(3);
-          // expect(resp.status).to.equal(401); should
+          // expect(resp.status).to.equal(403); should
         });
       }
     );
@@ -421,7 +421,7 @@ describe('Unit API tests part II', () => {
     );
 
     it(
-      '401 negative test: should deny workspace access modifications to a user' +
+      '403 negative test: should deny workspace access modifications to a user' +
         ' without group administrator role',
       () => {
         cy.updateWsByUserAPI(
@@ -431,7 +431,7 @@ describe('Unit API tests part II', () => {
           [Cypress.expose(ws1.id)],
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
       }
     );
@@ -552,7 +552,7 @@ describe('Unit API tests part II', () => {
     );
 
     it(
-      '500/401 negative test: should deny unit package uploads for a user with only developer level permissions',
+      '500/403 negative test: should deny unit package uploads for a user with only developer level permissions',
       { defaultCommandTimeout: 100000 },
       () => {
         cy.updateUsersOfWsAPI(
@@ -568,13 +568,13 @@ describe('Unit API tests part II', () => {
           units,
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
-          expect(resp.status).to.be.oneOf([401, 500]);
+          expect(resp.status).to.be.oneOf([403, 500]);
         });
       }
     );
 
     it(
-      '401/500 negative test: should deny unit package uploads when providing credentials' +
+      '403/500 negative test: should deny unit package uploads when providing credentials' +
         ' belonging to a different group',
       { defaultCommandTimeout: 100000 },
       () => {
@@ -583,7 +583,7 @@ describe('Unit API tests part II', () => {
           units,
           Cypress.expose(`token_${userGroupAdmin.username}`)
         ).then(resp => {
-          expect(resp.status).to.be.oneOf([401, 500]);
+          expect(resp.status).to.be.oneOf([403, 500]);
         });
       }
     );
@@ -604,12 +604,12 @@ describe('Unit API tests part II', () => {
       }
     );
 
-    it('401 negative test: should deny workspace group listing to a user with regular profile privileges', () => {
+    it('403 negative test: should deny workspace group listing to a user with regular profile privileges', () => {
       cy.getGroupsByUserAPI(
         Cypress.expose(`id_${userGroupAdmin.username}`),
         Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 
@@ -654,13 +654,13 @@ describe('Unit API tests part II', () => {
       }
     );
 
-    it('401 negative test: should deny regular users from updating workspace group assignments', () => {
+    it('403 negative test: should deny regular users from updating workspace group assignments', () => {
       cy.updateGroupsByUserAPI(
         Cypress.expose(`id_${Cypress.expose('username')}`),
         [Cypress.expose(group2.id)],
         Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 
