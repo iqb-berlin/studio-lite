@@ -4,7 +4,7 @@ import {
 import {
   ApiBearerAuth, ApiOkResponse, ApiTags, ApiUnauthorizedResponse
 } from '@nestjs/swagger';
-import { UnitInViewDto, UnitItemDto, WorkspaceFullDto } from '@studio-lite-lib/api-dto';
+import { UnitInViewDto, UnitItemInViewDto, WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { WorkspaceService } from '../services/workspace.service';
@@ -50,7 +50,7 @@ export class AdminController {
   @ApiOkResponse({ description: 'Unit items retrieved successfully.' })
   @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
   @ApiTags('admin')
-  async getAllUnitItems(): Promise<UnitItemDto[]> {
+  async getAllUnitItems(): Promise<UnitItemInViewDto[]> {
     return this.unitItemService.getAll();
   }
 }
