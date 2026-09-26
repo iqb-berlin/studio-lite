@@ -289,6 +289,11 @@ export class UsersService {
       where: { id: workspaceId },
       select: { groupId: true }
     });
+    // No workspace, no access. This used to fail on `workspace.groupId` and answer with a 500.
+    if (!workspace) return false;
+    // An administrator enters every workspace without being assigned to it; what they may do
+    // there is decided by WorkspaceUserService (#1571).
+    if (await this.getUserIsAdmin(userId)) return true;
     return this.isWorkspaceGroupAdmin(userId, workspace.groupId);
   }
 
