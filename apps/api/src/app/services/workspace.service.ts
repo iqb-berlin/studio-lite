@@ -40,6 +40,7 @@ import WorkspaceGroup from '../entities/workspace-group.entity';
 import Unit from '../entities/unit.entity';
 import { FileIo } from '../interfaces/file-io.interface';
 import { UnitImportData } from '../classes/unit-import-data.class';
+import { NotAUnitXmlError } from '../exceptions/not-a-unit-xml.error';
 import { UnitImportJsonData } from '../classes/unit-import-json-data.class';
 import { UnitService } from './unit.service';
 import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
@@ -887,11 +888,13 @@ export class WorkspaceService {
       } else if (f.mimetype === 'text/xml') {
         try {
           xmlCandidates.push(new UnitImportData(f));
-        } catch {
-          functionReturn.messages.push({
-            objectKey: f.originalname,
-            messageKey: 'unit-upload.api-warning.xml-parse'
-          });
+        } catch (error) {
+          if (!(error instanceof NotAUnitXmlError && error.isTestcenterFile)) {
+            functionReturn.messages.push({
+              objectKey: f.originalname,
+              messageKey: 'unit-upload.api-warning.xml-parse'
+            });
+          }
           usedFiles.push(f.originalname);
         }
       } else {

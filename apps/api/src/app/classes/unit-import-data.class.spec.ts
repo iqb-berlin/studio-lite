@@ -1,5 +1,6 @@
 import { createMock } from '@golevelup/ts-jest';
 import { UnitImportData } from './unit-import-data.class';
+import { NotAUnitXmlError } from '../exceptions/not-a-unit-xml.error';
 import { FileIo } from '../interfaces/file-io.interface';
 
 describe('UnitImportData', () => {
@@ -62,10 +63,58 @@ describe('UnitImportData', () => {
   it('should throw error if metadata is missing', () => {
     const invalidFile = createMock<FileIo>({
       originalname: 'test.xml',
-      buffer: Buffer.from('<Invalid></Invalid>')
+      buffer: Buffer.from('<Unit></Unit>')
     });
 
     expect(() => new UnitImportData(invalidFile)).toThrow('metadata element missing');
+  });
+
+  it('should read a unit behind an XML declaration', () => {
+    const data = new UnitImportData(createMock<FileIo>({
+      originalname: 'unit01.xml',
+      buffer: Buffer.from(`<?xml version="1.0"?>\n${xmlContent}`)
+    }));
+
+    expect(data.key).toBe('UNIT01');
+  });
+
+  describe('files that are not a unit (#1710)', () => {
+    const load = (xml: string) => () => new UnitImportData(createMock<FileIo>({
+      originalname: 'export.zip/file.xml',
+      buffer: Buffer.from(xml)
+    }));
+    const thrownBy = (xml: string): NotAUnitXmlError => {
+      try {
+        load(xml)();
+      } catch (error) {
+        return error as NotAUnitXmlError;
+      }
+      throw new Error('nothing thrown');
+    };
+
+    // The booklet the export writes has <Metadata><Id> just like a unit and was imported as one
+    it('should refuse the exported booklet although it carries a unit-like id', () => {
+      const booklet = `<?xml version="1.0"?>
+        <Booklet><Metadata><Id>booklet1</Id><Label/></Metadata><Units><Unit id="U1"/></Units></Booklet>`;
+
+      expect(load(booklet)).toThrow(NotAUnitXmlError);
+      expect(thrownBy(booklet).rootElement).toBe('Booklet');
+      expect(thrownBy(booklet).isTestcenterFile).toBe(true);
+    });
+
+    it('should recognise the exported test-taker file as a Testcenter file', () => {
+      const error = thrownBy('<?xml version="1.0"?><Testtakers><Metadata/><Group id="g"/></Testtakers>');
+
+      expect(error.isTestcenterFile).toBe(true);
+    });
+
+    it('should not take any other root element for a Testcenter file', () => {
+      const error = thrownBy('<Something><Metadata><Id>X</Id></Metadata></Something>');
+
+      expect(error).toBeInstanceOf(NotAUnitXmlError);
+      expect(error.rootElement).toBe('Something');
+      expect(error.isTestcenterFile).toBe(false);
+    });
   });
 
   it('should not resolve empty companion references to a bare folder', () => {
