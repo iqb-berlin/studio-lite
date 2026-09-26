@@ -1,15 +1,8 @@
 import { ExecutionContext } from '@nestjs/common';
-import { WorkspaceGroupId } from './workspace-group.decorator';
-
-jest.mock('@nestjs/common', () => ({
-  ...jest.requireActual('@nestjs/common'),
-  createParamDecorator: jest.fn(factory => factory)
-}));
+import { workspaceGroupIdFromRequest } from './workspace-group.decorator';
 
 describe('WorkspaceGroupIdDecorator', () => {
   it('should return workspace_group_id as integer from request params', () => {
-    const factory = WorkspaceGroupId as unknown as (data: unknown, ctx: ExecutionContext) => number;
-
     const mockRequest = {
       params: {
         workspace_group_id: '123'
@@ -21,7 +14,7 @@ describe('WorkspaceGroupIdDecorator', () => {
       getRequest: jest.fn().mockReturnValue(mockRequest)
     } as unknown as ExecutionContext;
 
-    const result = factory(null, mockExecutionContext);
+    const result = workspaceGroupIdFromRequest(null, mockExecutionContext);
 
     expect(result).toBe(123);
   });

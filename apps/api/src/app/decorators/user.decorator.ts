@@ -7,9 +7,10 @@ import UserEntity from '../entities/user.entity';
  * `JwtStrategy.validate` returns, not a database row, and typing it as the entity promises more
  * than is there.
  */
-export const User = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
-    return request.user as UserEntity;
-  }
-);
+/** The decorator's body, named so a test can call it without going through Nest. */
+export const userFromRequest = (data: unknown, ctx: ExecutionContext): UserEntity => {
+  const request = ctx.switchToHttp().getRequest();
+  return request.user as UserEntity;
+};
+
+export const User = createParamDecorator(userFromRequest);
