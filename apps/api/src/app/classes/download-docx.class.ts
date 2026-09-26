@@ -25,14 +25,19 @@ import {
   ItemsMetadataValues
 } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
-import { FileChild } from 'docx/build/file/file-child';
+// Type-only, like every deep import into a package: were it ever emitted as a runtime require,
+// an `exports` map in that package would kill the boot -- see the swagger import in
+// setting.controller.ts.
+import type { FileChild } from 'docx/build/file/file-child';
 import type { Element, AnyNode } from 'domhandler';
 import { BasicAcceptedElems } from 'cheerio';
 
 import { imageSize } from 'image-size';
 
-import { ISizeCalculationResult } from 'image-size/dist/types/interface';
-import * as katex from 'katex';
+import type { ISizeCalculationResult } from 'image-size/dist/types/interface';
+// katex is CommonJS with no statically detectable named exports: under ESM `import * as katex`
+// yields only `{ default }`, and every `katex.x` is undefined. The default import works in both.
+import katex from 'katex';
 import { mml2omml } from 'mathml2omml';
 import { WebColors } from '../utils/web-colors';
 

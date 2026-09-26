@@ -2,13 +2,13 @@ import {
   Body, Controller, Get, Inject, Patch, Query, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiHeader, ApiOkResponse, ApiQuery, ApiTags, ApiUnauthorizedResponse
+  ApiBearerAuth, ApiHeader, ApiNotAcceptableResponse, ApiOkResponse, ApiQuery, ApiTags,
+  ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import {
   MissingsProfilesDto, ConfigDto, AppLogoDto, UnitExportConfigDto, ProfilesRegistryDto,
   EmailTemplateDto, UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
-import { ApiNotAcceptableResponse } from '@nestjs/swagger/dist/decorators/api-response.decorator';
 import { SettingService } from '../services/setting.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';

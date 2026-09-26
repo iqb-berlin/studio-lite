@@ -1,7 +1,9 @@
 import { applyDecorators, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
-import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
+// Type-only: Nest 12 restricts its `exports` map, so this deep path must never become a
+// runtime import.
+import type { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 
 /**
  * One decorator for an upload route: it installs multer's file interceptor and, in the same move,

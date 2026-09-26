@@ -11,7 +11,9 @@ import { Repository } from 'typeorm';
 import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { Express } from 'express';
 import 'multer';
-import * as AdmZip from 'adm-zip';
+// adm-zip is CommonJS with no statically detectable named exports -- see the note on the katex
+// import in download-docx.class.ts.
+import AdmZip from 'adm-zip';
 import * as fs from 'fs';
 import * as util from 'util';
 import { ResourcePackageNotFoundException } from '../exceptions/resource-package-not-found.exception';

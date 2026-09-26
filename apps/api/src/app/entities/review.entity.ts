@@ -1,5 +1,5 @@
 import {
-  Column, Entity, OneToMany, PrimaryGeneratedColumn
+  Column, Entity, OneToMany, PrimaryGeneratedColumn, Relation
 } from 'typeorm';
 import { ReviewSettingsDto } from '@studio-lite-lib/api-dto';
 
@@ -39,7 +39,9 @@ class Review {
   settings: ReviewSettingsDto;
 
   @OneToMany(() => ReviewUnit, unit => unit.review)
-  units: ReviewUnit[];
+  // See the note in review-unit.entity.ts: the two import each other, and `Relation` keeps the
+  // decorator metadata from reading the other class while it is still being evaluated.
+  units: Relation<ReviewUnit[]>;
 
   @Column({
     type: 'timestamp with time zone',
