@@ -2,6 +2,8 @@ import { defineConfig } from 'cypress';
 import { nxE2EPreset } from '@nx/cypress/plugins/cypress-preset';
 import { Client } from 'pg';
 import coverageTask from '@cypress/code-coverage/task';
+// The release version, sent as the `app-version` header the API compares against (#1643)
+import packageJson from '../../package.json';
 
 const cypressJsonConfig = {
   fileServerFolder: '.',
@@ -24,7 +26,7 @@ export default defineConfig({
     username: 'fadmin',
     password: '4445',
     locale: 'de',
-    version: '20.0.1'
+    version: packageJson.version
   },
   e2e: {
     ...nxE2EPreset(__dirname),
