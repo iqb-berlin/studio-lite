@@ -12,7 +12,7 @@ import {
   ws3
 } from '../../support/util-api';
 import { buildDownloadQuery } from '../../support/api';
-import { AccessLevel, MyData } from '../../support/testData';
+import { AccessLevel, MyData, ReviewData } from '../../support/testData';
 
 describe('Unit API tests part II', () => {
   describe('75. GET /api/workspaces/{workspace_id}/users/{user_id}', () => {
@@ -244,6 +244,84 @@ describe('Unit API tests part II', () => {
       ).then(resp => {
         expect(resp.status).to.equal(403);
       });
+    });
+  });
+
+  // Renaming a workspace, choosing its drop box and creating, changing or deleting its reviews
+  // asked WorkspaceGuard alone, so a member with the lowest level could do all of it (#1715).
+  describe('a commenter and the routes that change the workspace (#1715)', () => {
+    // The guard refuses before the review is looked up, so its id does not have to exist.
+    const anyReview: ReviewData = {
+      id: parseInt(noId, 10), link: '', name: 'Commenter review', units: []
+    };
+
+    before(() => {
+      cy.setUsersOfWsAPI(
+        Cypress.expose(ws2.id),
+        [
+          { id: Cypress.expose(`id_${Cypress.expose('username')}`), access: AccessLevel.Admin },
+          { id: Cypress.expose(`id_${userGroupAdmin.username}`), access: AccessLevel.Admin },
+          { id: Cypress.expose(`id_${user3.username}`), access: AccessLevel.Basic }
+        ],
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+      });
+    });
+
+    after(() => {
+      // ws2 goes back to the two users the following specs count on.
+      cy.setUsersOfWsAPI(
+        Cypress.expose(ws2.id),
+        [
+          { id: Cypress.expose(`id_${Cypress.expose('username')}`), access: AccessLevel.Admin },
+          { id: Cypress.expose(`id_${userGroupAdmin.username}`), access: AccessLevel.Admin }
+        ],
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+      });
+    });
+
+    it('200 positive test: should still let the commenter read the reviews of the workspace', () => {
+      cy.getAllReviewAPI(Cypress.expose(ws2.id), Cypress.expose(`token_${user3.username}`)).then(resp => {
+        expect(resp.status).to.equal(200);
+      });
+    });
+
+    it('403 negative test: should not let a commenter rename the workspace', () => {
+      cy.renameWsAPI(Cypress.expose(ws2.id), 'Renamed by a commenter', Cypress.expose(`token_${user3.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(403);
+        });
+    });
+
+    it('403 negative test: should not let a commenter choose the drop box', () => {
+      cy.dropboxWsAPI(Cypress.expose(ws2.id), Cypress.expose(ws1.id), Cypress.expose(`token_${user3.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(403);
+        });
+    });
+
+    it('403 negative test: should not let a commenter create a review', () => {
+      cy.addReviewAPI(Cypress.expose(ws2.id), 'Commenter review', Cypress.expose(`token_${user3.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(403);
+        });
+    });
+
+    it('403 negative test: should not let a commenter change a review', () => {
+      cy.updateReviewAPI(Cypress.expose(ws2.id), anyReview, Cypress.expose(`token_${user3.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(403);
+        });
+    });
+
+    it('403 negative test: should not let a commenter delete a review', () => {
+      cy.deleteReviewAPI(Cypress.expose(ws2.id), noId, Cypress.expose(`token_${user3.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(403);
+        });
     });
   });
 

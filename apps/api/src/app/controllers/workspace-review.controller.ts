@@ -17,6 +17,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
+import { ManageOrGroupAdminAccessGuard } from '../guards/manage-or-group-admin-access.guard';
 import { WorkspaceId } from '../decorators/workspace.decorator';
 import { ReviewService } from '../services/review.service';
 
@@ -59,12 +60,15 @@ export class WorkspaceReviewController {
     return this.reviewService.findOne(reviewId);
   }
 
+  // Creating, changing and deleting reviews need the manage level -- the frontend offers the review
+  // dialog from level 3 on -- or the group's admin. They used to ask WorkspaceGuard alone, which
+  // every member passes, down to a commenter (#1715).
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Review data changed' })
-  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No manage privileges in the workspace.' })
   @ApiUnprocessableEntityResponse({ description: 'Saving of review is forbidden.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
@@ -76,7 +80,7 @@ export class WorkspaceReviewController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -84,7 +88,7 @@ export class WorkspaceReviewController {
     type: Number
   })
   @ApiUnprocessableEntityResponse({ description: 'Saving of review is forbidden.' })
-  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No manage privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
   async create(@Body() createReviewDto: CreateReviewDto) {
@@ -92,11 +96,11 @@ export class WorkspaceReviewController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Workspace review deleted successfully.' })
-  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No manage privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
   async remove(
