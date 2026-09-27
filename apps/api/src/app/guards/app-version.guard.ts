@@ -5,6 +5,9 @@ import {
   Inject,
   Injectable
 } from '@nestjs/common';
+// The whole file, not `{ version }`: the API's tests run as ESM, where a JSON module has a default
+// export only. The frontend imports the named field instead, for its bundle's sake.
+import packageJson from '../../../../../package.json';
 
 /**
  * Refuses any request whose `app-version` header does not name exactly the version this server
@@ -36,12 +39,11 @@ export class AppVersionGuard implements CanActivate {
 }
 
 /**
- * The version {@link AppVersionGuard} compares against. The frontend hands the same literal to its
- * own `APP_VERSION` provider (`apps/frontend/src/main.ts`), and both are raised with the release
- * version in package.json — three places kept in step by hand, so an edit here is only half the
- * change.
+ * The version {@link AppVersionGuard} compares against: the release version from package.json,
+ * which the frontend (`apps/frontend/src/main.ts`) and the e2e setup read as well. Nothing to raise
+ * here at a release -- package.json is the only place (#1643).
  */
 export const AppVersionProvider = {
   provide: 'APP_VERSION',
-  useValue: '20.0.1'
+  useValue: packageJson.version
 };

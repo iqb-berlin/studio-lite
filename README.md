@@ -297,10 +297,12 @@ in *Done*.
 ### Releases
 
 A release is `develop` merged into `main` and tagged there. The version number is bumped on a
-`release/X.Y.Z` branch off `develop` and stands in five places: `package.json`,
-`apps/frontend/src/main.ts` (`APP_VERSION`), `apps/frontend-e2e/cypress.config.ts` (`env.version`),
-`apps/api/src/app/guards/app-version.guard.ts` and its spec. That branch goes to `main` as a pull
-request; the tag is created by publishing the GitHub release. The tag job does not build anything —
+`release/X.Y.Z` branch off `develop`, and it stands in one place only: the `version` field of
+`package.json` (then `npm i`, which updates the two matching lines of the lockfile). The frontend,
+the API's `AppVersionGuard` and the e2e setup all read it from there at build time.
+(`apps/api/runtime-package.json` carries a version of its own, `0.0.1`, which stays as it is.)
+That branch goes to `main` as a pull request; the tag is created by publishing the GitHub release.
+The tag job does not build anything —
 it pulls the four images the `main` pipeline built for that commit and pushes them to Docker Hub as
 `:X.Y.Z` and `:latest`, which is why that pipeline has to be green for exactly that SHA first.
 Afterwards the same branch is merged into `develop`, so the bump is not missing there.
