@@ -8,7 +8,7 @@ import {
   ApiOkResponse,
   ApiParam,
   ApiTags,
-  ApiForbiddenResponse, ApiUnprocessableEntityResponse
+  ApiForbiddenResponse, ApiNotFoundResponse, ApiUnprocessableEntityResponse
 } from '@nestjs/swagger';
 import {
   ReviewInListDto,
@@ -52,12 +52,14 @@ export class WorkspaceReviewController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Review retrieved successfully.' })
   @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiNotFoundResponse({ description: 'No such review in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
   async findOne(
+    @WorkspaceId() workspaceId: number,
     @Param('id', ParseIntPipe) reviewId: number
   ): Promise<ReviewFullDto> {
-    return this.reviewService.findOne(reviewId);
+    return this.reviewService.findOne(reviewId, workspaceId);
   }
 
   // Creating, changing and deleting reviews need the manage level -- the frontend offers the review
@@ -69,14 +71,16 @@ export class WorkspaceReviewController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Review data changed' })
   @ApiForbiddenResponse({ description: 'No manage privileges in the workspace.' })
-  @ApiUnprocessableEntityResponse({ description: 'Saving of review is forbidden.' })
+  @ApiNotFoundResponse({ description: 'No such review in the workspace.' })
+  @ApiUnprocessableEntityResponse({ description: 'No name, or a unit of another workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
   async patchReview(
+    @WorkspaceId() workspaceId: number,
     @Param('id', ParseIntPipe) reviewId: number,
     @Body() updateReview: ReviewFullDto
   ): Promise<void> {
-    return this.reviewService.patch(reviewId, updateReview);
+    return this.reviewService.patch(workspaceId, reviewId, updateReview);
   }
 
   @Post()
@@ -91,8 +95,8 @@ export class WorkspaceReviewController {
   @ApiForbiddenResponse({ description: 'No manage privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
-  async create(@Body() createReviewDto: CreateReviewDto) {
-    return this.reviewService.create(createReviewDto);
+  async create(@WorkspaceId() workspaceId: number, @Body() createReviewDto: CreateReviewDto) {
+    return this.reviewService.create(workspaceId, createReviewDto);
   }
 
   @Delete(':id')
@@ -101,10 +105,12 @@ export class WorkspaceReviewController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Workspace review deleted successfully.' })
   @ApiForbiddenResponse({ description: 'No manage privileges in the workspace.' })
+  @ApiNotFoundResponse({ description: 'No such review in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
   async remove(
+    @WorkspaceId() workspaceId: number,
     @Param('id', ParseIntPipe) reviewId: number): Promise<void> {
-    return this.reviewService.remove(reviewId);
+    return this.reviewService.remove(workspaceId, reviewId);
   }
 }
