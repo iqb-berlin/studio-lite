@@ -135,6 +135,7 @@ declare namespace Cypress {
     uploadUnitsAPI(wsId: string, filename:string, token:string): Chainable<Response>; // 84
     exportUnitsAPI(wsId: string, downloadQuery: string, token: string): Chainable<Response>;
     importUnitsAPI(wsId: string, zipContent: string, token: string): Chainable<Response>;
+    getAdminUnitItemsAPI(token: string): Chainable<Response>;
     getGroupsByUserAPI(id: string, token: string): Chainable<Response>; // 85
     updateGroupsByUserAPI(id: string, groupIds: string[], token: string): Chainable<Response>; // 86
     deleteWsAPI(qs: string[], token: string): Chainable<Response>; // 87

@@ -2007,6 +2007,20 @@ Cypress.Commands.add('importUnitsAPI', (wsId: string, zipContent: string, token:
   postUnitFiles(wsId, formData, token);
 });
 
+// The items of all units, as the admin view "Unit-Items" lists them
+Cypress.Commands.add('getAdminUnitItemsAPI', (token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/admin/unit-items',
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 85
 Cypress.Commands.add('getGroupsByUserAPI', (userId:string, token:string) => {
   const authorization = `bearer ${token}`;
