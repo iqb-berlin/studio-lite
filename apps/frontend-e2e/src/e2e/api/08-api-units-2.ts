@@ -338,6 +338,53 @@ describe('Unit API tests part II', () => {
       });
     });
 
+    // An import test, but it has to run here: section 79 deletes the unit it exports.
+    it(
+      '201 positive test: an export with test takers imports again without a booklet unit (#1710)',
+      { defaultCommandTimeout: 100000 },
+      () => {
+        const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+        const settings = JSON.stringify({
+          ...JSON.parse(buildDownloadQuery([Cypress.expose(unit2.shortname)])),
+          addTestTakersHot: 1
+        });
+        cy.getUnitsByWsAPI(Cypress.expose(ws1.id), adminToken).then(before => {
+          const idsBefore = before.body.map((u: { id: number }) => u.id);
+          cy.exportUnitsAPI(
+            Cypress.expose(ws2.id),
+            settings,
+            Cypress.expose(`token_${userGroupAdmin.username}`)
+          ).then(exported => {
+            expect(exported.status).to.equal(200);
+            // the zip lists its file names uncompressed: the export does contain the test center files
+            expect(exported.body).to.include('booklet1.xml');
+            expect(exported.body).to.include('booklet1_testtaker.xml');
+            cy.importUnitsAPI(Cypress.expose(ws1.id), exported.body, adminToken).then(imported => {
+              cy.getUnitsByWsAPI(Cypress.expose(ws1.id), adminToken).then(after => {
+                const imports = after.body.filter((u: { id: number }) => !idsBefore.includes(u.id));
+                // cleaned up before anything is asserted, so that a failure leaves ws1 as it was
+                if (imports.length) {
+                  cy.deleteUnitsAPI(
+                    imports.map((u: { id: number }) => String(u.id)),
+                    Cypress.expose(ws1.id),
+                    adminToken
+                  );
+                }
+                cy.then(() => {
+                  expect(imported.status).to.equal(201);
+                  // the object key is the path inside the zip, e.g. 'export.zip/booklet1_testtaker.xml'
+                  const aboutBooklet = imported.body.messages
+                    .filter((m: { objectKey: string }) => /(^|\/)booklet1(_testtaker)?\.xml$/.test(m.objectKey));
+                  expect(aboutBooklet).to.deep.equal([]);
+                  expect(imports.map((u: { key: string }) => u.key)).to.deep.equal([unit2.shortname]);
+                });
+              });
+            });
+          });
+        });
+      }
+    );
+
     it('401 negative test: should deny unit download when an invalid authentication token is provided', () => {
       const unitIds = [Cypress.expose(unit2.shortname)];
       cy.downloadWsUnitsAPI(

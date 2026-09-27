@@ -1939,6 +1939,40 @@ Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:str
     });
 });
 
+// The unit export kept as a binary string, so that it can be imported again as it is
+Cypress.Commands.add('exportUnitsAPI', (wsId: string, downloadQuery: string, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}?download=true&settings=${downloadQuery}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    encoding: 'binary',
+    failOnStatusCode: false
+  });
+});
+
+// Imports a zip handed over as a binary string, as exportUnitsAPI returns it. A multipart request
+// gets its response body back as an ArrayBuffer; it is handed on parsed, as the import report.
+Cypress.Commands.add('importUnitsAPI', (wsId: string, zipContent: string, token: string) => {
+  const authorization = `bearer ${token}`;
+  const formData = new FormData();
+  formData.append('files', Cypress.Blob.binaryStringToBlob(zipContent, 'application/zip'), 'export.zip');
+  cy.request({
+    method: 'POST',
+    url: `/api/workspaces/${wsId}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      'content-type': 'multipart/form-data',
+      authorization
+    },
+    body: formData,
+    failOnStatusCode: false
+  }).then(resp => ({ ...resp, body: JSON.parse(new TextDecoder().decode(resp.body)) }));
+});
+
 // 85
 Cypress.Commands.add('getGroupsByUserAPI', (userId:string, token:string) => {
   const authorization = `bearer ${token}`;
