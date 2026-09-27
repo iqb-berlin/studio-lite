@@ -614,9 +614,101 @@ describe('Review API tests', () => {
     });
   });
 
+  // The guards check the level in the workspace of the path. The review was taken from its id
+  // alone and a new one put into the workspace of the body, so managing one workspace reached
+  // the reviews of every other one. review1 lives in ws1; userGroupAdmin may manage ws2 as well.
+  describe('a review and the workspace of the path (#1717)', () => {
+    it('404 negative test: should not read a review through another workspace', () => {
+      cy.getReviewAPI(Cypress.expose(ws2.id),
+        Cypress.expose('id_review1'),
+        Cypress.expose(`token_${userGroupAdmin.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(404);
+        });
+    });
+
+    it('404 negative test: should not change a review through another workspace', () => {
+      cy.updateReviewAPI(Cypress.expose(ws2.id),
+        {
+          id: parseInt(Cypress.expose('id_review1'), 10),
+          link: '',
+          name: 'Changed through ws2',
+          units: [Cypress.expose(unit4.shortname)]
+        },
+        Cypress.expose(`token_${userGroupAdmin.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(404);
+        });
+    });
+
+    // A reviewer reads a unit by its id once it is in the review; one of another workspace would
+    // be served to everyone with the review's link. It is left out rather than refused, so that a
+    // review keeps being savable when one of its units has been moved away. unit1 was moved to
+    // ws2 in 38. (updateReviewAPI sends the first unit only.)
+    it('200 positive test: should leave a unit of another workspace out of the review', () => {
+      cy.updateReviewAPI(Cypress.expose(ws1.id),
+        {
+          id: parseInt(Cypress.expose('id_review1'), 10),
+          link: '',
+          name: 'Teil1',
+          units: [Cypress.expose(unit1.shortname)]
+        },
+        Cypress.expose(`token_${userGroupAdmin.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+      cy.getReviewAPI(Cypress.expose(ws1.id),
+        Cypress.expose('id_review1'),
+        Cypress.expose(`token_${userGroupAdmin.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(200);
+          expect(resp.body.units).not.to.include(parseInt(Cypress.expose(unit1.shortname), 10));
+        });
+    });
+
+    it('201 positive test: should create a review in the workspace of the path, whatever the body says', () => {
+      cy.request({
+        method: 'POST',
+        url: `/api/workspaces/${Cypress.expose(ws1.id)}/reviews/`,
+        headers: {
+          'app-version': Cypress.expose('version'),
+          authorization: `bearer ${Cypress.expose(`token_${userGroupAdmin.username}`)}`
+        },
+        body: { name: 'Body names ws2', workspaceId: parseInt(Cypress.expose(ws2.id), 10) },
+        failOnStatusCode: false
+      }).then(resp => {
+        expect(resp.status).to.equal(201);
+        const reviewId = `${resp.body}`;
+        cy.getReviewAPI(Cypress.expose(ws1.id), reviewId, Cypress.expose(`token_${userGroupAdmin.username}`))
+          .then(inWs1 => {
+            expect(inWs1.status).to.equal(200);
+          });
+        cy.getReviewAPI(Cypress.expose(ws2.id), reviewId, Cypress.expose(`token_${userGroupAdmin.username}`))
+          .then(inWs2 => {
+            expect(inWs2.status).to.equal(404);
+          });
+        cy.deleteReviewAPI(Cypress.expose(ws1.id), reviewId, Cypress.expose(`token_${userGroupAdmin.username}`))
+          .then(deleted => {
+            expect(deleted.status).to.equal(200);
+          });
+      });
+    });
+  });
+
   describe('74. DELETE /api/workspaces/{workspace_id}/reviews/{ids}', () => {
-    it('200 positive test: should successfully delete an existing review for an authorized user', () => {
+    // review1 lives in ws1. The level is checked in the workspace of the path, and this used to
+    // delete it through ws2, where userGroupAdmin may manage as well (#1717).
+    it('404 negative test: should not delete a review through another workspace', () => {
       cy.deleteReviewAPI(Cypress.expose(ws2.id),
+        Cypress.expose('id_review1'),
+        Cypress.expose(`token_${userGroupAdmin.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(404);
+        });
+    });
+
+    it('200 positive test: should successfully delete an existing review for an authorized user', () => {
+      cy.deleteReviewAPI(Cypress.expose(ws1.id),
         Cypress.expose('id_review1'),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
