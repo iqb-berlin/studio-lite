@@ -199,6 +199,26 @@ export class WorkspaceService {
       });
   }
 
+  /**
+   * A user's workspaces as a group admin sees them: only those in groups the requester
+   * administers; an administrator sees all of them (#1650). The group-admin area asks this to tick
+   * the boxes of the group it shows, and handed out the person's workspaces in foreign groups too.
+   *
+   * {@link findAll} stays as it is: it also builds a user's own list of workspaces
+   * ({@link findAllGroupwise}), where a filter by administered groups would hide them from anyone
+   * who administers none.
+   */
+  async findAllInAdministeredGroups(userId: number, requesterId: number): Promise<UsersWorkspaceInListDto[]> {
+    const workspaces = await this.findAll(userId);
+    if (await this.usersService.getUserIsAdmin(requesterId)) return workspaces;
+    const administeredGroups = await this.workspaceGroupAdminRepository.find({
+      where: { userId: requesterId },
+      select: { workspaceGroupId: true }
+    });
+    const groupIds = new Set(administeredGroups.map(group => group.workspaceGroupId));
+    return workspaces.filter(workspace => groupIds.has(workspace.groupId));
+  }
+
   async findAllGroupwise(userId?: number): Promise<WorkspaceGroupDto[]> {
     this.logger.log(
       `Returning groupwise ordered workspaces${

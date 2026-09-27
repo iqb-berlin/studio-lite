@@ -81,8 +81,10 @@ export class GroupAdminUserController {
   @ApiForbiddenResponse({ description: 'No group-admin privileges. ' })
   // @ApiNotFoundResponse({ description: 'User not found.' }) // TODO: Exception implementieren?
   @ApiTags('group-admin user')
-  async findOnesWorkspaces(@Param('id') id: number): Promise<UsersWorkspaceInListDto[]> {
-    return this.workspaceService.findAll(id);
+  async findOnesWorkspaces(@UserId() userId: number, @Param('id') id: number): Promise<UsersWorkspaceInListDto[]> {
+    // The path names a user, so the guard can only ask whether the requester administers any group
+    // at all; the answer is narrowed to the requester's groups instead (#1650).
+    return this.workspaceService.findAllInAdministeredGroups(id, userId);
   }
 
   /**
