@@ -80,6 +80,9 @@ declare namespace Cypress {
     getGroupsOfWsAPI(wsId: string, token:string): Chainable<Response>; // 41
     updateGroupNameOfWsAPI(wsId: string, groupName:string, token:string): Chainable<Response>; // 42
     getUnitSchemeAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 43
+    // eslint-disable-next-line max-len
+    updateUnitVariablesAPI(unitId: string, wsId: string, variables: Record<string, unknown>[], token: string): Chainable<Response>;
+    uploadUnitFilesAPI(wsId: string, fixtures: string[], token: string): Chainable<Response>;
     updateUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 44
     getUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 45
     updateUnitSchemeAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 46

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<Unit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/iqb-berlin/testcenter/blob/master/definitions/vo_Unit.xsd">
+  <Metadata>
+    <Id>VI2_IMPORT</Id>
+    <Label>VariableInfo 2.0</Label>
+  </Metadata>
+  <DefinitionRef player="iqb-player-aspect@3.0" editor="iqb-editor-aspect@3.0">VI2_IMPORT.voud</DefinitionRef>
+  <BaseVariables>
+    <Variable id="text_1" alias="text_1" type="NO_VALUE" format="" nullable="false" multiple="false"/>
+    <Variable id="geogebra_1" alias="geogebra_1" type="STRING" format="GGB_FILE" nullable="false" multiple="false"/>
+  </BaseVariables>
+</Unit>

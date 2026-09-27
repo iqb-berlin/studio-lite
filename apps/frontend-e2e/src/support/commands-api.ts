@@ -761,6 +761,52 @@ Cypress.Commands.add('getUnitSchemeAPI', (unitId: string, wsId: string, token:st
   });
 });
 
+// Saves a variable list the way the editor does, with an empty definition beside it
+Cypress.Commands.add(
+  'updateUnitVariablesAPI',
+  (unitId: string, wsId: string, variables: Record<string, unknown>[], token: string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'PATCH',
+      url: `/api/workspaces/${wsId}/units/${unitId}/definition`,
+      headers: {
+        'app-version': Cypress.expose('version'),
+        authorization
+      },
+      body: { definition: '', variables },
+      failOnStatusCode: false
+    });
+  }
+);
+
+// The unit import of importUnitsAPI and uploadUnitFilesAPI. A multipart request gets its response
+// body back as an ArrayBuffer; it is handed on parsed, as the import report.
+function postUnitFiles(wsId: string, formData: FormData, token: string) {
+  return cy.request({
+    method: 'POST',
+    url: `/api/workspaces/${wsId}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      'content-type': 'multipart/form-data',
+      authorization: `bearer ${token}`
+    },
+    body: formData,
+    failOnStatusCode: false
+  }).then(resp => ({ ...resp, body: JSON.parse(new TextDecoder().decode(resp.body)) }));
+}
+
+// Uploads fixture files side by side and unzipped, e.g. a unit XML with its definition
+Cypress.Commands.add('uploadUnitFilesAPI', (wsId: string, fixtures: string[], token: string) => {
+  const formData = new FormData();
+  fixtures.forEach(fixture => {
+    cy.fixture(fixture, 'binary').then(content => {
+      const mimeType = fixture.endsWith('.xml') ? 'text/xml' : 'application/octet-stream';
+      formData.append('files', Cypress.Blob.binaryStringToBlob(content, mimeType), fixture.split('/').pop());
+    });
+  });
+  cy.then(() => postUnitFiles(wsId, formData, token));
+});
+
 // 44
 Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1954,23 +2000,11 @@ Cypress.Commands.add('exportUnitsAPI', (wsId: string, downloadQuery: string, tok
   });
 });
 
-// Imports a zip handed over as a binary string, as exportUnitsAPI returns it. A multipart request
-// gets its response body back as an ArrayBuffer; it is handed on parsed, as the import report.
+// Imports a zip handed over as a binary string, as exportUnitsAPI returns it
 Cypress.Commands.add('importUnitsAPI', (wsId: string, zipContent: string, token: string) => {
-  const authorization = `bearer ${token}`;
   const formData = new FormData();
   formData.append('files', Cypress.Blob.binaryStringToBlob(zipContent, 'application/zip'), 'export.zip');
-  cy.request({
-    method: 'POST',
-    url: `/api/workspaces/${wsId}`,
-    headers: {
-      'app-version': Cypress.expose('version'),
-      'content-type': 'multipart/form-data',
-      authorization
-    },
-    body: formData,
-    failOnStatusCode: false
-  }).then(resp => ({ ...resp, body: JSON.parse(new TextDecoder().decode(resp.body)) }));
+  postUnitFiles(wsId, formData, token);
 });
 
 // 85

@@ -854,6 +854,64 @@ describe('Unit API tests part II', () => {
     );
   });
 
+  describe('a variable list in the VariableInfo 2.0 spelling (#1606)', () => {
+    // What the schemer and coding-box get: the 1.x spelling, and `page` back as the empty value
+    // that 2.0 dropped.
+    // Compared as text, so that a failure shows which variable came back in which spelling
+    const inV1 = 'text_1 no-value "" "" | geogebra_1 string "ggb-file" ""';
+    const spelling = (variables: { id: string, type: string, format: string, page: string }[]) => variables
+      .map(v => `${v.id} ${v.type} ${JSON.stringify(v.format)} ${JSON.stringify(v.page)}`)
+      .join(' | ');
+
+    it('200 positive test: is stored in the 1.x spelling when saved from the editor', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      const unit = { shortname: 'VI2_SAVE', name: 'VariableInfo 2.0', group: '' };
+      cy.createUnitAPI(Cypress.expose(ws1.id), unit, adminToken).then(created => {
+        const unitId = String(created.body);
+        cy.updateUnitVariablesAPI(unitId, Cypress.expose(ws1.id), [
+          {
+            id: 'text_1', alias: 'text_1', type: 'NO_VALUE', format: '', multiple: false, nullable: false
+          },
+          {
+            id: 'geogebra_1', alias: 'geogebra_1', type: 'STRING', format: 'GGB_FILE', multiple: false, nullable: false
+          }
+        ], adminToken).then(saved => {
+          cy.getUnitSchemeAPI(unitId, Cypress.expose(ws1.id), adminToken).then(read => {
+            cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
+            cy.then(() => {
+              expect(saved.status).to.equal(200);
+              expect(spelling(read.body.variables)).to.equal(inV1);
+            });
+          });
+        });
+      });
+    });
+
+    it('201 positive test: is stored in the 1.x spelling when imported', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      cy.uploadUnitFilesAPI(
+        Cypress.expose(ws1.id),
+        ['variable-info-2/VI2_IMPORT.xml', 'variable-info-2/VI2_IMPORT.voud'],
+        adminToken
+      ).then(imported => {
+        cy.getUnitsByWsAPI(Cypress.expose(ws1.id), adminToken).then(units => {
+          const unit = units.body.find((u: { key: string }) => u.key === 'VI2_IMPORT');
+          expect(unit, 'imported unit').not.to.equal(undefined);
+          const unitId = String(unit.id);
+          cy.getUnitSchemeAPI(unitId, Cypress.expose(ws1.id), adminToken).then(read => {
+            // cleaned up before anything else is asserted, so that a failure leaves ws1 as it was
+            cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
+            cy.then(() => {
+              expect(imported.status).to.equal(201);
+              expect(imported.body.messages).to.deep.equal([]);
+              expect(spelling(read.body.variables)).to.equal(inV1);
+            });
+          });
+        });
+      });
+    });
+  });
+
   describe('85. GET /api/admin/users/{id}/workspace-groups', () => {
     it(
       '200 positive test: should successfully retrieve the list of workspace groups' +
