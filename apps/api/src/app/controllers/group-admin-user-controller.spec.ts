@@ -126,14 +126,17 @@ describe('GroupAdminUserController', () => {
   });
 
   describe('findOnesWorkspaces', () => {
-    it('should return workspaces for a user', async () => {
+    // The answer is narrowed to the requester's groups; it used to list the person's workspaces in
+    // every group (#1650).
+    it('should return the workspaces of a user within the requester\'s groups', async () => {
       const mockWorkspaces = [{ id: 1 }] as UsersWorkspaceInListDto[];
-      workspaceService.findAll.mockResolvedValue(mockWorkspaces);
+      workspaceService.findAllInAdministeredGroups.mockResolvedValue(mockWorkspaces);
 
-      const result = await controller.findOnesWorkspaces(1);
+      const result = await controller.findOnesWorkspaces(7, 1);
 
       expect(result).toBe(mockWorkspaces);
-      expect(workspaceService.findAll).toHaveBeenCalledWith(1);
+      expect(workspaceService.findAllInAdministeredGroups).toHaveBeenCalledWith(1, 7);
+      expect(workspaceService.findAll).not.toHaveBeenCalled();
     });
   });
 });

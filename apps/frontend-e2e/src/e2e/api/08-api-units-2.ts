@@ -583,16 +583,18 @@ describe('Unit API tests part II', () => {
     });
 
     it(
-      '403/200 negative test: should return error or empty data when requesting ' +
-        "workspaces for a user you don't manage",
+      '200 positive test: should list only the workspaces in groups the requester administers',
       () => {
+        // The administrator works in ws1 and ws2 (groupVera, which userGroupAdmin administers)
+        // and in ws3 (group2, which it does not). ws3 used to be handed out as well (#1650).
         cy.getWsByUserAPI(
           Cypress.expose(`id_${Cypress.expose('username')}`),
           Cypress.expose(`token_${userGroupAdmin.username}`)
         ).then(resp => {
           expect(resp.status).to.equal(200);
-          expect(resp.body.length).to.equal(3);
-          // expect(resp.status).to.equal(403); should
+          expect(resp.body.length).to.equal(2);
+          expect(resp.body.map((workspace: { id: number }) => workspace.id))
+            .not.to.include(parseInt(Cypress.expose(ws3.id), 10));
         });
       }
     );
