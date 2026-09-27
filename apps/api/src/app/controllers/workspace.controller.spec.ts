@@ -24,6 +24,9 @@ import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitRichNoteService } from '../services/unit-rich-note.service';
 import { UnitDownloadClass } from '../classes/unit-download.class';
 import UserEntity from '../entities/user.entity';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { WorkspaceGuard } from '../guards/workspace.guard';
+import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 
 describe('WorkspaceController', () => {
   let controller: WorkspaceController;
@@ -227,6 +230,13 @@ describe('WorkspaceController', () => {
       await controller.patchSettings(1, dto);
       expect(workspaceService.patchSettings).toHaveBeenCalledWith(1, dto);
     });
+  });
+
+  // Renaming and choosing the drop box asked WorkspaceGuard alone, which a commenter passes (#1715);
+  // the frontend offers both only in the group-admin area.
+  it.each(['patchName', 'patchDropBox'] as const)('should guard %s for the group admin', method => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceController.prototype[method]))
+      .toEqual([JwtAuthGuard, WorkspaceGuard, IsWorkspaceGroupAdminGuard]);
   });
 
   describe('patchName', () => {

@@ -254,11 +254,15 @@ export class WorkspaceController {
     return this.workspaceService.patchSettings(workspaceId, workspaceSetting);
   }
 
+  // Renaming and choosing the drop box are group administration -- the frontend offers both only
+  // in the group-admin area. They used to ask WorkspaceGuard alone, which every member passes,
+  // down to a commenter (#1715). WorkspaceGuard stays in front so that a workspace which does not
+  // exist is refused before the group is looked up.
   @Patch('name')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse()
-  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No group-admin privileges for the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
@@ -267,10 +271,10 @@ export class WorkspaceController {
   }
 
   @Patch('drop-box')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse()
-  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No group-admin privileges for the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')

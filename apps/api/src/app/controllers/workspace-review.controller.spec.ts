@@ -5,6 +5,7 @@ import { WorkspaceReviewController } from './workspace-review.controller';
 import { ReviewService } from '../services/review.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
+import { ManageOrGroupAdminAccessGuard } from '../guards/manage-or-group-admin-access.guard';
 
 describe('WorkspaceReviewController', () => {
   let controller: WorkspaceReviewController;
@@ -20,6 +21,8 @@ describe('WorkspaceReviewController', () => {
       .overrideGuard(JwtAuthGuard).useValue({ canActivate: () => true })
       .overrideGuard(WorkspaceGuard)
       .useValue({ canActivate: () => true })
+      .overrideGuard(ManageOrGroupAdminAccessGuard)
+      .useValue({ canActivate: () => true })
       .compile();
 
     controller = module.get<WorkspaceReviewController>(WorkspaceReviewController);
@@ -28,6 +31,18 @@ describe('WorkspaceReviewController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  // Creating, changing and deleting a review asked WorkspaceGuard alone, which a commenter passes
+  // (#1715); reading the reviews stays open to every member.
+  it.each(['create', 'patchReview', 'remove'] as const)('should guard %s with the manage level', method => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceReviewController.prototype[method]))
+      .toEqual([JwtAuthGuard, WorkspaceGuard, ManageOrGroupAdminAccessGuard]);
+  });
+
+  it.each(['findAll', 'findOne'] as const)('should leave %s to every member', method => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceReviewController.prototype[method]))
+      .toEqual([JwtAuthGuard, WorkspaceGuard]);
   });
 
   describe('findAll', () => {
