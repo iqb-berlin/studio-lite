@@ -94,6 +94,37 @@ describe('Token Refresh UI Logic', () => {
     });
   });
 
+  // Until #1705 the interceptor logged out here too: its catchError for a failed refresh also
+  // caught the error of the request retried after a successful one (#1694).
+  it('stays logged in if the request retried after a successful refresh fails again', () => {
+    const newAccessToken = 'retry-access-token';
+    const newRefreshToken = 'retry-refresh-token';
+    login(standardUser.username, standardUser.password);
+    cy.intercept('GET', '/api/auth-data', {
+      statusCode: 401,
+      body: { message: 'Unauthorized' }
+    }).as('authDataFail');
+    cy.intercept('POST', '/api/refresh', {
+      statusCode: 200,
+      body: { accessToken: newAccessToken, refreshToken: newRefreshToken }
+    }).as('refreshRequest');
+
+    cy.visit('/');
+
+    cy.wait('@authDataFail');
+    cy.wait('@refreshRequest');
+    cy.wait('@authDataFail'); // the retry fails as well
+    // a 401 under a token renewed a moment ago can only mean the missing permission; once it is
+    // shown, the interceptor is done with the request
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('.error-container').should('contain', json['app-http-error']['403']);
+    });
+    cy.window().then(win => {
+      expect(win.localStorage.getItem('id_token')).to.equal(newAccessToken);
+      expect(win.localStorage.getItem('refresh_token')).to.equal(newRefreshToken);
+    });
+  });
+
   it('only calls the refresh endpoint once for multiple concurrent 401 requests', () => {
     login(standardUser.username, standardUser.password);
     // 1. Mock multiple concurrent requests to return 401
