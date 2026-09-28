@@ -1,3 +1,4 @@
+import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, Not, In } from 'typeorm';
@@ -262,6 +263,17 @@ describe('UnitCommentService', () => {
   });
 
   describe('toggleVote', () => {
+    // A review opened through its link and password carries user 0; its vote failed on the
+    // foreign key to `user` (#1730).
+    it('should refuse a vote without a user account', async () => {
+      mockVoteRepository.save.mockClear();
+      mockVoteRepository.delete.mockClear();
+      await expect(service.toggleVote(1, 0, 'up')).rejects.toThrow(ForbiddenException);
+      await expect(service.toggleVote(1, 0, null)).rejects.toThrow(ForbiddenException);
+      expect(voteRepository.save).not.toHaveBeenCalled();
+      expect(voteRepository.delete).not.toHaveBeenCalled();
+    });
+
     it('should delete vote if vote is null', async () => {
       const commentId = 1;
       const userId = 1;

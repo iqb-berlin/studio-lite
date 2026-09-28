@@ -4,8 +4,8 @@ import {
 } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { SafeHtml } from '@angular/platform-browser';
+import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
+import { By, SafeHtml } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -210,6 +210,50 @@ describe('CommentComponent', () => {
       fixture.detectChanges();
       const deleteIcon = fixture.nativeElement.querySelector('studio-lite-wrapped-icon[icon="delete"]');
       expect(deleteIcon).toBeTruthy();
+    });
+  });
+
+  // A review opened through its link and password reaches the comments as user 0 and has no
+  // account a vote could belong to (#1730).
+  describe('voting without a user account', () => {
+    const voteButtons = (): HTMLButtonElement[] => [
+      fixture.nativeElement.querySelector('[data-cy="comment-vote-up"]'),
+      fixture.nativeElement.querySelector('[data-cy="comment-vote-down"]')
+    ];
+    // The tooltips that can show: on the button while it can vote, on its wrapper while it cannot
+    const voteTooltips = (): string[] => fixture.debugElement
+      .queryAll(By.css('.vote-button-host, .vote-button'))
+      .map(el => el.injector.get(MatTooltip))
+      .filter(tooltip => !tooltip.disabled)
+      .map(tooltip => tooltip.message);
+
+    it('should offer the vote buttons to a user with an account', () => {
+      component.userId = 1;
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      expect(component.canVote).toBe(true);
+      expect(voteButtons().map(button => button.disabled)).toEqual([false, false]);
+      expect(voteTooltips()).toEqual(['comment.vote-up', 'comment.vote-down']);
+    });
+
+    it('should disable the vote buttons and say why for user 0', () => {
+      component.userId = 0;
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      expect(component.canVote).toBe(false);
+      expect(voteButtons().map(button => button.disabled)).toEqual([true, true]);
+      expect(voteTooltips()).toEqual(['comment.vote-needs-account', 'comment.vote-needs-account']);
+    });
+
+    it('should still show the number of votes to user 0', () => {
+      component.userId = 0;
+      component.comment.upVotes = 2;
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('.vote-count').textContent.trim()).toBe('2');
     });
   });
 
