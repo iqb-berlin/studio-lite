@@ -1265,5 +1265,53 @@
     "description": "Notiz/Beschreibung",
     "createdAt": "Erstellt am",
     "changedAt": "Geändert am"
+  },
+  "codebook": {
+    "coding": {
+      "has-only-manual-coding": "Manuell kodierte Variablen",
+      "select-all-including-hidden": "Alle verfügbaren Aufgaben auswählen, auch ausgeblendete Suchtreffer.",
+      "has-closed-vars": "Geschlossen kodierte Variablen",
+      "has-derived-vars": "Abgeleitete Variablen",
+      "has-closed-vars-tooltip": "Variablen mit automatischer/residuelle Kodierung einschließen.",
+      "code-label-to-upper-tooltip": "Alle Code-Bezeichnungen im Dokument automatisch in Großbuchstaben umwandeln.",
+      "selected-units": "{{count}} Aufgaben ausgewählt",
+      "has-only-manual-coding-tooltip": "Nur Variablen mit manuellen Kodier-Anweisungen exportieren.",
+      "hide-item-var-relation": "Item-Variable-Relation ausblenden",
+      "export-format": "Exportformat",
+      "error-save-changes": "Änderungen im Arbeitsbereich müssen erst noch gespeichert werden!",
+      "has-only-vars-with-codes": "Nur Variablen mit Codes",
+      "has-general-instructions": "Allgemeine Hinweise für jede Variable",
+      "show-score": "Bewertung anzeigen",
+      "codebook-export-error": "Das Codebook konnte nicht geladen oder exportiert werden. Bitte erneut versuchen.",
+      "code-label-to-upper": "Code-Label in Großbuchstaben",
+      "select-all-units": "Alle Aufgaben auswählen",
+      "codebook-content": "Variablen-Auswahl",
+      "has-only-vars-with-codes-tooltip": "Nur Variablen, die mindestens einen Code besitzen, werden in das Codebook aufgenommen.",
+      "hide-item-var-relation-tooltip": "Die Zuordnung zwischen Items und Variablen im Dokument ausblenden.",
+      "show-score-tooltip": "Die Punktwerte (Scores) für jeden Code in der Tabelle anzeigen.",
+      "has-derived-vars-tooltip": "Variablen, die aus anderen Variablen berechnet werden (Source-Typ nicht 'BASE'), in den Export aufnehmen.",
+      "codebook-formatting": "Formatierung",
+      "has-general-instructions-tooltip": "Den Text der allgemeinen Kodieranweisungen für jede Variable anzeigen."
+    },
+    "workspace": {
+      "unit-name": "Name",
+      "unit-key": "Kurzname",
+      "select-missings-profile": "Profil auswählen...",
+      "export-coding-book": "Codebook exportieren",
+      "group": "Gruppe",
+      "coding-missing-profiles": "Missings-Profil",
+      "select-unit": "Bitte Aufgaben auswählen!",
+      "unit-selected": "Eine Aufgabe ausgewählt",
+      "units-selected": "Aufgaben ausgewählt"
+    },
+    "export": "Exportieren",
+    "search-filter": {
+      "filter-units": "Suche nach Aufgaben",
+      "enter-filter": "Suchbegriff",
+      "delete-filter": "Suchbegriff zurücksetzen"
+    },
+    "dialogs": {
+      "cancel": "Abbrechen"
+    }
   }
 }
