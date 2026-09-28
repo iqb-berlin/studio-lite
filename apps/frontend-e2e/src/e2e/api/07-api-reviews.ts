@@ -693,6 +693,67 @@ describe('Review API tests', () => {
           });
       });
     });
+
+    // A unit moved away after it was put into the review is no longer served through it. It must
+    // then also leave the review's navigation: listed there, it failed as soon as a reviewer opened
+    // it. Its entry stays, so it is back in the review once it returns.
+    describe('a unit moved away and back', () => {
+      // unit4 goes back to ws1 even if the test fails halfway; moving it where it already is
+      // answers 200 without changing anything (see 38).
+      after(() => {
+        cy.moveToAPI(
+          Cypress.expose(ws2.id),
+          Cypress.expose(ws1.id),
+          Cypress.expose(unit4.shortname),
+          Cypress.expose(`token_${userGroupAdmin.username}`)
+        );
+      });
+
+      it('200 positive test: should list a unit that left the workspace no longer, and again once it is back', () => {
+        const groupAdminToken = Cypress.expose(`token_${userGroupAdmin.username}`);
+        const unitId = parseInt(Cypress.expose(unit4.shortname), 10);
+        const unitsSeenByReviewer = () => cy.getReviewAsReviewerAPI(
+          Cypress.expose('id_review1'),
+          Cypress.expose('tokenOfReview1')
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+          return resp.body.units;
+        });
+        cy.updateReviewAPI(Cypress.expose(ws1.id),
+          {
+            id: parseInt(Cypress.expose('id_review1'), 10),
+            link: '',
+            name: 'Teil1',
+            units: [Cypress.expose(unit4.shortname)]
+          },
+          groupAdminToken)
+          .its('status').should('equal', 200);
+        unitsSeenByReviewer().should('deep.equal', [unitId]);
+
+        cy.moveToAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(ws2.id),
+          Cypress.expose(unit4.shortname),
+          groupAdminToken
+        ).its('status').should('equal', 200);
+        unitsSeenByReviewer().should('deep.equal', []);
+        cy.getReviewAPI(Cypress.expose(ws1.id), Cypress.expose('id_review1'), groupAdminToken)
+          .its('body.units').should('deep.equal', []);
+        cy.getReviewPropertiesAPI(
+          Cypress.expose('id_review1'),
+          Cypress.expose(unit4.shortname),
+          Cypress.expose('tokenOfReview1')
+        ).its('status').should('equal', 403);
+
+        cy.moveToAPI(
+          Cypress.expose(ws2.id),
+          Cypress.expose(ws1.id),
+          Cypress.expose(unit4.shortname),
+          groupAdminToken
+        ).its('status').should('equal', 200);
+        unitsSeenByReviewer().should('deep.equal', [unitId]);
+      });
+    });
   });
 
   describe('74. DELETE /api/workspaces/{workspace_id}/reviews/{ids}', () => {

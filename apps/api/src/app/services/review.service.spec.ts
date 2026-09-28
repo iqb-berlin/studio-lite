@@ -129,6 +129,7 @@ describe('ReviewService', () => {
       reviewRepository.findOne.mockResolvedValue(review);
 
       reviewUnitRepository.find.mockResolvedValue([{ unitId: 10 }] as ReviewUnit[]);
+      unitRepository.find.mockResolvedValue([{ id: 10 }] as Unit[]);
 
       const workspace = {
         id: 1,
@@ -141,6 +142,34 @@ describe('ReviewService', () => {
       expect(result.id).toBe(1);
       expect(result.workspaceName).toBe('ws');
       expect(result.units).toEqual([10]);
+    });
+
+    // isUnitInReview refuses a unit that has left the review's workspace; listing it anyway put
+    // it into the review's navigation, where opening it failed.
+    it('should list only the units that are still in the review\'s workspace, in their order', async () => {
+      reviewRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Review);
+      reviewUnitRepository.find.mockResolvedValue([{ unitId: 12 }, { unitId: 10 }, { unitId: 11 }] as ReviewUnit[]);
+      unitRepository.find.mockResolvedValue([{ id: 10 }, { id: 12 }] as Unit[]);
+      workspaceRepository.findOne.mockResolvedValue({ id: 1, name: 'ws', workspaceGroup: { id: 2 } } as Workspace);
+
+      const result = await service.findOne(1);
+
+      expect(unitRepository.find).toHaveBeenCalledWith(expect.objectContaining({
+        where: expect.objectContaining({ workspaceId: 1 })
+      }));
+      expect(result.units).toEqual([12, 10]);
+    });
+
+    it('should leave the stored units of the review untouched', async () => {
+      reviewRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Review);
+      reviewUnitRepository.find.mockResolvedValue([{ unitId: 10 }, { unitId: 11 }] as ReviewUnit[]);
+      unitRepository.find.mockResolvedValue([{ id: 10 }] as Unit[]);
+      workspaceRepository.findOne.mockResolvedValue({ id: 1, name: 'ws', workspaceGroup: { id: 2 } } as Workspace);
+
+      await service.findOne(1);
+
+      expect(reviewUnitRepository.delete).not.toHaveBeenCalled();
+      expect(reviewUnitRepository.save).not.toHaveBeenCalled();
     });
   });
 
