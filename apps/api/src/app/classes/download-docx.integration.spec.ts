@@ -3,7 +3,7 @@ import { create } from 'xmlbuilder2';
 import {
   CodebookUnitDto,
   CodeBookContentSetting
-} from '@studio-lite-lib/api-dto';
+} from '@iqb/ngx-coding-components/codebook-models';
 import { DownloadDocx } from './download-docx.class';
 
 const defaultSettings = {

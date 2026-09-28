@@ -35,12 +35,13 @@ RUN mkdir packages
 # guard: if its dependencies are not contained in the committed pair with the
 # same versions, the build stops here. Fix: node scripts/update-api-runtime-deps.mjs
 COPY --chown=node:node --from=base /usr/src/studio-lite/dist/apps/${PROJECT}/package.json generated-package.json
+COPY --chown=node:node vendor/iqb-ngx-coding-components-4.1.0.tgz ./vendor/iqb-ngx-coding-components-4.1.0.tgz
 COPY --chown=node:node apps/${PROJECT}/runtime-package.json package.json
 COPY --chown=node:node apps/${PROJECT}/runtime-package-lock.json package-lock.json
 RUN node -e ' \
     const generated = require("./generated-package.json").dependencies || {}; \
     const committed = require("./package.json").dependencies || {}; \
-    const drift = Object.entries(generated).filter(function (e) { return committed[e[0]] !== e[1]; }); \
+    const drift = Object.entries(generated).filter(function (e) { return committed[e[0]] !== e[1] && !(e[0] === "@iqb/ngx-coding-components" && committed[e[0]] === "file:vendor/iqb-ngx-coding-components-" + e[1] + ".tgz"); }); \
     if (drift.length) { \
       console.error("Runtime dependencies drifted from the committed pair:"); \
       drift.forEach(function (e) { console.error("  " + e[0] + ": generated " + e[1] + ", committed " + (committed[e[0]] || "missing")); }); \
