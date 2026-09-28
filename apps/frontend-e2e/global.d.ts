@@ -112,6 +112,7 @@ declare namespace Cypress {
     Chainable<Response>; // 64a
     getAllReviewAPI(wsId:string, token:string): Chainable<Response>; // 65
     getReviewWindowAPI(reviewId:string, token:string): Chainable<Response>; // 66
+    getReviewAsReviewerAPI(reviewId: string, token: string): Chainable<Response>;
     getReviewPropertiesAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 67
     getReviewDefinitionAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 68
     getReviewSchemeAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 69

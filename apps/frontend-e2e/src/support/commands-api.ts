@@ -1689,6 +1689,20 @@ Cypress.Commands.add('getReviewWindowAPI', (reviewId:string, token:string) => {
   });
 });
 
+// The review as a reviewer opens it: GET /api/reviews/{review_id}, with the units of its navigation
+Cypress.Commands.add('getReviewAsReviewerAPI', (reviewId: string, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/reviews/${reviewId}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 67
 Cypress.Commands.add('getReviewPropertiesAPI', (reviewId:string, unitId:string, token:string) => {
   const authorization = `bearer ${token}`;
