@@ -854,6 +854,33 @@ describe('Unit API tests part II', () => {
     );
   });
 
+  // The admin view links each item to /a/<workspace>/<unit>. Before #1709 the list carried no
+  // workspace, and the link put the unit id in its place (#1698).
+  describe('GET /api/admin/unit-items', () => {
+    it('200 positive test: names the workspace each item\'s unit is in', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      // section 84 imported M6_AK0011, which brings an item, into ws1 and ws2
+      cy.getAdminUnitItemsAPI(adminToken).then(resp => {
+        expect(resp.status).to.equal(200);
+        const items = resp.body.filter((i: { unitKey: string }) => i.unitKey === 'M6_AK0011');
+        expect(items.map((i: { workspaceId: number }) => String(i.workspaceId)).sort())
+          .to.deep.equal([String(Cypress.expose(ws1.id)), String(Cypress.expose(ws2.id))].sort());
+        items.forEach((item: { unitId: number, workspaceId: number }) => {
+          cy.getUnitsByWsAPI(String(item.workspaceId), adminToken).then(units => {
+            const unit = units.body.find((u: { id: number }) => u.id === item.unitId);
+            expect(unit?.key, `unit ${item.unitId} in workspace ${item.workspaceId}`).to.equal('M6_AK0011');
+          });
+        });
+      });
+    });
+
+    it('403 negative test: is kept from a user without admin rights', () => {
+      cy.getAdminUnitItemsAPI(Cypress.expose(`token_${userGroupAdmin.username}`)).then(resp => {
+        expect(resp.status).to.equal(403);
+      });
+    });
+  });
+
   describe('a variable list in the VariableInfo 2.0 spelling (#1606)', () => {
     // What the schemer and coding-box get: the 1.x spelling, and `page` back as the empty value
     // that 2.0 dropped.
