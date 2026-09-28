@@ -115,8 +115,9 @@ export class ReviewService {
       workspaceGroupId: workspaceData.workspaceGroup.id,
       workspaceGroupName: workspaceData.workspaceGroup.name,
       // The same units isUnitInReview lets through: a unit moved to another workspace since would
-      // stand in the review's navigation and fail as soon as it is opened. Its entry stays, so a
-      // unit handed back from a drop box is part of the review again.
+      // stand in the review's navigation and fail as soon as it is opened. Its entry stays until the
+      // review is saved again -- a unit handed back from a drop box before that is part of it again,
+      // but saving writes what the dialog shows, and it no longer shows this unit.
       units: await this.unitsOfWorkspace(units.map(u => u.unitId), review.workspaceId)
     };
   }
