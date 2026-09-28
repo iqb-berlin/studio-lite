@@ -161,6 +161,21 @@ describe('Aspect Editor Elements Creation', () => {
     });
   });
 
+  it('adds widget molecular editor ', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      // adds widget molecular editor
+      // Darstellungart select Elektronenformel
+      // checks that widget molecular editor exists
+    });
+  });
+
+  it('adds widget periodic system ', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      // adds widget periodic system
+      // checks that widget periodic system exists
+    });
+  });
+
   it('saves the unit definition with all added element', () => {
     cy.intercept('PATCH', '/api/workspaces/*/units/*/definition').as(
       'saveUnit'

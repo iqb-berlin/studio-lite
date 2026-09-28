@@ -215,6 +215,24 @@ describe('Unit Preview (Vorschau)', () => {
     });
   });
 
+  it('verifies widget molecular editor in preview', () => {
+    cy.getIFrameBody('[data-cy="unit-preview-iframe"]').within(() => {
+      // checks that widget molecular editor exists
+      // interact with the molecular editor, selecting two element H and 0 and connect them
+      // ANd speichern
+      // checks that the element are on preview
+    });
+  });
+
+  it('verifies widget periodic system in preview', () => {
+    cy.getIFrameBody('[data-cy="unit-preview-iframe"]').within(() => {
+      // checks that widget periodic system exists
+      // interact with the periodic system selecting two element H and 0 and connect them
+      // ANd speichern
+      // checks that the element are on preview
+    });
+  });
+
   it('verifies preview bar controls', () => {
     cy.get('studio-lite-preview-bar').should('exist');
     cy.get('[data-cy="preview-bar-check-coding"]').should('exist');
