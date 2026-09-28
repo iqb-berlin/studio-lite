@@ -94,10 +94,17 @@
   }
 }
 
+.vote-button-host {
+  display: inline-flex;
+}
+
 .vote-button {
   color: inherit;
-  &:hover {
+  &:hover:not(:disabled) {
     color: #444;
+  }
+  &:disabled {
+    opacity: .38;
   }
 }
 

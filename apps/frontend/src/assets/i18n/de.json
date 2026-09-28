@@ -930,6 +930,7 @@
     "show": "Anzeigen",
     "vote-up": "Zustimmung",
     "vote-down": "Ablehnung",
+    "vote-needs-account": "Abstimmen ist nur mit einem Studio-Konto möglich.",
     "show-voters": "Details zum Votum anzeigen",
     "voter-overview": "Votum-Übersicht",
     "up-votes": "Zustimmung",

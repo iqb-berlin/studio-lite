@@ -612,6 +612,44 @@ describe('Review API tests', () => {
           expect(resp.status).to.equal(403);
         });
     });
+
+    // A vote belongs to a user account, and a review login has none: its token carries user 0.
+    // The vote used to fail on the vote table's foreign key to `user` (#1730).
+    it('403 negative test: should refuse a vote from a review login, and still take one from a user', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      const comment: CommentData = {
+        body: 'Comment to vote on',
+        parentId: undefined,
+        unitId: parseInt(Cypress.expose(unit4.shortname), 10),
+        userId: parseInt(Cypress.expose(`id_${Cypress.expose('username')}`), 10),
+        userName: Cypress.expose('username')
+      };
+      cy.createCommentReviewAPI(Cypress.expose('id_review1'), Cypress.expose(unit4.shortname), comment, adminToken)
+        .then(created => {
+          expect(created.status).to.equal(201);
+          const commentId = String(created.body);
+          cy.voteCommentReviewAPI(
+            Cypress.expose('id_review1'),
+            Cypress.expose(unit4.shortname),
+            commentId,
+            'up',
+            Cypress.expose('tokenOfReview1')
+          ).its('status').should('equal', 403);
+          cy.voteCommentReviewAPI(
+            Cypress.expose('id_review1'),
+            Cypress.expose(unit4.shortname),
+            commentId,
+            'up',
+            adminToken
+          ).its('status').should('be.within', 200, 299);
+          cy.deleteCommentReviewAPI(
+            Cypress.expose('id_review1'),
+            Cypress.expose(unit4.shortname),
+            commentId,
+            adminToken
+          ).its('status').should('equal', 200);
+        });
+    });
   });
 
   // The guards check the level in the workspace of the path. The review was taken from its id

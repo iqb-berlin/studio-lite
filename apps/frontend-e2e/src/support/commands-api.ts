@@ -1703,6 +1703,24 @@ Cypress.Commands.add('getReviewAsReviewerAPI', (reviewId: string, token: string)
   });
 });
 
+// A vote on a comment in a review: 'up', 'down' or null to take it back
+Cypress.Commands.add(
+  'voteCommentReviewAPI',
+  (reviewId: string, unitId: string, commentId: string, vote: 'up' | 'down' | null, token: string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'POST',
+      url: `/api/reviews/${reviewId}/units/${unitId}/comments/${commentId}/vote`,
+      headers: {
+        'app-version': Cypress.expose('version'),
+        authorization
+      },
+      body: { vote },
+      failOnStatusCode: false
+    });
+  }
+);
+
 // 67
 Cypress.Commands.add('getReviewPropertiesAPI', (reviewId:string, unitId:string, token:string) => {
   const authorization = `bearer ${token}`;
