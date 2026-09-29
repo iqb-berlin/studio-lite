@@ -16,7 +16,7 @@ import { BookletConfigEditComponent } from '../booklet-config-edit/booklet-confi
   selector: 'studio-lite-review-config',
   templateUrl: './review-config.component.html',
   styleUrls: ['./review-config.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatFormField, MatInput, FormsModule, ReviewConfigEditComponent, BookletConfigEditComponent, TranslateModule, MatLabel]
 })
 export class ReviewConfigComponent {

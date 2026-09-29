@@ -1,5 +1,5 @@
 import {
-  CanActivate, ExecutionContext, Injectable, UnauthorizedException
+  CanActivate, ExecutionContext, ForbiddenException, Injectable
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
@@ -44,6 +44,6 @@ export class WriteOrGroupAdminAccessGuard implements CanActivate {
       }
     }
 
-    throw new UnauthorizedException();
+    throw new ForbiddenException();
   }
 }

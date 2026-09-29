@@ -12,28 +12,28 @@ import { VeronaModuleMetadataDto } from '@studio-lite-lib/api-dto';
 @Entity()
 class VeronaModule {
   @PrimaryColumn()
-    key: string;
+  key: string;
 
   @Column({
     type: 'jsonb'
   })
-    metadata: VeronaModuleMetadataDto;
+  metadata: VeronaModuleMetadataDto;
 
   @Column({
     type: 'bytea'
   })
-    file: Uint8Array;
+  file: Uint8Array;
 
   @Column({
     name: 'file_size'
   })
-    fileSize: number;
+  fileSize: number;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'file_datetime'
   })
-    fileDateTime: Date;
+  fileDateTime: Date;
 }
 
 export default VeronaModule;

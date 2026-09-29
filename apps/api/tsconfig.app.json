@@ -3,10 +3,11 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "module": "commonjs",
+    "esModuleInterop": true,
     "types": ["node"],
     "emitDecoratorMetadata": true,
     "target": "es2021"
   },
-  "exclude": ["**/*.spec.ts", "**/*.test.ts", "jest.config.ts"],
+  "exclude": ["**/*.spec.ts", "**/*.test.ts", "jest.config.ts", "jest.setup.esm.ts"],
   "include": ["**/*.ts"]
 }

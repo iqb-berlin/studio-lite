@@ -7,7 +7,7 @@ export class StudioValidators {
         JSON.parse(control.value);
       }
       return null;
-    } catch (e) {
+    } catch {
       return { invalidJson: true };
     }
   }

@@ -1,5 +1,6 @@
 @if (pageList.length) {
-  <div class="page-nav fx-row-space-between-center mat-elevation-z3">
+  <div class="page-nav fx-row-space-between-center mat-elevation-z3"
+       data-cy="page-navigation">
     @for (p of pageList; track p) {
       <div class="nav-button">
         @if (p.type === '#previous') {
@@ -28,7 +29,8 @@
             <button class="page-button"
                     [class.selected-page]="p.disabled"
                     [disabled]="p.disabled"
-                    (click)="gotoPage.emit({ action: p.type, index: p.index })">
+                    (click)="gotoPage.emit({ action: p.type, index: p.index })"
+                    data-cy="page-navigation-page">
               {{ p.index }}
             </button>
             @if (!p.disabled) {

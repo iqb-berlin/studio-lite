@@ -45,10 +45,10 @@ describe('Admin API tests', () => {
         });
     });
 
-    it('401 negative test: should deny a regular user from listed all users', () => {
+    it('403 negative test: should deny a regular user from listed all users', () => {
       cy.getUsersAPI(Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp2 => {
-          expect(resp2.status).to.equal(401);
+          expect(resp2.status).to.equal(403);
         });
     });
   });
@@ -67,23 +67,23 @@ describe('Admin API tests', () => {
         });
     });
 
-    it('401 negative test: should deny a regular user from retrieving the full user list', () => {
+    it('403 negative test: should deny a regular user from retrieving the full user list', () => {
       cy.getUsersFullAPI(false, Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp2 => {
-          expect(resp2.status).to.equal(401);
+          expect(resp2.status).to.equal(403);
         });
     });
   });
 
   describe('9. PATCH /api/admin/users/{id}', () => {
-    it('401 negative test: should prevent a non-administrator user from granting ' +
+    it('403 negative test: should prevent a non-administrator user from granting ' +
       'themselves administrator rights', () => {
       cy.updateUserAPI(Cypress.expose(`id_${userGroupAdmin.username}`),
         userGroupAdmin,
         true,
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -121,7 +121,7 @@ describe('Admin API tests', () => {
         });
     });
 
-    it('401 negative test: should deny a regular user from creating a workspace group', () => {
+    it('403 negative test: should deny a regular user from creating a workspace group', () => {
       cy.updateUserAPI(Cypress.expose(`id_${userGroupAdmin.username}`),
         userGroupAdmin,
         false,
@@ -130,7 +130,7 @@ describe('Admin API tests', () => {
           expect(resp.status).to.equal(200);
           cy.createGroupAPI(group2, Cypress.expose(`token_${userGroupAdmin.username}`))
             .then(resp2 => {
-              expect(resp2.status).to.equal(401);
+              expect(resp2.status).to.equal(403);
             });
         });
     });
@@ -152,10 +152,10 @@ describe('Admin API tests', () => {
         });
     });
 
-    it('401 negative test: should deny access to workspace group details for a non-administrator user', () => {
+    it('403 negative test: should deny access to workspace group details for a non-administrator user', () => {
       cy.getGroupByIdAPI(Cypress.expose(groupVera.id), Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -181,10 +181,10 @@ describe('Admin API tests', () => {
         });
     });
 
-    it('401 negative test: should deny a regular user from listing workspace groups', () => {
+    it('403 negative test: should deny a regular user from listing workspace groups', () => {
       cy.getWsGroupsAPI(Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -225,12 +225,12 @@ describe('Admin API tests', () => {
         });
     });
 
-    it('401 negative test: should deny updates by a user who is not an administrator', () => {
+    it('403 negative test: should deny updates by a user who is not an administrator', () => {
       cy.updateGroupAPI(Cypress.expose(groupVera.id),
         'vera2027',
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
   });
@@ -285,11 +285,11 @@ describe('Admin API tests', () => {
         });
     });
 
-    it('401 negative test: should deny a user without admin credentials from viewing the admin list', () => {
+    it('403 negative test: should deny a user without admin credentials from viewing the admin list', () => {
       cy.getAdminOfGroupAPI(Cypress.expose(groupVera.id),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
   });

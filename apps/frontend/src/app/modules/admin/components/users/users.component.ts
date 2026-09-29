@@ -49,7 +49,7 @@ import { CountSessionsWithStatusPipe } from '../../../../pipes/count-sessions-wi
   selector: 'studio-lite-users',
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [UsersMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent, DatePipe, CountSessionsWithStatusPipe]
 })
 export class UsersComponent implements OnInit, OnDestroy {

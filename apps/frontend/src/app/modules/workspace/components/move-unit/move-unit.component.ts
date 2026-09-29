@@ -23,7 +23,7 @@ import { WorkspaceService } from '../../services/workspace.service';
   selector: 'studio-lite-move-unit',
   templateUrl: './move-unit.component.html',
   styleUrls: ['./move-unit.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatDialogTitle, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, MatDialogContent, SelectUnitListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, MatCheckbox]
 })
 

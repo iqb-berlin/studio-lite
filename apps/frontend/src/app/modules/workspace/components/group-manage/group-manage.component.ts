@@ -6,7 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { combineLatest } from 'rxjs';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import {
-  // eslint-disable-next-line max-len
+
   MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -33,7 +33,7 @@ import { SearchFilterComponent } from '../../../../components/search-filter/sear
   selector: 'studio-lite-group-manage',
   templateUrl: './group-manage.component.html',
   styleUrls: ['./group-manage.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatDialogTitle, MatDialogContent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatBadge, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, GroupMenuComponent, SelectUnitListComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 

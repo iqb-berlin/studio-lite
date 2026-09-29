@@ -13,7 +13,7 @@ import { AddReviewButtonComponent } from '../add-review-button/add-review-button
   selector: 'studio-lite-review-menu',
   templateUrl: './review-menu.component.html',
   styleUrls: ['./review-menu.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [AddReviewButtonComponent, DeleteReviewButtonComponent, StartReviewButtonComponent, ExportReviewButtonComponent, PrintReviewButtonComponent, CopyReviewLinkButtonComponent]
 })
 export class ReviewMenuComponent {

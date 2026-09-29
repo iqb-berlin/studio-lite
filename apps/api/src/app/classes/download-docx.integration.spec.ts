@@ -1,4 +1,4 @@
-import AdmZip = require('adm-zip');
+import AdmZip from 'adm-zip';
 import { create } from 'xmlbuilder2';
 import {
   CodebookUnitDto,

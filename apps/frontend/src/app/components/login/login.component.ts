@@ -28,7 +28,7 @@ import { AreaTitleComponent } from '../area-title/area-title.component';
   selector: 'studio-lite-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [AreaTitleComponent, WarningComponent, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatButton, TranslateModule]
 })
 export class LoginComponent implements OnInit, OnDestroy {

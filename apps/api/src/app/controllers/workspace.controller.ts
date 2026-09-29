@@ -21,8 +21,7 @@ import {
   ApiOkResponse,
   ApiParam,
   ApiQuery,
-  ApiTags,
-  ApiUnauthorizedResponse
+  ApiTags
 } from '@nestjs/swagger';
 import {
   WorkspaceFullDto,
@@ -84,7 +83,7 @@ export class WorkspaceController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
   @ApiForbiddenResponse({ description: 'Forbidden.' })
-  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'User has no privileges in the workspace.' })
   @ApiNotFoundResponse({ description: 'The requested workspace_id does not exist.' })
   @ApiQuery({
     name: 'download',
@@ -99,9 +98,9 @@ export class WorkspaceController {
   @ApiTags('workspace')
   async find(
     @WorkspaceId() workspaceId: number,
-      @Query('download') download: boolean,
-      @Query('settings') settings: string,
-      @Res({ passthrough: true }) res: Response
+    @Query('download') download: boolean,
+    @Query('settings') settings: string,
+    @Res({ passthrough: true }) res: Response
   ): Promise<WorkspaceFullDto | StreamableFile> {
     if (download) {
       let unitDownloadSettings: UnitDownloadSettingsDto;
@@ -140,12 +139,12 @@ export class WorkspaceController {
   @ApiBody({ type: UnitDownloadSettingsDto })
   @ApiOkResponse()
   @ApiForbiddenResponse({ description: 'Forbidden.' })
-  @ApiUnauthorizedResponse({ description: 'User has no privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'User has no privileges in the workspace.' })
   @ApiTags('workspace')
   async downloadUnitsJson(
     @WorkspaceId() workspaceId: number,
-      @Body() settings: UnitDownloadSettingsDto,
-      @Res({ passthrough: true }) res: Response
+    @Body() settings: UnitDownloadSettingsDto,
+    @Res({ passthrough: true }) res: Response
   ): Promise<StreamableFile> {
     const file = await UnitDownloadClass.get(
       workspaceId,
@@ -170,7 +169,7 @@ export class WorkspaceController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'user_id', type: Number })
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiNotFoundResponse({ description: 'User_id not found' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace')
@@ -185,7 +184,7 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace')
   async findUsers(@WorkspaceId() workspaceId: number): Promise<UsersInWorkspaceDto> {
@@ -197,7 +196,7 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace')
   async findGroups(@WorkspaceId() workspaceId: number): Promise<string[]> {
@@ -214,12 +213,12 @@ export class WorkspaceController {
   @UseGuards(JwtAuthGuard, ManageOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
   async deleteUnitGroup(
-  @WorkspaceId() workspaceId: number,
+    @WorkspaceId() workspaceId: number,
     @Body() body: GroupNameDto | RenameGroupNameDto
   ) {
     return this.workspaceService.patchGroupName(workspaceId, body);
@@ -234,7 +233,6 @@ export class WorkspaceController {
   @ApiCreatedResponse({
     type: RequestReportDto
   })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
   @ApiForbiddenResponse({ description: 'Forbidden. No sufficient privileges to upload units in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   async addUnitFiles(@WorkspaceId() workspaceId: number,
@@ -248,7 +246,7 @@ export class WorkspaceController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace')
   async patchSettings(@WorkspaceId() workspaceId: number,
@@ -256,11 +254,15 @@ export class WorkspaceController {
     return this.workspaceService.patchSettings(workspaceId, workspaceSetting);
   }
 
+  // Renaming and choosing the drop box are group administration -- the frontend offers both only
+  // in the group-admin area. They used to ask WorkspaceGuard alone, which every member passes,
+  // down to a commenter (#1715). WorkspaceGuard stays in front so that a workspace which does not
+  // exist is refused before the group is looked up.
   @Patch('name')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No group-admin privileges for the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')
@@ -269,10 +271,10 @@ export class WorkspaceController {
   }
 
   @Patch('drop-box')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, IsWorkspaceGroupAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse()
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No group-admin privileges for the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace')

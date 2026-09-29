@@ -1,8 +1,8 @@
 import {
-  Column, Entity, OneToMany, PrimaryGeneratedColumn
+  Column, Entity, OneToMany, PrimaryGeneratedColumn, Relation
 } from 'typeorm';
 import { ReviewSettingsDto } from '@studio-lite-lib/api-dto';
-// eslint-disable-next-line import/no-cycle
+
 import ReviewUnit from './review-unit.entity';
 
 /**
@@ -14,21 +14,21 @@ import ReviewUnit from './review-unit.entity';
 @Entity()
 class Review {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column({
     name: 'workspace_id'
   })
-    workspaceId: number;
+  workspaceId: number;
 
   @Column()
-    name: string;
+  name: string;
 
   @Column()
-    link: string;
+  link: string;
 
   @Column()
-    password: string;
+  password: string;
 
   @Column({
     type: 'jsonb',
@@ -36,24 +36,26 @@ class Review {
     default: () => "'{}'",
     nullable: false
   })
-    settings: ReviewSettingsDto;
+  settings: ReviewSettingsDto;
 
   @OneToMany(() => ReviewUnit, unit => unit.review)
-    units: ReviewUnit[];
+  // See the note in review-unit.entity.ts: the two import each other, and `Relation` keeps the
+  // decorator metadata from reading the other class while it is still being evaluated.
+  units: Relation<ReviewUnit[]>;
 
   @Column({
     type: 'timestamp with time zone',
     nullable: true,
     name: 'created_at'
   })
-    createdAt: Date;
+  createdAt: Date;
 
   @Column({
     type: 'timestamp with time zone',
     nullable: true,
     name: 'changed_at'
   })
-    changedAt: Date;
+  changedAt: Date;
 }
 
 export default Review;

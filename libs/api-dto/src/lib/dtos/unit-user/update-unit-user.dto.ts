@@ -2,11 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUnitUserDto {
   @ApiProperty()
-    lastSeenCommentChangedAt!: Date;
+  lastSeenCommentChangedAt!: Date;
 
   @ApiProperty()
-    userId!: number;
+  userId!: number;
 
   @ApiProperty()
-    userName?: string;
+  userName?: string;
 }

@@ -40,25 +40,25 @@ describe('Comments API tests', () => {
         });
       });
 
-      it('401 negative test: should deny comment creation for a user without sufficient workspace permissions', () => {
+      it('403 negative test: should deny comment creation for a user without sufficient workspace permissions', () => {
         cy.postCommentAPI(
           Cypress.expose(ws2.id),
           Cypress.expose(unit1.shortname),
           comment,
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
       });
 
-      it('401 negative test: should deny comment creation when both workspace ID and credentials are invalid', () => {
+      it('403 negative test: should deny comment creation when both workspace ID and credentials are invalid', () => {
         cy.postCommentAPI(
           Cypress.expose(ws2.id),
           Cypress.expose(unit1.shortname),
           comment,
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
       });
 
@@ -90,8 +90,8 @@ describe('Comments API tests', () => {
         }
       );
 
-      it('500 negative test: should return a server error when trying to add a comment without a workspace ID', () => {
-        // Passing the wrong workspace doesn't affect to insert comment if we pass a valid unit
+      it('403 negative test: should be refused when trying to add a comment without a workspace ID', () => {
+        // A workspace that does not exist is refused before the unit is looked at (#1571)
         const comment3: CommentData = {
           body: '<p>Kommentare 3 zur Aufgabe 1</p>',
           userName: `${userGroupAdmin.username}`,
@@ -107,7 +107,7 @@ describe('Comments API tests', () => {
           comment3,
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(403);
         });
       });
 
@@ -161,7 +161,7 @@ describe('Comments API tests', () => {
       });
 
       it(
-        '500 negative test: should return a server error when attempting to retrieve comments' +
+        '403 negative test: should be refused when attempting to retrieve comments' +
           ' without a valid workspace ID',
         () => {
           cy.getCommentsAPI(
@@ -169,7 +169,7 @@ describe('Comments API tests', () => {
             Cypress.expose(unit1.shortname),
             Cypress.expose(`token_${Cypress.expose('username')}`)
           ).then(resp => {
-            expect(resp.status).to.be.equal(500);
+            expect(resp.status).to.be.equal(403);
           });
         }
       );
@@ -201,7 +201,7 @@ describe('Comments API tests', () => {
       });
 
       it(
-        '500 negative test: should return a server error when attempting to update timestamp' +
+        '403 negative test: should be refused when attempting to update timestamp' +
           ' with invalid request data',
         () => {
           comment.lastSeenCommentChangedAt = new Date();
@@ -211,7 +211,7 @@ describe('Comments API tests', () => {
             comment,
             Cypress.expose(`token_${Cypress.expose('username')}`)
           ).then(resp => {
-            expect(resp.status).to.be.equal(500);
+            expect(resp.status).to.be.equal(403);
           });
         }
       );
@@ -247,7 +247,7 @@ describe('Comments API tests', () => {
       );
 
       it(
-        '500 negative test: should return a server error when attempting to retrieve last seen timestamp' +
+        '403 negative test: should be refused when attempting to retrieve last seen timestamp' +
           ' without a valid workspace ID',
         () => {
           cy.getCommentTimeAPI(
@@ -255,14 +255,14 @@ describe('Comments API tests', () => {
             Cypress.expose(unit1.shortname),
             Cypress.expose(`token_${Cypress.expose('username')}`)
           ).then(resp => {
-            expect(resp.status).to.be.equal(500);
+            expect(resp.status).to.be.equal(403);
           });
         }
       );
     });
 
     describe('60. PATCH /api/workspaces/{workspace_id}/units/{id}/comments/{id}', () => {
-      it('401 negative test: should deny comment updates even for an administrator if they are not the author', () => {
+      it('403 negative test: should deny comment updates even for an administrator if they are not the author', () => {
         comment.body = '<p>Kommentare 4 zur Aufgabe 1</p>';
         cy.updateCommentAPI(
           Cypress.expose(ws2.id),
@@ -271,12 +271,12 @@ describe('Comments API tests', () => {
           comment,
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
-          expect(resp.status).to.be.equal(401);
+          expect(resp.status).to.be.equal(403);
         });
       });
 
       it(
-        '500 negative test: should return a server error when attempting to update a comment' +
+        '403 negative test: should be refused when attempting to update a comment' +
           ' using an invalid workspace ID',
         () => {
           comment.body = '<p>Kommentare 4 zur Aufgabe 1</p>';
@@ -287,7 +287,7 @@ describe('Comments API tests', () => {
             comment,
             Cypress.expose(`token_${userGroupAdmin.username}`)
           ).then(resp => {
-            expect(resp.status).to.be.equal(500);
+            expect(resp.status).to.be.equal(403);
           });
         }
       );
@@ -346,19 +346,19 @@ describe('Comments API tests', () => {
     });
 
     describe('61. DELETE /api/workspaces/{workspace_id}/units/{id}/comments/{id}', () => {
-      it('401 negative test: should deny comment deletion for a user without sufficient privileges', () => {
+      it('403 negative test: should deny comment deletion for a user without sufficient privileges', () => {
         cy.deleteCommentAPI(
           Cypress.expose(ws2.id),
           Cypress.expose(unit1.shortname),
           Cypress.expose('comment2'),
           Cypress.expose(`token_${user3.username}`)
         ).then(resp => {
-          expect(resp.status).to.be.equal(401);
+          expect(resp.status).to.be.equal(403);
         });
       });
 
       it(
-        '500 negative test: should return a server error when attempting to delete a comment' +
+        '403 negative test: should be refused when attempting to delete a comment' +
           ' using an invalid workspace ID',
         () => {
           cy.deleteCommentAPI(
@@ -367,7 +367,7 @@ describe('Comments API tests', () => {
             Cypress.expose('comment2'),
             Cypress.expose(`token_${userGroupAdmin.username}`)
           ).then(resp => {
-            expect(resp.status).to.be.equal(500);
+            expect(resp.status).to.be.equal(403);
           });
         }
       );
@@ -386,24 +386,16 @@ describe('Comments API tests', () => {
         });
       });
 
-      it(
-        '404/200 negative test: should return success despite providing an invalid ' +
-          'unit ID for comment deletion',
-        () => {
-          // This test get 200, but maybe should be 500, because we are using a no existent unit.
-          // It does not need the unit.
-          // to delete the comment. The check was only the right workspace and have the credentials
-          cy.deleteCommentAPI(
-            Cypress.expose(ws2.id),
-            noId,
-            Cypress.expose('comment2'),
-            Cypress.expose(`token_${userGroupAdmin.username}`)
-          ).then(resp => {
-            expect(resp.status).to.be.equal(200);
-            //  expect(resp.status).to.be.equal(404);
-          });
-        }
-      );
+      it('404 negative test: should refuse deletion of a comment when providing an invalid unit ID', () => {
+        cy.deleteCommentAPI(
+          Cypress.expose(ws2.id),
+          noId,
+          Cypress.expose('comment2'),
+          Cypress.expose(`token_${userGroupAdmin.username}`)
+        ).then(resp => {
+          expect(resp.status).to.be.equal(404);
+        });
+      });
 
       it('200 positive test: should allow an administrator to successfully delete comments', () => {
         cy.deleteCommentAPI(
@@ -466,11 +458,11 @@ describe('Comments API tests', () => {
       });
     });
 
-    it('401 negative test: should deny hiding a comment to a user without access to the workspace', () => {
+    it('403 negative test: should deny hiding a comment to a user without access to the workspace', () => {
       // user3 is in no workspace here. Before #1628 the route asked for nothing but a valid token,
       // so this call hid a comment in a workspace the caller has never been part of. The refusal
-      // comes from WorkspaceGuard, which runs ahead of CommentAccessGuard and answers 401; that
-      // the token itself is good is what the 200 further down shows.
+      // comes from WorkspaceGuard, which runs ahead of CommentAccessGuard and answers 403 (401
+      // until #1706); that the token itself is good is what the 200 further down shows.
       cy.patchCommentVisibilityAPI(
         Cypress.expose(ws2.id),
         Cypress.expose(unit1.shortname),
@@ -479,11 +471,11 @@ describe('Comments API tests', () => {
         Cypress.expose(`id_${user3.username}`),
         Cypress.expose('tokenOfMember')
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 
-    it('401 negative test: should deny deleting another user\'s comment to a plain member of the workspace', () => {
+    it('403 negative test: should deny deleting another user\'s comment to a plain member of the workspace', () => {
       cy.setUsersOfWsAPI(
         Cypress.expose(ws2.id),
         [
@@ -503,7 +495,7 @@ describe('Comments API tests', () => {
         Cypress.expose('commentOfAuthor'),
         Cypress.expose('tokenOfMember')
       ).then(resp => {
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
 

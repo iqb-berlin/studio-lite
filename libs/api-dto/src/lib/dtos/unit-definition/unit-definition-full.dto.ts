@@ -2,11 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UnitDefinitionFullDto {
   @ApiProperty()
-    id!: number;
+  id!: number;
 
   @ApiProperty()
-    unitId!: number;
+  unitId!: number;
 
   @ApiProperty()
-    data!: string;
+  data!: string;
 }

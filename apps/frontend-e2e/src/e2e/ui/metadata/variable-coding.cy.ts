@@ -5,7 +5,7 @@ import {
 } from '../../../support/metadata/metadata-util';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
 import {
-  AccessLevel, modules, testGroups, testWorkspaces
+  AccessLevel, modules, metadataBistaIIIGroup, metadataMathPrimarWorkspace
 } from '../../../support/testData';
 import {
   addFirstUser,
@@ -28,8 +28,8 @@ import {
 } from '../../../support/helpers/group-admin';
 
 describe('Variable and Item Metadata Coherence', () => {
-  const mathArea = testWorkspaces.metadata.mathPrimar1;
-  const group = testGroups.metadata.bista3;
+  const mathArea = metadataMathPrimarWorkspace;
+  const group = metadataBistaIIIGroup;
 
   before(() => {
     addFirstUser();

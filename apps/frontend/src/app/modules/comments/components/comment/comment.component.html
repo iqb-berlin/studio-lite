@@ -59,12 +59,20 @@
           <div class="vote-section">
             <div class="integrated-vote-container"
                  [class.vote-active-up]="comment.userVote === 'up'">
-              <button mat-icon-button
-                      class="vote-button"
-                      matTooltip="{{'comment.vote-up' | translate}}"
-                      (click)="onVote('up')">
-                <studio-lite-wrapped-icon icon="thumb_up"></studio-lite-wrapped-icon>
-              </button>
+              <!-- a disabled button receives no mouse events: its explanation sits on the wrapper -->
+              <span class="vote-button-host"
+                    matTooltip="{{'comment.vote-needs-account' | translate}}"
+                    [matTooltipDisabled]="canVote">
+                <button mat-icon-button
+                        class="vote-button"
+                        matTooltip="{{'comment.vote-up' | translate}}"
+                        [matTooltipDisabled]="!canVote"
+                        [disabled]="!canVote"
+                        data-cy="comment-vote-up"
+                        (click)="onVote('up')">
+                  <studio-lite-wrapped-icon icon="thumb_up"></studio-lite-wrapped-icon>
+                </button>
+              </span>
               @if (comment.upVotes) {
                 <span class="vote-count"
                       matTooltip="{{'comment.show-voters' | translate}}"
@@ -76,12 +84,19 @@
 
             <div class="integrated-vote-container"
                  [class.vote-active-down]="comment.userVote === 'down'">
-              <button mat-icon-button
-                      class="vote-button"
-                      matTooltip="{{'comment.vote-down' | translate}}"
-                      (click)="onVote('down')">
-                <studio-lite-wrapped-icon icon="thumb_down"></studio-lite-wrapped-icon>
-              </button>
+              <span class="vote-button-host"
+                    matTooltip="{{'comment.vote-needs-account' | translate}}"
+                    [matTooltipDisabled]="canVote">
+                <button mat-icon-button
+                        class="vote-button"
+                        matTooltip="{{'comment.vote-down' | translate}}"
+                        [matTooltipDisabled]="!canVote"
+                        [disabled]="!canVote"
+                        data-cy="comment-vote-down"
+                        (click)="onVote('down')">
+                  <studio-lite-wrapped-icon icon="thumb_down"></studio-lite-wrapped-icon>
+                </button>
+              </span>
               @if (comment.downVotes) {
                 <span class="vote-count"
                       matTooltip="{{'comment.show-voters' | translate}}"

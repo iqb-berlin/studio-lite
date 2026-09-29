@@ -641,6 +641,20 @@ Cypress.Commands.add('getUnitsByWsAPI', (wsId:string, token:string) => {
   });
 });
 
+// The workspace as a user sees it, with their access level -- what the frontend loads to open it
+Cypress.Commands.add('getUserWorkspaceAPI', (wsId:string, userId: string, token:string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/users/${userId}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // 38
 Cypress.Commands.add('moveToAPI', (wsOriginId:string, wsDestinyId: string, unitId:string, token:string) => {
   // TO DO replace the unitId by an array of Ids
@@ -747,10 +761,56 @@ Cypress.Commands.add('getUnitSchemeAPI', (unitId: string, wsId: string, token:st
   });
 });
 
+// Saves a variable list the way the editor does, with an empty definition beside it
+Cypress.Commands.add(
+  'updateUnitVariablesAPI',
+  (unitId: string, wsId: string, variables: Record<string, unknown>[], token: string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'PATCH',
+      url: `/api/workspaces/${wsId}/units/${unitId}/definition`,
+      headers: {
+        'app-version': Cypress.expose('version'),
+        authorization
+      },
+      body: { definition: '', variables },
+      failOnStatusCode: false
+    });
+  }
+);
+
+// The unit import of importUnitsAPI and uploadUnitFilesAPI. A multipart request gets its response
+// body back as an ArrayBuffer; it is handed on parsed, as the import report.
+function postUnitFiles(wsId: string, formData: FormData, token: string) {
+  return cy.request({
+    method: 'POST',
+    url: `/api/workspaces/${wsId}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      'content-type': 'multipart/form-data',
+      authorization: `bearer ${token}`
+    },
+    body: formData,
+    failOnStatusCode: false
+  }).then(resp => ({ ...resp, body: JSON.parse(new TextDecoder().decode(resp.body)) }));
+}
+
+// Uploads fixture files side by side and unzipped, e.g. a unit XML with its definition
+Cypress.Commands.add('uploadUnitFilesAPI', (wsId: string, fixtures: string[], token: string) => {
+  const formData = new FormData();
+  fixtures.forEach(fixture => {
+    cy.fixture(fixture, 'binary').then(content => {
+      const mimeType = fixture.endsWith('.xml') ? 'text/xml' : 'application/octet-stream';
+      formData.append('files', Cypress.Blob.binaryStringToBlob(content, mimeType), fixture.split('/').pop());
+    });
+  });
+  cy.then(() => postUnitFiles(wsId, formData, token));
+});
+
 // 44
 Cypress.Commands.add('updateUnitDefinitionAPI', (unitId: string, wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
-  // eslint-disable-next-line max-len
+
   // const definition = '{"type":"aspect-unit-definition","stateVariables":[],"enableSectionNumbering":false,"sectionNumberingPosition":"left","showUnitNavNext":false,"version":"4.9.0","pages":[{"sections":[{"elements":[{"isRelevantForPresentationComplete":true,"id":"text_1743412177740_1","alias":"text_1","position":{"xPosition":0,"yPosition":0,"gridColumn":1,"gridColumnRange":1,"gridRow":1,"gridRowRange":1,"marginLeft":{"value":0,"unit":"px"},"marginRight":{"value":0,"unit":"px"},"marginTop":{"value":0,"unit":"px"},"marginBottom":{"value":10,"unit":"px"},"zIndex":0},"dimensions":{"width":180,"height":98,"isWidthFixed":false,"isHeightFixed":false,"minWidth":null,"maxWidth":null,"minHeight":null,"maxHeight":null},"type":"text","text":"<p style=\"padding-left: 0px; text-indent: 0px; margin-bottom: 0px; margin-top: 0\" indentsize=\"20\">Wie viele Monde hat Jupiter?</p>","markingMode":"selection","markingPanels":[],"highlightableOrange":false,"highlightableTurquoise":false,"highlightableYellow":false,"hasSelectionPopup":false,"columnCount":1,"styling":{"backgroundColor":"transparent","fontColor":"#000000","font":"NunitoSans","fontSize":20,"bold":false,"italic":false,"underline":false,"lineHeight":135}},{"isRelevantForPresentationComplete":true,"id":"text-area_1743412202936_1","alias":"text-area_1","position":{"xPosition":0,"yPosition":0,"gridColumn":1,"gridColumnRange":1,"gridRow":2,"gridRowRange":1,"marginLeft":{"value":0,"unit":"px"},"marginRight":{"value":0,"unit":"px"},"marginTop":{"value":0,"unit":"px"},"marginBottom":{"value":0,"unit":"px"},"zIndex":0},"dimensions":{"width":230,"height":132,"isWidthFixed":false,"isHeightFixed":false,"minWidth":null,"maxWidth":null,"minHeight":null,"maxHeight":null},"label":"","value":"Jupiter hat ... Monde.","required":false,"requiredWarnMessage":"Eingabe erforderlich","readOnly":false,"inputAssistancePreset":null,"inputAssistanceCustomKeys":"","inputAssistancePosition":"floating","inputAssistanceFloatingStartPosition":"startBottom","restrictedToInputAssistanceChars":false,"hasArrowKeys":false,"hasBackspaceKey":false,"showSoftwareKeyboard":true,"addInputAssistanceToKeyboard":true,"hideNativeKeyboard":true,"type":"text-area","appearance":"outline","resizeEnabled":false,"hasDynamicRowCount":true,"hasAutoHeight":false,"rowCount":3,"expectedCharactersCount":135,"hasReturnKey":false,"hasKeyboardIcon":false,"styling":{"backgroundColor":"transparent","fontColor":"#000000","font":"NunitoSans","fontSize":20,"bold":false,"italic":false,"underline":false,"lineHeight":135}}],"height":400,"backgroundColor":"#ffffff","dynamicPositioning":true,"autoColumnSize":true,"autoRowSize":true,"gridColumnSizes":[{"value":1,"unit":"fr"}],"gridRowSizes":[{"value":1,"unit":"fr"}],"visibilityDelay":0,"animatedVisibility":false,"enableReHide":false,"logicalConnectiveOfRules":"disjunction","visibilityRules":[],"ignoreNumbering":false}],"hasMaxWidth":true,"maxWidth":750,"margin":30,"backgroundColor":"#ffffff","alwaysVisible":false,"alwaysVisiblePagePosition":"left","alwaysVisibleAspectRatio":50}]}';
   cy.request({
     method: 'PATCH',
@@ -1182,9 +1242,9 @@ Cypress.Commands.add('getUnitDefinitionAPI', (unitId: string, wsId: string, toke
 // 46
 Cypress.Commands.add('updateUnitSchemeAPI', (unitId: string, wsId: string, token:string) => {
   const authorization = `bearer ${token}`;
-  // eslint-disable-next-line max-len
+
   // const scheme1:string = '{"variableCodings":[{"id":"text-area_1","alias":"text-area_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":false,"ruleSets":[{"ruleOperatorAnd":true,"rules":[{"method":"MATCH","parameters":["Jupiter hat 92 Monde."]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL","label":"","score":0,"ruleSetOperatorAnd":false,"ruleSets":[],"manualInstruction":"<p>\\n Alle anderen Antworten \\n </p>"}]}],"version":"3.0"}';
-  // eslint-disable-next-line max-len
+
   const scheme1:string = '{"variableCodings":[{"id":"text-area_1","alias":"text-area_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":false,"ruleSets":[{"ruleOperatorAnd":true,"rules":[{"method":"MATCH","parameters":["Jupiter hat 92 Monde."]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL","label":"","score":0,"ruleSetOperatorAnd":false,"ruleSets":[],"manualInstruction":"<p>\\n Alle anderen Antworten \\n </p>"}]},{"id":"text_1","alias":"text_1","label":"","sourceType":"BASE_NO_VALUE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[]},{"id":"text_1744012056375_1","alias":"text_2","label":"","sourceType":"BASE_NO_VALUE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[]},{"id":"radio_1744012095680_1","alias":"radio_1","label":"","sourceType":"BASE","sourceParameters":{"solverExpression":"","processing":[]},"deriveSources":[],"processing":[],"fragmenting":"","manualInstruction":"","codeModel":"NONE","codes":[{"id":1,"type":"FULL_CREDIT","label":"","score":1,"ruleSetOperatorAnd":true,"ruleSets":[{"ruleOperatorAnd":false,"rules":[{"method":"MATCH","parameters":["3"]}]}],"manualInstruction":""},{"id":0,"type":"RESIDUAL_AUTO","label":"","score":0,"ruleSetOperatorAnd":true,"ruleSets":[],"manualInstruction":""}]}],"version":"3.0"}';
   cy.request({
     method: 'PATCH',
@@ -1629,6 +1689,38 @@ Cypress.Commands.add('getReviewWindowAPI', (reviewId:string, token:string) => {
   });
 });
 
+// The review as a reviewer opens it: GET /api/reviews/{review_id}, with the units of its navigation
+Cypress.Commands.add('getReviewAsReviewerAPI', (reviewId: string, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/reviews/${reviewId}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// A vote on a comment in a review: 'up', 'down' or null to take it back
+Cypress.Commands.add(
+  'voteCommentReviewAPI',
+  (reviewId: string, unitId: string, commentId: string, vote: 'up' | 'down' | null, token: string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'POST',
+      url: `/api/reviews/${reviewId}/units/${unitId}/comments/${commentId}/vote`,
+      headers: {
+        'app-version': Cypress.expose('version'),
+        authorization
+      },
+      body: { vote },
+      failOnStatusCode: false
+    });
+  }
+);
+
 // 67
 Cypress.Commands.add('getReviewPropertiesAPI', (reviewId:string, unitId:string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -1923,6 +2015,42 @@ Cypress.Commands.add('uploadUnitsAPI', (wsId: string, filename:string, token:str
         failOnStatusCode: false
       });
     });
+});
+
+// The unit export kept as a binary string, so that it can be imported again as it is
+Cypress.Commands.add('exportUnitsAPI', (wsId: string, downloadQuery: string, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}?download=true&settings=${downloadQuery}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    encoding: 'binary',
+    failOnStatusCode: false
+  });
+});
+
+// Imports a zip handed over as a binary string, as exportUnitsAPI returns it
+Cypress.Commands.add('importUnitsAPI', (wsId: string, zipContent: string, token: string) => {
+  const formData = new FormData();
+  formData.append('files', Cypress.Blob.binaryStringToBlob(zipContent, 'application/zip'), 'export.zip');
+  postUnitFiles(wsId, formData, token);
+});
+
+// The items of all units, as the admin view "Unit-Items" lists them
+Cypress.Commands.add('getAdminUnitItemsAPI', (token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/admin/unit-items',
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
 });
 
 // 85

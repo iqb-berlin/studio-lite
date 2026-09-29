@@ -46,7 +46,7 @@ import { EntriesDividerComponent } from '../../../../components/entries-divider/
   selector: 'studio-lite-workspace-groups',
   templateUrl: './workspace-groups.component.html',
   styleUrls: ['./workspace-groups.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent]
 })
 export class WorkspaceGroupsComponent implements OnInit {

@@ -11,24 +11,24 @@ import {
 @Unique('unit_id_unique', ['unitId'])
 class UnitMetadataToDelete {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column({
     name: 'unit_id'
   })
-    unitId: number;
+  unitId: number;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'changed_at'
   })
-    changedAt: Date;
+  changedAt: Date;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'created_at'
   })
-    createdAt: Date;
+  createdAt: Date;
 }
 
 export default UnitMetadataToDelete;

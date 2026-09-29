@@ -22,7 +22,7 @@
           </th>
           <td mat-cell *matCellDef="let item">
             @if (column === 'unitId') {
-              <a [routerLink]="`/a/${item.unitId}`">{{ item.unitId }}</a>
+              <a [routerLink]="`/a/${item.workspaceId}/${item.unitId}`">{{ item.unitId }}</a>
             } @else if (column === 'createdAt' || column === 'changedAt') {
               {{ item[column] | date : i18nService.dateTimeFormat : i18nService.timeZone }}
             } @else {

@@ -3,5 +3,5 @@ import { ReviewBaseDto } from './review-base.dto';
 
 export class ReviewInListDto extends ReviewBaseDto {
   @ApiProperty()
-    link?: string;
+  link?: string;
 }

@@ -2,11 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class MissingsProfilesDto {
   @ApiProperty()
-    id?: number;
+  id?: number;
 
   @ApiProperty()
-    label!: string;
+  label!: string;
 
   @ApiProperty()
-    missings?: string;
+  missings?: string;
 }

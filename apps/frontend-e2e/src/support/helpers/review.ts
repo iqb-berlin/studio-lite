@@ -83,7 +83,9 @@ export function createReview(name: string, unitNames: string[]): void {
  * @param unitNames - Array of unit names to select
  */
 export function modifyReviewUnits(name: string, unitNames: string[]): void {
+  cy.intercept('GET', '/api/workspaces/*/reviews/*').as('getReviewForModify');
   cy.contains('mat-row', name).click();
+  cy.wait('@getReviewForModify');
   cy.intercept('PATCH', '/api/workspaces/*/reviews/*').as('updateReview');
   unitNames.forEach(unit => selectCheckBox(unit));
   cy.translate(Cypress.expose('locale')).then(json => {

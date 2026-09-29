@@ -1,20 +1,17 @@
 import {
   AccessLevel,
-  modules,
-  newUser,
+  standardUser,
   resource,
-  testGroups,
-  testWorkspaces
+  adminGroup,
+  adminMathWorkspace
 } from '../../../support/testData';
 import {
   addFirstUser,
-  addModules,
   addResourcePackage,
   createGroup,
   createNewUser,
   deleteFirstUser,
   deleteGroup,
-  deleteAllModules,
   deleteResource,
   deleteUser
 } from '../../../support/helpers';
@@ -24,8 +21,8 @@ import {
 } from '../../../support/helpers/group-admin';
 
 describe('UI Administration Management', () => {
-  const group1 = testGroups.admin;
-  const ws1 = testWorkspaces.admin.math1;
+  const group1 = adminGroup;
+  const ws1 = adminMathWorkspace;
   before(() => {
     addFirstUser();
   });
@@ -38,11 +35,11 @@ describe('UI Administration Management', () => {
   });
 
   it('creates a new user', () => {
-    createNewUser(newUser);
+    createNewUser(standardUser);
   });
 
   it('deletes a user', () => {
-    deleteUser(newUser.username);
+    deleteUser(standardUser.username);
   });
 
   it('creates a workspace group', () => {
@@ -54,21 +51,11 @@ describe('UI Administration Management', () => {
     grantRemovePrivilegeAtWs([Cypress.expose('username')], 'Mathematik I', [AccessLevel.Basic]);
   });
 
-  it('uploads Verona modules',
-    { defaultCommandTimeout: 100000 },
-    () => {
-      addModules(modules);
-    });
-
   it('uploads a resource package',
     { defaultCommandTimeout: 200000 },
     () => {
       addResourcePackage(resource);
     });
-
-  it('deletes Verona modules', () => {
-    deleteAllModules();
-  });
 
   it('deletes a resource package', () => {
     deleteResource();

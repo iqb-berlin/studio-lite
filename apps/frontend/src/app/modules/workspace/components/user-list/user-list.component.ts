@@ -2,7 +2,7 @@ import {
   AfterViewInit, Component, Input, ViewChild
 } from '@angular/core';
 import {
-  // eslint-disable-next-line max-len
+
   MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { UserInListDto } from '@studio-lite-lib/api-dto';
@@ -13,7 +13,7 @@ import { TranslateModule } from '@ngx-translate/core';
   selector: 'studio-lite-user-list',
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, TranslateModule]
 })
 export class UserListComponent implements AfterViewInit {

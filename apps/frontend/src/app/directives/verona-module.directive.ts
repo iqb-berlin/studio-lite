@@ -125,8 +125,8 @@ export abstract class VeronaModuleDirective implements OnDestroy {
       schemer: 'schemers'
     };
     return this.moduleService[serviceProperties[moduleType]] as Record<
-    string,
-    VeronaModuleClass
+      string,
+      VeronaModuleClass
     >;
   }
 

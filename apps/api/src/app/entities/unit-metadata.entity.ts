@@ -10,6 +10,6 @@ class UnitMetadata extends Metadata {
   @Column({
     name: 'unit_id'
   })
-    unitId: number;
+  unitId: number;
 }
 export default UnitMetadata;

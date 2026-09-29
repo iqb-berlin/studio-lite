@@ -2,29 +2,29 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ConfigDto {
   @ApiProperty()
-    appTitle!: string;
+  appTitle!: string;
 
   @ApiProperty()
-    introHtml = '';
+  introHtml = '';
 
   @ApiProperty()
-    imprintHtml = '';
+  imprintHtml = '';
 
   @ApiProperty()
-    emailSubject = '';
+  emailSubject = '';
 
   @ApiProperty()
-    emailBody = '';
+  emailBody = '';
 
   @ApiProperty()
-    globalWarningText = '';
+  globalWarningText = '';
 
   @ApiProperty()
-    globalWarningExpiredDay?: Date;
+  globalWarningExpiredDay?: Date;
 
   @ApiProperty()
-    globalWarningExpiredHour?: number;
+  globalWarningExpiredHour?: number;
 
   @ApiProperty()
-    hasUsers = true;
+  hasUsers = true;
 }

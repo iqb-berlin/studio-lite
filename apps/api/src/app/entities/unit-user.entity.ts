@@ -9,18 +9,18 @@ class UnitUser {
   @PrimaryColumn({
     name: 'unit_id'
   })
-    unitId: number;
+  unitId: number;
 
   @PrimaryColumn({
     name: 'user_id'
   })
-    userId: number;
+  userId: number;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'last_seen_comment_changed_at'
   })
-    lastSeenCommentChangedAt: Date;
+  lastSeenCommentChangedAt: Date;
 }
 
 export default UnitUser;

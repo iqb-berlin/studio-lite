@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { WorkspaceGuard } from './workspace.guard';
 import { AuthService } from '../services/auth.service';
@@ -43,7 +43,7 @@ describe('WorkspaceGuard', () => {
     expect(authService.canAccessWorkSpace).toHaveBeenCalledWith(userId, workspaceId);
   });
 
-  it('should throw UnauthorizedException if authService.canAccessWorkSpace returns false', async () => {
+  it('should throw ForbiddenException if authService.canAccessWorkSpace returns false', async () => {
     const userId = 1;
     const workspaceId = 'w1';
     authService.canAccessWorkSpace.mockResolvedValue(false);
@@ -57,7 +57,7 @@ describe('WorkspaceGuard', () => {
       })
     });
 
-    await expect(workspaceGuard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+    await expect(workspaceGuard.canActivate(context)).rejects.toThrow(ForbiddenException);
     expect(authService.canAccessWorkSpace).toHaveBeenCalledWith(userId, workspaceId);
   });
 });

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { ReadOrGroupAdminAccessGuard } from './read-or-group-admin-access.guard';
 import { AuthService } from '../services/auth.service';
@@ -83,7 +83,7 @@ describe('ReadOrGroupAdminAccessGuard', () => {
     expect(await guard.canActivate(context)).toBe(true);
   });
 
-  it('should throw UnauthorizedException if all checks fail', async () => {
+  it('should throw ForbiddenException if all checks fail', async () => {
     workspaceUserService.hasAccess.mockResolvedValue(false);
     authService.isAdminUser.mockResolvedValue(false);
     workspaceService.findOne.mockResolvedValue({ id: 10, groupId: 5 } as unknown as never);
@@ -97,6 +97,6 @@ describe('ReadOrGroupAdminAccessGuard', () => {
       })
     });
 
-    await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+    await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
   });
 });

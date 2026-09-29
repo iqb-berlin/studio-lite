@@ -3,8 +3,8 @@ import { UnitItemWithMetadataDto, UnitMetadataDto } from '@studio-lite-lib/api-d
 
 export class UnitFullMetadataDto {
   @ApiProperty()
-    profiles?: UnitMetadataDto[];
+  profiles?: UnitMetadataDto[];
 
   @ApiProperty()
-    items?: UnitItemWithMetadataDto[];
+  items?: UnitItemWithMetadataDto[];
 }

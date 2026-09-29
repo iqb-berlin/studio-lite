@@ -148,6 +148,21 @@ describe('PageNavigationComponent', () => {
       expect(pageButtons.length).toBe(3);
     });
 
+    it('should carry the markers the e2e tests address it by', () => {
+      component.pageList = [
+        {
+          index: 1, id: 'page1', type: '#goto', disabled: true
+        },
+        {
+          index: 2, id: 'page2', type: '#goto', disabled: false
+        }
+      ];
+      fixture.detectChanges();
+
+      expect(fixture.debugElement.query(By.css('[data-cy="page-navigation"]'))).toBeTruthy();
+      expect(fixture.debugElement.queryAll(By.css('[data-cy="page-navigation-page"]')).length).toBe(2);
+    });
+
     it('should show enabled indicator for non-disabled goto pages', () => {
       component.pageList = [
         {

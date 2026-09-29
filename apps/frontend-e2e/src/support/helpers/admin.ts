@@ -72,16 +72,10 @@ export function deleteUser(user: string): void {
   cy.contains('mat-row', user)
     .find('[data-cy="admin-users-delete-user"]').click();
   cy.translate(Cypress.expose('locale')).then(json => {
+    cy.intercept('DELETE', '/api/admin/users*').as('deleteUserReq');
     cy.clickButton(json.delete);
-    // cy.clickDialogButtonWithResponseCheck(
-    //   json.delete,
-    //   [200],
-    //   '/api/admin/users*',
-    //   'DELETE',
-    //   'deleteUser'
-    // );
+    cy.wait('@deleteUserReq').its('response.statusCode').should('be.oneOf', [200, 204]);
   });
-  cy.wait(100);
 }
 
 /**
@@ -149,12 +143,17 @@ export function makeAdminOfGroup(group: string, admins: string[]): void {
 }
 
 // ---------------------------------------------------------------------------
-// Helper: navigate to the admin Settings tab
-// ---------------------------------------------------------------------------
+/**
+ * Navigates to the admin Settings tab.
+ * Waits for the initial missings-profiles GET request to complete, ensuring
+ * form fields are populated before tests interact with them (#1619).
+ */
 export function goToSettings(): void {
+  cy.intercept('GET', '/api/admin/settings/missings-profiles').as('getMissingsProfiles');
   cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('settings');
+  cy.wait('@getMissingsProfiles');
 }
 
 // ---------------------------------------------------------------------------

@@ -19,7 +19,7 @@ import { BackendService as WriteBackendService } from '../../services/backend.se
   selector: 'studio-lite-app-logo',
   templateUrl: './app-logo.component.html',
   styleUrls: ['./app-logo.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [
     FormsModule,
     ReactiveFormsModule,

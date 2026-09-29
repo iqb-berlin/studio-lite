@@ -10,7 +10,7 @@ import {
   ApiParam,
   ApiQuery,
   ApiTags,
-  ApiUnauthorizedResponse
+  ApiForbiddenResponse
 } from '@nestjs/swagger';
 import {
   CreateUserDto, IdArrayDto,
@@ -41,7 +41,7 @@ export class AdminUserController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspace groups retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace group.' })
   @ApiTags('admin user')
   async findOnesWorkspaceGroups(@Param('id') id: number): Promise<WorkspaceGroupInListDto[]> {
     return this.workspaceGroupService.findAll(id);
@@ -52,7 +52,7 @@ export class AdminUserController {
   @ApiBearerAuth()
   @ApiTags('admin user')
   @ApiOkResponse({ description: 'Workspace group updated successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace group.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   async patchOnesWorkspaceGroups(@Param('id') id: number,
     @Body() body: IdArrayDto): Promise<void> {
@@ -64,7 +64,7 @@ export class AdminUserController {
   @ApiBearerAuth()
   @ApiTags('admin user')
   @ApiOkResponse({ description: 'Users deleted successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace group.' })
   @ApiQuery({
     name: 'id',
     type: Number,
@@ -82,7 +82,7 @@ export class AdminUserController {
     description: 'Sends back the id of the new user in database',
     type: Number
   })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace group.' })
   @ApiTags('admin user')
   async create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
@@ -91,7 +91,7 @@ export class AdminUserController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'User updated successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace group.' })
   @ApiNotFoundResponse({ description: 'User_id not found.' })
   @ApiParam({ name: 'id', type: Number })
   @ApiBearerAuth()
@@ -110,7 +110,7 @@ export class AdminUserController {
   @ApiBearerAuth()
   @ApiTags('admin user')
   @ApiOkResponse({ description: 'Session deleted successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace group.' })
   @ApiParam({ name: 'userId', type: Number })
   @ApiParam({ name: 'sessionId', type: String })
   async removeSession(@Param('userId') userId: number, @Param('sessionId') sessionId: string): Promise<void> {
@@ -126,7 +126,7 @@ export class AdminUserController {
   @ApiBearerAuth()
   @ApiTags('admin user')
   @ApiOkResponse({ description: 'Orphaned sessions deleted successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace group.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace group.' })
   @ApiParam({ name: 'id', type: Number })
   async removeOrphanedSessions(@Param('id') id: number): Promise<number> {
     return this.authService.deleteOrphanedSessions(id);

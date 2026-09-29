@@ -1,4 +1,3 @@
-// eslint-disable-next-line max-classes-per-file
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { UntypedFormBuilder, ReactiveFormsModule } from '@angular/forms';

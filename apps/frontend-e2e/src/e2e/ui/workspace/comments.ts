@@ -1,34 +1,20 @@
 import {
-  importedUnit, newUser,
-  ws1
+  importedUnit, standardUser,
+  primaryWorkspace
 } from '../../../support/testData';
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
 import {
   clickIndexTabWorkspace,
-  importExercise,
   loginWithUser,
   selectUnit
 } from '../../../support/helpers';
 
 describe('Unit Comments', () => {
-  before(() => {
-    createBasicSpecCy();
-  });
-
   beforeEach(() => {
     cy.intercept('GET', '/api/workspaces/*/units/*/comments').as('getComments');
   });
 
-  after(() => {
-    deleteBasicSpecCy();
-  });
-
-  it('imports test units', () => {
-    cy.visitWs(ws1);
-    importExercise('test_studio_units_download.zip');
-  });
-
   it('creates multiple general comments', () => {
+    cy.visitWs(primaryWorkspace);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.wait('@getComments');
@@ -60,8 +46,8 @@ describe('Unit Comments', () => {
   });
 
   it('allows other users to view hidden comments with filter enabled', () => {
-    loginWithUser(newUser.username, newUser.password);
-    cy.visitWs(ws1);
+    loginWithUser(standardUser.username, standardUser.password);
+    cy.visitWs(primaryWorkspace);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.wait('@getComments');
@@ -77,7 +63,7 @@ describe('Unit Comments', () => {
 
   it('deletes a comment', () => {
     loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.wait('@getComments');
@@ -89,7 +75,7 @@ describe('Unit Comments', () => {
   });
 
   it('makes hidden comment visible again', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.wait('@getComments');
@@ -104,7 +90,7 @@ describe('Unit Comments', () => {
   });
 
   it('creates comment linked to specific item', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.wait('@getComments');
@@ -115,7 +101,7 @@ describe('Unit Comments', () => {
   });
 
   it('filters comments by item', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.wait('@getComments');
@@ -126,7 +112,7 @@ describe('Unit Comments', () => {
   });
 
   it('upvotes a comment and checks count and coloring', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.wait('@getComments');
@@ -142,7 +128,7 @@ describe('Unit Comments', () => {
   });
 
   it('removes upvote on a comment', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.wait('@getComments');
@@ -159,7 +145,7 @@ describe('Unit Comments', () => {
   });
 
   it('downvotes a comment and checks count and coloring', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.wait('@getComments');
@@ -175,7 +161,7 @@ describe('Unit Comments', () => {
   });
 
   it('shows voter overview dialog', () => {
-    cy.visitWs(ws1);
+    cy.visitWs(primaryWorkspace);
     selectUnit(importedUnit.shortname);
     clickIndexTabWorkspace('comments');
     cy.wait('@getComments');

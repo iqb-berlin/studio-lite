@@ -2,9 +2,9 @@ import {
   Controller, Get, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiOkResponse, ApiTags, ApiUnauthorizedResponse
+  ApiBearerAuth, ApiOkResponse, ApiTags, ApiForbiddenResponse
 } from '@nestjs/swagger';
-import { UnitInViewDto, UnitItemDto, WorkspaceFullDto } from '@studio-lite-lib/api-dto';
+import { UnitInViewDto, UnitItemInViewDto, WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { WorkspaceService } from '../services/workspace.service';
@@ -28,7 +28,7 @@ export class AdminController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspaces retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiTags('admin workspace-group')
   async getAllWorkspaces(): Promise<WorkspaceFullDto[]> {
     return this.workspaceService.getAllWorkspaces();
@@ -38,7 +38,7 @@ export class AdminController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Workspaces retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiTags('admin workspace-group')
   async getAllUnits(): Promise<UnitInViewDto[]> {
     return this.unitService.getAllUnits();
@@ -48,9 +48,9 @@ export class AdminController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Unit items retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiTags('admin')
-  async getAllUnitItems(): Promise<UnitItemDto[]> {
+  async getAllUnitItems(): Promise<UnitItemInViewDto[]> {
     return this.unitItemService.getAll();
   }
 }

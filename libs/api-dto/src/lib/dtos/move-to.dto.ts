@@ -3,5 +3,5 @@ import { IdArrayDto } from './id-array.dto';
 
 export class MoveToDto extends IntersectionType(IdArrayDto) {
   @ApiProperty({ example: 1 })
-    targetId!: number;
+  targetId!: number;
 }

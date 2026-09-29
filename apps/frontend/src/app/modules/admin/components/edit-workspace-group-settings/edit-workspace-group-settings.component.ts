@@ -26,12 +26,12 @@ export class EditWorkspaceGroupSettingsComponent implements OnInit {
   settings!: WorkspaceGroupSettingsDto;
   profiles: Profile[] = [];
   formData: {
-    profilesSelected : Profile[],
+    profilesSelected: Profile[],
     states: State[]
   } = {
-      profilesSelected: [],
-      states: []
-    };
+    profilesSelected: [],
+    states: []
+  };
 
   fetchedProfiles: Profile[] = [];
   constructor(public wsgAdminService: WsgAdminService,

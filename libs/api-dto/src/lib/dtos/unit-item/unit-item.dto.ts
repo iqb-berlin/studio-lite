@@ -2,35 +2,35 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UnitItemDto {
   @ApiProperty()
-    uuid?: string;
+  uuid?: string;
 
   @ApiProperty()
-    id?: string;
+  id?: string;
 
   @ApiProperty()
-    order?: number;
+  order?: number;
 
   @ApiProperty()
-    position?: string;
+  position?: string;
 
   @ApiProperty()
-    locked?: boolean;
+  locked?: boolean;
 
   @ApiProperty()
-    variableId?: string | null;
+  variableId?: string | null;
 
   @ApiProperty()
-    variableReadOnlyId?: string | null;
+  variableReadOnlyId?: string | null;
 
   @ApiProperty()
-    description?: string;
+  description?: string;
 
   @ApiProperty()
-    unitId?: number;
+  unitId?: number;
 
   @ApiProperty()
-    createdAt?: Date;
+  createdAt?: Date;
 
   @ApiProperty()
-    changedAt?: Date;
+  changedAt?: Date;
 }

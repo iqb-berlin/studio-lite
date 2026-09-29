@@ -12,7 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { CommonModule } from '@angular/common';
+
 import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 
 import { BackendService } from '../../services/backend.service';
@@ -28,7 +28,6 @@ import { BackendService } from '../../services/backend.service';
   styleUrls: ['./unit-rich-note-tags-config.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     MatButtonModule,

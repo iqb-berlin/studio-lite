@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { IsAdminGuard } from './is-admin.guard';
 import { AuthService } from '../services/auth.service';
@@ -41,7 +41,7 @@ describe('IsAdminGuard', () => {
     expect(authService.isAdminUser).toHaveBeenCalledWith(userId);
   });
 
-  it('should throw UnauthorizedException if authService.isAdminUser returns false', async () => {
+  it('should throw ForbiddenException if authService.isAdminUser returns false', async () => {
     const userId = 1;
     authService.isAdminUser.mockResolvedValue(false);
 
@@ -53,7 +53,7 @@ describe('IsAdminGuard', () => {
       })
     });
 
-    await expect(isAdminGuard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+    await expect(isAdminGuard.canActivate(context)).rejects.toThrow(ForbiddenException);
     expect(authService.isAdminUser).toHaveBeenCalledWith(userId);
   });
 });

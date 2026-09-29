@@ -10,7 +10,7 @@ import { MetadataProfileGroup } from '@studio-lite-lib/api-dto';
 @Entity()
 class MetadataProfile {
   @PrimaryColumn()
-    id: string;
+  id: string;
 
   @Column({
     type: 'jsonb',
@@ -18,7 +18,7 @@ class MetadataProfile {
     default: () => "'[]'",
     nullable: false
   })
-    groups: MetadataProfileGroup[] = [];
+  groups: MetadataProfileGroup[] = [];
 
   @Column({
     type: 'jsonb',
@@ -26,13 +26,13 @@ class MetadataProfile {
     default: () => "'[]'",
     nullable: false
   })
-    label: TextWithLanguage[] = [];
+  label: TextWithLanguage[] = [];
 
   @Column({
     type: 'timestamp with time zone',
     name: 'modified_at'
   })
-    modifiedAt: Date;
+  modifiedAt: Date;
 }
 
 export default MetadataProfile;

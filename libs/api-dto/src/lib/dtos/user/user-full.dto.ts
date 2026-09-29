@@ -4,41 +4,41 @@ import { UserActivityStatus } from './user-activity-status';
 
 export class UserFullDto {
   @ApiProperty()
-    id!: number;
+  id!: number;
 
   @ApiProperty()
-    name?: string;
+  name?: string;
 
   @ApiProperty()
-    isAdmin?: boolean;
+  isAdmin?: boolean;
 
   @ApiProperty()
-    description?: string;
+  description?: string;
 
   @ApiProperty()
-    password?: string;
+  password?: string;
 
   @ApiProperty()
-    email?: string;
+  email?: string;
 
   @ApiProperty()
-    lastName?: string;
+  lastName?: string;
 
   @ApiProperty()
-    firstName?: string;
+  firstName?: string;
 
   @ApiProperty()
-    emailPublishApproved?: boolean;
+  emailPublishApproved?: boolean;
 
   @ApiProperty()
-    lastActivity?: Date;
+  lastActivity?: Date;
 
   @ApiProperty()
-    isLoggedIn?: boolean;
+  isLoggedIn?: boolean;
 
   @ApiProperty({ required: false, enum: ['active', 'passive', 'inactive', 'orphaned'] })
-    activityStatus?: UserActivityStatus;
+  activityStatus?: UserActivityStatus;
 
   @ApiProperty({ type: [UserSessionInfoDto] })
-    sessions?: UserSessionInfoDto[];
+  sessions?: UserSessionInfoDto[];
 }

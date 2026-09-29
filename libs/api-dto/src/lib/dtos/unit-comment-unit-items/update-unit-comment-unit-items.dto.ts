@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUnitCommentUnitItemsDto {
   @ApiProperty()
-    unitItemUuids!: string[];
+  unitItemUuids!: string[];
 
   @ApiProperty()
-    userId!: number;
+  userId!: number;
 }

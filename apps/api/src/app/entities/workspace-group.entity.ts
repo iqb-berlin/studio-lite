@@ -8,10 +8,10 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 class WorkspaceGroup {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column()
-    name: string;
+  name: string;
 
   @Column({
     type: 'jsonb',
@@ -19,7 +19,7 @@ class WorkspaceGroup {
     default: () => "'{}'",
     nullable: false
   })
-    settings = {};
+  settings = {};
 }
 
 export default WorkspaceGroup;

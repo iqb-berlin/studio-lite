@@ -7,9 +7,11 @@ import {
   setFormControl,
   logout,
   login,
-  createGroup, deleteGroup
+  createGroup,
+  deleteGroup,
+  clickIndexTabAdmin
 } from '../../../support/helpers';
-import { group1 } from '../../../support/testData';
+import { baseGroup } from '../../../support/testData';
 
 describe('Admin Settings Tab Configuration', () => {
   before(() => addFirstUser());
@@ -198,11 +200,11 @@ describe('Admin Settings Tab Configuration', () => {
 
   describe('Unit Export Config card', () => {
     const unitXsdUrl =
-      'https://github.com/iqb-berlin/testcenter/blob/master/definitions/vo_Unit.xsd';
+      'https://w3id.org/iqb/spec/unit-xml/17.6';
     const bookletXsdUrl =
-      'https://github.com/iqb-berlin/testcenter/blob/master/definitions/vo_Booklet.xsd';
+      'https://w3id.org/iqb/spec/testcenter-booklet-xml/18.0';
     const testTakersXsdUrl =
-      'https://github.com/iqb-berlin/testcenter/blob/master/definitions/vo_Testtakers.xsd';
+      'https://w3id.org/iqb/spec/testcenter-testtaker-xml/18.0';
 
     it('displays the Unit Export Config fields', () => {
       goToSettings();
@@ -274,24 +276,18 @@ describe('Admin Settings Tab Configuration', () => {
       );
     });
 
-    // Tracked in https://github.com/iqb-berlin/studio-lite/issues/1526:
-    // re-verify against the refactored studio-lite-profiles component
-    // (now @iqb/metadata-components based) before removing .skip.
-    it.skip('checks that the we have only two registry stores with the test registry', () => {
+    it('checks that the we have only 23 registry stores with the test registry', () => {
       // create a group workspace
-      createGroup(group1);
+      createGroup(baseGroup);
 
-      // checks that we have only two profiles
-      cy.get('mat-table').contains(group1).click();
+      // checks that we have only 23 profiles
+      cy.get('mat-table').contains(baseGroup).click();
       cy.get('[data-cy="workspaces-groups-menu-edit"]').click();
       cy.get('studio-lite-profiles')
-        .get('mat-expansion-panel').should('have.length', 2);
+        .get('mat-expansion-panel').should('have.length', 23);
       cy.translate(Cypress.expose('locale')).then(json => {
         cy.contains('button', json.cancel).click();
       });
-
-      // deletes group
-      deleteGroup(group1);
     });
 
     it('restores the original profile registry CSV URL', () => {
@@ -303,6 +299,20 @@ describe('Admin Settings Tab Configuration', () => {
         'saveRegistry',
         4
       );
+
+      // checks that we have only 33 profiles
+      clickIndexTabAdmin('workspace-groups');
+      cy.get('mat-table').contains(baseGroup).click();
+      cy.get('[data-cy="workspaces-groups-menu-edit"]').click();
+      cy.get('studio-lite-profiles')
+        .get('mat-expansion-panel')
+        .should('have.length', 33);
+      cy.translate(Cypress.expose('locale')).then(json => {
+        cy.contains('button', json.cancel).click();
+      });
+
+      // deletes group
+      deleteGroup(baseGroup);
     });
   });
 

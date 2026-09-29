@@ -1,10 +1,10 @@
 import {
   AccessLevel,
-  group1,
-  newUser,
-  anotherUser,
-  ws1,
-  ws2
+  baseGroup,
+  standardUser,
+  secondaryUser,
+  primaryWorkspace,
+  secondaryWorkspace
 } from '../../../support/testData';
 import {
   addFirstUser,
@@ -36,18 +36,18 @@ import {
 describe('Role Radio Buttons – wsg-admin access rights', () => {
   before(() => {
     addFirstUser();
-    createNewUser(newUser);
-    createNewUser(anotherUser);
-    createGroup(group1);
-    createWs(ws1, group1);
-    createWs(ws2, group1);
+    createNewUser(standardUser);
+    createNewUser(secondaryUser);
+    createGroup(baseGroup);
+    createWs(primaryWorkspace, baseGroup);
+    createWs(secondaryWorkspace, baseGroup);
     // makeAdminOfGroup navigates away — call last so it doesn't break createWs above
-    makeAdminOfGroup(group1, [Cypress.expose('username')]);
+    makeAdminOfGroup(baseGroup, [Cypress.expose('username')]);
   });
 
   beforeEach(() => {
     cy.visit('/');
-    cy.findAdminGroupSettings(group1).click();
+    cy.findAdminGroupSettings(baseGroup).click();
   });
 
   // -------------------------------------------------------------------------
@@ -61,8 +61,8 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
     // host `(click)` that deselects. The panels hide it (`--mat-radio-touch-target-display`);
     // without this assertion, removing that style leaves every deselect test below green.
     it('hides the touch target that would swallow deselect clicks', () => {
-      openWsTab(ws1);
-      getRoleRadio(`(${newUser.username})`, AccessLevel.Basic)
+      openWsTab(primaryWorkspace);
+      getRoleRadio(`(${standardUser.username})`, AccessLevel.Basic)
         .find('.mat-mdc-radio-touch-target')
         .should('not.be.visible');
     });
@@ -94,35 +94,35 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
 
   describe('Workspaces panel – selecting and deselecting', () => {
     beforeEach(() => {
-      openWsTab(ws1);
+      openWsTab(primaryWorkspace);
     });
 
     // One walk over all three levels: every level can be picked, and picking the next one
     // unchecks the one before -- the same assertion the three per-level tests each made once.
     it('marks only the clicked level and unchecks the level before it', () => {
-      selectRoleAtWs(newUser.username, AccessLevel.Basic);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, true);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Developer, false);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, false);
+      selectRoleAtWs(standardUser.username, AccessLevel.Basic);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Basic, true);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Developer, false);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Admin, false);
 
-      selectRoleAtWs(newUser.username, AccessLevel.Developer);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Developer, true);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, false);
+      selectRoleAtWs(standardUser.username, AccessLevel.Developer);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Developer, true);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Basic, false);
 
-      selectRoleAtWs(newUser.username, AccessLevel.Admin);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, true);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Developer, false);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, false);
+      selectRoleAtWs(standardUser.username, AccessLevel.Admin);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Admin, true);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Developer, false);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Basic, false);
     });
 
     it('leaves the row without a level when the checked radio is clicked again', () => {
-      selectRoleAtWs(newUser.username, AccessLevel.Admin);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, true);
+      selectRoleAtWs(standardUser.username, AccessLevel.Admin);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Admin, true);
 
-      deselectRoleAtWs(newUser.username, AccessLevel.Admin);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, false);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Developer, false);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, false);
+      deselectRoleAtWs(standardUser.username, AccessLevel.Admin);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Basic, false);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Developer, false);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Admin, false);
     });
   });
 
@@ -133,18 +133,18 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
   describe('Workspaces panel – save and reload', () => {
     it('persists an Admin role assignment after save and page reload', () => {
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveUsers');
-      openWsTab(ws1);
-      selectRoleAtWs(newUser.username, AccessLevel.Admin);
+      openWsTab(primaryWorkspace);
+      selectRoleAtWs(standardUser.username, AccessLevel.Admin);
       clickAccessRightsSaveButton();
       cy.wait('@saveUsers').its('response.statusCode').should('eq', 200);
 
       cy.visit('/');
-      cy.findAdminGroupSettings(group1).click();
-      openWsTab(ws1);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, true);
+      cy.findAdminGroupSettings(baseGroup).click();
+      openWsTab(primaryWorkspace);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Admin, true);
 
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('cleanupSave');
-      deselectRoleAtWs(newUser.username, AccessLevel.Admin);
+      deselectRoleAtWs(standardUser.username, AccessLevel.Admin);
       clickAccessRightsSaveButton();
       cy.wait('@cleanupSave');
     });
@@ -152,56 +152,56 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
     it('persists removal of role (deselect then save)', () => {
       // First assign
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveFirst');
-      openWsTab(ws1);
-      selectRoleAtWs(newUser.username, AccessLevel.Basic);
+      openWsTab(primaryWorkspace);
+      selectRoleAtWs(standardUser.username, AccessLevel.Basic);
       clickAccessRightsSaveButton();
       cy.wait('@saveFirst').its('response.statusCode').should('eq', 200);
 
       // Now deselect and save
       cy.visit('/');
-      cy.findAdminGroupSettings(group1).click();
+      cy.findAdminGroupSettings(baseGroup).click();
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveUsers');
-      openWsTab(ws1);
-      deselectRoleAtWs(newUser.username, AccessLevel.Basic);
+      openWsTab(primaryWorkspace);
+      deselectRoleAtWs(standardUser.username, AccessLevel.Basic);
       clickAccessRightsSaveButton();
       cy.wait('@saveUsers').its('response.statusCode').should('eq', 200);
 
       // Reload and verify unchecked
       cy.visit('/');
-      cy.findAdminGroupSettings(group1).click();
-      openWsTab(ws1);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, false);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Developer, false);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, false);
+      cy.findAdminGroupSettings(baseGroup).click();
+      openWsTab(primaryWorkspace);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Basic, false);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Developer, false);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Admin, false);
     });
 
     it('persists a role switch (Basic → Admin) after save', () => {
       // Assign Basic first
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveFirst');
-      openWsTab(ws1);
-      selectRoleAtWs(newUser.username, AccessLevel.Basic);
+      openWsTab(primaryWorkspace);
+      selectRoleAtWs(standardUser.username, AccessLevel.Basic);
       clickAccessRightsSaveButton();
       cy.wait('@saveFirst').its('response.statusCode').should('eq', 200);
 
       // Switch to Admin
       cy.visit('/');
-      cy.findAdminGroupSettings(group1).click();
+      cy.findAdminGroupSettings(baseGroup).click();
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveSwitch');
-      openWsTab(ws1);
-      selectRoleAtWs(newUser.username, AccessLevel.Admin);
+      openWsTab(primaryWorkspace);
+      selectRoleAtWs(standardUser.username, AccessLevel.Admin);
       clickAccessRightsSaveButton();
       cy.wait('@saveSwitch').its('response.statusCode').should('eq', 200);
 
       // Reload and verify Admin is checked, Basic is not
       cy.visit('/');
-      cy.findAdminGroupSettings(group1).click();
-      openWsTab(ws1);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, true);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, false);
+      cy.findAdminGroupSettings(baseGroup).click();
+      openWsTab(primaryWorkspace);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Admin, true);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Basic, false);
 
       // Cleanup
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('cleanupSave');
-      deselectRoleAtWs(newUser.username, AccessLevel.Admin);
+      deselectRoleAtWs(standardUser.username, AccessLevel.Admin);
       clickAccessRightsSaveButton();
       cy.wait('@cleanupSave');
     });
@@ -213,33 +213,33 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
 
   describe('Users panel – selecting and deselecting', () => {
     beforeEach(() => {
-      openUsersTab(newUser.username);
+      openUsersTab(standardUser.username);
     });
 
     it('marks only the clicked level and unchecks the level before it', () => {
-      selectRoleAtUser(ws1, AccessLevel.Basic);
-      assertRoleRadioChecked(ws1, AccessLevel.Basic, true);
-      assertRoleRadioChecked(ws1, AccessLevel.Developer, false);
-      assertRoleRadioChecked(ws1, AccessLevel.Admin, false);
+      selectRoleAtUser(primaryWorkspace, AccessLevel.Basic);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Basic, true);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Developer, false);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Admin, false);
 
-      selectRoleAtUser(ws1, AccessLevel.Developer);
-      assertRoleRadioChecked(ws1, AccessLevel.Developer, true);
-      assertRoleRadioChecked(ws1, AccessLevel.Basic, false);
+      selectRoleAtUser(primaryWorkspace, AccessLevel.Developer);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Developer, true);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Basic, false);
 
-      selectRoleAtUser(ws1, AccessLevel.Admin);
-      assertRoleRadioChecked(ws1, AccessLevel.Admin, true);
-      assertRoleRadioChecked(ws1, AccessLevel.Developer, false);
-      assertRoleRadioChecked(ws1, AccessLevel.Basic, false);
+      selectRoleAtUser(primaryWorkspace, AccessLevel.Admin);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Admin, true);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Developer, false);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Basic, false);
     });
 
     it('leaves the row without a level when the checked radio is clicked again', () => {
-      selectRoleAtUser(ws1, AccessLevel.Admin);
-      assertRoleRadioChecked(ws1, AccessLevel.Admin, true);
+      selectRoleAtUser(primaryWorkspace, AccessLevel.Admin);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Admin, true);
 
-      deselectRoleAtUser(ws1, AccessLevel.Admin);
-      assertRoleRadioChecked(ws1, AccessLevel.Basic, false);
-      assertRoleRadioChecked(ws1, AccessLevel.Developer, false);
-      assertRoleRadioChecked(ws1, AccessLevel.Admin, false);
+      deselectRoleAtUser(primaryWorkspace, AccessLevel.Admin);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Basic, false);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Developer, false);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Admin, false);
     });
   });
 
@@ -250,19 +250,19 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
   describe('Users panel – save and reload', () => {
     it('persists Basic role via Users panel after save and reload', () => {
       cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('saveWorkspaces');
-      openUsersTab(newUser.username);
-      selectRoleAtUser(ws1, AccessLevel.Basic);
+      openUsersTab(standardUser.username);
+      selectRoleAtUser(primaryWorkspace, AccessLevel.Basic);
       clickAccessRightsSaveButton();
       cy.wait('@saveWorkspaces').its('response.statusCode').should('eq', 200);
 
       cy.visit('/');
-      cy.findAdminGroupSettings(group1).click();
-      openUsersTab(newUser.username);
-      assertRoleRadioChecked(ws1, AccessLevel.Basic, true);
+      cy.findAdminGroupSettings(baseGroup).click();
+      openUsersTab(standardUser.username);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Basic, true);
 
       // Cleanup
       cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('cleanupSave');
-      deselectRoleAtUser(ws1, AccessLevel.Basic);
+      deselectRoleAtUser(primaryWorkspace, AccessLevel.Basic);
       clickAccessRightsSaveButton();
       cy.wait('@cleanupSave');
     });
@@ -270,26 +270,26 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
     it('persists role removal via Users panel after save and reload', () => {
       // Assign first
       cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('saveFirst');
-      openUsersTab(newUser.username);
-      selectRoleAtUser(ws1, AccessLevel.Developer);
+      openUsersTab(standardUser.username);
+      selectRoleAtUser(primaryWorkspace, AccessLevel.Developer);
       clickAccessRightsSaveButton();
       cy.wait('@saveFirst').its('response.statusCode').should('eq', 200);
 
       // Deselect
       cy.visit('/');
-      cy.findAdminGroupSettings(group1).click();
+      cy.findAdminGroupSettings(baseGroup).click();
       cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('saveWorkspaces');
-      openUsersTab(newUser.username);
-      deselectRoleAtUser(ws1, AccessLevel.Developer);
+      openUsersTab(standardUser.username);
+      deselectRoleAtUser(primaryWorkspace, AccessLevel.Developer);
       clickAccessRightsSaveButton();
       cy.wait('@saveWorkspaces').its('response.statusCode').should('eq', 200);
 
       cy.visit('/');
-      cy.findAdminGroupSettings(group1).click();
-      openUsersTab(newUser.username);
-      assertRoleRadioChecked(ws1, AccessLevel.Developer, false);
-      assertRoleRadioChecked(ws1, AccessLevel.Basic, false);
-      assertRoleRadioChecked(ws1, AccessLevel.Admin, false);
+      cy.findAdminGroupSettings(baseGroup).click();
+      openUsersTab(standardUser.username);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Developer, false);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Basic, false);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Admin, false);
     });
   });
 
@@ -301,22 +301,22 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
     it('role set via Workspaces tab is shown correctly in Users tab', () => {
       // Assign via Workspaces panel
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('saveUsers');
-      openWsTab(ws1);
-      selectRoleAtWs(newUser.username, AccessLevel.Developer);
+      openWsTab(primaryWorkspace);
+      selectRoleAtWs(standardUser.username, AccessLevel.Developer);
       clickAccessRightsSaveButton();
       cy.wait('@saveUsers').its('response.statusCode').should('eq', 200);
 
       // Verify via Users panel
       cy.visit('/');
-      cy.findAdminGroupSettings(group1).click();
-      openUsersTab(newUser.username);
-      assertRoleRadioChecked(ws1, AccessLevel.Developer, true);
-      assertRoleRadioChecked(ws1, AccessLevel.Basic, false);
-      assertRoleRadioChecked(ws1, AccessLevel.Admin, false);
+      cy.findAdminGroupSettings(baseGroup).click();
+      openUsersTab(standardUser.username);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Developer, true);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Basic, false);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Admin, false);
 
       // Cleanup
       cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('cleanupSave');
-      deselectRoleAtUser(ws1, AccessLevel.Developer);
+      deselectRoleAtUser(primaryWorkspace, AccessLevel.Developer);
       clickAccessRightsSaveButton();
       cy.wait('@cleanupSave');
     });
@@ -324,22 +324,22 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
     it('role set via Users tab is shown correctly in Workspaces tab', () => {
       // Assign via Users panel
       cy.intercept('PATCH', '/api/group-admin/users/*/workspaces').as('saveWs');
-      openUsersTab(newUser.username);
-      selectRoleAtUser(ws1, AccessLevel.Admin);
+      openUsersTab(standardUser.username);
+      selectRoleAtUser(primaryWorkspace, AccessLevel.Admin);
       clickAccessRightsSaveButton();
       cy.wait('@saveWs').its('response.statusCode').should('eq', 200);
 
       // Verify via Workspaces panel
       cy.visit('/');
-      cy.findAdminGroupSettings(group1).click();
-      openWsTab(ws1);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, true);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, false);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Developer, false);
+      cy.findAdminGroupSettings(baseGroup).click();
+      openWsTab(primaryWorkspace);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Admin, true);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Basic, false);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Developer, false);
 
       // Cleanup
       cy.intercept('PATCH', '/api/group-admin/workspaces/*/users').as('cleanupSave');
-      deselectRoleAtWs(newUser.username, AccessLevel.Admin);
+      deselectRoleAtWs(standardUser.username, AccessLevel.Admin);
       clickAccessRightsSaveButton();
       cy.wait('@cleanupSave');
     });
@@ -351,34 +351,34 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
 
   describe('Multiple users/workspaces – radio groups are independent', () => {
     it('two users in the same workspace have independent radio groups', () => {
-      openWsTab(ws1);
+      openWsTab(primaryWorkspace);
 
-      selectRoleAtWs(newUser.username, AccessLevel.Basic);
-      selectRoleAtWs(anotherUser.username, AccessLevel.Admin);
+      selectRoleAtWs(standardUser.username, AccessLevel.Basic);
+      selectRoleAtWs(secondaryUser.username, AccessLevel.Admin);
 
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Basic, true);
-      assertRoleRadioChecked(`(${newUser.username})`, AccessLevel.Admin, false);
-      assertRoleRadioChecked(`(${anotherUser.username})`, AccessLevel.Admin, true);
-      assertRoleRadioChecked(`(${anotherUser.username})`, AccessLevel.Basic, false);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Basic, true);
+      assertRoleRadioChecked(`(${standardUser.username})`, AccessLevel.Admin, false);
+      assertRoleRadioChecked(`(${secondaryUser.username})`, AccessLevel.Admin, true);
+      assertRoleRadioChecked(`(${secondaryUser.username})`, AccessLevel.Basic, false);
     });
 
     it('one user can have different levels across two workspaces', () => {
-      openUsersTab(newUser.username);
+      openUsersTab(standardUser.username);
 
-      selectRoleAtUser(ws1, AccessLevel.Basic);
-      selectRoleAtUser(ws2, AccessLevel.Admin);
+      selectRoleAtUser(primaryWorkspace, AccessLevel.Basic);
+      selectRoleAtUser(secondaryWorkspace, AccessLevel.Admin);
 
-      assertRoleRadioChecked(ws1, AccessLevel.Basic, true);
-      assertRoleRadioChecked(ws1, AccessLevel.Admin, false);
-      assertRoleRadioChecked(ws2, AccessLevel.Admin, true);
-      assertRoleRadioChecked(ws2, AccessLevel.Basic, false);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Basic, true);
+      assertRoleRadioChecked(primaryWorkspace, AccessLevel.Admin, false);
+      assertRoleRadioChecked(secondaryWorkspace, AccessLevel.Admin, true);
+      assertRoleRadioChecked(secondaryWorkspace, AccessLevel.Basic, false);
     });
   });
 
   after(() => {
-    deleteUser(newUser.username);
-    deleteUser(anotherUser.username);
-    deleteGroup(group1);
+    deleteUser(standardUser.username);
+    deleteUser(secondaryUser.username);
+    deleteGroup(baseGroup);
     deleteFirstUser();
   });
 });

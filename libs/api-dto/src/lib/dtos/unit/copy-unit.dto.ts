@@ -5,5 +5,5 @@ export class CopyUnitDto extends IntersectionType(
   IdArrayDto
 ) {
   @ApiProperty({ example: true })
-    addComments!: boolean;
+  addComments!: boolean;
 }

@@ -7,7 +7,7 @@ import { catchError, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 
 export type ProfileStoreWithProfiles = {
-  profileStore:MDProfileStore,
+  profileStore: MDProfileStore,
   profiles: MDProfile[]
 };
 /**

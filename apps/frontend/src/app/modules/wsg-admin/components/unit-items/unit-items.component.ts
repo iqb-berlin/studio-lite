@@ -35,7 +35,7 @@ import { DeleteDialogComponent } from '../../../../components/delete-dialog/dele
   selector: 'studio-lite-unit-items',
   templateUrl: './unit-items.component.html',
   styleUrls: ['./unit-items.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, DatePipe, MatPaginator, IncludePipe, MatIcon, MatIconButton, MatTooltip]
 })
 

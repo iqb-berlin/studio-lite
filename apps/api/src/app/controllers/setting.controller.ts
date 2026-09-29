@@ -2,13 +2,13 @@ import {
   Body, Controller, Get, Inject, Patch, Query, UseGuards
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiHeader, ApiOkResponse, ApiQuery, ApiTags, ApiUnauthorizedResponse
+  ApiBearerAuth, ApiHeader, ApiNotAcceptableResponse, ApiOkResponse, ApiQuery, ApiTags,
+  ApiForbiddenResponse
 } from '@nestjs/swagger';
 import {
   MissingsProfilesDto, ConfigDto, AppLogoDto, UnitExportConfigDto, ProfilesRegistryDto,
   EmailTemplateDto, UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
-import { ApiNotAcceptableResponse } from '@nestjs/swagger/dist/decorators/api-response.decorator';
 import { SettingService } from '../services/setting.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
@@ -50,7 +50,7 @@ export class SettingController {
   @Patch('config')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Config settings updated successfully.' }) // TODO Exception?
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchConfig(@Body() settingData: ConfigDto) {
@@ -67,7 +67,7 @@ export class SettingController {
   @Patch('app-logo')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'App logo updated successfully.' }) // TODO Exception?
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchAppLogo(@Body() newLogo: AppLogoDto) {
@@ -85,7 +85,7 @@ export class SettingController {
   @Patch('unit-export-config')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Unit export config updated successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchUnitExportConfig(@Body() newUnitExportConfig: UnitExportConfigDto) {
@@ -104,7 +104,7 @@ export class SettingController {
   @Patch('profiles-registry')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Profiles registry updated successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiNotAcceptableResponse({ description: 'Profiles registry not acceptable.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
@@ -115,7 +115,7 @@ export class SettingController {
   @Get('email-template')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Email template retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiTags('admin settings')
   async findEmailTemplate(): Promise<EmailTemplateDto> {
     return this.settingService.findEmailTemplate();
@@ -124,7 +124,7 @@ export class SettingController {
   @Patch('email-template')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Email template updated successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchEmailTemplate(@Body() newEmailTemplate: EmailTemplateDto) {
@@ -144,7 +144,7 @@ export class SettingController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Missings profiles config updated successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiTags('admin settings')
   async patchMissingsProfiles(@Body() newMissingsProfiles: MissingsProfilesDto) {
     return this.settingService.patchMissingsProfiles(newMissingsProfiles);
@@ -162,7 +162,7 @@ export class SettingController {
   @Get('unit-rich-note-tags-config')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Unit rich note tags config retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async findUnitRichNoteTagsConfig(): Promise<UnitRichNoteTagDto[] | string[]> {
@@ -172,7 +172,7 @@ export class SettingController {
   @Patch('unit-rich-note-tags')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'Unit rich note tags updated successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiBearerAuth()
   @ApiTags('admin settings')
   async patchUnitRichNoteTags(@Body() newTags: UnitRichNoteTagDto[] | string) {

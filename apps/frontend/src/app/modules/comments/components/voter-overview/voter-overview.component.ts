@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { CommonModule } from '@angular/common';
+
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButtonModule } from '@angular/material/button';
 import { UnitCommentVoterDto } from '@studio-lite-lib/api-dto';
@@ -9,7 +9,7 @@ import { UnitCommentVoterDto } from '@studio-lite-lib/api-dto';
 @Component({
   selector: 'studio-lite-voter-overview',
   standalone: true,
-  imports: [MatDialogModule, MatIconModule, CommonModule, TranslateModule, MatButtonModule],
+  imports: [MatDialogModule, MatIconModule, TranslateModule, MatButtonModule],
   templateUrl: './voter-overview.component.html',
   styleUrls: ['./voter-overview.component.scss']
 })

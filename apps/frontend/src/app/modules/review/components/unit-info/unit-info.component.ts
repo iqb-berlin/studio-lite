@@ -24,7 +24,7 @@ const PanelWidthOffset = 40;
   selector: 'studio-lite-unit-info',
   templateUrl: './unit-info.component.html',
   styleUrls: ['./unit-info.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatIcon, MatButton, MatTooltip, WrappedIconComponent, UnitPropertiesComponent, UnitLastChangesComponent, TranslateModule, PrintMetadataComponent, UnitPrintCommentsComponent, UnitPrintCodingComponent]
 })
 export class UnitInfoComponent implements AfterViewInit, OnDestroy {

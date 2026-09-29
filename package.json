@@ -1,6 +1,6 @@
 {
   "name": "studio-lite",
-  "version": "20.0.1",
+  "version": "20.1.0",
   "author": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen",
   "license": "MIT",
   "scripts": {
@@ -11,8 +11,10 @@
     "test-e2e": "nx e2e frontend-e2e --prod --browser chromium",
     "test-e2e-api": "nx e2e frontend-e2e --prod --browser chromium --spec \"./apps/frontend-e2e/src/e2e/api/**/*\"",
     "test-e2e-ui": "nx e2e frontend-e2e --prod --browser chromium --spec \"./apps/frontend-e2e/src/e2e/ui/**/*\"",
+    "test-e2e-ui-workspace": "nx e2e frontend-e2e --prod --browser chromium --spec \"./apps/frontend-e2e/src/e2e/ui/workspace/**/*\"",
+    "test-e2e-ui-admin": "nx e2e frontend-e2e --prod --browser chromium --spec \"./apps/frontend-e2e/src/e2e/ui/{admin,auth,core,group-admin,metadata,shared,user}/**/*\"",
     "test-e2e-ui-mobile": "nx e2e frontend-e2e --prod --browser chromium --spec \"./apps/frontend-e2e/src/e2e/ui/**/*\" --config \"viewportWidth=375,viewportHeight=667\"",
-    "test-e2e-coverage": "nx run frontend-e2e:e2e-coverage --browser chrome",
+    "test-e2e-coverage": "nx run frontend-e2e:e2e-coverage --browser chromium",
     "test-app": "nx run-many --target=test --all --parallel",
     "test-app-coverage": "nx run-many --target=test --all --parallel=1 --maxWorkers=2 --coverage && scripts/merge-coverage.sh",
     "test-frontend": "nx test frontend",
@@ -28,22 +30,21 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "20.3.25",
-    "@angular/cdk": "20.2.14",
-    "@angular/common": "20.3.25",
-    "@angular/compiler": "20.3.25",
-    "@angular/core": "20.3.25",
-    "@angular/elements": "20.3.25",
-    "@angular/forms": "20.3.25",
-    "@angular/material": "20.2.14",
-    "@angular/material-date-fns-adapter": "20.2.14",
-    "@angular/platform-browser": "20.3.25",
-    "@angular/platform-browser-dynamic": "20.3.25",
-    "@angular/router": "20.3.25",
-    "@golevelup/ts-jest": "^0.3.4",
-    "@iqb/metadata-components": "^0.3.3",
+    "@angular/animations": "21.2.23",
+    "@angular/cdk": "21.2.14",
+    "@angular/common": "21.2.23",
+    "@angular/compiler": "21.2.23",
+    "@angular/core": "21.2.23",
+    "@angular/elements": "21.2.23",
+    "@angular/forms": "21.2.23",
+    "@angular/material": "21.2.14",
+    "@angular/material-date-fns-adapter": "21.2.14",
+    "@angular/platform-browser": "21.2.23",
+    "@angular/platform-browser-dynamic": "21.2.23",
+    "@angular/router": "21.2.23",
+    "@iqb/metadata-components": "^1.0.0",
     "@iqb/metadata-resolver": "0.2.1",
-    "@iqb/ngx-coding-components": "3.4.0",
+    "@iqb/ngx-coding-components": "4.0.0",
     "@iqb/responses": "5.2.2",
     "@iqbspecs/coding-scheme": "3.4.1",
     "@iqbspecs/metadata-profile": "^0.11.1",
@@ -51,17 +52,16 @@
     "@iqbspecs/metadata-values": "^3.0.3",
     "@iqbspecs/response": "2.0.0",
     "@iqbspecs/variable-info": "1.3.0",
-    "@nestjs/axios": "4.0.1",
-    "@nestjs/cli": "11.0.14",
-    "@nestjs/common": "11.0.21",
-    "@nestjs/config": "4.0.4",
-    "@nestjs/core": "11.0.21",
-    "@nestjs/jwt": "11.0.2",
-    "@nestjs/passport": "11.0.5",
-    "@nestjs/platform-express": "11.0.21",
-    "@nestjs/schedule": "6.1.3",
-    "@nestjs/swagger": "11.0.7",
-    "@nestjs/typeorm": "11.0.0",
+    "@nestjs/axios": "12.0.1",
+    "@nestjs/common": "12.1.0",
+    "@nestjs/config": "12.0.1",
+    "@nestjs/core": "12.1.0",
+    "@nestjs/jwt": "12.0.2",
+    "@nestjs/passport": "12.0.0",
+    "@nestjs/platform-express": "12.1.0",
+    "@nestjs/schedule": "12.0.2",
+    "@nestjs/swagger": "12.0.2",
+    "@nestjs/typeorm": "12.0.1",
     "@ngx-formly/core": "^7.0.0",
     "@ngx-formly/material": "^7.0.0",
     "@ngx-translate/core": "^15.0.0",
@@ -99,7 +99,7 @@
     "docx": "^8.5.0",
     "domhandler": "^5.0.3",
     "exceljs": "^4.4.0",
-    "express": "4.22.2",
+    "express": "5.2.1",
     "file-saver-es": "^2.0.5",
     "image-size": "^1.1.1",
     "katex": "^0.16.11",
@@ -122,21 +122,9 @@
     "zone.js": "0.15.0"
   },
   "overrides": {
+    "ioredis": "^5.0.4",
     "stylus": "0.0.1-security",
     "@parcel/watcher": "2.5.1",
-    "@nestjs/platform-express": {
-      "path-to-regexp": "^8.4.2"
-    },
-    "@nestjs/swagger": {
-      "path-to-regexp": "^8.4.2",
-      "js-yaml": "^4.2.0"
-    },
-    "@nestjs/core": {
-      "path-to-regexp": "^8.4.2"
-    },
-    "@nestjs/common": {
-      "file-type": "^21.3.4"
-    },
     "xmlbuilder2": {
       "js-yaml": "^3.14.2"
     },
@@ -151,24 +139,26 @@
     "webpack": "^5.107.2"
   },
   "devDependencies": {
-    "@angular-builders/custom-webpack": "^20.0.0",
-    "@angular-devkit/build-angular": "20.3.28",
-    "@angular-devkit/core": "20.3.28",
-    "@angular-devkit/schematics": "20.3.28",
-    "@angular-devkit/schematics-cli": "20.3.14",
-    "@angular-eslint/eslint-plugin": "20.7.0",
-    "@angular-eslint/eslint-plugin-template": "20.7.0",
-    "@angular-eslint/template-parser": "20.7.0",
-    "@angular/cli": "20.3.28",
-    "@angular/compiler-cli": "20.3.25",
-    "@angular/language-service": "20.3.25",
+    "@angular-builders/custom-webpack": "^21.1.0",
+    "@angular-devkit/build-angular": "21.2.24",
+    "@angular-devkit/core": "21.2.24",
+    "@angular-devkit/schematics": "21.2.24",
+    "@angular-devkit/schematics-cli": "21.2.24",
+    "@angular-eslint/eslint-plugin": "21.4.0",
+    "@angular-eslint/eslint-plugin-template": "21.4.0",
+    "@angular-eslint/template-parser": "21.4.0",
+    "@eslint/js": "10.0.1",
+    "@stylistic/eslint-plugin": "5.10.0",
+    "@angular/cli": "21.2.24",
+    "@angular/compiler-cli": "21.2.23",
+    "@angular/language-service": "21.2.23",
     "@compodoc/compodoc": "^2.0.0",
     "@cypress/code-coverage": "^4.0.2",
-    "@iqb/eslint-config": "^2.0.0",
+    "@golevelup/ts-jest": "^0.3.4",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@jest/globals": "30.2.0",
     "@jsdevtools/coverage-istanbul-loader": "^3.0.5",
-    "@nestjs/schematics": "11.0.5",
-    "@nestjs/testing": "11.0.5",
+    "@nestjs/testing": "12.1.0",
     "@nx/angular": "22.7.5",
     "@nx/cypress": "22.7.5",
     "@nx/esbuild": "22.7.5",
@@ -179,7 +169,7 @@
     "@nx/node": "22.7.5",
     "@nx/webpack": "22.7.5",
     "@nx/workspace": "22.7.5",
-    "@schematics/angular": "20.3.28",
+    "@schematics/angular": "21.2.24",
     "@types/bcrypt": "^5.0.0",
     "@types/jest": "30.0.0",
     "@types/multer": "^1.4.7",
@@ -187,20 +177,19 @@
     "@types/passport-jwt": "^3.0.7",
     "@types/passport-local": "^1.0.34",
     "@types/pg": "^8.15.6",
-    "@typescript-eslint/eslint-plugin": "7.18.0",
-    "@typescript-eslint/parser": "7.18.0",
-    "@typescript-eslint/utils": "^7.16.0",
+    "@typescript-eslint/eslint-plugin": "8.70.1",
+    "@typescript-eslint/parser": "8.70.1",
+    "@typescript-eslint/utils": "^8.70.1",
     "cypress": "15.10.0",
     "esbuild-plugin-tsc": "^0.4.0",
-    "eslint": "8.57.1",
-    "eslint-config-airbnb-typescript": "^18.0.0",
-    "eslint-config-prettier": "10.1.5",
+    "eslint": "10.11.0",
     "eslint-plugin-cypress": "2.15.1",
     "eslint-plugin-html": "^7.1.0",
-    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-import-x": "4.17.1",
+    "globals": "17.12.0",
     "jest": "30.2.0",
     "jest-environment-jsdom": "30.2.0",
-    "jest-preset-angular": "15.0.3",
+    "jest-preset-angular": "16.2.0",
     "jest-util": "30.2.0",
     "nx": "22.7.5",
     "nyc": "^18.0.0",
@@ -208,33 +197,7 @@
     "ts-jest": "29.4.5",
     "ts-node": "10.9.1",
     "typescript": "5.9.3",
+    "typescript-eslint": "8.70.1",
     "webpack-merge": "5.8.0"
-  },
-  "eslintConfig": {
-    "extends": "@iqb/eslint-config",
-    "parserOptions": {
-      "project": "./tsconfig.base.json"
-    },
-    "overrides": [
-      {
-        "files": [
-          "e2e-tests/**/*.ts"
-        ],
-        "rules": {
-          "@typescript-eslint/no-unused-expressions": [
-            "error",
-            {
-              "allowTaggedTemplates": true
-            }
-          ],
-          "newline-per-chained-call": [
-            "off"
-          ]
-        },
-        "plugins": [
-          "html"
-        ]
-      }
-    ]
   }
 }

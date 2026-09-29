@@ -2,7 +2,7 @@ import {
   Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild
 } from '@angular/core';
 import {
-  // eslint-disable-next-line max-len
+
   MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -31,7 +31,7 @@ import { ModuleSelectionChange } from '../../models/module-selection-change.inte
   selector: 'studio-lite-verona-modules-table',
   templateUrl: './verona-modules-table.component.html',
   styleUrls: ['./verona-modules-table.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatButton, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatAnchor, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe, BytesPipe, TranslateModule, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe]
 })
 export class VeronaModulesTableComponent implements OnInit, OnDestroy {

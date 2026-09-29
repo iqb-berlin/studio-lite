@@ -11,7 +11,7 @@
 export * from './navigation';
 
 // Admin management helpers
-// eslint-disable-next-line import/export
+
 export * from './admin';
 
 // Common utilities
@@ -34,3 +34,6 @@ export * from './review';
 
 // Widget management helpers
 export * from './widgets';
+
+// Admin user-table helpers (shared between user-management and admin-user-management specs)
+export * from './admin-users';

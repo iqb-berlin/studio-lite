@@ -7,10 +7,10 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 @Entity()
 class Setting {
   @PrimaryColumn()
-    key: string;
+  key: string;
 
   @Column()
-    content: string;
+  content: string;
 }
 
 export default Setting;

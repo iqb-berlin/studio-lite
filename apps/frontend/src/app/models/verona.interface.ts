@@ -1,10 +1,10 @@
 export type NavigationTarget = 'first' | 'last' | 'previous' | 'next' | 'end';
 export type Progress = 'none' | 'some' | 'complete';
 export type PagingMode =
-  | 'separate'
-  | 'buttons'
-  | 'concat-scroll'
-  | 'concat-scroll-snap';
+  | 'separate' |
+  'buttons' |
+  'concat-scroll' |
+  'concat-scroll-snap';
 export type PrintMode = 'off' | 'on' | 'on-with-ids' | 'selected-elements-only';
 
 export interface SharedParameter {

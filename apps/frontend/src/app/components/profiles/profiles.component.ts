@@ -39,10 +39,10 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
   isLoading: boolean = false;
   isError: boolean = false;
-  profileStoresWithProfiles : ProfileStoreWithProfiles[] = [];
+  profileStoresWithProfiles: ProfileStoreWithProfiles[] = [];
   fetchedProfiles: CoreProfile[] = [];
-  profilesSelected : CoreProfile[] = [];
-  profile!:Profile;
+  profilesSelected: CoreProfile[] = [];
+  profile!: Profile;
 
   @Output() hasChanged = new EventEmitter<Array<CoreProfile>>();
   private _profiles: Profile[] | undefined;

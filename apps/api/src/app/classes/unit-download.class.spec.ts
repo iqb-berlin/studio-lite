@@ -16,16 +16,28 @@ import {
   VeronaModuleFileDto,
   UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
-import * as AdmZip from 'adm-zip';
-import { UnitDownloadClass } from './unit-download.class';
+// `unstable_mockModule` is missing from the global `jest` object's type, so it comes from here.
+// It is aliased because the global `jest` -- used for `jest.fn()` below -- types its mocks
+// loosely, and importing over that name would make every `mockReturnValue` a type error.
+import { jest as jestEsm } from '@jest/globals';
+// Type only: the value comes from the mocked module below, while the casts further down keep
+// using `AdmZip` as a type.
+import type AdmZip from 'adm-zip';
 import { ExportReportMessage, ExportReportScope } from './export-report.class';
-import { UnitService } from '../services/unit.service';
-import { UnitCommentService } from '../services/unit-comment.service';
-import { VeronaModulesService } from '../services/verona-modules.service';
-import { SettingService } from '../services/setting.service';
-import { UnitRichNoteService } from '../services/unit-rich-note.service';
+import type { UnitService } from '../services/unit.service';
+import type { UnitCommentService } from '../services/unit-comment.service';
+import type { VeronaModulesService } from '../services/verona-modules.service';
+import type { SettingService } from '../services/setting.service';
+import type { UnitRichNoteService } from '../services/unit-rich-note.service';
 
-jest.mock('adm-zip');
+// ESM module namespaces are frozen, so a replacement has to be registered before the module is
+// pulled in -- which is why the two imports below are dynamic.
+jestEsm.unstable_mockModule('adm-zip', () => ({
+  default: jest.fn()
+}));
+
+const AdmZipMock = (await import('adm-zip')).default as unknown as jest.Mock;
+const { UnitDownloadClass } = await import('./unit-download.class');
 
 describe('UnitDownloadClass', () => {
   let mockZip: {
@@ -38,7 +50,7 @@ describe('UnitDownloadClass', () => {
       addFile: jest.fn(),
       toBuffer: jest.fn().mockReturnValue(Buffer.from('zip-content'))
     };
-    (AdmZip as unknown as jest.Mock).mockImplementation(() => mockZip);
+    AdmZipMock.mockImplementation(() => mockZip);
   });
 
   describe('get', () => {

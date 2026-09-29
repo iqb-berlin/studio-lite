@@ -17,7 +17,7 @@ import { BackendService } from '../../../../services/backend.service';
   selector: 'studio-lite-email-template',
   templateUrl: './email-template.component.html',
   styleUrls: ['./email-template.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, CdkTextareaAutosize, MatButton, TranslateModule]
 })
 

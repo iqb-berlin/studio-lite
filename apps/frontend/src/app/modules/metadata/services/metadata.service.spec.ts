@@ -189,7 +189,6 @@ describe('MetadataService', () => {
 
       service.downloadMetadataReport(reportType, columns, units).subscribe();
 
-      // eslint-disable-next-line no-unexpected-multiline
       const req = httpMock.expectOne(request => request.url === `${serverUrl}workspaces/123/units/properties` &&
         request.params.get('type') === reportType &&
         request.params.getAll('column')?.length === 2 &&

@@ -75,14 +75,58 @@ describe('UnitItemService', () => {
   });
 
   describe('getAll', () => {
-    it('should return all unit items', async () => {
-      const items = [{ uuid: 'u1' }, { uuid: 'u2' }] as UnitItem[];
+    // The admin view links each item to its unit, and a unit's address is /a/<workspace>/<unit>;
+    // without the workspace the link used the unit id in its place (#1698).
+    it('should return every item with its unit and workspace', async () => {
+      const items = [{
+        uuid: 'u1',
+        unitId: 136421,
+        unit: {
+          key: 'M1',
+          name: 'Mathe 1',
+          workspaceId: 42,
+          workspace: { name: 'Mathematik' }
+        }
+      }] as unknown as UnitItem[];
       mockRepository.find.mockResolvedValue(items);
 
       const result = await service.getAll();
 
-      expect(repository.find).toHaveBeenCalled();
-      expect(result).toEqual(items);
+      expect(repository.find).toHaveBeenCalledWith({ relations: ['unit', 'unit.workspace'] });
+      expect(result).toEqual([{
+        uuid: 'u1',
+        unitId: 136421,
+        unitKey: 'M1',
+        unitName: 'Mathe 1',
+        workspaceId: 42,
+        workspaceName: 'Mathematik'
+      }]);
+    });
+
+    // The unit is loaded only for its key, name and workspace. Handing it on would attach its
+    // metadata, variables and coding scheme to every single item of every workspace.
+    it('should not hand on the loaded unit itself', async () => {
+      mockRepository.find.mockResolvedValue([{
+        uuid: 'u1',
+        unit: { key: 'M1', scheme: '{"variableCodings":[]}', workspace: { name: 'W' } }
+      }] as unknown as UnitItem[]);
+
+      const [result] = await service.getAll();
+
+      expect(result).not.toHaveProperty('unit');
+    });
+
+    it('should fall back to empty values for an item without a unit', async () => {
+      mockRepository.find.mockResolvedValue([{ uuid: 'u2' }] as UnitItem[]);
+
+      const [result] = await service.getAll();
+
+      expect(result).toEqual(expect.objectContaining({
+        unitKey: '',
+        unitName: '',
+        workspaceId: 0,
+        workspaceName: ''
+      }));
     });
   });
 

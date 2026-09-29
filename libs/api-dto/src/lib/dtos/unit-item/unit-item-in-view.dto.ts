@@ -3,14 +3,14 @@ import { UnitItemDto } from './unit-item.dto';
 
 export class UnitItemInViewDto extends UnitItemDto {
   @ApiProperty()
-    unitKey!: string;
+  unitKey!: string;
 
   @ApiProperty()
-    unitName!: string;
+  unitName!: string;
 
   @ApiProperty()
-    workspaceId!: number;
+  workspaceId!: number;
 
   @ApiProperty()
-    workspaceName!: string;
+  workspaceName!: string;
 }

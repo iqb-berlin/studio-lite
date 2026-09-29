@@ -8,7 +8,7 @@ import {
   ApiOkResponse,
   ApiParam,
   ApiTags,
-  ApiUnauthorizedResponse, ApiUnprocessableEntityResponse
+  ApiForbiddenResponse, ApiNotFoundResponse, ApiUnprocessableEntityResponse
 } from '@nestjs/swagger';
 import {
   ReviewInListDto,
@@ -17,6 +17,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
+import { ManageOrGroupAdminAccessGuard } from '../guards/manage-or-group-admin-access.guard';
 import { WorkspaceId } from '../decorators/workspace.decorator';
 import { ReviewService } from '../services/review.service';
 
@@ -39,7 +40,7 @@ export class WorkspaceReviewController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Reviews retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
   async findAll(@WorkspaceId() workspaceId: number): Promise<ReviewInListDto[]> {
@@ -50,33 +51,40 @@ export class WorkspaceReviewController {
   @UseGuards(JwtAuthGuard, WorkspaceGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Review retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiNotFoundResponse({ description: 'No such review in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
   async findOne(
+    @WorkspaceId() workspaceId: number,
     @Param('id', ParseIntPipe) reviewId: number
   ): Promise<ReviewFullDto> {
-    return this.reviewService.findOne(reviewId);
+    return this.reviewService.findOne(reviewId, workspaceId);
   }
 
+  // Creating, changing and deleting reviews need the manage level -- the frontend offers the review
+  // dialog from level 3 on -- or the group's admin. They used to ask WorkspaceGuard alone, which
+  // every member passes, down to a commenter (#1715).
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Review data changed' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
-  @ApiUnprocessableEntityResponse({ description: 'Saving of review is forbidden.' })
+  @ApiForbiddenResponse({ description: 'No manage privileges in the workspace.' })
+  @ApiNotFoundResponse({ description: 'No such review in the workspace.' })
+  @ApiUnprocessableEntityResponse({ description: 'No name, or a unit of another workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
   async patchReview(
+    @WorkspaceId() workspaceId: number,
     @Param('id', ParseIntPipe) reviewId: number,
-      @Body() updateReview: ReviewFullDto
+    @Body() updateReview: ReviewFullDto
   ): Promise<void> {
-    return this.reviewService.patch(reviewId, updateReview);
+    return this.reviewService.patch(workspaceId, reviewId, updateReview);
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -84,23 +92,25 @@ export class WorkspaceReviewController {
     type: Number
   })
   @ApiUnprocessableEntityResponse({ description: 'Saving of review is forbidden.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No manage privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
-  async create(@Body() createReviewDto: CreateReviewDto) {
-    return this.reviewService.create(createReviewDto);
+  async create(@WorkspaceId() workspaceId: number, @Body() createReviewDto: CreateReviewDto) {
+    return this.reviewService.create(workspaceId, createReviewDto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, ManageOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Workspace review deleted successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No manage privileges in the workspace.' })
+  @ApiNotFoundResponse({ description: 'No such review in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace review')
   async remove(
+    @WorkspaceId() workspaceId: number,
     @Param('id', ParseIntPipe) reviewId: number): Promise<void> {
-    return this.reviewService.remove(reviewId);
+    return this.reviewService.remove(workspaceId, reviewId);
   }
 }

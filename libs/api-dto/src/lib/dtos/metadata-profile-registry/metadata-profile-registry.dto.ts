@@ -2,11 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class MetadataProfileRegistryDto {
   @ApiProperty()
-    id!: string;
+  id!: string;
 
   @ApiProperty()
-    csv!: string;
+  csv!: string;
 
   @ApiProperty()
-    modifiedAt!: Date;
+  modifiedAt!: Date;
 }

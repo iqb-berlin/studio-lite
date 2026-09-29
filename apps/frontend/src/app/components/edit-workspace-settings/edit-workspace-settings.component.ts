@@ -22,15 +22,15 @@ import { State } from '../../modules/admin/models/state.type';
 import { SelectModuleComponent } from '../select-module/select-module.component';
 
 type Profile = {
-  id:string,
-  label:string
+  id: string,
+  label: string
 };
 
 type SelectedRow = {
-  id:number,
-  groupId:number,
-  name:string,
-  unitsCount:number,
+  id: number,
+  groupId: number,
+  name: string,
+  unitsCount: number,
 };
 
 /**
@@ -42,7 +42,7 @@ type SelectedRow = {
   selector: 'studio-lite-edit-workspace-settings',
   templateUrl: './edit-workspace-settings.component.html',
   styleUrls: ['./edit-workspace-settings.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatDialogTitle, MatDialogContent, MatLabel, SelectModuleComponent, MatCheckbox, MatError, MatSelect, MatOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule, IncludePipe]
 })
 export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
@@ -53,17 +53,17 @@ export class EditWorkspaceSettingsComponent implements OnInit, OnDestroy {
     public workspaceService: WorkspaceService,
     public moduleService: ModuleService,
 
-    @Inject(MAT_DIALOG_DATA) public data: { settings: WorkspaceSettingsDto, selectedRow:SelectedRow }
+    @Inject(MAT_DIALOG_DATA) public data: { settings: WorkspaceSettingsDto, selectedRow: SelectedRow }
   ) {
     this.dialogData = { ...this.data.settings as WorkspaceSettingsDto };
   }
 
   dialogData: WorkspaceSettingsDto;
   selectionChanged!: State[];
-  itemMDProfiles:Profile[] = [];
-  unitMDProfiles:Profile[] = [];
-  selectedItemMDProfile:string = '';
-  selectedUnitMDProfile:string = '';
+  itemMDProfiles: Profile[] = [];
+  unitMDProfiles: Profile[] = [];
+  selectedItemMDProfile: string = '';
+  selectedUnitMDProfile: string = '';
   profiles: Array<string> = [];
   settings = { ...this.workspaceService.workspaceSettings, profile: '' };
 

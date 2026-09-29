@@ -18,7 +18,7 @@ import { State } from '../../../admin/models/state.type';
   selector: 'studio-lite-states',
   templateUrl: './states.component.html',
   styleUrls: ['./states.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatProgressSpinner, MatFormField, MatInput, MatIconButton, MatTooltip, MatIcon, MatError, TranslateModule, MatButton]
 })
 export class StatesComponent implements OnInit, OnDestroy {

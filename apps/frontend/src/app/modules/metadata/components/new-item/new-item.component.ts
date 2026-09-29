@@ -16,7 +16,7 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'studio-lite-new-item',
-  // eslint-disable-next-line max-len
+
   imports: [MatButton, MatDialogActions, TranslateModule, MatLabel, MatFormField, MatSelect, MatOption, MatDialogClose, MatDialogContent, MatDialogTitle, FormsModule],
   templateUrl: './new-item.component.html',
   styleUrl: './new-item.component.scss'

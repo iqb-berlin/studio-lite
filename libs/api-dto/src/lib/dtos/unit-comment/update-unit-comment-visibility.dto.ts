@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUnitCommentVisibilityDto {
   @ApiProperty()
-    hidden!: boolean;
+  hidden!: boolean;
 
   @ApiProperty()
-    userId!: number;
+  userId!: number;
 }

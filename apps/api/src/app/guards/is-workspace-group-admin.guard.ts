@@ -1,5 +1,5 @@
 import {
-  CanActivate, ExecutionContext, Injectable, UnauthorizedException
+  CanActivate, ExecutionContext, ForbiddenException, Injectable
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthService } from '../services/auth.service';
@@ -41,13 +41,13 @@ export class IsWorkspaceGroupAdminGuard implements CanActivate {
         ANY_WORKSPACE_GROUP_ADMIN_KEY,
         [context.getHandler(), context.getClass()]
       );
-      if (!isGroupless) throw new UnauthorizedException();
+      if (!isGroupless) throw new ForbiddenException();
       const isAnyGroupAdmin = await this.authService.isWorkspaceGroupAdmin(userId);
-      if (!isAnyGroupAdmin) throw new UnauthorizedException();
+      if (!isAnyGroupAdmin) throw new ForbiddenException();
       return true;
     }
     const isGroupAdmin = await this.authService.isWorkspaceGroupAdmin(userId, workspaceGroupId);
-    if (!isGroupAdmin) throw new UnauthorizedException();
+    if (!isGroupAdmin) throw new ForbiddenException();
     return true;
   }
 

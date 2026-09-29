@@ -142,7 +142,7 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
   onLoadUnitProperties(): void {
     this.setPresentationStatus('none');
     this.setResponsesStatus('none');
-    this.setPageList([], '');
+    this.clearPageList();
     this.subscribeForUnitPropertiesChanges();
   }
 

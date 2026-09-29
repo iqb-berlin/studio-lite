@@ -12,55 +12,55 @@ import Unit from './unit.entity';
 @Entity()
 class UnitItem {
   @PrimaryGeneratedColumn()
-    uuid: string;
+  uuid: string;
 
   @Column()
-    id: string;
+  id: string;
 
   @ManyToOne(() => Unit)
   @JoinColumn({
     name: 'unit_id'
   })
-    unit: Unit;
+  unit: Unit;
 
   @Column()
-    order: number;
+  order: number;
 
   @Column()
-    locked: boolean;
+  locked: boolean;
 
   @Column()
-    position: string;
+  position: string;
 
   @Column({
     name: 'unit_id'
   })
-    unitId: number;
+  unitId: number;
 
   @Column({
     name: 'variable_id'
   })
-    variableId: string;
+  variableId: string;
 
   @Column({
     name: 'variable_read_only_id'
   })
-    variableReadOnlyId: string;
+  variableReadOnlyId: string;
 
   @Column()
-    description: string;
+  description: string;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'created_at'
   })
-    createdAt: Date;
+  createdAt: Date;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'changed_at'
   })
-    changedAt: Date;
+  changedAt: Date;
 }
 
 export default UnitItem;

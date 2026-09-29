@@ -150,3 +150,31 @@
   - `UnitImportData` and `UnitImportJsonData` read the import formats for `WorkspaceService`.
   - `findOrphanedSessionIds` in `utils/` is asked by both `admin-user-controller.ts` (which displays them) and `SessionCleanupService` (which deletes them), so the two cannot drift into asking it in different words.
 - **Rationale**: The services here run to a thousand lines and more, and what can be named on its own is what leaves without a fight. Once out, it is testable without the service's dependencies — and a second caller can have it.
+
+## Workflow: Pull Requests and Tickets
+
+Branches, the pipeline and the board columns are described in the README under *How work flows through this repository*. Read it before creating a branch, opening a pull request or moving a card on the board. The rules below repeat the two points most easily got wrong and add what the README leaves open.
+
+### Pull Requests
+- **Rule**: Never write `Closes #…`, `Fixes #…` or `Resolves #…` in a commit message or pull request text. Reference the issue as `(#1629)`.
+  - **Rationale**: GitHub closes the ticket on merge, and the board moves it to *Done* past *zu testen* and *Zu veröffentlichen*.
+- **Rule**: Force-push only with `--force-with-lease`, never with `--force`.
+  - **Rationale**: `--force` silently overwrites whatever someone else pushed to the branch in the meantime.
+- **Rule**: A pull request stays within the goal of its issue. What turns up on the way and belongs elsewhere — in review as well — becomes an issue of its own, not a commit on the branch.
+  - **Rationale**: Every extra topic lengthens the review, and every further round costs a pipeline run of about 25 minutes.
+
+### Board 18
+- **Rule**: A ticket goes on the board of its own repository, even when it comes out of work on another one: studio-lite on [board 18](https://github.com/orgs/iqb-berlin/projects/18), verona-modules-aspect on [board 13](https://github.com/orgs/iqb-berlin/projects/13).
+- **Rule**: `gh issue create` alone leaves a studio-lite ticket invisible — add it to board 18 as well (`gh project item-add 18 --owner iqb-berlin --url <issue-url>`). A new card goes to *Neue Tickets*; *Priority* and *Aufwand* stay empty, the team estimates them.
+- **Rule**: Move a card to *In progress* only while working towards a pull request. The column tells colleagues that something is being built; looking into a ticket, or an analysis that ends in a question, is not that yet.
+- **Rule**: After the merge the test decides the column. With an end-to-end test of its own the change goes to *Zu veröffentlichen*, without one to *zu testen*, where someone else builds the test.
+  - "Of its own" means a test that checks exactly this change and would fail without it. An existing spec that keeps passing does not count.
+  - **Exception**: Upgrades, CI and dependency changes without behaviour of their own (Angular, NestJS, ESLint, the release gate) go to *Zu veröffentlichen*; the whole suite is their test.
+- **Rule**: *In review* means released and awaiting validation by the reporters, not code-reviewed. A ticket stays open through all of these columns; do not close it by hand.
+
+### Tickets
+- **Rule**: In a ticket written by someone else, leave their text as it is and keep exactly **one** comment headed "Stand", edited whenever something new is known. In a ticket of your own the description is the current state: edit it rather than append to it.
+  - **Rationale**: A ticket is read for where things stand, not as a log of how anyone got there.
+- **Rule**: Keep comments short: the result, its consequence, one reference (a file, a commit, a pull request). Approaches that were dropped stay out of the ticket.
+- **Rule**: A question goes to the person you are working for, not into the ticket.
+  - **Rationale**: A question in a ticket makes work for everyone who reads it and is outdated the next day.

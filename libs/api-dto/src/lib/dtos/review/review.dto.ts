@@ -3,17 +3,17 @@ import { ReviewBaseDto } from './review-base.dto';
 
 export class ReviewDto extends ReviewBaseDto {
   @ApiProperty()
-    workspaceId!: number;
+  workspaceId!: number;
 
   @ApiProperty()
-    workspaceName?: string;
+  workspaceName?: string;
 
   @ApiProperty()
-    workspaceGroupId?: number;
+  workspaceGroupId?: number;
 
   @ApiProperty()
-    workspaceGroupName?: string;
+  workspaceGroupName?: string;
 
   @ApiProperty()
-    numberOfUnits?: number;
+  numberOfUnits?: number;
 }

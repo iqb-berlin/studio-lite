@@ -14,7 +14,7 @@ import { ReviewTableComponent } from '../review-table/review-table.component';
   selector: 'studio-lite-user-reviews-area',
   templateUrl: './user-reviews-area.component.html',
   styleUrls: ['./user-reviews-area.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [AreaTitleComponent, MatButton, LogoutDirective, MatTooltip, MatIcon, TranslateModule, ReviewTableComponent]
 })
 export class UserReviewsAreaComponent implements OnInit {

@@ -4,8 +4,8 @@ import { ReviewConfigDto } from './review-config.dto';
 
 export class ReviewSettingsDto {
   @ApiProperty()
-    bookletConfig?: BookletConfigDto;
+  bookletConfig?: BookletConfigDto;
 
   @ApiProperty()
-    reviewConfig?: ReviewConfigDto;
+  reviewConfig?: ReviewConfigDto;
 }

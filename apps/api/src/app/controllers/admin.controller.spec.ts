@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { WorkspaceFullDto, UnitInViewDto } from '@studio-lite-lib/api-dto';
+import { WorkspaceFullDto, UnitInViewDto, UnitItemInViewDto } from '@studio-lite-lib/api-dto';
 import { AdminController } from './admin.controller';
 import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
@@ -65,7 +65,9 @@ describe('AdminController', () => {
 
   describe('getAllUnitItems', () => {
     it('should return all unit items', async () => {
-      const mockItems = [{ uuid: 'u1', id: 'i1' }];
+      const mockItems = [{
+        uuid: 'u1', id: 'i1', unitId: 7, unitKey: 'M1', unitName: 'Mathe 1', workspaceId: 3, workspaceName: 'W'
+      }] as UnitItemInViewDto[];
       unitItemService.getAll.mockResolvedValue(mockItems);
 
       const result = await controller.getAllUnitItems();

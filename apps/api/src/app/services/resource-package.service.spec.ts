@@ -5,15 +5,37 @@ import {
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
+// `unstable_mockModule` is missing from the global `jest` object's type, so it comes from here.
+// It is aliased because the global `jest` -- used for `jest.fn()` below -- types its mocks
+// loosely, and importing over that name would make every `mockReturnValue` a type error.
+import { jest as jestEsm } from '@jest/globals';
 import 'multer';
-import * as fs from 'fs';
-import * as AdmZip from 'adm-zip';
-import { ResourcePackageService } from './resource-package.service';
+// The class itself arrives through the dynamic import below; this keeps its name usable as a
+// type, which a `const` from `await import()` cannot be.
+import type { ResourcePackageService } from './resource-package.service';
 import ResourcePackage from '../entities/resource-package.entity';
 import { ResourcePackageNotFoundException } from '../exceptions/resource-package-not-found.exception';
 
-jest.mock('fs');
-jest.mock('adm-zip');
+// ESM module namespaces are frozen, so a replacement has to be registered before the module is
+// pulled in -- which is why the imports below are dynamic. ES modules have no automock, so the
+// rest of fs is carried over unchanged rather than left undefined: anything this suite does not
+// control itself would otherwise fail with "is not a function".
+jestEsm.unstable_mockModule('fs', () => ({
+  ...(jest.requireActual('fs') as object),
+  existsSync: jest.fn(),
+  rmSync: jest.fn(),
+  writeFileSync: jest.fn(),
+  readFileSync: jest.fn(),
+  mkdirSync: jest.fn()
+}));
+
+jestEsm.unstable_mockModule('adm-zip', () => ({
+  default: jest.fn()
+}));
+
+const fs = await import('fs');
+const AdmZipMock = (await import('adm-zip')).default as unknown as jest.Mock;
+const { ResourcePackageService: ResourcePackageServiceClass } = await import('./resource-package.service');
 
 describe('ResourcePackageService', () => {
   let service: ResourcePackageService;
@@ -22,7 +44,7 @@ describe('ResourcePackageService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        ResourcePackageService,
+        ResourcePackageServiceClass,
         {
           provide: getRepositoryToken(ResourcePackage),
           useValue: createMock<Repository<ResourcePackage>>()
@@ -30,7 +52,7 @@ describe('ResourcePackageService', () => {
       ]
     }).compile();
 
-    service = module.get<ResourcePackageService>(ResourcePackageService);
+    service = module.get<ResourcePackageService>(ResourcePackageServiceClass);
     resourcePackageRepository = module.get(getRepositoryToken(ResourcePackage));
 
     jest.clearAllMocks();
@@ -95,7 +117,7 @@ describe('ResourcePackageService', () => {
         }
       });
 
-      (AdmZip as unknown as jest.Mock).mockImplementation(() => ({
+      AdmZipMock.mockImplementation(() => ({
         getEntries: jest.fn().mockReturnValue([{ entryName: 'file1' }]),
         extractAllToAsync: mockExtractAllToAsync
       }));
@@ -112,7 +134,7 @@ describe('ResourcePackageService', () => {
         buffer: Buffer.from('')
       } as Express.Multer.File;
       resourcePackageRepository.findOne.mockResolvedValue(new ResourcePackage());
-      (AdmZip as unknown as jest.Mock).mockImplementation(() => ({}));
+      AdmZipMock.mockImplementation(() => ({}));
 
       await expect(service.create(file)).rejects.toThrow(ConflictException);
     });
@@ -122,7 +144,7 @@ describe('ResourcePackageService', () => {
         originalname: 'invalid.zip',
         buffer: Buffer.from('')
       } as Express.Multer.File;
-      (AdmZip as unknown as jest.Mock).mockImplementation(() => ({}));
+      AdmZipMock.mockImplementation(() => ({}));
 
       await expect(service.create(file)).rejects.toThrow(BadRequestException);
     });
@@ -133,7 +155,7 @@ describe('ResourcePackageService', () => {
         buffer: Buffer.from('not a zip')
       } as Express.Multer.File;
       resourcePackageRepository.findOne.mockResolvedValue(null);
-      (AdmZip as unknown as jest.Mock).mockImplementation(() => {
+      AdmZipMock.mockImplementation(() => {
         throw new Error('Invalid or unsupported zip format. No END header found');
       });
 

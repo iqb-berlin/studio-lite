@@ -12,7 +12,7 @@ import { ReviewService } from '../../services/review.service';
   selector: 'studio-lite-unit-nav',
   templateUrl: './unit-nav.component.html',
   styleUrls: ['./unit-nav.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatFabAnchor, MatTooltip, MatAnchor, MatSelectionList, MatListOption, TranslateModule, MatFabButton, MatButton]
 })
 export class UnitNavComponent {

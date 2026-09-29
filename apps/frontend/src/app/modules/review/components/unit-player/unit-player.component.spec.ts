@@ -356,6 +356,16 @@ describe('UnitPlayerComponent', () => {
     });
   });
 
+  describe('onLoadUnitProperties()', () => {
+    it('should drop the page list of the unit left behind', () => {
+      component.setPageList(['p1', 'p2', 'p3'], 'p1');
+
+      component.onLoadUnitProperties();
+
+      expect(component.pageList).toEqual([]);
+    });
+  });
+
   describe('Component Properties', () => {
     it('should have unitData property', () => {
       expect(component.unitData).toBeDefined();

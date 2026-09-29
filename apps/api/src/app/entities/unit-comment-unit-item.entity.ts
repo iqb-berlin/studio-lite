@@ -9,29 +9,29 @@ class UnitCommentUnitItem {
   @PrimaryColumn({
     name: 'unit_item_uuid'
   })
-    unitItemUuid: string;
+  unitItemUuid: string;
 
   @PrimaryColumn({
     name: 'unit_comment_id'
   })
-    unitCommentId: number;
+  unitCommentId: number;
 
   @Column({
     name: 'unit_id'
   })
-    unitId: number;
+  unitId: number;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'created_at'
   })
-    createdAt: Date;
+  createdAt: Date;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'changed_at'
   })
-    changedAt: Date;
+  changedAt: Date;
 }
 
 export default UnitCommentUnitItem;

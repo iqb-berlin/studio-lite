@@ -12,7 +12,7 @@ import { WrappedIconComponent } from '../wrapped-icon/wrapped-icon.component';
   selector: 'studio-lite-search-filter',
   templateUrl: './search-filter.component.html',
   styleUrls: ['./search-filter.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatFormField, MatLabel, MatInput, MatIconButton, MatSuffix, MatTooltip, WrappedIconComponent, TranslateModule]
 })
 export class SearchFilterComponent {

@@ -3,12 +3,12 @@ import { SessionActivityStatus } from './user-activity-status';
 
 export class UserSessionInfoDto {
   @ApiProperty()
-    sessionId!: string;
+  sessionId!: string;
 
   // Last user interaction.
   @ApiProperty()
-    lastActivity?: Date;
+  lastActivity?: Date;
 
   @ApiProperty({ enum: ['active', 'passive', 'orphaned'] })
-    activityStatus!: SessionActivityStatus;
+  activityStatus!: SessionActivityStatus;
 }

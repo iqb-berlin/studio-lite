@@ -2,47 +2,47 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UnitInViewDto {
   @ApiProperty()
-    key!: string;
+  key!: string;
 
   @ApiProperty()
-    name?: string;
+  name?: string;
 
   @ApiProperty()
-    groupName?: string;
+  groupName?: string;
 
   @ApiProperty()
-    id!: number;
+  id!: number;
 
   @ApiProperty()
-    workspaceName?: string;
+  workspaceName?: string;
 
   @ApiProperty()
-    workspaceId!: number;
+  workspaceId!: number;
 
   @ApiProperty({
     type: 'string',
     format: 'date-time'
   })
-    lastChangedMetadata?: Date;
+  lastChangedMetadata?: Date;
 
   @ApiProperty({
     type: 'string',
     format: 'date-time'
   })
-    lastChangedDefinition?: Date;
+  lastChangedDefinition?: Date;
 
   @ApiProperty({
     type: 'string',
     format: 'date-time'
   })
-    lastChangedScheme?: Date;
+  lastChangedScheme?: Date;
 
   @ApiProperty()
-    lastChangedMetadataUser?: string;
+  lastChangedMetadataUser?: string;
 
   @ApiProperty()
-    lastChangedDefinitionUser?: string;
+  lastChangedDefinitionUser?: string;
 
   @ApiProperty()
-    lastChangedSchemeUser?: string;
+  lastChangedSchemeUser?: string;
 }

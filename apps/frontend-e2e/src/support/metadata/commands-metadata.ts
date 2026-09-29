@@ -102,7 +102,7 @@ Cypress.Commands.add('updateWsMetadataAPI',
 //   'updateUnitMetadataAPI',
 //   (wsId: string, unitId: string, profile:string, entry: MetadataValuesEntry, token: string) => {
 //     console.log(entry);
-// eslint-disable-next-line max-len
+
 //     const jsonObj = JSON.parse('[{"id":"a1","label":[{"lang":"de","value":"Für SPF geeignet"}],"value":"false","valueAsText":{"lang":"de","value":"ja"}},{"id":"iqb_phones","label":[{"lang":"de","value":"Kopfhörer"}],"value":[],"valueAsText":[]},{"id":"w8","label":[{"lang":"de","value":"Leitidee"}],"value":[],"valueAsText":[]},{"id":"iqb_author","label":[{"lang":"de","value":"Entwickler:in"}],"value":[{"lang":"de","value":"Ana Maier"}],"valueAsText":[{"lang":"de","value":"Ana Maier"}]}]');
 //     const authorization = `bearer ${token}`;
 //     const nu = parseInt(`${unitId}`, 10);

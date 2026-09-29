@@ -10,7 +10,7 @@ import {
   UseInterceptors
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiNotAcceptableResponse, ApiOkResponse, ApiQuery, ApiTags, ApiUnauthorizedResponse
+  ApiBearerAuth, ApiCreatedResponse, ApiNotAcceptableResponse, ApiOkResponse, ApiQuery, ApiTags, ApiForbiddenResponse
 } from '@nestjs/swagger';
 import { VeronaModuleInListDto, VeronaModuleType } from '@studio-lite-lib/api-dto';
 import { VERONA_MODULE_TYPES, isKnownVeronaModuleType } from '@studio-lite/shared-code';
@@ -58,7 +58,7 @@ export class AdminVeronaModuleController {
     enum: VERONA_MODULE_TYPES
   })
   async addModuleFile(
-  @UploadedFile() file,
+    @UploadedFile() file,
     @Query('type', new ParseArrayPipe({ items: String, separator: ',' })) types: string[]
   ) {
     const normalizedTypes = types.map(type => type.trim()).filter(Boolean);
@@ -80,7 +80,7 @@ export class AdminVeronaModuleController {
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Verona modules deleted successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiTags('admin verona-module')
   @ApiQuery({
     name: 'key',

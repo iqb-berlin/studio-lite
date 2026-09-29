@@ -19,42 +19,42 @@ import Workspace from './workspace.entity';
 @Entity()
 class Unit {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column({
     name: 'workspace_id'
   })
-    workspaceId: number;
+  workspaceId: number;
 
   @ManyToOne(() => Workspace)
   @JoinColumn({
     name: 'workspace_id'
   })
-    workspace: Workspace;
+  workspace: Workspace;
 
   @Column()
-    key: string;
+  key: string;
 
   @Column()
-    name: string;
+  name: string;
 
   @Column({
     name: 'group_name',
     nullable: true
   })
-    groupName: string;
+  groupName: string;
 
   @Column()
-    description: string;
+  description: string;
 
   @Column()
-    reference: string;
+  reference: string;
 
   @Column()
-    transcript: string;
+  transcript: string;
 
   @Column()
-    state: string;
+  state: string;
 
   @Column({
     type: 'jsonb',
@@ -62,13 +62,13 @@ class Unit {
     default: () => "'{}'",
     nullable: false
   })
-    metadata = {};
+  metadata = {};
 
   @Column()
-    player: string;
+  player: string;
 
   @Column()
-    editor: string;
+  editor: string;
 
   @Column({
     type: 'jsonb',
@@ -76,62 +76,62 @@ class Unit {
     default: () => "'[]'",
     nullable: false
   })
-    variables = [];
+  variables = [];
 
   @Column({
     name: 'last_changed_definition_user',
     nullable: true
   })
-    lastChangedDefinitionUser: string;
+  lastChangedDefinitionUser: string;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'last_changed_definition',
     nullable: true
   })
-    lastChangedDefinition: Date;
+  lastChangedDefinition: Date;
 
   @Column()
-    schemer: string;
+  schemer: string;
 
   @Column()
-    scheme: string;
+  scheme: string;
 
   @Column({
     name: 'scheme_type'
   })
-    schemeType: string;
+  schemeType: string;
 
   @Column({
     name: 'last_changed_scheme_user',
     nullable: true
   })
-    lastChangedSchemeUser: string;
+  lastChangedSchemeUser: string;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'last_changed_scheme',
     nullable: true
   })
-    lastChangedScheme: Date;
+  lastChangedScheme: Date;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'last_changed_metadata'
   })
-    lastChangedMetadata: Date;
+  lastChangedMetadata: Date;
 
   @Column({
     name: 'last_changed_metadata_user',
     nullable: true
   })
-    lastChangedMetadataUser: string;
+  lastChangedMetadataUser: string;
 
   @Column({
     nullable: true,
     unique: true
   })
-    uuid: string;
+  uuid: string;
 }
 
 export default Unit;

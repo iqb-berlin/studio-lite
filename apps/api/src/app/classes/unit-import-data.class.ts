@@ -3,6 +3,7 @@ import * as cheerio from 'cheerio';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { FileIo } from '../interfaces/file-io.interface';
+import { NotAUnitXmlError } from '../exceptions/not-a-unit-xml.error';
 
 export class UnitImportData {
   key: string;
@@ -41,6 +42,9 @@ export class UnitImportData {
     const xmlDocument = cheerio.load(fileIo.buffer.toString(), {
       xml: true
     });
+    // A booklet carries <Metadata><Id> just like a unit; without this check it became one
+    const rootElement = xmlDocument.root().children().get(0)?.name ?? '';
+    if (rootElement !== 'Unit') throw new NotAUnitXmlError(rootElement);
     this.setMetaData(xmlDocument);
     this.setDefinitionRef(xmlDocument);
     this.setCommentsRef(xmlDocument);
@@ -152,7 +156,7 @@ export class UnitImportData {
             multiple: variableRecord.attribs['multiple'] ? variableRecord.attribs['multiple'] === 'true' : false,
             // eslint-disable-next-line @typescript-eslint/dot-notation
             page: variableRecord.attribs['page'],
-            // eslint-disable-next-line @typescript-eslint/dot-notation
+
             valuePositionLabels: UnitImportData.getValuePositionLabelsForVariable(valuePositionLabelsElement),
             valuesComplete: valuesElement.length ? valuesElement.attr('complete') as unknown as boolean : false,
             values: UnitImportData.getValuesForVariable(valuesElement)

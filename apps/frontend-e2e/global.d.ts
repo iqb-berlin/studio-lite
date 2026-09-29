@@ -73,12 +73,16 @@ declare namespace Cypress {
     updateUnitPropertiesAPI(wsId: string, unitId: string, entry: DefinitionUnit, token: string):
     Chainable<Response>; // 36
     getUnitsByWsAPI(wsId: string, token: string): Chainable<Response>; // 37
+    getUserWorkspaceAPI(wsId: string, userId: string, token: string): Chainable<Response>;
     moveToAPI(wsOriginId:string, wsDestinyId: string, unitId:string, token:string):Chainable<Response>; // 38
     renameWsAPI(wsId: string, wsName: string, token: string): Chainable<Response>; // 39
     copyToAPI(wsDestinationId:string, copyUnit: CopyUnit, token:string): Chainable<Response>; // 40
     getGroupsOfWsAPI(wsId: string, token:string): Chainable<Response>; // 41
     updateGroupNameOfWsAPI(wsId: string, groupName:string, token:string): Chainable<Response>; // 42
     getUnitSchemeAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 43
+    // eslint-disable-next-line max-len
+    updateUnitVariablesAPI(unitId: string, wsId: string, variables: Record<string, unknown>[], token: string): Chainable<Response>;
+    uploadUnitFilesAPI(wsId: string, fixtures: string[], token: string): Chainable<Response>;
     updateUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 44
     getUnitDefinitionAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 45
     updateUnitSchemeAPI(wsId: string, unitId: string, token: string): Chainable<Response>; // 46
@@ -108,6 +112,9 @@ declare namespace Cypress {
     Chainable<Response>; // 64a
     getAllReviewAPI(wsId:string, token:string): Chainable<Response>; // 65
     getReviewWindowAPI(reviewId:string, token:string): Chainable<Response>; // 66
+    getReviewAsReviewerAPI(reviewId: string, token: string): Chainable<Response>;
+    // eslint-disable-next-line max-len
+    voteCommentReviewAPI(reviewId: string, unitId: string, commentId: string, vote: 'up' | 'down' | null, token: string): Chainable<Response>;
     getReviewPropertiesAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 67
     getReviewDefinitionAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 68
     getReviewSchemeAPI(reviewId:string, unitId:string, token:string): Chainable<Response>; // 69
@@ -129,6 +136,9 @@ declare namespace Cypress {
     // eslint-disable-next-line max-len
     updateWsByUserAPI(id: string, groupId: string, levels: number[], wsIds: string[], token: string): Chainable<Response>; // 83
     uploadUnitsAPI(wsId: string, filename:string, token:string): Chainable<Response>; // 84
+    exportUnitsAPI(wsId: string, downloadQuery: string, token: string): Chainable<Response>;
+    importUnitsAPI(wsId: string, zipContent: string, token: string): Chainable<Response>;
+    getAdminUnitItemsAPI(token: string): Chainable<Response>;
     getGroupsByUserAPI(id: string, token: string): Chainable<Response>; // 85
     updateGroupsByUserAPI(id: string, groupIds: string[], token: string): Chainable<Response>; // 86
     deleteWsAPI(qs: string[], token: string): Chainable<Response>; // 87

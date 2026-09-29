@@ -4,7 +4,7 @@ import { ParseFilePipe } from './parse-file.pipe';
 describe('ParseFilePipe', () => {
   let pipe: ParseFilePipe;
   let metadata: ArgumentMetadata;
-  let parseFileInput: Parameters<ParseFilePipe['transform']>[0];
+  type ParseFileInput = Parameters<ParseFilePipe['transform']>[0];
 
   beforeEach(() => {
     pipe = new ParseFilePipe();
@@ -41,7 +41,7 @@ describe('ParseFilePipe', () => {
   it('returns the same file instance', () => {
     const file = {
       originalname: 'test.txt'
-    } as unknown as typeof parseFileInput;
+    } as unknown as ParseFileInput;
     const result = pipe.transform(file, metadata);
     expect(result).toBe(file);
   });
@@ -49,7 +49,7 @@ describe('ParseFilePipe', () => {
   it('returns the same files array instance', () => {
     const files = [
       { originalname: 'test.txt' }
-    ] as unknown as typeof parseFileInput;
+    ] as unknown as ParseFileInput;
     const result = pipe.transform(files, metadata);
     expect(result).toBe(files);
   });

@@ -9,10 +9,10 @@ import { LanguageCodedText as TextWithLanguage } from '@iqbspecs/metadata-profil
 @Entity()
 class RegisteredMetadataProfile {
   @PrimaryColumn()
-    id: string;
+  id: string;
 
   @Column()
-    url: string;
+  url: string;
 
   @Column({
     type: 'jsonb',
@@ -20,13 +20,13 @@ class RegisteredMetadataProfile {
     default: () => "'[]'",
     nullable: false
   })
-    title: TextWithLanguage[] = [];
+  title: TextWithLanguage[] = [];
 
   @Column()
-    creator: string;
+  creator: string;
 
   @Column()
-    maintainer: string;
+  maintainer: string;
 
   @Column({
     type: 'jsonb',
@@ -34,13 +34,13 @@ class RegisteredMetadataProfile {
     default: () => "'[]'",
     nullable: false
   })
-    profiles: string[] = [];
+  profiles: string[] = [];
 
   @Column({
     type: 'timestamp with time zone',
     name: 'modified_at'
   })
-    modifiedAt: Date;
+  modifiedAt: Date;
 }
 
 export default RegisteredMetadataProfile;

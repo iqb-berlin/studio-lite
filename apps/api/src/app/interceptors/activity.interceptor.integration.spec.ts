@@ -45,9 +45,9 @@ describe('ActivityInterceptor (integration)', () => {
     const reflector = new Reflector();
     const modeOf = (handler: unknown, controller: unknown): string | undefined => reflector
       .getAllAndOverride<string | undefined>(
-      BACKGROUND_REQUEST_KEY,
-      [handler as () => void, controller as new () => unknown]
-    );
+        BACKGROUND_REQUEST_KEY,
+        [handler as () => void, controller as new () => unknown]
+      );
 
     it.each([
       ['refresh', AppController.prototype.refresh],

@@ -36,21 +36,37 @@ export class UnitItemService {
     return manager ? manager.getRepository(UnitItem) : this.unitItemRepository;
   }
 
-  async getAll(): Promise<UnitItemDto[]> {
-    return this.unitItemRepository.find();
+  /**
+   * All items of all workspaces, for the admin view. Each carries its unit and workspace, because
+   * the view links to the unit, and a unit's address in the frontend is `/a/<workspace>/<unit>`
+   * (#1698).
+   */
+  async getAll(): Promise<UnitItemInViewDto[]> {
+    return this.unitItemRepository.find({
+      relations: ['unit', 'unit.workspace']
+    }).then(items => items.map(UnitItemService.inView));
   }
 
   async findAllForGroup(workspaceGroupId: number): Promise<UnitItemInViewDto[]> {
     return this.unitItemRepository.find({
       relations: ['unit', 'unit.workspace'],
       where: { unit: { workspaceId: In(await this.getWorkspaceIds(workspaceGroupId)) } }
-    }).then(items => items.map(item => ({
+    }).then(items => items.map(UnitItemService.inView));
+  }
+
+  /**
+   * An item as the admin and the group admin views show it: with the key and name of its unit and
+   * the id and name of its workspace. The loaded unit itself is left out -- it would bring its
+   * metadata, variables and coding scheme along with every single item, and neither view reads it.
+   */
+  private static inView({ unit, ...item }: UnitItem): UnitItemInViewDto {
+    return {
       ...item,
-      unitKey: item.unit?.key || '',
-      unitName: item.unit?.name || '',
-      workspaceId: item.unit?.workspaceId || 0,
-      workspaceName: item.unit?.workspace?.name || ''
-    })));
+      unitKey: unit?.key || '',
+      unitName: unit?.name || '',
+      workspaceId: unit?.workspaceId || 0,
+      workspaceName: unit?.workspace?.name || ''
+    };
   }
 
   private async getWorkspaceIds(workspaceGroupId: number): Promise<number[]> {

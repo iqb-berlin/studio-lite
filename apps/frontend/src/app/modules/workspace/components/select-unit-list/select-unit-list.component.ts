@@ -2,7 +2,7 @@ import {
   Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild
 } from '@angular/core';
 import {
-  // eslint-disable-next-line max-len
+
   MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
@@ -29,7 +29,7 @@ import { ScrollIntoViewDirective } from '../../directives/scroll-into-view.direc
   selector: 'studio-lite-select-unit-list',
   templateUrl: './select-unit-list.component.html',
   styleUrls: ['select-unit-list.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, IncludePipe, IsSelectedPipe, IsAllSelectedPipe, HasSelectionValuePipe, TranslateModule, ScrollIntoViewDirective]
 })
 export class SelectUnitListComponent implements OnChanges, OnDestroy {

@@ -4,32 +4,32 @@ import { UnitRichNoteTagDto } from '../unit-rich-note/unit-rich-note-tag.dto';
 
 export class WorkspaceSettingsDto {
   @ApiProperty()
-    defaultEditor = '';
+  defaultEditor = '';
 
   @ApiProperty()
-    defaultPlayer = '';
+  defaultPlayer = '';
 
   @ApiProperty()
-    defaultSchemer = '';
+  defaultSchemer = '';
 
   @ApiProperty()
-    unitGroups?: string[];
+  unitGroups?: string[];
 
   @ApiProperty()
-    stableModulesOnly?: boolean = true;
+  stableModulesOnly?: boolean = true;
 
   @ApiProperty()
-    unitMDProfile?: string;
+  unitMDProfile?: string;
 
   @ApiProperty()
-    itemMDProfile?: string;
+  itemMDProfile?: string;
 
   @ApiProperty()
-    states?: State[];
+  states?: State[];
 
   @ApiProperty()
-    hiddenRoutes?: string[];
+  hiddenRoutes?: string[];
 
   @ApiProperty()
-    richNoteTags?: string[] | UnitRichNoteTagDto[];
+  richNoteTags?: string[] | UnitRichNoteTagDto[];
 }

@@ -1,4 +1,6 @@
-import { enableProdMode, ApplicationModule, importProvidersFrom } from '@angular/core';
+import {
+  enableProdMode, ApplicationModule, importProvidersFrom, provideZoneChangeDetection
+} from '@angular/core';
 
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -47,6 +49,9 @@ import {
   selectTranslationsForLanguage,
   TranslationMap
 } from './app/services/translation-merger';
+// Named, not the whole file: esbuild then keeps just the version string in the bundle -- a default
+// import would ship all of package.json, dependency list included, to the browser.
+import { version as appVersion } from '../../../package.json';
 
 // eslint-disable-next-line no-bitwise
 const hash = (str: string) => str.split('').reduce((prev, curr) => Math.imul(31, prev) + curr.charCodeAt(0) | 0, 0);
@@ -73,7 +78,7 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideRouter(APP_ROUTES, withRouterConfig({ onSameUrlNavigation: 'reload' })),
+    provideZoneChangeDetection(), provideRouter(APP_ROUTES, withRouterConfig({ onSameUrlNavigation: 'reload' })),
     provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(
       ApplicationModule,
@@ -141,8 +146,9 @@ bootstrapApplication(AppComponent, {
       useValue: 'IQB-Studio'
     },
     {
+      // from package.json, the one place a release raises it (#1643)
       provide: 'APP_VERSION',
-      useValue: '20.0.1'
+      useValue: appVersion
     }
   ]
 });

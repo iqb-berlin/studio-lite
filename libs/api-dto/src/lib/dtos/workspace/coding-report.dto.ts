@@ -22,37 +22,37 @@ export const CODING_SCHEME_PROBLEM_TYPES = Object.keys(
 
 export class CodingReportValidationProblemDto {
   @ApiProperty({ enum: CODING_SCHEME_PROBLEM_TYPES })
-    type!: CodingSchemeProblemType;
+  type!: CodingSchemeProblemType;
 
   @ApiProperty()
-    breaking!: boolean;
+  breaking!: boolean;
 
   @ApiPropertyOptional()
-    code?: string;
+  code?: string;
 }
 
 export class CodingReportDto {
   @ApiProperty({ })
-    unit: string | undefined;
+  unit: string | undefined;
 
   @ApiProperty({ })
-    variable!: string;
+  variable!: string;
 
   @ApiProperty()
-    variableType!: string;
+  variableType!: string;
 
   @ApiProperty()
-    item!: string;
+  item!: string;
 
   @ApiProperty()
-    validation!: string;
+  validation!: string;
 
   @ApiPropertyOptional({ type: [CodingReportValidationProblemDto] })
-    validationProblems?: CodingReportValidationProblemDto[];
+  validationProblems?: CodingReportValidationProblemDto[];
 
   @ApiProperty()
-    codingType!: string;
+  codingType!: string;
 
   @ApiProperty()
-    trainingEffort!: string;
+  trainingEffort!: string;
 }

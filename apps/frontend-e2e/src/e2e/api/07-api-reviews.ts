@@ -33,13 +33,13 @@ describe('Review API tests', () => {
         });
     });
 
-    it('500 negative test: should return a server error when attempting to create ' +
+    it('403 negative test: should be refused when attempting to create ' +
       'a review without a valid workspace ID', () => {
       cy.addReviewAPI(noId,
         reviewName2,
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.be.equal(500);
+          expect(resp.status).to.be.equal(403);
         });
     });
 
@@ -71,12 +71,12 @@ describe('Review API tests', () => {
         });
     });
 
-    it('500 negative test: should return a server error when requesting reviews without a valid workspace ID', () => {
+    it('403 negative test: should be refused when requesting reviews without a valid workspace ID', () => {
       cy.getReviewAPI(noId,
         Cypress.expose('id_review1'),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.be.equal(500);
+          expect(resp.status).to.be.equal(403);
         });
     });
 
@@ -110,13 +110,13 @@ describe('Review API tests', () => {
         });
     });
 
-    it('500 negative test: should return a server error when attempting to update ' +
+    it('403 negative test: should be refused when attempting to update ' +
       'a review without a workspace ID', () => {
       cy.updateReviewAPI(noId,
         review1,
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -140,12 +140,12 @@ describe('Review API tests', () => {
         });
     });
 
-    it('500 negative test: should return a server error when attempting to list ' +
+    it('403 negative test: should be refused when attempting to list ' +
       'all reviews without a workspace ID', () => {
       cy.getAllReviewAPI(noId,
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -193,23 +193,23 @@ describe('Review API tests', () => {
         });
     });
 
-    it('401 negative test: should deny unit properties under a review the unit is not part of', () => {
+    it('403 negative test: should deny unit properties under a review the unit is not part of', () => {
       // Was 500 before #1630: nothing compared the unit in the path with the review in it, and the
       // answer depended on whether the id happened to exist.
       cy.getReviewPropertiesAPI(noId,
         Cypress.expose(unit4.shortname),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny review properties for a unit id the review does not contain', () => {
+    it('403 negative test: should deny review properties for a unit id the review does not contain', () => {
       cy.getReviewDefinitionAPI(Cypress.expose('id_review1'),
         noId,
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -234,22 +234,22 @@ describe('Review API tests', () => {
         });
     });
 
-    it('401 negative test: should deny a unit definition under a review that does not contain it', () => {
+    it('403 negative test: should deny a unit definition under a review that does not contain it', () => {
       // Handed out the definition with 200 before #1630, for any review id at all.
       cy.getReviewDefinitionAPI(noId,
         Cypress.expose(unit4.shortname),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny a unit definition for a unit id the review does not contain', () => {
+    it('403 negative test: should deny a unit definition for a unit id the review does not contain', () => {
       cy.getReviewDefinitionAPI(Cypress.expose('id_review1'),
         noId,
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -276,22 +276,22 @@ describe('Review API tests', () => {
         });
     });
 
-    it('401 negative test: should deny a coding scheme under a review that does not contain the unit', () => {
+    it('403 negative test: should deny a coding scheme under a review that does not contain the unit', () => {
       // The coding scheme of any unit, for any review id, with 200 -- until #1630.
       cy.getReviewSchemeAPI(noId,
         Cypress.expose(unit4.shortname),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny a coding scheme for a unit id the review does not contain', () => {
+    it('403 negative test: should deny a coding scheme for a unit id the review does not contain', () => {
       cy.getReviewSchemeAPI(Cypress.expose('id_review1'),
         noId,
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -318,7 +318,7 @@ describe('Review API tests', () => {
       };
     });
 
-    it('401 negative test: should deny writing a comment into a review that does not contain the unit', () => {
+    it('403 negative test: should deny writing a comment into a review that does not contain the unit', () => {
       // This wrote a comment into the database before #1630 -- attached to a unit, under a review
       // id that had nothing to do with it.
       cd.body = 'New comment review created without review id in the path';
@@ -327,18 +327,18 @@ describe('Review API tests', () => {
         cd,
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny writing a comment for a unit id the review does not contain', () => {
+    it('403 negative test: should deny writing a comment for a unit id the review does not contain', () => {
       cd.body = 'New comment review created without unit id in the path';
       cy.createCommentReviewAPI(Cypress.expose('id_review1'),
         noId,
         cd,
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -366,22 +366,22 @@ describe('Review API tests', () => {
   });
 
   describe('71. GET /api/reviews/{review_id}/units/{unit_id}/comments}', () => {
-    it('401 negative test: should deny reading comments under a review that does not contain the unit', () => {
+    it('403 negative test: should deny reading comments under a review that does not contain the unit', () => {
       // Handed out the unit's comments for any review id before #1630.
       cy.getCommentReviewAPI(noId,
         Cypress.expose(unit4.shortname),
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny reading comments for a unit id the review does not contain', () => {
+    it('403 negative test: should deny reading comments for a unit id the review does not contain', () => {
       cy.getCommentReviewAPI(Cypress.expose('id_review1'),
         noId,
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -415,7 +415,7 @@ describe('Review API tests', () => {
         userId: parseInt(Cypress.expose(`id_${Cypress.expose('username')}`), 10)
       };
     });
-    it('401 negative test: should deny updating a comment under a review that does not contain the unit', () => {
+    it('403 negative test: should deny updating a comment under a review that does not contain the unit', () => {
       // Reached the comment and wrote to it before #1630, review id notwithstanding.
       mcd.body = 'Update comment review created without review id in the path';
       cy.updateCommentReviewAPI(noId,
@@ -424,11 +424,11 @@ describe('Review API tests', () => {
         mcd,
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny updating a comment for a unit id the review does not contain', () => {
+    it('403 negative test: should deny updating a comment for a unit id the review does not contain', () => {
       mcd.body = 'Update comment review created without unit id in the path';
       cy.updateCommentReviewAPI(Cypress.expose('id_review1'),
         noId,
@@ -436,7 +436,7 @@ describe('Review API tests', () => {
         mcd,
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -489,24 +489,24 @@ describe('Review API tests', () => {
   });
 
   describe('73. DELETE /api/reviews/{review_id}/units/{unit_id}/comments/{id}', () => {
-    it('401 negative test: should deny deleting a comment under a review that does not contain the unit', () => {
+    it('403 negative test: should deny deleting a comment under a review that does not contain the unit', () => {
       // Deleted the row before #1630, whatever review the path named.
       cy.deleteCommentReviewAPI(noId,
         Cypress.expose(unit4.shortname),
         Cypress.expose('id_commentReview'),
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny deleting a comment for a unit id the review does not contain', () => {
+    it('403 negative test: should deny deleting a comment for a unit id the review does not contain', () => {
       cy.deleteCommentReviewAPI(Cypress.expose('id_review1'),
         noId,
         Cypress.expose('id_commentReview'),
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -583,40 +583,231 @@ describe('Review API tests', () => {
         });
     });
 
-    it('401 negative test: should deny a review login the review it was not issued for', () => {
+    it('403 negative test: should deny a review login the review it was not issued for', () => {
       // Same token, another review of the same workspace. This answered before #1630.
       cy.getReviewPropertiesAPI(Cypress.expose('id_review2'),
         Cypress.expose(unit4.shortname),
         Cypress.expose('tokenOfReview1'))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny a unit of another workspace under a review that has it not', () => {
+    it('403 negative test: should deny a unit of another workspace under a review that has it not', () => {
       // unit1 exists and is not in review1. Knowing its id was enough before #1630.
       cy.getReviewPropertiesAPI(Cypress.expose('id_review1'),
         Cypress.expose(unit1.shortname),
         Cypress.expose('tokenOfReview1'))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('401 negative test: should deny the same foreign unit to a logged-in user as well', () => {
+    it('403 negative test: should deny the same foreign unit to a logged-in user as well', () => {
       // The unit half of the guard does not depend on how one is logged in.
       cy.getReviewPropertiesAPI(Cypress.expose('id_review1'),
         Cypress.expose(unit1.shortname),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
+        });
+    });
+
+    // A vote belongs to a user account, and a review login has none: its token carries user 0.
+    // The vote used to fail on the vote table's foreign key to `user` (#1730).
+    it('403 negative test: should refuse a vote from a review login, and still take one from a user', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      const comment: CommentData = {
+        body: 'Comment to vote on',
+        parentId: undefined,
+        unitId: parseInt(Cypress.expose(unit4.shortname), 10),
+        userId: parseInt(Cypress.expose(`id_${Cypress.expose('username')}`), 10),
+        userName: Cypress.expose('username')
+      };
+      cy.createCommentReviewAPI(Cypress.expose('id_review1'), Cypress.expose(unit4.shortname), comment, adminToken)
+        .then(created => {
+          expect(created.status).to.equal(201);
+          const commentId = String(created.body);
+          cy.voteCommentReviewAPI(
+            Cypress.expose('id_review1'),
+            Cypress.expose(unit4.shortname),
+            commentId,
+            'up',
+            Cypress.expose('tokenOfReview1')
+          ).its('status').should('equal', 403);
+          cy.voteCommentReviewAPI(
+            Cypress.expose('id_review1'),
+            Cypress.expose(unit4.shortname),
+            commentId,
+            'up',
+            adminToken
+          ).its('status').should('be.within', 200, 299);
+          cy.deleteCommentReviewAPI(
+            Cypress.expose('id_review1'),
+            Cypress.expose(unit4.shortname),
+            commentId,
+            adminToken
+          ).its('status').should('equal', 200);
         });
     });
   });
 
+  // The guards check the level in the workspace of the path. The review was taken from its id
+  // alone and a new one put into the workspace of the body, so managing one workspace reached
+  // the reviews of every other one. review1 lives in ws1; userGroupAdmin may manage ws2 as well.
+  describe('a review and the workspace of the path (#1717)', () => {
+    it('404 negative test: should not read a review through another workspace', () => {
+      cy.getReviewAPI(Cypress.expose(ws2.id),
+        Cypress.expose('id_review1'),
+        Cypress.expose(`token_${userGroupAdmin.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(404);
+        });
+    });
+
+    it('404 negative test: should not change a review through another workspace', () => {
+      cy.updateReviewAPI(Cypress.expose(ws2.id),
+        {
+          id: parseInt(Cypress.expose('id_review1'), 10),
+          link: '',
+          name: 'Changed through ws2',
+          units: [Cypress.expose(unit4.shortname)]
+        },
+        Cypress.expose(`token_${userGroupAdmin.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(404);
+        });
+    });
+
+    // A reviewer reads a unit by its id once it is in the review; one of another workspace would
+    // be served to everyone with the review's link. It is left out rather than refused, so that a
+    // review keeps being savable when one of its units has been moved away. unit1 was moved to
+    // ws2 in 38. (updateReviewAPI sends the first unit only.)
+    it('200 positive test: should leave a unit of another workspace out of the review', () => {
+      cy.updateReviewAPI(Cypress.expose(ws1.id),
+        {
+          id: parseInt(Cypress.expose('id_review1'), 10),
+          link: '',
+          name: 'Teil1',
+          units: [Cypress.expose(unit1.shortname)]
+        },
+        Cypress.expose(`token_${userGroupAdmin.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(200);
+        });
+      cy.getReviewAPI(Cypress.expose(ws1.id),
+        Cypress.expose('id_review1'),
+        Cypress.expose(`token_${userGroupAdmin.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(200);
+          expect(resp.body.units).not.to.include(parseInt(Cypress.expose(unit1.shortname), 10));
+        });
+    });
+
+    it('201 positive test: should create a review in the workspace of the path, whatever the body says', () => {
+      cy.request({
+        method: 'POST',
+        url: `/api/workspaces/${Cypress.expose(ws1.id)}/reviews/`,
+        headers: {
+          'app-version': Cypress.expose('version'),
+          authorization: `bearer ${Cypress.expose(`token_${userGroupAdmin.username}`)}`
+        },
+        body: { name: 'Body names ws2', workspaceId: parseInt(Cypress.expose(ws2.id), 10) },
+        failOnStatusCode: false
+      }).then(resp => {
+        expect(resp.status).to.equal(201);
+        const reviewId = `${resp.body}`;
+        cy.getReviewAPI(Cypress.expose(ws1.id), reviewId, Cypress.expose(`token_${userGroupAdmin.username}`))
+          .then(inWs1 => {
+            expect(inWs1.status).to.equal(200);
+          });
+        cy.getReviewAPI(Cypress.expose(ws2.id), reviewId, Cypress.expose(`token_${userGroupAdmin.username}`))
+          .then(inWs2 => {
+            expect(inWs2.status).to.equal(404);
+          });
+        cy.deleteReviewAPI(Cypress.expose(ws1.id), reviewId, Cypress.expose(`token_${userGroupAdmin.username}`))
+          .then(deleted => {
+            expect(deleted.status).to.equal(200);
+          });
+      });
+    });
+
+    // A unit moved away after it was put into the review is no longer served through it. It must
+    // then also leave the review's navigation: listed there, it failed as soon as a reviewer opened
+    // it. Its entry stays, so it is back in the review once it returns.
+    describe('a unit moved away and back', () => {
+      // unit4 goes back to ws1 even if the test fails halfway; moving it where it already is
+      // answers 200 without changing anything (see 38).
+      after(() => {
+        cy.moveToAPI(
+          Cypress.expose(ws2.id),
+          Cypress.expose(ws1.id),
+          Cypress.expose(unit4.shortname),
+          Cypress.expose(`token_${userGroupAdmin.username}`)
+        );
+      });
+
+      it('200 positive test: should list a unit that left the workspace no longer, and again once it is back', () => {
+        const groupAdminToken = Cypress.expose(`token_${userGroupAdmin.username}`);
+        const unitId = parseInt(Cypress.expose(unit4.shortname), 10);
+        const unitsSeenByReviewer = () => cy.getReviewAsReviewerAPI(
+          Cypress.expose('id_review1'),
+          Cypress.expose('tokenOfReview1')
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+          return resp.body.units;
+        });
+        cy.updateReviewAPI(Cypress.expose(ws1.id),
+          {
+            id: parseInt(Cypress.expose('id_review1'), 10),
+            link: '',
+            name: 'Teil1',
+            units: [Cypress.expose(unit4.shortname)]
+          },
+          groupAdminToken)
+          .its('status').should('equal', 200);
+        unitsSeenByReviewer().should('deep.equal', [unitId]);
+
+        cy.moveToAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(ws2.id),
+          Cypress.expose(unit4.shortname),
+          groupAdminToken
+        ).its('status').should('equal', 200);
+        unitsSeenByReviewer().should('deep.equal', []);
+        cy.getReviewAPI(Cypress.expose(ws1.id), Cypress.expose('id_review1'), groupAdminToken)
+          .its('body.units').should('deep.equal', []);
+        cy.getReviewPropertiesAPI(
+          Cypress.expose('id_review1'),
+          Cypress.expose(unit4.shortname),
+          Cypress.expose('tokenOfReview1')
+        ).its('status').should('equal', 403);
+
+        cy.moveToAPI(
+          Cypress.expose(ws2.id),
+          Cypress.expose(ws1.id),
+          Cypress.expose(unit4.shortname),
+          groupAdminToken
+        ).its('status').should('equal', 200);
+        unitsSeenByReviewer().should('deep.equal', [unitId]);
+      });
+    });
+  });
+
   describe('74. DELETE /api/workspaces/{workspace_id}/reviews/{ids}', () => {
-    it('200 positive test: should successfully delete an existing review for an authorized user', () => {
+    // review1 lives in ws1. The level is checked in the workspace of the path, and this used to
+    // delete it through ws2, where userGroupAdmin may manage as well (#1717).
+    it('404 negative test: should not delete a review through another workspace', () => {
       cy.deleteReviewAPI(Cypress.expose(ws2.id),
+        Cypress.expose('id_review1'),
+        Cypress.expose(`token_${userGroupAdmin.username}`))
+        .then(resp => {
+          expect(resp.status).to.equal(404);
+        });
+    });
+
+    it('200 positive test: should successfully delete an existing review for an authorized user', () => {
+      cy.deleteReviewAPI(Cypress.expose(ws1.id),
         Cypress.expose('id_review1'),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
@@ -624,22 +815,22 @@ describe('Review API tests', () => {
         });
     });
 
-    it('500 negative test: should return a server error when attempting to delete an already deleted review', () => {
+    it('403 negative test: should be refused when attempting to delete an already deleted review', () => {
       cy.deleteReviewAPI(noId,
         Cypress.expose('id_review2'),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(403);
         });
     });
 
-    it('500 negative test: should return a server error when attempting to delete' +
+    it('403 negative test: should be refused when attempting to delete' +
       ' a review without a workspace ID', () => {
       cy.deleteReviewAPI(noId,
         Cypress.expose('id_review2'),
         Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(403);
         });
     });
 

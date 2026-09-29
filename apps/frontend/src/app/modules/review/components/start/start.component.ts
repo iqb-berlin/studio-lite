@@ -12,7 +12,7 @@ import { BookletConfigShowComponent } from '../booklet-config-show/booklet-confi
   selector: 'studio-lite-start',
   templateUrl: './start.component.html',
   styleUrls: ['./start.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatFabButton, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, BookletConfigShowComponent, MatFabAnchor, MatTooltip, TranslateModule]
 })
 

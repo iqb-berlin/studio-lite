@@ -23,7 +23,9 @@ import {
   UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
 import { orderFromCurrent, profileIdsMatch, toW3idProfileId } from '@studio-lite/shared-code';
-import * as AdmZip from 'adm-zip';
+// adm-zip is CommonJS with no statically detectable named exports -- see the note on the katex
+// import in download-docx.class.ts.
+import AdmZip from 'adm-zip';
 import {
   VariableCodingData,
   RuleSet,
@@ -38,6 +40,7 @@ import WorkspaceGroup from '../entities/workspace-group.entity';
 import Unit from '../entities/unit.entity';
 import { FileIo } from '../interfaces/file-io.interface';
 import { UnitImportData } from '../classes/unit-import-data.class';
+import { NotAUnitXmlError } from '../exceptions/not-a-unit-xml.error';
 import { UnitImportJsonData } from '../classes/unit-import-json-data.class';
 import { UnitService } from './unit.service';
 import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
@@ -196,6 +199,26 @@ export class WorkspaceService {
       });
   }
 
+  /**
+   * A user's workspaces as a group admin sees them: only those in groups the requester
+   * administers; an administrator sees all of them (#1650). The group-admin area asks this to tick
+   * the boxes of the group it shows, and handed out the person's workspaces in foreign groups too.
+   *
+   * {@link findAll} stays as it is: it also builds a user's own list of workspaces
+   * ({@link findAllGroupwise}), where a filter by administered groups would hide them from anyone
+   * who administers none.
+   */
+  async findAllInAdministeredGroups(userId: number, requesterId: number): Promise<UsersWorkspaceInListDto[]> {
+    const workspaces = await this.findAll(userId);
+    if (await this.usersService.getUserIsAdmin(requesterId)) return workspaces;
+    const administeredGroups = await this.workspaceGroupAdminRepository.find({
+      where: { userId: requesterId },
+      select: { workspaceGroupId: true }
+    });
+    const groupIds = new Set(administeredGroups.map(group => group.workspaceGroupId));
+    return workspaces.filter(workspace => groupIds.has(workspace.groupId));
+  }
+
   async findAllGroupwise(userId?: number): Promise<WorkspaceGroupDto[]> {
     this.logger.log(
       `Returning groupwise ordered workspaces${
@@ -308,10 +331,10 @@ export class WorkspaceService {
     const workspace = await this.workspacesRepository.findOne({
       where: { id: id }
     });
-    const workspaceUser = await this.workspaceUsersRepository.findOne({
-      where: { workspaceId: id, userId: userId }
-    });
-    if (workspace && workspaceUser) {
+    // The level includes the one an administrator holds without being assigned (#1571); the
+    // frontend opens the workspace with it, so an unassigned administrator sees it as commenter.
+    const userAccessLevel = await this.workspaceUserService.accessLevel(userId, id);
+    if (workspace && userAccessLevel !== null) {
       const workspaceGroup = await this.workspaceGroupRepository.findOne({
         where: { id: workspace.groupId }
       });
@@ -321,7 +344,7 @@ export class WorkspaceService {
         groupId: workspace.groupId,
         dropBoxId: workspace.dropBoxId,
         groupName: workspaceGroup.name,
-        userAccessLevel: workspaceUser.accessLevel,
+        userAccessLevel: userAccessLevel,
         settings: workspace.settings
       };
     }
@@ -845,10 +868,10 @@ export class WorkspaceService {
     files: FileIo[],
     functionReturn: RequestReportDto
   ): {
-      unitData: (UnitImportData | UnitImportJsonData)[];
-      notXmlFiles: { [fName: string]: FileIo };
-      usedFiles: string[];
-    } {
+    unitData: (UnitImportData | UnitImportJsonData)[];
+    notXmlFiles: { [fName: string]: FileIo };
+    usedFiles: string[];
+  } {
     const processedKeys = new Set<string>();
     const unitData: (UnitImportData | UnitImportJsonData)[] = [];
     const notXmlFiles: { [fName: string]: FileIo } = {};
@@ -885,11 +908,13 @@ export class WorkspaceService {
       } else if (f.mimetype === 'text/xml') {
         try {
           xmlCandidates.push(new UnitImportData(f));
-        } catch {
-          functionReturn.messages.push({
-            objectKey: f.originalname,
-            messageKey: 'unit-upload.api-warning.xml-parse'
-          });
+        } catch (error) {
+          if (!(error instanceof NotAUnitXmlError && error.isTestcenterFile)) {
+            functionReturn.messages.push({
+              objectKey: f.originalname,
+              messageKey: 'unit-upload.api-warning.xml-parse'
+            });
+          }
           usedFiles.push(f.originalname);
         }
       } else {

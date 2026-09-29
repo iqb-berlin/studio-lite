@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiOkResponse,
-  ApiQuery, ApiTags, ApiUnauthorizedResponse
+  ApiQuery, ApiTags
 } from '@nestjs/swagger';
 import {
   UserFullDto, UsersWorkspaceInListDto,
@@ -43,7 +43,7 @@ export class GroupAdminUserController {
   @AnyWorkspaceGroupAdmin()
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Group admin users retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No group-admin privileges.' })
+  @ApiForbiddenResponse({ description: 'No group-admin privileges.' })
   @ApiTags('group-admin user')
   @ApiQuery({
     name: 'full',
@@ -63,7 +63,6 @@ export class GroupAdminUserController {
   @AnyWorkspaceGroupAdmin()
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Group admin user workspaces updated successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No group-admin privileges.' })
   @ApiForbiddenResponse({ description: 'Forbidden. No privileges in the group, or a workspace outside it' })
   // @ApiNotFoundResponse({ description: 'Group admin user not found.' }) // TODO: Exception implementieren?
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
@@ -79,11 +78,13 @@ export class GroupAdminUserController {
   @AnyWorkspaceGroupAdmin()
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Group admin user workspaces retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No group-admin privileges. ' })
+  @ApiForbiddenResponse({ description: 'No group-admin privileges. ' })
   // @ApiNotFoundResponse({ description: 'User not found.' }) // TODO: Exception implementieren?
   @ApiTags('group-admin user')
-  async findOnesWorkspaces(@Param('id') id: number): Promise<UsersWorkspaceInListDto[]> {
-    return this.workspaceService.findAll(id);
+  async findOnesWorkspaces(@UserId() userId: number, @Param('id') id: number): Promise<UsersWorkspaceInListDto[]> {
+    // The path names a user, so the guard can only ask whether the requester administers any group
+    // at all; the answer is narrowed to the requester's groups instead (#1650).
+    return this.workspaceService.findAllInAdministeredGroups(id, userId);
   }
 
   /**

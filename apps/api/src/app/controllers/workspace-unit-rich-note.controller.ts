@@ -7,7 +7,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
-  ApiTags, ApiUnauthorizedResponse
+  ApiTags, ApiForbiddenResponse
 } from '@nestjs/swagger';
 import {
   CreateUnitRichNoteDto,
@@ -41,7 +41,7 @@ export class WorkspaceUnitRichNoteController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Rich notes for unit retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit rich note')
   async findNotes(@Param('unit_id', ParseIntPipe) unitId: number): Promise<UnitRichNotesDto> {
@@ -56,7 +56,7 @@ export class WorkspaceUnitRichNoteController {
     description: 'Sends back the id of the new rich note in database',
     type: Number
   })
-  @ApiUnauthorizedResponse({ description: 'No write privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No write privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit rich note')
   async createNote(@Body() createUnitRichNoteDto: CreateUnitRichNoteDto) {
@@ -69,7 +69,7 @@ export class WorkspaceUnitRichNoteController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Rich note successfully updated.' })
   @ApiNotFoundResponse({ description: 'Rich note not found.' })
-  @ApiUnauthorizedResponse({ description: 'Not authorized to update rich note.' })
+  @ApiForbiddenResponse({ description: 'Not authorized to update rich note.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit rich note')
   async patchNote(@Param('id', ParseIntPipe) id: number, @Body() note: UpdateUnitRichNoteDto) {
@@ -84,7 +84,7 @@ export class WorkspaceUnitRichNoteController {
   @ApiParam({ name: 'note_id', type: Number })
   @ApiOkResponse({ description: 'Rich note item connections for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Rich note item connections not found.' })
-  @ApiUnauthorizedResponse({ description: 'Not authorized to update rich note item connections.' })
+  @ApiForbiddenResponse({ description: 'Not authorized to update rich note item connections.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   async patchNoteItems(@Param('note_id', ParseIntPipe) noteId: number,
     @UnitId() unitId: number,
@@ -98,7 +98,7 @@ export class WorkspaceUnitRichNoteController {
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Rich note successfully deleted.' })
   @ApiNotFoundResponse({ description: 'Rich note not found.' })
-  @ApiUnauthorizedResponse({ description: 'Not authorized to delete rich note.' })
+  @ApiForbiddenResponse({ description: 'Not authorized to delete rich note.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit rich note')
   async removeNote(@Param('id', ParseIntPipe) id: number) {

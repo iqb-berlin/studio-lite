@@ -10,23 +10,23 @@ type Profile = {
 
 export class WorkspaceGroupSettingsDto {
   @ApiProperty()
-    defaultEditor = '';
+  defaultEditor = '';
 
   @ApiProperty()
-    defaultPlayer = '';
+  defaultPlayer = '';
 
   @ApiProperty()
-    defaultSchemer = '';
+  defaultSchemer = '';
 
   @ApiProperty()
-    profiles?:Profile[] = [];
+  profiles?: Profile[] = [];
 
   @ApiProperty()
-    states?:State[] = [];
+  states?: State[] = [];
 
   @ApiProperty()
-    hiddenRoutes?: string[];
+  hiddenRoutes?: string[];
 
   @ApiProperty()
-    richNoteTags?: string[] | UnitRichNoteTagDto[] = [];
+  richNoteTags?: string[] | UnitRichNoteTagDto[] = [];
 }

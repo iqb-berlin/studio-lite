@@ -42,7 +42,7 @@ describe('ReviewService', () => {
     } as unknown as jest.Mocked<AppService>;
 
     mockTranslateService = {
-      // eslint-disable-next-line @typescript-eslint/dot-notation
+
       instant: jest.fn((key: string, params?: Record<string, unknown>) => {
         if (key === 'review.booklet' && params) {
           return `Booklet: ${params['name']}`;

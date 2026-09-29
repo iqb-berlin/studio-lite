@@ -1,11 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, HttpException } from '@nestjs/common';
 import { createMock } from '@golevelup/ts-jest';
-import { AppVersionGuard } from './app-version.guard';
+import packageJson from '../../../../../package.json';
+import { AppVersionGuard, AppVersionProvider } from './app-version.guard';
 
 describe('AppVersionGuard', () => {
   let guard: AppVersionGuard;
-  const appVersion = '20.0.1';
+  // Taken from the provider instead of a literal of its own, which once kept an old number for a
+  // whole release (#1643).
+  const appVersion = AppVersionProvider.useValue;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -74,5 +77,12 @@ describe('AppVersionGuard', () => {
         521
       )
     );
+  });
+
+  // The guard compares against the release version in package.json -- the value the frontend
+  // sends, and nothing to raise here at a release (#1643).
+  it('should be provided the version from package.json', () => {
+    expect(AppVersionProvider).toEqual({ provide: 'APP_VERSION', useValue: packageJson.version });
+    expect(packageJson.version).toMatch(/^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/);
   });
 });

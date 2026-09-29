@@ -25,14 +25,19 @@ import {
   ItemsMetadataValues
 } from '@studio-lite-lib/api-dto';
 import * as cheerio from 'cheerio';
-import { FileChild } from 'docx/build/file/file-child';
+// Type-only, like every deep import into a package: were it ever emitted as a runtime require,
+// an `exports` map in that package would kill the boot -- see the swagger import in
+// setting.controller.ts.
+import type { FileChild } from 'docx/build/file/file-child';
 import type { Element, AnyNode } from 'domhandler';
 import { BasicAcceptedElems } from 'cheerio';
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import { imageSize } from 'image-size';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { ISizeCalculationResult } from 'image-size/dist/types/interface';
-import * as katex from 'katex';
+
+import type { ISizeCalculationResult } from 'image-size/dist/types/interface';
+// katex is CommonJS with no statically detectable named exports: under ESM `import * as katex`
+// yields only `{ default }`, and every `katex.x` is undefined. The default import works in both.
+import katex from 'katex';
 import { mml2omml } from 'mathml2omml';
 import { WebColors } from '../utils/web-colors';
 
@@ -847,7 +852,7 @@ export class DownloadDocx {
             )
           );
         }
-      } catch (e) {
+      } catch {
         elements.push(
           new Paragraph({
             text: 'HTML konnte nicht verarbeitet werden.'
@@ -933,7 +938,6 @@ export class DownloadDocx {
       value = value.trim();
 
       if (value.endsWith('%')) {
-        // eslint-disable-next-line no-bitwise,no-mixed-operators
         return Math.min((Number.parseFloat(value) * max) / 100, max);
       }
       return Math.min(Number.parseFloat(value), max);
@@ -947,6 +951,6 @@ export class DownloadDocx {
   }
 
   // Convert RGB color to HEX https://github.com/sindresorhus/rgb-hex
-  // eslint-disable-next-line no-bitwise,no-mixed-operators
+  // eslint-disable-next-line no-bitwise
   private static toHex = (red, green, blue) => (blue | (green << 8) | (red << 16) | (1 << 24)).toString(16).slice(1);
 }

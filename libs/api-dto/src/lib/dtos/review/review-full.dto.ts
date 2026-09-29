@@ -4,26 +4,26 @@ import { ReviewBaseDto } from './review-base.dto';
 
 export class ReviewFullDto extends ReviewBaseDto {
   @ApiProperty()
-    workspaceId?: number;
+  workspaceId?: number;
 
   @ApiProperty()
-    workspaceName?: string;
+  workspaceName?: string;
 
   @ApiProperty()
-    workspaceGroupId?: number;
+  workspaceGroupId?: number;
 
   @ApiProperty()
-    workspaceGroupName?: string;
+  workspaceGroupName?: string;
 
   @ApiProperty()
-    link?: string;
+  link?: string;
 
   @ApiProperty()
-    password?: string;
+  password?: string;
 
   @ApiProperty()
-    settings?: ReviewSettingsDto;
+  settings?: ReviewSettingsDto;
 
   @ApiProperty()
-    units?: number[];
+  units?: number[];
 }

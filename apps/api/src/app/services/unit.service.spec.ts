@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { EntityManager, QueryFailedError, Repository } from 'typeorm';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
   CreateUnitDto,
   UnitMetadataDto,
@@ -505,6 +506,30 @@ describe('UnitService', () => {
       await service.patchDefinition(1, { definition: 'xml' }, 'user', new Date());
       expect(unitDefinitionsRepository.save).toHaveBeenCalled();
       expect(unitsRepository.save).toHaveBeenCalled();
+    });
+
+    // Saving from the editor and importing both end up here. Whatever spelling the list came in,
+    // the schemer and coding-box read it from what is stored, and they know only 1.x (#1606).
+    it('should store a variable list in the VariableInfo 1.x spelling', async () => {
+      unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
+      unitDefinitionsRepository.findOne.mockResolvedValue({ id: 1 } as UnitDefinition);
+      const sentByA20Editor = {
+        id: 'geo1',
+        alias: 'geo1',
+        type: 'STRING',
+        format: 'GGB_FILE',
+        multiple: false,
+        nullable: false,
+        values: [],
+        valuePositionLabels: []
+      } as unknown as VariableInfo;
+
+      await service.patchDefinition(1, { definition: 'xml', variables: [sentByA20Editor] }, 'user', new Date());
+
+      const stored = unitsRepository.save.mock.calls[0][0] as Unit;
+      expect(stored.variables).toEqual([{
+        ...sentByA20Editor, type: 'string', format: 'ggb-file', page: ''
+      }]);
     });
   });
 

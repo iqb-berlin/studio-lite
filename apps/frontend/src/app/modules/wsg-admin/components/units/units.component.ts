@@ -35,7 +35,7 @@ import { IncludePipe } from '../../../../pipes/include.pipe';
   selector: 'studio-lite-units',
   templateUrl: './units.component.html',
   styleUrls: ['./units.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, FormsModule, TranslateModule, SearchFilterComponent, RouterLink, DatePipe, MatPaginator, MatTooltip, MatIcon, MatIconButton, IncludePipe]
 })
 

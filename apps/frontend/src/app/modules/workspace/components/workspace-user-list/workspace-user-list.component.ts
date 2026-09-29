@@ -17,7 +17,7 @@ export interface WorkspaceUserListData {
   selector: 'studio-lite-workspace-user-list',
   templateUrl: './workspace-user-list.component.html',
   styleUrls: ['./workspace-user-list.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [MatDialogTitle, MatDialogContent, UserListComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class WorkspaceUserListComponent {

@@ -1,9 +1,10 @@
 import {
-  CanActivate, ExecutionContext, Injectable, UnauthorizedException
+  CanActivate, ExecutionContext, ForbiddenException, Injectable
 } from '@nestjs/common';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
+import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-found.exception';
 
 /**
  * A comment may be deleted by whoever wrote it, and by whoever administers the workspace it is in --
@@ -29,15 +30,20 @@ export class CommentDeleteGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const userId = Number(req.user?.id) || 0;
     const commentId = Number(req.params.id ?? req.params.comment_id) || 0;
-    if (!userId || !commentId) throw new UnauthorizedException();
+    const unitId = Number(req.params.unit_id) || 0;
+    if (!userId || !commentId) throw new ForbiddenException();
 
     const comment = await this.unitCommentService.findOneComment(commentId);
+    if (unitId && comment.unitId !== unitId) {
+      throw new UnitCommentNotFoundException(commentId, 'DELETE');
+    }
+
     if (comment.userId === userId) return true;
 
     if (await this.authService.isAdminUser(userId)) return true;
     if (await this.isGroupAdminOfWorkspace(userId, Number(req.params.workspace_id) || 0)) return true;
 
-    throw new UnauthorizedException();
+    throw new ForbiddenException();
   }
 
   /** Whether the user administers the group the workspace belongs to. False without a workspace. */

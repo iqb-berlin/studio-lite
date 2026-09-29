@@ -57,10 +57,10 @@ describe('Cleanup API tests', () => {
     before(() => {
       qs = [Cypress.expose(groupVera.id), Cypress.expose(group2.id)];
     });
-    it('401 negative test: should deny workspace group deletion for a regular user account', () => {
+    it('403 negative test: should deny workspace group deletion for a regular user account', () => {
       cy.deleteGroupsAPI(qs, Cypress.expose(`token_${userGroupAdmin.username}`)).then(
         resp => {
-          expect(resp.status).to.equal(401);
+          expect(resp.status).to.equal(403);
         }
       );
     });
@@ -166,13 +166,14 @@ describe('Cleanup API tests', () => {
       });
     });
 
-    it('401 negative test: should deny deletion of a user account that no longer exists', () => {
+    it('403 negative test: should deny deletion of a user account that no longer exists', () => {
+      // The token still verifies, but its user is gone and so is the admin flag it would need.
       cy.deleteUsersAPI(
         [Cypress.expose(`id_${Cypress.expose('username')}`)],
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         Cypress.expose('token_admin', '');
-        expect(resp.status).to.equal(401);
+        expect(resp.status).to.equal(403);
       });
     });
   });

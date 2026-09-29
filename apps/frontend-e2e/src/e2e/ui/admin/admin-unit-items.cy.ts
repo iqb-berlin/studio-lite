@@ -6,6 +6,7 @@ describe('Admin Unit Items Management', () => {
       id: 1,
       uuid: 'uuid-1',
       unitId: 10,
+      workspaceId: 3,
       variableId: 'var_1',
       variableReadOnlyId: 'var_ro_1',
       description: 'First item description',
@@ -16,6 +17,7 @@ describe('Admin Unit Items Management', () => {
       id: 2,
       uuid: 'uuid-2',
       unitId: 11,
+      workspaceId: 4,
       variableId: 'var_2',
       variableReadOnlyId: 'var_ro_2',
       description: 'Second item description',
@@ -60,6 +62,15 @@ describe('Admin Unit Items Management', () => {
       cy.get('.cdk-column-variableReadOnlyId').should('contain', 'var_ro_2');
       cy.get('.cdk-column-description').should('contain', 'Second item description');
     });
+  });
+
+  // A unit's address is /a/<workspace>/<unit>. The link used to put the unit id in the place of the
+  // workspace and ended on "Daten/Objekt nicht gefunden" (#1698).
+  it('should link each item to its unit inside its workspace', () => {
+    cy.get('.mat-mdc-row').eq(0).find('.cdk-column-unitId a')
+      .should('have.attr', 'href', '#/a/3/10');
+    cy.get('.mat-mdc-row').eq(1).find('.cdk-column-unitId a')
+      .should('have.attr', 'href', '#/a/4/11');
   });
 
   it('should filter unit items by description', () => {

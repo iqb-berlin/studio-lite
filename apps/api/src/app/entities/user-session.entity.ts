@@ -14,26 +14,26 @@ import User from './user.entity';
 @Entity({ name: 'user_session' })
 class UserSession {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column({ name: 'session_id' })
-    sessionId: string;
+  sessionId: string;
 
   @Column({ name: 'user_id' })
-    userId: number;
+  userId: number;
 
   // Last user interaction. Drives the active status and the inactivity gate.
   @Column({ name: 'last_activity', type: 'timestamptz' })
-    lastActivity: Date;
+  lastActivity: Date;
 
   // Always lastActivity + PASSIVE_THRESHOLD_MS: a session dies from missing
   // interaction. SessionCleanupService drops the row afterwards.
   @Column({ name: 'expires_at', type: 'timestamptz' })
-    expiresAt: Date;
+  expiresAt: Date;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-    user: User;
+  user: User;
 }
 
 export default UserSession;

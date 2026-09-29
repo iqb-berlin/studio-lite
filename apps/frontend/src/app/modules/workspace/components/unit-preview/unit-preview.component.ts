@@ -145,7 +145,7 @@ export class UnitPreviewComponent
   onLoadUnitProperties(): void {
     this.setPresentationStatus('none');
     this.setResponsesStatus('none');
-    this.setPageList([], '');
+    this.clearPageList();
     this.subscribeForVeronaModuleLoaded();
   }
 

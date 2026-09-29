@@ -31,7 +31,7 @@ export const profileIdTransformer: ValueTransformer = {
  */
 class Metadata {
   @PrimaryGeneratedColumn()
-    id: number;
+  id: number;
 
   @Column({
     type: 'jsonb',
@@ -39,32 +39,32 @@ class Metadata {
     default: () => "'[]'",
     nullable: false
   })
-    entries: MetadataValuesEntry[] = [];
+  entries: MetadataValuesEntry[] = [];
 
   @Column({
     name: 'profile_id',
     transformer: profileIdTransformer
   })
-    profileId: string;
+  profileId: string;
 
   @Column({
     name: 'order',
     type: 'integer',
     default: -1
   })
-    order: number;
+  order: number;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'created_at'
   })
-    createdAt: Date;
+  createdAt: Date;
 
   @Column({
     type: 'timestamp with time zone',
     name: 'changed_at'
   })
-    changedAt: Date;
+  changedAt: Date;
 }
 
 export default Metadata;

@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  CreateWorkspaceDto, UserWorkspaceAccessDto, WorkspaceSettingsDto, RenameGroupNameDto
+  CreateWorkspaceDto, UserWorkspaceAccessDto, UsersWorkspaceInListDto, WorkspaceSettingsDto, RenameGroupNameDto
 } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { CodingSchemeProblem } from '@iqb/responses';
@@ -21,6 +21,7 @@ import { UnitCommentService } from './unit-comment.service';
 import { UnitRichNoteService } from './unit-rich-note.service';
 import User from '../entities/user.entity';
 import { FileIo } from '../interfaces/file-io.interface';
+import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
 
 describe('WorkspaceService', () => {
   let service: WorkspaceService;
@@ -113,6 +114,52 @@ describe('WorkspaceService', () => {
     });
   });
 
+  // A group admin used to get a person's workspaces in every group, names and access levels
+  // included (#1650).
+  describe('findAllInAdministeredGroups', () => {
+    const personsWorkspaces = [
+      { id: 1, groupId: 10 },
+      { id: 2, groupId: 20 },
+      { id: 3, groupId: 30 }
+    ] as UsersWorkspaceInListDto[];
+
+    beforeEach(() => {
+      jest.spyOn(service, 'findAll').mockResolvedValue(personsWorkspaces);
+    });
+
+    it('should keep only the workspaces in groups the requester administers', async () => {
+      (usersService.getUserIsAdmin as jest.Mock).mockResolvedValue(false);
+      (workspaceGroupAdminRepository.find as jest.Mock).mockResolvedValue([
+        { workspaceGroupId: 10 }, { workspaceGroupId: 30 }
+      ] as WorkspaceGroupAdmin[]);
+
+      const result = await service.findAllInAdministeredGroups(5, 7);
+
+      expect(service.findAll).toHaveBeenCalledWith(5);
+      expect(workspaceGroupAdminRepository.find).toHaveBeenCalledWith({
+        where: { userId: 7 },
+        select: { workspaceGroupId: true }
+      });
+      expect(result.map(workspace => workspace.id)).toEqual([1, 3]);
+    });
+
+    it('should answer with nothing for a person who works in none of the requester\'s groups', async () => {
+      (usersService.getUserIsAdmin as jest.Mock).mockResolvedValue(false);
+      (workspaceGroupAdminRepository.find as jest.Mock).mockResolvedValue([
+        { workspaceGroupId: 99 }
+      ] as WorkspaceGroupAdmin[]);
+
+      expect(await service.findAllInAdministeredGroups(5, 7)).toEqual([]);
+    });
+
+    it('should let an administrator see all of them', async () => {
+      (usersService.getUserIsAdmin as jest.Mock).mockResolvedValue(true);
+
+      expect(await service.findAllInAdministeredGroups(5, 1)).toBe(personsWorkspaces);
+      expect(workspaceGroupAdminRepository.find).not.toHaveBeenCalled();
+    });
+  });
+
   describe('setWorkspacesByUser', () => {
     it('should set workspaces', async () => {
       const userId = 1;
@@ -187,11 +234,33 @@ describe('WorkspaceService', () => {
   describe('findOneByUser', () => {
     it('should return workspace for user', async () => {
       (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, groupId: 2 });
-      (workspaceUsersRepository.findOne as jest.Mock).mockResolvedValue({ accessLevel: 1 });
+      (workspaceUserService.accessLevel as jest.Mock).mockResolvedValue(2);
       (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ name: 'g' });
 
       const result = await service.findOneByUser(1, 1);
       expect(result.id).toBe(1);
+      expect(result.userAccessLevel).toBe(2);
+    });
+
+    // The frontend opens a workspace with this level; for an unassigned administrator it is the
+    // implicit one, where there used to be "workspace not found" (#1571).
+    it('should hand on the level WorkspaceUserService grants, the implicit one of an administrator included',
+      async () => {
+        (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, groupId: 2 });
+        (workspaceUserService.accessLevel as jest.Mock).mockResolvedValue(1);
+        (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ name: 'g' });
+
+        const result = await service.findOneByUser(1, 5);
+
+        expect(workspaceUserService.accessLevel).toHaveBeenCalledWith(5, 1);
+        expect(result.userAccessLevel).toBe(1);
+      });
+
+    it('should refuse a user who holds no level in the workspace', async () => {
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, groupId: 2 });
+      (workspaceUserService.accessLevel as jest.Mock).mockResolvedValue(null);
+
+      await expect(service.findOneByUser(1, 5)).rejects.toThrow(AdminWorkspaceNotFoundException);
     });
   });
 
@@ -901,6 +970,44 @@ describe('WorkspaceService', () => {
 
       expect(result.messages).toHaveLength(0);
       expect(unitService.create).toHaveBeenCalledTimes(1);
+    });
+
+    // An export with test takers carries the Testcenter's booklet and test-taker files. Imported
+    // back, the booklet became an empty unit and the test-taker file raised a warning (#1710).
+    it('should pass over the booklet and test-taker files of an export', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      const result = await service.uploadFiles(1, [
+        buildFile('export.zip/UNIT01.xml', 'text/xml', xmlUnit('UNIT01')),
+        buildFile(
+          'export.zip/booklet1.xml',
+          'text/xml',
+          '<Booklet><Metadata><Id>booklet1</Id><Label/></Metadata><Units><Unit id="UNIT01"/></Units></Booklet>'
+        ),
+        buildFile(
+          'export.zip/booklet1_testtaker.xml',
+          'text/xml',
+          '<Testtakers><Metadata/><Group id="booklet1_group"/></Testtakers>'
+        )
+      ], user);
+
+      expect(result.messages).toHaveLength(0);
+      expect(unitService.create).toHaveBeenCalledTimes(1);
+      expect(unitService.create).toHaveBeenCalledWith(1, { key: 'UNIT01', name: 'L' }, user, true);
+    });
+
+    it('should still warn about an XML file that is neither a unit nor a Testcenter file', async () => {
+      const result = await service.uploadFiles(1, [
+        buildFile('other.xml', 'text/xml', '<Something><Metadata><Id>X</Id></Metadata></Something>')
+      ], user);
+
+      expect(unitService.create).not.toHaveBeenCalled();
+      expect(result.messages).toEqual([{
+        objectKey: 'other.xml',
+        messageKey: 'unit-upload.api-warning.xml-parse'
+      }]);
     });
 
     it('should report unreferenced JSON that is not a valid unit index as ignored', async () => {

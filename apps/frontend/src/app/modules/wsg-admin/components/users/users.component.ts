@@ -33,7 +33,7 @@ import { EntriesDividerComponent } from '../../../../components/entries-divider/
   selector: 'studio-lite-users',
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
-  // eslint-disable-next-line max-len
+
   imports: [
     SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader,
     MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, EntriesDividerComponent,

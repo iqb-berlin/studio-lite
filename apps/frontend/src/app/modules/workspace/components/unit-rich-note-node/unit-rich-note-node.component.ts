@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
@@ -26,7 +25,6 @@ export interface RichNoteNode {
   styleUrls: ['./unit-rich-note-node.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     MatButtonModule,
     MatIconModule,
     TranslateModule,
