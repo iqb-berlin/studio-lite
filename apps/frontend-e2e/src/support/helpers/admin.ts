@@ -205,29 +205,23 @@ export function openWorkspaceSettingsDialog(group: string, ws:string): void {
 }
 
 /**
- * Toggle a route's visibility checkbox inside the workspace-settings dialog.
- * @param routeName - one of 'editor' | 'preview' | 'schemer' | 'comments'
+ * Sets a route's visibility checkbox inside the workspace-settings dialog to the given state.
+ * check/uncheck leave a checkbox alone that is already in that state, so the result does not
+ * depend on what earlier tests saved -- a new workspace starts with 'notes' hidden (#1743).
+ * @param routeName - one of 'editor' | 'preview' | 'schemer' | 'comments' | 'notes'
  * @param setVisible - true to check (show), false to uncheck (hide)
  */
 export function setRouteVisibility(routeName: string, setVisible: boolean): void {
   cy.translate(Cypress.expose('locale')).then(json => {
     const routeLabel: string = json.workspace.routes[routeName];
-    cy.get('mat-checkbox')
-      .contains(routeLabel)
-      .parent()
+    cy.contains('studio-lite-edit-workspace-settings mat-checkbox', routeLabel)
+      .find('input[type="checkbox"]')
       .as('checkbox');
-
-    cy.get('@checkbox').then($checkbox => {
-      const isChecked = $checkbox.hasClass('mat-mdc-checkbox-checked');
-      if (setVisible && !isChecked) {
-        cy.log('Primero');
-        cy.get('@checkbox').click();
-      }
-      if (!setVisible) {
-        cy.log('segundo');
-        cy.get('@checkbox').click();
-      }
-    });
+    if (setVisible) {
+      cy.get('@checkbox').check({ force: true });
+    } else {
+      cy.get('@checkbox').uncheck({ force: true });
+    }
   });
 }
 

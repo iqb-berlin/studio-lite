@@ -20,7 +20,8 @@ import {
   printReview,
   deleteReview,
   modifyReviewUnits,
-  goToReviewAdmin
+  goToReviewAdmin,
+  saveReviewConfig
 } from '../../../support/helpers';
 import { grantRemovePrivilegeAtWs } from '../../../support/helpers/group-admin';
 
@@ -72,9 +73,7 @@ describe('Unit Reviews', () => {
       cy.get('mat-form-field').contains(json['booklet-config'].unitTitle.label).click();
       cy.get('mat-option').contains(json['booklet-config'].unitTitle.ON).click();
 
-      cy.get('studio-lite-save-changes').within(() => {
-        cy.get('button').contains(json.workspace.save).click();
-      });
+      saveReviewConfig();
       cy.get('[data-cy="workspace-review-close"]').click();
     });
   });
@@ -322,9 +321,7 @@ describe('Unit Reviews', () => {
         cy.get(`input[placeholder="${json.workspace['review-password']}"]`).should('be.visible');
         cy.get(`input[placeholder="${json.workspace['review-password']}"]`).clear();
         cy.get(`input[placeholder="${json.workspace['review-password']}"]`).type('rev-1234');
-        cy.get('studio-lite-save-changes').within(() => {
-          cy.get('button').contains(json.workspace.save).click();
-        });
+        saveReviewConfig();
         cy.get('[data-cy="workspace-review-close"]').click();
         logout();
 
@@ -379,11 +376,7 @@ describe('Unit Reviews', () => {
           .check({ force: true });
       });
 
-      cy.intercept('PATCH', '/api/workspaces/*/reviews/*').as('saveCodingReviewConfig');
-      cy.get('studio-lite-save-changes').within(() => {
-        cy.get('button').contains(json.workspace.save).click();
-      });
-      cy.wait('@saveCodingReviewConfig').its('response.statusCode').should('be.within', 200, 299);
+      saveReviewConfig();
       cy.get('[data-cy="workspace-review-close"]').click();
     });
   });

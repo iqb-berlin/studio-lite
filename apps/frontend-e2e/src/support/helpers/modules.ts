@@ -4,6 +4,7 @@
  */
 
 import { clickIndexTabAdmin } from './navigation';
+import { saveWorkspaceSettings } from './admin';
 
 /**
  * Adds Verona modules through the admin interface
@@ -148,8 +149,8 @@ export function setModuleWithoutVerification(
   cy.get('[data-cy="edit-workspace-settings-schemer"]').click();
   cy.get('mat-option>span').contains(schemer).click();
 
-  // Save with API
-  cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+  // Save and wait for the answer: a reload right after the click would cancel the request (#1743)
+  saveWorkspaceSettings();
 
   // Verify configuration persisted
   // verifyModuleConfiguration(ws, editor, player, schemer);

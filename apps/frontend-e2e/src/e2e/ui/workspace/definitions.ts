@@ -50,12 +50,7 @@ describe('Unit Definitions', () => {
 
 describe('Aspect Editor Elements Creation', () => {
   it('creates a new unit and opens definition editor', () => {
-    // The new unit takes the workspace's default editor. setModuleWithoutVerification clicks save
-    // without waiting for the answer, and the reload that follows would cancel the request -- the
-    // unit then has no editor and every test below fails with it (#1741).
-    cy.intercept('PATCH', '**/api/workspaces/*/settings').as('saveSettings');
     setModuleWithoutVerification(primaryWorkspace, 'Aspect', 'Aspect', 'Schemer');
-    cy.wait('@saveSettings').its('response.statusCode').should('be.oneOf', [200, 201, 204]);
     cy.visitWs(primaryWorkspace);
     addUnitPred(definitionAllElementsUnit);
     cy.visitWs(primaryWorkspace);
