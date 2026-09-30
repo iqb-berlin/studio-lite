@@ -12,6 +12,7 @@ import {
   addStatus,
   clickIndexTabWsgAdmin,
   goToWsMenu,
+  saveWorkspaceSettings,
   setModuleWithoutVerification,
   verifyModuleConfiguration
 } from '../../../support/helpers';
@@ -119,7 +120,7 @@ describe('Workspace Settings & Verona Modules', () => {
     cy.get('[data-cy="edit-workspace-settings-editor"]').find('mat-select').click();
     cy.get('mat-option').should('have.length.at.least', 1).first().click();
 
-    cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+    saveWorkspaceSettings();
 
     cy.visitWs(secondaryWorkspace);
     cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
@@ -140,7 +141,7 @@ describe('Workspace Settings & Verona Modules', () => {
       .contains('Begleitmaterial')
       .click();
 
-    cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+    saveWorkspaceSettings();
 
     cy.get('[data-cy="workspace-routes-notes"]').should('not.exist');
   });
@@ -155,7 +156,7 @@ describe('Workspace Settings & Verona Modules', () => {
       .contains('Begleitmaterial')
       .click();
 
-    cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+    saveWorkspaceSettings();
 
     cy.get('[data-cy="workspace-routes-notes"]').should('be.visible');
   });
