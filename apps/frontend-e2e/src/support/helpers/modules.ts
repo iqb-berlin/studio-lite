@@ -13,6 +13,9 @@ import { saveWorkspaceSettings } from './admin';
  * addModules(['iqb-editor-aspect-3.0.1.html', 'iqb-player-aspect-3.0.1.html']);
  */
 export function addModules(filenames: string[]): void {
+  // The admin button toggles: on an admin page it leads back home. Right after a first login the app
+  // is still on its way to /admin, so the start page is set here rather than assumed (#1746).
+  cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('v-modules');
 
