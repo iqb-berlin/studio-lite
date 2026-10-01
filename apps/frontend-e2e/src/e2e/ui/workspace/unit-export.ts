@@ -5,7 +5,8 @@ import {
 import {
   ensureUnitExists,
   goToWsMenu,
-  selectListUnits
+  selectListUnits,
+  waitForSuccess
 } from '../../../support/helpers';
 
 describe('Workspace Unit Export & Reports', () => {
@@ -79,7 +80,7 @@ describe('Workspace Unit Export & Reports', () => {
     cy.get('mat-radio-button[value="xml"]').click();
     cy.intercept('GET', '/api/workspaces/*?download=true*').as('downloadXmlReq');
     cy.get('[data-cy="workspace-export-unit-button"]').click();
-    cy.wait('@downloadXmlReq').its('response.statusCode').should('be.within', 200, 304);
+    waitForSuccess('@downloadXmlReq');
   });
 
   it('exports selected units as JSON format', () => {
@@ -91,7 +92,7 @@ describe('Workspace Unit Export & Reports', () => {
     cy.get('mat-radio-button[value="json"]').click();
     cy.intercept('POST', '/api/workspaces/*/download-units').as('downloadJsonReq');
     cy.get('[data-cy="workspace-export-unit-button"]').click();
-    cy.wait('@downloadJsonReq').its('response.statusCode').should('be.within', 200, 304);
+    waitForSuccess('@downloadJsonReq');
   });
 
   it('exports selected units with comments and rich notes options toggled', () => {
@@ -106,7 +107,7 @@ describe('Workspace Unit Export & Reports', () => {
 
     cy.intercept('GET', '/api/workspaces/*?download=true*').as('downloadFilteredReq');
     cy.get('[data-cy="workspace-export-unit-button"]').click();
-    cy.wait('@downloadFilteredReq').its('response.statusCode').should('be.within', 200, 304);
+    waitForSuccess('@downloadFilteredReq');
   });
 
   it('displays metadata report', () => {

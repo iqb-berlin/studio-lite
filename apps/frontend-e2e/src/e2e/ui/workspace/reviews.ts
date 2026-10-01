@@ -21,7 +21,8 @@ import {
   deleteReview,
   modifyReviewUnits,
   goToReviewAdmin,
-  saveReviewConfig
+  saveReviewConfig,
+  waitForSuccess
 } from '../../../support/helpers';
 import { grantRemovePrivilegeAtWs } from '../../../support/helpers/group-admin';
 
@@ -133,7 +134,7 @@ describe('Unit Reviews', () => {
     cy.intercept('GET', '/api/reviews/*').as('getReview');
     cy.visit('/');
     openReview(review);
-    cy.wait('@getReview').its('response.statusCode').should('be.within', 200, 299);
+    waitForSuccess('@getReview');
     cy.get('studio-lite-unit-nav', { timeout: 15000 }).within(() => {
       cy.get('.mat-mdc-list-item:contains("3")', { timeout: 10000 }).should('exist');
     });
@@ -204,9 +205,9 @@ describe('Unit Reviews', () => {
 
     cy.visit('/');
     openReview(review);
-    cy.wait('@getReview').its('response.statusCode').should('be.oneOf', [200, 304]);
+    waitForSuccess('@getReview');
     startReview();
-    cy.wait('@getUnitDefinition').its('response.statusCode').should('be.within', 200, 299);
+    waitForSuccess('@getUnitDefinition');
 
     cy.get('studio-lite-add-comment-button', { timeout: 15000 }).should('be.visible');
     cy.get('studio-lite-add-comment-button button').click();
@@ -218,7 +219,7 @@ describe('Unit Reviews', () => {
         cy.contains(json.review.comment).should('exist');
         cy.get('tiptap-editor').type('Test comment from Review');
         cy.contains('button', 'send').click({ force: true });
-        cy.wait('@postReviewComment').its('response.statusCode').should('be.within', 200, 299);
+        waitForSuccess('@postReviewComment');
         cy.get('button').contains(json.dialogs.close).should('exist').click({ force: true });
       });
     });
@@ -245,7 +246,7 @@ describe('Unit Reviews', () => {
     cy.intercept('GET', '/api/reviews/*').as('getReview');
     cy.visit('/');
     openReview(review);
-    cy.wait('@getReview').its('response.statusCode').should('be.oneOf', [200, 304]);
+    waitForSuccess('@getReview');
     startReview();
 
     // Navigate to the end (click the finish page option container at the end of the unit nav list)
@@ -283,7 +284,7 @@ describe('Unit Reviews', () => {
     cy.intercept('POST', '/api/workspaces/*/units/*/comments').as('createWorkspaceComment');
     cy.get('tiptap-editor').type('Unread comment for dot test');
     cy.contains('button', 'send').click();
-    cy.wait('@createWorkspaceComment').its('response.statusCode').should('be.within', 200, 299);
+    waitForSuccess('@createWorkspaceComment');
     clickIndexTabWorkspace('properties');
 
     loginWithUser(standardUser.username, standardUser.password);
@@ -298,7 +299,7 @@ describe('Unit Reviews', () => {
     cy.get('mat-row').contains('M6_AK0012').click();
     clickIndexTabWorkspace('comments');
     cy.get('studio-lite-comments', { timeout: 15000 }).should('be.visible');
-    cy.wait('@markCommentsSeen').its('response.statusCode').should('be.within', 200, 299);
+    waitForSuccess('@markCommentsSeen');
     clickIndexTabWorkspace('properties');
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments', { timeout: 15000 }).should('have.css', 'opacity', '0');

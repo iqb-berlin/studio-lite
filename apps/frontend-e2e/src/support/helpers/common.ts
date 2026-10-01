@@ -4,6 +4,23 @@
  */
 
 /**
+ * Waits for an intercepted request and asserts that it succeeded: any 2xx, and for a GET also
+ * 304, which the browser answers from its cache when the same resource is loaded again (#1745).
+ * @param alias - Alias of the intercept, with the leading '@'
+ * @example
+ * cy.intercept('PATCH', '/api/workspaces/*\/settings').as('saveSettings');
+ * waitForSuccess('@saveSettings');
+ */
+export function waitForSuccess(alias: string): void {
+  cy.wait(alias).then(({ request, response }) => {
+    const status = response?.statusCode;
+    const ok = (status !== undefined && status >= 200 && status < 300) ||
+      (request.method === 'GET' && status === 304);
+    expect(ok, `${request.method} ${request.url} answered ${status}`).to.equal(true);
+  });
+}
+
+/**
  * Selects a checkbox for a unit in the unit list
  * @param name - Unit name to select
  * @example
