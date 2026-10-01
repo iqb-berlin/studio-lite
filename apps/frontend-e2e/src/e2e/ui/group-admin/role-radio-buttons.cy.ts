@@ -16,7 +16,8 @@ import {
   makeAdminOfGroup,
   clickIndexTabWsgAdmin,
   openWsTab,
-  openUsersTab
+  openUsersTab,
+  waitForSuccess
 } from '../../../support/helpers';
 import {
   createWs,
@@ -136,7 +137,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       openWsTab(primaryWorkspace);
       selectRoleAtWs(standardUser.username, AccessLevel.Admin);
       clickAccessRightsSaveButton();
-      cy.wait('@saveUsers').its('response.statusCode').should('eq', 200);
+      waitForSuccess('@saveUsers');
 
       cy.visit('/');
       cy.findAdminGroupSettings(baseGroup).click();
@@ -155,7 +156,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       openWsTab(primaryWorkspace);
       selectRoleAtWs(standardUser.username, AccessLevel.Basic);
       clickAccessRightsSaveButton();
-      cy.wait('@saveFirst').its('response.statusCode').should('eq', 200);
+      waitForSuccess('@saveFirst');
 
       // Now deselect and save
       cy.visit('/');
@@ -164,7 +165,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       openWsTab(primaryWorkspace);
       deselectRoleAtWs(standardUser.username, AccessLevel.Basic);
       clickAccessRightsSaveButton();
-      cy.wait('@saveUsers').its('response.statusCode').should('eq', 200);
+      waitForSuccess('@saveUsers');
 
       // Reload and verify unchecked
       cy.visit('/');
@@ -181,7 +182,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       openWsTab(primaryWorkspace);
       selectRoleAtWs(standardUser.username, AccessLevel.Basic);
       clickAccessRightsSaveButton();
-      cy.wait('@saveFirst').its('response.statusCode').should('eq', 200);
+      waitForSuccess('@saveFirst');
 
       // Switch to Admin
       cy.visit('/');
@@ -190,7 +191,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       openWsTab(primaryWorkspace);
       selectRoleAtWs(standardUser.username, AccessLevel.Admin);
       clickAccessRightsSaveButton();
-      cy.wait('@saveSwitch').its('response.statusCode').should('eq', 200);
+      waitForSuccess('@saveSwitch');
 
       // Reload and verify Admin is checked, Basic is not
       cy.visit('/');
@@ -253,7 +254,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       openUsersTab(standardUser.username);
       selectRoleAtUser(primaryWorkspace, AccessLevel.Basic);
       clickAccessRightsSaveButton();
-      cy.wait('@saveWorkspaces').its('response.statusCode').should('eq', 200);
+      waitForSuccess('@saveWorkspaces');
 
       cy.visit('/');
       cy.findAdminGroupSettings(baseGroup).click();
@@ -273,7 +274,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       openUsersTab(standardUser.username);
       selectRoleAtUser(primaryWorkspace, AccessLevel.Developer);
       clickAccessRightsSaveButton();
-      cy.wait('@saveFirst').its('response.statusCode').should('eq', 200);
+      waitForSuccess('@saveFirst');
 
       // Deselect
       cy.visit('/');
@@ -282,7 +283,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       openUsersTab(standardUser.username);
       deselectRoleAtUser(primaryWorkspace, AccessLevel.Developer);
       clickAccessRightsSaveButton();
-      cy.wait('@saveWorkspaces').its('response.statusCode').should('eq', 200);
+      waitForSuccess('@saveWorkspaces');
 
       cy.visit('/');
       cy.findAdminGroupSettings(baseGroup).click();
@@ -304,7 +305,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       openWsTab(primaryWorkspace);
       selectRoleAtWs(standardUser.username, AccessLevel.Developer);
       clickAccessRightsSaveButton();
-      cy.wait('@saveUsers').its('response.statusCode').should('eq', 200);
+      waitForSuccess('@saveUsers');
 
       // Verify via Users panel
       cy.visit('/');
@@ -327,7 +328,7 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       openUsersTab(standardUser.username);
       selectRoleAtUser(primaryWorkspace, AccessLevel.Admin);
       clickAccessRightsSaveButton();
-      cy.wait('@saveWs').its('response.statusCode').should('eq', 200);
+      waitForSuccess('@saveWs');
 
       // Verify via Workspaces panel
       cy.visit('/');

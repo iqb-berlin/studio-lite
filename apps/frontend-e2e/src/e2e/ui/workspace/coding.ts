@@ -1,6 +1,7 @@
 import {
   clickIndexTabWorkspace,
-  selectUnit
+  selectUnit,
+  waitForSuccess
 } from '../../../support/helpers';
 import { definitionAllElementsUnit, primaryWorkspace } from '../../../support/testData';
 
@@ -42,7 +43,7 @@ describe('Aspect Coding Scheme (Kodierung)', () => {
     cy.get('[data-cy="workspace-unit-save-button"]', { timeout: 10000 })
       .should('not.be.disabled')
       .click();
-    cy.wait('@saveScheme').its('response.statusCode').should('eq', 200);
+    waitForSuccess('@saveScheme');
     cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
   });
 
@@ -67,7 +68,7 @@ describe('Aspect Coding Scheme (Kodierung)', () => {
     cy.get('[data-cy="workspace-unit-save-button"]', { timeout: 10000 })
       .should('not.be.disabled')
       .click();
-    cy.wait('@saveScheme').its('response.statusCode').should('eq', 200);
+    waitForSuccess('@saveScheme');
     cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
   });
 
@@ -104,7 +105,7 @@ describe('Aspect Coding Scheme (Kodierung)', () => {
     cy.get('[data-cy="workspace-unit-save-button"]', { timeout: 10000 })
       .should('not.be.disabled')
       .click();
-    cy.wait('@saveScheme').its('response.statusCode').should('eq', 200);
+    waitForSuccess('@saveScheme');
     cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
   });
 

@@ -5,7 +5,7 @@
 
 import { UserData } from '../testData';
 import { clickIndexTabAdmin, clickIndexTabWsgAdmin } from './navigation';
-import { editInput } from './common';
+import { editInput, waitForSuccess } from './common';
 
 /**
  * Adds the first admin user and logs in
@@ -74,7 +74,7 @@ export function deleteUser(user: string): void {
   cy.translate(Cypress.expose('locale')).then(json => {
     cy.intercept('DELETE', '/api/admin/users*').as('deleteUserReq');
     cy.clickButton(json.delete);
-    cy.wait('@deleteUserReq').its('response.statusCode').should('be.oneOf', [200, 204]);
+    waitForSuccess('@deleteUserReq');
   });
 }
 
@@ -185,7 +185,7 @@ export function saveAndExpect(
   cy.translate(Cypress.expose('locale')).then(json => {
     cy.get(`button:contains(${json.save})`).eq(cardNum).click({ force: true });
   });
-  cy.wait(`@${alias}`).its('response.statusCode').should('eq', 200);
+  waitForSuccess(`@${alias}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -229,5 +229,5 @@ export function setRouteVisibility(routeName: string, setVisible: boolean): void
 export function saveWorkspaceSettings(): void {
   cy.intercept('PATCH', '/api/workspaces/*/settings').as('saveWsSettings');
   cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
-  cy.wait('@saveWsSettings').its('response.statusCode').should('eq', 200);
+  waitForSuccess('@saveWsSettings');
 }

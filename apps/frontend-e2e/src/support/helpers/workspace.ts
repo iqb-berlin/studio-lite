@@ -5,6 +5,7 @@
 
 import { UnitData } from '../testData';
 import { clickIndexTabWorkspace, goToWsMenu } from './navigation';
+import { waitForSuccess } from './common';
 
 /**
  * Selects a unit by name
@@ -279,7 +280,7 @@ export function submitUnits(unitNames: string[]): void {
       .contains(json.workspace['submit-units'])
       .click();
   });
-  cy.wait('@submitUnitsReq').its('response.statusCode').should('be.oneOf', [200, 201, 204]);
+  waitForSuccess('@submitUnitsReq');
 }
 
 /**
@@ -300,7 +301,7 @@ export function returnSubmittedUnits(unitNames: string[]): void {
       .click();
   });
   // Wait for backend reponse
-  cy.wait('@returnUnitsReq').its('response.statusCode').should('be.oneOf', [200, 201, 204]);
+  waitForSuccess('@returnUnitsReq');
 }
 
 /**
@@ -412,7 +413,7 @@ export function openUnitProperties(shortname: string): void {
  */
 export function clickUnitPropertiesSaveButton(): void {
   cy.get('[data-cy="workspace-unit-save-button"]').should('not.be.disabled').click();
-  cy.wait('@saveProps').its('response.statusCode').should('eq', 200);
+  waitForSuccess('@saveProps');
 }
 
 /**

@@ -1,4 +1,5 @@
 import { clickIndexTabWsgAdmin } from './navigation';
+import { waitForSuccess } from './common';
 import { AccessLevel } from '../testData';
 
 // ---------------------------------------------------------------------------
@@ -204,7 +205,7 @@ export function addState(stateName: string): void {
     });
   cy.intercept('PATCH', '/api/workspace-groups/*').as('saveState');
   cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
-  cy.wait('@saveState').its('response.statusCode').should('eq', 200);
+  waitForSuccess('@saveState');
 }
 
 /**
@@ -232,7 +233,7 @@ export function deleteState(stateName: string): void {
       'deleteStateRequest'
     );
     cy.clickDialogButton(json.delete);
-    cy.wait('@deleteStateRequest').its('response.statusCode').should('eq', 200);
+    waitForSuccess('@deleteStateRequest');
   });
   cy.get('studio-lite-delete-state').should('not.exist');
 }
