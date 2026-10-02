@@ -56,8 +56,7 @@ describe('A unit link into a workspace without access', () => {
   it('keeps the user logged in and says that the access is missing', () => {
     loginWithUser(standardUser.username, standardUser.password);
     cy.intercept('GET', `/api/workspaces/${wsId}/**`).as('workspaceRequest');
-    // Opened afresh, as a link from outside is: a change of the hash alone would keep the page,
-    // and with it the error messages the login switched off (#1724).
+    // Opened afresh, as a link from outside is: a change of the hash alone would keep the page.
     cy.visit(`/#/a/${wsId}/${unitId}/preview`);
     cy.reload();
     cy.wait('@workspaceRequest');
@@ -69,6 +68,24 @@ describe('A unit link into a workspace without access', () => {
     cy.window().then(win => {
       expect(win.localStorage.getItem('id_token')).not.to.equal(null);
       expect(win.localStorage.getItem('refresh_token')).not.to.equal(null);
+    });
+  });
+
+  // The login switches error messages off so that a failed attempt is reported once, and nothing
+  // reloads the page afterwards. Until #1724 they stayed off: the API answered 403, and the page
+  // said nothing at all.
+  it('says that the access is missing in the page the login happened in', () => {
+    loginWithUser(standardUser.username, standardUser.password);
+    cy.get('[data-cy="goto-user-menu"]').should('exist');
+    cy.intercept('GET', `/api/workspaces/${wsId}/**`).as('workspaceRequest');
+    // only the hash changes, so the page of the login stays
+    cy.window().then(win => {
+      win.location.hash = `#/a/${wsId}/${unitId}/preview`;
+    });
+    cy.wait('@workspaceRequest').its('response.statusCode').should('equal', 403);
+
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('.error-container').should('contain', json['app-http-error']['403']);
     });
   });
 });
