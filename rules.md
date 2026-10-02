@@ -153,7 +153,7 @@
 
 ## Workflow: Pull Requests and Tickets
 
-Branches, the pipeline and the board columns are described in the README under *How work flows through this repository*. Read it before creating a branch, opening a pull request or moving a card on the board. The rules below begin with the step before any of that, the plan, then repeat the two points most easily got wrong and add what the README leaves open.
+Branches, the pipeline and the board columns are described in the README under *How work flows through this repository*. Read it before creating a branch, opening a pull request or moving a card on the board. The rules below begin with the two steps before any of that, the plan and the review, then repeat the two points most easily got wrong and add what the README leaves open.
 
 ### Before the Work: A Plan
 - **Rule**: Every ticket starts with a plan, agreed with the person you are working for before anything is changed — a small ticket as well, whose plan is then three lines. Work out the plan in Claude Code's plan mode (Shift+Tab), which edits nothing until the plan is approved.
@@ -166,6 +166,12 @@ Branches, the pipeline and the board columns are described in the README under *
   - **the places at risk**: a database changeset, e2e selectors (no compiler sees Cypress), what frontend and API share in `libs/`.
 - **Rule**: The plan goes into the conversation, not into the ticket; the ticket gets the result. Approving the plan is what moves the card to *In progress*. A plan that ends in a question, or in not building it, moves no card.
   - **Rationale**: A misunderstanding caught in a plan costs one message; caught in review it costs a pull request and a pipeline run. A session does not know what earlier sessions decided or rejected — without a plan, the first time a person sees what it is about to do is the finished pull request.
+
+### Before the Commit: A Review
+- **Rule**: Finish the change and verify it (tests, lint, typecheck), but do not commit it yet. Run `/code-review` on it first; only then commit, push and open the pull request.
+  - **Rationale**: A review before the pull request can still turn the change around — a regression, or a fix that compiles, passes every suite and does nothing. After the pull request every such round costs a pipeline run.
+- **Rule**: `/code-review` without a target reviews the uncommitted diff (`git diff HEAD`). Once the change is committed that diff is empty and the review finds nothing; then name the scope explicitly (`/code-review origin/develop..HEAD`, or the pull request number).
+- **Rule**: After the review, check `git status`. Review agents can leave files of their own in the working tree; they do not belong in the commit.
 
 ### Pull Requests
 - **Rule**: Never write `Closes #…`, `Fixes #…` or `Resolves #…` in a commit message or pull request text. Reference the issue as `(#1629)`.
