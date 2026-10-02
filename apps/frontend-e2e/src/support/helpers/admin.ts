@@ -35,6 +35,12 @@ export function addFirstUser(): void {
 export function deleteFirstUser(): void {
   cy.visit('/');
   deleteUser(Cypress.expose('username'));
+  // The deleted admin's tokens would stay in the browser, and the next login would meet the app's
+  // 401 -> refresh -> logout. The logout dialog is no way out: it calls the API for a user that is
+  // gone. So the session is cleared here and the start page is waited for (#1754).
+  cy.clearLocalStorage();
+  cy.visit('/');
+  cy.get('[data-cy="home-user-name"]').should('be.visible');
 }
 
 /**
