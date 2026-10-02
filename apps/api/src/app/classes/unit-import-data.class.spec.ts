@@ -21,7 +21,7 @@ describe('UnitImportData', () => {
           </Values>
         </Variable>
       </BaseVariables>
-      <CodingSchemeRef schemer="schemer-v1" schemetype="type1">unit01.vocs</CodingSchemeRef>
+      <CodingSchemeRef schemer="schemer-v1" schemeType="type1">unit01.vocs</CodingSchemeRef>
       <UnitCommentsRef>unit01.vouc</UnitCommentsRef>
       <UnitRichNotesRef>unit01.vorn</UnitRichNotesRef>
     </Unit>
@@ -49,6 +49,35 @@ describe('UnitImportData', () => {
     expect(data.commentsFileName).toBe('folder/unit01.vouc');
     expect(data.richNotesFileName).toBe('folder/unit01.vorn');
     expect(data.metadataFileName).toBe('folder/unit01.vomd');
+  });
+
+  // unit-xml writes `schemeType`, and the parser in XML mode tells it from `schemetype` (#1759).
+  describe('coding scheme type', () => {
+    const unitXml = (schemeRef: string) => createMock<FileIo>({
+      originalname: 'unit01.xml',
+      buffer: Buffer.from(`<Unit><Metadata><Id>UNIT01</Id><Label>L</Label></Metadata>${schemeRef}</Unit>`)
+    });
+
+    it('should read schemer and scheme type as the export writes them', () => {
+      const data = new UnitImportData(fileIoMock);
+
+      expect(data.schemer).toBe('schemer-v1');
+      expect(data.schemeType).toBe('type1');
+    });
+
+    it('should still read a scheme type written in lower case', () => {
+      const data = new UnitImportData(unitXml(
+        '<CodingSchemeRef schemer="s@1.0" schemetype="iqb-standard@3.0">unit01.vocs</CodingSchemeRef>'
+      ));
+
+      expect(data.schemeType).toBe('iqb-standard@3.0');
+    });
+
+    it('should leave the scheme type undefined when the file gives none', () => {
+      const data = new UnitImportData(unitXml('<CodingSchemeRef schemer="s@1.0">unit01.vocs</CodingSchemeRef>'));
+
+      expect(data.schemeType).toBeUndefined();
+    });
   });
 
   describe('definition type (#1368)', () => {

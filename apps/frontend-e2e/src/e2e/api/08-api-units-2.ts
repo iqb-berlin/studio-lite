@@ -939,6 +939,34 @@ describe('Unit API tests part II', () => {
     });
   });
 
+  // The XML import read the attribute as `schemetype`; the parser runs in XML mode and tells it from
+  // the `schemeType` that the export and unit-xml 17.6 write, so every imported unit lost it (#1759).
+  describe('the coding scheme type of an XML unit', () => {
+    it('201 positive test: is kept when the unit is imported', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      cy.uploadUnitFilesAPI(
+        Cypress.expose(ws1.id),
+        ['scheme-type/ST_IMPORT.xml', 'scheme-type/ST_IMPORT.voud', 'scheme-type/ST_IMPORT.vocs'],
+        adminToken
+      ).then(imported => {
+        cy.getUnitsByWsAPI(Cypress.expose(ws1.id), adminToken).then(units => {
+          const unit = units.body.find((u: { key: string }) => u.key === 'ST_IMPORT');
+          expect(unit, 'imported unit').not.to.equal(undefined);
+          const unitId = String(unit.id);
+          cy.getUnitSchemeAPI(unitId, Cypress.expose(ws1.id), adminToken).then(read => {
+            // cleaned up before anything else is asserted, so that a failure leaves ws1 as it was
+            cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
+            cy.then(() => {
+              expect(imported.status).to.equal(201);
+              expect(imported.body.messages).to.deep.equal([]);
+              expect(read.body.schemeType).to.equal('iqb-standard@3.2');
+            });
+          });
+        });
+      });
+    });
+  });
+
   describe('85. GET /api/admin/users/{id}/workspace-groups', () => {
     it(
       '200 positive test: should successfully retrieve the list of workspace groups' +

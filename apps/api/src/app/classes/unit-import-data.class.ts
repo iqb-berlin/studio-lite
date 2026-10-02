@@ -61,7 +61,9 @@ export class UnitImportData {
     const codingSchemeElement = xmlDocument('CodingSchemeRef').first();
     if (codingSchemeElement.length > 0) {
       this.schemer = codingSchemeElement.attr('schemer');
-      this.schemeType = codingSchemeElement.attr('schemetype');
+      // The parser runs in XML mode and is case-sensitive: the export and unit-xml 17.6 write
+      // `schemeType` (#1759). The lower-case spelling stays as a fallback for files written by hand.
+      this.schemeType = codingSchemeElement.attr('schemeType') ?? codingSchemeElement.attr('schemetype');
       const lastChangedScheme = codingSchemeElement.attr('lastChange');
       if (lastChangedScheme) this.lastChangedScheme = new Date(lastChangedScheme);
       this.codingSchemeFileName = this.resolveCompanionFile(codingSchemeElement.text());
