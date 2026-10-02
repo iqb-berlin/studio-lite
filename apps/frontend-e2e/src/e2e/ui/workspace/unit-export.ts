@@ -39,6 +39,33 @@ describe('Workspace Unit Export & Reports', () => {
     });
   });
 
+  // The settings outgrow the dialog once the booklet panel opens; scrolled to the end, the unit
+  // list still has to reach the bottom of the dialog content instead of ending a screen above it (#1749)
+  it('export dialog unit list grows with the settings column', () => {
+    cy.visitWs(primaryWorkspace);
+    cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
+    cy.get('studio-lite-export-test-taker-config input[type="number"]').first().clear().type('1');
+    cy.get('mat-dialog-content mat-expansion-panel.mat-expanded').should('have.length', 2);
+    cy.get('mat-dialog-content')
+      .should($content => {
+        expect($content[0].scrollHeight).to.be.greaterThan($content[0].clientHeight);
+      })
+      .scrollTo('bottom')
+      .then($content => {
+        const content = $content[0];
+        const style = getComputedStyle(content);
+        const contentBottom = content.getBoundingClientRect().bottom -
+          parseFloat(style.borderBottomWidth) - parseFloat(style.paddingBottom);
+        const listBottom = $content.find('studio-lite-select-unit-list')[0].getBoundingClientRect().bottom;
+        expect(listBottom).to.be.closeTo(contentBottom, 2);
+      });
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.clickDialogButton(json.cancel || json.close);
+    });
+  });
+
   it('export dialog search filter narrows the unit list', () => {
     ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
     cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
