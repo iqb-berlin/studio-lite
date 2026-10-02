@@ -28,18 +28,18 @@ export function addFirstUser(): void {
 }
 
 /**
- * Deletes the first admin user and logs out
+ * Deletes the first admin user and leaves the browser logged out, on the login form. There is no
+ * logout request: the session goes with the deleted user.
  * @example
  * deleteFirstUser();
  */
 export function deleteFirstUser(): void {
-  cy.visit('/');
   deleteUser(Cypress.expose('username'));
-  // The deleted admin's tokens would stay in the browser, and the next login would meet the app's
-  // 401 -> refresh -> logout. The logout dialog is no way out: it calls the API for a user that is
-  // gone. So the session is cleared here and the start page is waited for (#1754).
+  // The deleted admin would otherwise stay in the browser: its tokens in localStorage and its auth
+  // data in the running app. Clearing the storage alone is not enough, and visiting '/' from
+  // '/#/admin/...' only changes the hash, so the app is reloaded to start from nothing (#1754).
   cy.clearLocalStorage();
-  cy.visit('/');
+  cy.reload();
   cy.get('[data-cy="home-user-name"]').should('be.visible');
 }
 
@@ -65,6 +65,8 @@ export function createNewUser(newUser: UserData): void {
   cy.clickDataCyWithResponseCheck('[data-cy="admin-edit-user-button"]', [201], '/api/admin/users', 'POST', 'addUser');
 }
 
+let deleteUserCalls = 0;
+
 /**
  * Deletes a user by username
  * @param user - Username to delete
@@ -78,12 +80,14 @@ export function deleteUser(user: string): void {
   cy.contains('mat-row', user)
     .find('[data-cy="admin-users-delete-user"]').click();
   cy.translate(Cypress.expose('locale')).then(json => {
-    // An alias of its own per user: Cypress counts the requests of every intercept sharing an
+    // An alias of its own per call: Cypress counts the requests of every intercept sharing an
     // alias together, so a third deleteUser() in one hook resolved with the second one's request
     // before its own DELETE was sent (#1754)
-    cy.intercept('DELETE', '/api/admin/users*').as(`deleteUserReq-${user}`);
+    deleteUserCalls += 1;
+    const alias = `deleteUserReq${deleteUserCalls}`;
+    cy.intercept('DELETE', '/api/admin/users*').as(alias);
     cy.clickButton(json.delete);
-    waitForSuccess(`@deleteUserReq-${user}`);
+    waitForSuccess(`@${alias}`);
   });
 }
 
