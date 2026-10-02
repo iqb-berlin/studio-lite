@@ -1164,6 +1164,7 @@
   "print": {
     "stateLabel": "Status",
     "printOptions": "Druckoptionen",
+    "printLandscape": "Im Querformat drucken",
     "printMetadata": "Metadaten drucken",
     "printProperties": "Eigenschaften drucken",
     "printComments":  "Kommentare drucken",

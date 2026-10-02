@@ -19,6 +19,8 @@ import { PrintOptions } from '../../modules/print/models/print-options.interface
 })
 export class PrintOptionsComponent implements OnInit {
   printOptions: PrintOptions[] = [
+    // off: the sheet stays A4 portrait, as every print was before (#1765)
+    { key: 'printLandscape', value: false },
     { key: 'printProperties', value: true },
     { key: 'printMetadata', value: true },
     { key: 'printComments', value: true },
