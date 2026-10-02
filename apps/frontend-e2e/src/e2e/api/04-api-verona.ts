@@ -1,9 +1,13 @@
+import type { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import {
   modules
 } from '../../support/testData';
 import {
+  getNameAt,
   noId
 } from '../../support/util-api';
+
+const moduleKeys = modules.map(getNameAt);
 
 describe('Admin verona API tests', () => {
   describe('Register Module (POST /api/verona-modules)', () => {
@@ -25,7 +29,9 @@ describe('Admin verona API tests', () => {
       cy.getModulesAPI(Cypress.expose(`token_${Cypress.expose('username')}`)).then(
         resp => {
           expect(resp.status).to.be.oneOf([200, 304]);
-          expect(resp.body.length).equal(6);
+          // Its own modules, not the total: a database with leftovers holds more (#1750)
+          const keys = (resp.body as VeronaModuleInListDto[]).map(m => m.key);
+          expect(keys).to.include.members(moduleKeys);
         }
       );
     });
