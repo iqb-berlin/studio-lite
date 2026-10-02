@@ -341,6 +341,9 @@ export class UnitDownloadClass {
         DefinitionRef: {
           '@player': unitMetadata.player || '',
           '@editor': unitMetadata.editor || '',
+          ...(definitionData.definitionType && {
+            '@type': definitionData.definitionType
+          }),
           ...(unitMetadata.lastChangedDefinition && {
             '@lastChange': unitMetadata.lastChangedDefinition.toISOString()
           }),
@@ -1033,6 +1036,7 @@ export class UnitDownloadClass {
       zip.addFile(`${key}.voud`, Buffer.from(definitionData.definition));
       index.userInterface.definition = `${key}.voud`;
       index.userInterface.isDefinitionInline = false;
+      if (definitionData.definitionType) index.userInterface.type = definitionData.definitionType;
     }
     if (unitMetadata.lastChangedDefinition) {
       index.userInterface.modifiedAt = unitMetadata.lastChangedDefinition.toISOString();

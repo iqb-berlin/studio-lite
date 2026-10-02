@@ -119,6 +119,74 @@ describe('UnitDownloadClass', () => {
     });
   });
 
+  // XML carries the format as DefinitionRef/@type, JSON as userInterface.type (#1368).
+  describe('definition type', () => {
+    const exportUnit = async (exportFormat: 'xml' | 'json', definitionType?: string) => {
+      const unitServiceMock = createMock<UnitService>();
+      const settingServiceMock = createMock<SettingService>();
+      const unitRichNoteServiceMock = createMock<UnitRichNoteService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
+      unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
+      unitServiceMock.findOnesProperties.mockResolvedValue({
+        key: 'U1', name: 'Unit 1', metadata: {}, player: 'iqb-player-aspect@3.0'
+      } as unknown as UnitPropertiesDto);
+      unitServiceMock.ensureUuid.mockResolvedValue('uuid-1');
+      unitServiceMock.findOnesDefinition.mockResolvedValue({
+        definition: '{}', variables: [], ...(definitionType && { definitionType })
+      } as UnitDefinitionDto);
+      unitServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as UnitSchemeDto);
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
+
+      await UnitDownloadClass.get(
+        1,
+        unitServiceMock,
+        createMock<UnitCommentService>(),
+        veronaModuleServiceMock,
+        settingServiceMock,
+        unitRichNoteServiceMock,
+        {
+          unitIdList: [1],
+          exportFormat,
+          addPlayers: false,
+          addComments: false,
+          addTestTakersHot: 0,
+          addTestTakersMonitor: 0,
+          addTestTakersReview: 0
+        } as unknown as UnitDownloadSettingsDto,
+        exportFormat
+      );
+      const file = mockZip.addFile.mock.calls
+        .find((call: [string, Buffer]) => call[0] === `U1.${exportFormat}`);
+      return (file[1] as Buffer).toString();
+    };
+
+    it('should write the type as an attribute of DefinitionRef', async () => {
+      const xml = await exportUnit('xml', 'aspect-unit-definition@4.12.0');
+
+      expect(xml).toMatch(/<DefinitionRef [^>]*type="aspect-unit-definition@4\.12\.0"/);
+    });
+
+    it('should write no type attribute when none is stored', async () => {
+      const xml = await exportUnit('xml');
+
+      expect(xml).toMatch(/<DefinitionRef /);
+      expect(xml).not.toMatch(/<DefinitionRef [^>]*type=/);
+    });
+
+    it('should write the type into userInterface of the JSON index', async () => {
+      const index = JSON.parse(await exportUnit('json', 'aspect-unit-definition@4.12.0'));
+
+      expect(index.userInterface.type).toBe('aspect-unit-definition@4.12.0');
+    });
+
+    it('should leave userInterface.type out when none is stored', async () => {
+      const index = JSON.parse(await exportUnit('json'));
+
+      expect(index.userInterface).not.toHaveProperty('type');
+    });
+  });
+
   describe('generateCodeList', () => {
     it('should generate requested number of unique codes', () => {
       const result = UnitDownloadClass.generateCodeList(5, 10);

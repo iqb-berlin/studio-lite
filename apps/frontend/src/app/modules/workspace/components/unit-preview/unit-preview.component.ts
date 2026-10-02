@@ -28,6 +28,7 @@ import {
 import { PreviewDirective } from '../../../../directives/preview.directive';
 import { UnitState } from '../../../../models/verona.interface';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
+import { matchDefinitionType } from '../../utils/definition-type-match.utils';
 
 /**
  * The preview in the workspace: the unit as a test taker would see it, running in the player the
@@ -44,6 +45,7 @@ export class UnitPreviewComponent
   extends PreviewDirective
   implements AfterViewInit {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
+  definitionTypeWarning = '';
   private dataParts!: Record<string, string> | null;
   private unitStateDataType: string | null = null;
 
@@ -97,6 +99,7 @@ export class UnitPreviewComponent
       this.dataParts = null;
       this.unitStateDataType = null;
       this.message = '';
+      this.definitionTypeWarning = '';
       this.workspaceService
         .loadUnitProperties()
         .pipe(takeUntil(this.ngUnsubscribe))
@@ -162,6 +165,7 @@ export class UnitPreviewComponent
   postStore(unitDefinitionStore: UnitDefinitionStore): void {
     const unitDef = unitDefinitionStore.getData();
     if (this.postMessageTarget) {
+      this.definitionTypeWarning = this.getDefinitionTypeWarning(unitDef.definitionType);
       if (this.playerApiVersion === 1) {
         this.postMessageTarget.postMessage(
           {
@@ -187,13 +191,35 @@ export class UnitPreviewComponent
               directDownloadUrl: this.backendService.getDirectDownloadLink(),
               sharedParameters: this.sharedParameters
             },
-            unitDefinition: unitDef.definition || ''
+            unitDefinition: unitDef.definition || '',
+            ...(unitDef.definitionType && { unitDefinitionType: unitDef.definitionType })
           },
           '*'
         );
       }
       this.unitLoaded.next(true);
     }
+  }
+
+  /**
+   * A warning when the player says of itself that it does not read the format the unit is written
+   * in, naming the installed players that say they do. Empty whenever either side is silent: the
+   * player still runs, and an author decides whether to switch it (#1368).
+   */
+  private getDefinitionTypeWarning(definitionType: string | undefined): string {
+    const player = this.moduleService.players[this.playerName];
+    if (!player || matchDefinitionType(definitionType, player.metadata?.model) !== 'incompatible') return '';
+    const alternatives = Object.values(this.moduleService.players)
+      .filter(module => matchDefinitionType(definitionType, module.metadata?.model) === 'compatible')
+      .map(module => module.nameAndVersion);
+    const warning = this.translateService.instant(
+      'workspace.definition-type-incompatible',
+      { player: player.nameAndVersion, definitionType }
+    );
+    const hint = alternatives.length > 0 ?
+      this.translateService.instant('workspace.definition-type-alternatives', { players: alternatives.join(', ') }) :
+      this.translateService.instant('workspace.definition-type-no-alternative');
+    return `${warning} ${hint}`;
   }
 
   gotoUnit(target: string): void {

@@ -354,6 +354,52 @@ describe('UnitPlayerComponent', () => {
         '*'
       );
     });
+
+    it('should send the definition type at the top level when it is known', () => {
+      const componentWithPrivates = component as {
+        postMessageTarget: Window | undefined;
+        playerApiVersion: number;
+      };
+      componentWithPrivates.playerApiVersion = 6;
+      component.unitData.definitionType = 'aspect-unit-definition@4.12.0';
+      const postMessageSpy = jest.spyOn(componentWithPrivates.postMessageTarget!, 'postMessage');
+
+      component.postStore('test definition');
+
+      const message = postMessageSpy.mock.calls[0][0] as { unitDefinitionType?: string; playerConfig: object };
+      expect(message.unitDefinitionType).toBe('aspect-unit-definition@4.12.0');
+      expect(message.playerConfig).not.toHaveProperty('unitDefinitionType');
+    });
+
+    it('should send no definition type when none is known', () => {
+      const componentWithPrivates = component as {
+        postMessageTarget: Window | undefined;
+        playerApiVersion: number;
+      };
+      componentWithPrivates.playerApiVersion = 6;
+      component.unitData.definitionType = undefined;
+      const postMessageSpy = jest.spyOn(componentWithPrivates.postMessageTarget!, 'postMessage');
+
+      component.postStore('test definition');
+
+      expect(postMessageSpy.mock.calls[0][0]).not.toHaveProperty('unitDefinitionType');
+    });
+  });
+
+  describe('sendChangeData()', () => {
+    it('should keep the definition type that comes with a loaded definition', () => {
+      component.unitData.definition = '';
+      mockReviewBackendService.getUnitDefinition.mockReturnValue(of({
+        definition: 'loaded definition',
+        definitionType: 'aspect-unit-definition@4.12.0'
+      }));
+      const postStoreSpy = jest.spyOn(component, 'postStore');
+
+      component.sendChangeData();
+
+      expect(component.unitData.definitionType).toBe('aspect-unit-definition@4.12.0');
+      expect(postStoreSpy).toHaveBeenCalledWith('loaded definition');
+    });
   });
 
   describe('onLoadUnitProperties()', () => {

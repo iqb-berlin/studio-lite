@@ -86,6 +86,69 @@ describe('UnitDefinitionStore', () => {
     expect(emitSpy).toHaveBeenCalledTimes(2);
   });
 
+  // The format travels with the definition and never on its own (#1368).
+  describe('with the definition type', () => {
+    const typeA = 'aspect-unit-definition@4.11.0';
+    const typeB = 'aspect-unit-definition@4.12.0';
+    const vars = [buildVariable('v1', 'a1')];
+
+    it('does not mark a unit as changed when only the type is new', () => {
+      const store = new UnitDefinitionStore(1, { variables: vars, definition: 'def-a' });
+
+      store.setData([...vars], 'def-a', typeB);
+
+      expect(store.isChanged()).toBe(false);
+      expect(store.getChangedData()).toEqual({});
+    });
+
+    it('keeps the stored type while the definition is unchanged', () => {
+      const store = new UnitDefinitionStore(1, { variables: vars, definition: 'def-a', definitionType: typeA });
+
+      store.setData([buildVariable('v2', 'a2')], 'def-a');
+
+      expect(store.getChangedData()).not.toHaveProperty('definitionType');
+      expect(store.getData().definitionType).toBe(typeA);
+    });
+
+    it('sends the type with a changed definition', () => {
+      const store = new UnitDefinitionStore(1, { variables: vars, definition: 'def-a', definitionType: typeA });
+
+      store.setData([...vars], 'def-b', typeB);
+
+      expect(store.getChangedData()).toEqual({ definition: 'def-b', definitionType: typeB });
+      expect(store.getData().definitionType).toBe(typeB);
+    });
+
+    it('drops the stored type when a changed definition comes without one', () => {
+      const store = new UnitDefinitionStore(1, { variables: vars, definition: 'def-a', definitionType: typeA });
+
+      store.setData([...vars], 'def-b');
+
+      expect(store.getChangedData()).toEqual({ definition: 'def-b' });
+      expect(store.getData()).not.toHaveProperty('definitionType');
+    });
+
+    it('takes the type back when the definition is edited back to what was stored', () => {
+      const store = new UnitDefinitionStore(1, { variables: vars, definition: 'def-a', definitionType: typeA });
+
+      store.setData([...vars], 'def-b', typeB);
+      store.setData([...vars], 'def-a', typeA);
+
+      expect(store.isChanged()).toBe(false);
+      expect(store.getData().definitionType).toBe(typeA);
+    });
+
+    it('keeps the new type after the changes are applied', () => {
+      const store = new UnitDefinitionStore(1, { variables: vars, definition: 'def-a', definitionType: typeA });
+
+      store.setData([...vars], 'def-b', typeB);
+      store.applyChanges();
+
+      expect(store.isChanged()).toBe(false);
+      expect(store.getData().definitionType).toBe(typeB);
+    });
+  });
+
   // An editor following VariableInfo 2.0 writes type and format in upper case and leaves out
   // `page`. Studio stores and hands on the 1.x spelling, which the schemer and coding-box read (#1606).
   describe('with an editor in the VariableInfo 2.0 spelling', () => {

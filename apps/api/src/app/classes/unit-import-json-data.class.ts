@@ -12,6 +12,8 @@ export class UnitImportJsonData {
   transcript = '';
   reference = '';
   definition = '';
+  // `userInterface.type` of the unit index; '' when the file does not say
+  definitionType = '';
   definitionFileName: string;
   commentsFileName: string;
   richNotesFileName: string;
@@ -46,6 +48,7 @@ export class UnitImportJsonData {
     this.description = index.description ?? '';
     this.player = index.userInterface.player ?? '';
     this.editor = index.userInterface.editor ?? '';
+    this.definitionType = index.userInterface.type ?? '';
     this.definitionFileName = index.userInterface.definition ? folder + index.userInterface.definition : '';
     this.commentsFileName = index.comments?.id ? folder + index.comments.id : '';
     this.richNotesFileName = index.richNotes?.id ? folder + index.richNotes.id : '';

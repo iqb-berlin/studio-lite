@@ -15,6 +15,8 @@ export class UnitImportData {
   transcript: string;
   reference: string;
   definition: string;
+  // `type` of <DefinitionRef>/<Definition>; '' when the file does not say
+  definitionType = '';
   definitionFileName: string;
   commentsFileName: string;
   richNotesFileName: string;
@@ -84,6 +86,7 @@ export class UnitImportData {
     if (definitionRefElement.length > 0) {
       this.player = definitionRefElement.attr('player');
       this.editor = definitionRefElement.attr('editor');
+      this.definitionType = definitionRefElement.attr('type') || '';
       const lastChangedDefinition = definitionRefElement.attr('lastChange');
       if (lastChangedDefinition) this.lastChangedDefinition = new Date(lastChangedDefinition);
       this.definitionFileName = this.resolveCompanionFile(definitionRefElement.text());
@@ -92,6 +95,7 @@ export class UnitImportData {
       if (definitionElement.length > 0) {
         this.player = definitionElement.attr('player');
         this.editor = definitionElement.attr('editor');
+        this.definitionType = definitionElement.attr('type') || '';
         const lastChangedDefinition = definitionElement.attr('lastChange');
         if (lastChangedDefinition) this.lastChangedDefinition = new Date(lastChangedDefinition);
         this.definition = definitionElement.text() || '';

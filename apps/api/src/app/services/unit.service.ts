@@ -898,6 +898,7 @@ export class UnitService {
     const unitDefinition = await this.findUnitDefinitionByUnitId(unitId);
     if (unitDefinition) {
       returnUnit.definition = unitDefinition.data;
+      if (unitDefinition.type) returnUnit.definitionType = unitDefinition.type;
     }
     return returnUnit;
   }
@@ -950,13 +951,21 @@ export class UnitService {
     unitToUpdate.lastChangedDefinitionUser = userName;
 
     const unitDefinitionToUpdate = await this.findUnitDefinitionByUnitId(unitId);
+    // The type describes the definition it came with, so it is written only together with one, and
+    // a definition without a type takes the stored one away: an editor that does not report the
+    // format has just written a definition the old type may no longer describe. Without a
+    // definition (only the variables changed) neither is touched -- undefined is skipped on save.
+    const definitionType = unitDefinitionDto.definition === undefined ?
+      undefined :
+      unitDefinitionDto.definitionType || null;
 
     if (unitDefinitionToUpdate) {
       unitDefinitionToUpdate.data = unitDefinitionDto.definition;
+      unitDefinitionToUpdate.type = definitionType;
       await this.unitDefinitionsRepository.save(unitDefinitionToUpdate);
     } else {
       const newUnitDefinition = this.unitDefinitionsRepository
-        .create({ data: unitDefinitionDto.definition, unitId });
+        .create({ data: unitDefinitionDto.definition, type: definitionType, unitId });
       await this.unitDefinitionsRepository.save(newUnitDefinition);
     }
     if (unitDefinitionDto.variables) {

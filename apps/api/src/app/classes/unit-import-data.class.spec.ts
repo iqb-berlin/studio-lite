@@ -51,6 +51,33 @@ describe('UnitImportData', () => {
     expect(data.metadataFileName).toBe('folder/unit01.vomd');
   });
 
+  describe('definition type (#1368)', () => {
+    const unitXml = (definitionElement: string) => createMock<FileIo>({
+      originalname: 'unit01.xml',
+      buffer: Buffer.from(`<Unit><Metadata><Id>UNIT01</Id><Label>L</Label></Metadata>${definitionElement}</Unit>`)
+    });
+
+    it('should read the type of a referenced definition', () => {
+      const data = new UnitImportData(unitXml(
+        '<DefinitionRef player="p@1.0" type="aspect-unit-definition@4.12.0">unit01.voud</DefinitionRef>'
+      ));
+
+      expect(data.definitionType).toBe('aspect-unit-definition@4.12.0');
+    });
+
+    it('should read the type of an inline definition', () => {
+      const data = new UnitImportData(unitXml(
+        '<Definition player="p@1.0" type="aspect-unit-definition@4.12.0">{}</Definition>'
+      ));
+
+      expect(data.definitionType).toBe('aspect-unit-definition@4.12.0');
+    });
+
+    it('should leave the type empty when the file does not give one', () => {
+      expect(new UnitImportData(fileIoMock).definitionType).toBe('');
+    });
+  });
+
   it('should parse base variables correctly', () => {
     const data = new UnitImportData(fileIoMock);
 
