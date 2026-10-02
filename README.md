@@ -281,12 +281,15 @@ A branch name carries the issue it belongs to: `fix/1629-group-admin-guard`.
    only on a pull request against `develop`**, and there only the API specs and Chrome
    automatically — Firefox, Edge and the mobile viewports are manual jobs on the pipeline page.
 6. **Read the jobs, not the badge.** The badge at the top of this file is `main`'s last pipeline,
-   not yours. And in the pipeline, `test-app`, `lint-app`, `audit-app` and every e2e job are
-   `allow_failure: true`: a red unit test leaves the run green with a warning. What gates a merge
-   is `build-app`, `test-db` and `typecheck-app` — the last one deliberately, because Cypress
+   not yours. In the pipeline, every job gates a merge except `audit-app`, the `check-*` rule
+   jobs, the image scans and the manual browser jobs (Firefox, Edge and the mobile viewports),
+   which are `allow_failure: true`. Since #1657 that includes `test-app`, `lint-app` and the
+   automatic e2e jobs (`test-app-e2e-api`, `test-app-e2e-ui-admin-chrome`,
+   `test-app-e2e-ui-workspace-chrome`): a flaky spec blocks the merge just like a real regression,
+   so read the log before restarting the job. `typecheck-app` gates deliberately, because Cypress
    transpiles the e2e sources without type checking and a renamed member surfaces nowhere else
-   (#1586, #1590). `build-app` is `nx affected --base=HEAD~1`, so it builds what the last commit
-   touched, not the branch.
+   (#1586, #1590). `build-app`, `test-app` and `lint-app` run `nx affected --base=HEAD~1`, so they
+   cover what the last commit touched, not the branch.
 7. **Rebase when `develop` moves**, then force-push with `--force-with-lease`. A pipeline result
    belongs to a commit, not to a pull request.
 8. **Merge as a merge commit** once the pipeline is green.
