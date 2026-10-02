@@ -35,6 +35,7 @@ import {
   UnitDefinitionDto,
   UnitFullMetadataDto,
   UnitInListDto,
+  UnitExportContentsDto,
   UnitPropertiesDto,
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
@@ -55,6 +56,9 @@ import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import { WorkspaceService } from '../services/workspace.service';
 import { SettingService } from '../services/setting.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
+import { UnitCommentService } from '../services/unit-comment.service';
+import { UnitRichNoteService } from '../services/unit-rich-note.service';
+import { findUnitExportContents } from '../utils/unit-export-contents';
 
 /**
  * `workspaces/:workspace_id/units` -- the largest surface of the API: the units of a workspace,
@@ -77,7 +81,9 @@ export class WorkspaceUnitController {
   constructor(
     private unitService: UnitService,
     private workspaceService: WorkspaceService,
-    private settingsService: SettingService
+    private settingsService: SettingService,
+    private unitCommentService: UnitCommentService,
+    private unitRichNoteService: UnitRichNoteService
   ) {}
 
   /**
@@ -235,6 +241,27 @@ export class WorkspaceUnitController {
       return new StreamableFile(file as unknown as Uint8Array);
     }
     return this.unitService.findAllWithProperties(workspaceId);
+  }
+
+  /**
+   * For every unit of the workspace, which optional export files it would fill -- metadata, items,
+   * coding scheme, comments, rich notes. The export dialog offers a file only when one of the chosen
+   * units has content for it.
+   */
+  @Get('export-contents')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ type: [UnitExportContentsDto] })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiTags('workspace unit')
+  async findExportContents(@WorkspaceId() workspaceId: number): Promise<UnitExportContentsDto[]> {
+    return findUnitExportContents(
+      workspaceId,
+      this.unitService,
+      this.unitCommentService,
+      this.unitRichNoteService
+    );
   }
 
   @Get(':id/properties')

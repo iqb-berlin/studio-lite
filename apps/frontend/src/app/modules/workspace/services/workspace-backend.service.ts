@@ -15,6 +15,7 @@ import {
   ReviewInListDto,
   UnitDefinitionDto,
   UnitDownloadSettingsDto,
+  UnitExportContentsDto,
   UnitInListDto,
   UnitPropertiesDto,
   UnitSchemeDto,
@@ -90,6 +91,15 @@ export class WorkspaceBackendService {
       .get<UnitPropertiesDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/properties`)
       .pipe(
         catchError(() => of([]))
+      );
+  }
+
+  /** Which optional export files each unit would fill; null when the question cannot be answered. */
+  getUnitExportContents(workspaceId: number): Observable<UnitExportContentsDto[] | null> {
+    return this.http
+      .get<UnitExportContentsDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/export-contents`)
+      .pipe(
+        catchError(() => of(null))
       );
   }
 

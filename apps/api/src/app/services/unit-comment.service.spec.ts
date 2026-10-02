@@ -49,6 +49,27 @@ describe('UnitCommentService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('findUnitIdsWithComments', () => {
+    it('should answer which of the given units have comments', async () => {
+      mockRepository.find.mockResolvedValue([{ unitId: 1 }, { unitId: 1 }, { unitId: 3 }] as UnitComment[]);
+
+      const result = await service.findUnitIdsWithComments([1, 2, 3]);
+
+      expect(result).toEqual(new Set([1, 3]));
+      expect(repository.find).toHaveBeenCalledWith({
+        where: { unitId: In([1, 2, 3]) },
+        select: { unitId: true }
+      });
+    });
+
+    it('should not query for an empty list', async () => {
+      mockRepository.find.mockClear();
+
+      expect(await service.findUnitIdsWithComments([])).toEqual(new Set());
+      expect(repository.find).not.toHaveBeenCalled();
+    });
+  });
+
   describe('findOnesComments', () => {
     it('should return comments with itemUuids and vote counts', async () => {
       const unitId = 1;

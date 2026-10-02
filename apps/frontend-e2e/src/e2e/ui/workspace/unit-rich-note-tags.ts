@@ -72,7 +72,8 @@ describe('Unit Rich Notes', () => {
       .find('mat-checkbox')
       .click();
 
-    cy.get('mat-card.files mat-checkbox').eq(1).find('input').check({ force: true });
+    // the unit has a rich note, so the box is offered and already checked (#1729)
+    cy.get('[data-cy="export-file-addRichNotes"] input').should('be.enabled').and('be.checked');
 
     cy.intercept('GET', '/api/workspaces/*?download=true*').as('exportDownload');
     cy.get('[data-cy="workspace-export-unit-button"]').click({ force: true });

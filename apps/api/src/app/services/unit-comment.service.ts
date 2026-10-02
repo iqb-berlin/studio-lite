@@ -101,6 +101,16 @@ export class UnitCommentService {
           .createCommentItemConnection(unitId, itemUuid, commentId)));
   }
 
+  /** Which of the given units have at least one comment. */
+  async findUnitIdsWithComments(unitIds: number[]): Promise<Set<number>> {
+    if (!unitIds.length) return new Set();
+    const comments = await this.unitCommentsRepository.find({
+      where: { unitId: In(unitIds) },
+      select: { unitId: true }
+    });
+    return new Set(comments.map(comment => comment.unitId));
+  }
+
   async findOnesLastChangedComment(unitId: number, excludeUserId?: number): Promise<UnitCommentDto | null> {
     const whereClause: FindOptionsWhere<UnitComment> = { unitId: unitId };
     if (excludeUserId) {
