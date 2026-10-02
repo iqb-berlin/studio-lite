@@ -416,6 +416,30 @@ export class UnitService {
     return Promise.all(units.map(async unit => this.getModifiedMetadataForUnit(unit, workspace, profileCache)));
   }
 
+  /**
+   * The metadata and coding scheme of every unit of the workspace, read from the same source as the
+   * export reads them -- the metadata tables for a unit with the marker, its column otherwise -- but
+   * without the profile lookups, which only fill in `valueAsText` and decide nothing about content.
+   */
+  async findAllExportSources(
+    workspaceId: number
+  ): Promise<{ id: number; metadata: UnitMetadataValues; scheme: string }[]> {
+    const units = await this.unitsRepository.find({
+      where: { workspaceId: workspaceId },
+      select: ['id', 'metadata', 'scheme']
+    });
+    return Promise.all(units.map(async unit => {
+      const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(unit.id);
+      return {
+        id: unit.id,
+        metadata: unitMetadataToDelete ?
+          await this.findOnesStoredMetadata(unit.id) :
+          unit.metadata as UnitMetadataValues,
+        scheme: unit.scheme
+      };
+    }));
+  }
+
   private async getModifiedMetadataForUnit(
     unit: Unit,
     workspace: Workspace,
@@ -1049,11 +1073,15 @@ export class UnitService {
   }
 
   async findOnesMetadata(unitId: number): Promise<UnitFullMetadataDto> {
-    const metadata: UnitMetadataValues = {
+    const metadata = await this.findOnesStoredMetadata(unitId);
+    return await this.resolveValueAsText(metadata) as unknown as UnitFullMetadataDto;
+  }
+
+  private async findOnesStoredMetadata(unitId: number): Promise<UnitMetadataValues> {
+    return {
       profiles: await this.unitMetadataService.getAllByUnitId(unitId),
       items: await this.unitItemService
         .getAllByUnitIdWithMetadata(unitId) as unknown as UnitMetadataValues['items']
     };
-    return await this.resolveValueAsText(metadata) as unknown as UnitFullMetadataDto;
   }
 }

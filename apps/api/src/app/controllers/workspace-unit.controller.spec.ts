@@ -23,11 +23,15 @@ import { SettingService } from '../services/setting.service';
 import { WorkspaceService } from '../services/workspace.service';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import UserEntity from '../entities/user.entity';
+import { UnitCommentService } from '../services/unit-comment.service';
+import { UnitRichNoteService } from '../services/unit-rich-note.service';
 
 describe('WorkspaceUnitController', () => {
   let controller: WorkspaceUnitController;
   let unitService: UnitService;
   let workspaceService: WorkspaceService;
+  let unitCommentService: UnitCommentService;
+  let unitRichNoteService: UnitRichNoteService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -56,6 +60,14 @@ describe('WorkspaceUnitController', () => {
         {
           provide: WorkspaceUserService,
           useValue: createMock<WorkspaceUserService>()
+        },
+        {
+          provide: UnitCommentService,
+          useValue: createMock<UnitCommentService>()
+        },
+        {
+          provide: UnitRichNoteService,
+          useValue: createMock<UnitRichNoteService>()
         }
       ]
     }).compile();
@@ -63,6 +75,8 @@ describe('WorkspaceUnitController', () => {
     controller = module.get<WorkspaceUnitController>(WorkspaceUnitController);
     unitService = module.get<UnitService>(UnitService);
     workspaceService = module.get<WorkspaceService>(WorkspaceService);
+    unitCommentService = module.get<UnitCommentService>(UnitCommentService);
+    unitRichNoteService = module.get<UnitRichNoteService>(UnitRichNoteService);
   });
 
   it('should be defined', () => {
@@ -121,6 +135,29 @@ describe('WorkspaceUnitController', () => {
       expect(DownloadWorkspacesClass.getWorkspaceMetadataReport).toHaveBeenCalled();
       expect(res.set).toHaveBeenCalled();
       expect(result).toBeInstanceOf(StreamableFile);
+    });
+  });
+
+  describe('findExportContents', () => {
+    it('should answer for every unit of the workspace which optional export files it fills', async () => {
+      jest.spyOn(unitService, 'findAllExportSources').mockResolvedValue([
+        { id: 1, metadata: { profiles: [], items: [{ id: 'item1' }] }, scheme: '{}' },
+        { id: 2, metadata: null, scheme: '' }
+      ]);
+      jest.spyOn(unitCommentService, 'findUnitIdsWithComments').mockResolvedValue(new Set([2]));
+      jest.spyOn(unitRichNoteService, 'findUnitIdsWithNotes').mockResolvedValue(new Set([1]));
+
+      expect(await controller.findExportContents(7)).toEqual([
+        {
+          unitId: 1, metadata: false, items: true, codingScheme: true, comments: false, richNotes: true
+        },
+        {
+          unitId: 2, metadata: false, items: false, codingScheme: false, comments: true, richNotes: false
+        }
+      ]);
+      expect(unitService.findAllExportSources).toHaveBeenCalledWith(7);
+      expect(unitCommentService.findUnitIdsWithComments).toHaveBeenCalledWith([1, 2]);
+      expect(unitRichNoteService.findUnitIdsWithNotes).toHaveBeenCalledWith([1, 2]);
     });
   });
 

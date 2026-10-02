@@ -2039,6 +2039,20 @@ Cypress.Commands.add('importUnitsAPI', (wsId: string, zipContent: string, token:
   postUnitFiles(wsId, formData, token);
 });
 
+// Which optional export files each unit of the workspace would fill, as the export dialog asks it
+Cypress.Commands.add('getUnitExportContentsAPI', (wsId: string, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units/export-contents`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // The items of all units, as the admin view "Unit-Items" lists them
 Cypress.Commands.add('getAdminUnitItemsAPI', (token: string) => {
   const authorization = `bearer ${token}`;
