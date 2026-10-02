@@ -1173,6 +1173,7 @@ export class WorkspaceService {
       newUnitId,
       {
         definition: unitImportData.definition,
+        definitionType: unitImportData.definitionType,
         variables: unitImportData.baseVariables
       },
       null,

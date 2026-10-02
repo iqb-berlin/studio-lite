@@ -473,6 +473,24 @@ describe('UnitService', () => {
       const result = await service.findOnesDefinition(1);
       expect(result.definition).toBe('xml');
     });
+
+    it('should return the stored definition type', async () => {
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Unit);
+      unitDefinitionsRepository.findOne.mockResolvedValue(
+        { data: 'xml', type: 'aspect-unit-definition@4.12.0' } as UnitDefinition
+      );
+
+      const result = await service.findOnesDefinition(1);
+      expect(result.definitionType).toBe('aspect-unit-definition@4.12.0');
+    });
+
+    it('should leave the definition type out when none is stored', async () => {
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Unit);
+      unitDefinitionsRepository.findOne.mockResolvedValue({ data: 'xml', type: null } as UnitDefinition);
+
+      const result = await service.findOnesDefinition(1);
+      expect(result).not.toHaveProperty('definitionType');
+    });
   });
 
   describe('findOnesScheme', () => {
@@ -530,6 +548,70 @@ describe('UnitService', () => {
       expect(stored.variables).toEqual([{
         ...sentByA20Editor, type: 'string', format: 'ggb-file', page: ''
       }]);
+    });
+
+    // The type belongs to the definition it came with (#1368).
+    describe('with a definition type', () => {
+      const savedDefinition = () => unitDefinitionsRepository.save.mock.calls[0][0] as UnitDefinition;
+
+      beforeEach(() => {
+        unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
+      });
+
+      it('should store the type sent with a definition', async () => {
+        unitDefinitionsRepository.findOne.mockResolvedValue({ id: 1, type: null } as UnitDefinition);
+
+        await service.patchDefinition(
+          1,
+          { definition: 'xml', definitionType: 'aspect-unit-definition@4.12.0' },
+          'user',
+          new Date()
+        );
+
+        expect(savedDefinition().type).toBe('aspect-unit-definition@4.12.0');
+      });
+
+      it('should clear the stored type when a definition comes without one', async () => {
+        unitDefinitionsRepository.findOne.mockResolvedValue(
+          { id: 1, type: 'aspect-unit-definition@4.11.0' } as UnitDefinition
+        );
+
+        await service.patchDefinition(1, { definition: 'xml' }, 'user', new Date());
+
+        expect(savedDefinition().type).toBeNull();
+      });
+
+      it('should leave the stored type alone when only the variables change', async () => {
+        unitDefinitionsRepository.findOne.mockResolvedValue(
+          { id: 1, type: 'aspect-unit-definition@4.11.0' } as UnitDefinition
+        );
+
+        await service.patchDefinition(
+          1,
+          { variables: [], definitionType: 'aspect-unit-definition@4.12.0' },
+          'user',
+          new Date()
+        );
+
+        // undefined is what TypeORM skips on save, so the column keeps its value
+        expect(savedDefinition().type).toBeUndefined();
+      });
+
+      it('should store the type on a definition created by this call', async () => {
+        unitDefinitionsRepository.findOne.mockResolvedValue(null);
+        unitDefinitionsRepository.create.mockImplementation(entity => entity as UnitDefinition);
+
+        await service.patchDefinition(
+          1,
+          { definition: 'xml', definitionType: 'aspect-unit-definition@4.12.0' },
+          'user',
+          new Date()
+        );
+
+        expect(unitDefinitionsRepository.create).toHaveBeenCalledWith(
+          expect.objectContaining({ type: 'aspect-unit-definition@4.12.0', unitId: 1 })
+        );
+      });
     });
   });
 

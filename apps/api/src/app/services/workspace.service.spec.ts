@@ -1098,6 +1098,30 @@ describe('WorkspaceService', () => {
       );
     });
 
+    it('should hand the definition type of the index on with the definition (#1368)', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchDefinition as jest.Mock).mockResolvedValue(undefined);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          userInterface: { player: 'p', definition: 'unit01.voud', type: 'aspect-unit-definition@4.12.0' }
+        })),
+        buildFile('unit01.voud', 'application/octet-stream', '<definition/>')
+      ], user);
+
+      expect(unitService.patchDefinition).toHaveBeenCalledWith(
+        10,
+        expect.objectContaining({
+          definition: '<definition/>',
+          definitionType: 'aspect-unit-definition@4.12.0'
+        }),
+        null,
+        undefined
+      );
+    });
+
     it('should import vomd (unit-metadata@0.1) and voit (unit-items@0.2) files', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);

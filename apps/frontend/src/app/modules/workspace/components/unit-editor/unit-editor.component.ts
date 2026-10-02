@@ -123,7 +123,11 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
               if (msgData.unitDefinition) {
                 this.workspaceService
                   .getUnitDefinitionStore()
-                  ?.setData(msgData.variables, msgData.unitDefinition);
+                  ?.setData(
+                    msgData.variables,
+                    msgData.unitDefinition,
+                    typeof msgData.unitDefinitionType === 'string' ? msgData.unitDefinitionType : undefined
+                  );
                 // } else { TODO: find solution for voeGetDefinitionRequest
                 //   this.postMessageTarget.postMessage({
                 //     type: 'voeGetDefinitionRequest',
@@ -215,7 +219,8 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
               ),
               sharedParameters: this.sharedParameters
             },
-            unitDefinition: unitDef.definition ? unitDef.definition : ''
+            unitDefinition: unitDef.definition ? unitDef.definition : '',
+            ...(unitDef.definitionType && { unitDefinitionType: unitDef.definitionType })
           },
           '*'
         );

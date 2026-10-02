@@ -161,7 +161,23 @@ describe('UnitPrintPlayerComponent', () => {
       tick();
 
       expect(mockBackendService.getUnitDefinition).toHaveBeenCalledWith(1, 10);
-      expect(postStoreSpy).toHaveBeenCalledWith('test-definition');
+      expect(postStoreSpy).toHaveBeenCalledWith('test-definition', undefined);
+    }));
+
+    it('should pass the definition type on with the definition', fakeAsync(() => {
+      mockBackendService.getUnitDefinition.mockReturnValue(of({
+        definition: 'test-definition',
+        definitionType: 'aspect-unit-definition@4.12.0'
+      }));
+      const postStoreSpy = jest.spyOn(component, 'postStore');
+
+      component.workspaceId = 1;
+      component.unitId = 10;
+      component.sendChangeData();
+
+      tick();
+
+      expect(postStoreSpy).toHaveBeenCalledWith('test-definition', 'aspect-unit-definition@4.12.0');
     }));
 
     it('should handle empty definition', fakeAsync(() => {
@@ -175,7 +191,7 @@ describe('UnitPrintPlayerComponent', () => {
 
       tick();
 
-      expect(postStoreSpy).toHaveBeenCalledWith('');
+      expect(postStoreSpy).toHaveBeenCalledWith('', undefined);
     }));
 
     it('should handle null unit definition', fakeAsync(() => {
@@ -237,6 +253,28 @@ describe('UnitPrintPlayerComponent', () => {
         }),
         '*'
       );
+    });
+
+    it('should send the definition type at the top level when it is known', () => {
+      const mockWindow = { postMessage: jest.fn() };
+      component.postMessageTarget = mockWindow as never;
+      component.playerApiVersion = 6;
+
+      component.postStore('test-definition', 'aspect-unit-definition@4.12.0');
+
+      const message = mockWindow.postMessage.mock.calls[0][0];
+      expect(message.unitDefinitionType).toBe('aspect-unit-definition@4.12.0');
+      expect(message.playerConfig).not.toHaveProperty('unitDefinitionType');
+    });
+
+    it('should send no definition type when none is known', () => {
+      const mockWindow = { postMessage: jest.fn() };
+      component.postMessageTarget = mockWindow as never;
+      component.playerApiVersion = 6;
+
+      component.postStore('test-definition');
+
+      expect(mockWindow.postMessage.mock.calls[0][0]).not.toHaveProperty('unitDefinitionType');
     });
 
     it('should post message with printMode on-with-ids when printElementIds is true', () => {
