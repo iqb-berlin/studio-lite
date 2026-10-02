@@ -5,7 +5,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatCheckboxModule, MatCheckboxChange } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { BehaviorSubject, of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import {
@@ -62,7 +61,6 @@ describe('ProfilesComponent', () => {
         MatCheckboxModule,
         MatFormFieldModule,
         MatProgressSpinnerModule,
-        MatExpansionModule,
         TranslateModule.forRoot(),
         ProfilesComponent
       ],
@@ -282,7 +280,8 @@ describe('ProfilesComponent', () => {
       expect(error).toBeTruthy();
     });
 
-    it('should show expansion panel when profiles are loaded', async () => {
+    // #1549: a profile showed its name twice, as panel title and as checkbox label
+    it('shows each profile as a checkbox without a panel', async () => {
       fixture.detectChanges();
       await fixture.whenStable();
       // Wait for async subscribe callback to complete
@@ -290,13 +289,11 @@ describe('ProfilesComponent', () => {
       fixture.detectChanges();
 
       expect(component.isLoading).toBe(false);
-      expect(component.profileStoresWithProfiles.length).toBe(1);
+      expect(component.profileStoresWithProfiles[0].profiles.length).toBe(1);
 
-      const panel = fixture.debugElement.query(By.css('mat-expansion-panel'));
-      expect(panel).toBeTruthy();
-
-      const checkbox = fixture.debugElement.query(By.css('mat-checkbox'));
-      expect(checkbox).toBeTruthy();
+      expect(fixture.debugElement.query(By.css('mat-expansion-panel'))).toBeNull();
+      expect(fixture.debugElement.query(By.css('[data-cy="shared-profiles-select-profile-title"]'))).toBeNull();
+      expect(fixture.debugElement.queryAll(By.css('mat-checkbox')).length).toBe(1);
     });
   });
 });
