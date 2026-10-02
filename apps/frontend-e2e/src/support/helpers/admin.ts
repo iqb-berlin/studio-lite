@@ -78,9 +78,12 @@ export function deleteUser(user: string): void {
   cy.contains('mat-row', user)
     .find('[data-cy="admin-users-delete-user"]').click();
   cy.translate(Cypress.expose('locale')).then(json => {
-    cy.intercept('DELETE', '/api/admin/users*').as('deleteUserReq');
+    // An alias of its own per user: Cypress counts the requests of every intercept sharing an
+    // alias together, so a third deleteUser() in one hook resolved with the second one's request
+    // before its own DELETE was sent (#1754)
+    cy.intercept('DELETE', '/api/admin/users*').as(`deleteUserReq-${user}`);
     cy.clickButton(json.delete);
-    waitForSuccess('@deleteUserReq');
+    waitForSuccess(`@deleteUserReq-${user}`);
   });
 }
 
