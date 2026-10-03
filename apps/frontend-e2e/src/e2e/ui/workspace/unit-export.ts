@@ -1,3 +1,4 @@
+import { Interception } from 'cypress/types/net-stubbing';
 import {
   primaryWorkspace,
   exportUnits
@@ -80,20 +81,19 @@ describe('Workspace Unit Export & Reports', () => {
     });
   });
 
-  it('export dialog definition checkbox can be toggled', () => {
-    cy.visitWs(primaryWorkspace);
+  // A freshly created unit has neither comments nor rich notes, so the dialog offers neither (#1729)
+  it('export dialog locks the files the chosen units have no content for', () => {
+    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
     cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
-    cy.get('mat-card.files mat-checkbox, studio-lite-export-unit-file-config mat-checkbox')
-      .first()
-      .find('input')
-      .then($chk => {
-        const wasChecked = $chk.prop('checked');
-        cy.wrap($chk).click({ force: true });
-        cy.wrap($chk).should(wasChecked ? 'not.be.checked' : 'be.checked');
-      });
+    selectListUnits([exportUnits.exportUnit1.shortname]);
+    cy.get('[data-cy="export-file-addComments"] input').should('be.disabled').and('not.be.checked');
+    cy.get('[data-cy="export-file-addRichNotes"] input').should('be.disabled').and('not.be.checked');
     cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('studio-lite-export-unit-file-config')
+        .should('contain.text', json['unit-download']['no-comments'])
+        .and('contain.text', json['unit-download']['no-rich-notes']);
       cy.clickDialogButton(json.cancel || json.close);
     });
   });
@@ -122,19 +122,22 @@ describe('Workspace Unit Export & Reports', () => {
     waitForSuccess('@downloadJsonReq');
   });
 
-  it('exports selected units with comments and rich notes options toggled', () => {
+  it('exports selected units with the locked files left out', () => {
     ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
     cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
     selectListUnits([exportUnits.exportUnit1.shortname]);
-
-    cy.get('studio-lite-export-unit-file-config mat-checkbox').eq(0).click({ force: true });
-    cy.get('studio-lite-export-unit-file-config mat-checkbox').eq(1).click({ force: true });
+    cy.get('mat-radio-button[value="xml"]').click();
+    cy.get('[data-cy="export-file-addComments"] input').should('be.disabled');
 
     cy.intercept('GET', '/api/workspaces/*?download=true*').as('downloadFilteredReq');
     cy.get('[data-cy="workspace-export-unit-button"]').click();
     waitForSuccess('@downloadFilteredReq');
+    cy.get<Interception>('@downloadFilteredReq').then(interception => {
+      const settings = JSON.parse(new URL(interception.request.url).searchParams.get('settings') ?? '{}');
+      expect(settings).to.include({ addComments: false, addRichNotes: false });
+    });
   });
 
   it('displays metadata report', () => {

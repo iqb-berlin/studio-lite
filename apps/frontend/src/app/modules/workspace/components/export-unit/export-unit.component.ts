@@ -19,6 +19,7 @@ import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.co
 import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export-unit-file-config.component';
 import { mapBookletConfigToModernKeys, normalizeLegacyBookletConfig } from '../../utils/booklet-config-export.utils';
 import { HasTakersPipe } from '../../pipes/has-takers.pipe';
+import { ExportFileSelection } from '../../utils/export-file-options.utils';
 
 @Component({
   templateUrl: './export-unit.component.html',
@@ -64,5 +65,13 @@ export class ExportUnitComponent {
 
   setBookletConfigSettings(booklet: BookletConfigDto): void {
     this.unitExportSettings.bookletSettings = mapBookletConfigToModernKeys(booklet);
+  }
+
+  // addMetadata, addItems and addCodingScheme stay unset until the file config knows what the
+  // units hold -- unset means "add" to the API, as before these files became optional. Merged in
+  // place: the selection arrives during change detection, and a new settings object would change a
+  // binding that was already checked.
+  setFileSelection(selection: ExportFileSelection): void {
+    Object.assign(this.unitExportSettings, selection);
   }
 }

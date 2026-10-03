@@ -13,9 +13,9 @@
       <div class="fx-flex-row-50 settings">
         <studio-lite-export-unit-file-config
           [(exportFormat)]="unitExportSettings.exportFormat"
+          [selectedUnitIds]="unitExportSettings.unitIdList"
           [(addPlayers)]="unitExportSettings.addPlayers"
-          [(addComments)]="unitExportSettings.addComments"
-          [(addRichNotes)]="unitExportSettings.addRichNotes"
+          (fileSelectionChange)="setFileSelection($event)"
           (unitsWithOutPlayerChange)="unitSelectionTable.disabled = $event">
         </studio-lite-export-unit-file-config>
         <mat-accordion multi>
