@@ -8,14 +8,19 @@ import { clickIndexTabAdmin, clickIndexTabWsgAdmin } from './navigation';
 import { editInput, waitForSuccess } from './common';
 
 /**
- * Adds the first admin user and logs in
+ * Adds the first admin user and logs in. Waits until the app has loaded its config and shows that
+ * there are no users yet, before the login form is used.
  * @example
  * addFirstUser();
  */
 export function addFirstUser(): void {
   cy.visit('/');
-  cy.login(Cypress.expose('username'), Cypress.expose('password'));
   cy.translate(Cypress.expose('locale')).then(json => {
+    // Until the config has arrived the app assumes there are users, and a login sent then goes to
+    // /api/login instead of /api/init-login. The warning appears once the config says there are
+    // none (#1754).
+    cy.contains(json.home['no-user'].trim()).should('be.visible');
+    cy.login(Cypress.expose('username'), Cypress.expose('password'));
     cy.clickButtonWithResponseCheck(
       json.home.login,
       [201],
