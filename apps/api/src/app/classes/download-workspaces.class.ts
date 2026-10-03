@@ -2,22 +2,15 @@
 // import in download-docx.class.ts.
 import Excel from 'exceljs';
 import {
-  UnitPropertiesDto,
-  CodebookUnitDto,
   CodeBookContentSetting,
   MissingsProfilesDto
 } from '@studio-lite-lib/api-dto';
-import { ToTextFactory, CodeAsText } from '@iqb/responses';
+import { BadRequestException } from '@nestjs/common';
+import { CodebookGenerator, CodebookGenerationError } from '@iqb/ngx-coding-components/codebook-generator';
+import type { UnitPropertiesForCodebook } from '@iqb/ngx-coding-components/codebook-models';
 import { isCurrentFromOrder } from '@studio-lite/shared-code';
-import {
-  VariableCodingData,
-  CodeData
-} from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { CodingScheme } from '@iqbspecs/coding-scheme';
-import { Logger } from '@nestjs/common';
 import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
-import { DownloadDocx } from './download-docx.class';
 import { SettingService } from '../services/setting.service';
 
 interface WorkspaceData {
@@ -38,21 +31,6 @@ type Missing = {
   description: string;
   code: number;
 };
-
-interface BookVariable {
-  id: string;
-  label: string;
-  sourceType: string;
-  generalInstruction: string;
-  codes: CodeInfo[];
-}
-
-interface CodeInfo {
-  id: string;
-  label: string;
-  score?: string;
-  description: string;
-}
 
 export class DownloadWorkspacesClass {
   static setUnitsItemsDataRows(units) {
@@ -188,42 +166,38 @@ export class DownloadWorkspacesClass {
     settingsService: SettingService,
     contentSetting: CodeBookContentSetting,
     unitList: number[]
-  ): Promise<Buffer | []> {
+  ): Promise<Buffer> {
     const units = await unitService.findAllWithProperties(workspaceId);
     const selectedUnits = units.filter(unit => unitList.includes(unit.id));
     const profiles = await settingsService.findMissingsProfiles();
     const missings = profiles.length ?
       this.getProfileMissings(profiles, contentSetting.missingsProfile) :
       [];
-    const codebook: CodebookUnitDto[] = selectedUnits.map(
-      (unit: UnitPropertiesDto) => DownloadWorkspacesClass.getCodeBookDataForUnit(
-        unit,
-        contentSetting,
-        missings
-      )
-    );
-    if (codebook.length === 0) {
-      const logger = new Logger(DownloadWorkspacesClass.name);
-      logger.warn(
-        `Can not create codebook for units in workspace ${workspaceId} with unit ids ${unitList}`
-      );
-    }
-    if (contentSetting.exportFormat === 'docx') {
-      return new Promise(resolve => {
-        resolve(DownloadDocx.getDocXCodebook(codebook, contentSetting));
-      });
-    }
-
-    return new Promise(resolve => {
-      const noItemsCodebook = codebook.map((unit: CodebookUnitDto) => ({
+    const normalizedUnits: UnitPropertiesForCodebook[] = selectedUnits.map(unit => {
+      // Metadata stores the source ID; documents display the coding alias.
+      let aliases = new Map<string, string>();
+      try {
+        const schema = JSON.parse(unit.scheme || '{}');
+        aliases = new Map((schema.variableCodings || []).map((variable: { id: string; alias?: string }) => [variable.id, variable.alias || variable.id]));
+      } catch { /* The shared generator reports malformed schemas with the unit key. */ }
+      return {
+        id: unit.id,
         key: unit.key,
         name: unit.name,
-        variables: unit.variables,
-        missings: unit.missings
-      }));
-      const data = JSON.stringify(noItemsCodebook);
-      resolve(Buffer.from(data, 'utf-8'));
+        scheme: unit.scheme || undefined,
+        metadata: {
+          items: (unit.metadata?.items || []).filter(item => item.id && item.variableId)
+            .map(item => ({ id: item.id, variableId: aliases.get(item.variableId) || item.variableId }))
+        }
+      };
     });
+    try {
+      const blob = await CodebookGenerator.generateCodebook(normalizedUnits, contentSetting, missings);
+      return Buffer.from(await blob.arrayBuffer());
+    } catch (error) {
+      if (error instanceof CodebookGenerationError) throw new BadRequestException(error.message);
+      throw error;
+    }
   }
 
   private static getProfileMissings(
@@ -242,202 +216,6 @@ export class DownloadWorkspacesClass {
       missings = [];
     }
     return missings;
-  }
-
-  private static isClosed(variableCodingData: VariableCodingData): boolean {
-    return variableCodingData.codes.some(
-      codeData => codeData.type === 'RESIDUAL_AUTO' ||
-        codeData.type === 'INTENDED_INCOMPLETE'
-    );
-  }
-
-  private static isManual(variableCodingData: VariableCodingData): boolean {
-    return variableCodingData.codes.some(
-      codeData => codeData.manualInstruction
-    );
-  }
-
-  private static getCodeInfo(
-    code: CodeData,
-    contentSetting: CodeBookContentSetting
-  ): CodeInfo {
-    const codeInfo: CodeInfo = {
-      id: `${code.id}`,
-      label: '',
-      description: '<p>Kodierschema mit Schemer Version ab 1.5 erzeugen!</p>'
-    };
-    if (contentSetting.showScore) codeInfo.score = '';
-    return codeInfo;
-  }
-
-  private static getCodeInfoFromCodeAsText(
-    code: CodeData,
-    contentSetting: CodeBookContentSetting
-  ): CodeInfo {
-    const codeAsText = ToTextFactory.codeAsText(code, 'SIMPLE');
-    const rulesDescription =
-      contentSetting.hasOnlyManualCoding && !contentSetting.hasClosedVars ?
-        '' :
-        DownloadWorkspacesClass.getRulesDescription(codeAsText, code);
-    const codeInfo: CodeInfo = {
-      id: `${code.id}`,
-      label: contentSetting.codeLabelToUpper ?
-        codeAsText.label.toUpperCase() :
-        codeAsText.label,
-      description: `${rulesDescription}${code.manualInstruction}`
-    };
-    if (contentSetting.showScore) codeInfo.score = codeAsText.score.toString();
-    return codeInfo;
-  }
-
-  private static getRulesDescription(
-    codeAsText: CodeAsText,
-    code: CodeData
-  ): string {
-    let rulesDescription = '';
-    if (codeAsText.ruleSetDescriptions) {
-      codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
-        if (ruleSetDescription !== 'Keine Regeln definiert.') {
-          rulesDescription += `<p>${ruleSetDescription}</p>`;
-        } else if (code.manualInstruction === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
-      });
-    }
-    return rulesDescription;
-  }
-
-  private static getBaseOrDerivedBookVariable(
-    variableCoding: VariableCodingData,
-    contentSetting: CodeBookContentSetting
-  ): BookVariable | null {
-    const codes: CodeInfo[] = DownloadWorkspacesClass.getCodes(
-      variableCoding.codes,
-      contentSetting
-    );
-    const isDerived: boolean =
-      variableCoding.sourceType !== 'BASE' &&
-      variableCoding.sourceType !== 'BASE_NO_VALUE';
-    if (!isDerived || contentSetting.hasDerivedVars) {
-      return DownloadWorkspacesClass.getManualOrClosedCodedBookVariable(
-        contentSetting,
-        codes,
-        variableCoding
-      );
-    }
-    return null;
-  }
-
-  private static getCodes(
-    codes: CodeData[],
-    contentSetting: CodeBookContentSetting
-  ): CodeInfo[] {
-    return codes.map(code => {
-      // Catch schemer version <1.5
-      if (!Object.prototype.hasOwnProperty.call(code, 'rules')) {
-        return DownloadWorkspacesClass.getCodeInfoFromCodeAsText(
-          code,
-          contentSetting
-        );
-      }
-      return DownloadWorkspacesClass.getCodeInfo(code, contentSetting);
-    });
-  }
-
-  private static getManualOrClosedCodedBookVariable(
-    contentSetting: CodeBookContentSetting,
-    codes: CodeInfo[],
-    variableCoding: VariableCodingData
-  ): BookVariable | null {
-    const isClosed = DownloadWorkspacesClass.isClosed(variableCoding);
-    const isManual = DownloadWorkspacesClass.isManual(variableCoding);
-
-    const filterManual = contentSetting.hasOnlyManualCoding;
-    const filterClosed = contentSetting.hasClosedVars;
-
-    let manualMatches = isManual;
-    const closedMatches = isClosed;
-
-    if (filterManual && !filterClosed) {
-      manualMatches = isManual && !isClosed;
-    }
-
-    if (filterManual || filterClosed) {
-      const matches = (filterManual && manualMatches) || (filterClosed && closedMatches);
-      if (!matches) return null;
-    } else if (contentSetting.hasOnlyVarsWithCodes) {
-      if (!isManual && !isClosed) return null;
-    }
-
-    return DownloadWorkspacesClass.getBookVariable(
-      contentSetting,
-      codes,
-      variableCoding
-    );
-  }
-
-  private static getBookVariable(
-    contentSetting: CodeBookContentSetting,
-    codes: CodeInfo[],
-    variableCoding: VariableCodingData
-  ): BookVariable {
-    return {
-      id: variableCoding.alias || variableCoding.id,
-      label: variableCoding.label,
-      sourceType: variableCoding.sourceType,
-      generalInstruction: contentSetting.hasGeneralInstructions ?
-        variableCoding.manualInstruction :
-        '',
-      codes: codes
-    };
-  }
-
-  private static getCodeBookDataForUnit(
-    unit: UnitPropertiesDto,
-    contentSetting: CodeBookContentSetting,
-    missings: Missing[]
-  ): CodebookUnitDto {
-    const parsedScheme = unit.scheme ? new CodingScheme(unit.scheme) : null;
-    const variableCodings = parsedScheme?.variableCodings || [];
-    const bookVariables = DownloadWorkspacesClass.getBookVariables(
-      variableCodings,
-      contentSetting
-    );
-    return {
-      key: unit.key,
-      name: unit.name,
-      variables: DownloadWorkspacesClass.getSortedBookVariables(
-        bookVariables.filter(v => v.sourceType !== 'BASE_NO_VALUE')
-      ),
-      missings: missings,
-      items: unit.metadata.items
-    };
-  }
-
-  private static getBookVariables(
-    variableCodings: VariableCodingData[],
-    contentSetting: CodeBookContentSetting
-  ): BookVariable[] {
-    return variableCodings.reduce(
-      (bookVariables: BookVariable[], variableCoding) => {
-        const bookVariable =
-          DownloadWorkspacesClass.getBaseOrDerivedBookVariable(
-            variableCoding,
-            contentSetting
-          );
-        if (bookVariable) bookVariables.push(bookVariable);
-        return bookVariables;
-      },
-      []
-    );
-  }
-
-  private static getSortedBookVariables(
-    bookVariables: BookVariable[]
-  ): BookVariable[] {
-    return bookVariables.sort((a, b) => {
-      if (a.id < b.id) return -1;
-      if (a.id > b.id) return 1;
-      return 0;
-    });
   }
 
   static async getWorkspaceReport(
