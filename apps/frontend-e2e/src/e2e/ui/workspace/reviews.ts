@@ -22,6 +22,7 @@ import {
   modifyReviewUnits,
   goToReviewAdmin,
   saveReviewConfig,
+  selectReviewInAdmin,
   waitForSuccess
 } from '../../../support/helpers';
 import { grantRemovePrivilegeAtWs } from '../../../support/helpers/group-admin';
@@ -36,7 +37,7 @@ describe('Unit Reviews', () => {
 
     // Re-configure to set booklet and review settings
     goToReviewAdmin();
-    cy.contains('mat-row', review).click();
+    selectReviewInAdmin(review);
 
     cy.translate(Cypress.expose('locale')).then(json => {
       // Set Review Configuration
@@ -310,14 +311,8 @@ describe('Unit Reviews', () => {
     loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
     cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
-    cy.intercept('GET', '/api/workspaces/*/reviews/*').as('getReviewData');
-    cy.contains('mat-row', review).click();
-    cy.wait('@getReviewData').then(interception => {
-      const reviewLink = interception.response?.body.link;
-
-      // set a password for the review; wait until the async review data
-      // arrived and the config form re-rendered, otherwise typing races
-      // against the form being replaced
+    selectReviewInAdmin(review).then(({ link: reviewLink }) => {
+      // set a password for the review
       cy.translate(Cypress.expose('locale')).then(json => {
         cy.get(`input[placeholder="${json.workspace['review-password']}"]`).should('be.visible');
         cy.get(`input[placeholder="${json.workspace['review-password']}"]`).clear();
@@ -366,9 +361,7 @@ describe('Unit Reviews', () => {
     createReview(codingReviewName, ['M6_AK0011', 'M6_AK0012']);
 
     goToReviewAdmin();
-    cy.intercept('GET', '/api/workspaces/*/reviews/*').as('getReviewConfigData');
-    cy.contains('mat-row', codingReviewName).click();
-    cy.wait('@getReviewConfigData');
+    selectReviewInAdmin(codingReviewName);
 
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.get('studio-lite-review-config').within(() => {

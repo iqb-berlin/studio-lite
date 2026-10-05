@@ -11,6 +11,7 @@
       <mat-label>{{ 'workspace.review-name' | translate }}</mat-label>
       <input matInput
              required
+             data-cy="workspace-review-config-name"
              [placeholder]="'workspace.review-name' | translate"
              [(ngModel)]="name"
              [disabled]="!selectedReviewId"
