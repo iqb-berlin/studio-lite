@@ -88,6 +88,11 @@ export class UnitService {
     return unit;
   }
 
+  /** Whether the unit is in the workspace -- false as well for a unit that does not exist. */
+  async isInWorkspace(unitId: number, workspaceId: number): Promise<boolean> {
+    return this.unitsRepository.exists({ where: { id: unitId, workspaceId: workspaceId } });
+  }
+
   async getUnitIdsByWorkspaceId(workspaceId: number): Promise<number[]> {
     const units = await this.unitsRepository
       .find({

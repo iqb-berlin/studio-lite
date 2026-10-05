@@ -4,7 +4,6 @@ import {
 import { UnitCommentService } from '../services/unit-comment.service';
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
-import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-found.exception';
 
 /**
  * A comment may be deleted by whoever wrote it, and by whoever administers the workspace it is in --
@@ -16,6 +15,9 @@ import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-fou
  * expected to clear a discussion up.
  *
  * A review session passes neither half -- its comments carry no user id and it administers nothing.
+ *
+ * Whether the comment belongs to the unit and the workspace in the route is not asked here but by
+ * {@link CommentInUnitGuard}, which the delete route carries after this one.
  */
 @Injectable()
 export class CommentDeleteGuard implements CanActivate {
@@ -30,13 +32,9 @@ export class CommentDeleteGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const userId = Number(req.user?.id) || 0;
     const commentId = Number(req.params.id ?? req.params.comment_id) || 0;
-    const unitId = Number(req.params.unit_id) || 0;
     if (!userId || !commentId) throw new ForbiddenException();
 
     const comment = await this.unitCommentService.findOneComment(commentId);
-    if (unitId && comment.unitId !== unitId) {
-      throw new UnitCommentNotFoundException(commentId, 'DELETE');
-    }
 
     if (comment.userId === userId) return true;
 
