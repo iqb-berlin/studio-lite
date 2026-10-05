@@ -507,11 +507,9 @@ describe('Unit Reviews', () => {
         cy.get('mat-dialog-container').within(() => {
           // Without a user, a comment needs a name; the editor appears once there is one
           cy.get('studio-lite-comments').should('not.exist');
-          // Set at once, not typed: the editor appears with the first letter and takes the focus, so
-          // the rest of a typed name would land in the comment (#1785)
-          cy.get(`input[placeholder="${json.review['enter-comment-name']}"]`)
-            .invoke('val', visitorName)
-            .trigger('input');
+          // Typed as a visitor types it: the editor appears with the first letter, and once took the
+          // focus, so that the rest of the name went into the comment (#1785)
+          cy.get(`input[placeholder="${json.review['enter-comment-name']}"]`).type(visitorName);
           cy.get('tiptap-editor').should('be.visible').type(commentText);
           cy.contains('button', 'send').click({ force: true });
         });
@@ -547,6 +545,26 @@ describe('Unit Reviews', () => {
           json.comment['vote-needs-account']
         );
         cy.get('mat-dialog-container').within(() => {
+          cy.contains('button', json.dialogs.close).click();
+        });
+      });
+      cy.get('mat-dialog-container').should('not.exist');
+    });
+
+    it('keeps a kept name in its field while it is typed anew', () => {
+      const newName = 'Andere Person';
+      openCommentDialog();
+      cy.translate(Cypress.expose('locale')).then(json => {
+        cy.get('mat-dialog-container').within(() => {
+          // With the name kept, the editor is ready at once and has the focus
+          cy.focused().should('have.class', 'ProseMirror');
+          // Cleared, the editor disappears; it appears again with the first letter, and took the focus
+          // there, so that the rest of the name went into the comment (#1785)
+          cy.get(`input[placeholder="${json.review['enter-comment-name']}"]`)
+            .clear()
+            .type(newName)
+            .should('have.value', newName);
+          cy.get('tiptap-editor .ProseMirror').should('have.text', '');
           cy.contains('button', json.dialogs.close).click();
         });
       });

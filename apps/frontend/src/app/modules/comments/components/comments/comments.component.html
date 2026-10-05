@@ -69,6 +69,7 @@
   <div class="new-comment">
     <studio-lite-comment-editor
       submitLabel="comments.send-comment"
+      [autoFocus]="focusEditor"
       [unitItems]="unitItems"
       [placeholder]="'comments.write-comment' | translate"
       (handleSubmit)="addComment({ text: $event.text, parentId: null, items: $event.items })">
