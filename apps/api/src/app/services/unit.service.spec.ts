@@ -6,7 +6,7 @@ import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
   CreateUnitDto,
-  UnitItemWithMetadataDto,
+  UnitItemDto,
   UnitMetadataDto,
   UnitMetadataValues,
   UnitPropertiesDto,
@@ -26,7 +26,6 @@ import { UnitItemService } from './unit-item.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { MetadataProfileService } from './metadata-profile.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
-import UnitMetadataToDelete from '../entities/unit-metadata-to-delete.entity';
 
 describe('UnitService', () => {
   let service: UnitService;
@@ -231,7 +230,9 @@ describe('UnitService', () => {
     it('reads the metadata column of an unmarked unit without resolving profiles', async () => {
       const metadata = { profiles: [{ profileId: 'p', entries: [] }], items: [] };
       unitsRepository.find.mockResolvedValue([{ id: 1, metadata, scheme: '{}' } as unknown as Unit]);
-      unitMetadataToDeleteService.getOneByUnit.mockResolvedValue(undefined);
+      unitMetadataToDeleteService.findMarkedUnitIds.mockResolvedValue(new Set());
+      unitMetadataService.getAllByUnitIds.mockResolvedValue([]);
+      unitItemService.getAllByUnitIds.mockResolvedValue([]);
 
       const result = await service.findAllExportSources(4);
 
@@ -243,21 +244,28 @@ describe('UnitService', () => {
       expect(metadataProfileService.getStoredMetadataProfileFromDb).not.toHaveBeenCalled();
     });
 
-    it('reads the metadata tables of a marked unit, as the export does', async () => {
-      unitsRepository.find.mockResolvedValue([{ id: 2, metadata: { stale: true }, scheme: '' } as unknown as Unit]);
-      unitMetadataToDeleteService.getOneByUnit.mockResolvedValue({ unitId: 2 } as UnitMetadataToDelete);
-      unitMetadataService.getAllByUnitId.mockResolvedValue([{ profileId: 'p' } as UnitMetadataDto]);
-      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([{ id: 'item1' } as UnitItemWithMetadataDto]);
+    it('reads the metadata tables of the marked units, as the export does, in one query each', async () => {
+      unitsRepository.find.mockResolvedValue([
+        { id: 2, metadata: { stale: true }, scheme: '' },
+        { id: 3, metadata: { stale: true }, scheme: '' },
+        { id: 5, metadata: { profiles: [] }, scheme: '' }
+      ] as unknown as Unit[]);
+      unitMetadataToDeleteService.findMarkedUnitIds.mockResolvedValue(new Set([2, 3]));
+      unitMetadataService.getAllByUnitIds.mockResolvedValue([{ unitId: 2, profileId: 'p' } as UnitMetadataDto]);
+      unitItemService.getAllByUnitIds.mockResolvedValue([{ unitId: 3, id: 'item1' } as UnitItemDto]);
 
       const result = await service.findAllExportSources(4);
 
-      expect(result).toEqual([{
-        id: 2,
-        metadata: { profiles: [{ profileId: 'p' }], items: [{ id: 'item1' }] },
-        scheme: ''
-      }]);
-      expect(unitMetadataService.getAllByUnitId).toHaveBeenCalledWith(2);
-      expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalledWith(2);
+      expect(result).toEqual([
+        { id: 2, metadata: { profiles: [{ unitId: 2, profileId: 'p' }], items: [] }, scheme: '' },
+        { id: 3, metadata: { profiles: [], items: [{ unitId: 3, id: 'item1' }] }, scheme: '' },
+        { id: 5, metadata: { profiles: [] }, scheme: '' }
+      ]);
+      expect(unitMetadataToDeleteService.findMarkedUnitIds).toHaveBeenCalledWith([2, 3, 5]);
+      expect(unitMetadataService.getAllByUnitIds).toHaveBeenCalledWith([2, 3]);
+      expect(unitItemService.getAllByUnitIds).toHaveBeenCalledWith([2, 3]);
+      expect(unitMetadataToDeleteService.getOneByUnit).not.toHaveBeenCalled();
+      expect(unitItemService.getAllByUnitIdWithMetadata).not.toHaveBeenCalled();
     });
   });
 

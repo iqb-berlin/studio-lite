@@ -418,8 +418,12 @@ export class UnitService {
 
   /**
    * The metadata and coding scheme of every unit of the workspace, read from the same source as the
-   * export reads them -- the metadata tables for a unit with the marker, its column otherwise -- but
-   * without the profile lookups, which only fill in `valueAsText` and decide nothing about content.
+   * export reads them -- the metadata tables for a unit with the marker, its column otherwise.
+   *
+   * Only what decides content is read: the unit-level profiles and the items themselves, not the
+   * items' own profiles and not the profile lookups that fill in `valueAsText`. Four queries for the
+   * whole workspace, so that opening the export dialog does not fire a burst of queries per unit
+   * next to the properties request it already makes.
    */
   async findAllExportSources(
     workspaceId: number
@@ -428,15 +432,22 @@ export class UnitService {
       where: { workspaceId: workspaceId },
       select: ['id', 'metadata', 'scheme']
     });
-    return Promise.all(units.map(async unit => {
-      const unitMetadataToDelete = await this.unitMetadataToDeleteService.getOneByUnit(unit.id);
-      return {
-        id: unit.id,
-        metadata: unitMetadataToDelete ?
-          await this.findOnesStoredMetadata(unit.id) :
-          unit.metadata as UnitMetadataValues,
-        scheme: unit.scheme
-      };
+    const markedUnitIds = await this.unitMetadataToDeleteService
+      .findMarkedUnitIds(units.map(unit => unit.id));
+    const marked = [...markedUnitIds];
+    const [profiles, items] = await Promise.all([
+      this.unitMetadataService.getAllByUnitIds(marked),
+      this.unitItemService.getAllByUnitIds(marked)
+    ]);
+    return units.map(unit => ({
+      id: unit.id,
+      metadata: markedUnitIds.has(unit.id) ?
+        {
+          profiles: profiles.filter(profile => profile.unitId === unit.id),
+          items: items.filter(item => item.unitId === unit.id) as unknown as UnitMetadataValues['items']
+        } :
+        unit.metadata as UnitMetadataValues,
+      scheme: unit.scheme
     }));
   }
 
@@ -1073,15 +1084,11 @@ export class UnitService {
   }
 
   async findOnesMetadata(unitId: number): Promise<UnitFullMetadataDto> {
-    const metadata = await this.findOnesStoredMetadata(unitId);
-    return await this.resolveValueAsText(metadata) as unknown as UnitFullMetadataDto;
-  }
-
-  private async findOnesStoredMetadata(unitId: number): Promise<UnitMetadataValues> {
-    return {
+    const metadata: UnitMetadataValues = {
       profiles: await this.unitMetadataService.getAllByUnitId(unitId),
       items: await this.unitItemService
         .getAllByUnitIdWithMetadata(unitId) as unknown as UnitMetadataValues['items']
     };
+    return await this.resolveValueAsText(metadata) as unknown as UnitFullMetadataDto;
   }
 }
