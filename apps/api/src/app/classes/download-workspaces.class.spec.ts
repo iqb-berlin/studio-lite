@@ -1,4 +1,6 @@
 import { createMock } from '@golevelup/ts-jest';
+import AdmZip from 'adm-zip';
+import { load } from 'cheerio';
 // `unstable_mockModule` is missing from the global `jest` object's type, so it comes from here.
 // It is aliased because the global `jest` -- used for `jest.fn()` below -- types its mocks
 // loosely, and importing over that name would make every `mockResolvedValue` a type error.
@@ -225,6 +227,41 @@ describe('DownloadWorkspacesClass', () => {
         ]);
       }
     );
+
+    it.each([
+      {
+        name: 'direct list instructions',
+        instruction: '<ul><li>Erstes Kriterium</li><li>Zweites Kriterium</li></ul>',
+        ruleSets: [],
+        expected: ['Erstes Kriterium', 'Zweites Kriterium']
+      },
+      {
+        name: 'plain instructions after generated rule paragraphs',
+        instruction: 'Manuelle Instruktion',
+        ruleSets: [{ rules: [{ method: 'MATCH', parameters: ['ABC'] }], ruleOperatorAnd: true }],
+        expected: ['ABC', 'Manuelle Instruktion']
+      }
+    ])('retains $name in complete DOCX exports', async ({ instruction, ruleSets, expected }) => {
+      const units = createMock<UnitService>();
+      const settings = createMock<SettingService>();
+      const parsed = JSON.parse(scheme);
+      parsed.variableCodings[0].codes = [{
+        ...parsed.variableCodings[0].codes[0], manualInstruction: instruction, ruleSets
+      }];
+      units.findAllWithProperties.mockResolvedValue([{
+        id: 1, key: 'U', name: 'Unit', scheme: JSON.stringify(parsed), metadata: { items: [] }
+      }] as UnitPropertiesDto[]);
+      settings.findMissingsProfiles.mockResolvedValue([]);
+      const result = await DownloadWorkspacesClass.getWorkspaceCodingBook(
+        1, units, settings, { ...options, exportFormat: 'docx', hasClosedVars: true }, [1]
+      );
+      const $ = load(new AdmZip(result).readAsText('word/document.xml'), { xml: true });
+      const paragraphs = $('w\\:tr').first().children('w\\:tc').last()
+        .find('w\\:p')
+        .toArray()
+        .map(paragraph => $(paragraph).find('w\\:t').text());
+      expect(paragraphs).toEqual(expected);
+    });
 
     it('returns a real DOCX for an empty selection', async () => {
       const units = createMock<UnitService>(); const settings = createMock<SettingService>();
