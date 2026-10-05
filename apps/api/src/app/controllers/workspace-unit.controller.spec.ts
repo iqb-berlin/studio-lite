@@ -25,6 +25,12 @@ import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import UserEntity from '../entities/user.entity';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitRichNoteService } from '../services/unit-rich-note.service';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { WorkspaceGuard } from '../guards/workspace.guard';
+import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
+import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
+import { UnitsInWorkspaceGuard } from '../guards/units-in-workspace.guard';
+import { QueryUnitsInWorkspaceGuard } from '../guards/query-units-in-workspace.guard';
 
 describe('WorkspaceUnitController', () => {
   let controller: WorkspaceUnitController;
@@ -81,6 +87,35 @@ describe('WorkspaceUnitController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  // The access guards ask about the workspace in the path alone; the unit has to be held to it
+  // before anything else is asked about the unit (#1775).
+  it.each([
+    'findOnesProperties', 'findOnesMetadata', 'findOnesDefinition', 'findOnesScheme',
+    'patchUnitProperties', 'patchDefinition', 'patchScheme'
+  ] as const)('should hold the unit of %s to the workspace in its path', method => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype[method]).slice(0, 3))
+      .toEqual([JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard]);
+  });
+
+  it('should hold the unit of removeUnit to the workspace in its path, after the group admin', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype.removeUnit))
+      .toEqual([JwtAuthGuard, IsWorkspaceGroupAdminGuard, UnitInWorkspaceGuard]);
+  });
+
+  it.each(['moveUnits', 'patchDropBoxHistory'] as const)(
+    'should hold the units in the body of %s to the workspace in its path',
+    method => {
+      expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype[method]).slice(0, 3))
+        .toEqual([JwtAuthGuard, WorkspaceGuard, UnitsInWorkspaceGuard]);
+    }
+  );
+
+  // remove deletes the units of the query; a guard that read the body could be shown other units.
+  it('should hold the units in the query of remove to the workspace in its path', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype.remove).slice(0, 3))
+      .toEqual([JwtAuthGuard, WorkspaceGuard, QueryUnitsInWorkspaceGuard]);
   });
 
   describe('findAll', () => {

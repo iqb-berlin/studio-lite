@@ -736,8 +736,8 @@ describe('Review API tests', () => {
     // then also leave the review's navigation: listed there, it failed as soon as a reviewer opened
     // it. Its entry stays, so it is back in the review once it returns.
     describe('a unit moved away and back', () => {
-      // unit4 goes back to ws1 even if the test fails halfway; moving it where it already is
-      // answers 200 without changing anything (see 38).
+      // unit4 goes back to ws1 even if the test fails halfway. If it is back already, the move out
+      // of ws2 is refused with a 404 (#1775) and changes nothing.
       after(() => {
         cy.moveToAPI(
           Cypress.expose(ws2.id),

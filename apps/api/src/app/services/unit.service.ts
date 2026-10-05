@@ -93,6 +93,18 @@ export class UnitService {
     return this.unitsRepository.exists({ where: { id: unitId, workspaceId: workspaceId } });
   }
 
+  /** Those of the units that are not in the workspace -- unknown ids among them. Empty when all are. */
+  async idsNotInWorkspace(unitIds: number[], workspaceId: number): Promise<number[]> {
+    const distinctIds = [...new Set(unitIds)];
+    if (distinctIds.length === 0) return [];
+    const found = await this.unitsRepository.find({
+      where: { id: In(distinctIds), workspaceId: workspaceId },
+      select: ['id']
+    });
+    const foundIds = new Set(found.map(unit => unit.id));
+    return distinctIds.filter(id => !foundIds.has(id));
+  }
+
   async getUnitIdsByWorkspaceId(workspaceId: number): Promise<number[]> {
     const units = await this.unitsRepository
       .find({

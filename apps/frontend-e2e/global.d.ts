@@ -104,6 +104,7 @@ declare namespace Cypress {
     deleteCommentAPI(wsId: string, unitId: string, commentId:string, token:string): Chainable<Response>; // 61
     patchCommentVisibilityAPI(wsId: string, unitId: string, commentId: string, hidden: boolean, userId: string,
       token: string): Chainable<Response>; // 61a
+    requestWorkspaceAPI(method: string, path: string, token: string, body?: object): Chainable<Response>;
     voteCommentAPI(wsId: string, unitId: string, commentId: string, vote: 'up' | 'down' | null,
       token: string): Chainable<Response>; // 61b
     getCommentVotersAPI(wsId: string, unitId: string, commentId: string, token: string): Chainable<Response>; // 61c

@@ -21,6 +21,7 @@ import { ReadOrGroupAdminAccessGuard } from '../guards/read-or-group-admin-acces
 import { WriteOrGroupAdminAccessGuard } from '../guards/write-or-group-admin-access.guard';
 import { UnitId } from '../decorators/unit-id.decorator';
 import { ItemRichNoteService } from '../services/item-rich-note.service';
+import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
 
 /**
  * `workspaces/:workspace_id/units/:unit_id/rich-notes` -- the formatted notes on a unit, and which
@@ -28,6 +29,9 @@ import { ItemRichNoteService } from '../services/item-rich-note.service';
  *
  * Reading and writing both let the group admin through, so someone administering the workspace
  * from outside can read and correct notes without being assigned to it.
+ *
+ * Every route first holds the unit to the workspace of the path ({@link UnitInWorkspaceGuard},
+ * #1775). Whether a note of the path belongs to that unit is not asked yet (#1778).
  */
 @Controller('workspaces/:workspace_id/units/:unit_id/rich-notes')
 export class WorkspaceUnitRichNoteController {
@@ -37,7 +41,7 @@ export class WorkspaceUnitRichNoteController {
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, ReadOrGroupAdminAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, ReadOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Rich notes for unit retrieved successfully.' })
@@ -49,7 +53,7 @@ export class WorkspaceUnitRichNoteController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteOrGroupAdminAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -59,12 +63,17 @@ export class WorkspaceUnitRichNoteController {
   @ApiForbiddenResponse({ description: 'No write privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit rich note')
-  async createNote(@Body() createUnitRichNoteDto: CreateUnitRichNoteDto) {
-    return this.unitRichNoteService.createNote(createUnitRichNoteDto);
+  async createNote(
+    @Param('unit_id', ParseIntPipe) unitId: number,
+    @Body() createUnitRichNoteDto: CreateUnitRichNoteDto
+  ) {
+    // The unit is the one of the path, which UnitInWorkspaceGuard has held to the workspace. The
+    // body's unitId used to be saved as sent, and could name a unit of any other workspace (#1775).
+    return this.unitRichNoteService.createNote({ ...createUnitRichNoteDto, unitId });
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteOrGroupAdminAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Rich note successfully updated.' })
@@ -77,7 +86,7 @@ export class WorkspaceUnitRichNoteController {
   }
 
   @Patch(':note_id/items')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteOrGroupAdminAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -93,7 +102,7 @@ export class WorkspaceUnitRichNoteController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteOrGroupAdminAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Rich note successfully deleted.' })

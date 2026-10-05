@@ -17,6 +17,7 @@ import { WriteAccessGuard } from '../guards/write-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { UnitItemMetadataService } from '../services/unit-item-metadata.service';
 import { ItemUuid } from '../decorators/item-uuid.decorator';
+import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
 
 /**
  * `workspaces/:workspace_id/units/:unit_id/items/:item_uuid/metadata` -- the metadata rows of one
@@ -24,6 +25,9 @@ import { ItemUuid } from '../decorators/item-uuid.decorator';
  *
  * These routes address a single row; the whole metadata of a unit and all its items is saved in
  * one transaction through {@link WorkspaceUnitController}, which is what the metadata form uses.
+ *
+ * Every route first holds the unit to the workspace of the path ({@link UnitInWorkspaceGuard},
+ * #1775). Whether the item, and the row, belong to that unit is not asked yet (#1778).
  */
 @Controller('workspaces/:workspace_id/units/:unit_id/items/:item_uuid/metadata')
 export class UnitItemMetadataController {
@@ -32,7 +36,7 @@ export class UnitItemMetadataController {
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, WorkspaceAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, UnitInWorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -44,7 +48,7 @@ export class UnitItemMetadataController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -58,7 +62,7 @@ export class UnitItemMetadataController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiTags('item metadata')
   @ApiParam({ name: 'workspace_id', type: Number })

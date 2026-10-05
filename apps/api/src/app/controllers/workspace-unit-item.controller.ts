@@ -18,6 +18,7 @@ import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { UnitItemService } from '../services/unit-item.service';
 import { WriteOrGroupAdminAccessGuard } from '../guards/write-or-group-admin-access.guard';
 import { UnitId } from '../decorators/unit-id.decorator';
+import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
 import UnitCommentUnitItem from '../entities/unit-comment-unit-item.entity';
 
 /**
@@ -27,6 +28,9 @@ import UnitCommentUnitItem from '../entities/unit-comment-unit-item.entity';
  * Reading takes access to the workspace, writing takes write access, and deleting also lets the
  * group admin through -- an item may have to be removed by someone who administers the workspace
  * from outside.
+ *
+ * Every route first holds the unit to the workspace of the path ({@link UnitInWorkspaceGuard},
+ * #1775). Whether the item of the path belongs to that unit is not asked yet (#1778).
  */
 @Controller('workspaces/:workspace_id/units/:unit_id/items')
 export class WorkspaceUnitItemController {
@@ -36,7 +40,7 @@ export class WorkspaceUnitItemController {
 
   /** All items of the unit. `withoutMetadata` leaves the metadata out, which is much the cheaper read. */
   @Get()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, WorkspaceAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, UnitInWorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -53,7 +57,7 @@ export class WorkspaceUnitItemController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -66,7 +70,7 @@ export class WorkspaceUnitItemController {
   }
 
   @Delete(':uuid')
-  @UseGuards(JwtAuthGuard, WriteOrGroupAdminAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteOrGroupAdminAccessGuard)
   @ApiBearerAuth()
   @ApiTags('workspace unit item')
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -83,7 +87,7 @@ export class WorkspaceUnitItemController {
   }
 
   @Get('comments')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, WorkspaceAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, UnitInWorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })

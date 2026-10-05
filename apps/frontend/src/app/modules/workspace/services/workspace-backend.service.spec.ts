@@ -17,7 +17,8 @@ import {
   UsersInWorkspaceDto,
   WorkspaceGroupFullDto,
   UnitItemDto,
-  UnitRichNoteTagDto
+  UnitRichNoteTagDto,
+  UnitRichNotesDto
 } from '@studio-lite-lib/api-dto';
 import { firstValueFrom, Observable } from 'rxjs';
 import { WorkspaceBackendService } from './workspace-backend.service';
@@ -781,12 +782,54 @@ describe('WorkspaceBackendService', () => {
       await resultPromise;
     });
 
+    it('should return an empty array without asking for unit 0', async () => {
+      await expectObservableValue(service.getUnitItems(1, 0), []);
+      httpMock.expectNone(() => true);
+    });
+
+    it('should return an empty array without asking for a unit that is no number', async () => {
+      await expectObservableValue(service.getUnitItems(1, Number('abc')), []);
+      httpMock.expectNone(() => true);
+    });
+
+    it('should return an empty array without asking for workspace 0', async () => {
+      await expectObservableValue(service.getUnitItems(0, 1), []);
+      httpMock.expectNone(() => true);
+    });
+
     it('should return empty array on error', async () => {
       const resultPromise = expectObservableValue(service.getUnitItems(1, 1), []);
 
       const req = httpMock.expectOne(
         request => request.url === `${serverUrl}workspaces/1/units/1/items`
       );
+      req.error(new ProgressEvent('error'));
+
+      await resultPromise;
+    });
+  });
+
+  describe('getUnitRichNotes', () => {
+    it('should fetch the rich notes of the unit', async () => {
+      const mockData: UnitRichNotesDto = { tags: [], notes: [] };
+      const resultPromise = expectObservableValue(service.getUnitRichNotes(1, 1), mockData);
+
+      const req = httpMock.expectOne(`${serverUrl}workspaces/1/units/1/rich-notes`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockData);
+
+      await resultPromise;
+    });
+
+    it('should return no notes without asking for unit 0', async () => {
+      await expectObservableValue(service.getUnitRichNotes(1, 0), { tags: [], notes: [] });
+      httpMock.expectNone(() => true);
+    });
+
+    it('should return null on error', async () => {
+      const resultPromise = expectObservableValue(service.getUnitRichNotes(1, 1), null);
+
+      const req = httpMock.expectOne(`${serverUrl}workspaces/1/units/1/rich-notes`);
       req.error(new ProgressEvent('error'));
 
       await resultPromise;
