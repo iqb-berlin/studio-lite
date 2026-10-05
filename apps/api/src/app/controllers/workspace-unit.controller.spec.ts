@@ -29,6 +29,7 @@ import { UnitRichNoteService } from '../services/unit-rich-note.service';
 describe('WorkspaceUnitController', () => {
   let controller: WorkspaceUnitController;
   let unitService: UnitService;
+  let settingsService: SettingService;
   let workspaceService: WorkspaceService;
   let unitCommentService: UnitCommentService;
   let unitRichNoteService: UnitRichNoteService;
@@ -74,6 +75,7 @@ describe('WorkspaceUnitController', () => {
 
     controller = module.get<WorkspaceUnitController>(WorkspaceUnitController);
     unitService = module.get<UnitService>(UnitService);
+    settingsService = module.get<SettingService>(SettingService);
     workspaceService = module.get<WorkspaceService>(WorkspaceService);
     unitCommentService = module.get<UnitCommentService>(UnitCommentService);
     unitRichNoteService = module.get<UnitRichNoteService>(UnitRichNoteService);
@@ -104,17 +106,36 @@ describe('WorkspaceUnitController', () => {
   });
 
   describe('downloadCodingBook', () => {
-    it('should download coding book', async () => {
-      const mockFileBuffer = Buffer.from('test');
-      jest.spyOn(DownloadWorkspacesClass, 'getWorkspaceCodingBook').mockResolvedValue(mockFileBuffer);
-
-      const result = await controller.downloadCodingBook(
-        1, [1, 2], 'json', 'profile', false, false, false, false, false, false, false, false
-      );
-
-      expect(DownloadWorkspacesClass.getWorkspaceCodingBook).toHaveBeenCalled();
-      expect(result).toBeInstanceOf(StreamableFile);
-    });
+    it.each([undefined, 'all', 'required', 'not-required'] as const)(
+      'forwards training selection %s to the shared generator',
+      async trainingRequirement => {
+        const mockFileBuffer = Buffer.from('test');
+        jest.spyOn(DownloadWorkspacesClass, 'getWorkspaceCodingBook').mockResolvedValue(mockFileBuffer);
+        const result = await controller.downloadCodingBook(
+          1,
+          [1, 2],
+          'json',
+          'profile',
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          trainingRequirement
+        );
+        expect(DownloadWorkspacesClass.getWorkspaceCodingBook).toHaveBeenCalledWith(
+          1,
+          unitService,
+          settingsService,
+          expect.objectContaining({ trainingRequirement: trainingRequirement || 'all' }),
+          [1, 2]
+        );
+        expect(result).toBeInstanceOf(StreamableFile);
+      }
+    );
   });
 
   describe('findAllWithProperties', () => {

@@ -7,6 +7,7 @@ import {
   ParseArrayPipe,
   ParseBoolPipe,
   ParseIntPipe,
+  ParseEnumPipe,
   Patch,
   Post,
   Query,
@@ -147,6 +148,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
+  @ApiQuery({ name: 'trainingRequirement', required: false, enum: ['all', 'required', 'not-required'] })
   @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @Header('Content-Disposition', 'attachment; filename="iqb-studio-coding-book.docx"')
@@ -170,9 +172,16 @@ export class WorkspaceUnitController {
     @Query('closed', new ParseBoolPipe()) hasClosedVars: boolean,
     @Query('showScore', new ParseBoolPipe()) showScore: boolean,
     @Query('hideItemVarRelation', new ParseBoolPipe()) hideItemVarRelation: boolean,
-    @Query('codeLabelToUpper', new ParseBoolPipe()) codeLabelToUpper: boolean) {
+    @Query('codeLabelToUpper', new ParseBoolPipe()) codeLabelToUpper: boolean,
+    @Query('trainingRequirement', new ParseEnumPipe(
+      { ALL: 'all', REQUIRED: 'required', NOT_REQUIRED: 'not-required' },
+      { optional: true }
+    ))
+                   trainingRequirement?: CodeBookContentSetting['trainingRequirement']
+  ) {
     const options:CodeBookContentSetting = {
       exportFormat,
+      trainingRequirement: trainingRequirement || 'all',
       missingsProfile: missingsProfile,
       hasOnlyManualCoding: hasOnlyManualCoding,
       hasGeneralInstructions: hasGeneralInstructions,

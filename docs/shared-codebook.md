@@ -5,6 +5,9 @@ stammen aus `@iqb/ngx-coding-components` 4.1.0. Der Studio-Dialog beschafft nur 
 Aufgaben und Missingprofile, übergibt Vorauswahl und Speichersperre und verarbeitet
 den Exportwunsch über den bisherigen direkten API-Aufruf. Keine Job-Endpunkte,
 Statusabfragen oder Queue-Abhängigkeiten wurden ergänzt.
+Der Schulungsbedarf wird in beiden Anwendungen im gemeinsamen Formular gewählt
+und vom gemeinsamen Generator anhand von CODER_TRAINING_REQUIRED gefiltert.
+Die Gruppenspalte bleibt ausschließlich im Studio sichtbar.
 
 Die API normalisiert Itembeziehungen auf die Variablenaliase und verwendet den
 Generator der Bibliothek. Andere Berichte der DownloadWorkspaces-Klasse bleiben.

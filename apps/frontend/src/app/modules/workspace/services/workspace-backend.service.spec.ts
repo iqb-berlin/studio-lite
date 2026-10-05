@@ -860,4 +860,24 @@ describe('WorkspaceBackendService', () => {
       req.flush(new Blob(['zip']));
     });
   });
+  it('sends training requirement and selection to the direct codebook endpoint', () => {
+    service.getCodingBook(1, '', {
+      exportFormat: 'json',
+      missingsProfile: '',
+      hasOnlyManualCoding: true,
+      hasGeneralInstructions: true,
+      hasDerivedVars: true,
+      hasClosedVars: false,
+      hasOnlyVarsWithCodes: true,
+      codeLabelToUpper: true,
+      showScore: true,
+      hideItemVarRelation: true,
+      trainingRequirement: 'not-required'
+    }, [7]).subscribe();
+    const request = httpMock.expectOne(req => req.url === `${serverUrl}workspaces/1/units/coding-book`);
+    expect(request.request.method).toBe('GET');
+    expect(request.request.params.get('trainingRequirement')).toBe('not-required');
+    expect(request.request.params.getAll('id')).toEqual(['7']);
+    request.flush(new Blob(['[]']));
+  });
 });

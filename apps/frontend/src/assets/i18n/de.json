@@ -1283,6 +1283,11 @@
   },
   "codebook": {
     "coding": {
+      "training-requirement-filter": "Erhöhter Schulungsbedarf",
+      "training-requirement-all": "Alle Variablen",
+      "training-requirement-required": "Nur mit erhöhtem Schulungsbedarf",
+      "training-requirement-not-required": "Nur ohne erhöhten Schulungsbedarf",
+
       "has-only-manual-coding": "Manuell kodierte Variablen",
       "select-all-including-hidden": "Alle verfügbaren Aufgaben auswählen, auch ausgeblendete Suchtreffer.",
       "has-closed-vars": "Geschlossen kodierte Variablen",

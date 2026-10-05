@@ -197,6 +197,35 @@ describe('DownloadWorkspacesClass', () => {
       expect(data[0].missings[0].code).toBe(0);
     });
 
+    it.each(['required', 'not-required'] as const)(
+      'applies the shared %s training filter in Studio',
+      async trainingRequirement => {
+        const units = createMock<UnitService>();
+        const settings = createMock<SettingService>();
+        const parsed = JSON.parse(scheme);
+        parsed.variableCodings.push({
+          ...parsed.variableCodings[0],
+          id: 'TRAIN',
+          alias: 'TRAIN',
+          processing: ['CODER_TRAINING_REQUIRED']
+        });
+        units.findAllWithProperties.mockResolvedValue([{
+          id: 1, key: 'U', name: 'Unit', scheme: JSON.stringify(parsed), metadata: { items: [] }
+        }] as UnitPropertiesDto[]);
+        settings.findMissingsProfiles.mockResolvedValue([]);
+        const result = await DownloadWorkspacesClass.getWorkspaceCodingBook(
+          1,
+          units,
+          settings,
+          { ...options, trainingRequirement },
+          [1]
+        );
+        expect(JSON.parse(result.toString())[0].variables.map(variable => variable.id)).toEqual([
+          trainingRequirement === 'required' ? 'TRAIN' : 'V'
+        ]);
+      }
+    );
+
     it('returns a real DOCX for an empty selection', async () => {
       const units = createMock<UnitService>(); const settings = createMock<SettingService>();
       units.findAllWithProperties.mockResolvedValue([]); settings.findMissingsProfiles.mockResolvedValue([]);
