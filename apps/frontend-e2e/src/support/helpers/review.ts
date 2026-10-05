@@ -258,3 +258,92 @@ export function printReview(name: string): void {
 export function deleteReview(name: string): void {
   interactWithReview(name, 'workspace-review-menu-delete-review-button', 'workspace.delete');
 }
+
+/**
+ * Ticks "comments allowed" and "show comments already given" in the configuration of the review
+ * selected in the review admin -- without saving
+ */
+export function enableReviewComments(): void {
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.get('studio-lite-review-config').within(() => {
+      cy.contains('mat-checkbox', json.workspace['review-allow-comments'])
+        .find('input').check({ force: true });
+      cy.contains('mat-checkbox', json.workspace['review-show-comments'])
+        .find('input').check({ force: true });
+    });
+  });
+}
+
+/**
+ * Types a password into the configuration of the review selected in the review admin and saves it
+ * @param password - The password; under 4 characters the review link stays locked
+ */
+export function setReviewPassword(password: string): void {
+  cy.translate(Cypress.expose('locale')).then(json => {
+    // Not chained: the form is rendered anew once the review data has arrived, and typing would
+    // race against the form being replaced
+    cy.get(`input[placeholder="${json.workspace['review-password']}"]`).should('be.visible');
+    cy.get(`input[placeholder="${json.workspace['review-password']}"]`).clear();
+    cy.get(`input[placeholder="${json.workspace['review-password']}"]`).type(password);
+    saveReviewConfig();
+    // The response alone is not enough: the review admin takes the saved password over only when it
+    // has handled the response, and with it the save button goes back to disabled. The copy button
+    // reads the saved password, not the typed one.
+    cy.get('studio-lite-save-changes').contains('button', json.workspace.save).should('be.disabled');
+  });
+}
+
+/**
+ * Clicks the copy button of the review selected in the review admin and hands on what it put into
+ * the clipboard. `@angular/cdk` copies through a textarea it appends to the body and
+ * `document.execCommand('copy')`; the stub reads the textarea instead, which needs no clipboard
+ * permission and works headless.
+ */
+export function copyReviewLink(): Cypress.Chainable<string> {
+  let copied = '';
+  cy.window().then(win => {
+    // Only 'copy' is answered by the stub; any other command still reaches the browser
+    const execCommand = cy.stub(win.document, 'execCommand').as('execCommand');
+    execCommand.callThrough();
+    execCommand.withArgs('copy').callsFake(() => {
+      const textarea = win.document.body.querySelector(':scope > textarea');
+      copied = textarea instanceof win.HTMLTextAreaElement ? textarea.value : '';
+      return true;
+    });
+  });
+  cy.get('[data-cy="workspace-review-menu-copy-review-link-button"] button')
+    .should('be.enabled')
+    .click();
+  cy.get('@execCommand').should('have.been.calledWith', 'copy');
+  return cy.then(() => copied);
+}
+
+/**
+ * Opens a review link as an external visitor and logs in with the review's password. The session
+ * has no user: no user menu, only this review on the home page.
+ * @param url - The link as the copy button hands it out
+ * @param password - The review's password
+ */
+export function loginToReviewLink(url: string, password: string): void {
+  cy.visit(url);
+  // Wait out the first renderings: the config load replaces the input right after page load
+  cy.get('[data-cy="home-password"]').should('be.visible');
+  cy.get('[data-cy="home-password"]').type(password);
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.clickButtonWithResponseCheck(json.home.login, [201], '/api/login', 'POST', 'responseReviewLinkLogin');
+  });
+  cy.get('studio-lite-user-reviews-area').should('be.visible');
+}
+
+/**
+ * Logs an external visitor out. Without a user there is no user menu; the only way out is the icon
+ * in the reviews area of the home page.
+ */
+export function logoutFromReviewLink(): void {
+  cy.visit('/');
+  cy.get('studio-lite-user-reviews-area').contains('button', 'logout').click();
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.clickDialogButton(json.home.logout);
+  });
+  cy.get('[data-cy="home-user-name"]').should('be.visible');
+}
