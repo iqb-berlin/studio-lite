@@ -96,9 +96,7 @@ export function checkProfile(profile: string): void {
     'GET',
     '/api/metadata/profiles?url=https://w3id.org/iqb/p99/item/'
   ).as(alias);
-  cy.get('[data-cy="shared-profiles-select-profile-title"]')
-    .contains(profile)
-    .click();
+  // A profile of the new registry is a checkbox of its own, without a panel to open first (#1549)
   cy.get('[data-cy="shared-profiles-select-profile"]')
     .filter(`:contains(${profile})`)
     .click();
@@ -111,9 +109,6 @@ export function checkMultipleProfiles(profiles: string[]): void {
   ).as('selectedProfiles');
   waitForSuccess('@selectedProfiles');
   profiles.forEach(profile => {
-    cy.get('[data-cy="shared-profiles-select-profile-title"]')
-      .contains(profile)
-      .click();
     cy.get('[data-cy="shared-profiles-select-profile"]')
       .filter(`:contains(${profile})`)
       .click();
