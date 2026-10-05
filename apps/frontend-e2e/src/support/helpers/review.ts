@@ -1,5 +1,69 @@
+import { Interception } from 'cypress/types/net-stubbing';
 import { selectCheckBox, waitForSuccess } from './common';
 import { goToWsMenu } from './navigation';
+
+/**
+ * Waits until the review admin shows the selected review: its name in the settings and as many
+ * checked units as it has. Only then does a click in the unit list count -- the review arriving
+ * later sets the selection anew and undoes it. Waiting for the GET is not enough, since it ends
+ * when the answer passes Cypress, before the app has applied it (#1726).
+ * @param name - The name of the review
+ * @param unitCount - The number of units the review has so far
+ */
+function waitForReviewShown(name: string, unitCount: number): void {
+  cy.get('[data-cy="workspace-review-config-name"]').should('have.value', name);
+  cy.get('[data-cy^="workspace-select-unit-list-checkbox-"] input:checked')
+    .should('have.length', unitCount);
+}
+
+/**
+ * The workspace and review id of an intercepted request to `/api/workspaces/:id/reviews/:id`, and
+ * the token of the user logged in.
+ * @param alias - Alias of the intercepted request
+ */
+function reviewOfRequest(alias: string): Cypress.Chainable<{ wsId: string, reviewId: string, token: string }> {
+  return cy.get<Interception>(alias).then(({ request }) => {
+    const [, wsId, reviewId] = new URL(request.url).pathname.match(/\/workspaces\/(\d+)\/reviews\/(\d+)/) || [];
+    return cy.window().then(win => ({ wsId, reviewId, token: win.localStorage.getItem('id_token') || '' }));
+  });
+}
+
+/**
+ * The units the review admin holds for the review behind an intercepted request. Asked directly:
+ * the app's own GET may come back as 304 without a body.
+ * @param alias - Alias of an intercepted request to `/api/workspaces/:id/reviews/:id`
+ */
+function requestReviewUnits(alias: string): Cypress.Chainable<number[]> {
+  return reviewOfRequest(alias)
+    .then(({ wsId, reviewId, token }) => cy.getReviewAPI(wsId, reviewId, token))
+    .then(resp => {
+      expect(resp.status, 'status of the review').to.equal(200);
+      return resp.body.units as number[];
+    });
+}
+
+/**
+ * Checks what the save behind `alias` stored: the units it sent, and the units the API returns for
+ * the review afterwards -- to the review admin, and to a reviewer, as the tests that play the review
+ * see it. A save answered with 2xx can still have lost a unit, and those tests then fail far from
+ * the cause (#1726).
+ * @param alias - Alias of the intercepted PATCH of the review
+ * @param unitCount - The number of units the review should have
+ */
+function expectSavedReviewUnits(alias: string, unitCount: number): void {
+  cy.get<Interception>(alias).then(({ request }) => {
+    expect(request.body.units, 'units sent with the save').to.have.length(unitCount);
+  });
+  requestReviewUnits(alias).then(units => {
+    expect(units, 'units of the review after the save').to.have.length(unitCount);
+  });
+  reviewOfRequest(alias)
+    .then(({ reviewId, token }) => cy.getReviewAsReviewerAPI(reviewId, token))
+    .then(resp => {
+      expect(resp.status, 'status of the review for a reviewer').to.equal(200);
+      expect(resp.body.units, 'units a reviewer gets after the save').to.have.length(unitCount);
+    });
+}
 
 /**
  * Navigates to the review administration view within a workspace
@@ -66,6 +130,7 @@ export function createReview(name: string, unitNames: string[]): void {
       cy.get('button').contains(json.workspace.save).click();
     });
     waitForSuccess('@createReview');
+    waitForReviewShown(name, 0);
 
     unitNames.forEach(unit => selectCheckBox(unit));
 
@@ -73,30 +138,33 @@ export function createReview(name: string, unitNames: string[]): void {
       cy.get('button').contains(json.workspace.save).click();
     });
     waitForSuccess('@saveNewReviewUnits');
+    expectSavedReviewUnits('@saveNewReviewUnits', unitNames.length);
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 }
 
 /**
- * Modifies the unit selection for an existing review
+ * Adds units to an existing review
  * @param name - The name of the review to modify
- * @param unitNames - Array of unit names to select
+ * @param unitNames - Names of the units to add; none of them may be in the review yet
  */
 export function modifyReviewUnits(name: string, unitNames: string[]): void {
   cy.intercept('GET', '/api/workspaces/*/reviews/*').as('getReviewForModify');
   cy.contains('mat-row', name).click();
   cy.wait('@getReviewForModify');
-  cy.intercept('PATCH', '/api/workspaces/*/reviews/*').as('updateReview');
-  unitNames.forEach(unit => selectCheckBox(unit));
-  cy.translate(Cypress.expose('locale')).then(json => {
-    cy.get('studio-lite-save-changes').within(() => {
-      cy.get('button').contains(json.workspace.save).click();
+  requestReviewUnits('@getReviewForModify').then(({ length: unitsBefore }) => {
+    waitForReviewShown(name, unitsBefore);
+    cy.intercept('PATCH', '/api/workspaces/*/reviews/*').as('updateReview');
+    unitNames.forEach(unit => selectCheckBox(unit));
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('studio-lite-save-changes').within(() => {
+        cy.get('button').contains(json.workspace.save).click();
+      });
     });
+    // A lost unit used to pass here and break the two navigation tests that follow (#1597, #1726).
+    waitForSuccess('@updateReview');
+    expectSavedReviewUnits('@updateReview', unitsBefore + unitNames.length);
   });
-  // The status assertion is the point: cy.wait alone lets a failed PATCH pass
-  // this test green, and the missing unit then breaks the two navigation tests
-  // that follow -- the exact CI picture that led to #1597.
-  waitForSuccess('@updateReview');
   cy.get('[data-cy="workspace-review-close"]').click();
 }
 
