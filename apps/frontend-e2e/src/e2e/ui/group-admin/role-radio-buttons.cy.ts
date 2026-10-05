@@ -78,6 +78,43 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       });
     });
 
+    // A role picked before the rights of the newly selected row arrive would be reset by them
+    // (#1772). The row selected first leaves the radios enabled and an unsaved edit enables
+    // save, so only the panel's own lock can disable both while the second answer is held back.
+    it('locks the radio buttons and save while the rights of another workspace load', () => {
+      openWsTab(secondaryWorkspace);
+      selectRoleAtWs(standardUser.username, AccessLevel.Basic);
+      cy.intercept('GET', '**/api/group-admin/workspaces/*/users', req => {
+        req.on('response', res => { res.setDelay(1500); });
+      }).as('workspaceUsers');
+      cy.contains('mat-row', primaryWorkspace).click();
+      getRoleRadio(`(${standardUser.username})`, AccessLevel.Basic)
+        .find('input[type="radio"]')
+        .should('be.disabled');
+      cy.get('[data-cy="wsg-admin-access-rights-save-button"]').should('be.disabled');
+      cy.wait('@workspaceUsers');
+      getRoleRadio(`(${standardUser.username})`, AccessLevel.Basic)
+        .find('input[type="radio"]')
+        .should('be.enabled');
+    });
+
+    it('locks the radio buttons and save while the rights of another user load', () => {
+      openUsersTab(standardUser.username);
+      selectRoleAtUser(primaryWorkspace, AccessLevel.Basic);
+      cy.intercept('GET', '**/api/group-admin/users/*/workspaces', req => {
+        req.on('response', res => { res.setDelay(1500); });
+      }).as('userWorkspaces');
+      cy.contains('mat-row', secondaryUser.username).click();
+      getRoleRadio(primaryWorkspace, AccessLevel.Basic)
+        .find('input[type="radio"]')
+        .should('be.disabled');
+      cy.get('[data-cy="wsg-admin-access-rights-save-button"]').should('be.disabled');
+      cy.wait('@userWorkspaces');
+      getRoleRadio(primaryWorkspace, AccessLevel.Basic)
+        .find('input[type="radio"]')
+        .should('be.enabled');
+    });
+
     it('all radio buttons are disabled when no user is selected', () => {
       clickIndexTabWsgAdmin('users');
       // Rows are always rendered; only the radio inputs become disabled when nothing is selected

@@ -56,6 +56,19 @@ export function assertRoleRadioChecked(label: string, level: AccessLevel, should
     .should(shouldBeChecked ? 'be.checked' : 'not.be.checked');
 }
 
+/**
+ * Clicks a role radio button once it accepts input. The panel disables its radios while the
+ * rights of the selected row load; a click before they arrive would be reset by them.
+ * @param label - Row label
+ * @param level - AccessLevel
+ */
+function clickRoleRadio(label: string, level: AccessLevel): void {
+  getRoleRadio(label, level)
+    .find('input[type="radio"]')
+    .should('be.enabled');
+  getRoleRadio(label, level).click();
+}
+
 // ---------------------------------------------------------------------------
 // Workspaces panel (right panel when a workspace row is selected)
 // ---------------------------------------------------------------------------
@@ -67,7 +80,7 @@ export function assertRoleRadioChecked(label: string, level: AccessLevel, should
  * @param level - AccessLevel to select
  */
 export function selectRoleAtWs(username: string, level: AccessLevel): void {
-  getRoleRadio(`(${username})`, level).click();
+  clickRoleRadio(`(${username})`, level);
 }
 
 /**
@@ -77,7 +90,7 @@ export function selectRoleAtWs(username: string, level: AccessLevel): void {
  * @param level - The currently active AccessLevel to deselect
  */
 export function deselectRoleAtWs(username: string, level: AccessLevel): void {
-  getRoleRadio(`(${username})`, level).click();
+  clickRoleRadio(`(${username})`, level);
 }
 
 // ---------------------------------------------------------------------------
@@ -91,7 +104,7 @@ export function deselectRoleAtWs(username: string, level: AccessLevel): void {
  * @param level - AccessLevel to select
  */
 export function selectRoleAtUser(wsName: string, level: AccessLevel): void {
-  getRoleRadio(wsName, level).click();
+  clickRoleRadio(wsName, level);
 }
 
 /**
@@ -101,7 +114,7 @@ export function selectRoleAtUser(wsName: string, level: AccessLevel): void {
  * @param level - The currently active AccessLevel to deselect
  */
 export function deselectRoleAtUser(wsName: string, level: AccessLevel): void {
-  getRoleRadio(wsName, level).click();
+  clickRoleRadio(wsName, level);
 }
 /**
  * Creates a workspace within a group
