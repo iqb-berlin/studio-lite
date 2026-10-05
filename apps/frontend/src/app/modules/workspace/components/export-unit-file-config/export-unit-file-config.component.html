@@ -6,18 +6,22 @@
     <mat-radio-button value="json">{{'unit-download.export-format-json' | translate}}</mat-radio-button>
   </mat-radio-group>
   <div class="header">{{'unit-download.add-files' | translate}}</div>
-  <mat-checkbox [ngModel]="addComments"
-                (ngModelChange)="addCommentsChange.emit($event)">
-    {{'unit-download.add-comments' | translate}}
-  </mat-checkbox>
-  @if (addComments) {
-    <div class="config-message">{{'unit-download.export-votes-warning' | translate}}</div>
+  @for (state of fileStates; track state.option.label) {
+    <mat-checkbox [attr.data-cy]="'export-file-' + state.option.flag"
+                  [disabled]="!state.available"
+                  [checked]="state.checked"
+                  (change)="setFileChecked(state, $event.checked)">
+      {{state.option.label | translate}}
+    </mat-checkbox>
+    @if (!state.available) {
+      <div class="config-message">{{state.option.hint | translate}}</div>
+    }
+    @if (state.option.flag === 'addComments' && state.checked) {
+      <div class="config-message">{{'unit-download.export-votes-warning' | translate}}</div>
+    }
   }
-  <mat-checkbox [ngModel]="addRichNotes"
-                (ngModelChange)="addRichNotesChange.emit($event)">
-    {{'unit-download.add-rich-notes' | translate}}
-  </mat-checkbox>
-  <mat-checkbox [disabled]="!enablePlayerOption"
+  <mat-checkbox data-cy="export-file-addPlayers"
+                [disabled]="!enablePlayerOption"
                 [ngModel]="addPlayers" class="margin-bottom"
                 (ngModelChange)="addPlayersChange.emit($event);
                 unitsWithOutPlayerChange.emit($event ? unitsWithOutPlayer : [])">

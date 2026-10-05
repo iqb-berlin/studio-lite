@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { UnitItemMetadataDto, UnitItemWithMetadataDto } from '@studio-lite-lib/api-dto';
 import { UnitItemService } from './unit-item.service';
 import UnitItem from '../entities/unit-item.entity';
@@ -140,6 +140,26 @@ describe('UnitItemService', () => {
 
       expect(repository.find).toHaveBeenCalledWith({ where: { unitId }, order: { id: 'ASC' } });
       expect(result).toEqual(items);
+    });
+  });
+
+  describe('getAllByUnitIds', () => {
+    it('should return the items of all given units in one query, without their metadata', async () => {
+      const items = [{ id: 'a', unitId: 2 }, { id: 'b', unitId: 3 }] as unknown as UnitItem[];
+      mockRepository.find.mockResolvedValue(items);
+
+      const result = await service.getAllByUnitIds([2, 3]);
+
+      expect(repository.find).toHaveBeenCalledWith({ where: { unitId: In([2, 3]) } });
+      expect(result).toEqual(items);
+      expect(unitItemMetadataService.getAllByItemId).not.toHaveBeenCalled();
+    });
+
+    it('should not query for an empty list', async () => {
+      mockRepository.find.mockClear();
+
+      expect(await service.getAllByUnitIds([])).toEqual([]);
+      expect(repository.find).not.toHaveBeenCalled();
     });
   });
 

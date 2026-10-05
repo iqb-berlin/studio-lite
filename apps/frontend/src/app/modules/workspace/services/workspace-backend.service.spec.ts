@@ -212,6 +212,31 @@ describe('WorkspaceBackendService', () => {
     });
   });
 
+  describe('getUnitExportContents', () => {
+    it('should fetch which optional export files the units fill', async () => {
+      const mockData = [{
+        unitId: 1, metadata: true, items: false, codingScheme: true, comments: false, richNotes: false
+      }];
+
+      const resultPromise = expectObservableValue(service.getUnitExportContents(1), mockData);
+
+      const req = httpMock.expectOne(`${serverUrl}workspaces/1/units/export-contents`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockData);
+
+      await resultPromise;
+    });
+
+    it('should return null on error, so that no file is left out for it', async () => {
+      const resultPromise = expectObservableValue(service.getUnitExportContents(1), null);
+
+      const req = httpMock.expectOne(`${serverUrl}workspaces/1/units/export-contents`);
+      req.error(new ProgressEvent('error'));
+
+      await resultPromise;
+    });
+  });
+
   describe('addUnit', () => {
     it('should add a new unit and return its id', async () => {
       const newUnit: CreateUnitDto = { key: 'unit1', name: 'Unit 1' };

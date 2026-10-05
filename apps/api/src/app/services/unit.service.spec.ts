@@ -6,6 +6,7 @@ import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
   CreateUnitDto,
+  UnitItemDto,
   UnitMetadataDto,
   UnitMetadataValues,
   UnitPropertiesDto,
@@ -222,6 +223,49 @@ describe('UnitService', () => {
 
       const result = await service.findAllWithProperties(1);
       expect(result).toHaveLength(1);
+    });
+  });
+
+  describe('findAllExportSources', () => {
+    it('reads the metadata column of an unmarked unit without resolving profiles', async () => {
+      const metadata = { profiles: [{ profileId: 'p', entries: [] }], items: [] };
+      unitsRepository.find.mockResolvedValue([{ id: 1, metadata, scheme: '{}' } as unknown as Unit]);
+      unitMetadataToDeleteService.findMarkedUnitIds.mockResolvedValue(new Set());
+      unitMetadataService.getAllByUnitIds.mockResolvedValue([]);
+      unitItemService.getAllByUnitIds.mockResolvedValue([]);
+
+      const result = await service.findAllExportSources(4);
+
+      expect(result).toEqual([{ id: 1, metadata, scheme: '{}' }]);
+      expect(unitsRepository.find).toHaveBeenCalledWith({
+        where: { workspaceId: 4 },
+        select: ['id', 'metadata', 'scheme']
+      });
+      expect(metadataProfileService.getStoredMetadataProfileFromDb).not.toHaveBeenCalled();
+    });
+
+    it('reads the metadata tables of the marked units, as the export does, in one query each', async () => {
+      unitsRepository.find.mockResolvedValue([
+        { id: 2, metadata: { stale: true }, scheme: '' },
+        { id: 3, metadata: { stale: true }, scheme: '' },
+        { id: 5, metadata: { profiles: [] }, scheme: '' }
+      ] as unknown as Unit[]);
+      unitMetadataToDeleteService.findMarkedUnitIds.mockResolvedValue(new Set([2, 3]));
+      unitMetadataService.getAllByUnitIds.mockResolvedValue([{ unitId: 2, profileId: 'p' } as UnitMetadataDto]);
+      unitItemService.getAllByUnitIds.mockResolvedValue([{ unitId: 3, id: 'item1' } as UnitItemDto]);
+
+      const result = await service.findAllExportSources(4);
+
+      expect(result).toEqual([
+        { id: 2, metadata: { profiles: [{ unitId: 2, profileId: 'p' }], items: [] }, scheme: '' },
+        { id: 3, metadata: { profiles: [], items: [{ unitId: 3, id: 'item1' }] }, scheme: '' },
+        { id: 5, metadata: { profiles: [] }, scheme: '' }
+      ]);
+      expect(unitMetadataToDeleteService.findMarkedUnitIds).toHaveBeenCalledWith([2, 3, 5]);
+      expect(unitMetadataService.getAllByUnitIds).toHaveBeenCalledWith([2, 3]);
+      expect(unitItemService.getAllByUnitIds).toHaveBeenCalledWith([2, 3]);
+      expect(unitMetadataToDeleteService.getOneByUnit).not.toHaveBeenCalled();
+      expect(unitItemService.getAllByUnitIdWithMetadata).not.toHaveBeenCalled();
     });
   });
 
