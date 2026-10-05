@@ -29,17 +29,25 @@ function reviewOfRequest(alias: string): Cypress.Chainable<{ wsId: string, revie
 }
 
 /**
- * The units the review admin holds for the review behind an intercepted request. Asked directly:
- * the app's own GET may come back as 304 without a body.
+ * The review behind an intercepted request, as the review admin gets it. Asked directly: the app's
+ * own GET may come back as 304 without a body.
  * @param alias - Alias of an intercepted request to `/api/workspaces/:id/reviews/:id`
  */
-function requestReviewUnits(alias: string): Cypress.Chainable<number[]> {
+function requestReview(alias: string): Cypress.Chainable<{ units: number[], link: string }> {
   return reviewOfRequest(alias)
     .then(({ wsId, reviewId, token }) => cy.getReviewAPI(wsId, reviewId, token))
     .then(resp => {
       expect(resp.status, 'status of the review').to.equal(200);
-      return resp.body.units as number[];
+      return resp.body as { units: number[], link: string };
     });
+}
+
+/**
+ * The units of the review behind an intercepted request, see {@link requestReview}.
+ * @param alias - Alias of an intercepted request to `/api/workspaces/:id/reviews/:id`
+ */
+function requestReviewUnits(alias: string): Cypress.Chainable<number[]> {
+  return requestReview(alias).then(review => review.units);
 }
 
 /**
@@ -144,16 +152,28 @@ export function createReview(name: string, unitNames: string[]): void {
 }
 
 /**
+ * Selects a review in the review admin and waits until the admin shows it. A change to its units
+ * or settings made earlier is undone by the review arriving (#1726).
+ * @param name - The name of the review
+ * @returns The review as the API holds it
+ */
+export function selectReviewInAdmin(name: string): Cypress.Chainable<{ units: number[], link: string }> {
+  cy.intercept('GET', '/api/workspaces/*/reviews/*').as('getReviewInAdmin');
+  cy.contains('mat-row', name).click();
+  cy.wait('@getReviewInAdmin');
+  return requestReview('@getReviewInAdmin').then(review => {
+    waitForReviewShown(name, review.units.length);
+    return cy.wrap(review);
+  });
+}
+
+/**
  * Adds units to an existing review
  * @param name - The name of the review to modify
  * @param unitNames - Names of the units to add; none of them may be in the review yet
  */
 export function modifyReviewUnits(name: string, unitNames: string[]): void {
-  cy.intercept('GET', '/api/workspaces/*/reviews/*').as('getReviewForModify');
-  cy.contains('mat-row', name).click();
-  cy.wait('@getReviewForModify');
-  requestReviewUnits('@getReviewForModify').then(({ length: unitsBefore }) => {
-    waitForReviewShown(name, unitsBefore);
+  selectReviewInAdmin(name).then(({ units: { length: unitsBefore } }) => {
     cy.intercept('PATCH', '/api/workspaces/*/reviews/*').as('updateReview');
     unitNames.forEach(unit => selectCheckBox(unit));
     cy.translate(Cypress.expose('locale')).then(json => {
