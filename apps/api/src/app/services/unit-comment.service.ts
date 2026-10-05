@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   Repository, Not, In, FindOptionsWhere
@@ -101,6 +101,16 @@ export class UnitCommentService {
           .createCommentItemConnection(unitId, itemUuid, commentId)));
   }
 
+  /** Which of the given units have at least one comment. */
+  async findUnitIdsWithComments(unitIds: number[]): Promise<Set<number>> {
+    if (!unitIds.length) return new Set();
+    const comments = await this.unitCommentsRepository.find({
+      where: { unitId: In(unitIds) },
+      select: { unitId: true }
+    });
+    return new Set(comments.map(comment => comment.unitId));
+  }
+
   async findOnesLastChangedComment(unitId: number, excludeUserId?: number): Promise<UnitCommentDto | null> {
     const whereClause: FindOptionsWhere<UnitComment> = { unitId: unitId };
     if (excludeUserId) {
@@ -174,7 +184,13 @@ export class UnitCommentService {
     }
   }
 
+  /**
+   * A vote belongs to a user account. A review opened through its link and password has none --
+   * its token carries user 0 -- so it is refused here instead of failing on the vote table's
+   * foreign key to `user` (#1730).
+   */
   async toggleVote(commentId: number, userId: number, vote: 'up' | 'down' | null): Promise<void> {
+    if (!userId) throw new ForbiddenException('Voting needs a user account');
     this.logger.log(`User ${userId} toggling vote on comment ${commentId} to ${vote}`);
     if (!vote) {
       await this.unitCommentVoteRepository.delete({ commentId, userId });

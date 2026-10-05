@@ -3,6 +3,14 @@
   display: flex;
 }
 
+// The list takes the height the settings give the row instead of adding its own, and scrolls
+// inside it. Without size containment its rows would stretch the dialog to the length of the list.
+// The floor keeps it near the 65vh the dialog content allows when the settings are collapsed.
+.unit-selection {
+  contain: size;
+  min-height: 50vh;
+}
+
 .settings {
   padding: 2px 0;
 }

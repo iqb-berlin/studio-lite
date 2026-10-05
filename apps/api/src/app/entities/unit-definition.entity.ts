@@ -12,6 +12,17 @@ class UnitDefinition {
   @Column()
   data: string;
 
+  /**
+   * The format `data` is written in, as the editor reported it (`unitDefinitionType`, e.g.
+   * `aspect-unit-definition@4.12.0`). `null` means not reported, not unknown to anyone: editors
+   * that do not send the field leave it empty, and so does every unit not saved since 21.0.0.
+   */
+  @Column({
+    type: 'varchar',
+    nullable: true
+  })
+  type: string | null;
+
   @Column({
     name: 'unit_id'
   })

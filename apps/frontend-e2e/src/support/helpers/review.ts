@@ -1,4 +1,4 @@
-import { selectCheckBox } from './common';
+import { selectCheckBox, waitForSuccess } from './common';
 import { goToWsMenu } from './navigation';
 
 /**
@@ -65,14 +65,14 @@ export function createReview(name: string, unitNames: string[]): void {
     cy.get('.mat-mdc-dialog-component-host > .mat-mdc-dialog-actions').within(() => {
       cy.get('button').contains(json.workspace.save).click();
     });
-    cy.wait('@createReview').its('response.statusCode').should('be.within', 200, 299);
+    waitForSuccess('@createReview');
 
     unitNames.forEach(unit => selectCheckBox(unit));
 
     cy.get('studio-lite-save-changes').within(() => {
       cy.get('button').contains(json.workspace.save).click();
     });
-    cy.wait('@saveNewReviewUnits').its('response.statusCode').should('be.within', 200, 299);
+    waitForSuccess('@saveNewReviewUnits');
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 }
@@ -96,8 +96,22 @@ export function modifyReviewUnits(name: string, unitNames: string[]): void {
   // The status assertion is the point: cy.wait alone lets a failed PATCH pass
   // this test green, and the missing unit then breaks the two navigation tests
   // that follow -- the exact CI picture that led to #1597.
-  cy.wait('@updateReview').its('response.statusCode').should('be.within', 200, 299);
+  waitForSuccess('@updateReview');
   cy.get('[data-cy="workspace-review-close"]').click();
+}
+
+/**
+ * Saves the configuration of the review opened in the review admin and waits for the API response,
+ * so that closing the admin or logging out right after cannot cancel the request (#1743)
+ */
+export function saveReviewConfig(): void {
+  cy.intercept('PATCH', '/api/workspaces/*/reviews/*').as('saveReviewConfig');
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.get('studio-lite-save-changes').within(() => {
+      cy.get('button').contains(json.workspace.save).click();
+    });
+  });
+  waitForSuccess('@saveReviewConfig');
 }
 
 /**

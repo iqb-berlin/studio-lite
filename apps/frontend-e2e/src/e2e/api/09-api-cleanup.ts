@@ -1,3 +1,4 @@
+import type { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import {
   modules
 } from '../../support/testData';
@@ -118,6 +119,12 @@ describe('Cleanup API tests', () => {
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
+      });
+      // The API answers 200 even for a key that matches nothing, so only the list shows a
+      // module left behind (#1750)
+      cy.getModulesAPI(Cypress.expose(`token_${Cypress.expose('username')}`)).then(resp => {
+        const keys = (resp.body as VeronaModuleInListDto[]).map(m => m.key);
+        expect(qs.filter(key => keys.includes(key)), 'modules left behind').to.deep.equal([]);
       });
     });
   });

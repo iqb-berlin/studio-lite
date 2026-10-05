@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { UnitMetadataService } from './unit-metadata.service';
 import UnitMetadata from '../entities/unit-metadata.entity';
@@ -63,6 +63,25 @@ describe('UnitMetadataService', () => {
 
       expect(repository.findBy).toHaveBeenCalledWith({ unitId });
       expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('getAllByUnitIds', () => {
+    it('should return the profiles of all given units in one query', async () => {
+      const mockData = [{ id: 1, unitId: 2 }, { id: 2, unitId: 3 }] as UnitMetadata[];
+      mockRepository.findBy.mockResolvedValue(mockData);
+
+      const result = await service.getAllByUnitIds([2, 3]);
+
+      expect(repository.findBy).toHaveBeenCalledWith({ unitId: In([2, 3]) });
+      expect(result).toEqual(mockData);
+    });
+
+    it('should not query for an empty list', async () => {
+      mockRepository.findBy.mockClear();
+
+      expect(await service.getAllByUnitIds([])).toEqual([]);
+      expect(repository.findBy).not.toHaveBeenCalled();
     });
   });
 

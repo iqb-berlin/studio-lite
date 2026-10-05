@@ -43,6 +43,9 @@ import { combineNotationAndLabel } from './metadata-value.util';
 import { SettingService } from '../services/setting.service';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitRichNoteService } from '../services/unit-rich-note.service';
+import {
+  entryHasContent, hasCodingScheme, hasItems, hasMetadataContent
+} from '../utils/unit-export-contents';
 
 // Comment shape as defined by the iqb unit-comments@0.1 specification
 // (https://iqb-specifications.github.io/unit-comments/). Fields without a
@@ -180,12 +183,17 @@ export class UnitDownloadClass {
       unitId,
       workspaceId
     );
+    // a missing flag means "add" -- see UnitDownloadSettingsDto
+    const withMetadata = unitDownloadSettings.addMetadata !== false;
     const unitXml = UnitDownloadClass.createUnitXML(
       unitExportConfig,
-      unitMetadata
+      unitMetadata,
+      withMetadata
     );
-    const hideNumbering = await unitService.buildHideNumberingMap(unitMetadata.metadata);
-    UnitDownloadClass.addMetadata(unitMetadata, zip, hideNumbering);
+    if (withMetadata) {
+      const hideNumbering = await unitService.buildHideNumberingMap(unitMetadata.metadata);
+      UnitDownloadClass.addMetadata(unitMetadata, zip, hideNumbering);
+    }
     const definitionData = await unitService.findOnesDefinition(unitId);
     UnitDownloadClass.addUnitDefinition(
       definitionData,
@@ -199,7 +207,10 @@ export class UnitDownloadClass {
       UnitDownloadClass.addComments(comments, unitXml, unitMetadata, zip);
     }
     const schemeData = await unitService.findOnesScheme(unitId);
-    UnitDownloadClass.addScheme(schemeData, unitXml, unitMetadata, zip);
+    if (unitDownloadSettings.addCodingScheme !== false) {
+      UnitDownloadClass.addScheme(schemeData, unitXml, unitMetadata, zip);
+    }
+    // the variables are part of the unit, with or without the scheme they are derived in
     UnitDownloadClass.addDerivedVariables(schemeData, unitXml);
     if (unitDownloadSettings.addRichNotes) {
       await UnitDownloadClass.addRichNotes(
@@ -220,7 +231,8 @@ export class UnitDownloadClass {
 
   static createUnitXML(
     unitExportConfig: UnitExportConfigDto,
-    unitMetadata: UnitPropertiesDto
+    unitMetadata: UnitPropertiesDto,
+    withMetadata = true
   ): XMLBuilder {
     return XmlBuilder.create(
       { version: '1.0' },
@@ -234,7 +246,7 @@ export class UnitDownloadClass {
             Label: unitMetadata.name,
             Description: unitMetadata.description,
             Reference:
-              Object.keys(unitMetadata.metadata).length !== 0 ?
+              withMetadata && UnitDownloadClass.hasMetadataFile(unitMetadata.metadata) ?
                 `${unitMetadata.key}.vomd` :
                 ''
           }
@@ -248,12 +260,18 @@ export class UnitDownloadClass {
     zip: AdmZip,
     hideNumbering: Record<string, Record<string, boolean>> = {}
   ): void {
-    if (Object.keys(unitMetadata.metadata).length !== 0) {
+    if (UnitDownloadClass.hasMetadataFile(unitMetadata.metadata)) {
       zip.addFile(
         `${unitMetadata.key}.vomd`,
         Buffer.from(JSON.stringify(UnitDownloadClass.toLegacyMetadataBlob(unitMetadata.metadata, hideNumbering)))
       );
     }
+  }
+
+  // The XML metadata file carries the unit's metadata and its items together, so it is written
+  // when either has content -- and never as an empty `{"profiles":[],"items":[]}`.
+  private static hasMetadataFile(metadata?: UnitMetadataValues): boolean {
+    return hasMetadataContent(metadata) || hasItems(metadata);
   }
 
   /**
@@ -341,6 +359,9 @@ export class UnitDownloadClass {
         DefinitionRef: {
           '@player': unitMetadata.player || '',
           '@editor': unitMetadata.editor || '',
+          ...(definitionData.definitionType && {
+            '@type': definitionData.definitionType
+          }),
           ...(unitMetadata.lastChangedDefinition && {
             '@lastChange': unitMetadata.lastChangedDefinition.toISOString()
           }),
@@ -626,29 +647,6 @@ export class UnitDownloadClass {
     return valid.length ? valid : undefined;
   }
 
-  // True when an entry carries actual content (a non-empty simple value or a
-  // non-empty value list) — the bar for reporting a drop; entries with empty
-  // values vanish silently by design since nothing is lost.
-  private static entryHasContent(entry?: MetadataValuesEntry): boolean {
-    if (!entry) return false;
-    if (typeof entry.value === 'string') return entry.value !== '';
-    return Array.isArray(entry.value) && entry.value.length > 0;
-  }
-
-  // True when stored metadata holds content the spec transform cannot carry
-  // over: profile entries with content, or keys of a pre-profile legacy
-  // shape. knownMetadataKeys is checked against UnitMetadataValues so a new
-  // field on the internal shape fails compilation here instead of producing
-  // false warnings.
-  private static hasUnexportedMetadata(metadata?: { profiles?: ProfileValues[] }): boolean {
-    if (!metadata) return false;
-    if (metadata.profiles?.some(
-      profile => (profile?.entries ?? []).some(entry => UnitDownloadClass.entryHasContent(entry))
-    )) return true;
-    const knownMetadataKeys = { profiles: true, items: true } satisfies Record<keyof UnitMetadataValues, boolean>;
-    return Object.keys(metadata).some(k => !(k in knownMetadataKeys));
-  }
-
   // Reports every text that carried actual content but was dropped because
   // it does not fit the language_coded_texts shape.
   private static reportDroppedTexts(
@@ -745,7 +743,7 @@ export class UnitDownloadClass {
       const profileScope = scope?.forProfile(profile.profileId);
       const entries = (profile.entries ?? []).flatMap(entry => {
         if (!entry?.id) {
-          if (UnitDownloadClass.entryHasContent(entry)) {
+          if (entryHasContent(entry)) {
             profileScope?.report('dropped-content.entry-not-exported');
           }
           return [];
@@ -1033,13 +1031,15 @@ export class UnitDownloadClass {
       zip.addFile(`${key}.voud`, Buffer.from(definitionData.definition));
       index.userInterface.definition = `${key}.voud`;
       index.userInterface.isDefinitionInline = false;
+      if (definitionData.definitionType) index.userInterface.type = definitionData.definitionType;
     }
     if (unitMetadata.lastChangedDefinition) {
       index.userInterface.modifiedAt = unitMetadata.lastChangedDefinition.toISOString();
     }
 
     const schemeData = await unitService.findOnesScheme(unitId);
-    if (schemeData?.scheme) {
+    // a missing flag means "add" -- see UnitDownloadSettingsDto
+    if (unitDownloadSettings.addCodingScheme !== false && hasCodingScheme(schemeData?.scheme)) {
       zip.addFile(`${key}.vocs.json`, Buffer.from(schemeData.scheme));
       index.codingScheme = {
         id: `${key}.vocs.json`,
@@ -1066,6 +1066,36 @@ export class UnitDownloadClass {
       }
     }
 
+    if (unitDownloadSettings.addMetadata !== false) {
+      UnitDownloadClass.addMetadataJSON(unitMetadata, index, zip, exportReport);
+    }
+
+    if (unitDownloadSettings.addItems !== false) {
+      UnitDownloadClass.addItemsJSON(unitMetadata, index, zip, exportReport);
+    }
+
+    const variables = UnitDownloadClass.buildVariablesJSON(definitionData, schemeData);
+    if (variables) {
+      zip.addFile(`${key}.vova.json`, Buffer.from(JSON.stringify(variables, null, 2)));
+      index.variables = {
+        id: `${key}.vova.json`,
+        type: 'unit-variables',
+        ...(unitMetadata.lastChangedDefinition && { modifiedAt: unitMetadata.lastChangedDefinition.toISOString() })
+      };
+    }
+
+    zip.addFile(`${key}.json`, Buffer.from(JSON.stringify(index, null, 2)));
+    unitsMetadata.push(unitMetadata);
+    if (usedPlayers.indexOf(unitMetadata.player) < 0) usedPlayers.push(unitMetadata.player);
+  }
+
+  private static addMetadataJSON(
+    unitMetadata: UnitPropertiesDto,
+    index: UnitIndexJson,
+    zip: AdmZip,
+    exportReport: ExportReportMessage[]
+  ): void {
+    const key = unitMetadata.key;
     const metadataScope = new ExportReportScope(key, `${key}.vomd.json`, exportReport);
     const reportedBefore = exportReport.length;
     const metadataValues = UnitDownloadClass
@@ -1083,7 +1113,7 @@ export class UnitDownloadClass {
       };
     } else if (
       exportReport.length === reportedBefore &&
-      UnitDownloadClass.hasUnexportedMetadata(unitMetadata.metadata)
+      hasMetadataContent(unitMetadata.metadata)
     ) {
       // stored metadata exists but none of it fits the spec and the
       // transform reported nothing specific (e.g. a legacy shape without
@@ -1091,7 +1121,15 @@ export class UnitDownloadClass {
       // the omission must not stay silent
       metadataScope.report('dropped-content.metadata-not-exported');
     }
+  }
 
+  private static addItemsJSON(
+    unitMetadata: UnitPropertiesDto,
+    index: UnitIndexJson,
+    zip: AdmZip,
+    exportReport: ExportReportMessage[]
+  ): void {
+    const key = unitMetadata.key;
     const itemsScope = new ExportReportScope(key, `${key}.voit.json`, exportReport);
     const items = UnitDownloadClass.transformItems(unitMetadata.metadata?.items, itemsScope);
     if (items.length) {
@@ -1102,20 +1140,6 @@ export class UnitDownloadClass {
         ...(unitMetadata.lastChangedMetadata && { modifiedAt: unitMetadata.lastChangedMetadata.toISOString() })
       };
     }
-
-    const variables = UnitDownloadClass.buildVariablesJSON(definitionData, schemeData);
-    if (variables) {
-      zip.addFile(`${key}.vova.json`, Buffer.from(JSON.stringify(variables, null, 2)));
-      index.variables = {
-        id: `${key}.vova.json`,
-        type: 'unit-variables',
-        ...(unitMetadata.lastChangedDefinition && { modifiedAt: unitMetadata.lastChangedDefinition.toISOString() })
-      };
-    }
-
-    zip.addFile(`${key}.json`, Buffer.from(JSON.stringify(index, null, 2)));
-    unitsMetadata.push(unitMetadata);
-    if (usedPlayers.indexOf(unitMetadata.player) < 0) usedPlayers.push(unitMetadata.player);
   }
 
   static buildVariablesJSON(

@@ -181,6 +181,48 @@ describe('UnitEditorComponent', () => {
     expect(store.setData).not.toHaveBeenCalled();
   });
 
+  // Editor spec 4.6 reports the format of the definition beside it (#1368).
+  describe('unitDefinitionType in a definition change', () => {
+    const notify = (extra: Record<string, unknown>) => {
+      const frame = document.createElement('iframe');
+      document.body.appendChild(frame);
+      component.iFrameElement = frame;
+      component.sessionId = 's1';
+      component.editorApiVersion = 4;
+      const store = { setData: jest.fn() } as unknown as UnitDefinitionStore;
+      jest.spyOn(workspaceServiceMock, 'getUnitDefinitionStore').mockReturnValue(store);
+      component.handleIncomingMessage(new MessageEvent('message', {
+        data: {
+          type: 'voeDefinitionChangedNotification',
+          sessionId: 's1',
+          variables: { v: 1 },
+          unitDefinition: '<xml />',
+          ...extra
+        },
+        source: frame.contentWindow as Window
+      }));
+      return store;
+    };
+
+    it('should hand the reported type to the store', () => {
+      const store = notify({ unitDefinitionType: 'aspect-unit-definition@4.12.0' });
+
+      expect(store.setData).toHaveBeenCalledWith({ v: 1 }, '<xml />', 'aspect-unit-definition@4.12.0');
+    });
+
+    it('should hand on no type when the editor reports none', () => {
+      const store = notify({});
+
+      expect(store.setData).toHaveBeenCalledWith({ v: 1 }, '<xml />', undefined);
+    });
+
+    it('should ignore a type that is not a string', () => {
+      const store = notify({ unitDefinitionType: { name: 'aspect' } });
+
+      expect(store.setData).toHaveBeenCalledWith({ v: 1 }, '<xml />', undefined);
+    });
+  });
+
   // Editor spec 4.0 dropped definitionReportPolicy, and EditorConfig is additionalProperties: false
   // from then on. Editors below that spec version default to 'on-demand' and would wait for a
   // voeGetDefinitionRequest that this app never sends, so they keep getting the property.
@@ -220,6 +262,30 @@ describe('UnitEditorComponent', () => {
       component.postStore(store);
 
       expect(editorConfigOf(target)).toHaveProperty('definitionReportPolicy', 'eager');
+    });
+
+    it('should send the definition type at the top level when it is known', () => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.editorApiVersion = 4;
+
+      component.postStore({
+        getData: () => ({ definition: 'def', definitionType: 'aspect-unit-definition@4.12.0' })
+      } as unknown as UnitDefinitionStore);
+
+      const message = target.postMessage.mock.calls[0][0];
+      expect(message.unitDefinitionType).toBe('aspect-unit-definition@4.12.0');
+      expect(message.editorConfig).not.toHaveProperty('unitDefinitionType');
+    });
+
+    it('should send no definition type when none is known', () => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.editorApiVersion = 4;
+
+      component.postStore(store);
+
+      expect(target.postMessage.mock.calls[0][0]).not.toHaveProperty('unitDefinitionType');
     });
   });
 });

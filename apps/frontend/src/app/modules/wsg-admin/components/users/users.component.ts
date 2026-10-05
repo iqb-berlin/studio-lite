@@ -5,7 +5,7 @@ import {
 import {
   ViewChild, Component, OnInit, OnDestroy
 } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -43,12 +43,16 @@ import { EntriesDividerComponent } from '../../../../components/entries-divider/
 })
 export class UsersComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
+  private accessRightsRequest?: Subscription;
   objectsDatasource = new MatTableDataSource<UserFullDto>([]);
   displayedColumns = ['name', 'displayName', 'isAdmin', 'email', 'description'];
   tableSelectionCheckbox = new SelectionModel <UserFullDto>(true, []);
   tableSelectionRow = new SelectionModel <UserFullDto>(false, []);
   selectedUser = 0;
   userWorkspaces = new WorkspaceToCheckCollection([]);
+  // True while the rights of the selected user are on their way: a role picked now
+  // would be reset by their arrival, so the radio buttons stay disabled until then.
+  isLoadingAccessRights = false;
   readonly accessLevels = ACCESS_LEVELS;
 
   @ViewChild(MatSort) sort = new MatSort();
@@ -79,14 +83,14 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   onRoleChange(workspace: WorkspaceChecked, level: number): void {
-    if (!this.selectedUser) return;
+    if (!this.selectedUser || this.isLoadingAccessRights) return;
     workspace.accessLevel = level;
     workspace.isChecked = true;
     this.userWorkspaces.updateHasChanged();
   }
 
   onRoleClick(workspace: WorkspaceChecked, level: number): void {
-    if (!this.selectedUser) return;
+    if (!this.selectedUser || this.isLoadingAccessRights) return;
     if (workspace.isChecked && workspace.accessLevel === level) {
       workspace.accessLevel = 0;
       workspace.isChecked = false;
@@ -101,13 +105,21 @@ export class UsersComponent implements OnInit, OnDestroy {
         this.translateService.instant('warning'),
         { duration: 3000 });
     }
+    // A late answer for the previous user would overwrite the rights of this one.
+    if (this.isLoadingAccessRights) {
+      this.accessRightsRequest?.unsubscribe();
+      this.isLoadingAccessRights = false;
+      this.appService.dataLoading = false;
+    }
     if (this.selectedUser) {
       this.appService.dataLoading = true;
-      this.backendService.getWorkspacesByUser(this.selectedUser)
+      this.isLoadingAccessRights = true;
+      this.accessRightsRequest = this.backendService.getWorkspacesByUser(this.selectedUser)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(
           (dataResponse: UsersWorkspaceInListDto[]) => {
             this.userWorkspaces.setChecks(dataResponse);
+            this.isLoadingAccessRights = false;
             this.appService.dataLoading = false;
           }
         );
@@ -128,6 +140,8 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   saveWorkspaces(): void {
+    // The entries still hold the edits of the user selected before.
+    if (this.isLoadingAccessRights) return;
     if (this.selectedUser > 0) {
       if (this.userWorkspaces.hasChanged) {
         this.appService.dataLoading = true;

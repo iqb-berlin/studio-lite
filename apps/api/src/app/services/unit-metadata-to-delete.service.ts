@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 import UnitMetadataToDelete from '../entities/unit-metadata-to-delete.entity';
 
 /**
@@ -28,5 +28,15 @@ export class UnitMetadataToDeleteService {
 
   async getOneByUnit(unitId: number): Promise<UnitMetadataToDelete> {
     return this.unitMetadataToDeleteRepository.findOneBy({ unitId: unitId });
+  }
+
+  /** Which of the given units carry the marker -- one query for all of them. */
+  async findMarkedUnitIds(unitIds: number[]): Promise<Set<number>> {
+    if (!unitIds.length) return new Set();
+    const markers = await this.unitMetadataToDeleteRepository.find({
+      where: { unitId: In(unitIds) },
+      select: { unitId: true }
+    });
+    return new Set(markers.map(marker => marker.unitId));
   }
 }

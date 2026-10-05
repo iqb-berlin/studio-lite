@@ -20,7 +20,9 @@ import {
   printReview,
   deleteReview,
   modifyReviewUnits,
-  goToReviewAdmin
+  goToReviewAdmin,
+  saveReviewConfig,
+  waitForSuccess
 } from '../../../support/helpers';
 import { grantRemovePrivilegeAtWs } from '../../../support/helpers/group-admin';
 
@@ -72,9 +74,7 @@ describe('Unit Reviews', () => {
       cy.get('mat-form-field').contains(json['booklet-config'].unitTitle.label).click();
       cy.get('mat-option').contains(json['booklet-config'].unitTitle.ON).click();
 
-      cy.get('studio-lite-save-changes').within(() => {
-        cy.get('button').contains(json.workspace.save).click();
-      });
+      saveReviewConfig();
       cy.get('[data-cy="workspace-review-close"]').click();
     });
   });
@@ -134,7 +134,7 @@ describe('Unit Reviews', () => {
     cy.intercept('GET', '/api/reviews/*').as('getReview');
     cy.visit('/');
     openReview(review);
-    cy.wait('@getReview').its('response.statusCode').should('be.within', 200, 299);
+    waitForSuccess('@getReview');
     cy.get('studio-lite-unit-nav', { timeout: 15000 }).within(() => {
       cy.get('.mat-mdc-list-item:contains("3")', { timeout: 10000 }).should('exist');
     });
@@ -176,7 +176,9 @@ describe('Unit Reviews', () => {
   });
 
   it('loads the unit player and allows navigation through the review sequence', () => {
-    // We should now be in the first unit
+    cy.visit('/');
+    openReview(review);
+    startReview();
     cy.url().should('include', '/u/0');
 
     // Check UnitNavComponent in the header
@@ -197,8 +199,19 @@ describe('Unit Reviews', () => {
   });
 
   it('allows users to submit and view comments on units during the review', () => {
-    cy.get('studio-lite-add-comment-button').should('be.visible');
+    cy.intercept('GET', '/api/reviews/*').as('getReview');
+    cy.intercept('GET', '/api/reviews/*/units/*/definition').as('getUnitDefinition');
+    cy.intercept('POST', '/api/reviews/*/units/*/comments').as('postReviewComment');
+
+    cy.visit('/');
+    openReview(review);
+    waitForSuccess('@getReview');
+    startReview();
+    waitForSuccess('@getUnitDefinition');
+
+    cy.get('studio-lite-add-comment-button', { timeout: 15000 }).should('be.visible');
     cy.get('studio-lite-add-comment-button button').click();
+
     // Check CommentDialogComponent
     cy.get('mat-dialog-container').should('be.visible');
     cy.get('mat-dialog-container').within(() => {
@@ -206,6 +219,7 @@ describe('Unit Reviews', () => {
         cy.contains(json.review.comment).should('exist');
         cy.get('tiptap-editor').type('Test comment from Review');
         cy.contains('button', 'send').click({ force: true });
+        waitForSuccess('@postReviewComment');
         cy.get('button').contains(json.dialogs.close).should('exist').click({ force: true });
       });
     });
@@ -213,7 +227,10 @@ describe('Unit Reviews', () => {
   });
 
   it('displays unit technical details in the expandable info panel', () => {
-    cy.get('studio-lite-unit-info').should('be.visible');
+    cy.visit('/');
+    openReview(review);
+    startReview();
+    cy.get('studio-lite-unit-info', { timeout: 15000 }).should('be.visible');
 
     // Open info panel
     cy.get('studio-lite-unit-info').within(() => {
@@ -226,6 +243,12 @@ describe('Unit Reviews', () => {
   });
 
   it('shows the finish page upon completion and allows returning to the review', () => {
+    cy.intercept('GET', '/api/reviews/*').as('getReview');
+    cy.visit('/');
+    openReview(review);
+    waitForSuccess('@getReview');
+    startReview();
+
     // Navigate to the end (click the finish page option container at the end of the unit nav list)
     cy.get('studio-lite-unit-nav').within(() => {
       cy.get('.unit-list > div').last().click({ force: true });
@@ -254,6 +277,16 @@ describe('Unit Reviews', () => {
   });
 
   it('clears the new comment dot after viewing comments as different users', () => {
+    // Ensure an unread comment from another user (fadmin) exists on the unit
+    cy.visitWs(primaryWorkspace);
+    cy.get('mat-row').contains('M6_AK0012').click();
+    clickIndexTabWorkspace('comments');
+    cy.intercept('POST', '/api/workspaces/*/units/*/comments').as('createWorkspaceComment');
+    cy.get('tiptap-editor').type('Unread comment for dot test');
+    cy.contains('button', 'send').click();
+    waitForSuccess('@createWorkspaceComment');
+    clickIndexTabWorkspace('properties');
+
     loginWithUser(standardUser.username, standardUser.password);
     cy.visitWs(primaryWorkspace);
     cy.intercept('PATCH', '/api/workspaces/*/units/*/comments').as('markCommentsSeen');
@@ -266,7 +299,7 @@ describe('Unit Reviews', () => {
     cy.get('mat-row').contains('M6_AK0012').click();
     clickIndexTabWorkspace('comments');
     cy.get('studio-lite-comments', { timeout: 15000 }).should('be.visible');
-    cy.wait('@markCommentsSeen').its('response.statusCode').should('be.within', 200, 299);
+    waitForSuccess('@markCommentsSeen');
     clickIndexTabWorkspace('properties');
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments', { timeout: 15000 }).should('have.css', 'opacity', '0');
@@ -289,9 +322,7 @@ describe('Unit Reviews', () => {
         cy.get(`input[placeholder="${json.workspace['review-password']}"]`).should('be.visible');
         cy.get(`input[placeholder="${json.workspace['review-password']}"]`).clear();
         cy.get(`input[placeholder="${json.workspace['review-password']}"]`).type('rev-1234');
-        cy.get('studio-lite-save-changes').within(() => {
-          cy.get('button').contains(json.workspace.save).click();
-        });
+        saveReviewConfig();
         cy.get('[data-cy="workspace-review-close"]').click();
         logout();
 
@@ -346,11 +377,7 @@ describe('Unit Reviews', () => {
           .check({ force: true });
       });
 
-      cy.intercept('PATCH', '/api/workspaces/*/reviews/*').as('saveCodingReviewConfig');
-      cy.get('studio-lite-save-changes').within(() => {
-        cy.get('button').contains(json.workspace.save).click();
-      });
-      cy.wait('@saveCodingReviewConfig').its('response.statusCode').should('be.within', 200, 299);
+      saveReviewConfig();
       cy.get('[data-cy="workspace-review-close"]').click();
     });
   });

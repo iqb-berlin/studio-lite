@@ -242,7 +242,7 @@ scripts              install.sh, update.sh, make targets, migration helpers
 ## How work flows through this repository
 
 ```
-issue → branch → pull request → green pipeline → review → merge into develop → release to main
+issue → branch → /code-review → pull request → green pipeline → review → merge into develop → release to main
 ```
 
 ### Branches
@@ -265,11 +265,14 @@ A branch name carries the issue it belongs to: `fix/1629-group-admin-guard`.
 ### From issue to merge
 
 1. **Branch off `develop`**, named as above.
-2. **Reference the issue in the commit subject**, e.g. `(#1629)`. Do **not** write `Closes #1629`
+2. **Review before committing.** Once the change is finished and verified, run `/code-review` on
+   the uncommitted diff — committed, that diff is empty and the review finds nothing. Then check
+   `git status` for files the review left behind. The details are in `rules.md`.
+3. **Reference the issue in the commit subject**, e.g. `(#1629)`. Do **not** write `Closes #1629`
    in the pull request: it closes the ticket on merge and skips the board column the team works
    from. Referencing is fine, keywords are not.
-3. **Open a pull request against `develop`.**
-4. **The pipeline runs on GitLab**, mirrored from GitHub. The only workflow in `.github/workflows`
+4. **Open a pull request against `develop`.**
+5. **The pipeline runs on GitLab**, mirrored from GitHub. The only workflow in `.github/workflows`
    builds the documentation; besides it GitHub runs CodeQL and Dependabot from their default
    setups, and nothing of that gates a merge. A push to a branch runs `build-app`, `test-app`,
    `lint-app`, `typecheck-app` and `audit-app`. On a pull request the database jobs come along; on
@@ -277,16 +280,19 @@ A branch name carries the issue it belongs to: `fix/1629-group-admin-guard`.
    `database/changelog/`, so a new changeset alone does not bring them out. **The e2e suite runs
    only on a pull request against `develop`**, and there only the API specs and Chrome
    automatically — Firefox, Edge and the mobile viewports are manual jobs on the pipeline page.
-5. **Read the jobs, not the badge.** The badge at the top of this file is `main`'s last pipeline,
-   not yours. And in the pipeline, `test-app`, `lint-app`, `audit-app` and every e2e job are
-   `allow_failure: true`: a red unit test leaves the run green with a warning. What gates a merge
-   is `build-app`, `test-db` and `typecheck-app` — the last one deliberately, because Cypress
+6. **Read the jobs, not the badge.** The badge at the top of this file is `main`'s last pipeline,
+   not yours. In the pipeline, every job gates a merge except `audit-app`, the `check-*` rule
+   jobs, the image scans and the manual browser jobs (Firefox, Edge and the mobile viewports),
+   which are `allow_failure: true`. Since #1657 that includes `test-app`, `lint-app` and the
+   automatic e2e jobs (`test-app-e2e-api`, `test-app-e2e-ui-admin-chrome`,
+   `test-app-e2e-ui-workspace-chrome`): a flaky spec blocks the merge just like a real regression,
+   so read the log before restarting the job. `typecheck-app` gates deliberately, because Cypress
    transpiles the e2e sources without type checking and a renamed member surfaces nowhere else
-   (#1586, #1590). `build-app` is `nx affected --base=HEAD~1`, so it builds what the last commit
-   touched, not the branch.
-6. **Rebase when `develop` moves**, then force-push with `--force-with-lease`. A pipeline result
+   (#1586, #1590). `build-app`, `test-app` and `lint-app` run `nx affected --base=HEAD~1`, so they
+   cover what the last commit touched, not the branch.
+7. **Rebase when `develop` moves**, then force-push with `--force-with-lease`. A pipeline result
    belongs to a commit, not to a pull request.
-7. **Merge as a merge commit** once the pipeline is green.
+8. **Merge as a merge commit** once the pipeline is green.
 
 Tickets live on [project board 18](https://github.com/orgs/iqb-berlin/projects/18). A card moves to
 *In progress* when work starts and to *zu testen* once the fix is merged into `develop`; a change

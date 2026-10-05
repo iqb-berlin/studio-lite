@@ -89,6 +89,12 @@ export class UnitItemService {
     return this.repo(manager).findOneBy({ uuid: uuid });
   }
 
+  /** The items of all the given units, without their metadata, in one query. */
+  async getAllByUnitIds(unitIds: number[]): Promise<UnitItemDto[]> {
+    if (!unitIds.length) return [];
+    return this.repo().find({ where: { unitId: In(unitIds) } });
+  }
+
   async getAllByUnitIdWithMetadata(unitId: number, manager?: EntityManager): Promise<UnitItemWithMetadataDto[]> {
     return Promise.all((await this.getAllByUnitId(unitId, 'id', 'ASC', manager))
       .map(async item => ({

@@ -1689,6 +1689,38 @@ Cypress.Commands.add('getReviewWindowAPI', (reviewId:string, token:string) => {
   });
 });
 
+// The review as a reviewer opens it: GET /api/reviews/{review_id}, with the units of its navigation
+Cypress.Commands.add('getReviewAsReviewerAPI', (reviewId: string, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/reviews/${reviewId}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
+// A vote on a comment in a review: 'up', 'down' or null to take it back
+Cypress.Commands.add(
+  'voteCommentReviewAPI',
+  (reviewId: string, unitId: string, commentId: string, vote: 'up' | 'down' | null, token: string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'POST',
+      url: `/api/reviews/${reviewId}/units/${unitId}/comments/${commentId}/vote`,
+      headers: {
+        'app-version': Cypress.expose('version'),
+        authorization
+      },
+      body: { vote },
+      failOnStatusCode: false
+    });
+  }
+);
+
 // 67
 Cypress.Commands.add('getReviewPropertiesAPI', (reviewId:string, unitId:string, token:string) => {
   const authorization = `bearer ${token}`;
@@ -2005,6 +2037,20 @@ Cypress.Commands.add('importUnitsAPI', (wsId: string, zipContent: string, token:
   const formData = new FormData();
   formData.append('files', Cypress.Blob.binaryStringToBlob(zipContent, 'application/zip'), 'export.zip');
   postUnitFiles(wsId, formData, token);
+});
+
+// Which optional export files each unit of the workspace would fill, as the export dialog asks it
+Cypress.Commands.add('getUnitExportContentsAPI', (wsId: string, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: `/api/workspaces/${wsId}/units/export-contents`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
 });
 
 // The items of all units, as the admin view "Unit-Items" lists them

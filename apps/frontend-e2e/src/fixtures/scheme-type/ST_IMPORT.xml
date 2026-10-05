@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<Unit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://w3id.org/iqb/spec/unit-xml/17.6">
+  <Metadata>
+    <Id>ST_IMPORT</Id>
+    <Label>Scheme type</Label>
+  </Metadata>
+  <DefinitionRef player="iqb-player-aspect@3.0" editor="iqb-editor-aspect@3.0">ST_IMPORT.voud</DefinitionRef>
+  <CodingSchemeRef schemer="iqb-schemer@2.6" schemeType="iqb-standard@3.2">ST_IMPORT.vocs</CodingSchemeRef>
+</Unit>

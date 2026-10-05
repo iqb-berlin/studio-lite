@@ -150,3 +150,49 @@
   - `UnitImportData` and `UnitImportJsonData` read the import formats for `WorkspaceService`.
   - `findOrphanedSessionIds` in `utils/` is asked by both `admin-user-controller.ts` (which displays them) and `SessionCleanupService` (which deletes them), so the two cannot drift into asking it in different words.
 - **Rationale**: The services here run to a thousand lines and more, and what can be named on its own is what leaves without a fight. Once out, it is testable without the service's dependencies — and a second caller can have it.
+
+## Workflow: Pull Requests and Tickets
+
+Branches, the pipeline and the board columns are described in the README under *How work flows through this repository*. Read it before creating a branch, opening a pull request or moving a card on the board. The rules below begin with the two steps before any of that, the plan and the review, then repeat the two points most easily got wrong and add what the README leaves open.
+
+### Before the Work: A Plan
+- **Rule**: Every ticket starts with a plan, agreed with the person you are working for before anything is changed — a small ticket as well, whose plan is then three lines. Work out the plan in Claude Code's plan mode (Shift+Tab), which edits nothing until the plan is approved.
+- **Rule**: The plan states decisions, not a list of options:
+  - **what is asked for**, checked against the architecture: the Verona editor authors a unit, the player plays it, the studio hosts both and stores what they hand back. A finding that belongs to a Verona module is not work for this repository.
+  - **the cause, with evidence** — reproduced or measured, not assumed.
+  - **whether the fix is reachable**: who calls the code, and whether something later overwrites what it does.
+  - **the scope**, and what is left out and becomes an issue of its own.
+  - **the tests**, including whether an end-to-end test of its own is possible — that decides the column after the merge (see *Board 18*).
+  - **the places at risk**: a database changeset, e2e selectors (no compiler sees Cypress), what frontend and API share in `libs/`.
+- **Rule**: The plan goes into the conversation, not into the ticket; the ticket gets the result. Approving the plan is what moves the card to *In progress*. A plan that ends in a question, or in not building it, moves no card.
+  - **Rationale**: A misunderstanding caught in a plan costs one message; caught in review it costs a pull request and a pipeline run. A session does not know what earlier sessions decided or rejected — without a plan, the first time a person sees what it is about to do is the finished pull request.
+
+### Before the Commit: A Review
+- **Rule**: Finish the change and verify it (tests, lint, typecheck), but do not commit it yet. Run `/code-review` on it first; only then commit, push and open the pull request.
+  - **Rationale**: A review before the pull request can still turn the change around — a regression, or a fix that compiles, passes every suite and does nothing. After the pull request every such round costs a pipeline run.
+- **Rule**: `/code-review` without a target reviews the uncommitted diff (`git diff HEAD`). Once the change is committed that diff is empty and the review finds nothing; then name the scope explicitly (`/code-review origin/develop..HEAD`, or the pull request number).
+- **Rule**: After the review, check `git status`. Review agents can leave files of their own in the working tree; they do not belong in the commit.
+
+### Pull Requests
+- **Rule**: Never write `Closes #…`, `Fixes #…` or `Resolves #…` in a commit message or pull request text. Reference the issue as `(#1629)`.
+  - **Rationale**: GitHub closes the ticket on merge, and the board moves it to *Done* past *zu testen* and *Zu veröffentlichen*.
+- **Rule**: Force-push only with `--force-with-lease`, never with `--force`.
+  - **Rationale**: `--force` silently overwrites whatever someone else pushed to the branch in the meantime.
+- **Rule**: A pull request stays within the goal of its issue. What turns up on the way and belongs elsewhere — in review as well — becomes an issue of its own, not a commit on the branch.
+  - **Rationale**: Every extra topic lengthens the review, and every further round costs a pipeline run of about 25 minutes.
+
+### Board 18
+- **Rule**: A ticket goes on the board of its own repository, even when it comes out of work on another one: studio-lite on [board 18](https://github.com/orgs/iqb-berlin/projects/18), verona-modules-aspect on [board 13](https://github.com/orgs/iqb-berlin/projects/13).
+- **Rule**: `gh issue create` alone leaves a studio-lite ticket invisible — add it to board 18 as well (`gh project item-add 18 --owner iqb-berlin --url <issue-url>`). A new card goes to *Neue Tickets*; *Priority* and *Aufwand* stay empty, the team estimates them.
+- **Rule**: Move a card to *In progress* once the plan is approved, and only while working towards a pull request. The column tells colleagues that something is being built; looking into a ticket, or an analysis that ends in a question, is not that yet.
+- **Rule**: After the merge the test decides the column. With an end-to-end test of its own the change goes to *Zu veröffentlichen*, without one to *zu testen*, where someone else builds the test.
+  - "Of its own" means a test that checks exactly this change and would fail without it. An existing spec that keeps passing does not count.
+  - **Exception**: Upgrades, CI and dependency changes without behaviour of their own (Angular, NestJS, ESLint, the release gate) go to *Zu veröffentlichen*; the whole suite is their test.
+- **Rule**: *In review* means released and awaiting validation by the reporters, not code-reviewed. A ticket stays open through all of these columns; do not close it by hand.
+
+### Tickets
+- **Rule**: In a ticket written by someone else, leave their text as it is and keep exactly **one** comment headed "Stand", edited whenever something new is known. In a ticket of your own the description is the current state: edit it rather than append to it.
+  - **Rationale**: A ticket is read for where things stand, not as a log of how anyone got there.
+- **Rule**: Keep comments short: the result, its consequence, one reference (a file, a commit, a pull request). Approaches that were dropped stay out of the ticket.
+- **Rule**: A question goes to the person you are working for, not into the ticket.
+  - **Rationale**: A question in a ticket makes work for everyone who reads it and is outdated the next day.

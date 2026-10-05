@@ -85,6 +85,7 @@ describe('UnitPreviewComponent', () => {
     } as never;
 
     moduleServiceStub = {
+      players: {},
       widgets: {},
       loadWidgets: jest.fn().mockResolvedValue(undefined),
       getModuleHtml: jest.fn().mockResolvedValue('<html lang="">Widget</html>')
@@ -380,6 +381,113 @@ describe('UnitPreviewComponent', () => {
       component.postStore(store);
 
       expect(playerConfigOf(target)).not.toHaveProperty('stateReportPolicy');
+    });
+
+    it('should send the definition type at the top level when it is known', () => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.playerApiVersion = 6;
+
+      component.postStore({
+        getData: () => ({ definition: 'def', definitionType: 'aspect-unit-definition@4.12.0' })
+      } as never);
+
+      const message = target.postMessage.mock.calls[0][0];
+      expect(message.unitDefinitionType).toBe('aspect-unit-definition@4.12.0');
+      expect(message.playerConfig).not.toHaveProperty('unitDefinitionType');
+    });
+
+    it('should send no definition type when none is known', () => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.playerApiVersion = 6;
+
+      component.postStore(store);
+
+      expect(target.postMessage.mock.calls[0][0]).not.toHaveProperty('unitDefinitionType');
+    });
+  });
+
+  describe('definition type warning', () => {
+    const aspectModel = 'aspect-unit-definition@>=4.0 <=4.12';
+    const player = (key: string, version: string, model?: string) => new VeronaModuleClass({
+      key,
+      sortKey: key,
+      metadata: {
+        id: key, name: key.split('@')[0], version, model, type: 'PLAYER'
+      }
+    } as never);
+    const storeWith = (definitionType?: string) => ({
+      getData: () => ({ definition: 'def', definitionType })
+    }) as never;
+
+    beforeEach(() => {
+      component.postMessageTarget = { postMessage: jest.fn() } as never;
+      component.playerApiVersion = 6;
+      component.playerName = 'iqb-player-aspect@3.0';
+    });
+
+    it('should warn and name a fitting player when the selected one does not read the format', () => {
+      moduleServiceStub.players = {
+        'iqb-player-aspect@3.0': player('iqb-player-aspect@3.0', '3.0.1', aspectModel),
+        'iqb-player-aspect@4.0': player('iqb-player-aspect@4.0', '4.0.0', 'aspect-unit-definition@>=5.0 <=5.2')
+      };
+
+      component.postStore(storeWith('aspect-unit-definition@5.1.0'));
+
+      expect(component.definitionTypeWarning).toContain('workspace.definition-type-incompatible');
+      expect(component.definitionTypeWarning).toContain('workspace.definition-type-alternatives');
+    });
+
+    it('should say so when no installed player reads the format', () => {
+      moduleServiceStub.players = {
+        'iqb-player-aspect@3.0': player('iqb-player-aspect@3.0', '3.0.1', aspectModel)
+      };
+
+      component.postStore(storeWith('aspect-unit-definition@5.1.0'));
+
+      expect(component.definitionTypeWarning).toContain('workspace.definition-type-incompatible');
+      expect(component.definitionTypeWarning).toContain('workspace.definition-type-no-alternative');
+    });
+
+    it('should not warn when the player reads the format', () => {
+      moduleServiceStub.players = {
+        'iqb-player-aspect@3.0': player('iqb-player-aspect@3.0', '3.0.1', aspectModel)
+      };
+
+      component.postStore(storeWith('aspect-unit-definition@4.12.0'));
+
+      expect(component.definitionTypeWarning).toBe('');
+    });
+
+    it('should not warn when the unit has no type', () => {
+      moduleServiceStub.players = {
+        'iqb-player-aspect@3.0': player('iqb-player-aspect@3.0', '3.0.1', aspectModel)
+      };
+
+      component.postStore(storeWith(undefined));
+
+      expect(component.definitionTypeWarning).toBe('');
+    });
+
+    it('should not warn when the player declares no model', () => {
+      moduleServiceStub.players = {
+        'iqb-player-aspect@3.0': player('iqb-player-aspect@3.0', '2.12.6', '')
+      };
+
+      component.postStore(storeWith('aspect-unit-definition@5.1.0'));
+
+      expect(component.definitionTypeWarning).toBe('');
+    });
+
+    it('should drop the warning of the unit left behind', () => {
+      component.definitionTypeWarning = 'old warning';
+      component.unitLoaded.next(true);
+      workspaceServiceStub.loadUnitProperties = jest.fn().mockReturnValue(new Subject<void>());
+
+      component.onSelectedUnitChange();
+
+      expect(component.definitionTypeWarning).toBe('');
     });
   });
 

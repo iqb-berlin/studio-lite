@@ -15,6 +15,8 @@ export class UnitImportData {
   transcript: string;
   reference: string;
   definition: string;
+  // `type` of <DefinitionRef>/<Definition>; '' when the file does not say
+  definitionType = '';
   definitionFileName: string;
   commentsFileName: string;
   richNotesFileName: string;
@@ -59,7 +61,9 @@ export class UnitImportData {
     const codingSchemeElement = xmlDocument('CodingSchemeRef').first();
     if (codingSchemeElement.length > 0) {
       this.schemer = codingSchemeElement.attr('schemer');
-      this.schemeType = codingSchemeElement.attr('schemetype');
+      // The parser runs in XML mode and is case-sensitive: the export and unit-xml 17.6 write
+      // `schemeType` (#1759). The lower-case spelling stays as a fallback for files written by hand.
+      this.schemeType = codingSchemeElement.attr('schemeType') ?? codingSchemeElement.attr('schemetype');
       const lastChangedScheme = codingSchemeElement.attr('lastChange');
       if (lastChangedScheme) this.lastChangedScheme = new Date(lastChangedScheme);
       this.codingSchemeFileName = this.resolveCompanionFile(codingSchemeElement.text());
@@ -84,6 +88,7 @@ export class UnitImportData {
     if (definitionRefElement.length > 0) {
       this.player = definitionRefElement.attr('player');
       this.editor = definitionRefElement.attr('editor');
+      this.definitionType = definitionRefElement.attr('type') || '';
       const lastChangedDefinition = definitionRefElement.attr('lastChange');
       if (lastChangedDefinition) this.lastChangedDefinition = new Date(lastChangedDefinition);
       this.definitionFileName = this.resolveCompanionFile(definitionRefElement.text());
@@ -92,6 +97,7 @@ export class UnitImportData {
       if (definitionElement.length > 0) {
         this.player = definitionElement.attr('player');
         this.editor = definitionElement.attr('editor');
+        this.definitionType = definitionElement.attr('type') || '';
         const lastChangedDefinition = definitionElement.attr('lastChange');
         if (lastChangedDefinition) this.lastChangedDefinition = new Date(lastChangedDefinition);
         this.definition = definitionElement.text() || '';

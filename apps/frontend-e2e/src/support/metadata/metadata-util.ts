@@ -2,7 +2,8 @@ import { IqbProfile, IqbProfileExamples, RegistryProfile } from './iqbProfile';
 import {
   clickIndexTabAdmin,
   clickIndexTabWsgAdmin,
-  goToWsMenu
+  goToWsMenu,
+  waitForSuccess
 } from '../helpers';
 
 function getCheckBoxByName(name: string) {
@@ -95,9 +96,7 @@ export function checkProfile(profile: string): void {
     'GET',
     '/api/metadata/profiles?url=https://w3id.org/iqb/p99/item/'
   ).as(alias);
-  cy.get('[data-cy="shared-profiles-select-profile-title"]')
-    .contains(profile)
-    .click();
+  // A profile of the new registry is a checkbox of its own, without a panel to open first (#1549)
   cy.get('[data-cy="shared-profiles-select-profile"]')
     .filter(`:contains(${profile})`)
     .click();
@@ -108,13 +107,8 @@ export function checkMultipleProfiles(profiles: string[]): void {
     'GET',
     '/api/metadata/profiles?url=https://w3id.org/iqb/p99/item/'
   ).as('selectedProfiles');
-  cy.wait('@selectedProfiles')
-    .its('response.statusCode')
-    .should('to.be.oneOf', [200, 304]);
+  waitForSuccess('@selectedProfiles');
   profiles.forEach(profile => {
-    cy.get('[data-cy="shared-profiles-select-profile-title"]')
-      .contains(profile)
-      .click();
     cy.get('[data-cy="shared-profiles-select-profile"]')
       .filter(`:contains(${profile})`)
       .click();

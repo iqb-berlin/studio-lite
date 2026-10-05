@@ -114,7 +114,11 @@ export class ReviewService {
       workspaceName: workspaceData.name,
       workspaceGroupId: workspaceData.workspaceGroup.id,
       workspaceGroupName: workspaceData.workspaceGroup.name,
-      units: units.map(u => u.unitId)
+      // The same units isUnitInReview lets through: a unit moved to another workspace since would
+      // stand in the review's navigation and fail as soon as it is opened. Its entry stays until the
+      // review is saved again -- a unit handed back from a drop box before that is part of it again,
+      // but saving writes what the dialog shows, and it no longer shows this unit.
+      units: await this.unitsOfWorkspace(units.map(u => u.unitId), review.workspaceId)
     };
   }
 
@@ -204,6 +208,10 @@ export class ReviewService {
       // to a drop box does that too -- stays in the saved list the dialog sends back, so refusing
       // the save would leave the review unsavable for a unit nobody can see in it any more.
       const unitIds = await this.unitsOfWorkspace(newData.units, workspaceId);
+      const leftOut = [...new Set(newData.units.map(Number))].filter(id => !unitIds.includes(id));
+      if (leftOut.length) {
+        this.logger.warn(`Review units not in workspace ${workspaceId} left out: ${leftOut.join(', ')}`);
+      }
       await this.reviewUnitRepository.delete({ reviewId: reviewId });
       this.logger.log(`Set units for review with id: ${reviewId}`);
       const newReviewUnits = unitIds.map((unitId, index) => this.reviewUnitRepository.create({
@@ -232,12 +240,7 @@ export class ReviewService {
       select: { id: true }
     });
     const inWorkspace = new Set(units.map(unit => unit.id));
-    const kept = distinctIds.filter(id => inWorkspace.has(id));
-    if (kept.length < distinctIds.length) {
-      this.logger.warn(`Review units not in workspace ${workspaceId} left out: ` +
-        `${distinctIds.filter(id => !inWorkspace.has(id)).join(', ')}`);
-    }
-    return kept;
+    return distinctIds.filter(id => inWorkspace.has(id));
   }
 
   /**

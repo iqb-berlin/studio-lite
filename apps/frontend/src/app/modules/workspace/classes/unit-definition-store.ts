@@ -29,8 +29,14 @@ export class UnitDefinitionStore {
    * first, the one studio stores and hands on (see `toVariableInfoV1`), and compared regardless of
    * spelling and key order: an editor following 2.0 would otherwise mark every unit as changed the
    * moment it reports its unchanged list (#1606).
+   *
+   * The definition's format (`unitDefinitionType`) travels with the definition and never on its
+   * own: reported with an unchanged definition it is not a change, or every unit saved before the
+   * format was recorded would count as edited the moment an editor that reports it opens it.
+   * Reported by nobody alongside a changed definition, it is dropped, since the stored one may no
+   * longer describe what the editor wrote (#1368).
    */
-  setData(newVariables: VariableInfoInEitherSpelling[], newDefinition: string) {
+  setData(newVariables: VariableInfoInEitherSpelling[], newDefinition: string, newDefinitionType?: string) {
     const variables = newVariables ? toVariableInfoListV1(newVariables) : newVariables;
     if (sameVariableLists(variables, this.originalData.variables)) {
       if (this.changedData.variables) delete this.changedData.variables;
@@ -41,6 +47,11 @@ export class UnitDefinitionStore {
       if (this.changedData.definition) delete this.changedData.definition;
     } else {
       this.changedData.definition = newDefinition;
+    }
+    if (this.changedData.definition !== undefined && newDefinitionType) {
+      this.changedData.definitionType = newDefinitionType;
+    } else {
+      delete this.changedData.definitionType;
     }
     this.dataChange.emit();
   }
@@ -54,7 +65,12 @@ export class UnitDefinitionStore {
   }
 
   getData(): UnitDefinitionDto {
-    return { ...this.originalData, ...this.changedData };
+    const data = { ...this.originalData, ...this.changedData };
+    // a changed definition without a type of its own must not inherit the stored one
+    if (this.changedData.definition !== undefined && !this.changedData.definitionType) {
+      delete data.definitionType;
+    }
+    return data;
   }
 
   applyChanges() {

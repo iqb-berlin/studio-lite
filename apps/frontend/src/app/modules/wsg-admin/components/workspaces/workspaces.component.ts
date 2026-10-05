@@ -19,7 +19,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatRadioButton } from '@angular/material/radio';
 import { MatIcon } from '@angular/material/icon';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { RouterLink } from '@angular/router';
@@ -64,6 +64,9 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   tableSelectionRow = new SelectionModel <WorkspaceInListDto>(false, []);
   selectedWorkspaceId = 0;
   workspaceUsers = new WorkspaceUserToCheckCollection([]);
+  // True while the rights of the selected workspace are on their way: a role picked now
+  // would be reset by their arrival, so the radio buttons stay disabled until then.
+  isLoadingAccessRights = false;
   readonly accessLevels = ACCESS_LEVELS;
   isWorkspaceGroupAdmin = false;
   isBackUpWorkspaceGroup = false;
@@ -71,6 +74,7 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   unitsCount = 0;
 
   private ngUnsubscribe = new Subject<void>();
+  private accessRightsRequest?: Subscription;
   private backUpFolderName = 'backup';
 
   @ViewChild(MatSort) sort = new MatSort();
@@ -114,14 +118,14 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   }
 
   onRoleChange(user: WorkspaceUserChecked, level: number): void {
-    if (!this.selectedWorkspaceId) return;
+    if (!this.selectedWorkspaceId || this.isLoadingAccessRights) return;
     user.accessLevel = level;
     user.isChecked = true;
     this.workspaceUsers.updateHasChanged();
   }
 
   onRoleClick(user: WorkspaceUserChecked, level: number): void {
-    if (!this.selectedWorkspaceId) return;
+    if (!this.selectedWorkspaceId || this.isLoadingAccessRights) return;
     if (user.isChecked && user.accessLevel === level) {
       user.accessLevel = 0;
       user.isChecked = false;
@@ -137,13 +141,21 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
         { duration: 3000 }
       );
     }
+    // A late answer for the previous workspace would overwrite the rights of this one.
+    if (this.isLoadingAccessRights) {
+      this.accessRightsRequest?.unsubscribe();
+      this.isLoadingAccessRights = false;
+      this.appService.dataLoading = false;
+    }
     if (this.selectedWorkspaceId > 0) {
       this.appService.dataLoading = true;
-      this.backendService.getUsersByWorkspace(this.selectedWorkspaceId)
+      this.isLoadingAccessRights = true;
+      this.accessRightsRequest = this.backendService.getUsersByWorkspace(this.selectedWorkspaceId)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(
           (dataResponse: WorkspaceUserInListDto[]) => {
             this.workspaceUsers.setChecks(dataResponse);
+            this.isLoadingAccessRights = false;
             this.appService.dataLoading = false;
           }
         );
@@ -153,6 +165,8 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   }
 
   saveUsers(): void {
+    // The entries still hold the edits of the workspace selected before.
+    if (this.isLoadingAccessRights) return;
     if (this.selectedWorkspaceId) {
       if (this.workspaceUsers.hasChanged) {
         this.appService.dataLoading = true;

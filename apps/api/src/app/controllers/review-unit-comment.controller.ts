@@ -120,6 +120,7 @@ export class ReviewUnitCommentController {
   @ApiParam({ name: 'unit_id', type: Number })
   @ApiParam({ name: 'comment_id', type: Number })
   @ApiOkResponse({ description: 'Comment vote toggled.' })
+  @ApiForbiddenResponse({ description: 'A review opened through its link and password has no account to vote with.' })
   @ApiTags('review unit comment')
   async toggleVote(
     @Req() request,

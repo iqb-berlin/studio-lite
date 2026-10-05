@@ -4,6 +4,7 @@
  */
 
 import { clickIndexTabAdmin } from './navigation';
+import { saveWorkspaceSettings } from './admin';
 
 /**
  * Adds Verona modules through the admin interface
@@ -12,6 +13,9 @@ import { clickIndexTabAdmin } from './navigation';
  * addModules(['iqb-editor-aspect-3.0.1.html', 'iqb-player-aspect-3.0.1.html']);
  */
 export function addModules(filenames: string[]): void {
+  // The admin button toggles: on an admin page it leads back home. Right after a first login the app
+  // is still on its way to /admin, so the start page is set here rather than assumed (#1746).
+  cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('v-modules');
 
@@ -148,8 +152,8 @@ export function setModuleWithoutVerification(
   cy.get('[data-cy="edit-workspace-settings-schemer"]').click();
   cy.get('mat-option>span').contains(schemer).click();
 
-  // Save with API
-  cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+  // Save and wait for the answer: a reload right after the click would cancel the request (#1743)
+  saveWorkspaceSettings();
 
   // Verify configuration persisted
   // verifyModuleConfiguration(ws, editor, player, schemer);

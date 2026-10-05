@@ -1,3 +1,4 @@
+import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, Not, In } from 'typeorm';
@@ -46,6 +47,27 @@ describe('UnitCommentService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('findUnitIdsWithComments', () => {
+    it('should answer which of the given units have comments', async () => {
+      mockRepository.find.mockResolvedValue([{ unitId: 1 }, { unitId: 1 }, { unitId: 3 }] as UnitComment[]);
+
+      const result = await service.findUnitIdsWithComments([1, 2, 3]);
+
+      expect(result).toEqual(new Set([1, 3]));
+      expect(repository.find).toHaveBeenCalledWith({
+        where: { unitId: In([1, 2, 3]) },
+        select: { unitId: true }
+      });
+    });
+
+    it('should not query for an empty list', async () => {
+      mockRepository.find.mockClear();
+
+      expect(await service.findUnitIdsWithComments([])).toEqual(new Set());
+      expect(repository.find).not.toHaveBeenCalled();
+    });
   });
 
   describe('findOnesComments', () => {
@@ -262,6 +284,17 @@ describe('UnitCommentService', () => {
   });
 
   describe('toggleVote', () => {
+    // A review opened through its link and password carries user 0; its vote failed on the
+    // foreign key to `user` (#1730).
+    it('should refuse a vote without a user account', async () => {
+      mockVoteRepository.save.mockClear();
+      mockVoteRepository.delete.mockClear();
+      await expect(service.toggleVote(1, 0, 'up')).rejects.toThrow(ForbiddenException);
+      await expect(service.toggleVote(1, 0, null)).rejects.toThrow(ForbiddenException);
+      expect(voteRepository.save).not.toHaveBeenCalled();
+      expect(voteRepository.delete).not.toHaveBeenCalled();
+    });
+
     it('should delete vote if vote is null', async () => {
       const commentId = 1;
       const userId = 1;

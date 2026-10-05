@@ -416,6 +416,41 @@ export class UnitService {
     return Promise.all(units.map(async unit => this.getModifiedMetadataForUnit(unit, workspace, profileCache)));
   }
 
+  /**
+   * The metadata and coding scheme of every unit of the workspace, read from the same source as the
+   * export reads them -- the metadata tables for a unit with the marker, its column otherwise.
+   *
+   * Only what decides content is read: the unit-level profiles and the items themselves, not the
+   * items' own profiles and not the profile lookups that fill in `valueAsText`. Four queries for the
+   * whole workspace, so that opening the export dialog does not fire a burst of queries per unit
+   * next to the properties request it already makes.
+   */
+  async findAllExportSources(
+    workspaceId: number
+  ): Promise<{ id: number; metadata: UnitMetadataValues; scheme: string }[]> {
+    const units = await this.unitsRepository.find({
+      where: { workspaceId: workspaceId },
+      select: ['id', 'metadata', 'scheme']
+    });
+    const markedUnitIds = await this.unitMetadataToDeleteService
+      .findMarkedUnitIds(units.map(unit => unit.id));
+    const marked = [...markedUnitIds];
+    const [profiles, items] = await Promise.all([
+      this.unitMetadataService.getAllByUnitIds(marked),
+      this.unitItemService.getAllByUnitIds(marked)
+    ]);
+    return units.map(unit => ({
+      id: unit.id,
+      metadata: markedUnitIds.has(unit.id) ?
+        {
+          profiles: profiles.filter(profile => profile.unitId === unit.id),
+          items: items.filter(item => item.unitId === unit.id) as unknown as UnitMetadataValues['items']
+        } :
+        unit.metadata as UnitMetadataValues,
+      scheme: unit.scheme
+    }));
+  }
+
   private async getModifiedMetadataForUnit(
     unit: Unit,
     workspace: Workspace,
@@ -898,6 +933,7 @@ export class UnitService {
     const unitDefinition = await this.findUnitDefinitionByUnitId(unitId);
     if (unitDefinition) {
       returnUnit.definition = unitDefinition.data;
+      if (unitDefinition.type) returnUnit.definitionType = unitDefinition.type;
     }
     return returnUnit;
   }
@@ -950,13 +986,21 @@ export class UnitService {
     unitToUpdate.lastChangedDefinitionUser = userName;
 
     const unitDefinitionToUpdate = await this.findUnitDefinitionByUnitId(unitId);
+    // The type describes the definition it came with, so it is written only together with one, and
+    // a definition without a type takes the stored one away: an editor that does not report the
+    // format has just written a definition the old type may no longer describe. Without a
+    // definition (only the variables changed) neither is touched -- undefined is skipped on save.
+    const definitionType = unitDefinitionDto.definition === undefined ?
+      undefined :
+      unitDefinitionDto.definitionType || null;
 
     if (unitDefinitionToUpdate) {
       unitDefinitionToUpdate.data = unitDefinitionDto.definition;
+      unitDefinitionToUpdate.type = definitionType;
       await this.unitDefinitionsRepository.save(unitDefinitionToUpdate);
     } else {
       const newUnitDefinition = this.unitDefinitionsRepository
-        .create({ data: unitDefinitionDto.definition, unitId });
+        .create({ data: unitDefinitionDto.definition, type: definitionType, unitId });
       await this.unitDefinitionsRepository.save(newUnitDefinition);
     }
     if (unitDefinitionDto.variables) {

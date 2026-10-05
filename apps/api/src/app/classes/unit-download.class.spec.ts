@@ -119,6 +119,206 @@ describe('UnitDownloadClass', () => {
     });
   });
 
+  // XML carries the format as DefinitionRef/@type, JSON as userInterface.type (#1368).
+  describe('definition type', () => {
+    const exportUnit = async (exportFormat: 'xml' | 'json', definitionType?: string) => {
+      const unitServiceMock = createMock<UnitService>();
+      const settingServiceMock = createMock<SettingService>();
+      const unitRichNoteServiceMock = createMock<UnitRichNoteService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
+      unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
+      unitServiceMock.findOnesProperties.mockResolvedValue({
+        key: 'U1', name: 'Unit 1', metadata: {}, player: 'iqb-player-aspect@3.0'
+      } as unknown as UnitPropertiesDto);
+      unitServiceMock.ensureUuid.mockResolvedValue('uuid-1');
+      unitServiceMock.findOnesDefinition.mockResolvedValue({
+        definition: '{}', variables: [], ...(definitionType && { definitionType })
+      } as UnitDefinitionDto);
+      unitServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as UnitSchemeDto);
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
+
+      await UnitDownloadClass.get(
+        1,
+        unitServiceMock,
+        createMock<UnitCommentService>(),
+        veronaModuleServiceMock,
+        settingServiceMock,
+        unitRichNoteServiceMock,
+        {
+          unitIdList: [1],
+          exportFormat,
+          addPlayers: false,
+          addComments: false,
+          addTestTakersHot: 0,
+          addTestTakersMonitor: 0,
+          addTestTakersReview: 0
+        } as unknown as UnitDownloadSettingsDto,
+        exportFormat
+      );
+      const file = mockZip.addFile.mock.calls
+        .find((call: [string, Buffer]) => call[0] === `U1.${exportFormat}`);
+      return (file[1] as Buffer).toString();
+    };
+
+    it('should write the type as an attribute of DefinitionRef', async () => {
+      const xml = await exportUnit('xml', 'aspect-unit-definition@4.12.0');
+
+      expect(xml).toMatch(/<DefinitionRef [^>]*type="aspect-unit-definition@4\.12\.0"/);
+    });
+
+    it('should write no type attribute when none is stored', async () => {
+      const xml = await exportUnit('xml');
+
+      expect(xml).toMatch(/<DefinitionRef /);
+      expect(xml).not.toMatch(/<DefinitionRef [^>]*type=/);
+    });
+
+    it('should write the type into userInterface of the JSON index', async () => {
+      const index = JSON.parse(await exportUnit('json', 'aspect-unit-definition@4.12.0'));
+
+      expect(index.userInterface.type).toBe('aspect-unit-definition@4.12.0');
+    });
+
+    it('should leave userInterface.type out when none is stored', async () => {
+      const index = JSON.parse(await exportUnit('json'));
+
+      expect(index.userInterface).not.toHaveProperty('type');
+    });
+  });
+
+  // Metadata, items and the coding scheme can be left out, and no file is written without content
+  // (#1729). A missing flag keeps the file, so callers that do not know the flags lose nothing.
+  describe('optional files', () => {
+    const profiles = [{
+      profileId: 'p1',
+      order: 0,
+      entries: [{
+        id: 'e1', label: [], value: 'x', valueAsText: []
+      }]
+    }];
+    const items = [{ id: 'item1' }];
+
+    const exportUnit = async (
+      exportFormat: 'xml' | 'json',
+      flags: Partial<UnitDownloadSettingsDto>,
+      metadata: UnitMetadataValues = { profiles, items },
+      scheme = '{"variableCodings":[]}'
+    ) => {
+      // several exports in one test share the zip mock
+      mockZip.addFile.mockClear();
+      const unitServiceMock = createMock<UnitService>();
+      const settingServiceMock = createMock<SettingService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
+      unitServiceMock.findOnesProperties.mockResolvedValue({
+        key: 'U1', name: 'Unit 1', metadata, player: 'iqb-player-aspect@3.0', schemer: 'iqb-schemer@2.0'
+      } as unknown as UnitPropertiesDto);
+      unitServiceMock.ensureUuid.mockResolvedValue('uuid-1');
+      unitServiceMock.buildHideNumberingMap.mockResolvedValue({});
+      unitServiceMock.findOnesDefinition.mockResolvedValue({ definition: '{}', variables: [] } as UnitDefinitionDto);
+      unitServiceMock.findOnesScheme.mockResolvedValue({ scheme, schemeType: '' } as UnitSchemeDto);
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
+
+      await UnitDownloadClass.get(
+        1,
+        unitServiceMock,
+        createMock<UnitCommentService>(),
+        veronaModuleServiceMock,
+        settingServiceMock,
+        createMock<UnitRichNoteService>(),
+        {
+          unitIdList: [1],
+          exportFormat,
+          addPlayers: false,
+          addComments: false,
+          addTestTakersHot: 0,
+          addTestTakersMonitor: 0,
+          addTestTakersReview: 0,
+          ...flags
+        } as unknown as UnitDownloadSettingsDto,
+        exportFormat
+      );
+      const files = mockZip.addFile.mock.calls.map((call: [string, Buffer]) => call[0]);
+      const unitFile = mockZip.addFile.mock.calls
+        .find((call: [string, Buffer]) => call[0] === `U1.${exportFormat}`)[1].toString();
+      return { files, unitFile };
+    };
+
+    describe('xml', () => {
+      it('should write metadata and scheme when the flags are missing', async () => {
+        const { files, unitFile } = await exportUnit('xml', {});
+
+        expect(files).toEqual(expect.arrayContaining(['U1.vomd', 'U1.vocs']));
+        expect(unitFile).toContain('<Reference>U1.vomd</Reference>');
+        expect(unitFile).toMatch(/<CodingSchemeRef [^>]*schemer="iqb-schemer@2.0"[^>]*>U1.vocs</);
+      });
+
+      it('should write no metadata file and no reference for empty metadata', async () => {
+        const { files, unitFile } = await exportUnit('xml', {}, { profiles: [], items: [] });
+
+        expect(files).not.toContain('U1.vomd');
+        expect(unitFile).not.toContain('U1.vomd');
+      });
+
+      it('should write the metadata file for items alone, since they live in it', async () => {
+        const { files } = await exportUnit('xml', {}, { profiles: [], items });
+
+        expect(files).toContain('U1.vomd');
+      });
+
+      it('should leave metadata and items out with addMetadata false, and ignore addItems', async () => {
+        const left = await exportUnit('xml', { addMetadata: false, addItems: true });
+        const kept = await exportUnit('xml', { addItems: false });
+
+        expect(left.files).not.toContain('U1.vomd');
+        expect(left.unitFile).not.toContain('U1.vomd');
+        expect(kept.files).toContain('U1.vomd');
+      });
+
+      it('should leave the scheme file and the whole CodingSchemeRef out with addCodingScheme false', async () => {
+        const { files, unitFile } = await exportUnit('xml', { addCodingScheme: false });
+
+        expect(files).not.toContain('U1.vocs');
+        expect(unitFile).not.toContain('CodingSchemeRef');
+      });
+    });
+
+    describe('json', () => {
+      it('should write metadata, items and scheme when the flags are missing', async () => {
+        const { files, unitFile } = await exportUnit('json', {});
+        const index = JSON.parse(unitFile);
+
+        expect(files).toEqual(expect.arrayContaining(['U1.vomd.json', 'U1.voit.json', 'U1.vocs.json']));
+        expect(index).toHaveProperty('metadata');
+        expect(index).toHaveProperty('items');
+        expect(index).toHaveProperty('codingScheme');
+      });
+
+      it('should leave out each file, and its index entry, by its own flag', async () => {
+        const noMetadata = await exportUnit('json', { addMetadata: false });
+        const noItems = await exportUnit('json', { addItems: false });
+        const noScheme = await exportUnit('json', { addCodingScheme: false });
+
+        expect(noMetadata.files).not.toContain('U1.vomd.json');
+        expect(noMetadata.files).toContain('U1.voit.json');
+        expect(JSON.parse(noMetadata.unitFile)).not.toHaveProperty('metadata');
+        expect(noItems.files).not.toContain('U1.voit.json');
+        expect(noItems.files).toContain('U1.vomd.json');
+        expect(JSON.parse(noItems.unitFile)).not.toHaveProperty('items');
+        expect(noScheme.files).not.toContain('U1.vocs.json');
+        expect(JSON.parse(noScheme.unitFile)).not.toHaveProperty('codingScheme');
+      });
+
+      it('should not report legacy metadata as dropped when metadata is left out on purpose', async () => {
+        const legacyMetadata = { legacyKey: 'x' } as UnitMetadataValues;
+        const { files } = await exportUnit('json', { addMetadata: false }, legacyMetadata);
+
+        expect(files).not.toContain('_export-report.json');
+      });
+    });
+  });
+
   describe('generateCodeList', () => {
     it('should generate requested number of unique codes', () => {
       const result = UnitDownloadClass.generateCodeList(5, 10);
