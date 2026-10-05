@@ -1,3 +1,5 @@
+import { By } from '@angular/platform-browser';
+import { CodebookExportComponent } from '@iqb/ngx-coding-components/codebook-export';
 import { TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -50,6 +52,23 @@ describe('Studio shared codebook wrapper', () => {
     expect(backend.getCodingBook).toHaveBeenCalledWith(1, 'Profil', expect.objectContaining({ missingsProfile: 'Profil' }), [7]);
     expect(saveAs).toHaveBeenCalledTimes(1); expect(app.dataLoading).toBe(false);
     expect(dialog.close).toHaveBeenCalledWith({ selectedUnits: [7] }); fixture.destroy();
+  });
+
+  it('forwards the shared training selection through the rendered Studio form', () => {
+    const fixture = TestBed.createComponent(ExportCodingBookComponent); fixture.detectChanges();
+    const shared = fixture.debugElement.query(By.directive(CodebookExportComponent))
+      .componentInstance as CodebookExportComponent;
+    shared.contentOptions.trainingRequirement = 'required';
+    backend.getCodingBook.mockReturnValue(of(new Blob(['document'])));
+    shared.exportCodingBook();
+    expect(backend.getCodingBook).toHaveBeenCalledWith(
+      1,
+      '',
+      expect.objectContaining({ trainingRequirement: 'required' }),
+      [7]
+    );
+    expect(shared.columns).toContain('group');
+    fixture.destroy();
   });
 
   it('retains the dialog and clears loading after failure or a null result', () => {
