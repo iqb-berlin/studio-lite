@@ -22,6 +22,8 @@ import { CommentAccessGuard } from '../guards/comment-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { CommentWriteGuard } from '../guards/comment-write.guard';
 import { CommentDeleteGuard } from '../guards/comment-delete.guard';
+import { CommentInUnitGuard } from '../guards/comment-in-unit.guard';
+import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
 import { UnitUserService } from '../services/unit-user.service';
 import { ItemCommentService } from '../services/item-comment.service';
 import { UnitId } from '../decorators/unit-id.decorator';
@@ -35,11 +37,14 @@ import { UnitId } from '../decorators/unit-id.decorator';
  * timestamp settles for plain access to the workspace, since it says nothing about the comments
  * themselves.
  *
- * What the guards do NOT establish is ownership. {@link CommentWriteGuard} on the two PATCH routes
- * only checks that the body names the sender as its author -- it never loads the comment being
- * changed -- and deleting is guarded by the access level alone (see {@link CommentDeleteGuard},
- * which no route carries). Hiding a comment (`:comment_id/hidden`) asks for nothing but a valid
- * token.
+ * Changing a comment or its items is left to its author ({@link CommentWriteGuard}), deleting it
+ * to its author and the workspace's administrators ({@link CommentDeleteGuard}).
+ *
+ * The path is held to what it names. Every route first asks {@link UnitInWorkspaceGuard} whether
+ * the unit is in the workspace -- the guards about access ask about the workspace alone, so
+ * without it the discussion of any unit was open from any workspace the caller is in. Every route
+ * on a single comment then asks {@link CommentInUnitGuard}, last, whether the comment belongs to
+ * the unit. Either way a mismatch is answered with a 404.
  */
 @Controller('workspaces/:workspace_id/units/:unit_id/comments')
 export class WorkspaceUnitCommentController {
@@ -50,7 +55,7 @@ export class WorkspaceUnitCommentController {
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
@@ -62,7 +67,7 @@ export class WorkspaceUnitCommentController {
   }
 
   @Get('last-seen')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'User\'s last seen timestamp for comments of this unit.' })
@@ -74,7 +79,7 @@ export class WorkspaceUnitCommentController {
   }
 
   @Patch()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Register changed timestamp of the last seen comment' })
@@ -89,7 +94,7 @@ export class WorkspaceUnitCommentController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, CommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({
@@ -99,12 +104,24 @@ export class WorkspaceUnitCommentController {
   @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit comment')
-  async createComment(@Body() createUnitCommentDto: CreateUnitCommentDto) {
-    return this.unitCommentService.createComment(createUnitCommentDto);
+  async createComment(
+    @Param('unit_id', ParseIntPipe) unitId: number,
+    @Body() createUnitCommentDto: CreateUnitCommentDto
+  ) {
+    // The unit is the one of the path, which UnitInWorkspaceGuard has held to the workspace. The
+    // body's unitId used to be saved as sent, and could name a unit of any other workspace.
+    return this.unitCommentService.createComment({ ...createUnitCommentDto, unitId });
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentWriteGuard, CommentAccessGuard)
+  @UseGuards(
+    JwtAuthGuard,
+    WorkspaceGuard,
+    UnitInWorkspaceGuard,
+    CommentWriteGuard,
+    CommentAccessGuard,
+    CommentInUnitGuard
+  )
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
@@ -117,7 +134,14 @@ export class WorkspaceUnitCommentController {
   }
 
   @Patch(':comment_id/items')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard, CommentWriteGuard)
+  @UseGuards(
+    JwtAuthGuard,
+    WorkspaceGuard,
+    UnitInWorkspaceGuard,
+    CommentAccessGuard,
+    CommentWriteGuard,
+    CommentInUnitGuard
+  )
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -133,7 +157,7 @@ export class WorkspaceUnitCommentController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentDeleteGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, CommentDeleteGuard, CommentInUnitGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comment successfully updated.' })
@@ -146,7 +170,7 @@ export class WorkspaceUnitCommentController {
   }
 
   @Patch(':comment_id/hidden')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, CommentAccessGuard, CommentInUnitGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
@@ -158,7 +182,7 @@ export class WorkspaceUnitCommentController {
   }
 
   @Post(':comment_id/vote')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, CommentAccessGuard, CommentInUnitGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -174,7 +198,7 @@ export class WorkspaceUnitCommentController {
   }
 
   @Get(':comment_id/votes')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, CommentAccessGuard, CommentInUnitGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })

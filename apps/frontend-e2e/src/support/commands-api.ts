@@ -1560,6 +1560,53 @@ Cypress.Commands.add('patchCommentVisibilityAPI',
     });
   });
 
+// 61b: a vote on a comment in a workspace: 'up', 'down' or null to take it back
+Cypress.Commands.add('voteCommentAPI',
+  (wsId: string, unitId: string, commentId: string, vote: 'up' | 'down' | null, token: string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'POST',
+      url: `/api/workspaces/${wsId}/units/${unitId}/comments/${commentId}/vote`,
+      headers: {
+        'app-version': Cypress.expose('version'),
+        authorization
+      },
+      body: { vote },
+      failOnStatusCode: false
+    });
+  });
+
+// 61c
+Cypress.Commands.add('getCommentVotersAPI',
+  (wsId: string, unitId: string, commentId: string, token: string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'GET',
+      url: `/api/workspaces/${wsId}/units/${unitId}/comments/${commentId}/votes`,
+      headers: {
+        'app-version': Cypress.expose('version'),
+        authorization
+      },
+      failOnStatusCode: false
+    });
+  });
+
+// 61d
+Cypress.Commands.add('patchCommentItemsAPI',
+  (wsId: string, unitId: string, commentId: string, unitItemUuids: string[], token: string) => {
+    const authorization = `bearer ${token}`;
+    cy.request({
+      method: 'PATCH',
+      url: `/api/workspaces/${wsId}/units/${unitId}/comments/${commentId}/items`,
+      headers: {
+        'app-version': Cypress.expose('version'),
+        authorization
+      },
+      body: { unitItemUuids },
+      failOnStatusCode: false
+    });
+  });
+
 // 19b: the whole user list of a workspace, however many. updateUserListOfWsAPI takes exactly two.
 Cypress.Commands.add('setUsersOfWsAPI', (wsId: string, users: AccessUser[], token: string) => {
   const authorization = `bearer ${token}`;

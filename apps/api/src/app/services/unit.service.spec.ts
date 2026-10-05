@@ -166,6 +166,21 @@ describe('UnitService', () => {
     });
   });
 
+  describe('isInWorkspace', () => {
+    it('should ask for the unit in the workspace', async () => {
+      unitsRepository.exists.mockResolvedValue(true);
+
+      expect(await service.isInWorkspace(10, 3)).toBe(true);
+      expect(unitsRepository.exists).toHaveBeenCalledWith({ where: { id: 10, workspaceId: 3 } });
+    });
+
+    it('should return false when the unit is not in the workspace', async () => {
+      unitsRepository.exists.mockResolvedValue(false);
+
+      expect(await service.isInWorkspace(10, 7)).toBe(false);
+    });
+  });
+
   describe('create', () => {
     it('should create unit', async () => {
       unitsRepository.findOne.mockResolvedValue(null);

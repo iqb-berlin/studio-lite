@@ -8,7 +8,8 @@ import {
   user3,
   ws1,
   ws2,
-  unit1
+  unit1,
+  unit2
 } from '../../support/util-api';
 
 describe('Comments API tests', () => {
@@ -62,33 +63,49 @@ describe('Comments API tests', () => {
         });
       });
 
-      it(
-        '500/201 negative test: should unexpectedly allow adding a comment even ' +
-          'if an incorrect workspace ID is provided',
-        () => {
-          // Passing the wrong workspace doesn't affect to insert comment if we pass a valid unit
-          // Should be 500
-          const comment2: CommentData = {
-            body: '<p>Kommentare 2 zur Aufgabe 1</p>',
-            userName: `${userGroupAdmin.username}`,
-            userId: parseInt(
-              `${Cypress.expose(`id_${userGroupAdmin.username}`)}`,
-              10
-            ),
-            unitId: parseInt(`${Cypress.expose(unit1.shortname)}`, 10)
-          };
-          cy.postCommentAPI(
-            Cypress.expose(ws1.id),
-            Cypress.expose(unit1.shortname),
-            comment2,
-            Cypress.expose(`token_${Cypress.expose('username')}`)
-          ).then(resp => {
-            Cypress.expose('comment2', resp.body);
-            expect(resp.status).to.equal(201);
-            // expect(resp.status).to.equal(500); //should
-          });
-        }
-      );
+      it('404 negative test: should refuse adding a comment under a workspace the unit is not in', () => {
+        // Was 201 until #1697: the guards asked about ws1 alone, and the comment went into the
+        // discussion of unit1, which is in ws2.
+        const comment2: CommentData = {
+          body: '<p>Kommentare 2 zur Aufgabe 1</p>',
+          userName: `${userGroupAdmin.username}`,
+          userId: parseInt(
+            `${Cypress.expose(`id_${userGroupAdmin.username}`)}`,
+            10
+          ),
+          unitId: parseInt(`${Cypress.expose(unit1.shortname)}`, 10)
+        };
+        cy.postCommentAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(unit1.shortname),
+          comment2,
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(404);
+        });
+      });
+
+      it('201 positive test: should allow adding a second comment to the unit in its own workspace', () => {
+        // The comment the 404 above refused; 57. and 61. count on it.
+        const comment2: CommentData = {
+          body: '<p>Kommentare 2 zur Aufgabe 1</p>',
+          userName: `${userGroupAdmin.username}`,
+          userId: parseInt(
+            `${Cypress.expose(`id_${userGroupAdmin.username}`)}`,
+            10
+          ),
+          unitId: parseInt(`${Cypress.expose(unit1.shortname)}`, 10)
+        };
+        cy.postCommentAPI(
+          Cypress.expose(ws2.id),
+          Cypress.expose(unit1.shortname),
+          comment2,
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).then(resp => {
+          Cypress.expose('comment2', resp.body);
+          expect(resp.status).to.equal(201);
+        });
+      });
 
       it('403 negative test: should be refused when trying to add a comment without a workspace ID', () => {
         // A workspace that does not exist is refused before the unit is looked at (#1571)
@@ -149,14 +166,25 @@ describe('Comments API tests', () => {
         });
       });
 
-      it('200 negative test: should return an empty list when requesting comments for a non-existent unit ID', () => {
+      it('404 negative test: should refuse the comments of a unit that does not exist', () => {
+        // Was 200 with an empty list until #1697.
         cy.getCommentsAPI(
           Cypress.expose(ws2.id),
           noId,
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
-          expect(resp.status).to.be.equal(200);
-          expect(resp.body.length).to.be.equal(0);
+          expect(resp.status).to.be.equal(404);
+        });
+      });
+
+      it('404 negative test: should refuse the comments of a unit under a workspace it is not in', () => {
+        // Was 200 with the whole discussion of unit1 until #1697, to anyone with access to ws1.
+        cy.getCommentsAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(unit1.shortname),
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.be.equal(404);
         });
       });
 
@@ -179,12 +207,24 @@ describe('Comments API tests', () => {
       it('200 positive test: should allow an authorized user to update the comment visibility timestamp', () => {
         comment.lastSeenCommentChangedAt = new Date();
         cy.updateCommentTimeAPI(
-          Cypress.expose(ws1.id),
+          Cypress.expose(ws2.id),
           Cypress.expose(unit1.shortname),
           comment,
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
           expect(resp.status).to.be.equal(200);
+        });
+      });
+
+      it('404 negative test: should refuse a timestamp update under a workspace the unit is not in', () => {
+        comment.lastSeenCommentChangedAt = new Date();
+        cy.updateCommentTimeAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(unit1.shortname),
+          comment,
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.be.equal(404);
         });
       });
 
@@ -223,7 +263,7 @@ describe('Comments API tests', () => {
           ' on a specific unit',
         () => {
           cy.getCommentTimeAPI(
-            Cypress.expose(ws1.id),
+            Cypress.expose(ws2.id),
             Cypress.expose(unit1.shortname),
             Cypress.expose(`token_${Cypress.expose('username')}`)
           ).then(resp => {
@@ -231,6 +271,16 @@ describe('Comments API tests', () => {
           });
         }
       );
+
+      it('404 negative test: should refuse the last seen timestamp under a workspace the unit is not in', () => {
+        cy.getCommentTimeAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(unit1.shortname),
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.be.equal(404);
+        });
+      });
 
       it(
         '401 negative test: should deny access to the last seen timestamp when ' +
@@ -292,24 +342,19 @@ describe('Comments API tests', () => {
         }
       );
 
-      it(
-        '500/200 negative test: should return success despite attempting to update a comment' +
-          ' without specifying a unit ID',
-        () => {
-          // If we want to update a comment without unit id, return a 200, should 500
-          comment.body = '<p>Kommentare 4 zur Aufgabe 1</p>';
-          cy.updateCommentAPI(
-            Cypress.expose(ws2.id),
-            noId,
-            Cypress.expose('comment1'),
-            comment,
-            Cypress.expose(`token_${userGroupAdmin.username}`)
-          ).then(resp => {
-            expect(resp.status).to.be.equal(200);
-            // expect(resp.status).to.be.equal(500); //should
-          });
-        }
-      );
+      it('404 negative test: should refuse an update of a comment under a unit it does not belong to', () => {
+        // Was 200 until #1697: only the delete route held the comment to the unit in its path.
+        comment.body = '<p>Kommentare 4 zur Aufgabe 1</p>';
+        cy.updateCommentAPI(
+          Cypress.expose(ws2.id),
+          Cypress.expose(unit2.shortname),
+          Cypress.expose('comment1'),
+          comment,
+          Cypress.expose(`token_${userGroupAdmin.username}`)
+        ).then(resp => {
+          expect(resp.status).to.be.equal(404);
+        });
+      });
 
       it(
         '200 test: should no longer refuse an update because the body names no user (#1628)',
@@ -517,6 +562,232 @@ describe('Comments API tests', () => {
         Cypress.expose(ws2.id),
         Cypress.expose(unit1.shortname),
         Cypress.expose('commentOfAuthor'),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+      });
+    });
+  });
+
+  describe('#1696 #1697 a comment asked for under another unit or workspace', () => {
+    // The author asks, so every guard about permissions would let the call through. What answers
+    // 404 is the path: CommentInUnitGuard for unit2, which is in ws2 as well but not the comment's
+    // unit, and UnitInWorkspaceGuard for ws1, which unit1 is not in. unit1 lives in ws2 (moved there
+    // in 05.); the author is an admin of ws1 as well (03.), so ws1 passes every guard that asks
+    // about the workspace alone.
+    const unitComment: CommentData = {
+      body: '<p>Kommentar, der nur unter seiner eigenen Aufgabe zu finden ist</p>',
+      userName: `${userGroupAdmin.username}`,
+      userId: 0,
+      unitId: 0
+    };
+
+    before(() => {
+      unitComment.userId = parseInt(`${Cypress.expose(`id_${userGroupAdmin.username}`)}`, 10);
+      unitComment.unitId = parseInt(`${Cypress.expose(unit1.shortname)}`, 10);
+      cy.postCommentAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit1.shortname),
+        unitComment,
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(201);
+        Cypress.expose('commentInUnit', resp.body);
+      });
+    });
+
+    it('404 negative test: should refuse hiding the comment under another unit', () => {
+      cy.patchCommentVisibilityAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit2.shortname),
+        Cypress.expose('commentInUnit'),
+        true,
+        Cypress.expose(`id_${userGroupAdmin.username}`),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(404);
+      });
+    });
+
+    it('404 negative test: should refuse voting on the comment under another unit', () => {
+      cy.voteCommentAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit2.shortname),
+        Cypress.expose('commentInUnit'),
+        'up',
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(404);
+      });
+    });
+
+    it('404 negative test: should refuse listing the voters of the comment under another unit', () => {
+      cy.getCommentVotersAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit2.shortname),
+        Cypress.expose('commentInUnit'),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(404);
+      });
+    });
+
+    it('404 negative test: should refuse changing the items of the comment under another unit', () => {
+      cy.patchCommentItemsAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit2.shortname),
+        Cypress.expose('commentInUnit'),
+        [],
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(404);
+      });
+    });
+
+    it('404 negative test: should refuse deleting the comment under a unit id that is not a number', () => {
+      // Before #1696 `Number('abc') || 0` read as "no unit given", and the check was skipped.
+      cy.deleteCommentAPI(
+        Cypress.expose(ws2.id),
+        'abc',
+        Cypress.expose('commentInUnit'),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(404);
+      });
+    });
+
+    it('404 negative test: should refuse changing the comment under a unit of another workspace', () => {
+      cy.updateCommentAPI(
+        Cypress.expose(ws1.id),
+        Cypress.expose(unit1.shortname),
+        Cypress.expose('commentInUnit'),
+        unitComment,
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(404);
+      });
+    });
+
+    it('404 negative test: should refuse changing the items of the comment under another workspace', () => {
+      cy.patchCommentItemsAPI(
+        Cypress.expose(ws1.id),
+        Cypress.expose(unit1.shortname),
+        Cypress.expose('commentInUnit'),
+        [],
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(404);
+      });
+    });
+
+    it('404 negative test: should refuse hiding the comment under another workspace', () => {
+      cy.patchCommentVisibilityAPI(
+        Cypress.expose(ws1.id),
+        Cypress.expose(unit1.shortname),
+        Cypress.expose('commentInUnit'),
+        true,
+        Cypress.expose(`id_${userGroupAdmin.username}`),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(404);
+      });
+    });
+
+    it('404 negative test: should refuse voting on the comment under another workspace', () => {
+      cy.voteCommentAPI(
+        Cypress.expose(ws1.id),
+        Cypress.expose(unit1.shortname),
+        Cypress.expose('commentInUnit'),
+        'up',
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(404);
+      });
+    });
+
+    it('404 negative test: should refuse listing the voters of the comment under another workspace', () => {
+      cy.getCommentVotersAPI(
+        Cypress.expose(ws1.id),
+        Cypress.expose(unit1.shortname),
+        Cypress.expose('commentInUnit'),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(404);
+      });
+    });
+
+    it('404 negative test: should refuse deleting the comment under another workspace', () => {
+      cy.deleteCommentAPI(
+        Cypress.expose(ws1.id),
+        Cypress.expose(unit1.shortname),
+        Cypress.expose('commentInUnit'),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(404);
+      });
+    });
+
+    it('201 positive test: should create a comment on the unit of the path, not the one the body names', () => {
+      // The body names unit1, the path unit2. Until #1697 the body's unit was saved as sent, so
+      // the path's guards checked one unit and the comment went to another -- of any workspace.
+      // Deleting it under unit2 only works if it was written there.
+      cy.postCommentAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit2.shortname),
+        unitComment,
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(created => {
+        expect(created.status).to.equal(201);
+        cy.deleteCommentAPI(
+          Cypress.expose(ws2.id),
+          Cypress.expose(unit2.shortname),
+          String(created.body),
+          Cypress.expose(`token_${userGroupAdmin.username}`)
+        ).its('status').should('equal', 200);
+      });
+    });
+
+    it('201/200 positive test: should still let voting and listing the voters through under the own path', () => {
+      cy.voteCommentAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit1.shortname),
+        Cypress.expose('commentInUnit'),
+        'up',
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(201);
+      });
+      cy.getCommentVotersAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit1.shortname),
+        Cypress.expose('commentInUnit'),
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+        // Only the vote above: none of the refused calls reached the handler.
+        expect(resp.body).to.have.length(1);
+      });
+    });
+
+    it('200 positive test: should still let changing the items through under the own path', () => {
+      cy.patchCommentItemsAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit1.shortname),
+        Cypress.expose('commentInUnit'),
+        [],
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+      });
+    });
+
+    it('200 positive test: should still find the comment under its own unit and workspace', () => {
+      // The 404s above are about the path, not a comment that is gone: under its own unit and
+      // workspace the same comment is there, and is deleted.
+      cy.deleteCommentAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit1.shortname),
+        Cypress.expose('commentInUnit'),
         Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);

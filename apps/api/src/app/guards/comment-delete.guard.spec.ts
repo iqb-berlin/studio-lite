@@ -6,7 +6,6 @@ import { CommentDeleteGuard } from './comment-delete.guard';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
-import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-found.exception';
 
 describe('CommentDeleteGuard', () => {
   let guard: CommentDeleteGuard;
@@ -95,18 +94,5 @@ describe('CommentDeleteGuard', () => {
   it('should throw ForbiddenException without a comment in the route', async () => {
     await expect(guard.canActivate(contextFor(1, { workspace_id: '3' })))
       .rejects.toThrow(ForbiddenException);
-  });
-
-  it('should throw UnitCommentNotFoundException when unit_id in route does not match comment.unitId', async () => {
-    unitCommentService.findOneComment.mockResolvedValue(ownComment);
-
-    await expect(guard.canActivate(contextFor(1, { id: '42', unit_id: '99', workspace_id: '3' })))
-      .rejects.toThrow(UnitCommentNotFoundException);
-  });
-
-  it('should pass when unit_id in route matches comment.unitId', async () => {
-    unitCommentService.findOneComment.mockResolvedValue(ownComment);
-
-    expect(await guard.canActivate(contextFor(1, { id: '42', unit_id: '10', workspace_id: '3' }))).toBe(true);
   });
 });
