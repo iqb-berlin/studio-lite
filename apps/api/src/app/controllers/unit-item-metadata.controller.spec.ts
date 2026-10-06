@@ -8,6 +8,7 @@ import { WorkspaceGuard } from '../guards/workspace.guard';
 import { AppVersionGuard } from '../guards/app-version.guard';
 import { WriteAccessGuard } from '../guards/write-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
+import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
 
 describe('UnitItemMetadataController', () => {
   let controller: UnitItemMetadataController;
@@ -33,6 +34,8 @@ describe('UnitItemMetadataController', () => {
       .useValue({ canActivate: () => true })
       .overrideGuard(WorkspaceAccessGuard)
       .useValue({ canActivate: () => true })
+      .overrideGuard(UnitInWorkspaceGuard)
+      .useValue({ canActivate: () => true })
       .compile();
 
     controller = module.get<UnitItemMetadataController>(UnitItemMetadataController);
@@ -42,6 +45,17 @@ describe('UnitItemMetadataController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  // The access guards ask about the workspace in the path alone (#1775).
+  it.each(['findAll', 'create', 'remove'] as const)(
+    'should hold the unit of %s to the workspace in its path',
+    method => {
+      // Right after the workspace -- or after the app version, which is checked first as the cheaper.
+      const guards = Reflect.getMetadata('__guards__', UnitItemMetadataController.prototype[method]);
+      expect(guards.slice(0, 2)).toEqual([JwtAuthGuard, WorkspaceGuard]);
+      expect(guards.slice(2).filter(guard => guard !== AppVersionGuard)[0]).toBe(UnitInWorkspaceGuard);
+    }
+  );
 
   describe('findAll', () => {
     it('should return an array of metadata for an item', async () => {

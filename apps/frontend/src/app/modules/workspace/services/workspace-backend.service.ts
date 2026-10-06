@@ -436,6 +436,9 @@ export class WorkspaceBackendService {
   }
 
   getUnitItems(workspaceId: number, unitId: number): Observable <UnitItemDto[]> {
+    // Asked for without a unit selected, e.g. once the last unit of a workspace is gone. The API
+    // answers unit 0 with a 404 (#1775), which the interceptor would show as an error.
+    if (!(workspaceId > 0 && unitId > 0)) return of([]);
     const queryParams = new HttpParams().set('withoutMetadata', true);
     return this.http
       .get<UnitItemDto[]>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/items`, { params: queryParams })
@@ -446,6 +449,9 @@ export class WorkspaceBackendService {
 
   // --- Unit Rich Notes ---
   getUnitRichNotes(workspaceId: number, unitId: number): Observable<UnitRichNotesDto | null> {
+    // Without a unit there are no notes -- an empty list, not null, so the view drops those of the
+    // unit shown before (see getUnitItems).
+    if (!(workspaceId > 0 && unitId > 0)) return of({ tags: [], notes: [] });
     return this.http
       .get<UnitRichNotesDto>(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/rich-notes`)
       .pipe(

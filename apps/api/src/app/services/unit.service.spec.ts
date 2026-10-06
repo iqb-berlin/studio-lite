@@ -2,7 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { EntityManager, QueryFailedError, Repository } from 'typeorm';
+import {
+  EntityManager, In, QueryFailedError, Repository
+} from 'typeorm';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
   CreateUnitDto,
@@ -178,6 +180,29 @@ describe('UnitService', () => {
       unitsRepository.exists.mockResolvedValue(false);
 
       expect(await service.isInWorkspace(10, 7)).toBe(false);
+    });
+  });
+
+  describe('idsNotInWorkspace', () => {
+    it('should return the ids the workspace does not hold', async () => {
+      unitsRepository.find.mockResolvedValue([createMock<Unit>({ id: 10 })]);
+
+      expect(await service.idsNotInWorkspace([10, 11, 10], 3)).toEqual([11]);
+      expect(unitsRepository.find).toHaveBeenCalledWith({
+        where: { id: In([10, 11]), workspaceId: 3 },
+        select: ['id']
+      });
+    });
+
+    it('should return nothing when all units are in the workspace', async () => {
+      unitsRepository.find.mockResolvedValue([createMock<Unit>({ id: 10 }), createMock<Unit>({ id: 11 })]);
+
+      expect(await service.idsNotInWorkspace([10, 11], 3)).toEqual([]);
+    });
+
+    it('should not ask the database for an empty list', async () => {
+      expect(await service.idsNotInWorkspace([], 3)).toEqual([]);
+      expect(unitsRepository.find).not.toHaveBeenCalled();
     });
   });
 
