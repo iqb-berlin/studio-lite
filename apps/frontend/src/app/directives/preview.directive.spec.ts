@@ -344,6 +344,89 @@ describe('PreviewDirective', () => {
     expect(directive.pageList.filter(p => p.type === '#goto').map(p => p.id)).toEqual(['0', '1']);
   });
 
+  describe('after a restart of the unit (#1683)', () => {
+    const gotoIds = (directive: TestPreviewDirective): string[] => directive.pageList
+      .filter(p => p.type === '#goto')
+      .map(p => p.id);
+
+    it('drops the list when the player then reports a single page', () => {
+      const directive = createDirective();
+      directive.setPageList(['0', '1', '2'], '0');
+
+      directive.awaitPageListAfterRestart();
+      directive.setPageList(['0'], '0');
+
+      expect(directive.pageList).toEqual([]);
+    });
+
+    it('keeps the list over the empty report an older aspect player sends before counting', () => {
+      const directive = createDirective();
+      directive.setPageList(['0', '1', '2'], '0');
+
+      directive.awaitPageListAfterRestart();
+      directive.setPageList([], '0');
+
+      expect(gotoIds(directive)).toEqual(['0', '1', '2']);
+
+      directive.setPageList(['0'], '0');
+
+      expect(directive.pageList).toEqual([]);
+    });
+
+    it('keeps the list over a report without pages', () => {
+      const directive = createDirective();
+      directive.setPageList(['0', '1', '2'], '0');
+
+      directive.awaitPageListAfterRestart();
+      directive.setPageList(undefined, '1');
+
+      expect(gotoIds(directive)).toEqual(['0', '1', '2']);
+      expect(directive.pageList.find(p => p.type === '#goto' && p.disabled)?.id).toBe('0');
+    });
+
+    it('replaces the list when the player then reports several pages', () => {
+      const directive = createDirective();
+      directive.setPageList(['0', '1', '2'], '0');
+
+      directive.awaitPageListAfterRestart();
+      directive.setPageList([], '0');
+      directive.setPageList(['0', '1'], '0');
+
+      expect(gotoIds(directive)).toEqual(['0', '1']);
+    });
+
+    it('takes a single page as a page change again once the report has come', () => {
+      const directive = createDirective();
+
+      directive.awaitPageListAfterRestart();
+      directive.setPageList(['0', '1', '2'], '0');
+      directive.setPageList(['1'], '1');
+
+      expect(gotoIds(directive)).toEqual(['0', '1', '2']);
+      expect(directive.pageList.find(p => p.type === '#goto' && p.disabled)?.id).toBe('1');
+    });
+
+    it('drops the list through a vopStateChangedNotification with a single page', () => {
+      const directive = createDirective();
+      const mockWindow = window;
+      directive.iFrameElement = createIFrameWithWindow(mockWindow);
+      directive.setPageList(['0', '1', '2'], '0');
+
+      directive.awaitPageListAfterRestart();
+      [[], [{ id: '0', label: 'Seite 1' }]].forEach(validPages => directive.handleIncomingMessage(
+        createMessageEvent(
+          {
+            type: 'vopStateChangedNotification',
+            playerState: { validPages, currentPage: '0' }
+          },
+          mockWindow
+        )
+      ));
+
+      expect(directive.pageList).toEqual([]);
+    });
+  });
+
   it('sends page navigation commands based on api version', () => {
     const directive = createDirective();
     const postMessageTarget = { postMessage: jest.fn() } as unknown as Window;
