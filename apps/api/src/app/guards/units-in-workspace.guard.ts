@@ -1,9 +1,8 @@
-import {
-  CanActivate, ExecutionContext, Injectable
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { Request } from 'express';
 import { UnitService } from '../services/unit.service';
+import { UnitIdsInWorkspaceGuard } from './unit-ids-in-workspace.guard';
 import { unitIdsOfList } from '../utils/unit-ids';
-import { assertUnitsInWorkspace } from '../utils/units-in-workspace';
 
 /**
  * The counterpart of {@link UnitInWorkspaceGuard} for routes that name their units in the body, as
@@ -21,18 +20,8 @@ import { assertUnitsInWorkspace } from '../utils/units-in-workspace';
  * path names the target (#1779).
  */
 @Injectable()
-export class UnitsInWorkspaceGuard implements CanActivate {
-  constructor(private unitService: UnitService) {}
-
-  /** Passes when every unit of the body is in the workspace in the route. */
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest();
-    await assertUnitsInWorkspace(
-      this.unitService,
-      unitIdsOfList(req.body?.ids),
-      Number(req.params.workspace_id) || 0,
-      req.method
-    );
-    return true;
+export class UnitsInWorkspaceGuard extends UnitIdsInWorkspaceGuard {
+  constructor(unitService: UnitService) {
+    super(unitService, (req: Request) => unitIdsOfList(req.body?.ids));
   }
 }

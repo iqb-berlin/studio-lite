@@ -635,7 +635,12 @@ describe('Unit API tests', () => {
     // unit1 lives in ws2 since 38. The admin may enter ws1 as well, so every guard that asks about
     // the workspace alone lets the calls through; what answers 404 is that ws1 does not hold unit1.
     // None of them gets as far as changing anything.
-    const routes: { method: string; route: (unit: string) => string; body?: (unit: string) => object }[] = [
+    const routes: {
+      method: string;
+      route: (unit: string) => string;
+      body?: (unit: string) => object;
+      action?: string
+    }[] = [
       { method: 'GET', route: unit => `units/${unit}/properties` },
       { method: 'GET', route: unit => `units/${unit}/metadata` },
       { method: 'GET', route: unit => `units/${unit}/definition` },
@@ -653,9 +658,15 @@ describe('Unit API tests', () => {
       {
         method: 'PATCH',
         route: () => 'units/drop-box-history',
-        body: unit => ({ ids: [Number(unit)], targetId: Number(Cypress.expose(ws2.id)) })
+        body: unit => ({ ids: [Number(unit)], targetId: Number(Cypress.expose(ws2.id)) }),
+        action: 'submit'
       },
-      { method: 'PATCH', route: () => 'units/drop-box-history', body: unit => ({ ids: [Number(unit)] }) },
+      {
+        method: 'PATCH',
+        route: () => 'units/drop-box-history',
+        body: unit => ({ ids: [Number(unit)] }),
+        action: 'return'
+      },
       { method: 'GET', route: unit => `units/${unit}/rich-notes` },
       { method: 'POST', route: unit => `units/${unit}/rich-notes`, body: unit => ({ unitId: Number(unit) }) },
       { method: 'PATCH', route: unit => `units/${unit}/rich-notes/1`, body: () => ({}) },
@@ -670,8 +681,11 @@ describe('Unit API tests', () => {
       { method: 'DELETE', route: unit => `units/${unit}/items/no-item/metadata/1` }
     ];
 
-    routes.forEach(({ method, route, body }) => {
-      it(`404 negative test: ${method} ${route(':unit_id')} should refuse a unit of another workspace`, () => {
+    routes.forEach(({
+      method, route, body, action
+    }) => {
+      const name = `${method} ${route(':unit_id')}${action ? ` (${action})` : ''}`;
+      it(`404 negative test: ${name} should refuse a unit of another workspace`, () => {
         const unit = `${Cypress.expose(unit1.shortname)}`;
         cy.requestWorkspaceAPI(
           method,
