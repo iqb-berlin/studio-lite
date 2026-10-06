@@ -1252,7 +1252,14 @@
     "message": "Der Player hat einen Laufzeitfehler gemeldet.",
     "code": "Fehlercode",
     "session-id": "Session-ID",
-    "close": "Schließen"
+    "close": "Schließen",
+    "codes": {
+      "geogebra-not-loading": "Das GeoGebra-Paket konnte nicht geladen werden. Es fehlt auf diesem Studio oder ist gerade nicht erreichbar. Die Geometrie-Elemente dieser Aufgabe bleiben deshalb leer. Bitte wenden Sie sich an die Administration.",
+      "geometry-timeout": "Ein Geometrie-Element wurde nicht rechtzeitig fertig geladen. Mögliche Ursachen sind eine langsame Verbindung, ein unvollständiges GeoGebra-Paket oder eine fehlerhafte GeoGebra-Datei. Laden Sie die Aufgabe neu. Tritt der Fehler wieder auf, muss die GeoGebra-Datei im Editor geprüft werden. Wenden Sie sich sonst an die Administration.",
+      "image-not-loading": "Ein Bild dieser Aufgabe kann nicht angezeigt werden. Die Bilddatei ist vermutlich beschädigt. Das Bild muss im Editor neu hochgeladen werden.",
+      "media-timeout": "Ein Audio oder Video dieser Aufgabe wurde nicht rechtzeitig geladen. Mögliche Ursachen sind eine sehr große Datei oder ein Format, das der Browser nicht abspielen kann. Laden Sie die Aufgabe neu. Tritt der Fehler wieder auf, muss die Datei im Editor geprüft werden.",
+      "media-duration-error": "Bei einem Audio oder Video lässt sich die Länge nicht bestimmen. Das kommt etwa bei Aufnahmen vor, die direkt im Browser entstanden sind. Die Datei muss in einem anderen Format, zum Beispiel MP3 oder MP4, gespeichert und im Editor neu hochgeladen werden."
+    }
   },
   "unit": {
     "id" : "ID",
