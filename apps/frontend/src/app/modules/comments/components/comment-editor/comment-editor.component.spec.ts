@@ -161,10 +161,27 @@ describe('CommentEditorComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize specialization in ngAfterViewInit', () => {
-    component.ngAfterViewInit();
-    expect(mockEditor.on).toHaveBeenCalledWith('update', expect.any(Function));
-    expect(mockEditor.commands.focus).toHaveBeenCalled();
+  describe('autoFocus (#1785)', () => {
+    // The fixture has already been through ngAfterViewInit once
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should take the focus on appearing by default, and follow the text', () => {
+      component.ngAfterViewInit();
+
+      expect(mockEditor.commands.focus).toHaveBeenCalled();
+      expect(mockEditor.on).toHaveBeenCalledWith('update', expect.any(Function));
+    });
+
+    it('should leave the focus where it is when switched off, and still follow the text', () => {
+      component.autoFocus = false;
+
+      component.ngAfterViewInit();
+
+      expect(mockEditor.commands.focus).not.toHaveBeenCalled();
+      expect(mockEditor.on).toHaveBeenCalledWith('update', expect.any(Function));
+    });
   });
 
   it('should emit handleCancel and clear content onReset', () => {

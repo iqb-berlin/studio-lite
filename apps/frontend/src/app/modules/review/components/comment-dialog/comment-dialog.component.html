@@ -9,6 +9,7 @@
   <mat-form-field>
     <mat-label>{{'review.comment-name' | translate}}</mat-label>
     <input matInput
+      #nameInput
       [placeholder]="'review.enter-comment-name' | translate"
       [(ngModel)]="userName"
       (ngModelChange)="storeUserName()">
@@ -24,6 +25,7 @@
       [unitId]="this.reviewService.unitDbId"
       [workspaceId]="0"
       [newCommentOnly]="!reviewService.reviewConfig.showOthersComments"
+      [focusEditor]="focusEditor"
       [reviewId]="this.reviewService.reviewId"
       (onCommentsUpdated)="close()">
     </studio-lite-comments>

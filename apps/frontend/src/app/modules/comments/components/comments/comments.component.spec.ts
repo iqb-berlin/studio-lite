@@ -3,6 +3,7 @@ import {
   ComponentFixture, fakeAsync, TestBed, tick
 } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
+import { By } from '@angular/platform-browser';
 import {
   Component, EventEmitter, Input, Output, Pipe, PipeTransform
 } from '@angular/core';
@@ -64,6 +65,7 @@ class MockCommentEditorComponent {
   @Input() selectedItems: string[] = [];
   @Input() parentId: number | null = null;
   @Input() isProcessing = false;
+  @Input() autoFocus = true;
   @Output() handleSubmit = new EventEmitter<{ text: string; parentId: number | null; items: string[] }>();
   @Output() handleCancel = new EventEmitter<void>();
 }
@@ -184,6 +186,22 @@ describe('CommentsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('focusEditor (#1785)', () => {
+    const newCommentEditor = (): MockCommentEditorComponent => fixture.debugElement
+      .query(By.css('.new-comment studio-lite-comment-editor')).componentInstance;
+
+    it('should let the editor for a new comment take the focus by default', () => {
+      expect(newCommentEditor().autoFocus).toBe(true);
+    });
+
+    it('should hand a switched-off focus on to the editor for a new comment', () => {
+      fixture.componentRef.setInput('focusEditor', false);
+      fixture.detectChanges();
+
+      expect(newCommentEditor().autoFocus).toBe(false);
+    });
   });
 
   it('should fetch comments on init', fakeAsync(() => {

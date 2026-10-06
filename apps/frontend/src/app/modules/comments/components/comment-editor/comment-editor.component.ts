@@ -46,9 +46,15 @@ export class CommentEditorComponent extends RichTextEditorDirective implements A
 
   @Output() handleSubmit = new EventEmitter<{ text: string, items: string[] }>();
   @Output() handleCancel = new EventEmitter<void>();
+  /**
+   * Whether the editor takes the focus when it appears. Off where something else is filled in first:
+   * in the review's comment dialog the editor appears with the first letter of the name an external
+   * visitor gives, and taking the focus there sent the rest of the name into the comment (#1785).
+   */
+  @Input() autoFocus = true;
 
   ngAfterViewInit() {
-    this.editor.commands.focus();
+    if (this.autoFocus) this.editor.commands.focus();
     this.editor.on('update', () => {
       this.updateEditorHtml();
     });
