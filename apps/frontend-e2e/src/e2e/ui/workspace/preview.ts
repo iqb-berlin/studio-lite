@@ -45,6 +45,18 @@ const waitForPlayerState = (
   });
 };
 
+// The studio only listens to messages whose source is the player's frame, so the notification is
+// posted by a script running inside that frame, as the player itself would post it.
+const sendRuntimeErrorFromPlayer = (code: string, message: string): void => {
+  cy.get<HTMLIFrameElement>('[data-cy="unit-preview-iframe"]').then($iframe => {
+    const playerDocument = $iframe[0].contentDocument as Document;
+    const script = playerDocument.createElement('script');
+    const notification = { type: 'vopRuntimeErrorNotification', code, message };
+    script.textContent = `parent.postMessage(${JSON.stringify(notification)}, '*');`;
+    playerDocument.body.appendChild(script);
+  });
+};
+
 describe('Unit Preview (Vorschau)', () => {
   afterEach(() => {
     cy.get('body').then($body => {
@@ -219,6 +231,32 @@ describe('Unit Preview (Vorschau)', () => {
     cy.get('studio-lite-preview-bar').should('exist');
     cy.get('[data-cy="preview-bar-check-coding"]').should('exist');
     cy.get('[data-cy="preview-bar-print"]').should('exist');
+  });
+
+  it('explains a runtime error the player reports with a known code', () => {
+    sendRuntimeErrorFromPlayer('geogebra-not-loading', 'GeoGebra could not be loaded');
+    cy.get('mat-dialog-container', { timeout: 10000 }).within(() => {
+      cy.contains('h1', 'Player-Laufzeitfehler').should('exist');
+      cy.get('[data-cy="runtime-error-dialog-explanation"]')
+        .should('contain.text', 'Das GeoGebra-Paket konnte nicht geladen werden.')
+        .and('not.contain.text', 'Der Player hat einen Laufzeitfehler gemeldet.');
+      cy.get('code').should('have.text', 'geogebra-not-loading');
+      cy.get('[data-cy="runtime-error-dialog-message"]').should('contain.text', 'GeoGebra could not be loaded');
+      cy.contains('button', 'Schließen').click();
+    });
+    cy.get('mat-dialog-container').should('not.exist');
+  });
+
+  it('keeps the generic text for a runtime error with an unknown code', () => {
+    sendRuntimeErrorFromPlayer('unknown-code', 'Something went wrong');
+    cy.get('mat-dialog-container', { timeout: 10000 }).within(() => {
+      cy.get('[data-cy="runtime-error-dialog-explanation"]')
+        .should('have.text', 'Der Player hat einen Laufzeitfehler gemeldet.');
+      cy.get('code').should('have.text', 'unknown-code');
+      cy.get('[data-cy="runtime-error-dialog-message"]').should('contain.text', 'Something went wrong');
+      cy.contains('button', 'Schließen').click();
+    });
+    cy.get('mat-dialog-container').should('not.exist');
   });
 
   it('cleans up the test unit', () => {
