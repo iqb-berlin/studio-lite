@@ -1,5 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ElementRef } from '@angular/core';
+import {
+  Component, ElementRef, EventEmitter, Input, Output
+} from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatInputModule } from '@angular/material/input';
@@ -12,6 +15,21 @@ import { CommentDialogComponent } from './comment-dialog.component';
 import { ReviewBackendService } from '../../services/review-backend.service';
 import { ReviewService } from '../../services/review.service';
 import { AppService } from '../../../../services/app.service';
+import { CommentsComponent } from '../../../comments/components/comments/comments.component';
+
+/** Stands in for the comments, so that the test sees what the dialog hands them. */
+@Component({ selector: 'studio-lite-comments', template: '', standalone: true })
+class MockCommentsComponent {
+  @Input() userName = '';
+  @Input() unitItems: UnitItemDto[] = [];
+  @Input() userId = 0;
+  @Input() unitId = 0;
+  @Input() workspaceId = 0;
+  @Input() newCommentOnly = false;
+  @Input() focusEditor = true;
+  @Input() reviewId = 0;
+  @Output() onCommentsUpdated = new EventEmitter<void>();
+}
 
 describe('CommentDialogComponent', () => {
   let component: CommentDialogComponent;
@@ -66,7 +84,12 @@ describe('CommentDialogComponent', () => {
         { provide: AppService, useValue: mockAppService },
         { provide: 'SERVER_URL', useValue: environment.backendUrl }
       ]
-    }).compileComponents();
+    })
+      .overrideComponent(CommentDialogComponent, {
+        remove: { imports: [CommentsComponent] },
+        add: { imports: [MockCommentsComponent] }
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(CommentDialogComponent);
     component = fixture.componentInstance;
@@ -125,6 +148,28 @@ describe('CommentDialogComponent', () => {
 
       expect(component.nameInput).toBeDefined();
       expect(document.activeElement).toBe(component.nameInput?.nativeElement);
+    });
+
+    it('should hand the comments a focused editor when the name was kept', () => {
+      localStorage.setItem('iqb-studio-user-name-for-review-comments', 'John Doe');
+      fixture.detectChanges();
+
+      const comments: MockCommentsComponent = fixture.debugElement
+        .query(By.directive(MockCommentsComponent)).componentInstance;
+      expect(comments.focusEditor).toBe(true);
+    });
+
+    it('should hand the comments an unfocused editor when they appear with the first letter of the name', () => {
+      fixture.detectChanges();
+      expect(fixture.debugElement.query(By.directive(MockCommentsComponent))).toBeNull();
+
+      component.userName = 'J';
+      component.storeUserName();
+      fixture.detectChanges();
+
+      const comments: MockCommentsComponent = fixture.debugElement
+        .query(By.directive(MockCommentsComponent)).componentInstance;
+      expect(comments.focusEditor).toBe(false);
     });
 
     it('should leave the name field unfocused when the editor takes the focus', () => {
