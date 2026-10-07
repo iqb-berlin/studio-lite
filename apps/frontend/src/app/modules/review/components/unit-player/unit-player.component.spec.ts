@@ -412,6 +412,36 @@ describe('UnitPlayerComponent', () => {
     });
   });
 
+  describe('page navigation (#1800)', () => {
+    const renderWith = (pageNaviButtons?: string): HTMLElement => {
+      mockReviewService.bookletConfig = { pagingMode: 'separate', pageNaviButtons };
+      fixture.detectChanges();
+      return fixture.nativeElement as HTMLElement;
+    };
+
+    it('should be shown when pageNaviButtons is not set, as its default SEPARATE_BOTTOM', () => {
+      const element = renderWith(undefined);
+
+      expect(element.querySelector('studio-lite-page-navigation')).not.toBeNull();
+      expect(element.querySelector('.unit-host.with-footer')).not.toBeNull();
+    });
+
+    it('should be shown when pageNaviButtons is left empty in the review settings', () => {
+      expect(renderWith('').querySelector('studio-lite-page-navigation')).not.toBeNull();
+    });
+
+    it('should be shown when pageNaviButtons is SEPARATE_BOTTOM', () => {
+      expect(renderWith('SEPARATE_BOTTOM').querySelector('studio-lite-page-navigation')).not.toBeNull();
+    });
+
+    it('should be hidden when pageNaviButtons is OFF', () => {
+      const element = renderWith('OFF');
+
+      expect(element.querySelector('studio-lite-page-navigation')).toBeNull();
+      expect(element.querySelector('.unit-host.with-footer')).toBeNull();
+    });
+  });
+
   describe('Component Properties', () => {
     it('should have unitData property', () => {
       expect(component.unitData).toBeDefined();
