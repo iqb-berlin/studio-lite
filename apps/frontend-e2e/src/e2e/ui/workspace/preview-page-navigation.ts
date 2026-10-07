@@ -5,34 +5,33 @@ import {
 import { importedUnit, lightUnit, primaryWorkspace } from '../../../support/testData';
 
 /**
- * Sends what the editor would send after an author has deleted all pages but the first. The studio
- * takes a definition only from the editor's own frame and only with the session it started the
- * editor with, so a script inside that frame asks for a fresh start, waits for it, and answers with
- * the definition it was given, cut down to its first page. The editor itself must not see that
- * start: it would load the unit again and report the original definition back.
+ * Puts a stand-in in place of the editor that does what the editor does after an author has deleted
+ * all pages but the first: it reports itself ready and answers the start with the definition it is
+ * given, cut down to its first page. The studio takes a definition only from the editor's frame and
+ * only with the session of the latest start; a new srcdoc keeps the frame's window, and with the
+ * real editor gone no second ready can replace that session behind the stand-in's back. It answers
+ * once, so that the start of the next unit selected does not come back edited as well.
  */
 const reduceUnitToFirstPageInEditor = (): void => {
+  const standIn = `<script>
+    window.addEventListener('message', function onStart(event) {
+      if (!event.data || event.data.type !== 'voeStartCommand') return;
+      window.removeEventListener('message', onStart);
+      const definition = JSON.parse(event.data.unitDefinition);
+      definition.pages = definition.pages.slice(0, 1);
+      parent.postMessage({
+        type: 'voeDefinitionChangedNotification',
+        sessionId: event.data.sessionId,
+        timeStamp: Date.now(),
+        unitDefinition: JSON.stringify(definition)
+      }, '*');
+    });
+    parent.postMessage({ type: 'voeReadyNotification', metadata: { specVersion: '4.0' } }, '*');
+  </script>`;
   cy.get<HTMLIFrameElement>('studio-lite-unit-editor iframe').then($iframe => {
-    const editorDocument = $iframe[0].contentDocument as Document;
-    const script = editorDocument.createElement('script');
-    script.textContent = `
-      window.addEventListener('message', function onStart(event) {
-        if (!event.data || event.data.type !== 'voeStartCommand') return;
-        event.stopImmediatePropagation();
-        window.removeEventListener('message', onStart, true);
-        const definition = JSON.parse(event.data.unitDefinition);
-        definition.pages = definition.pages.slice(0, 1);
-        parent.postMessage({
-          type: 'voeDefinitionChangedNotification',
-          sessionId: event.data.sessionId,
-          timeStamp: Date.now(),
-          unitDefinition: JSON.stringify(definition)
-        }, '*');
-      }, true);
-      parent.postMessage({ type: 'voeReadyNotification', metadata: { specVersion: '4.0' } }, '*');
-    `;
-    editorDocument.body.appendChild(script);
+    $iframe[0].srcdoc = standIn;
   });
+  cy.get('[data-cy="workspace-unit-save-button"]', { timeout: 10000 }).should('not.be.disabled');
 };
 
 /**
@@ -84,8 +83,7 @@ describe('Unit Preview Page Navigation', () => {
     cy.get('[data-cy="workspace-routes-preview"] [mat-icon-button]').click();
     cy.get('.unit-preview [data-cy="page-navigation-page"]', { timeout: 30000 })
       .should('have.length', 3);
-    // The editor must have finished its own start, or its ready notification would replace the
-    // session the reduced definition is sent with.
+    // The studio must be done building the editor, or it could put the editor back over the stand-in.
     cy.getIFrameBody('studio-lite-unit-editor iframe').within(() => {
       cy.get('aspect-editor-page-view', { timeout: 30000 }).should('exist');
     });
@@ -98,7 +96,7 @@ describe('Unit Preview Page Navigation', () => {
   it('discards the edit and unpins the preview', () => {
     cy.on('uncaught:exception', err => !err.message.includes('ResizeObserver loop'));
     selectUnit(lightUnit.shortname);
-    // The studio asks to save only an edit that has arrived, which makes this the proof that it did.
+    // The edit is still unsaved, so leaving the unit asks whether to keep it.
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.contains('mat-dialog-container button', json.workspace['reject-changes-label']).click();
     });
