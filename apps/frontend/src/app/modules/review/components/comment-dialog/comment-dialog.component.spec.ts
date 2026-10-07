@@ -128,19 +128,6 @@ describe('CommentDialogComponent', () => {
       expect(component.focusEditor).toBe(true);
     });
 
-    it('should keep the focus out of the editor once a kept name is edited', () => {
-      localStorage.setItem('iqb-studio-user-name-for-review-comments', 'John Doe');
-      component.ngOnInit();
-
-      // Cleared and typed anew: the editor disappears and appears again with the first letter
-      component.userName = '';
-      component.storeUserName();
-      component.userName = 'J';
-      component.storeUserName();
-
-      expect(component.focusEditor).toBe(false);
-    });
-
     it('should put the focus into the name field when the name is missing', () => {
       fixture.detectChanges();
       // Runs the application's render hooks, afterNextRender among them
@@ -159,12 +146,7 @@ describe('CommentDialogComponent', () => {
       expect(comments.focusEditor).toBe(true);
     });
 
-    it('should hand the comments an unfocused editor when they appear with the first letter of the name', () => {
-      fixture.detectChanges();
-      expect(fixture.debugElement.query(By.directive(MockCommentsComponent))).toBeNull();
-
-      component.userName = 'J';
-      component.storeUserName();
+    it('should hand the comments an unfocused editor when the name is missing', () => {
       fixture.detectChanges();
 
       const comments: MockCommentsComponent = fixture.debugElement
@@ -181,6 +163,42 @@ describe('CommentDialogComponent', () => {
       component.focusNameIfMissing();
 
       expect(focus).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('while the name is missing or changed (#1797)', () => {
+    const getComments = (): MockCommentsComponent | undefined => fixture.debugElement
+      .query(By.directive(MockCommentsComponent))?.componentInstance;
+
+    it('should show the comments to an external visitor without a name', () => {
+      fixture.detectChanges();
+
+      expect(getComments()).toBeDefined();
+      expect(getComments()?.userName).toBe('');
+    });
+
+    it('should keep the comments, and the comment begun there, while the name is cleared and typed anew', () => {
+      localStorage.setItem('iqb-studio-user-name-for-review-comments', 'John Doe');
+      fixture.detectChanges();
+      const comments = getComments();
+
+      component.userName = '';
+      component.storeUserName();
+      fixture.detectChanges();
+      expect(getComments()).toBe(comments);
+      expect(comments?.userName).toBe('');
+
+      component.userName = 'J';
+      component.storeUserName();
+      fixture.detectChanges();
+      expect(getComments()).toBe(comments);
+      expect(comments?.userName).toBe('J');
+    });
+
+    it('should mark the name as required', () => {
+      fixture.detectChanges();
+
+      expect(component.nameInput?.nativeElement.required).toBe(true);
     });
   });
 

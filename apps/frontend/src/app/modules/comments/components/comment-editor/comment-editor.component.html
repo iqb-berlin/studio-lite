@@ -125,7 +125,7 @@
         <studio-lite-wrapped-icon icon="close"></studio-lite-wrapped-icon>
       </button>
       <button mat-fab
-              [disabled]="!(editorHTML | isCommentCommittable)"
+              [disabled]="submitDisabled || !(editorHTML | isCommentCommittable)"
               color="primary"
               matTooltip="{{ submitLabel | translate}}"
               [matTooltipPosition]="'above'"

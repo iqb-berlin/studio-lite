@@ -46,6 +46,8 @@ export class CommentComponent implements OnInit {
   @Input() latestCommentId!: Subject<number>;
   @Input() adminMode = false;
   @Input() showHiddenComments!: BehaviorSubject<boolean>;
+  /** Whether a reply can be written but not sent: a reply carries the author's name, and it is missing (#1797) */
+  @Input() replyDisabled = false;
 
   @Output() setActiveComment = new EventEmitter<ActiveComment | null>();
   @Output() deleteComment = new EventEmitter<{ commentId: number; numberOfReplies: number }>();

@@ -505,13 +505,14 @@ describe('Unit Reviews', () => {
       openCommentDialog();
       cy.translate(Cypress.expose('locale')).then(json => {
         cy.get('mat-dialog-container').within(() => {
-          // Without a user, a comment needs a name; the editor appears once there is one
-          cy.get('studio-lite-comments').should('not.exist');
-          // Typed as a visitor types it: the editor appears with the first letter, and once took the
-          // focus, so that the rest of the name went into the comment (#1785)
-          cy.get(`input[placeholder="${json.review['enter-comment-name']}"]`).type(visitorName);
+          // Without a user, a comment needs a name: it can be written at once, but sent only under a
+          // name (#1797). The name field has the focus; the editor once took it and got the rest of the
+          // name (#1785).
+          cy.get(`input[placeholder="${json.review['enter-comment-name']}"]`).should('be.focused');
           cy.get('tiptap-editor').should('be.visible').type(commentText);
-          cy.contains('button', 'send').click({ force: true });
+          cy.get('.new-comment .submit-button').should('be.disabled');
+          cy.get(`input[placeholder="${json.review['enter-comment-name']}"]`).type(visitorName);
+          cy.get('.new-comment .submit-button').should('be.enabled').click({ force: true });
         });
       });
       waitForSuccess('@postExternalComment');
@@ -529,7 +530,6 @@ describe('Unit Reviews', () => {
     });
 
     it('lets an external visitor neither change, delete nor vote on the comment', () => {
-      // The name given before is kept in the browser: the dialog opens with the comments at once
       openCommentDialog();
       cy.contains('studio-lite-comment', commentText).within(() => {
         cy.contains('.comment-action', 'edit').should('not.exist');
@@ -551,20 +551,46 @@ describe('Unit Reviews', () => {
       cy.get('mat-dialog-container').should('not.exist');
     });
 
-    it('keeps a kept name in its field while it is typed anew', () => {
+    it('keeps the comment begun while the name is cleared and typed anew', () => {
       const newName = 'Andere Person';
+      const draft = 'Begonnener Kommentar';
       openCommentDialog();
       cy.translate(Cypress.expose('locale')).then(json => {
         cy.get('mat-dialog-container').within(() => {
           // With the name kept, the editor is ready at once and has the focus
-          cy.focused().should('have.class', 'ProseMirror');
-          // Cleared, the editor disappears; it appears again with the first letter, and took the focus
-          // there, so that the rest of the name went into the comment (#1785)
+          cy.focused().should('have.class', 'ProseMirror').type(draft);
+          // Cleared, the name locks sending; the comment stays and is not sent under no name (#1797).
+          // Typed anew, the name stays in its field and does not go into the comment (#1785).
+          cy.get(`input[placeholder="${json.review['enter-comment-name']}"]`).clear();
+          cy.get('tiptap-editor .ProseMirror').should('have.text', draft);
+          cy.get('.new-comment .submit-button').should('be.disabled');
           cy.get(`input[placeholder="${json.review['enter-comment-name']}"]`)
-            .clear()
             .type(newName)
             .should('have.value', newName);
-          cy.get('tiptap-editor .ProseMirror').should('have.text', '');
+          cy.get('tiptap-editor .ProseMirror').should('have.text', draft);
+          cy.get('.new-comment .submit-button').should('be.enabled');
+          cy.contains('button', json.dialogs.close).click();
+        });
+      });
+      cy.get('mat-dialog-container').should('not.exist');
+    });
+
+    it('keeps a reply from being sent while the name is missing', () => {
+      const reply = 'Begonnene Antwort';
+      openCommentDialog();
+      cy.translate(Cypress.expose('locale')).then(json => {
+        cy.get(`input[placeholder="${json.review['enter-comment-name']}"]`).clear();
+        cy.contains('studio-lite-comment', commentText).within(() => {
+          cy.contains('.comment-action', 'reply').click();
+          cy.get('tiptap-editor .ProseMirror').type(reply);
+          cy.get('.submit-button').should('be.disabled');
+        });
+        cy.get(`input[placeholder="${json.review['enter-comment-name']}"]`).type(visitorName);
+        cy.contains('studio-lite-comment', commentText).within(() => {
+          cy.get('tiptap-editor .ProseMirror').should('have.text', reply);
+          cy.get('.submit-button').should('be.enabled');
+        });
+        cy.get('mat-dialog-container').within(() => {
           cy.contains('button', json.dialogs.close).click();
         });
       });

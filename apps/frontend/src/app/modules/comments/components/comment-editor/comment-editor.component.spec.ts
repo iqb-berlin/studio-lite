@@ -184,6 +184,38 @@ describe('CommentEditorComponent', () => {
     });
   });
 
+  describe('submitDisabled (#1797)', () => {
+    const getSubmitButton = (): HTMLButtonElement => fixture.nativeElement.querySelector('.submit-button');
+
+    beforeEach(() => {
+      component.editorHTML = '<p>test</p>';
+    });
+
+    it('should let a written comment be sent by default', () => {
+      fixture.detectChanges();
+
+      expect(getSubmitButton().disabled).toBe(false);
+    });
+
+    it('should keep a written comment from being sent when switched on', () => {
+      fixture.componentRef.setInput('submitDisabled', true);
+      fixture.detectChanges();
+
+      expect(getSubmitButton().disabled).toBe(true);
+    });
+
+    it('should keep the written comment when switched on and off again', () => {
+      fixture.componentRef.setInput('submitDisabled', true);
+      fixture.detectChanges();
+      fixture.componentRef.setInput('submitDisabled', false);
+      fixture.detectChanges();
+
+      expect(getSubmitButton().disabled).toBe(false);
+      expect(component.editorHTML).toBe('<p>test</p>');
+      expect(mockEditor.commands.clearContent).not.toHaveBeenCalled();
+    });
+  });
+
   it('should emit handleCancel and clear content onReset', () => {
     const cancelSpy = jest.spyOn(component.handleCancel, 'emit');
     component.onReset();

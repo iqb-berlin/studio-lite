@@ -12,6 +12,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { ActiveComment, ActiveCommentType } from '../../models/active-comment.interface';
 import { Comment } from '../../models/comment.interface';
 import { CommentComponent } from './comment.component';
+import { CommentEditorComponent } from '../comment-editor/comment-editor.component';
 
 describe('CommentComponent', () => {
   let component: CommentComponent;
@@ -254,6 +255,41 @@ describe('CommentComponent', () => {
       fixture.detectChanges();
 
       expect(fixture.nativeElement.querySelector('.vote-count').textContent.trim()).toBe('2');
+    });
+  });
+
+  // A reply carries the name of its author; without one it can be written but not sent (#1797)
+  describe('replying without a name', () => {
+    const replyEditor = (): CommentEditorComponent => fixture.debugElement
+      .query(By.directive(CommentEditorComponent)).componentInstance;
+
+    beforeEach(() => {
+      fixture.componentRef.setInput('activeComment', { id: 1, type: ActiveCommentType.replying });
+    });
+
+    it('should let a reply be sent by default', () => {
+      fixture.detectChanges();
+
+      expect(replyEditor().submitDisabled).toBe(false);
+    });
+
+    it('should keep a reply from being sent while replies are disabled', () => {
+      fixture.componentRef.setInput('replyDisabled', true);
+      fixture.detectChanges();
+
+      expect(replyEditor().submitDisabled).toBe(true);
+    });
+
+    it('should hand the lock on to the replies below', () => {
+      fixture.componentRef.setInput('activeComment', null);
+      fixture.componentRef.setInput('replies', [{ ...component.comment, id: 2, parentId: 1 }]);
+      fixture.componentRef.setInput('replyDisabled', true);
+      fixture.detectChanges();
+
+      const reply: CommentComponent = fixture.debugElement
+        .query(By.directive(CommentComponent)).componentInstance;
+      expect(reply.comment.id).toBe(2);
+      expect(reply.replyDisabled).toBe(true);
     });
   });
 
