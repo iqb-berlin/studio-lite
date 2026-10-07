@@ -166,6 +166,7 @@ export class UnitPreviewComponent
     const unitDef = unitDefinitionStore.getData();
     if (this.postMessageTarget) {
       this.definitionTypeWarning = this.getDefinitionTypeWarning(unitDef.definitionType);
+      this.awaitPageListAfterRestart();
       if (this.playerApiVersion === 1) {
         this.postMessageTarget.postMessage(
           {

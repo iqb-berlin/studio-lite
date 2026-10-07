@@ -38,6 +38,7 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
   presentationProgress: Progress = 'none';
   responseProgress: Progress = 'none';
   hasFocus = false;
+  private pageListAwaited = false;
 
   abstract gotoUnit(target: string): void;
   protected abstract handleUnitStateData(unitState: UnitState): void;
@@ -149,11 +150,34 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
   }
 
   /**
+   * The unit is about to be rebuilt under the same player -- after a change in the editor beside the
+   * preview -- and may come back with fewer pages. The list stays on screen, so that it does not
+   * blink on every change, but the player's next report about its pages decides it, even when that
+   * report names a single page (#1683).
+   *
+   * An empty list does not count as such a report: aspect players before verona-modules-aspect#1462
+   * send one after every start command, before they have counted their pages, and they stay in use.
+   * A unit the edit has left without any page therefore keeps the old list until the next unit change.
+   */
+  awaitPageListAfterRestart(): void {
+    this.pageListAwaited = true;
+  }
+
+  /**
    * What the player last said about its pages. A list of more than one page replaces what is held;
    * anything else is taken as "nothing new about the pages" and only moves the marker, because that
-   * is the shape in which a player reports an ordinary page change.
+   * is the shape in which a player reports an ordinary page change -- unless the list is awaited
+   * after a restart, see {@link awaitPageListAfterRestart}.
    */
   setPageList(validPages?: string[], currentPage?: string): void {
+    if (this.pageListAwaited) {
+      if (!validPages?.length) return;
+      this.pageListAwaited = false;
+      if (validPages.length === 1) {
+        this.clearPageList();
+        return;
+      }
+    }
     if (Array.isArray(validPages) && validPages.length > 1) {
       const newPageList: PageData[] = [];
       validPages.forEach((id, i) => {

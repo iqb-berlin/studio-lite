@@ -406,6 +406,17 @@ describe('UnitPreviewComponent', () => {
 
       expect(target.postMessage.mock.calls[0][0]).not.toHaveProperty('unitDefinitionType');
     });
+
+    it('should let the next page report decide the list of the restarted unit', () => {
+      component.postMessageTarget = { postMessage: jest.fn() } as never;
+      component.playerApiVersion = 6;
+      component.setPageList(['0', '1', '2'], '0');
+
+      component.postStore(store);
+      component.setPageList(['0'], '0');
+
+      expect(component.pageList).toEqual([]);
+    });
   });
 
   describe('definition type warning', () => {
