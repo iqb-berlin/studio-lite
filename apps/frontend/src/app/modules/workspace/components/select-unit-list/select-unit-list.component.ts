@@ -44,6 +44,9 @@ export class SelectUnitListComponent implements OnChanges, OnDestroy {
   @Input() selectedUnitId!: number;
   @Input() queryParams!: HttpParams;
   @Input() workspace!: number;
+  // Disables every checkbox, for as long as the selection is about to be set from outside;
+  // `disabled` instead names single units that can never be selected.
+  @Input() locked = false;
 
   @Input('show-groups')
   set showGroups(value: boolean) {

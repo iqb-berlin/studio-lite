@@ -647,4 +647,86 @@ describe('Unit Reviews', () => {
       cy.contains('mat-row', defaultsReview).should('not.exist');
     });
   });
+
+  // Units and settings ticked while a review loads were reset by its arrival (#1786). The review
+  // admin keeps them disabled until then; its answer is held back here to see that.
+  describe('#1786 the review admin while a review loads', () => {
+    const firstReview = 'LockedReviewOne';
+    const secondReview = 'LockedReviewTwo';
+    const newReview = 'LockedReviewNew';
+    const unitCheckbox = '[data-cy="workspace-select-unit-list-checkbox-M6_AK0013"] input';
+    const reviewName = '[data-cy="workspace-review-config-name"]';
+
+    const holdBackReview = (): void => {
+      cy.intercept('GET', '/api/workspaces/*/reviews/*', req => {
+        req.on('response', res => { res.setDelay(2000); });
+      }).as('heldBackReview');
+    };
+
+    const expectLocked = (locked: boolean): void => {
+      const state = locked ? 'be.disabled' : 'be.enabled';
+      cy.get(unitCheckbox).should(state);
+      cy.get(reviewName).should(state);
+    };
+
+    it('creates two reviews', () => {
+      loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
+      cy.visitWs(primaryWorkspace);
+      goToReviewAdmin();
+      createReview(firstReview, ['M6_AK0011']);
+      goToReviewAdmin();
+      createReview(secondReview, ['M6_AK0011', 'M6_AK0012']);
+    });
+
+    it('locks the units and the settings while another review loads', () => {
+      cy.visitWs(primaryWorkspace);
+      goToReviewAdmin();
+      selectReviewInAdmin(firstReview);
+      expectLocked(false);
+      holdBackReview();
+      cy.contains('mat-row', secondReview).click();
+      expectLocked(true);
+      cy.wait('@heldBackReview');
+      expectLocked(false);
+      cy.get(reviewName).should('have.value', secondReview);
+      cy.get('[data-cy^="workspace-select-unit-list-checkbox-"] input:checked').should('have.length', 2);
+      cy.get('[data-cy="workspace-review-close"]').click();
+    });
+
+    it('locks the units and the settings of a new review until it has loaded', () => {
+      cy.visitWs(primaryWorkspace);
+      goToReviewAdmin();
+      cy.intercept('POST', '/api/workspaces/*/reviews').as('createLockedReview');
+      holdBackReview();
+      cy.get('[data-cy="workspace-review-menu-add-review-button"]')
+        .should('be.visible')
+        .click();
+      cy.translate(Cypress.expose('locale')).then(json => {
+        cy.get(`input[placeholder="${json.workspace['new-review-name']}"]`)
+          .should('be.visible')
+          .clear()
+          .type(newReview);
+        cy.get('.mat-mdc-dialog-component-host > .mat-mdc-dialog-actions').within(() => {
+          cy.get('button').contains(json.workspace.save).click();
+        });
+      });
+      waitForSuccess('@createLockedReview');
+      expectLocked(true);
+      cy.wait('@heldBackReview');
+      expectLocked(false);
+      cy.get(reviewName).should('have.value', newReview);
+      cy.get('[data-cy="workspace-review-close"]').click();
+    });
+
+    it('deletes the reviews', () => {
+      cy.visitWs(primaryWorkspace);
+      goToReviewAdmin();
+      // A row clicked while the list reloads after a delete is deselected by the reloaded list
+      [firstReview, secondReview, newReview].forEach(name => {
+        deleteReview(name);
+        cy.contains('mat-row', name).should('not.exist');
+      });
+      cy.get('[data-cy="workspace-review-close"]').click();
+    });
+  });
 });

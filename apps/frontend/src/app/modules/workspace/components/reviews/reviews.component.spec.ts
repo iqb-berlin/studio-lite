@@ -12,7 +12,7 @@ import {
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { ReviewsComponent } from './reviews.component';
 import { environment } from '../../../../../environments/environment';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
@@ -248,6 +248,127 @@ describe('ReviewsComponent', () => {
     expect(component.reviewDataOriginal).toEqual({ id: 0 });
     expect(component.reviewDataToChange).toEqual({ id: 0 });
   }));
+
+  describe('while the selected review loads', () => {
+    let reviewA: Subject<ReviewFullDto | null>;
+    let reviewB: Subject<ReviewFullDto | null>;
+
+    beforeEach(() => {
+      reviewA = new Subject<ReviewFullDto | null>();
+      reviewB = new Subject<ReviewFullDto | null>();
+      backendServiceMock.getReview
+        .mockImplementation((wsId: number, reviewId: number) => (reviewId === 1 ? reviewA : reviewB));
+      jest.spyOn(component, 'checkForChangesAndContinue').mockResolvedValue(true);
+    });
+
+    it('should be locked until the review has arrived', fakeAsync(() => {
+      component.selectReview(1);
+      flushMicrotasks();
+
+      expect(component.isLoadingReview).toBe(true);
+
+      reviewA.next(createReviewFull());
+
+      expect(component.isLoadingReview).toBe(false);
+      expect(component.reviewDataToChange.name).toBe('Review A');
+    }));
+
+    it('should drop the late review selected before', fakeAsync(() => {
+      component.selectReview(1);
+      flushMicrotasks();
+      component.selectReview(2);
+      flushMicrotasks();
+
+      expect(reviewA.observed).toBe(false);
+
+      reviewB.next(createReviewFull({ id: 2, name: 'Review B', units: [13] }));
+
+      expect(component.isLoadingReview).toBe(false);
+      expect(component.reviewDataToChange.name).toBe('Review B');
+      expect(component.reviewDataToChange.units).toEqual([13]);
+    }));
+
+    it('should not save the data of the review selected before onto the one still loading', fakeAsync(() => {
+      component.selectReview(1);
+      flushMicrotasks();
+      reviewA.next(createReviewFull({ name: 'Old' }));
+      component.reviewDataToChange.name = 'New';
+      component.selectReview(2);
+      flushMicrotasks();
+
+      component.saveChanges();
+
+      expect(backendServiceMock.setReview).not.toHaveBeenCalled();
+    }));
+
+    it('should select nothing when the review does not arrive', fakeAsync(() => {
+      component.selectReview(1);
+      flushMicrotasks();
+      reviewA.next(createReviewFull());
+      component.selectReview(2);
+      flushMicrotasks();
+
+      reviewB.next(null);
+
+      expect(component.isLoadingReview).toBe(false);
+      expect(component.selectedReviewId).toBe(0);
+      expect(component.reviewDataOriginal).toEqual({ id: 0 });
+      expect(component.reviewDataToChange).toEqual({ id: 0 });
+    }));
+
+    it('should stay locked when a review clicked during a reload of the list arrives first', fakeAsync(() => {
+      const reviewList = new Subject<ReviewInListDto[]>();
+      backendServiceMock.getReviewList.mockReturnValue(reviewList);
+      component.loadReviewList(2);
+      component.selectReview(1);
+      flushMicrotasks();
+
+      reviewA.next(createReviewFull());
+
+      expect(component.isLoadingReview).toBe(true);
+
+      reviewList.next(createReviewList());
+      flushMicrotasks();
+      reviewB.next(createReviewFull({ id: 2, name: 'Review B' }));
+      tick();
+
+      expect(component.isLoadingReview).toBe(false);
+      expect(component.selectedReviewId).toBe(2);
+    }));
+
+    it('should unlock when no review is selected anymore', fakeAsync(() => {
+      component.selectReview(1);
+      flushMicrotasks();
+      component.selectReview(0);
+      flushMicrotasks();
+
+      expect(component.isLoadingReview).toBe(false);
+      expect(reviewA.observed).toBe(false);
+    }));
+
+    it('should be locked from the start of a reload of the list until the review has arrived', fakeAsync(() => {
+      const reviewList = new Subject<ReviewInListDto[]>();
+      backendServiceMock.getReviewList.mockReturnValue(reviewList);
+      component.selectReview(1);
+      flushMicrotasks();
+
+      component.loadReviewList(2);
+
+      expect(component.isLoadingReview).toBe(true);
+      expect(reviewA.observed).toBe(false);
+
+      reviewList.next(createReviewList());
+      flushMicrotasks();
+
+      expect(component.isLoadingReview).toBe(true);
+
+      reviewB.next(createReviewFull({ id: 2, name: 'Review B' }));
+      tick();
+
+      expect(component.isLoadingReview).toBe(false);
+      expect(component.selectedReviewId).toBe(2);
+    }));
+  });
 
   it('should update units and mark changes on unitSelectionChanged', () => {
     const detectSpy = jest.spyOn(component, 'detectChanges').mockReturnValue(true);

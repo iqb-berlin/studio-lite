@@ -5,6 +5,7 @@ import {
 } from '@angular/core';
 import { BookletConfigDto, ReviewConfigDto } from '@studio-lite-lib/api-dto';
 import { FormsModule } from '@angular/forms';
+import { By } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import { ReviewConfigComponent } from './review-config.component';
 import { ReviewConfigEditComponent } from '../review-config-edit/review-config-edit.component';
@@ -49,6 +50,39 @@ describe('ReviewConfigComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('of a selected review', () => {
+    const inputs = (): HTMLInputElement[] => Array.from(fixture.nativeElement.querySelectorAll('input'));
+    const editComponents = () => [
+      fixture.debugElement.query(By.directive(MockReviewConfigEditComponent)).componentInstance,
+      fixture.debugElement.query(By.directive(MockBookletConfigEditComponent)).componentInstance
+    ] as { disabled: boolean }[];
+
+    const render = async (disabled: boolean): Promise<void> => {
+      fixture.componentRef.setInput('selectedReviewId', 1);
+      fixture.componentRef.setInput('disabled', disabled);
+      fixture.detectChanges();
+      // ngModel applies `disabled` asynchronously
+      await fixture.whenStable();
+      fixture.detectChanges();
+    };
+
+    it('should enable name, password and settings', async () => {
+      await render(false);
+
+      expect(inputs()).toHaveLength(2);
+      expect(inputs().every(input => !input.disabled)).toBe(true);
+      expect(editComponents().every(edit => !edit.disabled)).toBe(true);
+    });
+
+    it('should disable name, password and settings while disabled', async () => {
+      await render(true);
+
+      expect(inputs()).toHaveLength(2);
+      expect(inputs().every(input => input.disabled)).toBe(true);
+      expect(editComponents().every(edit => edit.disabled)).toBe(true);
+    });
   });
 
   it('should handle name change', () => {

@@ -1,6 +1,7 @@
 import {
-  Component, OnInit, ViewChild
+  Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import {
   BookletConfigDto, ReviewConfigDto, ReviewFullDto, ReviewInListDto
 } from '@studio-lite-lib/api-dto';
@@ -40,11 +41,18 @@ import { I18nService } from '../../../../services/i18n.service';
   imports: [MatDialogTitle, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, ReviewMenuComponent, SelectUnitListComponent, ReviewConfigComponent, SaveChangesComponent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, DatePipe]
 })
 
-export class ReviewsComponent extends CheckForChangesDirective implements OnInit {
+export class ReviewsComponent extends CheckForChangesDirective implements OnInit, OnDestroy {
   @ViewChild(MatSort) sort = new MatSort();
 
+  private ngUnsubscribe = new Subject<void>();
+  private reviewRequest?: Subscription;
+  // The list resets the review data on arrival: a review clicked meanwhile does not unlock
+  private isLoadingReviewList = false;
   changed = false;
   selectedReviewId = 0;
+  // True while the review list or the selected review are on their way: a change to units or
+  // settings made now would be reset by their arrival, so both stay disabled until then, and save too.
+  isLoadingReview = false;
   reviews: ReviewInListDto[] = [];
   reviewDataOriginal: ReviewFullDto = { id: 0 };
   reviewDataToChange: ReviewFullDto = { id: 0 };
@@ -68,26 +76,38 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
     setTimeout(() => this.loadReviewList());
   }
 
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
+  }
+
   selectReview(id: number) {
     this.checkForChangesAndContinue(this.changed).then(go => {
       if (go) {
         this.changed = false;
         this.selectedReviewId = id;
+        // A late answer for the review selected before would overwrite this one.
+        this.reviewRequest?.unsubscribe();
         if (this.selectedReviewId > 0) {
-          this.backendService.getReview(
+          this.isLoadingReview = true;
+          this.reviewRequest = this.backendService.getReview(
             this.workspaceService.selectedWorkspaceId, this.selectedReviewId
           )
+            .pipe(takeUntil(this.ngUnsubscribe))
             .subscribe(data => {
-              if (data) {
-                this.reviewDataOriginal = data;
-                this.reviewDataToChange = ReviewsComponent.copyFrom(data);
-                this.changed = false;
-              }
+              // Without an answer nothing stays selected: an empty form saved onto this review, or
+              // the data of the one before, would overwrite it.
+              if (!data) this.selectedReviewId = 0;
+              this.reviewDataOriginal = data || { id: 0 };
+              this.reviewDataToChange = data ? ReviewsComponent.copyFrom(data) : { id: 0 };
+              this.changed = false;
+              this.isLoadingReview = this.isLoadingReviewList;
             });
         } else {
           this.reviewDataToChange = { id: 0 };
           this.reviewDataOriginal = { id: 0 };
           this.changed = false;
+          this.isLoadingReview = this.isLoadingReviewList;
         }
       }
     });
@@ -95,12 +115,19 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
 
   loadReviewList(id = 0): void {
     this.appService.dataLoading = true;
+    this.reviewRequest?.unsubscribe();
+    this.isLoadingReviewList = true;
+    this.isLoadingReview = true;
     this.backendService.getReviewList(this.workspaceService.selectedWorkspaceId)
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(reviews => {
         this.reviews = reviews;
         this.reviewDataOriginal = { id: 0 };
         this.reviewDataToChange = { id: 0 };
         this.appService.dataLoading = false;
+        this.isLoadingReviewList = false;
+        // Until selectReview locks again for the review to select, nothing runs in between
+        this.isLoadingReview = false;
         this.selectReview(id);
         // be sure that mat sort is initialized
         setTimeout(() => this.setObjectsDatasource(this.reviews));
@@ -130,12 +157,14 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   }
 
   saveChanges() {
+    // The data still belongs to the review selected before, or is about to be replaced.
+    if (this.isLoadingReview) return;
     if (this.reviewDataToChange) {
       this.backendService.setReview(
         this.workspaceService.selectedWorkspaceId,
         this.selectedReviewId,
         this.reviewDataToChange
-      ).subscribe(ok => {
+      ).pipe(takeUntil(this.ngUnsubscribe)).subscribe(ok => {
         if (ok) {
           if (this.reviewDataOriginal.name === this.reviewDataToChange.name) {
             this.reviewDataOriginal = ReviewsComponent.copyFrom(this.reviewDataToChange);

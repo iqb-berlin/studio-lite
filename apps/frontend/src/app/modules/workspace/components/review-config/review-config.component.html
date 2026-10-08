@@ -14,7 +14,7 @@
              data-cy="workspace-review-config-name"
              [placeholder]="'workspace.review-name' | translate"
              [(ngModel)]="name"
-             [disabled]="!selectedReviewId"
+             [disabled]="!selectedReviewId || disabled"
              (ngModelChange)="nameChange.emit($event); reviewChange.emit()">
     </mat-form-field>
     <div class="fx-row-start-stretch margin-bottom fx-gap-5">
@@ -22,14 +22,14 @@
         <input matInput
                [placeholder]="'workspace.review-password' | translate"
                [(ngModel)]="password"
-               [disabled]="!selectedReviewId"
+               [disabled]="!selectedReviewId || disabled"
                (ngModelChange)="passwordChange.emit($event); reviewChange.emit()">
       </mat-form-field>
       <div [class]="(selectedReviewId && password && password.length < 4) ? 'rev-message' : 'invisible'">
         {{'workspace.review-password-info' | translate}}
       </div>
     </div>
-    <studio-lite-review-config-edit [disabled]="!selectedReviewId"
+    <studio-lite-review-config-edit [disabled]="!selectedReviewId || disabled"
                                     [config]="reviewConfigSettings"
                                     (configChanged)="reviewConfigSettingsChange.emit($event); reviewChange.emit()">
     </studio-lite-review-config-edit>
@@ -44,7 +44,7 @@
       </mat-panel-title>
     </mat-expansion-panel-header>
     <div class="info">{{'workspace.booklet-settings-studio-hint' | translate}}</div>
-    <studio-lite-booklet-config-edit [disabled]="!selectedReviewId"
+    <studio-lite-booklet-config-edit [disabled]="!selectedReviewId || disabled"
                                      [config]="bookletConfigSettings"
                                      (configChanged)="bookletConfigSettingsChange.emit($event); reviewChange.emit()">
     </studio-lite-booklet-config-edit>
