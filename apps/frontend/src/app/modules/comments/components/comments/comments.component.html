@@ -50,6 +50,7 @@
             [activeComment]="activeComment"
             [latestCommentId]="latestCommentId"
             [adminMode]="adminMode"
+            [replyDisabled]="!userName"
             (setActiveComment)="setActiveComment($event)"
             (addComment)="addComment($event)"
             (deleteComment)="deleteComment($event)"
@@ -70,6 +71,7 @@
     <studio-lite-comment-editor
       submitLabel="comments.send-comment"
       [autoFocus]="focusEditor"
+      [submitDisabled]="!userName"
       [unitItems]="unitItems"
       [placeholder]="'comments.write-comment' | translate"
       (handleSubmit)="addComment({ text: $event.text, parentId: null, items: $event.items })">

@@ -44,6 +44,7 @@
           <studio-lite-comment-editor
             studioLiteScrollEditorIntoView [isVisible] = "activeComment | isReplying: comment"
             submitLabel="comment-editor.reply"
+            [submitDisabled]="replyDisabled"
             [placeholder]="'comments.write-comment' | translate"
             [unitItems]="unitItems"
             [selectedItems]="comment.itemUuids"
@@ -155,6 +156,7 @@
             [userId]="userId"
             [unitItems]="unitItems"
             [adminMode]="adminMode"
+            [replyDisabled]="replyDisabled"
             [latestCommentId]="latestCommentId"
             (setActiveComment)="setActiveComment.emit($event)"
             (updateComment)="updateComment.emit($event)"

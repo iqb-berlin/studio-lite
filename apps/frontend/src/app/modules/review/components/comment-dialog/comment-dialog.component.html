@@ -11,12 +11,13 @@
     <input matInput
       #nameInput
       [placeholder]="'review.enter-comment-name' | translate"
+      required
       [(ngModel)]="userName"
       (ngModelChange)="storeUserName()">
   </mat-form-field>
 }
 <mat-dialog-content>
-  @if ((appService.authData.userLongName || appService.authData.userName || userName) && reviewService.unitDbId) {
+  @if (reviewService.unitDbId) {
     <studio-lite-comments
       [style.height.%]="100"
       [userName]="userName"

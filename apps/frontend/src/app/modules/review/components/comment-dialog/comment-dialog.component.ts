@@ -30,10 +30,9 @@ const NAME_LOCAL_STORAGE_KEY = 'iqb-studio-user-name-for-review-comments';
 export class CommentDialogComponent implements OnInit, OnDestroy {
   userName = '';
   /**
-   * Whether the editor takes the focus when it appears: only when the name was there as the dialog
-   * opened -- logged in, or given before and kept -- and has not been edited since. While a name is
-   * being typed, the editor appears with its first letter (and again after the name was cleared);
-   * taking the focus there sent the rest of the name into the comment (#1785).
+   * Whether the editor takes the focus as the dialog opens: only when the name is there already --
+   * logged in, or given before and kept. Without one, the name field comes first; the editor taking
+   * the focus there once sent the rest of the name into the comment (#1785).
    */
   focusEditor = false;
   @ViewChild('nameInput') nameInput?: ElementRef<HTMLInputElement>;
@@ -80,7 +79,6 @@ export class CommentDialogComponent implements OnInit, OnDestroy {
   }
 
   storeUserName() {
-    this.focusEditor = false;
     localStorage.setItem(NAME_LOCAL_STORAGE_KEY, this.userName);
   }
 
