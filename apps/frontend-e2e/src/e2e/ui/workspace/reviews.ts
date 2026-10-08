@@ -609,6 +609,23 @@ describe('Unit Reviews', () => {
       cy.get('[data-cy="workspace-review-close"]').click();
     });
 
+    // The start page names what applies, the review's own value where a setting is empty (#1803)
+    it('lists the settings the review applies on its start page, marked as defaults', () => {
+      cy.visit('/');
+      openReview(defaultsReview);
+      cy.translate(Cypress.expose('locale')).then(json => {
+        const config = json['booklet-config'];
+        cy.get('mat-expansion-panel-header').click();
+        cy.get('[data-cy="booklet-config-show-pageNaviButtons"]')
+          .should('contain.text', config.pageNaviButtons.SEPARATE_BOTTOM)
+          .and('contain.text', config['is-default']);
+        cy.get('[data-cy="booklet-config-show-unitTitle"]')
+          .should('contain.text', config.unitTitle.OFF)
+          .and('contain.text', config['is-default']);
+        cy.get('[data-cy^="booklet-config-show-"]').should('have.length', 6);
+      });
+    });
+
     it('shows one page button per page and turns the page with them', () => {
       cy.visit('/');
       openReview(defaultsReview);

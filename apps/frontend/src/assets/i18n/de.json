@@ -981,6 +981,7 @@
   "booklet-config": {
     "show-xml-params": "XML Parameter zeigen",
     "hint-default": "Standard:",
+    "is-default": "(Standard)",
     "pagingMode": {
       "label": "Darstellung der Seiten einer Unit",
       "separate": "Blättern",
