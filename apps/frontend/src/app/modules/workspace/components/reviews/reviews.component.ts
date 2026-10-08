@@ -90,6 +90,9 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
         this.reviewRequest?.unsubscribe();
         if (this.selectedReviewId > 0) {
           this.isLoadingReview = true;
+          // The review menu reads link, units and settings from here: until the answer they would be
+          // those of the review selected before, so the menu's buttons go without them meanwhile.
+          this.reviewDataOriginal = { id: 0 };
           this.reviewRequest = this.backendService.getReview(
             this.workspaceService.selectedWorkspaceId, this.selectedReviewId
           )

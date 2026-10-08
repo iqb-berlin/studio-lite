@@ -273,6 +273,21 @@ describe('ReviewsComponent', () => {
       expect(component.reviewDataToChange.name).toBe('Review A');
     }));
 
+    it('should give the review menu nothing of the review selected before while another one loads', fakeAsync(() => {
+      component.selectReview(1);
+      flushMicrotasks();
+      reviewA.next(createReviewFull());
+      component.selectReview(2);
+      flushMicrotasks();
+
+      expect(component.reviewDataOriginal).toEqual({ id: 0 });
+
+      const answerB = createReviewFull({ id: 2, name: 'Review B', link: 'link-b' });
+      reviewB.next(answerB);
+
+      expect(component.reviewDataOriginal).toEqual(answerB);
+    }));
+
     it('should drop the late review selected before', fakeAsync(() => {
       component.selectReview(1);
       flushMicrotasks();
