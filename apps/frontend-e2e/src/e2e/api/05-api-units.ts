@@ -1747,6 +1747,40 @@ describe('Unit API tests', () => {
           });
         }
       );
+
+      // unit2 was created in ws2, the drop box of ws1: it was never submitted, so it has nowhere to
+      // go back to. Until #1793 that ended the whole request in a 500.
+      it('200 positive test: should return the submitted units and report one that was never submitted (#1793)', () => {
+        const token = Cypress.expose(`token_${Cypress.expose('username')}`);
+        cy.submitUnitsAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(ws2.id),
+          Cypress.expose(unit3.shortname),
+          token
+        ).its('status').should('equal', 200);
+        cy.requestWorkspaceAPI(
+          'PATCH',
+          `${Cypress.expose(ws2.id)}/units/drop-box-history`,
+          token,
+          { ids: [Number(Cypress.expose(unit3.shortname)), Number(Cypress.expose(unit2.shortname))] }
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+          expect(resp.body.messages).to.deep.equal([
+            { objectKey: unit2.shortname, messageKey: 'unit-patch.not-submitted' }
+          ]);
+        });
+        // unit3 is back in ws1, unit2 stays in ws2
+        cy.requestWorkspaceAPI(
+          'GET',
+          `${Cypress.expose(ws1.id)}/units/${Cypress.expose(unit3.shortname)}/properties`,
+          token
+        ).its('status').should('equal', 200);
+        cy.requestWorkspaceAPI(
+          'GET',
+          `${Cypress.expose(ws2.id)}/units/${Cypress.expose(unit2.shortname)}/properties`,
+          token
+        ).its('status').should('equal', 200);
+      });
     });
   });
 });

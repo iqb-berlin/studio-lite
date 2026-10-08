@@ -36,6 +36,7 @@ describe('UnitService', () => {
   let usersRepository: DeepMocked<Repository<User>>;
   let workspaceUserRepository: DeepMocked<Repository<WorkspaceUser>>;
   let workspaceRepository: DeepMocked<Repository<Workspace>>;
+  let unitDropBoxHistoryRepository: DeepMocked<Repository<UnitDropBoxHistory>>;
   let unitUserService: DeepMocked<UnitUserService>;
   let unitCommentService: DeepMocked<UnitCommentService>;
   let unitMetadataService: DeepMocked<UnitMetadataService>;
@@ -104,6 +105,7 @@ describe('UnitService', () => {
     usersRepository = module.get(getRepositoryToken(User));
     workspaceUserRepository = module.get(getRepositoryToken(WorkspaceUser));
     workspaceRepository = module.get(getRepositoryToken(Workspace));
+    unitDropBoxHistoryRepository = module.get(getRepositoryToken(UnitDropBoxHistory));
     unitUserService = module.get(UnitUserService);
     unitCommentService = module.get(UnitCommentService);
     unitMetadataService = module.get(UnitMetadataService);
@@ -509,6 +511,45 @@ describe('UnitService', () => {
 
       await service.patchDropBoxHistory([1], 2, 1, { id: 1 } as User);
       expect(unitsRepository.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('patchReturnDropBoxHistory', () => {
+    beforeEach(() => {
+      unitsRepository.findOne.mockImplementation(async ({ where }) => {
+        const { id, key } = where as { id?: number; key?: string };
+        if (key) return null; // no unit of the same key in the source
+        return { id, key: id === 1 ? 'SUBMITTED' : 'NEVER' } as Unit;
+      });
+      unitDropBoxHistoryRepository.findOne.mockImplementation(async ({ where }) => (
+        (where as { unitId: number }).unitId === 1 ?
+          { unitId: 1, sourceWorkspaceId: 5, targetWorkspaceId: 9 } as UnitDropBoxHistory :
+          null
+      ));
+      workspaceRepository.findOne.mockResolvedValue({ id: 5 } as Workspace);
+    });
+
+    it('should return a submitted unit to where it came from', async () => {
+      const report = await service.patchReturnDropBoxHistory([1], 9, { id: 1 } as User);
+
+      expect(report.messages).toEqual([]);
+      expect(unitsRepository.save).toHaveBeenCalledWith(expect.objectContaining({ id: 1, workspaceId: 5 }));
+      expect(unitDropBoxHistoryRepository.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          unitId: 1, sourceWorkspaceId: 5, targetWorkspaceId: 9, returned: true
+        }),
+        ['unitId', 'sourceWorkspaceId', 'targetWorkspaceId']
+      );
+    });
+
+    // #1793: a unit created in the drop box, or moved into it, has no submission to undo
+    it('should report a unit that was never submitted, and return the others', async () => {
+      const report = await service.patchReturnDropBoxHistory([1, 2], 9, { id: 1 } as User);
+
+      expect(report.messages).toEqual([{ objectKey: 'NEVER', messageKey: 'unit-patch.not-submitted' }]);
+      expect(unitsRepository.save).toHaveBeenCalledTimes(1);
+      expect(unitsRepository.save).toHaveBeenCalledWith(expect.objectContaining({ id: 1, workspaceId: 5 }));
+      expect(unitDropBoxHistoryRepository.upsert).toHaveBeenCalledTimes(1);
     });
   });
 

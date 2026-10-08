@@ -22,7 +22,8 @@
   "hour": "Uhr",
   "id": "ID",
   "unit-patch": {
-    "duplicate-unit-id": "Aufgabe bereits im Arbeitsbereich vorhanden"
+    "duplicate-unit-id": "Aufgabe bereits im Arbeitsbereich vorhanden",
+    "not-submitted": "Keine Abgabe in diese Drop-Box bekannt, Aufgabe kann nicht zurückgegeben werden"
   },
   "unit-upload": {
     "api-error": {
@@ -155,7 +156,8 @@
       "upload-units": "Import Aufgaben - Ergebnis",
       "unit-patch-workspace": "Aufgaben verschieben - unvollständig",
       "unit-copy": "Aufgaben kopieren - unvollständig",
-      "unit-submit": "Aufgaben abgeben - unvollständig"
+      "unit-submit": "Aufgaben abgeben - unvollständig",
+      "unit-return-submitted": "Aufgaben zurückgeben - unvollständig"
     }
   },
   "directives": {

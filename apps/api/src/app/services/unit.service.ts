@@ -814,9 +814,18 @@ export class UnitService {
                                   workspaceId: number,
                                   user: User): Promise<RequestReportDto> {
     const reports = await Promise.all(units.map(async unitId => {
-      const unit = await this.unitDropBoxHistoryRepository
+      const submission = await this.unitDropBoxHistoryRepository
         .findOne({ where: { unitId: unitId, targetWorkspaceId: workspaceId } });
-      return this.patchWorkspace([unitId], unit.sourceWorkspaceId, user, workspaceId, 'return');
+      if (!submission) {
+        // Created in the drop box, moved into it, or the workspace it came from is gone along with
+        // its submission: there is nowhere to return it to (#1793)
+        const unit = await this.unitsRepository.findOne({ where: { id: unitId }, select: ['key'] });
+        return <RequestReportDto>{
+          source: 'unit-return-submitted',
+          messages: [{ objectKey: unit?.key ?? `${unitId}`, messageKey: 'unit-patch.not-submitted' }]
+        };
+      }
+      return this.patchWorkspace([unitId], submission.sourceWorkspaceId, user, workspaceId, 'return');
     }));
     return {
       source: 'unit-return-submitted',
