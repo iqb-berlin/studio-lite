@@ -594,4 +594,40 @@ describe('Unit Reviews', () => {
       });
     });
   });
+
+  // A review whose booklet settings were never touched: pageNaviButtons then means its default,
+  // SEPARATE_BOTTOM, and the player shows its pages one by one without buttons of its own. Without
+  // the studio's navigation the pages after the first could not be reached (#1800).
+  describe('#1800 the page navigation of a review without booklet settings', () => {
+    const defaultsReview = 'DefaultsReview';
+
+    it('creates a review with a unit of three pages and leaves the booklet settings alone', () => {
+      loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
+      cy.visitWs(primaryWorkspace);
+      goToReviewAdmin();
+      createReview(defaultsReview, ['M6_AK0011']);
+      cy.get('[data-cy="workspace-review-close"]').click();
+    });
+
+    it('shows one page button per page and turns the page with them', () => {
+      cy.visit('/');
+      openReview(defaultsReview);
+      startReview();
+      cy.get('studio-lite-unit-player [data-cy="page-navigation-page"]', { timeout: 30000 })
+        .should('have.length', 3)
+        .eq(1)
+        .click();
+      cy.get('studio-lite-unit-player [data-cy="page-navigation-page"]')
+        .eq(1)
+        .should('be.disabled');
+    });
+
+    it('deletes the review', () => {
+      cy.visitWs(primaryWorkspace);
+      goToReviewAdmin();
+      deleteReview(defaultsReview);
+      cy.get('[data-cy="workspace-review-close"]').click();
+      cy.contains('mat-row', defaultsReview).should('not.exist');
+    });
+  });
 });
