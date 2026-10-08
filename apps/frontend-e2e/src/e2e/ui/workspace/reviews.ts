@@ -606,7 +606,6 @@ describe('Unit Reviews', () => {
       cy.visitWs(primaryWorkspace);
       goToReviewAdmin();
       createReview(defaultsReview, ['M6_AK0011']);
-      cy.get('[data-cy="workspace-review-close"]').click();
     });
 
     // The start page names what applies, the review's own value where a setting is empty (#1803)
