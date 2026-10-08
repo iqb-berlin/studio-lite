@@ -718,6 +718,26 @@ describe('Unit Reviews', () => {
       cy.get('[data-cy="workspace-review-close"]').click();
     });
 
+    // Until then the menu had link, units and settings of the review selected before (#1810)
+    it('locks the review menu while another review loads', () => {
+      const menuButtons = ['export', 'print', 'start']
+        .map(button => `[data-cy="workspace-review-menu-${button}-review-button"] .mat-mdc-button-base`);
+      const expectMenuLocked = (locked: boolean): void => {
+        menuButtons.forEach(button => cy.get(button)
+          .should(locked ? 'have.class' : 'not.have.class', 'mat-mdc-button-disabled'));
+      };
+      cy.visitWs(primaryWorkspace);
+      goToReviewAdmin();
+      selectReviewInAdmin(firstReview);
+      expectMenuLocked(false);
+      holdBackReview();
+      cy.contains('mat-row', secondReview).click();
+      expectMenuLocked(true);
+      cy.wait('@heldBackReview');
+      expectMenuLocked(false);
+      cy.get('[data-cy="workspace-review-close"]').click();
+    });
+
     it('deletes the reviews', () => {
       cy.visitWs(primaryWorkspace);
       goToReviewAdmin();
