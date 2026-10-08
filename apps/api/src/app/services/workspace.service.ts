@@ -755,6 +755,15 @@ export class WorkspaceService {
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
+  /** The drop box set for the workspace, or `null` when it has none or does not exist. */
+  async dropBoxIdOf(id: number): Promise<number | null> {
+    const workspace = await this.workspacesRepository.findOne({
+      where: { id: id },
+      select: ['id', 'dropBoxId']
+    });
+    return workspace?.dropBoxId ?? null;
+  }
+
   async patchDropBoxId(id: number, dropBoxId: number): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }

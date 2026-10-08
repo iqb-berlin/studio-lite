@@ -1,7 +1,9 @@
 import type { UnitInViewDto } from '@studio-lite-lib/api-dto';
 import {
+  AccessLevel,
   DefinitionUnit,
   CopyUnit,
+  UnitData,
   WsSettings
 } from '../../support/testData';
 import {
@@ -710,6 +712,101 @@ describe('Unit API tests', () => {
     });
   });
 
+  describe('#1779, #1780 units that cross into another workspace', () => {
+    // A unit in ws3 (group2), where userzwei has no access. fadmin, who administers group2, is
+    // assigned there for the time of these tests; ws3 has no users before and after them.
+    const foreignUnit: UnitData = { shortname: 'D1779', name: 'Fremd', group: 'Group1' };
+    const adminToken = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const groupAdminToken = () => Cypress.expose(`token_${userGroupAdmin.username}`);
+    const foreignUnitId = () => Number(Cypress.expose(foreignUnit.shortname));
+
+    before(() => {
+      cy.setUsersOfWsAPI(
+        Cypress.expose(ws3.id),
+        [{ id: Cypress.expose(`id_${Cypress.expose('username')}`), access: AccessLevel.Admin }],
+        adminToken()
+      ).its('status').should('equal', 200);
+      cy.createUnitAPI(Cypress.expose(ws3.id), foreignUnit, adminToken()).then(resp => {
+        expect(resp.status).to.equal(201);
+        Cypress.expose(foreignUnit.shortname, resp.body);
+      });
+    });
+
+    after(() => {
+      cy.deleteUnitsAPI([`${foreignUnitId()}`], Cypress.expose(ws3.id), adminToken());
+      cy.setUsersOfWsAPI(Cypress.expose(ws3.id), [], adminToken());
+    });
+
+    it('404 negative test: should not copy a unit of a workspace the user cannot enter (#1779)', () => {
+      cy.requestWorkspaceAPI(
+        'POST',
+        `${Cypress.expose(ws1.id)}/units`,
+        groupAdminToken(),
+        { ids: [foreignUnitId()], addComments: true }
+      ).its('status').should('equal', 404);
+    });
+
+    it('404 negative test: should not create a unit from one of a workspace the user cannot enter (#1779)', () => {
+      cy.requestWorkspaceAPI(
+        'POST',
+        `${Cypress.expose(ws1.id)}/units`,
+        groupAdminToken(),
+        { key: 'D1779_FROM', name: 'Fremd', createFrom: foreignUnitId() }
+      ).its('status').should('equal', 404);
+    });
+
+    it('201 positive test: should create a new unit, not overwrite the one whose id is sent along (#1779)', () => {
+      cy.requestWorkspaceAPI(
+        'POST',
+        `${Cypress.expose(ws1.id)}/units`,
+        groupAdminToken(),
+        { key: 'D1779_ID', name: 'Fremd', id: foreignUnitId() }
+      ).then(resp => {
+        expect(resp.status).to.equal(201);
+        expect(resp.body).not.to.equal(foreignUnitId());
+        cy.deleteUnitsAPI([`${resp.body}`], Cypress.expose(ws1.id), groupAdminToken())
+          .its('status').should('equal', 200);
+      });
+      // The unit of ws3 is still there, unchanged
+      cy.requestWorkspaceAPI(
+        'GET',
+        `${Cypress.expose(ws3.id)}/units/${foreignUnitId()}/properties`,
+        adminToken()
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body.key).to.equal(foreignUnit.shortname);
+      });
+    });
+
+    it('201 positive test: should create a unit from one of another workspace the user can enter', () => {
+      cy.requestWorkspaceAPI(
+        'POST',
+        `${Cypress.expose(ws1.id)}/units`,
+        adminToken(),
+        { key: 'D1779_FROM', name: 'Fremd', createFrom: foreignUnitId() }
+      ).then(resp => {
+        expect(resp.status).to.equal(201);
+        cy.deleteUnitsAPI([`${resp.body}`], Cypress.expose(ws1.id), adminToken())
+          .its('status').should('equal', 200);
+      });
+    });
+
+    it('403 negative test: should not move a unit into a workspace the user cannot manage units in (#1780)', () => {
+      cy.moveToAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(ws3.id),
+        Cypress.expose(unit2.shortname),
+        groupAdminToken()
+      ).its('status').should('equal', 403);
+      // Nothing was moved: unit2 is still in ws2
+      cy.requestWorkspaceAPI(
+        'GET',
+        `${Cypress.expose(ws2.id)}/units/${Cypress.expose(unit2.shortname)}/properties`,
+        groupAdminToken()
+      ).its('status').should('equal', 200);
+    });
+  });
+
   describe('39. PATCH /api/workspaces/{workspace_id}/name', () => {
     it('200 positive test: should allow an authorized user to rename a workspace', () => {
       cy.renameWsAPI(
@@ -748,7 +845,7 @@ describe('Unit API tests', () => {
     let copyUnit: CopyUnit;
     before(() => {
       copyUnit = {
-        createForm: parseInt(`${Cypress.expose(unit2.shortname)}`, 10),
+        createFrom: parseInt(`${Cypress.expose(unit2.shortname)}`, 10),
         groupName: 'Group_Copy',
         key: `${unit2.shortname}_copy`,
         name: unit2.name
@@ -1553,8 +1650,7 @@ describe('Unit API tests', () => {
       });
 
       it(
-        '500 negative test: should return error when attempting to submit units ' +
-          'without a destination workspace target',
+        '403 negative test: should refuse to submit units to a workspace that does not exist',
         () => {
           cy.submitUnitsAPI(
             Cypress.expose(ws1.id),
@@ -1562,10 +1658,22 @@ describe('Unit API tests', () => {
             Cypress.expose(unit3.shortname),
             Cypress.expose(`token_${Cypress.expose('username')}`)
           ).then(resp => {
-            expect(resp.status).to.equal(500);
+            // Was 500 until #1780: the target has to be the drop box of the workspace.
+            expect(resp.status).to.equal(403);
           });
         }
       );
+
+      it('403 negative test: should refuse to submit units to a workspace that is not the drop box (#1780)', () => {
+        cy.submitUnitsAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(ws3.id),
+          Cypress.expose(unit3.shortname),
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(403);
+        });
+      });
 
       it(
         '200 positive test: should successfully submit a unit from an origin workspace' +

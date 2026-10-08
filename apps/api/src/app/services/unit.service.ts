@@ -105,6 +105,17 @@ export class UnitService {
     return distinctIds.filter(id => !foundIds.has(id));
   }
 
+  /** The workspace of each unit, by unit id. A unit that does not exist is missing from the map. */
+  async workspacesOfUnits(unitIds: number[]): Promise<Map<number, number>> {
+    const distinctIds = [...new Set(unitIds)];
+    if (distinctIds.length === 0) return new Map();
+    const units = await this.unitsRepository.find({
+      where: { id: In(distinctIds) },
+      select: ['id', 'workspaceId']
+    });
+    return new Map(units.map(unit => [unit.id, unit.workspaceId]));
+  }
+
   async getUnitIdsByWorkspaceId(workspaceId: number): Promise<number[]> {
     const units = await this.unitsRepository
       .find({
@@ -271,7 +282,9 @@ export class UnitService {
       select: ['id']
     });
     if (existingUnitId) return 0;
-    const newUnit = this.unitsRepository.create(unit);
+    // A unit is created here, never overwritten: an id sent along would have save() update that
+    // unit -- in whatever workspace it is -- and move it into this one (#1779)
+    const newUnit = this.unitsRepository.create({ ...unit, id: undefined });
     newUnit.workspaceId = workspaceId;
     newUnit.groupName = unit.groupName;
     newUnit.uuid = crypto.randomUUID();

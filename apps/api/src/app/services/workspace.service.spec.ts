@@ -356,6 +356,21 @@ describe('WorkspaceService', () => {
     });
   });
 
+  describe('dropBoxIdOf', () => {
+    it('should return the drop box of the workspace', async () => {
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, dropBoxId: 7 } as Workspace);
+
+      expect(await service.dropBoxIdOf(1)).toBe(7);
+      expect(workspaceRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 }, select: ['id', 'dropBoxId'] });
+    });
+
+    it.each([[{ id: 1, dropBoxId: null }], [null]])('should return null for %p', async workspace => {
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(workspace);
+
+      expect(await service.dropBoxIdOf(1)).toBeNull();
+    });
+  });
+
   describe('patchDropBoxId', () => {
     it('should patch dropbox id', async () => {
       const ws = { id: 1 } as Workspace;
