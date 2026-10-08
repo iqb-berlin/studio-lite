@@ -28,13 +28,14 @@
              [dataSource]="objectsDatasource">
     <ng-container matColumnDef="selectCheckbox">
       <mat-header-cell *matHeaderCellDef  class="fx-flex-row-fix-70">
-        <mat-checkbox (change)="$event ? masterToggle() : null"
+        <mat-checkbox [disabled]="locked"
+                      (change)="$event ? masterToggle() : null"
                       [checked]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) &&  (tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)"
                       [indeterminate]="(tableSelectionCheckboxes | hasSelectionValue : tableSelectionCheckboxes.selected.length) && !(tableSelectionCheckboxes.selected.length | isAllSelected : objectsDatasource.data.length)">
         </mat-checkbox>
       </mat-header-cell>
       <mat-cell *matCellDef="let row" class="fx-flex-row-fix-70">
-        <mat-checkbox [disabled]="disabledUnits | include : row.id"
+        <mat-checkbox [disabled]="locked || (disabledUnits | include : row.id)"
                       [checked]="tableSelectionCheckboxes | isSelected: row : tableSelectionCheckboxes.selected.length"
                       [attr.data-cy]="'workspace-select-unit-list-checkbox-' + row.key"
                       (change)="$event ? tableSelectionCheckboxes.toggle(row) : null"
