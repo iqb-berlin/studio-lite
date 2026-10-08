@@ -1,44 +1,15 @@
 <div class="booklet-config fx-column-start-stretch">
-  @if (bookletConfig.pagingMode) {
+  @for (setting of settings; track setting.key) {
     <div
-      class="fx-row-center-center">
-      <div class="fx-flex-row-50">{{'booklet-config.pagingMode.label' | translate}}</div>
-      <div class="fx-flex-fill">{{'booklet-config.pagingMode.' + bookletConfig.pagingMode | translate}}</div>
-    </div>
-  }
-  @if (bookletConfig.pageNaviButtons) {
-    <div
-      class="fx-row-center-center">
-      <div class="fx-flex-row-50">{{'booklet-config.pageNaviButtons.label' | translate}}</div>
-      <div class="fx-flex-fill">{{'booklet-config.pageNaviButtons.' + bookletConfig.pageNaviButtons | translate}}</div>
-    </div>
-  }
-  @if (bookletConfig.unitNaviButtons) {
-    <div
-      class="fx-row-center-center">
-      <div class="fx-flex-row-50">{{'booklet-config.unitNaviButtons.label' | translate}}</div>
-      <div class="fx-flex-fill">{{'booklet-config.unitNaviButtons.' + bookletConfig.unitNaviButtons | translate}}</div>
-    </div>
-  }
-  @if (bookletConfig.controllerDesign) {
-    <div
-      class="fx-row-center-center">
-      <div class="fx-flex-row-50">{{'booklet-config.controllerDesign.label' | translate}}</div>
-      <div class="fx-flex-fill">{{'booklet-config.controllerDesign.' + bookletConfig.controllerDesign | translate}}</div>
-    </div>
-  }
-  @if (bookletConfig.unitScreenHeader) {
-    <div
-      class="fx-row-center-center">
-      <div class="fx-flex-row-50">{{'booklet-config.unitScreenHeader.label' | translate}}</div>
-      <div class="fx-flex-fill">{{'booklet-config.unitScreenHeader.' + bookletConfig.unitScreenHeader | translate}}</div>
-    </div>
-  }
-  @if (bookletConfig.unitTitle) {
-    <div
-      class="fx-row-center-center">
-      <div class="fx-flex-row-50">{{'booklet-config.unitTitle.label' | translate}}</div>
-      <div class="fx-flex-fill">{{'booklet-config.unitTitle.' + bookletConfig.unitTitle | translate}}</div>
+      class="fx-row-center-center"
+      [attr.data-cy]="'booklet-config-show-' + setting.key">
+      <div class="fx-flex-row-50">{{'booklet-config.' + setting.key + '.label' | translate}}</div>
+      <div class="fx-flex-fill">
+        {{'booklet-config.' + setting.key + '.' + setting.value | translate}}
+        @if (setting.isDefault) {
+          {{'booklet-config.is-default' | translate}}
+        }
+      </div>
     </div>
   }
 </div>
