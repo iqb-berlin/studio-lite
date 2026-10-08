@@ -31,6 +31,12 @@ import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.g
 import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
 import { UnitsInWorkspaceGuard } from '../guards/units-in-workspace.guard';
 import { QueryUnitsInWorkspaceGuard } from '../guards/query-units-in-workspace.guard';
+import { DeleteAccessGuard } from '../guards/delete-access.guard';
+import { CommentAccessGuard } from '../guards/comment-access.guard';
+import { WriteAccessGuard } from '../guards/write-access.guard';
+import { MoveTargetAccessGuard } from '../guards/move-target-access.guard';
+import { DropBoxTargetGuard } from '../guards/drop-box-target.guard';
+import { CopySourcesAccessibleGuard } from '../guards/copy-sources-accessible.guard';
 
 describe('WorkspaceUnitController', () => {
   let controller: WorkspaceUnitController;
@@ -111,6 +117,16 @@ describe('WorkspaceUnitController', () => {
         .toEqual([JwtAuthGuard, WorkspaceGuard, UnitsInWorkspaceGuard]);
     }
   );
+
+  // Where units cross into another workspace, that one is asked about too, after the path (#1779, #1780)
+  it.each([
+    ['moveUnits', [UnitsInWorkspaceGuard, DeleteAccessGuard, MoveTargetAccessGuard]],
+    ['patchDropBoxHistory', [UnitsInWorkspaceGuard, CommentAccessGuard, DropBoxTargetGuard]],
+    ['create', [WriteAccessGuard, CopySourcesAccessibleGuard]]
+  ] as const)('should hold the other workspace of %s to the user', (method, guards) => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype[method]))
+      .toEqual([JwtAuthGuard, WorkspaceGuard, ...guards]);
+  });
 
   // remove deletes the units of the query; a guard that read the body could be shown other units.
   it('should hold the units in the query of remove to the workspace in its path', () => {

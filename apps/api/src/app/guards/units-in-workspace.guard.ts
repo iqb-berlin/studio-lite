@@ -17,7 +17,7 @@ import { unitIdsOfList } from '../utils/unit-ids';
  *
  * For all of these routes the path names the workspace the units are in at that moment: the
  * source when moving or submitting, the drop box when returning. Copying is not among them -- its
- * path names the target (#1779).
+ * path names the target, and {@link CopySourcesAccessibleGuard} asks about its units (#1779).
  */
 @Injectable()
 export class UnitsInWorkspaceGuard extends UnitIdsInWorkspaceGuard {

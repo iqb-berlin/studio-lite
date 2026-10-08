@@ -136,8 +136,8 @@ export interface MyData {
  * Copy unit data structure
  */
 export interface CopyUnit {
-  /** Create form type */
-  createForm: number;
+  /** The unit to create from */
+  createFrom: number;
   /** Group name */
   groupName: string;
   /** Unit key */

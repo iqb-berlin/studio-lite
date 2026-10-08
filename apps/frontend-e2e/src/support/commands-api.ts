@@ -704,7 +704,7 @@ Cypress.Commands.add('copyToAPI', (wsDestinationId:string, copyUnit:CopyUnit, to
       authorization
     },
     body: {
-      createForm: copyUnit.createForm,
+      createFrom: copyUnit.createFrom,
       groupName: copyUnit.groupName,
       key: copyUnit.key,
       name: copyUnit.name

@@ -62,6 +62,10 @@ import { findUnitExportContents } from '../utils/unit-export-contents';
 import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
 import { UnitsInWorkspaceGuard } from '../guards/units-in-workspace.guard';
 import { QueryUnitsInWorkspaceGuard } from '../guards/query-units-in-workspace.guard';
+import { CopySourcesAccessibleGuard } from '../guards/copy-sources-accessible.guard';
+import { MoveTargetAccessGuard } from '../guards/move-target-access.guard';
+import { DropBoxTargetGuard } from '../guards/drop-box-target.guard';
+import { isCopyBody, isSubmissionBody } from '../utils/unit-request-body';
 
 /**
  * `workspaces/:workspace_id/units` -- the largest surface of the API: the units of a workspace,
@@ -77,14 +81,18 @@ import { QueryUnitsInWorkspaceGuard } from '../guards/query-units-in-workspace.g
  * unit takes write access, grouping takes manage access, and moving units to another workspace or
  * deleting them takes the top level. Two routes step out of that order: deleting a single unit is
  * the group admin's, and submitting units to a drop box ({@link patchDropBoxHistory}) moves them
- * out of the workspace on nothing more than comment access.
+ * out of the workspace on nothing more than comment access -- but only into the drop box set for
+ * the workspace ({@link DropBoxTargetGuard}).
  *
  * Those guards ask about the workspace of the path alone. That the units are in it is asked first,
  * by {@link UnitInWorkspaceGuard} for the unit in the path, by {@link UnitsInWorkspaceGuard} for
  * the units of the body and by {@link QueryUnitsInWorkspaceGuard} for the units deleted through the
  * query (#1775). The reports that take units from the query (`coding-book`, `properties`) carry no
- * such guard: they read the units of the workspace and drop any other id. Copying is the exception:
- * its path names the target, and its units come from elsewhere (#1779).
+ * such guard: they read the units of the workspace and drop any other id.
+ *
+ * Where units cross into another workspace, that one is asked about as well: the target of a move
+ * ({@link MoveTargetAccessGuard}, #1780), and the sources a copy takes its units from -- its path
+ * names the target ({@link CopySourcesAccessibleGuard}, #1779).
  */
 @Controller('workspaces/:workspace_id/units')
 export class WorkspaceUnitController {
@@ -351,11 +359,11 @@ export class WorkspaceUnitController {
   }
 
   @Patch('workspace-id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitsInWorkspaceGuard, DeleteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitsInWorkspaceGuard, DeleteAccessGuard, MoveTargetAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Unit moved' })
-  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace or in the target workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit')
   async moveUnits(@Body() body: MoveToDto,
@@ -370,17 +378,17 @@ export class WorkspaceUnitController {
    * the move in {@link UnitDropBoxHistory}.
    */
   @Patch('drop-box-history')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitsInWorkspaceGuard, CommentAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitsInWorkspaceGuard, CommentAccessGuard, DropBoxTargetGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Unit moved' })
-  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace, or the target is not its drop box.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit')
   async patchDropBoxHistory(@User() user: UserEntity,
     @Param('workspace_id', ParseIntPipe) workspaceId: number,
     @Body() body: MoveToDto | IdArrayDto) {
-    if ('targetId' in body) {
+    if (isSubmissionBody(body)) {
       return this.unitService.patchDropBoxHistory(body.ids, body.targetId, workspaceId, user);
     }
     return this.unitService.patchReturnDropBoxHistory(body.ids, workspaceId, user);
@@ -443,11 +451,12 @@ export class WorkspaceUnitController {
    * says whether to take the comments along is a copy.
    */
   @Post()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard, CopySourcesAccessibleGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({ description: 'Unit created' })
   @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiNotFoundResponse({ description: 'A unit to copy from is not found in a workspace the user can enter.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace unit')
   async create(
@@ -455,7 +464,7 @@ export class WorkspaceUnitController {
     @Body() body: CreateUnitDto | CopyUnitDto,
     @User() user: UserEntity
   ) {
-    if ('addComments' in body) {
+    if (isCopyBody(body)) {
       return this.unitService.copy(body.ids, workspaceId, user, body.addComments);
     }
     return this.unitService.create(workspaceId, body, user, false);

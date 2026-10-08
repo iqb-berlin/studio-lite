@@ -206,6 +206,25 @@ describe('UnitService', () => {
     });
   });
 
+  describe('workspacesOfUnits', () => {
+    it('should map each unit that exists to its workspace', async () => {
+      unitsRepository.find.mockResolvedValue([
+        createMock<Unit>({ id: 10, workspaceId: 3 }), createMock<Unit>({ id: 11, workspaceId: 4 })
+      ]);
+
+      expect(await service.workspacesOfUnits([10, 11, 12, 10])).toEqual(new Map([[10, 3], [11, 4]]));
+      expect(unitsRepository.find).toHaveBeenCalledWith({
+        where: { id: In([10, 11, 12]) },
+        select: ['id', 'workspaceId']
+      });
+    });
+
+    it('should not ask the database for an empty list', async () => {
+      expect(await service.workspacesOfUnits([])).toEqual(new Map());
+      expect(unitsRepository.find).not.toHaveBeenCalled();
+    });
+  });
+
   describe('create', () => {
     it('should create unit', async () => {
       unitsRepository.findOne.mockResolvedValue(null);
@@ -216,6 +235,19 @@ describe('UnitService', () => {
 
       const result = await service.create(1, { key: 'u1' } as CreateUnitDto, { id: 1 } as User, false);
       expect(result).toBe(2);
+    });
+
+    it('should create a new unit even when the body names an existing one', async () => {
+      unitsRepository.findOne.mockResolvedValue(null);
+      unitsRepository.create.mockReturnValue({ id: 2 } as Unit);
+      unitsRepository.save.mockResolvedValue({ id: 2 } as Unit);
+      workspaceUserRepository.find.mockResolvedValue([]);
+      usersRepository.findOne.mockResolvedValue({ lastName: 'Doe' } as User);
+      const body = { key: 'u1', id: 99 } as CreateUnitDto & { id: number };
+
+      await service.create(1, body, { id: 1 } as User, false);
+
+      expect(unitsRepository.create).toHaveBeenCalledWith(expect.objectContaining({ key: 'u1', id: undefined }));
     });
 
     it('should return 0 if unit exists', async () => {
