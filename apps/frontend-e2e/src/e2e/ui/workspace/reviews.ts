@@ -529,11 +529,13 @@ describe('Unit Reviews', () => {
       });
     });
 
-    it('lets an external visitor neither change, delete nor vote on the comment', () => {
+    it('lets an external visitor neither change, delete, hide nor vote on the comment', () => {
       openCommentDialog();
       cy.contains('studio-lite-comment', commentText).within(() => {
         cy.contains('.comment-action', 'edit').should('not.exist');
         cy.get('.delete-action').should('not.exist');
+        // Hiding hides the comment from everyone; a visitor without an account may not (#1784)
+        cy.contains('.comment-action', 'visibility_off').should('not.exist');
         cy.contains('.comment-action', 'reply').should('be.enabled');
         cy.get('[data-cy="comment-vote-up"]').should('be.disabled');
         cy.get('[data-cy="comment-vote-down"]').should('be.disabled');

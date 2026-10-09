@@ -1,14 +1,16 @@
 import { UnitItemDto, UnitItemWithMetadataDto } from '@studio-lite-lib/api-dto';
 import { Test, TestingModule } from '@nestjs/testing';
-import { createMock } from '@golevelup/ts-jest';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { ReviewUnitItemController } from './review-unit-item.controller';
 import { UnitItemService } from '../services/unit-item.service';
+import { ReviewService } from '../services/review.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ReviewGuard } from '../guards/review.guard';
 
 describe('ReviewUnitItemController', () => {
   let controller: ReviewUnitItemController;
   let unitItemsService: UnitItemService;
+  let reviewService: DeepMocked<ReviewService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -17,6 +19,10 @@ describe('ReviewUnitItemController', () => {
         {
           provide: UnitItemService,
           useValue: createMock<UnitItemService>()
+        },
+        {
+          provide: ReviewService,
+          useValue: createMock<ReviewService>()
         }
       ]
     })
@@ -28,6 +34,8 @@ describe('ReviewUnitItemController', () => {
 
     controller = module.get<ReviewUnitItemController>(ReviewUnitItemController);
     unitItemsService = module.get<UnitItemService>(UnitItemService);
+    reviewService = module.get(ReviewService);
+    reviewService.reviewConfigOf.mockResolvedValue({ showMetadata: true });
   });
 
   it('should be defined', () => {
@@ -35,6 +43,20 @@ describe('ReviewUnitItemController', () => {
   });
 
   describe('findAll', () => {
+    const reviewId = 2;
+
+    it('should serve the items without metadata when the review does not show it (#1784)', async () => {
+      const unitId = 10;
+      reviewService.reviewConfigOf.mockResolvedValue({ showMetadata: false });
+      jest.spyOn(unitItemsService, 'getAllByUnitId').mockResolvedValue([]);
+
+      await controller.findAll(reviewId, unitId, false);
+
+      expect(reviewService.reviewConfigOf).toHaveBeenCalledWith(reviewId);
+      expect(unitItemsService.getAllByUnitId).toHaveBeenCalledWith(unitId);
+      expect(unitItemsService.getAllByUnitIdWithMetadata).not.toHaveBeenCalled();
+    });
+
     it('should return items without metadata when withoutMetadata is true', async () => {
       const unitId = 10;
       const mockItems: UnitItemDto[] = [
@@ -53,7 +75,7 @@ describe('ReviewUnitItemController', () => {
       jest.spyOn(unitItemsService, 'getAllByUnitId')
         .mockResolvedValue(mockItems);
 
-      const result = await controller.findAll(unitId, true);
+      const result = await controller.findAll(reviewId, unitId, true);
 
       expect(result).toEqual(mockItems);
       expect(unitItemsService.getAllByUnitId).toHaveBeenCalledWith(unitId);
@@ -81,7 +103,7 @@ describe('ReviewUnitItemController', () => {
       jest.spyOn(unitItemsService, 'getAllByUnitIdWithMetadata')
         .mockResolvedValue(mockItemsWithMetadata);
 
-      const result = await controller.findAll(unitId, false);
+      const result = await controller.findAll(reviewId, unitId, false);
 
       expect(result).toEqual(mockItemsWithMetadata);
       expect(unitItemsService.getAllByUnitIdWithMetadata).toHaveBeenCalledWith(unitId);
@@ -103,7 +125,7 @@ describe('ReviewUnitItemController', () => {
       jest.spyOn(unitItemsService, 'getAllByUnitIdWithMetadata')
         .mockResolvedValue(mockItemsWithMetadata);
 
-      const result = await controller.findAll(unitId, undefined as unknown as boolean);
+      const result = await controller.findAll(reviewId, unitId, undefined as unknown as boolean);
 
       expect(result).toEqual(mockItemsWithMetadata);
       expect(unitItemsService.getAllByUnitIdWithMetadata).toHaveBeenCalledWith(unitId);
@@ -116,7 +138,7 @@ describe('ReviewUnitItemController', () => {
       jest.spyOn(unitItemsService, 'getAllByUnitId')
         .mockResolvedValue([]);
 
-      const result = await controller.findAll(unitId, true);
+      const result = await controller.findAll(reviewId, unitId, true);
 
       expect(result).toEqual([]);
       expect(unitItemsService.getAllByUnitId).toHaveBeenCalledWith(unitId);
@@ -128,7 +150,7 @@ describe('ReviewUnitItemController', () => {
       jest.spyOn(unitItemsService, 'getAllByUnitIdWithMetadata')
         .mockResolvedValue([]);
 
-      const result = await controller.findAll(unitId, false);
+      const result = await controller.findAll(reviewId, unitId, false);
 
       expect(result).toEqual([]);
       expect(unitItemsService.getAllByUnitIdWithMetadata).toHaveBeenCalledWith(unitId);
@@ -147,7 +169,7 @@ describe('ReviewUnitItemController', () => {
       jest.spyOn(unitItemsService, 'getAllByUnitId')
         .mockResolvedValue(mockItems);
 
-      const result = await controller.findAll(unitId, true);
+      const result = await controller.findAll(reviewId, unitId, true);
 
       expect(result).toEqual(mockItems);
       expect(unitItemsService.getAllByUnitId).toHaveBeenCalledWith(unitId);

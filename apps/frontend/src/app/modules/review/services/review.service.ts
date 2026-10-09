@@ -89,7 +89,9 @@ export class ReviewService {
     }
   }
 
+  /** Reloads the unit's comments for the info panel -- only in a review that shows them (#1784). */
   updateCommentsUnitInfo(unitId: number) {
+    if (this.reviewConfig.showOthersComments !== true) return;
     this.backendService
       .getUnitComments(this.reviewId, unitId)
       .subscribe(unitComments => {

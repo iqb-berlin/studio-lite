@@ -160,6 +160,16 @@ describe('ReviewService', () => {
       expect(result.units).toEqual([12, 10]);
     });
 
+    it('should leave the password out on the review route, and keep it for the management (#1784)', async () => {
+      reviewRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1, password: 'geheim' } as Review);
+      reviewUnitRepository.find.mockResolvedValue([]);
+      unitRepository.find.mockResolvedValue([]);
+      workspaceRepository.findOne.mockResolvedValue({ id: 1, name: 'ws', workspaceGroup: { id: 2 } } as Workspace);
+
+      expect(await service.findOne(1)).not.toHaveProperty('password');
+      expect((await service.findOne(1, 1)).password).toBe('geheim');
+    });
+
     it('should leave the stored units of the review untouched', async () => {
       reviewRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Review);
       reviewUnitRepository.find.mockResolvedValue([{ unitId: 10 }, { unitId: 11 }] as ReviewUnit[]);
@@ -180,6 +190,48 @@ describe('ReviewService', () => {
 
       await service.findUnitProperties(10, 1);
       expect(unitService.findOnesProperties).toHaveBeenCalledWith(10, 1);
+    });
+
+    const properties = {
+      id: 10, key: 'U10', description: 'Beschreibung', metadata: { profiles: [{ profileId: 'p' }] }
+    } as UnitPropertiesDto;
+
+    const reviewShowingMetadata = (showMetadata: boolean) => (
+      { workspaceId: 1, settings: { reviewConfig: { showMetadata } } } as Review
+    );
+
+    it('should return the properties as they are when the review shows metadata', async () => {
+      reviewRepository.findOne.mockResolvedValue(reviewShowingMetadata(true));
+      unitService.findOnesProperties.mockResolvedValue(properties);
+
+      expect(await service.findUnitProperties(10, 1)).toBe(properties);
+    });
+
+    it('should leave the metadata out when the review does not show it (#1784)', async () => {
+      reviewRepository.findOne.mockResolvedValue(reviewShowingMetadata(false));
+      unitService.findOnesProperties.mockResolvedValue(properties);
+
+      const result = await service.findUnitProperties(10, 1);
+      expect(result.key).toBe('U10');
+      expect(result).not.toHaveProperty('description');
+      expect(result.metadata).toEqual({ items: [] });
+    });
+  });
+
+  describe('reviewConfigOf', () => {
+    it('should return the review\'s settings', async () => {
+      reviewRepository.findOne.mockResolvedValue({ settings: { reviewConfig: { canComment: true } } } as Review);
+
+      expect(await service.reviewConfigOf(1)).toEqual({ canComment: true });
+      expect(reviewRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 }, select: { settings: true } });
+    });
+
+    it('should return no settings for a review without any, and for one that does not exist', async () => {
+      reviewRepository.findOne.mockResolvedValueOnce({ settings: {} } as Review);
+      reviewRepository.findOne.mockResolvedValueOnce(null);
+
+      expect(await service.reviewConfigOf(1)).toEqual({});
+      expect(await service.reviewConfigOf(999)).toEqual({});
     });
   });
 

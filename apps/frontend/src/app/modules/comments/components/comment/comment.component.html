@@ -108,14 +108,16 @@
             </div>
           </div>
 
-          <button mat-icon-button
-                  class="comment-action"
-                  (click)="toggleVisibility.emit(comment)"
-                  matTooltip="{{(comment.hidden ? 'comment.show' : 'comment.hide') | translate}}">
-            <studio-lite-wrapped-icon
-              [icon]="comment.hidden ? 'visibility' : 'visibility_off'">
-            </studio-lite-wrapped-icon>
-          </button>
+          @if (canHide) {
+            <button mat-icon-button
+                    class="comment-action"
+                    (click)="toggleVisibility.emit(comment)"
+                    matTooltip="{{(comment.hidden ? 'comment.show' : 'comment.hide') | translate}}">
+              <studio-lite-wrapped-icon
+                [icon]="comment.hidden ? 'visibility' : 'visibility_off'">
+              </studio-lite-wrapped-icon>
+            </button>
+          }
 
           <button mat-icon-button
                   class="comment-action"

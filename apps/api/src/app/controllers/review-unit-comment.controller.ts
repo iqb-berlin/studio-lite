@@ -19,6 +19,13 @@ import {
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ReviewGuard } from '../guards/review.guard';
 import { ReviewCommentAccessGuard } from '../guards/review-comment-access.guard';
+import { ReviewConfigGuard } from '../guards/review-config.guard';
+import { ReviewAccountGuard } from '../guards/review-account.guard';
+import { ReviewCommentOwnerGuard } from '../guards/review-comment-owner.guard';
+import { CommentWriteGuard } from '../guards/comment-write.guard';
+import { CommentDeleteGuard } from '../guards/comment-delete.guard';
+import { CommentInUnitGuard } from '../guards/comment-in-unit.guard';
+import { ReviewConfigRequired } from '../decorators/review-config-required.decorator';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitId } from '../decorators/unit-id.decorator';
 import { ItemCommentService } from '../services/item-comment.service';
@@ -32,6 +39,13 @@ import { UsersService } from '../services/users.service';
  * login or as a logged-in user. {@link ReviewGuard} holds both to the review and its units, and a
  * user to the review's workspace; {@link ReviewCommentAccessGuard} then asks a user for the access
  * level commenting takes there (#1818). A review login holds no access level in any workspace.
+ *
+ * The review's settings decide for everyone who opens it (#1784), through {@link ReviewConfigGuard}:
+ * writing takes "comments possible", reading the discussion "show the comments of others". A comment
+ * named in the path has to be one of the unit's ({@link CommentInUnitGuard}). Changing it is left to
+ * its author and deleting it to its author or the group's admin, as on the workspace's routes; a
+ * review login has no account and does neither, nor does it hide comments ({@link ReviewAccountGuard}).
+ * It may only tie its own new comment to items ({@link ReviewCommentOwnerGuard}).
  */
 @Controller('reviews/:review_id/units/:unit_id/comments')
 export class ReviewUnitCommentController {
@@ -42,7 +56,8 @@ export class ReviewUnitCommentController {
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard, ReviewConfigGuard)
+  @ReviewConfigRequired('showOthersComments')
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
   @ApiForbiddenResponse({ description: 'No privileges to retrieve comments for the unit.' })
@@ -52,7 +67,8 @@ export class ReviewUnitCommentController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard, ReviewConfigGuard)
+  @ReviewConfigRequired('canComment')
   @ApiBearerAuth()
   @ApiCreatedResponse({
     description: 'Sends back the id of the new comment in database',
@@ -72,7 +88,15 @@ export class ReviewUnitCommentController {
   }
 
   @Patch(':comment_id')
-  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
+  @UseGuards(
+    JwtAuthGuard,
+    ReviewGuard,
+    ReviewCommentAccessGuard,
+    ReviewConfigGuard,
+    CommentWriteGuard,
+    CommentInUnitGuard
+  )
+  @ReviewConfigRequired('canComment')
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
@@ -84,7 +108,15 @@ export class ReviewUnitCommentController {
   }
 
   @Patch(':comment_id/hidden')
-  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
+  @UseGuards(
+    JwtAuthGuard,
+    ReviewGuard,
+    ReviewAccountGuard,
+    ReviewCommentAccessGuard,
+    ReviewConfigGuard,
+    CommentInUnitGuard
+  )
+  @ReviewConfigRequired('canComment')
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
@@ -96,7 +128,15 @@ export class ReviewUnitCommentController {
   }
 
   @Delete(':comment_id')
-  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
+  @UseGuards(
+    JwtAuthGuard,
+    ReviewGuard,
+    ReviewCommentAccessGuard,
+    ReviewConfigGuard,
+    CommentDeleteGuard,
+    CommentInUnitGuard
+  )
+  @ReviewConfigRequired('canComment')
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
@@ -107,7 +147,15 @@ export class ReviewUnitCommentController {
   }
 
   @Patch(':comment_id/items')
-  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
+  @UseGuards(
+    JwtAuthGuard,
+    ReviewGuard,
+    ReviewCommentAccessGuard,
+    ReviewConfigGuard,
+    ReviewCommentOwnerGuard,
+    CommentInUnitGuard
+  )
+  @ReviewConfigRequired('canComment')
   @ApiBearerAuth()
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -123,7 +171,8 @@ export class ReviewUnitCommentController {
   }
 
   @Post(':comment_id/vote')
-  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard, ReviewConfigGuard, CommentInUnitGuard)
+  @ReviewConfigRequired('canComment', 'showOthersComments')
   @ApiBearerAuth()
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -140,7 +189,8 @@ export class ReviewUnitCommentController {
   }
 
   @Get(':comment_id/votes')
-  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard, ReviewConfigGuard, CommentInUnitGuard)
+  @ReviewConfigRequired('showOthersComments')
   @ApiBearerAuth()
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })

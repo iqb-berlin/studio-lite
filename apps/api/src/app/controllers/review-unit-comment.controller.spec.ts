@@ -14,6 +14,12 @@ import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ReviewGuard } from '../guards/review.guard';
 import { ReviewCommentAccessGuard } from '../guards/review-comment-access.guard';
+import { ReviewConfigGuard } from '../guards/review-config.guard';
+import { ReviewAccountGuard } from '../guards/review-account.guard';
+import { ReviewCommentOwnerGuard } from '../guards/review-comment-owner.guard';
+import { CommentWriteGuard } from '../guards/comment-write.guard';
+import { CommentDeleteGuard } from '../guards/comment-delete.guard';
+import { CommentInUnitGuard } from '../guards/comment-in-unit.guard';
 
 describe('ReviewUnitCommentController', () => {
   let controller: ReviewUnitCommentController;
@@ -44,6 +50,18 @@ describe('ReviewUnitCommentController', () => {
       .overrideGuard(ReviewGuard)
       .useValue({ canActivate: () => true })
       .overrideGuard(ReviewCommentAccessGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(ReviewConfigGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(ReviewAccountGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(ReviewCommentOwnerGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(CommentWriteGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(CommentDeleteGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(CommentInUnitGuard)
       .useValue({ canActivate: () => true })
       .compile();
 
