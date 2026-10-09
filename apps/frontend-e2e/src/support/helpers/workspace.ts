@@ -125,10 +125,33 @@ export function ensureUnitExists(ws: string, unit: UnitData): void {
 }
 
 /**
+ * Puts the new unit of the open dialog into a group of the workspace (#1789).
+ *
+ * The dialog offers a select of the workspace's groups, or only an input when it knows none -- which
+ * it knows depends on which of two requests answered first. Whichever it shows is waited for: the
+ * group is picked from the select, retrying until its option is rendered, or typed into the input.
+ * Nothing is decided from a snapshot of the page; that took options not rendered yet for a missing
+ * group and went on to a button that did not exist.
+ * @param group - Name of the group; it has to be one of the workspace's
+ */
+function selectNewUnitGroup(group: string): void {
+  cy.get('[data-cy="workspace-new-unit-group"], [data-cy="workspace-new-unit-new-group"]')
+    .then($groupControl => {
+      if ($groupControl.is('[data-cy="workspace-new-unit-group"]')) {
+        cy.wrap($groupControl).click();
+        cy.contains('mat-option', new RegExp(`^\\s*${Cypress._.escapeRegExp(group)}\\s*$`)).click();
+      } else {
+        cy.wrap($groupControl).clear().type(group);
+      }
+    });
+}
+
+/**
  * Creates a unit from an existing unit
  * @param ws - Source workspace (format: "Group: Workspace")
  * @param unit1 - Source unit to copy from
- * @param newUnit - New unit data
+ * @param newUnit - New unit data. Its group is picked from the groups of the workspace; without a
+ * group, the unit gets none.
  * @example
  * addUnitFromExisting('Math: Workspace 1', sourceUnit, newUnit);
  */
@@ -143,26 +166,7 @@ export function addUnitFromExisting(ws: string, unit1: UnitData, newUnit: UnitDa
   });
   cy.get('[data-cy="workspace-new-unit-unit-key"]').clear().type(newUnit.shortname);
   cy.get('[data-cy="workspace-new-unit-unit-name"]').clear().type(newUnit.name);
-  cy.get('body').then($body => {
-    if ($body.find('[data-cy="workspace-new-unit-new-group"]').length > 0) {
-      cy.get('[data-cy="workspace-new-unit-new-group"]')
-        .clear()
-        .type(newUnit.group);
-    } else {
-      cy.get('[data-cy="workspace-new-unit-group"]').click();
-      cy.get('body').then($body1 => {
-        if ($body1.find(`mat-option:contains("${unit1.group}")`).length > 0) {
-          cy.get(`mat-option:contains("${unit1.group}")`).click();
-        } else {
-          cy.get('.cdk-overlay-transparent-backdrop').click();
-          cy.get('[data-cy="workspace-add-new-group"]').click();
-          cy.get('[data-cy="workspace-new-unit-new-group"]')
-            .clear()
-            .type(newUnit.group);
-        }
-      });
-    }
-  });
+  if (newUnit.group) selectNewUnitGroup(newUnit.group);
   cy.clickDataCyWithResponseCheck('[data-cy="workspace-new-unit-submit-button"]',
     [201],
     '/api/workspaces/*/units',

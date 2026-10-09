@@ -79,8 +79,18 @@ Cypress.Commands.add('selectModule', (name: string) => {
 
 Cypress.Commands.add('visitWs', (ws: string) => {
   cy.visit('/');
-  cy.intercept('GET', '**/workspaces/*/units*').as('getUnits');
-  cy.get(`a:contains("${ws}")`).click();
+  // The workspace's link is followed by its address, not clicked: home draws its list anew when its
+  // own auth-data request answers, and a click on the link being replaced went nowhere -- no units
+  // were ever requested (#1781). The address is the same before and after. Once home keeps its
+  // links (#1822), this can click again.
+  cy.get(`studio-lite-user-workspaces-groups a.issue-item:contains("${ws}")`)
+    .should('have.length', 1)
+    .should('have.attr', 'href')
+    .and('match', /^#\/a\/\d+$/)
+    .then(href => {
+      cy.intercept('GET', '**/workspaces/*/units*').as('getUnits');
+      cy.visit(`/${href}`);
+    });
   cy.wait('@getUnits');
   cy.get('[data-cy="workspace-unit-selection-filter-units"]').should('be.visible');
 });
