@@ -1058,6 +1058,62 @@ describe('Unit API tests', () => {
     });
   });
 
+  // A unit submitted to a drop box from one workspace, returned, and later submitted to the same
+  // drop box from another, has two submissions there. Returning it picked either of them, so it
+  // could go back to the first workspace instead of the one it came from (#1806).
+  describe('#1806 returning a unit from a drop box', () => {
+    const token = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const unit: UnitData = { shortname: 'D1806', name: 'Abgabe', group: '' };
+    const ids = {
+      first: '', second: '', dropBox: '', unit: ''
+    };
+    const createWorkspace = (name: string, assign: (id: string) => void) => cy
+      .createWsAPI(Cypress.expose(groupVera.id), { id: '', name }, token())
+      .then(resp => {
+        expect(resp.status).to.equal(201);
+        assign(`${resp.body}`);
+        const adminId = Cypress.expose(`id_${Cypress.expose('username')}`);
+        cy.updateUsersOfWsAPI(`${resp.body}`, AccessLevel.Admin, adminId, token());
+      });
+    const submit = (from: string, to: string) => cy.submitUnitsAPI(from, to, ids.unit, token())
+      .its('status').should('equal', 200);
+    const unitKeysOf = (wsId: string) => cy.getUnitsByWsAPI(wsId, token())
+      .then(resp => (resp.body as { key: string }[]).map(u => u.key));
+
+    before(() => {
+      createWorkspace('Erster-1806', id => { ids.first = id; });
+      createWorkspace('Zweiter-1806', id => { ids.second = id; });
+      createWorkspace('Ablage-1806', id => { ids.dropBox = id; });
+      cy.then(() => {
+        cy.createUnitAPI(ids.first, unit, token()).then(resp => {
+          ids.unit = `${resp.body}`;
+        });
+        // First submission, from the first workspace, and its return
+        cy.dropboxWsAPI(ids.first, ids.dropBox, token()).its('status').should('equal', 200);
+        cy.dropboxWsAPI(ids.second, ids.dropBox, token()).its('status').should('equal', 200);
+      });
+      cy.then(() => {
+        submit(ids.first, ids.dropBox);
+        submit(ids.dropBox, '');
+        // To the second workspace without leaving the history behind: as a submission, too
+        cy.dropboxWsAPI(ids.first, ids.second, token()).its('status').should('equal', 200);
+        submit(ids.first, ids.second);
+        // Second submission to the drop box, from the second workspace
+        submit(ids.second, ids.dropBox);
+      });
+    });
+
+    after(() => {
+      cy.deleteWsAPI([ids.first, ids.second, ids.dropBox], token());
+    });
+
+    it('200 positive test: should return the unit to the workspace of its latest submission', () => {
+      submit(ids.dropBox, '');
+      unitKeysOf(ids.second).should('include', unit.shortname);
+      unitKeysOf(ids.first).should('not.include', unit.shortname);
+    });
+  });
+
   describe('39. PATCH /api/workspaces/{workspace_id}/name', () => {
     it('200 positive test: should allow an authorized user to rename a workspace', () => {
       cy.renameWsAPI(

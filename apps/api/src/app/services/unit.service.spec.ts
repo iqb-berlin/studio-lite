@@ -567,6 +567,16 @@ describe('UnitService', () => {
       expect(unitsRepository.save).toHaveBeenCalledWith(expect.objectContaining({ id: 1, workspaceId: 5 }));
       expect(unitDropBoxHistoryRepository.upsert).toHaveBeenCalledTimes(1);
     });
+
+    // #1806: an older, already returned submission from another workspace must not decide the target
+    it('should look for the latest submission not yet returned', async () => {
+      await service.patchReturnDropBoxHistory([1], 9, { id: 1 } as User);
+
+      expect(unitDropBoxHistoryRepository.findOne).toHaveBeenCalledWith({
+        where: { unitId: 1, targetWorkspaceId: 9, returned: false },
+        order: { changedAt: 'DESC' }
+      });
+    });
   });
 
   describe('copy', () => {
