@@ -13,6 +13,7 @@ import { ItemCommentService } from '../services/item-comment.service';
 import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ReviewGuard } from '../guards/review.guard';
+import { ReviewCommentAccessGuard } from '../guards/review-comment-access.guard';
 
 describe('ReviewUnitCommentController', () => {
   let controller: ReviewUnitCommentController;
@@ -41,6 +42,8 @@ describe('ReviewUnitCommentController', () => {
       .overrideGuard(JwtAuthGuard)
       .useValue({ canActivate: () => true })
       .overrideGuard(ReviewGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(ReviewCommentAccessGuard)
       .useValue({ canActivate: () => true })
       .compile();
 

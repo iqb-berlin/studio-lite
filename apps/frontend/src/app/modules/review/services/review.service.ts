@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BookletConfigDto, ReviewConfigDto } from '@studio-lite-lib/api-dto';
 import { Router } from '@angular/router';
 import {
-  from, Observable, switchMap, tap
+  catchError, from, Observable, of, switchMap, tap
 } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
@@ -38,6 +38,8 @@ export class ReviewService {
   unitInfoPanelWidth = 300;
   unitInfoPanelOn = false;
   allComments: Comment[] = [];
+  /** The review was refused: a logged-in user without access to its workspace (#1818). */
+  accessDenied = false;
 
   get unitDbId(): number {
     const unitData = this.units.filter(
@@ -104,12 +106,18 @@ export class ReviewService {
 
   loadReviewData(): Observable<void> {
     return this.backendService.getReview(this.reviewId).pipe(
+      // Only a 403 gets this far, see ReviewBackendService.getReview.
+      catchError(() => {
+        this.accessDenied = true;
+        return of(null);
+      }),
       tap(reviewData => {
         this.appService.appConfig.setPageTitle(
           this.translateService.instant('review.header'),
           true
         );
         if (reviewData) {
+          this.accessDenied = false;
           this.units = []; // Liste leeren vor dem Befüllen
           this.reviewName = reviewData.name ? reviewData.name : '?';
           this.workspaceName =
