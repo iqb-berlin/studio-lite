@@ -13,7 +13,6 @@ export class UnitImportData {
   fileName: string;
   description: string;
   transcript: string;
-  reference: string;
   definition: string;
   // `type` of <DefinitionRef>/<Definition>; '' when the file does not say
   definitionType = '';
@@ -123,9 +122,6 @@ export class UnitImportData {
     const unitTranscriptElement = metadataElement.find('Transcript').first();
     this.transcript =
       unitTranscriptElement.length > 0 ? unitTranscriptElement.text() : '';
-    const unitReferenceElement = metadataElement.find('Reference').first();
-    this.reference =
-      unitReferenceElement.length > 0 ? unitReferenceElement.text() : '';
     const unitLastChangeElement = metadataElement.find('Lastchange').first();
     if (unitLastChangeElement.length > 0) {
       this.lastChangedMetadata = new Date(unitLastChangeElement.text());
