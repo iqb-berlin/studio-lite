@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, MoreThan, Repository } from 'typeorm';
 import {
   CreateReviewDto,
+  ReviewConfigDto,
   ReviewFullDto,
   ReviewInListDto,
   ReviewDto, UnitPropertiesDto
@@ -15,6 +16,7 @@ import Workspace from '../entities/workspace.entity';
 import Unit from '../entities/unit.entity';
 import { UnitService } from './unit.service';
 import { ReviewUnprocessableException } from '../exceptions/review-unprocessable.exception';
+import { unitPropertiesWithoutMetadata } from '../utils/unit-properties-without-metadata';
 
 /**
  * The reviews of a workspace: what they contain, who may open them, and what a reviewer is served.
@@ -89,14 +91,18 @@ export class ReviewService {
   /**
    * The review with its units. With `workspaceId` -- the management routes -- only a review of that
    * workspace is found. Without it, the review route, which `ReviewGuard` has already tied to the
-   * review of a review login, or to a workspace the logged-in user may enter.
+   * review of a review login, or to a workspace the logged-in user may enter. That route serves
+   * whoever opens the review, so it leaves out the review's password, which only the management
+   * routes need (#1784).
    */
   async findOne(reviewId: number, workspaceId?: number): Promise<ReviewFullDto> {
     this.logger.log(`Returning data for review with id: ${reviewId}`);
-    const review = workspaceId === undefined ?
+    const found = workspaceId === undefined ?
       await this.reviewRepository.findOne({ where: { id: reviewId } }) :
       await this.findInWorkspace(reviewId, workspaceId);
-    if (!review) throw new NotFoundException();
+    if (!found) throw new NotFoundException();
+    const { password, ...withoutPassword } = found;
+    const review = workspaceId === undefined ? withoutPassword : found;
     const units = await this.reviewUnitRepository.find({
       where: { reviewId: reviewId },
       order: { order: 'ASC' }
@@ -122,10 +128,23 @@ export class ReviewService {
     };
   }
 
+  /** The unit's properties, without its metadata when the review does not show metadata (#1784). */
   async findUnitProperties(unitId: number, reviewId: number): Promise<UnitPropertiesDto> {
     const review = await this.reviewRepository
-      .findOne({ where: { id: reviewId }, select: ['workspaceId'] });
-    return this.unitService.findOnesProperties(unitId, review.workspaceId);
+      .findOne({ where: { id: reviewId }, select: ['workspaceId', 'settings'] });
+    const properties = await this.unitService.findOnesProperties(unitId, review.workspaceId);
+    return review.settings?.reviewConfig?.showMetadata === true ?
+      properties :
+      unitPropertiesWithoutMetadata(properties);
+  }
+
+  /**
+   * The review's settings for what it shows and allows; empty for a review without any, or one that
+   * does not exist. A setting counts as on only when it is true (see ReviewConfigGuard).
+   */
+  async reviewConfigOf(reviewId: number): Promise<ReviewConfigDto> {
+    const review = await this.reviewRepository.findOne({ where: { id: reviewId }, select: { settings: true } });
+    return review?.settings?.reviewConfig ?? {};
   }
 
   /** The workspace the review belongs to, or `null` for a review that does not exist. */

@@ -258,6 +258,30 @@ describe('CommentComponent', () => {
     });
   });
 
+  // Hiding a comment hides it from everyone; a review opened through its link has no account (#1784)
+  describe('hiding', () => {
+    const hideButtonShown = (): boolean => Array.from(fixture.nativeElement.querySelectorAll('.comment-action'))
+      .some(button => (button as HTMLElement).textContent?.includes('visibility_off'));
+
+    it('should offer hiding to a user with an account', () => {
+      component.userId = 1;
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      expect(component.canHide).toBe(true);
+      expect(hideButtonShown()).toBe(true);
+    });
+
+    it('should not offer hiding to user 0', () => {
+      component.userId = 0;
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      expect(component.canHide).toBe(false);
+      expect(hideButtonShown()).toBe(false);
+    });
+  });
+
   // A reply carries the name of its author; without one it can be written but not sent (#1797)
   describe('replying without a name', () => {
     const replyEditor = (): CommentEditorComponent => fixture.debugElement

@@ -513,15 +513,16 @@ describe('Review API tests', () => {
         });
     });
 
-    it('500/200 negative test: should return success when attempting to delete' +
+    it('404 negative test: should return error when attempting to delete' +
       ' a non-existent review comment ID', () => {
+      // The delete route looks the comment up before deleting it, to ask who wrote it (#1784). It
+      // used to delete nothing and answer 200.
       cy.deleteCommentReviewAPI(Cypress.expose('id_review1'),
         Cypress.expose(unit4.shortname),
         noId,
         Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
-          expect(resp.status).to.equal(200);
-          // expect(resp.status).to.equal(500); //should
+          expect(resp.status).to.equal(404);
         });
     });
 
@@ -777,6 +778,149 @@ describe('Review API tests', () => {
         .its('status').should('equal', 200);
       cy.getReviewPropertiesAPI(Cypress.expose('id_review1'), Cypress.expose(unit4.shortname), adminToken())
         .its('status').should('equal', 200);
+    });
+  });
+
+  // Under reviews/:review_id the review's settings were what the studio showed, not what the API
+  // answered; and any comment could be changed and deleted, by a review login as well (#1784).
+  describe('#1784 the review\'s settings, and what may be done to a comment', () => {
+    const adminToken = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const groupAdminToken = () => Cypress.expose(`token_${userGroupAdmin.username}`);
+    const visitorToken = () => Cypress.expose('tokenOfReview1');
+    const commentUrl = (commentId: string, rest = '') => `/api/reviews/${Cypress.expose('id_review1')}/units/` +
+      `${Cypress.expose(unit4.shortname)}/comments/${commentId}${rest}`;
+    const patchAs = (token: string, url: string, body: object) => cy.request({
+      method: 'PATCH',
+      url,
+      headers: { 'app-version': Cypress.expose('version'), authorization: `bearer ${token}` },
+      body,
+      failOnStatusCode: false
+    });
+    const comment = (body: string): CommentData => ({ body, userName: 'Besucherin' });
+    const ids = { visitorComment: '', userComment: '' };
+
+    before(() => {
+      cy.createCommentReviewAPI(
+        Cypress.expose('id_review1'),
+        Cypress.expose(unit4.shortname),
+        comment('Kommentar über den Link (#1784)'),
+        visitorToken()
+      ).then(resp => {
+        expect(resp.status).to.equal(201);
+        ids.visitorComment = `${resp.body}`;
+      });
+      cy.createCommentReviewAPI(
+        Cypress.expose('id_review1'),
+        Cypress.expose(unit4.shortname),
+        comment('Kommentar eines Kontos (#1784)'),
+        adminToken()
+      ).then(resp => {
+        expect(resp.status).to.equal(201);
+        ids.userComment = `${resp.body}`;
+      });
+    });
+
+    const updateAs = (token: string, commentId: string) => cy
+      .updateCommentReviewAPI(Cypress.expose('id_review1'), Cypress.expose(unit4.shortname), commentId, comment('neu'), token);
+    const deleteAs = (token: string, commentId: string) => cy
+      .deleteCommentReviewAPI(Cypress.expose('id_review1'), Cypress.expose(unit4.shortname), commentId, token);
+
+    after(() => {
+      deleteAs(adminToken(), ids.userComment);
+    });
+
+    it('403 negative test: should not let a review login change, hide or delete a comment', () => {
+      updateAs(visitorToken(), ids.visitorComment).its('status').should('equal', 403);
+      patchAs(visitorToken(), commentUrl(ids.visitorComment, '/hidden'), { hidden: true })
+        .its('status').should('equal', 403);
+      deleteAs(visitorToken(), ids.visitorComment).its('status').should('equal', 403);
+    });
+
+    it('200 positive test: should let a review login tie its own new comment to items, and no one else\'s', () => {
+      patchAs(visitorToken(), commentUrl(ids.visitorComment, '/items'), { unitItemUuids: [] })
+        .its('status').should('equal', 200);
+      patchAs(visitorToken(), commentUrl(ids.userComment, '/items'), { unitItemUuids: [] })
+        .its('status').should('equal', 403);
+    });
+
+    it('403 negative test: should leave changing a comment to its author', () => {
+      updateAs(groupAdminToken(), ids.userComment).its('status').should('equal', 403);
+    });
+
+    it('200 positive test: should let the group admin delete the comment of a review login', () => {
+      deleteAs(groupAdminToken(), ids.visitorComment).its('status').should('equal', 200);
+    });
+
+    it('200 positive test: should not hand the password to a review login', () => {
+      cy.getReviewAsReviewerAPI(Cypress.expose('id_review1'), visitorToken()).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body).not.to.have.property('password');
+      });
+    });
+
+    describe('a review that shows and allows nothing', () => {
+      const reviewPassword = 'reviewpass';
+      const review = { id: '', link: '', token: '' };
+
+      before(() => {
+        cy.addReviewAPI(Cypress.expose(ws1.id), 'Teil1784', adminToken()).then(created => {
+          expect(created.status).to.equal(201);
+          review.id = `${created.body}`;
+          cy.request({
+            method: 'PATCH',
+            url: `/api/workspaces/${Cypress.expose(ws1.id)}/reviews/${review.id}`,
+            headers: { 'app-version': Cypress.expose('version'), authorization: `bearer ${adminToken()}` },
+            body: {
+              id: parseInt(review.id, 10),
+              name: 'Teil1784',
+              password: reviewPassword,
+              settings: {
+                reviewConfig: {
+                  canComment: false, showCoding: false, showMetadata: false, showOthersComments: false
+                }
+              },
+              units: [parseInt(Cypress.expose(unit4.shortname), 10)]
+            }
+          }).its('status').should('equal', 200);
+          cy.getReviewAPI(Cypress.expose(ws1.id), review.id, adminToken()).then(resp => {
+            review.link = resp.body.link;
+            cy.loginAPI(review.link, reviewPassword).then(login => {
+              expect(login.status).to.equal(201);
+              review.token = login.body.accessToken;
+            });
+          });
+        });
+      });
+
+      after(() => {
+        cy.deleteReviewAPI(Cypress.expose(ws1.id), review.id, adminToken());
+      });
+
+      it('403 negative test: should not take a comment', () => {
+        cy.createCommentReviewAPI(review.id, Cypress.expose(unit4.shortname), comment('nicht erlaubt'), review.token)
+          .its('status').should('equal', 403);
+      });
+
+      it('403 negative test: should not show the comments of others', () => {
+        cy.getCommentReviewAPI(review.id, Cypress.expose(unit4.shortname), review.token)
+          .its('status').should('equal', 403);
+      });
+
+      it('403 negative test: should not show the coding, to a review login or a user of the workspace', () => {
+        cy.getReviewSchemeAPI(review.id, Cypress.expose(unit4.shortname), review.token)
+          .its('status').should('equal', 403);
+        cy.getReviewSchemeAPI(review.id, Cypress.expose(unit4.shortname), adminToken())
+          .its('status').should('equal', 403);
+      });
+
+      it('200 positive test: should serve the unit\'s properties without its metadata', () => {
+        cy.getReviewPropertiesAPI(review.id, Cypress.expose(unit4.shortname), review.token).then(resp => {
+          expect(resp.status).to.equal(200);
+          expect(resp.body.key).to.be.a('string').with.length.above(0);
+          expect(resp.body).not.to.have.property('description');
+          expect(resp.body.metadata).not.to.have.property('profiles');
+        });
+      });
     });
   });
 

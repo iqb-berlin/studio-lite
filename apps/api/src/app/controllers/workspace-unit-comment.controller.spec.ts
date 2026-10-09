@@ -21,6 +21,7 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
 import { UnitService } from '../services/unit.service';
 import { UsersService } from '../services/users.service';
+import { ReviewService } from '../services/review.service';
 
 describe('WorkspaceUnitCommentController', () => {
   let controller: WorkspaceUnitCommentController;
@@ -68,6 +69,10 @@ describe('WorkspaceUnitCommentController', () => {
         {
           provide: UsersService,
           useValue: createMock<UsersService>()
+        },
+        {
+          provide: ReviewService,
+          useValue: createMock<ReviewService>()
         }
       ]
     }).compile();

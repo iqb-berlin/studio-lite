@@ -4,6 +4,7 @@ import {
 import { UnitCommentService } from '../services/unit-comment.service';
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
+import { ReviewService } from '../services/review.service';
 
 /**
  * A comment may be deleted by whoever wrote it, and by whoever administers the workspace it is in --
@@ -16,6 +17,8 @@ import { WorkspaceService } from '../services/workspace.service';
  *
  * A review session passes neither half -- its comments carry no user id and it administers nothing.
  *
+ * The workspace is the one in the route; on a review route, which names none, the review's (#1784).
+ *
  * Whether the comment belongs to the unit and the workspace in the route is not asked here but by
  * {@link CommentInUnitGuard}, which the delete route carries after this one.
  */
@@ -24,7 +27,8 @@ export class CommentDeleteGuard implements CanActivate {
   constructor(
     private unitCommentService: UnitCommentService,
     private authService: AuthService,
-    private workspaceService: WorkspaceService
+    private workspaceService: WorkspaceService,
+    private reviewService: ReviewService
   ) {}
 
   /** Passes for the author of the comment, for an administrator, and for the group's admin. */
@@ -39,9 +43,17 @@ export class CommentDeleteGuard implements CanActivate {
     if (comment.userId === userId) return true;
 
     if (await this.authService.isAdminUser(userId)) return true;
-    if (await this.isGroupAdminOfWorkspace(userId, Number(req.params.workspace_id) || 0)) return true;
+    if (await this.isGroupAdminOfWorkspace(userId, await this.workspaceOf(req.params))) return true;
 
     throw new ForbiddenException();
+  }
+
+  /** The workspace of the route, or of the review a review route names. 0 without either. */
+  private async workspaceOf(params: { workspace_id?: string, review_id?: string }): Promise<number> {
+    const workspaceId = Number(params.workspace_id) || 0;
+    if (workspaceId) return workspaceId;
+    const reviewId = Number(params.review_id) || 0;
+    return reviewId ? (await this.reviewService.workspaceIdOf(reviewId)) ?? 0 : 0;
   }
 
   /** Whether the user administers the group the workspace belongs to. False without a workspace. */

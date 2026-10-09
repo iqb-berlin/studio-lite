@@ -6,12 +6,14 @@ import { CommentDeleteGuard } from './comment-delete.guard';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
+import { ReviewService } from '../services/review.service';
 
 describe('CommentDeleteGuard', () => {
   let guard: CommentDeleteGuard;
   let unitCommentService: DeepMocked<UnitCommentService>;
   let authService: DeepMocked<AuthService>;
   let workspaceService: DeepMocked<WorkspaceService>;
+  let reviewService: DeepMocked<ReviewService>;
 
   const contextFor = (userId: number, params: Record<string, string>): ExecutionContext => createMock<
     ExecutionContext>({
@@ -38,6 +40,10 @@ describe('CommentDeleteGuard', () => {
           provide: WorkspaceService,
           useValue: createMock<WorkspaceService>()
         },
+        {
+          provide: ReviewService,
+          useValue: createMock<ReviewService>()
+        },
         CommentDeleteGuard
       ]
     }).compile();
@@ -46,6 +52,7 @@ describe('CommentDeleteGuard', () => {
     unitCommentService = module.get(UnitCommentService);
     authService = module.get(AuthService);
     workspaceService = module.get(WorkspaceService);
+    reviewService = module.get(ReviewService);
     authService.isAdminUser.mockResolvedValue(false);
     authService.isWorkspaceGroupAdmin.mockResolvedValue(false);
   });
@@ -75,6 +82,26 @@ describe('CommentDeleteGuard', () => {
 
     expect(await guard.canActivate(contextFor(1, { id: '42', workspace_id: '3' }))).toBe(true);
     expect(authService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(1, 9);
+  });
+
+  it('should take the workspace of the review on a review route (#1784)', async () => {
+    unitCommentService.findOneComment.mockResolvedValue(foreignComment);
+    reviewService.workspaceIdOf.mockResolvedValue(3);
+    workspaceService.findOne.mockResolvedValue({ groupId: 9 } as WorkspaceFullDto);
+    authService.isWorkspaceGroupAdmin.mockResolvedValue(true);
+
+    expect(await guard.canActivate(contextFor(1, { comment_id: '42', review_id: '2', unit_id: '10' }))).toBe(true);
+    expect(reviewService.workspaceIdOf).toHaveBeenCalledWith(2);
+    expect(workspaceService.findOne).toHaveBeenCalledWith(3);
+  });
+
+  it('should throw ForbiddenException on a review route for another commenter', async () => {
+    unitCommentService.findOneComment.mockResolvedValue(foreignComment);
+    reviewService.workspaceIdOf.mockResolvedValue(3);
+    workspaceService.findOne.mockResolvedValue({ groupId: 9 } as WorkspaceFullDto);
+
+    await expect(guard.canActivate(contextFor(1, { comment_id: '42', review_id: '2', unit_id: '10' })))
+      .rejects.toThrow(ForbiddenException);
   });
 
   it('should throw ForbiddenException for another commenter of the workspace', async () => {

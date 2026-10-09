@@ -61,12 +61,16 @@ export class CommentComponent implements OnInit {
   // A vote belongs to a user account; a review opened through its link and password has none
   // and reaches the comments as user 0 (#1730).
   canVote: boolean = false;
+  // Hiding a comment hides it from everyone who reads the discussion; a review opened through its
+  // link and password may not decide that about the comments of others (#1784).
+  canHide: boolean = false;
   activeCommentType = ActiveCommentType;
   replyId: number | null = null;
 
   ngOnInit(): void {
     this.ownComment = this.userId > 0 && this.userId === this.comment.userId;
     this.canVote = this.userId > 0;
+    this.canHide = this.userId > 0;
     this.replyId = this.parentId ? this.parentId : this.comment.id;
   }
 

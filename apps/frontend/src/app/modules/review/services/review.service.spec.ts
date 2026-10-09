@@ -292,6 +292,18 @@ describe('ReviewService', () => {
   });
 
   describe('updateCommentsUnitInfo', () => {
+    beforeEach(() => {
+      service.reviewConfig = { showOthersComments: true };
+    });
+
+    it('should not fetch comments in a review that does not show them (#1784)', () => {
+      service.reviewConfig = { showOthersComments: false };
+
+      service.updateCommentsUnitInfo(100);
+
+      expect(mockBackendService.getUnitComments).not.toHaveBeenCalled();
+    });
+
     it('should fetch and update comments for given unit', done => {
       const mockComments: Comment[] = [
         {
