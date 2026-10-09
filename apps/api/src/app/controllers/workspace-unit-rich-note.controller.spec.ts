@@ -11,6 +11,8 @@ import { UnitService } from '../services/unit.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
 import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
+import { WriteOrGroupAdminAccessGuard } from '../guards/write-or-group-admin-access.guard';
+import { RichNoteInUnitGuard } from '../guards/rich-note-in-unit.guard';
 
 describe('WorkspaceUnitRichNoteController', () => {
   let controller: WorkspaceUnitRichNoteController;
@@ -43,6 +45,16 @@ describe('WorkspaceUnitRichNoteController', () => {
     method => {
       expect(Reflect.getMetadata('__guards__', WorkspaceUnitRichNoteController.prototype[method]).slice(0, 3))
         .toEqual([JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard]);
+    }
+  );
+
+  // The note of the path is held to the unit last, after the access is known (#1778).
+  it.each(['patchNote', 'patchNoteItems', 'removeNote'] as const)(
+    'should hold the note of %s to the unit in its path',
+    method => {
+      expect(Reflect.getMetadata('__guards__', WorkspaceUnitRichNoteController.prototype[method])).toEqual([
+        JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteOrGroupAdminAccessGuard, RichNoteInUnitGuard
+      ]);
     }
   );
 

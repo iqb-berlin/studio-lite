@@ -12,6 +12,7 @@ describe('UnitItemMetadataService', () => {
   const mockRepository = {
     find: jest.fn(),
     findBy: jest.fn(),
+    exists: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
     update: jest.fn(),
@@ -63,6 +64,21 @@ describe('UnitItemMetadataService', () => {
 
       expect(repository.findBy).toHaveBeenCalledWith({ unitItemUuid: uuid });
       expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('isOfItem', () => {
+    it('should ask for the row of the item', async () => {
+      mockRepository.exists.mockResolvedValue(true);
+
+      expect(await service.isOfItem(5, 'uuid-1')).toBe(true);
+      expect(repository.exists).toHaveBeenCalledWith({ where: { id: 5, unitItemUuid: 'uuid-1' } });
+    });
+
+    it('should return false when the row is not the item\'s', async () => {
+      mockRepository.exists.mockResolvedValue(false);
+
+      expect(await service.isOfItem(5, 'uuid-2')).toBe(false);
     });
   });
 

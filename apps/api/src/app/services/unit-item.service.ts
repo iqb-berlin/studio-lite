@@ -89,6 +89,11 @@ export class UnitItemService {
     return this.repo(manager).findOneBy({ uuid: uuid });
   }
 
+  /** Whether the item is one of the unit's -- false as well for an item that does not exist. */
+  async isInUnit(uuid: string, unitId: number): Promise<boolean> {
+    return this.unitItemRepository.exists({ where: { uuid: uuid, unitId: unitId } });
+  }
+
   /** The items of all the given units, without their metadata, in one query. */
   async getAllByUnitIds(unitIds: number[]): Promise<UnitItemDto[]> {
     if (!unitIds.length) return [];

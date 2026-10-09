@@ -9,6 +9,8 @@ import { AppVersionGuard } from '../guards/app-version.guard';
 import { WriteAccessGuard } from '../guards/write-access.guard';
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
+import { ItemInUnitGuard } from '../guards/item-in-unit.guard';
+import { ItemMetadataInItemGuard } from '../guards/item-metadata-in-item.guard';
 
 describe('UnitItemMetadataController', () => {
   let controller: UnitItemMetadataController;
@@ -36,6 +38,10 @@ describe('UnitItemMetadataController', () => {
       .useValue({ canActivate: () => true })
       .overrideGuard(UnitInWorkspaceGuard)
       .useValue({ canActivate: () => true })
+      .overrideGuard(ItemInUnitGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(ItemMetadataInItemGuard)
+      .useValue({ canActivate: () => true })
       .compile();
 
     controller = module.get<UnitItemMetadataController>(UnitItemMetadataController);
@@ -56,6 +62,19 @@ describe('UnitItemMetadataController', () => {
       expect(guards.slice(2).filter(guard => guard !== AppVersionGuard)[0]).toBe(UnitInWorkspaceGuard);
     }
   );
+
+  // The item of the path is held to the unit, and the row to the item, after the access is known (#1778).
+  it.each([
+    ['findAll', [
+      JwtAuthGuard, WorkspaceGuard, AppVersionGuard, UnitInWorkspaceGuard, WorkspaceAccessGuard, ItemInUnitGuard
+    ]],
+    ['create', [JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteAccessGuard, ItemInUnitGuard]],
+    ['remove', [
+      JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteAccessGuard, ItemInUnitGuard, ItemMetadataInItemGuard
+    ]]
+  ] as const)('should hold %s to the item in its path', (method, expected) => {
+    expect(Reflect.getMetadata('__guards__', UnitItemMetadataController.prototype[method])).toEqual(expected);
+  });
 
   describe('findAll', () => {
     it('should return an array of metadata for an item', async () => {
