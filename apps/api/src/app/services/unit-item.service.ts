@@ -109,23 +109,42 @@ export class UnitItemService {
     );
   }
 
-  static compare<T>(savedItems: T[], newItems: T[], key: string): { unchanged: T[]; removed: T[]; added: T[]; } {
+  /**
+   * Sorts the items of a save against the stored ones: `unchanged` are incoming items with a key the
+   * unit has, `removed` the stored ones the save no longer names, `added` incoming items without a
+   * key. An incoming key the unit does not have -- an item of another unit, or one deleted since --
+   * is `unknown`, and neither updated nor created. It used to count as unchanged, and the item it
+   * named was updated wherever it was (#1816).
+   */
+  static compare<T>(
+    savedItems: T[],
+    newItems: T[],
+    key: string
+  ): { unchanged: T[]; removed: T[]; added: T[]; unknown: T[] } {
+    const savedIds = savedItems
+      .map(item => item[key])
+      .filter(id => id !== undefined);
     const newIds = newItems
       .map(item => item[key])
-      .filter(uuid => uuid !== undefined);
+      .filter(id => id !== undefined);
     const unchanged = newItems
-      .filter(item => item[key] !== undefined && newIds.includes(item[key]));
+      .filter(item => item[key] !== undefined && savedIds.includes(item[key]));
+    const unknown = newItems
+      .filter(item => item[key] !== undefined && !savedIds.includes(item[key]));
     const removed = savedItems
       .filter(item => item[key] !== undefined && !newIds.includes(item[key]));
     const added = newItems
       .filter(item => item[key] === undefined);
-    return { unchanged, removed, added };
+    return {
+      unchanged, removed, added, unknown
+    };
   }
 
   async updateItem(uuid: string, item: UnitItemWithMetadataDto, manager?: EntityManager): Promise<void> {
     const updateItem = await this.getOneByUuid(uuid, manager);
     if (updateItem) {
-      const { profiles, ...unitItem } = item;
+      // The item stays in its unit: a unitId in the body used to move it there (#1816).
+      const { profiles, unitId, ...unitItem } = item;
       await this.repo(manager).update(uuid, this.toColumnValues(unitItem, manager));
       await this.reconcileItemProfiles(uuid, profiles || [], manager);
     }

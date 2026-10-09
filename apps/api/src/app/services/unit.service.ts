@@ -698,13 +698,25 @@ export class UnitService {
     });
   }
 
+  /**
+   * Brings the unit's items in line with a save. An item the save names by a uuid the unit does not
+   * have -- another unit's, or one deleted since -- is left alone and logged: it used to be updated
+   * wherever it was (#1816). Skipping rather than refusing keeps a save that raced a deletion.
+   */
   async patchItemsMetadata(
     unitId: number,
     items: UnitItemWithMetadataDto[],
-    manager?: EntityManager
+    manager?: EntityManager,
+    userName?: string | null
   ): Promise<void> {
     const itemsToUpdate = await this.unitItemService.getAllByUnitIdWithMetadata(unitId, manager);
-    const { unchanged, removed, added } = UnitItemService.compare(itemsToUpdate, items, 'uuid');
+    const {
+      unchanged, removed, added, unknown
+    } = UnitItemService.compare(itemsToUpdate, items, 'uuid');
+    if (unknown.length) {
+      this.logger.warn(`Metadata save of unit ${unitId} by ${userName || 'unknown user'} names items ` +
+        `the unit does not have, left alone: ${unknown.map(item => item.uuid).join(', ')}`);
+    }
     await Promise.all([
       ...unchanged.map(item => this.unitItemService.updateItem(item.uuid, item, manager)),
       ...removed.map(item => this.unitItemService.removeItem(item.uuid, manager)),
@@ -744,7 +756,7 @@ export class UnitService {
    * default and, because the read path uses the normalized tables (permanent
    * unit_metadata_to_delete marker) without re-deriving, it would be read back as hidden.
    */
-  async patchMetadata(unitId: number, metadata: UnitMetadataValues): Promise<void> {
+  async patchMetadata(unitId: number, metadata: UnitMetadataValues, userName?: string | null): Promise<void> {
     const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
     if (!unit) throw new UnitNotFoundException(unitId, 0, 'PATCH');
     const workspace = await this.workspaceRepository.findOne({ where: { id: unit.workspaceId } });
@@ -757,7 +769,7 @@ export class UnitService {
     const items = withOrder.items || [];
     await this.unitsRepository.manager.transaction(async manager => {
       await this.patchUnitMetadata(unitId, profiles as UnitMetadataDto[], manager);
-      await this.patchItemsMetadata(unitId, items as unknown as UnitItemWithMetadataDto[], manager);
+      await this.patchItemsMetadata(unitId, items as unknown as UnitItemWithMetadataDto[], manager, userName);
       await this.unitMetadataToDeleteService.upsertOneForUnit(unitId, manager);
     });
   }
@@ -766,7 +778,7 @@ export class UnitService {
     await this.patchUnitProperties(unitId, newData, userName);
     const dataKeys = Object.keys(newData);
     if (dataKeys.indexOf('metadata') >= 0) {
-      await this.patchMetadata(unitId, newData.metadata);
+      await this.patchMetadata(unitId, newData.metadata, userName);
     }
   }
 

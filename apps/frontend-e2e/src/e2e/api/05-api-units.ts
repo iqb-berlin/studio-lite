@@ -877,6 +877,92 @@ describe('Unit API tests', () => {
     });
   });
 
+  describe('#1816 saving the metadata of a unit with ids of another unit in the body', () => {
+    // Saving A's metadata names its items and rows by the ids the body carries. An item of B named
+    // there was updated -- renamed, moved into A -- and a row's unitId or unitItemUuid hung it on B.
+    const unitA: UnitData = { shortname: 'D1816A', name: 'Eigene', group: 'Group1' };
+    const unitB: UnitData = { shortname: 'D1816B', name: 'Andere', group: 'Group1' };
+    const token = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const ws = () => Cypress.expose(ws1.id);
+    const ids = {
+      unitA: '', unitB: '', itemA: '', itemB: ''
+    };
+    const saveMetadataOfA = (metadata: object) => cy.requestWorkspaceAPI(
+      'PATCH',
+      `${ws()}/units/${ids.unitA}/properties`,
+      token(),
+      { id: Number(ids.unitA), metadata }
+    );
+    type Row = { profileId: string };
+    type Item = { uuid: string; id: string; unitId: number; profiles: Row[] };
+    const metadataOf = (unitId: string) => cy.requestWorkspaceAPI('GET', `${ws()}/units/${unitId}/metadata`, token())
+      .then(resp => resp.body as { profiles: Row[]; items: Item[] });
+
+    before(() => {
+      cy.createUnitAPI(ws(), unitA, token()).then(resp => {
+        ids.unitA = `${resp.body}`;
+      });
+      cy.createUnitAPI(ws(), unitB, token()).then(resp => {
+        ids.unitB = `${resp.body}`;
+      });
+      cy.then(() => {
+        cy.requestWorkspaceAPI('POST', `${ws()}/units/${ids.unitB}/items`, token(), { id: 'item_b' }).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.itemB = resp.body;
+        });
+        saveMetadataOfA({
+          profiles: [{ profileId: 'unit-profile-1816', entries: [] }],
+          items: [{ id: 'item_a', profiles: [{ profileId: 'item-profile-1816', entries: [] }] }]
+        }).its('status').should('equal', 200);
+      });
+      cy.then(() => metadataOf(ids.unitA).then(metadata => {
+        ids.itemA = metadata.items[0].uuid;
+      }));
+    });
+
+    after(() => {
+      cy.deleteUnitsAPI([ids.unitA, ids.unitB], ws(), token());
+    });
+
+    it('200 positive test: should leave an item of another unit as it was', () => {
+      saveMetadataOfA({
+        profiles: [{ profileId: 'unit-profile-1816', entries: [] }],
+        items: [
+          { uuid: ids.itemA, id: 'item_a', profiles: [{ profileId: 'item-profile-1816', entries: [] }] },
+          {
+            uuid: ids.itemB, id: 'umbenannt', unitId: Number(ids.unitA), profiles: []
+          }
+        ]
+      }).its('status').should('equal', 200);
+      metadataOf(ids.unitB).then(metadata => {
+        expect(metadata.items.map(item => ({ uuid: item.uuid, id: item.id })))
+          .to.deep.equal([{ uuid: ids.itemB, id: 'item_b' }]);
+      });
+      metadataOf(ids.unitA).then(metadata => {
+        expect(metadata.items.map(item => item.uuid)).to.deep.equal([ids.itemA]);
+      });
+    });
+
+    it('200 positive test: should keep the metadata rows with their unit and item, whatever the body names', () => {
+      saveMetadataOfA({
+        profiles: [{ profileId: 'unit-profile-1816', unitId: Number(ids.unitB), entries: [] }],
+        items: [{
+          uuid: ids.itemA,
+          id: 'item_a',
+          profiles: [{ profileId: 'item-profile-1816', unitItemUuid: ids.itemB, entries: [] }]
+        }]
+      }).its('status').should('equal', 200);
+      metadataOf(ids.unitA).then(metadata => {
+        expect(metadata.profiles.map(row => row.profileId)).to.include('unit-profile-1816');
+        expect(metadata.items[0].profiles.map(row => row.profileId)).to.deep.equal(['item-profile-1816']);
+      });
+      metadataOf(ids.unitB).then(metadata => {
+        expect(metadata.profiles || []).to.deep.equal([]);
+        expect(metadata.items[0].profiles || []).to.deep.equal([]);
+      });
+    });
+  });
+
   describe('#1779, #1780 units that cross into another workspace', () => {
     // A unit in ws3 (group2), where userzwei has no access. fadmin, who administers group2, is
     // assigned there for the time of these tests; ws3 has no users before and after them.
