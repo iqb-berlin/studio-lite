@@ -10,6 +10,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { ReviewUnitCommentController } from './review-unit-comment.controller';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { ItemCommentService } from '../services/item-comment.service';
+import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ReviewGuard } from '../guards/review.guard';
 
@@ -17,6 +18,7 @@ describe('ReviewUnitCommentController', () => {
   let controller: ReviewUnitCommentController;
   let unitCommentService: UnitCommentService;
   let itemCommentService: ItemCommentService;
+  let usersService: UsersService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,6 +31,10 @@ describe('ReviewUnitCommentController', () => {
         {
           provide: ItemCommentService,
           useValue: createMock<ItemCommentService>()
+        },
+        {
+          provide: UsersService,
+          useValue: createMock<UsersService>()
         }
       ]
     })
@@ -41,6 +47,7 @@ describe('ReviewUnitCommentController', () => {
     controller = module.get<ReviewUnitCommentController>(ReviewUnitCommentController);
     unitCommentService = module.get<UnitCommentService>(UnitCommentService);
     itemCommentService = module.get<ItemCommentService>(ItemCommentService);
+    usersService = module.get<UsersService>(UsersService);
   });
 
   it('should be defined', () => {
@@ -95,39 +102,31 @@ describe('ReviewUnitCommentController', () => {
   });
 
   describe('createComment', () => {
-    it('should create a new comment and return its id', async () => {
-      const createDto: CreateUnitCommentDto = {
-        unitId: 10,
-        body: 'New comment',
-        userId: 1
-      } as CreateUnitCommentDto;
-      const newCommentId = 5;
+    const createDto: CreateUnitCommentDto = {
+      unitId: 99,
+      body: 'New comment',
+      userId: 99,
+      userName: 'Besucherin'
+    } as CreateUnitCommentDto;
 
-      jest.spyOn(unitCommentService, 'createComment')
-        .mockResolvedValue(newCommentId);
+    it('should create the comment as the caller on the unit of the path, with the name typed at hand', async () => {
+      jest.spyOn(usersService, 'commentAuthorOf').mockResolvedValue({ id: 7, name: 'Muster, Max' });
+      jest.spyOn(unitCommentService, 'createCommentAs').mockResolvedValue(5);
 
-      const result = await controller.createComment(createDto);
-
-      expect(result).toBe(newCommentId);
-      expect(unitCommentService.createComment).toHaveBeenCalledWith(createDto);
-      expect(unitCommentService.createComment).toHaveBeenCalledTimes(1);
+      expect(await controller.createComment({ user: { id: 7, name: 'max' } }, 10, createDto)).toBe(5);
+      expect(usersService.commentAuthorOf).toHaveBeenCalledWith(7, 'Besucherin');
+      expect(unitCommentService.createCommentAs)
+        .toHaveBeenCalledWith({ id: 7, name: 'Muster, Max' }, 10, createDto);
     });
 
-    it('should handle comments with different content', async () => {
-      const createDto: CreateUnitCommentDto = {
-        unitId: 20,
-        body: 'Another comment with different content',
-        userId: 2
-      } as CreateUnitCommentDto;
-      const newCommentId = 10;
+    it('should ask for the author of a review link as user 0', async () => {
+      jest.spyOn(usersService, 'commentAuthorOf').mockResolvedValue({ id: 0, name: 'Besucherin' });
+      jest.spyOn(unitCommentService, 'createCommentAs').mockResolvedValue(6);
 
-      jest.spyOn(unitCommentService, 'createComment')
-        .mockResolvedValue(newCommentId);
-
-      const result = await controller.createComment(createDto);
-
-      expect(result).toBe(newCommentId);
-      expect(unitCommentService.createComment).toHaveBeenCalledWith(createDto);
+      expect(await controller.createComment({ user: { id: 0, name: '' } }, 10, createDto)).toBe(6);
+      expect(usersService.commentAuthorOf).toHaveBeenCalledWith(0, 'Besucherin');
+      expect(unitCommentService.createCommentAs)
+        .toHaveBeenCalledWith({ id: 0, name: 'Besucherin' }, 10, createDto);
     });
   });
 

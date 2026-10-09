@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  Repository, Not, In, FindOptionsWhere
+  Repository, Not, In, FindOptionsWhere, IsNull
 } from 'typeorm';
 import {
   UnitCommentDto, CreateUnitCommentDto, UpdateUnitCommentDto, UpdateUnitCommentVisibilityDto,
@@ -12,6 +12,7 @@ import UnitCommentVote from '../entities/unit-comment-vote.entity';
 import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-found.exception';
 import { ItemCommentService } from './item-comment.service';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
+import { unitIdOf } from '../utils/unit-ids';
 
 /**
  * The comments on units: the discussion tree, hiding a comment, votes, and the copy that goes along
@@ -125,6 +126,41 @@ export class UnitCommentService {
       return comments[0];
     }
     return null;
+  }
+
+  /**
+   * Whether the comment opens a discussion of the unit -- one that can be answered. A reply is
+   * answered under its root comment, as the frontend does, so a reply to a reply would be one level
+   * deeper than any view shows, and outlive its root when that is deleted.
+   */
+  async isRootInUnit(commentId: number, unitId: number): Promise<boolean> {
+    return this.unitCommentsRepository.exists({ where: { id: commentId, unitId: unitId, parentId: IsNull() } });
+  }
+
+  /**
+   * A new comment on the unit, written by the author the route has established. Of the body only
+   * the text, the parent and whether it is hidden are taken (#1776): author and unit used to be
+   * saved as the body named them -- in another user's name, and counted as theirs for editing and
+   * deleting -- and a body `id` turned the insert into an update of that comment, wherever it was.
+   *
+   * A reply has to answer a root comment of the same unit; any other parent is answered with a 404.
+   * No parent (null, undefined or 0, as the copy of a unit has it) makes a root comment.
+   */
+  async createCommentAs(
+    author: { id: number; name: string },
+    unitId: number,
+    unitComment: CreateUnitCommentDto
+  ): Promise<number> {
+    const { body, parentId, hidden } = unitComment;
+    if (parentId) {
+      const parentCommentId = unitIdOf(parentId);
+      if (!parentCommentId || !await this.isRootInUnit(parentCommentId, unitId)) {
+        throw new UnitCommentNotFoundException(parentCommentId, 'POST');
+      }
+    }
+    return this.createComment({
+      body, parentId: parentId || null, hidden, unitId, userId: author.id, userName: author.name
+    });
   }
 
   async createComment(unitComment: CreateUnitCommentDto): Promise<number> {

@@ -1,7 +1,9 @@
 import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, Not, In } from 'typeorm';
+import {
+  Repository, Not, In, IsNull
+} from 'typeorm';
 import { UnitCommentDto, UpdateUnitCommentDto, UpdateUnitCommentVisibilityDto } from '@studio-lite-lib/api-dto';
 import { createMock } from '@golevelup/ts-jest';
 import { UnitCommentService } from './unit-comment.service';
@@ -9,6 +11,7 @@ import UnitComment from '../entities/unit-comment.entity';
 import UnitCommentVote from '../entities/unit-comment-vote.entity';
 import { ItemCommentService } from './item-comment.service';
 import UnitCommentUnitItem from '../entities/unit-comment-unit-item.entity';
+import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-found.exception';
 
 describe('UnitCommentService', () => {
   let service: UnitCommentService;
@@ -183,6 +186,87 @@ describe('UnitCommentService', () => {
         order: { changedAt: 'DESC' }
       });
       expect(result).toEqual(comments[0]);
+    });
+  });
+
+  describe('isRootInUnit', () => {
+    it('should ask for a root comment in the unit', async () => {
+      mockRepository.exists.mockResolvedValue(true);
+
+      expect(await service.isRootInUnit(42, 10)).toBe(true);
+      expect(repository.exists).toHaveBeenLastCalledWith({ where: { id: 42, unitId: 10, parentId: IsNull() } });
+    });
+
+    it('should return false when there is no such root comment in the unit', async () => {
+      mockRepository.exists.mockResolvedValue(false);
+
+      expect(await service.isRootInUnit(42, 11)).toBe(false);
+    });
+  });
+
+  describe('createCommentAs', () => {
+    const author = { id: 7, name: 'Muster, Max' };
+    const forged = {
+      body: 'test', unitId: 99, userId: 99, userName: 'someone else', hidden: false
+    };
+
+    beforeEach(() => {
+      mockRepository.exists.mockClear();
+      mockRepository.create.mockClear();
+      (mockRepository.create as jest.Mock).mockImplementation(comment => ({ ...comment, id: 123 }));
+      mockRepository.save.mockImplementation(async comment => comment as UnitComment);
+    });
+
+    it('should save the comment with the author and the unit given, whatever the body names', async () => {
+      expect(await service.createCommentAs(author, 10, forged)).toBe(123);
+      expect(repository.create).toHaveBeenCalledWith({
+        body: 'test',
+        parentId: null,
+        hidden: false,
+        unitId: 10,
+        userId: 7,
+        userName: 'Muster, Max',
+        createdAt: expect.any(Date),
+        changedAt: expect.any(Date)
+      });
+      expect(repository.exists).not.toHaveBeenCalled();
+    });
+
+    it('should leave out an id the body sends, so that no other comment is overwritten', async () => {
+      const withId = { ...forged, id: 42 } as typeof forged;
+
+      await service.createCommentAs(author, 10, withId);
+      expect(repository.create).toHaveBeenCalledWith(expect.not.objectContaining({ id: 42 }));
+    });
+
+    it.each([null, undefined, 0])('should make a root comment for the parent %p', async parentId => {
+      await service.createCommentAs(author, 10, { ...forged, parentId });
+      expect(repository.exists).not.toHaveBeenCalled();
+      expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({ parentId: null }));
+    });
+
+    it('should save a reply to a root comment of the same unit', async () => {
+      mockRepository.exists.mockResolvedValue(true);
+
+      expect(await service.createCommentAs(author, 10, { ...forged, parentId: 42 })).toBe(123);
+      expect(repository.exists).toHaveBeenCalledWith({ where: { id: 42, unitId: 10, parentId: IsNull() } });
+      expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({ parentId: 42 }));
+    });
+
+    it('should refuse a reply to a comment of another unit, or to a reply, with a 404', async () => {
+      mockRepository.exists.mockResolvedValue(false);
+
+      await expect(service.createCommentAs(author, 10, { ...forged, parentId: 42 }))
+        .rejects.toThrow(UnitCommentNotFoundException);
+      expect(repository.create).not.toHaveBeenCalled();
+    });
+
+    it('should refuse a parent that is no comment id without looking it up', async () => {
+      const malformed = { ...forged, parentId: 'abc' as unknown as number };
+
+      await expect(service.createCommentAs(author, 10, malformed)).rejects.toThrow(UnitCommentNotFoundException);
+      expect(repository.exists).not.toHaveBeenCalled();
+      expect(repository.create).not.toHaveBeenCalled();
     });
   });
 

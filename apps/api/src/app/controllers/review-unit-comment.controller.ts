@@ -21,6 +21,7 @@ import { ReviewGuard } from '../guards/review.guard';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitId } from '../decorators/unit-id.decorator';
 import { ItemCommentService } from '../services/item-comment.service';
+import { UsersService } from '../services/users.service';
 
 /**
  * `reviews/:review_id/units/:unit_id/comments` -- the discussion on a unit as a reviewer conducts
@@ -36,7 +37,8 @@ import { ItemCommentService } from '../services/item-comment.service';
 export class ReviewUnitCommentController {
   constructor(
     private unitCommentService: UnitCommentService,
-    private itemCommentService: ItemCommentService
+    private itemCommentService: ItemCommentService,
+    private usersService: UsersService
   ) {}
 
   @Get()
@@ -58,8 +60,15 @@ export class ReviewUnitCommentController {
   })
   @ApiForbiddenResponse({ description: 'No privileges to post comment for the unit.' })
   @ApiTags('review unit comment')
-  async createComment(@Body() createUnitCommentDto: CreateUnitCommentDto) {
-    return this.unitCommentService.createComment(createUnitCommentDto);
+  async createComment(
+    @Req() request,
+    @Param('unit_id', ParseIntPipe) unitId: number,
+    @Body() createUnitCommentDto: CreateUnitCommentDto
+  ) {
+    // The unit is the one of the path, which ReviewGuard has held to the review, and the author the
+    // token's user (#1776) -- for a review link no one, signed with the name its visitor typed.
+    const author = await this.usersService.commentAuthorOf(request.user.id, createUnitCommentDto.userName);
+    return this.unitCommentService.createCommentAs(author, unitId, createUnitCommentDto);
   }
 
   @Patch(':comment_id')

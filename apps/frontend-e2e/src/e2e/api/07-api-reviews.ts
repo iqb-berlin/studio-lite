@@ -650,6 +650,67 @@ describe('Review API tests', () => {
           ).its('status').should('equal', 200);
         });
     });
+
+    // The body names the admin as the author and unit1 as the unit. Both used to be saved as sent:
+    // a review login could write in a user's name, on a unit outside its review (#1776).
+    const forgedReviewComment = (): CommentData => ({
+      body: 'Kommentar mit fremden Angaben',
+      parentId: undefined,
+      unitId: parseInt(Cypress.expose(unit1.shortname), 10),
+      userId: parseInt(Cypress.expose(`id_${Cypress.expose('username')}`), 10),
+      userName: 'Besucherin'
+    });
+    const storedReviewComment = (commentId: string, token: string) => cy
+      .getCommentReviewAPI(Cypress.expose('id_review1'), Cypress.expose(unit4.shortname), token)
+      .then(resp => (resp.body as { id: number; unitId: number; userId: number; userName: string }[])
+        .find(unitComment => `${unitComment.id}` === commentId));
+
+    it('201 positive test: should take a review login\'s comment as no user\'s, on the unit of the path', () => {
+      cy.createCommentReviewAPI(
+        Cypress.expose('id_review1'),
+        Cypress.expose(unit4.shortname),
+        forgedReviewComment(),
+        Cypress.expose('tokenOfReview1')
+      ).then(created => {
+        expect(created.status).to.equal(201);
+        const commentId = String(created.body);
+        storedReviewComment(commentId, Cypress.expose('tokenOfReview1')).then(stored => {
+          expect(stored?.unitId).to.equal(parseInt(Cypress.expose(unit4.shortname), 10));
+          expect(stored?.userId).to.equal(0);
+          // A review login has no name of its own: its visitor signs with the one typed.
+          expect(stored?.userName).to.equal('Besucherin');
+        });
+        cy.deleteCommentReviewAPI(
+          Cypress.expose('id_review1'),
+          Cypress.expose(unit4.shortname),
+          commentId,
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).its('status').should('equal', 200);
+      });
+    });
+
+    it('201 positive test: should sign a logged-in user\'s review comment with their own name', () => {
+      const groupAdminToken = Cypress.expose(`token_${userGroupAdmin.username}`);
+      cy.createCommentReviewAPI(
+        Cypress.expose('id_review1'),
+        Cypress.expose(unit4.shortname),
+        forgedReviewComment(),
+        groupAdminToken
+      ).then(created => {
+        expect(created.status).to.equal(201);
+        const commentId = String(created.body);
+        storedReviewComment(commentId, groupAdminToken).then(stored => {
+          expect(stored?.userId).to.equal(parseInt(Cypress.expose(`id_${userGroupAdmin.username}`), 10));
+          expect(stored?.userName).to.be.a('string').and.not.be.empty.and.not.equal('Besucherin');
+        });
+        cy.deleteCommentReviewAPI(
+          Cypress.expose('id_review1'),
+          Cypress.expose(unit4.shortname),
+          commentId,
+          groupAdminToken
+        ).its('status').should('equal', 200);
+      });
+    });
   });
 
   // The guards check the level in the workspace of the path. The review was taken from its id

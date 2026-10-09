@@ -27,6 +27,7 @@ import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
 import { UnitUserService } from '../services/unit-user.service';
 import { ItemCommentService } from '../services/item-comment.service';
 import { UnitId } from '../decorators/unit-id.decorator';
+import { UsersService } from '../services/users.service';
 
 /**
  * `workspaces/:workspace_id/units/:unit_id/comments` -- the discussion on a unit from inside its
@@ -45,13 +46,17 @@ import { UnitId } from '../decorators/unit-id.decorator';
  * without it the discussion of any unit was open from any workspace the caller is in. Every route
  * on a single comment then asks {@link CommentInUnitGuard}, last, whether the comment belongs to
  * the unit. Either way a mismatch is answered with a 404.
+ *
+ * Who writes is the token's user, not whoever the body names (#1776): a new comment is signed with
+ * the caller's id and name, and the last-seen timestamp is the caller's own.
  */
 @Controller('workspaces/:workspace_id/units/:unit_id/comments')
 export class WorkspaceUnitCommentController {
   constructor(
     private unitUserService: UnitUserService,
     private unitCommentService: UnitCommentService,
-    private itemCommentService: ItemCommentService
+    private itemCommentService: ItemCommentService,
+    private usersService: UsersService
   ) {}
 
   @Get()
@@ -87,10 +92,15 @@ export class WorkspaceUnitCommentController {
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit comment')
   async patchOnesUnitUserLastSeen(
+    @Req() request,
     @Param('unit_id', ParseIntPipe) unitId: number,
     @Body() updateUnitUser: UpdateUnitUserDto
   ): Promise<void> {
-    return this.unitUserService.patchUnitUserCommentsLastSeen(unitId, updateUnitUser);
+    return this.unitUserService.patchUnitUserCommentsLastSeen(
+      unitId,
+      request.user.id,
+      updateUnitUser.lastSeenCommentChangedAt
+    );
   }
 
   @Post()
@@ -105,12 +115,14 @@ export class WorkspaceUnitCommentController {
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit comment')
   async createComment(
+    @Req() request,
     @Param('unit_id', ParseIntPipe) unitId: number,
     @Body() createUnitCommentDto: CreateUnitCommentDto
   ) {
-    // The unit is the one of the path, which UnitInWorkspaceGuard has held to the workspace. The
-    // body's unitId used to be saved as sent, and could name a unit of any other workspace.
-    return this.unitCommentService.createComment({ ...createUnitCommentDto, unitId });
+    // The unit is the one of the path, which UnitInWorkspaceGuard has held to the workspace, and
+    // the author the token's user. The body's unitId, userId and userName used to be saved as sent.
+    const author = await this.usersService.commentAuthorOf(request.user.id);
+    return this.unitCommentService.createCommentAs(author, unitId, createUnitCommentDto);
   }
 
   @Patch(':id')

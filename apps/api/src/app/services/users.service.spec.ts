@@ -265,6 +265,42 @@ describe('UsersService', () => {
     });
   });
 
+  describe('commentAuthorOf', () => {
+    it('should sign with the long name of the user', async () => {
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue({ lastName: 'Muster', firstName: 'Max' } as User);
+
+      expect(await service.commentAuthorOf(7, 'typed')).toEqual({ id: 7, name: 'Muster, Max' });
+    });
+
+    it('should fall back to the login name for a user without a long name', async () => {
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue({ name: 'max' } as User);
+
+      expect(await service.commentAuthorOf(7)).toEqual({ id: 7, name: 'max' });
+    });
+
+    it('should sign a review link, which is no user, with the name typed, without asking for a user', async () => {
+      const findOne = jest.spyOn(usersRepository, 'findOne');
+
+      expect(await service.commentAuthorOf(0, 'Besucherin')).toEqual({ id: 0, name: 'Besucherin' });
+      expect(await service.commentAuthorOf(0)).toEqual({ id: 0, name: '' });
+      expect(findOne).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getLongName', () => {
+    it.each([
+      [{ lastName: 'Muster', firstName: 'Max' }, 'Muster, Max'],
+      [{ lastName: 'Muster' }, 'Muster'],
+      [{ firstName: 'Max' }, 'Max'],
+      [{ name: 'max' }, ''],
+      [null, '']
+    ])('should make %p into %p', async (user, longName) => {
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue(user as User);
+
+      expect(await service.getLongName(7)).toBe(longName);
+    });
+  });
+
   describe('isUserLoggedIn', () => {
     // Rows are built the way the API writes them: expiresAt is always
     // lastActivity + PASSIVE_THRESHOLD_MS.
