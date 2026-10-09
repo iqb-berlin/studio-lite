@@ -10,7 +10,6 @@ export class UnitImportJsonData {
   fileName: string;
   description: string;
   transcript = '';
-  reference = '';
   definition = '';
   // `userInterface.type` of the unit index; '' when the file does not say
   definitionType = '';

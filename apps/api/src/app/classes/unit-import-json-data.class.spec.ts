@@ -127,11 +127,10 @@ describe('UnitImportJsonData', () => {
     expect(() => new UnitImportJsonData(invalid)).toThrow('userInterface missing');
   });
 
-  it('should default transcript, reference, schemer and schemeType to empty string', () => {
+  it('should default transcript, schemer and schemeType to empty string', () => {
     const data = new UnitImportJsonData(fileIoMock);
 
     expect(data.transcript).toBe('');
-    expect(data.reference).toBe('');
     expect(data.schemer).toBe('');
     expect(data.schemeType).toBe('');
   });
