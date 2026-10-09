@@ -183,6 +183,22 @@ describe('ReviewService', () => {
     });
   });
 
+  describe('workspaceIdOf', () => {
+    it('should return the workspace of the review', async () => {
+      reviewRepository.findOne.mockResolvedValue({ workspaceId: 4 } as Review);
+
+      expect(await service.workspaceIdOf(1)).toBe(4);
+      expect(reviewRepository.findOne)
+        .toHaveBeenCalledWith({ where: { id: 1 }, select: { workspaceId: true } });
+    });
+
+    it('should return null for a review that does not exist', async () => {
+      reviewRepository.findOne.mockResolvedValue(null);
+
+      expect(await service.workspaceIdOf(999)).toBeNull();
+    });
+  });
+
   describe('findOneForAuth', () => {
     it('should return review dto', async () => {
       reviewRepository.findOne.mockResolvedValue({ id: 1, name: 'r' } as Review);

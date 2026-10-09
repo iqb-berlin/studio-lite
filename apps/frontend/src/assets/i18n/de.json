@@ -1226,6 +1226,7 @@
     "end": "Ende der Aufgabenfolge",
     "end-page": "Endseite",
     "pages-count-info": "Anzahl der Aufgaben bzw. Seiten: {{count}}",
+    "access-denied": "Kein Zugriff auf den Arbeitsbereich dieses Reviews. Bitte abmelden und das Review über seinen Link mit Kennwort öffnen.",
     "title": "Review einer Aufgabenfolge",
     "booklet-config": "Einstellungen für Darstellung und Ablauf",
     "enter-comment-name": "Bitte Namen eingeben",

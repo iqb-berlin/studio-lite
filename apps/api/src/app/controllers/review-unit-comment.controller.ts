@@ -18,6 +18,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ReviewGuard } from '../guards/review.guard';
+import { ReviewCommentAccessGuard } from '../guards/review-comment-access.guard';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitId } from '../decorators/unit-id.decorator';
 import { ItemCommentService } from '../services/item-comment.service';
@@ -27,11 +28,10 @@ import { UsersService } from '../services/users.service';
  * `reviews/:review_id/units/:unit_id/comments` -- the discussion on a unit as a reviewer conducts
  * it: writing, revising and deleting comments, tying one to single items, hiding one, and voting.
  *
- * The same ground as {@link WorkspaceUnitCommentController}, reached with a review login. The
- * guards stop at the token because a reviewer holds no access level in any workspace -- and nothing
- * takes their place: neither the `review_id` in the route nor the unit it is asked about is checked
- * against the review the token was issued for, so these routes answer for any unit whose id is
- * known.
+ * The same ground as {@link WorkspaceUnitCommentController}, reached from a review -- with a review
+ * login or as a logged-in user. {@link ReviewGuard} holds both to the review and its units, and a
+ * user to the review's workspace; {@link ReviewCommentAccessGuard} then asks a user for the access
+ * level commenting takes there (#1818). A review login holds no access level in any workspace.
  */
 @Controller('reviews/:review_id/units/:unit_id/comments')
 export class ReviewUnitCommentController {
@@ -42,7 +42,7 @@ export class ReviewUnitCommentController {
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard, ReviewGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comments for unit retrieved successfully.' })
   @ApiForbiddenResponse({ description: 'No privileges to retrieve comments for the unit.' })
@@ -52,7 +52,7 @@ export class ReviewUnitCommentController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, ReviewGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({
     description: 'Sends back the id of the new comment in database',
@@ -72,7 +72,7 @@ export class ReviewUnitCommentController {
   }
 
   @Patch(':comment_id')
-  @UseGuards(JwtAuthGuard, ReviewGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
@@ -84,7 +84,7 @@ export class ReviewUnitCommentController {
   }
 
   @Patch(':comment_id/hidden')
-  @UseGuards(JwtAuthGuard, ReviewGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment body for successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
@@ -96,7 +96,7 @@ export class ReviewUnitCommentController {
   }
 
   @Delete(':comment_id')
-  @UseGuards(JwtAuthGuard, ReviewGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Comment successfully updated.' })
   @ApiNotFoundResponse({ description: 'Comment not found.' })
@@ -107,7 +107,7 @@ export class ReviewUnitCommentController {
   }
 
   @Patch(':comment_id/items')
-  @UseGuards(JwtAuthGuard, ReviewGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -123,7 +123,7 @@ export class ReviewUnitCommentController {
   }
 
   @Post(':comment_id/vote')
-  @UseGuards(JwtAuthGuard, ReviewGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -140,7 +140,7 @@ export class ReviewUnitCommentController {
   }
 
   @Get(':comment_id/votes')
-  @UseGuards(JwtAuthGuard, ReviewGuard)
+  @UseGuards(JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'review_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })

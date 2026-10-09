@@ -88,8 +88,8 @@ export class ReviewService {
 
   /**
    * The review with its units. With `workspaceId` -- the management routes -- only a review of that
-   * workspace is found. Without it, the review route for a reviewer, which `ReviewGuard` has already
-   * tied to the review of the token.
+   * workspace is found. Without it, the review route, which `ReviewGuard` has already tied to the
+   * review of a review login, or to a workspace the logged-in user may enter.
    */
   async findOne(reviewId: number, workspaceId?: number): Promise<ReviewFullDto> {
     this.logger.log(`Returning data for review with id: ${reviewId}`);
@@ -126,6 +126,12 @@ export class ReviewService {
     const review = await this.reviewRepository
       .findOne({ where: { id: reviewId }, select: ['workspaceId'] });
     return this.unitService.findOnesProperties(unitId, review.workspaceId);
+  }
+
+  /** The workspace the review belongs to, or `null` for a review that does not exist. */
+  async workspaceIdOf(reviewId: number): Promise<number | null> {
+    const review = await this.reviewRepository.findOne({ where: { id: reviewId }, select: { workspaceId: true } });
+    return review?.workspaceId ?? null;
   }
 
   async findOneForAuth(reviewId: number): Promise<ReviewDto> {

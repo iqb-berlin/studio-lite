@@ -1,6 +1,7 @@
 import {
   ReviewData,
-  CommentData
+  CommentData,
+  UserData
 } from '../../support/testData';
 import {
   noId,
@@ -167,10 +168,12 @@ describe('Review API tests', () => {
         });
     });
 
-    it('404 negative test: should return error when requesting a review window using an invalid ID', () => {
+    it('403 negative test: should return error when requesting a review window using an invalid ID', () => {
+      // A review that does not exist is refused like one the user may not open, so the answer does
+      // not tell which review ids exist (#1818). It used to be a 404.
       cy.getReviewWindowAPI(noId, Cypress.expose(`token_${userGroupAdmin.username}`))
         .then(resp => {
-          expect(resp.status).to.equal(404);
+          expect(resp.status).to.equal(403);
         });
     });
 
@@ -710,6 +713,70 @@ describe('Review API tests', () => {
           groupAdminToken
         ).its('status').should('equal', 200);
       });
+    });
+  });
+
+  // Under reviews/:review_id only a review login carried a review that was compared with the path;
+  // any logged-in user reached any review by its id. Someone without access to the review's
+  // workspace uses its link and password instead (#1818). review1 lives in ws1.
+  describe('#1818 a logged-in user reaches only reviews of their workspaces', () => {
+    const outsider: UserData = { username: 'ohnebereich', password: 'paso', isAdmin: false };
+    const adminToken = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const outsiderToken = () => Cypress.expose(`token_${outsider.username}`);
+
+    before(() => {
+      cy.createUserAPI(outsider, adminToken()).then(resp => {
+        expect(resp.status).to.equal(201);
+        Cypress.expose(`id_${outsider.username}`, resp.body);
+      });
+      cy.loginAPI(outsider.username, outsider.password).then(resp => {
+        expect(resp.status).to.equal(201);
+        Cypress.expose(`token_${outsider.username}`, resp.body.accessToken);
+      });
+    });
+
+    after(() => {
+      cy.deleteUsersAPI([Cypress.expose(`id_${outsider.username}`)], adminToken());
+    });
+
+    it('403 negative test: should not let a user without access to the workspace read the review', () => {
+      cy.getReviewWindowAPI(Cypress.expose('id_review1'), outsiderToken())
+        .its('status').should('equal', 403);
+    });
+
+    it('403 negative test: should not let them read a unit of the review', () => {
+      cy.getReviewPropertiesAPI(Cypress.expose('id_review1'), Cypress.expose(unit4.shortname), outsiderToken())
+        .its('status').should('equal', 403);
+    });
+
+    it('403 negative test: should not let them read the comments on a unit of the review', () => {
+      cy.getCommentReviewAPI(Cypress.expose('id_review1'), Cypress.expose(unit4.shortname), outsiderToken())
+        .its('status').should('equal', 403);
+    });
+
+    it('403 negative test: should not let them write a comment', () => {
+      const comment: CommentData = {
+        body: 'Kommentar ohne Zugriff auf den Arbeitsbereich',
+        unitId: parseInt(Cypress.expose(unit4.shortname), 10)
+      };
+      cy.createCommentReviewAPI(
+        Cypress.expose('id_review1'),
+        Cypress.expose(unit4.shortname),
+        comment,
+        outsiderToken()
+      ).its('status').should('equal', 403);
+    });
+
+    it('403 negative test: should answer a review that does not exist the same way', () => {
+      cy.getReviewWindowAPI(noId, outsiderToken())
+        .its('status').should('equal', 403);
+    });
+
+    it('200 positive test: should still let a user of the workspace read the review and its unit', () => {
+      cy.getReviewWindowAPI(Cypress.expose('id_review1'), adminToken())
+        .its('status').should('equal', 200);
+      cy.getReviewPropertiesAPI(Cypress.expose('id_review1'), Cypress.expose(unit4.shortname), adminToken())
+        .its('status').should('equal', 200);
     });
   });
 
