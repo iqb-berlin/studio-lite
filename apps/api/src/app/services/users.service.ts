@@ -320,11 +320,29 @@ export class UsersService {
       where: { id: userId },
       select: { lastName: true, firstName: true, name: true }
     });
-    if (user) {
-      if (user.lastName) return user.firstName ? `${user.lastName}, ${user.firstName}` : user.lastName;
-      return user.firstName || '';
-    }
-    return '';
+    return UsersService.longNameOf(user);
+  }
+
+  /**
+   * Who a new comment is by: the user of the token, signed with the name they go by -- the long
+   * name, or the login name where the account has none, which is what the frontend shows for them
+   * (`userLongName || userName`). A review link logs in as no one (id 0); its visitor signs with
+   * the name they typed, since there is no other (#1776).
+   */
+  async commentAuthorOf(userId: number, typedName?: string): Promise<{ id: number; name: string }> {
+    if (!userId) return { id: 0, name: typedName ?? '' };
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      select: { lastName: true, firstName: true, name: true }
+    });
+    return { id: userId, name: UsersService.longNameOf(user) || user?.name || '' };
+  }
+
+  /** "Last, First", the last name alone, or the first name alone; empty without either. */
+  private static longNameOf(user: Pick<User, 'lastName' | 'firstName'> | null): string {
+    if (!user) return '';
+    if (user.lastName) return user.firstName ? `${user.lastName}, ${user.firstName}` : user.lastName;
+    return user.firstName || '';
   }
 
   async remove(id: number | number[]): Promise<void> {
