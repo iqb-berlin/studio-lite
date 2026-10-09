@@ -122,6 +122,18 @@ export class UnitMetadataStore {
     this.restore();
   }
 
+  /**
+   * Takes the metadata as the server has stored it as the new starting point, in place of what was
+   * sent. Items created by a save get their uuid only there; without it the next save named them as
+   * new again, and the server deleted and recreated them, links and all (#1830). Other changed fields
+   * stay changed, and the store stays the same object, so whoever listens to it keeps listening.
+   */
+  reloadMetadata(metadata: UnitMetadataValues): void {
+    this.originalData = { ...this.originalData, metadata };
+    delete this.changedData.metadata;
+    this.dataChange.emit();
+  }
+
   restore(): void {
     this.changedData = <UnitPropertiesDto>{ id: this.originalData.id };
     this.dataChange.emit();

@@ -42,6 +42,7 @@ describe('UnitPropertiesComponent', () => {
       selectedWorkspaceId: 1,
       dropBoxId: 1,
       unitDefinitionStoreChanged: new Subject<void>(),
+      unitMetadataReloaded: new Subject<void>(),
       workspaceSettings: {
         defaultEditor: '',
         defaultPlayer: '',
@@ -160,6 +161,19 @@ describe('UnitPropertiesComponent', () => {
       profiles: [{ profileId: 'p1' }],
       items: [{ id: 'new' }]
     });
+  });
+
+  it('hands the metadata read back after a save to the form', () => {
+    const stored = { items: [{ id: 'item1', uuid: 'uuid-1' }] };
+    const store = createMock<UnitMetadataStore>();
+    store.getData.mockReturnValue({ id: 1, metadata: stored } as UnitPropertiesDto);
+    jest.spyOn(component.workspaceService, 'getUnitMetadataStore').mockReturnValue(store);
+    jest.spyOn(component.workspaceService.selectedUnit$, 'getValue').mockReturnValue(1);
+
+    (component.workspaceService.unitMetadataReloaded as unknown as Subject<void>).next();
+
+    expect(component.metadata).toEqual(stored);
+    expect(component.metadata).not.toBe(stored);
   });
 
   it('does not clobber stored profiles when onMetadataChange carries no profiles slice', () => {
