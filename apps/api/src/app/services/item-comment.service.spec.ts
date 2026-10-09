@@ -76,6 +76,15 @@ describe('ItemCommentService', () => {
         .rejects.toThrow(UnitItemNotFoundException);
     });
 
+    it('should look the item up in the unit only (#1815)', async () => {
+      unitCommentsRepository.findOne.mockResolvedValue(new UnitComment());
+      unitItemRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.createCommentItemConnection(3, 'uuid-of-another-unit', 1))
+        .rejects.toThrow(UnitItemNotFoundException);
+      expect(unitItemRepository.findOne).toHaveBeenCalledWith({ where: { uuid: 'uuid-of-another-unit', unitId: 3 } });
+    });
+
     it('should return commentId if connection already exists', async () => {
       unitCommentsRepository.findOne.mockResolvedValue(new UnitComment());
       unitItemRepository.findOne.mockResolvedValue(new UnitItem());
