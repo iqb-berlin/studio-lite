@@ -1888,20 +1888,31 @@ describe('Unit API tests', () => {
         });
       });
 
-      it(
-        '500/200 negative test: should return success despite designating a non-existent workspace' +
-          ' as the dropbox target',
-        () => {
-          cy.dropboxWsAPI(
-            Cypress.expose(ws1.id),
-            noId,
-            Cypress.expose(`token_${Cypress.expose('username')}`)
-          ).then(resp => {
-            expect(resp.status).to.equal(200);
-            // expect(resp.status).to.equal(500);  // should
-          });
-        }
-      );
+      // A drop box is another workspace of the same group; one that does not exist, one of another
+      // group and the workspace itself are answered alike, as not found (#1805)
+      it('404 negative test: should refuse a non-existent workspace as the dropbox target', () => {
+        cy.dropboxWsAPI(
+          Cypress.expose(ws1.id),
+          noId,
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).its('status').should('equal', 404);
+      });
+
+      it('404 negative test: should refuse a workspace of another group as the dropbox target', () => {
+        cy.dropboxWsAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(ws3.id),
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).its('status').should('equal', 404);
+      });
+
+      it('404 negative test: should refuse the workspace itself as its dropbox', () => {
+        cy.dropboxWsAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(ws1.id),
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).its('status').should('equal', 404);
+      });
 
       it(
         '200 positive test: should allow an authorized user to designate a workspace as ' +

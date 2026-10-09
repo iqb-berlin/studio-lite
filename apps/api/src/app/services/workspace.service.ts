@@ -764,11 +764,28 @@ export class WorkspaceService {
     return workspace?.dropBoxId ?? null;
   }
 
-  async patchDropBoxId(id: number, dropBoxId: number): Promise<void> {
+  /**
+   * Sets the workspace that units of this one are submitted to, or none. A drop box is another
+   * workspace of the same group, as the group admin's dialog offers it; anything else was saved as
+   * sent, and the submission check of #1780 then sent units wherever it pointed (#1805). A workspace
+   * of another group, one that does not exist and the workspace itself are all answered as not
+   * found, so the answer tells nothing about workspaces outside the group.
+   */
+  async patchDropBoxId(id: number, dropBoxId: number | null): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
-    workspaceToUpdate.dropBoxId = dropBoxId;
+    if (dropBoxId) {
+      const dropBox = await this.workspacesRepository.findOne({
+        where: { id: dropBoxId },
+        select: { id: true, groupId: true }
+      });
+      // The route hands the workspace id on as the text it arrives as (see WorkspaceId)
+      if (!dropBox || dropBox.id === Number(id) || dropBox.groupId !== workspaceToUpdate.groupId) {
+        throw new AdminWorkspaceNotFoundException(dropBoxId, 'PATCH');
+      }
+    }
+    workspaceToUpdate.dropBoxId = dropBoxId || null;
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 

@@ -372,11 +372,44 @@ describe('WorkspaceService', () => {
   });
 
   describe('patchDropBoxId', () => {
+    const lookup = (workspaces: Partial<Workspace>[]) => (workspaceRepository.findOne as jest.Mock)
+      .mockImplementation(async ({ where }) => workspaces.find(w => w.id === where.id) ?? null);
+
     it('should patch dropbox id', async () => {
-      const ws = { id: 1 } as Workspace;
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
+      const ws = { id: 1, groupId: 7 } as Workspace;
+      lookup([ws, { id: 100, groupId: 7 }]);
       await service.patchDropBoxId(1, 100);
       expect(ws.dropBoxId).toBe(100);
+    });
+
+    it('should clear the drop box', async () => {
+      const ws = { id: 1, groupId: 7, dropBoxId: 100 } as Workspace;
+      lookup([ws]);
+      await service.patchDropBoxId(1, null);
+      expect(ws.dropBoxId).toBeNull();
+      expect(workspaceRepository.save).toHaveBeenCalledWith(ws);
+    });
+
+    // #1805: a drop box is another workspace of the same group
+    it.each([
+      ['of another group', 200],
+      ['that does not exist', 300],
+      ['that is the workspace itself', 1]
+    ])('should refuse a drop box %s, and leave the setting as it was', async (_, dropBoxId) => {
+      const ws = { id: 1, groupId: 7, dropBoxId: 100 } as Workspace;
+      lookup([ws, { id: 100, groupId: 7 }, { id: 200, groupId: 8 }]);
+
+      await expect(service.patchDropBoxId(1, dropBoxId)).rejects.toThrow(AdminWorkspaceNotFoundException);
+      expect(ws.dropBoxId).toBe(100);
+      expect(workspaceRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should refuse the workspace itself when the route hands its id on as text', async () => {
+      const ws = { id: 1, groupId: 7 } as Workspace;
+      (workspaceRepository.findOne as jest.Mock)
+        .mockImplementation(async ({ where }) => ([ws].find(w => w.id === Number(where.id)) ?? null));
+
+      await expect(service.patchDropBoxId('1' as unknown as number, 1)).rejects.toThrow(AdminWorkspaceNotFoundException);
     });
   });
 
