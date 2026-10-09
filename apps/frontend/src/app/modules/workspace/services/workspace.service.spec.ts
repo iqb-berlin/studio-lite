@@ -605,6 +605,61 @@ describe('WorkspaceService', () => {
       expect(appService.dataLoading).toBe(false);
     });
 
+    it('should read the metadata back when the save created items', async () => {
+      const metadataStore = new UnitMetadataStore({ id: 1, metadata: { items: [] } });
+      metadataStore.setMetadata({ items: [{ id: 'item1' }] });
+      service.setUnitMetadataStore(metadataStore);
+      const reloadSpy = jest.fn();
+      service.unitMetadataReloaded.subscribe(reloadSpy);
+      const stored = { items: [{ id: 'item1', uuid: 'uuid-1' }] };
+
+      backendService.setUnitProperties.mockReturnValue(of(true));
+      backendService.getUnitProperties.mockReturnValue(of({ id: 1, metadata: stored }));
+
+      const result = await service.saveUnitData();
+
+      expect(result).toBe(true);
+      expect(backendService.getUnitProperties).toHaveBeenCalledWith(1, 1);
+      expect(metadataStore.getData().metadata).toEqual(stored);
+      expect(metadataStore.isChanged()).toBe(false);
+      expect(reloadSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not read the metadata back when all saved items exist', async () => {
+      const metadataStore = new UnitMetadataStore({ id: 1, metadata: { items: [{ id: 'item1', uuid: 'uuid-1' }] } });
+      metadataStore.setMetadata({ items: [{ id: 'item2', uuid: 'uuid-1' }] });
+      service.setUnitMetadataStore(metadataStore);
+      const reloadSpy = jest.fn();
+      service.unitMetadataReloaded.subscribe(reloadSpy);
+
+      backendService.setUnitProperties.mockReturnValue(of(true));
+
+      await service.saveUnitData();
+
+      expect(backendService.getUnitProperties).not.toHaveBeenCalled();
+      expect(reloadSpy).not.toHaveBeenCalled();
+    });
+
+    it('should leave the store alone when the reloaded unit is no longer selected', async () => {
+      const metadataStore = new UnitMetadataStore({ id: 1, metadata: { items: [] } });
+      metadataStore.setMetadata({ items: [{ id: 'item1' }] });
+      service.setUnitMetadataStore(metadataStore);
+      const otherStore = new UnitMetadataStore({ id: 2, metadata: { items: [] } });
+      const reloadSpy = jest.fn();
+      service.unitMetadataReloaded.subscribe(reloadSpy);
+
+      backendService.setUnitProperties.mockReturnValue(of(true));
+      backendService.getUnitProperties.mockImplementation(() => {
+        service.setUnitMetadataStore(otherStore);
+        return of({ id: 1, metadata: { items: [{ id: 'item1', uuid: 'uuid-1' }] } });
+      });
+
+      await service.saveUnitData();
+
+      expect(otherStore.getData().metadata).toEqual({ items: [] });
+      expect(reloadSpy).not.toHaveBeenCalled();
+    });
+
     it('should update lastChanged timestamps after successful save', async () => {
       const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
       metadataStore.setPlayer('newPlayer');

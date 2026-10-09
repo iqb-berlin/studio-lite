@@ -98,6 +98,8 @@ export class WorkspaceService {
   UnitMetadataStore | undefined
   >();
 
+  @Output() unitMetadataReloaded = new EventEmitter<void>();
+
   @Output() unitSchemeStoreChanged = new EventEmitter<
   UnitSchemeStore | undefined
   >();
@@ -293,10 +295,11 @@ export class WorkspaceService {
     let saveOk = true;
     this.appService.dataLoading = true;
     if (this.unitMetadataStore && this.unitMetadataStore.isChanged()) {
+      const changedData = this.unitMetadataStore.getChangedData();
       saveOk = await lastValueFrom(
         this.backendService.setUnitProperties(
           this.selectedWorkspaceId,
-          this.unitMetadataStore.getChangedData()
+          changedData
         )
       );
       if (saveOk) {
@@ -304,6 +307,9 @@ export class WorkspaceService {
         this.unitMetadataStore.applyChanges();
         this.lastChangedMetadata = new Date();
         this.lastChangedMetadataUser = this.getDisplayUserName();
+        if (changedData.metadata?.items?.some(item => !item.uuid)) {
+          await this.reloadUnitMetadata(changedData.id);
+        }
       }
     }
     if (
@@ -354,6 +360,22 @@ export class WorkspaceService {
     }
     this.appService.dataLoading = false;
     return saveOk;
+  }
+
+  /**
+   * Items that a save has just created get their uuid on the server only. Reading the metadata back
+   * hands it to the store and, via {@link unitMetadataReloaded}, to the form, so that the next save
+   * names these items as existing ones; named as new, the server would delete and recreate them
+   * (#1830). If the user has meanwhile moved to another unit, its store is left alone.
+   */
+  private async reloadUnitMetadata(unitId: number): Promise<void> {
+    const unitData = await lastValueFrom(
+      this.backendService.getUnitProperties(this.selectedWorkspaceId, unitId)
+    );
+    if (unitData && this.unitMetadataStore?.getData().id === unitId) {
+      this.unitMetadataStore.reloadMetadata(unitData.metadata ?? {});
+      this.unitMetadataReloaded.emit();
+    }
   }
 
   loadRichNoteTags(): void {

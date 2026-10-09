@@ -105,4 +105,22 @@ describe('UnitMetadataStore', () => {
     expect(store.isChanged()).toBe(false);
     expect(emitSpy).toHaveBeenCalledTimes(2);
   });
+
+  it('reloadMetadata takes the stored metadata as new original and keeps other changes', () => {
+    const store = new UnitMetadataStore(buildBaseProperties());
+    const emitSpy = jest.fn();
+    store.dataChange.subscribe(emitSpy);
+    const stored = { items: [{ id: 'item1', uuid: 'uuid-1' }] };
+
+    store.setMetadata({ items: [{ id: 'item1' }] });
+    store.setPlayer('p2');
+    store.reloadMetadata(stored);
+
+    expect(store.getData().metadata).toEqual(stored);
+    expect(store.getChangedData()).toEqual({ id: 10, player: 'p2' });
+    expect(emitSpy).toHaveBeenCalledTimes(3);
+
+    store.setMetadata({ items: [{ id: 'item1', uuid: 'uuid-1' }] });
+    expect(store.getChangedData().metadata).toBeUndefined();
+  });
 });

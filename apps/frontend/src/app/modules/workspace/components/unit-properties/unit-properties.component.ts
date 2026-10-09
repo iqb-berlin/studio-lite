@@ -171,6 +171,10 @@ export class UnitPropertiesComponent
       this.variablesLoaded = true;
     });
     this.addSubscriptionForUnitDefinitionChanges();
+    // after a save that created items, so that the items editor holds their uuids
+    this.workspaceService.unitMetadataReloaded
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => this.loadMetaData());
     this.unitIdChangedSubscription =
       this.workspaceService.selectedUnit$.subscribe(id => {
         this.readDataForUnitId(id);
