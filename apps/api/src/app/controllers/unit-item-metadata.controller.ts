@@ -18,6 +18,8 @@ import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 import { UnitItemMetadataService } from '../services/unit-item-metadata.service';
 import { ItemUuid } from '../decorators/item-uuid.decorator';
 import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
+import { ItemInUnitGuard } from '../guards/item-in-unit.guard';
+import { ItemMetadataInItemGuard } from '../guards/item-metadata-in-item.guard';
 
 /**
  * `workspaces/:workspace_id/units/:unit_id/items/:item_uuid/metadata` -- the metadata rows of one
@@ -27,7 +29,9 @@ import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
  * one transaction through {@link WorkspaceUnitController}, which is what the metadata form uses.
  *
  * Every route first holds the unit to the workspace of the path ({@link UnitInWorkspaceGuard},
- * #1775). Whether the item, and the row, belong to that unit is not asked yet (#1778).
+ * #1775). It then asks {@link ItemInUnitGuard} whether the item belongs to that unit, and removing a
+ * row asks {@link ItemMetadataInItemGuard} at the very end whether the row belongs to the item
+ * (#1778). Each mismatch is answered with a 404.
  */
 @Controller('workspaces/:workspace_id/units/:unit_id/items/:item_uuid/metadata')
 export class UnitItemMetadataController {
@@ -36,7 +40,14 @@ export class UnitItemMetadataController {
   ) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, AppVersionGuard, UnitInWorkspaceGuard, WorkspaceAccessGuard)
+  @UseGuards(
+    JwtAuthGuard,
+    WorkspaceGuard,
+    AppVersionGuard,
+    UnitInWorkspaceGuard,
+    WorkspaceAccessGuard,
+    ItemInUnitGuard
+  )
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -48,7 +59,7 @@ export class UnitItemMetadataController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteAccessGuard, ItemInUnitGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -62,7 +73,14 @@ export class UnitItemMetadataController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteAccessGuard)
+  @UseGuards(
+    JwtAuthGuard,
+    WorkspaceGuard,
+    UnitInWorkspaceGuard,
+    WriteAccessGuard,
+    ItemInUnitGuard,
+    ItemMetadataInItemGuard
+  )
   @ApiBearerAuth()
   @ApiTags('item metadata')
   @ApiParam({ name: 'workspace_id', type: Number })

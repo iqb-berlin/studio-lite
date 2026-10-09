@@ -12,4 +12,9 @@ describe('UnitItemNotFoundException', () => {
       description: 'Unit item with uuid uuid-1 not found'
     });
   });
+
+  it('should name the controller it is given', () => {
+    expect(new UnitItemNotFoundException('uuid-1', 'DELETE', 'unit-item').getResponse())
+      .toMatchObject({ controller: 'unit-item', method: 'DELETE' });
+  });
 });

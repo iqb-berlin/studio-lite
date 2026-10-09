@@ -20,6 +20,7 @@ import { WriteOrGroupAdminAccessGuard } from '../guards/write-or-group-admin-acc
 import { UnitId } from '../decorators/unit-id.decorator';
 import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
 import UnitCommentUnitItem from '../entities/unit-comment-unit-item.entity';
+import { ItemInUnitGuard } from '../guards/item-in-unit.guard';
 
 /**
  * `workspaces/:workspace_id/units/:unit_id/items` -- the items of a unit: listing them, adding
@@ -30,7 +31,8 @@ import UnitCommentUnitItem from '../entities/unit-comment-unit-item.entity';
  * from outside.
  *
  * Every route first holds the unit to the workspace of the path ({@link UnitInWorkspaceGuard},
- * #1775). Whether the item of the path belongs to that unit is not asked yet (#1778).
+ * #1775). Removing an item then asks {@link ItemInUnitGuard}, last, whether the item belongs to
+ * that unit (#1778). Either way a mismatch is answered with a 404.
  */
 @Controller('workspaces/:workspace_id/units/:unit_id/items')
 export class WorkspaceUnitItemController {
@@ -70,7 +72,7 @@ export class WorkspaceUnitItemController {
   }
 
   @Delete(':uuid')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteOrGroupAdminAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteOrGroupAdminAccessGuard, ItemInUnitGuard)
   @ApiBearerAuth()
   @ApiTags('workspace unit item')
   @ApiParam({ name: 'workspace_id', type: Number })

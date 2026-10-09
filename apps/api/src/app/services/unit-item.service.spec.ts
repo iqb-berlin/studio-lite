@@ -17,6 +17,7 @@ describe('UnitItemService', () => {
     find: jest.fn(),
     findOne: jest.fn(),
     findOneBy: jest.fn(),
+    exists: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
     update: jest.fn(),
@@ -173,6 +174,21 @@ describe('UnitItemService', () => {
 
       expect(repository.findOneBy).toHaveBeenCalledWith({ uuid });
       expect(result).toEqual(item);
+    });
+  });
+
+  describe('isInUnit', () => {
+    it('should ask for the item in the unit', async () => {
+      mockRepository.exists.mockResolvedValue(true);
+
+      expect(await service.isInUnit('uuid-1', 10)).toBe(true);
+      expect(repository.exists).toHaveBeenCalledWith({ where: { uuid: 'uuid-1', unitId: 10 } });
+    });
+
+    it('should return false when the item is not in the unit', async () => {
+      mockRepository.exists.mockResolvedValue(false);
+
+      expect(await service.isInUnit('uuid-1', 11)).toBe(false);
     });
   });
 

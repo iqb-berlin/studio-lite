@@ -130,6 +130,11 @@ export class UnitRichNoteService {
     return newNote.id;
   }
 
+  /** Whether the note is one of the unit's -- false as well for a note that does not exist. */
+  async isInUnit(id: number, unitId: number): Promise<boolean> {
+    return this.unitRichNotesRepository.exists({ where: { id: id, unitId: unitId } });
+  }
+
   async removeNote(id: number): Promise<void> {
     this.logger.log(`Deleting rich note with id: ${id}`);
     await this.unitRichNotesRepository.delete(id);

@@ -22,6 +22,7 @@ import { WriteOrGroupAdminAccessGuard } from '../guards/write-or-group-admin-acc
 import { UnitId } from '../decorators/unit-id.decorator';
 import { ItemRichNoteService } from '../services/item-rich-note.service';
 import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
+import { RichNoteInUnitGuard } from '../guards/rich-note-in-unit.guard';
 
 /**
  * `workspaces/:workspace_id/units/:unit_id/rich-notes` -- the formatted notes on a unit, and which
@@ -31,7 +32,8 @@ import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
  * from outside can read and correct notes without being assigned to it.
  *
  * Every route first holds the unit to the workspace of the path ({@link UnitInWorkspaceGuard},
- * #1775). Whether a note of the path belongs to that unit is not asked yet (#1778).
+ * #1775). Every route on a single note then asks {@link RichNoteInUnitGuard}, last, whether the
+ * note belongs to that unit (#1778). Either way a mismatch is answered with a 404.
  */
 @Controller('workspaces/:workspace_id/units/:unit_id/rich-notes')
 export class WorkspaceUnitRichNoteController {
@@ -73,7 +75,13 @@ export class WorkspaceUnitRichNoteController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteOrGroupAdminAccessGuard)
+  @UseGuards(
+    JwtAuthGuard,
+    WorkspaceGuard,
+    UnitInWorkspaceGuard,
+    WriteOrGroupAdminAccessGuard,
+    RichNoteInUnitGuard
+  )
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Rich note successfully updated.' })
@@ -86,7 +94,13 @@ export class WorkspaceUnitRichNoteController {
   }
 
   @Patch(':note_id/items')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteOrGroupAdminAccessGuard)
+  @UseGuards(
+    JwtAuthGuard,
+    WorkspaceGuard,
+    UnitInWorkspaceGuard,
+    WriteOrGroupAdminAccessGuard,
+    RichNoteInUnitGuard
+  )
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiParam({ name: 'unit_id', type: Number })
@@ -102,7 +116,13 @@ export class WorkspaceUnitRichNoteController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteOrGroupAdminAccessGuard)
+  @UseGuards(
+    JwtAuthGuard,
+    WorkspaceGuard,
+    UnitInWorkspaceGuard,
+    WriteOrGroupAdminAccessGuard,
+    RichNoteInUnitGuard
+  )
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Rich note successfully deleted.' })

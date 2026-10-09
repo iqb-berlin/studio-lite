@@ -14,6 +14,7 @@ import { WorkspaceService } from '../services/workspace.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
 import UnitCommentUnitItem from '../entities/unit-comment-unit-item.entity';
 import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
+import { ItemInUnitGuard } from '../guards/item-in-unit.guard';
 
 describe('WorkspaceUnitItemController', () => {
   let controller: WorkspaceUnitItemController;
@@ -63,6 +64,13 @@ describe('WorkspaceUnitItemController', () => {
       expect(guards.slice(2).filter(guard => guard !== AppVersionGuard)[0]).toBe(UnitInWorkspaceGuard);
     }
   );
+
+  // The item of the path is held to the unit last, after the access is known (#1778).
+  it('should hold the item that remove deletes to the unit in its path', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitItemController.prototype.remove)).toEqual([
+      JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteOrGroupAdminAccessGuard, ItemInUnitGuard
+    ]);
+  });
 
   describe('findAll', () => {
     it('should return unit items without metadata', async () => {

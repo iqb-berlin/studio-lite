@@ -92,6 +92,21 @@ describe('UnitRichNoteService', () => {
     });
   });
 
+  describe('isInUnit', () => {
+    it('should ask for the note in the unit', async () => {
+      unitRichNoteRepository.exists.mockResolvedValue(true);
+
+      expect(await service.isInUnit(7, 10)).toBe(true);
+      expect(unitRichNoteRepository.exists).toHaveBeenCalledWith({ where: { id: 7, unitId: 10 } });
+    });
+
+    it('should return false when the note is not in the unit', async () => {
+      unitRichNoteRepository.exists.mockResolvedValue(false);
+
+      expect(await service.isInUnit(7, 11)).toBe(false);
+    });
+  });
+
   describe('findNotes', () => {
     it('should use group-specific tags if available', async () => {
       const unit = { id: 100, workspaceId: 1 } as unknown as Unit;

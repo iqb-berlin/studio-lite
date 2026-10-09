@@ -52,12 +52,13 @@ export class ItemRichNoteService {
       throw new NotFoundException(`Note with id ${noteId} not found`);
     }
 
+    // An item of another unit is not found here: a note is only about the items of its own unit (#1778).
     const item = await this.unitItemRepository.findOne({
-      where: { uuid: itemUuid }
+      where: { uuid: itemUuid, unitId: unitId }
     });
     if (!item) {
       this.logger.warn(`Unit item with uuid ${itemUuid} not found`);
-      throw new UnitItemNotFoundException(itemUuid, 'createNoteItemConnection');
+      throw new UnitItemNotFoundException(itemUuid, 'createNoteItemConnection', 'item-rich-note');
     }
 
     const existingConnection = await this.unitRichNoteUnitItemRepository.findOne({

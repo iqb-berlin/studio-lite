@@ -712,6 +712,171 @@ describe('Unit API tests', () => {
     });
   });
 
+  describe('#1778 an item, a note or a metadata row asked for under another unit', () => {
+    // Two units of ws1, so every guard that asks about the workspace, or holds the unit to it, lets
+    // the calls through. What answers 404 is that the item, the note or the row is not one of the
+    // unit -- or, for the row, of the item -- in the path.
+    const unitA: UnitData = { shortname: 'D1778A', name: 'Eigene', group: 'Group1' };
+    const unitB: UnitData = { shortname: 'D1778B', name: 'Andere', group: 'Group1' };
+    const token = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const ws = () => Cypress.expose(ws1.id);
+    const ids = {
+      unitA: '', unitB: '', itemA: '', otherItemA: '', itemB: '', noteA: '', rowA: ''
+    };
+    const under = (unit: string, route: string) => `${ws()}/units/${unit}/${route}`;
+    const noteContent = 'Notiz zu #1778';
+
+    const notesOfA = () => cy.requestWorkspaceAPI('GET', under(ids.unitA, 'rich-notes'), token())
+      .then(resp => resp.body.notes as { id: number; content: string; itemReferences: string[] }[]);
+
+    before(() => {
+      cy.createUnitAPI(ws(), unitA, token()).then(resp => {
+        ids.unitA = `${resp.body}`;
+      });
+      cy.createUnitAPI(ws(), unitB, token()).then(resp => {
+        ids.unitB = `${resp.body}`;
+      });
+      cy.then(() => {
+        cy.requestWorkspaceAPI('POST', under(ids.unitA, 'items'), token(), { id: 'item_1' }).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.itemA = resp.body;
+        });
+        cy.requestWorkspaceAPI('POST', under(ids.unitA, 'items'), token(), { id: 'item_2' }).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.otherItemA = resp.body;
+        });
+        cy.requestWorkspaceAPI('POST', under(ids.unitB, 'items'), token(), { id: 'item_1' }).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.itemB = resp.body;
+        });
+      });
+      cy.then(() => {
+        cy.requestWorkspaceAPI(
+          'POST',
+          under(ids.unitA, `items/${ids.itemA}/metadata`),
+          token(),
+          { profileId: 'profile-1778', entries: [] }
+        ).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.rowA = `${resp.body}`;
+        });
+        cy.requestWorkspaceAPI(
+          'POST',
+          under(ids.unitA, 'rich-notes'),
+          token(),
+          {
+            unitId: Number(ids.unitA), tagId: 'tag-1778', content: noteContent, itemReferences: [ids.itemA]
+          }
+        ).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.noteA = `${resp.body}`;
+        });
+      });
+    });
+
+    after(() => {
+      cy.deleteUnitsAPI([ids.unitA, ids.unitB], ws(), token());
+    });
+
+    const refused: { name: string; method: string; route: () => string; body?: object }[] = [
+      {
+        name: 'DELETE an item of A under B',
+        method: 'DELETE',
+        route: () => under(ids.unitB, `items/${ids.itemA}`)
+      },
+      {
+        name: 'PATCH a note of A under B',
+        method: 'PATCH',
+        route: () => under(ids.unitB, `rich-notes/${ids.noteA}`),
+        body: { content: 'überschrieben' }
+      },
+      {
+        name: 'PATCH the items of a note of A under B',
+        method: 'PATCH',
+        route: () => under(ids.unitB, `rich-notes/${ids.noteA}/items`),
+        body: { itemReferences: [] }
+      },
+      {
+        name: 'DELETE a note of A under B',
+        method: 'DELETE',
+        route: () => under(ids.unitB, `rich-notes/${ids.noteA}`)
+      },
+      {
+        name: 'GET the metadata of an item of A under B',
+        method: 'GET',
+        route: () => under(ids.unitB, `items/${ids.itemA}/metadata`)
+      },
+      {
+        name: 'POST metadata to an item of A under B',
+        method: 'POST',
+        route: () => under(ids.unitB, `items/${ids.itemA}/metadata`),
+        body: { profileId: 'profile-1778-b', entries: [] }
+      },
+      {
+        name: 'DELETE a metadata row of A under B',
+        method: 'DELETE',
+        route: () => under(ids.unitB, `items/${ids.itemA}/metadata/${ids.rowA}`)
+      },
+      {
+        name: 'DELETE a metadata row under another item of its unit',
+        method: 'DELETE',
+        route: () => under(ids.unitA, `items/${ids.otherItemA}/metadata/${ids.rowA}`)
+      },
+      {
+        name: 'DELETE an item whose uuid is not spelled as one',
+        method: 'DELETE',
+        route: () => under(ids.unitA, 'items/no-item')
+      }
+    ];
+
+    refused.forEach(({
+      name, method, route, body
+    }) => {
+      it(`404 negative test: should refuse to ${name}`, () => {
+        cy.requestWorkspaceAPI(method, route(), token(), body).then(resp => {
+          expect(resp.status).to.equal(404);
+        });
+      });
+    });
+
+    it('200 positive test: should have left the item, its metadata row and the note of A as they were', () => {
+      cy.requestWorkspaceAPI('GET', under(ids.unitA, 'items'), token()).then(resp => {
+        expect(resp.status).to.equal(200);
+        const item = (resp.body as { uuid: string; profiles: { id: number }[] }[])
+          .find(unitItem => unitItem.uuid === ids.itemA);
+        expect(item?.profiles.map(row => `${row.id}`)).to.deep.equal([ids.rowA]);
+      });
+      notesOfA().then(notes => {
+        expect(notes.map(({ id, content, itemReferences }) => ({ id: `${id}`, content, itemReferences })))
+          .to.deep.equal([{ id: ids.noteA, content: noteContent, itemReferences: [ids.itemA] }]);
+      });
+    });
+
+    it('200 positive test: should not tie a note to an item of another unit', () => {
+      cy.requestWorkspaceAPI(
+        'PATCH',
+        under(ids.unitA, `rich-notes/${ids.noteA}/items`),
+        token(),
+        { itemReferences: [ids.itemA, ids.itemB] }
+      ).its('status').should('equal', 200);
+      notesOfA().then(notes => {
+        expect(notes[0].itemReferences).to.deep.equal([ids.itemA]);
+      });
+    });
+
+    it('200 positive test: should still let the note, the row and the item be changed under their own path', () => {
+      cy.requestWorkspaceAPI('PATCH', under(ids.unitA, `rich-notes/${ids.noteA}`), token(), { content: 'geändert' })
+        .its('status').should('equal', 200);
+      cy.requestWorkspaceAPI('DELETE', under(ids.unitA, `items/${ids.itemA}/metadata/${ids.rowA}`), token())
+        .its('status').should('equal', 200);
+      cy.requestWorkspaceAPI('DELETE', under(ids.unitA, `items/${ids.otherItemA}`), token())
+        .its('status').should('equal', 200);
+      notesOfA().then(notes => {
+        expect(notes[0].content).to.equal('geändert');
+      });
+    });
+  });
+
   describe('#1779, #1780 units that cross into another workspace', () => {
     // A unit in ws3 (group2), where userzwei has no access. fadmin, who administers group2, is
     // assigned there for the time of these tests; ws3 has no users before and after them.
