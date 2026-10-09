@@ -826,8 +826,13 @@ export class UnitService {
                                   workspaceId: number,
                                   user: User): Promise<RequestReportDto> {
     const reports = await Promise.all(units.map(async unitId => {
-      const submission = await this.unitDropBoxHistoryRepository
-        .findOne({ where: { unitId: unitId, targetWorkspaceId: workspaceId } });
+      // The submission to undo is the latest one not yet returned. A unit can have been submitted
+      // here before, from another workspace, and returned there; that older row used to be picked
+      // just as well and sent the unit back to the wrong workspace (#1806).
+      const submission = await this.unitDropBoxHistoryRepository.findOne({
+        where: { unitId: unitId, targetWorkspaceId: workspaceId, returned: false },
+        order: { changedAt: 'DESC' }
+      });
       if (!submission) {
         // Created in the drop box, moved into it, or the workspace it came from is gone along with
         // its submission: there is nowhere to return it to (#1793)
