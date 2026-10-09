@@ -57,9 +57,10 @@ export class ItemCommentService {
       throw new UnitCommentNotFoundException(commentId, 'createCommentItemConnection');
     }
 
-    // Check if the item exists
+    // An item of another unit is not found here: a comment is only about the items of its own unit,
+    // as a note is (#1778). A uuid of any unit used to be tied to the comment (#1815).
     const item = await this.unitItemRepository.findOne({
-      where: { uuid: itemUuid }
+      where: { uuid: itemUuid, unitId: unitId }
     });
     if (!item) {
       this.logger.warn(`Unit item with uuid ${itemUuid} not found`);

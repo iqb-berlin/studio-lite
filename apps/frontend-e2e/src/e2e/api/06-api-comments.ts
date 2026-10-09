@@ -922,4 +922,53 @@ describe('Comments API tests', () => {
         .its('body').should('equal', forgedTime);
     });
   });
+
+  // A comment is about the items of its own unit. Its item links took any item uuid, also one of
+  // another unit, possibly in another workspace (#1815). unit1 and unit2 both live in ws2.
+  describe('#1815 the items a comment is tied to', () => {
+    const token = () => Cypress.expose(`token_${userGroupAdmin.username}`);
+    const unitPath = (unit: string) => `${Cypress.expose(ws2.id)}/units/${Cypress.expose(unit)}`;
+    const ids = { comment: '', ownItem: '', otherItem: '' };
+
+    before(() => {
+      const itemComment: CommentData = {
+        body: '<p>Kommentar zu Items (#1815)</p>',
+        userName: `${userGroupAdmin.username}`,
+        userId: parseInt(`${Cypress.expose(`id_${userGroupAdmin.username}`)}`, 10),
+        unitId: parseInt(`${Cypress.expose(unit1.shortname)}`, 10)
+      };
+      cy.postCommentAPI(Cypress.expose(ws2.id), Cypress.expose(unit1.shortname), itemComment, token()).then(resp => {
+        expect(resp.status).to.equal(201);
+        ids.comment = `${resp.body}`;
+      });
+      cy.requestWorkspaceAPI('POST', `${unitPath(unit1.shortname)}/items`, token(), { id: 'item_1815' })
+        .then(resp => {
+          ids.ownItem = resp.body;
+        });
+      cy.requestWorkspaceAPI('POST', `${unitPath(unit2.shortname)}/items`, token(), { id: 'item_1815' })
+        .then(resp => {
+          ids.otherItem = resp.body;
+        });
+    });
+
+    after(() => {
+      cy.requestWorkspaceAPI('DELETE', `${unitPath(unit1.shortname)}/comments/${ids.comment}`, token());
+      cy.requestWorkspaceAPI('DELETE', `${unitPath(unit1.shortname)}/items/${ids.ownItem}`, token());
+      cy.requestWorkspaceAPI('DELETE', `${unitPath(unit2.shortname)}/items/${ids.otherItem}`, token());
+    });
+
+    it('200 positive test: should tie a comment to the items of its unit, and not to one of another unit', () => {
+      cy.requestWorkspaceAPI(
+        'PATCH',
+        `${unitPath(unit1.shortname)}/comments/${ids.comment}/items`,
+        token(),
+        { userId: 0, unitItemUuids: [ids.ownItem, ids.otherItem] }
+      ).its('status').should('equal', 200);
+      cy.requestWorkspaceAPI('GET', `${unitPath(unit1.shortname)}/comments`, token()).then(resp => {
+        const tied = (resp.body as { id: number; itemUuids: string[] }[])
+          .find(unitComment => `${unitComment.id}` === ids.comment);
+        expect(tied?.itemUuids).to.deep.equal([ids.ownItem]);
+      });
+    });
+  });
 });
