@@ -9,6 +9,7 @@ import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
   CreateUnitDto,
   UnitItemDto,
+  UnitItemWithMetadataDto,
   UnitMetadataDto,
   UnitMetadataValues,
   UnitPropertiesDto,
@@ -390,6 +391,21 @@ describe('UnitService', () => {
       unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
       await service.patchItemsMetadata(1, []);
       expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalled();
+    });
+
+    it('should leave alone an item the unit does not have, neither updating nor creating it (#1816)', async () => {
+      unitItemService.getAllByUnitIdWithMetadata
+        .mockResolvedValue([{ uuid: 'own', id: 'item_1' } as UnitItemWithMetadataDto]);
+
+      await service.patchItemsMetadata(1, [
+        { uuid: 'own', id: 'item_1' } as UnitItemWithMetadataDto,
+        { uuid: 'foreign', id: 'item_9' } as UnitItemWithMetadataDto
+      ]);
+
+      expect(unitItemService.updateItem).toHaveBeenCalledTimes(1);
+      expect(unitItemService.updateItem).toHaveBeenCalledWith('own', expect.anything(), undefined);
+      expect(unitItemService.addItem).not.toHaveBeenCalled();
+      expect(unitItemService.removeItem).not.toHaveBeenCalled();
     });
   });
 

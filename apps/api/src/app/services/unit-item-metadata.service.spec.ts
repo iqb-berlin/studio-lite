@@ -118,6 +118,14 @@ describe('UnitItemMetadataService', () => {
       );
       expect(result).toBe(id);
     });
+
+    it('should leave the row with its item, whatever unitItemUuid the payload names (#1816)', async () => {
+      mockRepository.update.mockResolvedValue({ affected: 1 });
+
+      await service.updateItemMetadata(123, { id: 123, profileId: 'p1', unitItemUuid: 'other' } as UnitItemMetadataDto);
+
+      expect(repository.update).toHaveBeenCalledWith(123, expect.not.objectContaining({ unitItemUuid: 'other' }));
+    });
   });
 
   describe('removeItemMetadata', () => {

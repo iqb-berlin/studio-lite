@@ -59,8 +59,13 @@ export class UnitMetadataService {
     return newItemMetadata.id;
   }
 
+  /**
+   * Overwrites the row with this id. It stays with its unit: a `unitId` in the payload -- the
+   * metadata save passes on what the client sent -- used to hang it on any unit (#1816).
+   */
   async updateMetadata(id: number, metadata: UnitMetadataDto, manager?: EntityManager): Promise<number> {
-    await this.repo(manager).update(id, { ...metadata, changedAt: new Date() });
+    const { unitId, ...values } = metadata;
+    await this.repo(manager).update(id, { ...values, changedAt: new Date() });
     return id;
   }
 
