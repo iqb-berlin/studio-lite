@@ -2,8 +2,12 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { RootCommentWithReplies } from '../models/root-comment-with-replies.interface';
 
 /**
- * How many comments are hidden from the review, replies included -- a hidden root comment takes its
- * whole thread with it. What the "n hidden" line above the list counts.
+ * How many comments are hidden, replies included -- a hidden root comment takes its whole thread
+ * with it. What the "n hidden" line above the list counts.
+ *
+ * Hiding only sets what the list shows by default. "Ignore visibility settings" shows hidden
+ * comments again in the viewer's own list and nowhere else; anyone who sees the list can use it, in
+ * a review as well (#1172).
  */
 @Pipe({
   name: 'hiddenCommentsCount',
