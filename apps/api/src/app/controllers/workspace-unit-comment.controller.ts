@@ -44,8 +44,10 @@ import { UsersService } from '../services/users.service';
  * The path is held to what it names. Every route first asks {@link UnitInWorkspaceGuard} whether
  * the unit is in the workspace -- the guards about access ask about the workspace alone, so
  * without it the discussion of any unit was open from any workspace the caller is in. Every route
- * on a single comment then asks {@link CommentInUnitGuard}, last, whether the comment belongs to
- * the unit. Either way a mismatch is answered with a 404.
+ * on a single comment then asks {@link CommentInUnitGuard} whether the comment belongs to the unit,
+ * before any guard loads the comment to ask for its author: those answered 403 for a comment of
+ * any unit and 404 for none, which told every comment id apart (#1777). Either way a mismatch is
+ * answered with a 404.
  *
  * Who writes is the token's user, not whoever the body names (#1776): a new comment is signed with
  * the caller's id and name, and the last-seen timestamp is the caller's own.
@@ -130,9 +132,9 @@ export class WorkspaceUnitCommentController {
     JwtAuthGuard,
     WorkspaceGuard,
     UnitInWorkspaceGuard,
-    CommentWriteGuard,
     CommentAccessGuard,
-    CommentInUnitGuard
+    CommentInUnitGuard,
+    CommentWriteGuard
   )
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -151,8 +153,8 @@ export class WorkspaceUnitCommentController {
     WorkspaceGuard,
     UnitInWorkspaceGuard,
     CommentAccessGuard,
-    CommentWriteGuard,
-    CommentInUnitGuard
+    CommentInUnitGuard,
+    CommentWriteGuard
   )
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
@@ -169,7 +171,7 @@ export class WorkspaceUnitCommentController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, CommentDeleteGuard, CommentInUnitGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, CommentInUnitGuard, CommentDeleteGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Comment successfully updated.' })

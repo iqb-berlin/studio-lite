@@ -42,9 +42,12 @@ import { UsersService } from '../services/users.service';
  *
  * The review's settings decide for everyone who opens it (#1784), through {@link ReviewConfigGuard}:
  * writing takes "comments possible", reading the discussion "show the comments of others". A comment
- * named in the path has to be one of the unit's ({@link CommentInUnitGuard}). Changing it is left to
- * its author and deleting it to its author or the group's admin, as on the workspace's routes; a
- * review login has no account and does neither, nor does it hide comments ({@link ReviewAccountGuard}).
+ * named in the path has to be one of the unit's ({@link CommentInUnitGuard}), asked before any guard
+ * loads the comment to ask for its author (#1777). Changing it is left to its author and deleting it
+ * to its author or the group's admin, as on the workspace's routes; a review login has no account
+ * and does neither, nor does it hide comments ({@link ReviewAccountGuard}). That is asked first:
+ * otherwise the comment's unit would be, and a review login could tell the comments of the unit
+ * from all others, hidden ones included.
  * It may only tie its own new comment to items ({@link ReviewCommentOwnerGuard}).
  */
 @Controller('reviews/:review_id/units/:unit_id/comments')
@@ -91,10 +94,11 @@ export class ReviewUnitCommentController {
   @UseGuards(
     JwtAuthGuard,
     ReviewGuard,
+    ReviewAccountGuard,
     ReviewCommentAccessGuard,
     ReviewConfigGuard,
-    CommentWriteGuard,
-    CommentInUnitGuard
+    CommentInUnitGuard,
+    CommentWriteGuard
   )
   @ReviewConfigRequired('canComment')
   @ApiBearerAuth()
@@ -131,10 +135,11 @@ export class ReviewUnitCommentController {
   @UseGuards(
     JwtAuthGuard,
     ReviewGuard,
+    ReviewAccountGuard,
     ReviewCommentAccessGuard,
     ReviewConfigGuard,
-    CommentDeleteGuard,
-    CommentInUnitGuard
+    CommentInUnitGuard,
+    CommentDeleteGuard
   )
   @ReviewConfigRequired('canComment')
   @ApiBearerAuth()
@@ -152,8 +157,8 @@ export class ReviewUnitCommentController {
     ReviewGuard,
     ReviewCommentAccessGuard,
     ReviewConfigGuard,
-    ReviewCommentOwnerGuard,
-    CommentInUnitGuard
+    CommentInUnitGuard,
+    ReviewCommentOwnerGuard
   )
   @ReviewConfigRequired('canComment')
   @ApiBearerAuth()

@@ -13,6 +13,10 @@ import { UnitCommentNotFoundException } from '../exceptions/unit-comment-not-fou
  * before, by {@link UnitInWorkspaceGuard}. With both, a comment can only be reached under its own
  * unit in its own workspace.
  *
+ * It has to come before every guard that loads the comment to ask for its author
+ * ({@link CommentWriteGuard}, {@link CommentDeleteGuard}, {@link ReviewCommentOwnerGuard}). Those
+ * load it by its id alone and answered 403 for a comment of any unit, 404 for none (#1777).
+ *
  * The route parameter is compared as the text it arrives as. Parsing it first is what let `abc`
  * through before (#1696): `Number('abc') || 0` came out as "no unit given" and skipped the check.
  */

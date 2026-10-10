@@ -20,7 +20,8 @@ import { ReviewService } from '../services/review.service';
  * The workspace is the one in the route; on a review route, which names none, the review's (#1784).
  *
  * Whether the comment belongs to the unit and the workspace in the route is not asked here but by
- * {@link CommentInUnitGuard}, which the delete route carries after this one.
+ * {@link CommentInUnitGuard}, which the delete route carries before this one: asked first, this
+ * guard answered 403 for a comment of any unit and 404 for none (#1777).
  */
 @Injectable()
 export class CommentDeleteGuard implements CanActivate {

@@ -554,6 +554,20 @@ describe('Comments API tests', () => {
       });
     });
 
+    it('404 negative test: should answer the member deleting the comment under another unit as not there', () => {
+      // Not as "not allowed": CommentDeleteGuard used to load the comment by its id alone, ahead of
+      // CommentInUnitGuard, and answered 403 for any comment that exists and 404 for one that does
+      // not -- so the member could tell every comment id apart (#1777). unit2 is in ws2 as well.
+      cy.deleteCommentAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit2.shortname),
+        Cypress.expose('commentOfAuthor'),
+        Cypress.expose('tokenOfMember')
+      ).then(resp => {
+        expect(resp.status).to.equal(404);
+      });
+    });
+
     it('200 positive test: should allow hiding a comment to a member with comment access', () => {
       cy.patchCommentVisibilityAPI(
         Cypress.expose(ws2.id),
@@ -652,6 +666,25 @@ describe('Comments API tests', () => {
       ).then(resp => {
         expect(resp.status).to.equal(404);
       });
+    });
+
+    it('404 negative test: should answer someone else changing the comment under another unit as not there', () => {
+      // The admin did not write the comment. CommentWriteGuard used to ask ahead of CommentInUnitGuard
+      // and answered 403 for any comment that exists, 404 for one that does not (#1777).
+      cy.updateCommentAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit2.shortname),
+        Cypress.expose('commentInUnit'),
+        unitComment,
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).its('status').should('equal', 404);
+      cy.patchCommentItemsAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit2.shortname),
+        Cypress.expose('commentInUnit'),
+        [],
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).its('status').should('equal', 404);
     });
 
     it('404 negative test: should refuse deleting the comment under a unit id that is not a number', () => {

@@ -75,6 +75,30 @@ describe('ReviewUnitCommentController', () => {
     expect(controller).toBeDefined();
   });
 
+  // A comment named in the path has to be one of the unit's before any guard loads it to ask for
+  // its author: those answered 403 for a comment of any unit and 404 for none, which told every
+  // comment id apart (#1777). ReviewGuard holds the unit itself to the review, ahead of both.
+  const loadsTheComment: unknown[] = [CommentWriteGuard, CommentDeleteGuard, ReviewCommentOwnerGuard];
+  it.each([
+    'patchCommentBody', 'patchCommentVisibility', 'removeComment',
+    'patchCommentItems', 'toggleVote', 'getCommentVoters'
+  ] as const)('should hold %s to the unit in its path before it asks about the comment\'s author', method => {
+    const guards: unknown[] = Reflect.getMetadata('__guards__', ReviewUnitCommentController.prototype[method]);
+    expect(guards).toContain(CommentInUnitGuard);
+    expect(guards.slice(0, guards.indexOf(CommentInUnitGuard)).filter(guard => loadsTheComment.includes(guard)))
+      .toEqual([]);
+  });
+
+  // A review login may neither change, hide nor delete a comment, and is told so before the comment's
+  // unit is asked: otherwise 403 and 404 would tell the comments of the unit from all others.
+  it.each([
+    'patchCommentBody', 'patchCommentVisibility', 'removeComment'
+  ] as const)('should refuse a review login on %s before it asks about the comment', method => {
+    const guards: unknown[] = Reflect.getMetadata('__guards__', ReviewUnitCommentController.prototype[method]);
+    expect(guards).toContain(ReviewAccountGuard);
+    expect(guards.indexOf(ReviewAccountGuard)).toBeLessThan(guards.indexOf(CommentInUnitGuard));
+  });
+
   describe('findOnesComments', () => {
     it('should return an array of unit comments', async () => {
       const unitId = 10;
