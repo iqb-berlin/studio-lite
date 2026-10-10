@@ -797,7 +797,7 @@ describe('Review API tests', () => {
       failOnStatusCode: false
     });
     const comment = (body: string): CommentData => ({ body, userName: 'Besucherin' });
-    const ids = { visitorComment: '', userComment: '' };
+    const ids = { visitorComment: '', userComment: '', otherUnitComment: '' };
 
     before(() => {
       cy.createCommentReviewAPI(
@@ -818,6 +818,16 @@ describe('Review API tests', () => {
         expect(resp.status).to.equal(201);
         ids.userComment = `${resp.body}`;
       });
+      // A comment of a unit review1 does not have: unit1, which is in ws2 by now.
+      cy.postCommentAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit1.shortname),
+        comment('Kommentar einer anderen Aufgabe (#1777)'),
+        groupAdminToken()
+      ).then(resp => {
+        expect(resp.status).to.equal(201);
+        ids.otherUnitComment = `${resp.body}`;
+      });
     });
 
     const updateAs = (token: string, commentId: string) => cy
@@ -827,6 +837,12 @@ describe('Review API tests', () => {
 
     after(() => {
       deleteAs(adminToken(), ids.userComment);
+      cy.deleteCommentAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(unit1.shortname),
+        ids.otherUnitComment,
+        groupAdminToken()
+      );
     });
 
     it('403 negative test: should not let a review login change, hide or delete a comment', () => {
@@ -845,6 +861,21 @@ describe('Review API tests', () => {
 
     it('403 negative test: should leave changing a comment to its author', () => {
       updateAs(groupAdminToken(), ids.userComment).its('status').should('equal', 403);
+    });
+
+    it('404 negative test: should answer a comment of another unit as not there, not as someone else\'s', () => {
+      // The admin did not write it. CommentWriteGuard and ReviewCommentOwnerGuard used to ask ahead
+      // of CommentInUnitGuard and answered 403 for any comment id that exists (#1777).
+      updateAs(adminToken(), ids.otherUnitComment).its('status').should('equal', 404);
+      patchAs(adminToken(), commentUrl(ids.otherUnitComment, '/items'), { unitItemUuids: [] })
+        .its('status').should('equal', 404);
+    });
+
+    it('403 negative test: should refuse a review login changing or deleting before asking for the comment', () => {
+      // A review login may do neither to any comment. Were the comment's unit asked first, 404 here
+      // and 403 for a comment of unit4 would tell the comments of the unit from all others.
+      updateAs(visitorToken(), ids.otherUnitComment).its('status').should('equal', 403);
+      deleteAs(visitorToken(), ids.otherUnitComment).its('status').should('equal', 403);
     });
 
     it('200 positive test: should let the group admin delete the comment of a review login', () => {

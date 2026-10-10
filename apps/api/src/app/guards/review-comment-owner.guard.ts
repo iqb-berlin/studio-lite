@@ -11,7 +11,7 @@ import { UnitCommentService } from '../services/unit-comment.service';
  * The second case is why {@link CommentWriteGuard} cannot serve here: the studio sends the items of
  * a new comment in a second call right after creating it, and a review login has to be able to
  * make that call for the comment it has just written (#1784). Which unit the comment belongs to is
- * asked by {@link CommentInUnitGuard}, after this one.
+ * asked by {@link CommentInUnitGuard}, before this one (#1777).
  */
 @Injectable()
 export class ReviewCommentOwnerGuard implements CanActivate {

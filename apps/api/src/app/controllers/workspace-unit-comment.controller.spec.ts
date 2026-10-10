@@ -16,6 +16,8 @@ import { WorkspaceUnitCommentController } from './workspace-unit-comment.control
 import { ItemCommentService } from '../services/item-comment.service';
 import { WorkspaceService } from '../services/workspace.service';
 import { CommentInUnitGuard } from '../guards/comment-in-unit.guard';
+import { CommentWriteGuard } from '../guards/comment-write.guard';
+import { CommentDeleteGuard } from '../guards/comment-delete.guard';
 import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
@@ -100,13 +102,17 @@ describe('WorkspaceUnitCommentController', () => {
   });
 
   // Only DELETE held the comment to the unit in its path (#1697), and only for a numeric unit (#1696).
-  // The check comes last, after the guards that decide whether the caller may do this at all.
+  // The check comes before any guard that loads the comment to ask for its author: those answered
+  // 403 for a comment of any unit and 404 for none, which told every comment id apart (#1777).
+  const loadsTheComment: unknown[] = [CommentWriteGuard, CommentDeleteGuard];
   it.each([
     'patchCommentBody', 'patchCommentItems', 'removeComment',
     'patchCommentVisibility', 'toggleVote', 'getCommentVoters'
-  ] as const)('should hold %s to the unit in its path, as the last guard', method => {
-    expect(Reflect.getMetadata('__guards__', WorkspaceUnitCommentController.prototype[method]).at(-1))
-      .toBe(CommentInUnitGuard);
+  ] as const)('should hold %s to the unit in its path before it asks about the comment\'s author', method => {
+    const guards: unknown[] = Reflect.getMetadata('__guards__', WorkspaceUnitCommentController.prototype[method]);
+    expect(guards).toContain(CommentInUnitGuard);
+    expect(guards.slice(0, guards.indexOf(CommentInUnitGuard)).filter(guard => loadsTheComment.includes(guard)))
+      .toEqual([]);
   });
 
   describe('findOnesComments', () => {
