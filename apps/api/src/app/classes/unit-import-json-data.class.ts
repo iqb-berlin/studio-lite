@@ -48,7 +48,13 @@ export class UnitImportJsonData {
     this.player = index.userInterface.player ?? '';
     this.editor = index.userInterface.editor ?? '';
     this.definitionType = index.userInterface.type ?? '';
-    this.definitionFileName = index.userInterface.definition ? folder + index.userInterface.definition : '';
+    // An inline definition is the definition itself, not the name of a file beside the index (#1839)
+    if (index.userInterface.isDefinitionInline) {
+      this.definition = index.userInterface.definition ?? '';
+      this.definitionFileName = '';
+    } else {
+      this.definitionFileName = index.userInterface.definition ? folder + index.userInterface.definition : '';
+    }
     this.commentsFileName = index.comments?.id ? folder + index.comments.id : '';
     this.richNotesFileName = index.richNotes?.id ? folder + index.richNotes.id : '';
     this.metadataFileName = index.metadata?.id ? folder + index.metadata.id : '';

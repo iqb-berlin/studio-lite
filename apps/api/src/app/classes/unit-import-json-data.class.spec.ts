@@ -59,6 +59,23 @@ describe('UnitImportJsonData', () => {
     expect(new UnitImportJsonData(fileIoMock).definitionType).toBe('');
   });
 
+  // With `isDefinitionInline` the index carries the definition itself, not a file name (#1839).
+  it('should take an inline definition as the definition, not as a file name', () => {
+    const data = new UnitImportJsonData(createMock<FileIo>({
+      originalname: 'folder/UNIT01.json',
+      buffer: Buffer.from(buildIndex({
+        userInterface: { player: 'iqb-player-aspect@3.0', definition: '{"content":1}', isDefinitionInline: true }
+      }))
+    }));
+
+    expect(data.definition).toBe('{"content":1}');
+    expect(data.definitionFileName).toBe('');
+  });
+
+  it('should leave the definition empty when it is a file reference', () => {
+    expect(new UnitImportJsonData(fileIoMock).definition).toBe('');
+  });
+
   it('should resolve file references with folder prefix', () => {
     const data = new UnitImportJsonData(fileIoMock);
 

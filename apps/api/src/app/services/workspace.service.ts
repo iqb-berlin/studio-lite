@@ -1003,6 +1003,10 @@ export class WorkspaceService {
         } else {
           WorkspaceService.warnMissingFile(unitImportData.definitionFileName, functionReturn);
         }
+      } else if (unitImportData.definition || unitImportData.lastChangedDefinition) {
+        // An inline definition (`<Definition>` in the XML, `isDefinitionInline` in the JSON index) has
+        // no file of its own, but is stored the same way, with its variables (#1839).
+        await this.importDefinition(newUnitId, unitImportData);
       }
 
       if (unitImportData.metadataFileName) {
