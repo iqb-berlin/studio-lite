@@ -929,16 +929,20 @@ describe('Unit API tests part II', () => {
     });
   });
 
-  describe('a variable list in the VariableInfo 2.0 spelling (#1606)', () => {
-    // What the schemer and coding-box get: the 1.x spelling, and `page` back as the empty value
-    // that 2.0 dropped.
+  describe('a variable list in the VariableInfo 2.0 spelling (#1606, #1708)', () => {
+    // What the schemer gets: the 1.x spelling, and `page` back as the empty value that 2.0 dropped.
     // Compared as text, so that a failure shows which variable came back in which spelling
     const inV1 = 'text_1 no-value "" "" | geogebra_1 string "ggb-file" ""';
     const spelling = (variables: { id: string, type: string, format: string, page: string }[]) => variables
       .map(v => `${v.id} ${v.type} ${JSON.stringify(v.format)} ${JSON.stringify(v.page)}`)
       .join(' | ');
+    // What is stored, and read back with the definition: the spelling it was sent in (#1708)
+    const storedInV2 = 'text_1 NO_VALUE "" | geogebra_1 STRING "GGB_FILE"';
+    const typesAndFormats = (variables: { id: string, type: string, format: string }[]) => variables
+      .map(v => `${v.id} ${v.type} ${JSON.stringify(v.format)}`)
+      .join(' | ');
 
-    it('200 positive test: is stored in the 1.x spelling when saved from the editor', () => {
+    it('200 positive test: is stored as sent and handed to the schemer in 1.x when saved from the editor', () => {
       const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
       const unit = { shortname: 'VI2_SAVE', name: 'VariableInfo 2.0', group: '' };
       cy.createUnitAPI(Cypress.expose(ws1.id), unit, adminToken).then(created => {
@@ -952,17 +956,20 @@ describe('Unit API tests part II', () => {
           }
         ], adminToken).then(saved => {
           cy.getUnitSchemeAPI(unitId, Cypress.expose(ws1.id), adminToken).then(read => {
-            cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
-            cy.then(() => {
-              expect(saved.status).to.equal(200);
-              expect(spelling(read.body.variables)).to.equal(inV1);
+            cy.getUnitDefinitionAPI(unitId, Cypress.expose(ws1.id), adminToken).then(stored => {
+              cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
+              cy.then(() => {
+                expect(saved.status).to.equal(200);
+                expect(spelling(read.body.variables)).to.equal(inV1);
+                expect(typesAndFormats(stored.body.variables)).to.equal(storedInV2);
+              });
             });
           });
         });
       });
     });
 
-    it('201 positive test: is stored in the 1.x spelling when imported', () => {
+    it('201 positive test: is stored as sent and handed to the schemer in 1.x when imported', () => {
       const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
       cy.uploadUnitFilesAPI(
         Cypress.expose(ws1.id),
@@ -974,12 +981,15 @@ describe('Unit API tests part II', () => {
           expect(unit, 'imported unit').not.to.equal(undefined);
           const unitId = String(unit.id);
           cy.getUnitSchemeAPI(unitId, Cypress.expose(ws1.id), adminToken).then(read => {
-            // cleaned up before anything else is asserted, so that a failure leaves ws1 as it was
-            cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
-            cy.then(() => {
-              expect(imported.status).to.equal(201);
-              expect(imported.body.messages).to.deep.equal([]);
-              expect(spelling(read.body.variables)).to.equal(inV1);
+            cy.getUnitDefinitionAPI(unitId, Cypress.expose(ws1.id), adminToken).then(stored => {
+              // cleaned up before anything else is asserted, so that a failure leaves ws1 as it was
+              cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
+              cy.then(() => {
+                expect(imported.status).to.equal(201);
+                expect(imported.body.messages).to.deep.equal([]);
+                expect(spelling(read.body.variables)).to.equal(inV1);
+                expect(typesAndFormats(stored.body.variables)).to.equal(storedInV2);
+              });
             });
           });
         });

@@ -603,6 +603,44 @@ describe('WorkspaceService', () => {
         .toBe('OK');
       expect(result.every(row => row.validation !== 'Fehler')).toBe(true);
     });
+
+    // A list stored in the VariableInfo 2.x spelling is read as such (#1708).
+    it('reads variable types in the 2.x spelling', async () => {
+      (unitService.findAllWithProperties as jest.Mock).mockResolvedValue([{
+        id: 11,
+        key: 'VI2',
+        name: '',
+        schemer: 'schemer@2.8.1',
+        variables: [
+          { id: 'panel', type: 'NO_VALUE' },
+          { id: 'count', type: 'NUMBER' }
+        ],
+        metadata: { items: [] },
+        scheme: JSON.stringify({
+          version: '2.5',
+          variableCodings: [{
+            id: 'panel', alias: 'panel', sourceType: 'BASE_NO_VALUE', codes: []
+          }, {
+            id: 'count',
+            alias: 'count',
+            sourceType: 'BASE',
+            codes: [{
+              id: 1,
+              type: 'FULL_CREDIT',
+              score: 1,
+              label: '',
+              manualInstruction: '',
+              ruleSetOperatorAnd: false,
+              ruleSets: [{ ruleOperatorAnd: false, rules: [{ method: 'NUMERIC_MATCH', parameters: ['1'] }] }]
+            }]
+          }]
+        })
+      }]);
+
+      const result = await service.getCodingReport(1);
+
+      expect(result.every(row => row.validation !== 'Fehler')).toBe(true);
+    });
   });
 
   describe('coding report validation aggregation', () => {

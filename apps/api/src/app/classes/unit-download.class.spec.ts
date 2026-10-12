@@ -356,6 +356,40 @@ describe('UnitDownloadClass', () => {
     });
   });
 
+  // coding-box, the testcenter and the unit XSD know only the VariableInfo 1.x spelling (#1708)
+  describe('addVariables', () => {
+    const unitDownloadClass = UnitDownloadClass as unknown as {
+      createUnitXML: (
+        config: UnitExportConfigDto,
+        meta: UnitPropertiesDto
+      ) => { toString: () => string };
+    };
+
+    it('should write a list stored in 2.x in the 1.x spelling, with the page', () => {
+      const unitXml = unitDownloadClass.createUnitXML(
+        { unitXsdUrl: 'xsd' } as unknown as UnitExportConfigDto,
+        { key: 'K1', name: 'N1', metadata: {} } as unknown as UnitPropertiesDto
+      );
+      const variable = (id: string, type: string, format: string) => ({
+        id, type, format, multiple: false, nullable: false, values: [], valuePositionLabels: []
+      });
+      const storedIn2x = [
+        variable('v1', 'NO_VALUE', ''),
+        variable('v2', 'STRING', 'GGB_FILE')
+      ] as unknown as UnitDefinitionDto['variables'];
+
+      UnitDownloadClass.addVariables(
+        { variables: storedIn2x } as UnitDefinitionDto,
+        unitXml as unknown as Parameters<typeof UnitDownloadClass.addVariables>[1]
+      );
+
+      const xmlString = unitXml.toString();
+      const flags = 'nullable="false" multiple="false" page=""';
+      expect(xmlString).toContain(`<Variable id="v1" type="no-value" format="" ${flags}/>`);
+      expect(xmlString).toContain(`<Variable id="v2" type="string" format="ggb-file" ${flags}/>`);
+    });
+  });
+
   describe('addDerivedVariables', () => {
     const unitDownloadClass = UnitDownloadClass as unknown as {
       createUnitXML: (
@@ -1793,6 +1827,20 @@ describe('UnitDownloadClass', () => {
       expect(result).not.toBeNull();
       expect(result.baseVariables).toHaveLength(1);
       expect(result.derivedVariables).toHaveLength(0);
+    });
+
+    // exported as the unit XML is, in the VariableInfo 1.x spelling (#1708)
+    it('should return baseVariables stored in 2.x in the 1.x spelling', () => {
+      const result = unitDownloadClass.buildVariablesJSON(
+        {
+          definition: '',
+          variables: [{ id: 'v1', type: 'NO_VALUE', format: '' }]
+        } as unknown as UnitDefinitionDto,
+        { scheme: '', schemeType: '' } as unknown as UnitSchemeDto
+      );
+      expect(result.baseVariables).toEqual([{
+        id: 'v1', type: 'no-value', format: '', page: ''
+      }]);
     });
 
     it('should set id and basedOn for derived variables, exclude BASE entries', () => {

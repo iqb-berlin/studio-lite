@@ -5,17 +5,16 @@ import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
  *
  * VariableInfo 2.0 writes both in upper case with underscores (`NO_VALUE`, `GGB_FILE`); 1.x wrote
  * them in lower case with hyphens (`no-value`, `ggb-file`). Editors that follow 2.0 send the new
- * spelling, but everything that reads the list still compares against 1.x: studio-lite itself,
- * the schemer it hands the list to, and coding-box, which reads it from the unit XML. The schemer
- * and coding-box are released on their own schedules.
+ * spelling. Studio stores the list as it comes and reads both spellings itself, through
+ * `@iqb/responses` (#1708). Some readers it hands the list to still compare against 1.x only: the
+ * schemer, and coding-box and the testcenter, which read it from the unit XML.
  *
- * Studio therefore brings each list into the 1.x spelling where it enters, and everything behind
- * that point keeps seeing what it saw before (#1606). The mapping is lossless: 2.0 has exactly the
- * values of 1.x in the other spelling. An entry that is already in 1.x is left untouched, byte for
- * byte, and so is one whose type neither spelling knows.
+ * Studio therefore brings the list into the 1.x spelling where it leaves for one of them (#1606,
+ * #1708). The mapping is lossless: 2.0 has exactly the values of 1.x in the other spelling. An
+ * entry that is already in 1.x is left untouched, byte for byte, and so is one whose type neither
+ * spelling knows.
  *
- * Once studio, the schemer and coding-box read both spellings, this bridge can go -- path by
- * path, as each of them is released.
+ * Once a reader takes both spellings, the conversion on its way out can go.
  */
 
 type TypeV1 = VariableInfo['type'];

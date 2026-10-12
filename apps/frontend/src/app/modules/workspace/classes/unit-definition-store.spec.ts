@@ -150,7 +150,7 @@ describe('UnitDefinitionStore', () => {
   });
 
   // An editor following VariableInfo 2.0 writes type and format in upper case and leaves out
-  // `page`. Studio stores and hands on the 1.x spelling, which the schemer and coding-box read (#1606).
+  // `page`. Studio stores what the editor sends (#1708) and compares regardless of spelling (#1606).
   describe('with an editor in the VariableInfo 2.0 spelling', () => {
     /** A stored entry as a 1.x editor wrote it, `page` in the middle as aspect has it. */
     const storedV1 = (): VariableInfo => ({
@@ -187,12 +187,12 @@ describe('UnitDefinitionStore', () => {
       expect(store.getChangedData()).toEqual({});
     });
 
-    it('keeps a changed list in the 1.x spelling, with the page restored', () => {
+    it('keeps a changed list in the spelling the editor sent', () => {
       const store = new UnitDefinitionStore(1, { variables: [storedV1()], definition: 'def-a' });
 
       store.setData([sentV2('STRING')], 'def-a');
 
-      expect(store.getChangedData().variables).toEqual([{ ...storedV1(), type: 'string' }]);
+      expect(store.getChangedData().variables).toEqual([sentV2('STRING')]);
     });
 
     it('still tells a missing list from an empty one', () => {

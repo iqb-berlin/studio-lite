@@ -5,6 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { toVariableInfoListV1 } from '@studio-lite/shared-code';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
@@ -206,7 +207,9 @@ export class UnitSchemerComponent
           },
           codingScheme: unitScheme.scheme || '',
           codingSchemeType: unitScheme.schemeType || '',
-          variables: variables || []
+          // the schemer still reads only the VariableInfo 1.x spelling, and the editor's unsaved
+          // list may come in 2.x (#1708)
+          variables: toVariableInfoListV1(variables)
         },
         '*'
       );

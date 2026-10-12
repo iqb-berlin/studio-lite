@@ -1,8 +1,7 @@
 import { UnitDefinitionDto } from '@studio-lite-lib/api-dto';
 import { EventEmitter } from '@angular/core';
-import {
-  sameVariableLists, toVariableInfoListV1, VariableInfoInEitherSpelling
-} from '@studio-lite/shared-code';
+import { sameVariableLists, VariableInfoInEitherSpelling } from '@studio-lite/shared-code';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 
 /**
  * The unit's definition while it is being worked on: what was loaded, and beside it only what has
@@ -25,10 +24,10 @@ export class UnitDefinitionStore {
   }
 
   /**
-   * Takes what the editor reports. Its variable list is brought into the VariableInfo 1.x spelling
-   * first, the one studio stores and hands on (see `toVariableInfoV1`), and compared regardless of
-   * spelling and key order: an editor following 2.0 would otherwise mark every unit as changed the
-   * moment it reports its unchanged list (#1606).
+   * Takes what the editor reports. Its variable list is kept in the spelling the editor used
+   * (VariableInfo 1.x or 2.x, #1708) and compared regardless of spelling and key order: an editor
+   * following 2.x would otherwise mark every unit stored in 1.x as changed the moment it reports its
+   * unchanged list (#1606). Readers that still need 1.x get it where the list leaves the studio.
    *
    * The definition's format (`unitDefinitionType`) travels with the definition and never on its
    * own: reported with an unchanged definition it is not a change, or every unit saved before the
@@ -37,11 +36,11 @@ export class UnitDefinitionStore {
    * longer describe what the editor wrote (#1368).
    */
   setData(newVariables: VariableInfoInEitherSpelling[], newDefinition: string, newDefinitionType?: string) {
-    const variables = newVariables ? toVariableInfoListV1(newVariables) : newVariables;
-    if (sameVariableLists(variables, this.originalData.variables)) {
+    if (sameVariableLists(newVariables, this.originalData.variables)) {
       if (this.changedData.variables) delete this.changedData.variables;
     } else {
-      this.changedData.variables = variables;
+      // the DTO is typed with the 1.x spelling; the list is stored as reported
+      this.changedData.variables = newVariables as VariableInfo[];
     }
     if (newDefinition === this.originalData.definition) {
       if (this.changedData.definition) delete this.changedData.definition;
