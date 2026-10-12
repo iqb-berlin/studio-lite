@@ -62,6 +62,16 @@ describe('DownloadDocx integration', () => {
     consoleWarnSpy.mockRestore();
   });
 
+  it.each([' ', '\t\r\n', '\u00a0'])('does not add a paragraph for general instruction %p', async generalInstruction => {
+    const units = buildUnits('<p>Bewerten</p>');
+    const settings = { ...defaultSettings, hasGeneralInstructions: true };
+    const baselineFile = await DownloadDocx.getDocXCodebook(units, settings);
+    const baseline = new AdmZip(baselineFile).readAsText('word/document.xml');
+    units[0].variables[0].generalInstruction = generalInstruction;
+    const actual = new AdmZip(await DownloadDocx.getDocXCodebook(units, settings)).readAsText('word/document.xml');
+    expect(actual).toBe(baseline);
+  });
+
   it('creates valid DOCX XML for Schemer formula spans with raw latex in data-latex', async () => {
     const description =
       '<p>Formel: ' +
