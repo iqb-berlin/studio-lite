@@ -19,7 +19,7 @@ import {
 // import in download-docx.class.ts.
 import AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
-import { HIDDEN_PROFILE_ORDER, VeronaModuleKeyCollection } from '@studio-lite/shared-code';
+import { HIDDEN_PROFILE_ORDER, toVariableInfoListV1, VeronaModuleKeyCollection } from '@studio-lite/shared-code';
 // Type-only -- see the note on the deep docx import in download-docx.class.ts.
 import type { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
 import {
@@ -391,7 +391,9 @@ export class UnitDownloadClass {
   ): void {
     if (definitionData.variables && definitionData.variables.length > 0) {
       const variablesElement = unitXml.root().ele('BaseVariables');
-      definitionData.variables.forEach(transformedVariable => {
+      // In the VariableInfo 1.x spelling, whatever is stored: coding-box, the testcenter and the
+      // unit XSD read only that one (#1708).
+      toVariableInfoListV1(definitionData.variables).forEach(transformedVariable => {
         const variableElement = variablesElement.ele({
           Variable: {
             '@id': transformedVariable.id,
@@ -1146,7 +1148,8 @@ export class UnitDownloadClass {
     definitionData: UnitDefinitionDto,
     schemeData: UnitSchemeDto
   ): { baseVariables: VariableInfo[]; derivedVariables: { id: string; basedOn: string[] }[] } | null {
-    const baseVariables: VariableInfo[] = definitionData?.variables ?? [];
+    // exported in the VariableInfo 1.x spelling, as the unit XML is (#1708)
+    const baseVariables: VariableInfo[] = toVariableInfoListV1(definitionData?.variables);
     const derivedVariables: { id: string; basedOn: string[] }[] = UnitDownloadClass
       .parseDerivedCodings(schemeData)
       .map(coding => ({

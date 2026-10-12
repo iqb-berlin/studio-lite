@@ -6,8 +6,13 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { createMock } from '@golevelup/ts-jest';
-import { UnitMetadataValues, UnitPropertiesDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import {
+  UnitDefinitionDto, UnitMetadataValues, UnitPropertiesDto, UnitSchemeDto, WorkspaceSettingsDto
+} from '@studio-lite-lib/api-dto';
 import { UnitMetadataStore } from '../../classes/unit-metadata-store';
+import { UnitSchemeStore } from '../../classes/unit-scheme-store';
+import { UnitDefinitionStore } from '../../classes/unit-definition-store';
+import { AliasId } from '../../../metadata/models/alias-id.interface';
 import { ModuleService } from '../../../../services/module.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -189,5 +194,21 @@ describe('UnitPropertiesComponent', () => {
       profiles: [{ profileId: 'p1' }],
       items: [{ id: 'item1' }]
     });
+  });
+
+  // Variables without a value are no item variables, in either VariableInfo spelling (#1708).
+  it.each(['no-value', 'NO_VALUE'])('leaves variables of type %s out of the item variables', noValueType => {
+    const schemeStore = createMock<UnitSchemeStore>();
+    schemeStore.getData.mockReturnValue({ scheme: '{}', variables: [] } as unknown as UnitSchemeDto);
+    const definitionStore = createMock<UnitDefinitionStore>();
+    definitionStore.getData.mockReturnValue({
+      variables: [{ id: 'panel', type: noValueType }, { id: 'text', type: 'STRING' }]
+    } as unknown as UnitDefinitionDto);
+    jest.spyOn(component.workspaceService, 'getUnitSchemeStore').mockReturnValue(schemeStore);
+    jest.spyOn(component.workspaceService, 'getUnitDefinitionStore').mockReturnValue(definitionStore);
+
+    const ids = (component as unknown as { getVariableIds(): AliasId[] }).getVariableIds();
+
+    expect(ids).toEqual([{ id: 'text', alias: 'text' }]);
   });
 });

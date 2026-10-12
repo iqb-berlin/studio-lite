@@ -682,6 +682,32 @@ describe('UnitService', () => {
       const result = await service.findOnesScheme(1);
       expect(result.scheme).toBe('{}');
     });
+
+    // The schemer reads the variables from here and knows only the 1.x spelling (#1708).
+    it('should hand out a variable list stored in 2.x in the 1.x spelling', async () => {
+      const storedIn2x = {
+        id: 'geo1',
+        type: 'STRING',
+        format: 'GGB_FILE',
+        multiple: false,
+        nullable: false,
+        values: [],
+        valuePositionLabels: []
+      } as unknown as VariableInfo;
+      unitsRepository.findOne.mockResolvedValue({ scheme: '{}', variables: [storedIn2x] } as Unit);
+
+      const result = await service.findOnesScheme(1);
+
+      expect(result.variables).toEqual([{
+        ...storedIn2x, type: 'string', format: 'ggb-file', page: ''
+      }]);
+    });
+
+    it('should keep a missing variable list missing', async () => {
+      unitsRepository.findOne.mockResolvedValue({ scheme: '{}', variables: null } as Unit);
+      const result = await service.findOnesScheme(1);
+      expect(result.variables).toBeNull();
+    });
   });
 
   describe('patchUnitGroup', () => {
@@ -709,9 +735,9 @@ describe('UnitService', () => {
       expect(unitsRepository.save).toHaveBeenCalled();
     });
 
-    // Saving from the editor and importing both end up here. Whatever spelling the list came in,
-    // the schemer and coding-box read it from what is stored, and they know only 1.x (#1606).
-    it('should store a variable list in the VariableInfo 1.x spelling', async () => {
+    // Saving from the editor and importing both end up here. The list is stored in the spelling it
+    // came in; readers that know only 1.x get it converted on the way out (#1708).
+    it('should store a variable list in the spelling it was sent in', async () => {
       unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
       unitDefinitionsRepository.findOne.mockResolvedValue({ id: 1 } as UnitDefinition);
       const sentByA20Editor = {
@@ -728,9 +754,7 @@ describe('UnitService', () => {
       await service.patchDefinition(1, { definition: 'xml', variables: [sentByA20Editor] }, 'user', new Date());
 
       const stored = unitsRepository.save.mock.calls[0][0] as Unit;
-      expect(stored.variables).toEqual([{
-        ...sentByA20Editor, type: 'string', format: 'ggb-file', page: ''
-      }]);
+      expect(stored.variables).toEqual([sentByA20Editor]);
     });
 
     // The type belongs to the definition it came with (#1368).

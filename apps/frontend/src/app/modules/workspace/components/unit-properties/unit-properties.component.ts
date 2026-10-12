@@ -36,6 +36,7 @@ import {
 } from '@angular/material/card';
 import { CodingSchemeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { normalizeVariableInfoType } from '@iqb/responses';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -421,8 +422,9 @@ export class UnitPropertiesComponent
         this.workspaceService.getUnitDefinitionStore()?.getData().variables ||
         unitSchemeVariables;
       if (defStoreVariables) {
+        // the list may be in the VariableInfo 1.x or 2.x spelling (#1708)
         const variables = defStoreVariables.filter(
-          v => v.type !== 'no-value'
+          v => normalizeVariableInfoType(v.type) !== 'NO_VALUE'
         );
         const variableAliasIds = variables.map(variable => ({
           id: variable.id,

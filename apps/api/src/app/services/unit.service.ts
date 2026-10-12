@@ -994,13 +994,18 @@ export class UnitService {
     return returnUnit;
   }
 
+  /**
+   * The scheme with the variables it codes. These go to the schemer, which still reads only the
+   * VariableInfo 1.x spelling (iqb-berlin/coding-components#238), so a list stored in 2.x is handed
+   * out in 1.x (#1708).
+   */
   async findOnesScheme(unitId: number): Promise<UnitSchemeDto> {
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId },
       select: ['scheme', 'schemeType', 'variables']
     });
     return {
-      variables: unit.variables,
+      variables: unit.variables && toVariableInfoListV1(unit.variables),
       scheme: unit.scheme,
       schemeType: unit.schemeType
     };
@@ -1060,10 +1065,10 @@ export class UnitService {
       await this.unitDefinitionsRepository.save(newUnitDefinition);
     }
     if (unitDefinitionDto.variables) {
-      // Stored in the VariableInfo 1.x spelling whatever the editor or the imported file used: the
-      // schemer and coding-box, which get the list from here, still read only that one (#1606).
-      // Saving from the editor and importing both come through this method.
-      unitToUpdate.variables = toVariableInfoListV1(unitDefinitionDto.variables);
+      // Stored in the spelling the editor or the imported file used, VariableInfo 1.x or 2.x (#1708).
+      // Readers that still need 1.x get it where the list leaves the studio (findOnesScheme, the
+      // unit export). Saving from the editor and importing both come through this method.
+      unitToUpdate.variables = unitDefinitionDto.variables;
       const aliasIds = unitDefinitionDto.variables.map(item => ({
         id: item.id,
         alias: item.alias || item.id
