@@ -1084,6 +1084,61 @@ describe('WorkspaceService', () => {
       expect(unitService.create).toHaveBeenCalledWith(1, { key: 'UNIT01', name: 'L' }, user, true);
     });
 
+    // A definition without a file of its own was dropped together with its variables (#1839).
+    describe('with an inline definition', () => {
+      beforeEach(() => {
+        (unitService.create as jest.Mock).mockResolvedValue(10);
+        (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+        (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+      });
+
+      it('should store the definition and the variables of an XML unit', async () => {
+        const result = await service.uploadFiles(1, [
+          buildFile('unit01.xml', 'text/xml', '<Unit><Metadata><Id>UNIT01</Id><Label>L</Label></Metadata>' +
+            '<Definition player="p@1.0">{"content":1}</Definition>' +
+            '<BaseVariables><Variable id="v1" type="string" format="" nullable="false" multiple="false"/>' +
+            '</BaseVariables></Unit>')
+        ], user);
+
+        expect(result.messages).toHaveLength(0);
+        expect(unitService.patchDefinition).toHaveBeenCalledWith(
+          10,
+          expect.objectContaining({
+            definition: '{"content":1}',
+            variables: [expect.objectContaining({ id: 'v1', type: 'string' })]
+          }),
+          null,
+          undefined
+        );
+      });
+
+      it('should store the definition of a JSON unit', async () => {
+        const result = await service.uploadFiles(1, [
+          buildFile('unit01.json', 'application/json', JSON.stringify({
+            id: 'UNIT01',
+            userInterface: { player: 'p@1.0', definition: '{"content":1}', isDefinitionInline: true }
+          }))
+        ], user);
+
+        expect(result.messages).toHaveLength(0);
+        expect(unitService.patchDefinition).toHaveBeenCalledWith(
+          10,
+          expect.objectContaining({ definition: '{"content":1}' }),
+          null,
+          undefined
+        );
+      });
+
+      it('should not store an empty definition without a date', async () => {
+        await service.uploadFiles(1, [
+          buildFile('unit01.xml', 'text/xml', '<Unit><Metadata><Id>UNIT01</Id><Label>L</Label></Metadata>' +
+            '<Definition player="p@1.0"/></Unit>')
+        ], user);
+
+        expect(unitService.patchDefinition).not.toHaveBeenCalled();
+      });
+    });
+
     it('should still warn about an XML file that is neither a unit nor a Testcenter file', async () => {
       const result = await service.uploadFiles(1, [
         buildFile('other.xml', 'text/xml', '<Something><Metadata><Id>X</Id></Metadata></Something>')

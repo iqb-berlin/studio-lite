@@ -997,6 +997,31 @@ describe('Unit API tests part II', () => {
     });
   });
 
+  // A definition written into the unit XML itself, `<Definition>` instead of `<DefinitionRef>`, was
+  // dropped on import together with the variables (#1839).
+  describe('an inline definition of an XML unit', () => {
+    it('201 positive test: is stored with its variables when imported', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      cy.uploadUnitFilesAPI(Cypress.expose(ws1.id), ['inline-definition/INLINE_DEF.xml'], adminToken).then(imported => {
+        cy.getUnitsByWsAPI(Cypress.expose(ws1.id), adminToken).then(units => {
+          const unit = units.body.find((u: { key: string }) => u.key === 'INLINE_DEF');
+          expect(unit, 'imported unit').not.to.equal(undefined);
+          const unitId = String(unit.id);
+          cy.getUnitDefinitionAPI(unitId, Cypress.expose(ws1.id), adminToken).then(read => {
+            // cleaned up before anything else is asserted, so that a failure leaves ws1 as it was
+            cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
+            cy.then(() => {
+              expect(imported.status).to.equal(201);
+              expect(imported.body.messages).to.deep.equal([]);
+              expect(read.body.definition).to.equal('{"type":"aspect-unit-definition","inline":true}');
+              expect(read.body.variables.map((v: { id: string }) => v.id)).to.deep.equal(['text_1']);
+            });
+          });
+        });
+      });
+    });
+  });
+
   // The XML import read the attribute as `schemetype`; the parser runs in XML mode and tells it from
   // the `schemeType` that the export and unit-xml 17.6 write, so every imported unit lost it (#1759).
   describe('the coding scheme type of an XML unit', () => {
