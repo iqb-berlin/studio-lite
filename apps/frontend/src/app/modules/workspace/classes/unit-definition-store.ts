@@ -1,5 +1,7 @@
 import { UnitDefinitionDto } from '@studio-lite-lib/api-dto';
-import { EventEmitter, Signal, signal } from '@angular/core';
+import {
+  EventEmitter, Signal, signal, WritableSignal
+} from '@angular/core';
 import { sameVariableLists, VariableInfoInEitherSpelling } from '@studio-lite/shared-code';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { dropSavedChanges } from '../utils/saved-changes.utils';
@@ -20,6 +22,9 @@ export class UnitDefinitionStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();
   private readonly changedState = signal(false);
   readonly changed: Signal<boolean> = this.changedState.asReadonly();
+  private readonly dataState: WritableSignal<UnitDefinitionDto>;
+  /** What {@link getData} answers, as a signal for whoever derives from it (#1361). */
+  readonly data: Signal<UnitDefinitionDto>;
   private originalData: UnitDefinitionDto;
   private changedData: UnitDefinitionDto;
   private unitId: number;
@@ -28,6 +33,8 @@ export class UnitDefinitionStore {
     this.unitId = unitId;
     this.originalData = originalData;
     this.changedData = <UnitDefinitionDto>{};
+    this.dataState = signal(this.getData());
+    this.data = this.dataState.asReadonly();
   }
 
   /**
@@ -100,6 +107,7 @@ export class UnitDefinitionStore {
 
   private notifyChange(): void {
     this.changedState.set(this.isChanged());
+    this.dataState.set(this.getData());
     this.dataChange.emit();
   }
 }

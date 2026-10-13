@@ -3,6 +3,7 @@ import { of, Subject } from 'rxjs';
 import {
   UnitDefinitionDto, UnitPropertiesDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitStoresService } from './unit-stores.service';
 import { WorkspaceBackendService } from './workspace-backend.service';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
@@ -114,6 +115,27 @@ describe('UnitStoresService', () => {
       service.loadSchemeStore(1, 3).subscribe();
 
       expect(service.schemeStore()?.getData().scheme).toBe('{}');
+    });
+  });
+
+  describe('variables', () => {
+    it('is empty until the scheme is loaded, then follows the editor\'s unsaved list', () => {
+      backendService.getUnitDefinition.mockReturnValue(of({
+        definition: 'def',
+        variables: [{ id: 'a', alias: 'a', type: 'string' }]
+      }));
+      backendService.getUnitScheme.mockReturnValue(of({ scheme: '{"variableCodings":[]}', schemeType: 'iqb@3.4' }));
+      service.loadDefinitionStore(1, 3).subscribe();
+      expect(service.variables()).toEqual([]);
+
+      service.loadSchemeStore(1, 3).subscribe();
+      expect(service.variables()).toEqual([{ id: 'a', alias: 'a' }]);
+
+      service.definitionStore()?.setData(
+        [{ id: 'a', alias: 'a', type: 'string' }, { id: 'b', alias: 'b', type: 'string' }] as VariableInfo[],
+        'def'
+      );
+      expect(service.variables()).toEqual([{ id: 'a', alias: 'a' }, { id: 'b', alias: 'b' }]);
     });
   });
 

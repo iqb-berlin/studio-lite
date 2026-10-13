@@ -7,11 +7,9 @@ import { provideRouter } from '@angular/router';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { createMock } from '@golevelup/ts-jest';
 import {
-  UnitDefinitionDto, UnitMetadataValues, UnitPropertiesDto, UnitSchemeDto, WorkspaceSettingsDto
+  UnitMetadataValues, UnitPropertiesDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { UnitMetadataStore } from '../../classes/unit-metadata-store';
-import { UnitSchemeStore } from '../../classes/unit-scheme-store';
-import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { AliasId } from '../../../metadata/models/alias-id.interface';
 import { ModuleService } from '../../../../services/module.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
@@ -193,20 +191,18 @@ describe('UnitPropertiesComponent', () => {
     });
   });
 
-  // Variables without a value are no item variables, in either VariableInfo spelling (#1708).
-  it.each(['no-value', 'NO_VALUE'])('leaves variables of type %s out of the item variables', noValueType => {
-    const schemeStore = createMock<UnitSchemeStore>();
-    schemeStore.getData.mockReturnValue({ scheme: '{}', variables: [] } as unknown as UnitSchemeDto);
-    const definitionStore = createMock<UnitDefinitionStore>();
-    definitionStore.getData.mockReturnValue({
-      variables: [{ id: 'panel', type: noValueType }, { id: 'text', type: 'STRING' }]
-    } as unknown as UnitDefinitionDto);
-    jest.spyOn(component.unitStores, 'schemeStore').mockReturnValue(schemeStore);
-    jest.spyOn(component.unitStores, 'definitionStore').mockReturnValue(definitionStore);
+  // the list is worked out by the service (unitVariables), the view only hands it on (#1361)
+  it('hands on the variables the service works out', () => {
+    const variables: AliasId[] = [{ id: 'text', alias: 'text' }];
+    jest.spyOn(component.unitStores, 'variables').mockReturnValue(variables);
+    const handedOn = jest.fn();
+    component.variablesLoader.subscribe(handedOn);
+    component.unitStores.loadDefinitionStore(1, 1).subscribe();
+    TestBed.tick();
 
-    const ids = (component as unknown as { getVariableIds(): AliasId[] }).getVariableIds();
+    component.unitStores.definitionStore()?.setData([], 'changed');
 
-    expect(ids).toEqual([{ id: 'text', alias: 'text' }]);
+    expect(handedOn).toHaveBeenLastCalledWith(variables);
   });
 
   // #1842: a taken key blocks saving once it is a change; a unit already carrying one stays editable

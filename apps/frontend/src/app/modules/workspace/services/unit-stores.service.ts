@@ -10,6 +10,7 @@ import { WorkspaceBackendService } from './workspace-backend.service';
 import { UnitMetadataStore } from '../classes/unit-metadata-store';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
+import { unitVariables } from '../utils/unit-variables.utils';
 
 /** One store of the open unit, and the request that is loading it, if one is. */
 interface StoreSlot<T> {
@@ -46,6 +47,12 @@ export class UnitStoresService {
     this.metadataStore()?.changed() ||
     this.definitionStore()?.changed() ||
     this.schemeStore()?.changed()
+  ));
+
+  /** The variables an item may refer to, as they are now, saved or not (#1361). */
+  readonly variables = computed(() => unitVariables(
+    this.definitionStore()?.data(),
+    this.schemeStore()?.data()
   ));
 
   private readonly metadataLoadedSubject = new Subject<UnitPropertiesDto>();

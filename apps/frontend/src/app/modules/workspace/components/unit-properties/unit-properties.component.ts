@@ -34,9 +34,6 @@ import {
   MatCardTitle,
   MatCardContent
 } from '@angular/material/card';
-import { CodingSchemeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { normalizeVariableInfoType } from '@iqb/responses';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -393,7 +390,9 @@ export class UnitPropertiesComponent
       .loadSchemeStore(this.workspaceService.selectedWorkspaceId, this.workspaceService.selectedUnit$.getValue())
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(unitSchemeStore => {
-        if (unitSchemeStore) this.variablesLoader.next(this.getVariableIds());
+        // handed on only once the scheme is there: without it the list is empty, and an item would
+        // take the empty list for its variable having gone
+        if (unitSchemeStore) this.variablesLoader.next(this.unitStores.variables());
       });
   }
 
@@ -404,57 +403,7 @@ export class UnitPropertiesComponent
         switchMap(store => store?.dataChange ?? EMPTY),
         takeUntil(this.ngUnsubscribe)
       )
-      .subscribe(() => this.variablesLoader.next(this.getVariableIds()));
-  }
-
-  private getVariableIds(): AliasId[] {
-    const data = this.unitStores.schemeStore()?.getData();
-    if (data) {
-      const unitSchemeVariables = data.variables || [];
-      const defStoreVariables: VariableInfo[] =
-        this.unitStores.definitionStore()?.getData().variables ||
-        unitSchemeVariables;
-      if (defStoreVariables) {
-        // the list may be in the VariableInfo 1.x or 2.x spelling (#1708)
-        const variables = defStoreVariables.filter(
-          v => normalizeVariableInfoType(v.type) !== 'NO_VALUE'
-        );
-        const variableAliasIds = variables.map(variable => ({
-          id: variable.id,
-          alias: variable.alias || variable.id
-        }));
-        const scheme: CodingSchemeData = JSON.parse(data.scheme);
-        const variableCodings = scheme?.variableCodings || [];
-        const variableCodingIds = variableCodings
-          .filter(vc => vc.sourceType !== 'BASE_NO_VALUE')
-          .filter(
-            vc => !(
-              vc.sourceType === 'BASE' &&
-                !variableAliasIds.find(aliasId => aliasId.id === vc.id)
-            )
-          )
-          .map(item => ({ id: item.id, alias: item.alias || item.id }));
-        // merge without duplicates
-        return (
-          [...variableAliasIds, ...variableCodingIds]
-            .reduce((acc: AliasId[], current: AliasId) => {
-              if (!acc.find(aliasId => aliasId.id === current.id)) {
-                acc.push(current);
-              }
-              return acc;
-            }, [])
-            // sort by alias
-            .sort((a, b) => {
-              const idA = a.alias.toUpperCase();
-              const idB = b.alias.toUpperCase();
-              if (idA < idB) return -1;
-              if (idA > idB) return 1;
-              return 0;
-            })
-        );
-      }
-    }
-    return [];
+      .subscribe(() => this.variablesLoader.next(this.unitStores.variables()));
   }
 
   /**

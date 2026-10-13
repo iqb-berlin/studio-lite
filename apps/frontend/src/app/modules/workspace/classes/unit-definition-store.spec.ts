@@ -238,4 +238,12 @@ describe('UnitDefinitionStore', () => {
     store.restore();
     expect(store.changed()).toBe(false);
   });
+
+  it('holds in data what getData answers', () => {
+    const store = new UnitDefinitionStore(1, { variables: [], definition: 'def-a' });
+    expect(store.data()).toEqual({ variables: [], definition: 'def-a' });
+
+    store.setData([buildVariable('v1', 'a1')], 'def-b');
+    expect(store.data()).toEqual(store.getData());
+  });
 });
