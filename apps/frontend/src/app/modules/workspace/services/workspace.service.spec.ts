@@ -18,6 +18,7 @@ import { UnitStoresService } from './unit-stores.service';
 import { UnitMetadataStore } from '../classes/unit-metadata-store';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
+import { AliasId } from '../../metadata/models/alias-id.interface';
 
 describe('WorkspaceService', () => {
   let service: WorkspaceService;
@@ -29,8 +30,10 @@ describe('WorkspaceService', () => {
     definitionStore: WritableSignal<UnitDefinitionStore | undefined>;
     schemeStore: WritableSignal<UnitSchemeStore | undefined>;
     changed: Signal<boolean>;
+    variables: WritableSignal<AliasId[]>;
     metadataLoaded$: Subject<UnitPropertiesDto>;
     loadMetadataStore: jest.Mock;
+    loadSchemeStore: jest.Mock;
     reset: jest.Mock;
   };
 
@@ -77,8 +80,10 @@ describe('WorkspaceService', () => {
       changed: computed(() => !!(
         metadataStore()?.changed() || definitionStore()?.changed() || schemeStore()?.changed()
       )),
+      variables: signal<AliasId[]>([]),
       metadataLoaded$: new Subject<UnitPropertiesDto>(),
       loadMetadataStore: jest.fn(),
+      loadSchemeStore: jest.fn(() => of(schemeStore())),
       reset: jest.fn()
     };
 
@@ -620,6 +625,72 @@ describe('WorkspaceService', () => {
       expect(backendService.setUnitProperties).toHaveBeenCalledWith(1, { id: 1, player: 'newPlayer' });
       expect(metadataStore.getChangedData()).toEqual({ id: 1, editor: 'newEditor' });
       expect(metadataStore.getData().player).toBe('newPlayer');
+    });
+
+    // #1361: a renamed alias or a removed variable reaches the items with the save of the definition
+    describe('with items referring to the unit\'s variables', () => {
+      const itemsMetadata = {
+        items: [
+          {
+            id: 'A1', uuid: 'u1', variableReadOnlyId: 'text_1', variableId: 'old alias'
+          },
+          {
+            id: 'A2', uuid: 'u2', variableReadOnlyId: 'gone', variableId: 'Gone'
+          }
+        ]
+      };
+      let metadataStore: UnitMetadataStore;
+
+      beforeEach(() => {
+        metadataStore = new UnitMetadataStore({ id: 1, metadata: itemsMetadata });
+        unitStores.metadataStore.set(metadataStore);
+        unitStores.schemeStore.set(new UnitSchemeStore(1, { scheme: '{}', schemeType: 'iqb@3.4' }));
+        unitStores.variables.set([{ id: 'text_1', alias: 'Antwort' }]);
+        backendService.setUnitProperties.mockReturnValue(of(true));
+        backendService.setUnitDefinition.mockReturnValue(of(true));
+      });
+
+      it('should bring the items in line when the definition is saved', async () => {
+        const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
+        definitionStore.setData([], 'new');
+        unitStores.definitionStore.set(definitionStore);
+
+        await service.saveUnitData();
+
+        expect(backendService.setUnitProperties).toHaveBeenCalledWith(1, {
+          id: 1,
+          metadata: {
+            items: [
+              {
+                id: 'A1', uuid: 'u1', variableReadOnlyId: 'text_1', variableId: 'Antwort'
+              },
+              {
+                id: 'A2', uuid: 'u2', variableReadOnlyId: null, variableId: null
+              }
+            ]
+          }
+        });
+      });
+
+      it('should leave the items alone when neither definition nor scheme is saved', async () => {
+        metadataStore.setPlayer('newPlayer');
+
+        await service.saveUnitData();
+
+        expect(backendService.setUnitProperties).toHaveBeenCalledWith(1, { id: 1, player: 'newPlayer' });
+      });
+
+      it('should leave the items alone without the whole list of variables', async () => {
+        const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
+        definitionStore.setData([], 'new');
+        unitStores.definitionStore.set(definitionStore);
+        unitStores.variables.set([]);
+
+        await service.saveUnitData();
+
+        expect(backendService.setUnitProperties).not.toHaveBeenCalled();
+        expect(backendService.setUnitDefinition).toHaveBeenCalled();
+      });
     });
 
     it('should save every part under the unit that was open when the save started', async () => {
