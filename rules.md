@@ -188,6 +188,7 @@ Branches, the pipeline and the board columns are described in the README under *
 - **Rule**: After the merge the test decides the column. With an end-to-end test of its own the change goes to *Zu veröffentlichen*, without one to *zu testen*, where someone else builds the test.
   - "Of its own" means a test that checks exactly this change and would fail without it. An existing spec that keeps passing does not count.
   - **Exception**: Upgrades, CI and dependency changes without behaviour of their own (Angular, NestJS, ESLint, the release gate) go to *Zu veröffentlichen*; the whole suite is their test.
+  - **Exception**: No end-to-end test of its own when it would catch nothing new: unit tests fail without the change, and a named existing spec exercises exactly the changed path. The "Stand" comment names both.
 - **Rule**: *In review* means released and awaiting validation by the reporters, not code-reviewed. A ticket stays open through all of these columns; do not close it by hand.
 
 ### Tickets
