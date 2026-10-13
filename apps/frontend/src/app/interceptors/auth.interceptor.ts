@@ -110,7 +110,7 @@ export class AuthInterceptor implements HttpInterceptor {
           } else {
             const httpErrorInfo = new AppHttpError(error);
             if (httpErrorInfo.status === 401) {
-              httpErrorInfo.status = 403;
+              httpErrorInfo.setStatus(403);
             }
             this.report(request, httpErrorInfo);
           }

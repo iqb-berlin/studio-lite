@@ -15,6 +15,7 @@ import {
   EmailTemplateDto
 } from '@studio-lite-lib/api-dto';
 import { AppService, defaultAppConfig } from './app.service';
+import { gateRejectionOf } from '../utils/gate-rejection';
 import {
   authRequestContext, backgroundRequestContext, logoutContext, tokenRefreshContext
 } from '../interceptors/request-classification';
@@ -39,6 +40,10 @@ export class BackendService {
   ) {
   }
 
+  /**
+   * Logs in, and answers whether that worked. A login the gateway in front (iqb-gate) did not let
+   * through is not a wrong password: its error is passed on, for the page to say why.
+   */
   login(name: string, password: string, initLoginMode: boolean): Observable<boolean> {
     const sessionId = BackendService.getSessionIdFromToken();
     return this.http.post<{ accessToken: string, refreshToken: string }>(
@@ -51,7 +56,7 @@ export class BackendService {
       { context: authRequestContext() }
     )
       .pipe(
-        catchError(() => of(false)),
+        catchError((error: unknown) => (gateRejectionOf(error) ? throwError(() => error) : of(false))),
         switchMap(loginData => {
           if (loginData && typeof loginData === 'object') {
             const { accessToken, refreshToken } = loginData as {

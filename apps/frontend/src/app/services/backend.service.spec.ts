@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { AuthDataDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 import { AppService } from './app.service';
@@ -121,6 +121,20 @@ describe('BackendService', () => {
       const req = httpMock.expectOne(`${serverUrl}login`);
       expect(req.request.body).toEqual({ username: 'user', password: 'pw', sessionId });
       req.flush(null);
+    });
+
+    it('should pass on a login the gateway did not let through, instead of calling it a failure', done => {
+      service.login('testUser', 'password', false).subscribe({
+        next: () => done.fail('expected the gateway\'s rejection'),
+        error: (error: HttpErrorResponse) => {
+          expect(error.status).toBe(403);
+          expect(error.error).toEqual({ code: 'automation-detected', signals: ['webdriver'] });
+          done();
+        }
+      });
+
+      const req = httpMock.expectOne(`${serverUrl}login`);
+      req.flush({ code: 'automation-detected', signals: ['webdriver'] }, { status: 403, statusText: 'Forbidden' });
     });
 
     it('should return false when auth-data fails after successful login', done => {

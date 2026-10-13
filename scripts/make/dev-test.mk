@@ -9,7 +9,7 @@ include $(STUDIO_BASE_DIR)/.env.dev
 .PHONY: dev-test-app dev-test-backend dev-test-frontend dev-test-registry-login dev-test-registry-logout\
 dev-test-build-e2e dev-test-e2e dev-test-e2e-api dev-test-e2e-ui-chrome dev-test-e2e-ui-workspace-chrome\
 dev-test-e2e-ui-admin-chrome dev-test-e2e-ui-chrome-mobile dev-test-e2e-ui-firefox dev-test-e2e-ui-firefox-mobile\
-dev-test-e2e-ui-edge dev-test-e2e-ui-edge-mobile
+dev-test-e2e-ui-edge dev-test-e2e-ui-edge-mobile dev-test-e2e-gate
 
 # The e2e image works in /usr/src/studio-lite. Mounted there, the specs, the Cypress config and the
 # translations of the working tree are what a run tests, not the copies made when the image was
@@ -173,3 +173,20 @@ dev-test-e2e-ui-edge-mobile:
 				--browser=edge\
 				--spec="./apps/frontend-e2e/src/e2e/ui/**/*"\
 				--config="viewportWidth=375,viewportHeight=667"
+
+# Run the e2e test of the gateway (iqb-gate) through it, with its check on (only in combination with
+# 'make dev-up' and the profile gate: COMPOSE_PROFILES=gate in .env.dev). The specs are mounted where
+# the e2e image works, /usr/src/studio-lite (#1790).
+dev-test-e2e-gate:
+	cd $(STUDIO_BASE_DIR) &&\
+		docker run\
+				--rm\
+				--pull never\
+				-v ./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e\
+				-v ./apps/frontend/src/assets/i18n:/usr/src/studio-lite/apps/frontend/src/assets/i18n\
+				-e IQB_GATE_E2E=on\
+				-e IQB_GATE_AUDIT_KEY=$(IQB_GATE_AUDIT_KEY)\
+				--network app-net\
+			studio-lite-frontend-e2e:$(TAG) e2e frontend-e2e --baseUrl=http://iqb-gate:8080\
+				--browser=chrome\
+				--spec="./apps/frontend-e2e/src/e2e/iqb-gate/**/*"

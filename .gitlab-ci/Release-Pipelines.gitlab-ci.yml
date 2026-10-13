@@ -446,7 +446,7 @@ test-main-pr-db:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
+    - sed -i "s/^TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - echo "${CI_REGISTRY_PASSWORD}" | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY}
     - docker network create app-net
@@ -606,7 +606,7 @@ test-main-pr-frontend:
 #    - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
 #    - ip a | grep mtu
 #    - docker network inspect bridge | grep mtu
-#    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
+#    - sed -i "s/^TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
 #    - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
 #    - export $(grep -v '^#' .env.studio-lite.template | xargs)
 #    - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -660,7 +660,7 @@ test-main-pr-e2e-api:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
+    - sed -i "s/^TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -715,7 +715,7 @@ test-main-pr-e2e-ui-workspace-chrome:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
+    - sed -i "s/^TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -771,7 +771,7 @@ test-main-pr-e2e-ui-admin-chrome:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
+    - sed -i "s/^TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -828,7 +828,7 @@ test-main-pr-e2e-ui-chrome-mobile:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
+    - sed -i "s/^TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -885,7 +885,7 @@ test-main-pr-e2e-ui-firefox:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
+    - sed -i "s/^TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -942,7 +942,7 @@ test-main-pr-e2e-ui-firefox-mobile:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
+    - sed -i "s/^TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -999,7 +999,7 @@ test-main-pr-e2e-ui-edge:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
+    - sed -i "s/^TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template
@@ -1056,7 +1056,7 @@ test-main-pr-e2e-ui-edge-mobile:
     - until docker info &> /dev/null; do println "Wait until docker daemon is started ...\n" && sleep 1; done
     - ip a | grep mtu
     - docker network inspect bridge | grep mtu
-    - sed -i "s/TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
+    - sed -i "s/^TAG=.*$/TAG=${CI_COMMIT_SHA}/" .env.studio-lite.template
     - sed -i "s^REGISTRY_PATH=.*$^REGISTRY_PATH=${CI_REGISTRY_IMAGE}/^" .env.studio-lite.template
     - export $(grep -v '^#' .env.studio-lite.template | xargs)
     - cp config/frontend/default.conf.http-template config/frontend/default.conf.template

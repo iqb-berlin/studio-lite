@@ -5,6 +5,16 @@ import coverageTask from '@cypress/code-coverage/task';
 // The release version, sent as the `app-version` header the API compares against (#1643)
 import packageJson from '../../package.json';
 
+/**
+ * The specs that need the gateway (iqb-gate) in front of the studio, with its check on. They count
+ * only when the run says so (IQB_GATE_E2E=on, as `make dev-test-e2e-gate` sets it); every other run,
+ * against the frontend without a gateway, leaves them out.
+ */
+function gateSpecs(): string[] {
+  const { IQB_GATE_E2E } = process.env;
+  return IQB_GATE_E2E?.trim().toLowerCase() === 'on' ? [] : ['src/e2e/iqb-gate/**'];
+}
+
 const cypressJsonConfig = {
   fileServerFolder: '.',
   fixturesFolder: './src/fixtures',
@@ -13,8 +23,38 @@ const cypressJsonConfig = {
   screenshotsFolder: '../../dist/cypress/apps/frontend-e2e/screenshots',
   chromeWebSecurity: false,
   specPattern: 'src/e2e/**/*.cy.{js,jsx,ts,tsx}',
+  // Cypress's own default, kept beside the one addition
+  excludeSpecPattern: ['*.hot-update.js', ...gateSpecs()],
   supportFile: 'src/support/e2e.ts'
 };
+
+/** The password of the gateway's audit page (IQB_GATE_AUDIT_KEY), for the gateway's spec. */
+function gateAuditKey(): string {
+  const { IQB_GATE_AUDIT_KEY } = process.env;
+  return IQB_GATE_AUDIT_KEY ?? '';
+}
+
+/**
+ * A connection to the test database, from the variables the e2e containers and CI jobs set.
+ *
+ * Destructured instead of accessed: process.env is an index signature, so tsconfig's
+ * noPropertyAccessFromIndexSignature forbids the dot while eslint's dot-notation forbids the
+ * bracket -- destructuring is the one spelling both accept (#1590).
+ */
+function databaseClient(): Client {
+  const {
+    DB_HOST, POSTGRES_HOST, DB_PORT, POSTGRES_PORT, DB_USER,
+    POSTGRES_USER, DB_PASSWORD, POSTGRES_PASSWORD, DB_NAME, POSTGRES_DB
+  } = process.env;
+  return new Client({
+    host: DB_HOST || POSTGRES_HOST || 'db',
+    port: Number(DB_PORT || POSTGRES_PORT || 5432),
+    user: DB_USER || POSTGRES_USER || 'root',
+    password: DB_PASSWORD || POSTGRES_PASSWORD || 'root-password',
+    database: DB_NAME || POSTGRES_DB || 'studio-lite'
+  });
+}
+
 export default defineConfig({
   allowCypressEnv: false,
   env: {
@@ -26,7 +66,9 @@ export default defineConfig({
     username: 'fadmin',
     password: '4445',
     locale: 'de',
-    version: packageJson.version
+    version: packageJson.version,
+    // The password of the gateway's audit page, for the gateway's spec
+    gateAuditKey: gateAuditKey()
   },
   e2e: {
     ...nxE2EPreset(__dirname),
@@ -61,22 +103,7 @@ export default defineConfig({
       });
       on('task', {
         async resetDatabase() {
-          // Destructured instead of accessed: process.env is an index signature,
-          // so tsconfig's noPropertyAccessFromIndexSignature forbids the dot while
-          // eslint's dot-notation forbids the bracket -- destructuring is the one
-          // spelling both accept (#1590).
-          const {
-            DB_HOST, POSTGRES_HOST, DB_PORT, POSTGRES_PORT, DB_USER,
-            POSTGRES_USER, DB_PASSWORD, POSTGRES_PASSWORD, DB_NAME, POSTGRES_DB
-          } = process.env;
-          const client = new Client({
-            host: DB_HOST || POSTGRES_HOST || 'db',
-            port: Number(DB_PORT || POSTGRES_PORT || 5432),
-            user: DB_USER || POSTGRES_USER || 'root',
-            password: DB_PASSWORD || POSTGRES_PASSWORD || 'root-password',
-            database: DB_NAME || POSTGRES_DB || 'studio-lite'
-          });
-
+          const client = databaseClient();
           await client.connect();
 
           try {
@@ -94,6 +121,30 @@ export default defineConfig({
           }
 
           return null;
+        },
+        // Only for the gateway's spec: there, creating a group and a workspace is a save of the
+        // administration, which Cypress itself is not allowed to make
+        async createWorkspaceFor({ userName, workspaceName }: { userName: string; workspaceName: string }) {
+          const client = databaseClient();
+          await client.connect();
+          try {
+            const group = await client.query(
+              'INSERT INTO "public"."workspace_group" ("name") VALUES ($1) RETURNING "id";',
+              [`${workspaceName} group`]
+            );
+            const workspace = await client.query(
+              'INSERT INTO "public"."workspace" ("name", "group_id") VALUES ($1, $2) RETURNING "id";',
+              [workspaceName, group.rows[0].id]
+            );
+            await client.query(
+              'INSERT INTO "public"."workspace_user" ("workspace_id", "user_id", "access_level") ' +
+              'SELECT $1, "id", 4 FROM "public"."user" WHERE "name" = $2;',
+              [workspace.rows[0].id, userName]
+            );
+            return workspace.rows[0].id as number;
+          } finally {
+            await client.end();
+          }
         }
       });
 
