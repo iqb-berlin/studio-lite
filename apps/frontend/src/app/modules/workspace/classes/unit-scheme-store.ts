@@ -1,5 +1,7 @@
 import { UnitSchemeDto } from '@studio-lite-lib/api-dto';
-import { EventEmitter, Signal, signal } from '@angular/core';
+import {
+  EventEmitter, Signal, signal, WritableSignal
+} from '@angular/core';
 
 /**
  * The unit's coding scheme while it is being edited. Unlike the other two stores it does not compare
@@ -11,6 +13,9 @@ export class UnitSchemeStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();
   private readonly changedState = signal(false);
   readonly changed: Signal<boolean> = this.changedState.asReadonly();
+  private readonly dataState: WritableSignal<UnitSchemeDto>;
+  /** What {@link getData} answers, as a signal for whoever derives from it (#1361). */
+  readonly data: Signal<UnitSchemeDto>;
   private originalData: UnitSchemeDto;
   private changedData: UnitSchemeDto;
   private unitId: number;
@@ -19,6 +24,8 @@ export class UnitSchemeStore {
     this.unitId = unitId;
     this.originalData = originalData;
     this.changedData = <UnitSchemeDto>{};
+    this.dataState = signal(this.getData());
+    this.data = this.dataState.asReadonly();
   }
 
   setData(newScheme: string, newSchemeType: string) {
@@ -60,6 +67,7 @@ export class UnitSchemeStore {
 
   private notifyChange(): void {
     this.changedState.set(this.isChanged());
+    this.dataState.set(this.getData());
     this.dataChange.emit();
   }
 }

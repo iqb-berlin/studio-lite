@@ -88,4 +88,12 @@ describe('UnitSchemeStore', () => {
     store.restore();
     expect(store.changed()).toBe(false);
   });
+
+  it('holds in data what getData answers', () => {
+    const store = new UnitSchemeStore(1, { scheme: 's1', schemeType: 't1' });
+    expect(store.data()).toEqual({ scheme: 's1', schemeType: 't1' });
+
+    store.setData('s2', 't2');
+    expect(store.data()).toEqual(store.getData());
+  });
 });
