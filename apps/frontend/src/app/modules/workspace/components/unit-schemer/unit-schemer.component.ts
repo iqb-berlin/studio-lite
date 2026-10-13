@@ -90,9 +90,6 @@ export class UnitSchemerComponent
         case 'vosSchemeChangedNotification':
           if (msgData.sessionId === this.sessionId) {
             if (msgData.codingScheme) {
-              this.workspaceService.codingScheme = JSON.parse(
-                msgData.codingScheme
-              );
               this.unitStores
                 .schemeStore()
                 ?.setData(msgData.codingScheme, msgData.codingSchemeType);

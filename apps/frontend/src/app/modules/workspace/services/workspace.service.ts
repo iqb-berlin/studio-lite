@@ -13,7 +13,6 @@ import {
   UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 import { HttpParams } from '@angular/common/http';
-import { CodingSchemeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { WorkspaceBackendService } from './workspace-backend.service';
 import { UnitMetadataStore } from '../classes/unit-metadata-store';
 import { AppService } from '../../../services/app.service';
@@ -85,7 +84,6 @@ export class WorkspaceService {
   readonly saving = this.savingState.asReadonly();
   private runningSave: Promise<boolean> | undefined;
   states: State[] = [];
-  codingScheme!: CodingSchemeData;
   dropBoxId: number | null = null;
   hasDroppedUnits: boolean = false;
 
