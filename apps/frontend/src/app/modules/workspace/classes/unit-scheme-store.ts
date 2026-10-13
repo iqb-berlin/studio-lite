@@ -33,17 +33,24 @@ export class UnitSchemeStore {
     return Object.keys(this.changedData).length > 1;
   }
 
+  /** A copy: what is sent must not change with the reports that arrive while it is under way (#1845). */
   getChangedData(): UnitSchemeDto {
-    return this.changedData;
+    return { ...this.changedData };
   }
 
   getData(): UnitSchemeDto {
     return { ...this.originalData, ...this.changedData };
   }
 
-  applyChanges() {
-    this.originalData = this.getData();
-    this.restore();
+  /**
+   * Takes what was sent as saved. A scheme the schemer reported since then stays a change (#1845).
+   * The report is kept whole, scheme and type together, since {@link isChanged} counts only a whole
+   * report as a change.
+   */
+  applyChanges(sent: UnitSchemeDto) {
+    this.originalData = { ...this.originalData, ...sent };
+    if (JSON.stringify(this.changedData) === JSON.stringify(sent)) this.changedData = <UnitSchemeDto>{};
+    this.notifyChange();
   }
 
   restore() {

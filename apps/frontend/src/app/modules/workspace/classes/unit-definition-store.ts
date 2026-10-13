@@ -2,6 +2,7 @@ import { UnitDefinitionDto } from '@studio-lite-lib/api-dto';
 import { EventEmitter, Signal, signal } from '@angular/core';
 import { sameVariableLists, VariableInfoInEitherSpelling } from '@studio-lite/shared-code';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { dropSavedChanges } from '../utils/saved-changes.utils';
 
 /**
  * The unit's definition while it is being worked on: what was loaded, and beside it only what has
@@ -65,8 +66,9 @@ export class UnitDefinitionStore {
     return Object.keys(this.changedData).length > 0;
   }
 
+  /** A copy: what is sent must not change with the edits made while it is under way (#1845). */
   getChangedData(): UnitDefinitionDto {
-    return this.changedData;
+    return structuredClone(this.changedData);
   }
 
   getData(): UnitDefinitionDto {
@@ -78,9 +80,17 @@ export class UnitDefinitionStore {
     return data;
   }
 
-  applyChanges() {
-    this.originalData = this.getData();
-    this.restore();
+  /**
+   * Takes what was sent as saved. What the editor reported since then stays a change: nobody sent
+   * it yet, and taking it as saved lost it (#1845).
+   */
+  applyChanges(sent: UnitDefinitionDto) {
+    const saved = { ...this.originalData, ...sent };
+    // as in getData: a definition sent without a type of its own does not keep the stored one
+    if (sent.definition !== undefined && !sent.definitionType) delete saved.definitionType;
+    this.originalData = saved;
+    dropSavedChanges(this.changedData, sent);
+    this.notifyChange();
   }
 
   restore() {
