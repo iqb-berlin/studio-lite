@@ -19,6 +19,7 @@ import { AppService } from '../../../services/app.service';
 import { State } from '../../admin/models/state.type';
 import { RichNoteTagsService } from './rich-note-tags.service';
 import { UnitStoresService } from './unit-stores.service';
+import { reconcileItemVariables } from '../utils/item-variables.utils';
 
 /**
  * The state of the workspace currently open: which unit is selected, what the user may do in it,
@@ -250,6 +251,9 @@ export class WorkspaceService {
     const unitMetadataStore = this.unitStores.metadataStore();
     const unitDefinitionStore = this.unitStores.definitionStore();
     const unitSchemeStore = this.unitStores.schemeStore();
+    if (unitMetadataStore && (unitDefinitionStore?.isChanged() || unitSchemeStore?.isChanged())) {
+      await this.reconcileItemVariables(unitMetadataStore, unitId);
+    }
     if (unitMetadataStore && unitMetadataStore.isChanged()) {
       const changedData = unitMetadataStore.getChangedData();
       saveOk = await lastValueFrom(
@@ -318,6 +322,26 @@ export class WorkspaceService {
     }
     this.appService.dataLoading = false;
     return saveOk;
+  }
+
+  /**
+   * When the definition or the scheme is saved, the items' variables are brought in line with the
+   * unit's variables in the same save: until now that happened only while the properties were open,
+   * and the stored metadata kept an alias renamed or a variable removed elsewhere (#1361). It is done
+   * only with the whole list -- the scheme loaded, the list not empty, the stores still this unit's --
+   * since an incomplete list would remove assignments to variables that do exist.
+   */
+  private async reconcileItemVariables(unitMetadataStore: UnitMetadataStore, unitId: number): Promise<void> {
+    const unitSchemeStore = await lastValueFrom(
+      this.unitStores.loadSchemeStore(this.selectedWorkspaceId, unitId),
+      { defaultValue: undefined }
+    );
+    const variables = this.unitStores.variables();
+    const metadata = unitMetadataStore.getData().metadata;
+    if (!unitSchemeStore || !variables.length || !metadata) return;
+    if (this.unitStores.metadataStore() !== unitMetadataStore) return;
+    const reconciled = reconcileItemVariables(metadata, variables);
+    if (reconciled) unitMetadataStore.setMetadata(reconciled);
   }
 
   /**
