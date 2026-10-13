@@ -1,5 +1,9 @@
 # Integration des gemeinsamen Codebooks
 
+## Aktuelle Format- und Aspect-Abnahme
+
+Die [Browser- und Word-Abnahme vom 13.10.2026](codebook-aspect-acceptance-2026-10-13.md) ergänzt die frühere Leerzeichen-Abnahme um bestätigte Formatierungsfixes und den bidirektionalen Formel-Austausch. Aktuelles Paket-SHA256: `0e355c3896799ae765cb6e90b00147da0359c56f5fdc90d36b7caf40fbe59ab8`. 1.245 Generator-Tests, 4.654 installierte Exportpaare und 262 tatsächliche Microsoft-Word-Web-Seiten sind geprüft. Die explizite 18pt-Schriftgröße des alten `Farbe`-Referenzfalls wird bewusst korrigiert; alle übrigen alten Dokumentbestandteile bleiben streng verglichen. Angaben zu früheren Paketständen weiter unten sind historische Nachweise.
+
 Studio bleibt Bedien- und Ausgabereferenz. Die gemeinsame UI und der Generator
 stammen aus `@iqb/ngx-coding-components` 4.1.0. Der Studio-Dialog beschafft nur noch
 Aufgaben und Missingprofile, übergibt Vorauswahl und Speichersperre und verarbeitet
