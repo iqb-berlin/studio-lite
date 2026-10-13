@@ -1,4 +1,15 @@
 services:
+  # Built from the iqb-gate repository until it is published:
+  # docker build -f packages/gateway/Dockerfile -t iqb-gate:local .   (in iqb-gate)
+  # Only with the profile gate (COMPOSE_PROFILES=gate in .env.dev): without it, the dev stack starts
+  # as it always did, on HTTP_PORT, and nobody needs the image.
+  iqb-gate:
+    profiles: ["gate"]
+    image: iqb-gate:local
+    pull_policy: never
+    ports:
+      - "${GATE_PORT:-4300}:8080"
+
   frontend:
     labels:
       - "traefik.enable=false"

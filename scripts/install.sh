@@ -256,6 +256,7 @@ prepare_installation_dir() {
   mkdir -p "${APP_DIR}/backup/release"
   mkdir -p "${APP_DIR}/backup/temp"
   mkdir -p "${APP_DIR}/config/frontend"
+  mkdir -p "${APP_DIR}/config/iqb-gate"
   mkdir -p "${APP_DIR}/scripts/make"
   mkdir -p "${APP_DIR}/scripts/migration"
 
@@ -283,6 +284,7 @@ download_files() {
   download_file "docker-compose.${APP_NAME}.prod.yaml" "docker-compose.${APP_NAME}.prod.yaml"
   download_file ".env.${APP_NAME}.template" ".env.${APP_NAME}.template"
   download_file config/frontend/default.conf.http-template config/frontend/default.conf.http-template
+  download_file config/iqb-gate/gate.yaml config/iqb-gate/gate.yaml
   download_file "scripts/make/${APP_NAME}.mk" scripts/make/prod.mk
   download_file "scripts/update_${APP_NAME}.sh" scripts/update.sh
   chmod +x "scripts/update_${APP_NAME}.sh"
@@ -324,6 +326,32 @@ customize_settings() {
   declare jwt_secret
   jwt_secret=$(openssl rand -base64 32 | tr -- '+/' '-_')
   sed -i.bak "s|^JWT_SECRET=.*|JWT_SECRET=${jwt_secret}|" ".env.${APP_NAME}" && rm ".env.${APP_NAME}.bak"
+
+  # The gateway (iqb-gate) does not start without its secret; the audit key opens its audit page
+  declare gate_secret gate_audit_key
+  gate_secret=$(openssl rand -hex 32)
+  gate_audit_key=$(openssl rand -hex 32)
+  sed -i.bak "s|^IQB_GATE_SECRET=.*|IQB_GATE_SECRET=${gate_secret}|" ".env.${APP_NAME}" && rm ".env.${APP_NAME}.bak"
+  sed -i.bak "s|^IQB_GATE_AUDIT_KEY=.*|IQB_GATE_AUDIT_KEY=${gate_audit_key}|" ".env.${APP_NAME}" &&
+    rm ".env.${APP_NAME}.bak"
+  printf "The password of the audit page https://%s/.iqb-gate/admin/ is IQB_GATE_AUDIT_KEY in '%s'.\n" \
+    "${server_name}" ".env.${APP_NAME}"
+
+  # The gateway believes X-Forwarded-* only from Traefik's network: without it, every request seems
+  # to come from Traefik -- one challenge limit for all users, and cookies without Secure
+  if ! test "$(docker network ls -q --filter name=app-net)"; then
+    docker network create app-net
+  fi
+  declare gate_trust_proxy
+  gate_trust_proxy=$(docker network inspect app-net --format '{{range .IPAM.Config}}{{.Subnet}},{{end}}')
+  gate_trust_proxy="${gate_trust_proxy%,}"
+  if [ -n "${gate_trust_proxy}" ]; then
+    sed -i.bak "s|^IQB_GATE_TRUST_PROXY=.*|IQB_GATE_TRUST_PROXY=${gate_trust_proxy}|" ".env.${APP_NAME}" &&
+      rm ".env.${APP_NAME}.bak"
+  else
+    printf "The subnet of app-net is unknown: set IQB_GATE_TRUST_PROXY in '%s' as described there.\n" \
+      ".env.${APP_NAME}"
+  fi
 
   # Setup makefiles
   sed -i.bak "s|^${MAKE_BASE_DIR_NAME} :=.*|${MAKE_BASE_DIR_NAME} := \\${APP_DIR}|" \

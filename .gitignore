@@ -79,3 +79,5 @@ testem.log
 /.ai
 
 .claude/worktrees
+# iqb-gate packages packed locally until they are published (see README, iqb-gate)
+vendor/iqb-gate/

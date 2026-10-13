@@ -1,5 +1,5 @@
 import {
-  enableProdMode, ApplicationModule, importProvidersFrom, provideZoneChangeDetection
+  enableProdMode, ApplicationModule, importProvidersFrom, inject, provideZoneChangeDetection
 } from '@angular/core';
 
 import { MatSelectModule } from '@angular/material/select';
@@ -34,7 +34,9 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { de } from 'date-fns/locale';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { IqbGateInterceptor, provideIqbGate } from '@iqb/gate-angular';
 import { PaginatorIntlService } from './app/services/paginator-intl.service';
+import { gateTextsFrom } from './app/utils/gate-texts';
 import { AuthInterceptor } from './app/interceptors/auth.interceptor';
 import { APP_ROUTES } from './app/app.routes';
 import { MetadataModule } from './app/modules/metadata/metadata.module';
@@ -107,6 +109,13 @@ bootstrapApplication(AppComponent, {
       useClass: AuthInterceptor,
       multi: true
     },
+    // After the AuthInterceptor: a save the gateway (iqb-gate) asks to confirm is repeated with the token
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: IqbGateInterceptor,
+      multi: true
+    },
+    provideIqbGate({ texts: () => gateTextsFrom(inject(TranslateService)) }),
     {
       provide: 'SERVER_URL',
       useValue: environment.backendUrl

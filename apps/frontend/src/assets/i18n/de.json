@@ -101,6 +101,8 @@
   "login": {
     "alternative": "alternativer Login (experimentell)",
     "no-success": "Login nicht erfolgreich",
+    "automation-detected": "Login abgelehnt: Der Browser wird automatisiert gesteuert. Hier dürfen sich nur Menschen anmelden.",
+    "not-verified": "Login nicht erfolgreich: Es wurde nicht bestätigt, dass sich hier ein Mensch anmeldet.",
     "error": "Fehler"
   },
   "user-profile": {
@@ -1176,12 +1178,39 @@
     "410": "Anmeldung abgelaufen. Bitte erneut anmelden!",
     "415": "Dieser Dateityp wird nicht unterstützt.",
     "422": "Die übermittelten Daten konnten nicht verarbeitet werden.",
+    "automation-detected": "Nicht gespeichert: Der Browser wird automatisiert gesteuert. Hier dürfen nur Menschen Daten eingeben.",
+    "not-verified": "Nicht gespeichert: Es wurde nicht bestätigt, dass hier ein Mensch speichert.",
     "500": "Allgemeines Server-Problem.",
     "504": "Zeitüberschreitung bei der Verarbeitung der Anfrage",
     "520": "Server derzeit nicht erreichbar.",
     "521": "Bitte Anwendung neu laden!",
     "close": "Fehlermeldung ausblenden",
     "login": "Login"
+  },
+  "human-verification": {
+    "title": "Bestätigen Sie, dass Sie ein Mensch sind",
+    "intro": "Bevor Sie in dieser Sitzung speichern, bestätigen Sie bitte einmal, dass hier ein Mensch arbeitet. Danach wird Ihre Änderung gespeichert.",
+    "failed": "Die Bestätigung ist nicht gelungen. Bitte versuchen Sie es noch einmal.",
+    "load-failed": "Die Bestätigung konnte nicht geladen werden. Ihre Änderung ist noch nicht gespeichert.",
+    "retry": "Erneut versuchen",
+    "cancel": "Abbrechen",
+    "widget": {
+      "ariaLinkLabel": "Besuchen Sie altcha.org",
+      "enterCode": "Code eingeben",
+      "enterCodeAria": "Geben Sie den Code ein, den Sie hören. Drücken Sie die Leertaste, um den Ton abzuspielen.",
+      "error": "Überprüfung fehlgeschlagen. Bitte versuchen Sie es später erneut.",
+      "expired": "Überprüfung abgelaufen. Bitte erneut versuchen.",
+      "footer": "Geschützt durch ALTCHA",
+      "getAudioChallenge": "Audio-Herausforderung abspielen",
+      "label": "Ich bin ein Mensch",
+      "loading": "Lade …",
+      "reload": "Neu laden",
+      "verify": "Überprüfen",
+      "verificationRequired": "Überprüfung erforderlich!",
+      "verified": "Überprüft",
+      "verifying": "Wird überprüft …",
+      "waitAlert": "Überprüfung läuft … bitte warten."
+    }
   },
   "print": {
     "stateLabel": "Status",

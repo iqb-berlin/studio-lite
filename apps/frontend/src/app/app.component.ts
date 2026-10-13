@@ -15,7 +15,6 @@ import { AsyncPipe } from '@angular/common';
 import { AppService, standardLogo } from './services/app.service';
 import { BackendService } from './services/backend.service';
 import { AppConfig } from './classes/app-config.class';
-import { IsInArrayPipe } from './pipes/is-in-array.pipe';
 import { DataLoadingAsTextPipe } from './pipes/data-loading-as-text.pipe';
 import { DataLoadingIsNumberPipe } from './pipes/data-loading-is-number.pipe';
 import { I18nService } from './services/i18n.service';
@@ -35,7 +34,10 @@ import { HeartbeatService } from './services/heartbeat.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 
-  imports: [MatProgressSpinner, MatButton, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule, DataLoadingIsNumberPipe, DataLoadingAsTextPipe, IsInArrayPipe, UserMenuComponent, WrappedIconComponent, AsyncPipe]
+  imports: [
+    MatProgressSpinner, MatButton, MatTooltip, MatIcon, RouterLink, RouterOutlet, TranslateModule,
+    DataLoadingIsNumberPipe, DataLoadingAsTextPipe, UserMenuComponent, WrappedIconComponent, AsyncPipe
+  ]
 })
 
 export class AppComponent implements OnInit {

@@ -98,7 +98,8 @@ export class AppService {
 
   addErrorMessage(error: AppHttpError) {
     if (!this.errorMessagesDisabled) {
-      const alikeErrors = this.errorMessages.filter(e => e.status === error.status);
+      // Alike are errors with the same message: a 403 for automation is not a missing permission
+      const alikeErrors = this.errorMessages.filter(e => e.key === error.key);
       if (alikeErrors.length > 0) {
         alikeErrors[0].message += `; ${error.message}`;
       } else {

@@ -153,6 +153,49 @@ the image. Rebuild it after a change there as well.
 `dev-test-e2e-ui-firefox`, `-ui-edge` and the `-mobile` variants of all three are the same suite in
 another browser or viewport.
 
+### The gateway (iqb-gate)
+
+In production, every request passes iqb-gate before it reaches the frontend, or with `/api` the
+backend: a gateway that lets only people save and log in. A login or a save first asks the browser for a proof of work and a
+report that it is not driven by a tool; after that, the session's saves pass until a burst of them.
+Reads are never checked, and neither is what runs without a person acting: token refresh, logout,
+the activity heartbeat, the unit download and marking comments as read.
+
+**Everything is checked by default.** The rules in `config/iqb-gate/gate.yaml` name areas --
+`login`, `administration`, `workspace`, `review`, `account` -- and end in `other`, which takes every
+write the others leave, so a new endpoint is checked without anyone adding it. Areas can be left out
+per installation: `IQB_GATE_RULES_OFF=workspace` in `.env.studio-lite` (or `.env.dev`) lets the
+workspace's saves through, and `other` does not take them instead. A name no rule has stops the
+gateway at start. The frontend's side is `provideIqbGate` and `IqbGateInterceptor` in
+`apps/frontend/src/main.ts`.
+
+**In development the gateway is optional.** Without it, the dev stack starts on `HTTP_PORT` as
+always, and the e2e suites run past it. To put it in front:
+
+```bash
+# in iqb-gate: build the image and pack the libraries
+docker build -f packages/gateway/Dockerfile -t iqb-gate:local .
+# in .env.dev: COMPOSE_PROFILES=gate
+make dev-up
+make dev-test-e2e-gate   # Cypress, rejected at the login and at every save
+```
+
+The studio is then also reachable through the gateway, at `http://localhost:4300` (`GATE_PORT`).
+`IQB_GATE_RULES_OFF` in `.env.dev` switches single areas off, `IQB_GATE_ENFORCE=off` all of them;
+`docker compose --env-file .env.dev up -d iqb-gate` applies either. The audit page,
+`/.iqb-gate/admin/`, asks for `IQB_GATE_AUDIT_KEY` as its password (any user name). With every
+area switched off it is gone, as with `IQB_GATE_ENFORCE=off`; its entries are kept and show again
+once an area is on.
+
+**Not published yet.** `@iqb/gate-angular` and `@iqb/gate-protocol` come from tarballs in
+`vendor/iqb-gate/` (ignored by git), packed with `npm pack` in the iqb-gate repository, and the
+image `iqbberlin/iqb-gate` that production names does not exist yet. Until both are published,
+this branch builds and runs only on a machine that has them.
+
+**Not for production before the script tokens.** The gateway also rejects scripts, eatPrepTBA among
+them -- already at their login, so they can no longer read either. They need script tokens first
+(step 5a), released before this reaches a server.
+
 ### Where to reach when you want to change something
 
 - `apps/frontend` — the Angular application: feature modules under `src/app/modules`, everything
@@ -423,6 +466,10 @@ application or the infrastructure, and the second is where an expired self-signe
 renewed and the infrastructure's login data changed. The application path offers a backup of its own
 before it touches anything: a dump of the database and an export of the backend volume, into
 `backup/<date>` of the installation directory. Take it.
+
+**The gateway** ([iqb-gate](#the-gateway-iqb-gate)) takes `IQB_GATE_SECRET`, `IQB_GATE_AUDIT_KEY`
+and `IQB_GATE_TRUST_PROXY` from the same file; the template explains each. It holds both Traefik
+routes, `/` and `/api`, so nothing reaches the frontend or the backend past it.
 
 **Schema changes are applied automatically**, but forward only. Going back to a version older than
 the installed one can leave the database in a state the old code cannot work with, and the old

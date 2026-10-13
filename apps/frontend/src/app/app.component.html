@@ -17,8 +17,8 @@
         <div class="fx-row-start-center fx-gap-10 fx-wrap"
              [matTooltip]="e.message">
           <mat-icon class="error-icon" [color]="'warn'">error_outline</mat-icon>
-          <span>{{('app-http-error.' + e.status) | translate}}</span>
-          @if (e.status | isInArray: [401, 403, 410]) {
+          <span>{{('app-http-error.' + e.key) | translate}}</span>
+          @if (e.offersLogin) {
             <button mat-raised-button
                     [color]="'primary'"
                     (click)="logout_from_error()">

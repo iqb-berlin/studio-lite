@@ -433,6 +433,7 @@ prepare_installation_dir() {
   mkdir -p "${APP_DIR}/backup/release"
   mkdir -p "${APP_DIR}/backup/temp"
   mkdir -p "${APP_DIR}/config/frontend"
+  mkdir -p "${APP_DIR}/config/iqb-gate"
   mkdir -p "${APP_DIR}/scripts/make"
   mkdir -p "${APP_DIR}/scripts/migration"
 }
@@ -456,6 +457,7 @@ update_files() {
   download_file "docker-compose.${APP_NAME}.yaml" docker-compose.yaml
   download_file "docker-compose.${APP_NAME}.prod.yaml" "docker-compose.${APP_NAME}.prod.yaml"
   download_file "scripts/make/${APP_NAME}.mk" scripts/make/prod.mk
+  download_file config/iqb-gate/gate.yaml config/iqb-gate/gate.yaml
 
   printf "File download done.\n\n"
 }
@@ -564,8 +566,29 @@ update_makefile() {
 }
 
 customize_settings() {
-  # write chosen version tag to env file
-  sed -i.bak "s|TAG.*|TAG=${TARGET_VERSION}|" "${APP_DIR}/.env.${APP_NAME}" && rm "${APP_DIR}/.env.${APP_NAME}.bak"
+  # write chosen version tag to env file (anchored: IQB_GATE_TAG is the gateway's own version)
+  sed -i.bak "s|^TAG=.*|TAG=${TARGET_VERSION}|" "${APP_DIR}/.env.${APP_NAME}" && rm "${APP_DIR}/.env.${APP_NAME}.bak"
+
+  # The gateway (iqb-gate) does not start without its secret: an installation from before it gets one
+  if ! grep -qE '^IQB_GATE_SECRET=.{32,}' "${APP_DIR}/.env.${APP_NAME}"; then
+    sed -i.bak '/^IQB_GATE_SECRET=/d' "${APP_DIR}/.env.${APP_NAME}" && rm "${APP_DIR}/.env.${APP_NAME}.bak"
+    printf "IQB_GATE_SECRET=%s\n" "$(openssl rand -hex 32)" >>"${APP_DIR}/.env.${APP_NAME}"
+  fi
+
+  # ... and believes X-Forwarded-* only from Traefik's network: without it, every request seems to
+  # come from Traefik -- one challenge limit for all users, and cookies without Secure
+  if ! grep -qE '^IQB_GATE_TRUST_PROXY=.+' "${APP_DIR}/.env.${APP_NAME}"; then
+    declare gate_trust_proxy
+    gate_trust_proxy=$(docker network inspect app-net --format '{{range .IPAM.Config}}{{.Subnet}},{{end}}' 2>/dev/null)
+    gate_trust_proxy="${gate_trust_proxy%,}"
+    if [ -n "${gate_trust_proxy}" ]; then
+      sed -i.bak '/^IQB_GATE_TRUST_PROXY=/d' "${APP_DIR}/.env.${APP_NAME}" && rm "${APP_DIR}/.env.${APP_NAME}.bak"
+      printf "IQB_GATE_TRUST_PROXY=%s\n" "${gate_trust_proxy}" >>"${APP_DIR}/.env.${APP_NAME}"
+    else
+      printf "The subnet of app-net is unknown: set IQB_GATE_TRUST_PROXY in '%s' (see .env.%s.template).\n" \
+        "${APP_DIR}/.env.${APP_NAME}" "${APP_NAME}"
+    fi
+  fi
 
   # Setup makefiles
   sed -i.bak "s|${MAKE_BASE_DIR_NAME} :=.*|${MAKE_BASE_DIR_NAME} := \\$(pwd)|" \
