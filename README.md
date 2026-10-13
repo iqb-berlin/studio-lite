@@ -156,18 +156,22 @@ another browser or viewport.
 ### The gateway (iqb-gate)
 
 In production, every request passes iqb-gate before it reaches the frontend, or with `/api` the
-backend: a gateway that lets only people save and log in. A login or a save first asks the browser for a proof of work and a
-report that it is not driven by a tool; after that, the session's saves pass until a burst of them.
-Reads are never checked, and neither is what runs without a person acting: token refresh, logout,
-the activity heartbeat, the unit download and marking comments as read.
+backend: a gateway that lets only people log in, save and read the API. Every request reports that
+the browser is not driven by a tool; the login -- or the first save or read of a session -- asks for a
+proof of work once, and after that the session's saves and reads pass until a burst of them. Not
+checked is what runs without a person acting (token refresh, logout, the activity heartbeat, the
+unit download, marking comments as read), what a page reads before the login (settings, logo), and
+the resource packages, which Verona modules load with script tags.
 
 **Everything is checked by default.** The rules in `config/iqb-gate/gate.yaml` name areas --
 `login`, `administration`, `workspace`, `review`, `account` -- and end in `other`, which takes every
-write the others leave, so a new endpoint is checked without anyone adding it. Areas can be left out
-per installation: `IQB_GATE_RULES_OFF=workspace` in `.env.studio-lite` (or `.env.dev`) lets the
-workspace's saves through, and `other` does not take them instead. A name no rule has stops the
-gateway at start. The frontend's side is `provideIqbGate` and `IqbGateInterceptor` in
-`apps/frontend/src/main.ts`.
+request the others leave, so a new endpoint is checked without anyone adding it; writes and reads
+have rules of their own. Areas can be left out per installation: `IQB_GATE_RULES_OFF=workspace` in
+`.env.studio-lite` (or `.env.dev`) lets the workspace's saves through, `IQB_GATE_READ_RULES_OFF` its
+reads, and `other` does not take them instead. A name no rule has stops the gateway at start. The
+frontend's side is `provideIqbGate` and `IqbGateInterceptor` in `apps/frontend/src/main.ts`: the
+library shows the challenge and, when the gateway refuses a request, says why; the studio keeps
+such refusals out of its own error display (`isGateRefusal` in `auth.interceptor.ts`).
 
 **In development the gateway is optional.** Without it, the dev stack starts on `HTTP_PORT` as
 always, and the e2e suites run past it. To put it in front:
@@ -177,11 +181,12 @@ always, and the e2e suites run past it. To put it in front:
 docker build -f packages/gateway/Dockerfile -t iqb-gate:local .
 # in .env.dev: COMPOSE_PROFILES=gate
 make dev-up
-make dev-test-e2e-gate   # Cypress, rejected at the login and at every save
+make dev-test-e2e-gate   # Cypress, rejected at the login, at every save and every read
 ```
 
 The studio is then also reachable through the gateway, at `http://localhost:4300` (`GATE_PORT`).
-`IQB_GATE_RULES_OFF` in `.env.dev` switches single areas off, `IQB_GATE_ENFORCE=off` all of them;
+`IQB_GATE_RULES_OFF` and `IQB_GATE_READ_RULES_OFF` in `.env.dev` switch single areas off,
+`IQB_GATE_ENFORCE=off` all of them;
 `docker compose --env-file .env.dev up -d iqb-gate` applies either. The audit page,
 `/.iqb-gate/admin/`, asks for `IQB_GATE_AUDIT_KEY` as its password (any user name). With every
 area switched off it is gone, as with `IQB_GATE_ENFORCE=off`; its entries are kept and show again
@@ -193,7 +198,7 @@ image `iqbberlin/iqb-gate` that production names does not exist yet. Until both 
 this branch builds and runs only on a machine that has them.
 
 **Not for production before the script tokens.** The gateway also rejects scripts, eatPrepTBA among
-them -- already at their login, so they can no longer read either. They need script tokens first
+them -- at their login and at every read. They need script tokens that may read and write first
 (step 5a), released before this reaches a server.
 
 ### Where to reach when you want to change something

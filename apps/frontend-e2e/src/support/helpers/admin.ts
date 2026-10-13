@@ -114,25 +114,17 @@ export function deleteUser(user: string): void {
 /**
  * Creates a workspace group
  * @param group - Group name
- * @param expectedStatus - The status the creation is to answer with; the request stays readable
- * as `@createWsGroup`
  * @example
  * createGroup('Mathematics');
  */
-export function createGroup(group: string, expectedStatus = 201): void {
+export function createGroup(group: string): void {
   cy.visit('/');
   cy.findAdminSettings().click();
   clickIndexTabAdmin('workspace-groups');
   cy.get('mat-icon').contains('add').click();
   cy.translate(Cypress.expose('locale')).then(json => {
     cy.get(`input[placeholder="${json.admin['group-name']}"]`).type(group);
-    cy.clickButtonWithResponseCheck(
-      json.create,
-      [expectedStatus],
-      '/api/admin/workspace-groups',
-      'POST',
-      'createWsGroup'
-    );
+    cy.clickButtonWithResponseCheck(json.create, [201], '/api/admin/workspace-groups', 'POST', 'createWsGroup');
   });
 }
 

@@ -1,18 +1,16 @@
-import { Interception } from 'cypress/types/net-stubbing';
 import type { AuthDataDto } from '@studio-lite-lib/api-dto';
-import { createGroup as createGroupInTheBrowser } from '../../support/helpers/admin';
 
 /**
- * The gateway in front of the studio (iqb-gate) lets only people log in and save -- everywhere, by
- * default: browsers driven by tools like Cypress, scripts calling the API, and clients that only
- * pretend to be a person are kept out. This spec checks that from the side of the automation:
- * Cypress is exactly what is to be kept out. So it cannot log in through the gateway itself, and
- * sets up its account past it.
+ * The gateway in front of the studio (iqb-gate) lets only people log in, save and read the API --
+ * everywhere, by default: browsers driven by tools like Cypress, scripts calling the API, and clients
+ * that only pretend to be a person are kept out. This spec checks that from the side of the
+ * automation: Cypress is exactly what is to be kept out. So it cannot log in through the gateway
+ * itself, and sets up its account past it.
  *
  * Runs only through the gateway with its check on and no rule switched off
  * (`make dev-test-e2e-gate`); every other run leaves this folder out (cypress.config.ts).
  */
-describe('Logins and saves only from people (iqb-gate)', () => {
+describe('Logins, saves and reads only from people (iqb-gate)', () => {
   const username = Cypress.expose('username');
   const password = Cypress.expose('password');
   // The studio as the gateway reaches it (IQB_GATE_UPSTREAM in docker-compose.yaml), on app-net
@@ -56,6 +54,16 @@ describe('Logins and saves only from people (iqb-gate)', () => {
     'app-version': Cypress.expose('version'),
     authorization: `bearer ${token}`,
     ...headers
+  });
+
+  /** Sends a read as a script would: no browser, no report on it -- logged in, with the token. */
+  const readAsScript = (
+    url: string,
+    headers: Record<string, string> = {}
+  ): Cypress.Chainable<Cypress.Response<Rejection>> => cy.request<Rejection>({
+    url,
+    headers: headersWith(headers),
+    failOnStatusCode: false
   });
 
   /** Sends a write as a script would: no browser, no report on it. */
@@ -124,8 +132,8 @@ describe('Logins and saves only from people (iqb-gate)', () => {
     }).then(({ body }) => {
       token = body.accessToken;
       refreshToken = body.refreshToken;
-      // A read: through the gateway, which checks none
-      cy.request<AuthDataDto>({ url: '/api/auth-data', headers: headersWith({}) }).then(response => {
+      // A read: past the gateway as well, which lets no read of Cypress through
+      cy.request<AuthDataDto>({ url: `${pastTheGateway}/api/auth-data`, headers: headersWith({}) }).then(response => {
         userId = response.body.userId;
       });
     });
@@ -156,7 +164,9 @@ describe('Logins and saves only from people (iqb-gate)', () => {
     cy.get('[data-cy="home-submit-button"]').click();
     cy.wait('@login').its('response.statusCode').should('equal', 403);
     cy.translate(Cypress.expose('locale')).then(json => {
-      cy.contains(json.login['automation-detected']).should('be.visible');
+      cy.get('[data-cy="gate-refusal-message"]')
+        .should('be.visible')
+        .and('have.text', json['human-verification']['automation-detected']);
     });
   });
 
@@ -171,17 +181,41 @@ describe('Logins and saves only from people (iqb-gate)', () => {
     createGroup({ [signalsHeader]: personSignals }).its('status').should('equal', 428);
   });
 
-  it('rejects an administration save made through the browser that Cypress drives, and says why', () => {
+  it('rejects a read sent without a browser, as a script sends it, also with a valid token', () => {
+    readAsScript(`/api/workspaces/${workspaceId}`).then(response => {
+      expectAutomationDetected(response);
+      expect(response.body.signals).to.include('signals-missing');
+    });
+  });
+
+  it('asks a client that only pretends to be a person for the challenge before it reads', () => {
+    readAsScript(`/api/workspaces/${workspaceId}`, { [signalsHeader]: personSignals })
+      .its('status').should('equal', 428);
+  });
+
+  // Logged in, the browser Cypress drives cannot even load the page: its first read is refused
+  it('rejects the reads of the browser that Cypress drives, and says why', () => {
+    cy.intercept('GET', '/api/auth-data').as('authData');
     visitLoggedIn();
-    createGroupInTheBrowser(groupName, 403);
-    cy.get<Interception>('@createWsGroup').then(({ response }) => {
+    cy.wait('@authData').then(({ response }) => {
+      expect(response?.statusCode).to.equal(403);
       expect(response?.body.code).to.equal('automation-detected');
       // Cypress launches Chrome as automated, and the browser says so
       expect(response?.body.signals).to.include('webdriver');
     });
     cy.translate(Cypress.expose('locale')).then(json => {
-      cy.contains(json['app-http-error']['automation-detected']).should('be.visible');
+      cy.get('[data-cy="gate-refusal-message"]')
+        .should('be.visible')
+        .and('have.text', json['human-verification']['automation-detected']);
     });
+  });
+
+  // What a page reads before the login, and the resource packages that Verona modules load with
+  // script tags: neither can carry the browser's report
+  it('lets the reads through that no person could have reported', () => {
+    readAsScript('/api/admin/settings/config').its('status').should('equal', 200);
+    readAsScript('/api/admin/settings/app-logo').its('status').should('be.within', 200, 299);
+    readAsScript('/api/packages/no-such-package/file.js').its('status').should('equal', 404);
   });
 
   // `other` takes what no area names -- an endpoint added later is checked from its first day
@@ -224,6 +258,7 @@ describe('Logins and saves only from people (iqb-gate)', () => {
 
   it('records every checked attempt under its rule, and nothing it let through', () => {
     const rules = ['login', 'administration', 'workspace', 'account', 'review', 'other'];
+    const writes = (entries: AuditEntry[]) => entries.filter(entry => entry.method !== 'GET');
     // An entry is written after its answer: once every rule has one, the spec waits a moment
     // longer, so that a wrongly recorded heartbeat would have arrived too
     auditSinceStart(entries => rules.every(rule => entries.some(entry => entry.rule === rule)));
@@ -231,10 +266,14 @@ describe('Logins and saves only from people (iqb-gate)', () => {
     auditSinceStart(() => true).then(entries => {
       expect([...new Set(entries.map(entry => entry.rule))]).to.have.members(rules);
       expect(entries.map(entry => entry.outcome)).to.include.members(['automation-detected', 'verification-required']);
-      expect(entries.filter(entry => entry.rule === 'login').every(entry => entry.path === '/api/login'))
+      expect(writes(entries).filter(entry => entry.rule === 'login').every(entry => entry.path === '/api/login'))
         .to.equal(true);
-      expect(entries.filter(entry => entry.rule === 'administration')
+      expect(writes(entries).filter(entry => entry.rule === 'administration')
         .every(entry => entry.path === '/api/admin/workspace-groups')).to.equal(true);
+      // Refused reads are recorded under their rules as well; public ones are not checked at all
+      expect(entries.some(entry => entry.method === 'GET' && entry.rule === 'workspace')).to.equal(true);
+      expect(entries.some(entry => entry.method === 'GET' && entry.rule === 'account')).to.equal(true);
+      expect(entries.some(entry => entry.path.startsWith('/api/admin/settings/'))).to.equal(false);
       expect(entries.some(entry => entry.path === '/api/activity')).to.equal(false);
       expect(entries.some(entry => entry.user === username)).to.equal(true);
     });

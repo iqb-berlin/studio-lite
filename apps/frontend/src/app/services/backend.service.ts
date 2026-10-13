@@ -14,8 +14,8 @@ import {
   UserWorkspaceFullDto,
   EmailTemplateDto
 } from '@studio-lite-lib/api-dto';
+import { isGateRefusal } from '@iqb/gate-angular';
 import { AppService, defaultAppConfig } from './app.service';
-import { gateRejectionOf } from '../utils/gate-rejection';
 import {
   authRequestContext, backgroundRequestContext, logoutContext, tokenRefreshContext
 } from '../interceptors/request-classification';
@@ -40,8 +40,10 @@ export class BackendService {
   }
 
   /**
-   * Logs in, and answers whether that worked. A login the gateway in front (iqb-gate) did not let
-   * through is not a wrong password: its error is passed on, for the page to say why.
+   * Logs in and loads the user's data: `true` once both arrived, `false` for a login that did not
+   * succeed. A refusal of the gateway in front (iqb-gate) comes through as the error it is: its
+   * library has already told the person why, and a `false` would have the login page say it again
+   * in the words of a wrong password.
    */
   login(name: string, password: string, initLoginMode: boolean): Observable<boolean> {
     const sessionId = BackendService.getSessionIdFromToken();
@@ -55,7 +57,7 @@ export class BackendService {
       { context: authRequestContext() }
     )
       .pipe(
-        catchError((error: unknown) => (gateRejectionOf(error) ? throwError(() => error) : of(false))),
+        catchError(error => BackendService.loginFailure(error)),
         switchMap(loginData => {
           if (loginData && typeof loginData === 'object') {
             const { accessToken, refreshToken } = loginData as {
@@ -70,12 +72,22 @@ export class BackendService {
                   this.appService.authData = authData;
                   return true;
                 }),
-                catchError(() => of(false))
+                catchError(error => {
+                  // Not logged in after all: the tokens of a login reported as failed would
+                  // still log the next page load in
+                  localStorage.removeItem('id_token');
+                  localStorage.removeItem('refresh_token');
+                  return BackendService.loginFailure(error);
+                })
               );
           }
           return of(false);
         })
       );
+  }
+
+  private static loginFailure(error: unknown): Observable<boolean> {
+    return isGateRefusal(error) ? throwError(() => error) : of(false);
   }
 
   refresh(refreshToken: string): Observable<{ accessToken: string, refreshToken: string } | null> {

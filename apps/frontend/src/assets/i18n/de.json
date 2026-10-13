@@ -101,8 +101,6 @@
   "login": {
     "alternative": "alternativer Login (experimentell)",
     "no-success": "Login nicht erfolgreich",
-    "automation-detected": "Login abgelehnt: Der Browser wird automatisiert gesteuert. Hier dürfen sich nur Menschen anmelden.",
-    "not-verified": "Login nicht erfolgreich: Es wurde nicht bestätigt, dass sich hier ein Mensch anmeldet.",
     "error": "Fehler"
   },
   "user-profile": {
@@ -1178,8 +1176,6 @@
     "410": "Anmeldung abgelaufen. Bitte erneut anmelden!",
     "415": "Dieser Dateityp wird nicht unterstützt.",
     "422": "Die übermittelten Daten konnten nicht verarbeitet werden.",
-    "automation-detected": "Nicht gespeichert: Der Browser wird automatisiert gesteuert. Hier dürfen nur Menschen Daten eingeben.",
-    "not-verified": "Nicht gespeichert: Es wurde nicht bestätigt, dass hier ein Mensch speichert.",
     "500": "Allgemeines Server-Problem.",
     "504": "Zeitüberschreitung bei der Verarbeitung der Anfrage",
     "520": "Server derzeit nicht erreichbar.",
@@ -1189,11 +1185,15 @@
   },
   "human-verification": {
     "title": "Bestätigen Sie, dass Sie ein Mensch sind",
-    "intro": "Bevor Sie in dieser Sitzung speichern, bestätigen Sie bitte einmal, dass hier ein Mensch arbeitet. Danach wird Ihre Änderung gespeichert.",
+    "intro": "Bevor Sie in dieser Sitzung weiterarbeiten, bestätigen Sie bitte einmal, dass hier ein Mensch arbeitet. Danach geht es weiter, wo Sie waren.",
     "failed": "Die Bestätigung ist nicht gelungen. Bitte versuchen Sie es noch einmal.",
-    "load-failed": "Die Bestätigung konnte nicht geladen werden. Ihre Änderung ist noch nicht gespeichert.",
+    "load-failed": "Die Bestätigung konnte nicht geladen werden. Bis dahin wird nichts geladen oder gespeichert.",
     "retry": "Erneut versuchen",
     "cancel": "Abbrechen",
+    "refusal-title": "Nicht ausgeführt",
+    "automation-detected": "Der Browser wird automatisiert gesteuert. Hier dürfen nur Menschen Daten lesen und eingeben; es wurde nichts geladen oder gespeichert.",
+    "not-verified": "Es wurde nicht bestätigt, dass hier ein Mensch arbeitet; es wurde nichts geladen oder gespeichert. Bitte versuchen Sie es in einer Minute noch einmal.",
+    "close": "Schließen",
     "widget": {
       "ariaLinkLabel": "Besuchen Sie altcha.org",
       "enterCode": "Code eingeben",

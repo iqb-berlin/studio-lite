@@ -6,7 +6,7 @@ x-env-postgres: &env-postgres
   POSTGRES_DB: ${POSTGRES_DB}
 
 services:
-  # In front of the frontend: every request passes it, every save and every login has to come
+  # In front of the frontend: every request passes it, every save, login and API read has to come
   # from a person (config/iqb-gate/gate.yaml). Image and published port are set per environment.
   iqb-gate:
     depends_on:
@@ -17,6 +17,7 @@ services:
       IQB_GATE_CONFIG: /etc/iqb-gate/gate.yaml
       IQB_GATE_ENFORCE: ${IQB_GATE_ENFORCE:-on}
       IQB_GATE_RULES_OFF: ${IQB_GATE_RULES_OFF:-}
+      IQB_GATE_READ_RULES_OFF: ${IQB_GATE_READ_RULES_OFF:-}
       IQB_GATE_SECRET: ${IQB_GATE_SECRET:-}
       IQB_GATE_AUDIT_KEY: ${IQB_GATE_AUDIT_KEY:-}
       IQB_GATE_TRUST_PROXY: ${IQB_GATE_TRUST_PROXY:-}

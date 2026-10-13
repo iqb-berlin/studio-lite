@@ -7,6 +7,7 @@ import {
   map, of
 } from 'rxjs';
 import { Router } from '@angular/router';
+import { isGateRefusal } from '@iqb/gate-angular';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 import { AppHttpError } from '../classes/app-http-error.class';
@@ -63,6 +64,8 @@ export class AuthInterceptor implements HttpInterceptor {
           if (error.status === 401 && !req.context.get(SKIP_TOKEN_REFRESH)) {
             return this.handle401Error(req, next, idToken);
           }
+          // The gateway in front (iqb-gate) refused it, and its library has already said why
+          if (isGateRefusal(error)) return throwError(() => error);
           httpErrorInfo = new AppHttpError(error);
           return throwError(() => error);
         }),
@@ -101,9 +104,10 @@ export class AuthInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<unknown>> {
     return next.handle(this.addToken(request, token)).pipe(
       catchError(error => {
+        if (isGateRefusal(error)) return throwError(() => error);
         const httpErrorInfo = new AppHttpError(error);
         if (httpErrorInfo.status === 401) {
-          httpErrorInfo.setStatus(403);
+          httpErrorInfo.status = 403;
         }
         this.report(request, httpErrorInfo);
         return throwError(() => error);

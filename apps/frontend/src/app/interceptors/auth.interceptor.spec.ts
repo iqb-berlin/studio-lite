@@ -188,6 +188,38 @@ describe('AuthInterceptor', () => {
     expect((appServiceSpy.addErrorMessage.mock.calls[0][0] as AppHttpError).status).toBe(403);
   });
 
+  // The gateway in front (iqb-gate) refuses an automated browser or an unconfirmed person; its library
+  // has already told the person why, so the studio's banner stays out of it
+  describe('a request the gateway refused', () => {
+    it('should not report a refusal of an automated browser', () => {
+      httpClient.get('/api/workspaces/7').subscribe({ error: () => {} });
+      httpMock.expectOne('/api/workspaces/7')
+        .flush({ code: 'automation-detected' }, { status: 403, statusText: 'Forbidden' });
+
+      expect(appServiceSpy.addErrorMessage).not.toHaveBeenCalled();
+    });
+
+    it('should not report a challenge that was not solved', () => {
+      httpClient.put('/api/workspaces/7', {}).subscribe({ error: () => {} });
+      httpMock.expectOne('/api/workspaces/7')
+        .flush({ code: 'human-verification-required' }, { status: 428, statusText: 'Precondition Required' });
+
+      expect(appServiceSpy.addErrorMessage).not.toHaveBeenCalled();
+    });
+
+    it('should not report a refusal of the request repeated after a token refresh', () => {
+      localStorage.setItem('refresh_token', 'old-refresh');
+      backendServiceSpy.refresh.mockReturnValue(of({ accessToken: 'new-access', refreshToken: 'new-refresh' }));
+
+      httpClient.get('/api/workspaces/7').subscribe({ error: () => {} });
+      httpMock.expectOne('/api/workspaces/7').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+      httpMock.expectOne('/api/workspaces/7')
+        .flush({ code: 'automation-detected' }, { status: 403, statusText: 'Forbidden' });
+
+      expect(appServiceSpy.addErrorMessage).not.toHaveBeenCalled();
+    });
+  });
+
   // A refresh that worked says the session is fine. If the repeated request still fails, that
   // failure belongs to the request, not to the session: the API answers missing workspace access
   // with 401 as well, and opening a unit in a foreign workspace used to log the user out (#1694).

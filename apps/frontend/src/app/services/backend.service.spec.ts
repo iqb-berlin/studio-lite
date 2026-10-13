@@ -123,25 +123,13 @@ describe('BackendService', () => {
       req.flush(null);
     });
 
-    it('should pass on a login the gateway did not let through, instead of calling it a failure', done => {
-      service.login('testUser', 'password', false).subscribe({
-        next: () => done.fail('expected the gateway\'s rejection'),
-        error: (error: HttpErrorResponse) => {
-          expect(error.status).toBe(403);
-          expect(error.error).toEqual({ code: 'automation-detected', signals: ['webdriver'] });
-          done();
-        }
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}login`);
-      req.flush({ code: 'automation-detected', signals: ['webdriver'] }, { status: 403, statusText: 'Forbidden' });
-    });
-
     it('should return false when auth-data fails after successful login', done => {
       const mockLoginResponse = { accessToken: 'test-token', refreshToken: 'test-refresh' };
 
       service.login('testUser', 'password', false).subscribe(result => {
         expect(result).toBe(false);
+        expect(localStorage.getItem('id_token')).toBeNull();
+        expect(localStorage.getItem('refresh_token')).toBeNull();
         done();
       });
 
@@ -150,6 +138,49 @@ describe('BackendService', () => {
 
       const authReq = httpMock.expectOne(`${serverUrl}auth-data`);
       authReq.error(new ProgressEvent('error'));
+    });
+
+    // The gateway in front (iqb-gate) refused it, and its library has said why: the login page
+    // must not add its own message, which reads like a wrong password
+    describe('refused by the gateway', () => {
+      it('should pass the refusal of the login on as an error', done => {
+        service.login('testUser', 'password', false).subscribe({
+          next: () => done.fail('a refusal must not become an answer'),
+          error: (error: HttpErrorResponse) => {
+            expect(error.status).toBe(403);
+            expect(localStorage.getItem('id_token')).toBeNull();
+            done();
+          }
+        });
+
+        httpMock.expectOne(`${serverUrl}login`)
+          .flush({ code: 'automation-detected' }, { status: 403, statusText: 'Forbidden' });
+      });
+
+      it('should pass the refusal of the auth-data read on, and keep no tokens', done => {
+        service.login('testUser', 'password', false).subscribe({
+          next: () => done.fail('a refusal must not become an answer'),
+          error: (error: HttpErrorResponse) => {
+            expect(error.status).toBe(428);
+            expect(localStorage.getItem('id_token')).toBeNull();
+            expect(localStorage.getItem('refresh_token')).toBeNull();
+            done();
+          }
+        });
+
+        httpMock.expectOne(`${serverUrl}login`).flush({ accessToken: 'test-token', refreshToken: 'test-refresh' });
+        httpMock.expectOne(`${serverUrl}auth-data`)
+          .flush({ code: 'human-verification-required' }, { status: 428, statusText: 'Precondition Required' });
+      });
+
+      it('should still answer false for a 403 of the studio itself', done => {
+        service.login('testUser', 'password', false).subscribe(result => {
+          expect(result).toBe(false);
+          done();
+        });
+
+        httpMock.expectOne(`${serverUrl}login`).flush('Forbidden', { status: 403, statusText: 'Forbidden' });
+      });
     });
   });
 

@@ -23,6 +23,15 @@ describe('gateTextsFrom', () => {
     expect(texts.cancel).toBe('<human-verification.cancel>');
   });
 
+  it('should take the texts of the notice that the gateway refused a request', () => {
+    const texts = gateTextsFrom(translate);
+
+    expect(texts.refusalTitle).toBe('<human-verification.refusal-title>');
+    expect(texts.automationDetected).toBe('<human-verification.automation-detected>');
+    expect(texts.notVerified).toBe('<human-verification.not-verified>');
+    expect(texts.close).toBe('<human-verification.close>');
+  });
+
   it('should take every text of the widget', () => {
     const texts = gateTextsFrom(translate);
 
@@ -51,7 +60,7 @@ describe('gateTextsFrom', () => {
 
     const { widget, ...dialog } = gateTextsFrom(translate);
 
-    expect(Object.keys(dialog)).toHaveLength(6);
+    expect(Object.keys(dialog)).toHaveLength(10);
     expect(Object.values(dialog).every(text => typeof text === 'string')).toBe(true);
     expect(Object.values(widget ?? {}).every(text => typeof text === 'string')).toBe(true);
   });

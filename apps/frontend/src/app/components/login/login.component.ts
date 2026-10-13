@@ -4,7 +4,7 @@ import {
 import {
   UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
@@ -15,7 +15,6 @@ import { MatButton } from '@angular/material/button';
 import { AppService } from '../../services/app.service';
 import { BackendService } from '../../services/backend.service';
 import { WarningComponent } from '../warning/warning.component';
-import { GateRejection, gateRejectionOf } from '../../utils/gate-rejection';
 import { AreaTitleComponent } from '../area-title/area-title.component';
 
 /**
@@ -46,7 +45,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   // it out (#1617). The template disables the submit button while this is true, and the
   // guard in login() catches the click that lands before that rendering does.
   isSubmitting = false;
-  private ngUnsubscribe = new Subject<void>();
+  private routingSubscription: Subscription | null = null;
 
   constructor(private fb: UntypedFormBuilder,
               private route: ActivatedRoute,
@@ -62,21 +61,17 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    this.route.queryParams
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(queryParams => {
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        this.redirectTo = queryParams['redirectTo'];
-      });
-    this.route.params
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(params => {
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        this.loginNamePreset = params['login'];
-        if (this.loginNamePreset) {
-          this.loginForm.setValue({ name: this.loginNamePreset, pw: '' });
-        }
-      });
+    this.routingSubscription = this.route.queryParams.subscribe(queryParams => {
+      // eslint-disable-next-line @typescript-eslint/dot-notation
+      this.redirectTo = queryParams['redirectTo'];
+    });
+    this.routingSubscription = this.route.params.subscribe(params => {
+      // eslint-disable-next-line @typescript-eslint/dot-notation
+      this.loginNamePreset = params['login'];
+      if (this.loginNamePreset) {
+        this.loginForm.setValue({ name: this.loginNamePreset, pw: '' });
+      }
+    });
   }
 
   login(): void {
@@ -90,27 +85,18 @@ export class LoginComponent implements OnInit, OnDestroy {
       const initLoginMode = !this.appService.appConfig.hasUsers;
       this.backendService.login(
         this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value, initLoginMode
-      )
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe({
-          next: async ok => {
-            await this.validLoginCheck(ok, initLoginMode);
-          },
-          error: async (error: unknown) => {
-            await this.validLoginCheck(false, initLoginMode, gateRejectionOf(error));
-          }
-        });
+      ).subscribe({
+        next: async ok => {
+          await this.validLoginCheck(ok, initLoginMode);
+        },
+        // Only the gateway's refusal comes as an error, and its library has said why already
+        error: () => this.endLoginAttempt()
+      });
     }
   }
 
-  /** `rejection`: why the gateway in front did not let the login through, if that was it. */
-  async validLoginCheck(ok: boolean, initLoginMode: boolean, rejection: GateRejection | null = null) {
-    this.isSubmitting = false;
-    this.appService.dataLoading = false;
-    // Switched off in login() only so that a failed login is not reported twice -- the snack bar
-    // below says it already. The answer is in, so from here on every error is shown again; the page
-    // is not reloaded after a login, and nothing else would switch them back on (#1724).
-    this.appService.errorMessagesDisabled = false;
+  async validLoginCheck(ok: boolean, initLoginMode: boolean) {
+    this.endLoginAttempt();
     if (ok) {
       if (this.redirectTo) {
         await this.router.navigate([this.redirectTo]);
@@ -119,21 +105,24 @@ export class LoginComponent implements OnInit, OnDestroy {
       }
     } else {
       this.snackBar.open(
-        this.translateService.instant(rejection ? `login.${rejection}` : 'login.no-success'),
+        this.translateService.instant('login.no-success'),
         this.translateService.instant('login.error'),
         { duration: 3000 });
     }
   }
 
+  private endLoginAttempt(): void {
+    this.isSubmitting = false;
+    this.appService.dataLoading = false;
+    // Switched off in login() only so that a failed login is not reported twice -- the snack bar
+    // in validLoginCheck says it already. The answer is in, so from here on every error is shown
+    // again; the page is not reloaded after a login, and nothing else would switch them back on (#1724).
+    this.appService.errorMessagesDisabled = false;
+  }
+
   ngOnDestroy(): void {
-    // A login still running is cancelled with the page: no answer will switch off what login()
-    // switched on, so it is done here.
-    if (this.isSubmitting) {
-      this.isSubmitting = false;
-      this.appService.dataLoading = false;
-      this.appService.errorMessagesDisabled = false;
+    if (this.routingSubscription !== null) {
+      this.routingSubscription.unsubscribe();
     }
-    this.ngUnsubscribe.next();
-    this.ngUnsubscribe.complete();
   }
 }

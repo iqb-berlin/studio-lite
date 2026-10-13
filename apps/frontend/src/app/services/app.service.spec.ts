@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { AuthDataDto } from '@studio-lite-lib/api-dto';
@@ -6,21 +5,6 @@ import { AppService } from './app.service';
 import { AppHttpError } from '../classes/app-http-error.class';
 
 describe('AppService', () => {
-  const httpError = (
-    status: number,
-    message: string,
-    urlWithParams: string,
-    body: unknown = null,
-    id = 0
-  ): AppHttpError => {
-    const error = new AppHttpError(new HttpErrorResponse({ status, error: body }));
-    error.id = id;
-    error.message = message;
-    error.method = 'GET';
-    error.urlWithParams = urlWithParams;
-    return error;
-  };
-
   let service: AppService;
 
   beforeEach(() => {
@@ -194,7 +178,13 @@ describe('AppService', () => {
 
   describe('addErrorMessage', () => {
     it('should add error message when not disabled', () => {
-      const error = httpError(500, 'Test message', '/test');
+      const error: AppHttpError = {
+        id: 0,
+        status: 500,
+        message: 'Test message',
+        method: 'GET',
+        urlWithParams: '/test'
+      };
 
       service.addErrorMessage(error);
       expect(service.errorMessages.length).toBe(1);
@@ -203,15 +193,33 @@ describe('AppService', () => {
 
     it('should not add error message when disabled', () => {
       service.errorMessagesDisabled = true;
-      const error = httpError(500, 'Test message', '/test');
+      const error: AppHttpError = {
+        id: 0,
+        status: 500,
+        message: 'Test message',
+        method: 'GET',
+        urlWithParams: '/test'
+      };
 
       service.addErrorMessage(error);
       expect(service.errorMessages.length).toBe(0);
     });
 
     it('should combine messages for errors with same status', () => {
-      const error1 = httpError(404, 'Message 1', '/test1');
-      const error2 = httpError(404, 'Message 2', '/test2');
+      const error1: AppHttpError = {
+        id: 0,
+        status: 404,
+        message: 'Message 1',
+        method: 'GET',
+        urlWithParams: '/test1'
+      };
+      const error2: AppHttpError = {
+        id: 0,
+        status: 404,
+        message: 'Message 2',
+        method: 'GET',
+        urlWithParams: '/test2'
+      };
 
       service.addErrorMessage(error1);
       service.addErrorMessage(error2);
@@ -220,23 +228,28 @@ describe('AppService', () => {
       expect(service.errorMessages[0].message).toBe('Message 1; Message 2');
     });
 
-    it('should keep a rejection for automation apart from a missing permission', () => {
-      service.addErrorMessage(httpError(403, 'Forbidden', '/test1'));
-      service.addErrorMessage(httpError(403, 'Automated', '/test2', { code: 'automation-detected' }));
-
-      expect(service.errorMessages.map(e => e.key)).toEqual(['403', 'automation-detected']);
-    });
-
     it('should increment errorMessageCounter for new errors', () => {
       const initialCounter = service.errorMessageCounter;
-      const error = httpError(500, 'Test message', '/test');
+      const error: AppHttpError = {
+        id: 0,
+        status: 500,
+        message: 'Test message',
+        method: 'GET',
+        urlWithParams: '/test'
+      };
 
       service.addErrorMessage(error);
       expect(service.errorMessageCounter).toBe(initialCounter + 1);
     });
 
     it('should assign id to error message', () => {
-      const error = httpError(500, 'Test message', '/test');
+      const error: AppHttpError = {
+        id: 0,
+        status: 500,
+        message: 'Test message',
+        method: 'GET',
+        urlWithParams: '/test'
+      };
 
       service.addErrorMessage(error);
       expect(service.errorMessages[0].id).toBeGreaterThan(0);
@@ -245,8 +258,20 @@ describe('AppService', () => {
 
   describe('removeErrorMessage', () => {
     it('should remove error message by id', () => {
-      const error1 = httpError(404, 'Message 1', '/test1', null, 1);
-      const error2 = httpError(500, 'Message 2', '/test2', null, 2);
+      const error1: AppHttpError = {
+        id: 1,
+        status: 404,
+        message: 'Message 1',
+        method: 'GET',
+        urlWithParams: '/test1'
+      };
+      const error2: AppHttpError = {
+        id: 2,
+        status: 500,
+        message: 'Message 2',
+        method: 'GET',
+        urlWithParams: '/test2'
+      };
 
       service.errorMessages = [error1, error2];
       service.removeErrorMessage(error1);
@@ -256,8 +281,20 @@ describe('AppService', () => {
     });
 
     it('should do nothing if error id not found', () => {
-      const error1 = httpError(404, 'Message 1', '/test1', null, 1);
-      const error2 = httpError(500, 'Message 2', '/test2', null, 999);
+      const error1: AppHttpError = {
+        id: 1,
+        status: 404,
+        message: 'Message 1',
+        method: 'GET',
+        urlWithParams: '/test1'
+      };
+      const error2: AppHttpError = {
+        id: 999,
+        status: 500,
+        message: 'Message 2',
+        method: 'GET',
+        urlWithParams: '/test2'
+      };
 
       service.errorMessages = [error1];
       service.removeErrorMessage(error2);

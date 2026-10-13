@@ -28,8 +28,7 @@ export default {
       }
     ]
   },
-  // @iqb/gate-protocol is shipped as ES modules in .js files; it is compiled for the specs like the .mjs ones
-  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$|@iqb/gate-protocol/)'],
+  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
   // See the stub's own comment: the shared DTOs carry @nestjs/swagger decorators, and from Nest 12
   // on that package is ES-module-only. The frontend never reads swagger metadata, so its specs get
   // decorators that do nothing instead of the real, unloadable package.
