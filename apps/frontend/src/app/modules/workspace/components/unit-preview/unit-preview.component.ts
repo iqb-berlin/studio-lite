@@ -253,22 +253,15 @@ export class UnitPreviewComponent
     );
   }
 
+  /**
+   * Codes the player's responses with the coding scheme as it is now, saved or not -- the player
+   * beside it shows the definition as it is now too, and saving first is no longer asked (#1361).
+   */
   async checkCodingChanged(): Promise<void> {
-    if (this.unitStores.changed()) {
-      this.snackBar.open(
-        this.translateService.instant('workspace.save-unit-before-check'),
-        this.translateService.instant('workspace.error'),
-        { duration: 3000 }
-      );
-    } else {
-      this.backendService
-        .getUnitScheme(
-          this.workspaceService.selectedWorkspaceId,
-          this.workspaceService.selectedUnit$.getValue()
-        )
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(schemeData => this.checkCoding(schemeData));
-    }
+    this.unitStores
+      .loadSchemeStore(this.workspaceService.selectedWorkspaceId, this.workspaceService.selectedUnit$.getValue())
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(unitSchemeStore => this.checkCoding(unitSchemeStore?.getData() ?? null));
   }
 
   showPrintOptions(): void {
@@ -329,13 +322,12 @@ export class UnitPreviewComponent
         }
         return;
       }
-      this.workspaceService.codingScheme = codingScheme;
       const varsWithCodes = codingScheme.variableCodings
         .filter(vc => vc.codes && vc.codes.length > 0)
         .map(vc => vc.alias || vc.id);
       const newResponses = CodingSchemeFactory.code(
         responses!,
-        this.workspaceService.codingScheme.variableCodings
+        codingScheme.variableCodings
       );
       this.errorDialog.open(ShowCodingResultsComponent, {
         data: {

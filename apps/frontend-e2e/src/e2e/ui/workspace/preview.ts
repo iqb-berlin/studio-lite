@@ -259,6 +259,32 @@ describe('Unit Preview (Vorschau)', () => {
     cy.get('mat-dialog-container').should('not.exist');
   });
 
+  // #1361: the coding is checked with the unit as it is now, saved or not
+  it('checks the coding without asking to save first', () => {
+    clickIndexTabWorkspace('properties');
+    cy.get('textarea[formcontrolname="description"]').type(' ungespeichert');
+    cy.get('[data-cy="workspace-unit-save-button"]').should('be.enabled');
+    clickIndexTabWorkspace('preview');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
+    // the check codes responses, so the player is given one first
+    waitForPlayerState('checkbox_1', 'true', () => {
+      cy.getIFrameBody('[data-cy="unit-preview-iframe"]').within(() => {
+        cy.get('aspect-checkbox', { timeout: 10000 }).contains('Beschriftung').click();
+      });
+    });
+    cy.get('[data-cy="preview-bar-check-coding"]').click();
+    cy.get('mat-dialog-content', { timeout: 10000 }).within(() => {
+      cy.contains('checkbox_1').should('exist');
+    });
+    cy.contains('mat-dialog-actions button', 'Schließen').click();
+    cy.get('mat-dialog-container').should('not.exist');
+    cy.get('[data-cy="workspace-unit-discard-button"]').click();
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.contains('mat-dialog-container button', json.workspace.reject).click();
+    });
+    cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
+  });
+
   it('cleans up the test unit', () => {
     cy.visitWs(primaryWorkspace);
     cy.intercept('DELETE', '/api/workspaces/*/units*').as('delUnits');

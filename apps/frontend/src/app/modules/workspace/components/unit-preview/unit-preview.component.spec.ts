@@ -19,6 +19,7 @@ import { environment } from '../../../../../environments/environment';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitStoresService } from '../../services/unit-stores.service';
+import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { PreviewService } from '../../services/preview.service';
 import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
@@ -82,7 +83,8 @@ describe('UnitPreviewComponent', () => {
       changed: jest.fn().mockReturnValue(false),
       metadataStore: () => undefined,
       definitionStore$: new Subject<void>(),
-      loadDefinitionStore: jest.fn().mockReturnValue(of(undefined))
+      loadDefinitionStore: jest.fn().mockReturnValue(of(undefined)),
+      loadSchemeStore: jest.fn().mockReturnValue(of(undefined))
     } as never;
 
     const previewServiceStub = {
@@ -160,21 +162,18 @@ describe('UnitPreviewComponent', () => {
     expect(window.open).toHaveBeenCalledWith('#/print?x=1', '_blank');
   });
 
-  it('warns when coding is checked while changes exist', async () => {
+  // #1361: the check takes the scheme as it is now, saved or not, as the player shows the definition
+  it('checks the coding with unsaved changes too, from the scheme store', async () => {
     jest.spyOn(unitStoresStub, 'changed').mockReturnValue(true);
 
     await component.checkCodingChanged();
 
-    expect(snackBarStub.open).toHaveBeenCalled();
-    expect(backendServiceStub.getUnitScheme).not.toHaveBeenCalled();
-  });
-
-  it('loads coding scheme when no changes exist', async () => {
-    jest.spyOn(unitStoresStub, 'changed').mockReturnValue(false);
-
-    await component.checkCodingChanged();
-
-    expect(backendServiceStub.getUnitScheme).toHaveBeenCalledWith(7, 5);
+    expect(unitStoresStub.loadSchemeStore).toHaveBeenCalledWith(7, 5);
+    expect(snackBarStub.open).not.toHaveBeenCalledWith(
+      'workspace.save-unit-before-check',
+      expect.anything(),
+      expect.anything()
+    );
   });
 
   it('passes the coding variables to the coding results dialog', async () => {
@@ -194,9 +193,9 @@ describe('UnitPreviewComponent', () => {
         status: 'CODING_COMPLETE'
       } as Response
     ];
-    (backendServiceStub.getUnitScheme as jest.Mock).mockReturnValue(of({
-      scheme: JSON.stringify({ variableCodings })
-    }));
+    jest.spyOn(unitStoresStub, 'loadSchemeStore').mockReturnValue(of(
+      new UnitSchemeStore(5, { scheme: JSON.stringify({ variableCodings }), schemeType: 'iqb@3.4' })
+    ));
     const codeSpy = jest.spyOn(CodingSchemeFactory, 'code')
       .mockReturnValue(codedResponses);
 
