@@ -1,12 +1,14 @@
 # The gateway in front of studio-lite (iqb-gate): every save comes from a person, and so does every
-# login. Rules are regular expressions on the path, matched without regard to case, as sent and as
-# the application reads it; the first matching rule decides, for each of the two spellings, and the
-# write is checked when either rule is on. `other` takes every write the rules above it leave, so an
-# endpoint added later is checked without anyone remembering it.
+# login and every read of the API. Rules are regular expressions on the path, matched without regard
+# to case, as sent and as the application reads it; the first matching rule decides, for each of the
+# two spellings, and the request is checked when either rule is on. `other` takes every write, and
+# every read, the rules above it leave, so an endpoint added later is checked without anyone
+# remembering it. An exemption holds only where both spellings match it.
 #
-# IQB_GATE_RULES_OFF (.env.studio-lite, .env.dev) switches rules off by name, e.g. `workspace`: their
-# writes then pass unchecked, and `other` does not take them either. Switch rules off there, not
-# here: update.sh replaces this file with the release's version.
+# IQB_GATE_RULES_OFF (.env.studio-lite, .env.dev) switches write rules off by name, e.g. `workspace`:
+# their writes then pass unchecked, and `other` does not take them either. IQB_GATE_READ_RULES_OFF
+# does the same for the read rules. Switch rules off there, not here: update.sh replaces this file
+# with the release's version.
 #
 # Scripts such as eatPrepTBA are rejected as well -- in production only once they can work with
 # script tokens (step 5a).
@@ -32,4 +34,22 @@ writeGate:
     - { method: PATCH, path: '^/api/workspaces/[^/]+/units/[^/]+/comments$' }
   # Who the audit log names: the claim of studio-lite's own JWT, unchecked by the gateway --
   # trustworthy where the status is 2xx, as studio-lite then accepted the token.
+  userClaim: username
+
+# Reads (GET) only from a person's browser: it reports no automation, and its session solved a
+# challenge -- the one of the login counts, so a person is not asked again while reading. Past the
+# read limit (600 in a minute) the session is asked again. Refused reads go to the audit log.
+readGate:
+  rules:
+    - { name: administration, path: '^/api/(admin|group-admin|workspace-groups)/' }
+    - { name: workspace, path: '^/api/workspaces/' }
+    - { name: review, path: '^/api/reviews/' }
+    - { name: account, path: '^/api/(my-data|auth-data)$' }
+    - { name: other, path: '^/api/' }
+  exempt:
+    # Read before the login, by every page that starts: the studio's settings and logo
+    - { path: '^/api/admin/settings/(config|app-logo)$' }
+    # Resource packages (GeoGebra): the Verona modules load them with script tags, which send no
+    # report, and the admin page links the download. Readable without a login anyway.
+    - { path: '^/api/packages/' }
   userClaim: username

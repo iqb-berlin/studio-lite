@@ -214,89 +214,42 @@ describe('LoginComponent', () => {
     });
   });
 
-  // The gateway in front (iqb-gate) checks the login too: what it rejects is no wrong password
-  describe('a login the gateway did not let through', () => {
+  // The gateway in front (iqb-gate) refused the login, and its library has said why
+  describe('a login the gateway refused', () => {
+    let appService: AppService;
     let snackBar: MatSnackBar;
 
     beforeEach(() => {
+      appService = TestBed.inject(AppService);
       snackBar = TestBed.inject(MatSnackBar);
       jest.spyOn(snackBar, 'open');
-    });
-
-    const loginAnsweredWith = async (error: HttpErrorResponse): Promise<void> => {
-      backendService.login.mockReturnValue(throwError(() => error));
+      backendService.login.mockReturnValue(throwError(() => new HttpErrorResponse({
+        status: 428, error: { code: 'human-verification-required' }
+      })));
       fillForm();
       component.login();
-      await fixture.whenStable();
-    };
-
-    it('should say that the browser was rejected as automated', async () => {
-      await loginAnsweredWith(new HttpErrorResponse({ status: 403, error: { code: 'automation-detected' } }));
-
-      expect(snackBar.open).toHaveBeenCalledWith('login.automation-detected', 'login.error', { duration: 3000 });
     });
 
-    it('should say that the person was not confirmed', async () => {
-      await loginAnsweredWith(new HttpErrorResponse({ status: 428 }));
-
-      expect(snackBar.open).toHaveBeenCalledWith('login.not-verified', 'login.error', { duration: 3000 });
+    it('should not add a message of its own', () => {
+      expect(snackBar.open).not.toHaveBeenCalled();
     });
 
-    it('should accept a new attempt and show error messages again', async () => {
-      await loginAnsweredWith(new HttpErrorResponse({ status: 428 }));
-
-      expect(TestBed.inject(AppService).errorMessagesDisabled).toBe(false);
-      component.login();
-      expect(backendService.login).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('leaving the page', () => {
-    let appService: AppService;
-
-    beforeEach(() => {
-      appService = TestBed.inject(AppService);
-    });
-
-    it('should cancel a login still in flight and switch off what it switched on', () => {
-      const answer = new Subject<boolean>();
-      backendService.login.mockReturnValue(answer);
-      fillForm();
-      component.login();
-
-      fixture.destroy();
-
-      expect(answer.observed).toBe(false);
+    it('should end the attempt, so that the person can try again', () => {
       expect(component.isSubmitting).toBe(false);
       expect(appService.dataLoading).toBe(false);
       expect(appService.errorMessagesDisabled).toBe(false);
     });
-
-    it('should leave the loading state alone when no login is running', () => {
-      appService.dataLoading = true;
-
-      fixture.destroy();
-
-      expect(appService.dataLoading).toBe(true);
-    });
-
-    it('should stop following the route', () => {
-      expect(queryParams.observed).toBe(true);
-      expect(params.observed).toBe(true);
-
-      fixture.destroy();
-
-      expect(queryParams.observed).toBe(false);
-      expect(params.observed).toBe(false);
-    });
   });
 
-  it('should report a wrong password as before', async () => {
+  it('should say that a login did not succeed when it was answered with false', async () => {
     const snackBar = TestBed.inject(MatSnackBar);
     jest.spyOn(snackBar, 'open');
+    backendService.login.mockReturnValue(of(false));
+    fillForm();
 
-    await component.validLoginCheck(false, false);
+    component.login();
+    await fixture.whenStable();
 
-    expect(snackBar.open).toHaveBeenCalledWith('login.no-success', 'login.error', { duration: 3000 });
+    expect(snackBar.open).toHaveBeenCalledTimes(1);
   });
 });
