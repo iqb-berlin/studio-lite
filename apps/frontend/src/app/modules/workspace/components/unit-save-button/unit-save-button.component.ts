@@ -54,7 +54,8 @@ export class UnitSaveButtonComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result !== false) {
+      // only the discard button confirms; Esc, a click beside the dialog or navigation give undefined
+      if (result === true) {
         this.unitStores.restore();
         const unitId = this.workspaceService.selectedUnit$.getValue();
         this.workspaceService.selectedUnit$.next(unitId);

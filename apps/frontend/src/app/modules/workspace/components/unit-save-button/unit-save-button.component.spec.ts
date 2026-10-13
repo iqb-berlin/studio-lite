@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { createMock } from '@golevelup/ts-jest';
+import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
@@ -68,6 +70,34 @@ describe('UnitSaveButtonComponent', () => {
     unitStores.restore();
     fixture.detectChanges();
     expect(saveButton(fixture).disabled).toBe(true);
+  });
+
+  describe('discarding the changes', () => {
+    const closeDialogWith = (result: boolean | undefined) => jest
+      .spyOn(TestBed.inject(MatDialog), 'open')
+      .mockReturnValue(createMock<MatDialogRef<ConfirmDialogComponent>>({ afterClosed: () => of(result) }));
+
+    beforeEach(() => {
+      unitStores.loadMetadataStore(1, 1).subscribe();
+      unitStores.metadataStore()?.setPlayer('player@2.0');
+    });
+
+    it('discards them once the discard button confirms', () => {
+      closeDialogWith(true);
+
+      createButton().componentInstance.discardChanges();
+
+      expect(unitStores.changed()).toBe(false);
+    });
+
+    // Esc, a click beside the dialog and navigation close it with undefined (#1844)
+    it.each([false, undefined])('keeps them when the dialog closes with %s', result => {
+      closeDialogWith(result);
+
+      createButton().componentInstance.discardChanges();
+
+      expect(unitStores.changed()).toBe(true);
+    });
   });
 
   // The button appears only once the user's access level is known, and the unit's properties may

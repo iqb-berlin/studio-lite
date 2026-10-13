@@ -69,7 +69,8 @@ export abstract class ModulesDirective implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result !== false) {
+      // only the delete button confirms; Esc, a click beside the dialog or navigation give undefined
+      if (result === true) {
         this.appService.dataLoading = true;
         this.backendService.deleteVeronaModules(this.selectedModules.map(element => element.key)).subscribe(
           (deleteFilesOk: boolean) => {

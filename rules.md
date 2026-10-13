@@ -35,6 +35,10 @@
     }
     ```
 
+### Dialog Results: Only the Confirming Button Confirms
+- **Rule**: Act on a dialog's result only when it is what its confirming button returns: `result === true` for `ConfirmDialogComponent`, the returned data (an object, a form) for a dialog that hands data back. `result !== false` on its own is not such a test.
+- **Rationale**: A `MatDialog` closed by Esc, by a click beside it or by navigation returns `undefined`, and `undefined !== false`. Written that way, a dismissed confirmation discarded unsaved work and deleted reviews and modules, and dismissed data dialogs ran on with `undefined` (#1844). The pattern had been fixed once before (79842c1c4) and came back with new dialogs.
+
 ### Unit Testing: Asynchronous Tests
 - **Rule**: Prefer `fakeAsync` and `tick()` over `async/await` with `setTimeout` or manual `wait()` helpers for testing asynchronous logic.
 - **Rationale**: 
