@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { signal, WritableSignal } from '@angular/core';
+import {
+  computed, Signal, signal, WritableSignal
+} from '@angular/core';
 import { of, Subject } from 'rxjs';
 import {
   UnitInListDto,
@@ -26,6 +28,7 @@ describe('WorkspaceService', () => {
     metadataStore: WritableSignal<UnitMetadataStore | undefined>;
     definitionStore: WritableSignal<UnitDefinitionStore | undefined>;
     schemeStore: WritableSignal<UnitSchemeStore | undefined>;
+    changed: Signal<boolean>;
     metadataLoaded$: Subject<UnitPropertiesDto>;
     loadMetadataStore: jest.Mock;
     reset: jest.Mock;
@@ -63,10 +66,17 @@ describe('WorkspaceService', () => {
       getTagLabel: jest.fn().mockReturnValue([])
     };
 
+    const metadataStore = signal<UnitMetadataStore | undefined>(undefined);
+    const definitionStore = signal<UnitDefinitionStore | undefined>(undefined);
+    const schemeStore = signal<UnitSchemeStore | undefined>(undefined);
     unitStores = {
-      metadataStore: signal(undefined),
-      definitionStore: signal(undefined),
-      schemeStore: signal(undefined),
+      metadataStore,
+      definitionStore,
+      schemeStore,
+      // as in UnitStoresService
+      changed: computed(() => !!(
+        metadataStore()?.changed() || definitionStore()?.changed() || schemeStore()?.changed()
+      )),
       metadataLoaded$: new Subject<UnitPropertiesDto>(),
       loadMetadataStore: jest.fn(),
       reset: jest.fn()
@@ -552,6 +562,64 @@ describe('WorkspaceService', () => {
 
       expect(otherStore.getData().metadata).toEqual({ items: [] });
       expect(reloadSpy).not.toHaveBeenCalled();
+    });
+
+    // #1845: the leave dialog's "save" must not send the same changes beside a running save
+    it('should not start a second save beside one under way', async () => {
+      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
+      metadataStore.setPlayer('newPlayer');
+      unitStores.metadataStore.set(metadataStore);
+      const response = new Subject<boolean>();
+      backendService.setUnitProperties.mockReturnValue(response);
+
+      const first = service.saveUnitData();
+      const second = service.saveUnitData();
+      expect(service.saving()).toBe(true);
+      response.next(true);
+      response.complete();
+
+      await expect(first).resolves.toBe(true);
+      await expect(second).resolves.toBe(true);
+      expect(backendService.setUnitProperties).toHaveBeenCalledTimes(1);
+      expect(service.saving()).toBe(false);
+    });
+
+    it('should save what was edited during a save once it is done, when asked meanwhile', async () => {
+      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
+      metadataStore.setPlayer('newPlayer');
+      unitStores.metadataStore.set(metadataStore);
+      const firstResponse = new Subject<boolean>();
+      backendService.setUnitProperties.mockReturnValueOnce(firstResponse).mockReturnValueOnce(of(true));
+
+      const first = service.saveUnitData();
+      metadataStore.setEditor('newEditor');
+      const second = service.saveUnitData();
+      firstResponse.next(true);
+      firstResponse.complete();
+      await first;
+      await expect(second).resolves.toBe(true);
+
+      expect(backendService.setUnitProperties).toHaveBeenNthCalledWith(1, 1, { id: 1, player: 'newPlayer' });
+      expect(backendService.setUnitProperties).toHaveBeenNthCalledWith(2, 1, { id: 1, editor: 'newEditor' });
+      expect(metadataStore.isChanged()).toBe(false);
+    });
+
+    it('should keep what was edited while the save was under way unsaved', async () => {
+      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
+      metadataStore.setPlayer('newPlayer');
+      unitStores.metadataStore.set(metadataStore);
+      const response = new Subject<boolean>();
+      backendService.setUnitProperties.mockReturnValue(response);
+
+      const save = service.saveUnitData();
+      metadataStore.setEditor('newEditor');
+      response.next(true);
+      response.complete();
+      await save;
+
+      expect(backendService.setUnitProperties).toHaveBeenCalledWith(1, { id: 1, player: 'newPlayer' });
+      expect(metadataStore.getChangedData()).toEqual({ id: 1, editor: 'newEditor' });
+      expect(metadataStore.getData().player).toBe('newPlayer');
     });
 
     it('should save every part under the unit that was open when the save started', async () => {

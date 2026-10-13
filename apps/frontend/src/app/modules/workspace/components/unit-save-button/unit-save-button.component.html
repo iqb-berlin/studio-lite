@@ -9,7 +9,7 @@
   </button>
 
   <button mat-button
-          [disabled]="!unitStores.changed() || workspaceService.unitKeyTaken()"
+          [disabled]="!unitStores.changed() || workspaceService.unitKeyTaken() || workspaceService.saving()"
           [matTooltip]="'workspace.save-unit' | translate"
           [color]="'primary'"
           matTooltipPosition="above"

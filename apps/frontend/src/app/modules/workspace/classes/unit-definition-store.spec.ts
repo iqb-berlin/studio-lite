@@ -60,13 +60,30 @@ describe('UnitDefinitionStore', () => {
     const store = new UnitDefinitionStore(1, original);
 
     store.setData([buildVariable('v2', 'a2')], 'def-b');
-    store.applyChanges();
+    store.applyChanges(store.getChangedData());
 
     expect(store.isChanged()).toBe(false);
     expect(store.getData()).toEqual({
       variables: [buildVariable('v2', 'a2')],
       definition: 'def-b'
     });
+  });
+
+  // #1845: what the editor reports while a save is under way was not sent and must stay a change
+  it('applyChanges takes only what was sent as saved', () => {
+    const store = new UnitDefinitionStore(1, { variables: [buildVariable('v1', 'a1')], definition: 'def-a' });
+    store.setData([buildVariable('v1', 'a1')], 'def-b');
+    const sent = store.getChangedData();
+
+    store.setData([buildVariable('v1', 'a1'), buildVariable('v2', 'a2')], 'def-c');
+    store.applyChanges(sent);
+
+    expect(store.isChanged()).toBe(true);
+    expect(store.getChangedData()).toEqual({
+      variables: [buildVariable('v1', 'a1'), buildVariable('v2', 'a2')],
+      definition: 'def-c'
+    });
+    expect(store.getData().definition).toBe('def-c');
   });
 
   it('restore resets change set and emits', () => {
@@ -142,7 +159,7 @@ describe('UnitDefinitionStore', () => {
       const store = new UnitDefinitionStore(1, { variables: vars, definition: 'def-a', definitionType: typeA });
 
       store.setData([...vars], 'def-b', typeB);
-      store.applyChanges();
+      store.applyChanges(store.getChangedData());
 
       expect(store.isChanged()).toBe(false);
       expect(store.getData().definitionType).toBe(typeB);
@@ -214,7 +231,7 @@ describe('UnitDefinitionStore', () => {
     expect(store.changed()).toBe(false);
 
     store.setData([], 'def-b');
-    store.applyChanges();
+    store.applyChanges(store.getChangedData());
     expect(store.changed()).toBe(false);
 
     store.setData([], 'def-c');

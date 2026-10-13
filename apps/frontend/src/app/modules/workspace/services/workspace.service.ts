@@ -80,6 +80,10 @@ export class WorkspaceService {
    * taken key blocks saving (#1842).
    */
   readonly unitKeyTaken = this.unitKeyTakenState.asReadonly();
+  private readonly savingState = signal(false);
+  /** Whether the open unit is being saved; no second save starts meanwhile (#1845). */
+  readonly saving = this.savingState.asReadonly();
+  private runningSave: Promise<boolean> | undefined;
   states: State[] = [];
   codingScheme!: CodingSchemeData;
   dropBoxId: number | null = null;
@@ -217,7 +221,29 @@ export class WorkspaceService {
     return this.appService.authData.userLongName || this.appService.authData.userName;
   }
 
-  async saveUnitData(): Promise<boolean> {
+  /**
+   * Saves the open unit. Asked again while a save is under way -- "save" in the dialog on leaving
+   * the unit -- it does not start a second one beside it, which sent the same new items twice
+   * (#1845). It waits for that save, and saves afterwards what was edited meanwhile and so was not
+   * part of it.
+   */
+  saveUnitData(): Promise<boolean> {
+    if (this.runningSave) {
+      return this.runningSave.then(saved => (saved && this.unitStores.changed() ? this.saveUnitData() : saved));
+    }
+    this.savingState.set(true);
+    this.runningSave = this.saveStores().finally(() => {
+      this.runningSave = undefined;
+      this.savingState.set(false);
+    });
+    return this.runningSave;
+  }
+
+  /**
+   * Sends what each store holds at the start and takes exactly that as saved: what is edited while
+   * the requests are under way stays a change for the next save (#1845).
+   */
+  private async saveStores(): Promise<boolean> {
     let reloadUnitList = false;
     let saveOk = true;
     this.appService.dataLoading = true;
@@ -236,7 +262,7 @@ export class WorkspaceService {
       );
       if (saveOk) {
         reloadUnitList = unitMetadataStore.isKeyOrNameOrGroupOrStateChanged();
-        unitMetadataStore.applyChanges();
+        unitMetadataStore.applyChanges(changedData);
         this.lastChangedMetadata = new Date();
         this.lastChangedMetadataUser = this.getDisplayUserName();
         if (changedData.metadata?.items?.some(item => !item.uuid)) {
@@ -249,29 +275,31 @@ export class WorkspaceService {
       unitDefinitionStore &&
       unitDefinitionStore.isChanged()
     ) {
+      const sentDefinition = unitDefinitionStore.getChangedData();
       saveOk = await lastValueFrom(
         this.backendService.setUnitDefinition(
           this.selectedWorkspaceId,
           unitId,
-          unitDefinitionStore.getChangedData()
+          sentDefinition
         )
       );
       if (saveOk) {
-        unitDefinitionStore.applyChanges();
+        unitDefinitionStore.applyChanges(sentDefinition);
         this.lastChangedDefinition = new Date();
         this.lastChangedDefinitionUser = this.getDisplayUserName();
       }
     }
     if (saveOk && unitSchemeStore && unitSchemeStore.isChanged()) {
+      const sentScheme = unitSchemeStore.getChangedData();
       saveOk = await lastValueFrom(
         this.backendService.setUnitScheme(
           this.selectedWorkspaceId,
           unitId,
-          unitSchemeStore.getChangedData()
+          sentScheme
         )
       );
       if (saveOk) {
-        unitSchemeStore.applyChanges();
+        unitSchemeStore.applyChanges(sentScheme);
         this.lastChangedScheme = new Date();
         this.lastChangedSchemeUser = this.getDisplayUserName();
       }
