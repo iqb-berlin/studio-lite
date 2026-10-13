@@ -3,7 +3,8 @@
           [disabled]="!unitStores.changed()"
           [matTooltip]="'workspace.reject-unit-changes' | translate"
           matTooltipPosition="above"
-          (click)="discardChanges()">
+          (click)="discardChanges()"
+          data-cy="workspace-unit-discard-button">
     <studio-lite-wrapped-icon icon="close"></studio-lite-wrapped-icon>
   </button>
 

@@ -147,11 +147,12 @@ describe('ModulesDirective', () => {
     expect(snackBar.open).toHaveBeenCalledWith('modules.not-deleted', 'error', { duration: 3000 });
   });
 
-  it('aborts delete when confirmation is rejected', () => {
+  // Esc, a click beside the dialog and navigation close it with undefined (#1844)
+  it.each([false, undefined])('aborts delete when the dialog closes with %s', result => {
     const { directive, backendService, deleteConfirmDialog } = createDirective();
     directive.selectedModules = [{ key: 'm1' } as VeronaModuleClass];
     deleteConfirmDialog.open.mockReturnValue({
-      afterClosed: jest.fn().mockReturnValue(of(false))
+      afterClosed: jest.fn().mockReturnValue(of(result))
     } as unknown as ReturnType<MatDialog['open']>);
 
     directive.deleteFiles();

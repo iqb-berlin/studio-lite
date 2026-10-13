@@ -123,8 +123,9 @@ describe('ChangePasswordDirective', () => {
     );
   });
 
-  it('should not call backend service when dialog is cancelled', () => {
-    mockDialogRef.afterClosed.mockReturnValue(of(false));
+  // Esc, a click beside the dialog and navigation close it with undefined (#1844)
+  it.each([false, undefined])('should not call backend service when the dialog closes with %s', result => {
+    mockDialogRef.afterClosed.mockReturnValue(of(result));
 
     directive.changePassword();
 

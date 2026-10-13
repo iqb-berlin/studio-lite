@@ -40,7 +40,8 @@ export class ChangePasswordDirective implements OnDestroy {
     dialogRef.afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(result => {
-        if (result !== false) {
+        // only the save button hands back the form; Esc, a click beside the dialog or navigation give undefined
+        if (result) {
           this.backendService.setUserPassword(result.controls.pw_old.value, result.controls.pw_new1.value)
             .pipe(takeUntil(this.ngUnsubscribe))
             .subscribe(

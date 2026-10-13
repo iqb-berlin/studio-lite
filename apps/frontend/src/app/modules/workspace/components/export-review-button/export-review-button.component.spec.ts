@@ -102,9 +102,10 @@ describe('ExportReviewButtonComponent', () => {
       expect(mockWorkspaceBackendService.downloadUnitsJson).not.toHaveBeenCalled();
     });
 
-    it('should not call any download when dialog is cancelled', () => {
+    // Esc, a click beside the dialog and navigation close it with undefined (#1844)
+    it.each([false, undefined])('should not call any download when the dialog closes with %s', result => {
       mockDialog.open.mockReturnValue(createMock<MatDialogRef<ExportUnitComponent>>({
-        afterClosed: () => of(false)
+        afterClosed: () => of(result)
       }));
 
       component.exportReview();

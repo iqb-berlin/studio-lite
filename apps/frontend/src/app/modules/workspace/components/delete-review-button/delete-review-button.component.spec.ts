@@ -16,7 +16,7 @@ describe('DeleteReviewButtonComponent', () => {
   let component: DeleteReviewButtonComponent;
   let fixture: ComponentFixture<DeleteReviewButtonComponent>;
 
-  let dialog: { open: jest.Mock<{ afterClosed: () => Observable<boolean> }> };
+  let dialog: { open: jest.Mock<{ afterClosed: () => Observable<boolean | undefined> }> };
   let backendService: {
     deleteReview: jest.Mock<Observable<boolean>, [number, number]>;
   };
@@ -76,6 +76,15 @@ describe('DeleteReviewButtonComponent', () => {
     expect(deletedSpy).toHaveBeenCalled();
     expect(changedSpy).toHaveBeenCalledWith(false);
     expect(appService.dataLoading).toBe(false);
+  });
+
+  // Esc, a click beside the dialog and navigation close it with undefined (#1844)
+  it.each([false, undefined])('keeps the review when the dialog closes with %s', result => {
+    dialog.open.mockReturnValueOnce({ afterClosed: () => of(result) });
+
+    component.deleteReview();
+
+    expect(backendService.deleteReview).not.toHaveBeenCalled();
   });
 
   it('shows an error snackbar when deletion fails', () => {
