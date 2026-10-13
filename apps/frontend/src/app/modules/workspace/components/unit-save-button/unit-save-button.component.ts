@@ -3,7 +3,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { Subject, takeUntil } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
@@ -14,7 +13,8 @@ import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrappe
 /**
  * Saves the open unit -- definition, scheme and properties together -- and is enabled only while one
  * of the stores actually holds a change. It reads that from {@link UnitStoresService.changed}, which
- * also knows about the stores set before the button existed (#1290).
+ * also knows about the stores set before the button existed (#1290). A key another unit of the
+ * workspace carries blocks it; a key that only breaks the format rules does not (#1842).
  */
 @Component({
   selector: 'studio-lite-unit-save-button',
@@ -30,17 +30,6 @@ export class UnitSaveButtonComponent {
     private translateService: TranslateService,
     private snackBar: MatSnackBar
   ) {}
-
-  private ngUnsubscribe = new Subject<void>();
-  isValidFormKey = true;
-
-  ngOnInit() {
-    this.workspaceService.unitPropertiesChange
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(isValid => {
-        this.isValidFormKey = isValid;
-      });
-  }
 
   discardChanges(): void {
     const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
@@ -78,10 +67,5 @@ export class UnitSaveButtonComponent {
           { duration: 3000 });
       }
     });
-  }
-
-  ngOnDestroy(): void {
-    this.ngUnsubscribe.next();
-    this.ngUnsubscribe.complete();
   }
 }

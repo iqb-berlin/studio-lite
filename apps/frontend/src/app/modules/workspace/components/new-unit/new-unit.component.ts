@@ -40,7 +40,7 @@ export class NewUnitComponent {
         Validators.pattern(WorkspaceService.unitKeyPatternString()),
         Validators.minLength(3),
         Validators.maxLength(20),
-        WorkspaceService.unitKeyUniquenessValidator(0, this.ds.unitList)
+        WorkspaceService.unitKeyUniquenessValidator(0, () => this.ds.unitList)
       ]),
       label: this.fb.control(data.label),
       groupSelect: this.fb.control(''),

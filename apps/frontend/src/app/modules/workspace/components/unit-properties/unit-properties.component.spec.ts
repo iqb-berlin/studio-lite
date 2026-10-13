@@ -56,7 +56,8 @@ describe('UnitPropertiesComponent', () => {
         stableModulesOnly: true
       } as WorkspaceSettingsDto,
       loadUnitProperties: () => of(null),
-      isValidFormKey: new BehaviorSubject<boolean>(true)
+      isValidFormKey: new BehaviorSubject<boolean>(true),
+      setUnitKeyTaken: jest.fn()
     } as unknown as WorkspaceService;
 
     const moduleServiceStub = {
@@ -206,6 +207,22 @@ describe('UnitPropertiesComponent', () => {
     const ids = (component as unknown as { getVariableIds(): AliasId[] }).getVariableIds();
 
     expect(ids).toEqual([{ id: 'text', alias: 'text' }]);
+  });
+
+  // #1842: a taken key blocks saving once it is a change; a unit already carrying one stays editable
+  it.each([
+    [true, true, true],
+    [false, true, false],
+    [true, false, false]
+  ])('reports the key as taken: changed %s, carried by another unit %s → %s', (changed, carried, taken) => {
+    const store = createMock<UnitMetadataStore>();
+    store.getChangedData.mockReturnValue(changed ? { id: 1, key: 'FIRST1' } : { id: 1 });
+    jest.spyOn(component.unitStores, 'metadataStore').mockReturnValue(store);
+    component.unitForm.get('key')?.setErrors(carried ? { keyNotUnique: 'taken' } : null);
+
+    (component as unknown as { reportUnitKeyTaken(): void }).reportUnitKeyTaken();
+
+    expect(component.workspaceService.setUnitKeyTaken).toHaveBeenCalledWith(taken);
   });
 
   // the editor may load the definition only after this view was built

@@ -38,6 +38,7 @@ import { UnitItemService } from './unit-item.service';
 import { MetadataProfileService } from './metadata-profile.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
+import { UnitKeyExistsException } from '../exceptions/unit-key-exists.exception';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 
 // Dedupes profile lookups within a single request (a units list shares the same
@@ -785,7 +786,10 @@ export class UnitService {
   async patchUnitProperties(unitId: number, newData: UnitPropertiesDto, userName: string): Promise<void> {
     const unit = await this.unitsRepository.findOne({ where: { id: unitId } });
     const dataKeys = Object.keys(newData);
-    if (dataKeys.indexOf('key') >= 0) unit.key = newData.key;
+    if (dataKeys.indexOf('key') >= 0) {
+      if (typeof newData.key === 'string' && newData.key !== unit.key) await this.assertKeyIsFree(unit, newData.key);
+      unit.key = newData.key;
+    }
     if (dataKeys.indexOf('name') >= 0) unit.name = newData.name;
     if (dataKeys.indexOf('description') >= 0) unit.description = newData.description;
     if (dataKeys.indexOf('transcript') >= 0) unit.transcript = newData.transcript;
@@ -813,6 +817,22 @@ export class UnitService {
       unit.lastChangedSchemeUser = userName;
     }
     await this.unitsRepository.save(unit);
+  }
+
+  /**
+   * A renamed unit must not take a key another unit of its workspace carries (#1842). Creating and
+   * copying already refuse that; renaming in the properties did not. Compared as the form compares,
+   * ignoring case and surrounding blanks.
+   */
+  private async assertKeyIsFree(unit: Unit, key: string): Promise<void> {
+    const normalisedKey = key.toUpperCase().trim();
+    const unitsOfWorkspace = await this.unitsRepository.find({
+      where: { workspaceId: unit.workspaceId },
+      select: ['id', 'key']
+    });
+    if (unitsOfWorkspace.some(other => other.id !== unit.id && other.key?.toUpperCase().trim() === normalisedKey)) {
+      throw new UnitKeyExistsException(unit.id, unit.workspaceId, key);
+    }
   }
 
   async patchDropBoxHistory(units: number[],

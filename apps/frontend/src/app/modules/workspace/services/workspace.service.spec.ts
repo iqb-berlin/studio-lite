@@ -138,14 +138,23 @@ describe('WorkspaceService', () => {
     };
 
     it('should return null for unique key', () => {
-      const validator = WorkspaceService.unitKeyUniquenessValidator(0, unitList);
+      const validator = WorkspaceService.unitKeyUniquenessValidator(0, () => unitList);
       const control = { value: 'NEWUNIT' } as AbstractControl;
       const result = validator(control);
       expect(result).toBeNull();
     });
 
+    // the workspace replaces its list object when it loads; one taken earlier was empty (#1842)
+    it('should check against the list as it is when the key is checked', () => {
+      let currentList: { [key: string]: UnitInListDto[] } = {};
+      const validator = WorkspaceService.unitKeyUniquenessValidator(0, () => currentList);
+      currentList = unitList;
+
+      expect(validator({ value: 'UNIT3' } as AbstractControl)).not.toBeNull();
+    });
+
     it('should return error for duplicate key (case insensitive)', () => {
-      const validator = WorkspaceService.unitKeyUniquenessValidator(0, unitList);
+      const validator = WorkspaceService.unitKeyUniquenessValidator(0, () => unitList);
       const control = { value: 'unit1' } as AbstractControl;
       const result = validator(control);
       expect(result).toEqual({
@@ -154,14 +163,14 @@ describe('WorkspaceService', () => {
     });
 
     it('should allow same key for same unit', () => {
-      const validator = WorkspaceService.unitKeyUniquenessValidator(1, unitList);
+      const validator = WorkspaceService.unitKeyUniquenessValidator(1, () => unitList);
       const control = { value: 'UNIT1' } as AbstractControl;
       const result = validator(control);
       expect(result).toBeNull();
     });
 
     it('should trim whitespace when checking uniqueness', () => {
-      const validator = WorkspaceService.unitKeyUniquenessValidator(0, unitList);
+      const validator = WorkspaceService.unitKeyUniquenessValidator(0, () => unitList);
       const control = { value: '  UNIT2  ' } as AbstractControl;
       const result = validator(control);
       expect(result).not.toBeNull();
@@ -173,9 +182,13 @@ describe('WorkspaceService', () => {
       service.lastChangedMetadata = new Date();
       service.lastChangedScheme = new Date();
       service.lastChangedDefinition = new Date();
+      service.isValidFormKey.next(false);
+      service.setUnitKeyTaken(true);
 
       service.resetUnitData();
 
+      expect(service.isValidFormKey.value).toBe(true);
+      expect(service.unitKeyTaken()).toBe(false);
       expect(service.lastChangedMetadata).toBeUndefined();
       expect(service.lastChangedScheme).toBeUndefined();
       expect(service.lastChangedDefinition).toBeUndefined();
@@ -623,14 +636,15 @@ describe('WorkspaceService', () => {
 
       expect(emitSpy).toHaveBeenCalled();
     });
+  });
 
-    it('should emit unitPropertiesChange event', () => {
-      const emitSpy = jest.fn();
-      service.unitPropertiesChange.subscribe(emitSpy);
+  describe('unitKeyTaken', () => {
+    it('should start free and follow what the properties report', () => {
+      expect(service.unitKeyTaken()).toBe(false);
 
-      service.unitPropertiesChange.emit(true);
+      service.setUnitKeyTaken(true);
 
-      expect(emitSpy).toHaveBeenCalledWith(true);
+      expect(service.unitKeyTaken()).toBe(true);
     });
   });
 
