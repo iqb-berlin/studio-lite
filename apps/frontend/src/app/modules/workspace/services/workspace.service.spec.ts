@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { signal, WritableSignal } from '@angular/core';
+import { of, Subject } from 'rxjs';
 import {
   UnitInListDto,
   UnitPropertiesDto,
@@ -11,6 +12,7 @@ import { WorkspaceService } from './workspace.service';
 import { WorkspaceBackendService } from './workspace-backend.service';
 import { AppService } from '../../../services/app.service';
 import { RichNoteTagsService } from './rich-note-tags.service';
+import { UnitStoresService } from './unit-stores.service';
 import { UnitMetadataStore } from '../classes/unit-metadata-store';
 import { UnitDefinitionStore } from '../classes/unit-definition-store';
 import { UnitSchemeStore } from '../classes/unit-scheme-store';
@@ -20,6 +22,14 @@ describe('WorkspaceService', () => {
   let backendService: jest.Mocked<WorkspaceBackendService>;
   let appService: jest.Mocked<AppService>;
   let richNoteTagsService: jest.Mocked<RichNoteTagsService>;
+  let unitStores: {
+    metadataStore: WritableSignal<UnitMetadataStore | undefined>;
+    definitionStore: WritableSignal<UnitDefinitionStore | undefined>;
+    schemeStore: WritableSignal<UnitSchemeStore | undefined>;
+    metadataLoaded$: Subject<UnitPropertiesDto>;
+    loadMetadataStore: jest.Mock;
+    reset: jest.Mock;
+  };
 
   const mockAuthData: AuthDataDto = {
     userId: 1,
@@ -53,12 +63,22 @@ describe('WorkspaceService', () => {
       getTagLabel: jest.fn().mockReturnValue([])
     };
 
+    unitStores = {
+      metadataStore: signal(undefined),
+      definitionStore: signal(undefined),
+      schemeStore: signal(undefined),
+      metadataLoaded$: new Subject<UnitPropertiesDto>(),
+      loadMetadataStore: jest.fn(),
+      reset: jest.fn()
+    };
+
     TestBed.configureTestingModule({
       providers: [
         WorkspaceService,
         { provide: WorkspaceBackendService, useValue: backendServiceMock },
         { provide: AppService, useValue: appServiceMock },
-        { provide: RichNoteTagsService, useValue: richNoteTagsServiceMock }
+        { provide: RichNoteTagsService, useValue: richNoteTagsServiceMock },
+        { provide: UnitStoresService, useValue: unitStores }
       ]
     });
 
@@ -149,143 +169,17 @@ describe('WorkspaceService', () => {
   });
 
   describe('resetUnitData', () => {
-    it('should reset all unit data and timestamps', () => {
+    it('should reset the timestamps and let go of the stores', () => {
       service.lastChangedMetadata = new Date();
       service.lastChangedScheme = new Date();
       service.lastChangedDefinition = new Date();
-      service.setUnitMetadataStore(new UnitMetadataStore({ id: 1 }));
-      service.setUnitDefinitionStore(new UnitDefinitionStore(1, { definition: '', variables: [] }));
-      service.setUnitSchemeStore(new UnitSchemeStore(1, { scheme: '', schemeType: '' }));
 
       service.resetUnitData();
 
       expect(service.lastChangedMetadata).toBeUndefined();
       expect(service.lastChangedScheme).toBeUndefined();
       expect(service.lastChangedDefinition).toBeUndefined();
-      expect(service.getUnitMetadataStore()).toBeUndefined();
-      expect(service.getUnitDefinitionStore()).toBeUndefined();
-      expect(service.getUnitSchemeStore()).toBeUndefined();
-    });
-  });
-
-  describe('setUnitDefinitionStore', () => {
-    it('should set unit definition store and emit event', () => {
-      const emitSpy = jest.fn();
-      service.unitDefinitionStoreChanged.subscribe(emitSpy);
-
-      const store = new UnitDefinitionStore(1, { definition: 'test', variables: [] });
-      service.setUnitDefinitionStore(store);
-
-      expect(service.getUnitDefinitionStore()).toBe(store);
-      expect(emitSpy).toHaveBeenCalledWith(store);
-    });
-
-    it('should set undefined and emit event', () => {
-      const emitSpy = jest.fn();
-      service.unitDefinitionStoreChanged.subscribe(emitSpy);
-
-      service.setUnitDefinitionStore(undefined);
-
-      expect(service.getUnitDefinitionStore()).toBeUndefined();
-      expect(emitSpy).toHaveBeenCalledWith(undefined);
-    });
-  });
-
-  describe('setUnitSchemeStore', () => {
-    it('should set unit scheme store and emit event', () => {
-      const emitSpy = jest.fn();
-      service.unitSchemeStoreChanged.subscribe(emitSpy);
-
-      const store = new UnitSchemeStore(1, { scheme: 'test', schemeType: 'type' });
-      service.setUnitSchemeStore(store);
-
-      expect(service.getUnitSchemeStore()).toBe(store);
-      expect(emitSpy).toHaveBeenCalledWith(store);
-    });
-  });
-
-  describe('setUnitMetadataStore', () => {
-    it('should set unit metadata store and emit event', () => {
-      const emitSpy = jest.fn();
-      service.unitMetadataStoreChanged.subscribe(emitSpy);
-
-      const store = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      service.setUnitMetadataStore(store);
-
-      expect(service.getUnitMetadataStore()).toBe(store);
-      expect(emitSpy).toHaveBeenCalledWith(store);
-    });
-  });
-
-  describe('restoreUnitStores', () => {
-    it('should restore all stores that are set', () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      const definitionStore = new UnitDefinitionStore(1, { definition: 'def', variables: [] });
-      const schemeStore = new UnitSchemeStore(1, { scheme: 'scheme', schemeType: 'type' });
-
-      const metadataRestoreSpy = jest.spyOn(metadataStore, 'restore');
-      const definitionRestoreSpy = jest.spyOn(definitionStore, 'restore');
-      const schemeRestoreSpy = jest.spyOn(schemeStore, 'restore');
-
-      service.setUnitMetadataStore(metadataStore);
-      service.setUnitDefinitionStore(definitionStore);
-      service.setUnitSchemeStore(schemeStore);
-
-      service.restoreUnitStores();
-
-      expect(metadataRestoreSpy).toHaveBeenCalled();
-      expect(definitionRestoreSpy).toHaveBeenCalled();
-      expect(schemeRestoreSpy).toHaveBeenCalled();
-    });
-
-    it('should not throw error when stores are undefined', () => {
-      service.setUnitMetadataStore(undefined);
-      service.setUnitDefinitionStore(undefined);
-      service.setUnitSchemeStore(undefined);
-
-      expect(() => service.restoreUnitStores()).not.toThrow();
-    });
-  });
-
-  describe('isChanged', () => {
-    it('should return false when no stores are set', () => {
-      service.setUnitMetadataStore(undefined);
-      service.setUnitDefinitionStore(undefined);
-      service.setUnitSchemeStore(undefined);
-
-      expect(service.isChanged()).toBe(false);
-    });
-
-    it('should return true when metadata store has changes', () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      metadataStore.setPlayer('newPlayer');
-      service.setUnitMetadataStore(metadataStore);
-
-      expect(service.isChanged()).toBe(true);
-    });
-
-    it('should return true when definition store has changes', () => {
-      const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
-      definitionStore.setData([], 'new');
-      service.setUnitDefinitionStore(definitionStore);
-
-      expect(service.isChanged()).toBe(true);
-    });
-
-    it('should return true when scheme store has changes', () => {
-      const schemeStore = new UnitSchemeStore(1, { scheme: 'old', schemeType: 'type' });
-      schemeStore.setData('new', 'newType');
-      service.setUnitSchemeStore(schemeStore);
-
-      expect(service.isChanged()).toBe(true);
-    });
-
-    it('should return false when stores exist but have no changes', () => {
-      service.setUnitMetadataStore(new UnitMetadataStore({ id: 1 }));
-      service.setUnitDefinitionStore(new UnitDefinitionStore(1, { definition: '', variables: [] }));
-      service.setUnitSchemeStore(new UnitSchemeStore(1, { scheme: '', schemeType: '' }));
-
-      expect(service.isChanged()).toBe(false);
+      expect(unitStores.reset).toHaveBeenCalled();
     });
   });
 
@@ -407,76 +301,63 @@ describe('WorkspaceService', () => {
   });
 
   describe('loadUnitProperties', () => {
-    it('should return existing metadata store if already loaded', done => {
-      const existingStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      service.setUnitMetadataStore(existingStore);
+    it('should load the metadata store of the selected unit', done => {
+      const store = new UnitMetadataStore({ id: 5 });
+      unitStores.loadMetadataStore.mockReturnValue(of(store));
+      service.selectedWorkspaceId = 1;
+      service.selectedUnit$.next(5);
 
-      service.loadUnitProperties().subscribe(store => {
-        expect(store).toBe(existingStore);
-        expect(backendService.getUnitProperties).not.toHaveBeenCalled();
+      service.loadUnitProperties().subscribe(loaded => {
+        expect(loaded).toBe(store);
+        expect(unitStores.loadMetadataStore).toHaveBeenCalledWith(1, 5);
         done();
       });
     });
+  });
 
-    it('should fetch unit properties and create metadata store', done => {
-      const mockProperties: UnitPropertiesDto = {
+  describe('freshly loaded unit properties', () => {
+    it('should take who changed which part when', () => {
+      unitStores.metadataLoaded$.next({
         id: 1,
-        key: 'unit1',
-        name: 'Unit 1',
         lastChangedMetadata: new Date('2024-01-01'),
         lastChangedMetadataUser: 'User 1',
         lastChangedDefinition: new Date('2024-01-02'),
         lastChangedDefinitionUser: 'User 2',
         lastChangedScheme: new Date('2024-01-03'),
         lastChangedSchemeUser: 'User 3'
-      };
-
-      service.selectedWorkspaceId = 1;
-      service.selectedUnit$.next(1);
-      service.setUnitMetadataStore(undefined);
-      backendService.getUnitProperties.mockReturnValue(of(mockProperties));
-
-      service.loadUnitProperties().subscribe(store => {
-        expect(store).toBeDefined();
-        expect(service.lastChangedMetadata).toEqual(new Date('2024-01-01'));
-        expect(service.lastChangedMetadataUser).toBe('User 1');
-        expect(service.lastChangedDefinition).toEqual(new Date('2024-01-02'));
-        expect(service.lastChangedDefinitionUser).toBe('User 2');
-        expect(service.lastChangedScheme).toEqual(new Date('2024-01-03'));
-        expect(service.lastChangedSchemeUser).toBe('User 3');
-        done();
       });
+
+      expect(service.lastChangedMetadata).toEqual(new Date('2024-01-01'));
+      expect(service.lastChangedMetadataUser).toBe('User 1');
+      expect(service.lastChangedDefinition).toEqual(new Date('2024-01-02'));
+      expect(service.lastChangedDefinitionUser).toBe('User 2');
+      expect(service.lastChangedScheme).toEqual(new Date('2024-01-03'));
+      expect(service.lastChangedSchemeUser).toBe('User 3');
     });
 
-    it('should create empty metadata store when no properties are returned', done => {
-      service.selectedWorkspaceId = 1;
-      service.selectedUnit$.next(5);
-      service.setUnitMetadataStore(undefined);
-      backendService.getUnitProperties.mockReturnValue(of(null));
+    it('should turn the dates the server sends as strings into dates', () => {
+      const fromServer: UnitPropertiesDto = JSON.parse(
+        '{ "id": 1, "lastChangedMetadata": "2024-01-01T00:00:00.000Z" }'
+      );
+      unitStores.metadataLoaded$.next(fromServer);
 
-      service.loadUnitProperties().subscribe(store => {
-        expect(store).toBeDefined();
-        expect(store?.getChangedData().id).toBe(5);
-        done();
-      });
+      expect(service.lastChangedMetadata).toEqual(new Date('2024-01-01'));
     });
 
-    it('should reset timestamps before loading', done => {
+    it('should forget the previous unit\'s timestamps when the server sends none', () => {
       service.lastChangedMetadata = new Date();
+      service.lastChangedMetadataUser = 'Someone';
       service.lastChangedDefinition = new Date();
       service.lastChangedScheme = new Date();
 
-      service.selectedWorkspaceId = 1;
-      service.selectedUnit$.next(1);
-      service.setUnitMetadataStore(undefined);
-      backendService.getUnitProperties.mockReturnValue(of(null));
+      unitStores.metadataLoaded$.next({ id: 1 });
 
-      service.loadUnitProperties().subscribe(() => {
-        expect(service.lastChangedMetadataUser).toBeUndefined();
-        expect(service.lastChangedDefinitionUser).toBeUndefined();
-        expect(service.lastChangedSchemeUser).toBeUndefined();
-        done();
-      });
+      expect(service.lastChangedMetadata).toBeUndefined();
+      expect(service.lastChangedMetadataUser).toBeUndefined();
+      expect(service.lastChangedDefinition).toBeUndefined();
+      expect(service.lastChangedDefinitionUser).toBeUndefined();
+      expect(service.lastChangedScheme).toBeUndefined();
+      expect(service.lastChangedSchemeUser).toBeUndefined();
     });
   });
 
@@ -493,7 +374,7 @@ describe('WorkspaceService', () => {
     it('should save only changed metadata', async () => {
       const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
       metadataStore.setPlayer('newPlayer');
-      service.setUnitMetadataStore(metadataStore);
+      unitStores.metadataStore.set(metadataStore);
 
       backendService.setUnitProperties.mockReturnValue(of(true));
       backendService.getUnitList.mockReturnValue(of([]));
@@ -508,7 +389,7 @@ describe('WorkspaceService', () => {
     it('should save only changed definition', async () => {
       const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
       definitionStore.setData([], 'new');
-      service.setUnitDefinitionStore(definitionStore);
+      unitStores.definitionStore.set(definitionStore);
 
       backendService.setUnitDefinition.mockReturnValue(of(true));
 
@@ -521,7 +402,7 @@ describe('WorkspaceService', () => {
     it('should save only changed scheme', async () => {
       const schemeStore = new UnitSchemeStore(1, { scheme: 'old', schemeType: 'type' });
       schemeStore.setData('new', 'newType');
-      service.setUnitSchemeStore(schemeStore);
+      unitStores.schemeStore.set(schemeStore);
 
       backendService.setUnitScheme.mockReturnValue(of(true));
 
@@ -539,9 +420,9 @@ describe('WorkspaceService', () => {
       const schemeStore = new UnitSchemeStore(1, { scheme: 'old', schemeType: 'type' });
       schemeStore.setData('new', 'newType');
 
-      service.setUnitMetadataStore(metadataStore);
-      service.setUnitDefinitionStore(definitionStore);
-      service.setUnitSchemeStore(schemeStore);
+      unitStores.metadataStore.set(metadataStore);
+      unitStores.definitionStore.set(definitionStore);
+      unitStores.schemeStore.set(schemeStore);
 
       backendService.setUnitProperties.mockReturnValue(of(true));
       backendService.setUnitDefinition.mockReturnValue(of(true));
@@ -562,8 +443,8 @@ describe('WorkspaceService', () => {
       const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
       definitionStore.setData([], 'new');
 
-      service.setUnitMetadataStore(metadataStore);
-      service.setUnitDefinitionStore(definitionStore);
+      unitStores.metadataStore.set(metadataStore);
+      unitStores.definitionStore.set(definitionStore);
 
       backendService.setUnitProperties.mockReturnValue(of(false));
 
@@ -577,7 +458,7 @@ describe('WorkspaceService', () => {
     it('should reload unit list when key/name/group/state changed', async () => {
       const metadataStore = new UnitMetadataStore({ id: 1, key: 'old', name: 'Old' });
       metadataStore.setBasicData('new', 'New', '', '', '', '', '');
-      service.setUnitMetadataStore(metadataStore);
+      unitStores.metadataStore.set(metadataStore);
 
       backendService.setUnitProperties.mockReturnValue(of(true));
       backendService.getUnitList.mockReturnValue(of([
@@ -593,7 +474,7 @@ describe('WorkspaceService', () => {
     it('should set dataLoading flag during save', async () => {
       const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
       metadataStore.setPlayer('newPlayer');
-      service.setUnitMetadataStore(metadataStore);
+      unitStores.metadataStore.set(metadataStore);
 
       backendService.setUnitProperties.mockReturnValue(of(true));
       backendService.getUnitList.mockReturnValue(of([]));
@@ -608,7 +489,7 @@ describe('WorkspaceService', () => {
     it('should read the metadata back when the save created items', async () => {
       const metadataStore = new UnitMetadataStore({ id: 1, metadata: { items: [] } });
       metadataStore.setMetadata({ items: [{ id: 'item1' }] });
-      service.setUnitMetadataStore(metadataStore);
+      unitStores.metadataStore.set(metadataStore);
       const reloadSpy = jest.fn();
       service.unitMetadataReloaded.subscribe(reloadSpy);
       const stored = { items: [{ id: 'item1', uuid: 'uuid-1' }] };
@@ -628,7 +509,7 @@ describe('WorkspaceService', () => {
     it('should not read the metadata back when all saved items exist', async () => {
       const metadataStore = new UnitMetadataStore({ id: 1, metadata: { items: [{ id: 'item1', uuid: 'uuid-1' }] } });
       metadataStore.setMetadata({ items: [{ id: 'item2', uuid: 'uuid-1' }] });
-      service.setUnitMetadataStore(metadataStore);
+      unitStores.metadataStore.set(metadataStore);
       const reloadSpy = jest.fn();
       service.unitMetadataReloaded.subscribe(reloadSpy);
 
@@ -643,14 +524,14 @@ describe('WorkspaceService', () => {
     it('should leave the store alone when the reloaded unit is no longer selected', async () => {
       const metadataStore = new UnitMetadataStore({ id: 1, metadata: { items: [] } });
       metadataStore.setMetadata({ items: [{ id: 'item1' }] });
-      service.setUnitMetadataStore(metadataStore);
+      unitStores.metadataStore.set(metadataStore);
       const otherStore = new UnitMetadataStore({ id: 2, metadata: { items: [] } });
       const reloadSpy = jest.fn();
       service.unitMetadataReloaded.subscribe(reloadSpy);
 
       backendService.setUnitProperties.mockReturnValue(of(true));
       backendService.getUnitProperties.mockImplementation(() => {
-        service.setUnitMetadataStore(otherStore);
+        unitStores.metadataStore.set(otherStore);
         return of({ id: 1, metadata: { items: [{ id: 'item1', uuid: 'uuid-1' }] } });
       });
 
@@ -660,10 +541,30 @@ describe('WorkspaceService', () => {
       expect(reloadSpy).not.toHaveBeenCalled();
     });
 
+    it('should save every part under the unit that was open when the save started', async () => {
+      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
+      metadataStore.setPlayer('newPlayer');
+      const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
+      definitionStore.setData([], 'new');
+      unitStores.metadataStore.set(metadataStore);
+      unitStores.definitionStore.set(definitionStore);
+
+      backendService.setUnitProperties.mockImplementation(() => {
+        // another unit is opened while the properties are on their way
+        service.selectedUnit$.next(2);
+        return of(true);
+      });
+      backendService.setUnitDefinition.mockReturnValue(of(true));
+
+      await service.saveUnitData();
+
+      expect(backendService.setUnitDefinition).toHaveBeenCalledWith(1, 1, { definition: 'new' });
+    });
+
     it('should update lastChanged timestamps after successful save', async () => {
       const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
       metadataStore.setPlayer('newPlayer');
-      service.setUnitMetadataStore(metadataStore);
+      unitStores.metadataStore.set(metadataStore);
 
       backendService.setUnitProperties.mockReturnValue(of(true));
       backendService.getUnitList.mockReturnValue(of([]));
@@ -681,7 +582,7 @@ describe('WorkspaceService', () => {
     it('should apply changes to stores after successful save', async () => {
       const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
       metadataStore.setPlayer('newPlayer');
-      service.setUnitMetadataStore(metadataStore);
+      unitStores.metadataStore.set(metadataStore);
 
       const applyChangesSpy = jest.spyOn(metadataStore, 'applyChanges');
 
@@ -702,7 +603,7 @@ describe('WorkspaceService', () => {
 
       const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
       metadataStore.setPlayer('newPlayer');
-      service.setUnitMetadataStore(metadataStore);
+      unitStores.metadataStore.set(metadataStore);
 
       backendService.setUnitProperties.mockReturnValue(of(true));
       backendService.getUnitList.mockReturnValue(of([]));

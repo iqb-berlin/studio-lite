@@ -1,5 +1,5 @@
 import {
-  Directive, ElementRef, OnDestroy
+  Directive, ElementRef, inject, OnDestroy
 } from '@angular/core';
 import {
   BehaviorSubject, from, map, Observable, of, Subject, takeUntil
@@ -11,9 +11,9 @@ import { SharedParameter } from '../models/verona.interface';
 import { UnitMetadataStore } from '../modules/workspace/classes/unit-metadata-store';
 import { ModuleService } from '../services/module.service';
 import { VeronaModuleClass } from '../models/verona-module.class';
-import { UnitDefinitionStore } from '../modules/workspace/classes/unit-definition-store';
 import { WorkspaceBackendService } from '../modules/workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../modules/workspace/services/workspace.service';
+import { UnitStoresService } from '../modules/workspace/services/unit-stores.service';
 import { AppService } from '../services/app.service';
 
 /**
@@ -38,6 +38,8 @@ export abstract class VeronaModuleDirective implements OnDestroy {
   abstract workspaceService: WorkspaceService;
   abstract appService: AppService;
   abstract hostingIframe: ElementRef;
+  // injected here rather than demanded of every subclass, of which only some read the unit's stores
+  protected readonly unitStores = inject(UnitStoresService);
 
   postMessageTarget: Window | undefined;
   sessionId = '';
@@ -78,42 +80,29 @@ export abstract class VeronaModuleDirective implements OnDestroy {
       .subscribe((m: MessageEvent) => this.handleIncomingMessage(m));
   }
 
-  sendUnitDefinition(
-    unitId: number,
-    unitDefinitionStore: UnitDefinitionStore | undefined
-  ): void {
+  /** Hands the unit's definition to the module, from the store if it is there, else loaded into it. */
+  sendUnitDefinition(unitId: number): void {
     if (!unitId) {
       this.message = this.translateService.instant('workspace.unit-not-found');
       this.postMessageTarget = undefined;
       return;
     }
-    if (unitId && unitDefinitionStore) {
-      this.postStore(unitDefinitionStore);
-    } else {
-      this.backendService
-        .getUnitDefinition(this.workspaceService.selectedWorkspaceId, unitId)
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(unitDefinitionDto => {
-          if (unitDefinitionDto) {
-            const newUnitDefinitionStore = new UnitDefinitionStore(
-              unitId,
-              unitDefinitionDto
-            );
-            this.workspaceService.setUnitDefinitionStore(
-              newUnitDefinitionStore
-            );
-            this.postStore(newUnitDefinitionStore);
-          } else {
-            this.snackBar.open(
-              this.translateService.instant(
-                'workspace.unit-definition-not-loaded'
-              ),
-              this.translateService.instant('workspace.error'),
-              { duration: 3000 }
-            );
-          }
-        });
-    }
+    this.unitStores
+      .loadDefinitionStore(this.workspaceService.selectedWorkspaceId, unitId)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(unitDefinitionStore => {
+        if (unitDefinitionStore) {
+          this.postStore(unitDefinitionStore);
+        } else {
+          this.snackBar.open(
+            this.translateService.instant(
+              'workspace.unit-definition-not-loaded'
+            ),
+            this.translateService.instant('workspace.error'),
+            { duration: 3000 }
+          );
+        }
+      });
   }
 
   private getModulesByType(

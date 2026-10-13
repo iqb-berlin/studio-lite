@@ -84,10 +84,7 @@ export class UnitSchemerComponent
         case 'vosReadyNotification':
           this.sessionId = UnitSchemerComponent.getSessionId();
           this.postMessageTarget = m.source as Window;
-          this.sendScheme(
-            this.workspaceService.selectedUnit$.getValue(),
-            this.workspaceService.getUnitSchemeStore()
-          );
+          this.sendScheme(this.workspaceService.selectedUnit$.getValue());
           break;
 
         case 'vosSchemeChangedNotification':
@@ -96,8 +93,8 @@ export class UnitSchemerComponent
               this.workspaceService.codingScheme = JSON.parse(
                 msgData.codingScheme
               );
-              this.workspaceService
-                .getUnitSchemeStore()
+              this.unitStores
+                .schemeStore()
                 ?.setData(msgData.codingScheme, msgData.codingSchemeType);
               // } else { TODO: find solution for vosGetSchemeRequest
               //   this.postMessageTarget.postMessage({
@@ -120,57 +117,43 @@ export class UnitSchemerComponent
   }
 
   sendChangeData(): void {
-    this.sendScheme(
-      this.workspaceService.selectedUnit$.getValue(),
-      this.workspaceService.getUnitSchemeStore()
-    );
+    this.sendScheme(this.workspaceService.selectedUnit$.getValue());
   }
 
-  private sendScheme(
-    unitId: number,
-    unitSchemeStore: UnitSchemeStore | undefined
-  ) {
+  private sendScheme(unitId: number) {
     if (!unitId) {
       this.message = this.translateService.instant('workspace.unit-not-found');
       this.postMessageTarget = undefined;
       return;
     }
-    if (unitSchemeStore) {
-      this.postStore(unitSchemeStore);
-    } else {
-      this.backendService
-        .getUnitScheme(this.workspaceService.selectedWorkspaceId, unitId)
-        .subscribe(ues => {
-          if (ues) {
-            const newUnitSchemeStore = new UnitSchemeStore(unitId, ues);
-            this.workspaceService.setUnitSchemeStore(newUnitSchemeStore);
-            this.postStore(newUnitSchemeStore);
-          } else {
-            this.snackBar.open(
-              this.translateService.instant(
-                'workspace.coding-scheme-not-loaded'
-              ),
-              this.translateService.instant('workspace.error'),
-              { duration: 3000 }
-            );
-          }
-        });
-    }
+    this.unitStores
+      .loadSchemeStore(this.workspaceService.selectedWorkspaceId, unitId)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(unitSchemeStore => {
+        if (unitSchemeStore) {
+          this.postStore(unitSchemeStore);
+        } else {
+          this.snackBar.open(
+            this.translateService.instant(
+              'workspace.coding-scheme-not-loaded'
+            ),
+            this.translateService.instant('workspace.error'),
+            { duration: 3000 }
+          );
+        }
+      });
   }
 
   private subscribeForVeronaModuleLoaded(): void {
     this.getVeronaModuleId(
-      this.workspaceService.getUnitMetadataStore(),
+      this.unitStores.metadataStore(),
       'schemer'
     )
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(schemerId => {
         if (schemerId) {
           if (schemerId === this.lastVeronaModuleId && this.postMessageTarget) {
-            this.sendScheme(
-              this.workspaceService.selectedUnit$.getValue(),
-              this.workspaceService.getUnitSchemeStore()
-            );
+            this.sendScheme(this.workspaceService.selectedUnit$.getValue());
           } else {
             this.postMessageTarget = undefined;
             this.buildVeronaModule(schemerId, 'schemer');
@@ -190,7 +173,7 @@ export class UnitSchemerComponent
   postStore(unitSchemeStore: UnitSchemeStore): void {
     const unitScheme = unitSchemeStore.getData();
     const variables =
-      this.workspaceService.getUnitDefinitionStore()?.getData().variables ||
+      this.unitStores.definitionStore()?.getData().variables ||
       unitScheme.variables;
     if (this.postMessageTarget) {
       this.postMessageTarget.postMessage(

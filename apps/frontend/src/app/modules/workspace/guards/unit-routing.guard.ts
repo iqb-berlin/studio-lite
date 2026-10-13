@@ -6,6 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { SaveOrDiscardComponent } from '../components/save-or-discard/save-or-discard.component';
 import { WorkspaceService } from '../services/workspace.service';
+import { UnitStoresService } from '../services/unit-stores.service';
 import { ConfirmDialogData } from '../models/confirm-dialog.interface';
 
 /**
@@ -24,11 +25,12 @@ export class UnitRoutingCanDeactivateGuard {
     public confirmDialog: MatDialog,
     private snackBar: MatSnackBar,
     public workspaceService: WorkspaceService,
+    private unitStores: UnitStoresService,
     private translateService: TranslateService
   ) { }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
-    if (this.workspaceService.isChanged() && this.workspaceService.userAccessLevel > 1) {
+    if (this.unitStores.changed() && this.workspaceService.userAccessLevel > 1) {
       const isValid = this.workspaceService.isValidFormKey.value;
       const hasWarning = !isValid;
       const content = isValid ?

@@ -261,7 +261,7 @@
               }
             </mat-card-content>
           </mat-card>
-          @if (workspaceService.unitMetadataStore &&
+          @if (unitStores.metadataStore() &&
           workspaceSettings && variablesLoaded && metadataLoaded &&
           ((workspaceSettings.unitMDProfile && metadata && unitProfile) ||
             !workspaceSettings.unitMDProfile)) {
@@ -288,7 +288,7 @@
           }
         </div>
         <div class="fx-column-start-stretch fx-flex-row-50 fx-gap-10">
-          @if (workspaceService.unitMetadataStore &&
+          @if (unitStores.metadataStore() &&
           workspaceSettings && variablesLoaded && metadataLoaded &&
           ((workspaceSettings.itemMDProfile && metadata && itemProfile)
             || !workspaceSettings.itemMDProfile)) {

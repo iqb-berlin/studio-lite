@@ -1,4 +1,5 @@
 import { ElementRef } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import {
   BehaviorSubject, firstValueFrom, Subject, of
 } from 'rxjs';
@@ -13,6 +14,7 @@ import { VeronaModuleFactory } from '@studio-lite/shared-code';
 import { AppService } from '../services/app.service';
 import { WorkspaceBackendService } from '../modules/workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../modules/workspace/services/workspace.service';
+import { UnitStoresService } from '../modules/workspace/services/unit-stores.service';
 import { UnitDefinitionStore } from '../modules/workspace/classes/unit-definition-store';
 import { UnitMetadataStore } from '../modules/workspace/classes/unit-metadata-store';
 import { ModuleService } from '../services/module.service';
@@ -81,8 +83,7 @@ describe('VeronaModuleDirective', () => {
 
     const workspaceService = {
       selectedWorkspaceId: 7,
-      selectedUnit$: new BehaviorSubject<number>(0),
-      setUnitDefinitionStore: jest.fn()
+      selectedUnit$: new BehaviorSubject<number>(0)
     } as unknown as WorkspaceService;
 
     const appService = {
@@ -93,7 +94,11 @@ describe('VeronaModuleDirective', () => {
       nativeElement: document.createElement('iframe')
     } as ElementRef;
 
-    const directive = new TestVeronaModuleDirective(
+    TestBed.configureTestingModule({
+      providers: [{ provide: WorkspaceBackendService, useValue: backendService }]
+    });
+    const unitStores = TestBed.inject(UnitStoresService);
+    const directive = TestBed.runInInjectionContext(() => new TestVeronaModuleDirective(
       moduleService,
       translateService,
       snackBar,
@@ -101,7 +106,7 @@ describe('VeronaModuleDirective', () => {
       workspaceService,
       appService,
       hostingIframe
-    );
+    ));
 
     return {
       directive,
@@ -111,7 +116,8 @@ describe('VeronaModuleDirective', () => {
       backendService,
       workspaceService,
       appService,
-      hostingIframe
+      hostingIframe,
+      unitStores
     };
   };
 
@@ -184,25 +190,15 @@ describe('VeronaModuleDirective', () => {
     const { directive, translateService } = createDirective();
 
     directive.postMessageTarget = window;
-    directive.sendUnitDefinition(0, undefined);
+    directive.sendUnitDefinition(0);
 
     expect(translateService.instant).toHaveBeenCalledWith('workspace.unit-not-found');
     expect(directive.message).toBe('workspace.unit-not-found');
     expect(directive.postMessageTarget).toBeUndefined();
   });
 
-  it('posts store when unit definition store exists', () => {
-    const { directive, backendService } = createDirective();
-    const unitDefinitionStore = new UnitDefinitionStore(1, { definition: 'x', variables: [] });
-
-    directive.sendUnitDefinition(1, unitDefinitionStore);
-
-    expect(directive.postStore).toHaveBeenCalledWith(unitDefinitionStore);
-    expect(backendService.getUnitDefinition).not.toHaveBeenCalled();
-  });
-
   it('loads unit definition when missing store and posts it', () => {
-    const { directive, backendService, workspaceService } = createDirective();
+    const { directive, backendService, unitStores } = createDirective();
 
     const definitionDto: UnitDefinitionDto = {
       definition: 'content',
@@ -211,11 +207,23 @@ describe('VeronaModuleDirective', () => {
 
     backendService.getUnitDefinition.mockReturnValue(of(definitionDto));
 
-    directive.sendUnitDefinition(5, undefined);
+    directive.sendUnitDefinition(5);
 
     expect(backendService.getUnitDefinition).toHaveBeenCalledWith(7, 5);
-    expect(workspaceService.setUnitDefinitionStore).toHaveBeenCalledWith(expect.any(UnitDefinitionStore));
-    expect(directive.postStore).toHaveBeenCalledWith(expect.any(UnitDefinitionStore));
+    expect(unitStores.definitionStore()).toEqual(expect.any(UnitDefinitionStore));
+    expect(directive.postStore).toHaveBeenCalledWith(unitStores.definitionStore());
+  });
+
+  it('posts the store it has without loading the definition again', () => {
+    const { directive, backendService, unitStores } = createDirective();
+    backendService.getUnitDefinition.mockReturnValue(of({ definition: 'x', variables: [] }));
+    directive.sendUnitDefinition(5);
+    directive.postStore.mockClear();
+
+    directive.sendUnitDefinition(5);
+
+    expect(directive.postStore).toHaveBeenCalledWith(unitStores.definitionStore());
+    expect(backendService.getUnitDefinition).toHaveBeenCalledTimes(1);
   });
 
   it('shows error when unit definition cannot be loaded', () => {
@@ -225,7 +233,7 @@ describe('VeronaModuleDirective', () => {
 
     backendService.getUnitDefinition.mockReturnValue(of(null));
 
-    directive.sendUnitDefinition(5, undefined);
+    directive.sendUnitDefinition(5);
 
     expect(snackBar.open).toHaveBeenCalledWith(
       'workspace.unit-definition-not-loaded',

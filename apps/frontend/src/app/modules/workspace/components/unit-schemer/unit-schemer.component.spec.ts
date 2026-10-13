@@ -8,10 +8,12 @@ import { environment } from '../../../../../environments/environment';
 import { UnitSchemerComponent } from './unit-schemer.component';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
+import { UnitStoresService } from '../../services/unit-stores.service';
 
 describe('UnitSchemerComponent', () => {
   let component: UnitSchemerComponent;
   let fixture: ComponentFixture<UnitSchemerComponent>;
+  let unitStores: UnitStoresService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -29,6 +31,7 @@ describe('UnitSchemerComponent', () => {
 
     fixture = TestBed.createComponent(UnitSchemerComponent);
     component = fixture.componentInstance;
+    unitStores = TestBed.inject(UnitStoresService);
     fixture.detectChanges();
   });
 
@@ -64,7 +67,7 @@ describe('UnitSchemerComponent', () => {
     it('sends the editor\'s unsaved list in the 1.x spelling', () => {
       const definitionStore = createMock<UnitDefinitionStore>();
       definitionStore.getData.mockReturnValue({ variables: [inV2] } as unknown as UnitDefinitionDto);
-      jest.spyOn(component.workspaceService, 'getUnitDefinitionStore').mockReturnValue(definitionStore);
+      jest.spyOn(unitStores, 'definitionStore').mockReturnValue(definitionStore);
       const schemeStore = createMock<UnitSchemeStore>();
       schemeStore.getData.mockReturnValue({ scheme: '', variables: [] } as unknown as UnitSchemeDto);
 
@@ -74,7 +77,7 @@ describe('UnitSchemerComponent', () => {
     });
 
     it('sends the scheme\'s list in the 1.x spelling when no definition is loaded', () => {
-      jest.spyOn(component.workspaceService, 'getUnitDefinitionStore').mockReturnValue(undefined);
+      jest.spyOn(unitStores, 'definitionStore').mockReturnValue(undefined);
       const schemeStore = createMock<UnitSchemeStore>();
       schemeStore.getData.mockReturnValue({ scheme: '', variables: [inV2] } as unknown as UnitSchemeDto);
 
@@ -84,7 +87,7 @@ describe('UnitSchemerComponent', () => {
     });
 
     it('sends an empty list when there is none', () => {
-      jest.spyOn(component.workspaceService, 'getUnitDefinitionStore').mockReturnValue(undefined);
+      jest.spyOn(unitStores, 'definitionStore').mockReturnValue(undefined);
       const schemeStore = createMock<UnitSchemeStore>();
       schemeStore.getData.mockReturnValue({ scheme: '' } as unknown as UnitSchemeDto);
 

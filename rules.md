@@ -16,6 +16,11 @@
 - **Preferred Solution (Pipes)**: Use **Pure Pipes** for data transformation in templates (e.g., `[navTabs]="navTabs | filterHiddenTabs:hiddenRoutes"`).
   - Pure pipes are only re-evaluated when their input references change, providing built-in memoization.
 
+### State: Signals
+- **Rule**: New state in the frontend is held in signals (`signal`, `computed`, handed out read-only with `asReadonly()`). Events and HTTP requests stay observables; where RxJS code needs a signal as a stream, `toObservable` bridges it.
+- **Rationale**: Angular is moving to signals and the studio will follow; what is written in signals now need not be rebuilt later. A signal also always has a current value, so a reader that comes late still gets it, while an event sent before anyone subscribed is lost (#1290).
+- **Note**: Reading a signal in a template (`[disabled]="!unitStores.changed()"`) is not a function call in the sense of *Performance: Template Bindings*: Angular tracks the read, and a `computed` is evaluated again only when what it depends on changes.
+
 ### Subscription Management
 - **Rule**: Use the `ngUnsubscribe` + `takeUntil` pattern for all subscriptions in Angular components.
 - **Rationale**: This ensures that subscriptions are automatically cleaned up when a component is destroyed, preventing memory leaks and unexpected behavior from asynchronous callbacks.

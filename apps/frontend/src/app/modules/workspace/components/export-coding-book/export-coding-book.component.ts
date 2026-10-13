@@ -14,6 +14,7 @@ import { MatButton } from '@angular/material/button';
 import { CodeBookContentSetting } from '@studio-lite-lib/api-dto';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
+import { UnitStoresService } from '../../services/unit-stores.service';
 import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.component';
 import { AppService } from '../../../../services/app.service';
 import { I18nService } from '../../../../services/i18n.service';
@@ -38,6 +39,7 @@ export class ExportCodingBookComponent implements OnInit {
   constructor(
     // @Inject(MAT_DIALOG_DATA) public data: { units: number[] },
     public workspaceService: WorkspaceService,
+    private unitStores: UnitStoresService,
     private backendService: WorkspaceBackendService,
     private appService: AppService,
     private i18nService: I18nService
@@ -47,7 +49,7 @@ export class ExportCodingBookComponent implements OnInit {
   unitList: number[] = [];
   selectedMissingsProfile: string = '';
   missingsProfiles: string[] = [''];
-  workspaceChanges = this.workspaceService.isChanged();
+  workspaceChanges = this.unitStores.changed();
 
   ngOnInit() {
     this.backendService.getMissingsProfiles().subscribe(missingsProfiles => {

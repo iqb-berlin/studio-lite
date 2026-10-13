@@ -1,5 +1,5 @@
 import { UnitDefinitionDto } from '@studio-lite-lib/api-dto';
-import { EventEmitter } from '@angular/core';
+import { EventEmitter, Signal, signal } from '@angular/core';
 import { sameVariableLists, VariableInfoInEitherSpelling } from '@studio-lite/shared-code';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 
@@ -10,9 +10,15 @@ import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
  *
  * Only the changed part is sent when the unit is saved, which is why a definition and its variables
  * are tracked separately here.
+ *
+ * Two ways out, for two kinds of listener: {@link changed} is the state -- whether anything is
+ * unsaved, readable at any time, also by whoever comes late -- and {@link dataChange} the event, for
+ * those that pass every edit on to a module.
  */
 export class UnitDefinitionStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();
+  private readonly changedState = signal(false);
+  readonly changed: Signal<boolean> = this.changedState.asReadonly();
   private originalData: UnitDefinitionDto;
   private changedData: UnitDefinitionDto;
   private unitId: number;
@@ -52,7 +58,7 @@ export class UnitDefinitionStore {
     } else {
       delete this.changedData.definitionType;
     }
-    this.dataChange.emit();
+    this.notifyChange();
   }
 
   isChanged(): boolean {
@@ -79,6 +85,11 @@ export class UnitDefinitionStore {
 
   restore() {
     this.changedData = <UnitDefinitionDto>{};
+    this.notifyChange();
+  }
+
+  private notifyChange(): void {
+    this.changedState.set(this.isChanged());
     this.dataChange.emit();
   }
 }
