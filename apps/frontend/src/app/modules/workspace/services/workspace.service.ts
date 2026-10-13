@@ -1,7 +1,9 @@
 import {
   BehaviorSubject, lastValueFrom, Observable
 } from 'rxjs';
-import { EventEmitter, Injectable, Output } from '@angular/core';
+import {
+  EventEmitter, Injectable, Output, signal
+} from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import {
@@ -71,6 +73,13 @@ export class WorkspaceService {
   lastChangedDefinitionUser?: string;
   lastChangedSchemeUser?: string;
   isValidFormKey = new BehaviorSubject<boolean>(true);
+  private readonly unitKeyTakenState = signal(false);
+  /**
+   * Whether another unit of the workspace already carries the key typed in the properties. Unlike
+   * a key that only breaks the format rules -- which units in use do, and must stay savable -- a
+   * taken key blocks saving (#1842).
+   */
+  readonly unitKeyTaken = this.unitKeyTakenState.asReadonly();
   states: State[] = [];
   codingScheme!: CodingSchemeData;
   dropBoxId: number | null = null;
@@ -86,9 +95,6 @@ export class WorkspaceService {
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
   @Output() unitMetadataReloaded = new EventEmitter<void>();
-
-  @Output() unitPropertiesChange: EventEmitter<boolean> =
-    new EventEmitter<boolean>();
 
   constructor(
     private backendService: WorkspaceBackendService,
@@ -112,14 +118,19 @@ export class WorkspaceService {
     return '[a-zA-Z][a-zA-Z0-9_-]*';
   }
 
+  /**
+   * The list is asked for each time the key is checked rather than handed over once: `resetUnitList`
+   * replaces the list object, so one taken when the form was built may be the empty list of a
+   * workspace still loading, and no key would ever count as taken (#1842).
+   */
   static unitKeyUniquenessValidator(
     unitId: number,
-    unitList: { [key: string]: UnitInListDto[] }
+    unitList: () => { [key: string]: UnitInListDto[] }
   ): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const newKeyNormalised = control.value.toUpperCase().trim();
       let allUnits: UnitInListDto[] = [];
-      Object.values(unitList).forEach(units => {
+      Object.values(unitList()).forEach(units => {
         allUnits = [...allUnits, ...units];
       });
       const allreadyIn = allUnits.filter(
@@ -139,7 +150,14 @@ export class WorkspaceService {
     this.lastChangedMetadata = undefined;
     this.lastChangedScheme = undefined;
     this.lastChangedDefinition = undefined;
+    // the key checks belong to the unit left; the next one is checked when its properties are shown
+    this.isValidFormKey.next(true);
+    this.unitKeyTakenState.set(false);
     this.unitStores.reset();
+  }
+
+  setUnitKeyTaken(taken: boolean): void {
+    this.unitKeyTakenState.set(taken);
   }
 
   resetUnitList(data: UnitInListDto[]) {

@@ -224,7 +224,7 @@ export class UnitPropertiesComponent
           Validators.pattern(WorkspaceService.unitKeyPatternString()),
           WorkspaceService.unitKeyUniquenessValidator(
             unitMetadata.id,
-            this.workspaceService.unitList
+            () => this.workspaceService.unitList
           )
         ]);
       }
@@ -250,6 +250,7 @@ export class UnitPropertiesComponent
         this.workspaceService.isValidFormKey.next(
           keyControl.status === 'VALID'
         );
+        this.reportUnitKeyTaken();
       }
 
       this.selectedStateColor = unitMetadata.state || '';
@@ -268,6 +269,7 @@ export class UnitPropertiesComponent
           this.unitForm.get('reference')?.value,
           this.unitForm.get('state')?.value
         );
+        this.reportUnitKeyTaken();
       });
       this.unitForm.enable();
       // timeout because we access ViewChildren
@@ -297,6 +299,16 @@ export class UnitPropertiesComponent
     }
     this.initialTranscript = this.unitForm.get('transcript')?.value;
     this.initialReference = this.unitForm.get('reference')?.value;
+  }
+
+  /**
+   * A taken key blocks saving only once it is a change: a unit that already carries a key another
+   * unit has -- from before the server checked renames -- stays editable, as the server only checks a
+   * key that is changed (#1842).
+   */
+  private reportUnitKeyTaken(): void {
+    const keyChanged = this.unitStores.metadataStore()?.getChangedData().key !== undefined;
+    this.workspaceService.setUnitKeyTaken(keyChanged && !!this.unitForm.get('key')?.hasError('keyNotUnique'));
   }
 
   private initVeronaModules(unitMetadata: UnitPropertiesDto): void {

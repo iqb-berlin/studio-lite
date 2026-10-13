@@ -12,6 +12,7 @@ import { environment } from '../../../../../environments/environment';
 import { UnitSaveButtonComponent } from './unit-save-button.component';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { UnitStoresService } from '../../services/unit-stores.service';
+import { WorkspaceService } from '../../services/workspace.service';
 
 describe('UnitSaveButtonComponent', () => {
   let unitStores: UnitStoresService;
@@ -70,6 +71,23 @@ describe('UnitSaveButtonComponent', () => {
     unitStores.restore();
     fixture.detectChanges();
     expect(saveButton(fixture).disabled).toBe(true);
+  });
+
+  // #1842: a key another unit carries blocks saving; one that only breaks the format rules does not
+  it('is disabled while the key typed in the properties is taken', () => {
+    const workspaceService = TestBed.inject(WorkspaceService);
+    unitStores.loadMetadataStore(1, 1).subscribe();
+    unitStores.metadataStore()?.setPlayer('player@2.0');
+    const fixture = createButton();
+
+    workspaceService.setUnitKeyTaken(true);
+    fixture.detectChanges();
+    expect(saveButton(fixture).disabled).toBe(true);
+
+    workspaceService.setUnitKeyTaken(false);
+    workspaceService.isValidFormKey.next(false);
+    fixture.detectChanges();
+    expect(saveButton(fixture).disabled).toBe(false);
   });
 
   describe('discarding the changes', () => {

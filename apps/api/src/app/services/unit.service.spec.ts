@@ -29,6 +29,7 @@ import { UnitItemService } from './unit-item.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { MetadataProfileService } from './metadata-profile.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
+import { UnitKeyExistsException } from '../exceptions/unit-key-exists.exception';
 
 describe('UnitService', () => {
   let service: UnitService;
@@ -511,6 +512,42 @@ describe('UnitService', () => {
       await service.patchUnit(1, { name: 'n' } as UnitPropertiesDto, 'user');
       expect(unit.name).toBe('n');
       expect(unitsRepository.save).toHaveBeenCalled();
+    });
+
+    // #1842: renaming did not check what creating and copying refuse
+    describe('with a new key', () => {
+      beforeEach(() => {
+        unitsRepository.findOne.mockResolvedValue({ id: 1, key: 'OLD', workspaceId: 7 } as Unit);
+        unitsRepository.find.mockResolvedValue([
+          { id: 1, key: 'OLD' }, { id: 2, key: 'M1_001' }
+        ] as Unit[]);
+      });
+
+      it.each(['M1_001', 'm1_001', ' M1_001 '])('refuses %p, which another unit carries', async key => {
+        await expect(service.patchUnit(1, { id: 1, key } as UnitPropertiesDto, 'user'))
+          .rejects.toBeInstanceOf(UnitKeyExistsException);
+        expect(unitsRepository.find).toHaveBeenCalledWith(expect.objectContaining({ where: { workspaceId: 7 } }));
+        expect(unitsRepository.save).not.toHaveBeenCalled();
+      });
+
+      it('takes a key no other unit carries', async () => {
+        await service.patchUnit(1, { id: 1, key: 'M1_002' } as UnitPropertiesDto, 'user');
+
+        expect(unitsRepository.save).toHaveBeenCalledWith(expect.objectContaining({ key: 'M1_002' }));
+      });
+
+      it('lets a unit keep or recase its own key', async () => {
+        await service.patchUnit(1, { id: 1, key: 'old' } as UnitPropertiesDto, 'user');
+
+        expect(unitsRepository.save).toHaveBeenCalledWith(expect.objectContaining({ key: 'old' }));
+      });
+
+      it('does not look at the other keys when the key is sent unchanged', async () => {
+        await service.patchUnit(1, { id: 1, key: 'OLD', name: 'n' } as UnitPropertiesDto, 'user');
+
+        expect(unitsRepository.find).not.toHaveBeenCalled();
+        expect(unitsRepository.save).toHaveBeenCalled();
+      });
     });
   });
 
