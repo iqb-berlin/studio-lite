@@ -60,4 +60,18 @@ describe('UnitSchemeStore', () => {
     expect(store.isChanged()).toBe(true);
     expect(store.getChangedData()).toEqual({ scheme: 's1', schemeType: 't2' });
   });
+
+  it('holds in changed whether a scheme has arrived', () => {
+    const store = new UnitSchemeStore(1, { scheme: 's1', schemeType: 't1' });
+    expect(store.changed()).toBe(false);
+
+    store.setData('s2', 't2');
+    expect(store.changed()).toBe(true);
+    store.applyChanges();
+    expect(store.changed()).toBe(false);
+
+    store.setData('s3', 't2');
+    store.restore();
+    expect(store.changed()).toBe(false);
+  });
 });

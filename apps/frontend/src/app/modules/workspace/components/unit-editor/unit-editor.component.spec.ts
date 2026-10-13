@@ -8,6 +8,7 @@ import { environment } from '../../../../../environments/environment';
 import { UnitEditorComponent } from './unit-editor.component';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
+import { UnitStoresService } from '../../services/unit-stores.service';
 import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
@@ -18,6 +19,7 @@ describe('UnitEditorComponent', () => {
 
   let backendServiceMock: jest.Mocked<WorkspaceBackendService>;
   let workspaceServiceMock: WorkspaceService;
+  let unitStoresMock: { definitionStore: jest.Mock; metadataStore: jest.Mock };
   let moduleServiceMock: ModuleService;
   let appServiceMock: AppService;
   let translateServiceMock: TranslateService;
@@ -30,11 +32,15 @@ describe('UnitEditorComponent', () => {
     workspaceServiceMock = {
       selectedWorkspaceId: 1,
       userAccessLevel: 0,
-      selectedUnit$: new BehaviorSubject<number>(1),
-      getUnitDefinitionStore: jest.fn().mockReturnValue({
-        setData: jest.fn()
-      } as unknown as UnitDefinitionStore)
+      selectedUnit$: new BehaviorSubject<number>(1)
     } as unknown as WorkspaceService;
+
+    unitStoresMock = {
+      definitionStore: jest.fn().mockReturnValue({
+        setData: jest.fn()
+      } as unknown as UnitDefinitionStore),
+      metadataStore: jest.fn()
+    };
 
     moduleServiceMock = {
       players: {},
@@ -65,6 +71,10 @@ describe('UnitEditorComponent', () => {
         {
           provide: WorkspaceService,
           useValue: workspaceServiceMock
+        },
+        {
+          provide: UnitStoresService,
+          useValue: unitStoresMock
         },
         {
           provide: ModuleService,
@@ -107,7 +117,7 @@ describe('UnitEditorComponent', () => {
     const store = {
       setData: jest.fn()
     } as unknown as UnitDefinitionStore;
-    jest.spyOn(workspaceServiceMock, 'getUnitDefinitionStore').mockReturnValue(store);
+    unitStoresMock.definitionStore.mockReturnValue(store);
 
     const message = new MessageEvent('message', {
       data: {
@@ -135,7 +145,7 @@ describe('UnitEditorComponent', () => {
     const store = {
       setData: jest.fn()
     } as unknown as UnitDefinitionStore;
-    jest.spyOn(workspaceServiceMock, 'getUnitDefinitionStore').mockReturnValue(store);
+    unitStoresMock.definitionStore.mockReturnValue(store);
 
     const message = new MessageEvent('message', {
       data: {
@@ -164,7 +174,7 @@ describe('UnitEditorComponent', () => {
     const store = {
       setData: jest.fn()
     } as unknown as UnitDefinitionStore;
-    jest.spyOn(workspaceServiceMock, 'getUnitDefinitionStore').mockReturnValue(store);
+    unitStoresMock.definitionStore.mockReturnValue(store);
 
     const message = new MessageEvent('message', {
       data: {
@@ -190,7 +200,7 @@ describe('UnitEditorComponent', () => {
       component.sessionId = 's1';
       component.editorApiVersion = 4;
       const store = { setData: jest.fn() } as unknown as UnitDefinitionStore;
-      jest.spyOn(workspaceServiceMock, 'getUnitDefinitionStore').mockReturnValue(store);
+      unitStoresMock.definitionStore.mockReturnValue(store);
       component.handleIncomingMessage(new MessageEvent('message', {
         data: {
           type: 'voeDefinitionChangedNotification',

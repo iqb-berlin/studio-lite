@@ -203,4 +203,22 @@ describe('UnitDefinitionStore', () => {
       expect(store.isChanged()).toBe(true);
     });
   });
+
+  it('holds in changed whether anything is unsaved', () => {
+    const store = new UnitDefinitionStore(1, { variables: [], definition: 'def-a' });
+    expect(store.changed()).toBe(false);
+
+    store.setData([], 'def-b');
+    expect(store.changed()).toBe(true);
+    store.setData([], 'def-a');
+    expect(store.changed()).toBe(false);
+
+    store.setData([], 'def-b');
+    store.applyChanges();
+    expect(store.changed()).toBe(false);
+
+    store.setData([], 'def-c');
+    store.restore();
+    expect(store.changed()).toBe(false);
+  });
 });

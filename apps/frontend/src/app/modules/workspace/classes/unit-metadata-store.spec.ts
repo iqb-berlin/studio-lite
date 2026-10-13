@@ -123,4 +123,28 @@ describe('UnitMetadataStore', () => {
     store.setMetadata({ items: [{ id: 'item1', uuid: 'uuid-1' }] });
     expect(store.getChangedData().metadata).toBeUndefined();
   });
+
+  it('holds in changed whether anything is unsaved', () => {
+    const store = new UnitMetadataStore(buildBaseProperties());
+    expect(store.changed()).toBe(false);
+
+    store.setPlayer('p2');
+    expect(store.changed()).toBe(true);
+    store.setPlayer('p1');
+    expect(store.changed()).toBe(false);
+
+    store.setMetadata({ items: [{ id: 'item1' }] });
+    expect(store.changed()).toBe(true);
+    store.reloadMetadata({ items: [{ id: 'item1', uuid: 'uuid-1' }] });
+    expect(store.changed()).toBe(false);
+
+    store.setBasicData('k2', 'n1', 'd1', 'g1', 't1', 'r1', 'draft');
+    expect(store.changed()).toBe(true);
+    store.applyChanges();
+    expect(store.changed()).toBe(false);
+
+    store.setPlayer('p2');
+    store.restore();
+    expect(store.changed()).toBe(false);
+  });
 });

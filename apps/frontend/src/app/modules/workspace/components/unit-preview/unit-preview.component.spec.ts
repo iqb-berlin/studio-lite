@@ -18,6 +18,7 @@ import { Response } from '@iqbspecs/response/response.interface';
 import { environment } from '../../../../../environments/environment';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
+import { UnitStoresService } from '../../services/unit-stores.service';
 import { PreviewService } from '../../services/preview.service';
 import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
@@ -36,6 +37,7 @@ describe('UnitPreviewComponent', () => {
   let dialogStub: MatDialog;
   let routerStub: Router;
   let workspaceServiceStub: WorkspaceService;
+  let unitStoresStub: UnitStoresService;
   let backendServiceStub: WorkspaceBackendService;
   let moduleServiceStub: ModuleService;
 
@@ -73,11 +75,14 @@ describe('UnitPreviewComponent', () => {
     workspaceServiceStub = {
       selectedUnit$: new BehaviorSubject<number>(5),
       selectedWorkspaceId: 7,
-      groupId: 9,
-      unitDefinitionStoreChanged: new Subject<void>(),
-      isChanged: jest.fn().mockReturnValue(false),
-      getUnitDefinitionStore: () => undefined,
-      getUnitMetadataStore: () => undefined
+      groupId: 9
+    } as never;
+
+    unitStoresStub = {
+      changed: jest.fn().mockReturnValue(false),
+      metadataStore: () => undefined,
+      definitionStore$: new Subject<void>(),
+      loadDefinitionStore: jest.fn().mockReturnValue(of(undefined))
     } as never;
 
     const previewServiceStub = {
@@ -106,6 +111,7 @@ describe('UnitPreviewComponent', () => {
         { provide: Router, useValue: routerStub },
         { provide: WorkspaceBackendService, useValue: backendServiceStub },
         { provide: WorkspaceService, useValue: workspaceServiceStub },
+        { provide: UnitStoresService, useValue: unitStoresStub },
         { provide: PreviewService, useValue: previewServiceStub },
         { provide: ModuleService, useValue: moduleServiceStub },
         { provide: AppService, useValue: appServiceStub },
@@ -155,7 +161,7 @@ describe('UnitPreviewComponent', () => {
   });
 
   it('warns when coding is checked while changes exist', async () => {
-    (workspaceServiceStub.isChanged as jest.Mock).mockReturnValue(true);
+    jest.spyOn(unitStoresStub, 'changed').mockReturnValue(true);
 
     await component.checkCodingChanged();
 
@@ -164,7 +170,7 @@ describe('UnitPreviewComponent', () => {
   });
 
   it('loads coding scheme when no changes exist', async () => {
-    (workspaceServiceStub.isChanged as jest.Mock).mockReturnValue(false);
+    jest.spyOn(unitStoresStub, 'changed').mockReturnValue(false);
 
     await component.checkCodingChanged();
 

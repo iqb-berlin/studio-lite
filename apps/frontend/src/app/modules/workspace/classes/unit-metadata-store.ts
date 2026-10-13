@@ -1,13 +1,16 @@
 import { UnitMetadataValues, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
-import { EventEmitter } from '@angular/core';
+import { EventEmitter, Signal, signal } from '@angular/core';
 
 /**
  * The unit's properties and metadata while they are being edited, in the same shape as
  * {@link UnitDefinitionStore}: the loaded state, and beside it the fields that differ from it. The
- * id is always carried, since it names what is to be patched.
+ * id is always carried, since it names what is to be patched. {@link changed} holds whether
+ * anything is unsaved as a signal, {@link dataChange} reports each edit as an event.
  */
 export class UnitMetadataStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();
+  private readonly changedState = signal(false);
+  readonly changed: Signal<boolean> = this.changedState.asReadonly();
   private originalData: UnitPropertiesDto;
   private changedData: UnitPropertiesDto;
 
@@ -22,7 +25,7 @@ export class UnitMetadataStore {
     } else {
       this.changedData.player = newPlayer;
     }
-    this.dataChange.emit();
+    this.notifyChange();
   }
 
   setEditor(newEditor: string): void {
@@ -31,7 +34,7 @@ export class UnitMetadataStore {
     } else {
       this.changedData.editor = newEditor;
     }
-    this.dataChange.emit();
+    this.notifyChange();
   }
 
   setSchemer(newSchemer: string): void {
@@ -40,7 +43,7 @@ export class UnitMetadataStore {
     } else {
       this.changedData.schemer = newSchemer;
     }
-    this.dataChange.emit();
+    this.notifyChange();
   }
 
   setBasicData(
@@ -87,7 +90,7 @@ export class UnitMetadataStore {
     } else {
       this.changedData.state = newState;
     }
-    this.dataChange.emit();
+    this.notifyChange();
   }
 
   setMetadata(newMetadata: UnitMetadataValues): void {
@@ -96,7 +99,7 @@ export class UnitMetadataStore {
     } else {
       this.changedData.metadata = JSON.parse(JSON.stringify(newMetadata));
     }
-    this.dataChange.emit();
+    this.notifyChange();
   }
 
   isChanged(): boolean {
@@ -131,11 +134,16 @@ export class UnitMetadataStore {
   reloadMetadata(metadata: UnitMetadataValues): void {
     this.originalData = { ...this.originalData, metadata };
     delete this.changedData.metadata;
-    this.dataChange.emit();
+    this.notifyChange();
   }
 
   restore(): void {
     this.changedData = <UnitPropertiesDto>{ id: this.originalData.id };
+    this.notifyChange();
+  }
+
+  private notifyChange(): void {
+    this.changedState.set(this.isChanged());
     this.dataChange.emit();
   }
 }

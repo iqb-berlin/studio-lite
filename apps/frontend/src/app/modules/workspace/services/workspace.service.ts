@@ -1,5 +1,5 @@
 import {
-  BehaviorSubject, lastValueFrom, Observable, of
+  BehaviorSubject, lastValueFrom, Observable
 } from 'rxjs';
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
@@ -15,27 +15,22 @@ import { CodingSchemeData } from '@iqbspecs/coding-scheme/coding-scheme.interfac
 import { WorkspaceBackendService } from './workspace-backend.service';
 import { UnitMetadataStore } from '../classes/unit-metadata-store';
 import { AppService } from '../../../services/app.service';
-import { UnitSchemeStore } from '../classes/unit-scheme-store';
-import { UnitDefinitionStore } from '../classes/unit-definition-store';
 import { State } from '../../admin/models/state.type';
 import { RichNoteTagsService } from './rich-note-tags.service';
+import { UnitStoresService } from './unit-stores.service';
 
 /**
  * The state of the workspace currently open: which unit is selected, what the user may do in it,
- * and the stores that hold the unit's parts while they are being edited -- definition, scheme and
- * metadata each in one of their own.
+ * and what happens to the selected unit as a whole -- loading it, letting go of it, saving it.
  *
- * The stores are what keeps unsaved work: a component that shows a unit reads from them and writes
- * back into them, and only the save writes to the server. That is also why leaving a unit asks the
- * stores whether anything is unsaved.
+ * The unit's parts while they are being edited live in the stores of {@link UnitStoresService}:
+ * a component that shows a unit reads from them and writes back into them, and only the save here
+ * writes to the server. That is also why leaving a unit asks the stores whether anything is unsaved.
  */
 @Injectable({
   providedIn: 'root'
 })
 export class WorkspaceService {
-  unitMetadataStore: UnitMetadataStore | undefined;
-  private unitDefinitionStore: UnitDefinitionStore | undefined;
-  private unitSchemeStore: UnitSchemeStore | undefined;
   groupId!: number;
   selectedWorkspaceId = 0;
   selectedWorkspaceName = '';
@@ -90,19 +85,7 @@ export class WorkspaceService {
   }
 
   @Output() onCommentsUpdated = new EventEmitter<void>();
-  @Output() unitDefinitionStoreChanged = new EventEmitter<
-  UnitDefinitionStore | undefined
-  >();
-
-  @Output() unitMetadataStoreChanged = new EventEmitter<
-  UnitMetadataStore | undefined
-  >();
-
   @Output() unitMetadataReloaded = new EventEmitter<void>();
-
-  @Output() unitSchemeStoreChanged = new EventEmitter<
-  UnitSchemeStore | undefined
-  >();
 
   @Output() unitPropertiesChange: EventEmitter<boolean> =
     new EventEmitter<boolean>();
@@ -110,8 +93,10 @@ export class WorkspaceService {
   constructor(
     private backendService: WorkspaceBackendService,
     private appService: AppService,
-    private richNoteTagsService: RichNoteTagsService
+    private richNoteTagsService: RichNoteTagsService,
+    private unitStores: UnitStoresService
   ) {
+    this.unitStores.metadataLoaded$.subscribe(unitData => this.setLastChanged(unitData));
     this.workspaceSettings = {
       defaultEditor: '',
       defaultPlayer: '',
@@ -154,50 +139,7 @@ export class WorkspaceService {
     this.lastChangedMetadata = undefined;
     this.lastChangedScheme = undefined;
     this.lastChangedDefinition = undefined;
-    this.setUnitSchemeStore(undefined);
-    this.setUnitMetadataStore(undefined);
-    this.setUnitDefinitionStore(undefined);
-  }
-
-  setUnitDefinitionStore(unitDefinitionStore: UnitDefinitionStore | undefined): void {
-    this.unitDefinitionStore = unitDefinitionStore;
-    this.unitDefinitionStoreChanged.emit(unitDefinitionStore);
-  }
-
-  getUnitDefinitionStore(): UnitDefinitionStore | undefined {
-    return this.unitDefinitionStore;
-  }
-
-  setUnitSchemeStore(unitSchemeStore: UnitSchemeStore | undefined): void {
-    this.unitSchemeStore = unitSchemeStore;
-    this.unitSchemeStoreChanged.emit(unitSchemeStore);
-  }
-
-  getUnitSchemeStore(): UnitSchemeStore | undefined {
-    return this.unitSchemeStore;
-  }
-
-  setUnitMetadataStore(unitMetadataStore: UnitMetadataStore | undefined): void {
-    this.unitMetadataStore = unitMetadataStore;
-    this.unitMetadataStoreChanged.emit(unitMetadataStore);
-  }
-
-  getUnitMetadataStore(): UnitMetadataStore | undefined {
-    return this.unitMetadataStore;
-  }
-
-  restoreUnitStores(): void {
-    if (this.getUnitMetadataStore()) this.getUnitMetadataStore()?.restore();
-    if (this.getUnitDefinitionStore()) this.getUnitDefinitionStore()?.restore();
-    if (this.getUnitSchemeStore()) this.getUnitSchemeStore()?.restore();
-  }
-
-  isChanged(): boolean {
-    return !!(
-      (this.unitMetadataStore && this.unitMetadataStore.isChanged()) ||
-      (this.unitDefinitionStore && this.unitDefinitionStore.isChanged()) ||
-      (this.unitSchemeStore && this.unitSchemeStore.isChanged())
-    );
+    this.unitStores.reset();
   }
 
   resetUnitList(data: UnitInListDto[]) {
@@ -240,50 +182,17 @@ export class WorkspaceService {
   }
 
   loadUnitProperties(): Observable<UnitMetadataStore | undefined> {
-    if (this.unitMetadataStore) return of(this.unitMetadataStore);
-    const selectedUnitId = this.selectedUnit$.getValue();
-    return this.backendService
-      .getUnitProperties(this.selectedWorkspaceId, selectedUnitId)
-      .pipe(
-        map(unitData => {
-          this.lastChangedMetadata = undefined;
-          this.lastChangedDefinition = undefined;
-          this.lastChangedScheme = undefined;
-          this.lastChangedMetadataUser = undefined;
-          this.lastChangedDefinitionUser = undefined;
-          this.lastChangedSchemeUser = undefined;
-          if (unitData) {
-            if (unitData.lastChangedMetadata) {
-              unitData.lastChangedMetadata = new Date(
-                unitData.lastChangedMetadata
-              );
-              this.lastChangedMetadata = new Date(unitData.lastChangedMetadata);
-              this.lastChangedMetadataUser = unitData.lastChangedMetadataUser;
-            }
-            if (unitData.lastChangedDefinition) {
-              unitData.lastChangedDefinition = new Date(
-                unitData.lastChangedDefinition
-              );
-              this.lastChangedDefinition = new Date(
-                unitData.lastChangedDefinition
-              );
-              this.lastChangedDefinitionUser =
-                unitData.lastChangedDefinitionUser;
-            }
-            if (unitData.lastChangedScheme) {
-              unitData.lastChangedScheme = new Date(unitData.lastChangedScheme);
-              this.lastChangedScheme = new Date(unitData.lastChangedScheme);
-              this.lastChangedSchemeUser = unitData.lastChangedSchemeUser;
-            }
-            this.setUnitMetadataStore(new UnitMetadataStore(unitData));
-          } else {
-            this.setUnitMetadataStore(
-              new UnitMetadataStore(<UnitPropertiesDto>{ id: selectedUnitId })
-            );
-          }
-          return this.unitMetadataStore;
-        })
-      );
+    return this.unitStores.loadMetadataStore(this.selectedWorkspaceId, this.selectedUnit$.getValue());
+  }
+
+  /** Who changed which part of the unit when, as the server reports it with freshly loaded properties. */
+  private setLastChanged(unitData: UnitPropertiesDto): void {
+    this.lastChangedMetadata = unitData.lastChangedMetadata ? new Date(unitData.lastChangedMetadata) : undefined;
+    this.lastChangedMetadataUser = unitData.lastChangedMetadata ? unitData.lastChangedMetadataUser : undefined;
+    this.lastChangedDefinition = unitData.lastChangedDefinition ? new Date(unitData.lastChangedDefinition) : undefined;
+    this.lastChangedDefinitionUser = unitData.lastChangedDefinition ? unitData.lastChangedDefinitionUser : undefined;
+    this.lastChangedScheme = unitData.lastChangedScheme ? new Date(unitData.lastChangedScheme) : undefined;
+    this.lastChangedSchemeUser = unitData.lastChangedScheme ? unitData.lastChangedSchemeUser : undefined;
   }
 
   private getDisplayUserName(): string {
@@ -294,8 +203,13 @@ export class WorkspaceService {
     let reloadUnitList = false;
     let saveOk = true;
     this.appService.dataLoading = true;
-    if (this.unitMetadataStore && this.unitMetadataStore.isChanged()) {
-      const changedData = this.unitMetadataStore.getChangedData();
+    // the unit and its stores as they are when the save starts; another unit may be opened meanwhile
+    const unitId = this.selectedUnit$.getValue();
+    const unitMetadataStore = this.unitStores.metadataStore();
+    const unitDefinitionStore = this.unitStores.definitionStore();
+    const unitSchemeStore = this.unitStores.schemeStore();
+    if (unitMetadataStore && unitMetadataStore.isChanged()) {
+      const changedData = unitMetadataStore.getChangedData();
       saveOk = await lastValueFrom(
         this.backendService.setUnitProperties(
           this.selectedWorkspaceId,
@@ -303,8 +217,8 @@ export class WorkspaceService {
         )
       );
       if (saveOk) {
-        reloadUnitList = this.unitMetadataStore.isKeyOrNameOrGroupOrStateChanged();
-        this.unitMetadataStore.applyChanges();
+        reloadUnitList = unitMetadataStore.isKeyOrNameOrGroupOrStateChanged();
+        unitMetadataStore.applyChanges();
         this.lastChangedMetadata = new Date();
         this.lastChangedMetadataUser = this.getDisplayUserName();
         if (changedData.metadata?.items?.some(item => !item.uuid)) {
@@ -314,32 +228,32 @@ export class WorkspaceService {
     }
     if (
       saveOk &&
-      this.unitDefinitionStore &&
-      this.unitDefinitionStore.isChanged()
+      unitDefinitionStore &&
+      unitDefinitionStore.isChanged()
     ) {
       saveOk = await lastValueFrom(
         this.backendService.setUnitDefinition(
           this.selectedWorkspaceId,
-          this.selectedUnit$.getValue(),
-          this.unitDefinitionStore.getChangedData()
+          unitId,
+          unitDefinitionStore.getChangedData()
         )
       );
       if (saveOk) {
-        this.unitDefinitionStore.applyChanges();
+        unitDefinitionStore.applyChanges();
         this.lastChangedDefinition = new Date();
         this.lastChangedDefinitionUser = this.getDisplayUserName();
       }
     }
-    if (saveOk && this.unitSchemeStore && this.unitSchemeStore.isChanged()) {
+    if (saveOk && unitSchemeStore && unitSchemeStore.isChanged()) {
       saveOk = await lastValueFrom(
         this.backendService.setUnitScheme(
           this.selectedWorkspaceId,
-          this.selectedUnit$.getValue(),
-          this.unitSchemeStore.getChangedData()
+          unitId,
+          unitSchemeStore.getChangedData()
         )
       );
       if (saveOk) {
-        this.unitSchemeStore.applyChanges();
+        unitSchemeStore.applyChanges();
         this.lastChangedScheme = new Date();
         this.lastChangedSchemeUser = this.getDisplayUserName();
       }
@@ -372,8 +286,9 @@ export class WorkspaceService {
     const unitData = await lastValueFrom(
       this.backendService.getUnitProperties(this.selectedWorkspaceId, unitId)
     );
-    if (unitData && this.unitMetadataStore?.getData().id === unitId) {
-      this.unitMetadataStore.reloadMetadata(unitData.metadata ?? {});
+    const unitMetadataStore = this.unitStores.metadataStore();
+    if (unitData && unitMetadataStore?.getData().id === unitId) {
+      unitMetadataStore.reloadMetadata(unitData.metadata ?? {});
       this.unitMetadataReloaded.emit();
     }
   }

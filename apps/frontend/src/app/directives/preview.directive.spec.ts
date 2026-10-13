@@ -8,6 +8,7 @@ import { Overlay } from '@angular/cdk/overlay';
 import { AppService } from '../services/app.service';
 import { WorkspaceBackendService } from '../modules/workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../modules/workspace/services/workspace.service';
+import { UnitStoresService } from '../modules/workspace/services/unit-stores.service';
 import { ModuleService } from '../services/module.service';
 import { UnitState } from '../models/verona.interface';
 import { PreviewDirective } from './preview.directive';
@@ -58,6 +59,7 @@ describe('PreviewDirective', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: ModuleService, useValue: { widgets: {}, loadWidgets: jest.fn() } },
+        { provide: UnitStoresService, useValue: {} },
         Overlay,
         ViewContainerRef
       ]

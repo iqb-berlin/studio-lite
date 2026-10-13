@@ -117,15 +117,12 @@ export class UnitPreviewComponent
   }
 
   sendChangeData(): void {
-    this.sendUnitDefinition(
-      this.workspaceService.selectedUnit$.getValue(),
-      this.workspaceService.getUnitDefinitionStore()
-    );
+    this.sendUnitDefinition(this.workspaceService.selectedUnit$.getValue());
   }
 
   private subscribeForVeronaModuleLoaded(): void {
     this.getVeronaModuleId(
-      this.workspaceService.getUnitMetadataStore(),
+      this.unitStores.metadataStore(),
       'player'
     )
       .pipe(takeUntil(this.ngUnsubscribe))
@@ -257,7 +254,7 @@ export class UnitPreviewComponent
   }
 
   async checkCodingChanged(): Promise<void> {
-    if (this.workspaceService.isChanged()) {
+    if (this.unitStores.changed()) {
       this.snackBar.open(
         this.translateService.instant('workspace.save-unit-before-check'),
         this.translateService.instant('workspace.error'),
@@ -275,7 +272,7 @@ export class UnitPreviewComponent
   }
 
   showPrintOptions(): void {
-    if (this.workspaceService.isChanged()) {
+    if (this.unitStores.changed()) {
       this.snackBar.open(
         this.translateService.instant('workspace.save-unit-before-check'),
         this.translateService.instant('workspace.error'),

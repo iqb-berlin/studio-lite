@@ -46,7 +46,6 @@ describe('UnitPropertiesComponent', () => {
       selectedUnit$: new BehaviorSubject<number>(0),
       selectedWorkspaceId: 1,
       dropBoxId: 1,
-      unitDefinitionStoreChanged: new Subject<void>(),
       unitMetadataReloaded: new Subject<void>(),
       workspaceSettings: {
         defaultEditor: '',
@@ -57,10 +56,6 @@ describe('UnitPropertiesComponent', () => {
         stableModulesOnly: true
       } as WorkspaceSettingsDto,
       loadUnitProperties: () => of(null),
-      getUnitDefinitionStore: () => undefined,
-      getUnitSchemeStore: () => undefined,
-      getUnitMetadataStore: () => undefined,
-      setUnitSchemeStore: () => {},
       isValidFormKey: new BehaviorSubject<boolean>(true)
     } as unknown as WorkspaceService;
 
@@ -72,7 +67,8 @@ describe('UnitPropertiesComponent', () => {
     } as unknown as ModuleService;
 
     const backendServiceStub = {
-      getUnitScheme: jest.fn().mockReturnValue(of(null))
+      getUnitScheme: jest.fn().mockReturnValue(of(null)),
+      getUnitDefinition: jest.fn().mockReturnValue(of({ definition: 'def', variables: [] }))
     } as unknown as WorkspaceBackendService;
 
     const metadataBackendServiceStub = {
@@ -142,7 +138,7 @@ describe('UnitPropertiesComponent', () => {
     store.getData.mockReturnValue({
       metadata: { profiles: [{ profileId: 'old' }], items: [{ id: 'item1' }] }
     } as unknown as UnitPropertiesDto);
-    jest.spyOn(component.workspaceService, 'getUnitMetadataStore').mockReturnValue(store);
+    jest.spyOn(component.unitStores, 'metadataStore').mockReturnValue(store);
 
     component.onMetadataChange({ profiles: [{ profileId: 'new' }] } as unknown as Parameters<
     typeof component.onMetadataChange>[0]);
@@ -158,7 +154,7 @@ describe('UnitPropertiesComponent', () => {
     store.getData.mockReturnValue({
       metadata: { profiles: [{ profileId: 'p1' }], items: [{ id: 'old' }] }
     } as unknown as UnitPropertiesDto);
-    jest.spyOn(component.workspaceService, 'getUnitMetadataStore').mockReturnValue(store);
+    jest.spyOn(component.unitStores, 'metadataStore').mockReturnValue(store);
 
     component.onItemsMetadataChange({ profiles: [], items: [{ id: 'new' }] } as unknown as UnitMetadataValues);
 
@@ -172,7 +168,7 @@ describe('UnitPropertiesComponent', () => {
     const stored = { items: [{ id: 'item1', uuid: 'uuid-1' }] };
     const store = createMock<UnitMetadataStore>();
     store.getData.mockReturnValue({ id: 1, metadata: stored } as UnitPropertiesDto);
-    jest.spyOn(component.workspaceService, 'getUnitMetadataStore').mockReturnValue(store);
+    jest.spyOn(component.unitStores, 'metadataStore').mockReturnValue(store);
     jest.spyOn(component.workspaceService.selectedUnit$, 'getValue').mockReturnValue(1);
 
     (component.workspaceService.unitMetadataReloaded as unknown as Subject<void>).next();
@@ -186,7 +182,7 @@ describe('UnitPropertiesComponent', () => {
     store.getData.mockReturnValue({
       metadata: { profiles: [{ profileId: 'p1' }], items: [{ id: 'item1' }] }
     } as unknown as UnitPropertiesDto);
-    jest.spyOn(component.workspaceService, 'getUnitMetadataStore').mockReturnValue(store);
+    jest.spyOn(component.unitStores, 'metadataStore').mockReturnValue(store);
 
     component.onMetadataChange({} as unknown as Parameters<typeof component.onMetadataChange>[0]);
 
@@ -204,11 +200,24 @@ describe('UnitPropertiesComponent', () => {
     definitionStore.getData.mockReturnValue({
       variables: [{ id: 'panel', type: noValueType }, { id: 'text', type: 'STRING' }]
     } as unknown as UnitDefinitionDto);
-    jest.spyOn(component.workspaceService, 'getUnitSchemeStore').mockReturnValue(schemeStore);
-    jest.spyOn(component.workspaceService, 'getUnitDefinitionStore').mockReturnValue(definitionStore);
+    jest.spyOn(component.unitStores, 'schemeStore').mockReturnValue(schemeStore);
+    jest.spyOn(component.unitStores, 'definitionStore').mockReturnValue(definitionStore);
 
     const ids = (component as unknown as { getVariableIds(): AliasId[] }).getVariableIds();
 
     expect(ids).toEqual([{ id: 'text', alias: 'text' }]);
+  });
+
+  // the editor may load the definition only after this view was built
+  it('works out the item variables anew when a definition store loaded later changes', () => {
+    const variables = jest.fn();
+    component.variablesLoader.subscribe(variables);
+    variables.mockClear();
+    component.unitStores.loadDefinitionStore(1, 1).subscribe();
+    TestBed.tick();
+
+    component.unitStores.definitionStore()?.setData([], 'changed');
+
+    expect(variables).toHaveBeenCalledTimes(1);
   });
 });
