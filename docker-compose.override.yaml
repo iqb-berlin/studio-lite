@@ -7,8 +7,28 @@ services:
     profiles: ["gate"]
     image: iqb-gate:local
     pull_policy: never
+    environment:
+      # The networks the dev Traefik may sit on, also for a .env.dev from before it
+      IQB_GATE_TRUST_PROXY: ${IQB_GATE_TRUST_PROXY:-172.16.0.0/12,192.168.0.0/16,10.0.0.0/8}
+
+  # The Traefik that asks the gateway, as in production (ForwardAuth): the studio through it on
+  # GATE_PORT. Its routes are a file, not Docker labels -- no Docker socket, rootless Docker as well.
+  gate-traefik:
+    profiles: ["gate"]
+    image: traefik:v3.6
+    command:
+      - "--providers.file.filename=/etc/traefik/dynamic.yaml"
+      - "--entrypoints.web.address=:8080"
+      # No limit on reading a request, as the gateway in front before: long uploads over slow lines
+      - "--entrypoints.web.transport.respondingTimeouts.readTimeout=0"
+      - "--global.checknewversion=false"
+      - "--global.sendAnonymousUsage=false"
     ports:
       - "${GATE_PORT:-4300}:8080"
+    volumes:
+      - "./config/iqb-gate/traefik-dev.yaml:/etc/traefik/dynamic.yaml:ro"
+    networks:
+      - application-network
 
   frontend:
     labels:

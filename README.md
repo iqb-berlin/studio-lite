@@ -155,8 +155,10 @@ another browser or viewport.
 
 ### The gateway (iqb-gate)
 
-In production, every request passes iqb-gate before it reaches the frontend, or with `/api` the
-backend: a gateway that lets only people log in, save and read the API. Every request reports that
+In production, Traefik asks iqb-gate about every request before it passes it on to the frontend,
+or with `/api` the backend (ForwardAuth: the middleware `studio-lite-iqb-gate` in
+`docker-compose.studio-lite.prod.yaml`): a gateway that lets only people log in, save and read the
+API. It sees the request's headers only; Traefik streams the body past it. Every request reports that
 the browser is not driven by a tool; the login -- or the first save or read of a session -- asks for a
 proof of work once, and after that the session's saves and reads pass until a burst of them. Not
 checked is what runs without a person acting (token refresh, logout, the activity heartbeat, the
@@ -174,7 +176,8 @@ library shows the challenge and, when the gateway refuses a request, says why; t
 such refusals out of its own error display (`isGateRefusal` in `auth.interceptor.ts`).
 
 **In development the gateway is optional.** Without it, the dev stack starts on `HTTP_PORT` as
-always, and the e2e suites run past it. To put it in front:
+always, and the e2e suites run past it. With the profile `gate`, a Traefik
+(`config/iqb-gate/traefik-dev.yaml`) asks the gateway as in production:
 
 ```bash
 # in iqb-gate: build the image and pack the libraries
@@ -184,7 +187,7 @@ make dev-up
 make dev-test-e2e-gate   # Cypress, rejected at the login, at every save and every read
 ```
 
-The studio is then also reachable through the gateway, at `http://localhost:4300` (`GATE_PORT`).
+The studio is then also reachable through that Traefik, at `http://localhost:4300` (`GATE_PORT`).
 `IQB_GATE_RULES_OFF` and `IQB_GATE_READ_RULES_OFF` in `.env.dev` switch single areas off,
 `IQB_GATE_ENFORCE=off` all of them;
 `docker compose --env-file .env.dev up -d iqb-gate` applies either. The audit page,
@@ -473,8 +476,11 @@ before it touches anything: a dump of the database and an export of the backend 
 `backup/<date>` of the installation directory. Take it.
 
 **The gateway** ([iqb-gate](#the-gateway-iqb-gate)) takes `IQB_GATE_SECRET`, `IQB_GATE_AUDIT_KEY`
-and `IQB_GATE_TRUST_PROXY` from the same file; the template explains each. It holds both Traefik
-routes, `/` and `/api`, so nothing reaches the frontend or the backend past it.
+and `IQB_GATE_TRUST_PROXY` from the same file; the template explains each. Traefik asks it about
+every request: the frontend's and the backend's routers both carry the middleware
+`studio-lite-iqb-gate`, and a router added later needs it as well, or it leads past the gateway.
+Without the gateway running, Traefik switches both routers off -- the studio is unreachable rather
+than unguarded.
 
 **Schema changes are applied automatically**, but forward only. Going back to a version older than
 the installed one can leave the database in a state the old code cannot work with, and the old

@@ -13,7 +13,7 @@ import type { AuthDataDto } from '@studio-lite-lib/api-dto';
 describe('Logins, saves and reads only from people (iqb-gate)', () => {
   const username = Cypress.expose('username');
   const password = Cypress.expose('password');
-  // The studio as the gateway reaches it (IQB_GATE_UPSTREAM in docker-compose.yaml), on app-net
+  // The studio straight from app-net, past the dev Traefik that asks the gateway (traefik-dev.yaml)
   const pastTheGateway = 'http://frontend:8080';
   const signalsHeader = 'x-client-signals';
   // What a person's browser reports: nothing automated, a click a moment ago

@@ -1,9 +1,10 @@
-# The gateway in front of studio-lite (iqb-gate): every save comes from a person, and so does every
-# login and every read of the API. Rules are regular expressions on the path, matched without regard
-# to case, as sent and as the application reads it; the first matching rule decides, for each of the
-# two spellings, and the request is checked when either rule is on. `other` takes every write, and
-# every read, the rules above it leave, so an endpoint added later is checked without anyone
-# remembering it. An exemption holds only where both spellings match it.
+# The gateway of studio-lite (iqb-gate), asked by Traefik about every request (ForwardAuth): every
+# save comes from a person, and so does every login and every read of the API. Rules are regular
+# expressions on the path, matched without regard to case, as sent and as the application reads it;
+# the first matching rule decides, for each of the two spellings, and the request is checked when
+# either rule is on. `other` takes every write, and every read, the rules above it leave, so an
+# endpoint added later is checked without anyone remembering it. An exemption holds only where both
+# spellings match it.
 #
 # IQB_GATE_RULES_OFF (.env.studio-lite, .env.dev) switches write rules off by name, e.g. `workspace`:
 # their writes then pass unchecked, and `other` does not take them either. IQB_GATE_READ_RULES_OFF
@@ -12,11 +13,6 @@
 #
 # Scripts such as eatPrepTBA are rejected as well -- in production only once they can work with
 # script tokens (step 5a).
-# The API goes straight to the backend, as Traefik routed it before the gateway: the frontend's
-# nginx would cut a long export off after 60 s, the gateway waits 600 s. The rest goes to nginx
-# (IQB_GATE_UPSTREAM).
-upstreams:
-  - { prefix: /api, upstream: 'http://backend:3333' }
 
 writeGate:
   rules:

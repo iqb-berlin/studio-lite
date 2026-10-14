@@ -1,0 +1,44 @@
+# The dev Traefik in front of the studio (docker-compose.override.yaml, profile gate): the routes of
+# docker-compose.studio-lite.prod.yaml, over plain HTTP. Traefik asks the gateway about every request
+# to the frontend and the backend (ForwardAuth) and passes it on itself once the gateway lets it
+# through; the gateway's own paths go to it straight -- but not its auth path, which only Traefik asks.
+http:
+  routers:
+    iqb-gate:
+      entryPoints: [web]
+      rule: "PathPrefix(`/.iqb-gate`) && !Path(`/.iqb-gate/auth`)"
+      service: iqb-gate
+    backend:
+      entryPoints: [web]
+      rule: "PathPrefix(`/api`)"
+      middlewares: [studio-lite-iqb-gate]
+      service: backend
+    frontend:
+      entryPoints: [web]
+      rule: "PathPrefix(`/`)"
+      middlewares: [studio-lite-iqb-gate]
+      service: frontend
+
+  middlewares:
+    studio-lite-iqb-gate:
+      forwardAuth:
+        address: "http://studio-lite-iqb-gate:8080/.iqb-gate/auth"
+        # Traefik names the request itself, whatever X-Forwarded-* a client sends
+        trustForwardHeader: false
+
+  services:
+    iqb-gate:
+      loadBalancer:
+        servers:
+          - url: "http://studio-lite-iqb-gate:8080"
+    backend:
+      loadBalancer:
+        servers:
+          - url: "http://backend:3333"
+    frontend:
+      loadBalancer:
+        # The Angular dev server answers only hosts it knows ("Blocked request"); it gets its own name,
+        # as from the gateway in front before. Production's nginx does not ask.
+        passHostHeader: false
+        servers:
+          - url: "http://frontend:8080"
