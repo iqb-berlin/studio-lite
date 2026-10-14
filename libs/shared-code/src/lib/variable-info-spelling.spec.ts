@@ -1,6 +1,7 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
   sameVariableLists,
+  toUnitXmlFormat,
   toVariableInfoListV1,
   toVariableInfoV1,
   VariableInfoInEitherSpelling
@@ -108,9 +109,32 @@ describe('variable-info-spelling', () => {
     });
   });
 
+  // The unit XSD allows only lower case, digits and hyphens in a format (#1857)
+  describe('toUnitXmlFormat', () => {
+    it.each([
+      ['CHEM_MOLECULE', 'chem-molecule'],
+      ['CHEM_ELEMENT_SYMBOLS', 'chem-element-symbols']
+    ])('spells %s, which 1.x does not know, as 1.x would: %s', (format, inXml) => {
+      expect(toUnitXmlFormat(format)).toBe(inXml);
+    });
+
+    it('leaves every format of 1.x as it is', () => {
+      FORMATS.forEach(([, formatV1]) => expect(toUnitXmlFormat(formatV1)).toBe(formatV1));
+    });
+
+    it('leaves a missing format missing', () => {
+      expect(toUnitXmlFormat(undefined)).toBeUndefined();
+    });
+  });
+
   describe('sameVariableLists', () => {
     it('finds the list of a 2.0 editor the same as the stored 1.x list it replaces', () => {
       expect(sameVariableLists([v2('STRING', 'GGB_FILE')], [v1('string', 'ggb-file')])).toBe(true);
+    });
+
+    it('finds a format 1.x does not know the same in the spelling of the unit XML (#1857)', () => {
+      const importedFromXml = v2('json', 'chem-molecule', { page: '' });
+      expect(sameVariableLists([v2('JSON', 'CHEM_MOLECULE')], [importedFromXml])).toBe(true);
     });
 
     it('finds two lists different that differ in content', () => {
