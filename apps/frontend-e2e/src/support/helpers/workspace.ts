@@ -79,26 +79,7 @@ export function addUnitPred(unit: UnitData): void {
   cy.get('[data-cy="workspace-add-unit-new-empty-unit"]').click();
   cy.get('[data-cy="workspace-new-unit-unit-key"]').type(unit.shortname);
   cy.get('[data-cy="workspace-new-unit-unit-name"]').type(unit.name);
-  cy.get('body').then($body => {
-    if ($body.find('[data-cy="workspace-new-unit-new-group"]').length > 0) {
-      cy.get('[data-cy="workspace-new-unit-new-group"]')
-        .clear()
-        .type(unit.group);
-    } else {
-      cy.get('[data-cy="workspace-new-unit-group"]').click();
-      cy.get('body').then($body1 => {
-        if ($body1.find(`mat-option:contains("${unit.group}")`).length > 0) {
-          cy.get(`mat-option:contains("${unit.group}")`).click();
-        } else {
-          cy.get('.cdk-overlay-transparent-backdrop').click();
-          cy.get('[data-cy="workspace-new-unit-add-new-group"]').click();
-          cy.get('[data-cy="workspace-new-unit-new-group"]')
-            .clear()
-            .type(unit.group);
-        }
-      });
-    }
-  });
+  if (unit.group) selectNewUnitGroup(unit.group);
   cy.clickDataCyWithResponseCheck('[data-cy="workspace-new-unit-submit-button"]',
     [201],
     '/api/workspaces/*/units',
@@ -108,6 +89,10 @@ export function addUnitPred(unit: UnitData): void {
 
 /**
  * Ensures a unit exists in a workspace. If not found, creates it.
+ *
+ * Whether it exists is asked of the API, not read from the page: the page may not have rendered the
+ * list yet, and the unit was then created a second time (#1820). Asked directly, since the app's own
+ * GET may come back as 304 without a body.
  * @param ws - Workspace name
  * @param unit - Unit data object
  * @example
@@ -115,13 +100,19 @@ export function addUnitPred(unit: UnitData): void {
  */
 export function ensureUnitExists(ws: string, unit: UnitData): void {
   cy.visitWs(ws);
-  cy.get('body').then($body => {
-    const unitFound = $body.find(`[data-cy="workspace-select-unit-list-checkbox-${unit.shortname}"]`).length > 0 ||
-      $body.text().includes(unit.shortname);
-    if (!unitFound) {
-      addUnitPred(unit);
-    }
-  });
+  cy.location('hash')
+    .should('match', /^#\/a\/\d+/)
+    .then(hash => {
+      const [, wsId] = hash.match(/^#\/a\/(\d+)/) || [];
+      return cy.window().then(win => cy.getUnitsByWsAPI(wsId, win.localStorage.getItem('id_token') || ''));
+    })
+    .then(resp => {
+      expect(resp.status, 'status of the unit list').to.equal(200);
+      const units: { key: string }[] = resp.body;
+      if (!units.some(listedUnit => listedUnit.key === unit.shortname)) {
+        addUnitPred(unit);
+      }
+    });
 }
 
 /**
