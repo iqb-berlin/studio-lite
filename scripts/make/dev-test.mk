@@ -175,15 +175,13 @@ dev-test-e2e-ui-edge-mobile:
 				--config="viewportWidth=375,viewportHeight=667"
 
 # Run the e2e test of the gateway (iqb-gate) through it, with its check on (only in combination with
-# 'make dev-up' and the profile gate: COMPOSE_PROFILES=gate in .env.dev). The specs are mounted where
-# the e2e image works, /usr/src/studio-lite (#1790).
+# 'make dev-up' and the profile gate: COMPOSE_PROFILES=gate in .env.dev).
 dev-test-e2e-gate:
 	cd $(STUDIO_BASE_DIR) &&\
 		docker run\
 				--rm\
 				--pull never\
-				-v ./apps/frontend-e2e:/usr/src/studio-lite/apps/frontend-e2e\
-				-v ./apps/frontend/src/assets/i18n:/usr/src/studio-lite/apps/frontend/src/assets/i18n\
+				$(E2E_MOUNTS)\
 				-e IQB_GATE_E2E=on\
 				-e IQB_GATE_AUDIT_KEY=$(IQB_GATE_AUDIT_KEY)\
 				--network app-net\
