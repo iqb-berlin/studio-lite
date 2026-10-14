@@ -414,6 +414,22 @@ build-app:
     paths:
       - dist
 
+# The coverage build (`npm run test-e2e-coverage`) is the only frontend build that still goes
+# through webpack, and nothing else builds it: it broke twice unnoticed (#1738, #1823). It is
+# not `nx affected --base=HEAD~1`, which only looks at the last commit of a push. Webpack keeps
+# imports that are only types while emitDecoratorMetadata is on, which is why the frontend's
+# tsconfig.app.json switches it off. It hands nothing on, so it has no artifacts.
+build-frontend-coverage:
+  stage: build
+  interruptible: true
+  rules:
+    - !reference [ .default_rules, rules ]
+  needs:
+    - install-dependencies
+  image: ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
+  script:
+    - npx nx run frontend:build-coverage --output-style=static
+
 test-db:
   stage: test-db
   interruptible: true

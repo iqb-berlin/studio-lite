@@ -5,6 +5,8 @@
     "types": [],
     "target": "ES2022",
     "useDefineForClassFields": false,
+    // Angular does not need it, and with it webpack keeps type-only imports: the coverage build fails (#1823)
+    "emitDecoratorMetadata": false,
     "moduleResolution": "bundler"
   },
   "files": ["src/main.ts", "src/polyfills.ts"],
