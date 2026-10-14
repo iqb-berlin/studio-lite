@@ -90,7 +90,7 @@ dev-test-e2e-ui-workspace-chrome:
 				--browser=chrome\
 				--spec="./apps/frontend-e2e/src/e2e/ui/workspace/**/*"
 
-# Run e2e ui admin & general tests with chrome in dev environment (only in combination with 'make dev-up')
+# Run all e2e ui tests except workspace with chrome in dev environment (only in combination with 'make dev-up')
 dev-test-e2e-ui-admin-chrome:
 	cd $(STUDIO_BASE_DIR) &&\
 		docker run\
@@ -100,7 +100,8 @@ dev-test-e2e-ui-admin-chrome:
 				--network app-net\
 			studio-lite-frontend-e2e:$(TAG) e2e frontend-e2e --baseUrl=http://frontend:8080\
 				--browser=chrome\
-				--spec="./apps/frontend-e2e/src/e2e/ui/{admin,auth,core,group-admin,metadata,shared,user}/**/*"
+				--spec="./apps/frontend-e2e/src/e2e/ui/**/*"\
+				--excludeSpecPattern="**/ui/workspace/**"
 
 # Run all e2e ui tests with chrome browser for mobiles in dev environment (only in combination with 'make dev-up')
 dev-test-e2e-ui-chrome-mobile:

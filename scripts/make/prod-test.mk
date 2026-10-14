@@ -149,7 +149,7 @@ prod-test-e2e-ui-workspace-chrome:
 		up --no-build --pull never test-e2e-ui-workspace-chrome
 	docker rm studio-lite-test-e2e-ui-workspace-chrome-1
 
-# Run e2e ui admin & general tests in prod environment (only in combination with 'make prod-test-up')
+# Run all e2e ui tests except workspace with chrome in prod environment (only in combination with 'make prod-test-up')
 prod-test-e2e-ui-admin-chrome:
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.e2e.yaml\
