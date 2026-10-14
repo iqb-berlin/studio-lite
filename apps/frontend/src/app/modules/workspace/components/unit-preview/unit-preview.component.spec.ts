@@ -135,6 +135,10 @@ describe('UnitPreviewComponent', () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -221,6 +225,27 @@ describe('UnitPreviewComponent', () => {
 
     expect(resultsComponent.dataSource.data[0]['transformed'])
       .toBe('["ABC","007"]');
+  });
+
+  // #1848: before the player has reported anything, the scheme's variables are shown without values
+  it('checks the coding before the player has reported any responses', async () => {
+    const variableCodings = [
+      {
+        id: 'text_1', alias: 'Antwort', sourceType: 'BASE', codes: []
+      } as unknown as VariableCodingData
+    ];
+    jest.spyOn(unitStoresStub, 'loadSchemeStore').mockReturnValue(of(
+      new UnitSchemeStore(5, { scheme: JSON.stringify({ variableCodings }), schemeType: 'iqb@3.4' })
+    ));
+
+    await component.checkCodingChanged();
+
+    expect(dialogStub.open).toHaveBeenCalledWith(
+      ShowCodingResultsComponent,
+      expect.objectContaining({
+        data: expect.objectContaining({ responses: [{ id: 'Antwort', value: null, status: 'UNSET' }] })
+      })
+    );
   });
 
   describe('handleWidgetCall', () => {

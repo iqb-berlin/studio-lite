@@ -325,8 +325,9 @@ export class UnitPreviewComponent
       const varsWithCodes = codingScheme.variableCodings
         .filter(vc => vc.codes && vc.codes.length > 0)
         .map(vc => vc.alias || vc.id);
+      // Before the player has reported anything, the scheme's variables are shown without values (#1848).
       const newResponses = CodingSchemeFactory.code(
-        responses!,
+        responses ?? [],
         codingScheme.variableCodings
       );
       this.errorDialog.open(ShowCodingResultsComponent, {
