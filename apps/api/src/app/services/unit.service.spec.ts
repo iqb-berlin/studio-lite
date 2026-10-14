@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
@@ -794,6 +794,26 @@ describe('UnitService', () => {
       expect(stored.variables).toEqual([sentByA20Editor]);
     });
 
+    // The frontend brings the items in line with the variables when it saves (#1361). The definition
+    // names only the base variables, so an item of a derived variable lost it here (#1853).
+    it('should leave the items in the stored metadata alone', async () => {
+      const metadata = {
+        items: [{ uuid: 'u-1', variableReadOnlyId: 'sum', variableId: 'Summe' }]
+      } as unknown as UnitMetadataValues;
+      unitsRepository.findOne.mockResolvedValue({ id: 1, metadata: structuredClone(metadata) } as Unit);
+      unitDefinitionsRepository.findOne.mockResolvedValue({ id: 1 } as UnitDefinition);
+
+      await service.patchDefinition(
+        1,
+        { definition: 'xml', variables: [{ id: 'text_1', alias: 'Antwort' } as VariableInfo] },
+        'user',
+        new Date()
+      );
+
+      const stored = unitsRepository.save.mock.calls[0][0] as Unit;
+      expect(stored.metadata).toEqual(metadata);
+    });
+
     // The type belongs to the definition it came with (#1368).
     describe('with a definition type', () => {
       const savedDefinition = () => unitDefinitionsRepository.save.mock.calls[0][0] as UnitDefinition;
@@ -869,6 +889,12 @@ describe('UnitService', () => {
         new Date()
       );
       expect(unitsRepository.save).toHaveBeenCalled();
+    });
+
+    it.each(['{broken', 'null', '{}'])('should refuse the scheme %s without a list of codings', async scheme => {
+      await expect(service.patchScheme(1, { scheme, schemeType: 't' }, 'user', new Date()))
+        .rejects.toThrow(BadRequestException);
+      expect(unitsRepository.save).not.toHaveBeenCalled();
     });
   });
 
