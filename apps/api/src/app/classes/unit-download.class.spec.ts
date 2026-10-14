@@ -388,6 +388,30 @@ describe('UnitDownloadClass', () => {
       expect(xmlString).toContain(`<Variable id="v1" type="no-value" format="" ${flags}/>`);
       expect(xmlString).toContain(`<Variable id="v2" type="string" format="ggb-file" ${flags}/>`);
     });
+
+    it('should write a format that 1.x does not know as 1.x would, for the unit XSD (#1857)', () => {
+      const unitXml = unitDownloadClass.createUnitXML(
+        { unitXsdUrl: 'xsd' } as unknown as UnitExportConfigDto,
+        { key: 'K1', name: 'N1', metadata: {} } as unknown as UnitPropertiesDto
+      );
+      const variable = (id: string, type: string, format: string) => ({
+        id, type, format, multiple: false, nullable: false, values: [], valuePositionLabels: []
+      });
+      const chemistry = [
+        variable('periodic_1', 'STRING', 'CHEM_ELEMENT_SYMBOLS'),
+        variable('molecule_1', 'JSON', 'CHEM_MOLECULE')
+      ] as unknown as UnitDefinitionDto['variables'];
+
+      UnitDownloadClass.addVariables(
+        { variables: chemistry } as UnitDefinitionDto,
+        unitXml as unknown as Parameters<typeof UnitDownloadClass.addVariables>[1]
+      );
+
+      const xmlString = unitXml.toString();
+      const flags = 'nullable="false" multiple="false" page=""';
+      expect(xmlString).toContain(`<Variable id="periodic_1" type="string" format="chem-element-symbols" ${flags}/>`);
+      expect(xmlString).toContain(`<Variable id="molecule_1" type="json" format="chem-molecule" ${flags}/>`);
+    });
   });
 
   describe('addDerivedVariables', () => {

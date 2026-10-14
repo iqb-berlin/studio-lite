@@ -19,7 +19,9 @@ import {
 // import in download-docx.class.ts.
 import AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
-import { HIDDEN_PROFILE_ORDER, toVariableInfoListV1, VeronaModuleKeyCollection } from '@studio-lite/shared-code';
+import {
+  HIDDEN_PROFILE_ORDER, toUnitXmlFormat, toVariableInfoListV1, VeronaModuleKeyCollection
+} from '@studio-lite/shared-code';
 // Type-only -- see the note on the deep docx import in download-docx.class.ts.
 import type { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
 import {
@@ -392,14 +394,14 @@ export class UnitDownloadClass {
     if (definitionData.variables && definitionData.variables.length > 0) {
       const variablesElement = unitXml.root().ele('BaseVariables');
       // In the VariableInfo 1.x spelling, whatever is stored: coding-box, the testcenter and the
-      // unit XSD read only that one (#1708).
+      // unit XSD read only that one (#1708). A format 1.x does not know is spelled as 1.x would (#1857).
       toVariableInfoListV1(definitionData.variables).forEach(transformedVariable => {
         const variableElement = variablesElement.ele({
           Variable: {
             '@id': transformedVariable.id,
             '@alias': transformedVariable.alias,
             '@type': transformedVariable.type,
-            '@format': transformedVariable.format,
+            '@format': toUnitXmlFormat(transformedVariable.format),
             '@nullable': transformedVariable.nullable,
             '@multiple': transformedVariable.multiple,
             '@page': transformedVariable.page

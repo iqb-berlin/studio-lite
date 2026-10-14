@@ -76,6 +76,17 @@ export function toVariableInfoListV1(
   return (variables ?? []).map(toVariableInfoV1);
 }
 
+/**
+ * A format as the unit XML may carry it: lower case with hyphens, as 1.x spells every format. The
+ * unit XSD allows nothing else, so a format that 1.x does not know gets the spelling 1.x would
+ * have given it (`CHEM_MOLECULE` → `chem-molecule`, iqb-specifications/unit-xml#1, #1857).
+ * The schemer keeps getting such a format as it is stored: it names the lower-case spelling only
+ * from @iqb/responses 5.3.1 on (iqb-berlin/coding-components#250).
+ */
+export function toUnitXmlFormat<T extends string | undefined>(format: T): T {
+  return (format && format.toLowerCase().replace(/_/g, '-')) as T;
+}
+
 /** The value with the keys of every object sorted, so that its JSON no longer depends on key order. */
 function withSortedKeys(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(withSortedKeys);
@@ -92,15 +103,16 @@ function withSortedKeys(value: unknown): unknown {
 /**
  * Whether two variable lists say the same, regardless of spelling and of key order. An editor
  * in the 2.0 spelling produces a list that differs from the stored one in both -- its `page` sits
- * elsewhere, or is missing -- without anything having changed. A missing list is not the same as
- * an empty one, as before.
+ * elsewhere, or is missing -- without anything having changed. The same holds for a format 1.x
+ * does not know, once a unit comes back from its own export: stored as `chem-molecule`, reported
+ * as `CHEM_MOLECULE` (#1857). A missing list is not the same as an empty one, as before.
  */
 export function sameVariableLists(
   a: VariableInfoInEitherSpelling[] | null | undefined,
   b: VariableInfoInEitherSpelling[] | null | undefined
 ): boolean {
   const comparable = (list: VariableInfoInEitherSpelling[] | null | undefined) => JSON.stringify(
-    list ? withSortedKeys(toVariableInfoListV1(list)) : list
+    list ? withSortedKeys(toVariableInfoListV1(list).map(v => ({ ...v, format: toUnitXmlFormat(v.format) }))) : list
   );
   return comparable(a) === comparable(b);
 }
