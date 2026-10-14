@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   EntityManager, In, Not, QueryFailedError, Repository
@@ -19,7 +19,6 @@ import {
   UnitPropertiesDto,
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
-import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { LanguageCodedText } from '@iqbspecs/metadata-profile';
 import {
   orderFromCurrent, profileIdsMatch, reconcileProfilesByProfileId, toVariableInfoListV1, toW3idProfileId
@@ -1096,19 +1095,8 @@ export class UnitService {
       if (unitToUpdate.scheme) {
         unitToUpdate.scheme = UnitService.getUpdatedScheme(unitToUpdate.scheme, aliasIds);
       }
-      UnitService.updateMetadataVariableId(unitToUpdate, aliasIds);
     }
     await this.unitsRepository.save(unitToUpdate);
-  }
-
-  private static updateMetadataVariableId(unit: Unit, variableAliasId: { id: string; alias: string }[]): void {
-    if (unit.metadata && (unit.metadata as UnitMetadataValues).items) {
-      (unit.metadata as UnitMetadataValues).items.forEach(item => {
-        if (item.variableReadOnlyId) {
-          item.variableId = variableAliasId.find(v => v.id === item.variableReadOnlyId)?.alias;
-        }
-      });
-    }
   }
 
   private static getUpdatedScheme(scheme: string, variableAliasId: { id: string; alias: string }[]): string {
@@ -1137,17 +1125,27 @@ export class UnitService {
     return scheme;
   }
 
+  private static isCodingScheme(text: string): boolean {
+    try {
+      return Array.isArray(JSON.parse(text)?.variableCodings);
+    } catch {
+      return false;
+    }
+  }
+
   async patchScheme(unitId: number,
                     unitSchemeDto: UnitSchemeDto,
                     userName: string | null,
                     schemeDate: Date | null): Promise<void> {
+    // Only a scheme with its list of variable codings is stored: getUpdatedScheme parses it on every
+    // later save of the definition, and the coding check in the preview reads the list.
+    if (!UnitService.isCodingScheme(unitSchemeDto.scheme)) {
+      throw new BadRequestException('The coding scheme has no list of variable codings');
+    }
     const unitToUpdate = await this.unitsRepository.findOne({
       where: { id: unitId }
     });
     unitToUpdate.scheme = unitSchemeDto.scheme;
-    const scheme = JSON.parse(unitSchemeDto.scheme);
-    UnitService.updateMetadataVariableId(unitToUpdate, scheme.variableCodings
-      .map((item: VariableCodingData) => ({ id: item.id, alias: item.alias || item.id })));
     unitToUpdate.schemeType = unitSchemeDto.schemeType;
     unitToUpdate.lastChangedScheme = schemeDate;
     unitToUpdate.lastChangedSchemeUser = userName;
