@@ -144,6 +144,10 @@ make dev-test-build-e2e   # after an nx workspace update
 make dev-test-e2e
 ```
 
+The specs (`apps/frontend-e2e/src`), the Cypress config and the translations come from the working
+tree, read-only; everything else they need — `node_modules`, `libs/`, `package.json` — comes from
+the image. Rebuild it after a change there as well.
+
 `make dev-test-e2e-api` and `make dev-test-e2e-ui-chrome` run one half each;
 `dev-test-e2e-ui-firefox`, `-ui-edge` and the `-mobile` variants of all three are the same suite in
 another browser or viewport.
