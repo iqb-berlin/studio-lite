@@ -125,21 +125,41 @@ export function ensureUnitExists(ws: string, unit: UnitData): void {
 }
 
 /**
- * Puts the new unit of the open dialog into a group of the workspace (#1789).
+ * Puts the new unit of the open dialog into a group, and creates the group if the dialog does not
+ * offer it (#1789, #1826).
  *
  * The dialog offers a select of the workspace's groups, or only an input when it knows none -- which
- * it knows depends on which of two requests answered first. Whichever it shows is waited for: the
- * group is picked from the select, retrying until its option is rendered, or typed into the input.
- * Nothing is decided from a snapshot of the page; that took options not rendered yet for a missing
- * group and went on to a button that did not exist.
- * @param group - Name of the group; it has to be one of the workspace's
+ * groups it knows depends on which of two requests answered first, so a group the workspace has may
+ * be missing. Whichever control the dialog shows is waited for; it keeps it until the button for a
+ * new group is clicked. In the select, the options are read once its own panel is open and has
+ * them: the panel renders all of the dialog's groups at once, and they do not change while the
+ * dialog is open. A group not among them is typed in as a new one, as into the input. Nothing is
+ * decided before the state it is decided by is there.
+ * @param group - Name of the group
  */
 function selectNewUnitGroup(group: string): void {
   cy.get('[data-cy="workspace-new-unit-group"], [data-cy="workspace-new-unit-new-group"]')
     .then($groupControl => {
       if ($groupControl.is('[data-cy="workspace-new-unit-group"]')) {
         cy.wrap($groupControl).click();
-        cy.contains('mat-option', new RegExp(`^\\s*${Cypress._.escapeRegExp(group)}\\s*$`)).click();
+        // The select names its panel while it is open -- not any listbox of the page
+        cy.wrap($groupControl).should('have.attr', 'aria-controls').then(panelId => {
+          cy.get(`#${panelId}`)
+            .should($panel => expect($panel.find('mat-option')).to.have.length.greaterThan(0))
+            .then($panel => {
+              const $option = $panel.find('mat-option').filter((_, option) => option.textContent?.trim() === group);
+              if ($option.length > 0) {
+                cy.wrap($option).click();
+                cy.wrap($groupControl).should('contain.text', group);
+              } else {
+                // The topmost backdrop is the one of this panel; its centre may lie under the panel
+                cy.get('.cdk-overlay-transparent-backdrop').last().click({ force: true });
+                cy.get(`#${panelId}`).should('not.exist');
+                cy.get('[data-cy="workspace-new-unit-add-new-group"]').click();
+                cy.get('[data-cy="workspace-new-unit-new-group"]').clear().type(group);
+              }
+            });
+        });
       } else {
         cy.wrap($groupControl).clear().type(group);
       }
@@ -150,8 +170,8 @@ function selectNewUnitGroup(group: string): void {
  * Creates a unit from an existing unit
  * @param ws - Source workspace (format: "Group: Workspace")
  * @param unit1 - Source unit to copy from
- * @param newUnit - New unit data. Its group is picked from the groups of the workspace; without a
- * group, the unit gets none.
+ * @param newUnit - New unit data. Its group is picked, or created if the dialog does not offer it;
+ * without a group, the unit gets none.
  * @example
  * addUnitFromExisting('Math: Workspace 1', sourceUnit, newUnit);
  */
