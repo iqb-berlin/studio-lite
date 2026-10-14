@@ -1,25 +1,42 @@
 services:
-  # Every request of the domain -- the page and /api alike -- goes through the gateway, which passes
-  # /api on to the backend and the rest to the frontend's nginx (gate.yaml): no route leads past it.
+  # Traefik asks the gateway about every request to the frontend and the backend (the middleware
+  # studio-lite-iqb-gate, ForwardAuth) and passes it on itself once the gateway lets it through. The
+  # gateway's router takes only its own paths -- not its auth path, which only Traefik asks.
+  # Router, service and middleware carry studio-lite's name: other applications may run a gateway as
+  # well. Without the gateway running, the middleware is gone and Traefik switches both routers off:
+  # no route leads past it.
   iqb-gate:
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.iqb-gate.entrypoints=websecure"
-      - "traefik.http.routers.iqb-gate.tls=true"
-      - "traefik.http.routers.iqb-gate.tls.certResolver=${TLS_CERTIFICATE_RESOLVER}"
-      - "traefik.http.routers.iqb-gate.tls.domains[0].main=${SERVER_NAME}"
-      - "traefik.http.routers.iqb-gate.tls.domains[0].sans=www.${SERVER_NAME}"
-      - "traefik.http.routers.iqb-gate.rule=HostRegexp(`www.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)"
-      - "traefik.http.routers.iqb-gate.middlewares=security-headers"
-      - "traefik.http.routers.iqb-gate.service=iqb-gate"
-      - "traefik.http.services.iqb-gate.loadbalancer.server.port=8080"
+      - "traefik.http.routers.studio-lite-iqb-gate.entrypoints=websecure"
+      - "traefik.http.routers.studio-lite-iqb-gate.tls=true"
+      - "traefik.http.routers.studio-lite-iqb-gate.tls.certResolver=${TLS_CERTIFICATE_RESOLVER}"
+      - "traefik.http.routers.studio-lite-iqb-gate.tls.domains[0].main=${SERVER_NAME}"
+      - "traefik.http.routers.studio-lite-iqb-gate.tls.domains[0].sans=www.${SERVER_NAME}"
+      - "traefik.http.routers.studio-lite-iqb-gate.rule=(HostRegexp(`www.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)) && PathPrefix(`/.iqb-gate`) && !Path(`/.iqb-gate/auth`)"
+      - "traefik.http.routers.studio-lite-iqb-gate.middlewares=security-headers"
+      - "traefik.http.routers.studio-lite-iqb-gate.service=studio-lite-iqb-gate"
+      - "traefik.http.services.studio-lite-iqb-gate.loadbalancer.server.port=8080"
+      # trustForwardHeader off: Traefik names the request itself, whatever X-Forwarded-* a client sends
+      - "traefik.http.middlewares.studio-lite-iqb-gate.forwardauth.address=http://studio-lite-iqb-gate:8080/.iqb-gate/auth"
+      - "traefik.http.middlewares.studio-lite-iqb-gate.forwardauth.trustForwardHeader=false"
       - "traefik.docker.network=app-net"
     image: ${REGISTRY_PATH}iqbberlin/iqb-gate:${IQB_GATE_TAG:-latest}
     restart: always
 
   frontend:
     labels:
-      - "traefik.enable=false"
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.tls.certResolver=${TLS_CERTIFICATE_RESOLVER}"
+      - "traefik.http.routers.frontend.tls.domains[0].main=${SERVER_NAME}"
+      - "traefik.http.routers.frontend.tls.domains[0].sans=www.${SERVER_NAME}"
+      - "traefik.http.routers.frontend.rule=HostRegexp(`www.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)"
+      - "traefik.http.routers.frontend.middlewares=security-headers,studio-lite-iqb-gate"
+      - "traefik.http.routers.frontend.service=frontend"
+      - "traefik.http.services.frontend.loadbalancer.server.port=8080"
+      - "traefik.docker.network=app-net"
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-frontend:${TAG}
     volumes:
       - "./config/frontend/default.conf.template:/etc/nginx/templates/default.conf.template:ro"
@@ -27,7 +44,17 @@ services:
 
   backend:
     labels:
-      - "traefik.enable=false"
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.backend.tls.certResolver=${TLS_CERTIFICATE_RESOLVER}"
+      - "traefik.http.routers.backend.tls.domains[0].main=${SERVER_NAME}"
+      - "traefik.http.routers.backend.tls.domains[0].sans=www.${SERVER_NAME}"
+      - "traefik.http.routers.backend.rule=(HostRegexp(`www.${SERVER_NAME}`) || Host(`${SERVER_NAME}`)) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.middlewares=security-headers,studio-lite-iqb-gate"
+      - "traefik.http.routers.backend.service=backend"
+      - "traefik.http.services.backend.loadbalancer.server.port=3333"
+      - "traefik.docker.network=app-net"
     image: ${REGISTRY_PATH}iqbberlin/studio-lite-backend:${TAG}
     volumes:
       - "backend_vol:/usr/src/studio-lite-api/packages"

@@ -174,8 +174,8 @@ dev-test-e2e-ui-edge-mobile:
 				--spec="./apps/frontend-e2e/src/e2e/ui/**/*"\
 				--config="viewportWidth=375,viewportHeight=667"
 
-# Run the e2e test of the gateway (iqb-gate) through it, with its check on (only in combination with
-# 'make dev-up' and the profile gate: COMPOSE_PROFILES=gate in .env.dev).
+# Run the e2e test of the gateway (iqb-gate) through the dev Traefik that asks it, with its check on
+# (only in combination with 'make dev-up' and the profile gate: COMPOSE_PROFILES=gate in .env.dev).
 dev-test-e2e-gate:
 	cd $(STUDIO_BASE_DIR) &&\
 		docker run\
@@ -185,6 +185,6 @@ dev-test-e2e-gate:
 				-e IQB_GATE_E2E=on\
 				-e IQB_GATE_AUDIT_KEY=$(IQB_GATE_AUDIT_KEY)\
 				--network app-net\
-			studio-lite-frontend-e2e:$(TAG) e2e frontend-e2e --baseUrl=http://iqb-gate:8080\
+			studio-lite-frontend-e2e:$(TAG) e2e frontend-e2e --baseUrl=http://gate-traefik:8080\
 				--browser=chrome\
 				--spec="./apps/frontend-e2e/src/e2e/iqb-gate/**/*"

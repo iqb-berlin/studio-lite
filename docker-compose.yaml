@@ -6,14 +6,12 @@ x-env-postgres: &env-postgres
   POSTGRES_DB: ${POSTGRES_DB}
 
 services:
-  # In front of the frontend: every request passes it, every save, login and API read has to come
-  # from a person (config/iqb-gate/gate.yaml). Image and published port are set per environment.
+  # Asked by Traefik about every request to the frontend and the backend (ForwardAuth): every save,
+  # login and API read has to come from a person (config/iqb-gate/gate.yaml). Traefik passes the
+  # request on itself; the gateway sees its headers only. Image and Traefik are set per environment.
   iqb-gate:
-    depends_on:
-      frontend:
-        condition: service_started
     environment:
-      IQB_GATE_UPSTREAM: http://frontend:8080
+      IQB_GATE_FORWARD_AUTH: "on"
       IQB_GATE_CONFIG: /etc/iqb-gate/gate.yaml
       IQB_GATE_ENFORCE: ${IQB_GATE_ENFORCE:-on}
       IQB_GATE_RULES_OFF: ${IQB_GATE_RULES_OFF:-}
@@ -25,7 +23,11 @@ services:
       - "./config/iqb-gate/gate.yaml:/etc/iqb-gate/gate.yaml:ro"
       - "iqb_gate_vol:/var/lib/iqb-gate"
     networks:
-      - application-network
+      application-network:
+        # The name Traefik's middleware asks for: studio-lite's own, as other applications on app-net
+        # may run a gateway of their own
+        aliases:
+          - studio-lite-iqb-gate
 
   frontend:
     depends_on:
