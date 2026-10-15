@@ -78,7 +78,7 @@ const runtimePackage = {
   // first require (#1587, #1592). ioredis itself still ends up NOT
   // installed -- optional peers never are; the override only exists for the
   // resolver's consistency check.
-  overrides: { ioredis: '^5.0.4' }
+  overrides: { ioredis: '^5.0.4', 'image-size': rootPackage.overrides['image-size'] }
 };
 writeFileSync(runtimePath, `${JSON.stringify(runtimePackage, null, 2)}\n`);
 
