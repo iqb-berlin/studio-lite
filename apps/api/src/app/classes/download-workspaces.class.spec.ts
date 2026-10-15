@@ -263,6 +263,34 @@ describe('DownloadWorkspacesClass', () => {
       expect(paragraphs).toEqual(expected);
     });
 
+    it.each([false, true])('retains code and general text around failed inline images, score=%p', async showScore => {
+      const instruction = '<p><strong>VOR</strong><img src="data:image/png;base64,YQ==">' +
+        '<span style="color:#ff0000">NACH</span></p><p>WEITER</p>';
+      const units = createMock<UnitService>();
+      const settings = createMock<SettingService>();
+      const parsed = JSON.parse(scheme);
+      parsed.variableCodings[0].manualInstruction = instruction;
+      parsed.variableCodings[0].codes[0].manualInstruction = instruction;
+      units.findAllWithProperties.mockResolvedValue([{
+        id: 1, key: 'U', name: 'Unit', scheme: JSON.stringify(parsed), metadata: { items: [] }
+      }] as UnitPropertiesDto[]);
+      settings.findMissingsProfiles.mockResolvedValue([]);
+      const result = await DownloadWorkspacesClass.getWorkspaceCodingBook(
+        1, units, settings, { ...options, exportFormat: 'docx', showScore }, [1]
+      );
+      const $ = load(new AdmZip(result).readAsText('word/document.xml'), { xml: true });
+      const paragraphs = $('w\\:p').toArray().filter(paragraph => $(paragraph).find('w\\:t').text().startsWith('VOR'));
+      expect(paragraphs).toHaveLength(2);
+      expect(paragraphs.map(paragraph => $(paragraph).find('w\\:t').text())).toEqual([
+        'VORHTML konnte nicht verarbeitet werden.NACH', 'VORHTML konnte nicht verarbeitet werden.NACH'
+      ]);
+      paragraphs.forEach(paragraph => {
+        expect($(paragraph).find('w\\:b')).toHaveLength(1);
+        expect($(paragraph).find('w\\:color[w\\:val="FF0000"]')).toHaveLength(1);
+      });
+      expect($('w\\:t').toArray().filter(node => $(node).text() === 'WEITER')).toHaveLength(2);
+    });
+
     it('returns a real DOCX for an empty selection', async () => {
       const units = createMock<UnitService>(); const settings = createMock<SettingService>();
       units.findAllWithProperties.mockResolvedValue([]); settings.findMissingsProfiles.mockResolvedValue([]);
