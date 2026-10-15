@@ -5,6 +5,7 @@ import { CodingScheme } from '@iqbspecs/coding-scheme';
 import { TranslateModule } from '@ngx-translate/core';
 
 describe('Installed shared Schemer and Responses compatibility', () => {
+  const variableId = 'V';
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SchemerComponent, TranslateModule.forRoot()],
@@ -26,7 +27,7 @@ describe('Installed shared Schemer and Responses compatibility', () => {
   it.each(['NO_VALUE', 'no-value'])('accepts %s in the actual installed Schemer without a factory mock', type => {
     const fixture = createSchemer(type);
     expect(fixture.componentInstance.problems).toEqual([]);
-    expect(fixture.componentInstance.codingStatus.V).toBe('OK');
+    expect(fixture.componentInstance.codingStatus[variableId]).toBe('OK');
     fixture.destroy();
   });
 
@@ -35,7 +36,7 @@ describe('Installed shared Schemer and Responses compatibility', () => {
     expect(fixture.componentInstance.problems).toContainEqual(expect.objectContaining({
       type: 'INVALID_SOURCE', breaking: true, variableId: 'V'
     }));
-    expect(fixture.componentInstance.codingStatus.V).toBe('ERROR');
+    expect(fixture.componentInstance.codingStatus[variableId]).toBe('ERROR');
     fixture.destroy();
   });
 });

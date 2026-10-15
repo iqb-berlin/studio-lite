@@ -1,6 +1,15 @@
 # Integration des gemeinsamen Codebooks
 
-## Aktueller Responses-Stand
+## Aktuelle SOLVER-Kompatibilität und Mindestversion
+
+Der [Nachtrag vom 15.10.2026](codebook-solver-compatibility-2026-10-15.md) erhält
+Kodierboxs bisherige SOLVER-Ergebnisse mit Engine-Code aus Responses 5.3.1 und
+isolierter bisheriger Mathematik. Die Bibliothek verlangt nun den Peer `^5.3.1`
+und prüft Chemieformate auch in gespeicherter Kleinschreibung. Aktueller Tarball-
+SHA256: `2df79a7b18196d7c25d7e02e15d5b148200d75ba2a315214ccfb8386536dd0a6`.
+Frühere Abschnitte und Berichte unten beziehen sich auf damalige Paketstände.
+
+## Vorheriger Responses-Abgleich
 
 Die [Prüfung vom 15.10.2026](codebook-responses-2026-10-15.md) verwendet überall
 `@iqb/responses` 5.3.1, die beim Abgleich aktuelle Patchversion der 5.3-Reihe.
