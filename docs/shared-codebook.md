@@ -1,8 +1,23 @@
 # Integration des gemeinsamen Codebooks
 
-## Aktuelle Inlinebild-Korrektur
+## Aktueller Responses-Stand
 
-Die [Prüfung vom 15.10.2026](codebook-inline-images-2026-10-15.md) behebt Textverlust bei defekten Inlinebildern. 1.285 Generator-Tests und 4.694 installierte Exportpaare bestehen. Beide Anwendungen verwenden den Tarball mit SHA256 `1340db41e6493cca3d4395426c14f156319c3bbbf0b81d01f84c233a56a5091a`. Eine neue Word-Abnahme wurde für diesen Paketstand nicht ausgeführt.
+Die [Prüfung vom 15.10.2026](codebook-responses-2026-10-15.md) verwendet überall
+`@iqb/responses` 5.3.1, die beim Abgleich aktuelle Patchversion der 5.3-Reihe.
+Die Bibliothek bezieht Responses als Peer (`^5.3.0`); Schemer, Validierung und
+Generator verwenden dieselbe Installation wie der Host. Es gibt keine private
+5.2.2-Installation mehr. 1.285 Generator-Tests und 4.694 installierte Exportpaare
+bestehen einschließlich der unveränderten Studio-Referenzen. Aktueller Tarball-
+SHA256: `9a0e75158dcc70e821c6a481d431ec6a0429e248afb85bd27991b1ae1af22d7a`.
+Frühere Berichte unten beziehen sich auf ihre damaligen Paketstände.
+
+## Vorheriger develop-Abgleich
+
+Der [Abgleich vom 15.10.2026](codebook-develop-sync-2026-10-15.md) übernimmt Studios neue Store-Signale und Anwendungsversion von `@iqb/responses` 5.3.0. Zu diesem früheren Prüfzeitpunkt blieb der gemeinsame Generator intern bei 5.2.2; der aktuelle Responses-Abgleich oben ersetzt diesen Stand. Nach dem Merge bestehen erneut 4.694 Exportvergleiche sowie Frontend-/API-Tests und beide Builds.
+
+## Vorherige Inlinebild-Korrektur
+
+Die [Prüfung vom 15.10.2026](codebook-inline-images-2026-10-15.md) behebt Textverlust bei defekten Inlinebildern. 1.285 Generator-Tests und 4.694 installierte Exportpaare bestehen. Dabei verwendeten beide Anwendungen den Tarball mit SHA256 `1340db41e6493cca3d4395426c14f156319c3bbbf0b81d01f84c233a56a5091a`. Eine neue Word-Abnahme wurde für diesen Paketstand nicht ausgeführt.
 
 ## Format- und Aspect-Abnahme vom 13.10.2026
 
