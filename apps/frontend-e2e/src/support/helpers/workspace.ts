@@ -88,6 +88,21 @@ export function addUnitPred(unit: UnitData): void {
 }
 
 /**
+ * The workspace the page shows, by its id, and the token of the user logged in -- what the API
+ * commands ask for. The id from the address (`#/a/<id>`), waited for until the router has set it.
+ * @example
+ * workspaceOfPage().then(({ wsId, token }) => cy.getUnitsByWsAPI(wsId, token));
+ */
+export function workspaceOfPage(): Cypress.Chainable<{ wsId: string; token: string }> {
+  return cy.location('hash')
+    .should('match', /^#\/a\/\d+/)
+    .then(hash => {
+      const [, wsId] = hash.match(/^#\/a\/(\d+)/) || [];
+      return cy.window().then(win => ({ wsId, token: win.localStorage.getItem('id_token') || '' }));
+    });
+}
+
+/**
  * Ensures a unit exists in a workspace. If not found, creates it.
  *
  * Whether it exists is asked of the API, not read from the page: the page may not have rendered the
@@ -100,12 +115,8 @@ export function addUnitPred(unit: UnitData): void {
  */
 export function ensureUnitExists(ws: string, unit: UnitData): void {
   cy.visitWs(ws);
-  cy.location('hash')
-    .should('match', /^#\/a\/\d+/)
-    .then(hash => {
-      const [, wsId] = hash.match(/^#\/a\/(\d+)/) || [];
-      return cy.window().then(win => cy.getUnitsByWsAPI(wsId, win.localStorage.getItem('id_token') || ''));
-    })
+  workspaceOfPage()
+    .then(({ wsId, token }) => cy.getUnitsByWsAPI(wsId, token))
     .then(resp => {
       expect(resp.status, 'status of the unit list').to.equal(200);
       const units: { key: string }[] = resp.body;

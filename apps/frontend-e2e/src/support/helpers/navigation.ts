@@ -34,13 +34,18 @@ export function clickIndexTabAdmin(tabName: string): void {
 }
 
 /**
- * Opens the workspace menu (three-dot menu)
+ * Opens the workspace menu (three-dot menu) and waits until its own panel is open (#1864). Its
+ * entries depend on the user's access level, which `cy.visitWs` waits for. The click is forced: a
+ * test before may have left a select open, whose backdrop covers the button.
  * @example
  * goToWsMenu();
  * cy.get('[data-cy="workspace-edit-unit-settings"]').click();
  */
 export function goToWsMenu(): void {
   cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+  cy.get('[data-cy="workspace-edit-unit-menu"]').closest('button')
+    .should('have.attr', 'aria-controls')
+    .then(panelId => cy.get(`#${panelId}`).should('be.visible'));
 }
 
 /**

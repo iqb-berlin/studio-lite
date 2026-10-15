@@ -11,32 +11,31 @@ import {
   deleteGroupFromManagement,
   closeGroupManagementDialog,
   openWorkspaceUserListDialog,
-  closeWorkspaceUserListDialog
+  closeWorkspaceUserListDialog,
+  workspaceOfPage
 } from '../../../support/helpers';
 
 describe('Unit Groups and Group Management', () => {
   it('creates a new unit group via the add-unit dialog', () => {
     cy.visitWs(primaryWorkspace);
-    cy.get('[data-cy="workspace-add-units"]').click();
-    cy.get('[data-cy="workspace-add-unit-new-empty-unit"]').click();
-    cy.get('[data-cy="workspace-new-unit-unit-key"]').type('GRP_U1');
-    cy.get('body').then($body => {
-      if ($body.find('[data-cy="workspace-new-unit-new-group"]').length > 0) {
-        cy.get('[data-cy="workspace-new-unit-new-group"]').clear().type(groupTestNames.newGroup);
-      } else {
-        cy.get('[data-cy="workspace-new-unit-group"]').click();
-        cy.get('.cdk-overlay-transparent-backdrop').click({ force: true });
-        cy.get('[data-cy="workspace-new-unit-add-new-group"]').click();
-        cy.get('[data-cy="workspace-new-unit-new-group"]').clear().type(groupTestNames.newGroup);
-      }
+    // The group is new: the workspace knows it after the unit is created, not before. Asked of the API,
+    // not read from the page; the dialog is filled by addUnitPred, which picks or creates the group (#1863)
+    workspaceOfPage().then(({ wsId, token }) => {
+      cy.getGroupsOfWsAPI(wsId, token).then(groups => {
+        expect(groups.status, 'status of the groups before').to.equal(200);
+        expect(groups.body).not.to.include(groupTestNames.newGroup);
+      });
+      addUnitPred({ shortname: 'GRP_U1', name: 'Group Test Unit 1', group: groupTestNames.newGroup });
+      cy.getGroupsOfWsAPI(wsId, token).then(groups => {
+        expect(groups.status, 'status of the groups after').to.equal(200);
+        expect(groups.body).to.include(groupTestNames.newGroup);
+      });
+      cy.getUnitsByWsAPI(wsId, token).then(response => {
+        expect(response.status, 'status of the unit list').to.equal(200);
+        const units: { key: string; groupName?: string }[] = response.body;
+        expect(units.find(unit => unit.key === 'GRP_U1')?.groupName).to.equal(groupTestNames.newGroup);
+      });
     });
-    cy.clickDataCyWithResponseCheck(
-      '[data-cy="workspace-new-unit-submit-button"]',
-      [201],
-      '/api/workspaces/*/units',
-      'POST',
-      'createGroupUnit'
-    );
   });
 
   it('creates a second unit in the same new group', () => {

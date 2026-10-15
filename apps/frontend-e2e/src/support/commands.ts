@@ -88,6 +88,9 @@ Cypress.Commands.add('visitWs', (ws: string) => {
     .click();
   cy.wait('@getUnits');
   cy.get('[data-cy="workspace-unit-selection-filter-units"]').should('be.visible');
+  // The workspace's own data is there, too: the title names it in the same step that sets the user's
+  // access level, which the workspace menu shows its entries by (#1864)
+  cy.title().should('contain', ws);
 });
 
 Cypress.Commands.add('runUntracked', fn => {
