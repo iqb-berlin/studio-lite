@@ -130,10 +130,16 @@ verändert. Die unabhängigen Studio-Referenzdateien bleiben unverändert.
 
 ## Nachweisgrenzen
 
-Ein aktueller HTTP-/Browser-/Redis-Lauf und ein neuer Microsoft-Renderinglauf
-wurden für diese Korrektur nicht ausgeführt. Die frühere Word-Web-Abnahme gilt
-für das damalige Artefakt; Windows-Desktop-Word bleibt offen. Die technische
-XML-/Mediengleichheit ersetzt die visuelle Abnahme nicht. Bereits veröffentlichte
-Verona-Schemer-Module benötigen weiterhin eine separate Aktualisierung.
+Die ergänzte [Windows-Desktop-Word-Abnahme](codebook-word-windows-2026-10-15.md)
+prüft den oben bezeichneten aktuellen Tarball: 16 synthetische Dokumente,
+32 vollständig gesichtete Seiten, sieben pixelgleiche aktuelle Host-Paare und
+zwei unveränderte alte Studio-Referenzen. Word LTSC 2024, Version 2408,
+Build 16.0.17932.21000 (64 Bit), besteht auch den Wiederholungslauf der endgültigen
+Prüfskriptfassung. Die vereinbarte Kennzeichnung und die dokumentierte
+18pt-Korrektur bleiben die sichtbaren Unterschiede zur alten Rich-Text-Referenz.
+
+Ein aktueller HTTP-/Browser-/Redis-Lauf wurde für diese Korrektur nicht erneut
+ausgeführt; die Word-Abnahme ersetzt diese Anwendungsprüfungen nicht.
+Bereits veröffentlichte Verona-Schemer-Module benötigen weiterhin eine separate Aktualisierung.
 Es wurden kein npm-Release, kein PR-Merge, kein Deployment und keine Datenmigration ausgeführt.
 Die CI der neuen PR-Heads ist ein separater Nachweis.
