@@ -76,8 +76,10 @@ Die echten Anwendungsadapter verwenden Datenquellen im Speicher.
 | Generator ESM/CommonJS | 1.285 Tests bestanden, keine übersprungen |
 | Studio-Frontend | 178 Tests in 9 betroffenen Suites bestanden |
 | Studio-API | 145 Tests in 4 betroffenen Suites bestanden |
-| Kodierbox-Frontend vollständig | 2.102 Tests bestanden |
-| Kodierbox-Backend vollständig | 2.667 bestanden, 17 bestehende Tests übersprungen |
+| Kodierbox-Frontend vollständig | 2.516 Tests bestanden |
+| Kodierbox-Zoneless | 750 Tests bestanden |
+| Kodierbox-Paketkorrekturen | 19 Tests bestanden |
+| Kodierbox-Backend vollständig | 2.682 bestanden, 17 bestehende Tests übersprungen |
 
 Alle Hosttests liefen ohne Jest-/Nx-Cache. Bibliothek und alle vier Host-Builds
 bestehen. Host-Lint und Lint der geänderten Bibliothekstestdatei bestehen;
@@ -101,6 +103,31 @@ Runtime-Lock und Tarball-Prüfsumme sind abgeglichen. Eine neue vollständige
 Docker-Runtime-Installation wurde nicht durchgeführt.
 
 
+## Erneute Prüfung nach Kodierbox-develop-Abgleich
+
+Die Kodierbox wurde mit `develop` auf `ab8d6f250` (Angular-Zoneless-Grundlage,
+PR #1048) zusammengeführt. Die vier Konflikte betrafen die beiden CI-Dateien,
+`package.json` und `package-lock.json`. Die eingegangenen Sicherheitsupdates,
+Paketkorrekturen und Zoneless-Änderungen bleiben erhalten; Responses 5.3.1,
+der gemeinsame Tarball, mathjs 12.4.3 und die reine Entwicklungsreferenz wurden
+beibehalten. Das vollständige Node-22-Bookworm-Image und die getrennten
+Frontend-/Backend-Prüfungen bleiben in der CI erhalten.
+
+Das aktualisierte esbuild 0.28.1 erfordert eine neue Erzeugung der eingecheckten
+Kompatibilitätsengine. Die Änderung betrifft dessen Modulinitialisierungshelfer;
+der bytegenaue Reproduzierbarkeitstest und die unabhängigen Engine-Vergleiche
+bestehen mit dem neuen Artefakt. Der Codebook-Zoneless-Test verwendet jetzt
+`whenStable()` und Jest-Timer anstelle des Zone.js-abhängigen `fakeAsync`.
+Seine drei Fälle bestehen auch im normalen Frontend-Testlauf. Sie prüfen weiterhin
+asynchrones Laden, sichtbaren Fortschritt, Downloadsperre und Polling-Abbruch.
+
+Die Tabelle oben enthält die nach diesem Abgleich wiederholten Kodierbox-Prüfungen.
+Die 19 Paketkorrekturtests sichern außerdem die aus `develop` übernommenen
+Abhängigkeiten ab. Der Installationsvergleich wurde anschließend mit den
+unveränderten installierten Studio-/Bibliothekspaketen erneut ausgeführt;
+Bibliotheks- und Studio-Builds/Tests wurden durch diesen Kodierbox-Abgleich nicht
+verändert. Die unabhängigen Studio-Referenzdateien bleiben unverändert.
+
 ## Nachweisgrenzen
 
 Ein aktueller HTTP-/Browser-/Redis-Lauf und ein neuer Microsoft-Renderinglauf
@@ -108,5 +135,5 @@ wurden für diese Korrektur nicht ausgeführt. Die frühere Word-Web-Abnahme gil
 für das damalige Artefakt; Windows-Desktop-Word bleibt offen. Die technische
 XML-/Mediengleichheit ersetzt die visuelle Abnahme nicht. Bereits veröffentlichte
 Verona-Schemer-Module benötigen weiterhin eine separate Aktualisierung.
-Es wurden kein npm-Release, Merge, Deployment und keine Datenmigration ausgeführt.
+Es wurden kein npm-Release, kein PR-Merge, kein Deployment und keine Datenmigration ausgeführt.
 Die CI der neuen PR-Heads ist ein separater Nachweis.
