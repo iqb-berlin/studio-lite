@@ -6,6 +6,11 @@ import { TranslateModule } from '@ngx-translate/core';
 import {
   VopRuntimeErrorNotificationDialogComponent
 } from './vop-runtime-error-notification-dialog.component';
+import * as de from '../../../assets/i18n/de.json';
+
+// The tests translate without a loader, so the pipe only shows keys; this finds the German text behind one.
+const germanText = (key: string): unknown => key.split('.')
+  .reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], de);
 
 describe('VopRuntimeErrorNotificationDialogComponent', () => {
   let component: VopRuntimeErrorNotificationDialogComponent;
@@ -71,19 +76,95 @@ describe('VopRuntimeErrorNotificationDialogComponent', () => {
   });
 
   it('should not render code block when code is undefined', async () => {
-    await TestBed.resetTestingModule();
-    await TestBed.configureTestingModule({
-      imports: [MatDialogModule, TranslateModule.forRoot(), VopRuntimeErrorNotificationDialogComponent],
-      providers: [
-        { provide: MatDialogRef, useValue: mockDialogRef },
-        { provide: MAT_DIALOG_DATA, useValue: { message: 'Only message' } }
-      ]
-    }).compileComponents();
-
-    const noCodeFixture = TestBed.createComponent(VopRuntimeErrorNotificationDialogComponent);
-    noCodeFixture.detectChanges();
+    const noCodeFixture = await createWithData({ message: 'Only message' });
 
     const codeEl = noCodeFixture.nativeElement.querySelector('code');
     expect(codeEl).toBeNull();
   });
+
+  describe('explanation', () => {
+    const explanationText = (f: ComponentFixture<VopRuntimeErrorNotificationDialogComponent>): string | undefined => (
+      f.nativeElement.querySelector('[data-cy="runtime-error-dialog-explanation"]') as HTMLElement
+    )?.textContent?.trim();
+
+    const messageElement = (f: ComponentFixture<VopRuntimeErrorNotificationDialogComponent>): HTMLElement => (
+      f.nativeElement.querySelector('[data-cy="runtime-error-dialog-message"]') as HTMLElement
+    );
+
+    it('should keep the generic text for an unknown code', () => {
+      expect(component.isKnownCode).toBe(false);
+      expect(component.explanationKey).toBe('runtime-error-dialog.message');
+      expect(explanationText(fixture)).toBe('runtime-error-dialog.message');
+    });
+
+    it('should keep the generic text when no code is given', async () => {
+      const noCodeFixture = await createWithData({ message: 'Only message' });
+
+      expect(noCodeFixture.componentInstance.isKnownCode).toBe(false);
+      expect(explanationText(noCodeFixture)).toBe('runtime-error-dialog.message');
+    });
+
+    it('should keep the message of an unknown code in bold', () => {
+      expect(messageElement(fixture).querySelector('strong')?.textContent).toBe(mockDialogData.message);
+      expect(messageElement(fixture).querySelector('small')).toBeNull();
+    });
+
+    it.each([
+      ['GEOGEBRA_NOT_LOADING', 'GEOGEBRA_NOT_LOADING'],
+      ['geogebra-not-loading', 'GEOGEBRA_NOT_LOADING'],
+      ['GEOGEBRA_TIMEOUT', 'GEOGEBRA_TIMEOUT'],
+      ['geometry-timeout', 'GEOGEBRA_TIMEOUT'],
+      ['IMAGE_NOT_LOADING', 'IMAGE_NOT_LOADING'],
+      ['image-not-loading', 'IMAGE_NOT_LOADING'],
+      ['MEDIA_TIMEOUT', 'MEDIA_TIMEOUT'],
+      ['media-timeout', 'MEDIA_TIMEOUT'],
+      ['audio-timeout', 'MEDIA_TIMEOUT'],
+      ['MEDIA_DURATION_ERROR', 'MEDIA_DURATION_ERROR'],
+      ['media-duration-error', 'MEDIA_DURATION_ERROR']
+    ])('should explain the code %s with the text of %s', async (code, specCode) => {
+      const key = `runtime-error-dialog.codes.${specCode}`;
+      const knownFixture = await createWithData({ code, message: 'technical detail' });
+
+      expect(knownFixture.componentInstance.isKnownCode).toBe(true);
+      expect(explanationText(knownFixture)).toBe(key);
+      expect(germanText(key)).toEqual(expect.stringMatching(/\S/));
+    });
+
+    it('should fall back to a key that has a German text', () => {
+      expect(germanText(component.explanationKey)).toEqual(expect.stringMatching(/\S/));
+    });
+
+    it('should show the message of a known code as a small technical detail', async () => {
+      const knownFixture = await createWithData({
+        code: 'GEOGEBRA_NOT_LOADING',
+        message: 'GeoGebra could not be loaded'
+      });
+
+      expect(messageElement(knownFixture).querySelector('small')?.textContent).toBe('GeoGebra could not be loaded');
+      expect(messageElement(knownFixture).querySelector('strong')).toBeNull();
+    });
+
+    it('should still show the code of a known code', async () => {
+      const knownFixture = await createWithData({ code: 'IMAGE_NOT_LOADING' });
+
+      expect(knownFixture.nativeElement.querySelector('code')?.textContent?.trim()).toBe('IMAGE_NOT_LOADING');
+    });
+  });
+
+  async function createWithData(
+    data: { sessionId?: string, code?: string, message?: string }
+  ): Promise<ComponentFixture<VopRuntimeErrorNotificationDialogComponent>> {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [MatDialogModule, TranslateModule.forRoot(), VopRuntimeErrorNotificationDialogComponent],
+      providers: [
+        { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: MAT_DIALOG_DATA, useValue: data }
+      ]
+    }).compileComponents();
+
+    const dataFixture = TestBed.createComponent(VopRuntimeErrorNotificationDialogComponent);
+    dataFixture.detectChanges();
+    return dataFixture;
+  }
 });
