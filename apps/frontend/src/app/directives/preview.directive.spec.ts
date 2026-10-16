@@ -1,7 +1,7 @@
 import { ElementRef, ViewContainerRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogState } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { Overlay } from '@angular/cdk/overlay';
@@ -291,6 +291,54 @@ describe('PreviewDirective', () => {
         }
       }
     );
+  });
+
+  describe('runtime errors while the error dialog is open', () => {
+    const runtimeError = (code: string, message: string): MessageEvent => createMessageEvent(
+      {
+        type: 'vopRuntimeErrorNotification', sessionId: 'session-1', code, message
+      },
+      window
+    );
+
+    const openedDialog = (directive: TestPreviewDirective) => {
+      const dialogRef = {
+        getState: jest.fn(() => MatDialogState.OPEN),
+        componentInstance: { add: jest.fn() }
+      };
+      (directive.errorDialog.open as jest.Mock).mockReturnValue(dialogRef);
+      return dialogRef;
+    };
+
+    it('adds a further runtime error to the open dialog instead of opening another', () => {
+      const directive = createDirective();
+      directive.iFrameElement = createIFrameWithWindow(window);
+      const dialogRef = openedDialog(directive);
+
+      directive.handleIncomingMessage(runtimeError('IMAGE_NOT_LOADING', 'image a'));
+      directive.handleIncomingMessage(runtimeError('IMAGE_NOT_LOADING', 'image b'));
+
+      expect(directive.errorDialog.open).toHaveBeenCalledTimes(1);
+      expect(dialogRef.componentInstance.add).toHaveBeenCalledWith({
+        sessionId: 'session-1', code: 'IMAGE_NOT_LOADING', message: 'image b'
+      });
+    });
+
+    it.each([
+      ['closing', MatDialogState.CLOSING],
+      ['closed', MatDialogState.CLOSED]
+    ])('opens a new dialog once the previous one is %s', (_, state) => {
+      const directive = createDirective();
+      directive.iFrameElement = createIFrameWithWindow(window);
+      const dialogRef = openedDialog(directive);
+
+      directive.handleIncomingMessage(runtimeError('IMAGE_NOT_LOADING', 'image a'));
+      dialogRef.getState.mockReturnValue(state);
+      directive.handleIncomingMessage(runtimeError('IMAGE_NOT_LOADING', 'image b'));
+
+      expect(directive.errorDialog.open).toHaveBeenCalledTimes(2);
+      expect(dialogRef.componentInstance.add).not.toHaveBeenCalled();
+    });
   });
 
   it('builds page list for valid pages and updates current page', () => {

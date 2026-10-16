@@ -249,6 +249,30 @@ describe('Unit Preview (Vorschau)', () => {
     cy.get('mat-dialog-container').should('not.exist');
   });
 
+  // #1869: errors the player reports one by one are collected in one dialog. The repeated error is sent
+  // before the last one, so once the last one is shown the repetition has been handled as well.
+  it('collects the runtime errors the player reports in one dialog', () => {
+    sendRuntimeErrorFromPlayer('IMAGE_NOT_LOADING', 'image a');
+    sendRuntimeErrorFromPlayer('IMAGE_NOT_LOADING', 'image b');
+    sendRuntimeErrorFromPlayer('IMAGE_NOT_LOADING', 'image a');
+    sendRuntimeErrorFromPlayer('IMAGE_NOT_LOADING', 'image c');
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('mat-dialog-container', { timeout: 10000 }).within(() => {
+        cy.get('[data-cy="runtime-error-dialog-message"]').should('have.length', 3);
+        cy.get('[data-cy="runtime-error-dialog-message"]').then($messages => {
+          expect($messages.toArray().map(message => message.textContent?.trim()))
+            .to.deep.equal(['image a', 'image b', 'image c']);
+        });
+        cy.get('[data-cy="runtime-error-dialog-explanation"]')
+          .should('have.length', 1)
+          .and('have.text', json['runtime-error-dialog'].codes.IMAGE_NOT_LOADING);
+      });
+      cy.get('mat-dialog-container').should('have.length', 1);
+      cy.contains('mat-dialog-container button', json['runtime-error-dialog'].close).click();
+    });
+    cy.get('mat-dialog-container').should('not.exist');
+  });
+
   // #1361: the coding is checked with the unit as it is now, saved or not
   it('checks the coding without asking to save first', () => {
     clickIndexTabWorkspace('properties');

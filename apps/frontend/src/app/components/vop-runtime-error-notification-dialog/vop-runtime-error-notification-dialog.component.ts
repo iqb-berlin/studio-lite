@@ -1,9 +1,12 @@
-import { Component, Inject } from '@angular/core';
+import {
+  Component, computed, Inject, signal
+} from '@angular/core';
 import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogRef
 } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
+import { VopRuntimeErrorNotification } from '../../models/verona.interface';
 
 /**
  * The codes of the player specification (plugin-player, "Fehlercodes") that the dialog explains,
@@ -24,10 +27,24 @@ const SPEC_CODES: ReadonlyMap<string, string> = new Map([
   ['media-duration-error', 'MEDIA_DURATION_ERROR']
 ]);
 
+/** A runtime error as the player reports it. */
+export type RuntimeError = Partial<Pick<VopRuntimeErrorNotification, 'sessionId' | 'code' | 'message'>>;
+
+/** The runtime errors that share one explanation, in the order they arrived. */
+export interface RuntimeErrorGroup {
+  explanationKey: string;
+  isKnownCode: boolean;
+  runtimeErrors: readonly RuntimeError[];
+}
+
 /**
- * Shows a runtime error the player has reported. For a code it knows, the dialog explains what
- * is wrong and what to do, and keeps the player's own message below as a technical detail; for
- * any other code it only says that the player has reported an error.
+ * Shows the runtime errors the player reports. For a code it knows, the dialog explains what is
+ * wrong and what to do, and keeps the player's own message below as a technical detail; for any
+ * other code it only says that the player has reported an error.
+ *
+ * A player reports every element that fails on its own, and each message names its element. So
+ * one dialog takes all the errors that arrive while it is open: each explanation is shown once,
+ * with the errors it covers below it, and an error already shown is not added again (#1869).
  */
 @Component({
   selector: 'studio-lite-vop-runtime-error-notification-dialog',
@@ -37,21 +54,38 @@ const SPEC_CODES: ReadonlyMap<string, string> = new Map([
   standalone: true
 })
 export class VopRuntimeErrorNotificationDialogComponent {
-  sessionId?: string;
-  code?: string;
-  message?: string;
-  readonly isKnownCode: boolean;
-  readonly explanationKey: string;
+  readonly sessionId?: string;
+  private readonly runtimeErrors = signal<RuntimeError[]>([]);
+
+  readonly groups = computed((): RuntimeErrorGroup[] => {
+    const groups = new Map<string, RuntimeErrorGroup>();
+    this.runtimeErrors().forEach(runtimeError => {
+      const specCode = runtimeError.code ? SPEC_CODES.get(runtimeError.code) : undefined;
+      const explanationKey = specCode ? `runtime-error-dialog.codes.${specCode}` : 'runtime-error-dialog.message';
+      const group = groups.get(explanationKey);
+      groups.set(explanationKey, {
+        explanationKey,
+        isKnownCode: !!specCode,
+        runtimeErrors: [...(group?.runtimeErrors ?? []), runtimeError]
+      });
+    });
+    return [...groups.values()];
+  });
 
   constructor(
     public dialogRef: MatDialogRef<VopRuntimeErrorNotificationDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { sessionId?: string, code?: string, message?: string }
+    @Inject(MAT_DIALOG_DATA) public data: RuntimeError
   ) {
     this.sessionId = data.sessionId;
-    this.code = data.code;
-    this.message = data.message;
-    const specCode = this.code ? SPEC_CODES.get(this.code) : undefined;
-    this.isKnownCode = !!specCode;
-    this.explanationKey = specCode ? `runtime-error-dialog.codes.${specCode}` : 'runtime-error-dialog.message';
+    this.add(data);
+  }
+
+  /** Adds a runtime error the player reports while the dialog is open, unless it is already shown. */
+  add(runtimeError: RuntimeError): void {
+    this.runtimeErrors.update(runtimeErrors => (
+      runtimeErrors.some(shown => shown.code === runtimeError.code && shown.message === runtimeError.message) ?
+        runtimeErrors :
+        [...runtimeErrors, runtimeError]
+    ));
   }
 }
