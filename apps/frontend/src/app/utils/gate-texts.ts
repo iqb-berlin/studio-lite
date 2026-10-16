@@ -18,6 +18,7 @@ export function gateTextsFrom(translate: TranslateService): GateTextsOverride {
     intro: text('intro'),
     failed: text('failed'),
     loadFailed: text('load-failed'),
+    reloadNeeded: text('reload-needed'),
     retry: text('retry'),
     cancel: text('cancel'),
     refusalTitle: text('refusal-title'),

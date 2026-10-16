@@ -1188,6 +1188,7 @@
     "intro": "Bevor Sie in dieser Sitzung weiterarbeiten, bestätigen Sie bitte einmal, dass hier ein Mensch arbeitet. Danach geht es weiter, wo Sie waren.",
     "failed": "Die Bestätigung ist nicht gelungen. Bitte versuchen Sie es noch einmal.",
     "load-failed": "Die Bestätigung konnte nicht geladen werden. Bis dahin wird nichts geladen oder gespeichert.",
+    "reload-needed": "Falls es weiter nicht gelingt, laden Sie die Seite neu – was noch nicht gespeichert ist, geht dabei verloren.",
     "retry": "Erneut versuchen",
     "cancel": "Abbrechen",
     "refusal-title": "Nicht ausgeführt",
@@ -1196,8 +1197,10 @@
     "close": "Schließen",
     "widget": {
       "ariaLinkLabel": "Besuchen Sie altcha.org",
+      "cancel": "Abbrechen",
       "enterCode": "Code eingeben",
       "enterCodeAria": "Geben Sie den Code ein, den Sie hören. Drücken Sie die Leertaste, um den Ton abzuspielen.",
+      "enterCodeFromImage": "Um fortzufahren, geben Sie bitte den Code aus dem Bild unten ein.",
       "error": "Überprüfung fehlgeschlagen. Bitte versuchen Sie es später erneut.",
       "expired": "Überprüfung abgelaufen. Bitte erneut versuchen.",
       "footer": "Geschützt durch ALTCHA",

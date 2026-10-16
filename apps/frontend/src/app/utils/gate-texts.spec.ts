@@ -1,6 +1,6 @@
 import { TranslateService } from '@ngx-translate/core';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { WIDGET_TEXT_NAMES } from '@iqb/gate-angular';
+import { DEFAULT_GATE_TEXTS, WIDGET_TEXT_NAMES } from '@iqb/gate-angular';
 import * as de from '../../assets/i18n/de.json';
 import { gateTextsFrom } from './gate-texts';
 
@@ -19,6 +19,7 @@ describe('gateTextsFrom', () => {
     expect(texts.intro).toBe('<human-verification.intro>');
     expect(texts.failed).toBe('<human-verification.failed>');
     expect(texts.loadFailed).toBe('<human-verification.load-failed>');
+    expect(texts.reloadNeeded).toBe('<human-verification.reload-needed>');
     expect(texts.retry).toBe('<human-verification.retry>');
     expect(texts.cancel).toBe('<human-verification.cancel>');
   });
@@ -50,7 +51,7 @@ describe('gateTextsFrom', () => {
     expect(texts.cancel).toBe('<human-verification.cancel>');
   });
 
-  it('should find every text it asks for in de.json', () => {
+  it('should ask for every text of the library and find each in de.json', () => {
     const lookUp = (key: string): unknown => key.split('.')
       .reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], de);
     translate.instant.mockImplementation((key: string | string[]) => {
@@ -60,7 +61,9 @@ describe('gateTextsFrom', () => {
 
     const { widget, ...dialog } = gateTextsFrom(translate);
 
-    expect(Object.keys(dialog)).toHaveLength(10);
+    const { widget: defaultWidget, ...defaultDialog } = DEFAULT_GATE_TEXTS;
+    expect(Object.keys(dialog).sort()).toEqual(Object.keys(defaultDialog).sort());
+    expect(Object.keys(widget ?? {}).sort()).toEqual(Object.keys(defaultWidget).sort());
     expect(Object.values(dialog).every(text => typeof text === 'string')).toBe(true);
     expect(Object.values(widget ?? {}).every(text => typeof text === 'string')).toBe(true);
   });
