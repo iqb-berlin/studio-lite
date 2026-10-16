@@ -203,9 +203,9 @@ export abstract class VeronaModuleDirective implements OnDestroy {
     }
   }
 
-  private setupIFrame(editorHtml: string): void {
-    if (this.iFrameElement && this.iFrameElement.parentElement) {
-      this.iFrameElement.srcdoc = editorHtml;
+  private setupIFrame(moduleHtml: string): void {
+    if (this.iFrameElement) {
+      this.iFrameElement.srcdoc = moduleHtml;
     }
   }
 
