@@ -1,10 +1,10 @@
 import {
-  Component, OnDestroy, OnInit
+  Component, OnDestroy, OnInit, signal
 } from '@angular/core';
 import {
   UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
@@ -45,7 +45,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   // it out (#1617). The template disables the submit button while this is true, and the
   // guard in login() catches the click that lands before that rendering does.
   isSubmitting = false;
-  private routingSubscription: Subscription | null = null;
+  private ngUnsubscribe = new Subject<void>();
+  private readonly destroyed = signal(false);
 
   constructor(private fb: UntypedFormBuilder,
               private route: ActivatedRoute,
@@ -61,11 +62,11 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    this.routingSubscription = this.route.queryParams.subscribe(queryParams => {
+    this.route.queryParams.pipe(takeUntil(this.ngUnsubscribe)).subscribe(queryParams => {
       // eslint-disable-next-line @typescript-eslint/dot-notation
       this.redirectTo = queryParams['redirectTo'];
     });
-    this.routingSubscription = this.route.params.subscribe(params => {
+    this.route.params.pipe(takeUntil(this.ngUnsubscribe)).subscribe(params => {
       // eslint-disable-next-line @typescript-eslint/dot-notation
       this.loginNamePreset = params['login'];
       if (this.loginNamePreset) {
@@ -85,12 +86,17 @@ export class LoginComponent implements OnInit, OnDestroy {
       const initLoginMode = !this.appService.appConfig.hasUsers;
       this.backendService.login(
         this.loginForm.get('name')?.value, this.loginForm.get('pw')?.value, initLoginMode
+      // Not given up with the page (no takeUntil): its answer holds tokens and a session on the
+      // server, which have to arrive to be kept or cleaned up (#1617). A page left meanwhile only
+      // skips its own part.
       ).subscribe({
         next: async ok => {
-          await this.validLoginCheck(ok, initLoginMode);
+          if (!this.destroyed()) await this.validLoginCheck(ok, initLoginMode);
         },
         // Only the gateway's refusal comes as an error, and its library has said why already
-        error: () => this.endLoginAttempt()
+        error: () => {
+          if (!this.destroyed()) this.endLoginAttempt();
+        }
       });
     }
   }
@@ -121,8 +127,11 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.routingSubscription !== null) {
-      this.routingSubscription.unsubscribe();
-    }
+    // A login still waiting for its answer, as behind the gateway's challenge, goes on without the
+    // page: what the page switched on for it would otherwise stay on
+    if (this.isSubmitting) this.endLoginAttempt();
+    this.destroyed.set(true);
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

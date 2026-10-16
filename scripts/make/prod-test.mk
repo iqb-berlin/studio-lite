@@ -4,6 +4,12 @@ include $(STUDIO_BASE_DIR)/.env.studio-lite
 
 # exports all variables (especially those of the included .env.studio-lite file!)
 .EXPORT_ALL_VARIABLES:
+# ... but the gateway's secret, which prod-test-up may write only after the file was read: exported
+# as it was then, empty, it would win over the file in docker compose
+unexport IQB_GATE_SECRET
+
+# The gateway's image, as the compose file names it
+GATE_IMAGE = $(REGISTRY_PATH)iqbberlin/iqb-gate:$(or $(IQB_GATE_TAG),latest)
 
 # prevents collisions of make target names with possible file names
 .PHONY: prod-registry-login prod-registry-logout prod-test-build prod-test-up prod-test-down prod-test-logs\
@@ -24,6 +30,10 @@ prod-registry-logout:
 
 # Build production and e2e test images
 prod-test-build: prod-registry-login
+	@# The gateway (iqb-gate) is not built here, but prod-test-up starts it too, without pulling. First, so
+	@# that a missing one stops the build before the rest: pulled as fresh as the others, or, while it is
+	@# not published, the one tagged by hand
+	docker pull $(GATE_IMAGE) || docker image inspect --format 'Not pulled: using the local $(GATE_IMAGE)' $(GATE_IMAGE)
 	cd $(STUDIO_BASE_DIR) &&\
 		docker build\
 				--progress plain\
@@ -84,6 +94,15 @@ prod-test-up:
 	fi
 	@if ! test $(shell docker network ls -q --filter name=app-net);\
 		then docker network create app-net;\
+	fi
+	@# The gateway does not start without its secret, and a .env.studio-lite made from the template has none
+	@if ! grep -qE '^IQB_GATE_SECRET=.{32,}' $(STUDIO_BASE_DIR)/.env.studio-lite; then\
+		sed -i.sed '/^IQB_GATE_SECRET=/d' $(STUDIO_BASE_DIR)/.env.studio-lite &&\
+			rm $(STUDIO_BASE_DIR)/.env.studio-lite.sed;\
+		if [ -s $(STUDIO_BASE_DIR)/.env.studio-lite ] && [ -n "$$(tail -c 1 $(STUDIO_BASE_DIR)/.env.studio-lite)" ];\
+			then printf '\n' >>$(STUDIO_BASE_DIR)/.env.studio-lite;\
+		fi;\
+		printf 'IQB_GATE_SECRET=%s\n' "$$(openssl rand -hex 32)" >>$(STUDIO_BASE_DIR)/.env.studio-lite;\
 	fi
 	docker compose\
 			--file $(STUDIO_BASE_DIR)/docker-compose.studio-lite.yaml\

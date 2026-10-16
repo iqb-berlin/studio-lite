@@ -123,7 +123,7 @@ describe('BackendService', () => {
       req.flush(null);
     });
 
-    it('should return false when auth-data fails after successful login', done => {
+    it('should return false and end the session when auth-data fails after successful login', done => {
       const mockLoginResponse = { accessToken: 'test-token', refreshToken: 'test-refresh' };
 
       service.login('testUser', 'password', false).subscribe(result => {
@@ -138,6 +138,25 @@ describe('BackendService', () => {
 
       const authReq = httpMock.expectOne(`${serverUrl}auth-data`);
       authReq.error(new ProgressEvent('error'));
+
+      const logoutReq = httpMock.expectOne(`${serverUrl}logout`);
+      expect(logoutReq.request.body).toEqual({ refreshToken: 'test-refresh' });
+      logoutReq.flush({});
+    });
+
+    it('should not log out a second time when the interceptor ended the session already', done => {
+      service.login('testUser', 'password', false).subscribe(result => {
+        expect(result).toBe(false);
+        done();
+      });
+
+      httpMock.expectOne(`${serverUrl}login`).flush({ accessToken: 'test-token', refreshToken: 'test-refresh' });
+      // As the interceptor does when the token of a 401 cannot be refreshed
+      localStorage.removeItem('id_token');
+      localStorage.removeItem('refresh_token');
+      httpMock.expectOne(`${serverUrl}auth-data`).flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+      httpMock.expectNone(`${serverUrl}logout`);
     });
 
     // The gateway in front (iqb-gate) refused it, and its library has said why: the login page
@@ -157,7 +176,7 @@ describe('BackendService', () => {
           .flush({ code: 'automation-detected' }, { status: 403, statusText: 'Forbidden' });
       });
 
-      it('should pass the refusal of the auth-data read on, and keep no tokens', done => {
+      it('should pass the refusal of the auth-data read on, keep no tokens and end the session', done => {
         service.login('testUser', 'password', false).subscribe({
           next: () => done.fail('a refusal must not become an answer'),
           error: (error: HttpErrorResponse) => {
@@ -171,6 +190,8 @@ describe('BackendService', () => {
         httpMock.expectOne(`${serverUrl}login`).flush({ accessToken: 'test-token', refreshToken: 'test-refresh' });
         httpMock.expectOne(`${serverUrl}auth-data`)
           .flush({ code: 'human-verification-required' }, { status: 428, statusText: 'Precondition Required' });
+        // The gateway lets the logout through: it is no read and no save of a person
+        httpMock.expectOne(`${serverUrl}logout`).flush({});
       });
 
       it('should still answer false for a 403 of the studio itself', done => {

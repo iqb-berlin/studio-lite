@@ -565,6 +565,16 @@ update_makefile() {
   fi
 }
 
+# Appends a line to the env file, and starts it on a line of its own: a file edited by hand may
+# end without a newline, and the line would otherwise be glued to its last one
+append_env_line() {
+  declare env_file="${APP_DIR}/.env.${APP_NAME}"
+  if [ -s "${env_file}" ] && [ -n "$(tail -c 1 "${env_file}")" ]; then
+    printf "\n" >>"${env_file}"
+  fi
+  printf "%s\n" "${1}" >>"${env_file}"
+}
+
 customize_settings() {
   # write chosen version tag to env file (anchored: IQB_GATE_TAG is the gateway's own version)
   sed -i.bak "s|^TAG=.*|TAG=${TARGET_VERSION}|" "${APP_DIR}/.env.${APP_NAME}" && rm "${APP_DIR}/.env.${APP_NAME}.bak"
@@ -572,7 +582,7 @@ customize_settings() {
   # The gateway (iqb-gate) does not start without its secret: an installation from before it gets one
   if ! grep -qE '^IQB_GATE_SECRET=.{32,}' "${APP_DIR}/.env.${APP_NAME}"; then
     sed -i.bak '/^IQB_GATE_SECRET=/d' "${APP_DIR}/.env.${APP_NAME}" && rm "${APP_DIR}/.env.${APP_NAME}.bak"
-    printf "IQB_GATE_SECRET=%s\n" "$(openssl rand -hex 32)" >>"${APP_DIR}/.env.${APP_NAME}"
+    append_env_line "IQB_GATE_SECRET=$(openssl rand -hex 32)"
   fi
 
   # ... and believes X-Forwarded-* only from Traefik's network: without it, every request seems to
@@ -583,7 +593,7 @@ customize_settings() {
     gate_trust_proxy="${gate_trust_proxy%,}"
     if [ -n "${gate_trust_proxy}" ]; then
       sed -i.bak '/^IQB_GATE_TRUST_PROXY=/d' "${APP_DIR}/.env.${APP_NAME}" && rm "${APP_DIR}/.env.${APP_NAME}.bak"
-      printf "IQB_GATE_TRUST_PROXY=%s\n" "${gate_trust_proxy}" >>"${APP_DIR}/.env.${APP_NAME}"
+      append_env_line "IQB_GATE_TRUST_PROXY=${gate_trust_proxy}"
     else
       printf "The subnet of app-net is unknown: set IQB_GATE_TRUST_PROXY in '%s' (see .env.%s.template).\n" \
         "${APP_DIR}/.env.${APP_NAME}" "${APP_NAME}"
