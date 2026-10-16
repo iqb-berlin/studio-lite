@@ -2,12 +2,18 @@
   {{ 'runtime-error-dialog.title' | translate }}
 </h1>
 <div mat-dialog-content>
-  <p>{{ 'runtime-error-dialog.message' | translate }}</p>
+  <p data-cy="runtime-error-dialog-explanation">{{ explanationKey | translate }}</p>
   @if (code) {
     <p><strong>{{ 'runtime-error-dialog.code' | translate }}:</strong> <code>{{ code }}</code></p>
   }
   @if (message) {
-    <p><strong>{{ message }}</strong></p>
+    <p data-cy="runtime-error-dialog-message">
+      @if (isKnownCode) {
+        <small>{{ message }}</small>
+      } @else {
+        <strong>{{ message }}</strong>
+      }
+    </p>
   }
   @if (sessionId) {
     <p><small>{{ 'runtime-error-dialog.session-id' | translate }}: {{ sessionId }}</small></p>
