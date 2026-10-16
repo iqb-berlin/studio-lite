@@ -1,4 +1,4 @@
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MatDialogState } from '@angular/material/dialog';
 import { Directive, inject, ViewContainerRef } from '@angular/core';
 import { from, takeUntil } from 'rxjs';
 import { Overlay } from '@angular/cdk/overlay';
@@ -9,6 +9,7 @@ import { Progress } from '../modules/workspace/models/types';
 import { VeronaModuleDirective } from './verona-module.directive';
 import { UnitState } from '../models/verona.interface';
 import {
+  RuntimeError,
   VopRuntimeErrorNotificationDialogComponent
 } from '../components/vop-runtime-error-notification-dialog/vop-runtime-error-notification-dialog.component';
 import { WidgetCallData } from '../modules/workspace/models/widget-call-data.interface';
@@ -39,6 +40,7 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
   responseProgress: Progress = 'none';
   hasFocus = false;
   private pageListAwaited = false;
+  private runtimeErrorDialog?: MatDialogRef<VopRuntimeErrorNotificationDialogComponent>;
 
   abstract gotoUnit(target: string): void;
   protected abstract handleUnitStateData(unitState: UnitState): void;
@@ -122,12 +124,10 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
           break;
 
         case 'vopRuntimeErrorNotification':
-          this.errorDialog?.open(VopRuntimeErrorNotificationDialogComponent, {
-            data: {
-              sessionId: msgData.sessionId,
-              code: msgData.code,
-              message: msgData.message
-            }
+          this.showRuntimeError({
+            sessionId: msgData.sessionId,
+            code: msgData.code,
+            message: msgData.message
           });
           break;
 
@@ -135,6 +135,21 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
           // eslint-disable-next-line no-console
           console.warn(`Message ignored: ${msgType}`);
       }
+    }
+  }
+
+  /**
+   * A player reports every element that fails on its own, so one dialog collects what arrives while
+   * it is open; only after it has been closed does the next error open a new one (#1869).
+   */
+  private showRuntimeError(runtimeError: RuntimeError): void {
+    if (this.runtimeErrorDialog?.getState() === MatDialogState.OPEN) {
+      this.runtimeErrorDialog.componentInstance.add(runtimeError);
+    } else {
+      this.runtimeErrorDialog = this.errorDialog?.open(
+        VopRuntimeErrorNotificationDialogComponent,
+        { data: runtimeError }
+      );
     }
   }
 
