@@ -74,9 +74,10 @@ export class BackendService {
                 }),
                 catchError(error => {
                   // Not logged in after all: the tokens of a login reported as failed would
-                  // still log the next page load in
-                  localStorage.removeItem('id_token');
-                  localStorage.removeItem('refresh_token');
+                  // still log the next page load in, and the session the login opened on the
+                  // server would live out its time without a client that could end it. Unless the
+                  // interceptor ended it already, when the token could not be refreshed for it
+                  if (localStorage.getItem('refresh_token')) this.logout();
                   return BackendService.loginFailure(error);
                 })
               );

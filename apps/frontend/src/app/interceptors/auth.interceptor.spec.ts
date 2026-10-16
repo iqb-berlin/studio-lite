@@ -220,6 +220,43 @@ describe('AuthInterceptor', () => {
     });
   });
 
+  // The library of the gateway (iqb-gate) fetches its challenge and hands in the solution itself, and
+  // answers their failures in its own dialog
+  describe('a request of the gateway itself', () => {
+    it('should send it without the studio\'s token', () => {
+      localStorage.setItem('id_token', 'token-123');
+
+      httpClient.get('/.iqb-gate/challenge').subscribe();
+
+      const req = httpMock.expectOne('/.iqb-gate/challenge');
+      expect(req.request.headers.get('Authorization')).toBeNull();
+      expect(req.request.headers.get('app-version')).toBeNull();
+      req.flush({});
+    });
+
+    it('should neither report its failure nor refresh the token for it', () => {
+      localStorage.setItem('refresh_token', 'old-refresh');
+      let failed = false;
+
+      httpClient.post('/.iqb-gate/verify', {}).subscribe({ error: () => { failed = true; } });
+      httpMock.expectOne('/.iqb-gate/verify').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+      httpClient.get('/.iqb-gate/challenge').subscribe({ error: () => {} });
+      httpMock.expectOne('/.iqb-gate/challenge')
+        .flush('Too Many Requests', { status: 429, statusText: 'Too Many Requests' });
+
+      expect(failed).toBe(true);
+      expect(backendServiceSpy.refresh).not.toHaveBeenCalled();
+      expect(appServiceSpy.addErrorMessage).not.toHaveBeenCalled();
+    });
+
+    it('should treat a path that only begins like the gateway\'s as the studio\'s', () => {
+      httpClient.get('/.iqb-gateway').subscribe({ error: () => {} });
+      httpMock.expectOne('/.iqb-gateway').flush('boom', { status: 500, statusText: 'Server Error' });
+
+      expect(appServiceSpy.addErrorMessage).toHaveBeenCalledTimes(1);
+    });
+  });
+
   // A refresh that worked says the session is fine. If the repeated request still fails, that
   // failure belongs to the request, not to the session: the API answers missing workspace access
   // with 401 as well, and opening a unit in a foreign workspace used to log the user out (#1694).

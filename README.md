@@ -173,7 +173,8 @@ have rules of their own. Areas can be left out per installation: `IQB_GATE_RULES
 reads, and `other` does not take them instead. A name no rule has stops the gateway at start. The
 frontend's side is `provideIqbGate` and `IqbGateInterceptor` in `apps/frontend/src/main.ts`: the
 library shows the challenge and, when the gateway refuses a request, says why; the studio keeps
-such refusals out of its own error display (`isGateRefusal` in `auth.interceptor.ts`).
+such refusals out of its own error display (`isGateRefusal` in `auth.interceptor.ts`), and lets the
+library's own requests to the gateway (`/.iqb-gate/…`) pass without its token or error display.
 
 **In development the gateway is optional.** Without it, the dev stack starts on `HTTP_PORT` as
 always, and the e2e suites run past it. With the profile `gate`, a Traefik
@@ -198,7 +199,10 @@ once an area is on.
 **Not published yet.** `@iqb/gate-angular` and `@iqb/gate-protocol` come from tarballs in
 `vendor/iqb-gate/` (ignored by git), packed with `npm pack` in the iqb-gate repository, and the
 image `iqbberlin/iqb-gate` that production names does not exist yet. Until both are published,
-this branch builds and runs only on a machine that has them.
+this branch builds and runs only on a machine that has them. `make prod-test-build` pulls the image
+unless it is there: tag the one built above for it (`docker tag iqb-gate:local
+iqbberlin/iqb-gate:latest`, with `REGISTRY_PATH` and `IQB_GATE_TAG` as in `.env.studio-lite`), and
+`make prod-test-up` gives an empty `IQB_GATE_SECRET` a value.
 
 **Not for production before the script tokens.** The gateway also rejects scripts, eatPrepTBA among
 them -- at their login and at every read. They need script tokens that may read and write first

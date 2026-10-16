@@ -1,6 +1,8 @@
 // eslint-disable-next-line max-classes-per-file
 import { Component, Input } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, fakeAsync, flush, TestBed
+} from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import {
@@ -239,6 +241,74 @@ describe('LoginComponent', () => {
       expect(appService.dataLoading).toBe(false);
       expect(appService.errorMessagesDisabled).toBe(false);
     });
+  });
+
+  // The person leaves the page while the login waits, as behind the gateway's challenge
+  describe('a page left while the login waits for its answer', () => {
+    let appService: AppService;
+    let answer: Subject<boolean>;
+
+    beforeEach(() => {
+      appService = TestBed.inject(AppService);
+      answer = new Subject<boolean>();
+      backendService.login.mockReturnValue(answer);
+      fillForm();
+      component.login();
+      fixture.destroy();
+    });
+
+    // Its answer holds tokens and a session on the server, kept or cleaned up only once it arrives (#1617)
+    it('should let the login finish', () => {
+      expect(answer.observed).toBe(true);
+    });
+
+    it('should switch off what the attempt switched on', () => {
+      expect(appService.dataLoading).toBe(false);
+      expect(appService.errorMessagesDisabled).toBe(false);
+    });
+
+    it('should not take the person away from the page open by then when the login succeeds', fakeAsync(() => {
+      const router = TestBed.inject(Router);
+      jest.spyOn(router, 'navigate');
+      component.redirectTo = '/a/1';
+      // The page the person went to loads something of its own
+      appService.dataLoading = true;
+
+      answer.next(true);
+      flush();
+
+      expect(router.navigate).not.toHaveBeenCalled();
+      expect(appService.dataLoading).toBe(true);
+    }));
+
+    it('should say nothing on the page open by then when the login fails', fakeAsync(() => {
+      const snackBar = TestBed.inject(MatSnackBar);
+      jest.spyOn(snackBar, 'open');
+      appService.errorMessagesDisabled = true;
+
+      answer.next(false);
+      flush();
+
+      expect(snackBar.open).not.toHaveBeenCalled();
+      expect(appService.errorMessagesDisabled).toBe(true);
+    }));
+
+    it('should leave the page open by then alone when the gateway refuses the login', () => {
+      appService.dataLoading = true;
+
+      answer.error(new HttpErrorResponse({ status: 428, error: { code: 'human-verification-required' } }));
+
+      expect(appService.dataLoading).toBe(true);
+    });
+  });
+
+  it('should leave what another page switched on when no login waits', () => {
+    const appService = TestBed.inject(AppService);
+    appService.dataLoading = true;
+
+    fixture.destroy();
+
+    expect(appService.dataLoading).toBe(true);
   });
 
   it('should say that a login did not succeed when it was answered with false', async () => {

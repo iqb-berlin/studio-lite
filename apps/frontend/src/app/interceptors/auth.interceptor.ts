@@ -8,6 +8,7 @@ import {
 } from 'rxjs';
 import { Router } from '@angular/router';
 import { isGateRefusal } from '@iqb/gate-angular';
+import { GATE_PREFIX } from '@iqb/gate-protocol';
 import { AppService } from '../services/app.service';
 import { BackendService } from '../services/backend.service';
 import { AppHttpError } from '../classes/app-http-error.class';
@@ -24,6 +25,9 @@ import { IS_BACKGROUND_REQUEST, SKIP_TOKEN_REFRESH } from './request-classificat
  *
  * The server's `Date` header is read along the way and becomes the clock skew every time-based
  * decision in the frontend is then measured against.
+ *
+ * The requests of the gateway in front (iqb-gate: its challenge) pass untouched: the studio's token
+ * is none of the gateway's business, and the gateway's library handles their failures itself.
  */
 @Injectable({
   providedIn: 'root'
@@ -40,6 +44,7 @@ export class AuthInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    if (AuthInterceptor.isGateRequest(req)) return next.handle(req);
     const idToken = localStorage.getItem('id_token');
     let httpErrorInfo: AppHttpError | null = null;
 
@@ -80,6 +85,10 @@ export class AuthInterceptor implements HttpInterceptor {
           }
         })
       );
+  }
+
+  private static isGateRequest(request: HttpRequest<unknown>): boolean {
+    return request.url === GATE_PREFIX || request.url.startsWith(`${GATE_PREFIX}/`);
   }
 
   private report(request: HttpRequest<unknown>, httpErrorInfo: AppHttpError): void {
