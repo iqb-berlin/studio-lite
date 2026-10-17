@@ -30,7 +30,7 @@
  */
 import { execSync } from 'node:child_process';
 import {
-  copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync
+  copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -46,6 +46,11 @@ console.log('Building api so dist/apps/api/package.json is current ...');
 execSync('npx nx run api:build', { cwd: repoRoot, stdio: 'inherit' });
 
 const generated = JSON.parse(readFileSync(generatedPath, 'utf8'));
+const rootPackage = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf8'));
+const localCodebook = rootPackage.dependencies['@iqb/ngx-coding-components'];
+if (localCodebook?.startsWith('file:vendor/')) {
+  generated.dependencies['@iqb/ngx-coding-components'] = localCodebook;
+}
 const rootLock = JSON.parse(readFileSync(join(repoRoot, 'package-lock.json'), 'utf8'));
 
 const extraDependencies = Object.fromEntries(EXTRA_DEPENDENCIES.map(name => {
@@ -73,7 +78,7 @@ const runtimePackage = {
   // first require (#1587, #1592). ioredis itself still ends up NOT
   // installed -- optional peers never are; the override only exists for the
   // resolver's consistency check.
-  overrides: { ioredis: '^5.0.4' }
+  overrides: { ioredis: '^5.0.4', 'image-size': rootPackage.overrides['image-size'] }
 };
 writeFileSync(runtimePath, `${JSON.stringify(runtimePackage, null, 2)}\n`);
 
@@ -84,6 +89,14 @@ writeFileSync(runtimePath, `${JSON.stringify(runtimePackage, null, 2)}\n`);
 const workDir = mkdtempSync(join(tmpdir(), 'api-runtime-lock-'));
 try {
   copyFileSync(runtimePath, join(workDir, 'package.json'));
+  // Keep unchanged dependency pins when only one runtime package is updated.
+  if (existsSync(runtimeLockPath)) {
+    copyFileSync(runtimeLockPath, join(workDir, 'package-lock.json'));
+  }
+  if (localCodebook?.startsWith('file:vendor/')) {
+    mkdirSync(join(workDir, 'vendor'));
+    copyFileSync(join(repoRoot, localCodebook.slice(5)), join(workDir, localCodebook.slice(5)));
+  }
   console.log('Resolving the runtime lockfile against the registry (this is the ONE place that still does) ...');
   execSync('npm install --package-lock-only --ignore-scripts --no-fund --no-audit', {
     cwd: workDir, stdio: 'inherit'

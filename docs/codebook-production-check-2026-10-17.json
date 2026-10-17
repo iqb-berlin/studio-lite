@@ -1,0 +1,13 @@
+{
+  "package": "4.1.0-dev.ff15d6d",
+  "source": "ff15d6d882417db26bc81fc88a09074eab74d57d",
+  "responses": "5.3.1",
+  "imageSize": "2.0.3",
+  "icnsAndPng": true,
+  "json": true,
+  "docx": true,
+  "zeroIndentTwips": 100,
+  "nativeFormula": true,
+  "scriptsExecuted": false,
+  "dockerStarted": false
+}

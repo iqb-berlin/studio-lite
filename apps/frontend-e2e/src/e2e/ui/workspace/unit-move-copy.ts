@@ -8,7 +8,8 @@ import {
   addUnitFromExisting,
   ensureUnitExists,
   goToWsMenu,
-  moveUnit
+  moveUnit,
+  selectTargetWorkspace
 } from '../../../support/helpers';
 
 describe('Workspace Unit Move & Copy Operations', () => {
@@ -35,8 +36,7 @@ describe('Workspace Unit Move & Copy Operations', () => {
     cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-copy-unit"]').click();
-    cy.get('mat-select').click();
-    cy.get(`mat-option:contains("${secondaryWorkspace}")`).click();
+    selectTargetWorkspace(secondaryWorkspace);
     cy.get(`[data-cy="workspace-select-unit-list-checkbox-${moveCopyUnits.copyTarget.shortname}"]`).click();
     cy.clickDataCyWithResponseCheck(
       '[data-cy="workspace-move-unit-button"]',
