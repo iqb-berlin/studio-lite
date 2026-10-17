@@ -30,7 +30,7 @@
  */
 import { execSync } from 'node:child_process';
 import {
-  copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
+  copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -89,6 +89,10 @@ writeFileSync(runtimePath, `${JSON.stringify(runtimePackage, null, 2)}\n`);
 const workDir = mkdtempSync(join(tmpdir(), 'api-runtime-lock-'));
 try {
   copyFileSync(runtimePath, join(workDir, 'package.json'));
+  // Keep unchanged dependency pins when only one runtime package is updated.
+  if (existsSync(runtimeLockPath)) {
+    copyFileSync(runtimeLockPath, join(workDir, 'package-lock.json'));
+  }
   if (localCodebook?.startsWith('file:vendor/')) {
     mkdirSync(join(workDir, 'vendor'));
     copyFileSync(join(repoRoot, localCodebook.slice(5)), join(workDir, localCodebook.slice(5)));
