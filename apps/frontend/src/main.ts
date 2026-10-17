@@ -34,9 +34,6 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { de } from 'date-fns/locale';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { NGX_CODING_COMPONENTS_DE_TRANSLATIONS } from '@iqb/ngx-coding-components/translations';
-import { map } from 'rxjs';
 import { PaginatorIntlService } from './app/services/paginator-intl.service';
 import { AuthInterceptor } from './app/interceptors/auth.interceptor';
 import { APP_ROUTES } from './app/app.routes';
@@ -44,34 +41,11 @@ import { MetadataModule } from './app/modules/metadata/metadata.module';
 import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
 import { BackendService } from './app/services/backend.service';
-import {
-  mergeTranslations,
-  selectTranslationsForLanguage,
-  TranslationMap
-} from './app/services/translation-merger';
+import { createTranslateLoader } from './app/services/translation-loader';
 // Named, not the whole file: esbuild then keeps just the version string in the bundle -- a default
 // import would ship all of package.json, dependency list included, to the browser.
 import { version as appVersion } from '../../../package.json';
 
-// eslint-disable-next-line no-bitwise
-const hash = (str: string) => str.split('').reduce((prev, curr) => Math.imul(31, prev) + curr.charCodeAt(0) | 0, 0);
-
-const codingComponentsTranslations: Record<string, TranslationMap> = {
-  de: NGX_CODING_COMPONENTS_DE_TRANSLATIONS
-};
-
-export function createTranslateLoader(http: HttpClient): TranslateLoader {
-  const studioLoader = new TranslateHttpLoader(http, './assets/i18n/', `.json?v=${Math
-    .abs(hash(new Date().toISOString()))}`);
-
-  return {
-    getTranslation: (language: string) => studioLoader.getTranslation(language)
-      .pipe(map(studioTranslations => mergeTranslations(
-        selectTranslationsForLanguage(language, codingComponentsTranslations),
-        studioTranslations as TranslationMap
-      )))
-  };
-}
 if (environment.production) {
   enableProdMode();
 }

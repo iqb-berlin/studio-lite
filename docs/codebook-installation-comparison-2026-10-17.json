@@ -1,0 +1,23 @@
+{
+  "hostExportPairs": 4694,
+  "optionCombinations": 768,
+  "missingCases": 3,
+  "formats": 2,
+  "originalStudioWhitespaceCases": 20,
+  "inlineImageCases": 5,
+  "inlineImageExportPairs": 40,
+  "identicalJson": true,
+  "identicalAllDocxParts": true,
+  "artifactIntegrity": "sha512-RjXrwSua+T89/XvhyqjmeOYnc/wUXpFMVr5aYGWeluDnHSnP8pTIJDme+mqDFgAJ1MQAIUbuQu7+rlPGhjkrrQ==",
+  "identicalInstalledPackageFiles": true,
+  "installedPackageFiles": 20,
+  "responsesVersion": "5.3.1",
+  "responsesPeerRange": "^5.3.1",
+  "responsesSharedWithHost": true,
+  "currentVariableInfoValidated": true,
+  "storedChemistryFormatsRecognized": true,
+  "realHostAdapters": true,
+  "inMemoryRepositories": true,
+  "httpBrowserRedis": false,
+  "windowsWord": false
+}

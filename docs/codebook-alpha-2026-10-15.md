@@ -1,5 +1,9 @@
 # Codebook-Alpha in Studio
 
+> Historischer Bericht vom 15.10.2026. Der Branch verwendet inzwischen den
+> [korrigierten Entwicklungsbuild vom 17.10.2026](codebook-integration-2026-10-17.md).
+> Die folgenden Paketangaben bleiben als Nachweis des damaligen Stands erhalten.
+
 Studio verwendet das veröffentlichte Paket `@iqb/ngx-coding-components@4.1.0-alpha.1`
 aus dem [GitHub-Prerelease](https://github.com/iqb-berlin/coding-components/releases/tag/Schemer_v2.9.0-alpha.1).
 Der eingecheckte Tarball hat SHA-256

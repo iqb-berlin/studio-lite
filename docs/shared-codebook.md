@@ -1,5 +1,15 @@
 # Integration des gemeinsamen Codebooks
 
+## Aktueller Entwicklungsstand vom 17.10.2026
+
+Beide Anwendungen verwenden jetzt denselben korrigierten Entwicklungsbuild
+`4.1.0-dev.ff15d6d` aus Bibliothekscommit
+`ff15d6d882417db26bc81fc88a09074eab74d57d`.
+Der [Integrationsbericht](codebook-integration-2026-10-17.md) dokumentiert Paket,
+Übersetzungseinbindung und aktuelle Prüfungen. Es wurde kein neuer Alpha-Kandidat
+oder Registry-Release erstellt. Die folgenden Abnahmeberichte beziehen sich auf
+ihre jeweils genannten früheren Artefakte.
+
 ## Windows-Desktop-Word-Abnahme des aktuellen Paketstands
 
 Die [Abnahme vom 15.10.2026](codebook-word-windows-2026-10-15.md) bestätigt
