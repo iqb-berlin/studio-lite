@@ -14,7 +14,7 @@
     "@angular/platform-browser": "21.2.23",
     "@angular/platform-browser-dynamic": "21.2.23",
     "@angular/router": "21.2.23",
-    "@iqb/ngx-coding-components": "file:vendor/iqb-ngx-coding-components-4.1.0-alpha.1.tgz",
+    "@iqb/ngx-coding-components": "file:vendor/iqb-ngx-coding-components-4.1.0-dev.ff15d6d.tgz",
     "@iqb/responses": "5.3.1",
     "@iqbspecs/coding-scheme": "3.4.1",
     "@iqbspecs/metadata-profile": "0.11.1",

@@ -35,7 +35,7 @@ RUN mkdir packages
 # guard: if its dependencies are not contained in the committed pair with the
 # same versions, the build stops here. Fix: node scripts/update-api-runtime-deps.mjs
 COPY --chown=node:node --from=base /usr/src/studio-lite/dist/apps/${PROJECT}/package.json generated-package.json
-COPY --chown=node:node vendor/iqb-ngx-coding-components-4.1.0-alpha.1.tgz ./vendor/iqb-ngx-coding-components-4.1.0-alpha.1.tgz
+COPY --chown=node:node vendor/iqb-ngx-coding-components-4.1.0-dev.ff15d6d.tgz ./vendor/iqb-ngx-coding-components-4.1.0-dev.ff15d6d.tgz
 COPY --chown=node:node apps/${PROJECT}/runtime-package.json package.json
 COPY --chown=node:node apps/${PROJECT}/runtime-package-lock.json package-lock.json
 RUN node -e ' \
