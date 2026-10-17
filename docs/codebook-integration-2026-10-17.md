@@ -75,3 +75,27 @@ Docker-Start wurden dabei nicht ausgeführt. Ein Deployment und eine erneute
 Microsoft-Word-Abnahme des Originalfalls sind nicht bestätigt. Die entfernte CI
 ist am aktuellen PR-Head separat zu prüfen. Frühere Word-Abnahmen gelten für
 ihre dort dokumentierten Artefakte.
+
+## CI-Nachtrag: Navigation und Zielauswahl im Browsertest
+
+Die GitLab-Pipeline [104220](https://scm.cms.hu-berlin.de/iqb/studio-lite/-/pipelines/104220)
+für `25128e73` scheiterte beim Kopieren an einer als animierend erkannten
+`mat-option` sowie beim ersten Test ausgeblendeter Reiter an einer ausbleibenden
+Arbeitsbereichs-Anfrage. Die Testnavigation aktiviert den tatsächlichen
+Arbeitsbereichslink nun per Fokus und Enter und prüft nach der Anfrage zusätzlich
+den Seitentitel. Das Aufgabenmenü wartet auf sein eigenes sichtbares Menüpanel.
+Die Zielauswahl beim Verschieben/Kopieren nutzt die Tastaturbedienung des echten
+Material-Selects und prüft den ausgewählten Wert und das geschlossene Panel.
+HTTP-Ergebnis und Aufgabenbestand in Quelle und Ziel werden weiterhin geprüft;
+es kommen keine pauschalen Wartezeiten oder unterdrückten Animationsprüfungen hinzu.
+
+Gegen ein isoliertes lokales PostgreSQL 14.24 mit allen 120 Liquibase-Migrationen
+(Liquibase 4.33.0), echte API und Produktionsfrontend bestehen elf Tests für
+ausgeblendete Reiter sowie alle drei vorhandenen Erstellungs-/Verschiebe-/Kopierfälle.
+Ein temporärer Einstieg importierte dafür die unveränderten drei Testfälle mit
+deren regulärer Einrichtung und Bereinigung; er ist nicht Teil des PRs.
+E2E-Lint besteht mit sechs vorhandenen Warnungen, E2E-Typecheck besteht ebenfalls.
+Chrome lief headless mit Cypress-Binary 15.21.1 (wie in den fehlgeschlagenen
+CI-Logs); die installierte CLI 15.10.0 meldet dabei eine Versionswarnung.
+Dies bestätigt diese 14 Browserfälle lokal, keine vollständige E2E-Suite,
+Coverage, Docker-Ausführung oder entfernte CI am neuen Head.

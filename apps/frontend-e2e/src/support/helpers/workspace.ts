@@ -196,6 +196,22 @@ export function addUnitFromExisting(ws: string, unit1: UnitData, newUnit: UnitDa
     'createUnitFromExisting');
 }
 
+/** Selects the destination through the select's keyboard navigation, including scrolling options. */
+export function selectTargetWorkspace(workspace: string): void {
+  cy.get('studio-lite-move-unit mat-select').click().focus()
+    .should('be.focused')
+    .and('have.attr', 'aria-expanded', 'true');
+  cy.get('mat-option').then($options => {
+    const $target = $options.filter((_index, option) => option.textContent?.includes(workspace) ?? false);
+    expect($target, 'unique target workspace').to.have.length(1);
+    const targetIndex = $options.index($target);
+    cy.get('studio-lite-move-unit mat-select')
+      .type(`{home}${'{downarrow}'.repeat(targetIndex)}{enter}`);
+  });
+  cy.get('studio-lite-move-unit mat-select .mat-mdc-select-value-text').should('contain.text', workspace);
+  cy.get('studio-lite-move-unit mat-select').should('have.attr', 'aria-expanded', 'false');
+}
+
 /**
  * Moves a unit from one workspace to another
  * @param wsorigin - Source workspace name
@@ -209,8 +225,7 @@ export function moveUnit(wsorigin: string, wsdestination: string, unit: UnitData
   cy.visitWs(wsorigin);
   goToWsMenu();
   cy.get('[data-cy="workspace-edit-unit-move-unit"]').click();
-  cy.get('mat-select').click();
-  cy.get(`mat-option:contains("${wsdestination}")`).click();
+  selectTargetWorkspace(wsdestination);
   cy.get(`[data-cy="workspace-select-unit-list-checkbox-${unit.shortname}"]`).click();
   cy.clickDataCyWithResponseCheck(
     '[data-cy="workspace-move-unit-button"]',
