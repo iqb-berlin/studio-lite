@@ -155,7 +155,6 @@
     "@angular/language-service": "21.2.23",
     "@compodoc/compodoc": "^2.0.0",
     "@cypress/code-coverage": "^4.0.2",
-    "@eslint/js": "10.0.1",
     "@golevelup/ts-jest": "^0.3.4",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@jest/globals": "30.2.0",

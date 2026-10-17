@@ -1,6 +1,7 @@
 import { By } from '@angular/platform-browser';
 import { CodebookExportComponent } from '@iqb/ngx-coding-components/codebook-export';
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -11,6 +12,7 @@ import { saveAs } from 'file-saver-es';
 import { ExportCodingBookComponent } from './export-coding-book.component';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
+import { UnitStoresService } from '../../services/unit-stores.service';
 import { AppService } from '../../../../services/app.service';
 import { I18nService } from '../../../../services/i18n.service';
 
@@ -19,18 +21,20 @@ jest.mock('file-saver-es', () => ({ saveAs: jest.fn() }));
 describe('Studio shared codebook wrapper', () => {
   const backend = { getUnitList: jest.fn(), getMissingsProfiles: jest.fn(), getCodingBook: jest.fn() };
   const workspace = {
-    isChanged: jest.fn(() => false), selectedWorkspaceId: 1, selectedWorkspaceName: 'Studio', selectedUnit$: new BehaviorSubject(7)
+    selectedWorkspaceId: 1, selectedWorkspaceName: 'Studio', selectedUnit$: new BehaviorSubject(7)
   };
+  const stores = { changed: signal(false) };
   const app = { dataLoading: false };
   const dialog = { close: jest.fn() };
   beforeEach(async () => {
-    jest.clearAllMocks(); workspace.isChanged.mockReturnValue(false); app.dataLoading = false;
+    jest.clearAllMocks(); stores.changed.set(false); app.dataLoading = false;
     backend.getUnitList.mockReturnValue(of([{ id: 7, key: 'U', name: 'Aufgabe' }]));
     backend.getMissingsProfiles.mockReturnValue(of([{ id: 8, label: 'Profil' }]));
     await TestBed.configureTestingModule({
       imports: [ExportCodingBookComponent, TranslateModule.forRoot()],
       providers: [provideNoopAnimations(), { provide: WorkspaceBackendService, useValue: backend },
-        { provide: WorkspaceService, useValue: workspace }, { provide: AppService, useValue: app },
+        { provide: WorkspaceService, useValue: workspace }, { provide: UnitStoresService, useValue: stores },
+        { provide: AppService, useValue: app },
         { provide: I18nService, useValue: { fullLocale: 'en-US', fileDateFormat: 'yyyy-MM-dd' } },
         { provide: MatDialogRef, useValue: dialog }]
     }).compileComponents();
@@ -84,9 +88,26 @@ describe('Studio shared codebook wrapper', () => {
   it('blocks unsaved changes and repeated exports', () => {
     const fixture = TestBed.createComponent(ExportCodingBookComponent); const c = fixture.componentInstance;
     const config = { selectedUnits: [7], missingsProfileId: 0, contentOptions: c.contentOptions };
-    workspace.isChanged.mockReturnValue(true); c.exportCodingBook(config);
-    expect(backend.getCodingBook).not.toHaveBeenCalled(); workspace.isChanged.mockReturnValue(false);
+    stores.changed.set(true); c.exportCodingBook(config);
+    expect(backend.getCodingBook).not.toHaveBeenCalled(); stores.changed.set(false);
     backend.getCodingBook.mockReturnValue(new Subject()); c.exportCodingBook(config); c.exportCodingBook(config);
     expect(backend.getCodingBook).toHaveBeenCalledTimes(1); fixture.destroy(); expect(app.dataLoading).toBe(false);
+  });
+
+  it('updates the shared form when unsaved store changes appear and are saved while the dialog is open', () => {
+    const fixture = TestBed.createComponent(ExportCodingBookComponent); fixture.detectChanges();
+    const shared = fixture.debugElement.query(By.directive(CodebookExportComponent))
+      .componentInstance as CodebookExportComponent;
+    expect(shared.workspaceChanges).toBe(false);
+    stores.changed.set(true); fixture.detectChanges();
+    expect(shared.workspaceChanges).toBe(true);
+    shared.exportCodingBook();
+    expect(backend.getCodingBook).not.toHaveBeenCalled();
+    stores.changed.set(false); fixture.detectChanges();
+    expect(shared.workspaceChanges).toBe(false);
+    backend.getCodingBook.mockReturnValue(of(new Blob(['document'])));
+    shared.exportCodingBook();
+    expect(backend.getCodingBook).toHaveBeenCalledTimes(1);
+    fixture.destroy();
   });
 });

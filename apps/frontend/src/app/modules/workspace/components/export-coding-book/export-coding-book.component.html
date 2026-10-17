@@ -1,6 +1,6 @@
 <ngx-codebook-export [availableUnits]="units" [missingsProfiles]="missingsProfiles"
   [selectedUnitIds]="unitList" [loading]="loading" [busy]="exporting"
-  [workspaceChanges]="workspaceChanges" [defaultContentOptions]="contentOptions"
+  [workspaceChanges]="workspaceChanges()" [defaultContentOptions]="contentOptions"
   (selectionChanged)="unitList = $event" (exportRequested)="exportCodingBook($event)" (cancel)="close()">
 </ngx-codebook-export>
 @if (error) { <p role="alert">{{ 'codebook.coding.codebook-export-error' | translate }}</p> }

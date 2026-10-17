@@ -11,6 +11,7 @@ import { CodebookExportComponent, DEFAULT_CODEBOOK_OPTIONS } from '@iqb/ngx-codi
 import type { CodebookExportConfig, MissingsProfile, UnitSelectionItem } from '@iqb/ngx-coding-components/codebook-models';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
+import { UnitStoresService } from '../../services/unit-stores.service';
 import { AppService } from '../../../../services/app.service';
 import { I18nService } from '../../../../services/i18n.service';
 
@@ -20,6 +21,7 @@ import { I18nService } from '../../../../services/i18n.service';
   styleUrls: ['./export-coding-book.component.scss']
 })
 export class ExportCodingBookComponent implements OnInit, OnDestroy {
+  readonly workspaceChanges = this.unitStores.changed;
   units: UnitSelectionItem[] = [];
   missingsProfiles: MissingsProfile[] = [];
   unitList: number[] = [];
@@ -30,12 +32,11 @@ export class ExportCodingBookComponent implements OnInit, OnDestroy {
   private readonly destroyed = new Subject<void>();
 
   constructor(public workspaceService: WorkspaceService,
+              private unitStores: UnitStoresService,
               private backendService: WorkspaceBackendService,
               private appService: AppService,
               private i18nService: I18nService,
               @Optional() private dialogRef: MatDialogRef<ExportCodingBookComponent>) {}
-
-  get workspaceChanges(): boolean { return this.workspaceService.isChanged(); }
 
   ngOnInit(): void {
     this.loading = true;
@@ -57,7 +58,7 @@ export class ExportCodingBookComponent implements OnInit, OnDestroy {
   }
 
   exportCodingBook(config: CodebookExportConfig): void {
-    if (this.exporting || this.workspaceChanges || !config.selectedUnits.length) return;
+    if (this.exporting || this.workspaceChanges() || !config.selectedUnits.length) return;
     this.exporting = true;
     this.error = false;
     this.appService.dataLoading = true;
