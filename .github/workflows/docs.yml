@@ -55,10 +55,10 @@ jobs:
       - run: npm run docs
       - id: coverage
         continue-on-error: true
-        # The four suites take about three minutes between them; the limit is there for a
+        # The five suites take about three minutes between them; the limit is there for a
         # hanging one, which would otherwise hold up every later publication until GitHub's
         # six hour default. They run as one command, so a single red spec anywhere costs the
-        # coverage of all four -- the merge needs every part to build the page over them.
+        # coverage of all five -- the merge needs every part to build the page over them.
         timeout-minutes: 30
         run: npm run test-app-coverage
       - name: Put the coverage report next to the documentation

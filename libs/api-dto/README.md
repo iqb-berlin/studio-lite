@@ -1,7 +1,7 @@
-# api-admin
+# api-dto
 
 This library was generated with [Nx](https://nx.dev).
 
 ## Running unit tests
 
-Run `nx test api-admin` to execute the unit tests via [Jest](https://jestjs.io).
+Run `nx test api-dto` to execute the unit tests via [Jest](https://jestjs.io).
