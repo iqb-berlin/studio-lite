@@ -4,8 +4,8 @@
 # each wrote.
 #
 # What the merged report is, and what it is not: each project measures its own sources and only
-# those (see `collectCoverageFrom` in the four jest configs), so the merge is the number for the
-# workspace as a whole -- useful to link to, and the only place where the four parts are weighted
+# those (see `collectCoverageFrom` in the five jest configs), so the merge is the number for the
+# workspace as a whole -- useful to link to, and the only place where the five parts are weighted
 # against each other by size. It is not a way to see a library through the eyes of the applications:
 # a measured run showed no file of libs/ in either application report, with or without
 # `collectCoverageFrom`, because jest discovers files below its roots only. What libs/ is worth is
@@ -22,11 +22,11 @@
 # repository writes one today; the e2e suite needs a database, and collecting its coverage is a
 # separate piece of work (see issue #1624). Whoever picks it up finds the merge ready for it.
 #
-# Usage: scripts/merge-coverage.sh   (after the four runs, see npm run test-app-coverage)
+# Usage: scripts/merge-coverage.sh   (after the five runs, see npm run test-app-coverage)
 
 set -euo pipefail
 
-projects=(apps/api apps/frontend libs/iqb-components libs/shared-code)
+projects=(apps/api apps/frontend libs/api-dto libs/iqb-components libs/shared-code)
 by_project="coverage/by-project"
 merged="coverage/all"
 merge_dir="coverage/.merge"

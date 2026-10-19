@@ -14,7 +14,7 @@ module.exports = {
    */
   snapshotFormat: { escapeString: true, printBasicPrototype: true },
   // The nx preset writes html only. The json report is what nyc reads to build one
-  // report over all four projects (scripts/merge-coverage.sh); without it there is
+  // report over all five projects (scripts/merge-coverage.sh); without it there is
   // nothing to merge. Both are written only when a run is asked for coverage, so a
   // plain `nx test` is unaffected.
   coverageReporters: ['html', 'json'],

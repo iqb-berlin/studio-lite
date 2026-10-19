@@ -36,15 +36,16 @@ alongside the API documentation.
 
 | Page | Coverage by the unit tests of |
 | --- | --- |
-| [`coverage/all/`](https://iqb-berlin.github.io/studio-lite/coverage/all/) | **all four projects at once** |
+| [`coverage/all/`](https://iqb-berlin.github.io/studio-lite/coverage/all/) | **all five projects at once** |
 | [`coverage/by-project/api/`](https://iqb-berlin.github.io/studio-lite/coverage/by-project/api/) | `apps/api` |
 | [`coverage/by-project/frontend/`](https://iqb-berlin.github.io/studio-lite/coverage/by-project/frontend/) | `apps/frontend` |
+| [`coverage/by-project/api-dto/`](https://iqb-berlin.github.io/studio-lite/coverage/by-project/api-dto/) | `libs/api-dto` |
 | [`coverage/by-project/iqb-components/`](https://iqb-berlin.github.io/studio-lite/coverage/by-project/iqb-components/) | `libs/iqb-components` |
 | [`coverage/by-project/shared-code/`](https://iqb-berlin.github.io/studio-lite/coverage/by-project/shared-code/) | `libs/shared-code` |
 
 **What the numbers mean.** Every project measures its own sources only — even where its specs run
 code of a library. The merged page is therefore the number for the workspace as a whole and the
-only place where the four parts are weighted against each other by their size; it says nothing the
+only place where the five parts are weighted against each other by their size; it says nothing the
 single pages do not. Whoever wants to decide whether something still needs a test reads the single
 page.
 
@@ -180,7 +181,7 @@ policy.
 
 | Command | What it does |
 | --- | --- |
-| `npm run test-app` | All unit tests of all four projects |
+| `npm run test-app` | All unit tests of all five projects |
 | `npm run test-frontend`, `npm run test-backend` | The unit tests of one application |
 | `npm run test-app-coverage` | The same, throttled, with the coverage report and its merge |
 | `npm run lint-app` | ESLint over all projects; `lint-frontend` also fixes what it can |
