@@ -1,5 +1,1 @@
-export type State = {
-  id: number,
-  label: string,
-  color: string
-};
+export type { State } from '@studio-lite-lib/api-dto';

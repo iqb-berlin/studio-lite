@@ -97,3 +97,5 @@ export { CreateUnitRichNoteDto } from './lib/dtos/unit-rich-note/create-unit-ric
 export { UpdateUnitRichNoteDto } from './lib/dtos/unit-rich-note/update-unit-rich-note.dto';
 export { UpdateUnitRichNoteUnitItemsDto } from './lib/dtos/unit-rich-note/update-unit-rich-note-unit-items.dto';
 export { UnitRichNoteTagDto } from './lib/dtos/unit-rich-note/unit-rich-note-tag.dto';
+
+export type { State } from './lib/dtos/state.type';
