@@ -181,7 +181,7 @@ always, and the e2e suites run past it. With the profile `gate`, a Traefik
 (`config/iqb-gate/traefik-dev.yaml`) asks the gateway as in production:
 
 ```bash
-# in iqb-gate: build the image and pack the libraries
+# in iqb-gate: build the image
 docker build -f packages/gateway/Dockerfile -t iqb-gate:local .
 # in .env.dev: COMPOSE_PROFILES=gate
 make dev-up
@@ -196,11 +196,10 @@ The studio is then also reachable through that Traefik, at `http://localhost:430
 area switched off it is gone, as with `IQB_GATE_ENFORCE=off`; its entries are kept and show again
 once an area is on.
 
-**Not published yet.** `@iqb/gate-angular` and `@iqb/gate-protocol` come from tarballs in
-`vendor/iqb-gate/` (ignored by git), packed with `npm pack` in the iqb-gate repository, and the
-image `iqbberlin/iqb-gate` that production names does not exist yet. Until both are published,
-this branch builds and runs only on a machine that has them. `make prod-test-build` pulls the image
-unless it is there: tag the one built above for it (`docker tag iqb-gate:local
+**The image is not published yet.** `@iqb/gate-angular` and `@iqb/gate-protocol` come from npm,
+but the image `iqbberlin/iqb-gate` that production names does not exist yet. Until it is
+published, the gateway runs only on a machine that has built it. `make prod-test-build` pulls the
+image unless it is there: tag the one built above for it (`docker tag iqb-gate:local
 iqbberlin/iqb-gate:latest`, with `REGISTRY_PATH` and `IQB_GATE_TAG` as in `.env.studio-lite`), and
 `make prod-test-up` gives an empty `IQB_GATE_SECRET` a value.
 
