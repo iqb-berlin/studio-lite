@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
-import { State } from '../../../admin/models/state.type';
+import { State } from '@studio-lite-lib/api-dto';
 import { DeleteStateComponent, DeleteStateData } from './delete-state.component';
 
 describe('DeleteStateComponent', () => {

@@ -1,5 +1,5 @@
+import { State } from '@studio-lite-lib/api-dto';
 import { StatePipe } from './state.pipe';
-import { State } from '../../admin/models/state.type';
 
 describe('StatePipe', () => {
   let pipe: StatePipe;

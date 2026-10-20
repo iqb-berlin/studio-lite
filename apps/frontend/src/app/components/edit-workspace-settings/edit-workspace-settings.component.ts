@@ -5,7 +5,9 @@ import { Subject, takeUntil } from 'rxjs';
 import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
-import { WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
+import {
+  State, WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceSettingsDto
+} from '@studio-lite-lib/api-dto';
 import { isItemProfileId } from '@studio-lite/shared-code';
 import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
 import { MatSelectChange, MatSelect } from '@angular/material/select';
@@ -18,7 +20,6 @@ import { ModuleService } from '../../services/module.service';
 import { AppService } from '../../services/app.service';
 import { WorkspaceService } from '../../modules/workspace/services/workspace.service';
 import { BackendService } from '../../modules/admin/services/backend.service';
-import { State } from '../../modules/admin/models/state.type';
 import { SelectModuleComponent } from '../select-module/select-module.component';
 
 type Profile = {

@@ -4,7 +4,7 @@ import {
 import { Component, Inject } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
-import { State } from '../../../admin/models/state.type';
+import { State } from '@studio-lite-lib/api-dto';
 
 export interface DeleteStateData {
   title: string,

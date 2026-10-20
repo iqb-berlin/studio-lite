@@ -6,11 +6,10 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
 import {
-  WorkspaceGroupSettingsDto
+  State, WorkspaceGroupSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
-import { State } from '../../../admin/models/state.type';
 import { CoreProfile, ProfilesComponent } from '../../../../components/profiles/profiles.component';
 import { WsgAdminService } from '../../services/wsg-admin.service';
 import { StatesComponent } from '../states/states.component';

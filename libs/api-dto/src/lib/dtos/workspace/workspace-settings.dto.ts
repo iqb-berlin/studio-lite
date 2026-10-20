@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { State } from '../state.type';
+import { State } from '../workspace-group/state.type';
 import { UnitRichNoteTagDto } from '../unit-rich-note/unit-rich-note-tag.dto';
 
 export class WorkspaceSettingsDto {
