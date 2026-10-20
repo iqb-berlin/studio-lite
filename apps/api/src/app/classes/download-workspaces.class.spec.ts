@@ -28,6 +28,7 @@ jestEsm.unstable_mockModule('./download-docx.class', () => ({
 }));
 
 jestEsm.unstable_mockModule('@iqbspecs/coding-scheme', () => ({
+  ...jestEsm.requireActual<typeof import('@iqbspecs/coding-scheme')>('@iqbspecs/coding-scheme'),
   CodingScheme: jest.fn()
     .mockImplementation(schemeData => (typeof schemeData === 'string' ? JSON.parse(schemeData) : schemeData))
 }));

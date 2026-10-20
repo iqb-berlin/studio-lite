@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Pinned runtime dependencies of the api image. Generated file, do not edit: run `node scripts/update-api-runtime-deps.mjs` (#1587).",
   "dependencies": {
-    "@iqb/responses": "5.4.0",
+    "@iqb/responses": "5.5.0",
     "@iqbspecs/coding-scheme": "3.5.0",
     "@iqbspecs/metadata-profile": "0.11.1",
     "@iqbspecs/metadata-values": "3.0.3",
