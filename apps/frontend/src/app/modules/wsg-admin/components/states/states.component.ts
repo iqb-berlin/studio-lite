@@ -10,9 +10,9 @@ import { MatInput } from '@angular/material/input';
 import { MatFormField, MatError } from '@angular/material/form-field';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { State } from '@studio-lite-lib/api-dto';
 import { DeleteStateComponent } from '../delete-state/delete-state.component';
 import { WsgAdminService } from '../../services/wsg-admin.service';
-import { State } from '../../../admin/models/state.type';
 
 @Component({
   selector: 'studio-lite-states',

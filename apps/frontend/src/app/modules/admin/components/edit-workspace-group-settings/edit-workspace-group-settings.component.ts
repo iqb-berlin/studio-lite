@@ -4,12 +4,11 @@ import {
 import {
   MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle
 } from '@angular/material/dialog';
-import { WorkspaceGroupFullDto, WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
+import { State, WorkspaceGroupFullDto, WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-group-component-data.type';
 import { BackendService } from '../../services/backend.service';
-import { State } from '../../models/state.type';
 import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
 import { ProfilesComponent } from '../../../../components/profiles/profiles.component';
 import { Profile } from '../../../../models/profile.type';

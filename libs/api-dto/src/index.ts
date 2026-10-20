@@ -12,6 +12,7 @@ export { ReviewInListDto } from './lib/dtos/review/review-in-list.dto';
 export { ReviewFullDto } from './lib/dtos/review/review-full.dto';
 export { UsersInWorkspaceDto } from './lib/dtos/user/users-in-workspace.dto';
 export { WorkspaceGroupSettingsDto } from './lib/dtos/workspace-group/workspace-group-settings.dto';
+export { State } from './lib/dtos/workspace-group/state.type';
 export { MyDataDto } from './lib/dtos/user/my-data.dto';
 export { UnitExportConfigDto } from './lib/dtos/setting/unit-export-config.dto';
 export { ProfilesRegistryDto } from './lib/dtos/setting/profiles-registry.dto';

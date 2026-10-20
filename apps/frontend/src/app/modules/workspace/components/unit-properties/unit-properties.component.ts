@@ -11,6 +11,7 @@ import {
   BehaviorSubject, EMPTY, Subject, Subscription, switchMap, takeUntil
 } from 'rxjs';
 import {
+  State,
   UnitMetadataValues,
   UnitPropertiesDto,
   WorkspaceSettingsDto
@@ -44,7 +45,6 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
-import { State } from '../../../admin/models/state.type';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { SelectModuleComponent } from '../../../../components/select-module/select-module.component';
 import { WorkspaceService } from '../../services/workspace.service';
