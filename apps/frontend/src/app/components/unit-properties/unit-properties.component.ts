@@ -2,8 +2,8 @@ import {
   Component, Input, OnChanges, SimpleChanges
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
+import { State } from '@studio-lite-lib/api-dto';
 import { WorkspaceBackendService } from '../../modules/workspace/services/workspace-backend.service';
-import { State } from '../../modules/admin/models/state.type';
 
 @Component({
   selector: 'studio-lite-unit-properties',

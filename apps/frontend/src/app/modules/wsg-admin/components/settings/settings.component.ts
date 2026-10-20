@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  WorkspaceGroupSettingsDto
+  State, WorkspaceGroupSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
@@ -12,7 +12,6 @@ import {
   MatCard, MatCardContent, MatCardHeader, MatCardTitle
 } from '@angular/material/card';
 import { WsgAdminService } from '../../services/wsg-admin.service';
-import { State } from '../../../admin/models/state.type';
 import { CoreProfile, ProfilesComponent } from '../../../../components/profiles/profiles.component';
 import { StatesComponent } from '../states/states.component';
 import {

@@ -6,12 +6,11 @@ import {
 
   MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
-import { UnitInListDto } from '@studio-lite-lib/api-dto';
+import { State, UnitInListDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { MatTooltip } from '@angular/material/tooltip';
-import { State } from '../../../admin/models/state.type';
 import { StatePipe } from '../../pipes/state.pipe';
 import { HasNewCommentsPipe } from '../../pipes/has-new-comments.pipe';
 import { UnitDropBoxTooltipPipe } from '../../pipes/unit-dropbox-tooltip.pipe';

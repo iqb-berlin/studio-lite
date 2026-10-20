@@ -7,6 +7,7 @@ import {
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import {
+  State,
   UnitInListDto,
   UnitPropertiesDto,
   WorkspaceSettingsDto,
@@ -16,7 +17,6 @@ import { HttpParams } from '@angular/common/http';
 import { WorkspaceBackendService } from './workspace-backend.service';
 import { UnitMetadataStore } from '../classes/unit-metadata-store';
 import { AppService } from '../../../services/app.service';
-import { State } from '../../admin/models/state.type';
 import { RichNoteTagsService } from './rich-note-tags.service';
 import { UnitStoresService } from './unit-stores.service';
 import { reconcileItemVariables } from '../utils/item-variables.utils';
