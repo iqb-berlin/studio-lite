@@ -79,13 +79,14 @@ Cypress.Commands.add('selectModule', (name: string) => {
 
 Cypress.Commands.add('visitWs', (ws: string) => {
   cy.visit('/');
-  // The workspace's link is clicked, as a user does. Home used to draw its list anew when its own
-  // auth-data request answered, and a click on the link being replaced went nowhere (#1781); it
-  // keeps its links since #1822.
+  // Follow the actual workspace link with Enter. This keeps the browser's focus on
+  // the chosen link while asynchronous home content can still change its position.
   cy.intercept('GET', '**/workspaces/*/units*').as('getUnits');
   cy.get(`studio-lite-user-workspaces-groups a.issue-item:contains("${ws}")`)
     .should('have.length', 1)
-    .click();
+    .should('be.visible')
+    .focus();
+  cy.press(Cypress.Keyboard.Keys.ENTER);
   cy.wait('@getUnits');
   cy.get('[data-cy="workspace-unit-selection-filter-units"]').should('be.visible');
   // The workspace's own data is there, too: the title names it in the same step that sets the user's
