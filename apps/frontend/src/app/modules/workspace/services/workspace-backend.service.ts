@@ -224,6 +224,7 @@ export class WorkspaceBackendService {
       queryParams = queryParams.append('codeLabelToUpper', contentOptions.codeLabelToUpper);
       queryParams = queryParams.append('hideItemVarRelation', contentOptions.hideItemVarRelation);
       queryParams = queryParams.append('hasOnlyVarsWithCodes', contentOptions.hasOnlyVarsWithCodes);
+      queryParams = queryParams.append('trainingRequirement', contentOptions.trainingRequirement || 'all');
       unitList.forEach(id => { queryParams = queryParams.append('id', id); });
       return this.http
         .get(`${this.serverUrl}workspaces/${workspaceId}/units/coding-book`, {
