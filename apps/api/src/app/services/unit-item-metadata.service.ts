@@ -31,6 +31,11 @@ export class UnitItemMetadataService {
     return this.repo(manager).findBy({ unitItemUuid: unitItemUuid });
   }
 
+  /** Whether the metadata row is one of the item's -- false as well for a row that does not exist. */
+  async isOfItem(id: number, unitItemUuid: string): Promise<boolean> {
+    return this.unitItemMetadataRepository.exists({ where: { id: id, unitItemUuid: unitItemUuid } });
+  }
+
   async addItemMetadata(unitItemUuid: string, metadata: UnitItemMetadataDto, manager?: EntityManager): Promise<number> {
     metadata.unitItemUuid = unitItemUuid;
     const { id, ...metadataWithoutId } = metadata;
@@ -49,8 +54,13 @@ export class UnitItemMetadataService {
     return newItemMetadata.id;
   }
 
+  /**
+   * Overwrites the row with this id. It stays with its item: a `unitItemUuid` in the payload -- the
+   * metadata save passes on what the client sent -- used to hang it on any item (#1816).
+   */
   async updateItemMetadata(id: number, metadata: UnitItemMetadataDto, manager?: EntityManager): Promise<number> {
-    await this.repo(manager).update(id, { ...metadata, changedAt: new Date() });
+    const { unitItemUuid, ...values } = metadata;
+    await this.repo(manager).update(id, { ...values, changedAt: new Date() });
     return id;
   }
 

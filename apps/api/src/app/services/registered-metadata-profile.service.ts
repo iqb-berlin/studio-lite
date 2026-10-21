@@ -129,13 +129,18 @@ export class RegisteredMetadataProfileService {
   // timestamp: otherwise upstream changes to a profile's label, title or groups
   // never reach the database, and a row written under a stale key (e.g. by an
   // instance from before #1570 during a rolling upgrade) could never be corrected.
-  // `save` upserts on the primary key, so one call covers the first registration
-  // and every later refresh alike.
+  // One upsert on the primary key covers the first registration and every later
+  // refresh alike; not `save`, whose lookup-then-insert lost to a parallel request
+  // (#1867, see MetadataVocabularyService.storeVocabulary).
   private async storeRegisteredMetadataProfile(
     rawProfile: RegisteredMetadataProfile, url: string
   ): Promise<RegisteredMetadataProfile> {
-    const profile = RegisteredMetadataProfileService.normalizeRegisteredProfile(rawProfile, url);
-    return this.registeredMetadataProfileRepository.save({ ...profile, modifiedAt: new Date() });
+    const profile = {
+      ...RegisteredMetadataProfileService.normalizeRegisteredProfile(rawProfile, url),
+      modifiedAt: new Date()
+    };
+    await this.registeredMetadataProfileRepository.upsert(profile, ['id']);
+    return profile;
   }
 
   private async storeRegistry(csv: string | null): Promise<void> {

@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
 import UnitUser from '../entities/unit-user.entity';
 import Unit from '../entities/unit.entity';
 
@@ -44,15 +43,17 @@ export class UnitUserService {
     return unitUser ? unitUser.lastSeenCommentChangedAt : new Date(2022, 6);
   }
 
+  /** Sets what the user has seen of the unit's comments. The user is the caller's, never a body's (#1776). */
   async patchUnitUserCommentsLastSeen(
     unitId: number,
-    updateUnitUser: UpdateUnitUserDto
+    userId: number,
+    lastSeenCommentChangedAt: Date
   ): Promise<void> {
     this.logger.log('Update lastSeenCommentChangedAt of UnitUser');
     const unitUser = await this.unitUserRepository
-      .findOne({ where: { userId: updateUnitUser.userId, unitId: unitId } });
+      .findOne({ where: { userId: userId, unitId: unitId } });
     if (unitUser) {
-      unitUser.lastSeenCommentChangedAt = updateUnitUser.lastSeenCommentChangedAt;
+      unitUser.lastSeenCommentChangedAt = lastSeenCommentChangedAt;
       await this.unitUserRepository.save(unitUser);
     }
   }

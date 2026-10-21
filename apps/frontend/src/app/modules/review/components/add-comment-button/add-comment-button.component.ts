@@ -23,7 +23,10 @@ export class AddCommentButtonComponent {
     const commentDialog = this.commentDialog.open(CommentDialogComponent, {
       width: '1000px',
       height: this.showOthersComments ? '800px' : '400px',
-      panelClass: 'review-dialog'
+      panelClass: 'review-dialog',
+      // The dialog places the focus itself: into the editor or, without a name, into the name field.
+      // Its own first-tabbable would move it into the name field even with the editor ready (#1785).
+      autoFocus: false
     });
     commentDialog.afterClosed().subscribe(() => {
       this.reviewService.updateCommentsUnitInfo(this.unitDbId);

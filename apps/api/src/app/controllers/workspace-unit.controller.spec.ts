@@ -23,11 +23,28 @@ import { SettingService } from '../services/setting.service';
 import { WorkspaceService } from '../services/workspace.service';
 import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import UserEntity from '../entities/user.entity';
+import { UnitCommentService } from '../services/unit-comment.service';
+import { UnitRichNoteService } from '../services/unit-rich-note.service';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { WorkspaceGuard } from '../guards/workspace.guard';
+import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
+import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
+import { UnitsInWorkspaceGuard } from '../guards/units-in-workspace.guard';
+import { QueryUnitsInWorkspaceGuard } from '../guards/query-units-in-workspace.guard';
+import { DeleteAccessGuard } from '../guards/delete-access.guard';
+import { CommentAccessGuard } from '../guards/comment-access.guard';
+import { WriteAccessGuard } from '../guards/write-access.guard';
+import { MoveTargetAccessGuard } from '../guards/move-target-access.guard';
+import { DropBoxTargetGuard } from '../guards/drop-box-target.guard';
+import { CopySourcesAccessibleGuard } from '../guards/copy-sources-accessible.guard';
 
 describe('WorkspaceUnitController', () => {
   let controller: WorkspaceUnitController;
   let unitService: UnitService;
+  let settingsService: SettingService;
   let workspaceService: WorkspaceService;
+  let unitCommentService: UnitCommentService;
+  let unitRichNoteService: UnitRichNoteService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -56,17 +73,67 @@ describe('WorkspaceUnitController', () => {
         {
           provide: WorkspaceUserService,
           useValue: createMock<WorkspaceUserService>()
+        },
+        {
+          provide: UnitCommentService,
+          useValue: createMock<UnitCommentService>()
+        },
+        {
+          provide: UnitRichNoteService,
+          useValue: createMock<UnitRichNoteService>()
         }
       ]
     }).compile();
 
     controller = module.get<WorkspaceUnitController>(WorkspaceUnitController);
     unitService = module.get<UnitService>(UnitService);
+    settingsService = module.get<SettingService>(SettingService);
     workspaceService = module.get<WorkspaceService>(WorkspaceService);
+    unitCommentService = module.get<UnitCommentService>(UnitCommentService);
+    unitRichNoteService = module.get<UnitRichNoteService>(UnitRichNoteService);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  // The access guards ask about the workspace in the path alone; the unit has to be held to it
+  // before anything else is asked about the unit (#1775).
+  it.each([
+    'findOnesProperties', 'findOnesMetadata', 'findOnesDefinition', 'findOnesScheme',
+    'patchUnitProperties', 'patchDefinition', 'patchScheme'
+  ] as const)('should hold the unit of %s to the workspace in its path', method => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype[method]).slice(0, 3))
+      .toEqual([JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard]);
+  });
+
+  it('should hold the unit of removeUnit to the workspace in its path, after the group admin', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype.removeUnit))
+      .toEqual([JwtAuthGuard, IsWorkspaceGroupAdminGuard, UnitInWorkspaceGuard]);
+  });
+
+  it.each(['moveUnits', 'patchDropBoxHistory'] as const)(
+    'should hold the units in the body of %s to the workspace in its path',
+    method => {
+      expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype[method]).slice(0, 3))
+        .toEqual([JwtAuthGuard, WorkspaceGuard, UnitsInWorkspaceGuard]);
+    }
+  );
+
+  // Where units cross into another workspace, that one is asked about too, after the path (#1779, #1780)
+  it.each([
+    ['moveUnits', [UnitsInWorkspaceGuard, DeleteAccessGuard, MoveTargetAccessGuard]],
+    ['patchDropBoxHistory', [UnitsInWorkspaceGuard, CommentAccessGuard, DropBoxTargetGuard]],
+    ['create', [WriteAccessGuard, CopySourcesAccessibleGuard]]
+  ] as const)('should hold the other workspace of %s to the user', (method, guards) => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype[method]))
+      .toEqual([JwtAuthGuard, WorkspaceGuard, ...guards]);
+  });
+
+  // remove deletes the units of the query; a guard that read the body could be shown other units.
+  it('should hold the units in the query of remove to the workspace in its path', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype.remove).slice(0, 3))
+      .toEqual([JwtAuthGuard, WorkspaceGuard, QueryUnitsInWorkspaceGuard]);
   });
 
   describe('findAll', () => {
@@ -90,17 +157,36 @@ describe('WorkspaceUnitController', () => {
   });
 
   describe('downloadCodingBook', () => {
-    it('should download coding book', async () => {
-      const mockFileBuffer = Buffer.from('test');
-      jest.spyOn(DownloadWorkspacesClass, 'getWorkspaceCodingBook').mockResolvedValue(mockFileBuffer);
-
-      const result = await controller.downloadCodingBook(
-        1, [1, 2], 'json', 'profile', false, false, false, false, false, false, false, false
-      );
-
-      expect(DownloadWorkspacesClass.getWorkspaceCodingBook).toHaveBeenCalled();
-      expect(result).toBeInstanceOf(StreamableFile);
-    });
+    it.each([undefined, 'all', 'required', 'not-required'] as const)(
+      'forwards training selection %s to the shared generator',
+      async trainingRequirement => {
+        const mockFileBuffer = Buffer.from('test');
+        jest.spyOn(DownloadWorkspacesClass, 'getWorkspaceCodingBook').mockResolvedValue(mockFileBuffer);
+        const result = await controller.downloadCodingBook(
+          1,
+          [1, 2],
+          'json',
+          'profile',
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          trainingRequirement
+        );
+        expect(DownloadWorkspacesClass.getWorkspaceCodingBook).toHaveBeenCalledWith(
+          1,
+          unitService,
+          settingsService,
+          expect.objectContaining({ trainingRequirement: trainingRequirement || 'all' }),
+          [1, 2]
+        );
+        expect(result).toBeInstanceOf(StreamableFile);
+      }
+    );
   });
 
   describe('findAllWithProperties', () => {
@@ -121,6 +207,29 @@ describe('WorkspaceUnitController', () => {
       expect(DownloadWorkspacesClass.getWorkspaceMetadataReport).toHaveBeenCalled();
       expect(res.set).toHaveBeenCalled();
       expect(result).toBeInstanceOf(StreamableFile);
+    });
+  });
+
+  describe('findExportContents', () => {
+    it('should answer for every unit of the workspace which optional export files it fills', async () => {
+      jest.spyOn(unitService, 'findAllExportSources').mockResolvedValue([
+        { id: 1, metadata: { profiles: [], items: [{ id: 'item1' }] }, scheme: '{}' },
+        { id: 2, metadata: null, scheme: '' }
+      ]);
+      jest.spyOn(unitCommentService, 'findUnitIdsWithComments').mockResolvedValue(new Set([2]));
+      jest.spyOn(unitRichNoteService, 'findUnitIdsWithNotes').mockResolvedValue(new Set([1]));
+
+      expect(await controller.findExportContents(7)).toEqual([
+        {
+          unitId: 1, metadata: false, items: true, codingScheme: true, comments: false, richNotes: true
+        },
+        {
+          unitId: 2, metadata: false, items: false, codingScheme: false, comments: true, richNotes: false
+        }
+      ]);
+      expect(unitService.findAllExportSources).toHaveBeenCalledWith(7);
+      expect(unitCommentService.findUnitIdsWithComments).toHaveBeenCalledWith([1, 2]);
+      expect(unitRichNoteService.findUnitIdsWithNotes).toHaveBeenCalledWith([1, 2]);
     });
   });
 

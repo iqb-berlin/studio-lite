@@ -4,29 +4,20 @@
 @if (!isLoading && !isError) {
   <div>
     <form class="fx-column-start-stretch" >
+      <!-- Every registry entry is one profile: a panel heading would only repeat its name (#1549) -->
       @for (collection of profileStoresWithProfiles; track collection) {
-        <div>
-          <mat-expansion-panel class="profile-store mat-elevation-z0">
-            <mat-expansion-panel-header>
-              <mat-panel-title
-                data-cy="shared-profiles-select-profile-title">
-                {{collection.profileStore | profileLabel}}
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            @for (profile of collection.profiles; track profile) {
-              <div>
-                <mat-checkbox
-                  [id]="profile.id"
-                  [checked]="profile.id | isProfileSelected:profilesSelected"
-                  (change)="changeSelection($event)"
-                  [name]="profile | profileLabel"
-                  data-cy="shared-profiles-select-profile">
-                  {{profile | profileLabel}}
-                </mat-checkbox>
-              </div>
-            }
-          </mat-expansion-panel>
-        </div>
+        @for (profile of collection.profiles; track profile) {
+          <div class="profile">
+            <mat-checkbox
+              [id]="profile.id"
+              [checked]="profile.id | isProfileSelected:profilesSelected"
+              (change)="changeSelection($event)"
+              [name]="profile | profileLabel"
+              data-cy="shared-profiles-select-profile">
+              {{profile | profileLabel}}
+            </mat-checkbox>
+          </div>
+        }
       }
     </form>
   </div>

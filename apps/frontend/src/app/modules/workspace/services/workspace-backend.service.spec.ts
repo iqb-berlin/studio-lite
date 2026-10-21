@@ -17,7 +17,8 @@ import {
   UsersInWorkspaceDto,
   WorkspaceGroupFullDto,
   UnitItemDto,
-  UnitRichNoteTagDto
+  UnitRichNoteTagDto,
+  UnitRichNotesDto
 } from '@studio-lite-lib/api-dto';
 import { firstValueFrom, Observable } from 'rxjs';
 import { WorkspaceBackendService } from './workspace-backend.service';
@@ -206,6 +207,31 @@ describe('WorkspaceBackendService', () => {
       const resultPromise = expectObservableValue(service.getUnitListWithProperties(1), []);
 
       const req = httpMock.expectOne(`${serverUrl}workspaces/1/units/properties`);
+      req.error(new ProgressEvent('error'));
+
+      await resultPromise;
+    });
+  });
+
+  describe('getUnitExportContents', () => {
+    it('should fetch which optional export files the units fill', async () => {
+      const mockData = [{
+        unitId: 1, metadata: true, items: false, codingScheme: true, comments: false, richNotes: false
+      }];
+
+      const resultPromise = expectObservableValue(service.getUnitExportContents(1), mockData);
+
+      const req = httpMock.expectOne(`${serverUrl}workspaces/1/units/export-contents`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockData);
+
+      await resultPromise;
+    });
+
+    it('should return null on error, so that no file is left out for it', async () => {
+      const resultPromise = expectObservableValue(service.getUnitExportContents(1), null);
+
+      const req = httpMock.expectOne(`${serverUrl}workspaces/1/units/export-contents`);
       req.error(new ProgressEvent('error'));
 
       await resultPromise;
@@ -756,12 +782,54 @@ describe('WorkspaceBackendService', () => {
       await resultPromise;
     });
 
+    it('should return an empty array without asking for unit 0', async () => {
+      await expectObservableValue(service.getUnitItems(1, 0), []);
+      httpMock.expectNone(() => true);
+    });
+
+    it('should return an empty array without asking for a unit that is no number', async () => {
+      await expectObservableValue(service.getUnitItems(1, Number('abc')), []);
+      httpMock.expectNone(() => true);
+    });
+
+    it('should return an empty array without asking for workspace 0', async () => {
+      await expectObservableValue(service.getUnitItems(0, 1), []);
+      httpMock.expectNone(() => true);
+    });
+
     it('should return empty array on error', async () => {
       const resultPromise = expectObservableValue(service.getUnitItems(1, 1), []);
 
       const req = httpMock.expectOne(
         request => request.url === `${serverUrl}workspaces/1/units/1/items`
       );
+      req.error(new ProgressEvent('error'));
+
+      await resultPromise;
+    });
+  });
+
+  describe('getUnitRichNotes', () => {
+    it('should fetch the rich notes of the unit', async () => {
+      const mockData: UnitRichNotesDto = { tags: [], notes: [] };
+      const resultPromise = expectObservableValue(service.getUnitRichNotes(1, 1), mockData);
+
+      const req = httpMock.expectOne(`${serverUrl}workspaces/1/units/1/rich-notes`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockData);
+
+      await resultPromise;
+    });
+
+    it('should return no notes without asking for unit 0', async () => {
+      await expectObservableValue(service.getUnitRichNotes(1, 0), { tags: [], notes: [] });
+      httpMock.expectNone(() => true);
+    });
+
+    it('should return null on error', async () => {
+      const resultPromise = expectObservableValue(service.getUnitRichNotes(1, 1), null);
+
+      const req = httpMock.expectOne(`${serverUrl}workspaces/1/units/1/rich-notes`);
       req.error(new ProgressEvent('error'));
 
       await resultPromise;
@@ -834,5 +902,25 @@ describe('WorkspaceBackendService', () => {
       expect(req.request.body).toEqual(settings);
       req.flush(new Blob(['zip']));
     });
+  });
+  it('sends training requirement and selection to the direct codebook endpoint', () => {
+    service.getCodingBook(1, '', {
+      exportFormat: 'json',
+      missingsProfile: '',
+      hasOnlyManualCoding: true,
+      hasGeneralInstructions: true,
+      hasDerivedVars: true,
+      hasClosedVars: false,
+      hasOnlyVarsWithCodes: true,
+      codeLabelToUpper: true,
+      showScore: true,
+      hideItemVarRelation: true,
+      trainingRequirement: 'not-required'
+    }, [7]).subscribe();
+    const request = httpMock.expectOne(req => req.url === `${serverUrl}workspaces/1/units/coding-book`);
+    expect(request.request.method).toBe('GET');
+    expect(request.request.params.get('trainingRequirement')).toBe('not-required');
+    expect(request.request.params.getAll('id')).toEqual(['7']);
+    request.flush(new Blob(['[]']));
   });
 });

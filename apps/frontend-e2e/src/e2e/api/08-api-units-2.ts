@@ -385,6 +385,54 @@ describe('Unit API tests part II', () => {
       }
     );
 
+    // Metadata and coding scheme became optional (#1729): an export without the flags keeps them,
+    // one that sets them to false leaves them out, and the dialog's question answers in advance.
+    it(
+      '200 positive test: should leave out metadata and coding scheme only when asked to (#1729)',
+      { defaultCommandTimeout: 100000 },
+      () => {
+        const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+        const wsId = Cypress.expose(ws1.id);
+        cy.getUnitsByWsAPI(wsId, adminToken).then(before => {
+          const idsBefore = before.body.map((u: { id: number }) => u.id);
+          cy.uploadUnitsAPI(wsId, 'variable_metadata.zip', adminToken).then(() => {
+            cy.getUnitsByWsAPI(wsId, adminToken).then(after => {
+              const importedIds = after.body
+                .filter((u: { id: number }) => !idsBefore.includes(u.id))
+                .map((u: { id: number }) => String(u.id));
+              const query = JSON.parse(buildDownloadQuery(importedIds));
+              cy.getUnitExportContentsAPI(wsId, adminToken).then(contents => {
+                cy.exportUnitsAPI(wsId, JSON.stringify(query), adminToken).then(withFiles => {
+                  cy.exportUnitsAPI(
+                    wsId,
+                    JSON.stringify({ ...query, addMetadata: false, addCodingScheme: false }),
+                    adminToken
+                  ).then(withoutFiles => {
+                    // cleaned up before anything is asserted, so that a failure leaves ws1 as it was
+                    if (importedIds.length) cy.deleteUnitsAPI(importedIds, wsId, adminToken);
+                    cy.then(() => {
+                      expect(importedIds).to.have.length(1);
+                      expect(contents.status).to.equal(200);
+                      expect(contents.body.find((c: { unitId: number }) => String(c.unitId) === importedIds[0]))
+                        .to.include({ metadata: true, codingScheme: true });
+                      // the zip lists its file names uncompressed
+                      expect(withFiles.status).to.equal(200);
+                      expect(withFiles.body).to.include('MA_01.vomd');
+                      expect(withFiles.body).to.include('MA_01.vocs');
+                      expect(withoutFiles.status).to.equal(200);
+                      expect(withoutFiles.body).to.include('MA_01.xml');
+                      expect(withoutFiles.body).not.to.include('MA_01.vomd');
+                      expect(withoutFiles.body).not.to.include('MA_01.vocs');
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      }
+    );
+
     it('401 negative test: should deny unit download when an invalid authentication token is provided', () => {
       const unitIds = [Cypress.expose(unit2.shortname)];
       cy.downloadWsUnitsAPI(
@@ -881,16 +929,20 @@ describe('Unit API tests part II', () => {
     });
   });
 
-  describe('a variable list in the VariableInfo 2.0 spelling (#1606)', () => {
-    // What the schemer and coding-box get: the 1.x spelling, and `page` back as the empty value
-    // that 2.0 dropped.
+  describe('a variable list in the VariableInfo 2.0 spelling (#1606, #1708)', () => {
+    // What the schemer gets: the 1.x spelling, and `page` back as the empty value that 2.0 dropped.
     // Compared as text, so that a failure shows which variable came back in which spelling
     const inV1 = 'text_1 no-value "" "" | geogebra_1 string "ggb-file" ""';
     const spelling = (variables: { id: string, type: string, format: string, page: string }[]) => variables
       .map(v => `${v.id} ${v.type} ${JSON.stringify(v.format)} ${JSON.stringify(v.page)}`)
       .join(' | ');
+    // What is stored, and read back with the definition: the spelling it was sent in (#1708)
+    const storedInV2 = 'text_1 NO_VALUE "" | geogebra_1 STRING "GGB_FILE"';
+    const typesAndFormats = (variables: { id: string, type: string, format: string }[]) => variables
+      .map(v => `${v.id} ${v.type} ${JSON.stringify(v.format)}`)
+      .join(' | ');
 
-    it('200 positive test: is stored in the 1.x spelling when saved from the editor', () => {
+    it('200 positive test: is stored as sent and handed to the schemer in 1.x when saved from the editor', () => {
       const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
       const unit = { shortname: 'VI2_SAVE', name: 'VariableInfo 2.0', group: '' };
       cy.createUnitAPI(Cypress.expose(ws1.id), unit, adminToken).then(created => {
@@ -904,17 +956,20 @@ describe('Unit API tests part II', () => {
           }
         ], adminToken).then(saved => {
           cy.getUnitSchemeAPI(unitId, Cypress.expose(ws1.id), adminToken).then(read => {
-            cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
-            cy.then(() => {
-              expect(saved.status).to.equal(200);
-              expect(spelling(read.body.variables)).to.equal(inV1);
+            cy.getUnitDefinitionAPI(unitId, Cypress.expose(ws1.id), adminToken).then(stored => {
+              cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
+              cy.then(() => {
+                expect(saved.status).to.equal(200);
+                expect(spelling(read.body.variables)).to.equal(inV1);
+                expect(typesAndFormats(stored.body.variables)).to.equal(storedInV2);
+              });
             });
           });
         });
       });
     });
 
-    it('201 positive test: is stored in the 1.x spelling when imported', () => {
+    it('201 positive test: is stored as sent and handed to the schemer in 1.x when imported', () => {
       const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
       cy.uploadUnitFilesAPI(
         Cypress.expose(ws1.id),
@@ -926,12 +981,68 @@ describe('Unit API tests part II', () => {
           expect(unit, 'imported unit').not.to.equal(undefined);
           const unitId = String(unit.id);
           cy.getUnitSchemeAPI(unitId, Cypress.expose(ws1.id), adminToken).then(read => {
+            cy.getUnitDefinitionAPI(unitId, Cypress.expose(ws1.id), adminToken).then(stored => {
+              // cleaned up before anything else is asserted, so that a failure leaves ws1 as it was
+              cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
+              cy.then(() => {
+                expect(imported.status).to.equal(201);
+                expect(imported.body.messages).to.deep.equal([]);
+                expect(spelling(read.body.variables)).to.equal(inV1);
+                expect(typesAndFormats(stored.body.variables)).to.equal(storedInV2);
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+
+  // A definition written into the unit XML itself, `<Definition>` instead of `<DefinitionRef>`, was
+  // dropped on import together with the variables (#1839).
+  describe('an inline definition of an XML unit', () => {
+    it('201 positive test: is stored with its variables when imported', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      cy.uploadUnitFilesAPI(Cypress.expose(ws1.id), ['inline-definition/INLINE_DEF.xml'], adminToken).then(imported => {
+        cy.getUnitsByWsAPI(Cypress.expose(ws1.id), adminToken).then(units => {
+          const unit = units.body.find((u: { key: string }) => u.key === 'INLINE_DEF');
+          expect(unit, 'imported unit').not.to.equal(undefined);
+          const unitId = String(unit.id);
+          cy.getUnitDefinitionAPI(unitId, Cypress.expose(ws1.id), adminToken).then(read => {
             // cleaned up before anything else is asserted, so that a failure leaves ws1 as it was
             cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
             cy.then(() => {
               expect(imported.status).to.equal(201);
               expect(imported.body.messages).to.deep.equal([]);
-              expect(spelling(read.body.variables)).to.equal(inV1);
+              expect(read.body.definition).to.equal('{"type":"aspect-unit-definition","inline":true}');
+              expect(read.body.variables.map((v: { id: string }) => v.id)).to.deep.equal(['text_1']);
+            });
+          });
+        });
+      });
+    });
+  });
+
+  // The XML import read the attribute as `schemetype`; the parser runs in XML mode and tells it from
+  // the `schemeType` that the export and unit-xml 17.6 write, so every imported unit lost it (#1759).
+  describe('the coding scheme type of an XML unit', () => {
+    it('201 positive test: is kept when the unit is imported', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      cy.uploadUnitFilesAPI(
+        Cypress.expose(ws1.id),
+        ['scheme-type/ST_IMPORT.xml', 'scheme-type/ST_IMPORT.voud', 'scheme-type/ST_IMPORT.vocs'],
+        adminToken
+      ).then(imported => {
+        cy.getUnitsByWsAPI(Cypress.expose(ws1.id), adminToken).then(units => {
+          const unit = units.body.find((u: { key: string }) => u.key === 'ST_IMPORT');
+          expect(unit, 'imported unit').not.to.equal(undefined);
+          const unitId = String(unit.id);
+          cy.getUnitSchemeAPI(unitId, Cypress.expose(ws1.id), adminToken).then(read => {
+            // cleaned up before anything else is asserted, so that a failure leaves ws1 as it was
+            cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
+            cy.then(() => {
+              expect(imported.status).to.equal(201);
+              expect(imported.body.messages).to.deep.equal([]);
+              expect(read.body.schemeType).to.equal('iqb-standard@3.2');
             });
           });
         });

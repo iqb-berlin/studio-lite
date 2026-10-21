@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
 import { createMock } from '@golevelup/ts-jest';
 import { UnitUserService } from './unit-user.service';
 import UnitUser from '../entities/unit-user.entity';
@@ -103,23 +102,23 @@ describe('UnitUserService', () => {
   });
 
   describe('patchUnitUserCommentsLastSeen', () => {
-    it('should update timestamp if unit user exists', async () => {
+    it('should update the timestamp of the given user if the unit user exists', async () => {
       const unitId = 2;
       const date = new Date();
-      const updateDto: UpdateUnitUserDto = { userId: 1, lastSeenCommentChangedAt: date };
       const unitUser = { userId: 1, unitId, lastSeenCommentChangedAt: new Date(2000, 1) } as UnitUser;
 
       mockUnitUserRepository.findOne.mockResolvedValue(unitUser);
       mockUnitUserRepository.save.mockResolvedValue({ ...unitUser, lastSeenCommentChangedAt: date });
 
-      await service.patchUnitUserCommentsLastSeen(unitId, updateDto);
+      await service.patchUnitUserCommentsLastSeen(unitId, 1, date);
 
+      expect(unitUserRepository.findOne).toHaveBeenCalledWith({ where: { userId: 1, unitId } });
       expect(unitUserRepository.save).toHaveBeenCalledWith(expect.objectContaining({ lastSeenCommentChangedAt: date }));
     });
 
     it('should do nothing if unit user does not exist', async () => {
       mockUnitUserRepository.findOne.mockResolvedValue(null);
-      await service.patchUnitUserCommentsLastSeen(2, { userId: 1, lastSeenCommentChangedAt: new Date() });
+      await service.patchUnitUserCommentsLastSeen(2, 1, new Date());
       expect(unitUserRepository.save).not.toHaveBeenCalled();
     });
   });

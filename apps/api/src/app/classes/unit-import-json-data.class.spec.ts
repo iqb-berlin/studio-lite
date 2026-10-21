@@ -44,6 +44,38 @@ describe('UnitImportJsonData', () => {
     expect(data.editor).toBe('iqb-editor-aspect@2.0');
   });
 
+  it('should read the definition type from userInterface (#1368)', () => {
+    const data = new UnitImportJsonData(createMock<FileIo>({
+      originalname: 'UNIT01.json',
+      buffer: Buffer.from(buildIndex({
+        userInterface: { player: 'iqb-player-aspect@3.0', type: 'aspect-unit-definition@4.12.0' }
+      }))
+    }));
+
+    expect(data.definitionType).toBe('aspect-unit-definition@4.12.0');
+  });
+
+  it('should leave the definition type empty when userInterface has none', () => {
+    expect(new UnitImportJsonData(fileIoMock).definitionType).toBe('');
+  });
+
+  // With `isDefinitionInline` the index carries the definition itself, not a file name (#1839).
+  it('should take an inline definition as the definition, not as a file name', () => {
+    const data = new UnitImportJsonData(createMock<FileIo>({
+      originalname: 'folder/UNIT01.json',
+      buffer: Buffer.from(buildIndex({
+        userInterface: { player: 'iqb-player-aspect@3.0', definition: '{"content":1}', isDefinitionInline: true }
+      }))
+    }));
+
+    expect(data.definition).toBe('{"content":1}');
+    expect(data.definitionFileName).toBe('');
+  });
+
+  it('should leave the definition empty when it is a file reference', () => {
+    expect(new UnitImportJsonData(fileIoMock).definition).toBe('');
+  });
+
   it('should resolve file references with folder prefix', () => {
     const data = new UnitImportJsonData(fileIoMock);
 
@@ -112,11 +144,10 @@ describe('UnitImportJsonData', () => {
     expect(() => new UnitImportJsonData(invalid)).toThrow('userInterface missing');
   });
 
-  it('should default transcript, reference, schemer and schemeType to empty string', () => {
+  it('should default transcript, schemer and schemeType to empty string', () => {
     const data = new UnitImportJsonData(fileIoMock);
 
     expect(data.transcript).toBe('');
-    expect(data.reference).toBe('');
     expect(data.schemer).toBe('');
     expect(data.schemeType).toBe('');
   });

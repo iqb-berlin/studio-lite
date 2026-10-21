@@ -58,12 +58,12 @@ export class UnitPrintPlayerComponent extends PreviewDirective implements AfterV
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(ued => {
         if (ued) {
-          this.postStore(ued.definition || '');
+          this.postStore(ued.definition || '', ued.definitionType);
         }
       });
   }
 
-  postStore(definition: string): void {
+  postStore(definition: string, definitionType?: string): void {
     if (!this.postMessageTarget) return;
 
     if (this.playerApiVersion === 1) {
@@ -88,7 +88,8 @@ export class UnitPrintPlayerComponent extends PreviewDirective implements AfterV
           directDownloadUrl: this.backendService.getDirectDownloadLink(),
           sharedParameters: this.sharedParameters
         },
-        unitDefinition: definition || ''
+        unitDefinition: definition || '',
+        ...(definitionType && { unitDefinitionType: definitionType })
       }, '*');
     }
     this.unitLoaded.next(true);

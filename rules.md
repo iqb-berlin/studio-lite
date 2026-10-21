@@ -16,6 +16,11 @@
 - **Preferred Solution (Pipes)**: Use **Pure Pipes** for data transformation in templates (e.g., `[navTabs]="navTabs | filterHiddenTabs:hiddenRoutes"`).
   - Pure pipes are only re-evaluated when their input references change, providing built-in memoization.
 
+### State: Signals
+- **Rule**: New state in the frontend is held in signals (`signal`, `computed`, handed out read-only with `asReadonly()`). Events and HTTP requests stay observables; where RxJS code needs a signal as a stream, `toObservable` bridges it.
+- **Rationale**: Angular is moving to signals and the studio will follow; what is written in signals now need not be rebuilt later. A signal also always has a current value, so a reader that comes late still gets it, while an event sent before anyone subscribed is lost (#1290).
+- **Note**: Reading a signal in a template (`[disabled]="!unitStores.changed()"`) is not a function call in the sense of *Performance: Template Bindings*: Angular tracks the read, and a `computed` is evaluated again only when what it depends on changes.
+
 ### Subscription Management
 - **Rule**: Use the `ngUnsubscribe` + `takeUntil` pattern for all subscriptions in Angular components.
 - **Rationale**: This ensures that subscriptions are automatically cleaned up when a component is destroyed, preventing memory leaks and unexpected behavior from asynchronous callbacks.
@@ -29,6 +34,10 @@
       this.ngUnsubscribe.complete();
     }
     ```
+
+### Dialog Results: Only the Confirming Button Confirms
+- **Rule**: Act on a dialog's result only when it is what its confirming button returns: `result === true` for `ConfirmDialogComponent`, the returned data (an object, a form) for a dialog that hands data back. `result !== false` on its own is not such a test.
+- **Rationale**: A `MatDialog` closed by Esc, by a click beside it or by navigation returns `undefined`, and `undefined !== false`. Written that way, a dismissed confirmation discarded unsaved work and deleted reviews and modules, and dismissed data dialogs ran on with `undefined` (#1844). The pattern had been fixed once before (79842c1c4) and came back with new dialogs.
 
 ### Unit Testing: Asynchronous Tests
 - **Rule**: Prefer `fakeAsync` and `tick()` over `async/await` with `setTimeout` or manual `wait()` helpers for testing asynchronous logic.
@@ -153,7 +162,25 @@
 
 ## Workflow: Pull Requests and Tickets
 
-Branches, the pipeline and the board columns are described in the README under *How work flows through this repository*. Read it before creating a branch, opening a pull request or moving a card on the board. The rules below repeat the two points most easily got wrong and add what the README leaves open.
+Branches, the pipeline and the board columns are described in the README under *How work flows through this repository*. Read it before creating a branch, opening a pull request or moving a card on the board. The rules below begin with the two steps before any of that, the plan and the review, then repeat the two points most easily got wrong and add what the README leaves open.
+
+### Before the Work: A Plan
+- **Rule**: Every ticket starts with a plan, agreed with the person you are working for before anything is changed — a small ticket as well, whose plan is then three lines. Work out the plan in Claude Code's plan mode (Shift+Tab), which edits nothing until the plan is approved.
+- **Rule**: The plan states decisions, not a list of options:
+  - **what is asked for**, checked against the architecture: the Verona editor authors a unit, the player plays it, the studio hosts both and stores what they hand back. A finding that belongs to a Verona module is not work for this repository.
+  - **the cause, with evidence** — reproduced or measured, not assumed.
+  - **whether the fix is reachable**: who calls the code, and whether something later overwrites what it does.
+  - **the scope**, and what is left out and becomes an issue of its own.
+  - **the tests**, including whether an end-to-end test of its own is possible — that decides the column after the merge (see *Board 18*).
+  - **the places at risk**: a database changeset, e2e selectors (no compiler sees Cypress), what frontend and API share in `libs/`.
+- **Rule**: The plan goes into the conversation, not into the ticket; the ticket gets the result. Approving the plan is what moves the card to *In progress*. A plan that ends in a question, or in not building it, moves no card.
+  - **Rationale**: A misunderstanding caught in a plan costs one message; caught in review it costs a pull request and a pipeline run. A session does not know what earlier sessions decided or rejected — without a plan, the first time a person sees what it is about to do is the finished pull request.
+
+### Before the Commit: A Review
+- **Rule**: Finish the change and verify it (tests, lint, typecheck), but do not commit it yet. Run `/code-review` on it first; only then commit, push and open the pull request.
+  - **Rationale**: A review before the pull request can still turn the change around — a regression, or a fix that compiles, passes every suite and does nothing. After the pull request every such round costs a pipeline run.
+- **Rule**: `/code-review` without a target reviews the uncommitted diff (`git diff HEAD`). Once the change is committed that diff is empty and the review finds nothing; then name the scope explicitly (`/code-review origin/develop..HEAD`, or the pull request number).
+- **Rule**: After the review, check `git status`. Review agents can leave files of their own in the working tree; they do not belong in the commit.
 
 ### Pull Requests
 - **Rule**: Never write `Closes #…`, `Fixes #…` or `Resolves #…` in a commit message or pull request text. Reference the issue as `(#1629)`.
@@ -166,10 +193,11 @@ Branches, the pipeline and the board columns are described in the README under *
 ### Board 18
 - **Rule**: A ticket goes on the board of its own repository, even when it comes out of work on another one: studio-lite on [board 18](https://github.com/orgs/iqb-berlin/projects/18), verona-modules-aspect on [board 13](https://github.com/orgs/iqb-berlin/projects/13).
 - **Rule**: `gh issue create` alone leaves a studio-lite ticket invisible — add it to board 18 as well (`gh project item-add 18 --owner iqb-berlin --url <issue-url>`). A new card goes to *Neue Tickets*; *Priority* and *Aufwand* stay empty, the team estimates them.
-- **Rule**: Move a card to *In progress* only while working towards a pull request. The column tells colleagues that something is being built; looking into a ticket, or an analysis that ends in a question, is not that yet.
+- **Rule**: Move a card to *In progress* once the plan is approved, and only while working towards a pull request. The column tells colleagues that something is being built; looking into a ticket, or an analysis that ends in a question, is not that yet.
 - **Rule**: After the merge the test decides the column. With an end-to-end test of its own the change goes to *Zu veröffentlichen*, without one to *zu testen*, where someone else builds the test.
   - "Of its own" means a test that checks exactly this change and would fail without it. An existing spec that keeps passing does not count.
   - **Exception**: Upgrades, CI and dependency changes without behaviour of their own (Angular, NestJS, ESLint, the release gate) go to *Zu veröffentlichen*; the whole suite is their test.
+  - **Exception**: No end-to-end test of its own when it would catch nothing new: unit tests fail without the change, and a named existing spec exercises exactly the changed path. The "Stand" comment names both.
 - **Rule**: *In review* means released and awaiting validation by the reporters, not code-reviewed. A ticket stays open through all of these columns; do not close it by hand.
 
 ### Tickets

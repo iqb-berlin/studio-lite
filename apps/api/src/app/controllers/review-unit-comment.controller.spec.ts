@@ -10,13 +10,22 @@ import { createMock } from '@golevelup/ts-jest';
 import { ReviewUnitCommentController } from './review-unit-comment.controller';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { ItemCommentService } from '../services/item-comment.service';
+import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ReviewGuard } from '../guards/review.guard';
+import { ReviewCommentAccessGuard } from '../guards/review-comment-access.guard';
+import { ReviewConfigGuard } from '../guards/review-config.guard';
+import { ReviewAccountGuard } from '../guards/review-account.guard';
+import { ReviewCommentOwnerGuard } from '../guards/review-comment-owner.guard';
+import { CommentWriteGuard } from '../guards/comment-write.guard';
+import { CommentDeleteGuard } from '../guards/comment-delete.guard';
+import { CommentInUnitGuard } from '../guards/comment-in-unit.guard';
 
 describe('ReviewUnitCommentController', () => {
   let controller: ReviewUnitCommentController;
   let unitCommentService: UnitCommentService;
   let itemCommentService: ItemCommentService;
+  let usersService: UsersService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,6 +38,10 @@ describe('ReviewUnitCommentController', () => {
         {
           provide: ItemCommentService,
           useValue: createMock<ItemCommentService>()
+        },
+        {
+          provide: UsersService,
+          useValue: createMock<UsersService>()
         }
       ]
     })
@@ -36,15 +49,54 @@ describe('ReviewUnitCommentController', () => {
       .useValue({ canActivate: () => true })
       .overrideGuard(ReviewGuard)
       .useValue({ canActivate: () => true })
+      .overrideGuard(ReviewCommentAccessGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(ReviewConfigGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(ReviewAccountGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(ReviewCommentOwnerGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(CommentWriteGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(CommentDeleteGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(CommentInUnitGuard)
+      .useValue({ canActivate: () => true })
       .compile();
 
     controller = module.get<ReviewUnitCommentController>(ReviewUnitCommentController);
     unitCommentService = module.get<UnitCommentService>(UnitCommentService);
     itemCommentService = module.get<ItemCommentService>(ItemCommentService);
+    usersService = module.get<UsersService>(UsersService);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  // A comment named in the path has to be one of the unit's before any guard loads it to ask for
+  // its author: those answered 403 for a comment of any unit and 404 for none, which told every
+  // comment id apart (#1777). ReviewGuard holds the unit itself to the review, ahead of both.
+  const loadsTheComment: unknown[] = [CommentWriteGuard, CommentDeleteGuard, ReviewCommentOwnerGuard];
+  it.each([
+    'patchCommentBody', 'patchCommentVisibility', 'removeComment',
+    'patchCommentItems', 'toggleVote', 'getCommentVoters'
+  ] as const)('should hold %s to the unit in its path before it asks about the comment\'s author', method => {
+    const guards: unknown[] = Reflect.getMetadata('__guards__', ReviewUnitCommentController.prototype[method]);
+    expect(guards).toContain(CommentInUnitGuard);
+    expect(guards.slice(0, guards.indexOf(CommentInUnitGuard)).filter(guard => loadsTheComment.includes(guard)))
+      .toEqual([]);
+  });
+
+  // A review login may neither change, hide nor delete a comment, and is told so before the comment's
+  // unit is asked: otherwise 403 and 404 would tell the comments of the unit from all others.
+  it.each([
+    'patchCommentBody', 'patchCommentVisibility', 'removeComment'
+  ] as const)('should refuse a review login on %s before it asks about the comment', method => {
+    const guards: unknown[] = Reflect.getMetadata('__guards__', ReviewUnitCommentController.prototype[method]);
+    expect(guards).toContain(ReviewAccountGuard);
+    expect(guards.indexOf(ReviewAccountGuard)).toBeLessThan(guards.indexOf(CommentInUnitGuard));
   });
 
   describe('findOnesComments', () => {
@@ -95,39 +147,31 @@ describe('ReviewUnitCommentController', () => {
   });
 
   describe('createComment', () => {
-    it('should create a new comment and return its id', async () => {
-      const createDto: CreateUnitCommentDto = {
-        unitId: 10,
-        body: 'New comment',
-        userId: 1
-      } as CreateUnitCommentDto;
-      const newCommentId = 5;
+    const createDto: CreateUnitCommentDto = {
+      unitId: 99,
+      body: 'New comment',
+      userId: 99,
+      userName: 'Besucherin'
+    } as CreateUnitCommentDto;
 
-      jest.spyOn(unitCommentService, 'createComment')
-        .mockResolvedValue(newCommentId);
+    it('should create the comment as the caller on the unit of the path, with the name typed at hand', async () => {
+      jest.spyOn(usersService, 'commentAuthorOf').mockResolvedValue({ id: 7, name: 'Muster, Max' });
+      jest.spyOn(unitCommentService, 'createCommentAs').mockResolvedValue(5);
 
-      const result = await controller.createComment(createDto);
-
-      expect(result).toBe(newCommentId);
-      expect(unitCommentService.createComment).toHaveBeenCalledWith(createDto);
-      expect(unitCommentService.createComment).toHaveBeenCalledTimes(1);
+      expect(await controller.createComment({ user: { id: 7, name: 'max' } }, 10, createDto)).toBe(5);
+      expect(usersService.commentAuthorOf).toHaveBeenCalledWith(7, 'Besucherin');
+      expect(unitCommentService.createCommentAs)
+        .toHaveBeenCalledWith({ id: 7, name: 'Muster, Max' }, 10, createDto);
     });
 
-    it('should handle comments with different content', async () => {
-      const createDto: CreateUnitCommentDto = {
-        unitId: 20,
-        body: 'Another comment with different content',
-        userId: 2
-      } as CreateUnitCommentDto;
-      const newCommentId = 10;
+    it('should ask for the author of a review link as user 0', async () => {
+      jest.spyOn(usersService, 'commentAuthorOf').mockResolvedValue({ id: 0, name: 'Besucherin' });
+      jest.spyOn(unitCommentService, 'createCommentAs').mockResolvedValue(6);
 
-      jest.spyOn(unitCommentService, 'createComment')
-        .mockResolvedValue(newCommentId);
-
-      const result = await controller.createComment(createDto);
-
-      expect(result).toBe(newCommentId);
-      expect(unitCommentService.createComment).toHaveBeenCalledWith(createDto);
+      expect(await controller.createComment({ user: { id: 0, name: '' } }, 10, createDto)).toBe(6);
+      expect(usersService.commentAuthorOf).toHaveBeenCalledWith(0, 'Besucherin');
+      expect(unitCommentService.createCommentAs)
+        .toHaveBeenCalledWith({ id: 0, name: 'Besucherin' }, 10, createDto);
     });
   });
 

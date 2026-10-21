@@ -1,13 +1,14 @@
 import { ElementRef, ViewContainerRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogState } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { Overlay } from '@angular/cdk/overlay';
 import { AppService } from '../services/app.service';
 import { WorkspaceBackendService } from '../modules/workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../modules/workspace/services/workspace.service';
+import { UnitStoresService } from '../modules/workspace/services/unit-stores.service';
 import { ModuleService } from '../services/module.service';
 import { UnitState } from '../models/verona.interface';
 import { PreviewDirective } from './preview.directive';
@@ -58,6 +59,7 @@ describe('PreviewDirective', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: ModuleService, useValue: { widgets: {}, loadWidgets: jest.fn() } },
+        { provide: UnitStoresService, useValue: {} },
         Overlay,
         ViewContainerRef
       ]
@@ -291,6 +293,54 @@ describe('PreviewDirective', () => {
     );
   });
 
+  describe('runtime errors while the error dialog is open', () => {
+    const runtimeError = (code: string, message: string): MessageEvent => createMessageEvent(
+      {
+        type: 'vopRuntimeErrorNotification', sessionId: 'session-1', code, message
+      },
+      window
+    );
+
+    const openedDialog = (directive: TestPreviewDirective) => {
+      const dialogRef = {
+        getState: jest.fn(() => MatDialogState.OPEN),
+        componentInstance: { add: jest.fn() }
+      };
+      (directive.errorDialog.open as jest.Mock).mockReturnValue(dialogRef);
+      return dialogRef;
+    };
+
+    it('adds a further runtime error to the open dialog instead of opening another', () => {
+      const directive = createDirective();
+      directive.iFrameElement = createIFrameWithWindow(window);
+      const dialogRef = openedDialog(directive);
+
+      directive.handleIncomingMessage(runtimeError('IMAGE_NOT_LOADING', 'image a'));
+      directive.handleIncomingMessage(runtimeError('IMAGE_NOT_LOADING', 'image b'));
+
+      expect(directive.errorDialog.open).toHaveBeenCalledTimes(1);
+      expect(dialogRef.componentInstance.add).toHaveBeenCalledWith({
+        sessionId: 'session-1', code: 'IMAGE_NOT_LOADING', message: 'image b'
+      });
+    });
+
+    it.each([
+      ['closing', MatDialogState.CLOSING],
+      ['closed', MatDialogState.CLOSED]
+    ])('opens a new dialog once the previous one is %s', (_, state) => {
+      const directive = createDirective();
+      directive.iFrameElement = createIFrameWithWindow(window);
+      const dialogRef = openedDialog(directive);
+
+      directive.handleIncomingMessage(runtimeError('IMAGE_NOT_LOADING', 'image a'));
+      dialogRef.getState.mockReturnValue(state);
+      directive.handleIncomingMessage(runtimeError('IMAGE_NOT_LOADING', 'image b'));
+
+      expect(directive.errorDialog.open).toHaveBeenCalledTimes(2);
+      expect(dialogRef.componentInstance.add).not.toHaveBeenCalled();
+    });
+  });
+
   it('builds page list for valid pages and updates current page', () => {
     const directive = createDirective();
 
@@ -342,6 +392,89 @@ describe('PreviewDirective', () => {
     directive.setPageList(['0', '1'], '0');
 
     expect(directive.pageList.filter(p => p.type === '#goto').map(p => p.id)).toEqual(['0', '1']);
+  });
+
+  describe('after a restart of the unit (#1683)', () => {
+    const gotoIds = (directive: TestPreviewDirective): string[] => directive.pageList
+      .filter(p => p.type === '#goto')
+      .map(p => p.id);
+
+    it('drops the list when the player then reports a single page', () => {
+      const directive = createDirective();
+      directive.setPageList(['0', '1', '2'], '0');
+
+      directive.awaitPageListAfterRestart();
+      directive.setPageList(['0'], '0');
+
+      expect(directive.pageList).toEqual([]);
+    });
+
+    it('keeps the list over the empty report an older aspect player sends before counting', () => {
+      const directive = createDirective();
+      directive.setPageList(['0', '1', '2'], '0');
+
+      directive.awaitPageListAfterRestart();
+      directive.setPageList([], '0');
+
+      expect(gotoIds(directive)).toEqual(['0', '1', '2']);
+
+      directive.setPageList(['0'], '0');
+
+      expect(directive.pageList).toEqual([]);
+    });
+
+    it('keeps the list over a report without pages', () => {
+      const directive = createDirective();
+      directive.setPageList(['0', '1', '2'], '0');
+
+      directive.awaitPageListAfterRestart();
+      directive.setPageList(undefined, '1');
+
+      expect(gotoIds(directive)).toEqual(['0', '1', '2']);
+      expect(directive.pageList.find(p => p.type === '#goto' && p.disabled)?.id).toBe('0');
+    });
+
+    it('replaces the list when the player then reports several pages', () => {
+      const directive = createDirective();
+      directive.setPageList(['0', '1', '2'], '0');
+
+      directive.awaitPageListAfterRestart();
+      directive.setPageList([], '0');
+      directive.setPageList(['0', '1'], '0');
+
+      expect(gotoIds(directive)).toEqual(['0', '1']);
+    });
+
+    it('takes a single page as a page change again once the report has come', () => {
+      const directive = createDirective();
+
+      directive.awaitPageListAfterRestart();
+      directive.setPageList(['0', '1', '2'], '0');
+      directive.setPageList(['1'], '1');
+
+      expect(gotoIds(directive)).toEqual(['0', '1', '2']);
+      expect(directive.pageList.find(p => p.type === '#goto' && p.disabled)?.id).toBe('1');
+    });
+
+    it('drops the list through a vopStateChangedNotification with a single page', () => {
+      const directive = createDirective();
+      const mockWindow = window;
+      directive.iFrameElement = createIFrameWithWindow(mockWindow);
+      directive.setPageList(['0', '1', '2'], '0');
+
+      directive.awaitPageListAfterRestart();
+      [[], [{ id: '0', label: 'Seite 1' }]].forEach(validPages => directive.handleIncomingMessage(
+        createMessageEvent(
+          {
+            type: 'vopStateChangedNotification',
+            playerState: { validPages, currentPage: '0' }
+          },
+          mockWindow
+        )
+      ));
+
+      expect(directive.pageList).toEqual([]);
+    });
   });
 
   it('sends page navigation commands based on api version', () => {

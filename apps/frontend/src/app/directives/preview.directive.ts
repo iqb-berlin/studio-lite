@@ -1,4 +1,4 @@
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MatDialogState } from '@angular/material/dialog';
 import { Directive, inject, ViewContainerRef } from '@angular/core';
 import { from, takeUntil } from 'rxjs';
 import { Overlay } from '@angular/cdk/overlay';
@@ -9,6 +9,7 @@ import { Progress } from '../modules/workspace/models/types';
 import { VeronaModuleDirective } from './verona-module.directive';
 import { UnitState } from '../models/verona.interface';
 import {
+  RuntimeError,
   VopRuntimeErrorNotificationDialogComponent
 } from '../components/vop-runtime-error-notification-dialog/vop-runtime-error-notification-dialog.component';
 import { WidgetCallData } from '../modules/workspace/models/widget-call-data.interface';
@@ -38,6 +39,8 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
   presentationProgress: Progress = 'none';
   responseProgress: Progress = 'none';
   hasFocus = false;
+  private pageListAwaited = false;
+  private runtimeErrorDialog?: MatDialogRef<VopRuntimeErrorNotificationDialogComponent>;
 
   abstract gotoUnit(target: string): void;
   protected abstract handleUnitStateData(unitState: UnitState): void;
@@ -121,12 +124,10 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
           break;
 
         case 'vopRuntimeErrorNotification':
-          this.errorDialog?.open(VopRuntimeErrorNotificationDialogComponent, {
-            data: {
-              sessionId: msgData.sessionId,
-              code: msgData.code,
-              message: msgData.message
-            }
+          this.showRuntimeError({
+            sessionId: msgData.sessionId,
+            code: msgData.code,
+            message: msgData.message
           });
           break;
 
@@ -134,6 +135,21 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
           // eslint-disable-next-line no-console
           console.warn(`Message ignored: ${msgType}`);
       }
+    }
+  }
+
+  /**
+   * A player reports every element that fails on its own, so one dialog collects what arrives while
+   * it is open; only after it has been closed does the next error open a new one (#1869).
+   */
+  private showRuntimeError(runtimeError: RuntimeError): void {
+    if (this.runtimeErrorDialog?.getState() === MatDialogState.OPEN) {
+      this.runtimeErrorDialog.componentInstance.add(runtimeError);
+    } else {
+      this.runtimeErrorDialog = this.errorDialog?.open(
+        VopRuntimeErrorNotificationDialogComponent,
+        { data: runtimeError }
+      );
     }
   }
 
@@ -149,11 +165,34 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
   }
 
   /**
+   * The unit is about to be rebuilt under the same player -- after a change in the editor beside the
+   * preview -- and may come back with fewer pages. The list stays on screen, so that it does not
+   * blink on every change, but the player's next report about its pages decides it, even when that
+   * report names a single page (#1683).
+   *
+   * An empty list does not count as such a report: aspect players before verona-modules-aspect#1462
+   * send one after every start command, before they have counted their pages, and they stay in use.
+   * A unit the edit has left without any page therefore keeps the old list until the next unit change.
+   */
+  awaitPageListAfterRestart(): void {
+    this.pageListAwaited = true;
+  }
+
+  /**
    * What the player last said about its pages. A list of more than one page replaces what is held;
    * anything else is taken as "nothing new about the pages" and only moves the marker, because that
-   * is the shape in which a player reports an ordinary page change.
+   * is the shape in which a player reports an ordinary page change -- unless the list is awaited
+   * after a restart, see {@link awaitPageListAfterRestart}.
    */
   setPageList(validPages?: string[], currentPage?: string): void {
+    if (this.pageListAwaited) {
+      if (!validPages?.length) return;
+      this.pageListAwaited = false;
+      if (validPages.length === 1) {
+        this.clearPageList();
+        return;
+      }
+    }
     if (Array.isArray(validPages) && validPages.length > 1) {
       const newPageList: PageData[] = [];
       validPages.forEach((id, i) => {

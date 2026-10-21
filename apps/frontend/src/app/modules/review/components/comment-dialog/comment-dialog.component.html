@@ -9,13 +9,15 @@
   <mat-form-field>
     <mat-label>{{'review.comment-name' | translate}}</mat-label>
     <input matInput
+      #nameInput
       [placeholder]="'review.enter-comment-name' | translate"
+      required
       [(ngModel)]="userName"
       (ngModelChange)="storeUserName()">
   </mat-form-field>
 }
 <mat-dialog-content>
-  @if ((appService.authData.userLongName || appService.authData.userName || userName) && reviewService.unitDbId) {
+  @if (reviewService.unitDbId) {
     <studio-lite-comments
       [style.height.%]="100"
       [userName]="userName"
@@ -24,6 +26,7 @@
       [unitId]="this.reviewService.unitDbId"
       [workspaceId]="0"
       [newCommentOnly]="!reviewService.reviewConfig.showOthersComments"
+      [focusEditor]="focusEditor"
       [reviewId]="this.reviewService.reviewId"
       (onCommentsUpdated)="close()">
     </studio-lite-comments>

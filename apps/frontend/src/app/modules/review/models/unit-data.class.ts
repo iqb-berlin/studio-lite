@@ -9,6 +9,8 @@ export class UnitData {
   responses = {};
   playerId = '';
   definition = '';
+  // the format of `definition`, when the editor reported one
+  definitionType?: string;
   dbMetadata?: UnitPropertiesDto;
   codingSchemeVariables?: VariableCodingData[];
   comments?: Comment[];

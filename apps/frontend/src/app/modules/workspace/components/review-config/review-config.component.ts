@@ -21,6 +21,8 @@ import { BookletConfigEditComponent } from '../booklet-config-edit/booklet-confi
 })
 export class ReviewConfigComponent {
   @Input() selectedReviewId!: number;
+  // Disables the fields of the selected review, while its data is still on its way
+  @Input() disabled = false;
   @Input() name!: string | undefined;
   @Input() password!: string | undefined;
   @Input() bookletConfigSettings!: BookletConfigDto | undefined;

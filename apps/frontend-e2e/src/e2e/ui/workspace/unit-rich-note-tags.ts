@@ -1,3 +1,4 @@
+import { Interception } from 'cypress/types/net-stubbing';
 import {
   primaryWorkspace, baseGroup, lightUnit, AccessLevel, richNotesTestNames
 } from '../../../support/testData';
@@ -12,7 +13,8 @@ import {
   createRichNote,
   editRichNote,
   createGroup,
-  deleteGroup
+  deleteGroup,
+  waitForSuccess
 } from '../../../support/helpers';
 import {
   createWs,
@@ -70,14 +72,14 @@ describe('Unit Rich Notes', () => {
       .find('mat-checkbox')
       .click();
 
-    cy.get('mat-card.files mat-checkbox').eq(1).find('input').check({ force: true });
+    // the unit has a rich note, so the box is offered and already checked (#1729)
+    cy.get('[data-cy="export-file-addRichNotes"] input').should('be.enabled').and('be.checked');
 
     cy.intercept('GET', '/api/workspaces/*?download=true*').as('exportDownload');
     cy.get('[data-cy="workspace-export-unit-button"]').click({ force: true });
 
-    cy.wait('@exportDownload').then(interception => {
-      expect(interception.response?.statusCode).to.eq(200);
-
+    waitForSuccess('@exportDownload');
+    cy.get<Interception>('@exportDownload').then(interception => {
       const bodyStr = Buffer.from(interception.response?.body, 'binary').toString('utf8');
       expect(bodyStr).to.include(`${lightUnit.shortname}.vorn`);
     });

@@ -22,7 +22,8 @@
   "hour": "Uhr",
   "id": "ID",
   "unit-patch": {
-    "duplicate-unit-id": "Aufgabe bereits im Arbeitsbereich vorhanden"
+    "duplicate-unit-id": "Aufgabe bereits im Arbeitsbereich vorhanden",
+    "not-submitted": "Keine Abgabe in diese Drop-Box bekannt, Aufgabe kann nicht zurückgegeben werden"
   },
   "unit-upload": {
     "api-error": {
@@ -49,6 +50,16 @@
     "add-comments": "Kommentare hinzufügen",
     "export-votes-warning": "Hinweis: Voten (Daumen hoch/runter) werden beim Export nicht übernommen.",
     "add-rich-notes": "Begleitmaterial hinzufügen",
+    "add-metadata-and-items": "Metadaten und Items hinzufügen",
+    "add-metadata": "Metadaten hinzufügen",
+    "add-items": "Items hinzufügen",
+    "add-coding-scheme": "Kodierschema hinzufügen",
+    "no-metadata-and-items": "Keine der gewählten Aufgaben hat Metadaten oder Items",
+    "no-metadata": "Keine der gewählten Aufgaben hat Metadaten",
+    "no-items": "Keine der gewählten Aufgaben hat Items",
+    "no-coding-scheme": "Keine der gewählten Aufgaben hat ein Kodierschema",
+    "no-comments": "Keine der gewählten Aufgaben hat Kommentare",
+    "no-rich-notes": "Keine der gewählten Aufgaben hat Begleitmaterial",
     "no-player": "Keine Aufgabe hat einen gültigen Player gesetzt",
     "add-login": "Logins generieren",
     "add-test-takers-review": "Anzahl für Review",
@@ -145,7 +156,8 @@
       "upload-units": "Import Aufgaben - Ergebnis",
       "unit-patch-workspace": "Aufgaben verschieben - unvollständig",
       "unit-copy": "Aufgaben kopieren - unvollständig",
-      "unit-submit": "Aufgaben abgeben - unvollständig"
+      "unit-submit": "Aufgaben abgeben - unvollständig",
+      "unit-return-submitted": "Aufgaben zurückgeben - unvollständig"
     }
   },
   "directives": {
@@ -763,6 +775,9 @@
     "no-schemer": "Kein gültiger Editor für das Antwortschema zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-editor": "Kein gültiger Editor zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
     "no-player": "Kein gültiger Player zugewiesen. Bitte gehen Sie zu \"Eigenschaften\".",
+    "definition-type-incompatible": "Der Player \"{{player}}\" gibt an, das Format \"{{definitionType}}\" dieser Aufgabe nicht zu lesen. Die Darstellung kann fehlerhaft sein.",
+    "definition-type-alternatives": "Laut eigener Angabe lesen es: {{players}}. Der Player lässt sich unter \"Eigenschaften\" wechseln.",
+    "definition-type-no-alternative": "Kein installierter Player gibt an, dieses Format zu lesen.",
     "no-widget": "Kein passendes Widget für den Typ \"{{widgetType}}\" gefunden.",
     "player-send-page-navigation-request": "Player sendet PageNavigationRequest: \"{{target}}\"",
     "player-send-unit-navigation-request": "Player sendet UnitNavigationRequest: \"{{target}}\"",
@@ -968,6 +983,7 @@
   "booklet-config": {
     "show-xml-params": "XML Parameter zeigen",
     "hint-default": "Standard:",
+    "is-default": "(Standard)",
     "pagingMode": {
       "label": "Darstellung der Seiten einer Unit",
       "separate": "Blättern",
@@ -1161,6 +1177,7 @@
   "print": {
     "stateLabel": "Status",
     "printOptions": "Druckoptionen",
+    "printLandscape": "Im Querformat drucken",
     "printMetadata": "Metadaten drucken",
     "printProperties": "Eigenschaften drucken",
     "printComments":  "Kommentare drucken",
@@ -1209,6 +1226,7 @@
     "end": "Ende der Aufgabenfolge",
     "end-page": "Endseite",
     "pages-count-info": "Anzahl der Aufgaben bzw. Seiten: {{count}}",
+    "access-denied": "Kein Zugriff auf den Arbeitsbereich dieses Reviews. Bitte abmelden und das Review über seinen Link mit Kennwort öffnen.",
     "title": "Review einer Aufgabenfolge",
     "booklet-config": "Einstellungen für Darstellung und Ablauf",
     "enter-comment-name": "Bitte Namen eingeben",
@@ -1238,7 +1256,14 @@
     "message": "Der Player hat einen Laufzeitfehler gemeldet.",
     "code": "Fehlercode",
     "session-id": "Session-ID",
-    "close": "Schließen"
+    "close": "Schließen",
+    "codes": {
+      "GEOGEBRA_NOT_LOADING": "Das GeoGebra-Paket konnte nicht geladen werden. Es fehlt auf diesem Studio oder ist gerade nicht erreichbar. Die Geometrie-Elemente dieser Aufgabe bleiben deshalb leer. Bitte wenden Sie sich an die Administration.",
+      "GEOGEBRA_TIMEOUT": "Ein Geometrie-Element wurde nicht rechtzeitig fertig geladen. Mögliche Ursachen sind eine langsame Verbindung, ein unvollständiges GeoGebra-Paket oder eine fehlerhafte GeoGebra-Datei. Laden Sie die Aufgabe neu. Tritt der Fehler wieder auf, muss die GeoGebra-Datei im Editor geprüft werden. Wenden Sie sich sonst an die Administration.",
+      "IMAGE_NOT_LOADING": "Ein Bild dieser Aufgabe kann nicht angezeigt werden. Die Bilddatei ist vermutlich beschädigt. Das Bild muss im Editor neu hochgeladen werden.",
+      "MEDIA_TIMEOUT": "Ein Audio oder Video dieser Aufgabe wurde nicht rechtzeitig geladen. Mögliche Ursachen sind eine sehr große Datei oder ein Format, das der Browser nicht abspielen kann. Laden Sie die Aufgabe neu. Tritt der Fehler wieder auf, muss die Datei im Editor geprüft werden.",
+      "MEDIA_DURATION_ERROR": "Bei einem Audio oder Video lässt sich die Länge nicht bestimmen. Das kommt etwa bei Aufnahmen vor, die direkt im Browser entstanden sind. Die Datei muss in einem anderen Format, zum Beispiel MP3 oder MP4, gespeichert und im Editor neu hochgeladen werden."
+    }
   },
   "unit": {
     "id" : "ID",

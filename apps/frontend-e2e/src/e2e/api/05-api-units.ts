@@ -1,6 +1,9 @@
+import type { UnitInViewDto } from '@studio-lite-lib/api-dto';
 import {
+  AccessLevel,
   DefinitionUnit,
   CopyUnit,
+  UnitData,
   WsSettings
 } from '../../support/testData';
 import {
@@ -85,7 +88,9 @@ describe('Unit API tests', () => {
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
         expect(resp.status).to.equal(200);
-        expect(resp.body.length).to.equal(2);
+        // Its own units, not the total: a database with leftovers holds more (#1750)
+        const ids = (resp.body as UnitInViewDto[]).map(u => u.id);
+        expect(ids).to.include.members([Cypress.expose(unit1.shortname), Cypress.expose(unit2.shortname)]);
       });
     });
 
@@ -486,7 +491,7 @@ describe('Unit API tests', () => {
     );
 
     it(
-      '500 negative test: should return a server error when attempting to update properties' +
+      '404 negative test: should refuse to update properties' +
         ' for a non-existent unit',
       () => {
         cy.updateUnitPropertiesAPI(
@@ -495,7 +500,7 @@ describe('Unit API tests', () => {
           entry1,
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(404);
         });
       }
     );
@@ -586,8 +591,8 @@ describe('Unit API tests', () => {
     );
 
     it(
-      '500/200 negative test: should return success but fail to move a unit that' +
-        ' is already in the target workspace',
+      '404 negative test: should refuse to move a unit out of a workspace it is not in' +
+        ' (it is already in the target workspace)',
       () => {
         cy.moveToAPI(
           Cypress.expose(ws1.id),
@@ -595,20 +600,20 @@ describe('Unit API tests', () => {
           Cypress.expose(unit2.shortname),
           Cypress.expose(`token_${userGroupAdmin.username}`)
         ).then(resp => {
-          expect(resp.status).to.be.equal(200);
-          // expect(resp.status).to.be.equal(500); // should
+          // Was 200 until #1775: the units of a move are now held to the workspace of the path.
+          expect(resp.status).to.be.equal(404);
         });
       }
     );
 
-    it('500 negative test: should return a server error when attempting to move a non-existent unit', () => {
+    it('404 negative test: should refuse to move a non-existent unit', () => {
       cy.moveToAPI(
         Cypress.expose(ws1.id),
         Cypress.expose(ws2.id),
         noId,
         Cypress.expose(`token_${userGroupAdmin.username}`)
       ).then(resp => {
-        expect(resp.status).to.be.equal(500);
+        expect(resp.status).to.be.equal(404);
       });
     });
 
@@ -626,6 +631,487 @@ describe('Unit API tests', () => {
         });
       }
     );
+  });
+
+  describe('#1775 a unit asked for under a workspace it is not in', () => {
+    // unit1 lives in ws2 since 38. The admin may enter ws1 as well, so every guard that asks about
+    // the workspace alone lets the calls through; what answers 404 is that ws1 does not hold unit1.
+    // None of them gets as far as changing anything.
+    const routes: {
+      method: string;
+      route: (unit: string) => string;
+      body?: (unit: string) => object;
+      action?: string
+    }[] = [
+      { method: 'GET', route: unit => `units/${unit}/properties` },
+      { method: 'GET', route: unit => `units/${unit}/metadata` },
+      { method: 'GET', route: unit => `units/${unit}/definition` },
+      { method: 'GET', route: unit => `units/${unit}/scheme` },
+      { method: 'PATCH', route: unit => `units/${unit}/properties`, body: () => ({}) },
+      { method: 'PATCH', route: unit => `units/${unit}/definition`, body: () => ({}) },
+      { method: 'PATCH', route: unit => `units/${unit}/scheme`, body: () => ({}) },
+      { method: 'DELETE', route: unit => `units/${unit}` },
+      { method: 'DELETE', route: unit => `units?id=${unit}` },
+      {
+        method: 'PATCH',
+        route: () => 'units/workspace-id',
+        body: unit => ({ ids: [Number(unit)], targetId: Number(Cypress.expose(ws2.id)) })
+      },
+      {
+        method: 'PATCH',
+        route: () => 'units/drop-box-history',
+        body: unit => ({ ids: [Number(unit)], targetId: Number(Cypress.expose(ws2.id)) }),
+        action: 'submit'
+      },
+      {
+        method: 'PATCH',
+        route: () => 'units/drop-box-history',
+        body: unit => ({ ids: [Number(unit)] }),
+        action: 'return'
+      },
+      { method: 'GET', route: unit => `units/${unit}/rich-notes` },
+      { method: 'POST', route: unit => `units/${unit}/rich-notes`, body: unit => ({ unitId: Number(unit) }) },
+      { method: 'PATCH', route: unit => `units/${unit}/rich-notes/1`, body: () => ({}) },
+      { method: 'PATCH', route: unit => `units/${unit}/rich-notes/1/items`, body: () => ({ itemReferences: [] }) },
+      { method: 'DELETE', route: unit => `units/${unit}/rich-notes/1` },
+      { method: 'GET', route: unit => `units/${unit}/items` },
+      { method: 'POST', route: unit => `units/${unit}/items`, body: () => ({}) },
+      { method: 'DELETE', route: unit => `units/${unit}/items/no-item` },
+      { method: 'GET', route: unit => `units/${unit}/items/comments` },
+      { method: 'GET', route: unit => `units/${unit}/items/no-item/metadata` },
+      { method: 'POST', route: unit => `units/${unit}/items/no-item/metadata`, body: () => ({}) },
+      { method: 'DELETE', route: unit => `units/${unit}/items/no-item/metadata/1` }
+    ];
+
+    routes.forEach(({
+      method, route, body, action
+    }) => {
+      const name = `${method} ${route(':unit_id')}${action ? ` (${action})` : ''}`;
+      it(`404 negative test: ${name} should refuse a unit of another workspace`, () => {
+        const unit = `${Cypress.expose(unit1.shortname)}`;
+        cy.requestWorkspaceAPI(
+          method,
+          `${Cypress.expose(ws1.id)}/${route(unit)}`,
+          Cypress.expose(`token_${Cypress.expose('username')}`),
+          body?.(unit)
+        ).then(resp => {
+          expect(resp.status).to.equal(404);
+        });
+      });
+    });
+
+    it('200 positive test: should still serve the unit under its own workspace', () => {
+      // The 404s above are about the workspace, not a unit that is gone.
+      cy.requestWorkspaceAPI(
+        'GET',
+        `${Cypress.expose(ws2.id)}/units/${Cypress.expose(unit1.shortname)}/definition`,
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+      });
+    });
+  });
+
+  describe('#1778 an item, a note or a metadata row asked for under another unit', () => {
+    // Two units of ws1, so every guard that asks about the workspace, or holds the unit to it, lets
+    // the calls through. What answers 404 is that the item, the note or the row is not one of the
+    // unit -- or, for the row, of the item -- in the path.
+    const unitA: UnitData = { shortname: 'D1778A', name: 'Eigene', group: 'Group1' };
+    const unitB: UnitData = { shortname: 'D1778B', name: 'Andere', group: 'Group1' };
+    const token = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const ws = () => Cypress.expose(ws1.id);
+    const ids = {
+      unitA: '', unitB: '', itemA: '', otherItemA: '', itemB: '', noteA: '', rowA: ''
+    };
+    const under = (unit: string, route: string) => `${ws()}/units/${unit}/${route}`;
+    const noteContent = 'Notiz zu #1778';
+
+    const notesOfA = () => cy.requestWorkspaceAPI('GET', under(ids.unitA, 'rich-notes'), token())
+      .then(resp => resp.body.notes as { id: number; content: string; itemReferences: string[] }[]);
+
+    before(() => {
+      cy.createUnitAPI(ws(), unitA, token()).then(resp => {
+        ids.unitA = `${resp.body}`;
+      });
+      cy.createUnitAPI(ws(), unitB, token()).then(resp => {
+        ids.unitB = `${resp.body}`;
+      });
+      cy.then(() => {
+        cy.requestWorkspaceAPI('POST', under(ids.unitA, 'items'), token(), { id: 'item_1' }).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.itemA = resp.body;
+        });
+        cy.requestWorkspaceAPI('POST', under(ids.unitA, 'items'), token(), { id: 'item_2' }).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.otherItemA = resp.body;
+        });
+        cy.requestWorkspaceAPI('POST', under(ids.unitB, 'items'), token(), { id: 'item_1' }).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.itemB = resp.body;
+        });
+      });
+      cy.then(() => {
+        cy.requestWorkspaceAPI(
+          'POST',
+          under(ids.unitA, `items/${ids.itemA}/metadata`),
+          token(),
+          { profileId: 'profile-1778', entries: [] }
+        ).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.rowA = `${resp.body}`;
+        });
+        cy.requestWorkspaceAPI(
+          'POST',
+          under(ids.unitA, 'rich-notes'),
+          token(),
+          {
+            unitId: Number(ids.unitA), tagId: 'tag-1778', content: noteContent, itemReferences: [ids.itemA]
+          }
+        ).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.noteA = `${resp.body}`;
+        });
+      });
+    });
+
+    after(() => {
+      cy.deleteUnitsAPI([ids.unitA, ids.unitB], ws(), token());
+    });
+
+    const refused: { name: string; method: string; route: () => string; body?: object }[] = [
+      {
+        name: 'DELETE an item of A under B',
+        method: 'DELETE',
+        route: () => under(ids.unitB, `items/${ids.itemA}`)
+      },
+      {
+        name: 'PATCH a note of A under B',
+        method: 'PATCH',
+        route: () => under(ids.unitB, `rich-notes/${ids.noteA}`),
+        body: { content: 'überschrieben' }
+      },
+      {
+        name: 'PATCH the items of a note of A under B',
+        method: 'PATCH',
+        route: () => under(ids.unitB, `rich-notes/${ids.noteA}/items`),
+        body: { itemReferences: [] }
+      },
+      {
+        name: 'DELETE a note of A under B',
+        method: 'DELETE',
+        route: () => under(ids.unitB, `rich-notes/${ids.noteA}`)
+      },
+      {
+        name: 'GET the metadata of an item of A under B',
+        method: 'GET',
+        route: () => under(ids.unitB, `items/${ids.itemA}/metadata`)
+      },
+      {
+        name: 'POST metadata to an item of A under B',
+        method: 'POST',
+        route: () => under(ids.unitB, `items/${ids.itemA}/metadata`),
+        body: { profileId: 'profile-1778-b', entries: [] }
+      },
+      {
+        name: 'DELETE a metadata row of A under B',
+        method: 'DELETE',
+        route: () => under(ids.unitB, `items/${ids.itemA}/metadata/${ids.rowA}`)
+      },
+      {
+        name: 'DELETE a metadata row under another item of its unit',
+        method: 'DELETE',
+        route: () => under(ids.unitA, `items/${ids.otherItemA}/metadata/${ids.rowA}`)
+      },
+      {
+        name: 'DELETE an item whose uuid is not spelled as one',
+        method: 'DELETE',
+        route: () => under(ids.unitA, 'items/no-item')
+      }
+    ];
+
+    refused.forEach(({
+      name, method, route, body
+    }) => {
+      it(`404 negative test: should refuse to ${name}`, () => {
+        cy.requestWorkspaceAPI(method, route(), token(), body).then(resp => {
+          expect(resp.status).to.equal(404);
+        });
+      });
+    });
+
+    it('200 positive test: should have left the item, its metadata row and the note of A as they were', () => {
+      cy.requestWorkspaceAPI('GET', under(ids.unitA, 'items'), token()).then(resp => {
+        expect(resp.status).to.equal(200);
+        const item = (resp.body as { uuid: string; profiles: { id: number }[] }[])
+          .find(unitItem => unitItem.uuid === ids.itemA);
+        expect(item?.profiles.map(row => `${row.id}`)).to.deep.equal([ids.rowA]);
+      });
+      notesOfA().then(notes => {
+        expect(notes.map(({ id, content, itemReferences }) => ({ id: `${id}`, content, itemReferences })))
+          .to.deep.equal([{ id: ids.noteA, content: noteContent, itemReferences: [ids.itemA] }]);
+      });
+    });
+
+    it('200 positive test: should not tie a note to an item of another unit', () => {
+      cy.requestWorkspaceAPI(
+        'PATCH',
+        under(ids.unitA, `rich-notes/${ids.noteA}/items`),
+        token(),
+        { itemReferences: [ids.itemA, ids.itemB] }
+      ).its('status').should('equal', 200);
+      notesOfA().then(notes => {
+        expect(notes[0].itemReferences).to.deep.equal([ids.itemA]);
+      });
+    });
+
+    it('200 positive test: should still let the note, the row and the item be changed under their own path', () => {
+      cy.requestWorkspaceAPI('PATCH', under(ids.unitA, `rich-notes/${ids.noteA}`), token(), { content: 'geändert' })
+        .its('status').should('equal', 200);
+      cy.requestWorkspaceAPI('DELETE', under(ids.unitA, `items/${ids.itemA}/metadata/${ids.rowA}`), token())
+        .its('status').should('equal', 200);
+      cy.requestWorkspaceAPI('DELETE', under(ids.unitA, `items/${ids.otherItemA}`), token())
+        .its('status').should('equal', 200);
+      notesOfA().then(notes => {
+        expect(notes[0].content).to.equal('geändert');
+      });
+    });
+  });
+
+  describe('#1816 saving the metadata of a unit with ids of another unit in the body', () => {
+    // Saving A's metadata names its items and rows by the ids the body carries. An item of B named
+    // there was updated -- renamed, moved into A -- and a row's unitId or unitItemUuid hung it on B.
+    const unitA: UnitData = { shortname: 'D1816A', name: 'Eigene', group: 'Group1' };
+    const unitB: UnitData = { shortname: 'D1816B', name: 'Andere', group: 'Group1' };
+    const token = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const ws = () => Cypress.expose(ws1.id);
+    const ids = {
+      unitA: '', unitB: '', itemA: '', itemB: ''
+    };
+    const saveMetadataOfA = (metadata: object) => cy.requestWorkspaceAPI(
+      'PATCH',
+      `${ws()}/units/${ids.unitA}/properties`,
+      token(),
+      { id: Number(ids.unitA), metadata }
+    );
+    type Row = { profileId: string };
+    type Item = { uuid: string; id: string; unitId: number; profiles: Row[] };
+    const metadataOf = (unitId: string) => cy.requestWorkspaceAPI('GET', `${ws()}/units/${unitId}/metadata`, token())
+      .then(resp => resp.body as { profiles: Row[]; items: Item[] });
+
+    before(() => {
+      cy.createUnitAPI(ws(), unitA, token()).then(resp => {
+        ids.unitA = `${resp.body}`;
+      });
+      cy.createUnitAPI(ws(), unitB, token()).then(resp => {
+        ids.unitB = `${resp.body}`;
+      });
+      cy.then(() => {
+        cy.requestWorkspaceAPI('POST', `${ws()}/units/${ids.unitB}/items`, token(), { id: 'item_b' }).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.itemB = resp.body;
+        });
+        saveMetadataOfA({
+          profiles: [{ profileId: 'unit-profile-1816', entries: [] }],
+          items: [{ id: 'item_a', profiles: [{ profileId: 'item-profile-1816', entries: [] }] }]
+        }).its('status').should('equal', 200);
+      });
+      cy.then(() => metadataOf(ids.unitA).then(metadata => {
+        ids.itemA = metadata.items[0].uuid;
+      }));
+    });
+
+    after(() => {
+      cy.deleteUnitsAPI([ids.unitA, ids.unitB], ws(), token());
+    });
+
+    it('200 positive test: should leave an item of another unit as it was', () => {
+      saveMetadataOfA({
+        profiles: [{ profileId: 'unit-profile-1816', entries: [] }],
+        items: [
+          { uuid: ids.itemA, id: 'item_a', profiles: [{ profileId: 'item-profile-1816', entries: [] }] },
+          {
+            uuid: ids.itemB, id: 'umbenannt', unitId: Number(ids.unitA), profiles: []
+          }
+        ]
+      }).its('status').should('equal', 200);
+      metadataOf(ids.unitB).then(metadata => {
+        expect(metadata.items.map(item => ({ uuid: item.uuid, id: item.id })))
+          .to.deep.equal([{ uuid: ids.itemB, id: 'item_b' }]);
+      });
+      metadataOf(ids.unitA).then(metadata => {
+        expect(metadata.items.map(item => item.uuid)).to.deep.equal([ids.itemA]);
+      });
+    });
+
+    it('200 positive test: should keep the metadata rows with their unit and item, whatever the body names', () => {
+      saveMetadataOfA({
+        profiles: [{ profileId: 'unit-profile-1816', unitId: Number(ids.unitB), entries: [] }],
+        items: [{
+          uuid: ids.itemA,
+          id: 'item_a',
+          profiles: [{ profileId: 'item-profile-1816', unitItemUuid: ids.itemB, entries: [] }]
+        }]
+      }).its('status').should('equal', 200);
+      metadataOf(ids.unitA).then(metadata => {
+        expect(metadata.profiles.map(row => row.profileId)).to.include('unit-profile-1816');
+        expect(metadata.items[0].profiles.map(row => row.profileId)).to.deep.equal(['item-profile-1816']);
+      });
+      metadataOf(ids.unitB).then(metadata => {
+        expect(metadata.profiles || []).to.deep.equal([]);
+        expect(metadata.items[0].profiles || []).to.deep.equal([]);
+      });
+    });
+  });
+
+  describe('#1779, #1780 units that cross into another workspace', () => {
+    // A unit in ws3 (group2), where userzwei has no access. fadmin, who administers group2, is
+    // assigned there for the time of these tests; ws3 has no users before and after them.
+    const foreignUnit: UnitData = { shortname: 'D1779', name: 'Fremd', group: 'Group1' };
+    const adminToken = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const groupAdminToken = () => Cypress.expose(`token_${userGroupAdmin.username}`);
+    const foreignUnitId = () => Number(Cypress.expose(foreignUnit.shortname));
+
+    before(() => {
+      cy.setUsersOfWsAPI(
+        Cypress.expose(ws3.id),
+        [{ id: Cypress.expose(`id_${Cypress.expose('username')}`), access: AccessLevel.Admin }],
+        adminToken()
+      ).its('status').should('equal', 200);
+      cy.createUnitAPI(Cypress.expose(ws3.id), foreignUnit, adminToken()).then(resp => {
+        expect(resp.status).to.equal(201);
+        Cypress.expose(foreignUnit.shortname, resp.body);
+      });
+    });
+
+    after(() => {
+      cy.deleteUnitsAPI([`${foreignUnitId()}`], Cypress.expose(ws3.id), adminToken());
+      cy.setUsersOfWsAPI(Cypress.expose(ws3.id), [], adminToken());
+    });
+
+    it('404 negative test: should not copy a unit of a workspace the user cannot enter (#1779)', () => {
+      cy.requestWorkspaceAPI(
+        'POST',
+        `${Cypress.expose(ws1.id)}/units`,
+        groupAdminToken(),
+        { ids: [foreignUnitId()], addComments: true }
+      ).its('status').should('equal', 404);
+    });
+
+    it('404 negative test: should not create a unit from one of a workspace the user cannot enter (#1779)', () => {
+      cy.requestWorkspaceAPI(
+        'POST',
+        `${Cypress.expose(ws1.id)}/units`,
+        groupAdminToken(),
+        { key: 'D1779_FROM', name: 'Fremd', createFrom: foreignUnitId() }
+      ).its('status').should('equal', 404);
+    });
+
+    it('201 positive test: should create a new unit, not overwrite the one whose id is sent along (#1779)', () => {
+      cy.requestWorkspaceAPI(
+        'POST',
+        `${Cypress.expose(ws1.id)}/units`,
+        groupAdminToken(),
+        { key: 'D1779_ID', name: 'Fremd', id: foreignUnitId() }
+      ).then(resp => {
+        expect(resp.status).to.equal(201);
+        expect(resp.body).not.to.equal(foreignUnitId());
+        cy.deleteUnitsAPI([`${resp.body}`], Cypress.expose(ws1.id), groupAdminToken())
+          .its('status').should('equal', 200);
+      });
+      // The unit of ws3 is still there, unchanged
+      cy.requestWorkspaceAPI(
+        'GET',
+        `${Cypress.expose(ws3.id)}/units/${foreignUnitId()}/properties`,
+        adminToken()
+      ).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body.key).to.equal(foreignUnit.shortname);
+      });
+    });
+
+    it('201 positive test: should create a unit from one of another workspace the user can enter', () => {
+      cy.requestWorkspaceAPI(
+        'POST',
+        `${Cypress.expose(ws1.id)}/units`,
+        adminToken(),
+        { key: 'D1779_FROM', name: 'Fremd', createFrom: foreignUnitId() }
+      ).then(resp => {
+        expect(resp.status).to.equal(201);
+        cy.deleteUnitsAPI([`${resp.body}`], Cypress.expose(ws1.id), adminToken())
+          .its('status').should('equal', 200);
+      });
+    });
+
+    it('403 negative test: should not move a unit into a workspace the user cannot manage units in (#1780)', () => {
+      cy.moveToAPI(
+        Cypress.expose(ws2.id),
+        Cypress.expose(ws3.id),
+        Cypress.expose(unit2.shortname),
+        groupAdminToken()
+      ).its('status').should('equal', 403);
+      // Nothing was moved: unit2 is still in ws2
+      cy.requestWorkspaceAPI(
+        'GET',
+        `${Cypress.expose(ws2.id)}/units/${Cypress.expose(unit2.shortname)}/properties`,
+        groupAdminToken()
+      ).its('status').should('equal', 200);
+    });
+  });
+
+  // A unit submitted to a drop box from one workspace, returned, and later submitted to the same
+  // drop box from another, has two submissions there. Returning it picked either of them, so it
+  // could go back to the first workspace instead of the one it came from (#1806).
+  describe('#1806 returning a unit from a drop box', () => {
+    const token = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const unit: UnitData = { shortname: 'D1806', name: 'Abgabe', group: '' };
+    const ids = {
+      first: '', second: '', dropBox: '', unit: ''
+    };
+    const createWorkspace = (name: string, assign: (id: string) => void) => cy
+      .createWsAPI(Cypress.expose(groupVera.id), { id: '', name }, token())
+      .then(resp => {
+        expect(resp.status).to.equal(201);
+        assign(`${resp.body}`);
+        const adminId = Cypress.expose(`id_${Cypress.expose('username')}`);
+        cy.updateUsersOfWsAPI(`${resp.body}`, AccessLevel.Admin, adminId, token());
+      });
+    const submit = (from: string, to: string) => cy.submitUnitsAPI(from, to, ids.unit, token())
+      .its('status').should('equal', 200);
+    const unitKeysOf = (wsId: string) => cy.getUnitsByWsAPI(wsId, token())
+      .then(resp => (resp.body as { key: string }[]).map(u => u.key));
+
+    before(() => {
+      createWorkspace('Erster-1806', id => { ids.first = id; });
+      createWorkspace('Zweiter-1806', id => { ids.second = id; });
+      createWorkspace('Ablage-1806', id => { ids.dropBox = id; });
+      cy.then(() => {
+        cy.createUnitAPI(ids.first, unit, token()).then(resp => {
+          ids.unit = `${resp.body}`;
+        });
+        // First submission, from the first workspace, and its return
+        cy.dropboxWsAPI(ids.first, ids.dropBox, token()).its('status').should('equal', 200);
+        cy.dropboxWsAPI(ids.second, ids.dropBox, token()).its('status').should('equal', 200);
+      });
+      cy.then(() => {
+        submit(ids.first, ids.dropBox);
+        submit(ids.dropBox, '');
+        // To the second workspace without leaving the history behind: as a submission, too
+        cy.dropboxWsAPI(ids.first, ids.second, token()).its('status').should('equal', 200);
+        submit(ids.first, ids.second);
+        // Second submission to the drop box, from the second workspace
+        submit(ids.second, ids.dropBox);
+      });
+    });
+
+    after(() => {
+      cy.deleteWsAPI([ids.first, ids.second, ids.dropBox], token());
+    });
+
+    it('200 positive test: should return the unit to the workspace of its latest submission', () => {
+      submit(ids.dropBox, '');
+      unitKeysOf(ids.second).should('include', unit.shortname);
+      unitKeysOf(ids.first).should('not.include', unit.shortname);
+    });
   });
 
   describe('39. PATCH /api/workspaces/{workspace_id}/name', () => {
@@ -666,7 +1152,7 @@ describe('Unit API tests', () => {
     let copyUnit: CopyUnit;
     before(() => {
       copyUnit = {
-        createForm: parseInt(`${Cypress.expose(unit2.shortname)}`, 10),
+        createFrom: parseInt(`${Cypress.expose(unit2.shortname)}`, 10),
         groupName: 'Group_Copy',
         key: `${unit2.shortname}_copy`,
         name: unit2.name
@@ -819,13 +1305,13 @@ describe('Unit API tests', () => {
       });
     });
 
-    it('500 negative test: should return a server error when requesting a unit scheme using an invalid unit ID', () => {
+    it('404 negative test: should refuse to return a unit scheme for an invalid unit ID', () => {
       cy.getUnitSchemeAPI(
         noId,
         Cypress.expose(ws1.id),
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
-        expect(resp.status).to.equal(500);
+        expect(resp.status).to.equal(404);
       });
     });
 
@@ -882,7 +1368,7 @@ describe('Unit API tests', () => {
     });
 
     it(
-      '500 negative test: should return a server error when attempting ' +
+      '404 negative test: should refuse ' +
         'to update a unit definition without a valid unit ID',
       () => {
         cy.updateUnitDefinitionAPI(
@@ -890,7 +1376,7 @@ describe('Unit API tests', () => {
           Cypress.expose(ws1.id),
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(404);
         });
       }
     );
@@ -951,7 +1437,7 @@ describe('Unit API tests', () => {
   // ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
   describe('45. GET /api/workspaces/{workspace_id}/units/{id}/definition', () => {
     it(
-      '500 negative test: should return a server error when attempting to retrieve ' +
+      '404 negative test: should refuse to retrieve ' +
         'a unit definition without a valid unit ID',
       () => {
         cy.getUnitDefinitionAPI(
@@ -959,7 +1445,7 @@ describe('Unit API tests', () => {
           Cypress.expose(ws1.id),
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(404);
         });
       }
     );
@@ -1011,7 +1497,7 @@ describe('Unit API tests', () => {
 
   describe('46. PATCH /api/workspaces/{workspace_id}/units/{id}/scheme', () => {
     it(
-      '500 negative test: should return a server error when attempting to update' +
+      '404 negative test: should refuse to update' +
         ' variable coding without a valid unit ID',
       () => {
         cy.updateUnitSchemeAPI(
@@ -1019,7 +1505,7 @@ describe('Unit API tests', () => {
           Cypress.expose(ws1.id),
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(404);
         });
       }
     );
@@ -1325,7 +1811,7 @@ describe('Unit API tests', () => {
       });
 
       it(
-        '500 negative test: should return a server error when attempting to assign' +
+        '404 negative test: should refuse to assign' +
           ' an unit state without a valid unit ID',
         () => {
           cy.updateUnitStateAPI(
@@ -1334,7 +1820,7 @@ describe('Unit API tests', () => {
             '0',
             Cypress.expose(`token_${Cypress.expose('username')}`)
           ).then(resp => {
-            expect(resp.status).to.equal(500);
+            expect(resp.status).to.equal(404);
           });
         }
       );
@@ -1402,20 +1888,31 @@ describe('Unit API tests', () => {
         });
       });
 
-      it(
-        '500/200 negative test: should return success despite designating a non-existent workspace' +
-          ' as the dropbox target',
-        () => {
-          cy.dropboxWsAPI(
-            Cypress.expose(ws1.id),
-            noId,
-            Cypress.expose(`token_${Cypress.expose('username')}`)
-          ).then(resp => {
-            expect(resp.status).to.equal(200);
-            // expect(resp.status).to.equal(500);  // should
-          });
-        }
-      );
+      // A drop box is another workspace of the same group; one that does not exist, one of another
+      // group and the workspace itself are answered alike, as not found (#1805)
+      it('404 negative test: should refuse a non-existent workspace as the dropbox target', () => {
+        cy.dropboxWsAPI(
+          Cypress.expose(ws1.id),
+          noId,
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).its('status').should('equal', 404);
+      });
+
+      it('404 negative test: should refuse a workspace of another group as the dropbox target', () => {
+        cy.dropboxWsAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(ws3.id),
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).its('status').should('equal', 404);
+      });
+
+      it('404 negative test: should refuse the workspace itself as its dropbox', () => {
+        cy.dropboxWsAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(ws1.id),
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).its('status').should('equal', 404);
+      });
 
       it(
         '200 positive test: should allow an authorized user to designate a workspace as ' +
@@ -1459,20 +1956,19 @@ describe('Unit API tests', () => {
         }
       );
 
-      it('500 negative test: should return error when attempting to submit units without a valid unit ID', () => {
+      it('404 negative test: should refuse to submit units without a valid unit ID', () => {
         cy.submitUnitsAPI(
           Cypress.expose(ws1.id),
           Cypress.expose(ws2.id),
           noId,
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
-          expect(resp.status).to.equal(500);
+          expect(resp.status).to.equal(404);
         });
       });
 
       it(
-        '500 negative test: should return error when attempting to submit units ' +
-          'without a destination workspace target',
+        '403 negative test: should refuse to submit units to a workspace that does not exist',
         () => {
           cy.submitUnitsAPI(
             Cypress.expose(ws1.id),
@@ -1480,10 +1976,22 @@ describe('Unit API tests', () => {
             Cypress.expose(unit3.shortname),
             Cypress.expose(`token_${Cypress.expose('username')}`)
           ).then(resp => {
-            expect(resp.status).to.equal(500);
+            // Was 500 until #1780: the target has to be the drop box of the workspace.
+            expect(resp.status).to.equal(403);
           });
         }
       );
+
+      it('403 negative test: should refuse to submit units to a workspace that is not the drop box (#1780)', () => {
+        cy.submitUnitsAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(ws3.id),
+          Cypress.expose(unit3.shortname),
+          Cypress.expose(`token_${Cypress.expose('username')}`)
+        ).then(resp => {
+          expect(resp.status).to.equal(403);
+        });
+      });
 
       it(
         '200 positive test: should successfully submit a unit from an origin workspace' +
@@ -1529,7 +2037,7 @@ describe('Unit API tests', () => {
       );
 
       it(
-        '500 negative test: should return error when attempting to retrieve unit submission ' +
+        '404 negative test: should refuse to return a unit submission ' +
           'for an invalid unit ID',
         () => {
           cy.submitUnitsAPI(
@@ -1538,7 +2046,7 @@ describe('Unit API tests', () => {
             noId,
             Cypress.expose(`token_${Cypress.expose('username')}`)
           ).then(resp => {
-            expect(resp.status).to.equal(500);
+            expect(resp.status).to.equal(404);
           });
         }
       );
@@ -1557,6 +2065,40 @@ describe('Unit API tests', () => {
           });
         }
       );
+
+      // unit2 was created in ws2, the drop box of ws1: it was never submitted, so it has nowhere to
+      // go back to. Until #1793 that ended the whole request in a 500.
+      it('200 positive test: should return the submitted units and report one that was never submitted (#1793)', () => {
+        const token = Cypress.expose(`token_${Cypress.expose('username')}`);
+        cy.submitUnitsAPI(
+          Cypress.expose(ws1.id),
+          Cypress.expose(ws2.id),
+          Cypress.expose(unit3.shortname),
+          token
+        ).its('status').should('equal', 200);
+        cy.requestWorkspaceAPI(
+          'PATCH',
+          `${Cypress.expose(ws2.id)}/units/drop-box-history`,
+          token,
+          { ids: [Number(Cypress.expose(unit3.shortname)), Number(Cypress.expose(unit2.shortname))] }
+        ).then(resp => {
+          expect(resp.status).to.equal(200);
+          expect(resp.body.messages).to.deep.equal([
+            { objectKey: unit2.shortname, messageKey: 'unit-patch.not-submitted' }
+          ]);
+        });
+        // unit3 is back in ws1, unit2 stays in ws2
+        cy.requestWorkspaceAPI(
+          'GET',
+          `${Cypress.expose(ws1.id)}/units/${Cypress.expose(unit3.shortname)}/properties`,
+          token
+        ).its('status').should('equal', 200);
+        cy.requestWorkspaceAPI(
+          'GET',
+          `${Cypress.expose(ws2.id)}/units/${Cypress.expose(unit2.shortname)}/properties`,
+          token
+        ).its('status').should('equal', 200);
+      });
     });
   });
 });

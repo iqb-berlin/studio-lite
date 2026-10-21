@@ -2,6 +2,11 @@ const path = require('path');
 
 module.exports = {
   module: {
+    parser: {
+      json: {
+        namedExports: true
+      }
+    },
     rules: [
       {
         test: /\.(js|ts)$/,

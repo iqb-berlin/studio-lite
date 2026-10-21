@@ -89,6 +89,17 @@ export class UnitItemService {
     return this.repo(manager).findOneBy({ uuid: uuid });
   }
 
+  /** Whether the item is one of the unit's -- false as well for an item that does not exist. */
+  async isInUnit(uuid: string, unitId: number): Promise<boolean> {
+    return this.unitItemRepository.exists({ where: { uuid: uuid, unitId: unitId } });
+  }
+
+  /** The items of all the given units, without their metadata, in one query. */
+  async getAllByUnitIds(unitIds: number[]): Promise<UnitItemDto[]> {
+    if (!unitIds.length) return [];
+    return this.repo().find({ where: { unitId: In(unitIds) } });
+  }
+
   async getAllByUnitIdWithMetadata(unitId: number, manager?: EntityManager): Promise<UnitItemWithMetadataDto[]> {
     return Promise.all((await this.getAllByUnitId(unitId, 'id', 'ASC', manager))
       .map(async item => ({
@@ -98,23 +109,42 @@ export class UnitItemService {
     );
   }
 
-  static compare<T>(savedItems: T[], newItems: T[], key: string): { unchanged: T[]; removed: T[]; added: T[]; } {
+  /**
+   * Sorts the items of a save against the stored ones: `unchanged` are incoming items with a key the
+   * unit has, `removed` the stored ones the save no longer names, `added` incoming items without a
+   * key. An incoming key the unit does not have -- an item of another unit, or one deleted since --
+   * is `unknown`, and neither updated nor created. It used to count as unchanged, and the item it
+   * named was updated wherever it was (#1816).
+   */
+  static compare<T>(
+    savedItems: T[],
+    newItems: T[],
+    key: string
+  ): { unchanged: T[]; removed: T[]; added: T[]; unknown: T[] } {
+    const savedIds = savedItems
+      .map(item => item[key])
+      .filter(id => id !== undefined);
     const newIds = newItems
       .map(item => item[key])
-      .filter(uuid => uuid !== undefined);
+      .filter(id => id !== undefined);
     const unchanged = newItems
-      .filter(item => item[key] !== undefined && newIds.includes(item[key]));
+      .filter(item => item[key] !== undefined && savedIds.includes(item[key]));
+    const unknown = newItems
+      .filter(item => item[key] !== undefined && !savedIds.includes(item[key]));
     const removed = savedItems
       .filter(item => item[key] !== undefined && !newIds.includes(item[key]));
     const added = newItems
       .filter(item => item[key] === undefined);
-    return { unchanged, removed, added };
+    return {
+      unchanged, removed, added, unknown
+    };
   }
 
   async updateItem(uuid: string, item: UnitItemWithMetadataDto, manager?: EntityManager): Promise<void> {
     const updateItem = await this.getOneByUuid(uuid, manager);
     if (updateItem) {
-      const { profiles, ...unitItem } = item;
+      // The item stays in its unit: a unitId in the body used to move it there (#1816).
+      const { profiles, unitId, ...unitItem } = item;
       await this.repo(manager).update(uuid, this.toColumnValues(unitItem, manager));
       await this.reconcileItemProfiles(uuid, profiles || [], manager);
     }

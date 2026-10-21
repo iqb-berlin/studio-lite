@@ -177,6 +177,28 @@ describe('StartComponent', () => {
     }));
   });
 
+  describe('a refused review (#1818)', () => {
+    const accessDeniedText = (): Element | null => fixture.nativeElement.querySelector('.access-denied');
+
+    beforeEach(() => {
+      Object.assign(mockReviewService, { bookletConfig: {}, reviewName: '', workspaceName: '' });
+    });
+
+    it('should tell the user to use the review link', () => {
+      mockReviewService.accessDenied = true;
+      fixture.detectChanges();
+
+      expect(accessDeniedText()).not.toBeNull();
+    });
+
+    it('should say nothing of it for a review that loaded', () => {
+      mockReviewService.accessDenied = false;
+      fixture.detectChanges();
+
+      expect(accessDeniedText()).toBeNull();
+    });
+  });
+
   describe('Component Dependencies', () => {
     it('should inject ReviewService', () => {
       expect(component.reviewService).toBeDefined();

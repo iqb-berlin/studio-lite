@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { UnitItemMetadataDto, UnitItemWithMetadataDto } from '@studio-lite-lib/api-dto';
 import { UnitItemService } from './unit-item.service';
 import UnitItem from '../entities/unit-item.entity';
@@ -17,6 +17,7 @@ describe('UnitItemService', () => {
     find: jest.fn(),
     findOne: jest.fn(),
     findOneBy: jest.fn(),
+    exists: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
     update: jest.fn(),
@@ -143,6 +144,26 @@ describe('UnitItemService', () => {
     });
   });
 
+  describe('getAllByUnitIds', () => {
+    it('should return the items of all given units in one query, without their metadata', async () => {
+      const items = [{ id: 'a', unitId: 2 }, { id: 'b', unitId: 3 }] as unknown as UnitItem[];
+      mockRepository.find.mockResolvedValue(items);
+
+      const result = await service.getAllByUnitIds([2, 3]);
+
+      expect(repository.find).toHaveBeenCalledWith({ where: { unitId: In([2, 3]) } });
+      expect(result).toEqual(items);
+      expect(unitItemMetadataService.getAllByItemId).not.toHaveBeenCalled();
+    });
+
+    it('should not query for an empty list', async () => {
+      mockRepository.find.mockClear();
+
+      expect(await service.getAllByUnitIds([])).toEqual([]);
+      expect(repository.find).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getOneByUuid', () => {
     it('should return item by uuid', async () => {
       const uuid = 'uuid-1';
@@ -153,6 +174,21 @@ describe('UnitItemService', () => {
 
       expect(repository.findOneBy).toHaveBeenCalledWith({ uuid });
       expect(result).toEqual(item);
+    });
+  });
+
+  describe('isInUnit', () => {
+    it('should ask for the item in the unit', async () => {
+      mockRepository.exists.mockResolvedValue(true);
+
+      expect(await service.isInUnit('uuid-1', 10)).toBe(true);
+      expect(repository.exists).toHaveBeenCalledWith({ where: { uuid: 'uuid-1', unitId: 10 } });
+    });
+
+    it('should return false when the item is not in the unit', async () => {
+      mockRepository.exists.mockResolvedValue(false);
+
+      expect(await service.isInUnit('uuid-1', 11)).toBe(false);
     });
   });
 
@@ -199,6 +235,18 @@ describe('UnitItemService', () => {
       expect(unitItemMetadataService.addItemMetadata).not.toHaveBeenCalled();
       // p2 is no longer present -> removed
       expect(unitItemMetadataService.removeItemMetadata).toHaveBeenCalledWith(3, undefined);
+    });
+
+    it('should not move the item into the unit a unitId in the body names (#1816)', async () => {
+      const uuid = 'uuid-1';
+      mockRepository.findOneBy.mockResolvedValue({ uuid, unitId: 1 } as UnitItem);
+      mockRepository.update.mockResolvedValue({ affected: 1 });
+      mockUnitItemMetadataService.getAllByItemId.mockResolvedValue([]);
+
+      await service.updateItem(uuid, { uuid, id: 'item_1', unitId: 99 } as UnitItemWithMetadataDto);
+
+      expect(repository.update).toHaveBeenCalledWith(uuid, expect.not.objectContaining({ unitId: 99 }));
+      expect(repository.update).toHaveBeenCalledWith(uuid, expect.objectContaining({ id: 'item_1' }));
     });
 
     it('inserts an item profile that has no stored counterpart', async () => {
@@ -297,8 +345,16 @@ describe('UnitItemService', () => {
       const newer = [{ id: 1 }, { id: 3 }];
       const result = UnitItemService.compare(saved, newer, 'id');
       expect(result.removed).toEqual([{ id: 2 }]);
-      expect(result.unchanged).toEqual([{ id: 1 }, { id: 3 }]);
+      expect(result.unchanged).toEqual([{ id: 1 }]);
       expect(result.added).toEqual([]);
+    });
+
+    it('should not count a key the unit does not have as unchanged, but as unknown (#1816)', () => {
+      const result = UnitItemService.compare([{ id: 1 }], [{ id: 1 }, { id: 9 }, { name: 'neu' }], 'id');
+      expect(result.unchanged).toEqual([{ id: 1 }]);
+      expect(result.unknown).toEqual([{ id: 9 }]);
+      expect(result.added).toEqual([{ name: 'neu' }]);
+      expect(result.removed).toEqual([]);
     });
   });
 });

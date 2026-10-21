@@ -88,6 +88,11 @@ export const setEditor: WsSettings = {
   itemMDProfile: ''
 };
 
+/**
+ * The key the API gives a module file, built like VeronaModuleMetadataDto.getKey:
+ * iqb-player-stars-0.6.26.html becomes iqb-player-stars@0.6
+ */
 export function getNameAt(initialName: string): string {
-  return initialName.replace(/-+(?=[^-\d]*\d)/, '@').replace(/.\d.html$/, '');
+  // The whole patch version goes: removing one digit left 'iqb-player-stars@0.6.' (#1750)
+  return initialName.replace(/-+(?=[^-\d]*\d)/, '@').replace(/\.\d+\.html$/, '');
 }

@@ -354,6 +354,52 @@ describe('UnitPlayerComponent', () => {
         '*'
       );
     });
+
+    it('should send the definition type at the top level when it is known', () => {
+      const componentWithPrivates = component as {
+        postMessageTarget: Window | undefined;
+        playerApiVersion: number;
+      };
+      componentWithPrivates.playerApiVersion = 6;
+      component.unitData.definitionType = 'aspect-unit-definition@4.12.0';
+      const postMessageSpy = jest.spyOn(componentWithPrivates.postMessageTarget!, 'postMessage');
+
+      component.postStore('test definition');
+
+      const message = postMessageSpy.mock.calls[0][0] as { unitDefinitionType?: string; playerConfig: object };
+      expect(message.unitDefinitionType).toBe('aspect-unit-definition@4.12.0');
+      expect(message.playerConfig).not.toHaveProperty('unitDefinitionType');
+    });
+
+    it('should send no definition type when none is known', () => {
+      const componentWithPrivates = component as {
+        postMessageTarget: Window | undefined;
+        playerApiVersion: number;
+      };
+      componentWithPrivates.playerApiVersion = 6;
+      component.unitData.definitionType = undefined;
+      const postMessageSpy = jest.spyOn(componentWithPrivates.postMessageTarget!, 'postMessage');
+
+      component.postStore('test definition');
+
+      expect(postMessageSpy.mock.calls[0][0]).not.toHaveProperty('unitDefinitionType');
+    });
+  });
+
+  describe('sendChangeData()', () => {
+    it('should keep the definition type that comes with a loaded definition', () => {
+      component.unitData.definition = '';
+      mockReviewBackendService.getUnitDefinition.mockReturnValue(of({
+        definition: 'loaded definition',
+        definitionType: 'aspect-unit-definition@4.12.0'
+      }));
+      const postStoreSpy = jest.spyOn(component, 'postStore');
+
+      component.sendChangeData();
+
+      expect(component.unitData.definitionType).toBe('aspect-unit-definition@4.12.0');
+      expect(postStoreSpy).toHaveBeenCalledWith('loaded definition');
+    });
   });
 
   describe('onLoadUnitProperties()', () => {
@@ -363,6 +409,36 @@ describe('UnitPlayerComponent', () => {
       component.onLoadUnitProperties();
 
       expect(component.pageList).toEqual([]);
+    });
+  });
+
+  describe('page navigation (#1800)', () => {
+    const renderWith = (pageNaviButtons?: string): HTMLElement => {
+      mockReviewService.bookletConfig = { pagingMode: 'separate', pageNaviButtons };
+      fixture.detectChanges();
+      return fixture.nativeElement as HTMLElement;
+    };
+
+    it('should be shown when pageNaviButtons is not set, as its default SEPARATE_BOTTOM', () => {
+      const element = renderWith(undefined);
+
+      expect(element.querySelector('studio-lite-page-navigation')).not.toBeNull();
+      expect(element.querySelector('.unit-host.with-footer')).not.toBeNull();
+    });
+
+    it('should be shown when pageNaviButtons is left empty in the review settings', () => {
+      expect(renderWith('').querySelector('studio-lite-page-navigation')).not.toBeNull();
+    });
+
+    it('should be shown when pageNaviButtons is SEPARATE_BOTTOM', () => {
+      expect(renderWith('SEPARATE_BOTTOM').querySelector('studio-lite-page-navigation')).not.toBeNull();
+    });
+
+    it('should be hidden when pageNaviButtons is OFF', () => {
+      const element = renderWith('OFF');
+
+      expect(element.querySelector('studio-lite-page-navigation')).toBeNull();
+      expect(element.querySelector('.unit-host.with-footer')).toBeNull();
     });
   });
 

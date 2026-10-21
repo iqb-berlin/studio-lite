@@ -56,12 +56,8 @@ describe('Workspace Module Switch', () => {
   }
 
   // A new unit takes the workspace's default player, so the workspace is set to one player per unit.
-  // setModuleWithoutVerification clicks save without waiting for the answer, and the reload that
-  // follows would cancel the request -- hence the wait here.
   function addUnitWithPlayer(unitKey: string, player: string): void {
-    cy.intercept('PATCH', '**/api/workspaces/*/settings').as('saveSettings');
     setModuleWithoutVerification(primaryWorkspace, 'Aspect', player, 'Schemer');
-    cy.wait('@saveSettings').its('response.statusCode').should('be.oneOf', [200, 201, 204]);
     cy.visitWs(primaryWorkspace);
     addUnit(unitKey);
   }

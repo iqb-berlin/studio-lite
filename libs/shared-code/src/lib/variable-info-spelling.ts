@@ -5,17 +5,16 @@ import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
  *
  * VariableInfo 2.0 writes both in upper case with underscores (`NO_VALUE`, `GGB_FILE`); 1.x wrote
  * them in lower case with hyphens (`no-value`, `ggb-file`). Editors that follow 2.0 send the new
- * spelling, but everything that reads the list still compares against 1.x: studio-lite itself,
- * the schemer it hands the list to, and coding-box, which reads it from the unit XML. The schemer
- * and coding-box are released on their own schedules.
+ * spelling. Studio stores the list as it comes and reads both spellings itself, through
+ * `@iqb/responses` (#1708). Some readers it hands the list to still compare against 1.x only: the
+ * schemer, and coding-box and the testcenter, which read it from the unit XML.
  *
- * Studio therefore brings each list into the 1.x spelling where it enters, and everything behind
- * that point keeps seeing what it saw before (#1606). The mapping is lossless: 2.0 has exactly the
- * values of 1.x in the other spelling. An entry that is already in 1.x is left untouched, byte for
- * byte, and so is one whose type neither spelling knows.
+ * Studio therefore brings the list into the 1.x spelling where it leaves for one of them (#1606,
+ * #1708). The mapping is lossless: 2.0 has exactly the values of 1.x in the other spelling. An
+ * entry that is already in 1.x is left untouched, byte for byte, and so is one whose type neither
+ * spelling knows.
  *
- * Once studio, the schemer and coding-box read both spellings, this bridge can go -- path by
- * path, as each of them is released.
+ * Once a reader takes both spellings, the conversion on its way out can go.
  */
 
 type TypeV1 = VariableInfo['type'];
@@ -77,6 +76,17 @@ export function toVariableInfoListV1(
   return (variables ?? []).map(toVariableInfoV1);
 }
 
+/**
+ * A format as the unit XML may carry it: lower case with hyphens, as 1.x spells every format. The
+ * unit XSD allows nothing else, so a format that 1.x does not know gets the spelling 1.x would
+ * have given it (`CHEM_MOLECULE` → `chem-molecule`, iqb-specifications/unit-xml#1, #1857).
+ * The schemer keeps getting such a format as it is stored: it names the lower-case spelling only
+ * from @iqb/responses 5.3.1 on (iqb-berlin/coding-components#250).
+ */
+export function toUnitXmlFormat<T extends string | undefined>(format: T): T {
+  return (format && format.toLowerCase().replace(/_/g, '-')) as T;
+}
+
 /** The value with the keys of every object sorted, so that its JSON no longer depends on key order. */
 function withSortedKeys(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(withSortedKeys);
@@ -93,15 +103,16 @@ function withSortedKeys(value: unknown): unknown {
 /**
  * Whether two variable lists say the same, regardless of spelling and of key order. An editor
  * in the 2.0 spelling produces a list that differs from the stored one in both -- its `page` sits
- * elsewhere, or is missing -- without anything having changed. A missing list is not the same as
- * an empty one, as before.
+ * elsewhere, or is missing -- without anything having changed. The same holds for a format 1.x
+ * does not know, once a unit comes back from its own export: stored as `chem-molecule`, reported
+ * as `CHEM_MOLECULE` (#1857). A missing list is not the same as an empty one, as before.
  */
 export function sameVariableLists(
   a: VariableInfoInEitherSpelling[] | null | undefined,
   b: VariableInfoInEitherSpelling[] | null | undefined
 ): boolean {
   const comparable = (list: VariableInfoInEitherSpelling[] | null | undefined) => JSON.stringify(
-    list ? withSortedKeys(toVariableInfoListV1(list)) : list
+    list ? withSortedKeys(toVariableInfoListV1(list).map(v => ({ ...v, format: toUnitXmlFormat(v.format) }))) : list
   );
   return comparable(a) === comparable(b);
 }

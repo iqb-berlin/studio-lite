@@ -10,7 +10,8 @@ import {
   clickUnitPropertiesSaveButton,
   editUnitPropertiesAndVerify,
   openUnitProperties,
-  selectUnit
+  selectUnit,
+  waitForSuccess
 } from '../../../support/helpers';
 import { addState } from '../../../support/helpers/group-admin';
 
@@ -241,7 +242,7 @@ describe('Unit Properties Panel', () => {
           .contains(json.workspace?.save || json.save)
           .click();
       });
-      cy.wait('@dialogSave').its('response.statusCode').should('eq', 200);
+      waitForSuccess('@dialogSave');
 
       cy.visitWs(primaryWorkspace);
       openUnitProperties(propertiesUnits.propUnit1.shortname);

@@ -37,9 +37,10 @@ describe('PrintOptionsComponent', () => {
   describe('Initialization', () => {
     it('should initialize with default print options', () => {
       expect(component.printOptions).toBeDefined();
-      expect(component.printOptions.length).toBe(8);
+      expect(component.printOptions.length).toBe(9);
 
       const expectedOptions = [
+        { key: 'printLandscape', value: false },
         { key: 'printProperties', value: true },
         { key: 'printMetadata', value: true },
         { key: 'printComments', value: true },
@@ -99,8 +100,8 @@ describe('PrintOptionsComponent', () => {
 
       const checkboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
 
-      // 7 checkboxes (all except printPreviewHeight)
-      expect(checkboxes.length).toBe(7);
+      // 8 checkboxes (all except printPreviewHeight)
+      expect(checkboxes.length).toBe(8);
     });
 
     it('should render input field for printPreviewHeight', async () => {

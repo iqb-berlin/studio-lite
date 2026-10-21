@@ -1,3 +1,4 @@
+import type { WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
 import {
   noId,
   fakeUser,
@@ -177,7 +178,9 @@ describe('Admin API tests', () => {
       cy.getWsGroupsAPI(Cypress.expose(`token_${Cypress.expose('username')}`))
         .then(resp => {
           expect(resp.status).to.equal(200);
-          expect(resp.body.length).to.equal(2);
+          // Its own groups, not the total: a database with leftovers holds more (#1750)
+          const ids = (resp.body as WorkspaceGroupInListDto[]).map(g => g.id);
+          expect(ids).to.include.members([Cypress.expose(groupVera.id), Cypress.expose(group2.id)]);
         });
     });
 

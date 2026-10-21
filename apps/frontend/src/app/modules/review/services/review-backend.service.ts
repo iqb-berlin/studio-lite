@@ -1,6 +1,6 @@
 import { catchError, map } from 'rxjs/operators';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
 import { Inject, Injectable } from '@angular/core';
 import {
   ReviewFullDto,
@@ -38,12 +38,17 @@ export class ReviewBackendService {
       );
   }
 
+  /**
+   * The review with its units, or `null` when it cannot be loaded. A 403 is passed on: it means a
+   * logged-in user without access to the review's workspace, who is to use the review's link and
+   * password instead (#1818).
+   */
   getReview(reviewId: number): Observable <ReviewFullDto | null> {
     return this.http
       .get<ReviewFullDto>(`${this.serverUrl}reviews/${reviewId}`)
       .pipe(
         map(r => r),
-        catchError(() => of(null))
+        catchError((error: HttpErrorResponse) => (error.status === 403 ? throwError(() => error) : of(null)))
       );
   }
 

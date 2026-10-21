@@ -5,8 +5,8 @@ import {
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
-import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
-import { BehaviorSubject, of } from 'rxjs';
+import { WorkspaceInListDto, WorkspaceUserInListDto } from '@studio-lite-lib/api-dto';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { AppService } from '../../../../services/app.service';
 import { I18nService } from '../../../../services/i18n.service';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
@@ -188,6 +188,103 @@ describe('WorkspacesComponent', () => {
 
     expect(component.selectedWorkspaceId).toBe(1);
     expect(mockBackendService.getUsersByWorkspace).toHaveBeenCalledWith(1);
+  });
+
+  describe('while the rights of the selected workspace load', () => {
+    const ws1 = {
+      id: 1, name: 'ws1', groupId: 1, unitsCount: 0
+    } as WorkspaceInListDto;
+    const ws2 = {
+      id: 2, name: 'ws2', groupId: 1, unitsCount: 0
+    } as WorkspaceInListDto;
+    let usersOfWs1: Subject<WorkspaceUserInListDto[]>;
+    let usersOfWs2: Subject<WorkspaceUserInListDto[]>;
+
+    const radioInputs = (): HTMLInputElement[] => Array.from(
+      fixture.nativeElement.querySelectorAll('[data-cy="access-rights-row"] input[type="radio"]')
+    );
+
+    beforeEach(() => {
+      usersOfWs1 = new Subject<WorkspaceUserInListDto[]>();
+      usersOfWs2 = new Subject<WorkspaceUserInListDto[]>();
+      mockBackendService.getUsers.mockReturnValue(of([
+        {
+          id: 1, name: 'user1', isAdmin: false, description: ''
+        }
+      ]));
+      mockBackendService.getUsersByWorkspace
+        .mockImplementation((id: number) => (id === 1 ? usersOfWs1 : usersOfWs2));
+      fixture.detectChanges();
+    });
+
+    it('should disable the radio buttons until the rights have arrived', () => {
+      component.tableSelectionRow.select(ws1);
+      fixture.detectChanges();
+
+      expect(radioInputs()).toHaveLength(3);
+      expect(radioInputs().every(input => input.disabled)).toBe(true);
+
+      usersOfWs1.next([]);
+      fixture.detectChanges();
+
+      expect(radioInputs().every(input => !input.disabled)).toBe(true);
+    });
+
+    it('should ignore role changes and clicks before the rights have arrived', () => {
+      component.tableSelectionRow.select(ws1);
+      const user = component.workspaceUsers.entries[0];
+
+      component.onRoleChange(user, 2);
+      user.isChecked = true;
+      user.accessLevel = 2;
+      component.onRoleClick(user, 2);
+
+      expect(user.isChecked).toBe(true);
+      expect(user.accessLevel).toBe(2);
+      expect(component.workspaceUsers.hasChanged).toBe(false);
+    });
+
+    it('should not save the edits of the workspace before onto the one still loading', () => {
+      component.tableSelectionRow.select(ws1);
+      usersOfWs1.next([]);
+      component.onRoleChange(component.workspaceUsers.entries[0], 2);
+      component.tableSelectionRow.select(ws2);
+      fixture.detectChanges();
+
+      expect(component.workspaceUsers.hasChanged).toBe(true);
+      expect(fixture.nativeElement
+        .querySelector('[data-cy="wsg-admin-access-rights-save-button"]').disabled).toBe(true);
+
+      component.saveUsers();
+
+      expect(mockBackendService.setUsersByWorkspace).not.toHaveBeenCalled();
+    });
+
+    it('should drop the late rights of the workspace selected before', () => {
+      component.tableSelectionRow.select(ws1);
+      component.tableSelectionRow.select(ws2);
+
+      usersOfWs1.next([{
+        id: 1, name: 'user1', isAdmin: false, workspaceAccessLevel: 4
+      }]);
+
+      expect(component.isLoadingAccessRights).toBe(true);
+      expect(component.workspaceUsers.entries[0].isChecked).toBe(false);
+
+      usersOfWs2.next([]);
+
+      expect(component.isLoadingAccessRights).toBe(false);
+      expect(mockAppService.dataLoading).toBe(false);
+    });
+
+    it('should stop loading when the workspace is deselected before the rights arrive', () => {
+      component.tableSelectionRow.select(ws1);
+      component.tableSelectionRow.deselect(ws1);
+
+      expect(component.isLoadingAccessRights).toBe(false);
+      expect(mockAppService.dataLoading).toBe(false);
+      expect(usersOfWs1.observed).toBe(false);
+    });
   });
 
   it('should save users rights', () => {

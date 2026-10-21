@@ -78,7 +78,8 @@ describe('AddCommentButtonComponent', () => {
       expect(mockDialog.open).toHaveBeenCalledWith(CommentDialogComponent, {
         width: '1000px',
         height: '400px',
-        panelClass: 'review-dialog'
+        panelClass: 'review-dialog',
+        autoFocus: false
       });
     });
 
@@ -89,7 +90,8 @@ describe('AddCommentButtonComponent', () => {
       expect(mockDialog.open).toHaveBeenCalledWith(CommentDialogComponent, {
         width: '1000px',
         height: '800px',
-        panelClass: 'review-dialog'
+        panelClass: 'review-dialog',
+        autoFocus: false
       });
     });
 

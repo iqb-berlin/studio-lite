@@ -5,7 +5,7 @@
 }
 @if (workspaceGroups.length) {
   <div class="fx-column-start-stretch fx-gap-10">
-    @for (wsg of workspaceGroups; track wsg) {
+    @for (wsg of workspaceGroups; track wsg.id) {
       <div class="fx-column-start-stretch workspace-group-container mat-elevation-z2">
         @if (wsg.workspaces.length || wsg.isAdmin) {
           <div class="fx-row-space-between-center workspace-group-header">

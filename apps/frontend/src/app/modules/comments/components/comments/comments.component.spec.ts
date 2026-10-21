@@ -3,6 +3,7 @@ import {
   ComponentFixture, fakeAsync, TestBed, tick
 } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
+import { By } from '@angular/platform-browser';
 import {
   Component, EventEmitter, Input, Output, Pipe, PipeTransform
 } from '@angular/core';
@@ -64,6 +65,8 @@ class MockCommentEditorComponent {
   @Input() selectedItems: string[] = [];
   @Input() parentId: number | null = null;
   @Input() isProcessing = false;
+  @Input() autoFocus = true;
+  @Input() submitDisabled = false;
   @Output() handleSubmit = new EventEmitter<{ text: string; parentId: number | null; items: string[] }>();
   @Output() handleCancel = new EventEmitter<void>();
 }
@@ -84,6 +87,7 @@ class MockCommentComponent {
   @Input() scrollTargetId: Subject<number> | null = null;
   @Input() showHiddenComments!: Subject<boolean> | { value: boolean };
   @Input() adminMode = false;
+  @Input() replyDisabled = false;
   @Output() handleCancel = new EventEmitter<void>();
   @Output() handleDelete = new EventEmitter<{ commentId: number; numberOfReplies: number }>();
   @Output() handleSetActive = new EventEmitter<ActiveComment | null>();
@@ -184,6 +188,48 @@ describe('CommentsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('focusEditor (#1785)', () => {
+    const newCommentEditor = (): MockCommentEditorComponent => fixture.debugElement
+      .query(By.css('.new-comment studio-lite-comment-editor')).componentInstance;
+
+    it('should let the editor for a new comment take the focus by default', () => {
+      expect(newCommentEditor().autoFocus).toBe(true);
+    });
+
+    it('should hand a switched-off focus on to the editor for a new comment', () => {
+      fixture.componentRef.setInput('focusEditor', false);
+      fixture.detectChanges();
+
+      expect(newCommentEditor().autoFocus).toBe(false);
+    });
+  });
+
+  describe('sending without a name (#1797)', () => {
+    const newCommentEditor = (): MockCommentEditorComponent => fixture.debugElement
+      .query(By.css('.new-comment studio-lite-comment-editor')).componentInstance;
+    const rootComments = (): MockCommentComponent[] => fixture.debugElement
+      .queryAll(By.directive(MockCommentComponent))
+      .map(debugElement => debugElement.componentInstance);
+
+    it('should let a new comment and replies be sent under a name', () => {
+      fixture.componentRef.setInput('userName', 'John Doe');
+      fixture.detectChanges();
+
+      expect(newCommentEditor().submitDisabled).toBe(false);
+      expect(rootComments().length).toBeGreaterThan(0);
+      rootComments().forEach(comment => expect(comment.replyDisabled).toBe(false));
+    });
+
+    it('should keep a new comment and replies from being sent without a name', () => {
+      fixture.componentRef.setInput('userName', '');
+      fixture.detectChanges();
+
+      expect(newCommentEditor().submitDisabled).toBe(true);
+      expect(rootComments().length).toBeGreaterThan(0);
+      rootComments().forEach(comment => expect(comment.replyDisabled).toBe(true));
+    });
   });
 
   it('should fetch comments on init', fakeAsync(() => {

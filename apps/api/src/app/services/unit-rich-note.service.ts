@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import {
   UnitRichNoteDto,
   CreateUnitRichNoteDto,
@@ -33,6 +33,16 @@ export class UnitRichNoteService {
     private unitService: UnitService,
     private settingService: SettingService
   ) {}
+
+  /** Which of the given units have at least one rich note. */
+  async findUnitIdsWithNotes(unitIds: number[]): Promise<Set<number>> {
+    if (!unitIds.length) return new Set();
+    const notes = await this.unitRichNotesRepository.find({
+      where: { unitId: In(unitIds) },
+      select: { unitId: true }
+    });
+    return new Set(notes.map(note => note.unitId));
+  }
 
   async findNotes(unitId: number): Promise<UnitRichNotesDto> {
     this.logger.log(`Returning rich notes for unit with id: ${unitId}`);
@@ -118,6 +128,11 @@ export class UnitRichNoteService {
     }
 
     return newNote.id;
+  }
+
+  /** Whether the note is one of the unit's -- false as well for a note that does not exist. */
+  async isInUnit(id: number, unitId: number): Promise<boolean> {
+    return this.unitRichNotesRepository.exists({ where: { id: id, unitId: unitId } });
   }
 
   async removeNote(id: number): Promise<void> {

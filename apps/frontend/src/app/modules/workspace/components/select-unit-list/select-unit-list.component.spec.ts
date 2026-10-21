@@ -109,6 +109,32 @@ describe('SelectUnitListComponent', () => {
     expect(component.selectionCount).toBe(0);
   });
 
+  describe('locked', () => {
+    const checkboxInputs = (): HTMLInputElement[] => Array.from(
+      fixture.nativeElement.querySelectorAll('mat-checkbox input[type="checkbox"]')
+    );
+
+    const render = (locked: boolean): void => {
+      fixture.componentRef.setInput('workspace', 10);
+      fixture.componentRef.setInput('locked', locked);
+      fixture.detectChanges();
+    };
+
+    it('should leave all checkboxes enabled when not locked', () => {
+      render(false);
+
+      expect(checkboxInputs()).toHaveLength(4);
+      expect(checkboxInputs().every(input => !input.disabled)).toBe(true);
+    });
+
+    it('should disable all checkboxes, the one selecting all as well', () => {
+      render(true);
+
+      expect(checkboxInputs()).toHaveLength(4);
+      expect(checkboxInputs().every(input => input.disabled)).toBe(true);
+    });
+  });
+
   it('should deselect disabled units', () => {
     component.queryParams = new HttpParams();
     component.updateUnitList(10);

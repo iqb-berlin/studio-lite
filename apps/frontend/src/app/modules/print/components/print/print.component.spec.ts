@@ -145,6 +145,65 @@ describe('PrintComponent', () => {
     });
   });
 
+  // `@page` holds for the whole document; landscape is one rule after the portrait one of styles.scss
+  describe('orientation of the sheet (#1765)', () => {
+    const paramsWith = (printOptions: string[]) => ({
+      get: jest.fn(() => null),
+      getAll: jest.fn((key: string) => (key === 'printOptions' ? printOptions : [])),
+      has: jest.fn(),
+      keys: []
+    }) as unknown as ParamMap;
+    const landscapeStyles = () => Array.from(document.head.querySelectorAll('style'))
+      .filter(style => style.textContent === PrintComponent.LANDSCAPE_RULES);
+
+    afterEach(() => {
+      landscapeStyles().forEach(style => style.remove());
+    });
+
+    it('should set the sheet to landscape when the option is chosen', () => {
+      queryParamMapSubject.next(paramsWith(['printLandscape', 'printPreview']));
+
+      component.ngOnInit();
+
+      expect(landscapeStyles()).toHaveLength(1);
+      expect(PrintComponent.LANDSCAPE_RULES).toContain('size: A4 landscape');
+      expect(PrintComponent.LANDSCAPE_RULES).toContain('width: 297mm');
+    });
+
+    it('should leave the sheet in portrait without the option', () => {
+      queryParamMapSubject.next(paramsWith(['printPreview']));
+
+      component.ngOnInit();
+
+      expect(landscapeStyles()).toHaveLength(0);
+    });
+
+    it('should add the rule only once when the options arrive again', () => {
+      component.ngOnInit();
+      queryParamMapSubject.next(paramsWith(['printLandscape']));
+      queryParamMapSubject.next(paramsWith(['printLandscape']));
+
+      expect(landscapeStyles()).toHaveLength(1);
+    });
+
+    it('should take the rule away when the options change to portrait', () => {
+      component.ngOnInit();
+      queryParamMapSubject.next(paramsWith(['printLandscape']));
+      queryParamMapSubject.next(paramsWith([]));
+
+      expect(landscapeStyles()).toHaveLength(0);
+    });
+
+    it('should take the rule away with the component', () => {
+      queryParamMapSubject.next(paramsWith(['printLandscape']));
+      component.ngOnInit();
+
+      component.ngOnDestroy();
+
+      expect(landscapeStyles()).toHaveLength(0);
+    });
+  });
+
   describe('ngOnDestroy', () => {
     it('should unsubscribe from queryParamMap', () => {
       const mockParams1 = {

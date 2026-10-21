@@ -47,10 +47,11 @@ export class ExportReviewButtonComponent implements OnDestroy {
 
     dialogRef.afterClosed()
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((result: UnitDownloadSettingsDto | boolean) => {
-        if (result !== false) {
+      .subscribe((result: UnitDownloadSettingsDto | boolean | undefined) => {
+        // only the export button hands back settings; Esc, a click beside the dialog or navigation give undefined
+        if (result && typeof result === 'object') {
           this.appService.dataLoading = true;
-          const settings = result as UnitDownloadSettingsDto;
+          const settings = result;
           const download$ = settings.exportFormat === 'json' ?
             this.backendService.downloadUnitsJson(this.workspaceService.selectedWorkspaceId, settings) :
             this.backendService.downloadUnits(this.workspaceService.selectedWorkspaceId, settings);

@@ -283,8 +283,10 @@ describe('Admin Settings Tab Configuration', () => {
       // checks that we have only 23 profiles
       cy.get('mat-table').contains(baseGroup).click();
       cy.get('[data-cy="workspaces-groups-menu-edit"]').click();
+      // One checkbox per registry entry, now that an entry no longer gets a panel (#1549)
       cy.get('studio-lite-profiles')
-        .get('mat-expansion-panel').should('have.length', 23);
+        .find('[data-cy="shared-profiles-select-profile"]')
+        .should('have.length', 23);
       cy.translate(Cypress.expose('locale')).then(json => {
         cy.contains('button', json.cancel).click();
       });
@@ -305,7 +307,7 @@ describe('Admin Settings Tab Configuration', () => {
       cy.get('mat-table').contains(baseGroup).click();
       cy.get('[data-cy="workspaces-groups-menu-edit"]').click();
       cy.get('studio-lite-profiles')
-        .get('mat-expansion-panel')
+        .find('[data-cy="shared-profiles-select-profile"]')
         .should('have.length', 33);
       cy.translate(Cypress.expose('locale')).then(json => {
         cy.contains('button', json.cancel).click();

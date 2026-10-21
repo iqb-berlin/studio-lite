@@ -2,7 +2,8 @@ import {
   addUnitPred,
   clickIndexTabWorkspace,
   selectUnit,
-  setModuleWithoutVerification
+  setModuleWithoutVerification,
+  waitForSuccess
 } from '../../../support/helpers';
 import { definitionAllElementsUnit, primaryWorkspace } from '../../../support/testData';
 
@@ -168,7 +169,7 @@ describe('Aspect Editor Elements Creation', () => {
     cy.get('[data-cy="workspace-unit-save-button"]', { timeout: 10000 })
       .should('not.be.disabled')
       .click();
-    cy.wait('@saveUnit').its('response.statusCode').should('eq', 200);
+    waitForSuccess('@saveUnit');
     cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
   });
 });

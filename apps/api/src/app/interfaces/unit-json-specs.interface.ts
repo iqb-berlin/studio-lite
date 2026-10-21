@@ -65,6 +65,8 @@ export interface ExternalDataBlock {
 export interface UserInterfaceBlock {
   player: string;
   editor?: string;
+  // data format of the definition, e.g. "aspect-unit-definition@4.12.0"
+  type?: string;
   definition?: string;
   isDefinitionInline?: boolean;
   modifiedAt?: string;

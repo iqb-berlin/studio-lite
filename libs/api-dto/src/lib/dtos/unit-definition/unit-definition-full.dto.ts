@@ -9,4 +9,8 @@ export class UnitDefinitionFullDto {
 
   @ApiProperty()
   data!: string;
+
+  /** The format `data` is written in; `null` when no editor reported it. */
+  @ApiProperty({ required: false, nullable: true })
+  type?: string | null;
 }

@@ -1,11 +1,13 @@
-import { EventEmitter, ElementRef } from '@angular/core';
-import { Subject } from 'rxjs';
+import { ElementRef } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { AppService } from '../services/app.service';
 import { ModuleService } from '../services/module.service';
 import { WorkspaceBackendService } from '../modules/workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../modules/workspace/services/workspace.service';
+import { UnitStoresService } from '../modules/workspace/services/unit-stores.service';
 import { UnitDefinitionStore } from '../modules/workspace/classes/unit-definition-store';
 import { UnitDefinitionDirective } from './unit-definition.directive';
 
@@ -23,9 +25,9 @@ class TestUnitDefinitionDirective extends UnitDefinitionDirective {
   handleIncomingMessage = jest.fn();
   sendChangeData = jest.fn();
 
-  constructor(workspaceService: WorkspaceService) {
+  constructor() {
     super();
-    this.workspaceService = workspaceService;
+    this.workspaceService = {} as WorkspaceService;
     this.moduleService = { loadList: jest.fn() } as unknown as ModuleService;
     this.translateService = { instant: jest.fn() } as unknown as TranslateService;
     this.snackBar = { open: jest.fn() } as unknown as MatSnackBar;
@@ -36,41 +38,59 @@ class TestUnitDefinitionDirective extends UnitDefinitionDirective {
 }
 
 describe('UnitDefinitionDirective', () => {
-  it('subscribes to existing store changes and calls sendChangeData', () => {
-    const dataChange$ = new Subject<void>();
-    const unitDefinitionStore = { dataChange: dataChange$ } as UnitDefinitionStore;
-    const workspaceService = {
-      getUnitDefinitionStore: jest.fn(() => unitDefinitionStore),
-      unitDefinitionStoreChanged: new EventEmitter<UnitDefinitionStore | undefined>()
-    } as unknown as WorkspaceService;
+  let definitionStore$: BehaviorSubject<UnitDefinitionStore | undefined>;
+  let directive: TestUnitDefinitionDirective;
 
-    const directive = new TestUnitDefinitionDirective(workspaceService);
+  beforeEach(() => {
+    definitionStore$ = new BehaviorSubject<UnitDefinitionStore | undefined>(undefined);
+    TestBed.configureTestingModule({
+      providers: [{ provide: UnitStoresService, useValue: { definitionStore$ } }]
+    });
+    directive = TestBed.runInInjectionContext(() => new TestUnitDefinitionDirective());
+  });
+
+  it('subscribes to existing store changes and calls sendChangeData', () => {
+    const store = new UnitDefinitionStore(1, { definition: 'def', variables: [] });
+    definitionStore$.next(store);
 
     directive.addSubscriptionForUnitDefinitionChanges();
-    dataChange$.next();
+    store.setData([], 'new');
 
     expect(directive.sendChangeData).toHaveBeenCalledTimes(1);
   });
 
   it('waits for store availability and then subscribes to changes', () => {
-    const dataChange$ = new Subject<void>();
-    const unitDefinitionStore = { dataChange: dataChange$ } as UnitDefinitionStore;
-    let currentStore: UnitDefinitionStore | undefined;
-
-    const unitDefinitionStoreChanged = new EventEmitter<UnitDefinitionStore | undefined>();
-    const workspaceService = {
-      getUnitDefinitionStore: jest.fn(() => currentStore),
-      unitDefinitionStoreChanged
-    } as unknown as WorkspaceService;
-
-    const directive = new TestUnitDefinitionDirective(workspaceService);
+    const store = new UnitDefinitionStore(1, { definition: 'def', variables: [] });
 
     directive.addSubscriptionForUnitDefinitionChanges();
-
-    currentStore = unitDefinitionStore;
-    unitDefinitionStoreChanged.emit(unitDefinitionStore);
-    dataChange$.next();
+    definitionStore$.next(store);
+    store.setData([], 'new');
 
     expect(directive.sendChangeData).toHaveBeenCalledTimes(1);
+  });
+
+  it('follows the store of the next unit and lets go of the previous one', () => {
+    const previous = new UnitDefinitionStore(1, { definition: 'def', variables: [] });
+    const next = new UnitDefinitionStore(2, { definition: 'def', variables: [] });
+    definitionStore$.next(previous);
+    directive.addSubscriptionForUnitDefinitionChanges();
+
+    definitionStore$.next(undefined);
+    definitionStore$.next(next);
+    previous.setData([], 'stale');
+    next.setData([], 'new');
+
+    expect(directive.sendChangeData).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops when the component cancels its subscriptions', () => {
+    const store = new UnitDefinitionStore(1, { definition: 'def', variables: [] });
+    definitionStore$.next(store);
+    directive.addSubscriptionForUnitDefinitionChanges();
+
+    directive.ngUnsubscribe.next();
+    store.setData([], 'new');
+
+    expect(directive.sendChangeData).not.toHaveBeenCalled();
   });
 });

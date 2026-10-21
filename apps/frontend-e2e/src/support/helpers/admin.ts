@@ -5,17 +5,22 @@
 
 import { UserData } from '../testData';
 import { clickIndexTabAdmin, clickIndexTabWsgAdmin } from './navigation';
-import { editInput } from './common';
+import { editInput, waitForSuccess } from './common';
 
 /**
- * Adds the first admin user and logs in
+ * Adds the first admin user and logs in. Waits until the app has loaded its config and shows that
+ * there are no users yet, before the login form is used.
  * @example
  * addFirstUser();
  */
 export function addFirstUser(): void {
   cy.visit('/');
-  cy.login(Cypress.expose('username'), Cypress.expose('password'));
   cy.translate(Cypress.expose('locale')).then(json => {
+    // Until the config has arrived the app assumes there are users, and a login sent then goes to
+    // /api/login instead of /api/init-login. The warning appears once the config says there are
+    // none (#1754).
+    cy.contains(json.home['no-user'].trim()).should('be.visible');
+    cy.login(Cypress.expose('username'), Cypress.expose('password'));
     cy.clickButtonWithResponseCheck(
       json.home.login,
       [201],
@@ -28,13 +33,19 @@ export function addFirstUser(): void {
 }
 
 /**
- * Deletes the first admin user and logs out
+ * Deletes the first admin user and leaves the browser logged out, on the login form. There is no
+ * logout request: the session goes with the deleted user.
  * @example
  * deleteFirstUser();
  */
 export function deleteFirstUser(): void {
-  cy.visit('/');
   deleteUser(Cypress.expose('username'));
+  // The deleted admin would otherwise stay in the browser: its tokens in localStorage and its auth
+  // data in the running app. Clearing the storage alone is not enough, and visiting '/' from
+  // '/#/admin/...' only changes the hash, so the app is reloaded to start from nothing (#1754).
+  cy.clearLocalStorage();
+  cy.reload();
+  cy.get('[data-cy="home-user-name"]').should('be.visible');
 }
 
 /**
@@ -59,6 +70,8 @@ export function createNewUser(newUser: UserData): void {
   cy.clickDataCyWithResponseCheck('[data-cy="admin-edit-user-button"]', [201], '/api/admin/users', 'POST', 'addUser');
 }
 
+let deleteUserCalls = 0;
+
 /**
  * Deletes a user by username
  * @param user - Username to delete
@@ -72,9 +85,14 @@ export function deleteUser(user: string): void {
   cy.contains('mat-row', user)
     .find('[data-cy="admin-users-delete-user"]').click();
   cy.translate(Cypress.expose('locale')).then(json => {
-    cy.intercept('DELETE', '/api/admin/users*').as('deleteUserReq');
+    // An alias of its own per call: Cypress counts the requests of every intercept sharing an
+    // alias together, so a third deleteUser() in one hook resolved with the second one's request
+    // before its own DELETE was sent (#1754)
+    deleteUserCalls += 1;
+    const alias = `deleteUserReq${deleteUserCalls}`;
+    cy.intercept('DELETE', '/api/admin/users*').as(alias);
     cy.clickButton(json.delete);
-    cy.wait('@deleteUserReq').its('response.statusCode').should('be.oneOf', [200, 204]);
+    waitForSuccess(`@${alias}`);
   });
 }
 
@@ -185,7 +203,7 @@ export function saveAndExpect(
   cy.translate(Cypress.expose('locale')).then(json => {
     cy.get(`button:contains(${json.save})`).eq(cardNum).click({ force: true });
   });
-  cy.wait(`@${alias}`).its('response.statusCode').should('eq', 200);
+  waitForSuccess(`@${alias}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -205,29 +223,23 @@ export function openWorkspaceSettingsDialog(group: string, ws:string): void {
 }
 
 /**
- * Toggle a route's visibility checkbox inside the workspace-settings dialog.
- * @param routeName - one of 'editor' | 'preview' | 'schemer' | 'comments'
+ * Sets a route's visibility checkbox inside the workspace-settings dialog to the given state.
+ * check/uncheck leave a checkbox alone that is already in that state, so the result does not
+ * depend on what earlier tests saved -- a new workspace starts with 'notes' hidden (#1743).
+ * @param routeName - one of 'editor' | 'preview' | 'schemer' | 'comments' | 'notes'
  * @param setVisible - true to check (show), false to uncheck (hide)
  */
 export function setRouteVisibility(routeName: string, setVisible: boolean): void {
   cy.translate(Cypress.expose('locale')).then(json => {
     const routeLabel: string = json.workspace.routes[routeName];
-    cy.get('mat-checkbox')
-      .contains(routeLabel)
-      .parent()
+    cy.contains('studio-lite-edit-workspace-settings mat-checkbox', routeLabel)
+      .find('input[type="checkbox"]')
       .as('checkbox');
-
-    cy.get('@checkbox').then($checkbox => {
-      const isChecked = $checkbox.hasClass('mat-mdc-checkbox-checked');
-      if (setVisible && !isChecked) {
-        cy.log('Primero');
-        cy.get('@checkbox').click();
-      }
-      if (!setVisible) {
-        cy.log('segundo');
-        cy.get('@checkbox').click();
-      }
-    });
+    if (setVisible) {
+      cy.get('@checkbox').check({ force: true });
+    } else {
+      cy.get('@checkbox').uncheck({ force: true });
+    }
   });
 }
 
@@ -235,5 +247,5 @@ export function setRouteVisibility(routeName: string, setVisible: boolean): void
 export function saveWorkspaceSettings(): void {
   cy.intercept('PATCH', '/api/workspaces/*/settings').as('saveWsSettings');
   cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
-  cy.wait('@saveWsSettings').its('response.statusCode').should('eq', 200);
+  waitForSuccess('@saveWsSettings');
 }

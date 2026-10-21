@@ -2,10 +2,12 @@ import {
   BehaviorSubject, firstValueFrom, Observable, of
 } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { UnitRoutingCanDeactivateGuard } from './unit-routing.guard';
 import { WorkspaceService } from '../services/workspace.service';
+import { UnitStoresService } from '../services/unit-stores.service';
 import { ConfirmDialogData } from '../models/confirm-dialog.interface';
 
 type DialogResult = false | 'NO' | 'YES' | 'MAYBE' | null | undefined;
@@ -24,11 +26,11 @@ describe('UnitRoutingCanDeactivateGuard', () => {
   let confirmDialog: { open: jest.Mock<DialogRefLike, [unknown, DialogConfig]> };
   let snackBar: { open: jest.Mock<void, [string, string, { duration: number }]> };
   let workspaceService: {
-    isChanged: jest.Mock<boolean, []>;
     userAccessLevel: number;
     isValidFormKey: BehaviorSubject<boolean>;
     saveUnitData: jest.Mock<Promise<boolean>, []>;
   };
+  let unitStores: DeepMocked<UnitStoresService>;
   let translateService: { instant: jest.Mock<string, [string]> };
 
   const createDialogRef = (result: DialogResult): DialogRefLike => ({
@@ -61,11 +63,12 @@ describe('UnitRoutingCanDeactivateGuard', () => {
       open: jest.fn()
     };
     workspaceService = {
-      isChanged: jest.fn(() => true),
       userAccessLevel: 2,
       isValidFormKey: new BehaviorSubject<boolean>(true),
       saveUnitData: jest.fn(async () => true)
     };
+    unitStores = createMock<UnitStoresService>();
+    unitStores.changed.mockReturnValue(true);
     translateService = {
       instant: jest.fn((key: string) => key)
     };
@@ -74,12 +77,13 @@ describe('UnitRoutingCanDeactivateGuard', () => {
       confirmDialog as unknown as MatDialog,
       snackBar as unknown as MatSnackBar,
       workspaceService as unknown as WorkspaceService,
+      unitStores,
       translateService as unknown as TranslateService
     );
   });
 
   it('allows navigation when nothing changed', async () => {
-    workspaceService.isChanged.mockReturnValue(false);
+    unitStores.changed.mockReturnValue(false);
 
     await expect(getResult()).resolves.toBe(true);
     expect(confirmDialog.open).not.toHaveBeenCalled();

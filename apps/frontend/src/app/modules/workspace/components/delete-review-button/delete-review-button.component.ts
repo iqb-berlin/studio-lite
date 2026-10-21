@@ -45,7 +45,8 @@ export class DeleteReviewButtonComponent {
 
     dialogRef.afterClosed()
       .subscribe(result => {
-        if (result !== false) {
+        // only the delete button confirms; Esc, a click beside the dialog or navigation give undefined
+        if (result === true) {
           this.changedChange.emit(false);
           this.appService.dataLoading = true;
           this.backendService.deleteReview(

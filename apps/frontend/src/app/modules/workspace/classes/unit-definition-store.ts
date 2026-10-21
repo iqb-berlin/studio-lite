@@ -1,8 +1,10 @@
 import { UnitDefinitionDto } from '@studio-lite-lib/api-dto';
-import { EventEmitter } from '@angular/core';
 import {
-  sameVariableLists, toVariableInfoListV1, VariableInfoInEitherSpelling
-} from '@studio-lite/shared-code';
+  EventEmitter, Signal, signal, WritableSignal
+} from '@angular/core';
+import { sameVariableLists, VariableInfoInEitherSpelling } from '@studio-lite/shared-code';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { dropSavedChanges } from '../utils/saved-changes.utils';
 
 /**
  * The unit's definition while it is being worked on: what was loaded, and beside it only what has
@@ -11,9 +13,18 @@ import {
  *
  * Only the changed part is sent when the unit is saved, which is why a definition and its variables
  * are tracked separately here.
+ *
+ * Two ways out, for two kinds of listener: {@link changed} is the state -- whether anything is
+ * unsaved, readable at any time, also by whoever comes late -- and {@link dataChange} the event, for
+ * those that pass every edit on to a module.
  */
 export class UnitDefinitionStore {
   dataChange: EventEmitter<void> = new EventEmitter<void>();
+  private readonly changedState = signal(false);
+  readonly changed: Signal<boolean> = this.changedState.asReadonly();
+  private readonly dataState: WritableSignal<UnitDefinitionDto>;
+  /** What {@link getData} answers, as a signal for whoever derives from it (#1361). */
+  readonly data: Signal<UnitDefinitionDto>;
   private originalData: UnitDefinitionDto;
   private changedData: UnitDefinitionDto;
   private unitId: number;
@@ -22,48 +33,81 @@ export class UnitDefinitionStore {
     this.unitId = unitId;
     this.originalData = originalData;
     this.changedData = <UnitDefinitionDto>{};
+    this.dataState = signal(this.getData());
+    this.data = this.dataState.asReadonly();
   }
 
   /**
-   * Takes what the editor reports. Its variable list is brought into the VariableInfo 1.x spelling
-   * first, the one studio stores and hands on (see `toVariableInfoV1`), and compared regardless of
-   * spelling and key order: an editor following 2.0 would otherwise mark every unit as changed the
-   * moment it reports its unchanged list (#1606).
+   * Takes what the editor reports. Its variable list is kept in the spelling the editor used
+   * (VariableInfo 1.x or 2.x, #1708) and compared regardless of spelling and key order: an editor
+   * following 2.x would otherwise mark every unit stored in 1.x as changed the moment it reports its
+   * unchanged list (#1606). Readers that still need 1.x get it where the list leaves the studio.
+   *
+   * The definition's format (`unitDefinitionType`) travels with the definition and never on its
+   * own: reported with an unchanged definition it is not a change, or every unit saved before the
+   * format was recorded would count as edited the moment an editor that reports it opens it.
+   * Reported by nobody alongside a changed definition, it is dropped, since the stored one may no
+   * longer describe what the editor wrote (#1368).
    */
-  setData(newVariables: VariableInfoInEitherSpelling[], newDefinition: string) {
-    const variables = newVariables ? toVariableInfoListV1(newVariables) : newVariables;
-    if (sameVariableLists(variables, this.originalData.variables)) {
+  setData(newVariables: VariableInfoInEitherSpelling[], newDefinition: string, newDefinitionType?: string) {
+    if (sameVariableLists(newVariables, this.originalData.variables)) {
       if (this.changedData.variables) delete this.changedData.variables;
     } else {
-      this.changedData.variables = variables;
+      // the DTO is typed with the 1.x spelling; the list is stored as reported
+      this.changedData.variables = newVariables as VariableInfo[];
     }
     if (newDefinition === this.originalData.definition) {
       if (this.changedData.definition) delete this.changedData.definition;
     } else {
       this.changedData.definition = newDefinition;
     }
-    this.dataChange.emit();
+    if (this.changedData.definition !== undefined && newDefinitionType) {
+      this.changedData.definitionType = newDefinitionType;
+    } else {
+      delete this.changedData.definitionType;
+    }
+    this.notifyChange();
   }
 
   isChanged(): boolean {
     return Object.keys(this.changedData).length > 0;
   }
 
+  /** A copy: what is sent must not change with the edits made while it is under way (#1845). */
   getChangedData(): UnitDefinitionDto {
-    return this.changedData;
+    return structuredClone(this.changedData);
   }
 
   getData(): UnitDefinitionDto {
-    return { ...this.originalData, ...this.changedData };
+    const data = { ...this.originalData, ...this.changedData };
+    // a changed definition without a type of its own must not inherit the stored one
+    if (this.changedData.definition !== undefined && !this.changedData.definitionType) {
+      delete data.definitionType;
+    }
+    return data;
   }
 
-  applyChanges() {
-    this.originalData = this.getData();
-    this.restore();
+  /**
+   * Takes what was sent as saved. What the editor reported since then stays a change: nobody sent
+   * it yet, and taking it as saved lost it (#1845).
+   */
+  applyChanges(sent: UnitDefinitionDto) {
+    const saved = { ...this.originalData, ...sent };
+    // as in getData: a definition sent without a type of its own does not keep the stored one
+    if (sent.definition !== undefined && !sent.definitionType) delete saved.definitionType;
+    this.originalData = saved;
+    dropSavedChanges(this.changedData, sent);
+    this.notifyChange();
   }
 
   restore() {
     this.changedData = <UnitDefinitionDto>{};
+    this.notifyChange();
+  }
+
+  private notifyChange(): void {
+    this.changedState.set(this.isChanged());
+    this.dataState.set(this.getData());
     this.dataChange.emit();
   }
 }

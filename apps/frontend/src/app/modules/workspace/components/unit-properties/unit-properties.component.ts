@@ -8,9 +8,10 @@ import {
   ReactiveFormsModule
 } from '@angular/forms';
 import {
-  BehaviorSubject, Subject, Subscription, takeUntil
+  BehaviorSubject, EMPTY, Subject, Subscription, switchMap, takeUntil
 } from 'rxjs';
 import {
+  State,
   UnitMetadataValues,
   UnitPropertiesDto,
   WorkspaceSettingsDto
@@ -34,8 +35,6 @@ import {
   MatCardTitle,
   MatCardContent
 } from '@angular/material/card';
-import { CodingSchemeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -46,11 +45,10 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { NewGroupButtonComponent } from '../new-group-button/new-group-button.component';
 import { ItemsComponent } from '../../../metadata/components/items/items.component';
-import { UnitSchemeStore } from '../../classes/unit-scheme-store';
-import { State } from '../../../admin/models/state.type';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { SelectModuleComponent } from '../../../../components/select-module/select-module.component';
 import { WorkspaceService } from '../../services/workspace.service';
+import { UnitStoresService } from '../../services/unit-stores.service';
 import { ModuleService } from '../../../../services/module.service';
 import { RequestMessageDirective } from '../../directives/request-message.directive';
 import { CanReturnUnitPipe } from '../../pipes/can-return-unit.pipe';
@@ -138,6 +136,7 @@ export class UnitPropertiesComponent
   constructor(
     private fb: UntypedFormBuilder,
     public workspaceService: WorkspaceService,
+    public unitStores: UnitStoresService,
     public moduleService: ModuleService,
     public backendService: WorkspaceBackendService,
     public router: Router,
@@ -171,6 +170,10 @@ export class UnitPropertiesComponent
       this.variablesLoaded = true;
     });
     this.addSubscriptionForUnitDefinitionChanges();
+    // after a save that created items, so that the items editor holds their uuids
+    this.workspaceService.unitMetadataReloaded
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(() => this.loadMetaData());
     this.unitIdChangedSubscription =
       this.workspaceService.selectedUnit$.subscribe(id => {
         this.readDataForUnitId(id);
@@ -204,7 +207,7 @@ export class UnitPropertiesComponent
 
   private setupForm() {
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-    const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
+    const unitMetadataStore = this.unitStores.metadataStore();
     if (selectedUnitId > 0 && unitMetadataStore) {
       const unitMetadata = unitMetadataStore.getData();
       this.selectedStateId = unitMetadata.state || null;
@@ -218,7 +221,7 @@ export class UnitPropertiesComponent
           Validators.pattern(WorkspaceService.unitKeyPatternString()),
           WorkspaceService.unitKeyUniquenessValidator(
             unitMetadata.id,
-            this.workspaceService.unitList
+            () => this.workspaceService.unitList
           )
         ]);
       }
@@ -244,6 +247,7 @@ export class UnitPropertiesComponent
         this.workspaceService.isValidFormKey.next(
           keyControl.status === 'VALID'
         );
+        this.reportUnitKeyTaken();
       }
 
       this.selectedStateColor = unitMetadata.state || '';
@@ -253,7 +257,7 @@ export class UnitPropertiesComponent
         filteredState.length ? this.selectedStateColor = filteredState[0].color : this.selectedStateColor = '';
         const isValidFormKey = this.unitForm.get('key')?.status === 'VALID';
         this.workspaceService.isValidFormKey.next(isValidFormKey);
-        this.workspaceService.getUnitMetadataStore()?.setBasicData(
+        this.unitStores.metadataStore()?.setBasicData(
           this.unitForm.get('key')?.value,
           this.unitForm.get('name')?.value,
           this.unitForm.get('description')?.value,
@@ -262,6 +266,7 @@ export class UnitPropertiesComponent
           this.unitForm.get('reference')?.value,
           this.unitForm.get('state')?.value
         );
+        this.reportUnitKeyTaken();
       });
       this.unitForm.enable();
       // timeout because we access ViewChildren
@@ -293,13 +298,23 @@ export class UnitPropertiesComponent
     this.initialReference = this.unitForm.get('reference')?.value;
   }
 
+  /**
+   * A taken key blocks saving only once it is a change: a unit that already carries a key another
+   * unit has -- from before the server checked renames -- stays editable, as the server only checks a
+   * key that is changed (#1842).
+   */
+  private reportUnitKeyTaken(): void {
+    const keyChanged = this.unitStores.metadataStore()?.getChangedData().key !== undefined;
+    this.workspaceService.setUnitKeyTaken(keyChanged && !!this.unitForm.get('key')?.hasError('keyNotUnique'));
+  }
+
   private initVeronaModules(unitMetadata: UnitPropertiesDto): void {
     if (this.editorSelector) {
       this.editorSelector.value = unitMetadata.editor || '';
       this.editorSelectionChangedSubscription =
         this.editorSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService
-            .getUnitMetadataStore()
+          this.unitStores
+            .metadataStore()
             ?.setEditor(selectedValue);
         });
     }
@@ -307,8 +322,8 @@ export class UnitPropertiesComponent
       this.playerSelector.value = unitMetadata.player || '';
       this.playerSelectionChangedSubscription =
         this.playerSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService
-            .getUnitMetadataStore()
+          this.unitStores
+            .metadataStore()
             ?.setPlayer(selectedValue);
         });
     }
@@ -316,8 +331,8 @@ export class UnitPropertiesComponent
       this.schemerSelector.value = unitMetadata.schemer || '';
       this.schemerSelectionChangedSubscription =
         this.schemerSelector.selectionChanged.subscribe(selectedValue => {
-          this.workspaceService
-            .getUnitMetadataStore()
+          this.unitStores
+            .metadataStore()
             ?.setSchemer(selectedValue);
         });
     }
@@ -325,7 +340,7 @@ export class UnitPropertiesComponent
 
   private loadMetaData() {
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
-    const unitMetadataStore = this.workspaceService.getUnitMetadataStore();
+    const unitMetadataStore = this.unitStores.metadataStore();
     if (selectedUnitId > 0 && unitMetadataStore) {
       this.workspaceSettings = this.workspaceService.workspaceSettings;
       const unitMetadata = unitMetadataStore.getData();
@@ -371,91 +386,24 @@ export class UnitPropertiesComponent
   }
 
   private updateVariables(): void {
-    const unitId = this.workspaceService.selectedUnit$.getValue();
-    if (!this.workspaceService.getUnitSchemeStore()) {
-      this.backendService
-        .getUnitScheme(this.workspaceService.selectedWorkspaceId, unitId)
-        .subscribe(ues => {
-          if (ues) {
-            this.workspaceService.setUnitSchemeStore(
-              new UnitSchemeStore(unitId, ues)
-            );
-            this.variablesLoader.next(this.getVariableIds());
-          }
-        });
-    } else {
-      this.variablesLoader.next(this.getVariableIds());
-    }
-  }
-
-  private addSubscriptionForUnitDefinitionChanges(): void {
-    if (this.workspaceService.getUnitDefinitionStore()) {
-      this.subscribeUnitDefinitionChanges();
-    } else {
-      this.workspaceService.unitDefinitionStoreChanged
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(() => {
-          this.subscribeUnitDefinitionChanges();
-        });
-    }
-  }
-
-  private subscribeUnitDefinitionChanges() {
-    this.workspaceService
-      .getUnitDefinitionStore()
-      ?.dataChange.pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(() => {
-        this.variablesLoader.next(this.getVariableIds());
+    this.unitStores
+      .loadSchemeStore(this.workspaceService.selectedWorkspaceId, this.workspaceService.selectedUnit$.getValue())
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(unitSchemeStore => {
+        // handed on only once the scheme is there: without it the list is empty, and an item would
+        // take the empty list for its variable having gone
+        if (unitSchemeStore) this.variablesLoader.next(this.unitStores.variables());
       });
   }
 
-  private getVariableIds(): AliasId[] {
-    const data = this.workspaceService.getUnitSchemeStore()?.getData();
-    if (data) {
-      const unitSchemeVariables = data.variables || [];
-      const defStoreVariables: VariableInfo[] =
-        this.workspaceService.getUnitDefinitionStore()?.getData().variables ||
-        unitSchemeVariables;
-      if (defStoreVariables) {
-        const variables = defStoreVariables.filter(
-          v => v.type !== 'no-value'
-        );
-        const variableAliasIds = variables.map(variable => ({
-          id: variable.id,
-          alias: variable.alias || variable.id
-        }));
-        const scheme: CodingSchemeData = JSON.parse(data.scheme);
-        const variableCodings = scheme?.variableCodings || [];
-        const variableCodingIds = variableCodings
-          .filter(vc => vc.sourceType !== 'BASE_NO_VALUE')
-          .filter(
-            vc => !(
-              vc.sourceType === 'BASE' &&
-                !variableAliasIds.find(aliasId => aliasId.id === vc.id)
-            )
-          )
-          .map(item => ({ id: item.id, alias: item.alias || item.id }));
-        // merge without duplicates
-        return (
-          [...variableAliasIds, ...variableCodingIds]
-            .reduce((acc: AliasId[], current: AliasId) => {
-              if (!acc.find(aliasId => aliasId.id === current.id)) {
-                acc.push(current);
-              }
-              return acc;
-            }, [])
-            // sort by alias
-            .sort((a, b) => {
-              const idA = a.alias.toUpperCase();
-              const idB = b.alias.toUpperCase();
-              if (idA < idB) return -1;
-              if (idA > idB) return 1;
-              return 0;
-            })
-        );
-      }
-    }
-    return [];
+  // follows whichever definition store there is, the editor may open one only after this view
+  private addSubscriptionForUnitDefinitionChanges(): void {
+    this.unitStores.definitionStore$
+      .pipe(
+        switchMap(store => store?.dataChange ?? EMPTY),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(() => this.variablesLoader.next(this.unitStores.variables()));
   }
 
   /**
@@ -466,7 +414,7 @@ export class UnitPropertiesComponent
    * changes.
    */
   onMetadataChange(metadata: Partial<IqbUnitMetadataValues>): void {
-    const store = this.workspaceService.getUnitMetadataStore();
+    const store = this.unitStores.metadataStore();
     if (!store) return;
     const current = (store.getData().metadata ?? {}) as UnitMetadataValues;
     // Only overwrite the profiles slice when the event actually carries one, so a
@@ -479,7 +427,7 @@ export class UnitPropertiesComponent
   }
 
   onItemsMetadataChange(metadata: UnitMetadataValues): void {
-    const store = this.workspaceService.getUnitMetadataStore();
+    const store = this.unitStores.metadataStore();
     if (!store) return;
     const current = (store.getData().metadata ?? {}) as UnitMetadataValues;
     store.setMetadata({

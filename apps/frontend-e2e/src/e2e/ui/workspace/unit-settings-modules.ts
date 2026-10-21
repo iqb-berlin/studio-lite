@@ -12,7 +12,9 @@ import {
   addStatus,
   clickIndexTabWsgAdmin,
   goToWsMenu,
+  saveWorkspaceSettings,
   setModuleWithoutVerification,
+  setRouteVisibility,
   verifyModuleConfiguration
 } from '../../../support/helpers';
 
@@ -119,7 +121,7 @@ describe('Workspace Settings & Verona Modules', () => {
     cy.get('[data-cy="edit-workspace-settings-editor"]').find('mat-select').click();
     cy.get('mat-option').should('have.length.at.least', 1).first().click();
 
-    cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+    saveWorkspaceSettings();
 
     cy.visitWs(secondaryWorkspace);
     cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
@@ -130,34 +132,29 @@ describe('Workspace Settings & Verona Modules', () => {
     });
   });
 
-  it('hides a route tab (Begleitmaterial / notes) when unchecked in settings', () => {
+  // A new workspace starts with the notes route hidden, so it is shown first and hidden again.
+  it('shows a route tab (Begleitmaterial / notes) when checked in settings', () => {
     cy.visitWs(primaryWorkspace);
 
     cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
     cy.get('[data-cy="workspace-edit-unit-settings"]').click();
 
-    cy.get('studio-lite-edit-workspace-settings mat-checkbox')
-      .contains('Begleitmaterial')
-      .click();
-
-    cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
-
-    cy.get('[data-cy="workspace-routes-notes"]').should('not.exist');
-  });
-
-  it('restores route tab when checked back on in settings', () => {
-    cy.visitWs(primaryWorkspace);
-
-    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
-    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
-
-    cy.get('studio-lite-edit-workspace-settings mat-checkbox')
-      .contains('Begleitmaterial')
-      .click();
-
-    cy.get('[data-cy="edit-workspace-settings-submit-button"]').click();
+    setRouteVisibility('notes', true);
+    saveWorkspaceSettings();
 
     cy.get('[data-cy="workspace-routes-notes"]').should('be.visible');
+  });
+
+  it('hides the route tab again when unchecked in settings', () => {
+    cy.visitWs(primaryWorkspace);
+
+    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
+
+    setRouteVisibility('notes', false);
+    saveWorkspaceSettings();
+
+    cy.get('[data-cy="workspace-routes-notes"]').should('not.exist');
   });
 
   it('displays group management dialog', () => {

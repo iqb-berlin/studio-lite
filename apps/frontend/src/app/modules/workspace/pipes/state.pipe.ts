@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { State } from '../../admin/models/state.type';
+import { State } from '@studio-lite-lib/api-dto';
 
 /**
  * The label or the colour of a unit state. The states themselves are configured per workspace

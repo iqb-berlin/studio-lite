@@ -49,6 +49,8 @@ export class CommentsComponent implements OnInit, OnDestroy {
   @Input() reviewId = 0;
   @Input() newCommentOnly = false;
   @Input() adminMode = false;
+  /** Whether the editor for a new comment takes the focus when it appears (see CommentEditorComponent.autoFocus) */
+  @Input() focusEditor = true;
   @Output() onCommentsUpdated = new EventEmitter<void>();
 
   comments: Comment[] = [];

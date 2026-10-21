@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 import { HIDDEN_PROFILE_ORDER } from '@studio-lite/shared-code';
 import UnitMetadata from '../entities/unit-metadata.entity';
 
@@ -35,6 +35,12 @@ export class UnitMetadataService {
     return this.repo(manager).findBy({ unitId: unitId });
   }
 
+  /** The unit-level profiles of all the given units, in one query. */
+  async getAllByUnitIds(unitIds: number[]): Promise<UnitMetadataDto[]> {
+    if (!unitIds.length) return [];
+    return this.unitMetadataRepository.findBy({ unitId: In(unitIds) });
+  }
+
   async addMetadata(unitId: number, metadata: UnitMetadataDto, manager?: EntityManager): Promise<number> {
     metadata.unitId = unitId;
     const { id, ...metadataWithoutId } = metadata;
@@ -53,8 +59,13 @@ export class UnitMetadataService {
     return newItemMetadata.id;
   }
 
+  /**
+   * Overwrites the row with this id. It stays with its unit: a `unitId` in the payload -- the
+   * metadata save passes on what the client sent -- used to hang it on any unit (#1816).
+   */
   async updateMetadata(id: number, metadata: UnitMetadataDto, manager?: EntityManager): Promise<number> {
-    await this.repo(manager).update(id, { ...metadata, changedAt: new Date() });
+    const { unitId, ...values } = metadata;
+    await this.repo(manager).update(id, { ...values, changedAt: new Date() });
     return id;
   }
 

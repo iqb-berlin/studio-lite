@@ -91,6 +91,10 @@ export class LoginComponent implements OnInit, OnDestroy {
   async validLoginCheck(ok: boolean, initLoginMode: boolean) {
     this.isSubmitting = false;
     this.appService.dataLoading = false;
+    // Switched off in login() only so that a failed login is not reported twice -- the snack bar
+    // below says it already. The answer is in, so from here on every error is shown again; the page
+    // is not reloaded after a login, and nothing else would switch them back on (#1724).
+    this.appService.errorMessagesDisabled = false;
     if (ok) {
       if (this.redirectTo) {
         await this.router.navigate([this.redirectTo]);

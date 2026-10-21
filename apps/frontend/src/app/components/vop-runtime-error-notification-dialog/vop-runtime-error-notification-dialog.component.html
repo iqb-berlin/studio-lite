@@ -2,12 +2,22 @@
   {{ 'runtime-error-dialog.title' | translate }}
 </h1>
 <div mat-dialog-content>
-  <p>{{ 'runtime-error-dialog.message' | translate }}</p>
-  @if (code) {
-    <p><strong>{{ 'runtime-error-dialog.code' | translate }}:</strong> <code>{{ code }}</code></p>
-  }
-  @if (message) {
-    <p><strong>{{ message }}</strong></p>
+  @for (group of groups(); track group.explanationKey) {
+    <p data-cy="runtime-error-dialog-explanation">{{ group.explanationKey | translate }}</p>
+    @for (runtimeError of group.runtimeErrors; track $index) {
+      @if (runtimeError.code) {
+        <p><strong>{{ 'runtime-error-dialog.code' | translate }}:</strong> <code>{{ runtimeError.code }}</code></p>
+      }
+      @if (runtimeError.message) {
+        <p data-cy="runtime-error-dialog-message">
+          @if (group.isKnownCode) {
+            <small>{{ runtimeError.message }}</small>
+          } @else {
+            <strong>{{ runtimeError.message }}</strong>
+          }
+        </p>
+      }
+    }
   }
   @if (sessionId) {
     <p><small>{{ 'runtime-error-dialog.session-id' | translate }}: {{ sessionId }}</small></p>

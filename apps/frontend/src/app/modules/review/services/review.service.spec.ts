@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { ReviewService } from './review.service';
 import { ReviewBackendService } from './review-backend.service';
 import { ModuleService } from '../../../services/module.service';
@@ -292,6 +292,18 @@ describe('ReviewService', () => {
   });
 
   describe('updateCommentsUnitInfo', () => {
+    beforeEach(() => {
+      service.reviewConfig = { showOthersComments: true };
+    });
+
+    it('should not fetch comments in a review that does not show them (#1784)', () => {
+      service.reviewConfig = { showOthersComments: false };
+
+      service.updateCommentsUnitInfo(100);
+
+      expect(mockBackendService.getUnitComments).not.toHaveBeenCalled();
+    });
+
     it('should fetch and update comments for given unit', done => {
       const mockComments: Comment[] = [
         {
@@ -432,6 +444,27 @@ describe('ReviewService', () => {
         expect(service.reviewConfig).toEqual({ canComment: true });
         expect(service.bookletConfig).toEqual({ unitScreenHeader: 'WITH_UNIT_TITLE' });
         expect(mockModuleService.loadList).toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it('should note a refused review and still finish loading (#1818)', done => {
+      mockBackendService.getReview.mockReturnValue(throwError(() => ({ status: 403 })));
+
+      service.loadReviewData().subscribe(() => {
+        expect(service.accessDenied).toBe(true);
+        expect(service.units).toHaveLength(0);
+        expect(mockModuleService.loadList).toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it('should clear the note once the review loads', done => {
+      service.accessDenied = true;
+      mockBackendService.getReview.mockReturnValue(of({ id: 1, name: 'Test Review', units: [] }));
+
+      service.loadReviewData().subscribe(() => {
+        expect(service.accessDenied).toBe(false);
         done();
       });
     });

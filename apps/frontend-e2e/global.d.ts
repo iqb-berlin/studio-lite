@@ -104,6 +104,12 @@ declare namespace Cypress {
     deleteCommentAPI(wsId: string, unitId: string, commentId:string, token:string): Chainable<Response>; // 61
     patchCommentVisibilityAPI(wsId: string, unitId: string, commentId: string, hidden: boolean, userId: string,
       token: string): Chainable<Response>; // 61a
+    requestWorkspaceAPI(method: string, path: string, token: string, body?: object): Chainable<Response>;
+    voteCommentAPI(wsId: string, unitId: string, commentId: string, vote: 'up' | 'down' | null,
+      token: string): Chainable<Response>; // 61b
+    getCommentVotersAPI(wsId: string, unitId: string, commentId: string, token: string): Chainable<Response>; // 61c
+    patchCommentItemsAPI(wsId: string, unitId: string, commentId: string, unitItemUuids: string[],
+      token: string): Chainable<Response>; // 61d
     setUsersOfWsAPI(wsId: string, users: AccessUser[], token: string): Chainable<Response>; // 19b
     addReviewAPI(wsId:string, reviewName: string, token:string): Chainable<Response>; // 62
     getReviewAPI(wsId:string, reviewId:string, token:string): Chainable<Response>; // 63
@@ -138,6 +144,7 @@ declare namespace Cypress {
     uploadUnitsAPI(wsId: string, filename:string, token:string): Chainable<Response>; // 84
     exportUnitsAPI(wsId: string, downloadQuery: string, token: string): Chainable<Response>;
     importUnitsAPI(wsId: string, zipContent: string, token: string): Chainable<Response>;
+    getUnitExportContentsAPI(wsId: string, token: string): Chainable<Response>;
     getAdminUnitItemsAPI(token: string): Chainable<Response>;
     getGroupsByUserAPI(id: string, token: string): Chainable<Response>; // 85
     updateGroupsByUserAPI(id: string, groupIds: string[], token: string): Chainable<Response>; // 86

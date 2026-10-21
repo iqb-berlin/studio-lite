@@ -129,6 +129,65 @@ describe('Unit Print Preview', () => {
     });
   });
 
+  // The orientation is one `@page` rule for the whole print; landscape comes after the portrait rule of
+  // styles.scss, so the last one decides (#1765).
+  describe('orientation of the sheet', () => {
+    const pageRules = (doc: Document): string[] => Array.from(doc.styleSheets)
+      .flatMap(sheet => {
+        try {
+          return Array.from(sheet.cssRules);
+        } catch {
+          return []; // a stylesheet of another origin does not show its rules
+        }
+      })
+      .map(rule => rule.cssText)
+      .filter(text => text.startsWith('@page'));
+
+    const openPrintView = (landscape: boolean): void => {
+      cy.visitWs(primaryWorkspace);
+      goToWsMenu();
+      cy.get('[data-cy="workspace-edit-unit-preview-units"]').click();
+      selectListUnits([printUnits[0]]);
+      cy.window().then(win => {
+        cy.stub(win, 'open')
+          .callsFake((url: string) => {
+            win.location.hash = url.replace(/^#/, '');
+          })
+          .as('windowOpen');
+      });
+      cy.translate(Cypress.expose('locale')).then(json => {
+        if (landscape) {
+          cy.get('studio-lite-print-options')
+            .contains('mat-checkbox', json.print.printLandscape)
+            .find('input')
+            .check({ force: true });
+        }
+        cy.get('button[type="submit"]').contains(json.construct).click();
+      });
+      cy.get('@windowOpen').should('be.called');
+      cy.url().should('include', '/print');
+      cy.get('studio-lite-unit-properties').should('have.length', 1);
+    };
+
+    it('keeps the sheet in portrait by default', () => {
+      openPrintView(false);
+      cy.document().then(doc => {
+        const rules = pageRules(doc);
+        // Chrome writes `A4 portrait` back as `a4`: portrait is what a size without orientation means
+        expect(rules[rules.length - 1].toLowerCase()).to.contain('a4');
+        expect(rules.join(' ')).not.to.contain('landscape');
+      });
+    });
+
+    it('turns the sheet to landscape when chosen in the print options', () => {
+      openPrintView(true);
+      cy.document().then(doc => {
+        const rules = pageRules(doc);
+        expect(rules[rules.length - 1]).to.contain('landscape');
+      });
+    });
+  });
+
   it('verifies print options dialog opens from preview bar', () => {
     cy.visitWs(primaryWorkspace);
     selectUnit(printUnits[0]);

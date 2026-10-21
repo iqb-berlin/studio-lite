@@ -39,6 +39,13 @@ describe('Metadata Profile Management', () => {
       .click();
     cy.get('[data-cy="workspaces-groups-menu-edit"]').click();
     checkMultipleProfiles(searchProfiles);
+    // Each profile once, as its checkbox: no panel title repeating its name (#1549)
+    cy.get('[data-cy="shared-profiles-select-profile-title"]').should('not.exist');
+    searchProfiles.forEach(profile => {
+      cy.get('[data-cy="shared-profiles-select-profile"]')
+        .filter(`:contains(${profile})`)
+        .should('have.length', 1);
+    });
     cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
   });
 

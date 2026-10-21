@@ -45,11 +45,23 @@ const waitForPlayerState = (
   });
 };
 
+// The studio only listens to messages whose source is the player's frame, so the notification is
+// posted by a script running inside that frame, as the player itself would post it.
+const sendRuntimeErrorFromPlayer = (code: string, message: string): void => {
+  cy.get<HTMLIFrameElement>('[data-cy="unit-preview-iframe"]').then($iframe => {
+    const playerDocument = $iframe[0].contentDocument as Document;
+    const script = playerDocument.createElement('script');
+    const notification = { type: 'vopRuntimeErrorNotification', code, message };
+    script.textContent = `parent.postMessage(${JSON.stringify(notification)}, '*');`;
+    playerDocument.body.appendChild(script);
+  });
+};
+
 describe('Unit Preview (Vorschau)', () => {
   afterEach(() => {
     cy.get('body').then($body => {
       if ($body.find('mat-dialog-container').length > 0) {
-        cy.contains('mat-dialog-actions button', 'Schließen').click({ force: true });
+        cy.contains('mat-dialog-container button', 'Schließen').click({ force: true });
         cy.get('mat-dialog-container').should('not.exist');
       }
       if ($body.find('.cdk-overlay-backdrop').length > 0) {
@@ -219,6 +231,72 @@ describe('Unit Preview (Vorschau)', () => {
     cy.get('studio-lite-preview-bar').should('exist');
     cy.get('[data-cy="preview-bar-check-coding"]').should('exist');
     cy.get('[data-cy="preview-bar-print"]').should('exist');
+  });
+
+  // #1788: a code of the player specification is explained to the author
+  it('explains a runtime error the player reports with a known code', () => {
+    sendRuntimeErrorFromPlayer('GEOGEBRA_NOT_LOADING', 'GeoGebra could not be loaded');
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('mat-dialog-container', { timeout: 10000 }).within(() => {
+        cy.contains('h1', json['runtime-error-dialog'].title).should('exist');
+        cy.get('[data-cy="runtime-error-dialog-explanation"]')
+          .should('have.text', json['runtime-error-dialog'].codes.GEOGEBRA_NOT_LOADING);
+        cy.get('code').should('have.text', 'GEOGEBRA_NOT_LOADING');
+        cy.get('[data-cy="runtime-error-dialog-message"]').should('contain.text', 'GeoGebra could not be loaded');
+        cy.contains('button', json['runtime-error-dialog'].close).click();
+      });
+    });
+    cy.get('mat-dialog-container').should('not.exist');
+  });
+
+  // #1869: errors the player reports one by one are collected in one dialog. The repeated error is sent
+  // before the last one, so once the last one is shown the repetition has been handled as well.
+  it('collects the runtime errors the player reports in one dialog', () => {
+    sendRuntimeErrorFromPlayer('IMAGE_NOT_LOADING', 'image a');
+    sendRuntimeErrorFromPlayer('IMAGE_NOT_LOADING', 'image b');
+    sendRuntimeErrorFromPlayer('IMAGE_NOT_LOADING', 'image a');
+    sendRuntimeErrorFromPlayer('IMAGE_NOT_LOADING', 'image c');
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('mat-dialog-container', { timeout: 10000 }).within(() => {
+        cy.get('[data-cy="runtime-error-dialog-message"]').should('have.length', 3);
+        cy.get('[data-cy="runtime-error-dialog-message"]').then($messages => {
+          expect($messages.toArray().map(message => message.textContent?.trim()))
+            .to.deep.equal(['image a', 'image b', 'image c']);
+        });
+        cy.get('[data-cy="runtime-error-dialog-explanation"]')
+          .should('have.length', 1)
+          .and('have.text', json['runtime-error-dialog'].codes.IMAGE_NOT_LOADING);
+      });
+      cy.get('mat-dialog-container').should('have.length', 1);
+      cy.contains('mat-dialog-container button', json['runtime-error-dialog'].close).click();
+    });
+    cy.get('mat-dialog-container').should('not.exist');
+  });
+
+  // #1361: the coding is checked with the unit as it is now, saved or not
+  it('checks the coding without asking to save first', () => {
+    clickIndexTabWorkspace('properties');
+    cy.get('textarea[formcontrolname="description"]').type(' ungespeichert');
+    cy.get('[data-cy="workspace-unit-save-button"]').should('be.enabled');
+    clickIndexTabWorkspace('preview');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
+    // the check codes responses, so the player is given one first
+    waitForPlayerState('checkbox_1', 'true', () => {
+      cy.getIFrameBody('[data-cy="unit-preview-iframe"]').within(() => {
+        cy.get('aspect-checkbox', { timeout: 10000 }).contains('Beschriftung').click();
+      });
+    });
+    cy.get('[data-cy="preview-bar-check-coding"]').click();
+    cy.get('mat-dialog-content', { timeout: 10000 }).within(() => {
+      cy.contains('checkbox_1').should('exist');
+    });
+    cy.contains('mat-dialog-actions button', 'Schließen').click();
+    cy.get('mat-dialog-container').should('not.exist');
+    cy.get('[data-cy="workspace-unit-discard-button"]').click();
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.contains('mat-dialog-container button', json.workspace.reject).click();
+    });
+    cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
   });
 
   it('cleans up the test unit', () => {

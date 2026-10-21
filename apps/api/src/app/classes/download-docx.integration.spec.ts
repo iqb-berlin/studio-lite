@@ -3,7 +3,7 @@ import { create } from 'xmlbuilder2';
 import {
   CodebookUnitDto,
   CodeBookContentSetting
-} from '@studio-lite-lib/api-dto';
+} from '@iqb/ngx-coding-components/codebook-models';
 import { DownloadDocx } from './download-docx.class';
 
 const defaultSettings = {
@@ -60,6 +60,29 @@ describe('DownloadDocx integration', () => {
 
   afterEach(() => {
     consoleWarnSpy.mockRestore();
+  });
+
+  it.each([
+    ['<p>10&nbsp;kg</p>', '10\u00a0kg'],
+    ['<p>20&#8239;cm</p>', '20\u202fcm'],
+    ['<p><strong>10&nbsp;kg</strong></p>', '10\u00a0kg'],
+    ['<p>Abstand  bleibt</p>', 'Abstand  bleibt']
+  ])('retains exact code and general instruction spacing for %p', async (html, text) => {
+    const units = buildUnits(html);
+    units[0].variables[0].generalInstruction = html;
+    const settings = { ...defaultSettings, hasGeneralInstructions: true };
+    const xml = new AdmZip(await DownloadDocx.getDocXCodebook(units, settings)).readAsText('word/document.xml');
+    expect(xml.split(`>${text}</w:t>`).length - 1).toBe(2);
+  });
+
+  it.each([' ', '\t\r\n', '\u00a0'])('does not add a paragraph for general instruction %p', async generalInstruction => {
+    const units = buildUnits('<p>Bewerten</p>');
+    const settings = { ...defaultSettings, hasGeneralInstructions: true };
+    const baselineFile = await DownloadDocx.getDocXCodebook(units, settings);
+    const baseline = new AdmZip(baselineFile).readAsText('word/document.xml');
+    units[0].variables[0].generalInstruction = generalInstruction;
+    const actual = new AdmZip(await DownloadDocx.getDocXCodebook(units, settings)).readAsText('word/document.xml');
+    expect(actual).toBe(baseline);
   });
 
   it('creates valid DOCX XML for Schemer formula spans with raw latex in data-latex', async () => {

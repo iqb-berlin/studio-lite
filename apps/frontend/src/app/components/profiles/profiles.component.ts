@@ -7,7 +7,6 @@ import { MDProfileStore } from '@iqbspecs/metadata-store/metadata-store.interfac
 import { toW3idProfileId } from '@studio-lite/shared-code';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatError } from '@angular/material/form-field';
-import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { FormsModule } from '@angular/forms';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import {
@@ -22,8 +21,7 @@ import { IsProfileSelectedPipe } from '../../pipes/is-profile-selected.pipe';
 export type CoreProfile = Profile;
 
 /**
- * Picking metadata profiles out of the registry: the profile sets it lists, each with the profiles
- * it contains, and a checkbox per profile.
+ * Picking metadata profiles out of the registry: a checkbox per profile it lists.
  *
  * A stored selection may be spelled in a retired form, so the comparison goes through the canonical
  * id ({@link IsProfileSelectedPipe}) instead of matching strings.
@@ -32,8 +30,8 @@ export type CoreProfile = Profile;
   selector: 'studio-lite-profiles',
   templateUrl: './profiles.component.html',
   styleUrls: ['./profiles.component.scss'],
-  imports: [MatProgressSpinner, FormsModule, MatExpansionPanel, MatExpansionPanelHeader,
-    MatExpansionPanelTitle, MatCheckbox, MatError, TranslateModule, ProfileLabelPipe, IsProfileSelectedPipe]
+  imports: [MatProgressSpinner, FormsModule, MatCheckbox, MatError, TranslateModule, ProfileLabelPipe,
+    IsProfileSelectedPipe]
 })
 export class ProfilesComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();

@@ -18,6 +18,8 @@ import { Response } from '@iqbspecs/response/response.interface';
 import { environment } from '../../../../../environments/environment';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { WorkspaceService } from '../../services/workspace.service';
+import { UnitStoresService } from '../../services/unit-stores.service';
+import { UnitSchemeStore } from '../../classes/unit-scheme-store';
 import { PreviewService } from '../../services/preview.service';
 import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
@@ -36,6 +38,7 @@ describe('UnitPreviewComponent', () => {
   let dialogStub: MatDialog;
   let routerStub: Router;
   let workspaceServiceStub: WorkspaceService;
+  let unitStoresStub: UnitStoresService;
   let backendServiceStub: WorkspaceBackendService;
   let moduleServiceStub: ModuleService;
 
@@ -73,11 +76,15 @@ describe('UnitPreviewComponent', () => {
     workspaceServiceStub = {
       selectedUnit$: new BehaviorSubject<number>(5),
       selectedWorkspaceId: 7,
-      groupId: 9,
-      unitDefinitionStoreChanged: new Subject<void>(),
-      isChanged: jest.fn().mockReturnValue(false),
-      getUnitDefinitionStore: () => undefined,
-      getUnitMetadataStore: () => undefined
+      groupId: 9
+    } as never;
+
+    unitStoresStub = {
+      changed: jest.fn().mockReturnValue(false),
+      metadataStore: () => undefined,
+      definitionStore$: new Subject<void>(),
+      loadDefinitionStore: jest.fn().mockReturnValue(of(undefined)),
+      loadSchemeStore: jest.fn().mockReturnValue(of(undefined))
     } as never;
 
     const previewServiceStub = {
@@ -85,6 +92,7 @@ describe('UnitPreviewComponent', () => {
     } as never;
 
     moduleServiceStub = {
+      players: {},
       widgets: {},
       loadWidgets: jest.fn().mockResolvedValue(undefined),
       getModuleHtml: jest.fn().mockResolvedValue('<html lang="">Widget</html>')
@@ -105,6 +113,7 @@ describe('UnitPreviewComponent', () => {
         { provide: Router, useValue: routerStub },
         { provide: WorkspaceBackendService, useValue: backendServiceStub },
         { provide: WorkspaceService, useValue: workspaceServiceStub },
+        { provide: UnitStoresService, useValue: unitStoresStub },
         { provide: PreviewService, useValue: previewServiceStub },
         { provide: ModuleService, useValue: moduleServiceStub },
         { provide: AppService, useValue: appServiceStub },
@@ -124,6 +133,10 @@ describe('UnitPreviewComponent', () => {
     fixture = TestBed.createComponent(UnitPreviewComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should create', () => {
@@ -153,21 +166,18 @@ describe('UnitPreviewComponent', () => {
     expect(window.open).toHaveBeenCalledWith('#/print?x=1', '_blank');
   });
 
-  it('warns when coding is checked while changes exist', async () => {
-    (workspaceServiceStub.isChanged as jest.Mock).mockReturnValue(true);
+  // #1361: the check takes the scheme as it is now, saved or not, as the player shows the definition
+  it('checks the coding with unsaved changes too, from the scheme store', async () => {
+    jest.spyOn(unitStoresStub, 'changed').mockReturnValue(true);
 
     await component.checkCodingChanged();
 
-    expect(snackBarStub.open).toHaveBeenCalled();
-    expect(backendServiceStub.getUnitScheme).not.toHaveBeenCalled();
-  });
-
-  it('loads coding scheme when no changes exist', async () => {
-    (workspaceServiceStub.isChanged as jest.Mock).mockReturnValue(false);
-
-    await component.checkCodingChanged();
-
-    expect(backendServiceStub.getUnitScheme).toHaveBeenCalledWith(7, 5);
+    expect(unitStoresStub.loadSchemeStore).toHaveBeenCalledWith(7, 5);
+    expect(snackBarStub.open).not.toHaveBeenCalledWith(
+      'workspace.save-unit-before-check',
+      expect.anything(),
+      expect.anything()
+    );
   });
 
   it('passes the coding variables to the coding results dialog', async () => {
@@ -187,9 +197,9 @@ describe('UnitPreviewComponent', () => {
         status: 'CODING_COMPLETE'
       } as Response
     ];
-    (backendServiceStub.getUnitScheme as jest.Mock).mockReturnValue(of({
-      scheme: JSON.stringify({ variableCodings })
-    }));
+    jest.spyOn(unitStoresStub, 'loadSchemeStore').mockReturnValue(of(
+      new UnitSchemeStore(5, { scheme: JSON.stringify({ variableCodings }), schemeType: 'iqb@3.4' })
+    ));
     const codeSpy = jest.spyOn(CodingSchemeFactory, 'code')
       .mockReturnValue(codedResponses);
 
@@ -215,6 +225,27 @@ describe('UnitPreviewComponent', () => {
 
     expect(resultsComponent.dataSource.data[0]['transformed'])
       .toBe('["ABC","007"]');
+  });
+
+  // #1848: before the player has reported anything, the scheme's variables are shown without values
+  it('checks the coding before the player has reported any responses', async () => {
+    const variableCodings = [
+      {
+        id: 'text_1', alias: 'Antwort', sourceType: 'BASE', codes: []
+      } as unknown as VariableCodingData
+    ];
+    jest.spyOn(unitStoresStub, 'loadSchemeStore').mockReturnValue(of(
+      new UnitSchemeStore(5, { scheme: JSON.stringify({ variableCodings }), schemeType: 'iqb@3.4' })
+    ));
+
+    await component.checkCodingChanged();
+
+    expect(dialogStub.open).toHaveBeenCalledWith(
+      ShowCodingResultsComponent,
+      expect.objectContaining({
+        data: expect.objectContaining({ responses: [{ id: 'Antwort', value: null, status: 'UNSET' }] })
+      })
+    );
   });
 
   describe('handleWidgetCall', () => {
@@ -380,6 +411,124 @@ describe('UnitPreviewComponent', () => {
       component.postStore(store);
 
       expect(playerConfigOf(target)).not.toHaveProperty('stateReportPolicy');
+    });
+
+    it('should send the definition type at the top level when it is known', () => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.playerApiVersion = 6;
+
+      component.postStore({
+        getData: () => ({ definition: 'def', definitionType: 'aspect-unit-definition@4.12.0' })
+      } as never);
+
+      const message = target.postMessage.mock.calls[0][0];
+      expect(message.unitDefinitionType).toBe('aspect-unit-definition@4.12.0');
+      expect(message.playerConfig).not.toHaveProperty('unitDefinitionType');
+    });
+
+    it('should send no definition type when none is known', () => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.playerApiVersion = 6;
+
+      component.postStore(store);
+
+      expect(target.postMessage.mock.calls[0][0]).not.toHaveProperty('unitDefinitionType');
+    });
+
+    it('should let the next page report decide the list of the restarted unit', () => {
+      component.postMessageTarget = { postMessage: jest.fn() } as never;
+      component.playerApiVersion = 6;
+      component.setPageList(['0', '1', '2'], '0');
+
+      component.postStore(store);
+      component.setPageList(['0'], '0');
+
+      expect(component.pageList).toEqual([]);
+    });
+  });
+
+  describe('definition type warning', () => {
+    const aspectModel = 'aspect-unit-definition@>=4.0 <=4.12';
+    const player = (key: string, version: string, model?: string) => new VeronaModuleClass({
+      key,
+      sortKey: key,
+      metadata: {
+        id: key, name: key.split('@')[0], version, model, type: 'PLAYER'
+      }
+    } as never);
+    const storeWith = (definitionType?: string) => ({
+      getData: () => ({ definition: 'def', definitionType })
+    }) as never;
+
+    beforeEach(() => {
+      component.postMessageTarget = { postMessage: jest.fn() } as never;
+      component.playerApiVersion = 6;
+      component.playerName = 'iqb-player-aspect@3.0';
+    });
+
+    it('should warn and name a fitting player when the selected one does not read the format', () => {
+      moduleServiceStub.players = {
+        'iqb-player-aspect@3.0': player('iqb-player-aspect@3.0', '3.0.1', aspectModel),
+        'iqb-player-aspect@4.0': player('iqb-player-aspect@4.0', '4.0.0', 'aspect-unit-definition@>=5.0 <=5.2')
+      };
+
+      component.postStore(storeWith('aspect-unit-definition@5.1.0'));
+
+      expect(component.definitionTypeWarning).toContain('workspace.definition-type-incompatible');
+      expect(component.definitionTypeWarning).toContain('workspace.definition-type-alternatives');
+    });
+
+    it('should say so when no installed player reads the format', () => {
+      moduleServiceStub.players = {
+        'iqb-player-aspect@3.0': player('iqb-player-aspect@3.0', '3.0.1', aspectModel)
+      };
+
+      component.postStore(storeWith('aspect-unit-definition@5.1.0'));
+
+      expect(component.definitionTypeWarning).toContain('workspace.definition-type-incompatible');
+      expect(component.definitionTypeWarning).toContain('workspace.definition-type-no-alternative');
+    });
+
+    it('should not warn when the player reads the format', () => {
+      moduleServiceStub.players = {
+        'iqb-player-aspect@3.0': player('iqb-player-aspect@3.0', '3.0.1', aspectModel)
+      };
+
+      component.postStore(storeWith('aspect-unit-definition@4.12.0'));
+
+      expect(component.definitionTypeWarning).toBe('');
+    });
+
+    it('should not warn when the unit has no type', () => {
+      moduleServiceStub.players = {
+        'iqb-player-aspect@3.0': player('iqb-player-aspect@3.0', '3.0.1', aspectModel)
+      };
+
+      component.postStore(storeWith(undefined));
+
+      expect(component.definitionTypeWarning).toBe('');
+    });
+
+    it('should not warn when the player declares no model', () => {
+      moduleServiceStub.players = {
+        'iqb-player-aspect@3.0': player('iqb-player-aspect@3.0', '2.12.6', '')
+      };
+
+      component.postStore(storeWith('aspect-unit-definition@5.1.0'));
+
+      expect(component.definitionTypeWarning).toBe('');
+    });
+
+    it('should drop the warning of the unit left behind', () => {
+      component.definitionTypeWarning = 'old warning';
+      component.unitLoaded.next(true);
+      workspaceServiceStub.loadUnitProperties = jest.fn().mockReturnValue(new Subject<void>());
+
+      component.onSelectedUnitChange();
+
+      expect(component.definitionTypeWarning).toBe('');
     });
   });
 

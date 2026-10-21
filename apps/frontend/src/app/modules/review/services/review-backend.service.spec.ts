@@ -188,6 +188,21 @@ describe('ReviewBackendService', () => {
       req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
     });
 
+    it('should pass on a 403, which tells the reviewer to use the review link (#1818)', done => {
+      const reviewId = 999;
+
+      service.getReview(reviewId).subscribe({
+        next: () => done(new Error('expected an error')),
+        error: error => {
+          expect(error.status).toBe(403);
+          done();
+        }
+      });
+
+      const req = httpMock.expectOne(`${serverUrl}reviews/${reviewId}`);
+      req.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
+    });
+
     it('should handle empty review data', done => {
       const reviewId = 1;
       const mockReview: ReviewFullDto = {

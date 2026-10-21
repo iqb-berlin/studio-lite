@@ -168,7 +168,7 @@
                 [matTooltip]="'save' | translate"
                 matTooltipPosition="above"
                 [color]="'primary'"
-                [disabled]="!workspaceUsers.hasChanged"
+                [disabled]="!workspaceUsers.hasChanged || isLoadingAccessRights"
                 (click)="saveUsers()">
           <mat-icon>save</mat-icon>
         </button>
@@ -192,7 +192,7 @@
                   class="access-rights-radio"
                   [name]="'u-role-' + u.id"
                   [checked]="!!selectedWorkspaceId && u.accessLevel === level && u.isChecked"
-                  [disabled]="!selectedWorkspaceId"
+                  [disabled]="!selectedWorkspaceId || isLoadingAccessRights"
                   [matTooltip]="'access-rights.access-level-'+level | translate"
                   [attr.data-cy]="'access-rights-radio-button-' + level"
                   (change)="onRoleChange(u, level)"

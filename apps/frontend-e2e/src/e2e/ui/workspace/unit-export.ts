@@ -1,3 +1,4 @@
+import { Interception } from 'cypress/types/net-stubbing';
 import {
   primaryWorkspace,
   exportUnits
@@ -5,7 +6,8 @@ import {
 import {
   ensureUnitExists,
   goToWsMenu,
-  selectListUnits
+  selectListUnits,
+  waitForSuccess
 } from '../../../support/helpers';
 
 describe('Workspace Unit Export & Reports', () => {
@@ -38,6 +40,33 @@ describe('Workspace Unit Export & Reports', () => {
     });
   });
 
+  // The settings outgrow the dialog once the booklet panel opens; scrolled to the end, the unit
+  // list still has to reach the bottom of the dialog content instead of ending a screen above it (#1749)
+  it('export dialog unit list grows with the settings column', () => {
+    cy.visitWs(primaryWorkspace);
+    cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
+    goToWsMenu();
+    cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
+    cy.get('studio-lite-export-test-taker-config input[type="number"]').first().clear().type('1');
+    cy.get('mat-dialog-content mat-expansion-panel.mat-expanded').should('have.length', 2);
+    cy.get('mat-dialog-content')
+      .should($content => {
+        expect($content[0].scrollHeight).to.be.greaterThan($content[0].clientHeight);
+      })
+      .scrollTo('bottom')
+      .then($content => {
+        const content = $content[0];
+        const style = getComputedStyle(content);
+        const contentBottom = content.getBoundingClientRect().bottom -
+          parseFloat(style.borderBottomWidth) - parseFloat(style.paddingBottom);
+        const listBottom = $content.find('studio-lite-select-unit-list')[0].getBoundingClientRect().bottom;
+        expect(listBottom).to.be.closeTo(contentBottom, 2);
+      });
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.clickDialogButton(json.cancel || json.close);
+    });
+  });
+
   it('export dialog search filter narrows the unit list', () => {
     ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
     cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
@@ -52,20 +81,19 @@ describe('Workspace Unit Export & Reports', () => {
     });
   });
 
-  it('export dialog definition checkbox can be toggled', () => {
-    cy.visitWs(primaryWorkspace);
+  // A freshly created unit has neither comments nor rich notes, so the dialog offers neither (#1729)
+  it('export dialog locks the files the chosen units have no content for', () => {
+    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
     cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
-    cy.get('mat-card.files mat-checkbox, studio-lite-export-unit-file-config mat-checkbox')
-      .first()
-      .find('input')
-      .then($chk => {
-        const wasChecked = $chk.prop('checked');
-        cy.wrap($chk).click({ force: true });
-        cy.wrap($chk).should(wasChecked ? 'not.be.checked' : 'be.checked');
-      });
+    selectListUnits([exportUnits.exportUnit1.shortname]);
+    cy.get('[data-cy="export-file-addComments"] input').should('be.disabled').and('not.be.checked');
+    cy.get('[data-cy="export-file-addRichNotes"] input').should('be.disabled').and('not.be.checked');
     cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('studio-lite-export-unit-file-config')
+        .should('contain.text', json['unit-download']['no-comments'])
+        .and('contain.text', json['unit-download']['no-rich-notes']);
       cy.clickDialogButton(json.cancel || json.close);
     });
   });
@@ -79,7 +107,7 @@ describe('Workspace Unit Export & Reports', () => {
     cy.get('mat-radio-button[value="xml"]').click();
     cy.intercept('GET', '/api/workspaces/*?download=true*').as('downloadXmlReq');
     cy.get('[data-cy="workspace-export-unit-button"]').click();
-    cy.wait('@downloadXmlReq').its('response.statusCode').should('be.within', 200, 304);
+    waitForSuccess('@downloadXmlReq');
   });
 
   it('exports selected units as JSON format', () => {
@@ -91,22 +119,25 @@ describe('Workspace Unit Export & Reports', () => {
     cy.get('mat-radio-button[value="json"]').click();
     cy.intercept('POST', '/api/workspaces/*/download-units').as('downloadJsonReq');
     cy.get('[data-cy="workspace-export-unit-button"]').click();
-    cy.wait('@downloadJsonReq').its('response.statusCode').should('be.within', 200, 304);
+    waitForSuccess('@downloadJsonReq');
   });
 
-  it('exports selected units with comments and rich notes options toggled', () => {
+  it('exports selected units with the locked files left out', () => {
     ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
     cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
     selectListUnits([exportUnits.exportUnit1.shortname]);
-
-    cy.get('studio-lite-export-unit-file-config mat-checkbox').eq(0).click({ force: true });
-    cy.get('studio-lite-export-unit-file-config mat-checkbox').eq(1).click({ force: true });
+    cy.get('mat-radio-button[value="xml"]').click();
+    cy.get('[data-cy="export-file-addComments"] input').should('be.disabled');
 
     cy.intercept('GET', '/api/workspaces/*?download=true*').as('downloadFilteredReq');
     cy.get('[data-cy="workspace-export-unit-button"]').click();
-    cy.wait('@downloadFilteredReq').its('response.statusCode').should('be.within', 200, 304);
+    waitForSuccess('@downloadFilteredReq');
+    cy.get<Interception>('@downloadFilteredReq').then(interception => {
+      const settings = JSON.parse(new URL(interception.request.url).searchParams.get('settings') ?? '{}');
+      expect(settings).to.include({ addComments: false, addRichNotes: false });
+    });
   });
 
   it('displays metadata report', () => {

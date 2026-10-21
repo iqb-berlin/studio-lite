@@ -86,7 +86,7 @@ describe('UnitMetadataStore', () => {
     const store = new UnitMetadataStore(buildBaseProperties());
 
     store.setPlayer('p2');
-    store.applyChanges();
+    store.applyChanges(store.getChangedData());
 
     expect(store.isChanged()).toBe(false);
     expect(store.getData().player).toBe('p2');
@@ -104,5 +104,86 @@ describe('UnitMetadataStore', () => {
     expect(store.getChangedData()).toEqual({ id: 10 });
     expect(store.isChanged()).toBe(false);
     expect(emitSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('reloadMetadata takes the stored metadata as new original and keeps other changes', () => {
+    const store = new UnitMetadataStore(buildBaseProperties());
+    const emitSpy = jest.fn();
+    store.dataChange.subscribe(emitSpy);
+    const stored = { items: [{ id: 'item1', uuid: 'uuid-1' }] };
+
+    store.setMetadata({ items: [{ id: 'item1' }] });
+    const sent = store.getChangedData();
+    store.setPlayer('p2');
+    store.applyChanges(sent);
+    store.reloadMetadata(stored);
+
+    expect(store.getData().metadata).toEqual(stored);
+    expect(store.getChangedData()).toEqual({ id: 10, player: 'p2' });
+    expect(emitSpy).toHaveBeenCalledTimes(4);
+
+    store.setMetadata({ items: [{ id: 'item1', uuid: 'uuid-1' }] });
+    expect(store.getChangedData().metadata).toBeUndefined();
+  });
+
+  // #1845: what is edited while a save is under way was not sent and must stay a change
+  it('applyChanges takes only what was sent as saved', () => {
+    const store = new UnitMetadataStore(buildBaseProperties());
+    store.setBasicData('k1', 'n1', 'before', 'g1', 't1', 'r1', 'draft');
+    const sent = store.getChangedData();
+
+    store.setBasicData('k1', 'n1', 'before and after', 'g1', 't1', 'r1', 'draft');
+    store.applyChanges(sent);
+
+    expect(store.getChangedData()).toEqual({ id: 10, description: 'before and after' });
+    expect(store.changed()).toBe(true);
+  });
+
+  it('hands out a copy that later edits do not change', () => {
+    const store = new UnitMetadataStore(buildBaseProperties());
+    store.setMetadata({ items: [{ id: 'item1' }] });
+    const sent = store.getChangedData();
+
+    store.setMetadata({ items: [{ id: 'item1' }, { id: 'item2' }] });
+
+    expect(sent.metadata).toEqual({ items: [{ id: 'item1' }] });
+  });
+
+  it('reloadMetadata keeps metadata edited again while the save was under way', () => {
+    const store = new UnitMetadataStore(buildBaseProperties());
+    store.setMetadata({ items: [{ id: 'item1' }] });
+    const sent = store.getChangedData();
+
+    store.setMetadata({ items: [{ id: 'item1' }, { id: 'item2' }] });
+    store.applyChanges(sent);
+    store.reloadMetadata({ items: [{ id: 'item1', uuid: 'uuid-1' }] });
+
+    expect(store.getData().metadata).toEqual({ items: [{ id: 'item1' }, { id: 'item2' }] });
+    expect(store.changed()).toBe(true);
+  });
+
+  it('holds in changed whether anything is unsaved', () => {
+    const store = new UnitMetadataStore(buildBaseProperties());
+    expect(store.changed()).toBe(false);
+
+    store.setPlayer('p2');
+    expect(store.changed()).toBe(true);
+    store.setPlayer('p1');
+    expect(store.changed()).toBe(false);
+
+    store.setMetadata({ items: [{ id: 'item1' }] });
+    expect(store.changed()).toBe(true);
+    store.applyChanges(store.getChangedData());
+    store.reloadMetadata({ items: [{ id: 'item1', uuid: 'uuid-1' }] });
+    expect(store.changed()).toBe(false);
+
+    store.setBasicData('k2', 'n1', 'd1', 'g1', 't1', 'r1', 'draft');
+    expect(store.changed()).toBe(true);
+    store.applyChanges(store.getChangedData());
+    expect(store.changed()).toBe(false);
+
+    store.setPlayer('p2');
+    store.restore();
+    expect(store.changed()).toBe(false);
   });
 });

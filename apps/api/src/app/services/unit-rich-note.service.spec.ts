@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -70,6 +70,40 @@ describe('UnitRichNoteService', () => {
         links: [],
         itemReferences: ['new-uuid-1']
       });
+    });
+  });
+
+  describe('findUnitIdsWithNotes', () => {
+    it('should answer which of the given units have rich notes', async () => {
+      unitRichNoteRepository.find.mockResolvedValueOnce([{ unitId: 2 }, { unitId: 2 }] as UnitRichNote[]);
+
+      const result = await service.findUnitIdsWithNotes([1, 2]);
+
+      expect(result).toEqual(new Set([2]));
+      expect(unitRichNoteRepository.find).toHaveBeenCalledWith({
+        where: { unitId: In([1, 2]) },
+        select: { unitId: true }
+      });
+    });
+
+    it('should not query for an empty list', async () => {
+      expect(await service.findUnitIdsWithNotes([])).toEqual(new Set());
+      expect(unitRichNoteRepository.find).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('isInUnit', () => {
+    it('should ask for the note in the unit', async () => {
+      unitRichNoteRepository.exists.mockResolvedValue(true);
+
+      expect(await service.isInUnit(7, 10)).toBe(true);
+      expect(unitRichNoteRepository.exists).toHaveBeenCalledWith({ where: { id: 7, unitId: 10 } });
+    });
+
+    it('should return false when the note is not in the unit', async () => {
+      unitRichNoteRepository.exists.mockResolvedValue(false);
+
+      expect(await service.isInUnit(7, 11)).toBe(false);
     });
   });
 

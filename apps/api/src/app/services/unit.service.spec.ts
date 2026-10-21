@@ -1,11 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { EntityManager, QueryFailedError, Repository } from 'typeorm';
+import {
+  EntityManager, In, QueryFailedError, Repository
+} from 'typeorm';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
   CreateUnitDto,
+  UnitItemDto,
+  UnitItemWithMetadataDto,
   UnitMetadataDto,
   UnitMetadataValues,
   UnitPropertiesDto,
@@ -25,6 +29,7 @@ import { UnitItemService } from './unit-item.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { MetadataProfileService } from './metadata-profile.service';
 import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
+import { UnitKeyExistsException } from '../exceptions/unit-key-exists.exception';
 
 describe('UnitService', () => {
   let service: UnitService;
@@ -33,6 +38,7 @@ describe('UnitService', () => {
   let usersRepository: DeepMocked<Repository<User>>;
   let workspaceUserRepository: DeepMocked<Repository<WorkspaceUser>>;
   let workspaceRepository: DeepMocked<Repository<Workspace>>;
+  let unitDropBoxHistoryRepository: DeepMocked<Repository<UnitDropBoxHistory>>;
   let unitUserService: DeepMocked<UnitUserService>;
   let unitCommentService: DeepMocked<UnitCommentService>;
   let unitMetadataService: DeepMocked<UnitMetadataService>;
@@ -101,6 +107,7 @@ describe('UnitService', () => {
     usersRepository = module.get(getRepositoryToken(User));
     workspaceUserRepository = module.get(getRepositoryToken(WorkspaceUser));
     workspaceRepository = module.get(getRepositoryToken(Workspace));
+    unitDropBoxHistoryRepository = module.get(getRepositoryToken(UnitDropBoxHistory));
     unitUserService = module.get(UnitUserService);
     unitCommentService = module.get(UnitCommentService);
     unitMetadataService = module.get(UnitMetadataService);
@@ -165,6 +172,63 @@ describe('UnitService', () => {
     });
   });
 
+  describe('isInWorkspace', () => {
+    it('should ask for the unit in the workspace', async () => {
+      unitsRepository.exists.mockResolvedValue(true);
+
+      expect(await service.isInWorkspace(10, 3)).toBe(true);
+      expect(unitsRepository.exists).toHaveBeenCalledWith({ where: { id: 10, workspaceId: 3 } });
+    });
+
+    it('should return false when the unit is not in the workspace', async () => {
+      unitsRepository.exists.mockResolvedValue(false);
+
+      expect(await service.isInWorkspace(10, 7)).toBe(false);
+    });
+  });
+
+  describe('idsNotInWorkspace', () => {
+    it('should return the ids the workspace does not hold', async () => {
+      unitsRepository.find.mockResolvedValue([createMock<Unit>({ id: 10 })]);
+
+      expect(await service.idsNotInWorkspace([10, 11, 10], 3)).toEqual([11]);
+      expect(unitsRepository.find).toHaveBeenCalledWith({
+        where: { id: In([10, 11]), workspaceId: 3 },
+        select: ['id']
+      });
+    });
+
+    it('should return nothing when all units are in the workspace', async () => {
+      unitsRepository.find.mockResolvedValue([createMock<Unit>({ id: 10 }), createMock<Unit>({ id: 11 })]);
+
+      expect(await service.idsNotInWorkspace([10, 11], 3)).toEqual([]);
+    });
+
+    it('should not ask the database for an empty list', async () => {
+      expect(await service.idsNotInWorkspace([], 3)).toEqual([]);
+      expect(unitsRepository.find).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('workspacesOfUnits', () => {
+    it('should map each unit that exists to its workspace', async () => {
+      unitsRepository.find.mockResolvedValue([
+        createMock<Unit>({ id: 10, workspaceId: 3 }), createMock<Unit>({ id: 11, workspaceId: 4 })
+      ]);
+
+      expect(await service.workspacesOfUnits([10, 11, 12, 10])).toEqual(new Map([[10, 3], [11, 4]]));
+      expect(unitsRepository.find).toHaveBeenCalledWith({
+        where: { id: In([10, 11, 12]) },
+        select: ['id', 'workspaceId']
+      });
+    });
+
+    it('should not ask the database for an empty list', async () => {
+      expect(await service.workspacesOfUnits([])).toEqual(new Map());
+      expect(unitsRepository.find).not.toHaveBeenCalled();
+    });
+  });
+
   describe('create', () => {
     it('should create unit', async () => {
       unitsRepository.findOne.mockResolvedValue(null);
@@ -175,6 +239,19 @@ describe('UnitService', () => {
 
       const result = await service.create(1, { key: 'u1' } as CreateUnitDto, { id: 1 } as User, false);
       expect(result).toBe(2);
+    });
+
+    it('should create a new unit even when the body names an existing one', async () => {
+      unitsRepository.findOne.mockResolvedValue(null);
+      unitsRepository.create.mockReturnValue({ id: 2 } as Unit);
+      unitsRepository.save.mockResolvedValue({ id: 2 } as Unit);
+      workspaceUserRepository.find.mockResolvedValue([]);
+      usersRepository.findOne.mockResolvedValue({ lastName: 'Doe' } as User);
+      const body = { key: 'u1', id: 99 } as CreateUnitDto & { id: number };
+
+      await service.create(1, body, { id: 1 } as User, false);
+
+      expect(unitsRepository.create).toHaveBeenCalledWith(expect.objectContaining({ key: 'u1', id: undefined }));
     });
 
     it('should return 0 if unit exists', async () => {
@@ -225,6 +302,49 @@ describe('UnitService', () => {
     });
   });
 
+  describe('findAllExportSources', () => {
+    it('reads the metadata column of an unmarked unit without resolving profiles', async () => {
+      const metadata = { profiles: [{ profileId: 'p', entries: [] }], items: [] };
+      unitsRepository.find.mockResolvedValue([{ id: 1, metadata, scheme: '{}' } as unknown as Unit]);
+      unitMetadataToDeleteService.findMarkedUnitIds.mockResolvedValue(new Set());
+      unitMetadataService.getAllByUnitIds.mockResolvedValue([]);
+      unitItemService.getAllByUnitIds.mockResolvedValue([]);
+
+      const result = await service.findAllExportSources(4);
+
+      expect(result).toEqual([{ id: 1, metadata, scheme: '{}' }]);
+      expect(unitsRepository.find).toHaveBeenCalledWith({
+        where: { workspaceId: 4 },
+        select: ['id', 'metadata', 'scheme']
+      });
+      expect(metadataProfileService.getStoredMetadataProfileFromDb).not.toHaveBeenCalled();
+    });
+
+    it('reads the metadata tables of the marked units, as the export does, in one query each', async () => {
+      unitsRepository.find.mockResolvedValue([
+        { id: 2, metadata: { stale: true }, scheme: '' },
+        { id: 3, metadata: { stale: true }, scheme: '' },
+        { id: 5, metadata: { profiles: [] }, scheme: '' }
+      ] as unknown as Unit[]);
+      unitMetadataToDeleteService.findMarkedUnitIds.mockResolvedValue(new Set([2, 3]));
+      unitMetadataService.getAllByUnitIds.mockResolvedValue([{ unitId: 2, profileId: 'p' } as UnitMetadataDto]);
+      unitItemService.getAllByUnitIds.mockResolvedValue([{ unitId: 3, id: 'item1' } as UnitItemDto]);
+
+      const result = await service.findAllExportSources(4);
+
+      expect(result).toEqual([
+        { id: 2, metadata: { profiles: [{ unitId: 2, profileId: 'p' }], items: [] }, scheme: '' },
+        { id: 3, metadata: { profiles: [], items: [{ unitId: 3, id: 'item1' }] }, scheme: '' },
+        { id: 5, metadata: { profiles: [] }, scheme: '' }
+      ]);
+      expect(unitMetadataToDeleteService.findMarkedUnitIds).toHaveBeenCalledWith([2, 3, 5]);
+      expect(unitMetadataService.getAllByUnitIds).toHaveBeenCalledWith([2, 3]);
+      expect(unitItemService.getAllByUnitIds).toHaveBeenCalledWith([2, 3]);
+      expect(unitMetadataToDeleteService.getOneByUnit).not.toHaveBeenCalled();
+      expect(unitItemService.getAllByUnitIdWithMetadata).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getUserDisplayName', () => {
     it('should format name', () => {
       const user = { firstName: 'John', lastName: 'Doe', name: 'user' } as User;
@@ -272,6 +392,21 @@ describe('UnitService', () => {
       unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
       await service.patchItemsMetadata(1, []);
       expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalled();
+    });
+
+    it('should leave alone an item the unit does not have, neither updating nor creating it (#1816)', async () => {
+      unitItemService.getAllByUnitIdWithMetadata
+        .mockResolvedValue([{ uuid: 'own', id: 'item_1' } as UnitItemWithMetadataDto]);
+
+      await service.patchItemsMetadata(1, [
+        { uuid: 'own', id: 'item_1' } as UnitItemWithMetadataDto,
+        { uuid: 'foreign', id: 'item_9' } as UnitItemWithMetadataDto
+      ]);
+
+      expect(unitItemService.updateItem).toHaveBeenCalledTimes(1);
+      expect(unitItemService.updateItem).toHaveBeenCalledWith('own', expect.anything(), undefined);
+      expect(unitItemService.addItem).not.toHaveBeenCalled();
+      expect(unitItemService.removeItem).not.toHaveBeenCalled();
     });
   });
 
@@ -378,6 +513,42 @@ describe('UnitService', () => {
       expect(unit.name).toBe('n');
       expect(unitsRepository.save).toHaveBeenCalled();
     });
+
+    // #1842: renaming did not check what creating and copying refuse
+    describe('with a new key', () => {
+      beforeEach(() => {
+        unitsRepository.findOne.mockResolvedValue({ id: 1, key: 'OLD', workspaceId: 7 } as Unit);
+        unitsRepository.find.mockResolvedValue([
+          { id: 1, key: 'OLD' }, { id: 2, key: 'M1_001' }
+        ] as Unit[]);
+      });
+
+      it.each(['M1_001', 'm1_001', ' M1_001 '])('refuses %p, which another unit carries', async key => {
+        await expect(service.patchUnit(1, { id: 1, key } as UnitPropertiesDto, 'user'))
+          .rejects.toBeInstanceOf(UnitKeyExistsException);
+        expect(unitsRepository.find).toHaveBeenCalledWith(expect.objectContaining({ where: { workspaceId: 7 } }));
+        expect(unitsRepository.save).not.toHaveBeenCalled();
+      });
+
+      it('takes a key no other unit carries', async () => {
+        await service.patchUnit(1, { id: 1, key: 'M1_002' } as UnitPropertiesDto, 'user');
+
+        expect(unitsRepository.save).toHaveBeenCalledWith(expect.objectContaining({ key: 'M1_002' }));
+      });
+
+      it('lets a unit keep or recase its own key', async () => {
+        await service.patchUnit(1, { id: 1, key: 'old' } as UnitPropertiesDto, 'user');
+
+        expect(unitsRepository.save).toHaveBeenCalledWith(expect.objectContaining({ key: 'old' }));
+      });
+
+      it('does not look at the other keys when the key is sent unchanged', async () => {
+        await service.patchUnit(1, { id: 1, key: 'OLD', name: 'n' } as UnitPropertiesDto, 'user');
+
+        expect(unitsRepository.find).not.toHaveBeenCalled();
+        expect(unitsRepository.save).toHaveBeenCalled();
+      });
+    });
   });
 
   describe('patchDropBoxHistory', () => {
@@ -393,6 +564,55 @@ describe('UnitService', () => {
 
       await service.patchDropBoxHistory([1], 2, 1, { id: 1 } as User);
       expect(unitsRepository.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('patchReturnDropBoxHistory', () => {
+    beforeEach(() => {
+      unitsRepository.findOne.mockImplementation(async ({ where }) => {
+        const { id, key } = where as { id?: number; key?: string };
+        if (key) return null; // no unit of the same key in the source
+        return { id, key: id === 1 ? 'SUBMITTED' : 'NEVER' } as Unit;
+      });
+      unitDropBoxHistoryRepository.findOne.mockImplementation(async ({ where }) => (
+        (where as { unitId: number }).unitId === 1 ?
+          { unitId: 1, sourceWorkspaceId: 5, targetWorkspaceId: 9 } as UnitDropBoxHistory :
+          null
+      ));
+      workspaceRepository.findOne.mockResolvedValue({ id: 5 } as Workspace);
+    });
+
+    it('should return a submitted unit to where it came from', async () => {
+      const report = await service.patchReturnDropBoxHistory([1], 9, { id: 1 } as User);
+
+      expect(report.messages).toEqual([]);
+      expect(unitsRepository.save).toHaveBeenCalledWith(expect.objectContaining({ id: 1, workspaceId: 5 }));
+      expect(unitDropBoxHistoryRepository.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          unitId: 1, sourceWorkspaceId: 5, targetWorkspaceId: 9, returned: true
+        }),
+        ['unitId', 'sourceWorkspaceId', 'targetWorkspaceId']
+      );
+    });
+
+    // #1793: a unit created in the drop box, or moved into it, has no submission to undo
+    it('should report a unit that was never submitted, and return the others', async () => {
+      const report = await service.patchReturnDropBoxHistory([1, 2], 9, { id: 1 } as User);
+
+      expect(report.messages).toEqual([{ objectKey: 'NEVER', messageKey: 'unit-patch.not-submitted' }]);
+      expect(unitsRepository.save).toHaveBeenCalledTimes(1);
+      expect(unitsRepository.save).toHaveBeenCalledWith(expect.objectContaining({ id: 1, workspaceId: 5 }));
+      expect(unitDropBoxHistoryRepository.upsert).toHaveBeenCalledTimes(1);
+    });
+
+    // #1806: an older, already returned submission from another workspace must not decide the target
+    it('should look for the latest submission not yet returned', async () => {
+      await service.patchReturnDropBoxHistory([1], 9, { id: 1 } as User);
+
+      expect(unitDropBoxHistoryRepository.findOne).toHaveBeenCalledWith({
+        where: { unitId: 1, targetWorkspaceId: 9, returned: false },
+        order: { changedAt: 'DESC' }
+      });
     });
   });
 
@@ -473,6 +693,24 @@ describe('UnitService', () => {
       const result = await service.findOnesDefinition(1);
       expect(result.definition).toBe('xml');
     });
+
+    it('should return the stored definition type', async () => {
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Unit);
+      unitDefinitionsRepository.findOne.mockResolvedValue(
+        { data: 'xml', type: 'aspect-unit-definition@4.12.0' } as UnitDefinition
+      );
+
+      const result = await service.findOnesDefinition(1);
+      expect(result.definitionType).toBe('aspect-unit-definition@4.12.0');
+    });
+
+    it('should leave the definition type out when none is stored', async () => {
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Unit);
+      unitDefinitionsRepository.findOne.mockResolvedValue({ data: 'xml', type: null } as UnitDefinition);
+
+      const result = await service.findOnesDefinition(1);
+      expect(result).not.toHaveProperty('definitionType');
+    });
   });
 
   describe('findOnesScheme', () => {
@@ -480,6 +718,32 @@ describe('UnitService', () => {
       unitsRepository.findOne.mockResolvedValue({ scheme: '{}', schemeType: 't' } as Unit);
       const result = await service.findOnesScheme(1);
       expect(result.scheme).toBe('{}');
+    });
+
+    // The schemer reads the variables from here and knows only the 1.x spelling (#1708).
+    it('should hand out a variable list stored in 2.x in the 1.x spelling', async () => {
+      const storedIn2x = {
+        id: 'geo1',
+        type: 'STRING',
+        format: 'GGB_FILE',
+        multiple: false,
+        nullable: false,
+        values: [],
+        valuePositionLabels: []
+      } as unknown as VariableInfo;
+      unitsRepository.findOne.mockResolvedValue({ scheme: '{}', variables: [storedIn2x] } as Unit);
+
+      const result = await service.findOnesScheme(1);
+
+      expect(result.variables).toEqual([{
+        ...storedIn2x, type: 'string', format: 'ggb-file', page: ''
+      }]);
+    });
+
+    it('should keep a missing variable list missing', async () => {
+      unitsRepository.findOne.mockResolvedValue({ scheme: '{}', variables: null } as Unit);
+      const result = await service.findOnesScheme(1);
+      expect(result.variables).toBeNull();
     });
   });
 
@@ -508,9 +772,9 @@ describe('UnitService', () => {
       expect(unitsRepository.save).toHaveBeenCalled();
     });
 
-    // Saving from the editor and importing both end up here. Whatever spelling the list came in,
-    // the schemer and coding-box read it from what is stored, and they know only 1.x (#1606).
-    it('should store a variable list in the VariableInfo 1.x spelling', async () => {
+    // Saving from the editor and importing both end up here. The list is stored in the spelling it
+    // came in; readers that know only 1.x get it converted on the way out (#1708).
+    it('should store a variable list in the spelling it was sent in', async () => {
       unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
       unitDefinitionsRepository.findOne.mockResolvedValue({ id: 1 } as UnitDefinition);
       const sentByA20Editor = {
@@ -527,9 +791,91 @@ describe('UnitService', () => {
       await service.patchDefinition(1, { definition: 'xml', variables: [sentByA20Editor] }, 'user', new Date());
 
       const stored = unitsRepository.save.mock.calls[0][0] as Unit;
-      expect(stored.variables).toEqual([{
-        ...sentByA20Editor, type: 'string', format: 'ggb-file', page: ''
-      }]);
+      expect(stored.variables).toEqual([sentByA20Editor]);
+    });
+
+    // The frontend brings the items in line with the variables when it saves (#1361). The definition
+    // names only the base variables, so an item of a derived variable lost it here (#1853).
+    it('should leave the items in the stored metadata alone', async () => {
+      const metadata = {
+        items: [{ uuid: 'u-1', variableReadOnlyId: 'sum', variableId: 'Summe' }]
+      } as unknown as UnitMetadataValues;
+      unitsRepository.findOne.mockResolvedValue({ id: 1, metadata: structuredClone(metadata) } as Unit);
+      unitDefinitionsRepository.findOne.mockResolvedValue({ id: 1 } as UnitDefinition);
+
+      await service.patchDefinition(
+        1,
+        { definition: 'xml', variables: [{ id: 'text_1', alias: 'Antwort' } as VariableInfo] },
+        'user',
+        new Date()
+      );
+
+      const stored = unitsRepository.save.mock.calls[0][0] as Unit;
+      expect(stored.metadata).toEqual(metadata);
+    });
+
+    // The type belongs to the definition it came with (#1368).
+    describe('with a definition type', () => {
+      const savedDefinition = () => unitDefinitionsRepository.save.mock.calls[0][0] as UnitDefinition;
+
+      beforeEach(() => {
+        unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
+      });
+
+      it('should store the type sent with a definition', async () => {
+        unitDefinitionsRepository.findOne.mockResolvedValue({ id: 1, type: null } as UnitDefinition);
+
+        await service.patchDefinition(
+          1,
+          { definition: 'xml', definitionType: 'aspect-unit-definition@4.12.0' },
+          'user',
+          new Date()
+        );
+
+        expect(savedDefinition().type).toBe('aspect-unit-definition@4.12.0');
+      });
+
+      it('should clear the stored type when a definition comes without one', async () => {
+        unitDefinitionsRepository.findOne.mockResolvedValue(
+          { id: 1, type: 'aspect-unit-definition@4.11.0' } as UnitDefinition
+        );
+
+        await service.patchDefinition(1, { definition: 'xml' }, 'user', new Date());
+
+        expect(savedDefinition().type).toBeNull();
+      });
+
+      it('should leave the stored type alone when only the variables change', async () => {
+        unitDefinitionsRepository.findOne.mockResolvedValue(
+          { id: 1, type: 'aspect-unit-definition@4.11.0' } as UnitDefinition
+        );
+
+        await service.patchDefinition(
+          1,
+          { variables: [], definitionType: 'aspect-unit-definition@4.12.0' },
+          'user',
+          new Date()
+        );
+
+        // undefined is what TypeORM skips on save, so the column keeps its value
+        expect(savedDefinition().type).toBeUndefined();
+      });
+
+      it('should store the type on a definition created by this call', async () => {
+        unitDefinitionsRepository.findOne.mockResolvedValue(null);
+        unitDefinitionsRepository.create.mockImplementation(entity => entity as UnitDefinition);
+
+        await service.patchDefinition(
+          1,
+          { definition: 'xml', definitionType: 'aspect-unit-definition@4.12.0' },
+          'user',
+          new Date()
+        );
+
+        expect(unitDefinitionsRepository.create).toHaveBeenCalledWith(
+          expect.objectContaining({ type: 'aspect-unit-definition@4.12.0', unitId: 1 })
+        );
+      });
     });
   });
 
@@ -543,6 +889,12 @@ describe('UnitService', () => {
         new Date()
       );
       expect(unitsRepository.save).toHaveBeenCalled();
+    });
+
+    it.each(['{broken', 'null', '{}'])('should refuse the scheme %s without a list of codings', async scheme => {
+      await expect(service.patchScheme(1, { scheme, schemeType: 't' }, 'user', new Date()))
+        .rejects.toThrow(BadRequestException);
+      expect(unitsRepository.save).not.toHaveBeenCalled();
     });
   });
 

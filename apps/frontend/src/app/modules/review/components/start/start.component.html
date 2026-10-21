@@ -1,5 +1,8 @@
 <div class="start-page fx-column-center-center">
   <div class="start-data fx-column-start-stretch">
+    @if (reviewService.accessDenied) {
+      <p class="access-denied">{{'review.access-denied' | translate}}</p>
+    }
     <div>
       <h4>{{'review.title' | translate}}</h4>
       <h1>{{reviewService.reviewName}}</h1>

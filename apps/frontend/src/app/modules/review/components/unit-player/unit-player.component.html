@@ -1,5 +1,5 @@
 <div class="unit-host"
-  [class.with-footer]="reviewService.bookletConfig.pageNaviButtons === 'SEPARATE_BOTTOM'">
+  [class.with-footer]="reviewService.bookletConfig.pageNaviButtons !== 'OFF'">
   <div class="fx-row-start-stretch full-height">
     @if (message) {
       <div class="message">
@@ -18,7 +18,9 @@
     }
   </div>
 
-  @if (reviewService.bookletConfig.pageNaviButtons === 'SEPARATE_BOTTOM') {
+  <!-- An unset pageNaviButtons means its default, SEPARATE_BOTTOM: the player falls back to the
+       separate paging mode then and offers no navigation of its own (#1800). -->
+  @if (reviewService.bookletConfig.pageNaviButtons !== 'OFF') {
     <div class="page-navigation fx-row-end-center">
       <studio-lite-page-navigation [pageList]="pageList"
                                    (gotoPage)="gotoPage($event)">

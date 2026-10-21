@@ -356,12 +356,60 @@ describe('WorkspaceService', () => {
     });
   });
 
+  describe('dropBoxIdOf', () => {
+    it('should return the drop box of the workspace', async () => {
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, dropBoxId: 7 } as Workspace);
+
+      expect(await service.dropBoxIdOf(1)).toBe(7);
+      expect(workspaceRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 }, select: ['id', 'dropBoxId'] });
+    });
+
+    it.each([[{ id: 1, dropBoxId: null }], [null]])('should return null for %p', async workspace => {
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(workspace);
+
+      expect(await service.dropBoxIdOf(1)).toBeNull();
+    });
+  });
+
   describe('patchDropBoxId', () => {
+    const lookup = (workspaces: Partial<Workspace>[]) => (workspaceRepository.findOne as jest.Mock)
+      .mockImplementation(async ({ where }) => workspaces.find(w => w.id === where.id) ?? null);
+
     it('should patch dropbox id', async () => {
-      const ws = { id: 1 } as Workspace;
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
+      const ws = { id: 1, groupId: 7 } as Workspace;
+      lookup([ws, { id: 100, groupId: 7 }]);
       await service.patchDropBoxId(1, 100);
       expect(ws.dropBoxId).toBe(100);
+    });
+
+    it('should clear the drop box', async () => {
+      const ws = { id: 1, groupId: 7, dropBoxId: 100 } as Workspace;
+      lookup([ws]);
+      await service.patchDropBoxId(1, null);
+      expect(ws.dropBoxId).toBeNull();
+      expect(workspaceRepository.save).toHaveBeenCalledWith(ws);
+    });
+
+    // #1805: a drop box is another workspace of the same group
+    it.each([
+      ['of another group', 200],
+      ['that does not exist', 300],
+      ['that is the workspace itself', 1]
+    ])('should refuse a drop box %s, and leave the setting as it was', async (_, dropBoxId) => {
+      const ws = { id: 1, groupId: 7, dropBoxId: 100 } as Workspace;
+      lookup([ws, { id: 100, groupId: 7 }, { id: 200, groupId: 8 }]);
+
+      await expect(service.patchDropBoxId(1, dropBoxId)).rejects.toThrow(AdminWorkspaceNotFoundException);
+      expect(ws.dropBoxId).toBe(100);
+      expect(workspaceRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should refuse the workspace itself when the route hands its id on as text', async () => {
+      const ws = { id: 1, groupId: 7 } as Workspace;
+      (workspaceRepository.findOne as jest.Mock)
+        .mockImplementation(async ({ where }) => ([ws].find(w => w.id === Number(where.id)) ?? null));
+
+      await expect(service.patchDropBoxId('1' as unknown as number, 1)).rejects.toThrow(AdminWorkspaceNotFoundException);
     });
   });
 
@@ -553,6 +601,44 @@ describe('WorkspaceService', () => {
 
       expect(result.find(row => row.variable === '_08_reached')?.validation)
         .toBe('OK');
+      expect(result.every(row => row.validation !== 'Fehler')).toBe(true);
+    });
+
+    // A list stored in the VariableInfo 2.x spelling is read as such (#1708).
+    it('reads variable types in the 2.x spelling', async () => {
+      (unitService.findAllWithProperties as jest.Mock).mockResolvedValue([{
+        id: 11,
+        key: 'VI2',
+        name: '',
+        schemer: 'schemer@2.8.1',
+        variables: [
+          { id: 'panel', type: 'NO_VALUE' },
+          { id: 'count', type: 'NUMBER' }
+        ],
+        metadata: { items: [] },
+        scheme: JSON.stringify({
+          version: '2.5',
+          variableCodings: [{
+            id: 'panel', alias: 'panel', sourceType: 'BASE_NO_VALUE', codes: []
+          }, {
+            id: 'count',
+            alias: 'count',
+            sourceType: 'BASE',
+            codes: [{
+              id: 1,
+              type: 'FULL_CREDIT',
+              score: 1,
+              label: '',
+              manualInstruction: '',
+              ruleSetOperatorAnd: false,
+              ruleSets: [{ ruleOperatorAnd: false, rules: [{ method: 'NUMERIC_MATCH', parameters: ['1'] }] }]
+            }]
+          }]
+        })
+      }]);
+
+      const result = await service.getCodingReport(1);
+
       expect(result.every(row => row.validation !== 'Fehler')).toBe(true);
     });
   });
@@ -998,6 +1084,61 @@ describe('WorkspaceService', () => {
       expect(unitService.create).toHaveBeenCalledWith(1, { key: 'UNIT01', name: 'L' }, user, true);
     });
 
+    // A definition without a file of its own was dropped together with its variables (#1839).
+    describe('with an inline definition', () => {
+      beforeEach(() => {
+        (unitService.create as jest.Mock).mockResolvedValue(10);
+        (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+        (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+      });
+
+      it('should store the definition and the variables of an XML unit', async () => {
+        const result = await service.uploadFiles(1, [
+          buildFile('unit01.xml', 'text/xml', '<Unit><Metadata><Id>UNIT01</Id><Label>L</Label></Metadata>' +
+            '<Definition player="p@1.0">{"content":1}</Definition>' +
+            '<BaseVariables><Variable id="v1" type="string" format="" nullable="false" multiple="false"/>' +
+            '</BaseVariables></Unit>')
+        ], user);
+
+        expect(result.messages).toHaveLength(0);
+        expect(unitService.patchDefinition).toHaveBeenCalledWith(
+          10,
+          expect.objectContaining({
+            definition: '{"content":1}',
+            variables: [expect.objectContaining({ id: 'v1', type: 'string' })]
+          }),
+          null,
+          undefined
+        );
+      });
+
+      it('should store the definition of a JSON unit', async () => {
+        const result = await service.uploadFiles(1, [
+          buildFile('unit01.json', 'application/json', JSON.stringify({
+            id: 'UNIT01',
+            userInterface: { player: 'p@1.0', definition: '{"content":1}', isDefinitionInline: true }
+          }))
+        ], user);
+
+        expect(result.messages).toHaveLength(0);
+        expect(unitService.patchDefinition).toHaveBeenCalledWith(
+          10,
+          expect.objectContaining({ definition: '{"content":1}' }),
+          null,
+          undefined
+        );
+      });
+
+      it('should not store an empty definition without a date', async () => {
+        await service.uploadFiles(1, [
+          buildFile('unit01.xml', 'text/xml', '<Unit><Metadata><Id>UNIT01</Id><Label>L</Label></Metadata>' +
+            '<Definition player="p@1.0"/></Unit>')
+        ], user);
+
+        expect(unitService.patchDefinition).not.toHaveBeenCalled();
+      });
+    });
+
     it('should still warn about an XML file that is neither a unit nor a Testcenter file', async () => {
       const result = await service.uploadFiles(1, [
         buildFile('other.xml', 'text/xml', '<Something><Metadata><Id>X</Id></Metadata></Something>')
@@ -1093,6 +1234,30 @@ describe('WorkspaceService', () => {
       expect(unitService.patchDefinition).toHaveBeenCalledWith(
         10,
         expect.objectContaining({ variables: baseVariables }),
+        null,
+        undefined
+      );
+    });
+
+    it('should hand the definition type of the index on with the definition (#1368)', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchDefinition as jest.Mock).mockResolvedValue(undefined);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+
+      await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          userInterface: { player: 'p', definition: 'unit01.voud', type: 'aspect-unit-definition@4.12.0' }
+        })),
+        buildFile('unit01.voud', 'application/octet-stream', '<definition/>')
+      ], user);
+
+      expect(unitService.patchDefinition).toHaveBeenCalledWith(
+        10,
+        expect.objectContaining({
+          definition: '<definition/>',
+          definitionType: 'aspect-unit-definition@4.12.0'
+        }),
         null,
         undefined
       );

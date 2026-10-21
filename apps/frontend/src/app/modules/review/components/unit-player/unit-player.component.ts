@@ -159,6 +159,7 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
         .subscribe(ued => {
           if (ued) {
             this.unitData.definition = ued.definition || '';
+            this.unitData.definitionType = ued.definitionType;
             this.postStore(this.unitData.definition);
           } else {
             this.snackBar.open(
@@ -207,7 +208,8 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
             directDownloadUrl: this.backendService.getDirectDownloadLink(),
             sharedParameters: this.sharedParameters
           },
-          unitDefinition: definition || ''
+          unitDefinition: definition || '',
+          ...(this.unitData.definitionType && { unitDefinitionType: this.unitData.definitionType })
         },
         '*'
       );

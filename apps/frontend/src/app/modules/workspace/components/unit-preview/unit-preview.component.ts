@@ -28,6 +28,7 @@ import {
 import { PreviewDirective } from '../../../../directives/preview.directive';
 import { UnitState } from '../../../../models/verona.interface';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
+import { matchDefinitionType } from '../../utils/definition-type-match.utils';
 
 /**
  * The preview in the workspace: the unit as a test taker would see it, running in the player the
@@ -44,6 +45,7 @@ export class UnitPreviewComponent
   extends PreviewDirective
   implements AfterViewInit {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
+  definitionTypeWarning = '';
   private dataParts!: Record<string, string> | null;
   private unitStateDataType: string | null = null;
 
@@ -97,6 +99,7 @@ export class UnitPreviewComponent
       this.dataParts = null;
       this.unitStateDataType = null;
       this.message = '';
+      this.definitionTypeWarning = '';
       this.workspaceService
         .loadUnitProperties()
         .pipe(takeUntil(this.ngUnsubscribe))
@@ -114,15 +117,12 @@ export class UnitPreviewComponent
   }
 
   sendChangeData(): void {
-    this.sendUnitDefinition(
-      this.workspaceService.selectedUnit$.getValue(),
-      this.workspaceService.getUnitDefinitionStore()
-    );
+    this.sendUnitDefinition(this.workspaceService.selectedUnit$.getValue());
   }
 
   private subscribeForVeronaModuleLoaded(): void {
     this.getVeronaModuleId(
-      this.workspaceService.getUnitMetadataStore(),
+      this.unitStores.metadataStore(),
       'player'
     )
       .pipe(takeUntil(this.ngUnsubscribe))
@@ -162,6 +162,8 @@ export class UnitPreviewComponent
   postStore(unitDefinitionStore: UnitDefinitionStore): void {
     const unitDef = unitDefinitionStore.getData();
     if (this.postMessageTarget) {
+      this.definitionTypeWarning = this.getDefinitionTypeWarning(unitDef.definitionType);
+      this.awaitPageListAfterRestart();
       if (this.playerApiVersion === 1) {
         this.postMessageTarget.postMessage(
           {
@@ -187,13 +189,35 @@ export class UnitPreviewComponent
               directDownloadUrl: this.backendService.getDirectDownloadLink(),
               sharedParameters: this.sharedParameters
             },
-            unitDefinition: unitDef.definition || ''
+            unitDefinition: unitDef.definition || '',
+            ...(unitDef.definitionType && { unitDefinitionType: unitDef.definitionType })
           },
           '*'
         );
       }
       this.unitLoaded.next(true);
     }
+  }
+
+  /**
+   * A warning when the player says of itself that it does not read the format the unit is written
+   * in, naming the installed players that say they do. Empty whenever either side is silent: the
+   * player still runs, and an author decides whether to switch it (#1368).
+   */
+  private getDefinitionTypeWarning(definitionType: string | undefined): string {
+    const player = this.moduleService.players[this.playerName];
+    if (!player || matchDefinitionType(definitionType, player.metadata?.model) !== 'incompatible') return '';
+    const alternatives = Object.values(this.moduleService.players)
+      .filter(module => matchDefinitionType(definitionType, module.metadata?.model) === 'compatible')
+      .map(module => module.nameAndVersion);
+    const warning = this.translateService.instant(
+      'workspace.definition-type-incompatible',
+      { player: player.nameAndVersion, definitionType }
+    );
+    const hint = alternatives.length > 0 ?
+      this.translateService.instant('workspace.definition-type-alternatives', { players: alternatives.join(', ') }) :
+      this.translateService.instant('workspace.definition-type-no-alternative');
+    return `${warning} ${hint}`;
   }
 
   gotoUnit(target: string): void {
@@ -229,26 +253,19 @@ export class UnitPreviewComponent
     );
   }
 
+  /**
+   * Codes the player's responses with the coding scheme as it is now, saved or not -- the player
+   * beside it shows the definition as it is now too, and saving first is no longer asked (#1361).
+   */
   async checkCodingChanged(): Promise<void> {
-    if (this.workspaceService.isChanged()) {
-      this.snackBar.open(
-        this.translateService.instant('workspace.save-unit-before-check'),
-        this.translateService.instant('workspace.error'),
-        { duration: 3000 }
-      );
-    } else {
-      this.backendService
-        .getUnitScheme(
-          this.workspaceService.selectedWorkspaceId,
-          this.workspaceService.selectedUnit$.getValue()
-        )
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(schemeData => this.checkCoding(schemeData));
-    }
+    this.unitStores
+      .loadSchemeStore(this.workspaceService.selectedWorkspaceId, this.workspaceService.selectedUnit$.getValue())
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(unitSchemeStore => this.checkCoding(unitSchemeStore?.getData() ?? null));
   }
 
   showPrintOptions(): void {
-    if (this.workspaceService.isChanged()) {
+    if (this.unitStores.changed()) {
       this.snackBar.open(
         this.translateService.instant('workspace.save-unit-before-check'),
         this.translateService.instant('workspace.error'),
@@ -305,13 +322,13 @@ export class UnitPreviewComponent
         }
         return;
       }
-      this.workspaceService.codingScheme = codingScheme;
       const varsWithCodes = codingScheme.variableCodings
         .filter(vc => vc.codes && vc.codes.length > 0)
         .map(vc => vc.alias || vc.id);
+      // Before the player has reported anything, the scheme's variables are shown without values (#1848).
       const newResponses = CodingSchemeFactory.code(
-        responses!,
-        this.workspaceService.codingScheme.variableCodings
+        responses ?? [],
+        codingScheme.variableCodings
       );
       this.errorDialog.open(ShowCodingResultsComponent, {
         data: {

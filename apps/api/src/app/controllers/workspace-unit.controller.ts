@@ -7,6 +7,7 @@ import {
   ParseArrayPipe,
   ParseBoolPipe,
   ParseIntPipe,
+  ParseEnumPipe,
   Patch,
   Post,
   Query,
@@ -35,6 +36,7 @@ import {
   UnitDefinitionDto,
   UnitFullMetadataDto,
   UnitInListDto,
+  UnitExportContentsDto,
   UnitPropertiesDto,
   UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
@@ -55,6 +57,16 @@ import { DownloadWorkspacesClass } from '../classes/download-workspaces.class';
 import { WorkspaceService } from '../services/workspace.service';
 import { SettingService } from '../services/setting.service';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
+import { UnitCommentService } from '../services/unit-comment.service';
+import { UnitRichNoteService } from '../services/unit-rich-note.service';
+import { findUnitExportContents } from '../utils/unit-export-contents';
+import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
+import { UnitsInWorkspaceGuard } from '../guards/units-in-workspace.guard';
+import { QueryUnitsInWorkspaceGuard } from '../guards/query-units-in-workspace.guard';
+import { CopySourcesAccessibleGuard } from '../guards/copy-sources-accessible.guard';
+import { MoveTargetAccessGuard } from '../guards/move-target-access.guard';
+import { DropBoxTargetGuard } from '../guards/drop-box-target.guard';
+import { isCopyBody, isSubmissionBody } from '../utils/unit-request-body';
 
 /**
  * `workspaces/:workspace_id/units` -- the largest surface of the API: the units of a workspace,
@@ -70,14 +82,27 @@ import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.g
  * unit takes write access, grouping takes manage access, and moving units to another workspace or
  * deleting them takes the top level. Two routes step out of that order: deleting a single unit is
  * the group admin's, and submitting units to a drop box ({@link patchDropBoxHistory}) moves them
- * out of the workspace on nothing more than comment access.
+ * out of the workspace on nothing more than comment access -- but only into the drop box set for
+ * the workspace ({@link DropBoxTargetGuard}).
+ *
+ * Those guards ask about the workspace of the path alone. That the units are in it is asked first,
+ * by {@link UnitInWorkspaceGuard} for the unit in the path, by {@link UnitsInWorkspaceGuard} for
+ * the units of the body and by {@link QueryUnitsInWorkspaceGuard} for the units deleted through the
+ * query (#1775). The reports that take units from the query (`coding-book`, `properties`) carry no
+ * such guard: they read the units of the workspace and drop any other id.
+ *
+ * Where units cross into another workspace, that one is asked about as well: the target of a move
+ * ({@link MoveTargetAccessGuard}, #1780), and the sources a copy takes its units from -- its path
+ * names the target ({@link CopySourcesAccessibleGuard}, #1779).
  */
 @Controller('workspaces/:workspace_id/units')
 export class WorkspaceUnitController {
   constructor(
     private unitService: UnitService,
     private workspaceService: WorkspaceService,
-    private settingsService: SettingService
+    private settingsService: SettingService,
+    private unitCommentService: UnitCommentService,
+    private unitRichNoteService: UnitRichNoteService
   ) {}
 
   /**
@@ -141,6 +166,7 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
+  @ApiQuery({ name: 'trainingRequirement', required: false, enum: ['all', 'required', 'not-required'] })
   @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @Header('Content-Disposition', 'attachment; filename="iqb-studio-coding-book.docx"')
@@ -164,9 +190,16 @@ export class WorkspaceUnitController {
     @Query('closed', new ParseBoolPipe()) hasClosedVars: boolean,
     @Query('showScore', new ParseBoolPipe()) showScore: boolean,
     @Query('hideItemVarRelation', new ParseBoolPipe()) hideItemVarRelation: boolean,
-    @Query('codeLabelToUpper', new ParseBoolPipe()) codeLabelToUpper: boolean) {
+    @Query('codeLabelToUpper', new ParseBoolPipe()) codeLabelToUpper: boolean,
+    @Query('trainingRequirement', new ParseEnumPipe(
+      { ALL: 'all', REQUIRED: 'required', NOT_REQUIRED: 'not-required' },
+      { optional: true }
+    ))
+                   trainingRequirement?: CodeBookContentSetting['trainingRequirement']
+  ) {
     const options:CodeBookContentSetting = {
       exportFormat,
+      trainingRequirement: trainingRequirement || 'all',
       missingsProfile: missingsProfile,
       hasOnlyManualCoding: hasOnlyManualCoding,
       hasGeneralInstructions: hasGeneralInstructions,
@@ -237,8 +270,29 @@ export class WorkspaceUnitController {
     return this.unitService.findAllWithProperties(workspaceId);
   }
 
-  @Get(':id/properties')
+  /**
+   * For every unit of the workspace, which optional export files it would fill -- metadata, items,
+   * coding scheme, comments, rich notes. The export dialog offers a file only when one of the chosen
+   * units has content for it.
+   */
+  @Get('export-contents')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
+  @ApiBearerAuth()
+  @ApiParam({ name: 'workspace_id', type: Number })
+  @ApiOkResponse({ type: [UnitExportContentsDto] })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiTags('workspace unit')
+  async findExportContents(@WorkspaceId() workspaceId: number): Promise<UnitExportContentsDto[]> {
+    return findUnitExportContents(
+      workspaceId,
+      this.unitService,
+      this.unitCommentService,
+      this.unitRichNoteService
+    );
+  }
+
+  @Get(':unit_id/properties')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
@@ -247,13 +301,13 @@ export class WorkspaceUnitController {
   @ApiNotFoundResponse()
   @ApiTags('workspace unit')
   async findOnesProperties(
-    @Param('workspace_id', ParseIntPipe) workspaceId: number, @Param('id', ParseIntPipe) unitId: number
+    @Param('workspace_id', ParseIntPipe) workspaceId: number, @Param('unit_id', ParseIntPipe) unitId: number
   ): Promise<UnitPropertiesDto> {
     return this.unitService.findOnesProperties(unitId, workspaceId);
   }
 
-  @Get(':id/metadata')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
+  @Get(':unit_id/metadata')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
@@ -261,13 +315,13 @@ export class WorkspaceUnitController {
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit')
   async findOnesMetadata(
-    @Param('id', ParseIntPipe) unitId: number
+    @Param('unit_id', ParseIntPipe) unitId: number
   ): Promise<UnitFullMetadataDto> {
     return this.unitService.findOnesMetadata(unitId);
   }
 
-  @Get(':id/definition')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
+  @Get(':unit_id/definition')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
@@ -275,13 +329,13 @@ export class WorkspaceUnitController {
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace unit')
   async findOnesDefinition(
-    @Param('id', ParseIntPipe) unitId: number
+    @Param('unit_id', ParseIntPipe) unitId: number
   ): Promise<UnitDefinitionDto> {
     return this.unitService.findOnesDefinition(unitId);
   }
 
-  @Get(':id/scheme')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard)
+  @Get(':unit_id/scheme')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WorkspaceAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
@@ -289,7 +343,7 @@ export class WorkspaceUnitController {
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit')
   async findOnesScheme(
-    @Param('id', ParseIntPipe) unitId: number
+    @Param('unit_id', ParseIntPipe) unitId: number
   ): Promise<UnitSchemeDto> {
     return this.unitService.findOnesScheme(unitId);
   }
@@ -299,26 +353,26 @@ export class WorkspaceUnitController {
    * user's display name is resolved here because it is stored on the unit as "last changed by" --
    * the unit keeps the name, not the id.
    */
-  @Patch(':id/properties')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @Patch(':unit_id/properties')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async patchUnitProperties(@Param('id', ParseIntPipe) unitId: number,
+  async patchUnitProperties(@Param('unit_id', ParseIntPipe) unitId: number,
     @User() user: UserEntity,
     @Body() unitProperties: UnitPropertiesDto) {
     return this.unitService.patchUnit(unitId, unitProperties, await this.unitService.getDisplayNameForUser(user.id));
   }
 
   @Patch('workspace-id')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, DeleteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitsInWorkspaceGuard, DeleteAccessGuard, MoveTargetAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Unit moved' })
-  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace or in the target workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit')
   async moveUnits(@Body() body: MoveToDto,
@@ -333,17 +387,17 @@ export class WorkspaceUnitController {
    * the move in {@link UnitDropBoxHistory}.
    */
   @Patch('drop-box-history')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, CommentAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitsInWorkspaceGuard, CommentAccessGuard, DropBoxTargetGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Unit moved' })
-  @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiForbiddenResponse({ description: 'No privileges in the workspace, or the target is not its drop box.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit')
   async patchDropBoxHistory(@User() user: UserEntity,
     @Param('workspace_id', ParseIntPipe) workspaceId: number,
     @Body() body: MoveToDto | IdArrayDto) {
-    if ('targetId' in body) {
+    if (isSubmissionBody(body)) {
       return this.unitService.patchDropBoxHistory(body.ids, body.targetId, workspaceId, user);
     }
     return this.unitService.patchReturnDropBoxHistory(body.ids, workspaceId, user);
@@ -363,8 +417,8 @@ export class WorkspaceUnitController {
       .patchUnitGroup(workspaceId, body.name, body.ids);
   }
 
-  @Patch(':id/definition')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @Patch(':unit_id/definition')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
@@ -372,7 +426,7 @@ export class WorkspaceUnitController {
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async patchDefinition(@Param('id', ParseIntPipe) unitId: number,
+  async patchDefinition(@Param('unit_id', ParseIntPipe) unitId: number,
     @User() user: UserEntity,
     @Body() unitDefinitionDto: UnitDefinitionDto) {
     return this.unitService.patchDefinition(
@@ -382,8 +436,8 @@ export class WorkspaceUnitController {
       new Date());
   }
 
-  @Patch(':id/scheme')
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @Patch(':unit_id/scheme')
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitInWorkspaceGuard, WriteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse()
@@ -391,7 +445,7 @@ export class WorkspaceUnitController {
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
-  async patchScheme(@Param('id', ParseIntPipe) unitId: number,
+  async patchScheme(@Param('unit_id', ParseIntPipe) unitId: number,
     @User() user: UserEntity,
     @Body() unitSchemeDto: UnitSchemeDto) {
     return this.unitService.patchScheme(
@@ -406,11 +460,12 @@ export class WorkspaceUnitController {
    * says whether to take the comments along is a copy.
    */
   @Post()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, WriteAccessGuard, CopySourcesAccessibleGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiCreatedResponse({ description: 'Unit created' })
   @ApiForbiddenResponse({ description: 'No privileges in the workspace.' })
+  @ApiNotFoundResponse({ description: 'A unit to copy from is not found in a workspace the user can enter.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('workspace unit')
   async create(
@@ -418,14 +473,14 @@ export class WorkspaceUnitController {
     @Body() body: CreateUnitDto | CopyUnitDto,
     @User() user: UserEntity
   ) {
-    if ('addComments' in body) {
+    if (isCopyBody(body)) {
       return this.unitService.copy(body.ids, workspaceId, user, body.addComments);
     }
     return this.unitService.create(workspaceId, body, user, false);
   }
 
   @Delete()
-  @UseGuards(JwtAuthGuard, WorkspaceGuard, DeleteAccessGuard)
+  @UseGuards(JwtAuthGuard, WorkspaceGuard, QueryUnitsInWorkspaceGuard, DeleteAccessGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
@@ -448,8 +503,8 @@ export class WorkspaceUnitController {
    * Deletes a single unit. Unlike {@link remove}, which takes delete access in the workspace, this
    * one is for the group admin, who has no access level in it.
    */
-  @Delete(':unitId')
-  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
+  @Delete(':unit_id')
+  @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard, UnitInWorkspaceGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiTags('workspace unit')
@@ -457,7 +512,7 @@ export class WorkspaceUnitController {
   @ApiForbiddenResponse({ description: 'No admin privileges in the workspace.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   async removeUnit(
-    @Param('unitId', ParseIntPipe) unitId: number
+    @Param('unit_id', ParseIntPipe) unitId: number
   ): Promise<void> {
     return this.unitService.remove(unitId);
   }

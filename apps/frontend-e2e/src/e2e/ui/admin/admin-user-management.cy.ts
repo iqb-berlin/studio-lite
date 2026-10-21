@@ -13,7 +13,8 @@ import {
   goToAdminUsers,
   makeAdminOfGroup,
   saveUserEdit,
-  selectUserRow
+  selectUserRow,
+  waitForSuccess
 } from '../../../support/helpers';
 import { secondaryUser } from '../../../support/testData';
 
@@ -157,7 +158,7 @@ describe('Admin User Management', () => {
         cy.get('mat-dialog-actions button')
           .contains(json.save)
           .click({ force: true });
-        cy.wait('@patchGroup').its('response.statusCode').should('eq', 200);
+        waitForSuccess('@patchGroup');
       });
       cy.contains('mat-row', 'Umbenennte Gruppe').should('exist');
       deleteGroup('Umbenennte Gruppe');

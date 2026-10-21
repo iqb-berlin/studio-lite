@@ -5,6 +5,11 @@
       {{message}}
     </div>
   }
+  @if (definitionTypeWarning) {
+    <div class="definition-type-warning" data-cy="unit-preview-definition-type-warning">
+      {{definitionTypeWarning}}
+    </div>
+  }
   @if (loading) {
     <mat-spinner class="wait-animation fx-flex-fill"></mat-spinner>
   }

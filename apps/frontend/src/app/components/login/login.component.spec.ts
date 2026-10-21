@@ -14,6 +14,7 @@ import { of, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { LoginComponent } from './login.component';
 import { BackendService } from '../../services/backend.service';
+import { AppService } from '../../services/app.service';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -114,6 +115,50 @@ describe('LoginComponent', () => {
       fixture.detectChanges();
 
       expect(submitButton().disabled).toBe(true);
+    });
+  });
+
+  // The login holds error messages back so that a failed attempt is reported once, by the snack
+  // bar. Nothing reloads the page afterwards, so unless the answer switches them on again, every
+  // 403, 404 or 500 after a login stays silent (#1724).
+  describe('error messages around a login', () => {
+    let appService: AppService;
+
+    beforeEach(() => {
+      appService = TestBed.inject(AppService);
+    });
+
+    it('should hold error messages back while the answer is outstanding', () => {
+      backendService.login.mockReturnValue(new Subject<boolean>());
+      fillForm();
+
+      component.login();
+
+      expect(appService.errorMessagesDisabled).toBe(true);
+    });
+
+    it('should show error messages again after a successful login', async () => {
+      const answer = new Subject<boolean>();
+      backendService.login.mockReturnValue(answer);
+      fillForm();
+
+      component.login();
+      answer.next(true);
+      await fixture.whenStable();
+
+      expect(appService.errorMessagesDisabled).toBe(false);
+    });
+
+    it('should show error messages again after a failed login', async () => {
+      const answer = new Subject<boolean>();
+      backendService.login.mockReturnValue(answer);
+      fillForm();
+
+      component.login();
+      answer.next(false);
+      await fixture.whenStable();
+
+      expect(appService.errorMessagesDisabled).toBe(false);
     });
   });
 });

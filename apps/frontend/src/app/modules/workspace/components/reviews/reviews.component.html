@@ -66,11 +66,13 @@
           <studio-lite-select-unit-list [hidden]="!selectedReviewId"
             [selectedUnitIds]="reviewDataToChange.units ? reviewDataToChange.units : []"
             [workspace]="workspaceService.selectedWorkspaceId"
+            [locked]="isLoadingReview"
             (selectionChanged)="unitSelectionChanged($event)">
           </studio-lite-select-unit-list>
         </div>
         <studio-lite-review-config class="fx-flex-row-50 settings"
           [selectedReviewId]="selectedReviewId"
+          [disabled]="isLoadingReview"
           [bookletConfigSettings]="reviewDataToChange.settings?.bookletConfig"
           [reviewConfigSettings]="reviewDataToChange.settings?.reviewConfig"
           [(name)]="reviewDataToChange.name"
@@ -81,7 +83,7 @@
         </studio-lite-review-config>
       </div>
       <studio-lite-save-changes [changed]="changed"
-                                [disabled]="!reviewDataToChange.name"
+                                [disabled]="!reviewDataToChange.name || isLoadingReview"
                                 (discardChanges)="discardChanges()"
                                 (saveChanges)="saveChanges()">
       </studio-lite-save-changes>

@@ -1,14 +1,15 @@
 <div class="fx-row-start-start">
   <button mat-button
-          [disabled]="!storesDataChanged"
+          [disabled]="!unitStores.changed()"
           [matTooltip]="'workspace.reject-unit-changes' | translate"
           matTooltipPosition="above"
-          (click)="discardChanges()">
+          (click)="discardChanges()"
+          data-cy="workspace-unit-discard-button">
     <studio-lite-wrapped-icon icon="close"></studio-lite-wrapped-icon>
   </button>
 
   <button mat-button
-          [disabled]="!storesDataChanged || !isValidFormKey"
+          [disabled]="!unitStores.changed() || workspaceService.unitKeyTaken() || workspaceService.saving()"
           [matTooltip]="'workspace.save-unit' | translate"
           [color]="'primary'"
           matTooltipPosition="above"

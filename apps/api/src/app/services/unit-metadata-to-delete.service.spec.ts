@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import UnitMetadataToDelete from '../entities/unit-metadata-to-delete.entity';
 
@@ -10,7 +10,8 @@ describe('UnitMetadataToDeleteService', () => {
 
   const mockRepository = {
     upsert: jest.fn(),
-    findOneBy: jest.fn()
+    findOneBy: jest.fn(),
+    find: jest.fn()
   };
 
   beforeEach(async () => {
@@ -64,6 +65,24 @@ describe('UnitMetadataToDeleteService', () => {
 
       expect(repository.findOneBy).toHaveBeenCalledWith({ unitId });
       expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('findMarkedUnitIds', () => {
+    it('should answer which of the given units carry the marker, in one query', async () => {
+      mockRepository.find.mockResolvedValue([{ unitId: 2 }] as UnitMetadataToDelete[]);
+
+      const result = await service.findMarkedUnitIds([1, 2]);
+
+      expect(repository.find).toHaveBeenCalledWith({ where: { unitId: In([1, 2]) }, select: { unitId: true } });
+      expect(result).toEqual(new Set([2]));
+    });
+
+    it('should not query for an empty list', async () => {
+      mockRepository.find.mockClear();
+
+      expect(await service.findMarkedUnitIds([])).toEqual(new Set());
+      expect(repository.find).not.toHaveBeenCalled();
     });
   });
 });

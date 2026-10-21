@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { UnitMetadataDto } from '@studio-lite-lib/api-dto';
 import { UnitMetadataService } from './unit-metadata.service';
 import UnitMetadata from '../entities/unit-metadata.entity';
@@ -66,6 +66,25 @@ describe('UnitMetadataService', () => {
     });
   });
 
+  describe('getAllByUnitIds', () => {
+    it('should return the profiles of all given units in one query', async () => {
+      const mockData = [{ id: 1, unitId: 2 }, { id: 2, unitId: 3 }] as UnitMetadata[];
+      mockRepository.findBy.mockResolvedValue(mockData);
+
+      const result = await service.getAllByUnitIds([2, 3]);
+
+      expect(repository.findBy).toHaveBeenCalledWith({ unitId: In([2, 3]) });
+      expect(result).toEqual(mockData);
+    });
+
+    it('should not query for an empty list', async () => {
+      mockRepository.findBy.mockClear();
+
+      expect(await service.getAllByUnitIds([])).toEqual([]);
+      expect(repository.findBy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('addMetadata', () => {
     it('should add new metadata', async () => {
       const unitId = 1;
@@ -118,6 +137,14 @@ describe('UnitMetadataService', () => {
         expect.objectContaining({ profileId: 'p1', changedAt: expect.any(Date) })
       );
       expect(result).toBe(id);
+    });
+
+    it('should leave the row with its unit, whatever unitId the payload names (#1816)', async () => {
+      mockRepository.update.mockResolvedValue({ affected: 1 });
+
+      await service.updateMetadata(123, { id: 123, profileId: 'p1', unitId: 99 } as UnitMetadataDto);
+
+      expect(repository.update).toHaveBeenCalledWith(123, expect.not.objectContaining({ unitId: 99 }));
     });
   });
 

@@ -15,6 +15,7 @@ import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.co
 import { ExportTestTakerConfigComponent } from '../export-test-taker-config/export-test-taker-config.component';
 import { BookletConfigEditComponent } from '../booklet-config-edit/booklet-config-edit.component';
 import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export-unit-file-config.component';
+import { ExportFileSelection } from '../../utils/export-file-options.utils';
 
 describe('ExportUnitComponent', () => {
   let component: ExportUnitComponent;
@@ -55,13 +56,11 @@ describe('ExportUnitComponent', () => {
   @Component({ selector: 'studio-lite-export-unit-file-config', template: '', standalone: true })
   class MockExportUnitFileConfigComponent {
     @Input() exportFormat: 'xml' | 'json' = 'json';
+    @Input() selectedUnitIds: number[] = [];
     @Input() addPlayers!: boolean;
-    @Input() addComments!: boolean;
-    @Input() addRichNotes!: boolean;
     @Output() exportFormatChange = new EventEmitter<'xml' | 'json'>();
     @Output() addPlayersChange = new EventEmitter<boolean>();
-    @Output() addCommentsChange = new EventEmitter<boolean>();
-    @Output() addRichNotesChange = new EventEmitter<boolean>();
+    @Output() fileSelectionChange = new EventEmitter<ExportFileSelection>();
     @Output() unitsWithOutPlayerChange = new EventEmitter<number[]>();
   }
 
@@ -140,6 +139,20 @@ describe('ExportUnitComponent', () => {
     expect(component.unitExportSettings.unitIdList).toEqual([3, 7]);
   });
 
+  it('should pass the unit selection on to the file config', () => {
+    const unitList = fixture.debugElement
+      .query(By.directive(MockSelectUnitListComponent))
+      .componentInstance as MockSelectUnitListComponent;
+    const fileConfig = fixture.debugElement
+      .query(By.directive(MockExportUnitFileConfigComponent))
+      .componentInstance as MockExportUnitFileConfigComponent;
+
+    unitList.selectionChanged.emit([3, 7]);
+    fixture.detectChanges();
+
+    expect(fileConfig.selectedUnitIds).toEqual([3, 7]);
+  });
+
   it('should disable units without a player in the unit list', () => {
     const unitList = fixture.debugElement
       .query(By.directive(MockSelectUnitListComponent))
@@ -159,12 +172,21 @@ describe('ExportUnitComponent', () => {
       .componentInstance as MockExportUnitFileConfigComponent;
 
     fileConfig.addPlayersChange.emit(true);
-    fileConfig.addCommentsChange.emit(true);
-    fileConfig.addRichNotesChange.emit(true);
+    fileConfig.fileSelectionChange.emit({
+      addMetadata: false, addCodingScheme: true, addComments: true, addRichNotes: true
+    });
 
     expect(component.unitExportSettings.addPlayers).toBe(true);
+    expect(component.unitExportSettings.addMetadata).toBe(false);
+    expect(component.unitExportSettings.addCodingScheme).toBe(true);
     expect(component.unitExportSettings.addComments).toBe(true);
     expect(component.unitExportSettings.addRichNotes).toBe(true);
+  });
+
+  it('should leave the files that became optional unset until the file config decides', () => {
+    expect(component.unitExportSettings).not.toHaveProperty('addMetadata');
+    expect(component.unitExportSettings).not.toHaveProperty('addItems');
+    expect(component.unitExportSettings).not.toHaveProperty('addCodingScheme');
   });
 
   it('should adopt the test taker settings', () => {

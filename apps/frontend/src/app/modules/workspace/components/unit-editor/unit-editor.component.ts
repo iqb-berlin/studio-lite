@@ -110,10 +110,7 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
             this.editorApiVersion = 1;
           }
           this.sessionId = UnitEditorComponent.getSessionId();
-          this.sendUnitDefinition(
-            this.workspaceService.selectedUnit$.getValue(),
-            this.workspaceService.getUnitDefinitionStore()
-          );
+          this.sendUnitDefinition(this.workspaceService.selectedUnit$.getValue());
           break;
 
         case 'voeDefinitionChangedNotification':
@@ -121,9 +118,13 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
           if (msgData.sessionId === this.sessionId) {
             if (this.editorApiVersion > 1) {
               if (msgData.unitDefinition) {
-                this.workspaceService
-                  .getUnitDefinitionStore()
-                  ?.setData(msgData.variables, msgData.unitDefinition);
+                this.unitStores
+                  .definitionStore()
+                  ?.setData(
+                    msgData.variables,
+                    msgData.unitDefinition,
+                    typeof msgData.unitDefinitionType === 'string' ? msgData.unitDefinitionType : undefined
+                  );
                 // } else { TODO: find solution for voeGetDefinitionRequest
                 //   this.postMessageTarget.postMessage({
                 //     type: 'voeGetDefinitionRequest',
@@ -147,8 +148,8 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
 
         case 'vo.FromAuthoringModule.DataTransfer':
           if (msgData.sessionId === this.sessionId) {
-            this.workspaceService
-              .getUnitDefinitionStore()
+            this.unitStores
+              .definitionStore()
               ?.setData(msgData.variables, msgData.unitDefinition);
           }
           break;
@@ -163,17 +164,14 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
 
   private subscribeForVeronaModuleLoaded(): void {
     this.getVeronaModuleId(
-      this.workspaceService.getUnitMetadataStore(),
+      this.unitStores.metadataStore(),
       'editor'
     )
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(editorId => {
         if (editorId) {
           if (editorId === this.lastVeronaModuleId && this.postMessageTarget) {
-            this.sendUnitDefinition(
-              this.workspaceService.selectedUnit$.getValue(),
-              this.workspaceService.getUnitDefinitionStore()
-            );
+            this.sendUnitDefinition(this.workspaceService.selectedUnit$.getValue());
           } else {
             this.postMessageTarget = undefined;
             this.buildVeronaModule(editorId, 'editor');
@@ -215,7 +213,8 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
               ),
               sharedParameters: this.sharedParameters
             },
-            unitDefinition: unitDef.definition ? unitDef.definition : ''
+            unitDefinition: unitDef.definition ? unitDef.definition : '',
+            ...(unitDef.definitionType && { unitDefinitionType: unitDef.definitionType })
           },
           '*'
         );

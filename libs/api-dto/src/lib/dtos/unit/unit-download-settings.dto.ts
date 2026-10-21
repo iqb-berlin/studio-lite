@@ -17,6 +17,19 @@ export class UnitDownloadSettingsDto {
   @ApiProperty()
   addRichNotes = false;
 
+  // The three files below were written unconditionally before they became optional, and no pipe
+  // fills in the defaults of this class -- so a caller that does not know them must keep getting
+  // them: a missing value means "add", only false leaves the file out.
+  @ApiProperty({ required: false, default: true })
+  addMetadata?: boolean;
+
+  // JSON only: in XML the items live inside the metadata file and follow addMetadata.
+  @ApiProperty({ required: false, default: true })
+  addItems?: boolean;
+
+  @ApiProperty({ required: false, default: true })
+  addCodingScheme?: boolean;
+
   @ApiProperty()
   addTestTakersReview = 0;
 

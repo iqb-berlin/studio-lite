@@ -5,6 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { toVariableInfoListV1 } from '@studio-lite/shared-code';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { AppService } from '../../../../services/app.service';
@@ -83,20 +84,14 @@ export class UnitSchemerComponent
         case 'vosReadyNotification':
           this.sessionId = UnitSchemerComponent.getSessionId();
           this.postMessageTarget = m.source as Window;
-          this.sendScheme(
-            this.workspaceService.selectedUnit$.getValue(),
-            this.workspaceService.getUnitSchemeStore()
-          );
+          this.sendScheme(this.workspaceService.selectedUnit$.getValue());
           break;
 
         case 'vosSchemeChangedNotification':
           if (msgData.sessionId === this.sessionId) {
             if (msgData.codingScheme) {
-              this.workspaceService.codingScheme = JSON.parse(
-                msgData.codingScheme
-              );
-              this.workspaceService
-                .getUnitSchemeStore()
+              this.unitStores
+                .schemeStore()
                 ?.setData(msgData.codingScheme, msgData.codingSchemeType);
               // } else { TODO: find solution for vosGetSchemeRequest
               //   this.postMessageTarget.postMessage({
@@ -119,57 +114,43 @@ export class UnitSchemerComponent
   }
 
   sendChangeData(): void {
-    this.sendScheme(
-      this.workspaceService.selectedUnit$.getValue(),
-      this.workspaceService.getUnitSchemeStore()
-    );
+    this.sendScheme(this.workspaceService.selectedUnit$.getValue());
   }
 
-  private sendScheme(
-    unitId: number,
-    unitSchemeStore: UnitSchemeStore | undefined
-  ) {
+  private sendScheme(unitId: number) {
     if (!unitId) {
       this.message = this.translateService.instant('workspace.unit-not-found');
       this.postMessageTarget = undefined;
       return;
     }
-    if (unitSchemeStore) {
-      this.postStore(unitSchemeStore);
-    } else {
-      this.backendService
-        .getUnitScheme(this.workspaceService.selectedWorkspaceId, unitId)
-        .subscribe(ues => {
-          if (ues) {
-            const newUnitSchemeStore = new UnitSchemeStore(unitId, ues);
-            this.workspaceService.setUnitSchemeStore(newUnitSchemeStore);
-            this.postStore(newUnitSchemeStore);
-          } else {
-            this.snackBar.open(
-              this.translateService.instant(
-                'workspace.coding-scheme-not-loaded'
-              ),
-              this.translateService.instant('workspace.error'),
-              { duration: 3000 }
-            );
-          }
-        });
-    }
+    this.unitStores
+      .loadSchemeStore(this.workspaceService.selectedWorkspaceId, unitId)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(unitSchemeStore => {
+        if (unitSchemeStore) {
+          this.postStore(unitSchemeStore);
+        } else {
+          this.snackBar.open(
+            this.translateService.instant(
+              'workspace.coding-scheme-not-loaded'
+            ),
+            this.translateService.instant('workspace.error'),
+            { duration: 3000 }
+          );
+        }
+      });
   }
 
   private subscribeForVeronaModuleLoaded(): void {
     this.getVeronaModuleId(
-      this.workspaceService.getUnitMetadataStore(),
+      this.unitStores.metadataStore(),
       'schemer'
     )
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(schemerId => {
         if (schemerId) {
           if (schemerId === this.lastVeronaModuleId && this.postMessageTarget) {
-            this.sendScheme(
-              this.workspaceService.selectedUnit$.getValue(),
-              this.workspaceService.getUnitSchemeStore()
-            );
+            this.sendScheme(this.workspaceService.selectedUnit$.getValue());
           } else {
             this.postMessageTarget = undefined;
             this.buildVeronaModule(schemerId, 'schemer');
@@ -189,7 +170,7 @@ export class UnitSchemerComponent
   postStore(unitSchemeStore: UnitSchemeStore): void {
     const unitScheme = unitSchemeStore.getData();
     const variables =
-      this.workspaceService.getUnitDefinitionStore()?.getData().variables ||
+      this.unitStores.definitionStore()?.getData().variables ||
       unitScheme.variables;
     if (this.postMessageTarget) {
       this.postMessageTarget.postMessage(
@@ -206,7 +187,9 @@ export class UnitSchemerComponent
           },
           codingScheme: unitScheme.scheme || '',
           codingSchemeType: unitScheme.schemeType || '',
-          variables: variables || []
+          // the schemer still reads only the VariableInfo 1.x spelling, and the editor's unsaved
+          // list may come in 2.x (#1708)
+          variables: toVariableInfoListV1(variables)
         },
         '*'
       );

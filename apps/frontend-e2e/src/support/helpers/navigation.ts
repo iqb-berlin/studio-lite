@@ -34,13 +34,18 @@ export function clickIndexTabAdmin(tabName: string): void {
 }
 
 /**
- * Opens the workspace menu (three-dot menu)
+ * Opens the workspace menu (three-dot menu) and waits until its own panel is open (#1864). Its
+ * entries depend on the user's access level, which `cy.visitWs` waits for. The click is forced: a
+ * test before may have left a select open, whose backdrop covers the button.
  * @example
  * goToWsMenu();
  * cy.get('[data-cy="workspace-edit-unit-settings"]').click();
  */
 export function goToWsMenu(): void {
   cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
+  cy.get('[data-cy="workspace-edit-unit-menu"]').closest('button')
+    .should('have.attr', 'aria-controls')
+    .then(panelId => cy.get(`#${panelId}`).should('be.visible'));
 }
 
 /**
@@ -54,9 +59,19 @@ export function goToItem(itemId: string): void {
 }
 
 /**
+ * Waits until the radio buttons of the access-rights panel accept input. The panel disables
+ * them while the rights of the selected row load, so this is the moment those rights arrived.
+ */
+function waitForAccessRights(): void {
+  cy.get('studio-lite-roles-header').should('be.visible');
+  cy.get('[data-cy="access-rights-row"] input[type="radio"]')
+    .first()
+    .should('be.enabled');
+}
+
+/**
  * Navigates to the wsg-admin Workspaces tab and selects a workspace row.
- * Waits for the user list (roles-header) to be visible, ensuring the async
- * GET for users has completed before the caller proceeds.
+ * Waits until the rights of that workspace have arrived before the caller proceeds.
  * @param ws - Workspace name to click
  * @example
  * openWsTab('Workspace 1');
@@ -64,13 +79,12 @@ export function goToItem(itemId: string): void {
 export function openWsTab(ws: string): void {
   clickIndexTabWsgAdmin('workspaces');
   cy.contains('mat-row', ws).click();
-  cy.get('studio-lite-roles-header').should('be.visible');
+  waitForAccessRights();
 }
 
 /**
  * Navigates to the wsg-admin Users tab and selects a user row.
- * Waits for the workspace list (roles-header) to be visible, ensuring the async
- * GET for workspaces has completed before the caller proceeds.
+ * Waits until the rights of that user have arrived before the caller proceeds.
  * @param username - Username to click
  * @example
  * openUsersTab('normaluser');
@@ -78,5 +92,5 @@ export function openWsTab(ws: string): void {
 export function openUsersTab(username: string): void {
   clickIndexTabWsgAdmin('users');
   cy.contains('mat-row', username).click();
-  cy.get('studio-lite-roles-header').should('be.visible');
+  waitForAccessRights();
 }

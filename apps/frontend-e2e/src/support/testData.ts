@@ -136,8 +136,8 @@ export interface MyData {
  * Copy unit data structure
  */
 export interface CopyUnit {
-  /** Create form type */
-  createForm: number;
+  /** The unit to create from */
+  createFrom: number;
   /** Group name */
   groupName: string;
   /** Unit key */
@@ -343,7 +343,7 @@ export const moveCopyUnits = {
   /** Unit that gets copied (stays in both workspaces) */
   copyTarget: { shortname: 'MC_CPY1', name: 'MoveCopy Copy Target', group: 'Gruppe D' } as UnitData,
   /** Newly created unit from an existing one */
-  newFromExisting: { shortname: 'MC_NEW1', name: 'MoveCopy New From Existing', group: 'Group D' } as UnitData
+  newFromExisting: { shortname: 'MC_NEW1', name: 'MoveCopy New From Existing', group: 'Gruppe D' } as UnitData
 };
 
 /**

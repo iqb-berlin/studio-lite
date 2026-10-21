@@ -13,7 +13,7 @@ export {
   HIDDEN_PROFILE_ORDER, ACTIVE_PROFILE_ORDER, orderFromCurrent, isCurrentFromOrder
 } from './lib/profile-order';
 export {
-  VariableInfoInEitherSpelling, toVariableInfoV1, toVariableInfoListV1, sameVariableLists
+  VariableInfoInEitherSpelling, toVariableInfoV1, toVariableInfoListV1, toUnitXmlFormat, sameVariableLists
 } from './lib/variable-info-spelling';
 export {
   ReconcilableProfile, ProfileReconcileOps, mergeProfile, reconcileProfilesByProfileId

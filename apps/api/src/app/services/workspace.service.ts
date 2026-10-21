@@ -755,11 +755,37 @@ export class WorkspaceService {
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
-  async patchDropBoxId(id: number, dropBoxId: number): Promise<void> {
+  /** The drop box set for the workspace, or `null` when it has none or does not exist. */
+  async dropBoxIdOf(id: number): Promise<number | null> {
+    const workspace = await this.workspacesRepository.findOne({
+      where: { id: id },
+      select: ['id', 'dropBoxId']
+    });
+    return workspace?.dropBoxId ?? null;
+  }
+
+  /**
+   * Sets the workspace that units of this one are submitted to, or none. A drop box is another
+   * workspace of the same group, as the group admin's dialog offers it; anything else was saved as
+   * sent, and the submission check of #1780 then sent units wherever it pointed (#1805). A workspace
+   * of another group, one that does not exist and the workspace itself are all answered as not
+   * found, so the answer tells nothing about workspaces outside the group.
+   */
+  async patchDropBoxId(id: number, dropBoxId: number | null): Promise<void> {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
-    workspaceToUpdate.dropBoxId = dropBoxId;
+    if (dropBoxId) {
+      const dropBox = await this.workspacesRepository.findOne({
+        where: { id: dropBoxId },
+        select: { id: true, groupId: true }
+      });
+      // The route hands the workspace id on as the text it arrives as (see WorkspaceId)
+      if (!dropBox || dropBox.id === Number(id) || dropBox.groupId !== workspaceToUpdate.groupId) {
+        throw new AdminWorkspaceNotFoundException(dropBoxId, 'PATCH');
+      }
+    }
+    workspaceToUpdate.dropBoxId = dropBoxId || null;
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
@@ -977,6 +1003,10 @@ export class WorkspaceService {
         } else {
           WorkspaceService.warnMissingFile(unitImportData.definitionFileName, functionReturn);
         }
+      } else if (unitImportData.definition || unitImportData.lastChangedDefinition) {
+        // An inline definition (`<Definition>` in the XML, `isDefinitionInline` in the JSON index) has
+        // no file of its own, but is stored the same way, with its variables (#1839).
+        await this.importDefinition(newUnitId, unitImportData);
       }
 
       if (unitImportData.metadataFileName) {
@@ -1173,6 +1203,7 @@ export class WorkspaceService {
       newUnitId,
       {
         definition: unitImportData.definition,
+        definitionType: unitImportData.definitionType,
         variables: unitImportData.baseVariables
       },
       null,
