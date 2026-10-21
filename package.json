@@ -1,6 +1,6 @@
 {
   "name": "studio-lite",
-  "version": "21.0.0-beta.1",
+  "version": "21.0.0",
   "author": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen",
   "license": "MIT",
   "scripts": {
