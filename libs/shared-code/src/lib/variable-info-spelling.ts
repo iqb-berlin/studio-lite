@@ -14,7 +14,8 @@ import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
  * entry that is already in 1.x is left untouched, byte for byte, and so is one whose type neither
  * spelling knows.
  *
- * Once a reader takes both spellings, the conversion on its way out can go.
+ * The conversion stays even where a reader has learned both spellings: a unit opens with the
+ * schemer version it names as long as that is installed, and older testcenters remain in use.
  */
 
 type TypeV1 = VariableInfo['type'];
