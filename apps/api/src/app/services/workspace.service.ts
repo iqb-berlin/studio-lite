@@ -7,12 +7,10 @@ import {
   WorkspaceFullDto,
   RequestReportDto,
   WorkspaceSettingsDto,
-  UnitPropertiesDto,
   UsersWorkspaceInListDto,
   UserWorkspaceAccessDto,
   UserWorkspaceFullDto,
   CodingReportDto,
-  CodingReportValidationProblemDto,
   WorkspaceInListDto,
   GroupNameDto,
   RenameGroupNameDto,
@@ -27,20 +25,14 @@ import { orderFromCurrent, profileIdsMatch, toW3idProfileId } from '@studio-lite
 // gives a namespace object that is not the class and has none of its members. The default import
 // works in both.
 import AdmZip from 'adm-zip';
-import {
-  VariableCodingData,
-  RuleSet,
-  CodeData,
-  CodingSchemeData
-} from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
 import Unit from '../entities/unit.entity';
 import { FileIo } from '../interfaces/file-io.interface';
 import { UnitImportData } from '../classes/unit-import-data.class';
+import { CodingReportClass } from '../classes/coding-report.class';
 import { NotAUnitXmlError } from '../exceptions/not-a-unit-xml.error';
 import { UnitImportJsonData } from '../classes/unit-import-json-data.class';
 import { UnitService } from './unit.service';
@@ -93,9 +85,8 @@ interface ImportedComment {
  * A unit group is not a table: it is a name in the settings and the same name on each unit, which
  * is why creating, renaming and removing one all write both sides.
  *
- * The coding report over a workspace lives here as well -- a block of static helpers that read the
- * coding schemes of its units and judge them. It belongs to the workspace only in that it is asked
- * for one, and it is the one part of this service that touches no repository.
+ * The coding report over a workspace is asked for here and built by {@link CodingReportClass} from
+ * the units alone.
  */
 @Injectable()
 export class WorkspaceService {
@@ -428,208 +419,15 @@ export class WorkspaceService {
   }
 
   /**
-   * One row per coding variable of every unit in the workspace: what is coded, how, and what the
-   * validation of the scheme against the unit's variables says. A unit whose scheme cannot be used
-   * -- missing, unparsable, or written by a schemer too old for it -- still gets a row, so the
-   * report shows the gap instead of leaving the unit out.
+   * One row per coding variable of every unit in the workspace -- see {@link CodingReportClass}
+   * for what the rows say.
    */
   async getCodingReport(id: number): Promise<CodingReportDto[]> {
-    const unitDataRows: CodingReportDto[] = [];
     const unitListWithMetadata = await this.unitService.findAllWithProperties(
       id
     );
     if (!unitListWithMetadata) return [];
-
-    unitListWithMetadata.forEach((unit: UnitPropertiesDto) => {
-      if (WorkspaceService.isValidScheme(unit.scheme, unit.schemer)) {
-        const parsedUnitScheme = WorkspaceService.parseScheme(unit.scheme);
-        const version = 'version';
-        if (parsedUnitScheme && parsedUnitScheme[version]) {
-          const validationResults = CodingSchemeFactory.validate(
-            unit.variables,
-            parsedUnitScheme.variableCodings
-          );
-          WorkspaceService.processVariableCodings(
-            parsedUnitScheme,
-            validationResults,
-            unit,
-            id,
-            unitDataRows
-          );
-        }
-      } else {
-        WorkspaceService.addInvalidSchemeRow(unit, id, unitDataRows);
-      }
-    });
-
-    return unitDataRows;
-  }
-
-  /**
-   * Whether a unit's coding scheme can be read at all. A scheme without a schemer is the current
-   * JSON format, which no longer names one; an older scheme is only usable from schemer 1.5 on.
-   */
-  private static isValidScheme(
-    scheme: string | undefined,
-    schemer: string
-  ): boolean {
-    if (!scheme) return false;
-    if (!schemer) return true; // JSON format: schemer is no longer explicitly assigned per spec
-    return schemer.split('@')[1] >= '1.5';
-  }
-
-  private static parseScheme(scheme: string): CodingSchemeData | null {
-    try {
-      return JSON.parse(scheme);
-    } catch {
-      return null; // Catch JSON parsing errors gracefully
-    }
-  }
-
-  static processVariableCodings(
-    parsedUnitScheme: CodingSchemeData,
-    validationResults: CodingSchemeProblem[],
-    unit: UnitPropertiesDto,
-    workspaceId: number,
-    unitDataRows: CodingReportDto[]
-  ): void {
-    parsedUnitScheme.variableCodings
-      ?.filter(vc => vc.sourceType !== 'BASE_NO_VALUE')
-      .forEach((codingVariable: VariableCodingData) => {
-        const validationProblems = WorkspaceService.getValidationProblems(
-          validationResults,
-          codingVariable
-        );
-        const validationResultText = WorkspaceService.getValidationStatus(
-          validationProblems
-        );
-        const codingType = WorkspaceService.determineCodingType(codingVariable);
-        const trainingEffort = WorkspaceService.determineTrainingEffort(
-          codingVariable
-        );
-        const foundItem = WorkspaceService.findMatchingItem(
-          unit,
-          codingVariable
-        );
-
-        unitDataRows.push({
-          unit: WorkspaceService.generateUnitLink(workspaceId, unit),
-          variable: codingVariable.alias || codingVariable.id || '–',
-          variableType: WorkspaceService.determineVariableType(codingVariable),
-          item: foundItem?.id || '–',
-          validation: validationResultText,
-          validationProblems,
-          codingType: codingType,
-          trainingEffort: trainingEffort
-        });
-      });
-  }
-
-  static getValidationProblems(
-    validationResults: CodingSchemeProblem[],
-    codingVariable: VariableCodingData
-  ): CodingReportValidationProblemDto[] {
-    const codingVariableId = codingVariable.alias || codingVariable.id;
-    const seenProblems = new Set<string>();
-
-    return validationResults
-      .filter(problem => problem.variableId === codingVariableId)
-      .map(problem => ({
-        type: problem.type,
-        breaking: problem.breaking,
-        ...(problem.code ? { code: problem.code } : {})
-      }))
-      .filter(problem => {
-        const key = `${problem.type}|${problem.breaking}|${problem.code || ''}`;
-        if (seenProblems.has(key)) return false;
-        seenProblems.add(key);
-        return true;
-      })
-      .sort((problemA, problemB) => (
-        Number(problemB.breaking) - Number(problemA.breaking) ||
-        problemA.type.localeCompare(problemB.type) ||
-        (problemA.code || '').localeCompare(problemB.code || '')
-      ));
-  }
-
-  static getValidationStatus(
-    validationProblems: CodingReportValidationProblemDto[]
-  ): string {
-    if (validationProblems.some(problem => problem.breaking)) return 'Fehler';
-    if (validationProblems.length > 0) return 'Warnung';
-    return 'OK';
-  }
-
-  static determineCodingType(codingVariable: VariableCodingData): string {
-    let closedCoding = false;
-    let manualCodingOnly = true;
-    let hasRules = false;
-
-    codingVariable.codes?.forEach((code: CodeData) => {
-      if (code.manualInstruction.length === 0) manualCodingOnly = false;
-
-      code.ruleSets.forEach((ruleSet: RuleSet) => {
-        hasRules ||= ruleSet.rules.length > 0;
-        manualCodingOnly &&=
-          code.manualInstruction.length > 0 && ruleSet.rules.length === 0;
-      });
-
-      closedCoding ||= ['RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(
-        code.type
-      );
-    });
-
-    if (closedCoding) return 'automatisch';
-    if (manualCodingOnly) return 'manuell';
-    if (hasRules) return 'halbautomatisch';
-    return 'keine Regeln';
-  }
-
-  static determineVariableType(codingVariable: VariableCodingData): string {
-    return codingVariable.sourceType === 'BASE' ?
-      'Basisvariable' :
-      'abgeleitete Variable';
-  }
-
-  static determineTrainingEffort(codingVariable: VariableCodingData): string {
-    return codingVariable.processing?.includes('CODER_TRAINING_REQUIRED') ?
-      'erhöht' :
-      'normal';
-  }
-
-  static findMatchingItem(
-    unit: UnitPropertiesDto,
-    codingVariable: VariableCodingData
-  ): ItemsMetadataValues {
-    const codingVariableId = codingVariable.alias || codingVariable.id;
-    return unit.metadata.items?.find(
-      item => item.variableId === codingVariableId
-    );
-  }
-
-  static generateUnitLink(id: number, unit: UnitPropertiesDto): string {
-    return (
-      `<a href=#/a/${id}/${unit.id}>${unit.key}${unit.name ? ': ' : ''}${
-        unit.name
-      }</a>` || '-'
-    );
-  }
-
-  static addInvalidSchemeRow(
-    unit: UnitPropertiesDto,
-    id: number,
-    unitDataRows: CodingReportDto[]
-  ): void {
-    unitDataRows.push({
-      unit: WorkspaceService.generateUnitLink(id, unit),
-      variable: '',
-      variableType: '',
-      item: '',
-      validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
-      validationProblems: [],
-      codingType: '',
-      trainingEffort: ''
-    });
+    return CodingReportClass.build(id, unitListWithMetadata);
   }
 
   async patch(workspaceData: Partial<WorkspaceFullDto>): Promise<void> {

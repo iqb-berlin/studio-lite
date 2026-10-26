@@ -3,11 +3,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  CreateWorkspaceDto, UserWorkspaceAccessDto, UsersWorkspaceInListDto, WorkspaceSettingsDto, RenameGroupNameDto
+  CodingReportDto, CreateWorkspaceDto, UnitPropertiesDto, UserWorkspaceAccessDto, UsersWorkspaceInListDto,
+  WorkspaceSettingsDto, RenameGroupNameDto
 } from '@studio-lite-lib/api-dto';
-import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { CodingSchemeProblem } from '@iqb/responses';
 import { WorkspaceService } from './workspace.service';
+import { CodingReportClass } from '../classes/coding-report.class';
 import Workspace from '../entities/workspace.entity';
 import WorkspaceUser from '../entities/workspace-user.entity';
 import WorkspaceGroup from '../entities/workspace-group.entity';
@@ -553,213 +553,25 @@ describe('WorkspaceService', () => {
   });
 
   describe('getCodingReport', () => {
+    afterEach(() => jest.restoreAllMocks());
+
     it('should return report', async () => {
       (unitService.findAllWithProperties as jest.Mock).mockResolvedValue([]);
       const result = await service.getCodingReport(1);
       expect(result).toEqual([]);
     });
 
-    it('keeps activated no-value variables and alias chains free of breaking errors', async () => {
-      (unitService.findAllWithProperties as jest.Mock).mockResolvedValue([{
-        id: 10,
-        key: 'DLB007',
-        name: '',
-        schemer: 'schemer@2.8.1',
-        variables: [
-          { id: 'marking-panel_1', type: 'no-value' },
-          { id: 'id04', type: 'string' },
-          { id: '02', type: 'string' }
-        ],
-        metadata: { items: [] },
-        scheme: JSON.stringify({
-          version: '2.5',
-          variableCodings: [{
-            id: 'marking-panel_1',
-            alias: '_08_reached',
-            sourceType: 'BASE',
-            sourceParameters: {
-              processing: ['TAKE_DISPLAYED_AS_VALUE_CHANGED']
-            },
-            codes: [{
-              id: 0,
-              type: 'INTENDED_INCOMPLETE',
-              score: 0,
-              label: '',
-              manualInstruction: '',
-              ruleSetOperatorAnd: false,
-              ruleSets: []
-            }]
-          }, {
-            id: 'id04', alias: '02', sourceType: 'BASE', codes: []
-          }, {
-            id: '02', alias: '05', sourceType: 'BASE', codes: []
-          }]
-        })
-      }]);
+    it('builds the report with CodingReportClass from the units of the workspace', async () => {
+      const units = [{ id: 10, key: 'DLB007' }] as UnitPropertiesDto[];
+      const rows = [{ unit: 'DLB007' }] as CodingReportDto[];
+      (unitService.findAllWithProperties as jest.Mock).mockResolvedValue(units);
+      const build = jest.spyOn(CodingReportClass, 'build').mockReturnValue(rows);
 
       const result = await service.getCodingReport(1);
 
-      expect(result.find(row => row.variable === '_08_reached')?.validation)
-        .toBe('OK');
-      expect(result.every(row => row.validation !== 'Fehler')).toBe(true);
-    });
-
-    // A list stored in the VariableInfo 2.x spelling is read as such (#1708).
-    it('reads variable types in the 2.x spelling', async () => {
-      (unitService.findAllWithProperties as jest.Mock).mockResolvedValue([{
-        id: 11,
-        key: 'VI2',
-        name: '',
-        schemer: 'schemer@2.8.1',
-        variables: [
-          { id: 'panel', type: 'NO_VALUE' },
-          { id: 'count', type: 'NUMBER' }
-        ],
-        metadata: { items: [] },
-        scheme: JSON.stringify({
-          version: '2.5',
-          variableCodings: [{
-            id: 'panel', alias: 'panel', sourceType: 'BASE_NO_VALUE', codes: []
-          }, {
-            id: 'count',
-            alias: 'count',
-            sourceType: 'BASE',
-            codes: [{
-              id: 1,
-              type: 'FULL_CREDIT',
-              score: 1,
-              label: '',
-              manualInstruction: '',
-              ruleSetOperatorAnd: false,
-              ruleSets: [{ ruleOperatorAnd: false, rules: [{ method: 'NUMERIC_MATCH', parameters: ['1'] }] }]
-            }]
-          }]
-        })
-      }]);
-
-      const result = await service.getCodingReport(1);
-
-      expect(result.every(row => row.validation !== 'Fehler')).toBe(true);
-    });
-  });
-
-  describe('coding report validation aggregation', () => {
-    const codingVariable = {
-      id: 'technical-id', alias: 'public-id'
-    } as VariableCodingData;
-
-    it('deduplicates and sorts all problems with breaking problems first', () => {
-      const validationResults: CodingSchemeProblem[] = [{
-        type: 'VACANT',
-        breaking: false,
-        variableId: 'public-id',
-        variableLabel: ''
-      }, {
-        type: 'SOURCE_MISSING',
-        breaking: true,
-        variableId: 'public-id',
-        variableLabel: '',
-        code: '2'
-      }, {
-        type: 'SOURCE_MISSING',
-        breaking: true,
-        variableId: 'public-id',
-        variableLabel: '',
-        code: '2'
-      }];
-
-      const validationProblems = WorkspaceService.getValidationProblems(
-        validationResults,
-        codingVariable
-      );
-
-      expect(validationProblems).toEqual([{
-        type: 'SOURCE_MISSING', breaking: true, code: '2'
-      }, {
-        type: 'VACANT', breaking: false
-      }]);
-      expect(
-        WorkspaceService.getValidationStatus(validationProblems)
-      ).toBe('Fehler');
-    });
-
-    it('reports warnings when no problem is breaking', () => {
-      expect(WorkspaceService.getValidationStatus([{
-        type: 'VACANT', breaking: false
-      }])).toBe('Warnung');
-      expect(WorkspaceService.getValidationStatus([])).toBe('OK');
-    });
-  });
-
-  describe('determineCodingType', () => {
-    it('maps closed coding to automatisch', () => {
-      const codingType = WorkspaceService.determineCodingType({
-        codes: [{
-          type: 'RESIDUAL_AUTO',
-          manualInstruction: '',
-          ruleSets: [{ rules: [] }]
-        }]
-      } as unknown as VariableCodingData);
-
-      expect(codingType).toBe('automatisch');
-    });
-
-    it('maps rules-based coding to halbautomatisch', () => {
-      const codingType = WorkspaceService.determineCodingType({
-        codes: [{
-          manualInstruction: '',
-          ruleSets: [{ rules: [{ method: 'MATCH', parameters: ['a'] }] }]
-        }]
-      } as unknown as VariableCodingData);
-
-      expect(codingType).toBe('halbautomatisch');
-    });
-
-    it('maps manual coding to manuell', () => {
-      const codingType = WorkspaceService.determineCodingType({
-        codes: [{
-          manualInstruction: 'Hinweis',
-          ruleSets: [{ rules: [] }]
-        }]
-      } as unknown as VariableCodingData);
-
-      expect(codingType).toBe('manuell');
-    });
-  });
-
-  describe('determineVariableType', () => {
-    it('maps base variables to Basisvariable', () => {
-      const variableType = WorkspaceService.determineVariableType({
-        sourceType: 'BASE'
-      } as unknown as VariableCodingData);
-
-      expect(variableType).toBe('Basisvariable');
-    });
-
-    it('maps derived variables to abgeleitete Variable', () => {
-      const variableType = WorkspaceService.determineVariableType({
-        sourceType: 'SUM_SCORE'
-      } as unknown as VariableCodingData);
-
-      expect(variableType).toBe('abgeleitete Variable');
-    });
-  });
-
-  describe('determineTrainingEffort', () => {
-    it('returns erhöht when CODER_TRAINING_REQUIRED is set', () => {
-      const trainingEffort = WorkspaceService.determineTrainingEffort({
-        processing: ['CODER_TRAINING_REQUIRED']
-      } as unknown as VariableCodingData);
-
-      expect(trainingEffort).toBe('erhöht');
-    });
-
-    it('returns normal when CODER_TRAINING_REQUIRED is not set', () => {
-      const trainingEffort = WorkspaceService.determineTrainingEffort({
-        processing: []
-      } as unknown as VariableCodingData);
-
-      expect(trainingEffort).toBe('normal');
+      expect(unitService.findAllWithProperties).toHaveBeenCalledWith(1);
+      expect(build).toHaveBeenCalledWith(1, units);
+      expect(result).toBe(rows);
     });
   });
 
