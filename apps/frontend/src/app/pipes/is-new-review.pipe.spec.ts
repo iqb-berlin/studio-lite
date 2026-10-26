@@ -69,8 +69,6 @@ describe('IsNewReviewPipe', () => {
   });
 
   it('should handle date strings', () => {
-    const today = new Date();
-    const dateString = today.toISOString();
-    expect(pipe.transform(new Date(dateString))).toBe(true);
+    expect(pipe.transform(new Date().toISOString())).toBe(true);
   });
 });

@@ -11,8 +11,9 @@ import { differenceInCalendarDays } from 'date-fns';
   standalone: true
 })
 export class IsNewReviewPipe implements PipeTransform {
+  // `changedAt` arrives from the JSON as a string, which date-fns 2 does not parse: hence `new Date`.
   // eslint-disable-next-line class-methods-use-this
-  transform(date: Date): boolean {
+  transform(date: Date | string): boolean {
     return differenceInCalendarDays(new Date(), new Date(date)) <= 3;
   }
 }
