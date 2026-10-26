@@ -1,10 +1,10 @@
 import AdmZip from 'adm-zip';
 import { create } from 'xmlbuilder2';
+import { CodebookDocxGenerator } from '@iqb/ngx-coding-components/codebook-generator';
 import {
   CodebookUnitDto,
   CodeBookContentSetting
 } from '@iqb/ngx-coding-components/codebook-models';
-import { DownloadDocx } from './download-docx.class';
 
 const defaultSettings = {
   showScore: false,
@@ -42,16 +42,16 @@ const buildUnits = (description: string): CodebookUnitDto[] => [
   }
 ] as unknown as CodebookUnitDto[];
 
-const getDocumentXml = async (description: string): Promise<string> => {
-  const buffer = await DownloadDocx.getDocXCodebook(
-    buildUnits(description),
-    defaultSettings
-  );
-  const zip = new AdmZip(buffer as Buffer);
-  return zip.readAsText('word/document.xml');
+const generateDocx = async (units: CodebookUnitDto[], settings: CodeBookContentSetting): Promise<Buffer> => {
+  const blob = await CodebookDocxGenerator.generateDocx(units, settings);
+  return Buffer.from(await blob.arrayBuffer());
 };
 
-describe('DownloadDocx integration', () => {
+const getDocumentXml = async (description: string): Promise<string> => new AdmZip(
+  await generateDocx(buildUnits(description), defaultSettings)
+).readAsText('word/document.xml');
+
+describe('CodebookDocxGenerator integration', () => {
   let consoleWarnSpy: jest.SpyInstance;
 
   beforeEach(() => {
@@ -71,17 +71,17 @@ describe('DownloadDocx integration', () => {
     const units = buildUnits(html);
     units[0].variables[0].generalInstruction = html;
     const settings = { ...defaultSettings, hasGeneralInstructions: true };
-    const xml = new AdmZip(await DownloadDocx.getDocXCodebook(units, settings)).readAsText('word/document.xml');
+    const xml = new AdmZip(await generateDocx(units, settings)).readAsText('word/document.xml');
     expect(xml.split(`>${text}</w:t>`).length - 1).toBe(2);
   });
 
   it.each([' ', '\t\r\n', '\u00a0'])('does not add a paragraph for general instruction %p', async generalInstruction => {
     const units = buildUnits('<p>Bewerten</p>');
     const settings = { ...defaultSettings, hasGeneralInstructions: true };
-    const baselineFile = await DownloadDocx.getDocXCodebook(units, settings);
+    const baselineFile = await generateDocx(units, settings);
     const baseline = new AdmZip(baselineFile).readAsText('word/document.xml');
     units[0].variables[0].generalInstruction = generalInstruction;
-    const actual = new AdmZip(await DownloadDocx.getDocXCodebook(units, settings)).readAsText('word/document.xml');
+    const actual = new AdmZip(await generateDocx(units, settings)).readAsText('word/document.xml');
     expect(actual).toBe(baseline);
   });
 
