@@ -111,6 +111,26 @@ describe('Admin API tests', () => {
           expect(resp.status).to.equal(404);
         });
     });
+
+    // A password set by an administrator ends the user's sessions as a change of their own does
+    // (#1901). The value stays the same so that later logins of this user still work; isAdmin stays
+    // as the promotion above left it.
+    it('200 positive test: should end every session of a user whose password an administrator sets', () => {
+      cy.loginAPI(userGroupAdmin.username, userGroupAdmin.password).then(session => {
+        expect(session.status).to.equal(201);
+        cy.updateUserAPI(Cypress.expose(`id_${userGroupAdmin.username}`),
+          userGroupAdmin,
+          true,
+          Cypress.expose(`token_${Cypress.expose('username')}`),
+          userGroupAdmin.password)
+          .then(resp => {
+            expect(resp.status).to.equal(200);
+          });
+        cy.refreshTokenAPI(session.body.refreshToken).then(resp => {
+          expect(resp.status).to.equal(401);
+        });
+      });
+    });
   });
 
   describe('10. POST /api/admin/workspace-groups', () => {

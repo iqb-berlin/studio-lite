@@ -88,16 +88,21 @@ export class AdminUserController {
     return this.usersService.create(createUserDto);
   }
 
+  /**
+   * A password set here ends every session of the account, as a change by the user does (#1901).
+   * The other fields leave the sessions alone.
+   */
   @Patch(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
-  @ApiOkResponse({ description: 'User updated successfully.' })
+  @ApiOkResponse({ description: 'User updated successfully. A new password ends every session of the user.' })
   @ApiForbiddenResponse({ description: 'No privileges in the workspace group.' })
   @ApiNotFoundResponse({ description: 'User_id not found.' })
   @ApiParam({ name: 'id', type: Number })
   @ApiBearerAuth()
   @ApiTags('admin user')
-  async patch(@Param('id') userId: number, @Body() userFullDto: UserFullDto) {
-    return this.usersService.patch(userId, userFullDto);
+  async patch(@Param('id') userId: number, @Body() userFullDto: UserFullDto): Promise<void> {
+    await this.usersService.patch(userId, userFullDto);
+    if (userFullDto.password) await this.authService.logout(userId);
   }
 
   /**

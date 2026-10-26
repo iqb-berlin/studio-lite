@@ -88,13 +88,32 @@ describe('AdminUserController', () => {
   });
 
   describe('patch', () => {
-    it('should update a user', async () => {
+    it('should update a user and leave their sessions alone', async () => {
       const dto = { id: 1, name: 'updated' } as UserFullDto;
       usersService.patch.mockResolvedValue(undefined);
 
       await controller.patch(1, dto);
 
       expect(usersService.patch).toHaveBeenCalledWith(1, dto);
+      expect(authService.logout).not.toHaveBeenCalled();
+    });
+
+    it('should end every session of the user when a password is set', async () => {
+      const dto = { id: 1, password: 'new' } as UserFullDto;
+      usersService.patch.mockResolvedValue(undefined);
+
+      await controller.patch(1, dto);
+
+      expect(usersService.patch).toHaveBeenCalledWith(1, dto);
+      expect(authService.logout).toHaveBeenCalledWith(1);
+    });
+
+    it('should end no session when the user does not exist', async () => {
+      const dto = { id: 1, password: 'new' } as UserFullDto;
+      usersService.patch.mockRejectedValue(new Error('not found'));
+
+      await expect(controller.patch(1, dto)).rejects.toThrow('not found');
+      expect(authService.logout).not.toHaveBeenCalled();
     });
   });
 

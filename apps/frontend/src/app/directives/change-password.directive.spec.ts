@@ -1,7 +1,8 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, flushMicrotasks } from '@angular/core/testing';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { UntypedFormGroup, UntypedFormControl } from '@angular/forms';
 import { of } from 'rxjs';
@@ -16,6 +17,7 @@ describe('ChangePasswordDirective', () => {
   let mockBackendService: jest.Mocked<BackendService>;
   let mockSnackBar: jest.Mocked<MatSnackBar>;
   let mockTranslateService: jest.Mocked<TranslateService>;
+  let mockRouter: jest.Mocked<Router>;
   let mockDialogRef: jest.Mocked<MatDialogRef<ChangePasswordComponent>>;
 
   beforeEach(async () => {
@@ -28,7 +30,8 @@ describe('ChangePasswordDirective', () => {
     } as unknown as jest.Mocked<MatDialog>;
 
     mockBackendService = {
-      setUserPassword: jest.fn()
+      setUserPassword: jest.fn(),
+      logout: jest.fn()
     } as unknown as jest.Mocked<BackendService>;
 
     mockSnackBar = {
@@ -38,6 +41,10 @@ describe('ChangePasswordDirective', () => {
     mockTranslateService = {
       instant: jest.fn()
     } as unknown as jest.Mocked<TranslateService>;
+
+    mockRouter = {
+      navigate: jest.fn().mockResolvedValue(true)
+    } as unknown as jest.Mocked<Router>;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -51,6 +58,7 @@ describe('ChangePasswordDirective', () => {
         { provide: BackendService, useValue: mockBackendService },
         { provide: MatSnackBar, useValue: mockSnackBar },
         { provide: TranslateService, useValue: mockTranslateService },
+        { provide: Router, useValue: mockRouter },
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl
@@ -62,7 +70,8 @@ describe('ChangePasswordDirective', () => {
       mockDialog,
       mockBackendService,
       mockSnackBar,
-      mockTranslateService
+      mockTranslateService,
+      mockRouter
     );
   });
 
@@ -80,7 +89,7 @@ describe('ChangePasswordDirective', () => {
     });
   });
 
-  it('should call backend service and show success message when password change succeeds', () => {
+  it('should call backend service and show success message when password change succeeds', fakeAsync(() => {
     const mockFormGroup = new UntypedFormGroup({
       pw_old: new UntypedFormControl('oldPassword'),
       pw_new1: new UntypedFormControl('newPassword')
@@ -100,7 +109,39 @@ describe('ChangePasswordDirective', () => {
       'OK',
       { duration: 3000 }
     );
-  });
+  }));
+
+  // The server has ended every session of the account, this one included (#1901)
+  it('should leave for the start page and log out when password change succeeds', fakeAsync(() => {
+    const mockFormGroup = new UntypedFormGroup({
+      pw_old: new UntypedFormControl('oldPassword'),
+      pw_new1: new UntypedFormControl('newPassword')
+    });
+    mockDialogRef.afterClosed.mockReturnValue(of(mockFormGroup));
+    mockBackendService.setUserPassword.mockReturnValue(of(true));
+
+    directive.changePassword();
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
+    expect(mockBackendService.logout).not.toHaveBeenCalled();
+    flushMicrotasks();
+
+    expect(mockBackendService.logout).toHaveBeenCalled();
+  }));
+
+  it('should not log out when the navigation away is cancelled', fakeAsync(() => {
+    const mockFormGroup = new UntypedFormGroup({
+      pw_old: new UntypedFormControl('oldPassword'),
+      pw_new1: new UntypedFormControl('newPassword')
+    });
+    mockDialogRef.afterClosed.mockReturnValue(of(mockFormGroup));
+    mockBackendService.setUserPassword.mockReturnValue(of(true));
+    mockRouter.navigate.mockResolvedValue(false);
+
+    directive.changePassword();
+    flushMicrotasks();
+
+    expect(mockBackendService.logout).not.toHaveBeenCalled();
+  }));
 
   it('should show error message when password change fails', () => {
     const mockFormGroup = new UntypedFormGroup({
@@ -121,6 +162,8 @@ describe('ChangePasswordDirective', () => {
       'Error',
       { duration: 3000 }
     );
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
+    expect(mockBackendService.logout).not.toHaveBeenCalled();
   });
 
   // Esc, a click beside the dialog and navigation close it with undefined (#1844)

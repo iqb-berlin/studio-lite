@@ -184,9 +184,9 @@ Cypress.Commands.add('getUsersFullAPI',
     });
   });
 
-// 9
+// 9: a password sent along ends every session of the user (#1901)
 Cypress.Commands.add('updateUserAPI',
-  (id: string, user:UserData, credentials: boolean, token:string) => {
+  (id: string, user:UserData, credentials: boolean, token:string, password?: string) => {
     const authorization = `bearer ${token}`;
     const nu = parseInt(`${Cypress.expose(`id_${user.username}`)}`, 10);
     cy.request({
@@ -198,7 +198,8 @@ Cypress.Commands.add('updateUserAPI',
       },
       body: {
         id: nu,
-        isAdmin: credentials
+        isAdmin: credentials,
+        ...(password ? { password } : {})
       },
       failOnStatusCode: false
     });

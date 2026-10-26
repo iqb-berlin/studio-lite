@@ -1,5 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, TestBed, fakeAsync, flushMicrotasks
+} from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -13,6 +15,7 @@ import { UserFullDto, UserInListDto } from '@studio-lite-lib/api-dto';
 import { FormControl, FormGroup, UntypedFormGroup } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '@studio-lite/shared-code';
@@ -21,6 +24,7 @@ import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to
 import { environment } from '../../../../../environments/environment';
 import { UsersComponent } from './users.component';
 import { AppService } from '../../../../services/app.service';
+import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { BackendService } from '../../services/backend.service';
 import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { UsersMenuComponent } from '../users-menu/users-menu.component';
@@ -34,6 +38,8 @@ describe('UsersComponent', () => {
   let mockSnackBar: Partial<MatSnackBar>;
   let mockDialog: Partial<MatDialog>;
   let mockHeartbeatService: Partial<HeartbeatService>;
+  let mockAppBackendService: Partial<AppBackendService>;
+  let mockRouter: Partial<Router>;
 
   const setDocumentVisibility = (visibilityState: 'visible' | 'hidden'): void => {
     Object.defineProperty(document, 'visibilityState', {
@@ -74,6 +80,7 @@ describe('UsersComponent', () => {
 
     mockAppService = {
       dataLoading: false,
+      authData: { ...AppService.defaultAuthData, userId: 7 },
       appConfig: {
         setPageTitle: jest.fn()
       } as unknown as AppConfig,
@@ -92,6 +99,14 @@ describe('UsersComponent', () => {
 
     mockHeartbeatService = {
       refreshActivityPulse: jest.fn()
+    };
+
+    mockAppBackendService = {
+      logout: jest.fn()
+    };
+
+    mockRouter = {
+      navigate: jest.fn().mockResolvedValue(true)
     };
 
     await TestBed.configureTestingModule({
@@ -116,7 +131,9 @@ describe('UsersComponent', () => {
         { provide: AppService, useValue: mockAppService },
         { provide: HeartbeatService, useValue: mockHeartbeatService },
         { provide: MatSnackBar, useValue: mockSnackBar },
-        { provide: MatDialog, useValue: mockDialog }
+        { provide: MatDialog, useValue: mockDialog },
+        { provide: AppBackendService, useValue: mockAppBackendService },
+        { provide: Router, useValue: mockRouter }
       ]
     })
       .overrideComponent(UsersComponent, {
@@ -272,7 +289,57 @@ describe('UsersComponent', () => {
     }));
     expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
     expect(mockSnackBar.open).toHaveBeenCalledWith('admin.user-edited', '', { duration: 1000 });
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
+    expect(mockAppBackendService.logout).not.toHaveBeenCalled();
   });
+
+  // The server has ended every session of the account, the administrator's own included (#1901)
+  it('should log out when an administrator sets their own password', fakeAsync(() => {
+    const user = { id: 7, name: 'admin' } as UserFullDto;
+    const userData = new FormGroup({
+      name: new FormControl('admin'),
+      password: new FormControl('newPass')
+    });
+
+    component.editUser({ selection: [user], user: userData });
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
+    flushMicrotasks();
+
+    expect(mockAppBackendService.logout).toHaveBeenCalled();
+    expect(mockSnackBar.open).toHaveBeenCalledWith('user-profile.new-password', 'user-profile.ok', { duration: 3000 });
+    expect(mockBackendService.getUsersFullWithActivity).not.toHaveBeenCalled();
+    expect(mockAppService.dataLoading).toBe(false);
+  }));
+
+  it('should stay logged in when an administrator changes their own data without a password', fakeAsync(() => {
+    const user = { id: 7, name: 'admin' } as UserFullDto;
+    const userData = new FormGroup({
+      name: new FormControl('newAdmin'),
+      password: new FormControl('')
+    });
+
+    component.editUser({ selection: [user], user: userData });
+    flushMicrotasks();
+
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
+    expect(mockAppBackendService.logout).not.toHaveBeenCalled();
+    expect(mockSnackBar.open).toHaveBeenCalledWith('admin.user-edited', '', { duration: 1000 });
+  }));
+
+  it('should stay logged in when setting their own password fails', fakeAsync(() => {
+    (mockBackendService.changeUserData as jest.Mock).mockReturnValue(of(false));
+    const user = { id: 7, name: 'admin' } as UserFullDto;
+    const userData = new FormGroup({
+      name: new FormControl('admin'),
+      password: new FormControl('newPass')
+    });
+
+    component.editUser({ selection: [user], user: userData });
+    flushMicrotasks();
+
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
+    expect(mockAppBackendService.logout).not.toHaveBeenCalled();
+  }));
 
   it('should handle edit user failure', () => {
     (mockBackendService.changeUserData as jest.Mock).mockReturnValue(of(false));

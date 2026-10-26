@@ -103,6 +103,32 @@ describe('Auth API tests', () => {
       });
     });
 
+    // A copy of a refresh token must not outlive the old password, not even one of the session the
+    // password was changed in (#1901).
+    it('200 positive test: should end every session of the account when the password changes', () => {
+      const refreshStatuses: number[] = [];
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(sessionA => {
+        cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(sessionB => {
+          cy.updatePasswordAPI(sessionA.body.accessToken, Cypress.expose('password'), '4567').then(resp => {
+            expect(resp.status).to.equal(200);
+            expect(resp.body).to.equal(true);
+          });
+          cy.refreshTokenAPI(sessionA.body.refreshToken).then(resp => refreshStatuses.push(resp.status));
+          cy.refreshTokenAPI(sessionB.body.refreshToken).then(resp => refreshStatuses.push(resp.status));
+        });
+      });
+
+      // Reset before asserting: a failed assertion would otherwise leave the changed password behind
+      // for every later spec.
+      cy.loginAPI(Cypress.expose('username'), '4567').then(resp => {
+        expect(resp.status).to.equal(201);
+        cy.updatePasswordAPI(resp.body.accessToken, '4567', Cypress.expose('password')).then(reset => {
+          expect(reset.body).to.equal(true);
+        });
+      });
+      cy.wrap(refreshStatuses).should('deep.equal', [401, 401]);
+    });
+
     it('500/200 negative test: should fail to update password if the old password is incorrect', () => {
       cy.updatePasswordAPI(
         Cypress.expose(`token_${Cypress.expose('username')}`),
