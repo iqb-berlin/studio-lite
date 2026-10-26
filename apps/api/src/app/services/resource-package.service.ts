@@ -12,7 +12,7 @@ import { ResourcePackageDto } from '@studio-lite-lib/api-dto';
 import { Express } from 'express';
 import 'multer';
 // adm-zip is CommonJS with no statically detectable named exports -- see the note on the adm-zip
-// import in workspace.service.ts.
+// import in workspace-import.service.ts.
 import AdmZip from 'adm-zip';
 import * as fs from 'fs';
 import * as util from 'util';
