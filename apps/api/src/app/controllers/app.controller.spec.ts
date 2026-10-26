@@ -149,14 +149,25 @@ describe('AppController', () => {
   });
 
   describe('setPassword', () => {
-    it('should call userService.setPassword', async () => {
+    it('should change the password and end every session of the account', async () => {
       const dto: ChangePasswordDto = { oldPassword: 'old', newPassword: 'new' };
       usersService.setPassword.mockResolvedValue(true);
 
-      const result = await controller.setPassword({ user: { id: 1 } }, dto);
+      const result = await controller.setPassword({ user: { id: 1, sessionId: 'sid-1' } }, dto);
 
       expect(result).toBe(true);
       expect(usersService.setPassword).toHaveBeenCalledWith(1, 'old', 'new');
+      expect(authService.logout).toHaveBeenCalledWith(1);
+    });
+
+    it('should leave the sessions alone when the old password is wrong', async () => {
+      const dto: ChangePasswordDto = { oldPassword: 'wrong', newPassword: 'new' };
+      usersService.setPassword.mockResolvedValue(false);
+
+      const result = await controller.setPassword({ user: { id: 1, sessionId: 'sid-1' } }, dto);
+
+      expect(result).toBe(false);
+      expect(authService.logout).not.toHaveBeenCalled();
     });
   });
 

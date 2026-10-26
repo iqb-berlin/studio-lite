@@ -24,6 +24,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 import { startWith, takeUntil } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '@studio-lite/shared-code';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
 import { IsSelectedIdPipe } from '../../../../pipes/is-selected-id.pipe';
@@ -33,6 +34,7 @@ import { EntriesDividerComponent } from '../../../../components/entries-divider/
 import {
   BackendService
 } from '../../services/backend.service';
+import { BackendService as AppBackendService } from '../../../../services/backend.service';
 import { AppService } from '../../../../services/app.service';
 import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
@@ -73,7 +75,9 @@ export class UsersComponent implements OnInit, OnDestroy {
     private heartbeatService: HeartbeatService,
     private snackBar: MatSnackBar,
     private translateService: TranslateService,
-    private deleteConfirmDialog: MatDialog
+    private deleteConfirmDialog: MatDialog,
+    private appBackendService: AppBackendService,
+    private router: Router
   ) {
     this.tableSelectionRow.changed.pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       r => {
@@ -166,6 +170,10 @@ export class UsersComponent implements OnInit, OnDestroy {
     if (newIsAdmin !== value.selection[0].isAdmin) changedData.isAdmin = newIsAdmin;
     this.backendService.changeUserData(id, changedData).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       respOk => {
+        if (respOk && changedData.password && id === this.appService.authData.userId) {
+          this.logOutAfterOwnPasswordChange();
+          return;
+        }
         this.updateUserList();
         if (respOk) {
           this.snackBar.open(
@@ -180,6 +188,20 @@ export class UsersComponent implements OnInit, OnDestroy {
             { duration: 3000 });
         }
       }
+    );
+  }
+
+  // The server has ended every session of the account, the administrator's own included (#1901).
+  // Leaving first, as LogoutDirective does, keeps the open list from firing requests without a token.
+  private logOutAfterOwnPasswordChange(): void {
+    this.appService.dataLoading = false;
+    this.router.navigate(['/']).then(done => {
+      if (done) this.appBackendService.logout();
+    });
+    this.snackBar.open(
+      this.translateService.instant('user-profile.new-password'),
+      this.translateService.instant('user-profile.ok'),
+      { duration: 3000 }
     );
   }
 

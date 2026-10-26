@@ -9,7 +9,6 @@ import {
   filterUsers,
   goToAdminUsers,
   login,
-  loginWithUser,
   logout,
   selectUserRow,
   updatePersonalData
@@ -50,10 +49,16 @@ describe('UI User Management', () => {
       updatePersonalData(newData);
     });
 
-    it('changes password successfully', () => {
+    // A changed password ends every session of the account, this one included, and the frontend
+    // logs out (#1901).
+    it('changes password successfully and asks to log in again', () => {
       changePassword('newpass', standardUser.password);
-      loginWithUser(standardUser.username, 'newpass');
+      cy.get('[data-cy="goto-user-menu"]').should('not.exist');
+      cy.get('[data-cy="home-user-name"]').should('be.visible');
+      login(standardUser.username, 'newpass');
       changePassword(standardUser.password, 'newpass');
+      cy.get('[data-cy="goto-user-menu"]').should('not.exist');
+      login(standardUser.username, standardUser.password);
     });
 
     it('logs out successfully', () => {

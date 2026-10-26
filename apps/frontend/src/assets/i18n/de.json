@@ -105,7 +105,7 @@
   "user-profile": {
     "data-edited": "Nutzer:innen-Daten geändert",
     "data-edit-error": "Konnte Nutzer:innen-Daten nicht ändern",
-    "new-password": "Neues Kennwort gespeichert",
+    "new-password": "Neues Kennwort gespeichert. Bitte melden Sie sich neu an.",
     "new-password-error": "Konnte Kennwort nicht ändern.",
     "error": "Fehler",
     "ok": "OK"

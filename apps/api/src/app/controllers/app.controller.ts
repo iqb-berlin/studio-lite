@@ -158,14 +158,22 @@ export class AppController {
     };
   }
 
+  /**
+   * A changed password ends every session of the account, the one it was changed in as well: a
+   * copy of that session's refresh token would otherwise outlive the old password (#1901). Access
+   * tokens already issued stay valid until they expire.
+   */
   @Patch('password')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Password successfully updated.' }) // TODO: Exception & Return Value entfernen
+  // TODO: Exception & Return Value entfernen
+  @ApiOkResponse({ description: 'Password successfully updated. Ends every session of the account.' })
   @ApiUnauthorizedResponse({ description: 'User is not authorized to update password.' })
   @ApiTags('auth')
   async setPassword(@Request() req, @Body() passwords: ChangePasswordDto): Promise<boolean> {
-    return this.userService.setPassword(req.user.id, passwords.oldPassword, passwords.newPassword);
+    const changed = await this.userService.setPassword(req.user.id, passwords.oldPassword, passwords.newPassword);
+    if (changed) await this.authService.logout(req.user.id);
+    return changed;
   }
 
   @Get('my-data')
