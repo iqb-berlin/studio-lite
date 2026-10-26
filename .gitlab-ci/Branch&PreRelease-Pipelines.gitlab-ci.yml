@@ -1166,9 +1166,8 @@ scan-develop-commit-db-image:
     name: ${TRIVY_IMAGE}
     entrypoint: [ "" ]
   variables:
-    # No need to clone the repo, we exclusively work on artifacts.  See
-    # https://docs.gitlab.com/ee/ci/runners/README.html#git-strategy
-    GIT_STRATEGY: none
+    # Unlike the other image scans this job clones the repo: the gating scan reads .trivyignore.yaml (#1892).
+    GIT_DEPTH: "1"
     TRIVY_USERNAME: "${CI_REGISTRY_USER}"
     TRIVY_PASSWORD: "${CI_REGISTRY_PASSWORD}"
     TRIVY_AUTH_URL: "${CI_REGISTRY}"
@@ -1196,12 +1195,13 @@ scan-develop-commit-db-image:
           --timeout 30m
           --scanners vuln
         "${FULL_IMAGE_NAME}"
-    # Fail on critical vulnerabilities
+    # Fail on critical vulnerabilities, except the ones excepted in .trivyignore.yaml
     - trivy image
           --exit-code 1
           --timeout 30m
           --scanners vuln
           --ignore-unfixed
+          --ignorefile .trivyignore.yaml
           --severity CRITICAL
         ${FULL_IMAGE_NAME}
   cache:
