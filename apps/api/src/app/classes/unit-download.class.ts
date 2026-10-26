@@ -15,14 +15,15 @@ import {
   VeronaModuleFileDto,
   VeronaModuleInListDto
 } from '@studio-lite-lib/api-dto';
-// adm-zip is CommonJS with no statically detectable named exports -- see the note on the katex
-// import in download-docx.class.ts.
+// adm-zip is CommonJS with no statically detectable named exports -- see the note on the adm-zip
+// import in workspace.service.ts.
 import AdmZip from 'adm-zip';
 import * as XmlBuilder from 'xmlbuilder2';
 import {
   HIDDEN_PROFILE_ORDER, toUnitXmlFormat, toVariableInfoListV1, VeronaModuleKeyCollection
 } from '@studio-lite/shared-code';
-// Type-only -- see the note on the deep docx import in download-docx.class.ts.
+// Type-only, like every deep import into a package: should the package add an `exports` map, a
+// runtime require of this path would kill the boot -- see the import in api-file.decorator.ts.
 import type { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
 import {
   CodingSchemeData,

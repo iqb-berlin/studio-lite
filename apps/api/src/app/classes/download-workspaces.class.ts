@@ -1,5 +1,5 @@
-// exceljs is CommonJS with no statically detectable named exports -- see the note on the katex
-// import in download-docx.class.ts.
+// exceljs is CommonJS with no statically detectable named exports -- see the note on the adm-zip
+// import in workspace.service.ts.
 import Excel from 'exceljs';
 import {
   CodeBookContentSetting,
