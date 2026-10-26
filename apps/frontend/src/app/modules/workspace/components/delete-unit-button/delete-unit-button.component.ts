@@ -1,8 +1,9 @@
-import { Component, Input, OnDestroy } from '@angular/core';
+import {
+  Component, Input, OnDestroy, inject
+} from '@angular/core';
 import {
   lastValueFrom, map, Subject, takeUntil
 } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
@@ -15,6 +16,7 @@ import { AppService } from '../../../../services/app.service';
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
+import { ChangeResultService } from '../../../../services/change-result.service';
 
 /**
  * Deletes the selected units after a confirmation, and leaves the unit that was open -- the view
@@ -32,13 +34,14 @@ export class DeleteUnitButtonComponent extends SelectUnitDirective implements On
 
   ngUnsubscribe = new Subject<void>();
 
+  private changeResult = inject(ChangeResultService);
+
   constructor(
     public workspaceService: WorkspaceService,
     public router: Router,
     public route: ActivatedRoute,
     private appService: AppService,
     public backendService: WorkspaceBackendService,
-    private snackBar: MatSnackBar,
     private translateService: TranslateService,
     private dialog: MatDialog
   ) {
@@ -71,19 +74,15 @@ export class DeleteUnitButtonComponent extends SelectUnitDirective implements On
               ).pipe(takeUntil(this.ngUnsubscribe))
                 .subscribe(
                   ok => {
+                    this.changeResult.show(
+                      ok,
+                      'workspace.unit-deleted',
+                      'workspace.unit-not-deleted',
+                      'workspace.error'
+                    );
                     if (ok) {
-                      this.snackBar.open(
-                        this.translateService.instant('workspace.unit-deleted'),
-                        '',
-                        { duration: 1000 }
-                      );
                       this.updateUnitList();
                     } else {
-                      this.snackBar.open(
-                        this.translateService.instant('workspace.unit-not-deleted'),
-                        this.translateService.instant('workspace.error'),
-                        { duration: 3000 }
-                      );
                       this.appService.dataLoading = false;
                     }
                   }

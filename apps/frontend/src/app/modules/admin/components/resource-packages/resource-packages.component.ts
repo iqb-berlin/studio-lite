@@ -1,5 +1,5 @@
 import {
-  Component, Inject, OnDestroy, OnInit
+  Component, Inject, OnDestroy, OnInit, inject
 } from '@angular/core';
 import {
   BehaviorSubject, Observable, Subject, switchMap, takeUntil, tap
@@ -11,13 +11,13 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { IqbFilesUploadQueueComponent, IqbFilesUploadInputForDirective } from '@studio-lite-lib/iqb-components';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { BackendService as ReadBackendService } from '../../../../services/backend.service';
 import { BackendService as WriteBackendService } from '../../services/backend.service';
 import { TableDataSourcePipe } from '../../pipes/table-data-source.pipe';
 import { ResourcePackagesTableComponent } from '../resource-packages-table/resource-packages-table.component';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
+import { ChangeResultService } from '../../../../services/change-result.service';
 
 @Component({
   selector: 'studio-lite-resource-packages',
@@ -32,12 +32,13 @@ export class ResourcePackagesComponent implements OnInit, OnDestroy {
   selectedResourcePackages: BehaviorSubject<number[]> = new BehaviorSubject<number[]>([]);
   private ngUnsubscribe = new Subject<void>();
 
+  private changeResult = inject(ChangeResultService);
+
   constructor(
     @Inject('SERVER_URL') public serverUrl: string,
     private writeBackendService: WriteBackendService,
     private readBackendService: ReadBackendService,
     private translateService: TranslateService,
-    private snackBar: MatSnackBar,
     private dialog: MatDialog
   ) {
   }
@@ -77,19 +78,7 @@ export class ResourcePackagesComponent implements OnInit, OnDestroy {
             switchMap(() => this.readBackendService
               .getResourcePackages()
               .pipe(tap(packages => {
-                if (packages) {
-                  this.snackBar.open(
-                    this.translateService.instant('admin.package-deleted'),
-                    '',
-                    { duration: 1000 }
-                  );
-                } else {
-                  this.snackBar.open(
-                    this.translateService.instant('admin.package-not-deleted'),
-                    this.translateService.instant('admin.error'),
-                    { duration: 3000 }
-                  );
-                }
+                this.changeResult.show(!!packages, 'admin.package-deleted', 'admin.package-not-deleted', 'admin.error');
               }))));
       });
   }

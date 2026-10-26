@@ -1,4 +1,6 @@
-import { Component, OnDestroy, Input } from '@angular/core';
+import {
+  Component, OnDestroy, Input, inject
+} from '@angular/core';
 import { CreateUnitDto, UnitInListDto } from '@studio-lite-lib/api-dto';
 import {
   lastValueFrom, map, Subject, Subscription
@@ -24,6 +26,7 @@ import {
 import { SelectUnitDirective } from '../../directives/select-unit.directive';
 import { NewUnitData } from '../../models/new-unit.interface';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
+import { ChangeResultService } from '../../../../services/change-result.service';
 
 /**
  * Adding units: a new one, a copy of an existing one, or units imported from a file. All three end
@@ -50,6 +53,8 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
 
   @Input() selectedUnitId!: number;
   @Input() disabled!: boolean;
+  private changeResult = inject(ChangeResultService);
+
   constructor(
     public workspaceService: WorkspaceService,
     public router: Router,
@@ -91,20 +96,15 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
                   createUnitDto
                 )
                 .subscribe(respOk => {
+                  this.changeResult.show(
+                    !!respOk,
+                    'workspace.unit-added',
+                    'workspace.unit-not-added',
+                    'workspace.error'
+                  );
                   if (respOk) {
-                    this.snackBar.open(
-                      this.translateService.instant('workspace.unit-added'),
-                      '',
-                      { duration: 1000 }
-                    );
                     this.addUnitGroup(createUnitDto.groupName);
                     this.updateUnitList(respOk);
-                  } else {
-                    this.snackBar.open(
-                      this.translateService.instant('workspace.unit-not-added'),
-                      this.translateService.instant('workspace.error'),
-                      { duration: 3000 }
-                    );
                   }
                   this.appService.dataLoading = false;
                 });
@@ -134,20 +134,10 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
         this.backendService
           .addUnit(this.workspaceService.selectedWorkspaceId, createUnitDto)
           .subscribe(respOk => {
+            this.changeResult.show(!!respOk, 'workspace.unit-added', 'workspace.unit-not-added', 'workspace.error');
             if (respOk) {
-              this.snackBar.open(
-                this.translateService.instant('workspace.unit-added'),
-                '',
-                { duration: 1000 }
-              );
               this.addUnitGroup(createUnitDto.groupName);
               this.updateUnitList(respOk);
-            } else {
-              this.snackBar.open(
-                this.translateService.instant('workspace.unit-not-added'),
-                this.translateService.instant('workspace.error'),
-                { duration: 3000 }
-              );
             }
             this.appService.dataLoading = false;
           });

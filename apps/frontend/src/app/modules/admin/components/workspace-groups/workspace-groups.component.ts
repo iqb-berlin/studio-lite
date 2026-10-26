@@ -11,7 +11,9 @@ import {
   MatTable,
   MatTableDataSource
 } from '@angular/material/table';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import {
+  Component, OnInit, ViewChild, inject
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { FormsModule, UntypedFormGroup } from '@angular/forms';
@@ -37,6 +39,7 @@ import { SearchFilterComponent } from '../../../../components/search-filter/sear
 import { WorkspaceGroupsMenuComponent } from '../workspace-groups-menu/workspace-groups-menu.component';
 import { Profile } from '../../../../models/profile.type';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
+import { ChangeResultService } from '../../../../services/change-result.service';
 
 /**
  * The workspace groups of the installation: creating, renaming and deleting them, appointing their
@@ -57,6 +60,8 @@ export class WorkspaceGroupsComponent implements OnInit {
   workspaceUsers = new UserToCheckCollection([]);
 
   @ViewChild(MatSort) sort = new MatSort();
+
+  private changeResult = inject(ChangeResultService);
 
   constructor(
     private appService: AppService,
@@ -90,17 +95,9 @@ export class WorkspaceGroupsComponent implements OnInit {
       settings: {}
     }).subscribe(
       respOk => {
+        this.changeResult.show(respOk, 'admin.group-created', 'admin.group-not-created');
         if (respOk) {
-          this.snackBar.open(
-            this.translateService.instant('admin.group-created'),
-            '',
-            { duration: 1000 });
           this.updateWorkspaceList();
-        } else {
-          this.snackBar.open(
-            this.translateService.instant('admin.group-not-created'),
-            this.translateService.instant('error'),
-            { duration: 3000 });
         }
         this.appService.dataLoading = false;
       }
@@ -121,18 +118,9 @@ export class WorkspaceGroupsComponent implements OnInit {
     })
       .subscribe(
         respOk => {
+          this.changeResult.show(respOk, 'admin.group-edited', 'admin.group-not-edited');
           if (respOk) {
-            this.snackBar.open(
-              this.translateService.instant('admin.group-edited'),
-              '',
-              { duration: 1000 });
             this.updateWorkspaceList();
-          } else {
-            this.snackBar.open(
-              this.translateService.instant('admin.group-not-edited'),
-              this.translateService.instant('error'),
-              { duration: 3000 }
-            );
           }
           this.appService.dataLoading = false;
         }
@@ -146,18 +134,9 @@ export class WorkspaceGroupsComponent implements OnInit {
     }, res.selectedRow)
       .subscribe(
         respOk => {
+          this.changeResult.show(respOk, 'admin.group-edited', 'admin.group-not-edited');
           if (respOk) {
-            this.snackBar.open(
-              this.translateService.instant('admin.group-edited'),
-              '',
-              { duration: 1000 });
             this.updateWorkspaceList();
-          } else {
-            this.snackBar.open(
-              this.translateService.instant('admin.group-not-edited'),
-              this.translateService.instant('error'),
-              { duration: 3000 }
-            );
           }
           this.appService.dataLoading = false;
         }
@@ -234,18 +213,10 @@ export class WorkspaceGroupsComponent implements OnInit {
           this.selectedWorkspaceGroupId, this.workspaceUsers.getChecks()
         ).subscribe(
           respOk => {
+            this.changeResult.show(respOk, 'access-rights.changed', 'access-rights.not-changed');
             if (respOk) {
-              this.snackBar.open(
-                this.translateService.instant('access-rights.changed'),
-                '',
-                { duration: 1000 });
               this.workspaceUsers.setHasChangedFalse();
               this.workspaceUsers.sortEntries();
-            } else {
-              this.snackBar.open(
-                this.translateService.instant('access-rights.not-changed'),
-                this.translateService.instant('error'),
-                { duration: 3000 });
             }
             this.appService.dataLoading = false;
           }

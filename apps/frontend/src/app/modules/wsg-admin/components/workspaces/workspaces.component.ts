@@ -3,7 +3,7 @@ import {
   MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import {
-  ViewChild, Component, OnInit, OnDestroy
+  ViewChild, Component, OnInit, OnDestroy, inject
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
@@ -39,6 +39,7 @@ import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 import { WorkspaceNamePipe } from '../../pipes/workspace-name.pipe';
 import { I18nService } from '../../../../services/i18n.service';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
+import { ChangeResultService } from '../../../../services/change-result.service';
 
 /**
  * The workspaces of a group as their admin sees them: creating, renaming, moving and deleting them,
@@ -78,6 +79,8 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   private backUpFolderName = 'backup';
 
   @ViewChild(MatSort) sort = new MatSort();
+
+  private changeResult = inject(ChangeResultService);
 
   constructor(
     private appService: AppService,
@@ -177,20 +180,10 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
           .pipe(takeUntil(this.ngUnsubscribe))
           .subscribe(
             respOk => {
+              this.changeResult.show(respOk, 'access-rights.changed', 'access-rights.not-changed');
               if (respOk) {
-                this.snackBar.open(
-                  this.translateService.instant('access-rights.changed'),
-                  '',
-                  { duration: 1000 }
-                );
                 this.workspaceUsers.sortEntries();
                 this.workspaceUsers.setHasChangedFalse();
-              } else {
-                this.snackBar.open(
-                  this.translateService.instant('access-rights.not-changed'),
-                  this.translateService.instant('error'),
-                  { duration: 3000 }
-                );
               }
               this.appService.dataLoading = false;
             }
@@ -338,19 +331,9 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
         respOk => {
+          this.changeResult.show(respOk, 'wsg-admin.workspace-added', 'wsg-admin.workspace-not-added');
           if (respOk) {
-            this.snackBar.open(
-              this.translateService.instant('wsg-admin.workspace-added'),
-              '',
-              { duration: 1000 }
-            );
             this.updateWorkspaceList();
-          } else {
-            this.snackBar.open(
-              this.translateService.instant('wsg-admin.workspace-not-added'),
-              this.translateService.instant('error'),
-              { duration: 3000 }
-            );
           }
           this.appService.dataLoading = false;
         }
@@ -363,19 +346,9 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
         respOk => {
+          this.changeResult.show(respOk, 'wsg-admin.drop-box-selected', 'wsg-admin.drop-box-not-selected');
           if (respOk) {
-            this.snackBar.open(
-              this.translateService.instant('wsg-admin.drop-box-selected'),
-              '',
-              { duration: 1000 }
-            );
             this.updateWorkspaceList();
-          } else {
-            this.snackBar.open(
-              this.translateService.instant('wsg-admin.drop-box-not-selected'),
-              this.translateService.instant('error'),
-              { duration: 3000 }
-            );
           }
           this.appService.dataLoading = false;
         }
@@ -388,19 +361,9 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
         respOk => {
+          this.changeResult.show(respOk, 'wsg-admin.workspace-renamed', 'wsg-admin.workspace-not-renamed');
           if (respOk) {
-            this.snackBar.open(
-              this.translateService.instant('wsg-admin.workspace-renamed'),
-              '',
-              { duration: 1000 }
-            );
             this.updateWorkspaceList();
-          } else {
-            this.snackBar.open(
-              this.translateService.instant('wsg-admin.workspace-not-renamed'),
-              this.translateService.instant('error'),
-              { duration: 3000 }
-            );
           }
           this.appService.dataLoading = false;
         }
@@ -413,18 +376,12 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(isOK => {
         this.appService.dataLoading = false;
-        if (!isOK) {
-          this.snackBar.open(
-            this.translateService.instant('wsg-admin.workspace-settings-not-changed'),
-            this.translateService.instant('error'),
-            { duration: 3000 });
-        } else {
-          value.selection[0].settings = value.settings;
-          this.snackBar.open(
-            this.translateService.instant('wsg-admin.workspace-settings-changed'),
-            '',
-            { duration: 1000 });
-        }
+        if (isOK) value.selection[0].settings = value.settings;
+        this.changeResult.show(
+          isOK,
+          'wsg-admin.workspace-settings-changed',
+          'wsg-admin.workspace-settings-not-changed'
+        );
       });
   }
 

@@ -4,7 +4,7 @@ import {
 } from '@angular/material/table';
 import { DatePipe } from '@angular/common';
 import {
-  ViewChild, Component, OnInit, OnDestroy
+  ViewChild, Component, OnInit, OnDestroy, inject
 } from '@angular/core';
 import {
   fromEvent, Subject, Subscription, timer
@@ -39,6 +39,7 @@ import { AppService } from '../../../../services/app.service';
 import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { DeleteDialogComponent } from '../../../../components/delete-dialog/delete-dialog.component';
 import { CountSessionsWithStatusPipe } from '../../../../pipes/count-sessions-with-status.pipe';
+import { ChangeResultService } from '../../../../services/change-result.service';
 
 /**
  * The user administration: every account with its sessions and what it may administer, and the acts
@@ -68,6 +69,8 @@ export class UsersComponent implements OnInit, OnDestroy {
   private readonly ngUnsubscribe = new Subject<void>();
 
   @ViewChild(MatSort) sort = new MatSort();
+
+  private changeResult = inject(ChangeResultService);
 
   constructor(
     private appService: AppService,
@@ -134,18 +137,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.backendService.addUser(user).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       respOk => {
         this.updateUserList();
-        if (respOk) {
-          this.snackBar.open(
-            this.translateService.instant('admin.user-created'),
-            '',
-            { duration: 1000 }
-          );
-        } else {
-          this.snackBar.open(
-            this.translateService.instant('admin.user-not-created'),
-            this.translateService.instant('error'),
-            { duration: 3000 });
-        }
+        this.changeResult.show(respOk, 'admin.user-created', 'admin.user-not-created');
       }
     );
   }
@@ -175,18 +167,7 @@ export class UsersComponent implements OnInit, OnDestroy {
           return;
         }
         this.updateUserList();
-        if (respOk) {
-          this.snackBar.open(
-            this.translateService.instant('admin.user-edited'),
-            '',
-            { duration: 1000 }
-          );
-        } else {
-          this.snackBar.open(
-            this.translateService.instant('admin.user-not-edited'),
-            this.translateService.instant('error'),
-            { duration: 3000 });
-        }
+        this.changeResult.show(respOk, 'admin.user-edited', 'admin.user-not-edited');
       }
     );
   }
@@ -223,17 +204,10 @@ export class UsersComponent implements OnInit, OnDestroy {
         users.forEach((r: UserFullDto) => usersToDelete.push(r.id));
         this.backendService.deleteUsers(usersToDelete).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
           respOk => {
+            this.changeResult.show(respOk, 'admin.users-deleted', 'admin.users-not-deleted');
             if (respOk) {
-              this.snackBar.open(
-                this.translateService.instant('admin.users-deleted'),
-                '',
-                { duration: 1000 });
               this.updateUserList();
             } else {
-              this.snackBar.open(
-                this.translateService.instant('admin.users-not-deleted'),
-                this.translateService.instant('error'),
-                { duration: 3000 });
               this.appService.dataLoading = false;
             }
           }
@@ -334,20 +308,10 @@ export class UsersComponent implements OnInit, OnDestroy {
           this.selectedUser, this.userWorkspaceGroups.getChecks()
         ).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
           respOk => {
+            this.changeResult.show(respOk, 'access-rights.changed', 'access-rights.not-changed');
             if (respOk) {
-              this.snackBar.open(
-                this.translateService.instant('access-rights.changed'),
-                '',
-                { duration: 1000 }
-              );
               this.userWorkspaceGroups.setHasChangedFalse();
               this.userWorkspaceGroups.sortEntries();
-            } else {
-              this.snackBar.open(
-                this.translateService.instant('access-rights.not-changed'),
-                this.translateService.instant('error'),
-                { duration: 3000 }
-              );
             }
             this.appService.dataLoading = false;
           }
