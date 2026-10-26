@@ -75,13 +75,16 @@
       "title": "Aufgabe(n) als Datei herunterladen",
       "ok-button-label": "Herunterladen",
       "booklet-id-required": "Pflichtfeld",
+      "booklet-id-pattern": "Nur A–Z, a–z, Ziffern, _ und -",
+      "test-takers-xml-only": "nur im XML-Format",
+      "test-takers-without-players": "Der Export enthält keine Player. Sie müssen im Testcenter bereits vorhanden sein.",
       "xml-key-group-label": "Group/@label",
       "xml-key-booklet-id": "Metadata/Id",
       "xml-key-booklet-label": "Metadata/Label",
       "xml-key-monitor-booklet-visibility": "ViewSettings/monitorBookletVisibility",
       "desc-group-label": "Bezeichnung der Testgruppe in der Testtaker-Datei (optional)",
       "desc-monitor-booklet-visibility": "Sichtbarkeit des Testhefts für Beobachter · Standard: (kein Eintrag)",
-      "desc-booklet-id": "Eindeutige technische ID des Testhefts (Pflichtfeld) · zugleich Dateiname der Testheft- und der Testtaker-XML",
+      "desc-booklet-id": "Eindeutige technische ID des Testhefts (Pflichtfeld, nur A–Z, a–z, Ziffern, _ und -) · zugleich Dateiname der Testheft- und der Testtaker-XML",
       "desc-booklet-label": "Anzeigename des Testhefts (optional)"
     }
   },

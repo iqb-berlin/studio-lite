@@ -12,7 +12,8 @@
       </studio-lite-select-unit-list>
       <div class="fx-flex-row-50 settings">
         <studio-lite-export-unit-file-config
-          [(exportFormat)]="unitExportSettings.exportFormat"
+          [exportFormat]="unitExportSettings.exportFormat"
+          (exportFormatChange)="setExportFormat($event)"
           [selectedUnitIds]="unitExportSettings.unitIdList"
           [(addPlayers)]="unitExportSettings.addPlayers"
           (fileSelectionChange)="setFileSelection($event)"
@@ -20,17 +21,31 @@
         </studio-lite-export-unit-file-config>
         <mat-accordion multi>
           <mat-expansion-panel
-            [expanded]="true">
+            data-cy="export-test-taker-panel"
+            [expanded]="unitExportSettings.exportFormat === 'xml'"
+            [disabled]="unitExportSettings.exportFormat === 'json'">
             <mat-expansion-panel-header>
               <mat-panel-title>
                 {{'workspace.test-taker-settings' | translate}}
               </mat-panel-title>
+              @if (unitExportSettings.exportFormat === 'json') {
+                <mat-panel-description>
+                  {{'unit-download.dialog.test-takers-xml-only' | translate}}
+                </mat-panel-description>
+              }
             </mat-expansion-panel-header>
               <studio-lite-export-test-taker-config [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
                                        [(addTestTakersHot)]="unitExportSettings.addTestTakersHot"
                                        [(addTestTakersMonitor)]="unitExportSettings.addTestTakersMonitor"
                                        [(passwordLess)]="unitExportSettings.passwordLess">
               </studio-lite-export-test-taker-config>
+              @if ((unitExportSettings.addTestTakersReview
+                | hasTakers : unitExportSettings.addTestTakersHot : unitExportSettings.addTestTakersMonitor)
+                && !unitExportSettings.addPlayers) {
+                <div class="config-message" data-cy="export-test-takers-without-players">
+                  {{'unit-download.dialog.test-takers-without-players' | translate}}
+                </div>
+              }
               <label class="field-description">{{'unit-download.dialog.desc-group-label' | translate}}</label>
               <mat-form-field class="full-width">
                 <mat-label>{{'unit-download.dialog.xml-key-group-label' | translate}}</mat-label>
@@ -65,9 +80,13 @@
                     name="bookletId"
                     [(ngModel)]="unitExportSettings.bookletId"
                     [required]="true"
+                    pattern="[A-Za-z0-9_\-]+"
+                    [errorStateMatcher]="showErrorWhileTyping"
                     #bookletId="ngModel">
-                  @if (bookletId.invalid && bookletId.touched) {
+                  @if (bookletId.errors?.['required']) {
                     <mat-error>{{'unit-download.dialog.booklet-id-required' | translate}}</mat-error>
+                  } @else if (bookletId.errors?.['pattern']) {
+                    <mat-error>{{'unit-download.dialog.booklet-id-pattern' | translate}}</mat-error>
                   }
                 </mat-form-field>
                 <label class="field-description">{{'unit-download.dialog.desc-booklet-label' | translate}}</label>
@@ -94,7 +113,7 @@
               [disabled]="!unitExportSettings.unitIdList.length
                 || ((unitExportSettings.addTestTakersReview
                      | hasTakers : unitExportSettings.addTestTakersHot : unitExportSettings.addTestTakersMonitor)
-                    && !unitExportSettings.bookletId)"
+                    && bookletId.invalid)"
               data-cy="workspace-export-unit-button">
         {{'unit-download.dialog.ok-button-label' | translate}}</button>
       <button mat-raised-button [mat-dialog-close]="false">

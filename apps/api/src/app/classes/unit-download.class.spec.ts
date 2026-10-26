@@ -317,6 +317,16 @@ describe('UnitDownloadClass', () => {
         expect(files).not.toContain('_export-report.json');
       });
     });
+
+    // The testcenter reads units only as XML, so a booklet beside JSON units would name missing units (#1477).
+    it('should write booklet and test takers for logins only in the XML format', async () => {
+      const xml = await exportUnit('xml', { addTestTakersHot: 1, bookletSettings: [] });
+      const json = await exportUnit('json', { addTestTakersHot: 1, bookletSettings: [] });
+
+      expect(xml.files).toEqual(expect.arrayContaining(['booklet1.xml', 'booklet1_testtaker.xml']));
+      expect(json.files).not.toContain('booklet1.xml');
+      expect(json.files).not.toContain('booklet1_testtaker.xml');
+    });
   });
 
   describe('generateCodeList', () => {
