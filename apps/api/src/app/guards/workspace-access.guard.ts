@@ -1,7 +1,6 @@
-import {
-  CanActivate, ExecutionContext, ForbiddenException, Injectable
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { WorkspaceUserService } from '../services/workspace-user.service';
+import { AccessLevelGuard } from './access-level.guard';
 
 /**
  * The lowest rung of the workspace access ladder: the user must be assigned to the workspace in
@@ -14,20 +13,8 @@ import { WorkspaceUserService } from '../services/workspace-user.service';
  * in.
  */
 @Injectable()
-export class WorkspaceAccessGuard implements CanActivate {
-  constructor(private workspaceUserService: WorkspaceUserService) {}
-
-  /** Forbidden unless the user holds any access level in this workspace. */
-  async canActivate(
-    context: ExecutionContext
-  ) {
-    const req = context.switchToHttp().getRequest();
-    const userId = req.user.id;
-    const workspaceId = req.params.workspace_id;
-    const canAccess = await this.workspaceUserService.hasAccess(userId, workspaceId);
-    if (!canAccess) {
-      throw new ForbiddenException();
-    }
-    return canAccess;
+export class WorkspaceAccessGuard extends AccessLevelGuard {
+  constructor(workspaceUserService: WorkspaceUserService) {
+    super((userId, workspaceId) => workspaceUserService.hasAccess(userId, workspaceId));
   }
 }
