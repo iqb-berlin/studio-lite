@@ -132,7 +132,8 @@ export class UnitDownloadClass {
       unitDownloadSettings.addTestTakersHot +
       unitDownloadSettings.addTestTakersMonitor +
       unitDownloadSettings.addTestTakersReview;
-    if (loginCount > 0) {
+    // The testcenter reads units only as XML: beside JSON units a booklet would name units it cannot find.
+    if (loginCount > 0 && exportFormat === 'xml') {
       UnitDownloadClass.addBooklet(
         unitExportConfig,
         unitDownloadSettings,

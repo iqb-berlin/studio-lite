@@ -1,12 +1,14 @@
 // eslint-disable-next-line max-classes-per-file
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, fakeAsync, TestBed, tick
+} from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
 import { provideHttpClient } from '@angular/common/http';
 import { By } from '@angular/platform-browser';
 import { ExportUnitComponent } from './export-unit.component';
@@ -128,6 +130,73 @@ describe('ExportUnitComponent', () => {
     expect(component.unitExportSettings.exportFormat).toBe('json');
     expect(fileConfig.exportFormat).toBe('json');
   });
+
+  // The testcenter reads units only as XML (#1477)
+  it('should drop the logins and lock their panel for the JSON format', () => {
+    const fileConfig = fixture.debugElement
+      .query(By.directive(MockExportUnitFileConfigComponent))
+      .componentInstance as MockExportUnitFileConfigComponent;
+    component.unitExportSettings.addTestTakersReview = 1;
+    component.unitExportSettings.addTestTakersHot = 2;
+    component.unitExportSettings.addTestTakersMonitor = 3;
+
+    fileConfig.exportFormatChange.emit('json');
+    fixture.detectChanges();
+
+    const panel = fixture.debugElement.query(By.css('[data-cy="export-test-taker-panel"]'))
+      .injector.get(MatExpansionPanel);
+    expect(component.unitExportSettings.addTestTakersReview).toBe(0);
+    expect(component.unitExportSettings.addTestTakersHot).toBe(0);
+    expect(component.unitExportSettings.addTestTakersMonitor).toBe(0);
+    expect(panel.disabled).toBe(true);
+    expect(panel.expanded).toBe(false);
+
+    fileConfig.exportFormatChange.emit('xml');
+    fixture.detectChanges();
+
+    expect(panel.disabled).toBe(false);
+    expect(panel.expanded).toBe(true);
+  });
+
+  it('should point out that logins without players need the players in the testcenter', () => {
+    const hint = () => fixture.debugElement.query(By.css('[data-cy="export-test-takers-without-players"]'));
+    expect(hint()).toBeNull();
+
+    component.unitExportSettings.addTestTakersHot = 1;
+    fixture.detectChanges();
+    expect(hint()).not.toBeNull();
+
+    component.unitExportSettings.addPlayers = true;
+    fixture.detectChanges();
+    expect(hint()).toBeNull();
+  });
+
+  // The export would otherwise replace the characters silently (UnitDownloadClass.safeBookletId)
+  it('should not download a booklet id the export would have to rewrite', fakeAsync(() => {
+    const input = fixture.debugElement.query(By.css('input[name="bookletId"]')).nativeElement as HTMLInputElement;
+    const button = fixture.debugElement.query(By.css('[data-cy="workspace-export-unit-button"]'))
+      .nativeElement as HTMLButtonElement;
+    const enterBookletId = (id: string) => {
+      input.value = id;
+      input.dispatchEvent(new Event('input'));
+      tick();
+      fixture.detectChanges();
+    };
+    component.unitExportSettings.unitIdList = [1];
+    component.unitExportSettings.addTestTakersHot = 1;
+
+    enterBookletId('Heft_1-a');
+    expect(button.disabled).toBe(false);
+
+    enterBookletId('Heft 1');
+    expect(button.disabled).toBe(true);
+    // shown while the field still has the focus, not only once it is left
+    expect(fixture.nativeElement.querySelector('mat-error')?.textContent)
+      .toContain('unit-download.dialog.booklet-id-pattern');
+
+    enterBookletId('Heft-ä');
+    expect(button.disabled).toBe(true);
+  }));
 
   it('should adopt the unit selection from the unit list', () => {
     const unitList = fixture.debugElement

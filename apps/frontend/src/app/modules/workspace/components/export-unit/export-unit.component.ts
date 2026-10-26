@@ -5,8 +5,9 @@ import {
 } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
+import { ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import {
-  MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle
+  MatAccordion, MatExpansionPanel, MatExpansionPanelDescription, MatExpansionPanelHeader, MatExpansionPanelTitle
 } from '@angular/material/expansion';
 import { FormsModule } from '@angular/forms';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
@@ -19,14 +20,14 @@ import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.co
 import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export-unit-file-config.component';
 import { mapBookletConfigToModernKeys, normalizeLegacyBookletConfig } from '../../utils/booklet-config-export.utils';
 import { HasTakersPipe } from '../../pipes/has-takers.pipe';
-import { ExportFileSelection } from '../../utils/export-file-options.utils';
+import { ExportFileSelection, ExportFormat } from '../../utils/export-file-options.utils';
 
 @Component({
   templateUrl: './export-unit.component.html',
   styleUrls: ['export-unit.component.scss'],
   imports: [
     MatDialogTitle, MatDialogContent, SelectUnitListComponent,
-    MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle,
+    MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription,
     ExportTestTakerConfigComponent, BookletConfigEditComponent,
     MatDialogActions, MatButton, MatDialogClose,
     TranslateModule, FormsModule, ExportUnitFileConfigComponent,
@@ -53,6 +54,9 @@ export class ExportUnitComponent {
 
   bookletConfigSettings: BookletConfigDto | undefined;
 
+  // The download button locks while the booklet id is invalid, so the reason shows while typing, not only on blur.
+  readonly showErrorWhileTyping = new ShowOnDirtyErrorStateMatcher();
+
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { units: number[], bookletConfigSettings: BookletConfigDto },
     public workspaceService: WorkspaceService
@@ -60,6 +64,16 @@ export class ExportUnitComponent {
     if (this.data && this.data.bookletConfigSettings) {
       this.bookletConfigSettings = normalizeLegacyBookletConfig(data.bookletConfigSettings);
       this.setBookletConfigSettings(this.bookletConfigSettings);
+    }
+  }
+
+  // The testcenter reads units only as XML, so the JSON format comes without logins and booklet.
+  setExportFormat(format: ExportFormat): void {
+    this.unitExportSettings.exportFormat = format;
+    if (format === 'json') {
+      this.unitExportSettings.addTestTakersReview = 0;
+      this.unitExportSettings.addTestTakersHot = 0;
+      this.unitExportSettings.addTestTakersMonitor = 0;
     }
   }
 
