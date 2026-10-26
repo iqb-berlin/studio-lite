@@ -33,6 +33,7 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import { WorkspaceService } from '../services/workspace.service';
+import { WorkspaceImportService } from '../services/workspace-import.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceId } from '../decorators/workspace.decorator';
 import { UnitDownloadClass } from '../classes/unit-download.class';
@@ -66,6 +67,7 @@ import { ManageOrGroupAdminAccessGuard } from '../guards/manage-or-group-admin-a
 export class WorkspaceController {
   constructor(
     private workspaceService: WorkspaceService,
+    private workspaceImportService: WorkspaceImportService,
     private unitService: UnitService,
     private unitMetadataService: UnitMetadataService,
     private unitDefinitionService: UnitDefinitionService,
@@ -241,7 +243,7 @@ export class WorkspaceController {
   async addUnitFiles(@WorkspaceId() workspaceId: number,
     @User() user: UserEntity,
     @UploadedFiles() files): Promise<RequestReportDto> {
-    return this.workspaceService.uploadFiles(workspaceId, files, user);
+    return this.workspaceImportService.uploadFiles(workspaceId, files, user);
   }
 
   @Patch('settings')

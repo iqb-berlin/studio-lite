@@ -1,5 +1,5 @@
 // exceljs is CommonJS with no statically detectable named exports -- see the note on the adm-zip
-// import in workspace.service.ts.
+// import in workspace-import.service.ts.
 import Excel from 'exceljs';
 import {
   CodeBookContentSetting,

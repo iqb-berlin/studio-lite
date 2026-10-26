@@ -15,6 +15,7 @@ import { Response } from 'express';
 import { WorkspaceController } from './workspace.controller';
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
+import { WorkspaceImportService } from '../services/workspace-import.service';
 import { UnitService } from '../services/unit.service';
 import { UnitMetadataService } from '../services/unit-metadata.service';
 import { UnitDefinitionService } from '../services/unit-definition.service';
@@ -33,6 +34,7 @@ import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.g
 describe('WorkspaceController', () => {
   let controller: WorkspaceController;
   let workspaceService: WorkspaceService;
+  let workspaceImportService: WorkspaceImportService;
   let usersService: UsersService;
 
   beforeEach(async () => {
@@ -46,6 +48,10 @@ describe('WorkspaceController', () => {
         {
           provide: WorkspaceService,
           useValue: createMock<WorkspaceService>()
+        },
+        {
+          provide: WorkspaceImportService,
+          useValue: createMock<WorkspaceImportService>()
         },
         {
           provide: UnitService,
@@ -88,6 +94,7 @@ describe('WorkspaceController', () => {
 
     controller = module.get<WorkspaceController>(WorkspaceController);
     workspaceService = module.get<WorkspaceService>(WorkspaceService);
+    workspaceImportService = module.get<WorkspaceImportService>(WorkspaceImportService);
     usersService = module.get<UsersService>(UsersService);
   });
 
@@ -225,10 +232,10 @@ describe('WorkspaceController', () => {
       const result: RequestReportDto = {} as RequestReportDto;
       const user = {} as UserEntity;
       const files = [];
-      jest.spyOn(workspaceService, 'uploadFiles').mockResolvedValue(result);
+      jest.spyOn(workspaceImportService, 'uploadFiles').mockResolvedValue(result);
 
       expect(await controller.addUnitFiles(1, user, files)).toBe(result);
-      expect(workspaceService.uploadFiles).toHaveBeenCalledWith(1, files, user);
+      expect(workspaceImportService.uploadFiles).toHaveBeenCalledWith(1, files, user);
     });
   });
 

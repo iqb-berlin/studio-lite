@@ -2,7 +2,7 @@ import {
   UnitDownloadSettingsDto, UnitExportConfigDto, UnitPropertiesDto, VeronaModuleFileDto, VeronaModuleInListDto
 } from '@studio-lite-lib/api-dto';
 // adm-zip is CommonJS with no statically detectable named exports -- see the note on the adm-zip
-// import in workspace.service.ts.
+// import in workspace-import.service.ts.
 import AdmZip from 'adm-zip';
 import { VeronaModuleKeyCollection } from '@studio-lite/shared-code';
 import { UnitService } from '../services/unit.service';

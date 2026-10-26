@@ -156,7 +156,7 @@
 - **Rule**: A task that is not the service's own subject — producing a file format, parsing an import, a question two callers have to answer identically — becomes a class in `classes/` or a function in `utils/`, and the service or controller calls it by name. This is the backend half of *Responsibility: Work That Is Not the Class's Job*.
 - **Examples**:
   - `UnitDownloadClass` and `DownloadWorkspacesClass` build what is downloaded; the controllers hand them the data and return the result.
-  - `UnitImportData` and `UnitImportJsonData` read the import formats for `WorkspaceService`.
+  - `UnitImportData` and `UnitImportJsonData` read the import formats for `WorkspaceImportService`.
   - `findOrphanedSessionIds` in `utils/` is asked by both `admin-user-controller.ts` (which displays them) and `SessionCleanupService` (which deletes them), so the two cannot drift into asking it in different words.
 - **Rationale**: The services here run to a thousand lines and more, and what can be named on its own is what leaves without a fight. Once out, it is testable without the service's dependencies — and a second caller can have it.
 

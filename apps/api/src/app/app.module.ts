@@ -52,6 +52,7 @@ import UserSession from './entities/user-session.entity';
 import { ResourcePackageService } from './services/resource-package.service';
 import { UsersService } from './services/users.service';
 import { WorkspaceService } from './services/workspace.service';
+import { WorkspaceImportService } from './services/workspace-import.service';
 import { WorkspaceGroupService } from './services/workspace-group.service';
 import { WorkspaceUserService } from './services/workspace-user.service';
 import { UnitService } from './services/unit.service';
@@ -239,6 +240,7 @@ const ENTITIES = [
     ResourcePackageService,
     UsersService,
     WorkspaceService,
+    WorkspaceImportService,
     WorkspaceGroupService,
     WorkspaceUserService,
     UnitService,
