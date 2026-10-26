@@ -35,13 +35,6 @@ export class WidgetsComponent extends ModulesDirective {
   protected readonly pageTitleKey = 'modules.widgets-title';
   protected readonly uploadPath = 'admin/verona-modules?type=WIDGET';
 
-  protected serverUrl: string;
-  protected appService: AppService;
-  moduleService: ModuleService;
-  protected backendService: BackendService;
-  protected deleteConfirmDialog: MatDialog;
-  protected snackBar: MatSnackBar;
-  protected translateService: TranslateService;
   widgetGroups: { model: string; modules: { [key: string]: VeronaModuleClass } }[] = [];
 
   constructor(@Inject('SERVER_URL') serverUrl: string,
@@ -51,14 +44,7 @@ export class WidgetsComponent extends ModulesDirective {
                                     deleteConfirmDialog: MatDialog,
                                     snackBar: MatSnackBar,
                                     translateService: TranslateService) {
-    super();
-    this.serverUrl = serverUrl;
-    this.appService = appService;
-    this.moduleService = moduleService;
-    this.backendService = backendService;
-    this.deleteConfirmDialog = deleteConfirmDialog;
-    this.snackBar = snackBar;
-    this.translateService = translateService;
+    super(serverUrl, appService, moduleService, backendService, deleteConfirmDialog, snackBar, translateService);
     this.setUpdateUploadUrl();
   }
 

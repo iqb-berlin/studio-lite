@@ -3,14 +3,6 @@ import { AnyExtension } from '@tiptap/core';
 // tiptap exportiert StarterKit als Default UND unter gleichem Namen; der Default ist die dokumentierte Form.
 // eslint-disable-next-line import-x/no-named-as-default
 import StarterKit from '@tiptap/starter-kit';
-import { Underline } from '@tiptap/extension-underline';
-import { Superscript } from '@tiptap/extension-superscript';
-import { Subscript } from '@tiptap/extension-subscript';
-import { TextStyle } from '@tiptap/extension-text-style';
-import { Color } from '@tiptap/extension-color';
-import { Highlight } from '@tiptap/extension-highlight';
-import { Image } from '@tiptap/extension-image';
-import { Placeholder } from '@tiptap/extension-placeholder';
 import { TranslateModule } from '@ngx-translate/core';
 import { TiptapEditorDirective } from 'ngx-tiptap';
 import { MatInput } from '@angular/material/input';
@@ -68,24 +60,7 @@ export class RichNoteEditorComponent extends RichTextEditorDirective {
       }),
       BulletListExtension,
       OrderedListExtension,
-      Underline,
-      Superscript,
-      Subscript,
-      TextStyle,
-      Color,
-      Image.configure({
-        inline: false,
-        allowBase64: true,
-        HTMLAttributes: {
-          style: 'max-width: 500px;'
-        }
-      }),
-      Placeholder.configure({
-        placeholder: this.placeholder
-      }),
-      Highlight.configure({
-        multicolor: true
-      })
+      ...this.getFormattingExtensions()
     ];
   }
 

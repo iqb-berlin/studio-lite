@@ -53,6 +53,16 @@ export abstract class RichTextEditorDirective implements OnInit, OnDestroy {
   protected getExtensions(): AnyExtension[] {
     return [
       StarterKit,
+      ...this.getFormattingExtensions()
+    ];
+  }
+
+  /**
+   * The formatting every editor offers after the document structure: marks, images, the
+   * placeholder and highlighting, in the order the editors register them.
+   */
+  protected getFormattingExtensions(): AnyExtension[] {
+    return [
       Underline,
       Superscript,
       Subscript,

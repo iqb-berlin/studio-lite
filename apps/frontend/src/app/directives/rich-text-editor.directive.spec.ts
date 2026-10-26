@@ -1,7 +1,11 @@
-import { Editor } from '@tiptap/core';
+import { AnyExtension, Editor } from '@tiptap/core';
 import { RichTextEditorDirective } from './rich-text-editor.directive';
 
-class TestRichTextEditorDirective extends RichTextEditorDirective {}
+class TestRichTextEditorDirective extends RichTextEditorDirective {
+  extensions(): AnyExtension[] {
+    return this.getExtensions();
+  }
+}
 
 const mockEditor = {
   commands: {
@@ -49,6 +53,17 @@ describe('RichTextEditorDirective', () => {
 
   it('should create an instance', () => {
     expect(directive).toBeTruthy();
+  });
+
+  it('should register StarterKit before the formatting every editor shares', () => {
+    directive.placeholder = 'Kommentar';
+
+    const extensions = directive.extensions();
+
+    expect(extensions.map(extension => extension.name)).toEqual([
+      'starterKit', 'underline', 'superscript', 'subscript', 'textStyle', 'color', 'image', 'placeholder', 'highlight'
+    ]);
+    expect(extensions[7].options).toEqual(expect.objectContaining({ placeholder: 'Kommentar' }));
   });
 
   it('should initialize editor in ngOnInit', () => {

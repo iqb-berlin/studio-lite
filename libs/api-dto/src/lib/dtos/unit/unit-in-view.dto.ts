@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { UnitLastChangedDto } from './unit-last-changed.dto';
 
-export class UnitInViewDto {
+export class UnitInViewDto extends UnitLastChangedDto {
   @ApiProperty()
   key!: string;
 
@@ -18,31 +19,4 @@ export class UnitInViewDto {
 
   @ApiProperty()
   workspaceId!: number;
-
-  @ApiProperty({
-    type: 'string',
-    format: 'date-time'
-  })
-  lastChangedMetadata?: Date;
-
-  @ApiProperty({
-    type: 'string',
-    format: 'date-time'
-  })
-  lastChangedDefinition?: Date;
-
-  @ApiProperty({
-    type: 'string',
-    format: 'date-time'
-  })
-  lastChangedScheme?: Date;
-
-  @ApiProperty()
-  lastChangedMetadataUser?: string;
-
-  @ApiProperty()
-  lastChangedDefinitionUser?: string;
-
-  @ApiProperty()
-  lastChangedSchemeUser?: string;
 }

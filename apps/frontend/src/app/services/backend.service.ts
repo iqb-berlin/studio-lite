@@ -18,6 +18,7 @@ import { AppService, defaultAppConfig } from './app.service';
 import {
   authRequestContext, backgroundRequestContext, logoutContext, tokenRefreshContext
 } from '../interceptors/request-classification';
+import { succeeded } from '../utils/succeeded.utils';
 
 /**
  * The API calls that belong to no single area: logging in and out, the token refresh, the user's own
@@ -178,28 +179,19 @@ export class BackendService {
   setWorkspaceSettings(workspaceId: number, settings: WorkspaceSettingsDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}workspaces/${workspaceId}/settings`, settings)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   deleteUserSession(userId: number, sessionId: string): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}admin/users/${userId}/sessions/${sessionId}`)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   deleteUserOrphanedSessions(userId: number): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}admin/users/${userId}/orphaned-sessions`)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   getEmailTemplate(): Observable<EmailTemplateDto> {
@@ -210,10 +202,7 @@ export class BackendService {
   setEmailTemplate(emailTemplateDto: EmailTemplateDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/settings/email-template`, emailTemplateDto)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   activity(): Observable<void> {

@@ -1,8 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { UnitMetadataValues } from './profile-metadata-values.class';
+import { UnitContentDto } from './unit-content.dto';
 
-export class CreateUnitDto {
+export class CreateUnitDto extends UnitContentDto {
   @ApiProperty({ example: 'EL2443' })
   key!: string;
 
@@ -17,25 +16,4 @@ export class CreateUnitDto {
 
   @ApiProperty()
   createFromKey?: string;
-
-  @ApiProperty()
-  player?: string;
-
-  @ApiProperty()
-  editor?: string;
-
-  @ApiProperty()
-  schemer?: string;
-
-  @ApiProperty()
-  schemeType?: string;
-
-  @ApiProperty()
-  scheme?: string;
-
-  @ApiProperty()
-  metadata?: UnitMetadataValues;
-
-  @ApiProperty()
-  variables?: VariableInfo[];
 }
