@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import {
   CreateWorkspaceDto,
   UserFullDto,
@@ -14,6 +14,7 @@ import {
   UnitInViewDto,
   UnitItemInViewDto
 } from '@studio-lite-lib/api-dto';
+import { succeeded } from '../../../utils/succeeded.utils';
 
 /**
  * Every call the group administration makes: the workspaces of a group, who works in them and at
@@ -55,19 +56,13 @@ export class BackendService {
   deleteWorkspaceUnit(workspaceId: number, unitId: number): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}`)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   deleteUnitItem(workspaceId: number, unitId: number, uuid: string): Observable<boolean> {
     return this.http
       .delete(`${this.serverUrl}workspaces/${workspaceId}/units/${unitId}/items/${uuid}`)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   getUsersFull(): Observable<UserFullDto[]> {
@@ -93,10 +88,7 @@ export class BackendService {
     accessTo: UserWorkspaceAccessForGroupDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}group-admin/users/${userId}/workspaces`, accessTo)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   getWorkspaces(workspaceGroupId: number): Observable<UsersWorkspaceInListDto[]> {
@@ -110,28 +102,19 @@ export class BackendService {
   addWorkspace(createWorkspaceDto: CreateWorkspaceDto): Observable<boolean> {
     return this.http
       .post<boolean>(`${this.serverUrl}group-admin/workspaces`, createWorkspaceDto)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   renameWorkspace(workspaceId: number, newName: string): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}workspaces/${workspaceId}/name`, { name: newName })
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   selectWorkspaceDropBox(workspaceId: number, dropBoxId: number): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}workspaces/${workspaceId}/drop-box`, { dropBoxId })
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   deleteWorkspaces(workspaces: number[]): Observable<boolean> {
@@ -139,19 +122,13 @@ export class BackendService {
     workspaces.forEach(id => { queryParams = queryParams.append('id', id); });
     return this.http
       .delete(`${this.serverUrl}group-admin/workspaces`, { params: queryParams })
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   moveWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean | object> {
     return this.http
       .patch(`${this.serverUrl}group-admin/workspaces/group-id`, { targetId: workspaceGroupId, ids: workspaces })
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   // *******************************************************************
@@ -166,10 +143,7 @@ export class BackendService {
   setUsersByWorkspace(workspaceId: number, accessTo: UserWorkspaceAccessDto[]): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}group-admin/workspaces/${workspaceId}/users`, accessTo)
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 
   getWorkspaceGroupData(workspaceGroupId: number): Observable<WorkspaceGroupFullDto | null> {

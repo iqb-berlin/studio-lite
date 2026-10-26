@@ -1,5 +1,6 @@
 import {
   Directive,
+  Inject,
   OnInit,
   QueryList,
   ViewChildren
@@ -29,13 +30,16 @@ export abstract class ModulesDirective implements OnInit {
 
   protected abstract readonly pageTitleKey: string;
   protected abstract readonly uploadPath: string;
-  protected abstract serverUrl: string;
-  protected abstract appService: AppService;
-  abstract moduleService: ModuleService;
-  protected abstract backendService: BackendService;
-  protected abstract deleteConfirmDialog: MatDialog;
-  protected abstract snackBar: MatSnackBar;
-  protected abstract translateService: TranslateService;
+
+  protected constructor(
+    @Inject('SERVER_URL') protected serverUrl: string,
+    protected appService: AppService,
+    public moduleService: ModuleService,
+    protected backendService: BackendService,
+    protected deleteConfirmDialog: MatDialog,
+    protected snackBar: MatSnackBar,
+    protected translateService: TranslateService
+  ) {}
 
   abstract loadModuleList(): void;
   abstract changeSelectedModules(selection: ModuleSelectionChange): void;

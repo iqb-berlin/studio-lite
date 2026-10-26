@@ -109,21 +109,7 @@ export class WorkspaceController {
       } catch {
         throw new BadRequestException('Invalid settings JSON');
       }
-      const file = await UnitDownloadClass.get(
-        workspaceId,
-        this.unitService,
-        this.unitCommentService,
-        this.veronaModuleService,
-        this.settingService,
-        this.unitRichNoteService,
-        unitDownloadSettings,
-        'xml'
-      );
-      res.set({
-        'Content-Type': 'text/html',
-        'Content-Disposition': 'attachment; filename="studio-export-units.zip"'
-      });
-      return new StreamableFile(file as unknown as Uint8Array);
+      return this.downloadUnits(workspaceId, unitDownloadSettings, 'xml', 'text/html', res);
     }
     return this.workspaceService.findOne(workspaceId);
   }
@@ -146,6 +132,17 @@ export class WorkspaceController {
     @Body() settings: UnitDownloadSettingsDto,
     @Res({ passthrough: true }) res: Response
   ): Promise<StreamableFile> {
+    return this.downloadUnits(workspaceId, settings, 'json', 'application/zip', res);
+  }
+
+  /** The zip of the workspace's units in the given format, sent as an attachment of the given type. */
+  private async downloadUnits(
+    workspaceId: number,
+    settings: UnitDownloadSettingsDto,
+    exportFormat: 'xml' | 'json',
+    contentType: string,
+    res: Response
+  ): Promise<StreamableFile> {
     const file = await UnitDownloadClass.get(
       workspaceId,
       this.unitService,
@@ -154,10 +151,10 @@ export class WorkspaceController {
       this.settingService,
       this.unitRichNoteService,
       settings,
-      'json'
+      exportFormat
     );
     res.set({
-      'Content-Type': 'application/zip',
+      'Content-Type': contentType,
       'Content-Disposition': 'attachment; filename="studio-export-units.zip"'
     });
     return new StreamableFile(file as unknown as Uint8Array);

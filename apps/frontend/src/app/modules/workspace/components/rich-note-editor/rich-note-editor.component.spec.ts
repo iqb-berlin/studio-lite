@@ -61,6 +61,16 @@ describe('RichNoteEditorComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should replace the lists of StarterKit by its own and keep the shared formatting', () => {
+    // eslint-disable-next-line @typescript-eslint/dot-notation
+    const names = component['getExtensions']().map(extension => extension.name);
+
+    expect(names).toEqual([
+      'starterKit', 'bulletList', 'orderedList', 'underline', 'superscript', 'subscript', 'textStyle', 'color',
+      'image', 'placeholder', 'highlight'
+    ]);
+  });
+
   it('should initialize editor with initial content', () => {
     component.initialHTML = '<p>Hello World</p>';
     component.ngOnInit();
