@@ -3,7 +3,7 @@ import {
   MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import {
-  ViewChild, Component, OnInit, OnDestroy
+  ViewChild, Component, OnInit, OnDestroy, inject
 } from '@angular/core';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -28,6 +28,7 @@ import { WorkspaceChecked } from '../../models/workspace-checked.class';
 import { ACCESS_LEVELS } from '../../models/access-levels';
 import { RolesHeaderComponent } from '../roles-header/roles-header.component';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
+import { ChangeResultService } from '../../../../services/change-result.service';
 
 @Component({
   selector: 'studio-lite-users',
@@ -56,6 +57,8 @@ export class UsersComponent implements OnInit, OnDestroy {
   readonly accessLevels = ACCESS_LEVELS;
 
   @ViewChild(MatSort) sort = new MatSort();
+
+  private changeResult = inject(ChangeResultService);
 
   constructor(
     private appService: AppService,
@@ -152,18 +155,10 @@ export class UsersComponent implements OnInit, OnDestroy {
           .pipe(takeUntil(this.ngUnsubscribe))
           .subscribe(
             respOk => {
+              this.changeResult.show(respOk, 'access-rights.changed', 'access-rights.not-changed');
               if (respOk) {
-                this.snackBar.open(
-                  this.translateService.instant('access-rights.changed'),
-                  '',
-                  { duration: 1000 });
                 this.userWorkspaces.sortEntries();
                 this.userWorkspaces.setHasChangedFalse();
-              } else {
-                this.snackBar.open(
-                  this.translateService.instant('access-rights.not-changed'),
-                  this.translateService.instant('error'),
-                  { duration: 3000 });
               }
               this.appService.dataLoading = false;
             }
