@@ -1,3 +1,7 @@
+// The users work in German time, and only there does a change of the clocks fall into a test (#1896).
+// Set here because the workers inherit it; in a spec process.env is a copy and TZ has no effect.
+process.env.TZ = 'Europe/Berlin';
+
 export default {
   displayName: 'frontend',
   preset: '../../jest.preset.js',
