@@ -12,27 +12,16 @@ import { UnitDefinitionStore } from '../modules/workspace/classes/unit-definitio
 import { UnitDefinitionDirective } from './unit-definition.directive';
 
 class TestUnitDefinitionDirective extends UnitDefinitionDirective {
-  moduleService: ModuleService;
-  translateService: TranslateService;
-  snackBar: MatSnackBar;
-  backendService: WorkspaceBackendService;
-  workspaceService: WorkspaceService;
-  appService: AppService;
   hostingIframe: ElementRef;
 
   onSelectedUnitChange = jest.fn();
   postStore = jest.fn();
   handleIncomingMessage = jest.fn();
   sendChangeData = jest.fn();
+  startSubscriptions = jest.fn();
 
   constructor() {
     super();
-    this.workspaceService = {} as WorkspaceService;
-    this.moduleService = { loadList: jest.fn() } as unknown as ModuleService;
-    this.translateService = { instant: jest.fn() } as unknown as TranslateService;
-    this.snackBar = { open: jest.fn() } as unknown as MatSnackBar;
-    this.backendService = { getUnitDefinition: jest.fn() } as unknown as WorkspaceBackendService;
-    this.appService = { postMessage$: new Subject<MessageEvent>() } as unknown as AppService;
     this.hostingIframe = { nativeElement: document.createElement('iframe') } as ElementRef;
   }
 }
@@ -44,7 +33,15 @@ describe('UnitDefinitionDirective', () => {
   beforeEach(() => {
     definitionStore$ = new BehaviorSubject<UnitDefinitionStore | undefined>(undefined);
     TestBed.configureTestingModule({
-      providers: [{ provide: UnitStoresService, useValue: { definitionStore$ } }]
+      providers: [
+        { provide: UnitStoresService, useValue: { definitionStore$ } },
+        { provide: WorkspaceService, useValue: {} },
+        { provide: ModuleService, useValue: { loadList: jest.fn() } },
+        { provide: TranslateService, useValue: { instant: jest.fn() } },
+        { provide: MatSnackBar, useValue: { open: jest.fn() } },
+        { provide: WorkspaceBackendService, useValue: { getUnitDefinition: jest.fn() } },
+        { provide: AppService, useValue: { postMessage$: new Subject<MessageEvent>() } }
+      ]
     });
     directive = TestBed.runInInjectionContext(() => new TestUnitDefinitionDirective());
   });

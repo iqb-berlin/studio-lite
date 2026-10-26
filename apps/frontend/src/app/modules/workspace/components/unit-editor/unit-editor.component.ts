@@ -1,14 +1,6 @@
-import {
-  AfterViewInit, Component, ElementRef, ViewChild
-} from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { TranslateService } from '@ngx-translate/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { takeUntil } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { ModuleService } from '../../../../services/module.service';
-import { WorkspaceBackendService } from '../../services/workspace-backend.service';
-import { AppService } from '../../../../services/app.service';
-import { WorkspaceService } from '../../services/workspace.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { RolePipe } from '../../pipes/role.pipe';
 import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
@@ -28,7 +20,7 @@ import { TrackIframeActivityDirective } from '../../../../directives/track-ifram
   host: { class: 'unit-editor' },
   imports: [MatProgressSpinner, TrackIframeActivityDirective]
 })
-export class UnitEditorComponent extends VeronaModuleDirective implements AfterViewInit {
+export class UnitEditorComponent extends VeronaModuleDirective {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
   editorApiVersion = 1;
 
@@ -46,19 +38,7 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
       {};
   }
 
-  constructor(
-    public backendService: WorkspaceBackendService,
-    public workspaceService: WorkspaceService,
-    public snackBar: MatSnackBar,
-    public moduleService: ModuleService,
-    public appService: AppService,
-    public translateService: TranslateService
-  ) {
-    super();
-  }
-
-  ngAfterViewInit(): void {
-    this.setHostingIframe();
+  protected startSubscriptions(): void {
     this.subscribeForPostMessages();
     this.subscribeForSelectedUnitChange();
   }
@@ -74,12 +54,7 @@ export class UnitEditorComponent extends VeronaModuleDirective implements AfterV
           this.onLoadUnitProperties();
         });
     } else {
-      this.ngUnsubscribe.next();
-      this.ngUnsubscribe.complete();
-      this.ngUnsubscribe = new Subject<void>();
-      this.unitLoaded.next(true);
-      this.subscribeForPostMessages();
-      this.subscribeForSelectedUnitChange();
+      this.renewSubscriptions();
     }
   }
 

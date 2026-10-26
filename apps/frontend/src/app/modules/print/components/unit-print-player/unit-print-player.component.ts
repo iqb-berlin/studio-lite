@@ -2,12 +2,6 @@ import {
   AfterViewInit, Component, ElementRef, Input, OnDestroy, Output, ViewChild
 } from '@angular/core';
 import { fromEvent, Subject, takeUntil } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { TranslateService } from '@ngx-translate/core';
-import { ModuleService } from '../../../../services/module.service';
-import { AppService } from '../../../../services/app.service';
-import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
-import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { PreviewDirective } from '../../../../directives/preview.directive';
 import { UnitState } from '../../../../models/verona.interface';
 import { WidgetCallData } from '../../../workspace/models/widget-call-data.interface';
@@ -36,21 +30,13 @@ export class UnitPrintPlayerComponent extends PreviewDirective implements AfterV
   @Input() printPreviewAutoHeight!: boolean;
   @Output() iFrameHeightChange = new Subject<number>();
 
-  constructor(
-    public appService: AppService,
-    public backendService: WorkspaceBackendService,
-    public workspaceService: WorkspaceService,
-    public moduleService: ModuleService,
-    public translateService: TranslateService,
-    public snackBar: MatSnackBar
-  ) {
-    super();
+  override ngAfterViewInit(): void {
+    super.ngAfterViewInit();
+    this.buildVeronaModule(this.playerId, 'player');
   }
 
-  ngAfterViewInit(): void {
-    this.setHostingIframe();
+  protected startSubscriptions(): void {
     this.subscribeForPostMessages();
-    this.buildVeronaModule(this.playerId, 'player');
   }
 
   sendChangeData(): void {
