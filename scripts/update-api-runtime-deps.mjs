@@ -17,7 +17,7 @@
  * not drifted from the committed pair, so forgetting to run this script fails
  * the image build with instructions instead of silently shipping stale deps.
  *
- * Run after changing backend dependencies:
+ * Run after changing backend dependencies or the root's overrides:
  *
  *   node scripts/update-api-runtime-deps.mjs
  *
@@ -46,6 +46,7 @@ console.log('Building api so dist/apps/api/package.json is current ...');
 execSync('npx nx run api:build', { cwd: repoRoot, stdio: 'inherit' });
 
 const generated = JSON.parse(readFileSync(generatedPath, 'utf8'));
+const rootPackage = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf8'));
 const rootLock = JSON.parse(readFileSync(join(repoRoot, 'package-lock.json'), 'utf8'));
 
 const extraDependencies = Object.fromEntries(EXTRA_DEPENDENCIES.map(name => {
@@ -63,17 +64,21 @@ const runtimePackage = {
     ...generated.dependencies,
     ...extraDependencies
   }).sort(([a], [b]) => a.localeCompare(b))),
-  // Settles the one known optional-peer conflict: @nestjs/microservices
-  // (an optional peer of @nestjs/core) accepts any ioredis, typeorm pins
-  // ^5.0.4, and ioredis 6.0.0 satisfies only the former. The override makes
-  // both ranges agree so npm's DEFAULT resolution goes through -- which is
-  // essential, because the default is what installs REQUIRED peers such as
-  // axios (for @nestjs/axios). --legacy-peer-deps looked like the obvious
-  // fix and skipped those too: the image built green and crashed on its
-  // first require (#1587, #1592). ioredis itself still ends up NOT
-  // installed -- optional peers never are; the override only exists for the
-  // resolver's consistency check.
-  overrides: { ioredis: '^5.0.4' }
+  // The root's overrides, so the image gets the same security floors as the
+  // tree the monorepo tests against. @nestjs/platform-express, for one, pins
+  // multer exactly, so only an override gets the image a fixed version.
+  //
+  // The ioredis override among them settles the one known optional-peer
+  // conflict: @nestjs/microservices (an optional peer of @nestjs/core)
+  // accepts any ioredis, typeorm pins ^5.0.4, and ioredis 6.0.0 satisfies
+  // only the former. The override makes both ranges agree so npm's DEFAULT
+  // resolution goes through -- which is essential, because the default is
+  // what installs REQUIRED peers such as axios (for @nestjs/axios).
+  // --legacy-peer-deps looked like the obvious fix and skipped those too: the
+  // image built green and crashed on its first require (#1587, #1592).
+  // ioredis itself still ends up NOT installed -- optional peers never are;
+  // the override only exists for the resolver's consistency check.
+  overrides: rootPackage.overrides
 };
 writeFileSync(runtimePath, `${JSON.stringify(runtimePackage, null, 2)}\n`);
 
