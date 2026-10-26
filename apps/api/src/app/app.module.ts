@@ -77,6 +77,7 @@ import UnitMetadata from './entities/unit-metadata.entity';
 import { UnitItemMetadataService } from './services/unit-item-metadata.service';
 import { UnitItemMetadataController } from './controllers/unit-item-metadata.controller';
 import { UnitMetadataService } from './services/unit-metadata.service';
+import { UnitDefinitionService } from './services/unit-definition.service';
 import UnitMetadataToDelete from './entities/unit-metadata-to-delete.entity';
 import { UnitMetadataToDeleteService } from './services/unit-metadata-to-delete.service';
 import { ItemCommentService } from './services/item-comment.service';
@@ -255,6 +256,7 @@ const ENTITIES = [
     UnitItemService,
     UnitItemMetadataService,
     UnitMetadataService,
+    UnitDefinitionService,
     UnitMetadataToDeleteService,
     WriteOrGroupAdminAccessGuard,
     ReadOrGroupAdminAccessGuard,

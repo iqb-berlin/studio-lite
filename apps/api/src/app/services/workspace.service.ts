@@ -36,6 +36,8 @@ import { CodingReportClass } from '../classes/coding-report.class';
 import { NotAUnitXmlError } from '../exceptions/not-a-unit-xml.error';
 import { UnitImportJsonData } from '../classes/unit-import-json-data.class';
 import { UnitService } from './unit.service';
+import { UnitMetadataService } from './unit-metadata.service';
+import { UnitDefinitionService } from './unit-definition.service';
 import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import { UsersService } from './users.service';
@@ -106,6 +108,8 @@ export class WorkspaceService {
     private workspaceUserService: WorkspaceUserService,
     private usersService: UsersService,
     private unitService: UnitService,
+    private unitMetadataService: UnitMetadataService,
+    private unitDefinitionService: UnitDefinitionService,
     private unitUserService: UnitUserService,
     private unitCommentService: UnitCommentService,
     private unitRichNoteService: UnitRichNoteService
@@ -981,12 +985,12 @@ export class WorkspaceService {
       const workspace = await this.workspacesRepository.findOne({
         where: { id: workspaceId }
       });
-      const metadata = UnitService.setCurrentProfiles(
+      const metadata = UnitMetadataService.setCurrentProfiles(
         workspace.settings?.unitMDProfile,
         workspace.settings?.itemMDProfile,
         unitImportData.metadata
       );
-      itemUuidLookups = await this.unitService.copyItemsWithMetadata(
+      itemUuidLookups = await this.unitMetadataService.copyItemsWithMetadata(
         newUnitId,
         metadata
       );
@@ -998,7 +1002,7 @@ export class WorkspaceService {
     newUnitId: number,
     unitImportData: UnitImportData | UnitImportJsonData
   ) {
-    await this.unitService.patchDefinition(
+    await this.unitDefinitionService.patchDefinition(
       newUnitId,
       {
         definition: unitImportData.definition,
@@ -1014,7 +1018,7 @@ export class WorkspaceService {
     newUnitId: number,
     unitImportData: UnitImportData | UnitImportJsonData
   ) {
-    await this.unitService.patchScheme(
+    await this.unitDefinitionService.patchScheme(
       newUnitId,
       {
         scheme: unitImportData.codingScheme,
@@ -1057,7 +1061,7 @@ export class WorkspaceService {
   // carry the obsolete boolean `isCurrent` on each profile. Derive `order` from
   // it (true -> 0, false -> -1) and drop the flag so the imported structure
   // matches the current model. A profile that already carries `order` keeps it.
-  // Profile ids are left as imported; UnitService.setCurrentProfiles rewrites the
+  // Profile ids are left as imported; UnitMetadataService.setCurrentProfiles rewrites the
   // legacy github spelling to w3id on the way to persistence (#1570).
   private static normalizeLegacyProfileOrder(metadata: UnitMetadataValues): UnitMetadataValues {
     if (!metadata || typeof metadata !== 'object') return metadata;
@@ -1107,7 +1111,7 @@ export class WorkspaceService {
         const vocabularyEntries = value as VocabularyEntryJson[];
         // Preserve the spec field `annotation` (the numbering / SKOS notation);
         // the pure label stays in `text`. valueAsText is left empty here because
-        // the read path (UnitService.ensureValueAsText) always recomputes the
+        // the read path (ensureValueAsText) always recomputes the
         // vocabulary display text, honouring hideNumbering — computing it now
         // would only be overwritten.
         internalValue = vocabularyEntries.map(vocabularyEntry => ({
@@ -1200,7 +1204,7 @@ export class WorkspaceService {
     // on the new profile, part of the units still classified under the old one,
     // and an unhandled rejection as the only trace (#1576).
     await Promise.all(
-      unitIds.map(unitId => this.unitService.patchMetadataCurrentProfile(
+      unitIds.map(unitId => this.unitMetadataService.patchMetadataCurrentProfile(
         unitId,
         newSettings?.unitMDProfile,
         newSettings?.itemMDProfile

@@ -18,6 +18,8 @@ import { Response } from 'express';
 import { WorkspaceUnitController } from './workspace-unit.controller';
 import { AuthService } from '../services/auth.service';
 import { UnitService } from '../services/unit.service';
+import { UnitMetadataService } from '../services/unit-metadata.service';
+import { UnitDefinitionService } from '../services/unit-definition.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
 import { SettingService } from '../services/setting.service';
 import { WorkspaceService } from '../services/workspace.service';
@@ -41,6 +43,8 @@ import { CopySourcesAccessibleGuard } from '../guards/copy-sources-accessible.gu
 describe('WorkspaceUnitController', () => {
   let controller: WorkspaceUnitController;
   let unitService: UnitService;
+  let unitMetadataService: UnitMetadataService;
+  let unitDefinitionService: UnitDefinitionService;
   let settingsService: SettingService;
   let workspaceService: WorkspaceService;
   let unitCommentService: UnitCommentService;
@@ -61,6 +65,14 @@ describe('WorkspaceUnitController', () => {
         {
           provide: UnitService,
           useValue: createMock<UnitService>()
+        },
+        {
+          provide: UnitMetadataService,
+          useValue: createMock<UnitMetadataService>()
+        },
+        {
+          provide: UnitDefinitionService,
+          useValue: createMock<UnitDefinitionService>()
         },
         {
           provide: SettingService,
@@ -87,6 +99,8 @@ describe('WorkspaceUnitController', () => {
 
     controller = module.get<WorkspaceUnitController>(WorkspaceUnitController);
     unitService = module.get<UnitService>(UnitService);
+    unitMetadataService = module.get<UnitMetadataService>(UnitMetadataService);
+    unitDefinitionService = module.get<UnitDefinitionService>(UnitDefinitionService);
     settingsService = module.get<SettingService>(SettingService);
     workspaceService = module.get<WorkspaceService>(WorkspaceService);
     unitCommentService = module.get<UnitCommentService>(UnitCommentService);
@@ -246,30 +260,30 @@ describe('WorkspaceUnitController', () => {
   describe('findOnesMetadata', () => {
     it('should return unit metadata', async () => {
       const result: UnitFullMetadataDto = {} as UnitFullMetadataDto;
-      jest.spyOn(unitService, 'findOnesMetadata').mockResolvedValue(result);
+      jest.spyOn(unitMetadataService, 'findOnesMetadata').mockResolvedValue(result);
 
       expect(await controller.findOnesMetadata(1)).toBe(result);
-      expect(unitService.findOnesMetadata).toHaveBeenCalledWith(1);
+      expect(unitMetadataService.findOnesMetadata).toHaveBeenCalledWith(1);
     });
   });
 
   describe('findOnesDefinition', () => {
     it('should return unit definition', async () => {
       const result: UnitDefinitionDto = {} as UnitDefinitionDto;
-      jest.spyOn(unitService, 'findOnesDefinition').mockResolvedValue(result);
+      jest.spyOn(unitDefinitionService, 'findOnesDefinition').mockResolvedValue(result);
 
       expect(await controller.findOnesDefinition(1)).toBe(result);
-      expect(unitService.findOnesDefinition).toHaveBeenCalledWith(1);
+      expect(unitDefinitionService.findOnesDefinition).toHaveBeenCalledWith(1);
     });
   });
 
   describe('findOnesScheme', () => {
     it('should return unit scheme', async () => {
       const result: UnitSchemeDto = {} as UnitSchemeDto;
-      jest.spyOn(unitService, 'findOnesScheme').mockResolvedValue(result);
+      jest.spyOn(unitDefinitionService, 'findOnesScheme').mockResolvedValue(result);
 
       expect(await controller.findOnesScheme(1)).toBe(result);
-      expect(unitService.findOnesScheme).toHaveBeenCalledWith(1);
+      expect(unitDefinitionService.findOnesScheme).toHaveBeenCalledWith(1);
     });
   });
 
@@ -325,22 +339,22 @@ describe('WorkspaceUnitController', () => {
   describe('patchDefinition', () => {
     it('should patch definition', async () => {
       const dto: UnitDefinitionDto = {} as UnitDefinitionDto;
-      jest.spyOn(unitService, 'patchDefinition').mockResolvedValue(undefined);
+      jest.spyOn(unitDefinitionService, 'patchDefinition').mockResolvedValue(undefined);
       jest.spyOn(unitService, 'getDisplayNameForUser').mockResolvedValue('User');
 
       await controller.patchDefinition(1, { id: 1 } as UserEntity, dto);
-      expect(unitService.patchDefinition).toHaveBeenCalled();
+      expect(unitDefinitionService.patchDefinition).toHaveBeenCalled();
     });
   });
 
   describe('patchScheme', () => {
     it('should patch scheme', async () => {
       const dto: UnitSchemeDto = {} as UnitSchemeDto;
-      jest.spyOn(unitService, 'patchScheme').mockResolvedValue(undefined);
+      jest.spyOn(unitDefinitionService, 'patchScheme').mockResolvedValue(undefined);
       jest.spyOn(unitService, 'getDisplayNameForUser').mockResolvedValue('User');
 
       await controller.patchScheme(1, { id: 1 } as UserEntity, dto);
-      expect(unitService.patchScheme).toHaveBeenCalled();
+      expect(unitDefinitionService.patchScheme).toHaveBeenCalled();
     });
   });
 

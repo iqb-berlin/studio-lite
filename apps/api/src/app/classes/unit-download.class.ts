@@ -31,6 +31,8 @@ import {
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitService } from '../services/unit.service';
+import { UnitMetadataService } from '../services/unit-metadata.service';
+import { UnitDefinitionService } from '../services/unit-definition.service';
 import { ExportReportMessage, ExportReportScope } from './export-report.class';
 import {
   EXPORT_REPORT_FILENAME,
@@ -79,6 +81,8 @@ export class UnitDownloadClass {
   static async get(
     workspaceId: number,
     unitService: UnitService,
+    unitMetadataService: UnitMetadataService,
+    unitDefinitionService: UnitDefinitionService,
     unitCommentService: UnitCommentService,
     veronaModuleService: VeronaModulesService,
     settingService: SettingService,
@@ -97,6 +101,7 @@ export class UnitDownloadClass {
         if (exportFormat === 'json') {
           await UnitDownloadClass.getUnitDataJSON(
             unitService,
+            unitDefinitionService,
             unitCommentService,
             unitId,
             workspaceId,
@@ -110,6 +115,8 @@ export class UnitDownloadClass {
         } else {
           await UnitDownloadClass.getUnitData(
             unitService,
+            unitMetadataService,
+            unitDefinitionService,
             unitCommentService,
             unitId,
             workspaceId,
@@ -173,6 +180,8 @@ export class UnitDownloadClass {
 
   static async getUnitData(
     unitService: UnitService,
+    unitMetadataService: UnitMetadataService,
+    unitDefinitionService: UnitDefinitionService,
     unitCommentService: UnitCommentService,
     unitId: number,
     workspaceId: number,
@@ -195,10 +204,10 @@ export class UnitDownloadClass {
       withMetadata
     );
     if (withMetadata) {
-      const hideNumbering = await unitService.buildHideNumberingMap(unitMetadata.metadata);
+      const hideNumbering = await unitMetadataService.buildHideNumberingMap(unitMetadata.metadata);
       UnitDownloadClass.addMetadata(unitMetadata, zip, hideNumbering);
     }
-    const definitionData = await unitService.findOnesDefinition(unitId);
+    const definitionData = await unitDefinitionService.findOnesDefinition(unitId);
     UnitDownloadClass.addUnitDefinition(
       definitionData,
       unitXml,
@@ -210,7 +219,7 @@ export class UnitDownloadClass {
       const comments = await unitCommentService.findOnesComments(unitId);
       UnitDownloadClass.addComments(comments, unitXml, unitMetadata, zip);
     }
-    const schemeData = await unitService.findOnesScheme(unitId);
+    const schemeData = await unitDefinitionService.findOnesScheme(unitId);
     if (unitDownloadSettings.addCodingScheme !== false) {
       UnitDownloadClass.addScheme(schemeData, unitXml, unitMetadata, zip);
     }
@@ -1008,6 +1017,7 @@ export class UnitDownloadClass {
 
   static async getUnitDataJSON(
     unitService: UnitService,
+    unitDefinitionService: UnitDefinitionService,
     unitCommentService: UnitCommentService,
     unitId: number,
     workspaceId: number,
@@ -1031,7 +1041,7 @@ export class UnitDownloadClass {
       userInterface: { player: unitMetadata.player || '' }
     };
 
-    const definitionData = await unitService.findOnesDefinition(unitId);
+    const definitionData = await unitDefinitionService.findOnesDefinition(unitId);
     if (unitMetadata.editor) index.userInterface.editor = unitMetadata.editor;
     if (definitionData?.definition?.length > 0) {
       zip.addFile(`${key}.voud`, Buffer.from(definitionData.definition));
@@ -1043,7 +1053,7 @@ export class UnitDownloadClass {
       index.userInterface.modifiedAt = unitMetadata.lastChangedDefinition.toISOString();
     }
 
-    const schemeData = await unitService.findOnesScheme(unitId);
+    const schemeData = await unitDefinitionService.findOnesScheme(unitId);
     // a missing flag means "add" -- see UnitDownloadSettingsDto
     if (unitDownloadSettings.addCodingScheme !== false && hasCodingScheme(schemeData?.scheme)) {
       zip.addFile(`${key}.vocs.json`, Buffer.from(schemeData.scheme));
