@@ -1,0 +1,10 @@
+# Read by the gating step of the db image scan (--ignorefile), see #1892.
+vulnerabilities:
+  - id: CVE-2025-68121
+    paths:
+      - "usr/local/bin/gosu"
+    statement: >-
+      crypto/tls flaw in the Go standard library gosu is built with. gosu never opens a TLS connection,
+      and upstream does not rebuild for Go CVEs in interfaces it does not call
+      (https://github.com/tianon/gosu/blob/master/SECURITY.md); gosu 1.20 is still built with Go 1.24.6.
+    expired_at: 2027-04-30

@@ -48,10 +48,12 @@ scan-db: scan-registry-login
 				--rm\
 				--volume /var/run/docker.sock:/var/run/docker.sock\
 				--volume ${HOME}/Library/Caches:/root/.cache/\
+				--volume $(STUDIO_BASE_DIR)/.trivyignore.yaml:/.trivyignore.yaml:ro\
 			$(TRIVY_VERSION)\
 				image\
 						--scanners vuln\
 						--ignore-unfixed\
+						--ignorefile /.trivyignore.yaml\
 						--severity CRITICAL\
 					$(REGISTRY_PATH)iqbberlin/studio-lite-db:scan
 
