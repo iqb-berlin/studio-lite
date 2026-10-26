@@ -21,12 +21,6 @@ const createMessageEvent =
   <T>(data: T, source: Window): MessageEvent<T> => ({ data, source } as unknown as MessageEvent<T>);
 
 class TestPreviewDirective extends PreviewDirective {
-  moduleService: ModuleService;
-  translateService: TranslateService;
-  snackBar: MatSnackBar;
-  backendService: WorkspaceBackendService;
-  workspaceService: WorkspaceService;
-  appService: AppService;
   hostingIframe: ElementRef;
   override errorDialog: MatDialog;
 
@@ -36,15 +30,10 @@ class TestPreviewDirective extends PreviewDirective {
   sendChangeData = jest.fn();
   onSelectedUnitChange = jest.fn();
   postStore = jest.fn();
+  startSubscriptions = jest.fn();
 
   constructor() {
     super();
-    this.moduleService = { loadList: jest.fn() } as unknown as ModuleService;
-    this.translateService = { instant: jest.fn((key: string) => key) } as unknown as TranslateService;
-    this.snackBar = { open: jest.fn() } as unknown as MatSnackBar;
-    this.backendService = { getUnitDefinition: jest.fn() } as unknown as WorkspaceBackendService;
-    this.workspaceService = { selectedWorkspaceId: 1 } as unknown as WorkspaceService;
-    this.appService = { postMessage$: new Subject<MessageEvent>() } as unknown as AppService;
     this.hostingIframe = { nativeElement: document.createElement('iframe') } as ElementRef;
     this.errorDialog = { open: jest.fn() } as unknown as MatDialog;
   }
@@ -58,8 +47,13 @@ describe('PreviewDirective', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        { provide: ModuleService, useValue: { widgets: {}, loadWidgets: jest.fn() } },
+        { provide: ModuleService, useValue: { widgets: {}, loadWidgets: jest.fn(), loadList: jest.fn() } },
         { provide: UnitStoresService, useValue: {} },
+        { provide: TranslateService, useValue: { instant: jest.fn((key: string) => key) } },
+        { provide: MatSnackBar, useValue: { open: jest.fn() } },
+        { provide: WorkspaceBackendService, useValue: { getUnitDefinition: jest.fn() } },
+        { provide: WorkspaceService, useValue: { selectedWorkspaceId: 1 } },
+        { provide: AppService, useValue: { postMessage$: new Subject<MessageEvent>() } },
         Overlay,
         ViewContainerRef
       ]

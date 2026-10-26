@@ -1,22 +1,14 @@
-import {
-  Component, ElementRef, ViewChild, AfterViewInit
-} from '@angular/core';
-import { takeUntil, Subject } from 'rxjs';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { takeUntil } from 'rxjs';
 import { ActivatedRoute, Params } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { VeronaModuleFactory } from '@studio-lite/shared-code';
-import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ModuleService } from '../../../../services/module.service';
-import { AppService } from '../../../../services/app.service';
 import { ReviewService } from '../../services/review.service';
 import { UnitData } from '../../models/unit-data.class';
 import { ReviewBackendService } from '../../services/review-backend.service';
 import { PageNavigationComponent } from '../../../../components/page-navigation/page-navigation.component';
 import { UnitInfoComponent } from '../unit-info/unit-info.component';
 import { PreviewDirective } from '../../../../directives/preview.directive';
-import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
-import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { UnitState } from '../../../../models/verona.interface';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
 
@@ -31,7 +23,7 @@ import { TrackIframeActivityDirective } from '../../../../directives/track-ifram
   styleUrls: ['./unit-player.component.scss'],
   imports: [UnitInfoComponent, PageNavigationComponent, TrackIframeActivityDirective]
 })
-export class UnitPlayerComponent extends PreviewDirective implements AfterViewInit {
+export class UnitPlayerComponent extends PreviewDirective {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
   unitData: UnitData = {
     databaseId: 0,
@@ -44,21 +36,14 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
 
   constructor(
     private route: ActivatedRoute,
-    public snackBar: MatSnackBar,
-    public backendService: WorkspaceBackendService,
     private reviewBackendService: ReviewBackendService,
-    public appService: AppService,
-    public moduleService: ModuleService,
-    public workspaceService: WorkspaceService,
     public reviewService: ReviewService,
-    public translateService: TranslateService,
     public override errorDialog: MatDialog
   ) {
     super();
   }
 
-  ngAfterViewInit(): void {
-    this.setHostingIframe();
+  protected startSubscriptions(): void {
     this.subscribeForPostMessages();
     this.subscribeForRouteChanges();
   }
@@ -96,12 +81,7 @@ export class UnitPlayerComponent extends PreviewDirective implements AfterViewIn
         this.onLoadUnitProperties();
       }
     } else {
-      this.ngUnsubscribe.next();
-      this.ngUnsubscribe.complete();
-      this.ngUnsubscribe = new Subject<void>();
-      this.unitLoaded.next(true);
-      this.subscribeForPostMessages();
-      this.subscribeForRouteChanges();
+      this.renewSubscriptions();
     }
   }
 

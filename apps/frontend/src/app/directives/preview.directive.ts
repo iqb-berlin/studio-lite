@@ -27,10 +27,7 @@ import { WidgetOverlayComponent } from '../modules/workspace/components/widget-o
  *
  * A player may also ask for a widget; the overlay that then opens is built here as well.
  */
-@Directive({
-  selector: '[preview]',
-  standalone: true
-})
+@Directive()
 export abstract class PreviewDirective extends UnitDefinitionDirective {
   errorDialog?: MatDialog;
   playerName = '';

@@ -1,11 +1,5 @@
-import {
-  AfterViewInit, Component, ElementRef, ViewChild
-} from '@angular/core';
-import {
-  skip, takeUntil, Subject
-} from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { TranslateService } from '@ngx-translate/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { skip, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ShowCodingResultsComponent } from '@iqb/ngx-coding-components';
 import { UnitSchemeDto } from '@studio-lite-lib/api-dto';
@@ -14,10 +8,6 @@ import { CodingSchemeFactory } from '@iqb/responses';
 import { Response } from '@iqbspecs/response/response.interface';
 import { Router } from '@angular/router';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { ModuleService } from '../../../../services/module.service';
-import { AppService } from '../../../../services/app.service';
-import { WorkspaceBackendService } from '../../services/workspace-backend.service';
-import { WorkspaceService } from '../../services/workspace.service';
 import { PreviewService } from '../../services/preview.service';
 import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { ShowResponsesComponent } from '../show-responses/show-responses.component';
@@ -41,30 +31,21 @@ import { matchDefinitionType } from '../../utils/definition-type-match.utils';
   host: { class: 'unit-preview' },
   imports: [PreviewBarComponent, MatProgressSpinner, TrackIframeActivityDirective]
 })
-export class UnitPreviewComponent
-  extends PreviewDirective
-  implements AfterViewInit {
+export class UnitPreviewComponent extends PreviewDirective {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
   definitionTypeWarning = '';
   private dataParts!: Record<string, string> | null;
   private unitStateDataType: string | null = null;
 
   constructor(
-    public appService: AppService,
-    public snackBar: MatSnackBar,
-    public backendService: WorkspaceBackendService,
-    public workspaceService: WorkspaceService,
-    public moduleService: ModuleService,
     public previewService: PreviewService,
-    public translateService: TranslateService,
     public override errorDialog: MatDialog,
     private router: Router
   ) {
     super();
   }
 
-  ngAfterViewInit(): void {
-    this.setHostingIframe();
+  protected startSubscriptions(): void {
     this.subscribeForPostMessages();
     this.subscribeForSelectedUnitChange();
     this.addSubscriptionForUnitDefinitionChanges();
@@ -105,14 +86,7 @@ export class UnitPreviewComponent
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(() => this.onLoadUnitProperties());
     } else {
-      this.ngUnsubscribe.next();
-      this.ngUnsubscribe.complete();
-      this.ngUnsubscribe = new Subject<void>();
-      this.unitLoaded.next(true);
-      this.subscribeForPostMessages();
-      this.subscribeForSelectedUnitChange();
-      this.addSubscriptionForUnitDefinitionChanges();
-      this.subscribeForPagingModeChanges();
+      this.renewSubscriptions();
     }
   }
 

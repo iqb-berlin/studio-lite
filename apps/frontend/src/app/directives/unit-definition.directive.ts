@@ -11,10 +11,7 @@ import { VeronaModuleDirective } from './verona-module.directive';
  * replaced when another unit is opened, which is why this follows whichever store there is rather
  * than the one it finds when subscribing.
  */
-@Directive({
-  selector: '[studioLiteUnitDefinition]',
-  standalone: true
-})
+@Directive()
 export abstract class UnitDefinitionDirective extends VeronaModuleDirective {
   addSubscriptionForUnitDefinitionChanges(): void {
     this.unitStores.definitionStore$

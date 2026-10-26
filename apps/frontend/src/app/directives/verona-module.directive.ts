@@ -1,5 +1,5 @@
 import {
-  Directive, ElementRef, inject, OnDestroy
+  AfterViewInit, Directive, ElementRef, inject, OnDestroy
 } from '@angular/core';
 import {
   BehaviorSubject, from, map, Observable, of, Subject, takeUntil
@@ -26,17 +26,15 @@ import { AppService } from '../services/app.service';
  * cannot be shared -- what a message means, what to do with a changed unit -- are left abstract for
  * the hosting component to answer.
  */
-@Directive({
-  selector: '[veronaModule]',
-  standalone: true
-})
-export abstract class VeronaModuleDirective implements OnDestroy {
-  abstract moduleService: ModuleService;
-  abstract translateService: TranslateService;
-  abstract snackBar: MatSnackBar;
-  abstract backendService: WorkspaceBackendService;
-  abstract workspaceService: WorkspaceService;
-  abstract appService: AppService;
+@Directive()
+export abstract class VeronaModuleDirective implements AfterViewInit, OnDestroy {
+  // the services every host talks through, injected here rather than by each host
+  moduleService = inject(ModuleService);
+  translateService = inject(TranslateService);
+  snackBar = inject(MatSnackBar);
+  backendService = inject(WorkspaceBackendService);
+  workspaceService = inject(WorkspaceService);
+  appService = inject(AppService);
   abstract hostingIframe: ElementRef;
   // injected here rather than demanded of every subclass, of which only some read the unit's stores
   protected readonly unitStores = inject(UnitStoresService);
@@ -60,12 +58,36 @@ export abstract class VeronaModuleDirective implements OnDestroy {
 
   abstract onSelectedUnitChange(): void;
 
+  /**
+   * What the host listens to while it shows a unit: at least the module's messages
+   * ({@link subscribeForPostMessages}), and whatever tells it the unit has changed. Started once the
+   * view is there, and again by {@link renewSubscriptions}.
+   */
+  protected abstract startSubscriptions(): void;
+
   abstract postStore(store: unknown): void;
 
   abstract handleIncomingMessage(m: MessageEvent): void;
 
+  ngAfterViewInit(): void {
+    this.setHostingIframe();
+    this.startSubscriptions();
+  }
+
   setHostingIframe(): void {
     this.iFrameElement = this.hostingIframe.nativeElement;
+  }
+
+  /**
+   * Drops every subscription, those of a unit still loading included, and starts the host's own
+   * again -- the way out when another unit is chosen before the current one has finished loading.
+   */
+  protected renewSubscriptions(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
+    this.ngUnsubscribe = new Subject<void>();
+    this.unitLoaded.next(true);
+    this.startSubscriptions();
   }
 
   subscribeForSelectedUnitChange(): void {

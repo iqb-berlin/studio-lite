@@ -1,16 +1,8 @@
-import {
-  AfterViewInit, Component, ElementRef, ViewChild
-} from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { TranslateService } from '@ngx-translate/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { takeUntil } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { toVariableInfoListV1 } from '@studio-lite/shared-code';
-import { WorkspaceService } from '../../services/workspace.service';
-import { WorkspaceBackendService } from '../../services/workspace-backend.service';
-import { AppService } from '../../../../services/app.service';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
-import { ModuleService } from '../../../../services/module.service';
 import {
   UnitDefinitionDirective
 } from '../../../../directives/unit-definition.directive';
@@ -29,24 +21,10 @@ import { TrackIframeActivityDirective } from '../../../../directives/track-ifram
   host: { class: 'unit-schemer' },
   imports: [MatProgressSpinner, TrackIframeActivityDirective]
 })
-export class UnitSchemerComponent
-  extends UnitDefinitionDirective
-  implements AfterViewInit {
+export class UnitSchemerComponent extends UnitDefinitionDirective {
   @ViewChild('hostingIframe') hostingIframe!: ElementRef;
 
-  constructor(
-    public backendService: WorkspaceBackendService,
-    public workspaceService: WorkspaceService,
-    public snackBar: MatSnackBar,
-    public moduleService: ModuleService,
-    public appService: AppService,
-    public translateService: TranslateService
-  ) {
-    super();
-  }
-
-  ngAfterViewInit(): void {
-    this.setHostingIframe();
+  protected startSubscriptions(): void {
     this.subscribeForPostMessages();
     this.subscribeForSelectedUnitChange();
     this.addSubscriptionForUnitDefinitionChanges();
@@ -61,13 +39,7 @@ export class UnitSchemerComponent
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(() => this.onLoadUnitProperties());
     } else {
-      this.ngUnsubscribe.next();
-      this.ngUnsubscribe.complete();
-      this.ngUnsubscribe = new Subject<void>();
-      this.unitLoaded.next(true);
-      this.subscribeForPostMessages();
-      this.subscribeForSelectedUnitChange();
-      this.addSubscriptionForUnitDefinitionChanges();
+      this.renewSubscriptions();
     }
   }
 

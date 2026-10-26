@@ -25,35 +25,20 @@ const createMessageEvent =
   <T>(data: T, source: Window): MessageEvent<T> => ({ data, source } as unknown as MessageEvent<T>);
 
 class TestVeronaModuleDirective extends VeronaModuleDirective {
-  moduleService: ModuleService;
-  translateService: TranslateService;
-  snackBar: MatSnackBar;
-  backendService: WorkspaceBackendService;
-  workspaceService: WorkspaceService;
-  appService: AppService;
   hostingIframe: ElementRef;
 
   onSelectedUnitChange = jest.fn();
   postStore = jest.fn();
   handleIncomingMessage = jest.fn();
+  startSubscriptions = jest.fn();
 
-  constructor(
-    moduleService: ModuleService,
-    translateService: TranslateService,
-    snackBar: MatSnackBar,
-    backendService: WorkspaceBackendService,
-    workspaceService: WorkspaceService,
-    appService: AppService,
-    hostingIframe: ElementRef
-  ) {
+  constructor(hostingIframe: ElementRef) {
     super();
-    this.moduleService = moduleService;
-    this.translateService = translateService;
-    this.snackBar = snackBar;
-    this.backendService = backendService;
-    this.workspaceService = workspaceService;
-    this.appService = appService;
     this.hostingIframe = hostingIframe;
+  }
+
+  renew(): void {
+    this.renewSubscriptions();
   }
 
   buildModule(moduleId: string | undefined, moduleType: 'player' | 'editor' | 'schemer'): void {
@@ -95,18 +80,17 @@ describe('VeronaModuleDirective', () => {
     } as ElementRef;
 
     TestBed.configureTestingModule({
-      providers: [{ provide: WorkspaceBackendService, useValue: backendService }]
+      providers: [
+        { provide: ModuleService, useValue: moduleService },
+        { provide: TranslateService, useValue: translateService },
+        { provide: MatSnackBar, useValue: snackBar },
+        { provide: WorkspaceBackendService, useValue: backendService },
+        { provide: WorkspaceService, useValue: workspaceService },
+        { provide: AppService, useValue: appService }
+      ]
     });
     const unitStores = TestBed.inject(UnitStoresService);
-    const directive = TestBed.runInInjectionContext(() => new TestVeronaModuleDirective(
-      moduleService,
-      translateService,
-      snackBar,
-      backendService,
-      workspaceService,
-      appService,
-      hostingIframe
-    ));
+    const directive = TestBed.runInInjectionContext(() => new TestVeronaModuleDirective(hostingIframe));
 
     return {
       directive,
@@ -387,5 +371,32 @@ describe('VeronaModuleDirective', () => {
     expect(directive.lastVeronaModuleId).toBe('');
 
     document.body.removeChild(iframe);
+  });
+
+  describe('subscription lifecycle', () => {
+    it('takes the iframe and starts the host subscriptions once the view is there', () => {
+      const { directive, hostingIframe } = createDirective();
+
+      directive.ngAfterViewInit();
+
+      expect(directive.iFrameElement).toBe(hostingIframe.nativeElement);
+      expect(directive.startSubscriptions).toHaveBeenCalledTimes(1);
+    });
+
+    it('drops every subscription, marks the unit loaded and starts the host subscriptions again', () => {
+      const { directive } = createDirective();
+      const previous = directive.ngUnsubscribe;
+      const dropped = jest.fn();
+      previous.subscribe({ complete: dropped });
+      directive.unitLoaded.next(false);
+
+      directive.renew();
+
+      expect(dropped).toHaveBeenCalled();
+      expect(directive.ngUnsubscribe).not.toBe(previous);
+      expect(directive.ngUnsubscribe.closed).toBe(false);
+      expect(directive.unitLoaded.getValue()).toBe(true);
+      expect(directive.startSubscriptions).toHaveBeenCalledTimes(1);
+    });
   });
 });
