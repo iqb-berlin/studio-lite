@@ -7,7 +7,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { ReviewUnitController } from './review-unit.controller';
 import { ReviewService } from '../services/review.service';
-import { UnitService } from '../services/unit.service';
+import { UnitDefinitionService } from '../services/unit-definition.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ReviewGuard } from '../guards/review.guard';
 import { ReviewConfigGuard } from '../guards/review-config.guard';
@@ -15,7 +15,7 @@ import { ReviewConfigGuard } from '../guards/review-config.guard';
 describe('ReviewUnitController', () => {
   let controller: ReviewUnitController;
   let reviewService: ReviewService;
-  let unitService: UnitService;
+  let unitDefinitionService: UnitDefinitionService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -26,8 +26,8 @@ describe('ReviewUnitController', () => {
           useValue: createMock<ReviewService>()
         },
         {
-          provide: UnitService,
-          useValue: createMock<UnitService>()
+          provide: UnitDefinitionService,
+          useValue: createMock<UnitDefinitionService>()
         }
       ]
     })
@@ -41,7 +41,7 @@ describe('ReviewUnitController', () => {
 
     controller = module.get<ReviewUnitController>(ReviewUnitController);
     reviewService = module.get<ReviewService>(ReviewService);
-    unitService = module.get<UnitService>(UnitService);
+    unitDefinitionService = module.get<UnitDefinitionService>(UnitDefinitionService);
   });
 
   it('should be defined', () => {
@@ -102,14 +102,14 @@ describe('ReviewUnitController', () => {
         variables: []
       } as UnitDefinitionDto;
 
-      jest.spyOn(unitService, 'findOnesDefinition')
+      jest.spyOn(unitDefinitionService, 'findOnesDefinition')
         .mockResolvedValue(mockDefinition);
 
       const result = await controller.getUnitDefinition(unitId);
 
       expect(result).toEqual(mockDefinition);
-      expect(unitService.findOnesDefinition).toHaveBeenCalledWith(unitId);
-      expect(unitService.findOnesDefinition).toHaveBeenCalledTimes(1);
+      expect(unitDefinitionService.findOnesDefinition).toHaveBeenCalledWith(unitId);
+      expect(unitDefinitionService.findOnesDefinition).toHaveBeenCalledTimes(1);
     });
 
     it('should handle different unit ids', async () => {
@@ -120,13 +120,13 @@ describe('ReviewUnitController', () => {
         variables: []
       } as UnitDefinitionDto;
 
-      jest.spyOn(unitService, 'findOnesDefinition')
+      jest.spyOn(unitDefinitionService, 'findOnesDefinition')
         .mockResolvedValue(mockDefinition);
 
       const result = await controller.getUnitDefinition(unitId);
 
       expect(result).toEqual(mockDefinition);
-      expect(unitService.findOnesDefinition).toHaveBeenCalledWith(unitId);
+      expect(unitDefinitionService.findOnesDefinition).toHaveBeenCalledWith(unitId);
     });
   });
 
@@ -139,14 +139,14 @@ describe('ReviewUnitController', () => {
         schemeType: 'test-type'
       } as UnitSchemeDto;
 
-      jest.spyOn(unitService, 'findOnesScheme')
+      jest.spyOn(unitDefinitionService, 'findOnesScheme')
         .mockResolvedValue(mockScheme);
 
       const result = await controller.findOnesScheme(unitId);
 
       expect(result).toEqual(mockScheme);
-      expect(unitService.findOnesScheme).toHaveBeenCalledWith(unitId);
-      expect(unitService.findOnesScheme).toHaveBeenCalledTimes(1);
+      expect(unitDefinitionService.findOnesScheme).toHaveBeenCalledWith(unitId);
+      expect(unitDefinitionService.findOnesScheme).toHaveBeenCalledTimes(1);
     });
 
     it('should handle different unit ids', async () => {
@@ -157,13 +157,13 @@ describe('ReviewUnitController', () => {
         schemeType: 'another-type'
       } as UnitSchemeDto;
 
-      jest.spyOn(unitService, 'findOnesScheme')
+      jest.spyOn(unitDefinitionService, 'findOnesScheme')
         .mockResolvedValue(mockScheme);
 
       const result = await controller.findOnesScheme(unitId);
 
       expect(result).toEqual(mockScheme);
-      expect(unitService.findOnesScheme).toHaveBeenCalledWith(unitId);
+      expect(unitDefinitionService.findOnesScheme).toHaveBeenCalledWith(unitId);
     });
   });
 });

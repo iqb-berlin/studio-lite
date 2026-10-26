@@ -16,6 +16,8 @@ import { WorkspaceController } from './workspace.controller';
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
 import { UnitService } from '../services/unit.service';
+import { UnitMetadataService } from '../services/unit-metadata.service';
+import { UnitDefinitionService } from '../services/unit-definition.service';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { SettingService } from '../services/setting.service';
 import { UsersService } from '../services/users.service';
@@ -48,6 +50,14 @@ describe('WorkspaceController', () => {
         {
           provide: UnitService,
           useValue: createMock<UnitService>()
+        },
+        {
+          provide: UnitMetadataService,
+          useValue: createMock<UnitMetadataService>()
+        },
+        {
+          provide: UnitDefinitionService,
+          useValue: createMock<UnitDefinitionService>()
         },
         {
           provide: VeronaModulesService,
@@ -116,7 +126,7 @@ describe('WorkspaceController', () => {
 
       await controller.find(1, true, '{}', res);
 
-      expect(spy.mock.lastCall[7]).toBe('xml');
+      expect(spy.mock.lastCall[9]).toBe('xml');
     });
 
     it('should throw BadRequestException for malformed settings JSON', async () => {
@@ -154,7 +164,7 @@ describe('WorkspaceController', () => {
 
       await controller.downloadUnitsJson(1, minimalSettings(), createMock<Response>());
 
-      expect(spy.mock.lastCall[7]).toBe('json');
+      expect(spy.mock.lastCall[9]).toBe('json');
     });
 
     it('should set application/zip content-type header', async () => {

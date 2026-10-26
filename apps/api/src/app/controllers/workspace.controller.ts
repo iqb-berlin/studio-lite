@@ -37,6 +37,8 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceId } from '../decorators/workspace.decorator';
 import { UnitDownloadClass } from '../classes/unit-download.class';
 import { UnitService } from '../services/unit.service';
+import { UnitMetadataService } from '../services/unit-metadata.service';
+import { UnitDefinitionService } from '../services/unit-definition.service';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { SettingService } from '../services/setting.service';
 import { UsersService } from '../services/users.service';
@@ -65,6 +67,8 @@ export class WorkspaceController {
   constructor(
     private workspaceService: WorkspaceService,
     private unitService: UnitService,
+    private unitMetadataService: UnitMetadataService,
+    private unitDefinitionService: UnitDefinitionService,
     private unitCommentService: UnitCommentService,
     private veronaModuleService: VeronaModulesService,
     private settingService: SettingService,
@@ -146,6 +150,8 @@ export class WorkspaceController {
     const file = await UnitDownloadClass.get(
       workspaceId,
       this.unitService,
+      this.unitMetadataService,
+      this.unitDefinitionService,
       this.unitCommentService,
       this.veronaModuleService,
       this.settingService,

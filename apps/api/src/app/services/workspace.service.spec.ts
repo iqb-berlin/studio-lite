@@ -16,6 +16,8 @@ import Unit from '../entities/unit.entity';
 import { WorkspaceUserService } from './workspace-user.service';
 import { UsersService } from './users.service';
 import { UnitService } from './unit.service';
+import { UnitMetadataService } from './unit-metadata.service';
+import { UnitDefinitionService } from './unit-definition.service';
 import { UnitUserService } from './unit-user.service';
 import { UnitCommentService } from './unit-comment.service';
 import { UnitRichNoteService } from './unit-rich-note.service';
@@ -33,6 +35,8 @@ describe('WorkspaceService', () => {
   let workspaceUserService: WorkspaceUserService;
   let usersService: UsersService;
   let unitService: UnitService;
+  let unitMetadataService: UnitMetadataService;
+  let unitDefinitionService: UnitDefinitionService;
   let unitUserService: UnitUserService;
   let unitCommentService: UnitCommentService;
   let unitRichNoteService: UnitRichNoteService;
@@ -46,6 +50,8 @@ describe('WorkspaceService', () => {
     workspaceUserService = createMock<WorkspaceUserService>();
     usersService = createMock<UsersService>();
     unitService = createMock<UnitService>();
+    unitMetadataService = createMock<UnitMetadataService>();
+    unitDefinitionService = createMock<UnitDefinitionService>();
     unitUserService = createMock<UnitUserService>();
     unitCommentService = createMock<UnitCommentService>();
     unitRichNoteService = createMock<UnitRichNoteService>();
@@ -61,6 +67,8 @@ describe('WorkspaceService', () => {
         { provide: WorkspaceUserService, useValue: workspaceUserService },
         { provide: UsersService, useValue: usersService },
         { provide: UnitService, useValue: unitService },
+        { provide: UnitMetadataService, useValue: unitMetadataService },
+        { provide: UnitDefinitionService, useValue: unitDefinitionService },
         { provide: UnitUserService, useValue: unitUserService },
         { provide: UnitCommentService, useValue: unitCommentService },
         { provide: UnitRichNoteService, useValue: unitRichNoteService }
@@ -77,6 +85,8 @@ describe('WorkspaceService', () => {
     workspaceUserService = module.get<WorkspaceUserService>(WorkspaceUserService);
     usersService = module.get<UsersService>(UsersService);
     unitService = module.get<UnitService>(UnitService);
+    unitMetadataService = module.get<UnitMetadataService>(UnitMetadataService);
+    unitDefinitionService = module.get<UnitDefinitionService>(UnitDefinitionService);
     unitUserService = module.get<UnitUserService>(UnitUserService);
     unitCommentService = module.get<UnitCommentService>(UnitCommentService);
     unitRichNoteService = module.get<UnitRichNoteService>(UnitRichNoteService);
@@ -474,7 +484,7 @@ describe('WorkspaceService', () => {
         expect(ws.settings.defaultEditor).toBe('new-editor');
         expect(ws.settings.unitMDProfile).toBe(unitProfile);
         expect(ws.settings.itemMDProfile).toBe(itemProfile);
-        expect(unitService.patchMetadataCurrentProfile).not.toHaveBeenCalled();
+        expect(unitMetadataService.patchMetadataCurrentProfile).not.toHaveBeenCalled();
       });
 
       it('treats an explicitly emptied profile key as removal and reclassifies', async () => {
@@ -487,7 +497,7 @@ describe('WorkspaceService', () => {
         } as WorkspaceSettingsDto);
 
         expect(ws.settings.unitMDProfile).toBe('');
-        expect(unitService.patchMetadataCurrentProfile).toHaveBeenCalledWith(7, '', '');
+        expect(unitMetadataService.patchMetadataCurrentProfile).toHaveBeenCalledWith(7, '', '');
       });
 
       it('does not reclassify when the same profile arrives in the retired spelling', async () => {
@@ -500,7 +510,7 @@ describe('WorkspaceService', () => {
           itemMDProfile: itemProfile
         } as WorkspaceSettingsDto);
 
-        expect(unitService.patchMetadataCurrentProfile).not.toHaveBeenCalled();
+        expect(unitMetadataService.patchMetadataCurrentProfile).not.toHaveBeenCalled();
         // ...but the stored spelling is still canonicalized
         expect(ws.settings.unitMDProfile).toBe(unitProfile);
       });
@@ -510,7 +520,7 @@ describe('WorkspaceService', () => {
         const ws = { id: 1, settings: storedSettings() };
         (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
         (unitService.getUnitIdsByWorkspaceId as jest.Mock).mockResolvedValue([7, 8]);
-        (unitService.patchMetadataCurrentProfile as jest.Mock).mockImplementation(async () => {
+        (unitMetadataService.patchMetadataCurrentProfile as jest.Mock).mockImplementation(async () => {
           calls.push('reclassify');
         });
         (workspaceRepository.save as jest.Mock).mockImplementation(async () => {
@@ -520,11 +530,11 @@ describe('WorkspaceService', () => {
 
         await service.patchSettings(1, { unitMDProfile: newUnitProfile } as WorkspaceSettingsDto);
 
-        expect(unitService.patchMetadataCurrentProfile).toHaveBeenCalledTimes(2);
+        expect(unitMetadataService.patchMetadataCurrentProfile).toHaveBeenCalledTimes(2);
         // The item profile was not part of the request: the kept value is passed
         // on, so the unchanged side is not reclassified against ''.
-        expect(unitService.patchMetadataCurrentProfile).toHaveBeenCalledWith(7, newUnitProfile, itemProfile);
-        expect(unitService.patchMetadataCurrentProfile).toHaveBeenCalledWith(8, newUnitProfile, itemProfile);
+        expect(unitMetadataService.patchMetadataCurrentProfile).toHaveBeenCalledWith(7, newUnitProfile, itemProfile);
+        expect(unitMetadataService.patchMetadataCurrentProfile).toHaveBeenCalledWith(8, newUnitProfile, itemProfile);
         expect(calls).toEqual(['reclassify', 'reclassify', 'save']);
       });
 
@@ -532,7 +542,7 @@ describe('WorkspaceService', () => {
         const ws = { id: 1, settings: storedSettings() };
         (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
         (unitService.getUnitIdsByWorkspaceId as jest.Mock).mockResolvedValue([7, 8]);
-        (unitService.patchMetadataCurrentProfile as jest.Mock)
+        (unitMetadataService.patchMetadataCurrentProfile as jest.Mock)
           .mockResolvedValueOnce(undefined)
           .mockRejectedValueOnce(new Error('db gone'));
 
@@ -720,7 +730,7 @@ describe('WorkspaceService', () => {
           text: [{ lang: 'de', value: 'Anwenden' }],
           annotation: [{ lang: 'de', value: '1.2' }]
         }],
-        // recomputed by UnitService.ensureValueAsText on read (see unit.service.spec)
+        // recomputed by ensureValueAsText on read (see metadata-value-as-text.spec)
         valueAsText: []
       });
     });
@@ -757,7 +767,7 @@ describe('WorkspaceService', () => {
       });
     });
 
-    // Profile ids are deliberately NOT rewritten here: UnitService.setCurrentProfiles
+    // Profile ids are deliberately NOT rewritten here: UnitMetadataService.setCurrentProfiles
     // canonicalizes them on the way to persistence, and the profile_id column
     // transformer backstops every writer (#1570).
     it('passes imported profile ids through unchanged', () => {
@@ -913,7 +923,7 @@ describe('WorkspaceService', () => {
         ], user);
 
         expect(result.messages).toHaveLength(0);
-        expect(unitService.patchDefinition).toHaveBeenCalledWith(
+        expect(unitDefinitionService.patchDefinition).toHaveBeenCalledWith(
           10,
           expect.objectContaining({
             definition: '{"content":1}',
@@ -933,7 +943,7 @@ describe('WorkspaceService', () => {
         ], user);
 
         expect(result.messages).toHaveLength(0);
-        expect(unitService.patchDefinition).toHaveBeenCalledWith(
+        expect(unitDefinitionService.patchDefinition).toHaveBeenCalledWith(
           10,
           expect.objectContaining({ definition: '{"content":1}' }),
           null,
@@ -947,7 +957,7 @@ describe('WorkspaceService', () => {
             '<Definition player="p@1.0"/></Unit>')
         ], user);
 
-        expect(unitService.patchDefinition).not.toHaveBeenCalled();
+        expect(unitDefinitionService.patchDefinition).not.toHaveBeenCalled();
       });
     });
 
@@ -982,7 +992,7 @@ describe('WorkspaceService', () => {
 
     it('should import companion files with arbitrary names when the index references them', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchScheme as jest.Mock).mockResolvedValue(undefined);
+      (unitDefinitionService.patchScheme as jest.Mock).mockResolvedValue(undefined);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
       (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
 
@@ -995,7 +1005,7 @@ describe('WorkspaceService', () => {
       ], user);
 
       expect(result.messages).toHaveLength(0);
-      expect(unitService.patchScheme).toHaveBeenCalledWith(
+      expect(unitDefinitionService.patchScheme).toHaveBeenCalledWith(
         10,
         expect.objectContaining({ scheme: schemeContent }),
         null,
@@ -1030,7 +1040,7 @@ describe('WorkspaceService', () => {
       const vovaContent = JSON.stringify({ baseVariables, derivedVariables: [] });
 
       (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchDefinition as jest.Mock).mockResolvedValue(undefined);
+      (unitDefinitionService.patchDefinition as jest.Mock).mockResolvedValue(undefined);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
       (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
 
@@ -1043,7 +1053,7 @@ describe('WorkspaceService', () => {
         buildFile('unit01.vova.json', 'application/json', vovaContent)
       ], user);
 
-      expect(unitService.patchDefinition).toHaveBeenCalledWith(
+      expect(unitDefinitionService.patchDefinition).toHaveBeenCalledWith(
         10,
         expect.objectContaining({ variables: baseVariables }),
         null,
@@ -1053,7 +1063,7 @@ describe('WorkspaceService', () => {
 
     it('should hand the definition type of the index on with the definition (#1368)', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
-      (unitService.patchDefinition as jest.Mock).mockResolvedValue(undefined);
+      (unitDefinitionService.patchDefinition as jest.Mock).mockResolvedValue(undefined);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
       (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
 
@@ -1064,7 +1074,7 @@ describe('WorkspaceService', () => {
         buildFile('unit01.voud', 'application/octet-stream', '<definition/>')
       ], user);
 
-      expect(unitService.patchDefinition).toHaveBeenCalledWith(
+      expect(unitDefinitionService.patchDefinition).toHaveBeenCalledWith(
         10,
         expect.objectContaining({
           definition: '<definition/>',
@@ -1078,7 +1088,7 @@ describe('WorkspaceService', () => {
     it('should import vomd (unit-metadata@0.1) and voit (unit-items@0.2) files', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (unitMetadataService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
       (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
 
       const vomdContent = JSON.stringify({
@@ -1110,7 +1120,7 @@ describe('WorkspaceService', () => {
       ], user);
 
       expect(result.messages).toHaveLength(0);
-      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, {
+      expect(unitMetadataService.copyItemsWithMetadata).toHaveBeenCalledWith(10, {
         profiles: [{
           profileId: 'https://example.org/unit-profile.json',
           order: -1,
@@ -1138,7 +1148,7 @@ describe('WorkspaceService', () => {
     it('should still import a legacy raw vomd blob with embedded items', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (unitMetadataService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
       (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
 
       const legacyVomd = JSON.stringify({
@@ -1154,7 +1164,7 @@ describe('WorkspaceService', () => {
       ], user);
 
       expect(result.messages).toHaveLength(0);
-      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, {
+      expect(unitMetadataService.copyItemsWithMetadata).toHaveBeenCalledWith(10, {
         profiles: [{ profileId: 'p1', order: -1, entries: [] }],
         items: [{ id: 'ITEM1', variableId: 'VAR1', profiles: [] }]
       });
@@ -1187,7 +1197,7 @@ describe('WorkspaceService', () => {
     it('should warn and continue when a companion JSON file is broken', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (unitMetadataService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
       (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
 
       const result = await service.uploadFiles(1, [
@@ -1204,13 +1214,13 @@ describe('WorkspaceService', () => {
         .map(m => m.objectKey);
       expect(parseWarnings).toEqual(expect.arrayContaining(['unit01.vomd.json', 'unit01.voit.json']));
       expect(unitService.create).toHaveBeenCalledTimes(1);
-      expect(unitService.copyItemsWithMetadata).not.toHaveBeenCalled();
+      expect(unitMetadataService.copyItemsWithMetadata).not.toHaveBeenCalled();
     });
 
     it('should import remaining blocks when only one companion file is broken', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (unitMetadataService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
       (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
 
       const voitContent = JSON.stringify([{ id: 'ITEM1', sourceVariableId: 'VAR1' }]);
@@ -1224,7 +1234,7 @@ describe('WorkspaceService', () => {
       ], user);
 
       expect(result.messages.map(m => m.objectKey)).toEqual(['unit01.vomd.json']);
-      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, expect.objectContaining({
+      expect(unitMetadataService.copyItemsWithMetadata).toHaveBeenCalledWith(10, expect.objectContaining({
         items: [expect.objectContaining({ id: 'ITEM1', variableId: 'VAR1' })]
       }));
     });
@@ -1232,7 +1242,7 @@ describe('WorkspaceService', () => {
     it('should clear legacy items when the items file is legitimately empty', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (unitMetadataService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
       (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
 
       const legacyBlob = JSON.stringify({ profiles: [], items: [{ id: 'OLD' }] });
@@ -1246,7 +1256,7 @@ describe('WorkspaceService', () => {
       ], user);
 
       expect(result.messages).toHaveLength(0);
-      expect(unitService.copyItemsWithMetadata).toHaveBeenCalledWith(10, expect.objectContaining({
+      expect(unitMetadataService.copyItemsWithMetadata).toHaveBeenCalledWith(10, expect.objectContaining({
         items: []
       }));
     });
@@ -1282,7 +1292,7 @@ describe('WorkspaceService', () => {
     it('does not warn when imported vocabulary entries carry an annotation (it is now persisted)', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
-      (unitService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
+      (unitMetadataService.copyItemsWithMetadata as jest.Mock).mockResolvedValue([]);
       (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
 
       const vomdContent = JSON.stringify({

@@ -25,6 +25,8 @@ import { jest as jestEsm } from '@jest/globals';
 import type AdmZip from 'adm-zip';
 import { ExportReportMessage, ExportReportScope } from './export-report.class';
 import type { UnitService } from '../services/unit.service';
+import type { UnitMetadataService } from '../services/unit-metadata.service';
+import type { UnitDefinitionService } from '../services/unit-definition.service';
 import type { UnitCommentService } from '../services/unit-comment.service';
 import type { VeronaModulesService } from '../services/verona-modules.service';
 import type { SettingService } from '../services/setting.service';
@@ -56,6 +58,8 @@ describe('UnitDownloadClass', () => {
   describe('get', () => {
     it('should create a zip with unit data and players', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -81,10 +85,10 @@ describe('UnitDownloadClass', () => {
         lastChangedMetadata: new Date()
       } as unknown as UnitPropertiesDto);
 
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: 'def'
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: 'scheme'
       } as unknown as UnitSchemeDto);
       veronaModuleServiceMock.findAll.mockResolvedValue([
@@ -107,6 +111,8 @@ describe('UnitDownloadClass', () => {
       const result = await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -123,6 +129,8 @@ describe('UnitDownloadClass', () => {
   describe('definition type', () => {
     const exportUnit = async (exportFormat: 'xml' | 'json', definitionType?: string) => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const settingServiceMock = createMock<SettingService>();
       const unitRichNoteServiceMock = createMock<UnitRichNoteService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
@@ -132,15 +140,17 @@ describe('UnitDownloadClass', () => {
         key: 'U1', name: 'Unit 1', metadata: {}, player: 'iqb-player-aspect@3.0'
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-1');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '{}', variables: [], ...(definitionType && { definitionType })
       } as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as UnitSchemeDto);
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as UnitSchemeDto);
       veronaModuleServiceMock.findAll.mockResolvedValue([]);
 
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         createMock<UnitCommentService>(),
         veronaModuleServiceMock,
         settingServiceMock,
@@ -208,6 +218,8 @@ describe('UnitDownloadClass', () => {
       // several exports in one test share the zip mock
       mockZip.addFile.mockClear();
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const settingServiceMock = createMock<SettingService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
@@ -215,14 +227,16 @@ describe('UnitDownloadClass', () => {
         key: 'U1', name: 'Unit 1', metadata, player: 'iqb-player-aspect@3.0', schemer: 'iqb-schemer@2.0'
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-1');
-      unitServiceMock.buildHideNumberingMap.mockResolvedValue({});
-      unitServiceMock.findOnesDefinition.mockResolvedValue({ definition: '{}', variables: [] } as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({ scheme, schemeType: '' } as UnitSchemeDto);
+      unitMetadataServiceMock.buildHideNumberingMap.mockResolvedValue({});
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({ definition: '{}', variables: [] } as UnitDefinitionDto);
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({ scheme, schemeType: '' } as UnitSchemeDto);
       veronaModuleServiceMock.findAll.mockResolvedValue([]);
 
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         createMock<UnitCommentService>(),
         veronaModuleServiceMock,
         settingServiceMock,
@@ -641,6 +655,8 @@ describe('UnitDownloadClass', () => {
   describe('get with exportFormat json', () => {
     it('should create key.json index file and not key.xml', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -663,12 +679,12 @@ describe('UnitDownloadClass', () => {
 
       unitServiceMock.ensureUuid.mockResolvedValue('test-uuid-1234');
 
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '<content/>',
         variables: []
       } as unknown as UnitDefinitionDto);
 
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: '',
         schemeType: ''
       } as unknown as UnitSchemeDto);
@@ -691,6 +707,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -706,6 +724,8 @@ describe('UnitDownloadClass', () => {
 
     it('should embed uuid and modifiedAt in the JSON index', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -722,10 +742,10 @@ describe('UnitDownloadClass', () => {
         lastChangedMetadata: modifiedAt
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('my-uuid-5678');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '', variables: []
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: '', schemeType: ''
       } as unknown as UnitSchemeDto);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
@@ -745,6 +765,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -763,6 +785,8 @@ describe('UnitDownloadClass', () => {
 
     it('should only include external blocks when data is present', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -778,10 +802,10 @@ describe('UnitDownloadClass', () => {
         lastChangedMetadata: new Date()
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-3');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '', variables: []
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: '', schemeType: ''
       } as unknown as UnitSchemeDto);
       unitCommentServiceMock.findOnesComments.mockResolvedValue([]);
@@ -802,6 +826,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -821,6 +847,8 @@ describe('UnitDownloadClass', () => {
 
     it('should use id (not fileName) in external data blocks', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -847,10 +875,10 @@ describe('UnitDownloadClass', () => {
         lastChangedMetadata: new Date()
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-4');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '<content/>', variables: [{ id: 'v1', type: 'string' }]
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: JSON.stringify({ variableCodings: [] }), schemeType: 'iqb-coding-scheme'
       } as unknown as UnitSchemeDto);
       unitCommentServiceMock.findOnesComments.mockResolvedValue([{ id: 1 }] as unknown as UnitCommentDto[]);
@@ -876,6 +904,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -896,6 +926,8 @@ describe('UnitDownloadClass', () => {
 
     it('should write voco.json in the unit-comments spec shape and drop non-spec fields', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -906,10 +938,10 @@ describe('UnitDownloadClass', () => {
         key: 'U5', name: 'Unit 5', description: '', player: 'player-1', lastChangedMetadata: new Date()
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-5');
-      unitServiceMock.findOnesDefinition.mockResolvedValue(
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue(
         { definition: '', variables: [] } as unknown as UnitDefinitionDto
       );
-      unitServiceMock.findOnesScheme.mockResolvedValue(undefined as unknown as UnitSchemeDto);
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue(undefined as unknown as UnitSchemeDto);
       unitCommentServiceMock.findOnesComments.mockResolvedValue([{
         id: 7,
         body: 'a comment',
@@ -942,6 +974,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -983,6 +1017,8 @@ describe('UnitDownloadClass', () => {
 
     it('should set modifiedAt on userInterface and external blocks when timestamps are available', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -1015,10 +1051,10 @@ describe('UnitDownloadClass', () => {
         lastChangedScheme: schemeChanged
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-6');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '<content/>', variables: [{ id: 'v1', type: 'string' }]
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: JSON.stringify({ variableCodings: [] }), schemeType: 'iqb-coding-scheme'
       } as unknown as UnitSchemeDto);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
@@ -1027,6 +1063,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -1054,6 +1092,8 @@ describe('UnitDownloadClass', () => {
 
     it('should always include player in userInterface even when empty', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -1069,16 +1109,18 @@ describe('UnitDownloadClass', () => {
         lastChangedMetadata: new Date()
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-5');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '', variables: []
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as unknown as UnitSchemeDto);
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as unknown as UnitSchemeDto);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
       veronaModuleServiceMock.findAll.mockResolvedValue([]);
 
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -1102,6 +1144,8 @@ describe('UnitDownloadClass', () => {
 
     it('should write vomd.json as unit-metadata@0.1 wrapper and voit.json as unit-items@0.2', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -1157,16 +1201,18 @@ describe('UnitDownloadClass', () => {
         lastChangedMetadata
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-6');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '', variables: []
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as unknown as UnitSchemeDto);
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as unknown as UnitSchemeDto);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
       veronaModuleServiceMock.findAll.mockResolvedValue([]);
 
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -1240,6 +1286,8 @@ describe('UnitDownloadClass', () => {
 
     it('should add an export report file when legacy metadata cannot be exported', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -1254,10 +1302,10 @@ describe('UnitDownloadClass', () => {
         player: 'player-1'
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-7');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '', variables: []
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: '', schemeType: ''
       } as unknown as UnitSchemeDto);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
@@ -1266,6 +1314,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
@@ -1297,6 +1347,8 @@ describe('UnitDownloadClass', () => {
 
     it('should not add a second metadata message when the transform already reported the drop', async () => {
       const unitServiceMock = createMock<UnitService>();
+      const unitMetadataServiceMock = createMock<UnitMetadataService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
       const unitCommentServiceMock = createMock<UnitCommentService>();
       const veronaModuleServiceMock = createMock<VeronaModulesService>();
       const settingServiceMock = createMock<SettingService>();
@@ -1318,10 +1370,10 @@ describe('UnitDownloadClass', () => {
         player: 'player-1'
       } as unknown as UnitPropertiesDto);
       unitServiceMock.ensureUuid.mockResolvedValue('uuid-8');
-      unitServiceMock.findOnesDefinition.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesDefinition.mockResolvedValue({
         definition: '', variables: []
       } as unknown as UnitDefinitionDto);
-      unitServiceMock.findOnesScheme.mockResolvedValue({
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({
         scheme: '', schemeType: ''
       } as unknown as UnitSchemeDto);
       unitRichNoteServiceMock.findNotes.mockResolvedValue({ tags: [], notes: [] });
@@ -1330,6 +1382,8 @@ describe('UnitDownloadClass', () => {
       await UnitDownloadClass.get(
         1,
         unitServiceMock,
+        unitMetadataServiceMock,
+        unitDefinitionServiceMock,
         unitCommentServiceMock,
         veronaModuleServiceMock,
         settingServiceMock,
