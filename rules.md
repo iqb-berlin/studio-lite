@@ -64,10 +64,22 @@
 - **Rationale**: `$any()` is the template equivalent of `any` in TypeScript and defeats the purpose of type-safe templates.
 - **Preferred Solution**: Use a custom `cast` pipe or a dedicated getter in the component to provide typed access to complex structures (like `FormGroup` within a `FormArray`).
 ### Unit Testing Policy
-- **New Classes**: Every new Angular or NestJS class (e.g., Pipes, Components, Services, Guards, Controllers) MUST have a corresponding `.spec.ts` file with comprehensive unit tests.
-- **Logic Changes**: Any modification to existing business logic or security flows MUST be accompanied by corresponding updates to the unit tests to verify the new behavior and prevent regressions.
-- **Public Members**: Adding or modifying any public method or property MUST trigger the creation or update of corresponding unit tests to ensure full coverage of the public interface.
+- **Rule**: A unit test checks behaviour that can be wrong: a decision (a branch, a calculation, a mapping), an error path, an authorisation, or a bug that has already happened. It is written from what a caller can observe — what is returned, emitted, rendered or sent — not from the lines of the implementation. What the code only copies from its own source, such as a fixed URL or a constant, is no behaviour of its own.
+- **Rule**: A change to business logic or a security flow comes with a test that fails without the change: a unit test, or an e2e test where only the running API shows the change (a query, a URL). A fixed bug gets a test that names its issue (`#1844`).
+- **Rule**: A new class or function with behaviour of its own (directive, pipe, service, guard, controller, a class in `classes/`, a function in `utils/`) gets a `.spec.ts` that tests that behaviour; where nothing could be wrong, there is no spec. A component always has its spec, as it has its `.scss` (see *Component Structure*); without behaviour of its own, `it('should create')` is its only test.
+- **Not this**:
+  - A test that only checks that the instance exists (`should create`, `should be created`, `should be defined`) beside other tests: each of them creates the instance anyway.
+  - A test without an assertion.
+  - A test that restates the implementation: the controller passes its arguments to the service and returns its answer; the backend method requests the URL written in it and answers `false` on an error, as every backend method does; the mocked repository returns X and so does the service. It breaks with every refactoring and cannot see whether the URL matches the API or the query the database — only the e2e tests in `apps/frontend-e2e` run against the real ones.
+  - Constants and framework wiring: the length of a list held in a field, that an injected service is defined, that `ngOnInit` defers its work with `setTimeout`.
+  - The same call with the same assertions in a second test.
+- **Still this**:
+  - The guards of a controller method (`Reflect.getMetadata('__guards__', …)`): they are its authorisation, and no other unit test sees them.
+  - A method that passes something on but assembles it first (query parameters, a body built from several values, an answer it reshapes) is tested for the assembly.
+  - That a caller reaches for code moved out of it (see *Responsibility*): one test per seam.
+- **Note**: Coverage shows what no test reaches; whether that needs a test, this rule decides. A test written only to reach a line is the test it excludes.
 - **Mocking**: Use `createMock<T>()` from `@golevelup/ts-jest` for NestJS tests to ensure type-safe mocking.
+- **Rationale**: A test that restates the code doubles the cost of every change to it and catches nothing. A spec demanded for every class and a test for every public member produced such tests by the hundreds (#1939).
 
 
 ### Type Safety: Avoid `any`
@@ -97,6 +109,7 @@
     - `[component-name].component.html` (Template)
     - `[component-name].component.scss` (Styles)
     - `[component-name].component.spec.ts` (Unit Tests)
+- **Rule**: The `.scss` and the `.spec.ts` exist even when there is nothing to style or to test: the stylesheet stays empty, and the spec holds `it('should create')` alone (see *Unit Testing Policy*).
 - **Rule**: These component directories MUST be located within the `components` subdirectory of their respective Angular module.
 - **Rationale**: This ensures a clean separation of concerns, consistent project structure, and improved maintainability.
 
