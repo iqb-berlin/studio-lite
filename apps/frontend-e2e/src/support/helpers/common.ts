@@ -4,6 +4,15 @@
  */
 
 /**
+ * requestTimeout for the first request after a workspace is opened in a fresh page: before it can go
+ * out, the workspace chunk has to be loaded and run, which takes longer than the default 5 s on a
+ * runner that stalls (#1890). Where the workspace was already open in the page, the default stays.
+ * @example
+ * cy.wait('@getUnits', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
+ */
+export const FIRST_WORKSPACE_REQUEST_TIMEOUT = 20000;
+
+/**
  * Waits for an intercepted request and asserts that it succeeded: any 2xx, and for a GET also
  * 304, which the browser answers from its cache when the same resource is loaded again (#1745).
  * @param alias - Alias of the intercept, with the leading '@'

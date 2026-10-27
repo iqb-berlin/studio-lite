@@ -1,5 +1,7 @@
 import { AccessLevel } from '../../../support/testData';
-import { addFirstUser, deleteFirstUser, selectUnit } from '../../../support/helpers';
+import {
+  addFirstUser, deleteFirstUser, FIRST_WORKSPACE_REQUEST_TIMEOUT, selectUnit
+} from '../../../support/helpers';
 
 // A unit renamed in its properties must not take the key of another unit of the workspace (#1842).
 // Creating and copying already refused that. A key that only breaks the format rules stays savable:
@@ -53,7 +55,7 @@ describe('The key of a unit renamed in its properties', () => {
   it('cannot be saved when another unit carries it, opened directly', () => {
     cy.intercept('GET', `/api/workspaces/${wsId}/units/${secondId}/properties`).as('loadProps');
     cy.visit(`/#/a/${wsId}/${secondId}/properties`);
-    cy.wait('@loadProps');
+    cy.wait('@loadProps', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
     cy.contains('FIRST1').should('exist');
     keyField().clear().type('first1').blur();
     cy.get('mat-error').should('be.visible');

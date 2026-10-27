@@ -1,5 +1,5 @@
 import { AccessLevel } from '../../../support/testData';
-import { addFirstUser, deleteFirstUser } from '../../../support/helpers';
+import { addFirstUser, deleteFirstUser, FIRST_WORKSPACE_REQUEST_TIMEOUT } from '../../../support/helpers';
 
 // Saving takes a while and blocks nothing. What is typed meanwhile was not sent, and must stay
 // unsaved rather than count as saved; and a second save must not start while one runs (#1845).
@@ -49,7 +49,7 @@ describe('Edits made while a unit is being saved', () => {
     }).as('saveProps');
     cy.intercept('GET', `/api/workspaces/${wsId}/units/${unitId}/properties`).as('loadProps');
     cy.visit(`/#/a/${wsId}/${unitId}/properties`);
-    cy.wait('@loadProps');
+    cy.wait('@loadProps', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
 
     description().type('vorher');
     saveButton().click();

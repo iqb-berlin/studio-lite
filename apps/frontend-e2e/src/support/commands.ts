@@ -1,5 +1,6 @@
 // -- This is a parent command --
 import Chainable = Cypress.Chainable;
+import { FIRST_WORKSPACE_REQUEST_TIMEOUT } from './helpers/common';
 
 Cypress.Commands.add('login', (username: string, password: string) => {
   cy.get('[data-cy="home-user-name"]')
@@ -86,7 +87,7 @@ Cypress.Commands.add('visitWs', (ws: string) => {
   cy.get(`studio-lite-user-workspaces-groups a.issue-item:contains("${ws}")`)
     .should('have.length', 1)
     .click();
-  cy.wait('@getUnits');
+  cy.wait('@getUnits', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
   cy.get('[data-cy="workspace-unit-selection-filter-units"]').should('be.visible');
   // The workspace's own data is there, too: the title names it in the same step that sets the user's
   // access level, which the workspace menu shows its entries by (#1864)

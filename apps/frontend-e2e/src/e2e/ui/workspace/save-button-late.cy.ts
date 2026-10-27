@@ -1,5 +1,5 @@
 import { AccessLevel } from '../../../support/testData';
-import { addFirstUser, deleteFirstUser } from '../../../support/helpers';
+import { addFirstUser, deleteFirstUser, FIRST_WORKSPACE_REQUEST_TIMEOUT } from '../../../support/helpers';
 
 // The save button appears only once the workspace data has told the user's access level. Opened
 // directly, a unit can have its properties loaded before that (#1290).
@@ -46,7 +46,7 @@ describe('The save button of a unit opened directly', () => {
       req.continue(res => { res.setDelay(3000); });
     }).as('loadProps');
     cy.visit(`/#/a/${wsId}/${unitId}/properties`);
-    cy.wait('@loadWorkspace');
+    cy.wait('@loadWorkspace', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
     cy.get('[data-cy="workspace-unit-save-button"]').should('exist');
     cy.wait('@loadProps');
     cy.get('textarea[formcontrolname="description"]').type('Kontrolle');
@@ -64,7 +64,7 @@ describe('The save button of a unit opened directly', () => {
     cy.intercept('GET', `/api/workspaces/${wsId}/units/${unitId}/properties`).as('loadProps');
     // opened directly, as by a reload: a second visit to the open app would only change the hash
     cy.reload();
-    cy.wait('@loadProps');
+    cy.wait('@loadProps', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
     cy.get('[data-cy="workspace-unit-save-button"]').should('not.exist');
     cy.wait('@loadWorkspace');
     cy.get('[data-cy="workspace-unit-save-button"]').should('exist');
