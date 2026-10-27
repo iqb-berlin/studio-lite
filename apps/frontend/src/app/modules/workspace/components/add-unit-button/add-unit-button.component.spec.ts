@@ -147,6 +147,26 @@ describe('AddUnitButtonComponent', () => {
     expect(appService.dataLoading).toBe(false);
   }));
 
+  it('shows the saved new group for one second', fakeAsync(() => {
+    const createUnit: CreateUnitDto = {
+      key: 'U3',
+      name: 'Unit 3',
+      groupName: 'G2'
+    };
+    const addUnitDialogSpy = jest.spyOn(
+      component as unknown as { addUnitDialog: (data: unknown) => Promise<CreateUnitDto | boolean> },
+      'addUnitDialog'
+    );
+    addUnitDialogSpy.mockResolvedValue(createUnit);
+    jest.spyOn(component, 'updateUnitList').mockImplementation(() => {});
+
+    component.addUnit();
+    flushMicrotasks();
+
+    expect(appBackendService.setWorkspaceSettings).toHaveBeenCalledWith(5, workspaceService.workspaceSettings);
+    expect(snackBar.open).toHaveBeenCalledWith('workspace.group-saved', '', { duration: 1000 });
+  }));
+
   it('adds a unit from an existing source', fakeAsync(() => {
     const existing: UnitInListDto = {
       id: 11,

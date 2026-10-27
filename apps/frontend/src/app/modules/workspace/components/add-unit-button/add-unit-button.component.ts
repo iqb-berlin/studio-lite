@@ -6,7 +6,6 @@ import {
   lastValueFrom, map, Subject, Subscription
 } from 'rxjs';
 import { UntypedFormGroup } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
@@ -61,7 +60,6 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
     public route: ActivatedRoute,
     private appService: AppService,
     public backendService: WorkspaceBackendService,
-    private snackBar: MatSnackBar,
     private appBackendService: AppBackendService,
     private selectUnitDialog: MatDialog,
     private newUnitDialog: MatDialog,
@@ -158,13 +156,7 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
           this.workspaceService.workspaceSettings
         )
         .subscribe(isOK => {
-          this.snackBar.open(
-            isOK ?
-              this.translateService.instant('workspace.group-saved') :
-              this.translateService.instant('workspace.group-not-saved'),
-            isOK ? '' : this.translateService.instant('workspace.error'),
-            { duration: 3000 }
-          );
+          this.changeResult.show(isOK, 'workspace.group-saved', 'workspace.group-not-saved', 'workspace.error');
         });
     }
   }
