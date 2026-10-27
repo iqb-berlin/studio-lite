@@ -2,7 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { SessionActivityStatus, UserSessionInfoDto } from '@studio-lite-lib/api-dto';
 
 /**
- * How many of a user's sessions are in a given state. Counting in a pure pipe instead of a template
+ * How many of a user's sessions are in one of the given states. Counting in a pure pipe instead of a template
  * expression: session lists are re-read on every change detection cycle while the admin list polls,
  * and array methods in a template would run each time.
  */
@@ -12,7 +12,7 @@ import { SessionActivityStatus, UserSessionInfoDto } from '@studio-lite-lib/api-
 })
 export class CountSessionsWithStatusPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
-  transform(sessions: UserSessionInfoDto[] | undefined, status: SessionActivityStatus): number {
-    return (sessions || []).filter(session => session.activityStatus === status).length;
+  transform(sessions: UserSessionInfoDto[] | undefined, ...statuses: SessionActivityStatus[]): number {
+    return (sessions || []).filter(session => statuses.includes(session.activityStatus)).length;
   }
 }

@@ -36,12 +36,14 @@
           {{'user.sessions' | translate}}
         </mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if ((element.sessions | countSessionsWithStatus: 'active') === 0) {
+          @if ((element.sessions | countSessionsWithStatus: 'active' : 'passive') === 0) {
             <span class="inactive-dot" [matTooltip]="'user.inactive' | translate"></span>
           } @else {
             @for (session of element.sessions; track session.sessionId) {
               @if (session.activityStatus === 'active') {
                 <span class="active-dot" [matTooltip]="('user.active' | translate) + (session.lastActivity ? ' (' + (session.lastActivity | date: 'dd.MM., HH:mm') + ')' : '')"></span>
+              } @else if (session.activityStatus === 'passive') {
+                <span class="passive-dot" [matTooltip]="('user.passive' | translate) + (session.lastActivity ? ' (' + (session.lastActivity | date: 'dd.MM., HH:mm') + ')' : '')"></span>
               }
             }
           }
