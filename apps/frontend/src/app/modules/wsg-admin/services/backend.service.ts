@@ -125,7 +125,7 @@ export class BackendService {
       .pipe(succeeded());
   }
 
-  moveWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean | object> {
+  moveWorkspaces(workspaceGroupId: number, workspaces: number[]): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}group-admin/workspaces/group-id`, { targetId: workspaceGroupId, ids: workspaces })
       .pipe(succeeded());

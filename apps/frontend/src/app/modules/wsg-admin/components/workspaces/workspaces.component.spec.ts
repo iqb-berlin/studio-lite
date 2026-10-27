@@ -4,6 +4,7 @@ import {
   Component, Input, Pipe, PipeTransform
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { WorkspaceInListDto, WorkspaceUserInListDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of, Subject } from 'rxjs';
@@ -59,6 +60,8 @@ describe('WorkspacesComponent', () => {
     getWorkspaces: jest.Mock;
     getUsersByWorkspace: jest.Mock;
     setUsersByWorkspace: jest.Mock;
+    deleteWorkspaces: jest.Mock;
+    moveWorkspaces: jest.Mock;
   };
   let mockAppBackendService: {
     setWorkspaceSettings?: jest.Mock;
@@ -82,7 +85,9 @@ describe('WorkspacesComponent', () => {
       getUsers: jest.fn().mockReturnValue(of([])),
       getWorkspaces: jest.fn().mockReturnValue(of([])),
       getUsersByWorkspace: jest.fn().mockReturnValue(of([])),
-      setUsersByWorkspace: jest.fn().mockReturnValue(of(true))
+      setUsersByWorkspace: jest.fn().mockReturnValue(of(true)),
+      deleteWorkspaces: jest.fn().mockReturnValue(of(false)),
+      moveWorkspaces: jest.fn().mockReturnValue(of(false))
     };
     mockAppBackendService = {};
     mockWorkspaceBackendService = {};
@@ -296,6 +301,25 @@ describe('WorkspacesComponent', () => {
 
     expect(mockBackendService.setUsersByWorkspace).toHaveBeenCalled();
     expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.changed', '', { duration: 1000 });
+  });
+
+  it('should show a failed deletion for three seconds', () => {
+    const dialog = (component as unknown as { deleteConfirmDialog: MatDialog }).deleteConfirmDialog;
+    jest.spyOn(dialog, 'open').mockReturnValue({ afterClosed: () => of(true) } as MatDialogRef<unknown>);
+
+    component.deleteWorkspace({ id: 3, name: 'ws3' } as WorkspaceInListDto);
+
+    expect(mockBackendService.deleteWorkspaces).toHaveBeenCalledWith([3]);
+    expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-admin.workspaces-not-deleted', 'error', { duration: 3000 });
+    expect(mockAppService.dataLoading).toBe(false);
+  });
+
+  it('should show a failed move for three seconds', () => {
+    component.moveWorkspace({ selection: [{ id: 3 } as WorkspaceInListDto], workspaceGroupId: 2 });
+
+    expect(mockBackendService.moveWorkspaces).toHaveBeenCalledWith(2, [3]);
+    expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-admin.workspaces-not-moved', 'error', { duration: 3000 });
+    expect(mockAppService.dataLoading).toBe(false);
   });
 
   describe('Route Visibility Configurations', () => {

@@ -276,19 +276,10 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this.ngUnsubscribe))
             .subscribe(
               respOk => {
+                this.changeResult.show(respOk, 'wsg-admin.workspaces-deleted', 'wsg-admin.workspaces-not-deleted');
                 if (respOk) {
-                  this.snackBar.open(
-                    this.translateService.instant('wsg-admin.workspaces-deleted'),
-                    '',
-                    { duration: 1000 }
-                  );
                   this.updateWorkspaceList();
                 } else {
-                  this.snackBar.open(
-                    this.translateService.instant('wsg-admin.workspaces-not-deleted'),
-                    this.translateService.instant('error'),
-                    { duration: 1000 }
-                  );
                   this.appService.dataLoading = false;
                 }
               });
@@ -303,19 +294,10 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
         respOk => {
+          this.changeResult.show(respOk, 'wsg-admin.workspaces-moved', 'wsg-admin.workspaces-not-moved');
           if (respOk) {
-            this.snackBar.open(
-              this.translateService.instant('wsg-admin.workspaces-moved'),
-              '',
-              { duration: 1000 }
-            );
             this.updateWorkspaceList();
           } else {
-            this.snackBar.open(
-              this.translateService.instant('wsg-admin.workspaces-not-moved'),
-              this.translateService.instant('error'),
-              { duration: 1000 }
-            );
             this.appService.dataLoading = false;
           }
         }

@@ -167,17 +167,9 @@ export class WorkspaceGroupsComponent implements OnInit {
     groups.forEach(r => workspaceGroupsToDelete.push(r.id));
     this.backendService.deleteWorkspaceGroups(workspaceGroupsToDelete).subscribe(
       respOk => {
+        this.changeResult.show(respOk, 'admin.groups-deleted', 'admin.groups-not-deleted');
         if (respOk) {
-          this.snackBar.open(
-            this.translateService.instant('admin.groups-deleted'),
-            '',
-            { duration: 1000 });
           this.updateWorkspaceList();
-        } else {
-          this.snackBar.open(
-            this.translateService.instant('admin.groups-not-deleted'),
-            this.translateService.instant('error'),
-            { duration: 1000 });
         }
         this.appService.dataLoading = false;
       }

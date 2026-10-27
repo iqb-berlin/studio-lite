@@ -156,6 +156,12 @@ describe('WorkspaceGroupsComponent', () => {
     expect(mockSnackBar.open).toHaveBeenCalledWith('admin.groups-deleted', '', expect.anything());
   });
 
+  it('should show a failed deletion of groups for three seconds', () => {
+    (mockBackendService.deleteWorkspaceGroups as jest.Mock).mockReturnValueOnce(of(false));
+    component.deleteGroups([{ id: 1 }] as WorkspaceGroupInListDto[]);
+    expect(mockSnackBar.open).toHaveBeenCalledWith('admin.groups-not-deleted', 'error', { duration: 3000 });
+  });
+
   it('should save users', () => {
     const mockUsers = [{ id: 1, name: 'user1' }] as UserInListDto[];
     (mockBackendService.getWorkspaceGroupAdmins as jest.Mock).mockReturnValue(of(mockUsers));
