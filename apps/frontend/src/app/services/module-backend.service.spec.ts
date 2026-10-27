@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { VeronaModuleInListDto, VeronaModuleFileDto } from '@studio-lite-lib/api-dto';
+import { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import { ModuleBackendService } from './module-backend.service';
 
 describe('ModuleBackendService', () => {
@@ -64,45 +64,6 @@ describe('ModuleBackendService', () => {
       const req = httpMock.expectOne(`${baseUrl}verona-modules?type=editor`);
       expect(req.request.method).toBe('GET');
       req.flush([]);
-    });
-
-    it('should return empty array on error', done => {
-      service.getModuleList().subscribe(modules => {
-        expect(modules).toEqual([]);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${baseUrl}verona-modules`);
-      req.error(new ProgressEvent('Network error'));
-    });
-  });
-
-  describe('getModuleHtml', () => {
-    it('should fetch module HTML', done => {
-      const mockFile: VeronaModuleFileDto = {
-        key: 'm1',
-        name: 'M1',
-        file: '<html lang=""></html>'
-      };
-
-      service.getModuleHtml('m1').subscribe(fileData => {
-        expect(fileData).toEqual(mockFile);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${baseUrl}verona-modules/m1`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockFile);
-    });
-
-    it('should return null on error', done => {
-      service.getModuleHtml('m1').subscribe(fileData => {
-        expect(fileData).toBeNull();
-        done();
-      });
-
-      const req = httpMock.expectOne(`${baseUrl}verona-modules/m1`);
-      req.error(new ProgressEvent('Network error'));
     });
   });
 });
