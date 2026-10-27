@@ -137,14 +137,18 @@ describe('WidgetOverlayComponent', () => {
       .toBe('new-state');
   });
 
+  const sendFromWidget = (data: object): void => {
+    const fakeSource = fixture.nativeElement.querySelector('iframe').contentWindow;
+    expect(fakeSource).toBeTruthy();
+    postMessage$.next({
+      data,
+      source: fakeSource
+    } as never as MessageEvent);
+  };
+
   describe('a state change that clears or keeps the state (#1685)', () => {
     const notifyState = (data: object): void => {
-      const fakeSource = fixture.nativeElement.querySelector('iframe').contentWindow;
-      expect(fakeSource).toBeTruthy();
-      postMessage$.next({
-        data: { type: 'vowStateChangedNotification', ...data },
-        source: fakeSource
-      } as never as MessageEvent);
+      sendFromWidget({ type: 'vowStateChangedNotification', ...data });
     };
 
     // The periodic table sends '' once every symbol is deselected, and the player has to get
@@ -221,18 +225,59 @@ describe('WidgetOverlayComponent', () => {
     expect(completeSpy).toHaveBeenCalled();
   });
 
-  it('calls continue() on vowReturnRequested', () => {
-    const continueSpy = jest.spyOn(component, 'continue');
-    const iframeEl = fixture.nativeElement.querySelector('iframe');
-    const fakeSource = iframeEl?.contentWindow;
-    if (!fakeSource) return;
+  describe('a return request with state and saveState (#1928)', () => {
+    const requestReturn = (data: object): void => {
+      sendFromWidget({ type: 'vowReturnRequested', ...data });
+    };
 
-    postMessage$.next({
-      data: { type: 'vowReturnRequested' },
-      source: fakeSource
-    } as never as MessageEvent);
+    // From verona-widgets-chemistry#9 on, the molecule editor sends its final state, image included,
+    // only with the return request.
+    it('returns the final state the request carries', () => {
+      requestReturn({ state: 'final-state', saveState: true });
 
-    expect(continueSpy).toHaveBeenCalled();
+      expect(playerPostMessageTarget.postMessage).toHaveBeenCalledWith(
+        {
+          type: 'vopWidgetReturn',
+          sessionId: 'player-session-1',
+          callId: 'call-42',
+          state: 'final-state'
+        },
+        '*'
+      );
+      expect(overlayRefStub.dispose).toHaveBeenCalled();
+    });
+
+    it('returns an empty final state', () => {
+      requestReturn({ state: '', saveState: true });
+
+      expect(playerPostMessageTarget.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'vopWidgetReturn', state: '' }),
+        '*'
+      );
+    });
+
+    // verona-widgets-chemistry#9 sends the key without a value as well, the periodic table always.
+    // A missing saveState means true in the widget API.
+    it.each([
+      ['undefined', { state: undefined, saveState: true }],
+      ['null', { state: null, saveState: true }],
+      ['neither state nor saveState', {}]
+    ])('keeps the last state when the request carries %s', (_, data) => {
+      sendFromWidget({ type: 'vowStateChangedNotification', state: 'last-state' });
+      requestReturn(data);
+
+      expect(playerPostMessageTarget.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'vopWidgetReturn', state: 'last-state' }),
+        '*'
+      );
+    });
+
+    it('closes without a return when saveState is false', () => {
+      requestReturn({ state: 'discarded-state', saveState: false });
+
+      expect(playerPostMessageTarget.postMessage).not.toHaveBeenCalled();
+      expect(overlayRefStub.dispose).toHaveBeenCalled();
+    });
   });
 
   it('should have a close icon button that calls close()', () => {
