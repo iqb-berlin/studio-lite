@@ -128,10 +128,6 @@ describe('GroupManageComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should load groups on init', fakeAsync(() => {
     component.ngOnInit();
     tick(); // for setTimeout

@@ -66,10 +66,6 @@ describe('ReviewService', () => {
     unitService = module.get(UnitService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findAll', () => {
     it('should return reviews for workspace', async () => {
       const reviews = [new Review()];

@@ -9,10 +9,6 @@ describe('HiddenCommentsCountPipe', () => {
     pipe = new HiddenCommentsCountPipe();
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return 0 for empty comments', () => {
     expect(pipe.transform([])).toBe(0);
   });

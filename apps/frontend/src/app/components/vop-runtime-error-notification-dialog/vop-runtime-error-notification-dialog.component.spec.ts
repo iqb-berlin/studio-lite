@@ -44,10 +44,6 @@ describe('VopRuntimeErrorNotificationDialogComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize sessionId and the first runtime error from dialog data', () => {
     expect(component.sessionId).toBe(mockDialogData.sessionId);
     expect(component.groups()).toEqual([{

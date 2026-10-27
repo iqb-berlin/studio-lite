@@ -29,10 +29,6 @@ describe('MetadataController', () => {
     controller = module.get<MetadataController>(MetadataController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('getMetadataProfileByUrl', () => {
     it('should return metadata profile for a given URL', async () => {
       const mockProfile = { url: 'http://test' };

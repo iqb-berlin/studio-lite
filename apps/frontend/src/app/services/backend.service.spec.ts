@@ -47,10 +47,6 @@ describe('BackendService', () => {
     localStorage.clear();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('login', () => {
     it('should login successfully with valid credentials', done => {
       const mockLoginResponse = { accessToken: 'test-token-123', refreshToken: 'refresh-token-123' };

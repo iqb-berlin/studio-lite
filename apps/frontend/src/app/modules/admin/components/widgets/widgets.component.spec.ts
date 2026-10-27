@@ -136,10 +136,6 @@ describe('WidgetsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should load widget list on init', async () => {
     jest.useFakeTimers();
     component.ngOnInit();

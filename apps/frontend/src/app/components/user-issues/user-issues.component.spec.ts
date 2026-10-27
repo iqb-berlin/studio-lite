@@ -20,10 +20,6 @@ describe('UserIssuesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should accept issues input', () => {
     const testIssues: UserIssue[] = [
       { link: '/issue/1', name: 'Issue 1' },

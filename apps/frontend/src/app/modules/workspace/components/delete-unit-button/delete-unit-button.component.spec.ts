@@ -72,10 +72,6 @@ describe('DeleteUnitButtonComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('deletes selected units when confirmed', fakeAsync(() => {
     const deleteUnitDialogSpy = jest.spyOn(
       component as unknown as { deleteUnitDialog: () => Promise<number[] | boolean> },

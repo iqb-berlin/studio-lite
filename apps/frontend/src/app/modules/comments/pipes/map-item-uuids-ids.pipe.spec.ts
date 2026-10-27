@@ -15,10 +15,6 @@ describe('MapItemUuidsIdsPipe', () => {
     pipe = new MapItemUuidsIdsPipe(translateService);
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should map uuids to ids using unitItems', () => {
     const unitItems: UnitItemDto[] = [
       { uuid: 'uuid1', id: 'ID 1' } as UnitItemDto,

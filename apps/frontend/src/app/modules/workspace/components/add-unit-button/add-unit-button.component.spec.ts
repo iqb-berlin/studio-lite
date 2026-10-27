@@ -93,10 +93,6 @@ describe('AddUnitButtonComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('adds a new unit and refreshes the list', fakeAsync(() => {
     const createUnit: CreateUnitDto = {
       key: 'U1',

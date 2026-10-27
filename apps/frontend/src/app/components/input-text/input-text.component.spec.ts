@@ -47,10 +47,6 @@ describe('InputTextComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize the form with the default value', () => {
     expect(component.textInputForm.get('text')?.value).toBe(mockDialogData.default);
   });

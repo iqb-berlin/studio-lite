@@ -26,10 +26,6 @@ describe('ModuleBackendService', () => {
     httpMock.verify();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('getModuleList', () => {
     it('should fetch module list without type', done => {
       const mockModules: VeronaModuleInListDto[] = [

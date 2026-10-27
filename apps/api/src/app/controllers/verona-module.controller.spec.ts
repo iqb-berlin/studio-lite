@@ -29,10 +29,6 @@ describe('VeronaModuleController', () => {
     veronaModulesService = module.get<VeronaModulesService>(VeronaModulesService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('findAllByType', () => {
     it('should return all modules when no type is specified', async () => {
       const mockModules: VeronaModuleInListDto[] = [

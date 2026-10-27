@@ -40,10 +40,6 @@ describe('ItemCommentService', () => {
     unitItemRepository = module.get(getRepositoryToken(UnitItem));
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findItemComments', () => {
     it('should return comments for item', async () => {
       const result = [];

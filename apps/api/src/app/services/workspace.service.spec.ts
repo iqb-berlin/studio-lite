@@ -80,10 +80,6 @@ describe('WorkspaceService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('getAllWorkspaces', () => {
     it('should return all', async () => {
       (workspaceRepository.find as jest.Mock).mockResolvedValue([]);

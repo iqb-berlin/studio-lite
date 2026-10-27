@@ -22,10 +22,6 @@ describe('UnitGroupComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('updates expanded when expandAll emits', () => {
     component.expanded = false;
     component.expandAll.next(true);

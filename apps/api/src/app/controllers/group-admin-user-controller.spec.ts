@@ -34,10 +34,6 @@ describe('GroupAdminUserController', () => {
     controller = module.get<GroupAdminUserController>(GroupAdminUserController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('findAll', () => {
     it('should return all users if full is false', async () => {
       const mockUsers = [{ id: 1, name: 'U1' }] as WorkspaceUserInListDto[];

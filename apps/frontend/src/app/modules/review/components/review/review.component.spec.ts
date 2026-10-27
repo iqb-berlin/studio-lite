@@ -65,10 +65,6 @@ describe('ReviewComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Component Initialization', () => {
     it('should have appService accessible', () => {
       expect(component.appService).toBeDefined();

@@ -92,10 +92,6 @@ describe('UnitsComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should update units', () => {
     const units = [{ id: 1, key: 'u1', name: 'unit1' }] as UnitInViewDto[];
     mockBackendService.getAllUnitsForGroup.mockReturnValue(of(units));

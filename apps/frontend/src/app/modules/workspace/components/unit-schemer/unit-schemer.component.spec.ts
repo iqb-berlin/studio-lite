@@ -35,10 +35,6 @@ describe('UnitSchemerComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   // The schemer reads only the VariableInfo 1.x spelling; the list may be stored or reported by
   // the editor in 2.x (#1708).
   describe('postStore', () => {

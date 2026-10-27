@@ -33,10 +33,6 @@ describe('MetadataBackendService', () => {
     httpMock.verify();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('getMetadataVocabulariesForProfile', () => {
     it('should return vocabularies on success', () => {
       const mockVocabs: MetadataVocabularyDto[] = [{ id: 'v1' } as MetadataVocabularyDto];

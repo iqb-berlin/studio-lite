@@ -37,10 +37,6 @@ describe('DeleteDialogComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize with title and content from dialog data', () => {
     expect(component.title).toBe(mockDialogData.title);
     expect(component.content).toBe(mockDialogData.content);

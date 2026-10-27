@@ -27,10 +27,6 @@ describe('WsgAdminService', () => {
     httpMock.verify();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   it('should initialize behavior subjects with default values', () => {
     expect(service.selectedWorkspaceGroupId.getValue()).toBe(0);
     expect(service.selectedWorkspaceGroupName.getValue()).toBe('');

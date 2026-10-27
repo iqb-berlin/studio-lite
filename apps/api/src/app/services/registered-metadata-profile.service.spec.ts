@@ -54,10 +54,6 @@ describe('RegisteredMetadataProfileService', () => {
     httpService = module.get(HttpService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('getRegisteredMetadataProfiles', () => {
     it('should throw if csv is invalid', async () => {
       settingsService.findUnitProfilesRegistry.mockResolvedValue({ csvUrl: 'csv-url' } as ProfilesRegistryDto);

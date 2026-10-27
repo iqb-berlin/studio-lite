@@ -30,10 +30,6 @@ describe('PrintOptionsComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Initialization', () => {
     it('should initialize with default print options', () => {
       expect(component.printOptions).toBeDefined();

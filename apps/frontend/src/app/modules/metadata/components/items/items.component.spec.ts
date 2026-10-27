@@ -67,10 +67,6 @@ describe('ItemsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize items from metadata on ngOnInit', () => {
     component.metadata = { items: [{ id: 'item1' } as unknown as ItemsMetadataValues] };
     component.ngOnInit();

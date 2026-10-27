@@ -7,10 +7,6 @@ describe('RolePipe', () => {
     pipe = new RolePipe();
   });
 
-  it('should create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return "guest" for access level 0', () => {
     expect(pipe.transform(0)).toBe('guest');
   });

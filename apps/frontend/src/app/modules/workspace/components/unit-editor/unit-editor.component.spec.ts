@@ -104,10 +104,6 @@ describe('UnitEditorComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should handle data transfer messages for the current session', () => {
     const frame = document.createElement('iframe');
     document.body.appendChild(frame);

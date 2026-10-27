@@ -58,10 +58,6 @@ describe('ResourcePackageService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findResourcePackages', () => {
     it('should return packages', async () => {
       const result = [new ResourcePackage()];

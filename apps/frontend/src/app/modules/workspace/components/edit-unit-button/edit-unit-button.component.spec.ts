@@ -99,10 +99,6 @@ describe('EditUnitButtonComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should set userListTitle on init', () => {
     expect(component.userListTitle).toBe('workspace.user-list');
   });

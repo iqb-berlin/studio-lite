@@ -28,10 +28,6 @@ describe('ChangePasswordComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize form with three password fields', () => {
     expect(component.changePasswordForm).toBeTruthy();
     expect(component.changePasswordForm.get('pw_old')).toBeTruthy();

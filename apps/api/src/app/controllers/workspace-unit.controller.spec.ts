@@ -107,10 +107,6 @@ describe('WorkspaceUnitController', () => {
     unitRichNoteService = module.get<UnitRichNoteService>(UnitRichNoteService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   // The access guards ask about the workspace in the path alone; the unit has to be held to it
   // before anything else is asked about the unit (#1775).
   it.each([

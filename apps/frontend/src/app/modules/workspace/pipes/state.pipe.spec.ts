@@ -8,10 +8,6 @@ describe('StatePipe', () => {
     pipe = new StatePipe();
   });
 
-  it('should create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return label for matching state id', () => {
     const states: State[] = [
       { id: 1, label: 'Draft', color: '#ff0000' },

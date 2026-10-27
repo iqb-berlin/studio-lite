@@ -33,10 +33,6 @@ describe('VoterOverviewComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should filter upVoters correctly', () => {
     expect(component.upVoters.length).toBe(2);
     expect(component.upVoters).toContain('User Up 1');

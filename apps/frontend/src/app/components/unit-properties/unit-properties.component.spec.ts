@@ -37,10 +37,6 @@ describe('UnitPropertiesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should call getWorkspaceGroupStates and update stateLabel in ngOnChanges', () => {
     component.workspaceGroupId = 100;
     component.state = '2';

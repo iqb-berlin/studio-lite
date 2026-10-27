@@ -52,10 +52,6 @@ describe('AppInfoComponent', () => {
     sanitizer = TestBed.inject(DomSanitizer);
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should accept appTitle input', () => {
     component.appTitle = 'Test Application';
     fixture.detectChanges();

@@ -37,10 +37,6 @@ describe('BookletConfigEditComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('defaults config values when undefined', () => {
     expect(component.bookletConfig).toEqual({
       pagingMode: '',

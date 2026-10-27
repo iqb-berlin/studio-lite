@@ -29,10 +29,6 @@ describe('BookletConfigShowComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Component Initialization', () => {
     it('should initialize with default bookletConfig', () => {
       expect(component.bookletConfig).toEqual(bookletConfigDefault);

@@ -37,10 +37,6 @@ describe('UnitItemsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should load all unit items on init', fakeAsync(() => {
     const mockItems = [{ uuid: 'u1', id: 'i1' }] as UnitItemInViewDto[];
     const spy = jest.spyOn(backendService, 'getAllUnitItems').mockReturnValue(of(mockItems));

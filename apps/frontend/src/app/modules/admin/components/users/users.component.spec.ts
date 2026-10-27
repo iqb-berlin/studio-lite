@@ -150,10 +150,6 @@ describe('UsersComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should load initial data on init', () => {
     jest.useFakeTimers();
     component.ngOnInit();

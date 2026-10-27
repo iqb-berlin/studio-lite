@@ -90,11 +90,6 @@ describe('ExportUnitFileConfigComponent', () => {
     backendService = TestBed.inject(WorkspaceBackendService) as unknown as MockWorkspaceBackendService;
   });
 
-  it('should create', () => {
-    create([]);
-    expect(component).toBeTruthy();
-  });
-
   it('should default exportFormat to json', () => {
     fixture = TestBed.createComponent(ExportUnitFileConfigComponent);
     expect(fixture.componentInstance.exportFormat).toBe('json');

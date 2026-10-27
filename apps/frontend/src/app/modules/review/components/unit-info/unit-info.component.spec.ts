@@ -67,10 +67,6 @@ describe('UnitInfoComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Input Properties', () => {
     describe('unitId setter', () => {
       it('should set id property when unitId input is provided', () => {

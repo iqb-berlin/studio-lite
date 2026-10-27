@@ -139,10 +139,6 @@ describe('CommentComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngOnInit', () => {
     it('should set ownComment to true if userId matches comment.userId', () => {
       component.userId = 1;

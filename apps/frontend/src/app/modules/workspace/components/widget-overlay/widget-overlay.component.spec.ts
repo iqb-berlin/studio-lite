@@ -93,10 +93,6 @@ describe('WidgetOverlayComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('initialises widgetState from callData on AfterViewInit', () => {
     const testAccess = component as never as WidgetOverlayTestAccess;
     expect(testAccess.widgetState)

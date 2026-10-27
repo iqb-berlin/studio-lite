@@ -33,10 +33,6 @@ describe('UnitMetadataToDeleteService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('upsertOneForUnit', () => {
     it('should upsert metadata to delete entry', async () => {
       const unitId = 1;

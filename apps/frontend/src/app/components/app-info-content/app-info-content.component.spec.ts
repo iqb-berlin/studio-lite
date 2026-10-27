@@ -31,10 +31,6 @@ describe('AppInfoContentComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should have injected APP_VERSION', () => {
     expect(component.appVersion).toBe('0.0.0');
   });

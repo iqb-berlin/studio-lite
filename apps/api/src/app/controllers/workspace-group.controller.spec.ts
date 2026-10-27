@@ -40,10 +40,6 @@ describe('WorkspaceGroupController', () => {
     unitService = module.get<UnitService>(UnitService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('findOne', () => {
     // The route asked for nothing but a valid token until #1712: any user could read any group
     // and download its report.

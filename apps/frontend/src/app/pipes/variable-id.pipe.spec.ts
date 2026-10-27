@@ -4,10 +4,6 @@ import { AliasId } from '../modules/metadata/models/alias-id.interface';
 describe('VariableIdPipe', () => {
   const pipe = new VariableIdPipe();
 
-  it('should be defined', () => {
-    expect(pipe).toBeDefined();
-  });
-
   it('should return alias if ID is found in aliasIds', () => {
     const aliasIds: AliasId[] = [
       { id: 'v1', alias: 'Alias 1' },

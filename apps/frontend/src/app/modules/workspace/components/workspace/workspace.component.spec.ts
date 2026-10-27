@@ -81,10 +81,6 @@ describe('WorkspaceComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('navTabs & hiddenRoutes', () => {
     it('should have all navTabs defined', () => {
       expect(component.navTabs.length).toBe(6);

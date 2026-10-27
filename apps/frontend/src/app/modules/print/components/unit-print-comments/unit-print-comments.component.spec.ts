@@ -56,10 +56,6 @@ describe('UnitPrintCommentsComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngOnChanges', () => {
     it('should fetch comments when unitId changes', () => {
       const mockComments = [createMockComment(1), createMockComment(2)];

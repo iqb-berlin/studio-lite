@@ -37,10 +37,6 @@ describe('VeronaModulesService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('getVeronaModule', () => {
     it('should return module file info if download false', async () => {
       const key = 'module-1';

@@ -107,10 +107,6 @@ describe('UnitPrintPlayerComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngAfterViewInit', () => {
     beforeEach(() => {
       // Mock the ViewChild hostingIframe

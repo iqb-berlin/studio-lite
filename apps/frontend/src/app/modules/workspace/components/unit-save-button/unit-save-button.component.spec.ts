@@ -50,10 +50,6 @@ describe('UnitSaveButtonComponent', () => {
     unitStores = TestBed.inject(UnitStoresService);
   });
 
-  it('should create', () => {
-    expect(createButton().componentInstance).toBeTruthy();
-  });
-
   it('is disabled while nothing is unsaved', () => {
     unitStores.loadMetadataStore(1, 1).subscribe();
 

@@ -29,10 +29,6 @@ describe('WorkspaceReviewController', () => {
     reviewService = module.get<ReviewService>(ReviewService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   // Creating, changing and deleting a review asked WorkspaceGuard alone, which a commenter passes
   // (#1715); reading the reviews stays open to every member.
   it.each(['create', 'patchReview', 'remove'] as const)('should guard %s with the manage level', method => {

@@ -50,10 +50,6 @@ describe('SettingService', () => {
     metadataVocabularyService.getStoredMetadataVocabularyById.mockResolvedValue(null);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findConfig', () => {
     it('should return config if setting exists', async () => {
       const config: ConfigDto = { appTitle: 'Test', hasUsers: true } as ConfigDto;

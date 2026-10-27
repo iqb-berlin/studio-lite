@@ -21,12 +21,6 @@ describe('PageNavigationComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    component.pageList = [];
-    fixture.detectChanges();
-    expect(component).toBeTruthy();
-  });
-
   describe('Template rendering', () => {
     it('should not render navigation when pageList is empty', () => {
       component.pageList = [];

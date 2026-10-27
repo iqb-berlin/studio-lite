@@ -33,10 +33,6 @@ describe('ReviewBackendService', () => {
     httpMock.verify();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('getUnitProperties', () => {
     it('should fetch unit properties successfully', done => {
       const reviewId = 123;

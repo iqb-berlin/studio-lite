@@ -38,10 +38,6 @@ describe('UnitUserService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('createUnitUser', () => {
     it('should create and save a unit user with default timestamp (July 2022) when none is specified', async () => {
       const userId = 1;

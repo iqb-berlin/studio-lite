@@ -51,10 +51,6 @@ describe('AboutComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should have correct injected values', () => {
     expect(component.appName).toBe('Studio-Lite');
     expect(component.appPublisher).toBe('IQB - Institut zur Qualitätsentwicklung im Bildungswesen');

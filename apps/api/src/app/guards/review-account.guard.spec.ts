@@ -11,10 +11,6 @@ describe('ReviewAccountGuard', () => {
     })
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should let a logged-in user pass', () => {
     expect(guard.canActivate(contextFor({ id: 7, reviewId: 0 }))).toBe(true);
   });

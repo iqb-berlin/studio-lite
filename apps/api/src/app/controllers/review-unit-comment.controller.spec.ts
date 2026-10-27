@@ -71,10 +71,6 @@ describe('ReviewUnitCommentController', () => {
     usersService = module.get<UsersService>(UsersService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   // A comment named in the path has to be one of the unit's before any guard loads it to ask for
   // its author: those answered 403 for a comment of any unit and 404 for none, which told every
   // comment id apart (#1777). ReviewGuard holds the unit itself to the review, ahead of both.

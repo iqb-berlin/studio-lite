@@ -96,10 +96,6 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize formData with empty arrays', () => {
     expect(component.formData).toBeDefined();
     expect(component.formData.profilesSelected).toEqual([]);

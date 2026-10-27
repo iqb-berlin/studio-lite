@@ -48,10 +48,6 @@ describe('MissingsProfilesConfigComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('updates form fields and marks dataChanged on value change', () => {
     backendService.getMissingsProfiles.mockReturnValue(of([
       { label: 'IQB-Standard', missings: '[1]' }

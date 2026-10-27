@@ -42,10 +42,6 @@ describe('Admin BackendService', () => {
     httpMock.verify();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('getAllWorkspaces', () => {
     it('returns workspaces on success', done => {
       const workspaces: WorkspaceFullDto[] = [{ id: 1 } as WorkspaceFullDto];

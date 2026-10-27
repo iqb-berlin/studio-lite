@@ -7,10 +7,6 @@ describe('NamedRouterLinkPipe', () => {
     pipe = new NamedRouterLinkPipe();
   });
 
-  it('should create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should create router link with outlet and path', () => {
     const outletName = 'sidebar';
     const path = 'settings';

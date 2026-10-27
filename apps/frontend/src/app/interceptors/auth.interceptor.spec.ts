@@ -81,11 +81,6 @@ describe('AuthInterceptor', () => {
     jest.clearAllMocks();
   });
 
-  it('should be created', () => {
-    const interceptor: AuthInterceptor = TestBed.inject(AuthInterceptor);
-    expect(interceptor).toBeTruthy();
-  });
-
   it('adds Authorization and app-version headers when token exists', () => {
     localStorage.setItem('id_token', 'token-123');
 

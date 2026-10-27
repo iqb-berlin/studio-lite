@@ -8,10 +8,6 @@ describe('IsNoteFooterVisiblePipe', () => {
     pipe = new IsNoteFooterVisiblePipe();
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return true if note has itemReferences', () => {
     const note = { itemReferences: ['item-1'], links: [] } as unknown as UnitRichNoteDto;
     expect(pipe.transform(note)).toBe(true);

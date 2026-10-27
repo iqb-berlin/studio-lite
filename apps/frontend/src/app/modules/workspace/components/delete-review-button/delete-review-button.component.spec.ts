@@ -59,10 +59,6 @@ describe('DeleteReviewButtonComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('deletes a review after confirmation', () => {
     const deletedSpy = jest.fn();
     const changedSpy = jest.fn();

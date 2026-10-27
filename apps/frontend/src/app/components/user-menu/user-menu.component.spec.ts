@@ -58,10 +58,6 @@ describe('UserMenuComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should have injected APP_VERSION', () => {
     expect(component.appVersion).toBe('1.2.3');
   });

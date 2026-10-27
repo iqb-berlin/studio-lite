@@ -30,10 +30,6 @@ describe('ReviewController', () => {
     reviewService = module.get<ReviewService>(ReviewService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('findOne', () => {
     it('should return a review by id', async () => {
       const reviewId = 1;

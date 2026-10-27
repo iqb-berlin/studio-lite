@@ -43,10 +43,6 @@ describe('WorkspaceGroupService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findAll', () => {
     it('should return all groups if no user provided', async () => {
       const groups = [{ id: 1, name: 'g1' }] as WorkspaceGroup[];

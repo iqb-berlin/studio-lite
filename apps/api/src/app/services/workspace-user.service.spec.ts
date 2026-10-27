@@ -63,10 +63,6 @@ describe('WorkspaceUserService', () => {
     mockUsersRepository.exists.mockResolvedValue(false);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('deleteAllByWorkspaceGroup', () => {
     it('should delete workspace users for all workspaces in group', async () => {
       const workspaceGroupId = 1;

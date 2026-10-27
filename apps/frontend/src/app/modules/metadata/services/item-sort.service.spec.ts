@@ -9,10 +9,6 @@ describe('ItemSortService', () => {
     service = TestBed.inject(ItemSortService);
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   it('should have default itemSortings', () => {
     expect(service.itemSortings).toEqual(['id', 'variableId']);
   });

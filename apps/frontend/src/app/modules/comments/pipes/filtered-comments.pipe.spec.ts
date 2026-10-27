@@ -8,10 +8,6 @@ describe('FilteredCommentsPipe', () => {
     pipe = new FilteredCommentsPipe();
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return all comments if itemFilters is empty', () => {
     const comments = [{ id: 1 }, { id: 2 }] as unknown as Comment[];
     expect(pipe.transform(comments, [])).toEqual(comments);

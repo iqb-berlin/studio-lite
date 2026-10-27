@@ -19,10 +19,6 @@ describe('WrappedIconComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should render the icon name in mat-icon', () => {
     component.icon = 'home';
     fixture.detectChanges();

@@ -40,10 +40,6 @@ describe('HiddenRouteGuard', () => {
     guard = TestBed.inject(HiddenRouteGuard);
   });
 
-  it('should be created', () => {
-    expect(guard).toBeTruthy();
-  });
-
   it('should redirect to properties if route is hidden', () => {
     const route = {
       routeConfig: { path: 'editor' }

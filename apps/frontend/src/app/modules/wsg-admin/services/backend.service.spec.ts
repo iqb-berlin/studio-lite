@@ -38,10 +38,6 @@ describe('WsgAdmin BackendService', () => {
     httpMock.verify();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('getUsers', () => {
     it('returns users on success', done => {
       const users: UserInListDto[] = [{ id: 1 } as UserInListDto];

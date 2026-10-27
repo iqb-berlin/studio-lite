@@ -74,10 +74,6 @@ describe('EditUserComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize form with dialog data', () => {
     expect(component.editUserForm.get('name')?.value).toBe('testuser');
     expect(component.editUserForm.get('firstName')?.value).toBe('John');

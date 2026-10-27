@@ -107,10 +107,6 @@ describe('UnitService', () => {
     unitDefinitionService = module.get(UnitDefinitionService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('getUnitIdsByWorkspaceId', () => {
     it('should return unit ids', async () => {
       unitsRepository.find.mockResolvedValue([{ id: 1 } as Unit]);

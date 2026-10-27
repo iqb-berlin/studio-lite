@@ -49,10 +49,6 @@ describe('SettingController', () => {
     settingService = module.get<SettingService>(SettingService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('findConfig', () => {
     it('should return config', async () => {
       const mockConfig: ConfigDto = {

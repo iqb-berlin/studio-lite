@@ -116,10 +116,6 @@ describe('EditWorkspaceSettingsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize profiles in ngOnInit', () => {
     expect(mockBackendService.getWorkspaceGroupById).toHaveBeenCalledWith(10);
     expect(mockBackendService.getWorkspaceById).toHaveBeenCalledWith(1);

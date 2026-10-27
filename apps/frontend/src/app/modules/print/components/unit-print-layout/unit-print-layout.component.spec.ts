@@ -137,10 +137,6 @@ describe('UnitPrintLayoutComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngOnInit', () => {
     it('should call initPlayer', () => {
       const initPlayerSpy = jest.spyOn(component as never, 'initPlayer');

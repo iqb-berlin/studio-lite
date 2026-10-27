@@ -114,10 +114,6 @@ describe('ExportUnitComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should pass the export format down and adopt changes from the file config', () => {
     const fileConfig = fixture.debugElement
       .query(By.directive(MockExportUnitFileConfigComponent))

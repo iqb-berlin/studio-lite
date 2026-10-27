@@ -98,10 +98,6 @@ describe('WorkspaceController', () => {
     usersService = module.get<UsersService>(UsersService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('find', () => {
     it('should return a workspace', async () => {
       const result: WorkspaceFullDto = { id: 1, name: 'Workspace', dropBoxId: 0 };

@@ -37,10 +37,6 @@ describe('WriteOrGroupAdminAccessGuard', () => {
     workspaceUserService = module.get(WorkspaceUserService);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should return true if workspaceUserService.canWrite is true', async () => {
     workspaceUserService.canWrite.mockResolvedValue(true);
     const context = createMock<ExecutionContext>({

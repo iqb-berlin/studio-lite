@@ -88,10 +88,6 @@ describe('UnitItemsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should update unit items on init', fakeAsync(() => {
     const mockItems: UnitItemInViewDto[] = [
       {

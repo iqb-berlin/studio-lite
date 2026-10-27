@@ -37,10 +37,6 @@ describe('AppController', () => {
     controller = module.get<AppController>(AppController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('login', () => {
     it('should return a token', async () => {
       const mockUser = { id: 1, name: 'test' } as UserEntity;

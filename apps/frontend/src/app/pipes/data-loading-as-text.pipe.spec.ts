@@ -17,10 +17,6 @@ describe('DataLoadingAsTextPipe', () => {
     pipe = new DataLoadingAsTextPipe(translateService);
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return percentage when value is a number <= 100', () => {
     expect(pipe.transform(0)).toBe('0 %');
     expect(pipe.transform(50)).toBe('50 %');

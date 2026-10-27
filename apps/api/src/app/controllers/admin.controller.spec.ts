@@ -33,10 +33,6 @@ describe('AdminController', () => {
     controller = module.get<AdminController>(AdminController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('getAllWorkspaces', () => {
     it('should return all workspaces', async () => {
       const mockWorkspaces = [{ id: 1, name: 'WS' } as WorkspaceFullDto];

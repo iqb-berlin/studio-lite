@@ -24,10 +24,6 @@ describe('AdminComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should have navigation links defined', () => {
     expect(component.navLinks).toBeDefined();
     expect(component.navLinks.length).toBeGreaterThan(0);

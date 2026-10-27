@@ -100,10 +100,6 @@ describe('CommentDialogComponent', () => {
     jest.clearAllMocks();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('where the focus goes (#1785)', () => {
     it('should keep the focus out of the editor for an external visitor without a kept name', () => {
       component.ngOnInit();

@@ -9,10 +9,6 @@ describe('IsProfileSelectedPipe', () => {
     pipe = new IsProfileSelectedPipe();
   });
 
-  it('should create', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('recognizes a profile that is selected under the same spelling', () => {
     expect(pipe.transform(w3id, [{ id: w3id }])).toBe(true);
   });

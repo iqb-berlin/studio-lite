@@ -38,10 +38,6 @@ describe('ReviewUnitItemController', () => {
     reviewService.reviewConfigOf.mockResolvedValue({ showMetadata: true });
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('findAll', () => {
     const reviewId = 2;
 

@@ -30,10 +30,6 @@ describe('SplitterGutterComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should emit startDragging and set pointerPressed on pointerdown', () => {
     jest.spyOn(component.startDragging, 'emit');
     const event = new PointerEvent('pointerdown');

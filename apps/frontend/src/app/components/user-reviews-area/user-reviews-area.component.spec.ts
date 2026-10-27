@@ -46,11 +46,6 @@ describe('UserReviewsAreaComponent', () => {
     component.isReviewUser = false;
   });
 
-  it('should create', () => {
-    fixture.detectChanges();
-    expect(component).toBeTruthy();
-  });
-
   it('should accept reviews input', () => {
     const mockReviews: ReviewDto[] = [{
       id: 1,
