@@ -1,0 +1,2 @@
+# Preserve generated bundle bytes, including whitespace in JavaScript templates.
+iqb-schemer-*.html -whitespace

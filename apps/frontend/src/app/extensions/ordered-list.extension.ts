@@ -26,5 +26,10 @@ export const OrderedListExtension = OrderedList.extend({
       setOrderedListStyle: (newStyle: string) => ({ commands }) => commands
         .updateAttributes(this.name, { listStyle: newStyle })
     };
+  },
+
+  /** Keep pasted labels literal; Tiptap 3's auto-conversion loses numbering in this custom schema. */
+  addProseMirrorPlugins() {
+    return [];
   }
 });

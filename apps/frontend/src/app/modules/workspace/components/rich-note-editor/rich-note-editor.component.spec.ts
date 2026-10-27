@@ -62,7 +62,7 @@ describe('RichNoteEditorComponent', () => {
     const names = component['getExtensions']().map(extension => extension.name);
 
     expect(names).toEqual([
-      'starterKit', 'bulletList', 'orderedList', 'underline', 'superscript', 'subscript', 'textStyle', 'color',
+      'starterKit', 'bulletList', 'orderedList', 'superscript', 'subscript', 'textStyle', 'color',
       'image', 'placeholder', 'highlight'
     ]);
   });

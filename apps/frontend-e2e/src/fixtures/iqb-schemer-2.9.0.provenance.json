@@ -1,0 +1,10 @@
+{
+  "source_repository": "https://github.com/iqb-berlin/coding-components",
+  "source_commit": "c69c148a6901eef114b862472a8c7434aa878d4f",
+  "build_command": "npm ci && npm run buildAndPack_sc",
+  "schemer_version": "2.9.0",
+  "coding_components_version": "5.0.0",
+  "tiptap_core_version": "3.32.0",
+  "ngx_tiptap_version": "14.0.1",
+  "sha256": "885318d5619e4ed0f77b5c83f64066a386cca38252860a44e1f069188339b798"
+}

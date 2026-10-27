@@ -8,7 +8,6 @@ import { AnyExtension, Editor } from '@tiptap/core';
 // tiptap exportiert StarterKit als Default UND unter gleichem Namen; der Default ist die dokumentierte Form.
 // eslint-disable-next-line import-x/no-named-as-default
 import StarterKit from '@tiptap/starter-kit';
-import { Underline } from '@tiptap/extension-underline';
 import { Superscript } from '@tiptap/extension-superscript';
 import { Subscript } from '@tiptap/extension-subscript';
 import { TextStyle } from '@tiptap/extension-text-style';
@@ -52,7 +51,7 @@ export abstract class RichTextEditorDirective implements OnInit, OnDestroy {
    */
   protected getExtensions(): AnyExtension[] {
     return [
-      StarterKit,
+      StarterKit.configure({ link: false, trailingNode: false }),
       ...this.getFormattingExtensions()
     ];
   }
@@ -63,7 +62,6 @@ export abstract class RichTextEditorDirective implements OnInit, OnDestroy {
    */
   protected getFormattingExtensions(): AnyExtension[] {
     return [
-      Underline,
       Superscript,
       Subscript,
       TextStyle,
@@ -88,6 +86,7 @@ export abstract class RichTextEditorDirective implements OnInit, OnDestroy {
     this.editor = new Editor({
       extensions: this.getExtensions(),
       content: this.initialHTML,
+      parseOptions: { preserveWhitespace: 'full' },
       onTransaction: () => {
         this.updateBaseEditorStates();
         // Child classes can implement `updateEditorStates` if needed
