@@ -103,18 +103,7 @@ export class UnitPlayerComponent extends PreviewDirective {
             unitProperties.name ? ` - ${unitProperties.name}` : ''
           }`;
           this.reviewService.setHeaderText(this.unitData.name);
-
-          if (playerId) {
-            if (playerId === this.lastVeronaModuleId && this.postMessageTarget) {
-              this.sendChangeData();
-            } else {
-              this.postMessageTarget = undefined;
-              this.buildVeronaModule(playerId, 'player');
-            }
-          } else {
-            this.message = this.translateService.instant('workspace.no-player');
-            this.postMessageTarget = undefined;
-          }
+          this.showVeronaModule(playerId, 'player', () => this.sendChangeData());
         }
       });
   }

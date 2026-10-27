@@ -101,17 +101,8 @@ export class UnitPreviewComponent extends PreviewDirective {
     )
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(playerId => {
-        if (playerId) {
-          if (playerId === this.lastVeronaModuleId && this.postMessageTarget) {
-            this.sendChangeData();
-          } else {
-            this.postMessageTarget = undefined;
-            this.buildVeronaModule(playerId, 'player');
-            this.playerName = playerId;
-          }
-        } else {
-          this.message = this.translateService.instant('workspace.no-player');
-          this.postMessageTarget = undefined;
+        if (this.showVeronaModule(playerId, 'player', () => this.sendChangeData())) {
+          this.playerName = playerId;
         }
       });
   }

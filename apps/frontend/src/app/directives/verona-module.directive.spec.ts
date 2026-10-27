@@ -44,6 +44,14 @@ class TestVeronaModuleDirective extends VeronaModuleDirective {
   buildModule(moduleId: string | undefined, moduleType: 'player' | 'editor' | 'schemer'): void {
     this.buildVeronaModule(moduleId, moduleType);
   }
+
+  show(moduleId: string, moduleType: 'player' | 'editor' | 'schemer', sendUnit: () => void): boolean {
+    return this.showVeronaModule(moduleId, moduleType, sendUnit);
+  }
+
+  accept(m: MessageEvent): boolean {
+    return this.acceptMessageFromModule(m);
+  }
 }
 
 describe('VeronaModuleDirective', () => {
@@ -397,6 +405,92 @@ describe('VeronaModuleDirective', () => {
       expect(directive.ngUnsubscribe.closed).toBe(false);
       expect(directive.unitLoaded.getValue()).toBe(true);
       expect(directive.startSubscriptions).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('showVeronaModule', () => {
+    it('says that the unit names no module and loads none', () => {
+      const { directive, moduleService } = createDirective();
+      const sendUnit = jest.fn();
+      directive.postMessageTarget = window;
+
+      const loading = directive.show('', 'editor', sendUnit);
+
+      expect(loading).toBe(false);
+      expect(directive.message).toBe('workspace.no-editor');
+      expect(directive.postMessageTarget).toBeUndefined();
+      expect(sendUnit).not.toHaveBeenCalled();
+      expect(moduleService.getModuleHtml).not.toHaveBeenCalled();
+    });
+
+    it('hands the unit to the module that is already running', () => {
+      const { directive, moduleService } = createDirective();
+      const sendUnit = jest.fn();
+      directive.lastVeronaModuleId = 'editor-1';
+      directive.postMessageTarget = window;
+
+      const loading = directive.show('editor-1', 'editor', sendUnit);
+
+      expect(loading).toBe(false);
+      expect(sendUnit).toHaveBeenCalledTimes(1);
+      expect(directive.postMessageTarget).toBe(window);
+      expect(moduleService.getModuleHtml).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['another module is named', 'editor-1', window],
+      ['the same module has not reported ready yet', 'editor-2', undefined]
+    ])('loads the module when %s', async (_case: string, lastModuleId: string, target: Window | undefined) => {
+      const { directive, moduleService } = createDirective();
+      const sendUnit = jest.fn();
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+      directive.iFrameElement = iframe;
+      directive.lastVeronaModuleId = lastModuleId;
+      directive.postMessageTarget = target;
+      const module = createModule('editor-2', 'editor');
+      provideModule(moduleService, 'editor', module);
+      moduleService.getModuleHtml = jest.fn().mockResolvedValue('<html lang=""></html>');
+
+      const loading = directive.show('editor-2', 'editor', sendUnit);
+      await Promise.resolve();
+
+      expect(loading).toBe(true);
+      expect(directive.postMessageTarget).toBeUndefined();
+      expect(sendUnit).not.toHaveBeenCalled();
+      expect(moduleService.getModuleHtml).toHaveBeenCalledWith(module);
+      expect(iframe.srcdoc).toBe('<html lang=""></html>');
+
+      document.body.removeChild(iframe);
+    });
+  });
+
+  describe('acceptMessageFromModule', () => {
+    const frameOf = (contentWindow: Window) => ({ contentWindow } as unknown as HTMLIFrameElement);
+
+    it('accepts a message of the module in its frame and answers to that frame from then on', () => {
+      const { directive } = createDirective();
+      directive.iFrameElement = frameOf(window);
+
+      expect(directive.accept(createMessageEvent({ type: 'voeReadyNotification' }, window))).toBe(true);
+      expect(directive.postMessageTarget).toBe(window);
+    });
+
+    it('ignores a message from another window', () => {
+      const { directive } = createDirective();
+      directive.iFrameElement = frameOf(window);
+      const otherWindow = {} as Window;
+
+      expect(directive.accept(createMessageEvent({ type: 'voeReadyNotification' }, otherWindow))).toBe(false);
+      expect(directive.postMessageTarget).toBeUndefined();
+    });
+
+    it.each([undefined, null])('ignores a message whose type is %s', (type: undefined | null) => {
+      const { directive } = createDirective();
+      directive.iFrameElement = frameOf(window);
+
+      expect(directive.accept(createMessageEvent({ type }, window))).toBe(false);
+      expect(directive.postMessageTarget).toBeUndefined();
     });
   });
 });
