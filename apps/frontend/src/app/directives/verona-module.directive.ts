@@ -172,6 +172,46 @@ export abstract class VeronaModuleDirective implements AfterViewInit, OnDestroy 
   }
 
   /**
+   * Shows the module a unit names: the one already running gets the unit handed over, any other is
+   * loaded into the iframe -- it asks for the unit itself once it reports ready --, and a unit that
+   * names none gets the message that it has no module of this type.
+   * @param sendUnit How this host hands a unit to a module that is already running.
+   * @returns Whether a module is being loaded.
+   */
+  protected showVeronaModule(
+    moduleId: string,
+    moduleType: 'player' | 'editor' | 'schemer',
+    sendUnit: () => void
+  ): boolean {
+    if (!moduleId) {
+      // workspace.no-player, workspace.no-editor, workspace.no-schemer
+      this.message = this.translateService.instant(`workspace.no-${moduleType}`);
+      this.postMessageTarget = undefined;
+      return false;
+    }
+    if (moduleId === this.lastVeronaModuleId && this.postMessageTarget) {
+      sendUnit();
+      return false;
+    }
+    this.postMessageTarget = undefined;
+    this.buildVeronaModule(moduleId, moduleType);
+    return true;
+  }
+
+  /**
+   * Whether a message is one the module in this host's iframe sent -- a message with a type, from
+   * that frame's window. If it is, that window is where the answers go from now on.
+   */
+  protected acceptMessageFromModule(m: MessageEvent): boolean {
+    const msgType = m.data.type;
+    if (msgType === undefined || msgType === null || m.source !== this.iFrameElement?.contentWindow) {
+      return false;
+    }
+    this.postMessageTarget = m.source as Window;
+    return true;
+  }
+
+  /**
    * The frame is emptied only when there is no module to show. It must not be emptied on the way to
    * a module: the module HTML is held after its first load, so the two assignments would then fall
    * into the same task, and Chrome 152 keeps the empty document and drops the module -- the frame

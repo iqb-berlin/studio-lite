@@ -59,81 +59,75 @@ export class UnitEditorComponent extends VeronaModuleDirective {
   }
 
   handleIncomingMessage(m: MessageEvent) {
+    if (!this.acceptMessageFromModule(m)) return;
     const msgData = m.data;
     const msgType = msgData.type;
-    if (
-      msgType !== undefined &&
-      msgType !== null &&
-      m.source === this.iFrameElement?.contentWindow
-    ) {
-      this.postMessageTarget = m.source as Window;
-      switch (msgType) {
-        case 'voeReadyNotification':
-        case 'vo.FromAuthoringModule.ReadyNotification':
-          if (msgType === 'voeReadyNotification') {
-            const majorVersion = msgData.metadata ?
-              msgData.metadata.specVersion.match(/\d+/) :
-              msgData.apiVersion.match(/\d+/);
-            if (majorVersion.length > 0) {
-              const majorVersionNumber = Number(majorVersion[0]);
-              this.editorApiVersion =
-                majorVersionNumber < 3 ? 2 : majorVersionNumber;
-            } else {
-              this.editorApiVersion = 2;
+    switch (msgType) {
+      case 'voeReadyNotification':
+      case 'vo.FromAuthoringModule.ReadyNotification':
+        if (msgType === 'voeReadyNotification') {
+          const majorVersion = msgData.metadata ?
+            msgData.metadata.specVersion.match(/\d+/) :
+            msgData.apiVersion.match(/\d+/);
+          if (majorVersion.length > 0) {
+            const majorVersionNumber = Number(majorVersion[0]);
+            this.editorApiVersion =
+              majorVersionNumber < 3 ? 2 : majorVersionNumber;
+          } else {
+            this.editorApiVersion = 2;
+          }
+        } else {
+          this.editorApiVersion = 1;
+        }
+        this.sessionId = UnitEditorComponent.getSessionId();
+        this.sendUnitDefinition(this.workspaceService.selectedUnit$.getValue());
+        break;
+
+      case 'voeDefinitionChangedNotification':
+      case 'vo.FromAuthoringModule.ChangedNotification':
+        if (msgData.sessionId === this.sessionId) {
+          if (this.editorApiVersion > 1) {
+            if (msgData.unitDefinition) {
+              this.unitStores
+                .definitionStore()
+                ?.setData(
+                  msgData.variables,
+                  msgData.unitDefinition,
+                  typeof msgData.unitDefinitionType === 'string' ? msgData.unitDefinitionType : undefined
+                );
+              // } else { TODO: find solution for voeGetDefinitionRequest
+              //   this.postMessageTarget.postMessage({
+              //     type: 'voeGetDefinitionRequest',
+              //     sessionId: this.sessionId
+              //   }, '*');
+            }
+            if (msgData.sharedParameters) {
+              this.sharedParameters = this.getMergedSharedParameters(msgData.sharedParameters);
             }
           } else {
-            this.editorApiVersion = 1;
+            this.postMessageTarget?.postMessage(
+              {
+                type: 'vo.ToAuthoringModule.DataRequest',
+                sessionId: this.sessionId
+              },
+              '*'
+            );
           }
-          this.sessionId = UnitEditorComponent.getSessionId();
-          this.sendUnitDefinition(this.workspaceService.selectedUnit$.getValue());
-          break;
+        }
+        break;
 
-        case 'voeDefinitionChangedNotification':
-        case 'vo.FromAuthoringModule.ChangedNotification':
-          if (msgData.sessionId === this.sessionId) {
-            if (this.editorApiVersion > 1) {
-              if (msgData.unitDefinition) {
-                this.unitStores
-                  .definitionStore()
-                  ?.setData(
-                    msgData.variables,
-                    msgData.unitDefinition,
-                    typeof msgData.unitDefinitionType === 'string' ? msgData.unitDefinitionType : undefined
-                  );
-                // } else { TODO: find solution for voeGetDefinitionRequest
-                //   this.postMessageTarget.postMessage({
-                //     type: 'voeGetDefinitionRequest',
-                //     sessionId: this.sessionId
-                //   }, '*');
-              }
-              if (msgData.sharedParameters) {
-                this.sharedParameters = this.getMergedSharedParameters(msgData.sharedParameters);
-              }
-            } else {
-              this.postMessageTarget.postMessage(
-                {
-                  type: 'vo.ToAuthoringModule.DataRequest',
-                  sessionId: this.sessionId
-                },
-                '*'
-              );
-            }
-          }
-          break;
+      case 'vo.FromAuthoringModule.DataTransfer':
+        if (msgData.sessionId === this.sessionId) {
+          this.unitStores
+            .definitionStore()
+            ?.setData(msgData.variables, msgData.unitDefinition);
+        }
+        break;
 
-        case 'vo.FromAuthoringModule.DataTransfer':
-          if (msgData.sessionId === this.sessionId) {
-            this.unitStores
-              .definitionStore()
-              ?.setData(msgData.variables, msgData.unitDefinition);
-          }
-          break;
-
-        default:
-          // eslint-disable-next-line no-console
-          console.warn(`processMessagePost ignored message: ${msgType}`);
-          break;
-      }
+      default:
+        // eslint-disable-next-line no-console
+        console.warn(`processMessagePost ignored message: ${msgType}`);
+        break;
     }
   }
 
@@ -143,20 +137,11 @@ export class UnitEditorComponent extends VeronaModuleDirective {
       'editor'
     )
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(editorId => {
-        if (editorId) {
-          if (editorId === this.lastVeronaModuleId && this.postMessageTarget) {
-            this.sendUnitDefinition(this.workspaceService.selectedUnit$.getValue());
-          } else {
-            this.postMessageTarget = undefined;
-            this.buildVeronaModule(editorId, 'editor');
-            // editor gets unit data via ReadyNotification
-          }
-        } else {
-          this.message = this.translateService.instant('workspace.no-editor');
-          this.postMessageTarget = undefined;
-        }
-      });
+      .subscribe(editorId => this.showVeronaModule(
+        editorId,
+        'editor',
+        () => this.sendUnitDefinition(this.workspaceService.selectedUnit$.getValue())
+      ));
   }
 
   private onLoadUnitProperties() {

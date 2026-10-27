@@ -44,44 +44,38 @@ export class UnitSchemerComponent extends UnitDefinitionDirective {
   }
 
   handleIncomingMessage(m: MessageEvent) {
+    if (!this.acceptMessageFromModule(m)) return;
     const msgData = m.data;
     const msgType = msgData.type;
-    if (
-      msgType !== undefined &&
-      msgType !== null &&
-      m.source === this.iFrameElement?.contentWindow
-    ) {
-      this.postMessageTarget = m.source as Window;
-      switch (msgType) {
-        case 'vosReadyNotification':
-          this.sessionId = UnitSchemerComponent.getSessionId();
-          this.postMessageTarget = m.source as Window;
-          this.sendScheme(this.workspaceService.selectedUnit$.getValue());
-          break;
+    switch (msgType) {
+      case 'vosReadyNotification':
+        this.sessionId = UnitSchemerComponent.getSessionId();
+        this.postMessageTarget = m.source as Window;
+        this.sendScheme(this.workspaceService.selectedUnit$.getValue());
+        break;
 
-        case 'vosSchemeChangedNotification':
-          if (msgData.sessionId === this.sessionId) {
-            if (msgData.codingScheme) {
-              this.unitStores
-                .schemeStore()
-                ?.setData(msgData.codingScheme, msgData.codingSchemeType);
-              // } else { TODO: find solution for vosGetSchemeRequest
-              //   this.postMessageTarget.postMessage({
-              //     type: 'vosGetSchemeRequest',
-              //     sessionId: this.sessionId
-              //   }, '*');
-            }
-            if (msgData.sharedParameters) {
-              this.sharedParameters = this.getMergedSharedParameters(msgData.sharedParameters);
-            }
+      case 'vosSchemeChangedNotification':
+        if (msgData.sessionId === this.sessionId) {
+          if (msgData.codingScheme) {
+            this.unitStores
+              .schemeStore()
+              ?.setData(msgData.codingScheme, msgData.codingSchemeType);
+            // } else { TODO: find solution for vosGetSchemeRequest
+            //   this.postMessageTarget.postMessage({
+            //     type: 'vosGetSchemeRequest',
+            //     sessionId: this.sessionId
+            //   }, '*');
           }
-          break;
+          if (msgData.sharedParameters) {
+            this.sharedParameters = this.getMergedSharedParameters(msgData.sharedParameters);
+          }
+        }
+        break;
 
-        default:
-          // eslint-disable-next-line no-console
-          console.warn(`processMessagePost ignored message: ${msgType}`);
-          break;
-      }
+      default:
+        // eslint-disable-next-line no-console
+        console.warn(`processMessagePost ignored message: ${msgType}`);
+        break;
     }
   }
 
@@ -119,20 +113,11 @@ export class UnitSchemerComponent extends UnitDefinitionDirective {
       'schemer'
     )
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(schemerId => {
-        if (schemerId) {
-          if (schemerId === this.lastVeronaModuleId && this.postMessageTarget) {
-            this.sendScheme(this.workspaceService.selectedUnit$.getValue());
-          } else {
-            this.postMessageTarget = undefined;
-            this.buildVeronaModule(schemerId, 'schemer');
-            // schemer gets unit data via ReadyNotification
-          }
-        } else {
-          this.postMessageTarget = undefined;
-          this.message = this.translateService.instant('workspace.no-schemer');
-        }
-      });
+      .subscribe(schemerId => this.showVeronaModule(
+        schemerId,
+        'schemer',
+        () => this.sendScheme(this.workspaceService.selectedUnit$.getValue())
+      ));
   }
 
   onLoadUnitProperties() {
