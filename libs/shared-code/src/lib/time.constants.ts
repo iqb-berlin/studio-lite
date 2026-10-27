@@ -30,6 +30,12 @@ export const ACTIVE_THRESHOLD_MS = 30 * MINUTE_MS;
  * duration seen from three sides.
  */
 export const PASSIVE_THRESHOLD_MS = 7 * DAY_MS;
+/**
+ * How long after its exchange a refresh token may come back without ending its session. Within it,
+ * the second use is taken for a second tab of the same browser that lost the race for the refresh:
+ * the lock between tabs (`st_refresh_lock`) is not atomic and holds for 5 seconds only.
+ */
+export const REFRESH_TOKEN_REUSE_GRACE_MS = 30 * SECOND_MS;
 
 /** How often the status bar redraws the remaining session time. */
 export const UI_BAR_REFRESH_INTERVAL_MS = SECOND_MS;

@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import {
-  In, LessThan, MoreThan, Repository
+  In, InsertQueryBuilder, LessThan, MoreThan, Repository, SelectQueryBuilder
 } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -11,9 +11,10 @@ import { AuthService } from './auth.service';
 import { UsersService } from './users.service';
 import { ReviewService } from './review.service';
 import { RefreshToken } from '../entities/refresh-token.entity';
+import { UsedRefreshToken } from '../entities/used-refresh-token.entity';
 import UserSession from '../entities/user-session.entity';
 import User from '../entities/user.entity';
-import { ACTIVE_THRESHOLD_MS } from '../app.constants';
+import { ACTIVE_THRESHOLD_MS, REFRESH_TOKEN_REUSE_GRACE_MS } from '../app.constants';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -22,6 +23,7 @@ describe('AuthService', () => {
   let jwtService: DeepMocked<JwtService>;
   let refreshTokenRepository: DeepMocked<Repository<RefreshToken>>;
   let userSessionRepository: DeepMocked<Repository<UserSession>>;
+  let usedRefreshTokenRepository: DeepMocked<Repository<UsedRefreshToken>>;
 
   const realDateNow = Date.now;
 
@@ -51,6 +53,10 @@ describe('AuthService', () => {
           useValue: createMock<Repository<UserSession>>()
         },
         {
+          provide: getRepositoryToken(UsedRefreshToken),
+          useValue: createMock<Repository<UsedRefreshToken>>()
+        },
+        {
           provide: ConfigService,
           useValue: createMock<ConfigService>()
         }
@@ -63,6 +69,10 @@ describe('AuthService', () => {
     jwtService = module.get(JwtService);
     refreshTokenRepository = module.get(getRepositoryToken(RefreshToken));
     userSessionRepository = module.get(getRepositoryToken(UserSession));
+    usedRefreshTokenRepository = module.get(getRepositoryToken(UsedRefreshToken));
+    // A deep mock answers every lookup with an object, which would make every unknown token look
+    // like an exchanged one.
+    usedRefreshTokenRepository.findOne.mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -230,10 +240,77 @@ describe('AuthService', () => {
       expect(userSessionRepository.save).not.toHaveBeenCalled();
     });
 
+    it('should record the exchanged token before deleting it', async () => {
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+      refreshTokenRepository.findOne.mockResolvedValue({
+        tokenHash: 'token-hash', userId: 1, sessionId: 'session-1', expiresAt
+      } as RefreshToken);
+      userSessionRepository.findOne.mockResolvedValue({
+        userId: 1, sessionId: 'session-1', lastActivity: new Date(), expiresAt
+      } as UserSession);
+      usersService.findOne.mockResolvedValue({ id: 1, name: 'user' } as User);
+      jwtService.sign.mockReturnValue('new-atoken');
+      const insertQuery = createMock<InsertQueryBuilder<UsedRefreshToken>>();
+      insertQuery.values.mockReturnValue(insertQuery);
+      insertQuery.orIgnore.mockReturnValue(insertQuery);
+      const queryBuilder = createMock<SelectQueryBuilder<UsedRefreshToken>>();
+      queryBuilder.insert.mockReturnValue(insertQuery);
+      usedRefreshTokenRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+
+      await service.refreshAccessToken('valid-token');
+
+      expect(insertQuery.values).toHaveBeenCalledWith({
+        tokenHash: 'token-hash', userId: 1, sessionId: 'session-1', usedAt: expect.any(Date)
+      });
+      // Two refreshes in flight with the same token record the same hash.
+      expect(insertQuery.orIgnore).toHaveBeenCalled();
+      const recordOrder = insertQuery.execute.mock.invocationCallOrder[0];
+      const deleteOrder = refreshTokenRepository.delete.mock.invocationCallOrder[0];
+      expect(recordOrder).toBeLessThan(deleteOrder);
+    });
+
     it('should return null if token not found', async () => {
       refreshTokenRepository.findOne.mockResolvedValue(null);
       const result = await service.refreshAccessToken('invalid');
       expect(result).toBeNull();
+      expect(userSessionRepository.delete).not.toHaveBeenCalled();
+    });
+
+    // Whoever used the token first got the new pair; which side is the copy cannot be told, so
+    // both lose the session (#1935).
+    it('should end the session when an exchanged token comes back after the grace period', async () => {
+      refreshTokenRepository.findOne.mockResolvedValue(null);
+      usedRefreshTokenRepository.findOne.mockResolvedValue({
+        tokenHash: 'token-hash',
+        userId: 1,
+        sessionId: 'session-1',
+        usedAt: new Date(1000000 - REFRESH_TOKEN_REUSE_GRACE_MS - 1000)
+      } as UsedRefreshToken);
+
+      const result = await service.refreshAccessToken('copied-token');
+
+      expect(result).toBeNull();
+      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 1, sessionId: 'session-1' });
+      expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 1, sessionId: 'session-1' });
+    });
+
+    // Within the grace period the second use is a second tab of the same browser that lost the race
+    // for the refresh; it is refused as before, and the session goes on.
+    it('should only refuse an exchanged token that comes back within the grace period', async () => {
+      refreshTokenRepository.findOne.mockResolvedValue(null);
+      usedRefreshTokenRepository.findOne.mockResolvedValue({
+        tokenHash: 'token-hash',
+        userId: 1,
+        sessionId: 'session-1',
+        usedAt: new Date(1000000 - REFRESH_TOKEN_REUSE_GRACE_MS + 1000)
+      } as UsedRefreshToken);
+
+      const result = await service.refreshAccessToken('raced-token');
+
+      expect(result).toBeNull();
+      expect(refreshTokenRepository.delete).not.toHaveBeenCalled();
+      expect(userSessionRepository.delete).not.toHaveBeenCalled();
     });
 
     it('should return null if token is expired', async () => {

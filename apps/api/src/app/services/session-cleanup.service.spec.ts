@@ -7,12 +7,15 @@ import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SessionCleanupService } from './session-cleanup.service';
 import { RefreshToken } from '../entities/refresh-token.entity';
+import { UsedRefreshToken } from '../entities/used-refresh-token.entity';
 import UserSession from '../entities/user-session.entity';
+import { PASSIVE_THRESHOLD_MS } from '../app.constants';
 
 describe('SessionCleanupService', () => {
   let service: SessionCleanupService;
   let userSessionRepository: DeepMocked<Repository<UserSession>>;
   let refreshTokenRepository: DeepMocked<Repository<RefreshToken>>;
+  let usedRefreshTokenRepository: DeepMocked<Repository<UsedRefreshToken>>;
   let loggerErrorSpy: jest.SpyInstance;
 
   beforeEach(async () => {
@@ -30,6 +33,10 @@ describe('SessionCleanupService', () => {
         {
           provide: getRepositoryToken(RefreshToken),
           useValue: createMock<Repository<RefreshToken>>()
+        },
+        {
+          provide: getRepositoryToken(UsedRefreshToken),
+          useValue: createMock<Repository<UsedRefreshToken>>()
         }
       ]
     }).compile();
@@ -37,6 +44,7 @@ describe('SessionCleanupService', () => {
     service = module.get<SessionCleanupService>(SessionCleanupService);
     userSessionRepository = module.get(getRepositoryToken(UserSession));
     refreshTokenRepository = module.get(getRepositoryToken(RefreshToken));
+    usedRefreshTokenRepository = module.get(getRepositoryToken(UsedRefreshToken));
   });
 
   afterEach(() => {
@@ -61,6 +69,20 @@ describe('SessionCleanupService', () => {
         .toHaveBeenCalledWith({ expiresAt: LessThan(new Date(1000000)) });
       expect(refreshTokenRepository.delete)
         .toHaveBeenCalledWith({ expiresAt: LessThan(new Date(1000000)) });
+    });
+
+    // A record of an exchanged token is needed only as long as the token could have lived (#1935).
+    it('should delete records of exchanged refresh tokens older than the inactivity window', async () => {
+      jest.useFakeTimers().setSystemTime(1000000);
+      userSessionRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
+      refreshTokenRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
+      usedRefreshTokenRepository.delete.mockResolvedValue({ affected: 4, raw: [] });
+      userSessionRepository.find.mockResolvedValue([]);
+
+      await service.cleanupExpiredRows();
+
+      expect(usedRefreshTokenRepository.delete)
+        .toHaveBeenCalledWith({ usedAt: LessThan(new Date(1000000 - PASSIVE_THRESHOLD_MS)) });
     });
 
     // A row that outlived its last refresh token cannot be reached by anyone, and expiry

@@ -48,6 +48,7 @@ import ResourcePackage from './entities/resource-package.entity';
 import Review from './entities/review.entity';
 import ReviewUnit from './entities/review-unit.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { UsedRefreshToken } from './entities/used-refresh-token.entity';
 import UserSession from './entities/user-session.entity';
 import { ResourcePackageService } from './services/resource-package.service';
 import { UsersService } from './services/users.service';
@@ -125,6 +126,7 @@ const ENTITIES = [
   Review,
   ReviewUnit,
   RefreshToken,
+  UsedRefreshToken,
   UserSession,
   UnitItem,
   UnitItemMetadata,
