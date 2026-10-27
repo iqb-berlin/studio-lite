@@ -60,10 +60,6 @@ describe('WorkspaceBackendService', () => {
     httpMock.verify();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('getWorkspaceGroupStates', () => {
     it('should fetch workspace group states', async () => {
       const mockData: WorkspaceGroupFullDto = {

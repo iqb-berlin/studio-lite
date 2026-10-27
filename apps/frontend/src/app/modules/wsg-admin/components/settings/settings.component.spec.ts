@@ -108,10 +108,6 @@ describe('WorkspaceSettingsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize settings from service', () => {
     expect(component.settings).toEqual(mockWsgAdminService.selectedWorkspaceGroupSettings.value);
   });

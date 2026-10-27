@@ -74,10 +74,6 @@ describe('UnitCommentsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should sort unit items by id', () => {
     expect(component.unitItems.map(i => i.id)).toEqual(['1', '2', '3']);
   });

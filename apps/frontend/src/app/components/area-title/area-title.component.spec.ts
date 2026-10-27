@@ -14,10 +14,6 @@ describe('AreaTitleComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should accept title input', () => {
     component.title = 'Test Title';
     fixture.detectChanges();

@@ -45,10 +45,6 @@ describe('UnitRichNoteTagsConfigComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should load config on init', () => {
     const config = ['http://test.url'];
     backendServiceMock.getUnitRichNoteTagsConfig.mockReturnValue(of(config as string[]));

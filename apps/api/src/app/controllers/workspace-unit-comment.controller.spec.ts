@@ -86,10 +86,6 @@ describe('WorkspaceUnitCommentController', () => {
     usersService = module.get<UsersService>(UsersService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   // The access guards ask about the workspace in the path alone; the unit has to be held to it
   // before anything else is asked about the unit.
   it.each([

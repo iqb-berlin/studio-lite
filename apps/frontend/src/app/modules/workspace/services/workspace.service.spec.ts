@@ -103,10 +103,6 @@ describe('WorkspaceService', () => {
     richNoteTagsService = TestBed.inject(RichNoteTagsService) as jest.Mocked<RichNoteTagsService>;
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('initialization', () => {
     it('should initialize with default values', () => {
       expect(service.selectedWorkspaceId).toBe(0);

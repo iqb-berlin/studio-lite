@@ -63,10 +63,6 @@ describe('UnitRichNotesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should rebuild display nodes when notes are loaded', () => {
     const notes = [{
       id: 1, tagId: 't1', content: 'test', unitId: 10

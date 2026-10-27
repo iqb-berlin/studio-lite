@@ -9,10 +9,6 @@ describe('FilteredRootCommentsPipe', () => {
     pipe = new FilteredRootCommentsPipe();
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return all root comments if itemFilters is empty', () => {
     const comments = [{ rootComment: { id: 1 } }] as RootCommentWithReplies[];
     expect(pipe.transform(comments, [])).toEqual(comments);

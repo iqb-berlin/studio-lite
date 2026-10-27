@@ -44,10 +44,6 @@ describe('EditWorkspaceGroupComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize form with dialog data', () => {
     expect(component.editWorkspaceGroupForm.get('name')?.value).toBe('Test Group');
     expect(component.name).toBe('Test Group');

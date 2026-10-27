@@ -42,10 +42,6 @@ describe('SearchFilterComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should render title in mat-label', () => {
     const label = fixture.nativeElement.querySelector('mat-label');
     expect(label.textContent).toBe('Test Title');

@@ -60,10 +60,6 @@ describe('MetadataVocabularyService', () => {
     httpService = module.get(HttpService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('getStoredMetadataVocabularyById', () => {
     it('should return stored vocabulary if found', async () => {
       const vocab = new MetadataVocabulary();

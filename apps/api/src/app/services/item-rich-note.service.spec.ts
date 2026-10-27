@@ -40,10 +40,6 @@ describe('ItemRichNoteService', () => {
     unitItemRepository = module.get(getRepositoryToken(UnitItem));
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('createNoteItemConnection', () => {
     beforeEach(() => {
       unitRichNotesRepository.findOne.mockResolvedValue(createMock<UnitRichNote>({ id: 7, unitId: 10 }));

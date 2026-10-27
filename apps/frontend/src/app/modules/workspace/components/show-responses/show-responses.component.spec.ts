@@ -24,12 +24,6 @@ describe('ShowResponsesComponent', () => {
     fixture.detectChanges();
   };
 
-  it('should create', async () => {
-    await setup({ responses: [], table: false });
-
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize table when data.table is true', async () => {
     const responses = [{ key: 'a', value: 1 }, { key: 'b', value: 2 }];
     await setup({ responses, table: true });

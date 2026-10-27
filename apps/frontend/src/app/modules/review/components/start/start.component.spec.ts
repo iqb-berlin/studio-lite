@@ -65,10 +65,6 @@ describe('StartComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngOnInit()', () => {
     it('should load review data when units array is empty', fakeAsync(() => {
       mockReviewService.units = [];

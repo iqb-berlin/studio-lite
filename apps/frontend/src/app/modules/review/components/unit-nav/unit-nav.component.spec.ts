@@ -48,10 +48,6 @@ describe('UnitNavComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Component Initialization', () => {
     it('should have reviewService injected', () => {
       expect(component.reviewService).toBeDefined();

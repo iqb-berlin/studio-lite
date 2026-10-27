@@ -37,10 +37,6 @@ describe('RichNoteTagsService', () => {
     service = TestBed.inject(RichNoteTagsService);
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   it('should load tags on initialization', done => {
     service.tags$.subscribe(tags => {
       expect(tags).toEqual(mockTags);

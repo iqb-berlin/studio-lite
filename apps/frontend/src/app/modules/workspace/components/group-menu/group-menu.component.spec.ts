@@ -30,10 +30,6 @@ describe('GroupMenuComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should have event emitters', () => {
     expect(component.groupAdded).toBeDefined();
     expect(component.groupRenamed).toBeDefined();

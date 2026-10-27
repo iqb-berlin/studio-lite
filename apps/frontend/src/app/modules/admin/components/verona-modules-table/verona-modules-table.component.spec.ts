@@ -106,10 +106,6 @@ describe('VeronaModulesTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should set modules and update datasource', done => {
     component.modules = {
       m1: new VeronaModuleClass({

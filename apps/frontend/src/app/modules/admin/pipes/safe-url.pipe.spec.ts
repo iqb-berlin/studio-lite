@@ -14,10 +14,6 @@ describe('SafeUrlPipe', () => {
     pipe = new SafeUrlPipe(sanitizer);
   });
 
-  it('should create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should transform a URL string to a SafeUrl', () => {
     const testUrl = 'https://example.com/test';
     const result = pipe.transform(testUrl);

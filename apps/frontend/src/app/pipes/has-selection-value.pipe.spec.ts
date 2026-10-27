@@ -4,10 +4,6 @@ import { HasSelectionValuePipe } from './has-selection-value.pipe';
 describe('HasSelectionValuePipe', () => {
   const pipe = new HasSelectionValuePipe();
 
-  it('should be defined', () => {
-    expect(pipe).toBeDefined();
-  });
-
   it('should return true if selectionLength > 0 and selectionModel has value', () => {
     const selection = new SelectionModel<number>(true, [1]);
     expect(pipe.transform(selection, 1)).toBe(true);

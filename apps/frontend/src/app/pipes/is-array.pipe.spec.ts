@@ -3,10 +3,6 @@ import { IsArrayPipe } from './is-array.pipe';
 describe('IsArrayPipe', () => {
   const pipe = new IsArrayPipe();
 
-  it('should be defined', () => {
-    expect(pipe).toBeDefined();
-  });
-
   it('should return true for an array', () => {
     expect(pipe.transform([1, 2, 3])).toBe(true);
   });

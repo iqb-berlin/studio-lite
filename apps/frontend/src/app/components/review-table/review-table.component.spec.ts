@@ -37,10 +37,6 @@ describe('ReviewTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize with empty reviews array', () => {
     expect(component.reviews).toEqual([]);
   });

@@ -131,10 +131,6 @@ describe('UnitPlayerComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Component Initialization', () => {
     it('should initialize unitData with default values', () => {
       expect(component.unitData).toBeDefined();

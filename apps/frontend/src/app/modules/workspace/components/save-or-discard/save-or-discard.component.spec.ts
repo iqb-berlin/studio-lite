@@ -50,11 +50,6 @@ describe('SaveOrDiscardComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component)
-      .toBeTruthy();
-  });
-
   it('should expose injected data', () => {
     expect(component.confirmData).toEqual(confirmData);
   });

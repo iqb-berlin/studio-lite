@@ -20,10 +20,6 @@ describe('StatusIndicationComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should accept progress inputs', () => {
     component.presentationProgress = 'some';
     component.responseProgress = 'complete';

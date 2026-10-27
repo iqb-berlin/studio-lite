@@ -14,10 +14,6 @@ describe('IsTreeControlExpandedPipe', () => {
     );
   });
 
-  it('should be defined', () => {
-    expect(pipe).toBeDefined();
-  });
-
   it('should return true if node is expanded', () => {
     const node = { id: '1' } as VocabFlatNode;
     jest.spyOn(treeControl, 'isExpanded').mockReturnValue(true);

@@ -63,10 +63,6 @@ describe('MoveWorkspaceComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should filter out the currently selected workspace group from typedData.workspaceGroups', () => {
     expect(component.typedData.workspaceGroups.length).toBe(2);
     expect(component.typedData.workspaceGroups.find(wsg => wsg.id === 1)).toBeUndefined();

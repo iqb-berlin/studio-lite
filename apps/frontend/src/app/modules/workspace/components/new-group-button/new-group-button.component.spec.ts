@@ -60,10 +60,6 @@ describe('NewGroupButtonComponent', () => {
     mockWorkspaceService.workspaceSettings.unitGroups = [];
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should add new group and save settings when dialog returns string', () => {
     const newGroupName = 'New Group';
     mockDialog.open.mockReturnValue({ afterClosed: () => of(newGroupName) });

@@ -139,10 +139,6 @@ describe('UnitPreviewComponent', () => {
     jest.restoreAllMocks();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('opens a print view with computed query params', () => {
     const urlTree = {} as UrlTree;
     (routerStub.createUrlTree as jest.Mock).mockReturnValue(urlTree);

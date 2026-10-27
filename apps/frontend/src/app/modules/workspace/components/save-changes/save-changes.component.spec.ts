@@ -24,10 +24,6 @@ describe('ReviewSaveChangesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should emit discardChanges', () => {
     const emitSpy = jest.spyOn(component.discardChanges, 'emit');
 

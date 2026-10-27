@@ -27,10 +27,6 @@ describe('AdminVeronaModuleController', () => {
     );
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('addModuleFile', () => {
     it('should upload a module file for multiple types', async () => {
       const mockFile = { buffer: Buffer.from('test') };

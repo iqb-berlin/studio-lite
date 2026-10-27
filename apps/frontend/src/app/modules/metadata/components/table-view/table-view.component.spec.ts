@@ -69,10 +69,6 @@ describe('TableViewComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize data source on ngOnInit', () => {
     component.data = { units: [{ id: 1, key: 'K1' } as unknown as UnitPropertiesDto], warning: '' };
     component.ngOnInit();

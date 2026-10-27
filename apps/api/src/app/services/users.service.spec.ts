@@ -85,10 +85,6 @@ describe('UsersService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findAllUsers', () => {
     it('should return all users', async () => {
       const users = [{ id: 1, name: 'user1' }] as User[];

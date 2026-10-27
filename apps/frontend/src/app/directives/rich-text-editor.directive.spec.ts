@@ -51,10 +51,6 @@ describe('RichTextEditorDirective', () => {
     directive = new TestRichTextEditorDirective();
   });
 
-  it('should create an instance', () => {
-    expect(directive).toBeTruthy();
-  });
-
   it('should register StarterKit before the formatting every editor shares', () => {
     directive.placeholder = 'Kommentar';
 

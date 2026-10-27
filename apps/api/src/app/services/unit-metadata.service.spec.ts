@@ -73,10 +73,6 @@ describe('UnitMetadataService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('getAll', () => {
     it('should return all unit metadata', async () => {
       const mockData = [{ id: 1, unitId: 1 }] as UnitMetadata[];

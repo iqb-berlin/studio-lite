@@ -109,10 +109,6 @@ describe('UnitPropertiesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('clears deprecated properties when requested', () => {
     component.unitForm.get('transcript')?.setValue('old');
     component.unitForm.get('reference')?.setValue('old');

@@ -36,10 +36,6 @@ describe('GroupAdminWorkspaceController', () => {
     controller = module.get<GroupAdminWorkspaceController>(GroupAdminWorkspaceController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('findOne', () => {
     it('should return a workspace', async () => {
       const mockWorkspace = { id: 1, name: 'WS' } as WorkspaceFullDto;

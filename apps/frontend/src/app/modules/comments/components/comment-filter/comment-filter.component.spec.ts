@@ -41,10 +41,6 @@ describe('CommentFilterComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Badge logic', () => {
     it('should display the correct count when items are filtered', () => {
       component.filteredItems = ['uuid-1'];

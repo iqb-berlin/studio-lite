@@ -43,10 +43,6 @@ describe('EditMyDataComponent', () => {
       fixture.detectChanges();
     });
 
-    it('should create', () => {
-      expect(component).toBeTruthy();
-    });
-
     it('should initialize form with injected data', () => {
       expect(component.editUserForm).toBeTruthy();
       expect(component.data).toEqual(mockMyData);

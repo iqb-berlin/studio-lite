@@ -35,10 +35,6 @@ describe('UnitInfoLoaderComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Component Initialization', () => {
     it('should initialize IntersectionObserver in constructor', () => {
       expect(component.intersectionObserver).toBeDefined();

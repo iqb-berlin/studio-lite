@@ -47,10 +47,6 @@ describe('UnitDataAreaComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should emit selectedRouterIndexChange on active link', fakeAsync(() => {
     const emitSpy = jest.spyOn(component.selectedRouterIndexChange, 'emit');
     (component as { nav?: { selectedIndex: number } }).nav = { selectedIndex: 2 };

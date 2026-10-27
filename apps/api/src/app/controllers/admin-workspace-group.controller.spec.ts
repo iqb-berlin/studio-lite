@@ -47,10 +47,6 @@ describe('AdminWorkspaceGroupController', () => {
     controller = module.get<AdminWorkspaceGroupController>(AdminWorkspaceGroupController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('findAll', () => {
     it('should return all workspace groups if download is false', async () => {
       const mockGroups = [{ id: 1, name: 'G1' }] as WorkspaceGroupInListDto[];

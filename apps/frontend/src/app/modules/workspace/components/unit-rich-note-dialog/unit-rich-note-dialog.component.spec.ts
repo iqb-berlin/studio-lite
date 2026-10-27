@@ -52,16 +52,6 @@ describe('UnitRichNoteDialogComponent', () => {
     dialogRefMock = createMock<MatDialogRef<UnitRichNoteDialogComponent>>();
   });
 
-  it('should create', async () => {
-    await setupTestBed({
-      workspaceId: 1,
-      unitId: 1,
-      tags: mockTags,
-      items: []
-    });
-    expect(component).toBeTruthy();
-  });
-
   it('should flatten tags on init', async () => {
     await setupTestBed({
       workspaceId: 1,

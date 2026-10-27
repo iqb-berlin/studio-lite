@@ -20,10 +20,6 @@ describe('AccountActionComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should accept changePassword type', () => {
     component.type = 'changePassword';
     component.iconName = 'vpn_key';

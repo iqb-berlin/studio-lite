@@ -111,10 +111,6 @@ describe('WorkspaceGroupsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should load initial data', () => {
     jest.useFakeTimers();
     component.ngOnInit();

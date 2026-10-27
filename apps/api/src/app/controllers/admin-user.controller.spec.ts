@@ -33,10 +33,6 @@ describe('AdminUserController', () => {
     controller = module.get<AdminUserController>(AdminUserController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('findOnesWorkspaceGroups', () => {
     it('should return workspace groups for a user', async () => {
       const mockGroups = [{ id: 1, name: 'G1' }] as WorkspaceGroupInListDto[];

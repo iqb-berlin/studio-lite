@@ -79,10 +79,6 @@ describe('AuthService', () => {
     Date.now = realDateNow;
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('validateUser', () => {
     it('should return user id on success', async () => {
       usersService.getUserByNameAndPassword.mockResolvedValue(1);

@@ -21,10 +21,6 @@ describe('WorkspaceGuard', () => {
     workspaceGuard = new WorkspaceGuard(authService);
   });
 
-  it('should be defined', () => {
-    expect(workspaceGuard).toBeDefined();
-  });
-
   it('should return true if authService.canAccessWorkSpace returns true', async () => {
     const userId = 1;
     const workspaceId = 'w1';

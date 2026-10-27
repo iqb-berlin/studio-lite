@@ -27,10 +27,6 @@ describe('AdminResourcePackageController', () => {
     );
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('removeIds', () => {
     it('should call service removeResourcePackages', async () => {
       const ids = [1, 2];

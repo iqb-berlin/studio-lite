@@ -17,10 +17,6 @@ const buildBaseProperties = (): UnitPropertiesDto => ({
 });
 
 describe('UnitMetadataStore', () => {
-  it('should create an instance', () => {
-    expect(new UnitMetadataStore({ id: 0 })).toBeTruthy();
-  });
-
   it('tracks player/editor/schemer changes and emits', () => {
     const store = new UnitMetadataStore(buildBaseProperties());
     const emitSpy = jest.fn();

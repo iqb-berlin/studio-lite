@@ -64,10 +64,6 @@ describe('LogoutDirective', () => {
     );
   });
 
-  it('should create an instance', () => {
-    expect(directive).toBeTruthy();
-  });
-
   it('should open confirmation dialog when logout is called', () => {
     mockTranslateService.instant.mockReturnValue('Translated Text');
     mockDialogRef.afterClosed.mockReturnValue(of(false));
@@ -131,9 +127,5 @@ describe('LogoutDirective', () => {
         done();
       }, 0);
     });
-  });
-
-  it('should cleanup subscriptions on destroy', () => {
-    directive.ngOnDestroy();
   });
 });

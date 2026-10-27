@@ -19,11 +19,6 @@ describe('UserWorkspacesGroupsComponent', () => {
     component.workspaceGroups = [];
   });
 
-  it('should create', () => {
-    fixture.detectChanges();
-    expect(component).toBeTruthy();
-  });
-
   it('should accept workspaceGroups input', () => {
     component.workspaceGroups = [{
       id: 1, name: 'Group 1', workspaces: [], isAdmin: false

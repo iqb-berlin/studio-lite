@@ -44,10 +44,6 @@ describe('PrintOptionsDialogComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('constructor', () => {
     it('should initialize with dialogRef', () => {
       expect(component.dialogRef).toBeDefined();

@@ -18,10 +18,6 @@ describe('FilledEntriesPipe', () => {
     pipe = new FilledEntriesPipe();
   });
 
-  it('should create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return an empty array for undefined input', () => {
     expect(pipe.transform(undefined)).toEqual([]);
   });

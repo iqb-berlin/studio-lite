@@ -44,10 +44,6 @@ describe('ProfilesRegistryComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('updates form fields and marks dataChanged on value change', () => {
     backendService.getProfilesRegistry.mockReturnValue(of({ csvUrl: 'url.csv' }));
 

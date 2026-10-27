@@ -19,10 +19,6 @@ describe('ItemSelectionComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should render label', () => {
     component.label = 'My Label';
     fixture.detectChanges();

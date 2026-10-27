@@ -22,10 +22,6 @@ describe('I18nService', () => {
     translateService = TestBed.inject(TranslateService) as jest.Mocked<TranslateService>;
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('default values', () => {
     it('should have correct default fileDateFormat', () => {
       expect(service.fileDateFormat).toBe('yyyy-MM-dd');

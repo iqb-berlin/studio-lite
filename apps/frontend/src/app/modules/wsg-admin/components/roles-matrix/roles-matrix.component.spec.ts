@@ -19,10 +19,6 @@ describe('RolesMatrixComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should have correct number of rows in dataSource', () => {
     expect(component.dataSource.length).toBeGreaterThan(0);
     // Based on the code seen: 15 items

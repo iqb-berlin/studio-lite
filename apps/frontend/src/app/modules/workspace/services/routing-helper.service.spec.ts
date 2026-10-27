@@ -1,20 +1,6 @@
-import { TestBed } from '@angular/core/testing';
 import { RoutingHelperService } from './routing-helper.service';
 
 describe('RoutingHelperService', () => {
-  let service: RoutingHelperService;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [RoutingHelperService]
-    });
-    service = TestBed.inject(RoutingHelperService);
-  });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('getSecondaryOutlet', () => {
     it('should return null when secondary outlet is not present', () => {
       const url = '/workspace/1';

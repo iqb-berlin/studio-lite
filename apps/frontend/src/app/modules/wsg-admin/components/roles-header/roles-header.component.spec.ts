@@ -29,10 +29,6 @@ describe('RolesHeaderComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should open roles matrix dialog', () => {
     component.showRolesMatrix();
     expect(mockMatDialog.open).toHaveBeenCalledWith(RolesMatrixComponent, { width: '800px' });

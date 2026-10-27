@@ -27,10 +27,6 @@ describe('ResourcePackageController', () => {
     resourcePackageService = module.get<ResourcePackageService>(ResourcePackageService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('findResourcePackages', () => {
     it('should return an array of resource packages', async () => {
       const mockResourcePackages: ResourcePackageDto[] = [

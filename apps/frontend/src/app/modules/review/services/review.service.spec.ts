@@ -91,10 +91,6 @@ describe('ReviewService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('Initial State', () => {
     it('should initialize with default values', () => {
       expect(service.reviewId).toBe(0);

@@ -61,10 +61,6 @@ describe('WorkspaceMenuComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should open add object dialog and emit event', () => {
     mockMatDialog.open.mockReturnValue({
       afterClosed: () => of('new-workspace')

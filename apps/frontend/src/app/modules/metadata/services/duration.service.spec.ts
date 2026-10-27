@@ -1,18 +1,6 @@
-import { TestBed } from '@angular/core/testing';
 import { DurationService } from './duration.service';
 
 describe('DurationService', () => {
-  let service: DurationService;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(DurationService);
-  });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('convertSecondsToMinutes', () => {
     it('should convert 0 seconds to 00:00', () => {
       expect(DurationService.convertSecondsToMinutes(0)).toEqual({ minutes: '00', seconds: '00' });

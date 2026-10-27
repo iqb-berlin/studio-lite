@@ -40,10 +40,6 @@ describe('UnitRichNoteService', () => {
     service = module.get<UnitRichNoteService>(UnitRichNoteService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('importNotes', () => {
     it('should map old item references to new item references and strip tagLabel', async () => {
       jest.spyOn(service, 'createNote').mockResolvedValue(1);

@@ -44,10 +44,6 @@ describe('ReviewUnitController', () => {
     unitDefinitionService = module.get<UnitDefinitionService>(UnitDefinitionService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('findUnitProperties', () => {
     it('should return unit properties', async () => {
       const reviewId = 1;

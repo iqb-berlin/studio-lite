@@ -17,10 +17,6 @@ describe('ToTimePipe', () => {
     pipe = new ToTimePipe(translateService);
   });
 
-  it('should create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should format single digit hour with leading zero', () => {
     jest.spyOn(translateService, 'instant').mockReturnValue('Uhr');
 

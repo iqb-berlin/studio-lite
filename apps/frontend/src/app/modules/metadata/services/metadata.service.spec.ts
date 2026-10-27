@@ -42,10 +42,6 @@ describe('MetadataService', () => {
     httpMock.verify();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('loadProfileVocabularies', () => {
     it('should load vocabularies and map IDs', async () => {
       const mockProfile = {

@@ -27,10 +27,6 @@ describe('AppService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('constants', () => {
     it('should have correct standardLogo', () => {
       expect(standardLogo).toEqual({

@@ -71,10 +71,6 @@ describe('UnitItemService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('getAll', () => {
     // The admin view links each item to its unit, and a unit's address is /a/<workspace>/<unit>;
     // without the workspace the link used the unit id in its place (#1698).

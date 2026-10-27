@@ -98,11 +98,6 @@ describe('MoveUnitComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component)
-      .toBeTruthy();
-  });
-
   it('should initialize workspaceList correctly excluding current workspace and low access level', () => {
     // Total workspaces in mock: 3
     // WS #1: excluded (current)

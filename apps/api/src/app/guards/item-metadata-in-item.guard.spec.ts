@@ -34,10 +34,6 @@ describe('ItemMetadataInItemGuard', () => {
     unitItemMetadataService.isOfItem.mockResolvedValue(true);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should pass when the row in the route is one of the item in the route', async () => {
     expect(await guard.canActivate(contextFor({ id: '5', item_uuid: uuid, unit_id: '10' }))).toBe(true);
     expect(unitItemMetadataService.isOfItem).toHaveBeenCalledWith(5, uuid);

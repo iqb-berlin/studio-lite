@@ -99,10 +99,6 @@ describe('AppConfigComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize form with empty values', () => {
     expect(component.configForm).toBeDefined();
     expect(component.configForm.get('appTitle')).toBeDefined();

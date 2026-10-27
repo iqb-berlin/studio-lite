@@ -50,10 +50,6 @@ describe('WorkspaceUnitItemController', () => {
     unitItemService = module.get<UnitItemService>(UnitItemService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   // The access guards ask about the workspace in the path alone (#1775).
   it.each(['findAll', 'create', 'remove', 'findItemCommentsByUnitId'] as const)(
     'should hold the unit of %s to the workspace in its path',

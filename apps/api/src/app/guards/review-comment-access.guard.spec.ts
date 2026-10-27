@@ -43,10 +43,6 @@ describe('ReviewCommentAccessGuard', () => {
     reviewService.workspaceIdOf.mockResolvedValue(11);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should let a review login pass without asking for an access level', async () => {
     expect(await guard.canActivate(contextFor(reviewSession, { review_id: '2' }))).toBe(true);
     expect(workspaceUserService.canComment).not.toHaveBeenCalled();

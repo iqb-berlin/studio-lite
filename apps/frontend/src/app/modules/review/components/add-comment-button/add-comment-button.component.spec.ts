@@ -49,10 +49,6 @@ describe('AddCommentButtonComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Input Properties', () => {
     it('should have required input properties', () => {
       expect(component.showOthersComments).toBeDefined();

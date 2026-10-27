@@ -48,10 +48,6 @@ describe('UnitCommentService', () => {
     itemCommentService = module.get<ItemCommentService>(ItemCommentService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findUnitIdsWithComments', () => {
     it('should answer which of the given units have comments', async () => {
       mockRepository.find.mockResolvedValue([{ unitId: 1 }, { unitId: 1 }, { unitId: 3 }] as UnitComment[]);

@@ -39,16 +39,6 @@ describe('ConfirmDialogComponent', () => {
     }).compileComponents();
   });
 
-  it('should create a component', async () => {
-    createComponent({
-      title: '',
-      content: '',
-      confirmButtonLabel: '',
-      showCancel: true
-    });
-    expect(component).toBeTruthy();
-  });
-
   it('should take default properties for those which are omitted on #ngOnInit()', async () => {
     createComponent({
       title: '',

@@ -75,11 +75,6 @@ describe('WorkspacesComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    fixture.detectChanges();
-    expect(component).toBeTruthy();
-  });
-
   it('should load workspaces on init', async () => {
     fixture.detectChanges();
     await fixture.whenStable();

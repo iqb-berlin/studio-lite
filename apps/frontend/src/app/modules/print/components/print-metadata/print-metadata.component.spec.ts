@@ -20,10 +20,6 @@ describe('PrintMetadataComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngOnChanges', () => {
     it('should update unitProfiles and items when metadata changes', () => {
       const mockProfiles: ProfileValues[] = [

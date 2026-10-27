@@ -9,10 +9,6 @@ describe('SplitterService', () => {
     service = TestBed.inject(SplitterService);
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('update', () => {
     it('should update panelSizes', () => {
       Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: 1000 });

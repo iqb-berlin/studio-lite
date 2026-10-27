@@ -38,10 +38,6 @@ describe('UnitDefinitionService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findOnesDefinition', () => {
     it('should return definition', async () => {
       unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Unit);

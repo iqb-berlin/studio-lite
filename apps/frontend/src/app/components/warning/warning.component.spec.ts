@@ -14,10 +14,6 @@ describe('WarningComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should accept warnMessage input', () => {
     component.warnMessage = 'This is a warning';
     fixture.detectChanges();

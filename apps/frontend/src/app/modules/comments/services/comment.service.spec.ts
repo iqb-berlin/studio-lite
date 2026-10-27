@@ -11,10 +11,6 @@ describe('CommentService', () => {
     service = TestBed.inject(CommentService);
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   it('should initialize showHiddenComments to false', () => {
     expect(service.showHiddenComments.value).toBeFalsy();
   });

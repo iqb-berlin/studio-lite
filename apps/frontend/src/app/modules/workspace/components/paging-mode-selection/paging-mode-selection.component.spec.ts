@@ -31,10 +31,6 @@ describe('PagingModeSelectionComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should have paging modes defined', () => {
     expect(component.pagingModes).toEqual(['buttons', 'separate', 'concat-scroll', 'concat-scroll-snap']);
   });

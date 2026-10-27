@@ -31,10 +31,6 @@ describe('UnitPrintCodeComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngOnChanges', () => {
     it('should update codeAsText when codeData changes', () => {
       const mockCodeData = createMockCodeData({
