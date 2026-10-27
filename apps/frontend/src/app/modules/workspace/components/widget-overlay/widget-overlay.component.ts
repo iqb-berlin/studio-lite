@@ -88,6 +88,16 @@ export class WidgetOverlayComponent implements AfterViewInit, OnDestroy {
         break;
 
       case 'vowReturnRequested':
+        // `saveState: false` cancels the widget, and then the player gets no return, as with the
+        // close button. Otherwise a string `state` is the widget's final state; anything else keeps
+        // the last one, since widgets send the key without a value as well (#1928).
+        if (msgData.saveState === false) {
+          this.close();
+          break;
+        }
+        if (typeof msgData.state === 'string') {
+          this.widgetState = msgData.state;
+        }
         this.continue();
         break;
 
