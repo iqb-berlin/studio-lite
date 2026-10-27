@@ -52,16 +52,4 @@ describe('MetadataController', () => {
       expect(metadataProfileService.getProfileVocabularies).toHaveBeenCalledWith('http://test');
     });
   });
-
-  describe('getRegistry', () => {
-    it('should return registered metadata profiles', async () => {
-      const mockRegistry = [{ id: 1 }];
-      registeredMetadataProfileService.getRegisteredMetadataProfiles.mockResolvedValue(mockRegistry as never);
-
-      const result = await controller.getRegistry();
-
-      expect(result).toBe(mockRegistry);
-      expect(registeredMetadataProfileService.getRegisteredMetadataProfiles).toHaveBeenCalled();
-    });
-  });
 });

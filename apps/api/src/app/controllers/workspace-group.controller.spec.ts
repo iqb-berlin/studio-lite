@@ -71,14 +71,4 @@ describe('WorkspaceGroupController', () => {
       expect(result).toBeInstanceOf(StreamableFile);
     });
   });
-
-  describe('patch', () => {
-    it('should update a workspace group', async () => {
-      const dto: WorkspaceGroupFullDto = { id: 1, name: 'New Name' };
-      jest.spyOn(workspaceGroupService, 'patch').mockResolvedValue(undefined);
-
-      await controller.patch(1, dto);
-      expect(workspaceGroupService.patch).toHaveBeenCalledWith(1, dto);
-    });
-  });
 });

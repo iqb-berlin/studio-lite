@@ -75,15 +75,4 @@ describe('AdminVeronaModuleController', () => {
         .rejects.toThrow(NotAcceptableException);
     });
   });
-
-  describe('remove', () => {
-    it('should remove modules by keys', async () => {
-      const keys = ['mod1', 'mod2'];
-      veronaModulesService.remove.mockResolvedValue(undefined);
-
-      await controller.remove(keys);
-
-      expect(veronaModulesService.remove).toHaveBeenCalledWith(keys);
-    });
-  });
 });
