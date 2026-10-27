@@ -8,9 +8,10 @@ import * as crypto from 'crypto';
 import { UsersService } from './users.service';
 import { ReviewService } from './review.service';
 import { RefreshToken } from '../entities/refresh-token.entity';
+import { UsedRefreshToken } from '../entities/used-refresh-token.entity';
 import UserSession from '../entities/user-session.entity';
 import { findOrphanedSessionIds } from '../utils/orphaned-sessions';
-import { PASSIVE_THRESHOLD_MS } from '../app.constants';
+import { PASSIVE_THRESHOLD_MS, REFRESH_TOKEN_REUSE_GRACE_MS } from '../app.constants';
 
 /**
  * Everything about being logged in: checking credentials, issuing the token pair, renewing it, and
@@ -40,7 +41,9 @@ export class AuthService {
     @Inject(getRepositoryToken(RefreshToken))
     private refreshTokenRepository: Repository<RefreshToken>,
     @Inject(getRepositoryToken(UserSession))
-    private userSessionRepository: Repository<UserSession>
+    private userSessionRepository: Repository<UserSession>,
+    @Inject(getRepositoryToken(UsedRefreshToken))
+    private usedRefreshTokenRepository: Repository<UsedRefreshToken>
   ) {
   }
 
@@ -241,10 +244,38 @@ export class AuthService {
     return true;
   }
 
+  /**
+   * A refresh token that was exchanged before and comes back has been copied: whoever used it first
+   * got the new pair. Which side is the copy cannot be told, so the session ends for both, the
+   * token that took this one's place included (RFC 9700, 4.14.2). Within the grace period the
+   * second use is taken for a second tab of the same browser and only refused.
+   *
+   * The warning is no proof of theft: a tab closed during a refresh sends the old token again when
+   * it is reopened.
+   */
+  private async endSessionOfReusedToken(token: string): Promise<void> {
+    const usedToken = await this.usedRefreshTokenRepository.findOne({
+      where: { tokenHash: AuthService.hashToken(token) }
+    });
+    if (!usedToken || Date.now() - usedToken.usedAt.getTime() <= REFRESH_TOKEN_REUSE_GRACE_MS) {
+      return;
+    }
+    this.logger.warn(
+      `Refresh token of user '${usedToken.userId}' was used again after its exchange; ` +
+      `ending session '${usedToken.sessionId}'.`
+    );
+    await this.logoutSession(usedToken.userId, usedToken.sessionId);
+  }
+
   async refreshAccessToken(token: string): Promise<{ accessToken: string, refreshToken: string } | null> {
     const refreshToken = await this.findRefreshTokenByToken(token);
 
-    if (!refreshToken || refreshToken.expiresAt < new Date()) {
+    if (!refreshToken) {
+      await this.endSessionOfReusedToken(token);
+      return null;
+    }
+
+    if (refreshToken.expiresAt < new Date()) {
       return null;
     }
 
@@ -269,8 +300,22 @@ export class AuthService {
     // The new token is written before the old one is dropped, so the session is never
     // without a key: a session with no unexpired refresh token is reported as orphaned and
     // may be deleted, and the row being rotated belongs to someone who is working.
+    // The old token is recorded as used before it goes, so that a second use can be told apart
+    // from an unknown token. Two refreshes with the same token in flight record the same hash;
+    // the second record is dropped rather than failing the refresh.
     const { sessionId } = userSession;
     const newRefreshToken = await this.generateRefreshToken(user.id, sessionId);
+    await this.usedRefreshTokenRepository
+      .createQueryBuilder()
+      .insert()
+      .values({
+        tokenHash: refreshToken.tokenHash,
+        userId: user.id,
+        sessionId,
+        usedAt: new Date()
+      })
+      .orIgnore()
+      .execute();
     await this.refreshTokenRepository.delete({ tokenHash: refreshToken.tokenHash });
 
     const accessToken = this.jwtService.sign(

@@ -148,4 +148,36 @@ describe('Auth API tests', () => {
       );
     });
   });
+
+  // ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
+  // A refresh token that comes back after its exchange was copied, and the server cannot tell which
+  // side is the copy: more than 30 seconds after the exchange, the session ends for both (#1935).
+  // Sooner, the second use is taken for a second tab of the same browser and only refused.
+  describe('5. POST /api/refresh', () => {
+    it('401 negative test: should end the session when an exchanged refresh token comes back', () => {
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(login => {
+        expect(login.status).to.equal(201);
+        const exchangedToken = login.body.refreshToken;
+        cy.refreshTokenAPI(exchangedToken).then(first => {
+          expect(first.status).to.equal(201);
+          cy.refreshTokenAPI(exchangedToken).then(raced => {
+            expect(raced.status).to.equal(401);
+          });
+          // The session survived the second use within the grace period.
+          cy.refreshTokenAPI(first.body.refreshToken).then(second => {
+            expect(second.status).to.equal(201);
+            // One second past REFRESH_TOKEN_REUSE_GRACE_MS in time.constants.ts.
+            cy.wait(31000);
+            cy.refreshTokenAPI(exchangedToken).then(copied => {
+              expect(copied.status).to.equal(401);
+            });
+            // The token that took the copied one's place goes with the session.
+            cy.refreshTokenAPI(second.body.refreshToken).then(replacement => {
+              expect(replacement.status).to.equal(401);
+            });
+          });
+        });
+      });
+    });
+  });
 });

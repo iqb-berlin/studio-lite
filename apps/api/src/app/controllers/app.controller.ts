@@ -69,7 +69,10 @@ export class AppController {
   @Post('refresh')
   @ApiTags('auth')
   @ApiCreatedResponse({ description: 'Token successfully refreshed.' })
-  @ApiUnauthorizedResponse({ description: 'Invalid or expired refresh token.' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or expired refresh token. A token used again more than 30 seconds after its ' +
+      'exchange also ends the session it belongs to.'
+  })
   async refresh(@Body() body: { refreshToken: string }) {
     const tokens = await this.authService.refreshAccessToken(body.refreshToken);
     if (!tokens) throw new UnauthorizedException();
