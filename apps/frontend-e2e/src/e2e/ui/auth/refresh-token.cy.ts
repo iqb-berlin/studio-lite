@@ -203,6 +203,22 @@ describe('Token Refresh UI Logic', () => {
           ]
         },
         {
+          id: 104,
+          name: 'passiveUser',
+          isLoggedIn: true,
+          lastActivity: passiveDate,
+          isAdmin: false,
+          email: '',
+          description: '',
+          sessions: [
+            {
+              sessionId: 's3',
+              lastActivity: passiveDate,
+              activityStatus: 'passive'
+            }
+          ]
+        },
+        {
           id: 103,
           name: 'inactiveUser',
           isLoggedIn: false,
@@ -239,6 +255,22 @@ describe('Token Refresh UI Logic', () => {
       .parent()
       .find('.inactive-dot')
       .should('exist');
+    // A resumable session is no longer hidden behind the grey dot (#1902)
+    cy.get('mat-row').contains('mat-cell', 'passiveUser')
+      .parent()
+      .find('.inactive-dot')
+      .should('not.exist');
+    cy.get('mat-row').contains('mat-cell', 'passiveUser')
+      .parent()
+      .find('.passive-dot')
+      .should('have.length', 1)
+      .trigger('mouseenter');
+    cy.translate(Cypress.expose('locale')).then(json => {
+      cy.get('.mat-mdc-tooltip')
+        .invoke('text')
+        .should('contain', json.user.passive)
+        .and('match', /\(\d{2}\.\d{2}\., \d{2}:\d{2}\)/);
+    });
   });
 
   it('deletes user', () => {
