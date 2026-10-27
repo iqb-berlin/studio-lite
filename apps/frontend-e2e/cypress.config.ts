@@ -1,7 +1,12 @@
 import { defineConfig } from 'cypress';
 import { nxE2EPreset } from '@nx/cypress/plugins/cypress-preset';
 import { Client } from 'pg';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { gunzipSync } from 'node:zlib';
 import coverageTask from '@cypress/code-coverage/task';
+import schemerProvenance from './src/fixtures/iqb-schemer-2.9.0.provenance.json';
 // The release version, sent as the `app-version` header the API compares against (#1643)
 import packageJson from '../../package.json';
 
@@ -60,6 +65,17 @@ export default defineConfig({
         return launchOptions;
       });
       on('task', {
+        readSchemerFixture() {
+          const archive = readFileSync(join(__dirname, 'src/fixtures/iqb-schemer-2.9.0.html.gz'));
+          if (createHash('sha256').update(archive).digest('hex') !== schemerProvenance.archive_sha256) {
+            throw new Error('Schemer fixture archive checksum mismatch');
+          }
+          const html = gunzipSync(archive);
+          if (createHash('sha256').update(html).digest('hex') !== schemerProvenance.sha256) {
+            throw new Error('Schemer fixture HTML checksum mismatch');
+          }
+          return html.toString('utf8');
+        },
         async resetDatabase() {
           // Destructured instead of accessed: process.env is an index signature,
           // so tsconfig's noPropertyAccessFromIndexSignature forbids the dot while

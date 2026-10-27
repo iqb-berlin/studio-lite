@@ -6,5 +6,7 @@
   "coding_components_version": "5.0.0",
   "tiptap_core_version": "3.32.0",
   "ngx_tiptap_version": "14.0.1",
-  "sha256": "885318d5619e4ed0f77b5c83f64066a386cca38252860a44e1f069188339b798"
+  "sha256": "885318d5619e4ed0f77b5c83f64066a386cca38252860a44e1f069188339b798",
+  "fixture_encoding": "gzip",
+  "archive_sha256": "0c6bc2be01d39fc34654f684beff538163062fedc5f1acb8732b1eaa71c44ee0"
 }

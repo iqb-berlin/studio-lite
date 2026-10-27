@@ -456,9 +456,9 @@ Cypress.Commands.add('getWsByGroupAPI',
   });
 
 // 22
-Cypress.Commands.add('addModuleAPI', (module:string, token: string) => {
+Cypress.Commands.add('addModuleAPI', (module:string, token: string, contents?: string) => {
   const authorization = `bearer ${token}`;
-  cy.fixture(module, 'binary')
+  (contents === undefined ? cy.fixture(module, 'binary') : cy.wrap(contents, { log: false }))
     .then(fileContent => {
       const formData = new FormData();
       formData.append('file', new Blob([fileContent], { type: 'html' }), module);

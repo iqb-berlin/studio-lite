@@ -2,9 +2,9 @@ import { AccessLevel } from '../../../support/testData';
 import { addFirstUser } from '../../../support/helpers';
 
 [
-  { fixture: 'iqb-schemer-2.8.4.html', schemerKey: 'iqb-schemer@2.8' },
-  { fixture: 'iqb-schemer-2.9.0.html', schemerKey: 'iqb-schemer@2.9' }
-].forEach(({ fixture, schemerKey }) => {
+  { fixture: 'iqb-schemer-2.8.4.html', schemerKey: 'iqb-schemer@2.8', archived: false },
+  { fixture: 'iqb-schemer-2.9.0.html', schemerKey: 'iqb-schemer@2.9', archived: true }
+].forEach(({ fixture, schemerKey, archived }) => {
   describe(`Coding instructions saved through ${fixture}`, () => {
     const group = { id: '', name: 'RichTextGroup' };
     const workspace = { id: '', name: 'RichTextWorkspace' };
@@ -26,7 +26,8 @@ import { addFirstUser } from '../../../support/helpers';
       addFirstUser();
       cy.window().then(win => {
         token = win.localStorage.getItem('id_token') || '';
-        cy.addModuleAPI(fixture, token).its('status').should('equal', 201);
+        const contents = archived ? cy.task<string>('readSchemerFixture') : cy.fixture<string>(fixture, 'binary');
+        contents.then(html => cy.addModuleAPI(fixture, token, html).its('status').should('equal', 201));
         cy.getUserIdAPI(token).then(authData => {
           userId = String(authData.body.userId);
           cy.createGroupAPI(group, token).then(createdGroup => {
