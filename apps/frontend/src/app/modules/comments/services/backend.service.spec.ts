@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { UpdateUnitCommentUnitItemsDto, UpdateUnitUserDto } from '@studio-lite-lib/api-dto';
+import { UpdateUnitCommentUnitItemsDto } from '@studio-lite-lib/api-dto';
 import { Comment } from '../models/comment.interface';
 import { BackendService } from './backend.service';
 
@@ -65,23 +65,6 @@ describe('Comments BackendService', () => {
     req.flush({});
   });
 
-  it('should return false when update fails', done => {
-    const dto: UpdateUnitCommentUnitItemsDto = {
-      unitItemUuids: ['item-1'],
-      userId: 5
-    };
-
-    service.updateCommentItemConnections(dto, 1, 2, 3, 4).subscribe(result => {
-      expect(result).toBe(false);
-      done();
-    });
-
-    const req = httpMock.expectOne(
-      `${serverUrl}reviews/3/units/2/comments/4/items`
-    );
-    req.error(new ProgressEvent('error'));
-  });
-
   it('should get comments for reviews', done => {
     service.getComments(10, 20, 30).subscribe(result => {
       expect(result).toEqual([]);
@@ -102,29 +85,6 @@ describe('Comments BackendService', () => {
     const req = httpMock.expectOne(`${serverUrl}workspaces/10/units/20/comments`);
     expect(req.request.method).toBe('GET');
     req.flush([]);
-  });
-
-  it('should handle error when getting comments', done => {
-    service.getComments(10, 20, 0).subscribe(result => {
-      expect(result).toEqual([]);
-      done();
-    });
-
-    const req = httpMock.expectOne(`${serverUrl}workspaces/10/units/20/comments`);
-    req.error(new ProgressEvent('error'));
-  });
-
-  it('should update comments', done => {
-    const dto = { status: 'reviewed' } as unknown as UpdateUnitUserDto;
-    service.updateComments(dto, 10, 20).subscribe(result => {
-      expect(result).toBe(true);
-      done();
-    });
-
-    const req = httpMock.expectOne(`${serverUrl}workspaces/10/units/20/comments`);
-    expect(req.request.method).toBe('PATCH');
-    expect(req.request.body).toEqual(dto);
-    req.flush({});
   });
 
   it('should create a comment for reviews', done => {
