@@ -151,12 +151,12 @@ export class CodingReportClass {
     let hasRules = false;
 
     codingVariable.codes?.forEach((code: CodeData) => {
-      if (code.manualInstruction.length === 0) manualCodingOnly = false;
+      // Both are optional in the coding scheme spec, and a code can come without either (#1873).
+      if (!code.manualInstruction) manualCodingOnly = false;
 
-      code.ruleSets.forEach((ruleSet: RuleSet) => {
+      (code.ruleSets ?? []).forEach((ruleSet: RuleSet) => {
         hasRules ||= ruleSet.rules.length > 0;
-        manualCodingOnly &&=
-          code.manualInstruction.length > 0 && ruleSet.rules.length === 0;
+        manualCodingOnly &&= ruleSet.rules.length === 0;
       });
 
       closedCoding ||= ['RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(

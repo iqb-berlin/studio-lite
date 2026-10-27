@@ -1,0 +1,60 @@
+{
+  "version": "3.0",
+  "variableCodings": [
+    {
+      "id": "auto_1",
+      "alias": "auto_1",
+      "label": "",
+      "sourceType": "BASE",
+      "manualInstruction": "",
+      "codeModel": "RULES_ONLY",
+      "ruleSets": [
+        { "ruleSetType": "MATCH", "ruleSetOperator": "OR", "ruleSetValue": "a", "rules": [] }
+      ],
+      "codes": [
+        {
+          "id": 1,
+          "score": 1,
+          "type": "FULL_CREDIT",
+          "label": "Code 1",
+          "ruleSetIndex": 0,
+          "manualInstruction": ""
+        },
+        {
+          "id": 0,
+          "score": 0,
+          "type": "RESIDUAL_AUTO",
+          "label": "Code 0",
+          "ruleSetIndex": null,
+          "manualInstruction": ""
+        }
+      ]
+    },
+    {
+      "id": "manual_1",
+      "alias": "manual_1",
+      "label": "",
+      "sourceType": "BASE",
+      "manualInstruction": "",
+      "codeModel": "MANUAL_ONLY",
+      "codes": [
+        {
+          "id": 1,
+          "score": 1,
+          "type": "FULL_CREDIT",
+          "label": "Code 1",
+          "ruleSetIndex": null,
+          "manualInstruction": "<p>Anweisung A</p>"
+        },
+        {
+          "id": 0,
+          "score": 0,
+          "type": "NO_CREDIT",
+          "label": "Code 0",
+          "ruleSetIndex": null,
+          "manualInstruction": "<p>Anweisung B</p>"
+        }
+      ]
+    }
+  ]
+}

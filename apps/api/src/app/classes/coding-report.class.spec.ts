@@ -91,6 +91,60 @@ describe('CodingReportClass', () => {
 
       expect(result.every(row => row.validation !== 'Fehler')).toBe(true);
     });
+
+    // A scheme whose codes carry no rule sets of their own failed the whole report (#1873).
+    it('reports a unit whose codes have no rule sets', () => {
+      const units = [{
+        id: 13,
+        key: 'UNIT1',
+        name: '',
+        schemer: 'iqb-schemer@2.8',
+        variables: [
+          { id: 'auto_1', type: 'string' },
+          { id: 'manual_1', type: 'string' }
+        ],
+        metadata: { items: [] },
+        scheme: JSON.stringify({
+          version: '3.0',
+          variableCodings: [{
+            id: 'auto_1',
+            alias: 'auto_1',
+            sourceType: 'BASE',
+            ruleSets: [{
+              ruleSetType: 'MATCH', ruleSetOperator: 'OR', ruleSetValue: 'a', rules: []
+            }],
+            codes: [
+              {
+                id: 1, score: 1, type: 'FULL_CREDIT', ruleSetIndex: 0, manualInstruction: ''
+              },
+              {
+                id: 0, score: 0, type: 'RESIDUAL_AUTO', ruleSetIndex: null, manualInstruction: ''
+              }
+            ]
+          }, {
+            id: 'manual_1',
+            alias: 'manual_1',
+            sourceType: 'BASE',
+            codes: [
+              {
+                id: 1, score: 1, type: 'FULL_CREDIT', ruleSetIndex: null, manualInstruction: '<p>Anweisung A</p>'
+              },
+              {
+                id: 0, score: 0, type: 'NO_CREDIT', ruleSetIndex: null, manualInstruction: '<p>Anweisung B</p>'
+              }
+            ]
+          }]
+        })
+      }] as unknown as UnitPropertiesDto[];
+
+      const result = CodingReportClass.build(1, units);
+
+      expect(result.map(row => [row.variable, row.codingType])).toEqual([
+        ['auto_1', 'automatisch'],
+        ['manual_1', 'manuell']
+      ]);
+    });
+
     it('reports a unit whose scheme cannot be used with one row', () => {
       const units = [{
         id: 12, key: 'OLD', name: 'Alt', schemer: 'schemer@1.4.0', scheme: '{}'
@@ -245,6 +299,39 @@ describe('CodingReportClass', () => {
           ruleSets: [{ rules: [] }]
         }]
       } as unknown as VariableCodingData);
+
+      expect(codingType).toBe('keine Regeln');
+    });
+
+    // Codes without rule sets or manual instruction, both optional in the spec (#1873).
+    it('maps manual codes without rule sets to manuell', () => {
+      const codingType = CodingReportClass.determineCodingType({
+        id: 'v',
+        sourceType: 'BASE',
+        codes: [{ id: 1, type: 'FULL_CREDIT', manualInstruction: '<p>Anweisung A</p>' },
+          { id: 0, type: 'NO_CREDIT', manualInstruction: '<p>Anweisung B</p>' }]
+      });
+
+      expect(codingType).toBe('manuell');
+    });
+
+    it('maps closed codes without rule sets to automatisch', () => {
+      const codingType = CodingReportClass.determineCodingType({
+        id: 'v',
+        sourceType: 'BASE',
+        codes: [{ id: 1, type: 'FULL_CREDIT', manualInstruction: '' },
+          { id: 0, type: 'RESIDUAL_AUTO', manualInstruction: '' }]
+      });
+
+      expect(codingType).toBe('automatisch');
+    });
+
+    it('maps codes without rule sets and manual instruction to keine Regeln', () => {
+      const codingType = CodingReportClass.determineCodingType({
+        id: 'v',
+        sourceType: 'BASE',
+        codes: [{ id: 1, type: 'FULL_CREDIT' }]
+      });
 
       expect(codingType).toBe('keine Regeln');
     });
