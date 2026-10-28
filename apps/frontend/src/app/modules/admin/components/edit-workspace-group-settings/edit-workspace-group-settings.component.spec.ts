@@ -5,13 +5,12 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideHttpClient } from '@angular/common/http';
-import { BehaviorSubject, of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { WorkspaceGroupFullDto, WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { EditWorkspaceGroupSettingsComponent } from './edit-workspace-group-settings.component';
 import { environment } from '../../../../../environments/environment';
 import { EditWorkspaceGroupComponentData } from '../../models/edit-workspace-group-component-data.type';
 import { BackendService } from '../../services/backend.service';
-import { WsgAdminService } from '../../../wsg-admin/services/wsg-admin.service';
 import { Profile } from '../../../../models/profile.type';
 
 global.fetch = jest.fn(() => Promise.resolve({
@@ -22,8 +21,6 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
   let component: EditWorkspaceGroupSettingsComponent;
   let fixture: ComponentFixture<EditWorkspaceGroupSettingsComponent>;
   let backendService: jest.Mocked<BackendService>;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let wsgAdminService: jest.Mocked<WsgAdminService>;
 
   const mockDialogData: EditWorkspaceGroupComponentData = {
     wsg: {
@@ -58,10 +55,6 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
       getWorkspaceGroupById: jest.fn()
     };
 
-    const wsgAdminServiceMock = {
-      selectedWorkspaceGroupSettings: new BehaviorSubject(mockSettings)
-    };
-
     await TestBed.configureTestingModule({
       imports: [
         EditWorkspaceGroupSettingsComponent,
@@ -74,7 +67,6 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
       providers: [
         provideHttpClient(),
         { provide: BackendService, useValue: backendServiceMock },
-        { provide: WsgAdminService, useValue: wsgAdminServiceMock },
         {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl
@@ -88,7 +80,6 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
       .compileComponents();
 
     backendService = TestBed.inject(BackendService) as jest.Mocked<BackendService>;
-    wsgAdminService = TestBed.inject(WsgAdminService) as jest.Mocked<WsgAdminService>;
 
     backendService.getWorkspaceGroupById.mockReturnValue(of(mockWorkspaceGroup));
 
@@ -125,6 +116,36 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
 
     expect(component.fetchedProfiles).toEqual([]);
     expect(component.formData.profilesSelected).toEqual([]);
+  });
+
+  // Saving before the stored profiles are in would replace them with an empty list (#1960).
+  describe('save button', () => {
+    const save = (): HTMLButtonElement => fixture.nativeElement
+      .querySelector('[data-cy="admin-edit-workspace-group-settings-save-button"]');
+    const notLoaded = (): HTMLElement | null => fixture.nativeElement
+      .querySelector('[data-cy="admin-edit-workspace-group-settings-not-loaded"]');
+
+    it('should stay disabled until the stored profiles have loaded', () => {
+      const group = new Subject<WorkspaceGroupFullDto | boolean>();
+      backendService.getWorkspaceGroupById.mockReturnValue(group);
+      fixture.detectChanges();
+
+      expect(save().disabled).toBe(true);
+      expect(notLoaded()).toBeNull();
+
+      group.next(mockWorkspaceGroup);
+      fixture.detectChanges();
+
+      expect(save().disabled).toBe(false);
+    });
+
+    it('should stay disabled and say so when the stored profiles could not be loaded', () => {
+      backendService.getWorkspaceGroupById.mockReturnValue(of(false));
+      fixture.detectChanges();
+
+      expect(save().disabled).toBe(true);
+      expect(notLoaded()).not.toBeNull();
+    });
   });
 
   it('should update formData when hasChanged is called', () => {

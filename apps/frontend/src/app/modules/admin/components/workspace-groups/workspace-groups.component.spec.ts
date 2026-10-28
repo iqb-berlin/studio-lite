@@ -119,20 +119,12 @@ describe('WorkspaceGroupsComponent', () => {
     expect(mockBackendService.getWorkspaceGroupList).toHaveBeenCalled();
   });
 
-  it('should edit group', () => {
+  // Settings sent along would be laid over the stored ones and wipe the group's profiles (#1960).
+  it('should send the new name of a group and none of its settings', () => {
     const group = { id: 1, name: 'oldGroup' } as WorkspaceGroupInListDto;
     const groupData = new UntypedFormGroup({ name: new FormControl('newGroup') });
     component.editGroup({ selection: [group], group: groupData });
-    expect(mockBackendService.changeWorkspaceGroup)
-      .toHaveBeenCalledWith(expect.objectContaining({ id: 1, name: 'newGroup' }));
-    expect(mockSnackBar.open).toHaveBeenCalledWith('admin.group-edited', '', expect.anything());
-  });
-
-  it('should edit group settings', () => {
-    component.editGroupSettings({ states: [], profiles: [], selectedRow: 1 });
-    expect(mockBackendService.setWorkspaceGroupProfiles).toHaveBeenCalledWith(
-      expect.anything(), 1
-    );
+    expect(mockBackendService.changeWorkspaceGroup).toHaveBeenCalledWith({ id: 1, name: 'newGroup' });
     expect(mockSnackBar.open).toHaveBeenCalledWith('admin.group-edited', '', expect.anything());
   });
 

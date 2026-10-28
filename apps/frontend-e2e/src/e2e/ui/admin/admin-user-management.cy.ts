@@ -3,6 +3,7 @@ import {
   clearFormControl,
   clearUserFilter,
   clickIndexTabAdmin,
+  clickIndexTabWsgAdmin,
   createGroup,
   createNewUser,
   deleteFirstUser,
@@ -12,10 +13,13 @@ import {
   filterUsers,
   goToAdminUsers,
   makeAdminOfGroup,
+  renameGroup,
   saveUserEdit,
-  selectUserRow,
-  waitForSuccess
+  selectUserRow
 } from '../../../support/helpers';
+import { addState } from '../../../support/helpers/group-admin';
+import { selectProfileForGroupFromAdmin } from '../../../support/metadata/metadata-util';
+import { IqbProfile } from '../../../support/metadata/iqbProfile';
 import { secondaryUser } from '../../../support/testData';
 
 describe('Admin User Management', () => {
@@ -145,23 +149,44 @@ describe('Admin User Management', () => {
 
     it('renames a group', () => {
       createGroup('Rename Test Group');
-      cy.contains('mat-row', 'Rename Test Group').click();
-      cy.get('[data-cy="admin-workspace-groups-rename-group"]').click({ force: true });
-      cy.translate(Cypress.expose('locale')).then(json => {
-        const placeholderText = json.admin['group-name'];
-        cy.get(`input[placeholder="${placeholderText}"]`)
-          .should('be.visible')
-          .clear()
-          .type('Umbenennte Gruppe');
-
-        cy.intercept('PATCH', '/api/admin/workspace-groups/*').as('patchGroup');
-        cy.get('mat-dialog-actions button')
-          .contains(json.save)
-          .click({ force: true });
-        waitForSuccess('@patchGroup');
-      });
-      cy.contains('mat-row', 'Umbenennte Gruppe').should('exist');
+      renameGroup('Rename Test Group', 'Umbenennte Gruppe');
       deleteGroup('Umbenennte Gruppe');
+    });
+
+    // Renaming a group and choosing its profiles sent settings along that were laid over the
+    // stored ones: renaming wiped the profiles, choosing profiles wiped the states (#1960).
+    it('keeps the profiles and the states of a group when it is renamed and given profiles', () => {
+      // neither name contains the other, so that no selector finds both rows
+      const group = 'Gruppe mit Profilen';
+      const renamed = 'Umbenannt mit Status';
+      createGroup(group);
+      makeAdminOfGroup(group, [Cypress.expose('username')]);
+      cy.findAdminGroupSettings(group).click();
+      clickIndexTabWsgAdmin('settings');
+      addState('Geprüft');
+
+      selectProfileForGroupFromAdmin(group, IqbProfile.DEu);
+      renameGroup(group, renamed);
+      selectProfileForGroupFromAdmin(renamed, IqbProfile.MAu);
+
+      // a page of its own, so that the list reloaded after saving cannot drop the selected row
+      cy.visit('/');
+      cy.findAdminSettings().click();
+      clickIndexTabAdmin('workspace-groups');
+      cy.contains('mat-row', renamed).click();
+      cy.get('mat-icon').contains('settings').click();
+      [IqbProfile.DEu, IqbProfile.MAu].forEach(profile => {
+        cy.get('[data-cy="shared-profiles-select-profile"]')
+          .filter(`:contains(${profile})`)
+          .find('input')
+          .should('be.checked');
+      });
+      cy.findAdminGroupSettings(renamed).click();
+      clickIndexTabWsgAdmin('settings');
+      cy.get('studio-lite-states .state .text-form-field input').should($inputs => {
+        expect([...$inputs].map(input => (input as HTMLInputElement).value)).to.include('Geprüft');
+      });
+      deleteGroup(renamed);
     });
 
     it('assigns a user as group admin', () => {

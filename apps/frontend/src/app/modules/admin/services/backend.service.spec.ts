@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { UserFullDto, WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
+import { UserFullDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from './backend.service';
 
 describe('Admin BackendService', () => {
@@ -28,17 +28,19 @@ describe('Admin BackendService', () => {
   });
 
   describe('setWorkspaceGroupProfiles', () => {
-    it('returns true on success', done => {
-      const settings: WorkspaceGroupSettingsDto = {} as WorkspaceGroupSettingsDto;
+    // The API lays the settings sent over the stored ones: anything but the profiles would
+    // overwrite the group's states or default modules (#1960).
+    it('should send the profiles and no other setting of the group', done => {
+      const profiles = [{ id: 'profile1', label: 'Profile 1' }];
 
-      service.setWorkspaceGroupProfiles(settings, 3).subscribe(result => {
+      service.setWorkspaceGroupProfiles(profiles, 3).subscribe(result => {
         expect(result).toBe(true);
         done();
       });
 
       const req = httpMock.expectOne(`${baseUrl}admin/workspace-groups/3`);
       expect(req.request.method).toBe('PATCH');
-      expect(req.request.body).toEqual({ id: 3, settings });
+      expect(req.request.body).toEqual({ id: 3, settings: { profiles } });
       req.flush(false);
     });
   });
