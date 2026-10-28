@@ -40,7 +40,16 @@ export function addFirstUser(): void {
  */
 export function deleteFirstUser(): void {
   deleteUser(Cypress.expose('username'));
-  // The deleted admin would otherwise stay in the browser: its tokens in localStorage and its auth
+  showLoginFormAfterUserDeleted();
+}
+
+/**
+ * Leaves the browser on the login form after the logged-in user was deleted.
+ * @example
+ * showLoginFormAfterUserDeleted();
+ */
+export function showLoginFormAfterUserDeleted(): void {
+  // The deleted user would otherwise stay in the browser: its tokens in localStorage and its auth
   // data in the running app. Clearing the storage alone is not enough, and visiting '/' from
   // '/#/admin/...' only changes the hash, so the app is reloaded to start from nothing (#1754).
   cy.clearLocalStorage();

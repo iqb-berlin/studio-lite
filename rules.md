@@ -81,6 +81,14 @@
 - **Mocking**: Use `createMock<T>()` from `@golevelup/ts-jest` for NestJS tests to ensure type-safe mocking.
 - **Rationale**: A test that restates the code doubles the cost of every change to it and catches nothing. A spec demanded for every class and a test for every public member produced such tests by the hundreds (#1939).
 
+### End-to-End Tests
+- **Rule**: An e2e test checks a path through the interface and the running API — what no unit test can see. What a unit test or a spec in `e2e/api` already checks, it does not check again.
+- **Rule**: Test data comes from the API commands in `support/` (`cy.*API`, `createTestBaseAPI`). Only what the spec checks goes through the interface; a spec that is about the coding report does not click its user, group and workspace into being.
+- **Rule**: A UI spec does not test the API itself: status codes, permissions and error cases belong in `e2e/api`. It asserts that its setup succeeded, so that a failure shows where it happened, and it may read back through the API what the interface saved.
+- **Rule**: Specs in `e2e/ui` import nothing from `e2e/api`, nor the other way round. What both need lives in `support/`.
+- **Note**: Creating users, groups and workspaces and uploading modules through the interface stays checked once, in the admin and group-admin specs.
+- **Rationale**: Cypress recommends specs that run in isolation and state that is set up programmatically, not through the interface ([best practices](https://docs.cypress.io/app/core-concepts/best-practices#Organizing-Tests-Logging-In-Controlling-State)). A test base clicked through the admin screens cost half a minute per spec, and to save it, fourteen files came to share one spec and its data (#1967).
+
 
 ### Type Safety: Avoid `any`
 - **Rule**: Do NOT use the `any` type.

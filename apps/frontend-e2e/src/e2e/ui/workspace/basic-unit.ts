@@ -11,11 +11,11 @@ import {
   importExercise,
   selectUnit
 } from '../../../support/helpers';
-import { createBasicSpecCy } from '../shared/basic.spec.cy';
+import { createTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Workspace Unit Management (Core CRUD)', () => {
   before(() => {
-    createBasicSpecCy();
+    createTestBaseAPI();
   });
 
   it('imports test units', () => {
