@@ -68,13 +68,6 @@ describe('HeartbeatService', () => {
     jest.useRealTimers();
   });
 
-  it('should be created', () => {
-    appServiceMock.authData = { userId: 1 } as AuthDataDto;
-    configureTestingModule();
-    service = TestBed.inject(HeartbeatService);
-    expect(service).toBeTruthy();
-  });
-
   it('should sync user activity to the backend', () => {
     appServiceMock.authData = { userId: 1 } as AuthDataDto;
     configureTestingModule();

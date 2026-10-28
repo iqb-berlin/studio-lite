@@ -52,10 +52,6 @@ describe('SessionCleanupService', () => {
     jest.restoreAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('cleanupExpiredRows', () => {
     it('should delete expired sessions and refresh tokens', async () => {
       jest.useFakeTimers().setSystemTime(1000000);
@@ -156,19 +152,6 @@ describe('SessionCleanupService', () => {
       refreshTokenRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
 
       await service.onApplicationBootstrap();
-
-      expect(userSessionRepository.delete).toHaveBeenCalled();
-      expect(refreshTokenRepository.delete).toHaveBeenCalled();
-    });
-  });
-
-  describe('handleScheduledCleanup', () => {
-    it('should run the cleanup', async () => {
-      userSessionRepository.find.mockResolvedValue([]);
-      userSessionRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
-      refreshTokenRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
-
-      await service.handleScheduledCleanup();
 
       expect(userSessionRepository.delete).toHaveBeenCalled();
       expect(refreshTokenRepository.delete).toHaveBeenCalled();

@@ -73,10 +73,6 @@ describe('WorkspaceGroupsMenuComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should open add group dialog and emit event on success', () => {
     const mockFormGroup = new UntypedFormGroup({});
     (mockDialog.open as jest.Mock).mockReturnValue({

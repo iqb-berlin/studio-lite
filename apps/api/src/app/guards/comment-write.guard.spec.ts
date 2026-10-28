@@ -34,10 +34,6 @@ describe('CommentWriteGuard', () => {
     unitCommentService = module.get(UnitCommentService);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should return true if the comment belongs to the requesting user', async () => {
     unitCommentService.findOneComment.mockResolvedValue({ id: 42, userId: 1 } as UnitCommentDto);
 

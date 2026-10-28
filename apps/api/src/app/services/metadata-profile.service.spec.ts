@@ -46,10 +46,6 @@ describe('MetadataProfileService', () => {
     httpService = module.get(HttpService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('getStoredMetadataProfileFromDb', () => {
     it('returns the stored profile from the DB without a background network fetch', async () => {
       const profile = new MetadataProfile();

@@ -192,10 +192,6 @@ describe('ReviewsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should call loadReviewList on init', fakeAsync(() => {
     const loadSpy = jest.spyOn(component, 'loadReviewList').mockImplementation(() => undefined);
 

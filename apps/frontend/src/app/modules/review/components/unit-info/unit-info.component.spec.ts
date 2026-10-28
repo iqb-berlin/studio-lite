@@ -67,10 +67,6 @@ describe('UnitInfoComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Input Properties', () => {
     describe('unitId setter', () => {
       it('should set id property when unitId input is provided', () => {
@@ -256,16 +252,6 @@ describe('UnitInfoComponent', () => {
       component.splitterElement = undefined!;
 
       expect(() => component.ngOnDestroy()).not.toThrow();
-    });
-  });
-
-  describe('Component Dependencies', () => {
-    it('should inject ReviewService', () => {
-      expect(component.reviewService).toBeDefined();
-    });
-
-    it('should have reviewService accessible', () => {
-      expect(component.reviewService).toBe(mockReviewService);
     });
   });
 

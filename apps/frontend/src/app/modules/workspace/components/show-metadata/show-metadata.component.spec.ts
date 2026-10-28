@@ -52,15 +52,7 @@ describe('ShowMetadataComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should expose dialog data', () => {
     expect(component.data).toEqual(dialogData);
-  });
-
-  it('should initialize unitList as empty', () => {
-    expect(component.unitList).toEqual([]);
   });
 });

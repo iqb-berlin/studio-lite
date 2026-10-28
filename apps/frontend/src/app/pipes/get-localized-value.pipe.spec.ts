@@ -21,10 +21,6 @@ describe('GetLocalizedValuePipe', () => {
     pipe = TestBed.inject(GetLocalizedValuePipe);
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return default value if values is null or empty', () => {
     expect(pipe.transform(null, 'default')).toBe('default');
     expect(pipe.transform([], 'default')).toBe('default');

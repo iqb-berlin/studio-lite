@@ -24,10 +24,6 @@ describe('ModuleService', () => {
     service = TestBed.inject(ModuleService);
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   describe('loadList', () => {
     it('should populate editors, players, and schemers dictionaries', async () => {
       const mockModulesByType: Record<string, VeronaModuleInListDto[]> = {

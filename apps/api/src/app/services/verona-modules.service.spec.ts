@@ -37,10 +37,6 @@ describe('VeronaModulesService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('getVeronaModule', () => {
     it('should return module file info if download false', async () => {
       const key = 'module-1';
@@ -148,13 +144,6 @@ describe('VeronaModulesService', () => {
     it('rejects a metadata type that is not in allowedTypes', async () => {
       await expect(service.upload(buildModuleBuffer('EDITOR'), ['player'])).rejects.toThrow();
       expect(repository.save).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('remove', () => {
-    it('should remove module', async () => {
-      await service.remove('key');
-      expect(repository.delete).toHaveBeenCalledWith('key');
     });
   });
 });

@@ -67,10 +67,6 @@ describe('LoginComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   // Every login without a sessionId creates its own session row, and the frontend keeps the
   // tokens of the last response only -- so a second call leaves behind a session nobody can
   // reach or log out for a whole inactivity window (#1617).

@@ -42,10 +42,6 @@ describe('PaginatorIntlService', () => {
     translateParser = TestBed.inject(TranslateParser) as jest.Mocked<TranslateParser>;
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   it('should extend MatPaginatorIntl', () => {
     expect(service instanceof MatPaginatorIntl).toBe(true);
   });

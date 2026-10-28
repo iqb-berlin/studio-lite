@@ -63,10 +63,6 @@ describe('UnitPrintCodingComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngOnChanges', () => {
     it('should fetch codings when workspaceId changes', () => {
       const mockScheme = {

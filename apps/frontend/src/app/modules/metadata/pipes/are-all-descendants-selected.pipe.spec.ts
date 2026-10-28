@@ -17,10 +17,6 @@ describe('AreAllDescendantsSelectedPipe', () => {
     selectionModel = new SelectionModel<VocabFlatNode>(true);
   });
 
-  it('should be defined', () => {
-    expect(pipe).toBeDefined();
-  });
-
   it('should return true if all descendants are selected', () => {
     const node = { id: '1', level: 0, expandable: true } as VocabFlatNode;
     const child1 = { id: '2', level: 1, expandable: false } as VocabFlatNode;

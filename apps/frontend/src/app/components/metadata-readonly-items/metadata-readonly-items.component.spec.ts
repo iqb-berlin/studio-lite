@@ -72,10 +72,6 @@ describe('MetadataReadonlyItemsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should render all items', () => {
     const items = fixture.nativeElement.querySelectorAll('.item');
     expect(items.length).toBe(2);

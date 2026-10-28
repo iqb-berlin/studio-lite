@@ -186,10 +186,6 @@ describe('CommentsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('focusEditor (#1785)', () => {
     const newCommentEditor = (): MockCommentEditorComponent => fixture.debugElement
       .query(By.css('.new-comment studio-lite-comment-editor')).componentInstance;

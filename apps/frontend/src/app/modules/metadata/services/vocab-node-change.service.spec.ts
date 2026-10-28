@@ -53,10 +53,6 @@ describe('VocabNodeChangeService', () => {
     service = TestBed.inject(VocabNodeChangeService);
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   it('should initialize data on creation', () => {
     const data = service.data;
     expect(data.length).toBe(1);

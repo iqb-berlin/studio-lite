@@ -24,10 +24,6 @@ describe('AppVersionGuard', () => {
     guard = module.get<AppVersionGuard>(AppVersionGuard);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should return true if app-version header matches', async () => {
     const context = createMock<ExecutionContext>({
       switchToHttp: () => ({

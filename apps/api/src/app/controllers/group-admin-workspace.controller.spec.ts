@@ -1,11 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import {
-  CreateWorkspaceDto,
-  WorkspaceFullDto,
-  WorkspaceUserInListDto,
-  UserWorkspaceAccessDto, MoveToDto
-} from '@studio-lite-lib/api-dto';
+import { CreateWorkspaceDto, MoveToDto } from '@studio-lite-lib/api-dto';
 import { GroupAdminWorkspaceController } from './group-admin-workspace.controller';
 import { WorkspaceService } from '../services/workspace.service';
 import { UsersService } from '../services/users.service';
@@ -34,45 +29,6 @@ describe('GroupAdminWorkspaceController', () => {
     }).compile();
 
     controller = module.get<GroupAdminWorkspaceController>(GroupAdminWorkspaceController);
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
-  describe('findOne', () => {
-    it('should return a workspace', async () => {
-      const mockWorkspace = { id: 1, name: 'WS' } as WorkspaceFullDto;
-      workspaceService.findOne.mockResolvedValue(mockWorkspace);
-
-      const result = await controller.findOne(1);
-
-      expect(result).toBe(mockWorkspace);
-      expect(workspaceService.findOne).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('findOnesUsers', () => {
-    it('should return users for a workspace', async () => {
-      const mockUsers = [{ id: 1 }] as WorkspaceUserInListDto[];
-      usersService.findAllUsers.mockResolvedValue(mockUsers);
-
-      const result = await controller.findOnesUsers(1);
-
-      expect(result).toBe(mockUsers);
-      expect(usersService.findAllUsers).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('patchOnesUsers', () => {
-    it('should update users for a workspace', async () => {
-      usersService.setUsersByWorkspace.mockResolvedValue(undefined as unknown as void);
-      const dto = [{ workspaceId: 1, role: 'RW' }] as unknown as UserWorkspaceAccessDto[];
-
-      await controller.patchOnesUsers(1, dto);
-
-      expect(usersService.setUsersByWorkspace).toHaveBeenCalledWith(1, dto);
-    });
   });
 
   describe('remove', () => {

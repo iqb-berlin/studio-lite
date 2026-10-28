@@ -65,12 +65,4 @@ describe('PreviewBarComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-
-  it('should take inputs', () => {
-    component.pageList = [];
-    component.playerApiVersion = 1;
-    component.playerName = 'player';
-    component.hasFocus = true;
-    expect(component.playerName).toBe('player');
-  });
 });

@@ -28,10 +28,6 @@ describe('ChangePasswordComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize form with three password fields', () => {
     expect(component.changePasswordForm).toBeTruthy();
     expect(component.changePasswordForm.get('pw_old')).toBeTruthy();
@@ -86,12 +82,6 @@ describe('ChangePasswordComponent', () => {
     expect(form.get('pw_new1')?.valid).toBe(true);
     expect(form.get('pw_new2')?.valid).toBe(true);
     expect(form.valid).toBe(true);
-  });
-
-  it('should have empty initial values', () => {
-    expect(component.changePasswordForm.get('pw_old')?.value).toBe('');
-    expect(component.changePasswordForm.get('pw_new1')?.value).toBe('');
-    expect(component.changePasswordForm.get('pw_new2')?.value).toBe('');
   });
 
   it('should accept special characters in passwords', () => {

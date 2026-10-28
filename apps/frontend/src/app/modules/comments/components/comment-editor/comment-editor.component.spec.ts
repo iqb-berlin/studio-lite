@@ -157,10 +157,6 @@ describe('CommentEditorComponent', () => {
     jest.clearAllMocks();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('autoFocus (#1785)', () => {
     // The fixture has already been through ngAfterViewInit once
     beforeEach(() => {

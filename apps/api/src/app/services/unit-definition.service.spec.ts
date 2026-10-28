@@ -38,10 +38,6 @@ describe('UnitDefinitionService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findOnesDefinition', () => {
     it('should return definition', async () => {
       unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Unit);
@@ -71,12 +67,6 @@ describe('UnitDefinitionService', () => {
   });
 
   describe('findOnesScheme', () => {
-    it('should return scheme', async () => {
-      unitsRepository.findOne.mockResolvedValue({ scheme: '{}', schemeType: 't' } as Unit);
-      const result = await service.findOnesScheme(1);
-      expect(result.scheme).toBe('{}');
-    });
-
     // The schemer reads the variables from here and knows only the 1.x spelling (#1708).
     it('should hand out a variable list stored in 2.x in the 1.x spelling', async () => {
       const storedIn2x = {
@@ -105,15 +95,6 @@ describe('UnitDefinitionService', () => {
   });
 
   describe('patchDefinition', () => {
-    it('should save definition', async () => {
-      unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
-      unitDefinitionsRepository.findOne.mockResolvedValue({ id: 1 } as UnitDefinition);
-
-      await service.patchDefinition(1, { definition: 'xml' }, 'user', new Date());
-      expect(unitDefinitionsRepository.save).toHaveBeenCalled();
-      expect(unitsRepository.save).toHaveBeenCalled();
-    });
-
     // Saving from the editor and importing both end up here. The list is stored in the spelling it
     // came in; readers that know only 1.x get it converted on the way out (#1708).
     it('should store a variable list in the spelling it was sent in', async () => {

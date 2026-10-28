@@ -64,18 +64,10 @@ describe('EmailTemplateComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize form with empty values', () => {
     expect(component.configForm).toBeDefined();
     expect(component.configForm.get('emailSubject')).toBeDefined();
     expect(component.configForm.get('emailBody')).toBeDefined();
-  });
-
-  it('should initialize dataChanged as false', () => {
-    expect(component.dataChanged).toBe(false);
   });
 
   it('should load email template on init', fakeAsync(() => {

@@ -45,10 +45,6 @@ describe('ReviewGuard', () => {
     usersService.canAccessWorkSpace.mockResolvedValue(true);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should return true for a review session on its own review', async () => {
     expect(await guard.canActivate(contextFor(reviewSession, { review_id: '2' }))).toBe(true);
   });

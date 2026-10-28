@@ -58,10 +58,6 @@ describe('UsersMenuComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should open edit user dialog for adding user and emit event on success', () => {
     const mockFormGroup = new UntypedFormGroup({});
     (mockDialog.open as jest.Mock).mockReturnValue({

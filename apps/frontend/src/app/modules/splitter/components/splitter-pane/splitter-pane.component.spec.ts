@@ -27,10 +27,6 @@ describe('SplitterPaneComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('init', () => {
     it('should initialize properties and calling initSize', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

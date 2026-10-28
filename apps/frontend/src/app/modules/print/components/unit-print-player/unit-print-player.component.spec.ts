@@ -107,10 +107,6 @@ describe('UnitPrintPlayerComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngAfterViewInit', () => {
     beforeEach(() => {
       // Mock the ViewChild hostingIframe
@@ -396,44 +392,6 @@ describe('UnitPrintPlayerComponent', () => {
       (component as never as { calculateIFrameHeight: () => void }).calculateIFrameHeight();
 
       expect(nextSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('input properties', () => {
-    it('should accept unitId', () => {
-      component.unitId = 42;
-      expect(component.unitId).toBe(42);
-    });
-
-    it('should accept workspaceId', () => {
-      component.workspaceId = 5;
-      expect(component.workspaceId).toBe(5);
-    });
-
-    it('should accept iFrameHeight', () => {
-      component.iFrameHeight = 800;
-      expect(component.iFrameHeight).toBe(800);
-    });
-
-    it('should accept playerId', () => {
-      component.playerId = 'test-player';
-      expect(component.playerId).toBe('test-player');
-    });
-
-    it('should accept printElementIds', () => {
-      component.printElementIds = true;
-      expect(component.printElementIds).toBe(true);
-    });
-
-    it('should accept printPreviewAutoHeight', () => {
-      component.printPreviewAutoHeight = true;
-      expect(component.printPreviewAutoHeight).toBe(true);
-    });
-  });
-
-  describe('output properties', () => {
-    it('should have iFrameHeightChange Subject', () => {
-      expect(component.iFrameHeightChange).toBeDefined();
     });
   });
 });

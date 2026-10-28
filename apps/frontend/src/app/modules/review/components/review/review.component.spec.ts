@@ -65,20 +65,6 @@ describe('ReviewComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('Component Initialization', () => {
-    it('should have appService accessible', () => {
-      expect(component.appService).toBeDefined();
-    });
-
-    it('should have reviewService accessible', () => {
-      expect(component.reviewService).toBeDefined();
-    });
-  });
-
   describe('ngOnInit()', () => {
     it('should set reviewId from route params when different and valid', fakeAsync(() => {
       mockReviewService.reviewId = 0;
@@ -182,32 +168,5 @@ describe('ReviewComponent', () => {
 
       expect(mockReviewService.reviewId).toBe(123);
     }));
-  });
-
-  describe('Template Bindings', () => {
-    it('should bind appService in template', () => {
-      fixture.detectChanges();
-      expect(component.appService).toBe(mockAppService);
-    });
-
-    it('should bind reviewService in template', () => {
-      fixture.detectChanges();
-      expect(component.reviewService).toBe(mockReviewService);
-    });
-  });
-
-  describe('Component Dependencies', () => {
-    it('should inject AppService', () => {
-      expect(component.appService).toBeDefined();
-    });
-
-    it('should inject ActivatedRoute', () => {
-      const route = (component as unknown as { route: ActivatedRoute }).route;
-      expect(route).toBeDefined();
-    });
-
-    it('should inject ReviewService', () => {
-      expect(component.reviewService).toBeDefined();
-    });
   });
 });

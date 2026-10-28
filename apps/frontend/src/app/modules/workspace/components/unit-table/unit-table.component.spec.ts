@@ -42,10 +42,6 @@ describe('UnitTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('initializes data source if missing on changes', () => {
     component.dataSource = undefined as unknown as MatTableDataSource<UnitInListDto>;
     component.ngOnChanges({});

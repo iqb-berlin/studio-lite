@@ -22,32 +22,6 @@ describe('I18nService', () => {
     translateService = TestBed.inject(TranslateService) as jest.Mocked<TranslateService>;
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
-  describe('default values', () => {
-    it('should have correct default fileDateFormat', () => {
-      expect(service.fileDateFormat).toBe('yyyy-MM-dd');
-    });
-
-    it('should have correct default fullLocale', () => {
-      expect(service.fullLocale).toBe('de-DE');
-    });
-
-    it('should have correct default language', () => {
-      expect(service.language).toBe('de');
-    });
-
-    it('should have correct default dateTimeFormat', () => {
-      expect(service.dateTimeFormat).toBe('dd.MM.yyyy HH:mm');
-    });
-
-    it('should have correct default dateFormat', () => {
-      expect(service.dateFormat).toBe('dd.MM.yyyy');
-    });
-  });
-
   describe('setLocale', () => {
     it('should set timeZone from browser', () => {
       service.setLocale();

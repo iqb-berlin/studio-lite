@@ -7,10 +7,6 @@ describe('IsNewReviewPipe', () => {
     pipe = new IsNewReviewPipe();
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return true for a date from today', () => {
     const today = new Date();
     expect(pipe.transform(today)).toBe(true);

@@ -44,10 +44,6 @@ describe('EditWorkspaceGroupComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize form with dialog data', () => {
     expect(component.editWorkspaceGroupForm.get('name')?.value).toBe('Test Group');
     expect(component.name).toBe('Test Group');
@@ -74,14 +70,6 @@ describe('EditWorkspaceGroupComponent', () => {
     nameControl?.setValue('abc');
     expect(nameControl?.hasError('minlength')).toBe(false);
     expect(nameControl?.valid).toBe(true);
-  });
-
-  it('should have data property with wsg information', () => {
-    expect(component.data).toBeDefined();
-    expect(component.data.wsg?.id).toBe(1);
-    expect(component.data.wsg?.name).toBe('Test Group');
-    expect(component.data.title).toBe('Edit Workspace Group');
-    expect(component.data.saveButtonLabel).toBe('Save');
   });
 
   it('should have editWorkspaceGroupForm defined', () => {

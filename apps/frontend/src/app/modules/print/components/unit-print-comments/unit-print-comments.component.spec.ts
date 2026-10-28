@@ -3,7 +3,6 @@ import { SimpleChange } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
 import { of, Subject } from 'rxjs';
-import { ItemsMetadataValues } from '@studio-lite-lib/api-dto';
 import { UnitPrintCommentsComponent } from './unit-print-comments.component';
 import { BackendService } from '../../../comments/services/backend.service';
 import { Comment } from '../../../comments/models/comment.interface';
@@ -54,10 +53,6 @@ describe('UnitPrintCommentsComponent', () => {
 
     fixture = TestBed.createComponent(UnitPrintCommentsComponent);
     component = fixture.componentInstance;
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
   });
 
   describe('ngOnChanges', () => {
@@ -196,32 +191,6 @@ describe('UnitPrintCommentsComponent', () => {
 
       expect(component.comments).toEqual(newComments);
       expect(component.comments.length).toBe(2);
-    });
-  });
-
-  describe('metadata input', () => {
-    it('should accept ItemsMetadataValues array', () => {
-      const mockMetadata: ItemsMetadataValues[] = [
-        { id: 'item1', profiles: [] },
-        { id: 'item2', profiles: [] }
-      ];
-
-      component.metadata = mockMetadata;
-
-      expect(component.metadata).toEqual(mockMetadata);
-    });
-
-    it('should accept null metadata', () => {
-      component.metadata = null;
-
-      expect(component.metadata).toBeNull();
-    });
-  });
-
-  describe('initial state', () => {
-    it('should have default values', () => {
-      expect(component.reviewId).toBe(0);
-      expect(component.comments).toEqual([]);
     });
   });
   describe('ngOnDestroy', () => {

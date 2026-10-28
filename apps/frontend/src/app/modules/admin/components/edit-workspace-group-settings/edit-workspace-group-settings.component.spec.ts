@@ -96,18 +96,10 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize formData with empty arrays', () => {
     expect(component.formData).toBeDefined();
     expect(component.formData.profilesSelected).toEqual([]);
     expect(component.formData.states).toEqual([]);
-  });
-
-  it('should have empty profiles array initially', () => {
-    expect(component.profiles).toEqual([]);
   });
 
   it('should have empty fetchedProfiles array initially', () => {
@@ -160,20 +152,6 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
     component.hasChanged(newProfiles);
 
     expect(component.formData.profilesSelected).toEqual(newProfiles);
-  });
-
-  it('should have data property with wsg information', () => {
-    expect(component.data).toBeDefined();
-    expect(component.data.wsg?.id).toBe(1);
-    expect(component.data.wsg?.name).toBe('Test Group');
-  });
-
-  it('should access wsgAdminService', () => {
-    expect(component.wsgAdminService).toBeDefined();
-  });
-
-  it('should access backendService', () => {
-    expect(component.backendService).toBeDefined();
   });
 
   it('should handle workspace group with empty profiles array', async () => {

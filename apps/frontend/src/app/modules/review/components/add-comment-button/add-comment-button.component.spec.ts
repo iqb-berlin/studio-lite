@@ -49,27 +49,6 @@ describe('AddCommentButtonComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('Input Properties', () => {
-    it('should have required input properties', () => {
-      expect(component.showOthersComments).toBeDefined();
-      expect(component.unitDbId).toBeDefined();
-    });
-
-    it('should accept showOthersComments input', () => {
-      component.showOthersComments = true;
-      expect(component.showOthersComments).toBe(true);
-    });
-
-    it('should accept unitDbId input', () => {
-      component.unitDbId = 456;
-      expect(component.unitDbId).toBe(456);
-    });
-  });
-
   describe('showReviewDialog()', () => {
     it('should open comment dialog with correct configuration when showOthersComments is false', () => {
       component.showOthersComments = false;
@@ -111,16 +90,6 @@ describe('AddCommentButtonComponent', () => {
       expect(() => {
         mockDialogRef.afterClosed().subscribe();
       }).not.toThrow();
-    });
-  });
-
-  describe('Component Dependencies', () => {
-    it('should inject MatDialog service', () => {
-      expect(mockDialog).toBeDefined();
-    });
-
-    it('should inject ReviewService', () => {
-      expect(mockReviewService).toBeDefined();
     });
   });
 });

@@ -116,10 +116,6 @@ describe('UnitSelectionComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should calculate stats when setting unitList', () => {
     component.setU = {
       'Group 1': [{ id: 1 }, { id: 2 }] as UnitInListDto[],

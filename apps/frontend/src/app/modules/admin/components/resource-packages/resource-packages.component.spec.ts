@@ -55,10 +55,6 @@ describe('ResourcePackagesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('updates resourcePackages on updateFormFields', () => {
     const packages$ = of([]);
     readBackendService.getResourcePackages.mockReturnValue(packages$);

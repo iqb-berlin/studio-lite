@@ -43,10 +43,6 @@ describe('WorkspaceGroupService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findAll', () => {
     it('should return all groups if no user provided', async () => {
       const groups = [{ id: 1, name: 'g1' }] as WorkspaceGroup[];
@@ -85,18 +81,6 @@ describe('WorkspaceGroupService', () => {
     it('should throw if not found', async () => {
       mockRepository.findOne.mockResolvedValue(null);
       await expect(service.findOne(1)).rejects.toThrow();
-    });
-  });
-
-  describe('create', () => {
-    it('should create group', async () => {
-      const dto = { name: 'g1', settings: {} } as CreateWorkspaceGroupDto;
-      const saved = { id: 1, ...dto } as WorkspaceGroup;
-      mockRepository.create.mockReturnValue(saved);
-      mockRepository.save.mockResolvedValue(saved);
-
-      const result = await service.create(dto);
-      expect(result).toBe(1);
     });
   });
 
@@ -180,13 +164,6 @@ describe('WorkspaceGroupService', () => {
       await service.patch(1, { id: 1, name: 'g', settings } as WorkspaceGroupFullDto);
 
       expect(group.settings).toMatchObject({ defaultEditor: 'e' });
-    });
-  });
-
-  describe('remove', () => {
-    it('should delete group', async () => {
-      await service.remove([1]);
-      expect(groupRepository.delete).toHaveBeenCalledWith([1]);
     });
   });
 

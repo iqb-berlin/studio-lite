@@ -44,10 +44,6 @@ describe('WorkspaceImportService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('uploadFiles', () => {
     const user = { id: 1 } as User;
     const buildFile = (name: string, mime: string, content: string): FileIo => ({

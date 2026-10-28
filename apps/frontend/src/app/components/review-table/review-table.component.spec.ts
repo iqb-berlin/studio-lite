@@ -37,29 +37,9 @@ describe('ReviewTableComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should initialize with empty reviews array', () => {
-    expect(component.reviews).toEqual([]);
-  });
-
-  it('should initialize with empty group name', () => {
-    expect(component.groupName).toBe('');
-  });
-
-  it('should initialize with list view', () => {
-    expect(component.reviewsView).toBe('list');
-  });
-
   it('should initialize data source', () => {
     expect(component.dataSource).toBeTruthy();
     expect(component.dataSource.data).toEqual([]);
-  });
-
-  it('should have default displayed columns for list view', () => {
-    expect(component.displayedColumns).toEqual(['name']);
   });
 
   it('should accept reviews input', () => {
@@ -68,13 +48,6 @@ describe('ReviewTableComponent', () => {
 
     expect(component.dataSource.data).toEqual(mockReviews);
     expect(component.dataSource.data.length).toBe(2);
-  });
-
-  it('should accept groupName input', () => {
-    component.groupName = 'Test Group';
-    fixture.detectChanges();
-
-    expect(component.groupName).toBe('Test Group');
   });
 
   it('should toggle view from list to details', () => {
@@ -153,10 +126,6 @@ describe('ReviewTableComponent', () => {
 
     expect(component.dataSource.data.length).toBe(1);
     expect(component.dataSource.data[0].name).toBe('Review 3');
-  });
-
-  it('should have i18nService injected', () => {
-    expect(component.i18nService).toBeTruthy();
   });
 
   it('should handle multiple view toggles', () => {

@@ -9,10 +9,6 @@ describe('TableDataSourcePipe', () => {
     pipe = new TableDataSourcePipe();
   });
 
-  it('should create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should transform an array of ResourcePackageDto to MatTableDataSource', () => {
     const mockData: ResourcePackageDto[] = [
       {

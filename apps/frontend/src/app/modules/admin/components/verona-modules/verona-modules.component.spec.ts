@@ -137,10 +137,6 @@ describe('VeronaModulesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should load module list on init', async () => {
     jest.useFakeTimers();
     component.ngOnInit();

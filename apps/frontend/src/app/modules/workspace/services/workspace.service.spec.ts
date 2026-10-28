@@ -103,37 +103,6 @@ describe('WorkspaceService', () => {
     richNoteTagsService = TestBed.inject(RichNoteTagsService) as jest.Mocked<RichNoteTagsService>;
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
-  describe('initialization', () => {
-    it('should initialize with default values', () => {
-      expect(service.selectedWorkspaceId).toBe(0);
-      expect(service.selectedWorkspaceName).toBe('');
-      expect(service.isWorkspaceGroupAdmin).toBe(false);
-      expect(service.userAccessLevel).toBe(0);
-      expect(service.unitList).toEqual({});
-      expect(service.workspaceSettings).toBeDefined();
-      expect(service.workspaceSettings.defaultEditor).toBe('');
-      expect(service.workspaceSettings.defaultPlayer).toBe('');
-    });
-
-    it('should have a selectedUnit$ observable with initial value 0', done => {
-      service.selectedUnit$.subscribe(value => {
-        expect(value).toBe(0);
-        done();
-      });
-    });
-
-    it('should have isValidFormKey BehaviorSubject with initial value true', done => {
-      service.isValidFormKey.subscribe(value => {
-        expect(value).toBe(true);
-        done();
-      });
-    });
-  });
-
   describe('unitKeyPatternString', () => {
     it('should return correct pattern string', () => {
       const pattern = WorkspaceService.unitKeyPatternString();

@@ -62,10 +62,6 @@ describe('ItemComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize model and fields on ngOnInit', () => {
     expect(component.model.id).toBe('item1');
     expect(component.fields.length).toBeGreaterThan(0);

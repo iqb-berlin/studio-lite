@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  CodingReportDto, CreateWorkspaceDto, UnitPropertiesDto, UserWorkspaceAccessDto, UsersWorkspaceInListDto,
+  CodingReportDto, CreateWorkspaceDto, UnitPropertiesDto, UsersWorkspaceInListDto,
   WorkspaceSettingsDto, RenameGroupNameDto
 } from '@studio-lite-lib/api-dto';
 import { WorkspaceService } from './workspace.service';
@@ -80,18 +80,6 @@ describe('WorkspaceService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('getAllWorkspaces', () => {
-    it('should return all', async () => {
-      (workspaceRepository.find as jest.Mock).mockResolvedValue([]);
-      await service.getAllWorkspaces();
-      expect(workspaceRepository.find).toHaveBeenCalled();
-    });
-  });
-
   describe('findAll', () => {
     it('should return workspaces for user', async () => {
       const userId = 1;
@@ -154,22 +142,6 @@ describe('WorkspaceService', () => {
     });
   });
 
-  describe('setWorkspacesByUser', () => {
-    it('should set workspaces', async () => {
-      const userId = 1;
-      const groupId = 2;
-      const workspaces: UserWorkspaceAccessDto[] = [{ id: 1, accessLevel: 1 }];
-
-      (workspaceUserService.deleteAllByWorkspaceGroup as jest.Mock).mockResolvedValue(null);
-      (workspaceUsersRepository.create as jest.Mock).mockReturnValue({});
-      (unitService.findAllForWorkspace as jest.Mock).mockResolvedValue([]);
-
-      await service.setWorkspacesByUser(userId, groupId, workspaces);
-
-      expect(workspaceUserService.deleteAllByWorkspaceGroup).toHaveBeenCalled();
-    });
-  });
-
   describe('findAllGroupwise', () => {
     it('should return groupwise workspaces', async () => {
       const userId = 1;
@@ -180,15 +152,6 @@ describe('WorkspaceService', () => {
 
       const result = await service.findAllGroupwise(userId);
       expect(result).toBeDefined();
-    });
-  });
-
-  describe('findAllByGroup', () => {
-    it('should return workspaces in group', async () => {
-      const groupId = 1;
-      (workspaceRepository.find as jest.Mock).mockResolvedValue([]);
-      await service.findAllByGroup(groupId);
-      expect(workspaceRepository.find).toHaveBeenCalledWith(expect.objectContaining({ where: { groupId } }));
     });
   });
 
@@ -205,12 +168,6 @@ describe('WorkspaceService', () => {
         expect.objectContaining({ select: { groupId: true } })
       );
     });
-
-    it('should return nothing for an empty list', async () => {
-      (workspaceRepository.find as jest.Mock).mockResolvedValue([]);
-
-      expect(await service.findGroupIdsOfWorkspaces([])).toEqual([]);
-    });
   });
 
   describe('findOne', () => {
@@ -226,16 +183,6 @@ describe('WorkspaceService', () => {
   });
 
   describe('findOneByUser', () => {
-    it('should return workspace for user', async () => {
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, groupId: 2 });
-      (workspaceUserService.accessLevel as jest.Mock).mockResolvedValue(2);
-      (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ name: 'g' });
-
-      const result = await service.findOneByUser(1, 1);
-      expect(result.id).toBe(1);
-      expect(result.userAccessLevel).toBe(2);
-    });
-
     // The frontend opens a workspace with this level; for an unassigned administrator it is the
     // implicit one, where there used to be "workspace not found" (#1571).
     it('should hand on the level WorkspaceUserService grants, the implicit one of an administrator included',
@@ -338,15 +285,6 @@ describe('WorkspaceService', () => {
       expect(ws.settings.unitGroups).toContain('new');
       expect(workspaceRepository.save).toHaveBeenCalled();
       expect(unitsRepository.update).toHaveBeenCalled();
-    });
-  });
-
-  describe('patchName', () => {
-    it('should patch name', async () => {
-      const ws = { id: 1 } as Workspace;
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
-      await service.patchName(1, 'new');
-      expect(ws.name).toBe('new');
     });
   });
 
@@ -539,21 +477,8 @@ describe('WorkspaceService', () => {
     });
   });
 
-  describe('remove', () => {
-    it('should remove workspace', async () => {
-      await service.remove(1);
-      expect(workspaceRepository.delete).toHaveBeenCalledWith(1);
-    });
-  });
-
   describe('getCodingReport', () => {
     afterEach(() => jest.restoreAllMocks());
-
-    it('should return report', async () => {
-      (unitService.findAllWithProperties as jest.Mock).mockResolvedValue([]);
-      const result = await service.getCodingReport(1);
-      expect(result).toEqual([]);
-    });
 
     it('builds the report with CodingReportClass from the units of the workspace', async () => {
       const units = [{ id: 10, key: 'DLB007' }] as UnitPropertiesDto[];

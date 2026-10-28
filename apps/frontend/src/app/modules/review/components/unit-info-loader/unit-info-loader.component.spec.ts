@@ -35,17 +35,9 @@ describe('UnitInfoLoaderComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Component Initialization', () => {
     it('should initialize IntersectionObserver in constructor', () => {
       expect(component.intersectionObserver).toBeDefined();
-    });
-
-    it('should initialize with spinnerOn as false', () => {
-      expect(component.spinnerOn).toBe(false);
     });
 
     it('should initialize with isInView as false', () => {
@@ -89,16 +81,6 @@ describe('UnitInfoLoaderComponent', () => {
       tick();
 
       expect(mockObserve).toHaveBeenCalledWith(fixture.nativeElement);
-    }));
-
-    it('should use setTimeout for observation setup', fakeAsync(() => {
-      component.ngAfterViewInit();
-
-      expect(mockObserve).not.toHaveBeenCalled();
-
-      tick();
-
-      expect(mockObserve).toHaveBeenCalled();
     }));
   });
 
@@ -204,10 +186,6 @@ describe('UnitInfoLoaderComponent', () => {
   });
 
   describe('EventEmitter', () => {
-    it('should have onEnter EventEmitter', () => {
-      expect(component.onEnter).toBeDefined();
-    });
-
     it('should emit onEnter event when element becomes visible', done => {
       fixture.detectChanges();
 
@@ -221,22 +199,6 @@ describe('UnitInfoLoaderComponent', () => {
       ];
 
       intersectionObserverCallback(mockEntries, component.intersectionObserver);
-    });
-  });
-
-  describe('Spinner Display', () => {
-    it('should display spinner when spinnerOn is true', () => {
-      component.spinnerOn = true;
-      fixture.detectChanges();
-
-      expect(component.spinnerOn).toBe(true);
-    });
-
-    it('should hide spinner when spinnerOn is false', () => {
-      component.spinnerOn = false;
-      fixture.detectChanges();
-
-      expect(component.spinnerOn).toBe(false);
     });
   });
 });

@@ -11,10 +11,6 @@ describe('IsNodeSelectedPipe', () => {
     selectionModel = new SelectionModel<VocabFlatNode>(true);
   });
 
-  it('should be defined', () => {
-    expect(pipe).toBeDefined();
-  });
-
   it('should return true if node is selected', () => {
     const node = { id: '1' } as VocabFlatNode;
     jest.spyOn(selectionModel, 'isSelected').mockReturnValue(true);

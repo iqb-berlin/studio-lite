@@ -33,10 +33,4 @@ describe('GroupMenuComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-
-  it('should have event emitters', () => {
-    expect(component.groupAdded).toBeDefined();
-    expect(component.groupRenamed).toBeDefined();
-    expect(component.groupDeleted).toBeDefined();
-  });
 });

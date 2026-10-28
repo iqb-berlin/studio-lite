@@ -48,10 +48,6 @@ describe('ReviewConfigComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('of a selected review', () => {
     const inputs = (): HTMLInputElement[] => Array.from(fixture.nativeElement.querySelectorAll('input'));
     const editComponents = () => [

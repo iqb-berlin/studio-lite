@@ -59,10 +59,6 @@ describe('AddReviewButtonComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('creates a review when confirmed', fakeAsync(() => {
     const addedSpy = jest.fn();
     const changedSpy = jest.fn();

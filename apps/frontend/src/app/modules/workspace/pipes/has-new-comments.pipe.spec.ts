@@ -8,10 +8,6 @@ describe('HasNewCommentsPipe', () => {
     pipe = new HasNewCommentsPipe();
   });
 
-  it('should create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return true when lastCommentChangedAt is after lastSeenCommentChangedAt', () => {
     const unit: UnitInListDto = {
       id: 1,

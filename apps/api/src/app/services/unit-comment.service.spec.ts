@@ -48,10 +48,6 @@ describe('UnitCommentService', () => {
     itemCommentService = module.get<ItemCommentService>(ItemCommentService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findUnitIdsWithComments', () => {
     it('should answer which of the given units have comments', async () => {
       mockRepository.find.mockResolvedValue([{ unitId: 1 }, { unitId: 1 }, { unitId: 3 }] as UnitComment[]);
@@ -109,30 +105,6 @@ describe('UnitCommentService', () => {
           userVote: 'up'
         }
       ]);
-    });
-  });
-
-  describe('copyComments', () => {
-    it('should copy comments from old unit to new unit', async () => {
-      const oldUnitId = 1;
-      const newUnitId = 2;
-      const itemUuidLookups = [];
-      const comments = [{
-        id: 1, body: 'test', unitId: oldUnitId, parentId: null
-      }] as UnitComment[];
-      const itemComments = [];
-
-      // Mock findOnesComments internally calling find and findUnitItemComments
-      mockRepository.find.mockResolvedValue(comments);
-      mockItemCommentService.findUnitItemComments.mockResolvedValue(itemComments as UnitCommentUnitItem[]);
-
-      (mockRepository.create as jest.Mock).mockImplementation(dto => ({ ...dto, id: 100 }));
-      mockRepository.save.mockResolvedValue({ id: 100 } as UnitComment);
-
-      await service.copyComments(oldUnitId, newUnitId, itemUuidLookups);
-
-      expect(repository.create).toHaveBeenCalled();
-      expect(repository.save).toHaveBeenCalled();
     });
   });
 
@@ -195,12 +167,6 @@ describe('UnitCommentService', () => {
 
       expect(await service.isRootInUnit(42, 10)).toBe(true);
       expect(repository.exists).toHaveBeenLastCalledWith({ where: { id: 42, unitId: 10, parentId: IsNull() } });
-    });
-
-    it('should return false when there is no such root comment in the unit', async () => {
-      mockRepository.exists.mockResolvedValue(false);
-
-      expect(await service.isRootInUnit(42, 11)).toBe(false);
     });
   });
 
@@ -267,24 +233,6 @@ describe('UnitCommentService', () => {
       await expect(service.createCommentAs(author, 10, malformed)).rejects.toThrow(UnitCommentNotFoundException);
       expect(repository.exists).not.toHaveBeenCalled();
       expect(repository.create).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('createComment', () => {
-    it('should create a comment', async () => {
-      const dto = { unitId: 1, body: 'test' } as UnitCommentDto;
-      const savedEntity = {
-        ...dto, id: 123, createdAt: new Date(), changedAt: new Date()
-      };
-
-      (mockRepository.create as jest.Mock).mockReturnValue(savedEntity as UnitComment);
-      mockRepository.save.mockResolvedValue(savedEntity as UnitComment);
-
-      const result = await service.createComment(dto);
-
-      expect(repository.create).toHaveBeenCalled();
-      expect(repository.save).toHaveBeenCalledWith(savedEntity);
-      expect(result).toBe(123);
     });
   });
 

@@ -7,10 +7,6 @@ describe('IsCurrentProfilePipe', () => {
     pipe = new IsCurrentProfilePipe();
   });
 
-  it('should create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return true for the primary profile (order 0)', () => {
     expect(pipe.transform(0)).toBe(true);
   });

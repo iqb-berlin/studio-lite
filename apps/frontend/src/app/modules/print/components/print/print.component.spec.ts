@@ -26,10 +26,6 @@ describe('PrintComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngOnInit', () => {
     it('should initialize component properties from query params', () => {
       const mockParams = {

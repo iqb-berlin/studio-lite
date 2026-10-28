@@ -3,10 +3,6 @@ import { IsSelectedIdPipe } from './is-selected-id.pipe';
 describe('IsSelectedIdPipe', () => {
   const pipe = new IsSelectedIdPipe();
 
-  it('should be defined', () => {
-    expect(pipe).toBeDefined();
-  });
-
   it('should return true if element.id matches id', () => {
     expect(pipe.transform({ id: 1 }, 1)).toBe(true);
   });

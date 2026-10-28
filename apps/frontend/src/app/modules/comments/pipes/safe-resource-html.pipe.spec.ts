@@ -21,10 +21,6 @@ describe('SafeResourceHTMLPipe', () => {
     pipe = new SafeResourceHTMLPipe(sanitizer);
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should call bypassSecurityTrustHtml', () => {
     const html = '<p>test</p>';
     const result = pipe.transform(html);

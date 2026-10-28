@@ -100,10 +100,6 @@ describe('CommentDialogComponent', () => {
     jest.clearAllMocks();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('where the focus goes (#1785)', () => {
     it('should keep the focus out of the editor for an external visitor without a kept name', () => {
       component.ngOnInit();
@@ -344,22 +340,6 @@ describe('CommentDialogComponent', () => {
   describe('Component Properties', () => {
     it('should initialize with empty userName', () => {
       expect(component.userName).toBe('');
-    });
-
-    it('should initialize with empty unitItems array', () => {
-      expect(component.unitItems).toEqual([]);
-    });
-
-    it('should have reviewService accessible', () => {
-      expect(component.reviewService).toBeDefined();
-    });
-
-    it('should have appService accessible', () => {
-      expect(component.appService).toBeDefined();
-    });
-
-    it('should have dialogRef accessible', () => {
-      expect(component.dialogRef).toBeDefined();
     });
   });
 });

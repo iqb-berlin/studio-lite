@@ -7,10 +7,6 @@ describe('FilterHiddenTabsPipe', () => {
     pipe = new FilterHiddenTabsPipe();
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should filter hidden routes', () => {
     const tabs = [
       { name: 'properties', duplicable: false },

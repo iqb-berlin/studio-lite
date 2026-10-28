@@ -48,10 +48,6 @@ describe('UnitExportConfigComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('updates form fields and marks dataChanged on value change', () => {
     backendService.getUnitExportConfig.mockReturnValue(of({
       unitXsdUrl: 'u.xsd',

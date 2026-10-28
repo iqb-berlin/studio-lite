@@ -49,10 +49,6 @@ describe('IsWorkspaceGroupAdminGuard', () => {
     reflector.getAllAndOverride.mockReturnValue(undefined);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should return true if user is global admin', async () => {
     const userId = 1;
     authService.isAdminUser.mockResolvedValue(true);

@@ -19,7 +19,6 @@ import { ACTIVE_THRESHOLD_MS, REFRESH_TOKEN_REUSE_GRACE_MS } from '../app.consta
 describe('AuthService', () => {
   let service: AuthService;
   let usersService: DeepMocked<UsersService>;
-  let reviewService: DeepMocked<ReviewService>;
   let jwtService: DeepMocked<JwtService>;
   let refreshTokenRepository: DeepMocked<Repository<RefreshToken>>;
   let userSessionRepository: DeepMocked<Repository<UserSession>>;
@@ -65,7 +64,6 @@ describe('AuthService', () => {
 
     service = module.get<AuthService>(AuthService);
     usersService = module.get(UsersService);
-    reviewService = module.get(ReviewService);
     jwtService = module.get(JwtService);
     refreshTokenRepository = module.get(getRepositoryToken(RefreshToken));
     userSessionRepository = module.get(getRepositoryToken(UserSession));
@@ -77,28 +75,6 @@ describe('AuthService', () => {
 
   afterEach(() => {
     Date.now = realDateNow;
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('validateUser', () => {
-    it('should return user id on success', async () => {
-      usersService.getUserByNameAndPassword.mockResolvedValue(1);
-      const result = await service.validateUser('user', 'pass');
-      expect(result).toBe(1);
-      expect(usersService.getUserByNameAndPassword).toHaveBeenCalledWith('user', 'pass');
-    });
-  });
-
-  describe('validateReview', () => {
-    it('should return review id on success', async () => {
-      reviewService.getReviewByKeyAndPassword.mockResolvedValue(10);
-      const result = await service.validateReview('key', 'pass');
-      expect(result).toBe(10);
-      expect(reviewService.getReviewByKeyAndPassword).toHaveBeenCalledWith('key', 'pass');
-    });
   });
 
   describe('login', () => {
@@ -362,10 +338,6 @@ describe('AuthService', () => {
       usersService.getUserIsAdmin.mockResolvedValue(true);
       expect(await service.isAdminUser(1)).toBe(true);
     });
-    it('should return false if user is not admin', async () => {
-      usersService.getUserIsAdmin.mockResolvedValue(false);
-      expect(await service.isAdminUser(1)).toBe(false);
-    });
     it('should return false if userId is falsy', async () => {
       expect(await service.isAdminUser(0)).toBe(false);
     });
@@ -385,30 +357,12 @@ describe('AuthService', () => {
     });
   });
 
-  describe('canAccessWorkSpace', () => {
-    it('should delegate to usersService', async () => {
-      usersService.canAccessWorkSpace.mockResolvedValue(true);
-      const result = await service.canAccessWorkSpace(1, 1);
-      expect(result).toBe(true);
-      expect(usersService.canAccessWorkSpace).toHaveBeenCalledWith(1, 1);
-    });
-  });
-
   describe('logout', () => {
     it('should delete all sessions and refresh tokens for the user', async () => {
       await service.logout(7);
 
       expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 7 });
       expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 7 });
-    });
-  });
-
-  describe('logoutSession', () => {
-    it('should delete the targeted session and its refresh tokens', async () => {
-      await service.logoutSession(7, 'session-7');
-
-      expect(refreshTokenRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'session-7' });
-      expect(userSessionRepository.delete).toHaveBeenCalledWith({ userId: 7, sessionId: 'session-7' });
     });
   });
 

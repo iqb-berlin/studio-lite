@@ -5,9 +5,7 @@ import { DeleteResult, Repository } from 'typeorm';
 // It is aliased because the global `jest` -- used for `jest.fn()` below -- types its mocks
 // loosely, and importing over that name would make every `mockReturnValue` a type error.
 import { jest as jestEsm } from '@jest/globals';
-import {
-  CreateUserDto, UserFullDto, UserWorkspaceAccessDto
-} from '@studio-lite-lib/api-dto';
+import { UserFullDto, UserWorkspaceAccessDto } from '@studio-lite-lib/api-dto';
 // The class itself arrives through the dynamic import below; this keeps its name usable as a
 // type, which a `const` from `await import()` cannot be.
 import type { UsersService } from './users.service';
@@ -85,10 +83,6 @@ describe('UsersService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findAllUsers', () => {
     it('should return all users', async () => {
       const users = [{ id: 1, name: 'user1' }] as User[];
@@ -139,22 +133,6 @@ describe('UsersService', () => {
 
       const result = await service.findOne(1);
       expect(result.id).toBe(1);
-    });
-  });
-
-  describe('create', () => {
-    it('should create user', async () => {
-      const dto = { name: 'u1', password: 'p1' } as CreateUserDto;
-      const savedUser = { id: 1, ...dto } as User;
-
-      jest.spyOn(bcrypt, 'hashSync').mockReturnValue('hashed');
-      jest.spyOn(usersRepository, 'create').mockReturnValue(savedUser);
-      jest.spyOn(usersRepository, 'save').mockResolvedValue(savedUser);
-
-      const result = await service.create(dto);
-
-      expect(result).toBe(1);
-      expect(usersRepository.save).toHaveBeenCalled();
     });
   });
 

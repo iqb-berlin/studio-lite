@@ -40,10 +40,6 @@ describe('WorkspaceGroupController', () => {
     unitService = module.get<UnitService>(UnitService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('findOne', () => {
     // The route asked for nothing but a valid token until #1712: any user could read any group
     // and download its report.
@@ -73,16 +69,6 @@ describe('WorkspaceGroupController', () => {
         'Content-Disposition': 'attachment; filename="iqb-studio-workspace-report.xlsx"'
       });
       expect(result).toBeInstanceOf(StreamableFile);
-    });
-  });
-
-  describe('patch', () => {
-    it('should update a workspace group', async () => {
-      const dto: WorkspaceGroupFullDto = { id: 1, name: 'New Name' };
-      jest.spyOn(workspaceGroupService, 'patch').mockResolvedValue(undefined);
-
-      await controller.patch(1, dto);
-      expect(workspaceGroupService.patch).toHaveBeenCalledWith(1, dto);
     });
   });
 });

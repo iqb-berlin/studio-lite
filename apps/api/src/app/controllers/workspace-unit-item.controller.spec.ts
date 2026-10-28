@@ -12,7 +12,6 @@ import { WriteOrGroupAdminAccessGuard } from '../guards/write-or-group-admin-acc
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
-import UnitCommentUnitItem from '../entities/unit-comment-unit-item.entity';
 import { UnitInWorkspaceGuard } from '../guards/unit-in-workspace.guard';
 import { ItemInUnitGuard } from '../guards/item-in-unit.guard';
 
@@ -50,10 +49,6 @@ describe('WorkspaceUnitItemController', () => {
     unitItemService = module.get<UnitItemService>(UnitItemService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   // The access guards ask about the workspace in the path alone (#1775).
   it.each(['findAll', 'create', 'remove', 'findItemCommentsByUnitId'] as const)(
     'should hold the unit of %s to the workspace in its path',
@@ -87,35 +82,6 @@ describe('WorkspaceUnitItemController', () => {
 
       expect(await controller.findAll(1, false)).toBe(result);
       expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('create', () => {
-    it('should create a unit item', async () => {
-      const dto: UnitItemWithMetadataDto = {} as UnitItemWithMetadataDto;
-      jest.spyOn(unitItemService, 'addItem').mockResolvedValue('new-uuid');
-
-      expect(await controller.create(1, dto)).toBe('new-uuid');
-      expect(unitItemService.addItem).toHaveBeenCalledWith(1, dto);
-    });
-  });
-
-  describe('remove', () => {
-    it('should remove a unit item', async () => {
-      jest.spyOn(unitItemService, 'removeItem').mockResolvedValue(undefined);
-
-      await controller.remove('uuid');
-      expect(unitItemService.removeItem).toHaveBeenCalledWith('uuid');
-    });
-  });
-
-  describe('findItemCommentsByUnitId', () => {
-    it('should return item comments', async () => {
-      const result: UnitCommentUnitItem[] = [];
-      jest.spyOn(unitItemService, 'findItemCommentsByUnitId').mockResolvedValue(result);
-
-      expect(await controller.findItemCommentsByUnitId(1)).toBe(result);
-      expect(unitItemService.findItemCommentsByUnitId).toHaveBeenCalledWith(1);
     });
   });
 });

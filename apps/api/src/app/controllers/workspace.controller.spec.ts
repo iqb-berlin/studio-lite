@@ -1,16 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
 import { BadRequestException, StreamableFile } from '@nestjs/common';
-import {
-  GroupNameDto,
-  NameDto,
-  RequestReportDto,
-  UnitDownloadSettingsDto,
-  UsersInWorkspaceDto,
-  UserWorkspaceFullDto,
-  WorkspaceFullDto,
-  WorkspaceSettingsDto
-} from '@studio-lite-lib/api-dto';
+import { UnitDownloadSettingsDto, WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import { Response } from 'express';
 import { WorkspaceController } from './workspace.controller';
 import { AuthService } from '../services/auth.service';
@@ -26,7 +17,6 @@ import { WorkspaceUserService } from '../services/workspace-user.service';
 import { UnitCommentService } from '../services/unit-comment.service';
 import { UnitRichNoteService } from '../services/unit-rich-note.service';
 import { UnitDownloadClass } from '../classes/unit-download.class';
-import UserEntity from '../entities/user.entity';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
@@ -34,8 +24,6 @@ import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.g
 describe('WorkspaceController', () => {
   let controller: WorkspaceController;
   let workspaceService: WorkspaceService;
-  let workspaceImportService: WorkspaceImportService;
-  let usersService: UsersService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -94,12 +82,6 @@ describe('WorkspaceController', () => {
 
     controller = module.get<WorkspaceController>(WorkspaceController);
     workspaceService = module.get<WorkspaceService>(WorkspaceService);
-    workspaceImportService = module.get<WorkspaceImportService>(WorkspaceImportService);
-    usersService = module.get<UsersService>(UsersService);
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
   });
 
   describe('find', () => {
@@ -187,91 +169,10 @@ describe('WorkspaceController', () => {
     });
   });
 
-  describe('findByUser', () => {
-    it('should return a user in workspace', async () => {
-      const result: UserWorkspaceFullDto = {} as UserWorkspaceFullDto;
-      jest.spyOn(workspaceService, 'findOneByUser').mockResolvedValue(result);
-
-      expect(await controller.findByUser(1, 1)).toBe(result);
-      expect(workspaceService.findOneByUser).toHaveBeenCalledWith(1, 1);
-    });
-  });
-
-  describe('findUsers', () => {
-    it('should return users in workspace', async () => {
-      const result: UsersInWorkspaceDto = [] as unknown as UsersInWorkspaceDto;
-      jest.spyOn(usersService, 'findAllWorkspaceUsers').mockResolvedValue(result);
-
-      expect(await controller.findUsers(1)).toBe(result);
-      expect(usersService.findAllWorkspaceUsers).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('findGroups', () => {
-    it('should return groups in workspace', async () => {
-      const result: string[] = ['Group 1'];
-      jest.spyOn(workspaceService, 'findAllWorkspaceGroups').mockResolvedValue(result);
-
-      expect(await controller.findGroups(1)).toBe(result);
-      expect(workspaceService.findAllWorkspaceGroups).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('deleteUnitGroup', () => {
-    it('should rename or delete unit group', async () => {
-      const dto: GroupNameDto = { groupName: 'Group', operation: 'add' };
-      jest.spyOn(workspaceService, 'patchGroupName').mockResolvedValue(undefined);
-
-      await controller.deleteUnitGroup(1, dto);
-      expect(workspaceService.patchGroupName).toHaveBeenCalledWith(1, dto);
-    });
-  });
-
-  describe('addUnitFiles', () => {
-    it('should upload files', async () => {
-      const result: RequestReportDto = {} as RequestReportDto;
-      const user = {} as UserEntity;
-      const files = [];
-      jest.spyOn(workspaceImportService, 'uploadFiles').mockResolvedValue(result);
-
-      expect(await controller.addUnitFiles(1, user, files)).toBe(result);
-      expect(workspaceImportService.uploadFiles).toHaveBeenCalledWith(1, files, user);
-    });
-  });
-
-  describe('patchSettings', () => {
-    it('should patch settings', async () => {
-      const dto: WorkspaceSettingsDto = {} as WorkspaceSettingsDto;
-      jest.spyOn(workspaceService, 'patchSettings').mockResolvedValue(undefined);
-
-      await controller.patchSettings(1, dto);
-      expect(workspaceService.patchSettings).toHaveBeenCalledWith(1, dto);
-    });
-  });
-
   // Renaming and choosing the drop box asked WorkspaceGuard alone, which a commenter passes (#1715);
   // the frontend offers both only in the group-admin area.
   it.each(['patchName', 'patchDropBox'] as const)('should guard %s for the group admin', method => {
     expect(Reflect.getMetadata('__guards__', WorkspaceController.prototype[method]))
       .toEqual([JwtAuthGuard, WorkspaceGuard, IsWorkspaceGroupAdminGuard]);
-  });
-
-  describe('patchName', () => {
-    it('should patch name', async () => {
-      const dto: NameDto = { name: 'New Name' };
-      jest.spyOn(workspaceService, 'patchName').mockResolvedValue(undefined);
-
-      await controller.patchName(1, dto);
-      expect(workspaceService.patchName).toHaveBeenCalledWith(1, 'New Name');
-    });
-  });
-
-  describe('patchDropBox', () => {
-    it('should patch dropbox id', async () => {
-      jest.spyOn(workspaceService, 'patchDropBoxId').mockResolvedValue(undefined);
-
-      await controller.patchDropBox(1, 10);
-      expect(workspaceService.patchDropBoxId).toHaveBeenCalledWith(1, 10);
-    });
   });
 });

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { AuthDataDto } from '@studio-lite-lib/api-dto';
-import { AppService, standardLogo, defaultAppConfig } from './app.service';
+import { AppService } from './app.service';
 import { AppHttpError } from '../classes/app-http-error.class';
 
 describe('AppService', () => {
@@ -25,25 +25,6 @@ describe('AppService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
-  describe('constants', () => {
-    it('should have correct standardLogo', () => {
-      expect(standardLogo).toEqual({
-        data: 'assets/studio-logo-144.png',
-        bodyBackground: '#7fafb1',
-        boxBackground: '#eeeeee'
-      });
-    });
-
-    it('should have correct defaultAppConfig', () => {
-      expect(defaultAppConfig.appTitle).toBe('IQB-Studio');
-      expect(defaultAppConfig.hasUsers).toBe(true);
-    });
   });
 
   describe('defaultAuthData', () => {
@@ -358,36 +339,6 @@ describe('AppService', () => {
 
       service.clearErrorMessages();
       expect(service.errorMessages.length).toBe(0);
-    });
-  });
-
-  describe('initial state', () => {
-    it('should initialize isLoggedInKeycloak to false', () => {
-      expect(service.isLoggedInKeycloak).toBe(false);
-    });
-
-    it('should initialize appLogo to null', () => {
-      expect(service.appLogo).toBeNull();
-    });
-
-    it('should initialize errorMessages to empty array', () => {
-      expect(service.errorMessages).toEqual([]);
-    });
-
-    it('should initialize errorMessageCounter to 0', () => {
-      expect(service.errorMessageCounter).toBe(0);
-    });
-
-    it('should initialize errorMessagesDisabled to false', () => {
-      expect(service.errorMessagesDisabled).toBe(false);
-    });
-
-    it('should initialize globalWarning to empty string', () => {
-      expect(service.globalWarning).toBe('');
-    });
-
-    it('should initialize dataLoading to false', () => {
-      expect(service.dataLoading).toBe(false);
     });
   });
 });

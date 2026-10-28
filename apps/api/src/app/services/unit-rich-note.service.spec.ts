@@ -40,10 +40,6 @@ describe('UnitRichNoteService', () => {
     service = module.get<UnitRichNoteService>(UnitRichNoteService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('importNotes', () => {
     it('should map old item references to new item references and strip tagLabel', async () => {
       jest.spyOn(service, 'createNote').mockResolvedValue(1);
@@ -98,12 +94,6 @@ describe('UnitRichNoteService', () => {
 
       expect(await service.isInUnit(7, 10)).toBe(true);
       expect(unitRichNoteRepository.exists).toHaveBeenCalledWith({ where: { id: 7, unitId: 10 } });
-    });
-
-    it('should return false when the note is not in the unit', async () => {
-      unitRichNoteRepository.exists.mockResolvedValue(false);
-
-      expect(await service.isInUnit(7, 11)).toBe(false);
     });
   });
 

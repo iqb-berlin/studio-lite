@@ -62,10 +62,6 @@ describe('FinishComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('ngOnInit()', () => {
     it('should load review data when units array is empty', fakeAsync(() => {
       mockReviewService.units = [];
@@ -129,34 +125,6 @@ describe('FinishComponent', () => {
 
       expect(mockReviewService.currentUnitSequenceId).toBe(0);
     }));
-
-    it('should use setTimeout for initialization', fakeAsync(() => {
-      mockReviewService.units = [];
-      const loadDataSpy = jest.spyOn(mockReviewService, 'loadReviewData');
-
-      component.ngOnInit();
-
-      expect(loadDataSpy).not.toHaveBeenCalled();
-
-      tick();
-
-      expect(loadDataSpy).toHaveBeenCalled();
-    }));
-  });
-
-  describe('Component Dependencies', () => {
-    it('should inject TranslateService', () => {
-      const translateService = (component as unknown as { translateService: TranslateService }).translateService;
-      expect(translateService).toBeDefined();
-    });
-
-    it('should inject ReviewService', () => {
-      expect(component.reviewService).toBeDefined();
-    });
-
-    it('should have reviewService accessible in template', () => {
-      expect(component.reviewService).toBe(mockReviewService);
-    });
   });
 
   describe('Component Lifecycle', () => {

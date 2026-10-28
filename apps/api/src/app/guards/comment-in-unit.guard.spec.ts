@@ -35,10 +35,6 @@ describe('CommentInUnitGuard', () => {
     unitCommentService.findOneComment.mockResolvedValue(comment);
   });
 
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   it('should pass when the unit in the route is the unit of the comment', async () => {
     expect(await guard.canActivate(contextFor({ id: '42', unit_id: '10' }))).toBe(true);
     expect(unitCommentService.findOneComment).toHaveBeenCalledWith(42);

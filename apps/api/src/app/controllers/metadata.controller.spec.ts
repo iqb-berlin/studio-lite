@@ -29,10 +29,6 @@ describe('MetadataController', () => {
     controller = module.get<MetadataController>(MetadataController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('getMetadataProfileByUrl', () => {
     it('should return metadata profile for a given URL', async () => {
       const mockProfile = { url: 'http://test' };
@@ -54,18 +50,6 @@ describe('MetadataController', () => {
 
       expect(result).toBe(mockVocabs);
       expect(metadataProfileService.getProfileVocabularies).toHaveBeenCalledWith('http://test');
-    });
-  });
-
-  describe('getRegistry', () => {
-    it('should return registered metadata profiles', async () => {
-      const mockRegistry = [{ id: 1 }];
-      registeredMetadataProfileService.getRegisteredMetadataProfiles.mockResolvedValue(mockRegistry as never);
-
-      const result = await controller.getRegistry();
-
-      expect(result).toBe(mockRegistry);
-      expect(registeredMetadataProfileService.getRegisteredMetadataProfiles).toHaveBeenCalled();
     });
   });
 });

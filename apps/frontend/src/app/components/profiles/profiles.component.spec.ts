@@ -76,10 +76,6 @@ describe('ProfilesComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should load profiles on init', async () => {
     fixture.detectChanges();
     await fixture.whenStable();

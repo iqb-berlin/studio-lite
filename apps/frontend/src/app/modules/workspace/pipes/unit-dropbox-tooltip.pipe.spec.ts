@@ -28,10 +28,6 @@ describe('UnitDropBoxTooltipPipe', () => {
     pipe = new UnitDropBoxTooltipPipe(translateService);
   });
 
-  it('should create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return empty string when unit has no sourceWorkspaceId', () => {
     const unit: UnitInListDto = {
       id: 1,

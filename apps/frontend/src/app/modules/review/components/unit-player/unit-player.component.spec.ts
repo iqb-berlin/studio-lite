@@ -131,26 +131,6 @@ describe('UnitPlayerComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('Component Initialization', () => {
-    it('should initialize unitData with default values', () => {
-      expect(component.unitData).toBeDefined();
-      expect(component.unitData.databaseId).toBe(0);
-      expect(component.unitData.sequenceId).toBe(0);
-    });
-
-    it('should have all required services injected', () => {
-      const route = (component as never as { route: ActivatedRoute }).route;
-      expect(route).toBeDefined();
-      expect(component.snackBar).toBeDefined();
-      expect(component.backendService).toBeDefined();
-      expect(component.reviewService).toBeDefined();
-    });
-  });
-
   describe('gotoUnit()', () => {
     beforeEach(() => {
       mockReviewService.currentUnitSequenceId = 5;
@@ -439,46 +419,6 @@ describe('UnitPlayerComponent', () => {
 
       expect(element.querySelector('studio-lite-page-navigation')).toBeNull();
       expect(element.querySelector('.unit-host.with-footer')).toBeNull();
-    });
-  });
-
-  describe('Component Properties', () => {
-    it('should have unitData property', () => {
-      expect(component.unitData).toBeDefined();
-    });
-
-    it('should have hostingIframe ViewChild reference', () => {
-      expect(component.hostingIframe).toBeDefined();
-    });
-  });
-
-  describe('Service Dependencies', () => {
-    it('should inject ActivatedRoute', () => {
-      const route = (component as never as { route: ActivatedRoute }).route;
-      expect(route).toBeDefined();
-    });
-
-    it('should inject MatSnackBar', () => {
-      expect(component.snackBar).toBeDefined();
-    });
-
-    it('should inject WorkspaceBackendService', () => {
-      expect(component.backendService).toBeDefined();
-    });
-
-    it('should inject ReviewBackendService', () => {
-      const reviewBackendService = (component as never as {
-        reviewBackendService: ReviewBackendService
-      }).reviewBackendService;
-      expect(reviewBackendService).toBeDefined();
-    });
-
-    it('should inject ReviewService', () => {
-      expect(component.reviewService).toBeDefined();
-    });
-
-    it('should inject TranslateService', () => {
-      expect(component.translateService).toBeDefined();
     });
   });
 

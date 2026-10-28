@@ -8,10 +8,6 @@ describe('UserIssuesPipe', () => {
     pipe = new UserIssuesPipe();
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should transform workspace DTOs to user issues with correct link and name', () => {
     const workspaces: WorkspaceDto[] = [
       { id: 1, name: 'Workspace 1' } as WorkspaceDto,

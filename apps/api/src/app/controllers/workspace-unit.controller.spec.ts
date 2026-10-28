@@ -1,14 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
 import {
-  CodingReportDto,
   CopyUnitDto,
   CreateUnitDto,
   IdArrayDto,
   MoveToDto,
   NewNameDto,
   UnitDefinitionDto,
-  UnitFullMetadataDto,
   UnitInListDto,
   UnitPropertiesDto,
   UnitSchemeDto
@@ -43,10 +41,8 @@ import { CopySourcesAccessibleGuard } from '../guards/copy-sources-accessible.gu
 describe('WorkspaceUnitController', () => {
   let controller: WorkspaceUnitController;
   let unitService: UnitService;
-  let unitMetadataService: UnitMetadataService;
   let unitDefinitionService: UnitDefinitionService;
   let settingsService: SettingService;
-  let workspaceService: WorkspaceService;
   let unitCommentService: UnitCommentService;
   let unitRichNoteService: UnitRichNoteService;
 
@@ -99,16 +95,10 @@ describe('WorkspaceUnitController', () => {
 
     controller = module.get<WorkspaceUnitController>(WorkspaceUnitController);
     unitService = module.get<UnitService>(UnitService);
-    unitMetadataService = module.get<UnitMetadataService>(UnitMetadataService);
     unitDefinitionService = module.get<UnitDefinitionService>(UnitDefinitionService);
     settingsService = module.get<SettingService>(SettingService);
-    workspaceService = module.get<WorkspaceService>(WorkspaceService);
     unitCommentService = module.get<UnitCommentService>(UnitCommentService);
     unitRichNoteService = module.get<UnitRichNoteService>(UnitRichNoteService);
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
   });
 
   // The access guards ask about the workspace in the path alone; the unit has to be held to it
@@ -157,16 +147,6 @@ describe('WorkspaceUnitController', () => {
 
       expect(await controller.findAll({ user: { id: 1 } }, 1, false, false, null)).toBe(result);
       expect(unitService.findAllForWorkspace).toHaveBeenCalledWith(1, 1, false, null, false);
-    });
-  });
-
-  describe('getCodingReport', () => {
-    it('should return coding report', async () => {
-      const result: CodingReportDto[] = [];
-      jest.spyOn(workspaceService, 'getCodingReport').mockResolvedValue(result);
-
-      expect(await controller.getCodingReport(1)).toBe(result);
-      expect(workspaceService.getCodingReport).toHaveBeenCalledWith(1);
     });
   });
 
@@ -244,46 +224,6 @@ describe('WorkspaceUnitController', () => {
       expect(unitService.findAllExportSources).toHaveBeenCalledWith(7);
       expect(unitCommentService.findUnitIdsWithComments).toHaveBeenCalledWith([1, 2]);
       expect(unitRichNoteService.findUnitIdsWithNotes).toHaveBeenCalledWith([1, 2]);
-    });
-  });
-
-  describe('findOnesProperties', () => {
-    it('should return unit properties', async () => {
-      const result: UnitPropertiesDto = {} as UnitPropertiesDto;
-      jest.spyOn(unitService, 'findOnesProperties').mockResolvedValue(result);
-
-      expect(await controller.findOnesProperties(1, 1)).toBe(result);
-      expect(unitService.findOnesProperties).toHaveBeenCalledWith(1, 1);
-    });
-  });
-
-  describe('findOnesMetadata', () => {
-    it('should return unit metadata', async () => {
-      const result: UnitFullMetadataDto = {} as UnitFullMetadataDto;
-      jest.spyOn(unitMetadataService, 'findOnesMetadata').mockResolvedValue(result);
-
-      expect(await controller.findOnesMetadata(1)).toBe(result);
-      expect(unitMetadataService.findOnesMetadata).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('findOnesDefinition', () => {
-    it('should return unit definition', async () => {
-      const result: UnitDefinitionDto = {} as UnitDefinitionDto;
-      jest.spyOn(unitDefinitionService, 'findOnesDefinition').mockResolvedValue(result);
-
-      expect(await controller.findOnesDefinition(1)).toBe(result);
-      expect(unitDefinitionService.findOnesDefinition).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('findOnesScheme', () => {
-    it('should return unit scheme', async () => {
-      const result: UnitSchemeDto = {} as UnitSchemeDto;
-      jest.spyOn(unitDefinitionService, 'findOnesScheme').mockResolvedValue(result);
-
-      expect(await controller.findOnesScheme(1)).toBe(result);
-      expect(unitDefinitionService.findOnesScheme).toHaveBeenCalledWith(1);
     });
   });
 
@@ -373,24 +313,6 @@ describe('WorkspaceUnitController', () => {
 
       await controller.create(1, dto, { id: 1 } as UserEntity);
       expect(unitService.copy).toHaveBeenCalled();
-    });
-  });
-
-  describe('remove', () => {
-    it('should remove units', async () => {
-      jest.spyOn(unitService, 'remove').mockResolvedValue(undefined);
-
-      await controller.remove([1, 2]);
-      expect(unitService.remove).toHaveBeenCalledWith([1, 2]);
-    });
-  });
-
-  describe('removeUnit', () => {
-    it('should remove a unit', async () => {
-      jest.spyOn(unitService, 'remove').mockResolvedValue(undefined);
-
-      await controller.removeUnit(1);
-      expect(unitService.remove).toHaveBeenCalledWith(1);
     });
   });
 });

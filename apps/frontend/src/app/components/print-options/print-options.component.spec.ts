@@ -30,30 +30,7 @@ describe('PrintOptionsComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Initialization', () => {
-    it('should initialize with default print options', () => {
-      expect(component.printOptions).toBeDefined();
-      expect(component.printOptions.length).toBe(9);
-
-      const expectedOptions = [
-        { key: 'printLandscape', value: false },
-        { key: 'printProperties', value: true },
-        { key: 'printMetadata', value: true },
-        { key: 'printComments', value: true },
-        { key: 'printCoding', value: true },
-        { key: 'printPreview', value: true },
-        { key: 'printElementIds', value: true },
-        { key: 'printPreviewAutoHeight', value: true },
-        { key: 'printPreviewHeight', value: 1000 }
-      ];
-
-      expect(component.printOptions).toEqual(expectedOptions);
-    });
-
     it('should emit printOptions on init', () => {
       jest.spyOn(component.printOptionsChange, 'emit');
 

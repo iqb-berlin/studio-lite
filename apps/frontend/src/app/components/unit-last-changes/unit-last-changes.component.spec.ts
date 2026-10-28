@@ -21,10 +21,6 @@ describe('UnitLastChangesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should render all change dates with users', () => {
     component.lastChangedDefinition = new Date('2024-01-22T10:00:00');
     component.lastChangedDefinitionUser = 'John Doe';

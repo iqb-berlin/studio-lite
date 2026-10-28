@@ -7,10 +7,6 @@ describe('SortAscendingPipe', () => {
     pipe = new SortAscendingPipe();
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should sort an array of objects by a string key in ascending order', () => {
     const items = [
       { name: 'Banana' },

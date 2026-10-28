@@ -71,10 +71,6 @@ describe('SelectUnitListComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should update unit list and set initial selection', () => {
     component.initialSelection = [2];
     component.queryParams = new HttpParams();

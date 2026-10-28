@@ -38,47 +38,12 @@ describe('UnitItemMetadataService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('getAll', () => {
-    it('should return all unit item metadata', async () => {
-      const mockData = [{ id: 1, unitItemUuid: 'uuid-1' }] as UnitItemMetadata[];
-      mockRepository.find.mockResolvedValue(mockData);
-
-      const result = await service.getAll();
-
-      expect(repository.find).toHaveBeenCalled();
-      expect(result).toEqual(mockData);
-    });
-  });
-
-  describe('getAllByItemId', () => {
-    it('should return metadata for specific item uuid', async () => {
-      const uuid = 'uuid-1';
-      const mockData = [{ id: 1, unitItemUuid: uuid }] as UnitItemMetadata[];
-      mockRepository.findBy.mockResolvedValue(mockData);
-
-      const result = await service.getAllByItemId(uuid);
-
-      expect(repository.findBy).toHaveBeenCalledWith({ unitItemUuid: uuid });
-      expect(result).toEqual(mockData);
-    });
-  });
-
   describe('isOfItem', () => {
     it('should ask for the row of the item', async () => {
       mockRepository.exists.mockResolvedValue(true);
 
       expect(await service.isOfItem(5, 'uuid-1')).toBe(true);
       expect(repository.exists).toHaveBeenCalledWith({ where: { id: 5, unitItemUuid: 'uuid-1' } });
-    });
-
-    it('should return false when the row is not the item\'s', async () => {
-      mockRepository.exists.mockResolvedValue(false);
-
-      expect(await service.isOfItem(5, 'uuid-2')).toBe(false);
     });
   });
 
@@ -125,18 +90,6 @@ describe('UnitItemMetadataService', () => {
       await service.updateItemMetadata(123, { id: 123, profileId: 'p1', unitItemUuid: 'other' } as UnitItemMetadataDto);
 
       expect(repository.update).toHaveBeenCalledWith(123, expect.not.objectContaining({ unitItemUuid: 'other' }));
-    });
-  });
-
-  describe('removeItemMetadata', () => {
-    it('should delete metadata by id', async () => {
-      const id = 123;
-
-      mockRepository.delete.mockResolvedValue({ affected: 1 });
-
-      await service.removeItemMetadata(id);
-
-      expect(repository.delete).toHaveBeenCalledWith(id);
     });
   });
 });

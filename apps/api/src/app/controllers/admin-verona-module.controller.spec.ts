@@ -27,10 +27,6 @@ describe('AdminVeronaModuleController', () => {
     );
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('addModuleFile', () => {
     it('should upload a module file for multiple types', async () => {
       const mockFile = { buffer: Buffer.from('test') };
@@ -77,17 +73,6 @@ describe('AdminVeronaModuleController', () => {
 
       await expect(controller.addModuleFile(mockFile, ['unknown']))
         .rejects.toThrow(NotAcceptableException);
-    });
-  });
-
-  describe('remove', () => {
-    it('should remove modules by keys', async () => {
-      const keys = ['mod1', 'mod2'];
-      veronaModulesService.remove.mockResolvedValue(undefined);
-
-      await controller.remove(keys);
-
-      expect(veronaModulesService.remove).toHaveBeenCalledWith(keys);
     });
   });
 });

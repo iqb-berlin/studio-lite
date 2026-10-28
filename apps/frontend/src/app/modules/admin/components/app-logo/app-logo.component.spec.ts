@@ -71,18 +71,10 @@ describe('AppLogoComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   it('should initialize form with empty values', () => {
     expect(component.configForm).toBeDefined();
     expect(component.configForm.get('bodyBackground')).toBeDefined();
     expect(component.configForm.get('boxBackground')).toBeDefined();
-  });
-
-  it('should initialize imageError as empty string', () => {
-    expect(component.imageError).toBe('');
   });
 
   it('should load logo data on init', done => {

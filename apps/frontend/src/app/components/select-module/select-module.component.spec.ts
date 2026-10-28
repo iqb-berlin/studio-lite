@@ -55,10 +55,6 @@ describe('SelectModuleComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('Inputs', () => {
     it('should set moduleList from modules input', () => {
       component.modules = mockModules;

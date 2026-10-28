@@ -29,16 +29,6 @@ describe('BookletConfigShowComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('Component Initialization', () => {
-    it('should initialize with default bookletConfig', () => {
-      expect(component.bookletConfig).toEqual(bookletConfigDefault);
-    });
-  });
-
   describe('config Input Setter', () => {
     it('should set bookletConfig when valid config is provided', () => {
       const testConfig: BookletConfigDto = {

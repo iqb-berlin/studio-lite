@@ -72,11 +72,6 @@ describe('NewUnitComponent', () => {
     jest.restoreAllMocks();
   });
 
-  it('should create', () => {
-    expect(component)
-      .toBeTruthy();
-  });
-
   it('should initialize form with data', () => {
     const keyControl = component.newUnitForm.get('key');
     const labelControl = component.newUnitForm.get('label');

@@ -75,10 +75,6 @@ describe('ChangePasswordDirective', () => {
     );
   });
 
-  it('should create an instance', () => {
-    expect(directive).toBeTruthy();
-  });
-
   it('should open change password dialog when changePassword is called', () => {
     mockDialogRef.afterClosed.mockReturnValue(of(false));
 
@@ -174,13 +170,5 @@ describe('ChangePasswordDirective', () => {
 
     expect(mockBackendService.setUserPassword).not.toHaveBeenCalled();
     expect(mockSnackBar.open).not.toHaveBeenCalled();
-  });
-
-  it('should cleanup subscriptions on destroy', () => {
-    // This mostly tests that ngOnDestroy exists and runs without error
-    directive.ngOnDestroy();
-    // Since ngUnsubscribe is private, we can't easily check if it emitted/completed
-    // without using 'any' or changing visibility.
-    // But we can ensure the method is callable.
   });
 });

@@ -7,10 +7,6 @@ describe('IsInArrayPipe', () => {
     pipe = new IsInArrayPipe();
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return true when value is in the array', () => {
     expect(pipe.transform(1, [1, 2, 3])).toBe(true);
     expect(pipe.transform(2, [1, 2, 3])).toBe(true);

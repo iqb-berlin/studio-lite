@@ -51,10 +51,6 @@ describe('ExportReviewButtonComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   describe('exportReview', () => {
     const buildSettings = (format: 'json' | 'xml'): UnitDownloadSettingsDto => ({
       unitIdList: [1],

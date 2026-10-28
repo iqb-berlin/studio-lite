@@ -7,10 +7,6 @@ describe('DataLoadingIsNumberPipe', () => {
     pipe = new DataLoadingIsNumberPipe();
   });
 
-  it('create an instance', () => {
-    expect(pipe).toBeTruthy();
-  });
-
   it('should return true when value is a number', () => {
     expect(pipe.transform(0)).toBe(true);
     expect(pipe.transform(1)).toBe(true);
