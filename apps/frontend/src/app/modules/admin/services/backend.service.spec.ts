@@ -45,6 +45,19 @@ describe('Admin BackendService', () => {
     });
   });
 
+  describe('getMissingsProfiles', () => {
+    // Without a value the missings form never watches for changes and cannot be saved (#1943).
+    it('should answer a failed request with an empty list', done => {
+      service.getMissingsProfiles().subscribe(result => {
+        expect(result).toEqual([]);
+        done();
+      });
+
+      httpMock.expectOne(`${baseUrl}admin/settings/missings-profiles`)
+        .flush('error', { status: 500, statusText: 'Server Error' });
+    });
+  });
+
   describe('getUsersFull', () => {
     it('requests users with full param without activity header', done => {
       const users: UserFullDto[] = [{ id: 2 } as UserFullDto];

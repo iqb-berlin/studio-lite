@@ -286,7 +286,9 @@ export class BackendService {
     return this.http
       .get<MissingsProfilesDto[]>(`${this.serverUrl}admin/settings/missings-profiles`)
       .pipe(
-        catchError(() => [])
+        // An empty list, not an empty array returned from catchError: that one emits nothing, and
+        // the form never learns that the load is over (#1943).
+        catchError(() => of([]))
       );
   }
 
