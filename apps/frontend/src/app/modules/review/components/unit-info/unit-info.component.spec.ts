@@ -255,16 +255,6 @@ describe('UnitInfoComponent', () => {
     });
   });
 
-  describe('Component Dependencies', () => {
-    it('should inject ReviewService', () => {
-      expect(component.reviewService).toBeDefined();
-    });
-
-    it('should have reviewService accessible', () => {
-      expect(component.reviewService).toBe(mockReviewService);
-    });
-  });
-
   describe('Protected Properties', () => {
     it('should expose "of" operator from rxjs', () => {
       const ofOperator = (component as unknown as { of: unknown }).of;

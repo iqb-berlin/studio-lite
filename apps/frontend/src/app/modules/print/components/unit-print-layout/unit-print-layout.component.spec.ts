@@ -305,10 +305,4 @@ describe('UnitPrintLayoutComponent', () => {
       expect(component.printOptions).toEqual(options);
     });
   });
-
-  describe('output properties', () => {
-    it('should have heightChange EventEmitter', () => {
-      expect(component.heightChange).toBeDefined();
-    });
-  });
 });

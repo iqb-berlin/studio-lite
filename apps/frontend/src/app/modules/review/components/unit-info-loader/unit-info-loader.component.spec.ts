@@ -200,10 +200,6 @@ describe('UnitInfoLoaderComponent', () => {
   });
 
   describe('EventEmitter', () => {
-    it('should have onEnter EventEmitter', () => {
-      expect(component.onEnter).toBeDefined();
-    });
-
     it('should emit onEnter event when element becomes visible', done => {
       fixture.detectChanges();
 

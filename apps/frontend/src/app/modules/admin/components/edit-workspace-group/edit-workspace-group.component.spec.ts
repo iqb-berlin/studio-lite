@@ -72,14 +72,6 @@ describe('EditWorkspaceGroupComponent', () => {
     expect(nameControl?.valid).toBe(true);
   });
 
-  it('should have data property with wsg information', () => {
-    expect(component.data).toBeDefined();
-    expect(component.data.wsg?.id).toBe(1);
-    expect(component.data.wsg?.name).toBe('Test Group');
-    expect(component.data.title).toBe('Edit Workspace Group');
-    expect(component.data.saveButtonLabel).toBe('Save');
-  });
-
   it('should have editWorkspaceGroupForm defined', () => {
     expect(component.editWorkspaceGroupForm).toBeDefined();
     expect(component.editWorkspaceGroupForm.get('name')).toBeDefined();

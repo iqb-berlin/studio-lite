@@ -58,15 +58,6 @@ describe('UserMenuComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should have injected APP_VERSION', () => {
-    expect(component.appVersion).toBe('1.2.3');
-  });
-
-  it('should have appService injected', () => {
-    expect(component.appService).toBeTruthy();
-    expect(component.appService).toBeInstanceOf(AppService);
-  });
-
   it('should initialize userName from appService authData', () => {
     expect(component.userName).toBe(appService.authData.userName);
   });

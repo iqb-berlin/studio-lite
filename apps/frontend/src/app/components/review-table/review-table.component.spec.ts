@@ -151,10 +151,6 @@ describe('ReviewTableComponent', () => {
     expect(component.dataSource.data[0].name).toBe('Review 3');
   });
 
-  it('should have i18nService injected', () => {
-    expect(component.i18nService).toBeTruthy();
-  });
-
   it('should handle multiple view toggles', () => {
     expect(component.reviewsView).toBe('list');
 

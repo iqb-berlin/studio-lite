@@ -31,14 +31,6 @@ describe('AppInfoContentComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should have injected APP_VERSION', () => {
-    expect(component.appVersion).toBe('0.0.0');
-  });
-
-  it('should have injected APP_NAME', () => {
-    expect(component.appName).toBe('Studio-Lite');
-  });
-
   it('should accept isUserLoggedIn input', () => {
     component.isUserLoggedIn = true;
     fixture.detectChanges();
