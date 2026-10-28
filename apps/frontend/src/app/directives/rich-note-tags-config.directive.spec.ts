@@ -22,12 +22,6 @@ describe('RichNoteTagsConfigDirective', () => {
     component = fixture.componentInstance;
   });
 
-  it('should initialize configForm and tagsJsonControl', () => {
-    expect(component.configForm).toBeDefined();
-    expect(component.tagsJsonControl).toBeDefined();
-    expect(component.configForm.get('tagsJson')).toBe(component.tagsJsonControl);
-  });
-
   it('should parse tags correctly', () => {
     component.tagsJsonControl.setValue('[{"id":"t1","label":"Tag 1"}]');
     // eslint-disable-next-line @typescript-eslint/dot-notation

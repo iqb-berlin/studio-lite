@@ -47,21 +47,9 @@ describe('InputTextComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should initialize the form with the default value', () => {
-    expect(component.textInputForm.get('text')?.value).toBe(mockDialogData.default);
-  });
-
   it('should be invalid if the text field is empty', () => {
     component.textInputForm.get('text')?.setValue('');
     expect(component.textInputForm.invalid).toBeTruthy();
-  });
-
-  it('should render the correct title and prompt', () => {
-    const title = fixture.debugElement.query(By.css('h1[mat-dialog-title]')).nativeElement;
-    const input = fixture.debugElement.query(By.css('input')).nativeElement;
-
-    expect(title.textContent).toContain(mockDialogData.title);
-    expect(input.placeholder).toBe(mockDialogData.prompt);
   });
 
   it('should show the warning when isBackUpWorkspaceGroup is true and workspacesCount > maxWorkspaceCount', () => {

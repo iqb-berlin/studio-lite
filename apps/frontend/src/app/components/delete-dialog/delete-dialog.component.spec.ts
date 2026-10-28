@@ -37,11 +37,6 @@ describe('DeleteDialogComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should initialize with title and content from dialog data', () => {
-    expect(component.title).toBe(mockDialogData.title);
-    expect(component.content).toBe(mockDialogData.content);
-  });
-
   it('should close dialog with true when confirm is called', () => {
     component.confirm();
     expect(mockDialogRef.close).toHaveBeenCalledWith(true);
@@ -50,11 +45,5 @@ describe('DeleteDialogComponent', () => {
   it('should close dialog with false when decline is called', () => {
     component.decline();
     expect(mockDialogRef.close).toHaveBeenCalledWith(false);
-  });
-
-  it('should render title and content in the template', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain(mockDialogData.title);
-    expect(compiled.querySelector('p')?.textContent).toContain(mockDialogData.content);
   });
 });

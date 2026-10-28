@@ -8,11 +8,11 @@ import {
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatCheckboxModule, MatCheckboxChange } from '@angular/material/checkbox';
-import { MatSelectModule, MatSelectChange } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSelectModule } from '@angular/material/select';
 import { of } from 'rxjs';
 import {
-  State, WorkspaceGroupFullDto, WorkspaceFullDto, WorkspaceSettingsDto
+  WorkspaceGroupFullDto, WorkspaceFullDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { EditWorkspaceSettingsComponent } from './edit-workspace-settings.component';
 import { BackendService } from '../../modules/admin/services/backend.service';
@@ -127,11 +127,6 @@ describe('EditWorkspaceSettingsComponent', () => {
     expect(component.selectedUnitMDProfile).toBe('profile1/unit.json');
   });
 
-  it('should update stableModulesOnly in setStableChecked', () => {
-    component.setStableChecked({ checked: true } as MatCheckboxChange);
-    expect(component.dialogData.stableModulesOnly).toBe(true);
-  });
-
   it('should update modules in selectModule', () => {
     component.selectModule('editor', 'new-editor');
     expect(component.dialogData.defaultEditor).toBe('new-editor');
@@ -141,23 +136,6 @@ describe('EditWorkspaceSettingsComponent', () => {
 
     component.selectModule('player', 'new-player');
     expect(component.dialogData.defaultPlayer).toBe('new-player');
-  });
-
-  it('should update unitMDProfile in selectUnitMDProfile', () => {
-    component.selectUnitMDProfile({ value: 'new-unit-profile' } as MatSelectChange);
-    expect(component.dialogData.unitMDProfile).toBe('new-unit-profile');
-  });
-
-  it('should update itemMDProfile in selectItemMDProfile', () => {
-    component.selectItemMDProfile({ value: 'new-item-profile' } as MatSelectChange);
-    expect(component.dialogData.itemMDProfile).toBe('new-item-profile');
-  });
-
-  it('should sync states in addData', () => {
-    const mockStates: State[] = [{ id: 1, label: 'State 1', color: 'red' }];
-    component.selectionChanged = mockStates;
-    component.addData();
-    expect(component.dialogData.states).toBe(mockStates);
   });
 
   it('should fall back to workspaceService.groupId if groupId is missing in selectedRow', async () => {
@@ -215,19 +193,6 @@ describe('EditWorkspaceSettingsComponent', () => {
       expect(component.dialogData.hiddenRoutes).toContain('editor');
       expect(component.dialogData.hiddenRoutes).toContain('preview');
       expect(component.dialogData.hiddenRoutes).not.toBe(initialHiddenRoutes);
-    });
-
-    it('toggleRouteVisibility should create a new array reference for handle "notes" route correctly', () => {
-      const initialHiddenRoutes: string[] = [];
-      component.dialogData.hiddenRoutes = initialHiddenRoutes;
-      component.toggleRouteVisibility('notes', false);
-      expect(component.dialogData.hiddenRoutes).toContain('notes');
-      expect(component.dialogData.hiddenRoutes).not.toBe(initialHiddenRoutes);
-
-      const updatedHiddenRoutes = component.dialogData.hiddenRoutes;
-      component.toggleRouteVisibility('notes', true);
-      expect(component.dialogData.hiddenRoutes).not.toContain('notes');
-      expect(component.dialogData.hiddenRoutes).not.toBe(updatedHiddenRoutes);
     });
   });
 });

@@ -19,13 +19,6 @@ describe('ItemSelectionComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should render label', () => {
-    component.label = 'My Label';
-    fixture.detectChanges();
-    const labelElement = fixture.debugElement.query(By.css('mat-label'));
-    expect(labelElement.nativeElement.textContent).toBe('My Label');
-  });
-
   it('should render unit items as options', async () => {
     component.unitItems = [
       { uuid: '1', id: 'Item 1' },

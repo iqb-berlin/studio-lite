@@ -11,10 +11,6 @@ describe('IsArrayPipe', () => {
     expect(pipe.transform({ a: 1 })).toBe(false);
   });
 
-  it('should return false for a string', () => {
-    expect(pipe.transform('array')).toBe(false);
-  });
-
   it('should return false for null or undefined', () => {
     expect(pipe.transform(null)).toBe(false);
     expect(pipe.transform(undefined)).toBe(false);

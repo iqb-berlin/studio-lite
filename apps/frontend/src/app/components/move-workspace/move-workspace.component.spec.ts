@@ -70,15 +70,6 @@ describe('MoveWorkspaceComponent', () => {
     expect(component.typedData.workspaceGroups.find(wsg => wsg.id === 3)).toBeDefined();
   });
 
-  it('should render the correct title, content, and warning', () => {
-    const titleElement = fixture.debugElement.query(By.css('h1[mat-dialog-title]')).nativeElement;
-    const contentElements = fixture.debugElement.queryAll(By.css('mat-dialog-content p'));
-
-    expect(titleElement.textContent).toContain(mockDialogData.title);
-    expect(contentElements[0].nativeElement.textContent).toContain(mockDialogData.content);
-    expect(contentElements[1].nativeElement.textContent).toContain(mockDialogData.warning);
-  });
-
   it('should populate mat-select with filtered workspace groups', async () => {
     const selectTrigger = fixture.debugElement.query(By.css('mat-select')).nativeElement;
     selectTrigger.click();

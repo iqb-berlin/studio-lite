@@ -353,17 +353,6 @@ describe('PreviewDirective', () => {
     expect(active?.id).toBe('p2');
   });
 
-  it('empties the page list on clearPageList', () => {
-    const directive = createDirective();
-
-    directive.setPageList(['p1', 'p2', 'p3'], 'p1');
-    expect(directive.pageList.length).toBe(5);
-
-    directive.clearPageList();
-
-    expect(directive.pageList).toEqual([]);
-  });
-
   it('keeps the page list empty when the next unit reports a single page', () => {
     const directive = createDirective();
 

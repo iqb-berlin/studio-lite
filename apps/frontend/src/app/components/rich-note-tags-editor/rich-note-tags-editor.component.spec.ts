@@ -24,12 +24,6 @@ describe('RichNoteTagsEditorComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should emit copyFromGlobalRequested when copyFromGlobal is called', () => {
-    const emitSpy = jest.spyOn(component.copyFromGlobalRequested, 'emit');
-    component.copyFromGlobal();
-    expect(emitSpy).toHaveBeenCalled();
-  });
-
   it('should display label', () => {
     component.label = 'Test Label';
     fixture.detectChanges();

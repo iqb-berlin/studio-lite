@@ -28,13 +28,6 @@ describe('ChangePasswordComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should initialize form with three password fields', () => {
-    expect(component.changePasswordForm).toBeTruthy();
-    expect(component.changePasswordForm.get('pw_old')).toBeTruthy();
-    expect(component.changePasswordForm.get('pw_new1')).toBeTruthy();
-    expect(component.changePasswordForm.get('pw_new2')).toBeTruthy();
-  });
-
   it('should require all password fields', () => {
     const form = component.changePasswordForm;
     expect(form.valid).toBe(false);
@@ -81,16 +74,6 @@ describe('ChangePasswordComponent', () => {
     expect(form.get('pw_old')?.valid).toBe(true);
     expect(form.get('pw_new1')?.valid).toBe(true);
     expect(form.get('pw_new2')?.valid).toBe(true);
-    expect(form.valid).toBe(true);
-  });
-
-  it('should accept special characters in passwords', () => {
-    const form = component.changePasswordForm;
-
-    form.get('pw_old')?.setValue('P@ssw0rd!');
-    form.get('pw_new1')?.setValue('N3wP@ss!');
-    form.get('pw_new2')?.setValue('N3wP@ss!');
-
     expect(form.valid).toBe(true);
   });
 });

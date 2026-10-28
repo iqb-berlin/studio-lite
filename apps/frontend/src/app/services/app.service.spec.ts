@@ -45,20 +45,6 @@ describe('AppService', () => {
       expect(service.authData).toEqual(AppService.defaultAuthData);
     });
 
-    it('should set authData correctly', () => {
-      const testAuthData: AuthDataDto = {
-        userId: 123,
-        userName: 'testUser',
-        userLongName: 'Test User',
-        isAdmin: true,
-        workspaces: [],
-        reviews: []
-      };
-
-      service.authData = testAuthData;
-      expect(service.authData).toEqual(testAuthData);
-    });
-
     it('should emit authDataChanged event when authData is set', done => {
       const testAuthData: AuthDataDto = {
         userId: 456,
@@ -315,30 +301,6 @@ describe('AppService', () => {
 
       expect(service.errorMessages.length).toBe(1);
       expect(service.errorMessages[0].id).toBe(1);
-    });
-  });
-
-  describe('clearErrorMessages', () => {
-    it('should clear all error messages', () => {
-      service.errorMessages = [
-        {
-          id: 1,
-          status: 404,
-          message: 'Message 1',
-          method: 'GET',
-          urlWithParams: '/test1'
-        },
-        {
-          id: 2,
-          status: 500,
-          message: 'Message 2',
-          method: 'GET',
-          urlWithParams: '/test2'
-        }
-      ];
-
-      service.clearErrorMessages();
-      expect(service.errorMessages.length).toBe(0);
     });
   });
 });

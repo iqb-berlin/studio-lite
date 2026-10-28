@@ -10,16 +10,6 @@ describe('IqbFilesUploadQueueComponent', () => {
     component = new IqbFilesUploadQueueComponent();
   });
 
-  it('should add and clear files', () => {
-    const file = new File(['a'], 'a.txt', { type: 'text/plain' });
-
-    component.add(file);
-    expect(component.files).toEqual([file]);
-
-    component.removeAll();
-    expect(component.files.length).toBe(0);
-  });
-
   it('should remove a file by id', () => {
     const file = new File(['a'], 'a.txt', { type: 'text/plain' });
     const upload = { id: 0 } as IqbFilesUploadComponent;

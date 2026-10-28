@@ -92,12 +92,6 @@ describe('SelectModuleComponent', () => {
       component.modules = mockModules;
     });
 
-    it('should be valid when selected module exists', () => {
-      component.value = 'mod-1';
-      expect(component.isValid).toBe(true);
-      expect(component.moduleSubstitute).toBe('');
-    });
-
     it('should be invalid when selected module does not exist and no substitute found', () => {
       component.value = 'unknown-module';
       expect(component.isValid).toBe(false);

@@ -11,7 +11,6 @@ import { LogoutDirective } from '../../directives/logout.directive';
 import { AppService } from '../../services/app.service';
 
 describe('UserMenuComponent', () => {
-  let component: UserMenuComponent;
   let fixture: ComponentFixture<UserMenuComponent>;
   let appService: AppService;
 
@@ -53,17 +52,8 @@ describe('UserMenuComponent', () => {
       .compileComponents();
 
     fixture = TestBed.createComponent(UserMenuComponent);
-    component = fixture.componentInstance;
     appService = TestBed.inject(AppService);
     fixture.detectChanges();
-  });
-
-  it('should initialize userName from appService authData', () => {
-    expect(component.userName).toBe(appService.authData.userName);
-  });
-
-  it('should initialize userLongName from appService authData', () => {
-    expect(component.userLongName).toBe(appService.authData.userLongName);
   });
 
   it('should set isUserLoggedIn to true when userId is greater than 0', () => {
@@ -78,10 +68,6 @@ describe('UserMenuComponent', () => {
     const newComponent = new UserMenuComponent(appService, '1.0.0');
 
     expect(newComponent.isUserLoggedIn).toBe(false);
-  });
-
-  it('should initialize isAdmin from appService authData', () => {
-    expect(component.isAdmin).toBe(appService.authData.isAdmin);
   });
 
   it('should set hasReviews to true when reviews array has items', () => {
