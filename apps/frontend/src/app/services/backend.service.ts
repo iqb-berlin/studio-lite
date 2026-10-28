@@ -182,18 +182,6 @@ export class BackendService {
       .pipe(succeeded());
   }
 
-  deleteUserSession(userId: number, sessionId: string): Observable<boolean> {
-    return this.http
-      .delete(`${this.serverUrl}admin/users/${userId}/sessions/${sessionId}`)
-      .pipe(succeeded());
-  }
-
-  deleteUserOrphanedSessions(userId: number): Observable<boolean> {
-    return this.http
-      .delete(`${this.serverUrl}admin/users/${userId}/orphaned-sessions`)
-      .pipe(succeeded());
-  }
-
   getEmailTemplate(): Observable<EmailTemplateDto> {
     return this.http
       .get<EmailTemplateDto>(`${this.serverUrl}admin/settings/email-template`);

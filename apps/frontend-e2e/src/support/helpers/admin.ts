@@ -138,6 +138,33 @@ export function deleteGroup(group: string): void {
 }
 
 /**
+ * Renames a workspace group in the admin area
+ * @param group - Current group name
+ * @param newName - New group name
+ * @example
+ * renameGroup('Mathematics', 'Mathematik');
+ */
+export function renameGroup(group: string, newName: string): void {
+  cy.visit('/');
+  cy.findAdminSettings().click();
+  clickIndexTabAdmin('workspace-groups');
+  cy.contains('mat-row', group).click();
+  cy.get('[data-cy="admin-workspace-groups-rename-group"]').click({ force: true });
+  cy.translate(Cypress.expose('locale')).then(json => {
+    cy.get(`input[placeholder="${json.admin['group-name']}"]`)
+      .should('be.visible')
+      .clear()
+      .type(newName);
+    cy.intercept('PATCH', '/api/admin/workspace-groups/*').as('patchGroup');
+    cy.get('mat-dialog-actions button')
+      .contains(json.save)
+      .click({ force: true });
+    waitForSuccess('@patchGroup');
+  });
+  cy.contains('mat-row', newName).should('exist');
+}
+
+/**
  * Makes users admins of a workspace group
  * @param group - Group name
  * @param admins - Array of usernames to make admins
@@ -155,9 +182,11 @@ export function makeAdminOfGroup(group: string, admins: string[]): void {
       .find('label')
       .click();
   });
+  cy.intercept('PATCH', '/api/admin/workspace-groups/*/admins').as('setGroupAdmins');
   cy.get('[data-cy="admin-workspace-groups-save-button"]')
     .should('not.be.disabled')
     .click();
+  waitForSuccess('@setGroupAdmins');
 }
 
 // ---------------------------------------------------------------------------

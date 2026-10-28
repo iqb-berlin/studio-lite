@@ -116,7 +116,7 @@ describe('WorkspaceGroupsMenuComponent', () => {
   it('should open edit settings dialog and emit event on success', () => {
     const group = { id: 1, name: 'g1' } as WorkspaceGroupInListDto;
     component.selectedRows = [group];
-    const resultData = { states: [], profilesSelected: [] };
+    const resultData = { profilesSelected: [] };
     (mockDialog.open as jest.Mock).mockReturnValue({
       afterClosed: jest.fn().mockReturnValue(of(resultData))
     });
@@ -125,6 +125,6 @@ describe('WorkspaceGroupsMenuComponent', () => {
     component.editGroupSettings();
 
     expect(mockDialog.open).toHaveBeenCalledWith(EditWorkspaceGroupSettingsComponent, expect.anything());
-    expect(emitSpy).toHaveBeenCalledWith({ states: [], profiles: [], selectedRow: 1 });
+    expect(emitSpy).toHaveBeenCalledWith({ profiles: [], selectedRow: 1 });
   });
 });

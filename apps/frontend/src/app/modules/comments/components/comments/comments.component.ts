@@ -97,12 +97,13 @@ export class CommentsComponent implements OnInit, OnDestroy {
               this.translateService.instant('error'),
               { duration: 3000 }
             );
+          } else {
+            this.snackBar.open(
+              this.translateService.instant('comment.visibility-updated'),
+              '',
+              { duration: 1000 }
+            );
           }
-          this.snackBar.open(
-            this.translateService.instant('comment.visibility-updated'),
-            '',
-            { duration: 1000 }
-          );
         }),
         switchMap(() => this.getUpdatedComments())
       )

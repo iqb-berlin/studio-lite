@@ -27,7 +27,6 @@ class MockStatusIndicationComponent {
 }
 
 describe('PreviewBarComponent', () => {
-  let component: PreviewBarComponent;
   let fixture: ComponentFixture<PreviewBarComponent>;
 
   const mockWorkspaceService = {};
@@ -58,11 +57,20 @@ describe('PreviewBarComponent', () => {
       .compileComponents();
 
     fixture = TestBed.createComponent(PreviewBarComponent);
-    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  // Without a player there is no one to tell that navigation is denied (#1951).
+  it.each([
+    ['no player', true, undefined, 3],
+    ['a player of API version 2', true, window, 2],
+    ['a player of API version 3', false, window, 3]
+  ])('should set the navigation-denied button with %s to disabled: %s', (_, disabled, target, version) => {
+    fixture.componentRef.setInput('postMessageTarget', target);
+    fixture.componentRef.setInput('playerApiVersion', version);
+    fixture.detectChanges();
+
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector('[data-cy="preview-bar-navigation-denied"]');
+    expect(button.disabled).toBe(disabled);
   });
 });

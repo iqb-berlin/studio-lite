@@ -22,7 +22,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import {
   CreateWorkspaceGroupDto,
-  State,
   UserInListDto,
   WorkspaceGroupInListDto
 } from '@studio-lite-lib/api-dto';
@@ -104,17 +103,13 @@ export class WorkspaceGroupsComponent implements OnInit {
     );
   }
 
+  // Renaming sends the name alone: the API lays any settings sent over the stored ones, so empty
+  // ones would wipe the group's profiles and default modules (#1960).
   editGroup(value: { selection: WorkspaceGroupInListDto[], group: UntypedFormGroup }): void {
     this.appService.dataLoading = true;
     this.backendService.changeWorkspaceGroup({
       id: value.selection[0].id,
-      name: value.group.get('name')?.value,
-      settings: {
-        defaultSchemer: '',
-        defaultPlayer: '',
-        defaultEditor: '',
-        profiles: []
-      }
+      name: value.group.get('name')?.value
     })
       .subscribe(
         respOk => {
@@ -127,11 +122,9 @@ export class WorkspaceGroupsComponent implements OnInit {
       );
   }
 
-  editGroupSettings(res: { states: State[], profiles: Profile[], selectedRow: number }): void {
+  editGroupSettings(res: { profiles: Profile[], selectedRow: number }): void {
     this.appService.dataLoading = true;
-    this.backendService.setWorkspaceGroupProfiles({
-      defaultEditor: '', defaultPlayer: '', defaultSchemer: '', states: res.states, profiles: res.profiles
-    }, res.selectedRow)
+    this.backendService.setWorkspaceGroupProfiles(res.profiles, res.selectedRow)
       .subscribe(
         respOk => {
           this.changeResult.show(respOk, 'admin.group-edited', 'admin.group-not-edited');

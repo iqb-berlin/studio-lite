@@ -78,6 +78,24 @@ describe('UnitRichNotesComponent', () => {
     expect(component.displayNodes[0].tagId).toBe('t1');
   });
 
+  it('should show no notes of the unit before when those of the next fail to load (#1952)', () => {
+    const notes = [{
+      id: 1, tagId: 't1', content: 'test', unitId: 10
+    }] as UnitRichNoteDto[];
+    workspaceBackendServiceMock.getUnitRichNotes.mockReturnValueOnce(of({ notes, tags: mockTags }));
+    workspaceServiceMock.selectedUnit$.next(10);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelectorAll('studio-lite-unit-rich-note-node').length).toBe(1);
+
+    workspaceBackendServiceMock.getUnitRichNotes.mockReturnValueOnce(of(null));
+    workspaceServiceMock.selectedUnit$.next(11);
+    fixture.detectChanges();
+
+    expect(element.querySelectorAll('studio-lite-unit-rich-note-node').length).toBe(0);
+    expect(element.querySelector('[data-cy="unit-rich-notes-not-loaded"]')).not.toBeNull();
+  });
+
   it('should group notes with invalid tagIds into an "unassigned" node', () => {
     const notes = [
       {

@@ -13,7 +13,6 @@ import {
   WorkspaceGroupFullDto,
   WorkspaceGroupInListDto,
   UnitExportConfigDto,
-  WorkspaceGroupSettingsDto,
   WorkspaceFullDto,
   UnitInViewDto,
   UnitItemInViewDto,
@@ -21,6 +20,7 @@ import {
   UnitRichNoteTagDto
 } from '@studio-lite-lib/api-dto';
 import { succeeded } from '../../../utils/succeeded.utils';
+import { Profile } from '../../../models/profile.type';
 
 /**
  * Every call the administration area makes: users and their sessions, workspace groups and their
@@ -59,11 +59,16 @@ export class BackendService {
       );
   }
 
-  setWorkspaceGroupProfiles(settings:WorkspaceGroupSettingsDto, workspaceGroupId: number): Observable<boolean> {
+  /**
+   * Sets the metadata profiles of a group and nothing else of its settings: the API lays the settings
+   * sent over the stored ones, so any further field would overwrite the group's states or default
+   * modules (#1960).
+   */
+  setWorkspaceGroupProfiles(profiles: Profile[], workspaceGroupId: number): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}`, {
         id: workspaceGroupId,
-        settings: settings
+        settings: { profiles }
       })
       .pipe(succeeded());
   }
@@ -218,6 +223,16 @@ export class BackendService {
       .pipe(succeeded());
   }
 
+  // Unlike getConfig of the app's BackendService, which falls back on the defaults for the start
+  // page, this answers a failure with null: the form must not offer those defaults for saving (#1968).
+  getAppConfig(): Observable<ConfigDto | null> {
+    return this.http
+      .get<ConfigDto>(`${this.serverUrl}admin/settings/config`)
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
   setAppConfig(appConfig: ConfigDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/settings/config`, appConfig)
@@ -281,7 +296,9 @@ export class BackendService {
     return this.http
       .get<MissingsProfilesDto[]>(`${this.serverUrl}admin/settings/missings-profiles`)
       .pipe(
-        catchError(() => [])
+        // An empty list, not an empty array returned from catchError: that one emits nothing, and
+        // the form never learns that the load is over (#1943).
+        catchError(() => of([]))
       );
   }
 

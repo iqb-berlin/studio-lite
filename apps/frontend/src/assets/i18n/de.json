@@ -288,6 +288,7 @@
     "groups-not-deleted": "Bereichsgruppe konnten nicht gelöscht werden",
     "groups-title": "Admin: Bereichsgruppen",
     "edit-group-settings": "Bereichsgruppe Einstellungen",
+    "group-profiles-not-loaded": "Die Profile der Bereichsgruppe konnten nicht geladen werden.",
     "download-units": "Aufgaben als CSV-Datei herunterladen",
     "error": "Fehler",
     "delete-one-package": "Paket löschen",
@@ -386,7 +387,8 @@
     "start-page-content-right": "Html-Inhalt für die Startseite",
     "imprint-content": "Html-Inhalt für die Impressum-/Datenschutzseite",
     "config-data-saved": "Konfigurationsdaten der Anwendung gespeichert - bitte neu laden!",
-    "config-data-not-saved": "Konnte Konfigurationsdaten der Anwendung nicht speichern"
+    "config-data-not-saved": "Konnte Konfigurationsdaten der Anwendung nicht speichern",
+    "config-data-not-loaded": "Die Konfiguration konnte nicht geladen werden."
   },
   "email-template": {
     "template-saved": "E-Mail-Template gespeichert",
@@ -804,7 +806,8 @@
     "delete-rich-note-confirm": "Soll dieses Begleitmaterial wirklich gelöscht werden?",
     "delete-rich-note-title": "Begleitmaterial löschen",
     "required": "Pflichtfeld",
-    "unassigned-rich-notes": "Uneindeutiges Begleitmaterial"
+    "unassigned-rich-notes": "Uneindeutiges Begleitmaterial",
+    "rich-notes-not-loaded": "Das Begleitmaterial konnte nicht geladen werden."
   },
   "rich-note": {
     "tag": "Kategorie",

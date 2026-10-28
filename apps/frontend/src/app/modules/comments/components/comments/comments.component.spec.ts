@@ -245,6 +245,14 @@ describe('CommentsComponent', () => {
     expect(snackBarSpy.open).toHaveBeenCalledWith('comment.visibility-updated', '', expect.any(Object));
   });
 
+  // The success message opened right after the failure replaced it (#1962).
+  it('should show only the failure when the visibility of a comment was not changed', () => {
+    backendServiceSpy.updateCommentVisibility.mockReturnValueOnce(of(false));
+    component.updateCommentVisibility(1, true);
+    expect(snackBarSpy.open).toHaveBeenCalledTimes(1);
+    expect(snackBarSpy.open).toHaveBeenCalledWith('comment.visibility-not-updated', 'error', { duration: 3000 });
+  });
+
   it('should update comment', () => {
     component.updateComment({ text: 'updated', commentId: 1, items: ['item1'] });
     expect(backendServiceSpy.updateComment).toHaveBeenCalledWith(

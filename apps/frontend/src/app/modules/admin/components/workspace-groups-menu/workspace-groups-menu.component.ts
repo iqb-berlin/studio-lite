@@ -14,6 +14,7 @@ import {
 import { BackendService } from '../../services/backend.service';
 import { WorkspaceService } from '../../../workspace/services/workspace.service';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
+import { Profile } from '../../../../models/profile.type';
 
 @Component({
   selector: 'studio-lite-workspace-groups-menu',
@@ -25,7 +26,7 @@ export class WorkspaceGroupsMenuComponent {
   @Input() selectedWorkspaceGroupId!: number;
   @Input() selectedRows!: WorkspaceGroupInListDto[];
   @Output() groupAdded: EventEmitter<UntypedFormGroup> = new EventEmitter<UntypedFormGroup>();
-  @Output() groupSettingsEdited = new EventEmitter();
+  @Output() groupSettingsEdited = new EventEmitter<{ profiles: Profile[], selectedRow: number }>();
   @Output() groupEdited: EventEmitter<{ selection: WorkspaceGroupInListDto[], group: UntypedFormGroup }> =
     new EventEmitter<{ selection: WorkspaceGroupInListDto[], group: UntypedFormGroup }>();
 
@@ -89,11 +90,11 @@ export class WorkspaceGroupsMenuComponent {
             saveButtonLabel: this.translateService.instant('save')
           }
         });
-      dialogRef.afterClosed().subscribe(data => {
+      dialogRef.afterClosed().subscribe((data: { profilesSelected: Profile[] } | false | undefined) => {
         if (typeof data !== 'undefined') {
           if (data !== false) {
             this.groupSettingsEdited
-              .emit({ states: data.states, profiles: data.profilesSelected, selectedRow: this.selectedRows[0].id });
+              .emit({ profiles: data.profilesSelected, selectedRow: this.selectedRows[0].id });
           }
         }
       });
