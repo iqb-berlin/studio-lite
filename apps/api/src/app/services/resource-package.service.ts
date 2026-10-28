@@ -128,9 +128,4 @@ export class ResourcePackageService {
       zippedResourcePackage.buffer as unknown as Uint8Array
     );
   }
-
-  getZippedResourcePackage(name: string): Buffer {
-    this.logger.log('Returning zipped resource package.');
-    return fs.readFileSync(`${this.resourcePackagesPath}/${name}/${name}.itcr.zip`);
-  }
 }
