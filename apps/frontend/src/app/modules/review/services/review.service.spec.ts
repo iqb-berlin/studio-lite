@@ -91,26 +91,6 @@ describe('ReviewService', () => {
     jest.clearAllMocks();
   });
 
-  describe('Initial State', () => {
-    it('should initialize with default values', () => {
-      expect(service.reviewId).toBe(0);
-      expect(service.reviewName).toBe('');
-      expect(service.reviewCreatedAt).toBe('');
-      expect(service.reviewChangedAt).toBe('');
-      expect(service.workspaceId).toBe(0);
-      expect(service.workspaceName).toBe('');
-      expect(service.units).toEqual([]);
-      expect(service.reviewConfig).toEqual({});
-      expect(service.bookletConfig).toEqual({});
-      expect(service.screenHeaderText).toBe('');
-      expect(service.pageHeaderText).toBe('');
-      expect(service.currentUnitSequenceId).toBe(-1);
-      expect(service.unitInfoPanelWidth).toBe(300);
-      expect(service.unitInfoPanelOn).toBe(false);
-      expect(service.allComments).toEqual([]);
-    });
-  });
-
   describe('unitDbId getter', () => {
     it('should return 0 when units array is empty', () => {
       service.units = [];

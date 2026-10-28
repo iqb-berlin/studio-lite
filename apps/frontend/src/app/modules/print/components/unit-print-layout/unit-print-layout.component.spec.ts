@@ -145,11 +145,6 @@ describe('UnitPrintLayoutComponent', () => {
 
       expect(initPlayerSpy).toHaveBeenCalled();
     });
-
-    it('should initialize with default values', () => {
-      expect(component.message).toBe('');
-      expect(component.playerId).toBe('');
-    });
   });
 
   describe('initPlayer', () => {

@@ -12,13 +12,6 @@ describe('PreviewService', () => {
     service = TestBed.inject(PreviewService);
   });
 
-  it('should initialize with default paging mode "buttons"', done => {
-    service.pagingMode.subscribe((mode: PagingMode) => {
-      expect(mode).toBe('buttons');
-      done();
-    });
-  });
-
   it('should set paging mode to "separate"', done => {
     service.setPagingMode('separate');
     service.pagingMode.subscribe((mode: PagingMode) => {

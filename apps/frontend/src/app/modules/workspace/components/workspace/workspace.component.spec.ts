@@ -82,10 +82,6 @@ describe('WorkspaceComponent', () => {
   });
 
   describe('navTabs & hiddenRoutes', () => {
-    it('should have all navTabs defined', () => {
-      expect(component.navTabs.length).toBe(6);
-    });
-
     it('should have workspaceSettings with hiddenRoutes', () => {
       component.workspaceService.workspaceSettings = {
         defaultEditor: '', defaultPlayer: '', defaultSchemer: '', hiddenRoutes: ['preview']

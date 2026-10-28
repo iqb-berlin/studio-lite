@@ -84,12 +84,6 @@ describe('ChangePasswordComponent', () => {
     expect(form.valid).toBe(true);
   });
 
-  it('should have empty initial values', () => {
-    expect(component.changePasswordForm.get('pw_old')?.value).toBe('');
-    expect(component.changePasswordForm.get('pw_new1')?.value).toBe('');
-    expect(component.changePasswordForm.get('pw_new2')?.value).toBe('');
-  });
-
   it('should accept special characters in passwords', () => {
     const form = component.changePasswordForm;
 

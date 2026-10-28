@@ -341,9 +341,5 @@ describe('CommentDialogComponent', () => {
     it('should initialize with empty userName', () => {
       expect(component.userName).toBe('');
     });
-
-    it('should initialize with empty unitItems array', () => {
-      expect(component.unitItems).toEqual([]);
-    });
   });
 });

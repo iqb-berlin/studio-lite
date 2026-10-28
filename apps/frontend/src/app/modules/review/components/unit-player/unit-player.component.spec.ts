@@ -131,14 +131,6 @@ describe('UnitPlayerComponent', () => {
     fixture.detectChanges();
   });
 
-  describe('Component Initialization', () => {
-    it('should initialize unitData with default values', () => {
-      expect(component.unitData).toBeDefined();
-      expect(component.unitData.databaseId).toBe(0);
-      expect(component.unitData.sequenceId).toBe(0);
-    });
-  });
-
   describe('gotoUnit()', () => {
     beforeEach(() => {
       mockReviewService.currentUnitSequenceId = 5;

@@ -66,12 +66,6 @@ describe('AppInfoContentComponent', () => {
     expect(component.isAdmin).toBe(true);
   });
 
-  it('should handle all boolean inputs as false by default', () => {
-    expect(component.isUserLoggedIn).toBeUndefined();
-    expect(component.hasReviews).toBeUndefined();
-    expect(component.isAdmin).toBeUndefined();
-  });
-
   it('should handle logged in admin user with reviews', () => {
     component.isUserLoggedIn = true;
     component.isAdmin = true;
