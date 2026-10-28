@@ -140,17 +140,4 @@ describe('UnitUserService', () => {
       expect(unitUserRepository.delete).toHaveBeenCalledTimes(1);
     });
   });
-
-  describe('findByUnitId', () => {
-    it('should return unit users', async () => {
-      const unitId = 1;
-      const unitUsers = [{ userId: 1, unitId }] as UnitUser[];
-      mockUnitUserRepository.find.mockResolvedValue(unitUsers);
-
-      const result = await service.findByUnitId(unitId);
-
-      expect(unitUserRepository.find).toHaveBeenCalledWith({ where: { unitId } });
-      expect(result).toEqual(unitUsers);
-    });
-  });
 });

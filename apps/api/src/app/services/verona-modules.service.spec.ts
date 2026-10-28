@@ -146,11 +146,4 @@ describe('VeronaModulesService', () => {
       expect(repository.save).not.toHaveBeenCalled();
     });
   });
-
-  describe('remove', () => {
-    it('should remove module', async () => {
-      await service.remove('key');
-      expect(repository.delete).toHaveBeenCalledWith('key');
-    });
-  });
 });

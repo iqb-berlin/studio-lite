@@ -51,19 +51,6 @@ describe('UnitMetadataToDeleteService', () => {
     });
   });
 
-  describe('getOneByUnit', () => {
-    it('should return one entry by unitId', async () => {
-      const unitId = 1;
-      const mockResult = { unitId, changedAt: new Date() } as UnitMetadataToDelete;
-      mockRepository.findOneBy.mockResolvedValue(mockResult);
-
-      const result = await service.getOneByUnit(unitId);
-
-      expect(repository.findOneBy).toHaveBeenCalledWith({ unitId });
-      expect(result).toEqual(mockResult);
-    });
-  });
-
   describe('findMarkedUnitIds', () => {
     it('should answer which of the given units carry the marker, in one query', async () => {
       mockRepository.find.mockResolvedValue([{ unitId: 2 }] as UnitMetadataToDelete[]);

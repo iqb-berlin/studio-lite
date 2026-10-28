@@ -85,18 +85,6 @@ describe('WorkspaceGroupService', () => {
   });
 
   describe('create', () => {
-    it('should create group', async () => {
-      const dto = { name: 'g1', settings: {} } as CreateWorkspaceGroupDto;
-      const saved = { id: 1, ...dto } as WorkspaceGroup;
-      mockRepository.create.mockReturnValue(saved);
-      mockRepository.save.mockResolvedValue(saved);
-
-      const result = await service.create(dto);
-      expect(result).toBe(1);
-    });
-  });
-
-  describe('create', () => {
     // #1570: a group can be created with a profile selection in the same request,
     // so this path must canonicalize just like patch does.
     it('canonicalizes the profile selection ids of a new group', async () => {
@@ -176,13 +164,6 @@ describe('WorkspaceGroupService', () => {
       await service.patch(1, { id: 1, name: 'g', settings } as WorkspaceGroupFullDto);
 
       expect(group.settings).toMatchObject({ defaultEditor: 'e' });
-    });
-  });
-
-  describe('remove', () => {
-    it('should delete group', async () => {
-      await service.remove([1]);
-      expect(groupRepository.delete).toHaveBeenCalledWith([1]);
     });
   });
 

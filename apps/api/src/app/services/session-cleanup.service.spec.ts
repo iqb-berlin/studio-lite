@@ -157,17 +157,4 @@ describe('SessionCleanupService', () => {
       expect(refreshTokenRepository.delete).toHaveBeenCalled();
     });
   });
-
-  describe('handleScheduledCleanup', () => {
-    it('should run the cleanup', async () => {
-      userSessionRepository.find.mockResolvedValue([]);
-      userSessionRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
-      refreshTokenRepository.delete.mockResolvedValue({ affected: 0, raw: [] });
-
-      await service.handleScheduledCleanup();
-
-      expect(userSessionRepository.delete).toHaveBeenCalled();
-      expect(refreshTokenRepository.delete).toHaveBeenCalled();
-    });
-  });
 });

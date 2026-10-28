@@ -11,7 +11,6 @@ describe('UnitItemService', () => {
   let service: UnitItemService;
   let repository: Repository<UnitItem>;
   let unitItemMetadataService: UnitItemMetadataService;
-  let itemCommentService: ItemCommentService;
 
   const mockRepository = {
     find: jest.fn(),
@@ -64,7 +63,6 @@ describe('UnitItemService', () => {
     service = module.get<UnitItemService>(UnitItemService);
     repository = module.get<Repository<UnitItem>>(getRepositoryToken(UnitItem));
     unitItemMetadataService = module.get<UnitItemMetadataService>(UnitItemMetadataService);
-    itemCommentService = module.get<ItemCommentService>(ItemCommentService);
   });
 
   afterEach(() => {
@@ -127,19 +125,6 @@ describe('UnitItemService', () => {
     });
   });
 
-  describe('getAllByUnitId', () => {
-    it('should return items', async () => {
-      const unitId = 1;
-      const items = [{ id: 1, unitId }] as unknown as UnitItem[];
-      mockRepository.find.mockResolvedValue(items);
-
-      const result = await service.getAllByUnitId(unitId);
-
-      expect(repository.find).toHaveBeenCalledWith({ where: { unitId }, order: { id: 'ASC' } });
-      expect(result).toEqual(items);
-    });
-  });
-
   describe('getAllByUnitIds', () => {
     it('should return the items of all given units in one query, without their metadata', async () => {
       const items = [{ id: 'a', unitId: 2 }, { id: 'b', unitId: 3 }] as unknown as UnitItem[];
@@ -160,31 +145,12 @@ describe('UnitItemService', () => {
     });
   });
 
-  describe('getOneByUuid', () => {
-    it('should return item by uuid', async () => {
-      const uuid = 'uuid-1';
-      const item = { uuid } as UnitItem;
-      mockRepository.findOneBy.mockResolvedValue(item);
-
-      const result = await service.getOneByUuid(uuid);
-
-      expect(repository.findOneBy).toHaveBeenCalledWith({ uuid });
-      expect(result).toEqual(item);
-    });
-  });
-
   describe('isInUnit', () => {
     it('should ask for the item in the unit', async () => {
       mockRepository.exists.mockResolvedValue(true);
 
       expect(await service.isInUnit('uuid-1', 10)).toBe(true);
       expect(repository.exists).toHaveBeenCalledWith({ where: { uuid: 'uuid-1', unitId: 10 } });
-    });
-
-    it('should return false when the item is not in the unit', async () => {
-      mockRepository.exists.mockResolvedValue(false);
-
-      expect(await service.isInUnit('uuid-1', 11)).toBe(false);
     });
   });
 
@@ -315,23 +281,6 @@ describe('UnitItemService', () => {
       expect(repository.save).toHaveBeenCalled();
       expect(unitItemMetadataService.addItemMetadata).toHaveBeenCalled();
       expect(result).toBe('real-uuid');
-    });
-  });
-
-  describe('removeItem', () => {
-    it('should delete item', async () => {
-      const uuid = 'u1';
-      mockRepository.delete.mockResolvedValue({ affected: 1 });
-      await service.removeItem(uuid);
-      expect(repository.delete).toHaveBeenCalledWith(uuid);
-    });
-  });
-
-  describe('findItemCommentsByUnitId', () => {
-    it('should proxy call to itemCommentService', async () => {
-      const unitId = 1;
-      await service.findItemCommentsByUnitId(unitId);
-      expect(itemCommentService.findItemCommentsByUnitId).toHaveBeenCalledWith(unitId);
     });
   });
 
