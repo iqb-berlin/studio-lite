@@ -78,7 +78,7 @@ export class GroupMenuComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
+      if (result === true) {
         this.groupDeleted.emit();
       }
     });

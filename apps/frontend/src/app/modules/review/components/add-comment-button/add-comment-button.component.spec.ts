@@ -83,13 +83,17 @@ describe('AddCommentButtonComponent', () => {
         done();
       });
     });
+  });
 
-    it('should handle dialog closed without errors', () => {
-      component.showReviewDialog();
+  // Without a unit there is nothing to comment on (#1954).
+  it.each([
+    [0, true],
+    [123, false]
+  ])('should disable the button for unit %s: %s', (unitDbId, disabled) => {
+    fixture.componentRef.setInput('unitDbId', unitDbId);
+    fixture.detectChanges();
 
-      expect(() => {
-        mockDialogRef.afterClosed().subscribe();
-      }).not.toThrow();
-    });
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector('.send-comment-button');
+    expect(button.disabled).toBe(disabled);
   });
 });
