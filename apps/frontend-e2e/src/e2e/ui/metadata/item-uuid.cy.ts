@@ -1,5 +1,5 @@
 import { AccessLevel, CommentData } from '../../../support/testData';
-import { addFirstUser, deleteFirstUser } from '../../../support/helpers';
+import { addFirstUser, deleteFirstUser, FIRST_WORKSPACE_REQUEST_TIMEOUT } from '../../../support/helpers';
 
 // A new item gets its uuid from the server when the unit is saved. Until #1830 the frontend did not
 // take it over: the next save in the same view sent the item as a new one, the server deleted it and
@@ -46,7 +46,7 @@ describe('An item saved a second time in the same view', () => {
     cy.intercept('PATCH', `/api/workspaces/${wsId}/units/${unitId}/properties`).as('saveProps');
     cy.intercept('GET', `/api/workspaces/${wsId}/units/${unitId}/properties`).as('loadProps');
     cy.visit(`/#/a/${wsId}/${unitId}/properties`);
-    cy.wait('@loadProps');
+    cy.wait('@loadProps', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
 
     cy.get('.add-item-button').click();
     cy.translate(Cypress.expose('locale')).then(json => {

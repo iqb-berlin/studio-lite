@@ -1,5 +1,5 @@
 import { AccessLevel } from '../../../support/testData';
-import { addFirstUser, deleteFirstUser } from '../../../support/helpers';
+import { addFirstUser, deleteFirstUser, FIRST_WORKSPACE_REQUEST_TIMEOUT } from '../../../support/helpers';
 
 // Only the discard button of the confirmation discards. Esc and a click beside the dialog close it
 // without an answer, and until #1844 that counted as one.
@@ -45,7 +45,7 @@ describe('Discarding the unsaved changes of a unit', () => {
   it('keeps them when the dialog is closed with Esc or beside it, and discards them on confirmation', () => {
     cy.intercept('GET', `/api/workspaces/${wsId}/units/${unitId}/properties`).as('loadProps');
     cy.visit(`/#/a/${wsId}/${unitId}/properties`);
-    cy.wait('@loadProps');
+    cy.wait('@loadProps', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
     description().type('Entwurf');
     saveButton().should('be.enabled');
 

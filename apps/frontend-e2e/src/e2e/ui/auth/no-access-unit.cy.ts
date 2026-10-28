@@ -4,6 +4,7 @@ import {
   createNewUser,
   deleteFirstUser,
   deleteUser,
+  FIRST_WORKSPACE_REQUEST_TIMEOUT,
   loginWithUser
 } from '../../../support/helpers';
 
@@ -59,7 +60,7 @@ describe('A unit link into a workspace without access', () => {
     // Opened afresh, as a link from outside is: a change of the hash alone would keep the page.
     cy.visit(`/#/a/${wsId}/${unitId}/preview`);
     cy.reload();
-    cy.wait('@workspaceRequest');
+    cy.wait('@workspaceRequest', { requestTimeout: FIRST_WORKSPACE_REQUEST_TIMEOUT });
 
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.get('.error-container').should('contain', json['app-http-error']['403']);
