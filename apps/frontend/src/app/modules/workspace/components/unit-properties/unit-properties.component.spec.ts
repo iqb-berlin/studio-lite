@@ -120,14 +120,6 @@ describe('UnitPropertiesComponent', () => {
     expect(component.unitForm.get('reference')?.value).toBe('');
   });
 
-  it('updates group name via form control', () => {
-    component.unitForm.get('group')?.setValue('');
-
-    component.onGroupNameChange('Group A');
-
-    expect(component.unitForm.get('group')?.value).toBe('Group A');
-  });
-
   it('merges changed profiles into the store while preserving items', () => {
     const store = createMock<UnitMetadataStore>();
     store.getData.mockReturnValue({

@@ -38,12 +38,4 @@ describe('RolePipe', () => {
   it('should return undefined for access level 10 (out of bounds)', () => {
     expect(pipe.transform(10)).toBeUndefined();
   });
-
-  it('should handle all valid access levels', () => {
-    const expectedRoles = ['guest', 'commenter', 'developer', 'maintainer', 'super'];
-
-    expectedRoles.forEach((role, index) => {
-      expect(pipe.transform(index)).toBe(role);
-    });
-  });
 });

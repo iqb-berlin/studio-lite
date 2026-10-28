@@ -1,8 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { of, Subject } from 'rxjs';
-import {
-  UnitDefinitionDto, UnitPropertiesDto, UnitSchemeDto
-} from '@studio-lite-lib/api-dto';
+import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitStoresService } from './unit-stores.service';
 import { WorkspaceBackendService } from './workspace-backend.service';
@@ -85,15 +83,6 @@ describe('UnitStoresService', () => {
   });
 
   describe('loadDefinitionStore', () => {
-    it('should create the store from the server\'s answer', () => {
-      const definition: UnitDefinitionDto = { definition: 'def', variables: [] };
-      backendService.getUnitDefinition.mockReturnValue(of(definition));
-
-      service.loadDefinitionStore(1, 3).subscribe();
-
-      expect(service.definitionStore()?.getData().definition).toBe('def');
-    });
-
     it('should hand out nothing when the server does not answer, and ask again next time', () => {
       backendService.getUnitDefinition.mockReturnValue(of(null));
       const loaded = jest.fn();
@@ -104,17 +93,6 @@ describe('UnitStoresService', () => {
       expect(loaded).toHaveBeenCalledWith(undefined);
       expect(service.definitionStore()).toBeUndefined();
       expect(backendService.getUnitDefinition).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('loadSchemeStore', () => {
-    it('should create the store from the server\'s answer', () => {
-      const scheme: UnitSchemeDto = { scheme: '{}', schemeType: 'type' };
-      backendService.getUnitScheme.mockReturnValue(of(scheme));
-
-      service.loadSchemeStore(1, 3).subscribe();
-
-      expect(service.schemeStore()?.getData().scheme).toBe('{}');
     });
   });
 

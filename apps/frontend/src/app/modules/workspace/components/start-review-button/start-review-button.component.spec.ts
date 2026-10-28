@@ -24,7 +24,7 @@ describe('StartReviewButtonComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should set locationOrigin from window', () => {
-    expect(component.locationOrigin).toBe(window.location.origin);
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

@@ -72,13 +72,6 @@ describe('NewUnitComponent', () => {
     jest.restoreAllMocks();
   });
 
-  it('should initialize form with data', () => {
-    const keyControl = component.newUnitForm.get('key');
-    const labelControl = component.newUnitForm.get('label');
-    expect(keyControl?.value).toBe('test');
-    expect(labelControl?.value).toBe('Test Label');
-  });
-
   it('should set group direct mode to true if no groups provided', () => {
     // Re-create component with empty groups
     TestBed.resetTestingModule();

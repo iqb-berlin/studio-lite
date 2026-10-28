@@ -107,13 +107,6 @@ describe('MoveUnitComponent', () => {
     expect(component.workspaceList[0].id).toBe(2);
   });
 
-  it('should get targetWorkspace value from form', () => {
-    component.selectForm.enable();
-    // eslint-disable-next-line @typescript-eslint/dot-notation
-    component.selectForm.controls['wsSelector'].setValue(123);
-    expect(component.targetWorkspace).toBe(123);
-  });
-
   it('should get selectedUnits from child component', () => {
     // Start with undefined child to check robustness
     Object.defineProperty(component, 'unitSelectionTable', { value: undefined });

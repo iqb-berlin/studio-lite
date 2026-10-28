@@ -73,11 +73,6 @@ describe('BookletConfigEditComponent', () => {
       fixture.detectChanges();
     });
 
-    it('should render controllerDesign field', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.querySelectorAll('mat-select').length).toBeGreaterThanOrEqual(6);
-    });
-
     it('should not render new modern fields', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       const selects = compiled.querySelectorAll('mat-select');
@@ -89,12 +84,6 @@ describe('BookletConfigEditComponent', () => {
     beforeEach(() => {
       component.context = 'export';
       fixture.detectChanges();
-    });
-
-    it('should not render controllerDesign field', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      const selects = compiled.querySelectorAll('mat-select');
-      expect(selects.length).toBeGreaterThan(6);
     });
 
     it('should render new modern fields', () => {

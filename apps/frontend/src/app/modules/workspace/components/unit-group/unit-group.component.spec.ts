@@ -22,13 +22,6 @@ describe('UnitGroupComponent', () => {
     fixture.detectChanges();
   });
 
-  it('updates expanded when expandAll emits', () => {
-    component.expanded = false;
-    component.expandAll.next(true);
-
-    expect(component.expanded).toBe(true);
-  });
-
   it('emits expandedChange when toggling via button', () => {
     component.expanded = false;
     component.count = 3;

@@ -90,13 +90,6 @@ describe('ExportUnitFileConfigComponent', () => {
     backendService = TestBed.inject(WorkspaceBackendService) as unknown as MockWorkspaceBackendService;
   });
 
-  it('should emit exportFormatChange when format changes', () => {
-    create([]);
-    jest.spyOn(component.exportFormatChange, 'emit');
-    component.exportFormatChange.emit('xml');
-    expect(component.exportFormatChange.emit).toHaveBeenCalledWith('xml');
-  });
-
   it('should offer and check a file one of the chosen units has content for', () => {
     create([1]);
 

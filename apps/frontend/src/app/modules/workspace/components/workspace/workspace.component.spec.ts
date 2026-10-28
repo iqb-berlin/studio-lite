@@ -81,12 +81,7 @@ describe('WorkspaceComponent', () => {
     fixture.detectChanges();
   });
 
-  describe('navTabs & hiddenRoutes', () => {
-    it('should have workspaceSettings with hiddenRoutes', () => {
-      component.workspaceService.workspaceSettings = {
-        defaultEditor: '', defaultPlayer: '', defaultSchemer: '', hiddenRoutes: ['preview']
-      };
-      expect(component.workspaceService.workspaceSettings.hiddenRoutes).toContain('preview');
-    });
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

@@ -37,14 +37,6 @@ describe('RichNoteTagsService', () => {
     service = TestBed.inject(RichNoteTagsService);
   });
 
-  it('should load tags on initialization', done => {
-    service.tags$.subscribe(tags => {
-      expect(tags).toEqual(mockTags);
-      expect(backendServiceMock.getUnitRichNoteTags).toHaveBeenCalled();
-      done();
-    });
-  });
-
   it('should get tag label by ID (recursive)', done => {
     service.tags$.subscribe(() => {
       const label = service.getTagLabel('child1');

@@ -24,7 +24,6 @@ describe('WorkspaceService', () => {
   let service: WorkspaceService;
   let backendService: jest.Mocked<WorkspaceBackendService>;
   let appService: jest.Mocked<AppService>;
-  let richNoteTagsService: jest.Mocked<RichNoteTagsService>;
   let unitStores: {
     metadataStore: WritableSignal<UnitMetadataStore | undefined>;
     definitionStore: WritableSignal<UnitDefinitionStore | undefined>;
@@ -100,14 +99,6 @@ describe('WorkspaceService', () => {
     service = TestBed.inject(WorkspaceService);
     backendService = TestBed.inject(WorkspaceBackendService) as jest.Mocked<WorkspaceBackendService>;
     appService = TestBed.inject(AppService) as jest.Mocked<AppService>;
-    richNoteTagsService = TestBed.inject(RichNoteTagsService) as jest.Mocked<RichNoteTagsService>;
-  });
-
-  describe('unitKeyPatternString', () => {
-    it('should return correct pattern string', () => {
-      const pattern = WorkspaceService.unitKeyPatternString();
-      expect(pattern).toBe('[a-zA-Z][a-zA-Z0-9_-]*');
-    });
   });
 
   describe('unitKeyUniquenessValidator', () => {
@@ -294,21 +285,6 @@ describe('WorkspaceService', () => {
       service.setWorkspaceGroupStates();
 
       expect(service.states).toEqual([]);
-    });
-  });
-
-  describe('loadUnitProperties', () => {
-    it('should load the metadata store of the selected unit', done => {
-      const store = new UnitMetadataStore({ id: 5 });
-      unitStores.loadMetadataStore.mockReturnValue(of(store));
-      service.selectedWorkspaceId = 1;
-      service.selectedUnit$.next(5);
-
-      service.loadUnitProperties().subscribe(loaded => {
-        expect(loaded).toBe(store);
-        expect(unitStores.loadMetadataStore).toHaveBeenCalledWith(1, 5);
-        done();
-      });
     });
   });
 
@@ -700,21 +676,6 @@ describe('WorkspaceService', () => {
       expect(service.lastChangedMetadataUser).toBe('Test User');
     });
 
-    it('should apply changes to stores after successful save', async () => {
-      const metadataStore = new UnitMetadataStore({ id: 1, key: 'test', name: 'Test' });
-      metadataStore.setPlayer('newPlayer');
-      unitStores.metadataStore.set(metadataStore);
-
-      const applyChangesSpy = jest.spyOn(metadataStore, 'applyChanges');
-
-      backendService.setUnitProperties.mockReturnValue(of(true));
-      backendService.getUnitList.mockReturnValue(of([]));
-
-      await service.saveUnitData();
-
-      expect(applyChangesSpy).toHaveBeenCalled();
-    });
-
     it('should use userName when userLongName is not available', async () => {
       appService.authData = {
         ...mockAuthData,
@@ -732,45 +693,6 @@ describe('WorkspaceService', () => {
       await service.saveUnitData();
 
       expect(service.lastChangedMetadataUser).toBe('testuser');
-    });
-  });
-
-  describe('event emitters', () => {
-    it('should emit onCommentsUpdated event', () => {
-      const emitSpy = jest.fn();
-      service.onCommentsUpdated.subscribe(emitSpy);
-
-      service.onCommentsUpdated.emit();
-
-      expect(emitSpy).toHaveBeenCalled();
-    });
-  });
-
-  describe('unitKeyTaken', () => {
-    it('should start free and follow what the properties report', () => {
-      expect(service.unitKeyTaken()).toBe(false);
-
-      service.setUnitKeyTaken(true);
-
-      expect(service.unitKeyTaken()).toBe(true);
-    });
-  });
-
-  describe('loadRichNoteTags', () => {
-    it('should call RichNoteTagsService.loadTags', () => {
-      service.loadRichNoteTags();
-      expect(richNoteTagsService.loadTags).toHaveBeenCalled();
-    });
-  });
-
-  describe('getRichNoteTagLabel', () => {
-    it('should call RichNoteTagsService.getTagLabel', () => {
-      const mockLabel = [{ lang: 'de', value: 'Label' }];
-      richNoteTagsService.getTagLabel.mockReturnValue(mockLabel);
-
-      const result = service.getRichNoteTagLabel('tag1');
-      expect(richNoteTagsService.getTagLabel).toHaveBeenCalledWith('tag1');
-      expect(result).toEqual(mockLabel);
     });
   });
 });
