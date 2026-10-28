@@ -168,12 +168,7 @@ export class CodingReportClass {
 
   /** Whether an instruction says anything; the schemer's editor leaves `<p></p>` behind when emptied. */
   private static hasText(html: string | undefined): boolean {
-    if (!html) return false;
-    const plain = html
-      .replace(/&nbsp;|&#160;|&#xA0;/gi, ' ')
-      .replace(/\s/g, '')
-      .replace(/[<>]/g, '');
-    return plain.length > 0;
+    return !!html?.replace(/&nbsp;|&#160;|&#xA0;/gi, ' ').split(/<[^>]*>/).some(part => part.trim());
   }
 
   static getValidationStatus(

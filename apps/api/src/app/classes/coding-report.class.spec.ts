@@ -454,10 +454,19 @@ describe('CodingReportClass', () => {
       expect(CodingReportClass.getCodesWithoutRules({ id: 'v', sourceType: 'BASE' })).toEqual([]);
     });
 
-    it('takes an emptied instruction for none', () => {
+    it.each(['<p>&nbsp;</p>', '<p>&#160;</p>', '<P>&#xa0;</P>', '<p></p>'])(
+      'takes the emptied instruction %s for none',
+      manualInstruction => {
+        expect(CodingReportClass.getCodesWithoutRules(variableWith([
+          { id: 1, type: 'FULL_CREDIT', manualInstruction }
+        ]))).toEqual([{ type: 'CODE_WITHOUT_RULES', breaking: false, code: '1' }]);
+      }
+    );
+
+    it('takes text between the tags for an instruction', () => {
       expect(CodingReportClass.getCodesWithoutRules(variableWith([
-        { id: 1, type: 'FULL_CREDIT', manualInstruction: '<p>&nbsp;</p>' }
-      ]))).toEqual([{ type: 'CODE_WITHOUT_RULES', breaking: false, code: '1' }]);
+        { id: 1, type: 'FULL_CREDIT', manualInstruction: '<p><strong>Anweisung</strong></p>' }
+      ]))).toEqual([]);
     });
 
     it.each<[string, Partial<VariableCodingData>]>([
