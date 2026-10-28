@@ -6,7 +6,7 @@
   <div class="fx-row-space-between-center fx-gap-20">
     <button matMiniFab
             [color]="'default'"
-            [disabled]="(playerApiVersion < 3) || (postMessageTarget === null)"
+            [disabled]="playerApiVersion < 3 || !postMessageTarget"
             [matTooltip]="'workspace.send-navigation-denied' | translate"
             (click)="navigationDenied.emit()"
             data-cy="preview-bar-navigation-denied">
