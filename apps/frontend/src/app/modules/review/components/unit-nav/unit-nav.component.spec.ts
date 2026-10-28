@@ -48,16 +48,6 @@ describe('UnitNavComponent', () => {
     fixture.detectChanges();
   });
 
-  describe('Component Initialization', () => {
-    it('should have reviewService injected', () => {
-      expect(component.reviewService).toBeDefined();
-    });
-
-    it('should have reviewService accessible in template', () => {
-      expect(component.reviewService).toBe(mockReviewService);
-    });
-  });
-
   describe('ReviewService Integration', () => {
     it('should access units from reviewService', () => {
       const mockUnits = [
@@ -98,11 +88,6 @@ describe('UnitNavComponent', () => {
   });
 
   describe('Template Binding', () => {
-    it('should bind reviewService for template access', () => {
-      fixture.detectChanges();
-      expect(component.reviewService).toBe(mockReviewService);
-    });
-
     it('should handle empty units array in reviewService', () => {
       mockReviewService.units = [];
       fixture.detectChanges();

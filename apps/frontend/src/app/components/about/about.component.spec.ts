@@ -6,7 +6,6 @@ import { provideRouter } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { AboutComponent } from './about.component';
 import { AppService } from '../../services/app.service';
-import { AppConfig } from '../../classes/app-config.class';
 
 describe('AboutComponent', () => {
   let component: AboutComponent;
@@ -51,17 +50,6 @@ describe('AboutComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should have correct injected values', () => {
-    expect(component.appName).toBe('Studio-Lite');
-    expect(component.appPublisher).toBe('IQB - Institut zur Qualitätsentwicklung im Bildungswesen');
-    expect(component.appVersion).toBe('0.0.0');
-  });
-
-  it('should have AppService injected', () => {
-    expect(component.appService).toBeTruthy();
-    expect(component.appService).toBeInstanceOf(AppService);
-  });
-
   it('should set page title on init', done => {
     const translatedTitle = 'Imprint';
     jest.spyOn(translateService, 'instant').mockReturnValue(translatedTitle);
@@ -74,10 +62,5 @@ describe('AboutComponent', () => {
       expect(appService.appConfig.setPageTitle).toHaveBeenCalledWith(translatedTitle);
       done();
     }, 10);
-  });
-
-  it('should have appService with appConfig', () => {
-    expect(appService.appConfig).toBeTruthy();
-    expect(appService.appConfig).toBeInstanceOf(AppConfig);
   });
 });

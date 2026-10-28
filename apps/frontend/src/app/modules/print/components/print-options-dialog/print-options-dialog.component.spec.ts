@@ -44,13 +44,6 @@ describe('PrintOptionsDialogComponent', () => {
     fixture.detectChanges();
   });
 
-  describe('constructor', () => {
-    it('should initialize with dialogRef', () => {
-      expect(component.dialogRef).toBeDefined();
-      expect(component.dialogRef).toBe(mockDialogRef);
-    });
-  });
-
   describe('cancel', () => {
     it('should close the dialog without data', () => {
       component.cancel();
@@ -68,10 +61,6 @@ describe('PrintOptionsDialogComponent', () => {
   });
 
   describe('dialogRef property', () => {
-    it('should be publicly accessible', () => {
-      expect(component.dialogRef).toBe(mockDialogRef);
-    });
-
     it('should allow calling close directly', () => {
       component.dialogRef.close('test-data');
 

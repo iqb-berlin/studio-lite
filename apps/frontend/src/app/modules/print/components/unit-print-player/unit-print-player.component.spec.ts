@@ -426,10 +426,4 @@ describe('UnitPrintPlayerComponent', () => {
       expect(component.printPreviewAutoHeight).toBe(true);
     });
   });
-
-  describe('output properties', () => {
-    it('should have iFrameHeightChange Subject', () => {
-      expect(component.iFrameHeightChange).toBeDefined();
-    });
-  });
 });

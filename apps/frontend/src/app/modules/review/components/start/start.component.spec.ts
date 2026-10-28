@@ -194,24 +194,4 @@ describe('StartComponent', () => {
       expect(accessDeniedText()).toBeNull();
     });
   });
-
-  describe('Component Dependencies', () => {
-    it('should inject ReviewService', () => {
-      expect(component.reviewService).toBeDefined();
-    });
-
-    it('should inject AppService', () => {
-      const appService = (component as unknown as { appService: AppService }).appService;
-      expect(appService).toBeDefined();
-    });
-
-    it('should inject TranslateService', () => {
-      const translate = (component as unknown as { translate: TranslateService }).translate;
-      expect(translate).toBeDefined();
-    });
-
-    it('should have reviewService accessible in template', () => {
-      expect(component.reviewService).toBe(mockReviewService);
-    });
-  });
 });

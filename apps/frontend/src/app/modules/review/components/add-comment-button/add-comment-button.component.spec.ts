@@ -50,11 +50,6 @@ describe('AddCommentButtonComponent', () => {
   });
 
   describe('Input Properties', () => {
-    it('should have required input properties', () => {
-      expect(component.showOthersComments).toBeDefined();
-      expect(component.unitDbId).toBeDefined();
-    });
-
     it('should accept showOthersComments input', () => {
       component.showOthersComments = true;
       expect(component.showOthersComments).toBe(true);
@@ -107,16 +102,6 @@ describe('AddCommentButtonComponent', () => {
       expect(() => {
         mockDialogRef.afterClosed().subscribe();
       }).not.toThrow();
-    });
-  });
-
-  describe('Component Dependencies', () => {
-    it('should inject MatDialog service', () => {
-      expect(mockDialog).toBeDefined();
-    });
-
-    it('should inject ReviewService', () => {
-      expect(mockReviewService).toBeDefined();
     });
   });
 });

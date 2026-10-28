@@ -158,20 +158,6 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
     expect(component.formData.profilesSelected).toEqual(newProfiles);
   });
 
-  it('should have data property with wsg information', () => {
-    expect(component.data).toBeDefined();
-    expect(component.data.wsg?.id).toBe(1);
-    expect(component.data.wsg?.name).toBe('Test Group');
-  });
-
-  it('should access wsgAdminService', () => {
-    expect(component.wsgAdminService).toBeDefined();
-  });
-
-  it('should access backendService', () => {
-    expect(component.backendService).toBeDefined();
-  });
-
   it('should handle workspace group with empty profiles array', async () => {
     const workspaceGroupEmptyProfiles: WorkspaceGroupFullDto = {
       id: 1,

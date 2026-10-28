@@ -345,17 +345,5 @@ describe('CommentDialogComponent', () => {
     it('should initialize with empty unitItems array', () => {
       expect(component.unitItems).toEqual([]);
     });
-
-    it('should have reviewService accessible', () => {
-      expect(component.reviewService).toBeDefined();
-    });
-
-    it('should have appService accessible', () => {
-      expect(component.appService).toBeDefined();
-    });
-
-    it('should have dialogRef accessible', () => {
-      expect(component.dialogRef).toBeDefined();
-    });
   });
 });

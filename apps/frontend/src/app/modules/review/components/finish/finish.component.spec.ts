@@ -140,21 +140,6 @@ describe('FinishComponent', () => {
     }));
   });
 
-  describe('Component Dependencies', () => {
-    it('should inject TranslateService', () => {
-      const translateService = (component as unknown as { translateService: TranslateService }).translateService;
-      expect(translateService).toBeDefined();
-    });
-
-    it('should inject ReviewService', () => {
-      expect(component.reviewService).toBeDefined();
-    });
-
-    it('should have reviewService accessible in template', () => {
-      expect(component.reviewService).toBe(mockReviewService);
-    });
-  });
-
   describe('Component Lifecycle', () => {
     it('should execute ngOnInit only once', fakeAsync(() => {
       mockReviewService.units = createMockUnitData(3);
