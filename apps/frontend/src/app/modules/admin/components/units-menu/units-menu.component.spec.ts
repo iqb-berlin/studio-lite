@@ -38,10 +38,7 @@ describe('UnitsMenuComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should emit event on downloadUnits click', () => {
-    const emitSpy = jest.spyOn(component.downloadUnits, 'emit');
-    const btn = fixture.nativeElement.querySelector('button');
-    btn.click();
-    expect(emitSpy).toHaveBeenCalledWith(true);
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

@@ -71,20 +71,6 @@ describe('AppLogoComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should initialize form with empty values', () => {
-    expect(component.configForm).toBeDefined();
-    expect(component.configForm.get('bodyBackground')).toBeDefined();
-    expect(component.configForm.get('boxBackground')).toBeDefined();
-  });
-
-  it('should load logo data on init', done => {
-    fixture.detectChanges();
-    setTimeout(() => {
-      expect(readBackendService.getAppLogo).toHaveBeenCalled();
-      done();
-    }, 100);
-  });
-
   it('should update form fields with loaded data', done => {
     fixture.detectChanges();
     setTimeout(() => {

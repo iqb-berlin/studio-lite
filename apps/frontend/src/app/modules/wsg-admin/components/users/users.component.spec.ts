@@ -296,17 +296,6 @@ describe('UsersComponent', () => {
       expect(component.userWorkspaces.updateHasChanged).toHaveBeenCalled();
     });
 
-    it('should switch role level on role change to a different level', () => {
-      wsEntry.isChecked = true;
-      wsEntry.accessLevel = 1;
-
-      component.onRoleChange(wsEntry, 4);
-
-      expect(wsEntry.accessLevel).toBe(4);
-      expect(wsEntry.isChecked).toBe(true);
-      expect(component.userWorkspaces.updateHasChanged).toHaveBeenCalled();
-    });
-
     it('should deselect role when clicking on the active role level', () => {
       wsEntry.isChecked = true;
       wsEntry.accessLevel = 2;

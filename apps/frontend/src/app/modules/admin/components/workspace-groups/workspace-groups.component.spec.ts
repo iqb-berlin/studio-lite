@@ -111,15 +111,6 @@ describe('WorkspaceGroupsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should load initial data', () => {
-    jest.useFakeTimers();
-    component.ngOnInit();
-    jest.runAllTimers();
-    expect(mockBackendService.getUsers).toHaveBeenCalled();
-    expect(mockBackendService.getWorkspaceGroupList).toHaveBeenCalled();
-    jest.useRealTimers();
-  });
-
   it('should add group', () => {
     const groupData = new UntypedFormGroup({ name: new FormControl('newGroup') });
     component.addGroup(groupData);

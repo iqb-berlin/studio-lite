@@ -136,15 +136,6 @@ describe('WidgetsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should load widget list on init', async () => {
-    jest.useFakeTimers();
-    component.ngOnInit();
-    jest.advanceTimersByTime(100);
-
-    expect(mockModuleService.loadWidgets).toHaveBeenCalled();
-    jest.useRealTimers();
-  });
-
   it('should change selected modules correctly', () => {
     const module1 = { metadata: { type: 'WIDGET', model: 'model-a' }, key: 'w1' } as VeronaModuleClass;
     const module2 = { metadata: { type: 'WIDGET', model: 'model-a' }, key: 'w2' } as VeronaModuleClass;

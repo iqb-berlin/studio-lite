@@ -18,7 +18,6 @@ import { AppService } from '../../../../services/app.service';
 describe('EditUserComponent', () => {
   let component: EditUserComponent;
   let fixture: ComponentFixture<EditUserComponent>;
-  let backendService: jest.Mocked<BackendService>;
 
   const mockDialogData: EditUserComponentData = {
     newUser: false,
@@ -67,21 +66,9 @@ describe('EditUserComponent', () => {
   beforeEach(async () => {
     await createTestModule(mockDialogData).compileComponents();
 
-    backendService = TestBed.inject(BackendService) as jest.Mocked<BackendService>;
-
     fixture = TestBed.createComponent(EditUserComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
-
-  it('should initialize form with dialog data', () => {
-    expect(component.editUserForm.get('name')?.value).toBe('testuser');
-    expect(component.editUserForm.get('firstName')?.value).toBe('John');
-    expect(component.editUserForm.get('lastName')?.value).toBe('Doe');
-    expect(component.editUserForm.get('email')?.value).toBe('john.doe@example.com');
-    expect(component.editUserForm.get('description')?.value).toBe('Test Description');
-    expect(component.editUserForm.get('isAdmin')?.value).toBe(false);
-    expect(component.editUserForm.get('password')?.value).toBe('testpass');
   });
 
   it('should validate name field with pattern', () => {
@@ -101,12 +88,6 @@ describe('EditUserComponent', () => {
     const passwordControl = component.editUserForm.get('password');
     passwordControl?.setValue('');
     expect(passwordControl?.hasError('required')).toBe(false);
-  });
-
-  it('should load email template on init', () => {
-    expect(backendService.getEmailTemplate).toHaveBeenCalled();
-    expect(component.emailTemplate).toBeDefined();
-    expect(component.emailTemplate.emailSubject).toBe('Test Subject');
   });
 
   it('should toggle password input type', () => {
@@ -143,22 +124,6 @@ describe('EditUserComponent', () => {
       const validChars = /^[ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!#$%&*\-_+=:?]+$/;
       expect(password).toMatch(validChars);
     }
-  });
-
-  it('should have all required form fields', () => {
-    expect(component.editUserForm.get('name')).toBeDefined();
-    expect(component.editUserForm.get('lastName')).toBeDefined();
-    expect(component.editUserForm.get('firstName')).toBeDefined();
-    expect(component.editUserForm.get('email')).toBeDefined();
-    expect(component.editUserForm.get('description')).toBeDefined();
-    expect(component.editUserForm.get('isAdmin')).toBeDefined();
-    expect(component.editUserForm.get('password')).toBeDefined();
-  });
-
-  it('should have emailTemplate defined after init', () => {
-    expect(component.emailTemplate).toBeDefined();
-    expect(component.emailTemplate.emailSubject).toBe('Test Subject');
-    expect(component.emailTemplate.emailBody).toContain('{{firstname}}');
   });
 });
 

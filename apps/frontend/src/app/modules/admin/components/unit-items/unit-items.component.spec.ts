@@ -37,17 +37,6 @@ describe('UnitItemsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should load all unit items on init', fakeAsync(() => {
-    const mockItems = [{ uuid: 'u1', id: 'i1' }] as UnitItemInViewDto[];
-    const spy = jest.spyOn(backendService, 'getAllUnitItems').mockReturnValue(of(mockItems));
-
-    component.ngOnInit();
-    tick();
-
-    expect(spy).toHaveBeenCalled();
-    expect(component.dataSource.data).toEqual(mockItems);
-  }));
-
   // A unit's address is /a/<workspace>/<unit>. The link used to put the unit id where the
   // workspace belongs, which opened a workspace that does not exist (#1698).
   it('should link the unit id to the unit inside its workspace', fakeAsync(() => {

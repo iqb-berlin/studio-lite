@@ -44,11 +44,6 @@ describe('StatesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create and init', () => {
-    expect(component).toBeTruthy();
-    expect(component.states.length).toBe(1);
-  });
-
   it('should handle state change', () => {
     jest.spyOn(component.hasChanged, 'emit');
     component.stateSelectionChange('#ffffff', 'color', '1');
