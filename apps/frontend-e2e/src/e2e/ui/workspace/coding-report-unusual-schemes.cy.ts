@@ -67,6 +67,22 @@ describe('The coding report of units with unusual or broken schemes', () => {
     cy.contains('mat-dialog-container tr', 'manual_1').contains('td', /^\s*manuell\s*$/);
   });
 
+  it('warns about a code that neither rules nor a manual instruction lead to', () => {
+    openCodingReport();
+    cy.translate(Cypress.expose('locale')).then(json => {
+      const withoutRules = json['coding-report']['validation-problems'].CODE_WITHOUT_RULES;
+      // the unit has no variables of its own, so both rows carry other problems as well;
+      // only one row's details are open at a time
+      cy.contains('mat-dialog-container tr', 'auto_1').find('[data-cy="validation-summary"]').click();
+      cy.contains('.validation-problem', withoutRules)
+        .should('contain.text', json['coding-report'].severity.warning)
+        .and('contain.text', json['coding-report']['code-reference'].replace('{{code}}', '1'));
+      // the codes of manual_1 have a manual instruction
+      cy.contains('mat-dialog-container tr', 'manual_1').find('[data-cy="validation-summary"]').click();
+      cy.get('.validation-problem').should('exist').and('not.contain.text', withoutRules);
+    });
+  });
+
   it('gives a unit whose scheme cannot be evaluated one row and reports the others', () => {
     openCodingReport();
     cy.contains('mat-dialog-container tr', 'BROKEN1')

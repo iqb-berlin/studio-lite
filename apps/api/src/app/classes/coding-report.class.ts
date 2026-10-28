@@ -129,11 +129,12 @@ export class CodingReportClass {
 
     return validationResults
       .filter(problem => problem.variableId === codingVariableId)
-      .map(problem => ({
+      .map((problem): CodingReportValidationProblemDto => ({
         type: problem.type,
         breaking: problem.breaking,
         ...(problem.code ? { code: problem.code } : {})
       }))
+      .concat(CodingReportClass.getCodesWithoutRules(codingVariable))
       .filter(problem => {
         const key = `${problem.type}|${problem.breaking}|${problem.code || ''}`;
         if (seenProblems.has(key)) return false;
@@ -145,6 +146,29 @@ export class CodingReportClass {
         problemA.type.localeCompare(problemB.type) ||
         (problemA.code || '').localeCompare(problemB.code || '')
       ));
+  }
+
+  /**
+   * The codes of a variable that can never be assigned: neither a rule nor a manual instruction leads
+   * to them. The validation of `@iqb/responses` does not look for this (#1873). Residual codes and
+   * the intended-incomplete code are given without rules by design, and in a variable coded by hand
+   * as a whole the coder may pick any code.
+   */
+  static getCodesWithoutRules(codingVariable: VariableCodingData): CodingReportValidationProblemDto[] {
+    if (codingVariable.sourceType === 'MANUAL' ||
+      codingVariable.codeModel === 'MANUAL_ONLY' ||
+      CodingReportClass.hasText(codingVariable.manualInstruction)) return [];
+    return (codingVariable.codes ?? [])
+      .filter(code => typeof code.id === 'number' &&
+        !['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(code.type) &&
+        !CodingReportClass.hasText(code.manualInstruction) &&
+        !(code.ruleSets ?? []).some(ruleSet => ruleSet.rules?.length > 0))
+      .map(code => ({ type: 'CODE_WITHOUT_RULES', breaking: false, code: String(code.id) }));
+  }
+
+  /** Whether an instruction says anything; the schemer's editor leaves `<p></p>` behind when emptied. */
+  private static hasText(html: string | undefined): boolean {
+    return !!html?.replace(/<[^>]*>|&nbsp;|\s/g, '');
   }
 
   static getValidationStatus(
