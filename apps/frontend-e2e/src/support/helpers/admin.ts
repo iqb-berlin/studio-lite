@@ -201,6 +201,9 @@ export function goToSettings(): void {
   cy.findAdminSettings().click();
   clickIndexTabAdmin('settings');
   cy.wait('@getMissingsProfiles');
+  // The logo card shows its form, and with it a save button, only once logo and colours are in
+  // (#1969). saveAndExpect finds the save buttons by their index.
+  cy.get('[data-cy="admin-app-logo-save-button"], [data-cy="admin-app-logo-not-loaded"]').should('exist');
 }
 
 // ---------------------------------------------------------------------------

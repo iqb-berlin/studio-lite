@@ -165,6 +165,18 @@ describe('BackendService', () => {
     });
   });
 
+  describe('getAppLogo', () => {
+    // A null would read as "no logo stored", and the admin form would offer an empty one for saving (#1969).
+    it('should answer a failed request with false', done => {
+      service.getAppLogo().subscribe(logo => {
+        expect(logo).toBe(false);
+        done();
+      });
+
+      httpMock.expectOne(`${serverUrl}admin/settings/app-logo`).error(new ProgressEvent('error'));
+    });
+  });
+
   describe('getConfig', () => {
     it('should return default config on error', done => {
       service.getConfig().subscribe(config => {

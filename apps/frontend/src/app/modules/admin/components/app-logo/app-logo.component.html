@@ -1,46 +1,62 @@
-<form [formGroup]="configForm"
-  class="fx-column-start-stretch">
-  <div class="fx-row-start-center fx-gap-10">
-    <img class="logo-img"
-      [src]="logoImageBase64"
-      [alt]="'logo.upload-info' | translate"/>
-    <input #hiddenimgfileinput
-      type="file"
-      [hidden]="true"
-      (change)="imgFileChange($event)"/>
-    <button mat-stroked-button color="primary" type="button" (click)="hiddenimgfileinput.click()" [matTooltip]="'logo.upload' | translate" class="upload-button">
-      <mat-icon class="button-icon">cloud_upload</mat-icon>
-      {{ 'logo.upload' | translate }}
-    </button>
-    <button mat-icon-button color="warn" type="button" (click)="removeLogoImg()" [matTooltip]="'logo.reset' | translate" [disabled]="!logoImageBase64" class="delete-button">
-      <mat-icon>delete</mat-icon>
-    </button>
-    @if (imageError) {
-      <div class="warning-warning">
-        {{imageError}}
-      </div>
-    }
-  </div>
-  <mat-form-field class="fx-flex-fill">
-    <mat-label>{{'logo.app-background-color' | translate}}</mat-label>
-    <input matInput
-      formControlName="bodyBackground"
-      [placeholder]="'logo.app-background-color-placeholder' | translate">
-  </mat-form-field>
-  <mat-form-field class="fx-flex-fill">
-    <mat-label>{{'logo.boxes-background-color' | translate}}</mat-label>
-    <input matInput
-      formControlName="boxBackground"
-      [placeholder]="'logo.boxes-background-color-placeholder' | translate">
-  </mat-form-field>
-  <div class="fx-row-end-center fx-gap-30" style="margin-top: 25px;">
-    @if (dataChanged) {
-      <div class="fx-flex-fill info">
-        {{ 'admin.reload-page' | translate }}
-      </div>
-    }
-    <button mat-raised-button color="primary" [disabled]="!dataChanged" (click)="saveData()">
-      {{ 'save' | translate }}
-    </button>
-  </div>
-</form>
+@if (logoLoad() === 'failed') {
+  <p class="info" data-cy="admin-app-logo-not-loaded">{{'logo.logo-not-loaded' | translate}}</p>
+} @else if (logoLoad() === 'loaded') {
+  <form [formGroup]="configForm"
+    class="fx-column-start-stretch">
+    <div class="fx-row-start-center fx-gap-10">
+      <img class="logo-img"
+        [src]="logoImageBase64"
+        [alt]="'logo.upload-info' | translate"/>
+      <input #hiddenimgfileinput
+        type="file"
+        [hidden]="true"
+        (change)="imgFileChange($event)"/>
+      <button mat-stroked-button
+        color="primary"
+        type="button"
+        (click)="hiddenimgfileinput.click()"
+        [matTooltip]="'logo.upload' | translate"
+        class="upload-button">
+        <mat-icon class="button-icon">cloud_upload</mat-icon>
+        {{ 'logo.upload' | translate }}
+      </button>
+      <button mat-icon-button
+        color="warn"
+        type="button"
+        (click)="removeLogoImg()"
+        [matTooltip]="'logo.reset' | translate"
+        [disabled]="!logoImageBase64"
+        class="delete-button">
+        <mat-icon>delete</mat-icon>
+      </button>
+      @if (imageError) {
+        <div class="warning-warning">
+          {{imageError}}
+        </div>
+      }
+    </div>
+    <mat-form-field class="fx-flex-fill">
+      <mat-label>{{'logo.app-background-color' | translate}}</mat-label>
+      <input matInput
+        formControlName="bodyBackground"
+        [placeholder]="'logo.app-background-color-placeholder' | translate">
+    </mat-form-field>
+    <mat-form-field class="fx-flex-fill">
+      <mat-label>{{'logo.boxes-background-color' | translate}}</mat-label>
+      <input matInput
+        formControlName="boxBackground"
+        [placeholder]="'logo.boxes-background-color-placeholder' | translate">
+    </mat-form-field>
+    <div class="fx-row-end-center fx-gap-30" style="margin-top: 25px;">
+      @if (dataChanged) {
+        <div class="fx-flex-fill info">
+          {{ 'admin.reload-page' | translate }}
+        </div>
+      }
+      <button mat-raised-button color="primary" [disabled]="!dataChanged" (click)="saveData()"
+        data-cy="admin-app-logo-save-button">
+        {{ 'save' | translate }}
+      </button>
+    </div>
+  </form>
+}

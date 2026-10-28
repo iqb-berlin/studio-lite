@@ -129,11 +129,13 @@ export class BackendService {
       );
   }
 
-  getAppLogo(): Observable<AppLogoDto | null> {
+  // A failure answers false, not null: null means that no logo is stored, and the admin form must
+  // not offer an empty logo for saving over one it could not load (#1969).
+  getAppLogo(): Observable<AppLogoDto | null | false> {
     return this.http
       .get<AppLogoDto | null>(`${this.serverUrl}admin/settings/app-logo`, {})
       .pipe(
-        catchError(() => of(null))
+        catchError(() => of(false as const))
       );
   }
 
