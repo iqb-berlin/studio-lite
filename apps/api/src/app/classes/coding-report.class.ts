@@ -10,6 +10,7 @@ import {
   RuleSet,
   VariableCodingData
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { Logger } from '@nestjs/common';
 import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
 
 /**
@@ -17,37 +18,54 @@ import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
  * alone. {@link WorkspaceService} loads the units and hands them over.
  */
 export class CodingReportClass {
+  private static readonly logger = new Logger(CodingReportClass.name);
+
+  private static readonly SCHEME_MISSING_OR_TOO_OLD = 'Kodierschema mit Schemer Version ab 1.5 erzeugen!';
+
+  private static readonly SCHEME_UNREADABLE = 'Kodierschema kann nicht ausgewertet werden';
+
   /**
    * One row per coding variable of every unit in the workspace: what is coded, how, and what the
    * validation of the scheme against the unit's variables says. A unit whose scheme cannot be used
-   * -- missing, unparsable, or written by a schemer too old for it -- still gets a row, so the
-   * report shows the gap instead of leaving the unit out.
+   * -- missing, written by a schemer too old for it, unparsable, or failing while it is evaluated --
+   * still gets a row, so the report shows the gap instead of leaving the unit out.
    */
   static build(workspaceId: number, unitListWithMetadata: UnitPropertiesDto[]): CodingReportDto[] {
-    const unitDataRows: CodingReportDto[] = [];
-    unitListWithMetadata.forEach((unit: UnitPropertiesDto) => {
-      if (CodingReportClass.isValidScheme(unit.scheme, unit.schemer)) {
-        const parsedUnitScheme = CodingReportClass.parseScheme(unit.scheme);
-        const version = 'version';
-        if (parsedUnitScheme && parsedUnitScheme[version]) {
-          const validationResults = CodingSchemeFactory.validate(
-            unit.variables,
-            parsedUnitScheme.variableCodings
-          );
-          CodingReportClass.processVariableCodings(
-            parsedUnitScheme,
-            validationResults,
-            unit,
-            workspaceId,
-            unitDataRows
-          );
-        }
-      } else {
-        CodingReportClass.addInvalidSchemeRow(unit, workspaceId, unitDataRows);
-      }
-    });
+    return unitListWithMetadata.flatMap(unit => CodingReportClass.buildUnitRows(workspaceId, unit));
+  }
 
-    return unitDataRows;
+  /**
+   * The rows of one unit. Whatever its scheme throws stays with this unit: it gets a single row
+   * saying so, and the other units of the workspace are reported as before (#1873).
+   */
+  private static buildUnitRows(workspaceId: number, unit: UnitPropertiesDto): CodingReportDto[] {
+    if (!CodingReportClass.isValidScheme(unit.scheme, unit.schemer)) {
+      return [CodingReportClass.invalidSchemeRow(unit, workspaceId, CodingReportClass.SCHEME_MISSING_OR_TOO_OLD)];
+    }
+    const unreadableRows = [
+      CodingReportClass.invalidSchemeRow(unit, workspaceId, CodingReportClass.SCHEME_UNREADABLE)
+    ];
+    try {
+      const parsedUnitScheme: CodingSchemeData = JSON.parse(unit.scheme);
+      if (!parsedUnitScheme?.version) return unreadableRows;
+      const validationResults = CodingSchemeFactory.validate(
+        unit.variables,
+        parsedUnitScheme.variableCodings
+      );
+      const unitDataRows: CodingReportDto[] = [];
+      CodingReportClass.processVariableCodings(
+        parsedUnitScheme,
+        validationResults,
+        unit,
+        workspaceId,
+        unitDataRows
+      );
+      return unitDataRows;
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      CodingReportClass.logger.warn(`Coding scheme of unit ${unit.id} cannot be evaluated: ${reason}`);
+      return unreadableRows;
+    }
   }
 
   /**
@@ -61,14 +79,6 @@ export class CodingReportClass {
     if (!scheme) return false;
     if (!schemer) return true; // JSON format: schemer is no longer explicitly assigned per spec
     return schemer.split('@')[1] >= '1.5';
-  }
-
-  private static parseScheme(scheme: string): CodingSchemeData | null {
-    try {
-      return JSON.parse(scheme);
-    } catch {
-      return null; // Catch JSON parsing errors gracefully
-    }
   }
 
   static processVariableCodings(
@@ -200,20 +210,20 @@ export class CodingReportClass {
     );
   }
 
-  static addInvalidSchemeRow(
+  private static invalidSchemeRow(
     unit: UnitPropertiesDto,
     id: number,
-    unitDataRows: CodingReportDto[]
-  ): void {
-    unitDataRows.push({
+    validation: string
+  ): CodingReportDto {
+    return {
       unit: CodingReportClass.generateUnitLink(id, unit),
       variable: '',
       variableType: '',
       item: '',
-      validation: 'Kodierschema mit Schemer Version ab 1.5 erzeugen!',
+      validation,
       validationProblems: [],
       codingType: '',
       trainingEffort: ''
-    });
+    };
   }
 }

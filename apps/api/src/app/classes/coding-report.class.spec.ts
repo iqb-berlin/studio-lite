@@ -1,3 +1,5 @@
+import { Logger } from '@nestjs/common';
+import { createMock } from '@golevelup/ts-jest';
 import { CodingReportValidationProblemDto, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { CodingSchemeProblem } from '@iqb/responses';
@@ -185,6 +187,88 @@ describe('CodingReportClass', () => {
       expect(CodingReportClass.build(3, units)).toEqual([
         expect.objectContaining({ variable: 'v1', item: 'I1' })
       ]);
+    });
+
+    // A scheme that fails while it is evaluated stays with its unit (#1873).
+    describe('with a unit whose scheme cannot be evaluated', () => {
+      const unreadableRow = (id: number, key: string) => ({
+        unit: `<a href=#/a/1/${id}>${key}</a>`,
+        variable: '',
+        variableType: '',
+        item: '',
+        validation: 'Kodierschema kann nicht ausgewertet werden',
+        validationProblems: [] as CodingReportValidationProblemDto[],
+        codingType: '',
+        trainingEffort: ''
+      });
+      const unit = (id: number, key: string, scheme: string) => createMock<UnitPropertiesDto>({
+        id,
+        key,
+        name: '',
+        schemer: '',
+        variables: [{ id: 'v1', type: 'string' }, { id: 'v2', type: 'string' }],
+        metadata: { items: [] },
+        scheme
+      });
+      const codedVariable = (id: string) => ({
+        id,
+        alias: id,
+        sourceType: 'BASE',
+        codes: [{
+          id: 1,
+          type: 'FULL_CREDIT',
+          manualInstruction: '',
+          ruleSets: [{ rules: [{ method: 'MATCH', parameters: ['a'] }] }]
+        }]
+      });
+      let warn: jest.SpyInstance;
+
+      beforeEach(() => {
+        warn = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+      });
+
+      afterEach(() => {
+        warn.mockRestore();
+      });
+
+      it('reports the other units and gives it one row', () => {
+        const units = [
+          unit(1, 'GOOD', JSON.stringify({ version: '3.0', variableCodings: [codedVariable('v1')] })),
+          unit(2, 'BROKEN', JSON.stringify({
+            version: '3.0',
+            variableCodings: [{ ...codedVariable('v1'), codes: [{ id: 1, ruleSets: [{}] }] }]
+          }))
+        ];
+
+        expect(CodingReportClass.build(1, units)).toEqual([
+          expect.objectContaining({ variable: 'v1', codingType: 'halbautomatisch' }),
+          unreadableRow(2, 'BROKEN')
+        ]);
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('unit 2'));
+      });
+
+      it('drops the rows its scheme gave before it failed', () => {
+        const units = [unit(3, 'HALF', JSON.stringify({
+          version: '3.0',
+          variableCodings: [codedVariable('v1'), {
+            id: 'v2', alias: 'v2', sourceType: 'BASE', codes: {}
+          }]
+        }))];
+
+        expect(CodingReportClass.build(1, units)).toEqual([unreadableRow(3, 'HALF')]);
+      });
+
+      it('gives one row to a scheme that is no JSON', () => {
+        expect(CodingReportClass.build(1, [unit(4, 'NOJSON', '{"version": ')]))
+          .toEqual([unreadableRow(4, 'NOJSON')]);
+      });
+
+      it('gives one row to a scheme without version', () => {
+        const units = [unit(5, 'NOVERSION', JSON.stringify({ variableCodings: [codedVariable('v1')] }))];
+
+        expect(CodingReportClass.build(1, units)).toEqual([unreadableRow(5, 'NOVERSION')]);
+        expect(warn).not.toHaveBeenCalled();
+      });
     });
   });
 
