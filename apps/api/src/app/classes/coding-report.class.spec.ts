@@ -463,11 +463,14 @@ describe('CodingReportClass', () => {
       }
     );
 
-    it('takes text between the tags for an instruction', () => {
-      expect(CodingReportClass.getCodesWithoutRules(variableWith([
-        { id: 1, type: 'FULL_CREDIT', manualInstruction: '<p><strong>Anweisung</strong></p>' }
-      ]))).toEqual([]);
-    });
+    it.each(['<p><strong>Anweisung</strong></p>', '<p><img src="beispiel.png"></p>', '<IMG SRC="beispiel.png">'])(
+      'takes %s for an instruction',
+      manualInstruction => {
+        expect(CodingReportClass.getCodesWithoutRules(variableWith([
+          { id: 1, type: 'FULL_CREDIT', manualInstruction }
+        ]))).toEqual([]);
+      }
+    );
 
     it.each<[string, Partial<VariableCodingData>]>([
       ['codes by hand only', { codeModel: 'MANUAL_ONLY' }],

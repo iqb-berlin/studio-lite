@@ -157,18 +157,23 @@ export class CodingReportClass {
   static getCodesWithoutRules(codingVariable: VariableCodingData): CodingReportValidationProblemDto[] {
     if (codingVariable.sourceType === 'MANUAL' ||
       codingVariable.codeModel === 'MANUAL_ONLY' ||
-      CodingReportClass.hasText(codingVariable.manualInstruction)) return [];
+      CodingReportClass.hasContent(codingVariable.manualInstruction)) return [];
     return (codingVariable.codes ?? [])
       .filter(code => typeof code.id === 'number' &&
         !['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(code.type) &&
-        !CodingReportClass.hasText(code.manualInstruction) &&
+        !CodingReportClass.hasContent(code.manualInstruction) &&
         !(code.ruleSets ?? []).some(ruleSet => ruleSet.rules?.length > 0))
       .map(code => ({ type: 'CODE_WITHOUT_RULES', breaking: false, code: String(code.id) }));
   }
 
-  /** Whether an instruction says anything; the schemer's editor leaves `<p></p>` behind when emptied. */
-  private static hasText(html: string | undefined): boolean {
-    return !!html?.replace(/&nbsp;|&#160;|&#xA0;/gi, ' ').split(/<[^>]*>/).some(part => part.trim());
+  /**
+   * Whether an instruction says anything: text between its tags, or an image. The schemer's editor
+   * leaves `<p></p>` behind when emptied.
+   */
+  private static hasContent(html: string | undefined): boolean {
+    if (!html) return false;
+    return /<img\b/i.test(html) ||
+      html.replace(/&nbsp;|&#160;|&#xA0;/gi, ' ').split(/<[^<>]*>/).some(part => part.trim());
   }
 
   static getValidationStatus(
