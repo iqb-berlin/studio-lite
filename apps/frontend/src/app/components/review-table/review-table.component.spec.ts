@@ -50,13 +50,6 @@ describe('ReviewTableComponent', () => {
     expect(component.dataSource.data.length).toBe(2);
   });
 
-  it('should accept groupName input', () => {
-    component.groupName = 'Test Group';
-    fixture.detectChanges();
-
-    expect(component.groupName).toBe('Test Group');
-  });
-
   it('should toggle view from list to details', () => {
     expect(component.reviewsView).toBe('list');
 

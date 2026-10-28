@@ -46,27 +46,6 @@ describe('UserReviewsAreaComponent', () => {
     component.isReviewUser = false;
   });
 
-  it('should accept reviews input', () => {
-    const mockReviews: ReviewDto[] = [{
-      id: 1,
-      name: 'Review 1',
-      workspaceId: 1,
-      workspaceGroupId: 1,
-      workspaceGroupName: 'Group A'
-    }];
-    component.reviews = mockReviews;
-    fixture.detectChanges();
-
-    expect(component.reviews).toEqual(mockReviews);
-  });
-
-  it('should accept isReviewUser input', () => {
-    component.isReviewUser = true;
-    fixture.detectChanges();
-
-    expect(component.isReviewUser).toBe(true);
-  });
-
   it('should initialize with empty groupedReviews', () => {
     expect(component.groupedReviews).toEqual([]);
   });

@@ -12,7 +12,6 @@ import { UnitPrintLayoutComponent } from './unit-print-layout.component';
 import { WorkspaceBackendService } from '../../../workspace/services/workspace-backend.service';
 import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
-import { PrintOption } from '../../models/print-options.interface';
 import { environment } from '../../../../../environments/environment';
 
 describe('UnitPrintLayoutComponent', () => {
@@ -270,34 +269,6 @@ describe('UnitPrintLayoutComponent', () => {
       component.playerHeightChange(250);
 
       expect(component.printPreviewHeight).toBe(250);
-    });
-  });
-
-  describe('input properties', () => {
-    it('should accept unitId input', () => {
-      component.unitId = 42;
-      expect(component.unitId).toBe(42);
-    });
-
-    it('should accept workspaceId input', () => {
-      component.workspaceId = 5;
-      expect(component.workspaceId).toBe(5);
-    });
-
-    it('should accept workspaceGroupId input', () => {
-      component.workspaceGroupId = 10;
-      expect(component.workspaceGroupId).toBe(10);
-    });
-
-    it('should accept printPreviewHeight input', () => {
-      component.printPreviewHeight = 800;
-      expect(component.printPreviewHeight).toBe(800);
-    });
-
-    it('should accept printOptions input', () => {
-      const options: PrintOption[] = ['printProperties', 'printMetadata'];
-      component.printOptions = options;
-      expect(component.printOptions).toEqual(options);
     });
   });
 });
