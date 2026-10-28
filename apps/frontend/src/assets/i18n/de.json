@@ -1210,6 +1210,8 @@
     "label": "Beschreibung",
     "common-manual-instruction": "Allgemeine Instruktionen für manuelles Kodieren",
     "manual-instruction": "Instruktionen für manuelles Kodieren",
+    "rule-sets-and": "Verknüpfung der Regelsätze: UND",
+    "rule-sets-or": "Verknüpfung der Regelsätze: ODER",
     "code-list": "Liste der möglichen Codes",
     "id": "ID",
     "coding": "Kodierung",
