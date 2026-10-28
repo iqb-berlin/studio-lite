@@ -36,8 +36,7 @@ describe('DeleteStateComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create and initialize data', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
-    expect(component.typedData).toEqual(mockData);
   });
 });

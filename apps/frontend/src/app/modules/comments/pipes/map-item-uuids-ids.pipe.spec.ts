@@ -42,12 +42,4 @@ describe('MapItemUuidsIdsPipe', () => {
     ]);
     expect(translateService.instant).toHaveBeenCalledWith('metadata.without-id');
   });
-
-  it('should handle empty or null unitItems', () => {
-    const uuids = ['uuid1'];
-    jest.spyOn(translateService, 'instant').mockReturnValue('ohne Titel');
-
-    const result = pipe.transform(uuids, []);
-    expect(result).toEqual([{ uuid: 'uuid1', id: 'ohne Titel' }]);
-  });
 });

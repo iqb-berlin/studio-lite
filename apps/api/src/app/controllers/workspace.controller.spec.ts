@@ -20,6 +20,8 @@ import { UnitDownloadClass } from '../classes/unit-download.class';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { WorkspaceGuard } from '../guards/workspace.guard';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
+import { ManageOrGroupAdminAccessGuard } from '../guards/manage-or-group-admin-access.guard';
+import { ReadOrGroupAdminAccessGuard } from '../guards/read-or-group-admin-access.guard';
 
 describe('WorkspaceController', () => {
   let controller: WorkspaceController;
@@ -82,6 +84,36 @@ describe('WorkspaceController', () => {
 
     controller = module.get<WorkspaceController>(WorkspaceController);
     workspaceService = module.get<WorkspaceService>(WorkspaceService);
+  });
+
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it.each(['find', 'downloadUnitsJson', 'findByUser'] as const)(
+    'should let only who may read the workspace, or the admin of its group, reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', WorkspaceController.prototype[method]))
+        .toEqual([JwtAuthGuard, ReadOrGroupAdminAccessGuard]);
+    }
+  );
+
+  it.each(['findUsers', 'findGroups'] as const)(
+    'should let only who may enter the workspace reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', WorkspaceController.prototype[method]))
+        .toEqual([JwtAuthGuard, WorkspaceGuard]);
+    }
+  );
+
+  it.each(['deleteUnitGroup', 'addUnitFiles'] as const)(
+    'should let only who may manage the workspace, or the admin of its group, reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', WorkspaceController.prototype[method]))
+        .toEqual([JwtAuthGuard, ManageOrGroupAdminAccessGuard]);
+    }
+  );
+
+  it('should let only admins of the group reach patchSettings', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceController.prototype.patchSettings))
+      .toEqual([JwtAuthGuard, IsWorkspaceGroupAdminGuard]);
   });
 
   describe('find', () => {

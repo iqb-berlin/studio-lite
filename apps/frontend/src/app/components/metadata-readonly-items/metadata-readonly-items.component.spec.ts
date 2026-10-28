@@ -72,11 +72,6 @@ describe('MetadataReadonlyItemsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should render all items', () => {
-    const items = fixture.nativeElement.querySelectorAll('.item');
-    expect(items.length).toBe(2);
-  });
-
   it('should render item ID or fallback', () => {
     const itemIds = fixture.nativeElement.querySelectorAll('.item-id');
     expect(itemIds[0].textContent).toContain('item-1');

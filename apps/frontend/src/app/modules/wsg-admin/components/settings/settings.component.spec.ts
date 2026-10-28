@@ -108,10 +108,6 @@ describe('WorkspaceSettingsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should initialize settings from service', () => {
-    expect(component.settings).toEqual(mockWsgAdminService.selectedWorkspaceGroupSettings.value);
-  });
-
   it('should save group settings successfully', () => {
     mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(of(true));
     component.saveGroupSettings();

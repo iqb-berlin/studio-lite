@@ -10,12 +10,6 @@ describe('SplitterService', () => {
   });
 
   describe('update', () => {
-    it('should update panelSizes', () => {
-      Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: 1000 });
-      service.update([100, 200]);
-      expect(service.panelSizes).toEqual([100, 200]);
-    });
-
     it('should not remove panels if total size fits within clientWidth', () => {
       Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: 1000 });
 

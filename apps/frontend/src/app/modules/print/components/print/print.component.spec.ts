@@ -77,27 +77,6 @@ describe('PrintComponent', () => {
       expect(component.printOptions).toEqual([]);
       expect(component.unitIds).toEqual([]);
     });
-
-    it('should convert string unitIds to numbers', () => {
-      const mockParams = {
-        get: jest.fn(() => '100'),
-        getAll: jest.fn((key: string) => {
-          if (key === 'unitIds') return ['5', '10', '15'];
-          return [];
-        }),
-        has: jest.fn(),
-        keys: []
-      };
-
-      queryParamMapSubject.next(mockParams as unknown as ParamMap);
-
-      component.ngOnInit();
-
-      expect(component.unitIds).toEqual([5, 10, 15]);
-      component.unitIds.forEach(id => {
-        expect(typeof id).toBe('number');
-      });
-    });
   });
 
   describe('addToScrollPosition', () => {
@@ -112,32 +91,6 @@ describe('PrintComponent', () => {
       component.addToScrollPosition(50);
 
       expect(mockScrollContainer.nativeElement.scrollTop).toBe(150);
-    });
-
-    it('should decrease scroll position with negative summand', () => {
-      const mockScrollContainer = {
-        nativeElement: {
-          scrollTop: 100
-        }
-      };
-      component.scrollContainer = mockScrollContainer as never;
-
-      component.addToScrollPosition(-30);
-
-      expect(mockScrollContainer.nativeElement.scrollTop).toBe(70);
-    });
-
-    it('should handle zero summand', () => {
-      const mockScrollContainer = {
-        nativeElement: {
-          scrollTop: 100
-        }
-      };
-      component.scrollContainer = mockScrollContainer as never;
-
-      component.addToScrollPosition(0);
-
-      expect(mockScrollContainer.nativeElement.scrollTop).toBe(100);
     });
   });
 

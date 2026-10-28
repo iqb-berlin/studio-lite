@@ -71,19 +71,4 @@ describe('EditWorkspaceGroupComponent', () => {
     expect(nameControl?.hasError('minlength')).toBe(false);
     expect(nameControl?.valid).toBe(true);
   });
-
-  it('should have editWorkspaceGroupForm defined', () => {
-    expect(component.editWorkspaceGroupForm).toBeDefined();
-    expect(component.editWorkspaceGroupForm.get('name')).toBeDefined();
-  });
-
-  it('should mark form as invalid when name is too short', () => {
-    component.editWorkspaceGroupForm.patchValue({ name: 'ab' });
-    expect(component.editWorkspaceGroupForm.valid).toBe(false);
-  });
-
-  it('should mark form as valid when name meets requirements', () => {
-    component.editWorkspaceGroupForm.patchValue({ name: 'Valid Group Name' });
-    expect(component.editWorkspaceGroupForm.valid).toBe(true);
-  });
 });

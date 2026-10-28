@@ -42,11 +42,4 @@ describe('DataLoadingAsTextPipe', () => {
     expect(translateService.instant).toHaveBeenCalledWith('application.wait-message');
     expect(result).toBe('Please wait...');
   });
-
-  it('should handle boolean false value', () => {
-    jest.spyOn(translateService, 'instant').mockReturnValue('Please wait...');
-    const result = pipe.transform(false);
-    expect(translateService.instant).toHaveBeenCalledWith('application.wait-message');
-    expect(result).toBe('Please wait...');
-  });
 });

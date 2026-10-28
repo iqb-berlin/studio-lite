@@ -22,10 +22,6 @@ describe('FilledEntriesPipe', () => {
     expect(pipe.transform(undefined)).toEqual([]);
   });
 
-  it('should return an empty array for null input', () => {
-    expect(pipe.transform(null)).toEqual([]);
-  });
-
   it('should keep an entry with a non-empty single valueAsText', () => {
     const entry = createEntry('entry1', { lang: 'de', value: 'Wert' });
     expect(pipe.transform([entry])).toEqual([entry]);

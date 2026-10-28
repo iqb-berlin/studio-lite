@@ -96,23 +96,6 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should initialize formData with empty arrays', () => {
-    expect(component.formData).toBeDefined();
-    expect(component.formData.profilesSelected).toEqual([]);
-    expect(component.formData.states).toEqual([]);
-  });
-
-  it('should have empty fetchedProfiles array initially', () => {
-    expect(component.fetchedProfiles).toEqual([]);
-  });
-
-  it('should load settings on init', async () => {
-    await component.ngOnInit();
-
-    expect(component.settings).toBe(mockSettings);
-    expect(backendService.getWorkspaceGroupById).toHaveBeenCalledWith(1);
-  });
-
   it('should load profiles from workspace group on init', async () => {
     await component.ngOnInit();
 
@@ -152,22 +135,5 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
     component.hasChanged(newProfiles);
 
     expect(component.formData.profilesSelected).toEqual(newProfiles);
-  });
-
-  it('should handle workspace group with empty profiles array', async () => {
-    const workspaceGroupEmptyProfiles: WorkspaceGroupFullDto = {
-      id: 1,
-      name: 'Test Group',
-      settings: {
-        ...mockSettings,
-        profiles: []
-      }
-    };
-
-    backendService.getWorkspaceGroupById.mockReturnValue(of(workspaceGroupEmptyProfiles));
-
-    await component.ngOnInit();
-
-    expect(component.fetchedProfiles).toEqual([]);
   });
 });

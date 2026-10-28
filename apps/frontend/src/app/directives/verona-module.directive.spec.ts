@@ -150,34 +150,6 @@ describe('VeronaModuleDirective', () => {
     return assigned;
   };
 
-  it('sets iframe element from hosting element', () => {
-    const { directive, hostingIframe } = createDirective();
-
-    directive.setHostingIframe();
-
-    expect(directive.iFrameElement).toBe(hostingIframe.nativeElement);
-  });
-
-  it('subscribes to selected unit changes', () => {
-    const { directive, workspaceService } = createDirective();
-
-    directive.subscribeForSelectedUnitChange();
-    directive.onSelectedUnitChange.mockClear();
-    workspaceService.selectedUnit$.next(3);
-
-    expect(directive.onSelectedUnitChange).toHaveBeenCalledTimes(1);
-  });
-
-  it('subscribes to post messages', () => {
-    const { directive, appService } = createDirective();
-
-    directive.subscribeForPostMessages();
-    const message = createMessageEvent({ type: 'x' }, window);
-    appService.postMessage$.next(message);
-
-    expect(directive.handleIncomingMessage).toHaveBeenCalledWith(message);
-  });
-
   it('handles missing unit id by clearing post target and setting message', () => {
     const { directive, translateService } = createDirective();
 

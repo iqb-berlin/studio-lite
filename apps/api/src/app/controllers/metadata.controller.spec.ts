@@ -29,6 +29,15 @@ describe('MetadataController', () => {
     controller = module.get<MetadataController>(MetadataController);
   });
 
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it.each(['getMetadataProfileByUrl', 'getMetadataVocabulariesForProfile', 'getRegistry'] as const)(
+    'should let any signed-in user reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', MetadataController.prototype[method]))
+        .toEqual([JwtAuthGuard]);
+    }
+  );
+
   describe('getMetadataProfileByUrl', () => {
     it('should return metadata profile for a given URL', async () => {
       const mockProfile = { url: 'http://test' };

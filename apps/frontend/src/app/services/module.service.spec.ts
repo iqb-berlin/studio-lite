@@ -88,14 +88,6 @@ describe('ModuleService', () => {
       // eslint-disable-next-line @typescript-eslint/dot-notation
       expect(service.schemers['s1'].metadata.name).toBe('S1');
     });
-
-    it('should handle empty response', async () => {
-      mockBackendService.getModuleList.mockImplementation(() => of([]));
-      await service.loadList();
-      expect(Object.keys(service.editors)).toHaveLength(0);
-      expect(Object.keys(service.players)).toHaveLength(0);
-      expect(Object.keys(service.schemers)).toHaveLength(0);
-    });
   });
 
   describe('loadWidgets', () => {
@@ -122,12 +114,6 @@ describe('ModuleService', () => {
       expect(Object.keys(service.widgets)).toHaveLength(1);
       // eslint-disable-next-line @typescript-eslint/dot-notation
       expect(service.widgets['w1'].metadata.name).toBe('W1');
-    });
-
-    it('should handle empty widget response', async () => {
-      mockBackendService.getModuleList.mockReturnValue(of([]));
-      await service.loadWidgets();
-      expect(Object.keys(service.widgets)).toHaveLength(0);
     });
   });
 

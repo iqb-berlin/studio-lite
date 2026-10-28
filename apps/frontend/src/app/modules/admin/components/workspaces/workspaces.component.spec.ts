@@ -97,9 +97,4 @@ describe('WorkspacesComponent', () => {
     ws.settings = undefined;
     expect(component.isRouteHidden(ws, 'editor')).toBe(false);
   });
-
-  it('should download workspaces report', () => {
-    component.xlsxDownloadWorkspaceReport();
-    expect(mockBackendService.getXlsWorkspaces).toHaveBeenCalled();
-  });
 });

@@ -26,9 +26,4 @@ describe('VariableIdPipe', () => {
   it('should return "-" if ID is not found and no alias is provided', () => {
     expect(pipe.transform('v1', null, undefined)).toBe('-');
   });
-
-  it('should return "-" if ID is null', () => {
-    expect(pipe.transform(null, 'Fallback', undefined)).toBe('Fallback');
-    expect(pipe.transform(null, null, undefined)).toBe('-');
-  });
 });

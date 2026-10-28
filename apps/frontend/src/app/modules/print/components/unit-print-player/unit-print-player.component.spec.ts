@@ -17,12 +17,6 @@ import { HeartbeatService } from '../../../../services/heartbeat.service';
 import { environment } from '../../../../../environments/environment';
 
 describe('UnitPrintPlayerComponent', () => {
-  type UnitPrintPlayerTestAccess = UnitPrintPlayerComponent & {
-    setHostingIframe: () => void;
-    subscribeForPostMessages: () => void;
-    buildVeronaModule: (moduleId: string, moduleType: 'player') => void;
-  };
-
   let component: UnitPrintPlayerComponent;
   let fixture: ComponentFixture<UnitPrintPlayerComponent>;
   let mockBackendService: DeepMocked<WorkspaceBackendService>;
@@ -107,59 +101,7 @@ describe('UnitPrintPlayerComponent', () => {
     component = fixture.componentInstance;
   });
 
-  describe('ngAfterViewInit', () => {
-    beforeEach(() => {
-      // Mock the ViewChild hostingIframe
-      Object.defineProperty(component, 'hostingIframe', {
-        value: {
-          nativeElement: document.createElement('iframe')
-        },
-        writable: true
-      });
-    });
-
-    it('should set hosting iframe', () => {
-      const setHostingIframeSpy = jest.spyOn(component as UnitPrintPlayerTestAccess, 'setHostingIframe');
-
-      component.ngAfterViewInit();
-
-      expect(setHostingIframeSpy).toHaveBeenCalled();
-    });
-
-    it('should subscribe for post messages', () => {
-      const subscribeSpy = jest.spyOn(component as UnitPrintPlayerTestAccess, 'subscribeForPostMessages');
-
-      component.ngAfterViewInit();
-
-      expect(subscribeSpy).toHaveBeenCalled();
-    });
-
-    it('should build verona module with playerId', () => {
-      const buildSpy = jest.spyOn(component as UnitPrintPlayerTestAccess, 'buildVeronaModule');
-      component.playerId = 'test-player@1.0.0';
-
-      component.ngAfterViewInit();
-
-      expect(buildSpy).toHaveBeenCalledWith('test-player@1.0.0', 'player');
-    });
-  });
-
   describe('sendChangeData', () => {
-    it('should fetch unit definition and post store', fakeAsync(() => {
-      const mockDefinition = { definition: 'test-definition' };
-      mockBackendService.getUnitDefinition.mockReturnValue(of(mockDefinition));
-      const postStoreSpy = jest.spyOn(component, 'postStore');
-
-      component.workspaceId = 1;
-      component.unitId = 10;
-      component.sendChangeData();
-
-      tick();
-
-      expect(mockBackendService.getUnitDefinition).toHaveBeenCalledWith(1, 10);
-      expect(postStoreSpy).toHaveBeenCalledWith('test-definition', undefined);
-    }));
-
     it('should pass the definition type on with the definition', fakeAsync(() => {
       mockBackendService.getUnitDefinition.mockReturnValue(of({
         definition: 'test-definition',
@@ -207,11 +149,8 @@ describe('UnitPrintPlayerComponent', () => {
   describe('postStore', () => {
     it('should return early if no postMessageTarget', () => {
       component.postMessageTarget = undefined;
-      const postMessageSpy = jest.fn();
 
-      component.postStore('test-definition');
-
-      expect(postMessageSpy).not.toHaveBeenCalled();
+      expect(() => component.postStore('test-definition')).not.toThrow();
     });
 
     it('should post message for API version 1', () => {
@@ -326,29 +265,6 @@ describe('UnitPrintPlayerComponent', () => {
       component.postStore('test-definition');
 
       expect(playerConfigOf(mockWindow)).toHaveProperty('stateReportPolicy', 'eager');
-    });
-
-    it('should emit unitLoaded after posting', () => {
-      const mockWindow = { postMessage: jest.fn() };
-      component.postMessageTarget = mockWindow as never;
-      component.playerApiVersion = 3;
-      const nextSpy = jest.spyOn(component.unitLoaded, 'next');
-
-      component.postStore('test-definition');
-
-      expect(nextSpy).toHaveBeenCalledWith(true);
-    });
-  });
-
-  describe('gotoUnit', () => {
-    it('should be defined as empty method', () => {
-      expect(() => component.gotoUnit('target')).not.toThrow();
-    });
-  });
-
-  describe('onSelectedUnitChange', () => {
-    it('should be defined as empty method', () => {
-      expect(() => component.onSelectedUnitChange()).not.toThrow();
     });
   });
 

@@ -142,6 +142,28 @@ describe('WorkspaceService', () => {
     });
   });
 
+  describe('setWorkspacesByUser', () => {
+    // These rows are the user's access to the workspaces of the group (#1957).
+    it('should replace the access of the user in the group by one row per workspace with its level', async () => {
+      const deleteRows = workspaceUserService.deleteAllByWorkspaceGroup as jest.Mock;
+      const saveRow = workspaceUsersRepository.save as jest.Mock;
+      deleteRows.mockResolvedValue(null);
+      (workspaceUsersRepository.create as jest.Mock).mockImplementation(row => row);
+      (unitService.findAllForWorkspace as jest.Mock)
+        .mockImplementation(async (workspaceId: number) => (workspaceId === 4 ? [{ id: 40 }] : []));
+
+      await service.setWorkspacesByUser(7, 2, [{ id: 1, accessLevel: 1 }, { id: 4, accessLevel: 3 }]);
+
+      expect(deleteRows).toHaveBeenCalledWith(2, 7);
+      // the old rows go first: deleted afterwards, they would take the new ones with them
+      expect(deleteRows.mock.invocationCallOrder[0]).toBeLessThan(saveRow.mock.invocationCallOrder[0]);
+      expect(saveRow).toHaveBeenCalledTimes(2);
+      expect(saveRow).toHaveBeenCalledWith({ userId: 7, workspaceId: 1, accessLevel: 1 });
+      expect(saveRow).toHaveBeenCalledWith({ userId: 7, workspaceId: 4, accessLevel: 3 });
+      expect(unitUserService.createUnitUser).toHaveBeenCalledWith(7, 40);
+    });
+  });
+
   describe('findAllGroupwise', () => {
     it('should return groupwise workspaces', async () => {
       const userId = 1;

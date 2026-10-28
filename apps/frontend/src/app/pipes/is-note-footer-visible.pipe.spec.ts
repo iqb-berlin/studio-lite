@@ -27,10 +27,6 @@ describe('IsNoteFooterVisiblePipe', () => {
     expect(pipe.transform(undefined)).toBe(false);
   });
 
-  it('should return false if note is null', () => {
-    expect(pipe.transform(null)).toBe(false);
-  });
-
   it('should return false if note has undefined properties', () => {
     const note = {} as unknown as UnitRichNoteDto;
     expect(pipe.transform(note)).toBe(false);

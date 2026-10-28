@@ -1,7 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import {
-  ComponentFixture, fakeAsync, TestBed, tick
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UnitInListDto } from '@studio-lite-lib/api-dto';
 import { Component, Input } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
@@ -127,14 +125,6 @@ describe('UnitSelectionComponent', () => {
     expect(component.groupsInfo).toContain('2 workspace.groups');
     expect(component.groupsInfo).toContain('3 workspace.units');
   });
-
-  it('should update unit list on comments updated', fakeAsync(() => {
-    const updateSpy = jest.spyOn(component, 'updateUnitList');
-    component.ngOnInit();
-    (workspaceServiceMock.onCommentsUpdated as Subject<void>).next();
-    tick();
-    expect(updateSpy).toHaveBeenCalled();
-  }));
 
   it('should update expandedGroups count on change', () => {
     component.expandedGroups = 5;

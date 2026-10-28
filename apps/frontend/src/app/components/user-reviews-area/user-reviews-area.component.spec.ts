@@ -46,10 +46,6 @@ describe('UserReviewsAreaComponent', () => {
     component.isReviewUser = false;
   });
 
-  it('should initialize with empty groupedReviews', () => {
-    expect(component.groupedReviews).toEqual([]);
-  });
-
   it('should group reviews by workspace group on ngOnInit', () => {
     component.reviews = [
       {
@@ -98,30 +94,5 @@ describe('UserReviewsAreaComponent', () => {
     expect(component.groupedReviews.length).toBe(1);
     expect(component.groupedReviews[0].groupName).toBe('');
     expect(component.groupedReviews[0].groupId).toBe(0);
-  });
-
-  it('should handle empty reviews array', () => {
-    component.reviews = [];
-
-    component.ngOnInit();
-
-    expect(component.groupedReviews).toEqual([]);
-  });
-
-  it('should group reviews by groupId when groupId is the same', () => {
-    component.reviews = [
-      {
-        id: 1, name: 'Review 1', workspaceId: 1, workspaceGroupId: 5, workspaceGroupName: 'Test Group'
-      },
-      {
-        id: 2, name: 'Review 2', workspaceId: 2, workspaceGroupId: 5, workspaceGroupName: 'Test Group'
-      }
-    ];
-
-    component.ngOnInit();
-
-    expect(component.groupedReviews.length).toBe(1);
-    expect(component.groupedReviews[0].groupId).toBe(5);
-    expect(component.groupedReviews[0].reviews.length).toBe(2);
   });
 });

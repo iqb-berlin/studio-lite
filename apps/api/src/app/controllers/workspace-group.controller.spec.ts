@@ -40,6 +40,12 @@ describe('WorkspaceGroupController', () => {
     unitService = module.get<UnitService>(UnitService);
   });
 
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it('should let only admins of the group reach patch', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceGroupController.prototype.patch))
+      .toEqual([JwtAuthGuard, IsWorkspaceGroupAdminGuard]);
+  });
+
   describe('findOne', () => {
     // The route asked for nothing but a valid token until #1712: any user could read any group
     // and download its report.

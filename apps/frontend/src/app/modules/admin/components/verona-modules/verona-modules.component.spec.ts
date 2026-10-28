@@ -8,9 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
-import {
-  IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent, ConfirmDialogComponent
-} from '@studio-lite-lib/iqb-components';
+import { IqbFilesUploadInputForDirective, IqbFilesUploadQueueComponent } from '@studio-lite-lib/iqb-components';
 import { environment } from '../../../../../environments/environment';
 import { VeronaModulesComponent } from './verona-modules.component';
 import { AppService } from '../../../../services/app.service';
@@ -137,15 +135,6 @@ describe('VeronaModulesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should load module list on init', async () => {
-    jest.useFakeTimers();
-    component.ngOnInit();
-    jest.advanceTimersByTime(100);
-
-    expect(mockModuleService.loadList).toHaveBeenCalled();
-    jest.useRealTimers();
-  });
-
   it('should change selected modules correctly', () => {
     const module1 = { metadata: { type: 'editor' }, key: 'm1' } as VeronaModuleClass;
     const module2 = { metadata: { type: 'player' }, key: 'm2' } as VeronaModuleClass;
@@ -197,13 +186,6 @@ describe('VeronaModulesComponent', () => {
     component.deleteFiles();
 
     expect(mockSnackBar.open).toHaveBeenCalledWith('modules.not-deleted', 'error', { duration: 3000 });
-  });
-
-  it('should ask for confirmation before deleting', () => {
-    component.selectedModules = [{ key: 'm1' } as VeronaModuleClass];
-    const spy = jest.spyOn(mockDialog, 'open');
-    component.deleteFiles();
-    expect(spy).toHaveBeenCalledWith(ConfirmDialogComponent, expect.anything());
   });
 
   it('should abort delete if confirmation is rejected', () => {

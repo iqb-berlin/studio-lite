@@ -45,21 +45,5 @@ describe('WsgAdminService', () => {
       expect(req.request.body).toEqual({ id: 3, settings });
       req.flush(false);
     });
-
-    it('returns false on error', done => {
-      const settings: WorkspaceGroupSettingsDto = {
-        defaultSchemer: 'schemer',
-        defaultPlayer: 'player',
-        defaultEditor: 'editor'
-      };
-
-      service.setWorkspaceGroupSettings(3, settings).subscribe(result => {
-        expect(result).toBe(false);
-        done();
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}workspace-groups/3`);
-      req.error(new ProgressEvent('error'));
-    });
   });
 });

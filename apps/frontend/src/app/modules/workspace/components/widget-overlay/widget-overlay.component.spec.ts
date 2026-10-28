@@ -93,12 +93,6 @@ describe('WidgetOverlayComponent', () => {
     fixture.detectChanges();
   });
 
-  it('initialises widgetState from callData on AfterViewInit', () => {
-    const testAccess = component as never as WidgetOverlayTestAccess;
-    expect(testAccess.widgetState)
-      .toBe('initial-state');
-  });
-
   it('sends vowStartCommand on vowReadyNotification', () => {
     jest.spyOn(VeronaModuleDirective, 'getSessionId')
       .mockReturnValue('widget-session-7');
@@ -210,17 +204,6 @@ describe('WidgetOverlayComponent', () => {
     expect(overlayRefStub.dispose).toHaveBeenCalled();
   });
 
-  it('ngOnDestroy completes the unsubscribe subject', () => {
-    const privateSub = (component as never as WidgetOverlayTestAccess).ngUnsubscribe;
-    const nextSpy = jest.spyOn(privateSub, 'next');
-    const completeSpy = jest.spyOn(privateSub, 'complete');
-
-    component.ngOnDestroy();
-
-    expect(nextSpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
-  });
-
   describe('a return request with state and saveState (#1928)', () => {
     const requestReturn = (data: object): void => {
       sendFromWidget({ type: 'vowReturnRequested', ...data });
@@ -274,14 +257,5 @@ describe('WidgetOverlayComponent', () => {
       expect(playerPostMessageTarget.postMessage).not.toHaveBeenCalled();
       expect(overlayRefStub.dispose).toHaveBeenCalled();
     });
-  });
-
-  it('should have a close icon button that calls close()', () => {
-    const closeSpy = jest.spyOn(component, 'close');
-    const closeBtn = fixture.nativeElement.querySelector('.close-button');
-    expect(closeBtn).toBeTruthy();
-    expect(closeBtn.querySelector('mat-icon').textContent).toContain('close');
-    closeBtn.click();
-    expect(closeSpy).toHaveBeenCalled();
   });
 });

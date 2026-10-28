@@ -6,6 +6,7 @@ import { UsersService } from '../services/users.service';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { AuthService } from '../services/auth.service';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 describe('AdminUserController', () => {
   let controller: AdminUserController;
@@ -30,6 +31,23 @@ describe('AdminUserController', () => {
 
     controller = module.get<AdminUserController>(AdminUserController);
   });
+
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it.each([
+    'findOnesWorkspaceGroups',
+    'patchOnesWorkspaceGroups',
+    'remove',
+    'create',
+    'patch',
+    'removeSession',
+    'removeOrphanedSessions'
+  ] as const)(
+    'should let only administrators reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', AdminUserController.prototype[method]))
+        .toEqual([JwtAuthGuard, IsAdminGuard]);
+    }
+  );
 
   describe('patch', () => {
     it('should update a user and leave their sessions alone', async () => {

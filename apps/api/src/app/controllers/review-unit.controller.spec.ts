@@ -38,6 +38,20 @@ describe('ReviewUnitController', () => {
     reviewService = module.get<ReviewService>(ReviewService);
   });
 
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it.each(['findUnitProperties', 'getUnitDefinition'] as const)(
+    'should hold %s to a review its caller may open',
+    method => {
+      expect(Reflect.getMetadata('__guards__', ReviewUnitController.prototype[method]))
+        .toEqual([JwtAuthGuard, ReviewGuard]);
+    }
+  );
+
+  it('should hold findOnesScheme to a review its caller may open and to the settings of the review', () => {
+    expect(Reflect.getMetadata('__guards__', ReviewUnitController.prototype.findOnesScheme))
+      .toEqual([JwtAuthGuard, ReviewGuard, ReviewConfigGuard]);
+  });
+
   describe('findUnitProperties', () => {
     it('should return unit properties', async () => {
       const reviewId = 1;

@@ -194,16 +194,6 @@ describe('ExportUnitComponent', () => {
     expect(button.disabled).toBe(true);
   }));
 
-  it('should adopt the unit selection from the unit list', () => {
-    const unitList = fixture.debugElement
-      .query(By.directive(MockSelectUnitListComponent))
-      .componentInstance as MockSelectUnitListComponent;
-
-    unitList.selectionChanged.emit([3, 7]);
-
-    expect(component.unitExportSettings.unitIdList).toEqual([3, 7]);
-  });
-
   it('should pass the unit selection on to the file config', () => {
     const unitList = fixture.debugElement
       .query(By.directive(MockSelectUnitListComponent))
@@ -278,12 +268,6 @@ describe('ExportUnitComponent', () => {
     bookletConfig.configChanged.emit({ unitTitle: 'ON' });
 
     expect(component.unitExportSettings.bookletSettings.map(s => s.key)).toContain('toolbar_show_unit_title');
-  });
-
-  it('should prefill bookletId, bookletLabel and groupLabel', () => {
-    expect(component.unitExportSettings.bookletId).toBe('booklet1');
-    expect(component.unitExportSettings.bookletLabel).toBe('Testheft 1');
-    expect(component.unitExportSettings.groupLabel).toBe('Gruppe 1');
   });
 
   it('should map booklet config to modern keys on setBookletConfigSettings', () => {

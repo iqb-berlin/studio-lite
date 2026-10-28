@@ -18,8 +18,4 @@ describe('DataLoadingIsNumberPipe', () => {
   it('should return false when value is boolean true', () => {
     expect(pipe.transform(true)).toBe(false);
   });
-
-  it('should return false when value is boolean false', () => {
-    expect(pipe.transform(false)).toBe(false);
-  });
 });

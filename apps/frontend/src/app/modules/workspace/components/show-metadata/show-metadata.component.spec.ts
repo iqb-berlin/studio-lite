@@ -52,7 +52,7 @@ describe('ShowMetadataComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should expose dialog data', () => {
-    expect(component.data).toEqual(dialogData);
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

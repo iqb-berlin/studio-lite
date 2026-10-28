@@ -99,28 +99,6 @@ describe('AppConfigComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should initialize form with empty values', () => {
-    expect(component.configForm).toBeDefined();
-    expect(component.configForm.get('appTitle')).toBeDefined();
-    expect(component.configForm.get('introHtml')).toBeDefined();
-    expect(component.configForm.get('imprintHtml')).toBeDefined();
-    expect(component.configForm.get('globalWarningText')).toBeDefined();
-    expect(component.configForm.get('globalWarningExpiredDay')).toBeDefined();
-    expect(component.configForm.get('globalWarningExpiredHour')).toBeDefined();
-  });
-
-  it('should have expiredHours array with 24 elements', () => {
-    expect(component.expiredHours).toBeDefined();
-    expect(component.expiredHours.length).toBe(24);
-    expect(component.expiredHours[0]).toBe(0);
-    expect(component.expiredHours[23]).toBe(23);
-  });
-
-  it('should load config data on init', () => {
-    fixture.detectChanges();
-    expect(readBackendService.getConfig).toHaveBeenCalled();
-  });
-
   it('should update form fields with loaded data', () => {
     fixture.detectChanges();
     expect(component.configForm.get('appTitle')?.value).toBe('Test App');

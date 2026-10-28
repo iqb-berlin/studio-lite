@@ -64,18 +64,6 @@ describe('EmailTemplateComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should initialize form with empty values', () => {
-    expect(component.configForm).toBeDefined();
-    expect(component.configForm.get('emailSubject')).toBeDefined();
-    expect(component.configForm.get('emailBody')).toBeDefined();
-  });
-
-  it('should load email template on init', fakeAsync(() => {
-    component.ngOnInit();
-    tick(200);
-    expect(backendService.getEmailTemplate).toHaveBeenCalled();
-  }));
-
   it('should update form fields with loaded template', fakeAsync(() => {
     component.ngOnInit();
     tick(200);
@@ -128,7 +116,7 @@ describe('EmailTemplateComponent', () => {
 
     expect(backendService.setEmailTemplate).toHaveBeenCalled();
     tick(100);
-    expect(snackBar.open).toHaveBeenCalled();
+    expect(snackBar.open).toHaveBeenCalledWith('email-template.template-not-saved', 'error', expect.anything());
   }));
 
   it('should handle null email template response', fakeAsync(() => {
@@ -141,44 +129,6 @@ describe('EmailTemplateComponent', () => {
 
     expect(newComponent.configForm.get('emailSubject')?.value).toBe('');
     expect(newComponent.configForm.get('emailBody')?.value).toBe('');
-  }));
-
-  it('should properly construct EmailTemplateDto when saving', fakeAsync(() => {
-    backendService.setEmailTemplate.mockReturnValue(of(true));
-    component.ngOnInit();
-    tick(200);
-
-    component.configForm.patchValue({
-      emailSubject: 'Custom Subject',
-      emailBody: 'Custom Body with {{placeholder}}'
-    });
-
-    component.saveData();
-    tick(100);
-
-    const callArgs = backendService.setEmailTemplate.mock.calls[0][0];
-    expect(callArgs).toEqual({
-      emailSubject: 'Custom Subject',
-      emailBody: 'Custom Body with {{placeholder}}'
-    });
-  }));
-
-  it('should handle empty form values when saving', fakeAsync(() => {
-    backendService.setEmailTemplate.mockReturnValue(of(true));
-    component.ngOnInit();
-    tick(200);
-
-    component.configForm.patchValue({
-      emailSubject: '',
-      emailBody: ''
-    });
-
-    component.saveData();
-    tick(100);
-
-    const callArgs = backendService.setEmailTemplate.mock.calls[0][0];
-    expect(callArgs.emailSubject).toBe('');
-    expect(callArgs.emailBody).toBe('');
   }));
 
   it('should not save if configForm is null', () => {

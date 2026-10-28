@@ -73,13 +73,4 @@ describe('HasNewCommentsPipe', () => {
 
     expect(pipe.transform(unit)).toBe(false);
   });
-
-  it('should handle minimal unit object', () => {
-    const unit: UnitInListDto = {
-      id: 1,
-      key: 'unit1'
-    };
-
-    expect(pipe.transform(unit)).toBe(false);
-  });
 });

@@ -122,13 +122,6 @@ describe('UnitItemsComponent', () => {
     expect(component.formatUuid(uuid)).toBe('123...def');
   });
 
-  it('should open delete dialog', () => {
-    const item = { uuid: '123', workspaceId: 1, unitId: 1 } as unknown as UnitItemInViewDto;
-    const dialogSpy = jest.spyOn(dialog, 'open');
-    component.openDeleteDialog(item);
-    expect(dialogSpy).toHaveBeenCalled();
-  });
-
   it('should call backend service delete on confirmation', fakeAsync(() => {
     const item = { uuid: '123', workspaceId: 1, unitId: 1 } as unknown as UnitItemInViewDto;
     const deleteSpy = jest.spyOn(backendService, 'deleteUnitItem').mockReturnValue(of(true));

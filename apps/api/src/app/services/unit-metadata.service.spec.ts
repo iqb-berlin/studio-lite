@@ -395,4 +395,26 @@ describe('UnitMetadataService', () => {
       });
     });
   });
+
+  describe('findOnesMetadata', () => {
+    // What the metadata view of a unit and the copy of a unit read (#1958).
+    it('should put the profiles of the unit and of its items together and fill in their display text', async () => {
+      const text = [{ lang: 'de', value: 'Mathematik' }];
+      mockRepository.findBy.mockResolvedValue([
+        { profileId: 'unit-profile', entries: [{ id: 'subject', value: text }] } as UnitMetadataDto
+      ]);
+      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([{
+        uuid: 'item-uuid',
+        profiles: [{ profileId: 'item-profile', entries: [{ id: 'topic', value: text }] }]
+      } as UnitItemWithMetadataDto]);
+      metadataProfileService.getStoredMetadataProfileFromDb.mockResolvedValue(null);
+
+      const result = await service.findOnesMetadata(5);
+
+      expect(mockRepository.findBy).toHaveBeenCalledWith({ unitId: 5 });
+      expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalledWith(5);
+      expect(result.profiles?.[0].entries?.[0].valueAsText).toEqual(text);
+      expect(result.items?.[0].profiles[0].entries?.[0].valueAsText).toEqual(text);
+    });
+  });
 });

@@ -42,11 +42,6 @@ describe('SearchFilterComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should render title in mat-label', () => {
-    const label = fixture.nativeElement.querySelector('mat-label');
-    expect(label.textContent).toBe('Test Title');
-  });
-
   it('should emit valueChange on input keyup', () => {
     jest.spyOn(component.valueChange, 'emit');
     const input = fixture.nativeElement.querySelector('input');

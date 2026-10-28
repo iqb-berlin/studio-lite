@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
-  EntityManager, In, QueryFailedError, Repository
+  EntityManager, In, Not, QueryFailedError, Repository
 } from 'typeorm';
 import {
   CreateUnitDto,
@@ -583,6 +583,23 @@ describe('UnitService', () => {
 
       expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('connection lost'));
       warnSpy.mockRestore();
+    });
+  });
+
+  describe('patchUnitGroup', () => {
+    // The ids come from the body unchecked, and the route's guard asks about the workspace alone:
+    // only the workspace in both conditions keeps the units of other workspaces out of reach (#1957).
+    it('should limit both updates to the workspace of the path', async () => {
+      await service.patchUnitGroup(3, 'Gruppe', [1, 2]);
+
+      expect(unitsRepository.update).toHaveBeenCalledWith(
+        { workspaceId: 3, groupName: 'Gruppe', id: Not(In([1, 2])) },
+        { groupName: '' }
+      );
+      expect(unitsRepository.update).toHaveBeenCalledWith(
+        { workspaceId: 3, id: In([1, 2]) },
+        { groupName: 'Gruppe' }
+      );
     });
   });
 });

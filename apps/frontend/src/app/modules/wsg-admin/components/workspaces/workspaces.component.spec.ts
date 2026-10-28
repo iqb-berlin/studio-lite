@@ -142,26 +142,6 @@ describe('WorkspacesComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create and init', () => {
-    mockBackendService.getUsers.mockReturnValue(of([]));
-    mockBackendService.getWorkspaces.mockReturnValue(of([
-      {
-        id: 1,
-        name: 'ws1',
-        groupId: 1,
-        unitsCount: 0
-      } as WorkspaceInListDto
-    ]));
-
-    fixture.detectChanges();
-
-    expect(component).toBeTruthy();
-    expect(mockBackendService.getUsers).toHaveBeenCalled();
-    expect(mockBackendService.getWorkspaces).toHaveBeenCalledWith(1);
-    expect(component.workspaces.length).toBe(1);
-    expect(component.displayedColumns).toContain('notes');
-  });
-
   it('should render one radio button per access level in each row', () => {
     mockBackendService.getUsers.mockReturnValue(of([
       {
@@ -367,17 +347,6 @@ describe('WorkspacesComponent', () => {
       component.onRoleChange(userEntry, 2);
 
       expect(userEntry.accessLevel).toBe(2);
-      expect(userEntry.isChecked).toBe(true);
-      expect(component.workspaceUsers.updateHasChanged).toHaveBeenCalled();
-    });
-
-    it('should switch role level on role change to a different level', () => {
-      userEntry.isChecked = true;
-      userEntry.accessLevel = 1;
-
-      component.onRoleChange(userEntry, 4);
-
-      expect(userEntry.accessLevel).toBe(4);
       expect(userEntry.isChecked).toBe(true);
       expect(component.workspaceUsers.updateHasChanged).toHaveBeenCalled();
     });

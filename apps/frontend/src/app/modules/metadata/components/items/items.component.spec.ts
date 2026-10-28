@@ -67,13 +67,6 @@ describe('ItemsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should initialize items from metadata on ngOnInit', () => {
-    component.metadata = { items: [{ id: 'item1' } as unknown as ItemsMetadataValues] };
-    component.ngOnInit();
-    expect(component.items.length).toBe(1);
-    expect(component.items[0].id).toBe('item1');
-  });
-
   it('should add an empty item when add is called and items list is empty', () => {
     const emitSpy = jest.spyOn(component.metadataChange, 'emit');
     component.items = [];

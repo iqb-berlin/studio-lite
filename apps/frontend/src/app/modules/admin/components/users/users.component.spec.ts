@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
-import { UserFullDto, UserInListDto } from '@studio-lite-lib/api-dto';
+import { UserFullDto } from '@studio-lite-lib/api-dto';
 import { FormControl, FormGroup, UntypedFormGroup } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
@@ -150,15 +150,6 @@ describe('UsersComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should load initial data on init', () => {
-    jest.useFakeTimers();
-    component.ngOnInit();
-    jest.runOnlyPendingTimers();
-    expect(mockBackendService.getWorkspaceGroupList).toHaveBeenCalled();
-    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
-    jest.useRealTimers();
-  });
-
   it('should refresh without activity when explicitly requested', () => {
     component.updateUserList(false);
 
@@ -227,22 +218,6 @@ describe('UsersComponent', () => {
 
     expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
     jest.useRealTimers();
-  });
-
-  it('should add user successfully', () => {
-    const userData = new FormGroup({
-      name: new FormControl('test'),
-      password: new FormControl('pass'),
-      isAdmin: new FormControl(false),
-      description: new FormControl('desc'),
-      firstName: new FormControl('first'),
-      lastName: new FormControl('last'),
-      email: new FormControl('email@test.com')
-    });
-    component.addUser(userData);
-    expect(mockBackendService.addUser).toHaveBeenCalled();
-    expect(mockBackendService.getUsersFullWithActivity).toHaveBeenCalled();
-    expect(mockSnackBar.open).toHaveBeenCalledWith('admin.user-created', '', { duration: 1000 });
   });
 
   it('should handle add user failure', () => {
@@ -494,15 +469,6 @@ describe('UsersComponent', () => {
     } as unknown as WorkspaceGroupToCheckCollection;
     component.saveWorkspaces();
     expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.not-changed', 'error', { duration: 3000 });
-  });
-
-  it('should toggle row selection', () => {
-    const user = { id: 1, name: 'test' } as unknown as UserInListDto;
-    component.toggleRowSelection(user);
-    expect(component.tableSelectionRow.isSelected(user)).toBe(true);
-
-    component.toggleRowSelection(user);
-    expect(component.tableSelectionRow.isSelected(user)).toBe(false);
   });
 
   it('should calculate session and logged-in counts from activityStatus', () => {

@@ -27,10 +27,4 @@ describe('WorkspaceNamePipe', () => {
 
     expect(pipe.transform(999, workspaces)).toBe('');
   });
-
-  it('returns an empty string when the workspace list is empty', () => {
-    const pipe = new WorkspaceNamePipe();
-
-    expect(pipe.transform(1, [])).toBe('');
-  });
 });

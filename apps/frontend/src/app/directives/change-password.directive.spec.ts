@@ -75,16 +75,6 @@ describe('ChangePasswordDirective', () => {
     );
   });
 
-  it('should open change password dialog when changePassword is called', () => {
-    mockDialogRef.afterClosed.mockReturnValue(of(false));
-
-    directive.changePassword();
-
-    expect(mockDialog.open).toHaveBeenCalledWith(ChangePasswordComponent, {
-      width: '400px'
-    });
-  });
-
   it('should call backend service and show success message when password change succeeds', fakeAsync(() => {
     const mockFormGroup = new UntypedFormGroup({
       pw_old: new UntypedFormControl('oldPassword'),

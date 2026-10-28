@@ -77,18 +77,32 @@ describe('UnitRichNoteDialogComponent', () => {
     expect(component.noteForm.get('tagId')?.value).toBe('child');
   });
 
-  it('should disable save button if content is empty', () => {
+  // Each test builds its own dialog: one that relies on the component of the test before it passes
+  // only in the order of this file (#1942).
+  const setupNewNote = () => setupTestBed({
+    workspaceId: 1,
+    unitId: 1,
+    tags: mockTags,
+    items: []
+  });
+
+  it('should disable save button if content is empty', async () => {
+    await setupNewNote();
+    // with a tag, so that it is the empty content that blocks, not the invalid form
+    component.noteForm.get('tagId')?.setValue('parent.child');
     component.onContentChange('');
     expect(component.isSaveDisabled).toBe(true);
   });
 
-  it('should enable save button if tag and content are present', () => {
+  it('should enable save button if tag and content are present', async () => {
+    await setupNewNote();
     component.noteForm.get('tagId')?.setValue('parent.child');
     component.onContentChange('<p>some content</p>');
     expect(component.isSaveDisabled).toBe(false);
   });
 
-  it('should enable save button if tag and items are present, even if text is empty', () => {
+  it('should enable save button if tag and items are present, even if text is empty', async () => {
+    await setupNewNote();
     component.noteForm.get('tagId')?.setValue('parent.child');
     component.onContentChange('');
     component.onSelectedItemChange(['item1']);

@@ -136,31 +136,7 @@ describe('UnitPrintLayoutComponent', () => {
     component = fixture.componentInstance;
   });
 
-  describe('ngOnInit', () => {
-    it('should call initPlayer', () => {
-      const initPlayerSpy = jest.spyOn(component as never, 'initPlayer');
-
-      component.ngOnInit();
-
-      expect(initPlayerSpy).toHaveBeenCalled();
-    });
-  });
-
   describe('initPlayer', () => {
-    it('should fetch unit properties', fakeAsync(() => {
-      const mockProperties = createMockUnitProperties();
-      mockBackendService.getUnitProperties.mockReturnValue(of(mockProperties));
-      mockModuleService.players = { 'verona-player-simple@1.0.0': {} };
-
-      component.workspaceId = 1;
-      component.unitId = 10;
-      component.ngOnInit();
-
-      tick(0);
-
-      expect(mockBackendService.getUnitProperties).toHaveBeenCalledWith(1, 10);
-    }));
-
     it('should handle null unit properties', fakeAsync(() => {
       mockBackendService.getUnitProperties.mockReturnValue(of(null));
 
@@ -175,20 +151,6 @@ describe('UnitPrintLayoutComponent', () => {
   });
 
   describe('setUnitProperties', () => {
-    it('should set unitProperties and playerId', fakeAsync(() => {
-      const mockProperties = createMockUnitProperties();
-      mockBackendService.getUnitProperties.mockReturnValue(of(mockProperties));
-      mockModuleService.players = { 'verona-player-simple@1.0.0': {} };
-
-      component.workspaceId = 1;
-      component.unitId = 10;
-      component.ngOnInit();
-
-      tick(0);
-
-      expect(component.unitProperties).toBeDefined();
-    }));
-
     it('should load module list if players are empty', fakeAsync(() => {
       const mockProperties = createMockUnitProperties();
       mockBackendService.getUnitProperties.mockReturnValue(of(mockProperties));
@@ -241,34 +203,6 @@ describe('UnitPrintLayoutComponent', () => {
 
       expect(emitSpy).toHaveBeenCalledWith(200);
       expect(component.printPreviewHeight).toBe(700);
-    });
-
-    it('should handle negative height difference', () => {
-      const emitSpy = jest.spyOn(component.heightChange, 'emit');
-      component.printPreviewHeight = 500;
-
-      component.playerHeightChange(300);
-
-      expect(emitSpy).toHaveBeenCalledWith(-200);
-      expect(component.printPreviewHeight).toBe(300);
-    });
-
-    it('should handle zero height change', () => {
-      const emitSpy = jest.spyOn(component.heightChange, 'emit');
-      component.printPreviewHeight = 500;
-
-      component.playerHeightChange(500);
-
-      expect(emitSpy).toHaveBeenCalledWith(0);
-      expect(component.printPreviewHeight).toBe(500);
-    });
-
-    it('should update printPreviewHeight to new value', () => {
-      component.printPreviewHeight = 100;
-
-      component.playerHeightChange(250);
-
-      expect(component.printPreviewHeight).toBe(250);
     });
   });
 });

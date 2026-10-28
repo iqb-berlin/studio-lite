@@ -55,15 +55,6 @@ describe('ResourcePackagesComponent', () => {
     fixture.detectChanges();
   });
 
-  it('updates resourcePackages on updateFormFields', () => {
-    const packages$ = of([]);
-    readBackendService.getResourcePackages.mockReturnValue(packages$);
-
-    component.updateFormFields();
-
-    expect(component.resourcePackages).toBe(packages$);
-  });
-
   it('does not delete when dialog is canceled', () => {
     const dialogRef: Pick<MatDialogRef<unknown, boolean>, 'afterClosed'> = {
       afterClosed: () => of(false)

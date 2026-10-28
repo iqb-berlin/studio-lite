@@ -237,21 +237,26 @@ describe('UnitCommentService', () => {
   });
 
   describe('createComments', () => {
-    it('should create comments recursively', async () => {
-      const unitId = 1;
-      const itemUuids = [];
+    // A copied reply hangs under the copy of its root, not under the root it was copied from (#1958).
+    it('should hang each copied reply under the copy of its root', async () => {
       const comments = [
-        { id: 1, parentId: null } as UnitCommentDto,
-        { id: 2, parentId: 1 } as UnitCommentDto
+        { id: 1, parentId: null, body: 'Wurzel' } as UnitCommentDto,
+        { id: 2, parentId: 1, body: 'Antwort' } as UnitCommentDto
       ];
+      // the mocks of this file are shared by all its tests, so this one sets them only for its own calls
+      const copy = (dto: Partial<UnitComment>) => ({ ...dto }) as UnitComment;
+      const saveAs = (id: number) => (entity: UnitComment) => Promise.resolve(Object.assign(entity, { id }));
+      mockRepository.create.mockImplementationOnce(copy).mockImplementationOnce(copy);
+      mockRepository.save.mockImplementationOnce(saveAs(100)).mockImplementationOnce(saveAs(101));
 
-      mockRepository.create.mockImplementation(dto => ({ ...dto, id: Math.random() }) as UnitComment);
-      mockRepository.save.mockImplementation(entity => Promise.resolve(entity) as Promise<UnitComment>);
+      await service.createComments(comments, 5, []);
 
-      await service.createComments(comments, unitId, itemUuids);
-
-      expect(repository.create).toHaveBeenCalled();
-      expect(repository.save).toHaveBeenCalled();
+      expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({
+        body: 'Wurzel', parentId: null, unitId: 5
+      }));
+      expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({
+        body: 'Antwort', parentId: 100, unitId: 5
+      }));
     });
   });
 

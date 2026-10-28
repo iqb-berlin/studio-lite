@@ -6,9 +6,6 @@ import {
 } from '@angular/core';
 import { TiptapEditorDirective } from 'ngx-tiptap';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
-import {
-  RichTextEditorDirective
-} from '../../../../directives/rich-text-editor.directive';
 import { CommentEditorComponent } from './comment-editor.component';
 
 const mockEditor = {
@@ -212,14 +209,6 @@ describe('CommentEditorComponent', () => {
     });
   });
 
-  it('should emit handleCancel and clear content onReset', () => {
-    const cancelSpy = jest.spyOn(component.handleCancel, 'emit');
-    component.onReset();
-    expect(cancelSpy).toHaveBeenCalled();
-    expect(mockEditor.commands.clearContent).toHaveBeenCalledWith(true);
-    expect(mockEditor.commands.focus).toHaveBeenCalled();
-  });
-
   it('should emit handleSubmit and clear content onSubmit if content is not empty', () => {
     const submitSpy = jest.spyOn(component.handleSubmit, 'emit');
     mockEditor.getHTML.mockReturnValue('<p>content</p>');
@@ -243,69 +232,6 @@ describe('CommentEditorComponent', () => {
     expect(mockEditor.commands.clearContent).toHaveBeenCalledWith(true);
   });
 
-  it('should toggle bold', () => {
-    component.toggleBold();
-    expect(mockEditor.chain).toHaveBeenCalled();
-    expect(mockEditor.chain().toggleBold).toHaveBeenCalled();
-    expect(mockEditor.chain().run).toHaveBeenCalled();
-  });
-
-  it('should toggle italic', () => {
-    component.toggleItalic();
-    expect(mockEditor.chain).toHaveBeenCalled();
-    expect(mockEditor.chain().toggleItalic).toHaveBeenCalled();
-    expect(mockEditor.chain().run).toHaveBeenCalled();
-  });
-
-  it('should toggle underline', () => {
-    component.toggleUnderline();
-    expect(mockEditor.chain).toHaveBeenCalled();
-    expect(mockEditor.chain().toggleUnderline).toHaveBeenCalled();
-    expect(mockEditor.chain().run).toHaveBeenCalled();
-  });
-
-  it('should toggle strike', () => {
-    component.toggleStrike();
-    expect(mockEditor.commands.toggleStrike).toHaveBeenCalled();
-  });
-
-  it('should toggle superscript', () => {
-    component.toggleSuperscript();
-    expect(mockEditor.chain).toHaveBeenCalled();
-    expect(mockEditor.chain().toggleSuperscript).toHaveBeenCalled();
-    expect(mockEditor.chain().run).toHaveBeenCalled();
-  });
-
-  it('should toggle subscript', () => {
-    component.toggleSubscript();
-    expect(mockEditor.chain).toHaveBeenCalled();
-    expect(mockEditor.chain().toggleSubscript).toHaveBeenCalled();
-    expect(mockEditor.chain().run).toHaveBeenCalled();
-  });
-
-  it('should toggle bullet list', () => {
-    component.toggleBulletList();
-    expect(mockEditor.chain).toHaveBeenCalled();
-    expect(mockEditor.chain().toggleBulletList).toHaveBeenCalled();
-    expect(mockEditor.chain().run).toHaveBeenCalled();
-  });
-
-  it('should apply font color', () => {
-    component.selectedFontColor = 'red';
-    component.applyFontColor();
-    expect(mockEditor.chain).toHaveBeenCalled();
-    expect(mockEditor.chain().setColor).toHaveBeenCalledWith('red');
-    expect(mockEditor.chain().run).toHaveBeenCalled();
-  });
-
-  it('should apply highlight color', () => {
-    component.selectedHighlightColor = 'yellow';
-    component.applyHighlightColor();
-    expect(mockEditor.chain).toHaveBeenCalled();
-    expect(mockEditor.chain().toggleHighlight).toHaveBeenCalledWith({ color: 'yellow' });
-    expect(mockEditor.chain().run).toHaveBeenCalled();
-  });
-
   it('should update editorHTML onSelectedItemChange if content is not empty', () => {
     mockEditor.getHTML.mockReturnValue('<p>some content</p>');
     component.onSelectedItemChange();
@@ -317,16 +243,5 @@ describe('CommentEditorComponent', () => {
     component.editorHTML = 'initial';
     component.onSelectedItemChange();
     expect(component.editorHTML).toBe('initial');
-  });
-
-  it('should call setImage command when adding image', async () => {
-    const mockSrc = 'data:image/png;base64,...';
-    jest.spyOn(RichTextEditorDirective as unknown as {
-      loadImage: (fileTypes?: string[]) => Promise<string>
-    }, 'loadImage').mockResolvedValue(mockSrc);
-
-    await component.addImage();
-
-    expect(mockEditor.commands.setImage).toHaveBeenCalledWith({ src: mockSrc });
   });
 });

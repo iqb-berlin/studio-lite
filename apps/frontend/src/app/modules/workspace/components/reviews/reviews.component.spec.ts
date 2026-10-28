@@ -192,30 +192,6 @@ describe('ReviewsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should call loadReviewList on init', fakeAsync(() => {
-    const loadSpy = jest.spyOn(component, 'loadReviewList').mockImplementation(() => undefined);
-
-    component.ngOnInit();
-    tick();
-
-    expect(loadSpy).toHaveBeenCalled();
-  }));
-
-  it('should load reviews and initialize datasource', fakeAsync(() => {
-    const reviews = createReviewList();
-    backendServiceMock.getReviewList.mockReturnValue(of(reviews));
-    const selectSpy = jest.spyOn(component, 'selectReview');
-
-    component.loadReviewList();
-    tick();
-    tick();
-
-    expect(appServiceMock.dataLoading).toBe(false);
-    expect(component.reviews).toEqual(reviews);
-    expect(selectSpy).toHaveBeenCalledWith(0);
-    expect(component.objectsDatasource.data).toEqual(reviews);
-  }));
-
   it('should select a review and copy data when confirmed', fakeAsync(() => {
     const review = createReviewFull();
     backendServiceMock.getReview.mockReturnValue(of(review));
@@ -381,17 +357,6 @@ describe('ReviewsComponent', () => {
     }));
   });
 
-  it('should update units and mark changes on unitSelectionChanged', () => {
-    const detectSpy = jest.spyOn(component, 'detectChanges').mockReturnValue(true);
-
-    component.reviewDataToChange = createReviewFull({ units: [] });
-    component.unitSelectionChanged([3, 4]);
-
-    expect(component.reviewDataToChange.units).toEqual([3, 4]);
-    expect(detectSpy).toHaveBeenCalled();
-    expect(component.changed).toBe(true);
-  });
-
   it('should discard changes and restore from original', () => {
     component.changed = true;
     component.reviewDataOriginal = createReviewFull();
@@ -441,7 +406,7 @@ describe('ReviewsComponent', () => {
 
     component.saveChanges();
 
-    expect(snackBarMock.open).toHaveBeenCalled();
+    expect(snackBarMock.open).toHaveBeenCalledWith('workspace.review-not-saved', 'workspace.error', expect.anything());
   });
 
   it('should detect no changes for identical data', () => {

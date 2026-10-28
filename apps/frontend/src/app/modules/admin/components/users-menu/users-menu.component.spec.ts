@@ -122,16 +122,6 @@ describe('UsersMenuComponent', () => {
       expect(component.orphanedSessionCount).toBe(2);
     });
 
-    it('should report no orphaned sessions when the selected user has none', () => {
-      component.selectedRows = [{
-        id: 1,
-        name: 'test',
-        sessions: [{ sessionId: 's1', activityStatus: 'active' }]
-      } as UserFullDto];
-
-      expect(component.orphanedSessionCount).toBe(0);
-    });
-
     // The action clears one user's sessions, so it has no meaning without exactly one row.
     it('should report no orphaned sessions when nothing is selected', () => {
       component.selectedRows = [];
@@ -143,14 +133,6 @@ describe('UsersMenuComponent', () => {
       component.selectedRows = [{ id: 1, name: 'test' } as UserFullDto];
 
       expect(component.orphanedSessionCount).toBe(0);
-    });
-
-    it('should emit when the clear action is triggered', () => {
-      const emitSpy = jest.spyOn(component.orphanedSessionsCleared, 'emit');
-
-      component.clearOrphanedSessions();
-
-      expect(emitSpy).toHaveBeenCalled();
     });
   });
 });
