@@ -101,9 +101,9 @@ describe('UnitPrintCodeComponent', () => {
     // With a manual instruction the hint that a rule set has no rules is left out (#1974). With more
     // than one rule set the hint carries a prefix and is still printed (#1975).
     it.each([
-      ['', 'Keine Regeln definiert.'],
-      ['<p>Bitte von Hand kodieren.</p>', '']
-    ])('should state an empty rule set for manual instruction %j as %j', (manualInstruction, description) => {
+      ['', ['Keine Regeln definiert.']],
+      ['<p>Bitte von Hand kodieren.</p>', []]
+    ])('should print an empty rule set for manual instruction %j as %j', (manualInstruction, ruleBlocks) => {
       const mockCodeData = createMockCodeData({
         type: 'FULL_CREDIT',
         manualInstruction,
@@ -113,8 +113,10 @@ describe('UnitPrintCodeComponent', () => {
       component.ngOnChanges({
         codeData: new SimpleChange(null, mockCodeData, true)
       });
+      fixture.detectChanges();
 
-      expect(component.codeAsText.description.replace(/<[^>]+>/g, '')).toBe(description);
+      const blocks: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.rule-block'));
+      expect(blocks.map(block => block.textContent)).toEqual(ruleBlocks);
     });
 
     // Split at every semicolon, also inside a value (#1975).
