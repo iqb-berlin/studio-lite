@@ -11,6 +11,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
+import { createMock } from '@golevelup/ts-jest';
 import { GroupManageComponent } from './group-manage.component';
 import { environment } from '../../../../../environments/environment';
 import { WorkspaceService } from '../../services/workspace.service';
@@ -126,7 +127,16 @@ describe('GroupManageComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it.each([
+    [[2, 3], true],
+    [[1], true],
+    [[4, 1], false]
+  ])('should take a selection of units %j instead of [1, 4] as changed: %s (#1963)', (selectedUnitIds, changed) => {
+    component.groupUnitsOriginal = [1, 4];
+    component.unitSelectionTable = createMock<SelectUnitListComponent>({ selectedUnitIds });
+
+    component.unitSelectionChanged();
+
+    expect(component.changed).toBe(changed);
   });
 });
