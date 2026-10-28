@@ -2,9 +2,9 @@ import { Inject, Injectable } from '@angular/core';
 import { WorkspaceGroupSettingsDto } from '@studio-lite-lib/api-dto';
 import { MDProfile } from '@iqbspecs/metadata-profile';
 import { MDProfileStore } from '@iqbspecs/metadata-store/metadata-store.interface';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { succeeded } from '../../../utils/succeeded.utils';
 
 export type ProfileStoreWithProfiles = {
   profileStore: MDProfileStore,
@@ -39,9 +39,6 @@ export class WsgAdminService {
         id: workspaceGroupId,
         settings: settings
       })
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+      .pipe(succeeded());
   }
 }

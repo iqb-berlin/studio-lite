@@ -23,14 +23,12 @@ export class GroupMenuComponent {
   @Output() groupDeleted: EventEmitter<void> = new EventEmitter<void>();
 
   constructor(
-    private messageDialog: MatDialog,
-    private inputTextDialog: MatDialog,
-    private deleteConfirmDialog: MatDialog,
+    private dialog: MatDialog,
     private translateService: TranslateService
   ) {}
 
   addGroup() {
-    const dialogRef = this.inputTextDialog.open(InputTextComponent, {
+    const dialogRef = this.dialog.open(InputTextComponent, {
       width: '500px',
       data: {
         title: this.translateService.instant('workspace.new-unit-group'),
@@ -48,7 +46,7 @@ export class GroupMenuComponent {
   }
 
   renameGroup() {
-    const dialogRef = this.inputTextDialog.open(InputTextComponent, {
+    const dialogRef = this.dialog.open(InputTextComponent, {
       width: '500px',
       data: {
         title: this.translateService.instant('workspace.rename-unit-group'),
@@ -66,7 +64,7 @@ export class GroupMenuComponent {
   }
 
   deleteGroup() {
-    const dialogRef = this.deleteConfirmDialog.open(ConfirmDialogComponent, {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: <ConfirmDialogData>{
         title: this.translateService.instant('workspace.delete-unit-group'),
