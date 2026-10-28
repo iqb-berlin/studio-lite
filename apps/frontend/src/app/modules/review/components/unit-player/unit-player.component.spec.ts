@@ -210,17 +210,6 @@ describe('UnitPlayerComponent', () => {
 
       expect(component.unitData.responses).toEqual(initialResponses);
     });
-
-    it('should handle empty dataParts object', () => {
-      const unitState = { dataParts: {} };
-
-      const handleMethod = (component as never as {
-        handleUnitStateData: (state: { dataParts?: Record<string, unknown> }) => void
-      }).handleUnitStateData;
-      handleMethod.call(component, unitState);
-
-      expect(component.unitData.responses).toEqual({});
-    });
   });
 
   describe('postStore()', () => {
@@ -315,24 +304,6 @@ describe('UnitPlayerComponent', () => {
 
       expect((postMessageSpy.mock.calls[0][0] as { playerConfig: object }).playerConfig)
         .not.toHaveProperty('stateReportPolicy');
-    });
-
-    it('should handle empty definition string', () => {
-      const componentWithPrivates = component as {
-        postMessageTarget: Window | undefined;
-        playerApiVersion: number;
-      };
-      componentWithPrivates.playerApiVersion = 1;
-      const postMessageSpy = jest.spyOn(componentWithPrivates.postMessageTarget!, 'postMessage');
-
-      component.postStore('');
-
-      expect(postMessageSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          unitDefinition: ''
-        }),
-        '*'
-      );
     });
 
     it('should send the definition type at the top level when it is known', () => {

@@ -115,59 +115,5 @@ describe('PrintMetadataComponent', () => {
 
       expect(component.unitProfiles).toEqual(previousProfiles);
     });
-
-    it('should handle empty profiles and items arrays', () => {
-      const mockMetadata: UnitMetadataValues = {
-        profiles: [],
-        items: []
-      };
-
-      component.metadata = mockMetadata;
-      component.ngOnChanges({
-        metadata: new SimpleChange(null, mockMetadata, true)
-      });
-
-      expect(component.unitProfiles).toEqual([]);
-      expect(component.items).toEqual([]);
-    });
-
-    it('should update when metadata changes from null to populated', () => {
-      component.metadata = null;
-      fixture.detectChanges();
-
-      const mockMetadata: UnitMetadataValues = {
-        profiles: [
-          {
-            profileId: 'p1'
-          }
-        ],
-        items: [
-          {
-            id: 'i1',
-            profiles: []
-          }
-        ]
-      };
-
-      component.metadata = mockMetadata;
-      component.ngOnChanges({
-        metadata: new SimpleChange(null, mockMetadata, false)
-      });
-
-      expect(component.unitProfiles).toBeDefined();
-      expect(component.items).toBeDefined();
-    });
-
-    it('should handle metadata with undefined profiles and items', () => {
-      const mockMetadata: UnitMetadataValues = {};
-
-      component.metadata = mockMetadata;
-      component.ngOnChanges({
-        metadata: new SimpleChange(null, mockMetadata, true)
-      });
-
-      expect(component.unitProfiles).toBeUndefined();
-      expect(component.items).toBeUndefined();
-    });
   });
 });

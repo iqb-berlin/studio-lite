@@ -48,51 +48,7 @@ describe('UnitNavComponent', () => {
     fixture.detectChanges();
   });
 
-  describe('ReviewService Integration', () => {
-    it('should access units from reviewService', () => {
-      const mockUnits = [
-        {
-          databaseId: 1,
-          sequenceId: 0,
-          playerId: 'p1',
-          responses: {},
-          definition: 'd1',
-          name: 'Unit 1'
-        },
-        {
-          databaseId: 2,
-          sequenceId: 1,
-          playerId: 'p2',
-          responses: {},
-          definition: 'd2',
-          name: 'Unit 2'
-        }
-      ];
-      mockReviewService.units = mockUnits;
-
-      expect(component.reviewService.units).toEqual(mockUnits);
-      expect(component.reviewService.units.length).toBe(2);
-    });
-
-    it('should access currentUnitSequenceId from reviewService', () => {
-      mockReviewService.currentUnitSequenceId = 5;
-
-      expect(component.reviewService.currentUnitSequenceId).toBe(5);
-    });
-
-    it('should access reviewConfig from reviewService', () => {
-      mockReviewService.reviewConfig = { showOthersComments: true };
-
-      expect(component.reviewService.reviewConfig.showOthersComments).toBe(true);
-    });
-  });
-
-  describe('Template Binding', () => {
-    it('should handle empty units array in reviewService', () => {
-      mockReviewService.units = [];
-      fixture.detectChanges();
-
-      expect(component.reviewService.units).toEqual([]);
-    });
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

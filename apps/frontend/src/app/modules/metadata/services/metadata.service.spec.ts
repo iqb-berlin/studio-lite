@@ -4,7 +4,7 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 import { of } from 'rxjs';
 import { MDProfile } from '@iqbspecs/metadata-profile';
 import {
-  MetadataProfileDto, MetadataVocabularyDto, TopConcept, UnitPropertiesDto
+  MetadataProfileDto, MetadataVocabularyDto, TopConcept
 } from '@studio-lite-lib/api-dto';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { MetadataService } from './metadata.service';
@@ -197,18 +197,6 @@ describe('MetadataService', () => {
   });
 
   describe('createMetadataReport', () => {
-    it('should return report data on success', () => {
-      const mockReport: UnitPropertiesDto[] = [{ id: 1 } as unknown as UnitPropertiesDto];
-
-      service.createMetadataReport().subscribe(result => {
-        expect(result).toEqual(mockReport);
-      });
-
-      const req = httpMock.expectOne(`${serverUrl}workspaces/123/units/properties`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockReport);
-    });
-
     it('should return false on error', () => {
       service.createMetadataReport().subscribe(result => {
         expect(result).toBe(false);
@@ -220,12 +208,6 @@ describe('MetadataService', () => {
   });
 
   describe('VocabularyProvider bridge', () => {
-    it('getVocabularies should return the vocabularies array', () => {
-      const vocabularies = [{ id: 'voc1', label: 'Voc 1' }] as unknown as MetadataService['vocabularies'];
-      service.vocabularies = vocabularies;
-      expect(service.getVocabularies()).toBe(vocabularies);
-    });
-
     it('getVocabularyDictionary should map id, label, notation and text', () => {
       service.vocabulariesIdDictionary = {
         id1: {

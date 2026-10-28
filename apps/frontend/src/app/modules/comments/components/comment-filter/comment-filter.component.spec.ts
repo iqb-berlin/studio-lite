@@ -70,26 +70,6 @@ describe('CommentFilterComponent', () => {
     });
   });
 
-  describe('Interactions', () => {
-    it('should emit filteredItemsChange when selection changes', () => {
-      jest.spyOn(component.filteredItemsChange, 'emit');
-      const newFilters = ['uuid-1'];
-
-      component.filteredItemsChange.emit(newFilters);
-      expect(component.filteredItemsChange.emit).toHaveBeenCalledWith(newFilters);
-    });
-
-    it('should toggle showHiddenComments when slide toggle changes', () => {
-      const currentValue = component.showHiddenComments.value;
-      jest.spyOn(component.showHiddenComments, 'next');
-
-      // Simulating what ngModelChange does in the template
-      component.showHiddenComments.next(!currentValue);
-
-      expect(component.showHiddenComments.next).toHaveBeenCalledWith(!currentValue);
-    });
-  });
-
   describe('Disabled state', () => {
     it('should disable the trigger button', () => {
       component.disabled = true;

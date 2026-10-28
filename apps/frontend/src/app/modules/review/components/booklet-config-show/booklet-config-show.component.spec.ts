@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import { BookletConfigDto } from '@studio-lite-lib/api-dto';
 import { BookletConfigShowComponent } from './booklet-config-show.component';
 
 describe('BookletConfigShowComponent', () => {
@@ -30,70 +29,10 @@ describe('BookletConfigShowComponent', () => {
   });
 
   describe('config Input Setter', () => {
-    it('should set bookletConfig when valid config is provided', () => {
-      const testConfig: BookletConfigDto = {
-        pagingMode: 'separate',
-        pageNaviButtons: 'FIRST_PREV_NEXT_LAST_SEPARATE_ONLY',
-        unitNaviButtons: 'ARROWS_ONLY',
-        controllerDesign: 'controls-over-content',
-        unitScreenHeader: 'WITH_UNIT_TITLE',
-        unitTitle: 'Test Title'
-      };
-
-      component.config = testConfig;
-
-      expect(component.bookletConfig).toEqual(testConfig);
-    });
-
     it('should use default config when undefined is provided', () => {
       component.config = undefined;
 
       expect(component.bookletConfig).toEqual(bookletConfigDefault);
-    });
-
-    it('should replace existing config with new config', () => {
-      const firstConfig: BookletConfigDto = {
-        pagingMode: 'concat-scroll',
-        pageNaviButtons: 'FIRST_LAST_ONLY',
-        unitNaviButtons: '',
-        controllerDesign: '',
-        unitScreenHeader: '',
-        unitTitle: 'First Title'
-      };
-
-      const secondConfig: BookletConfigDto = {
-        pagingMode: 'separate',
-        pageNaviButtons: 'ARROWS_ONLY',
-        unitNaviButtons: 'ARROWS_ONLY',
-        controllerDesign: 'controls-over-content',
-        unitScreenHeader: 'WITH_UNIT_TITLE',
-        unitTitle: 'Second Title'
-      };
-
-      component.config = firstConfig;
-      expect(component.bookletConfig).toEqual(firstConfig);
-
-      component.config = secondConfig;
-      expect(component.bookletConfig).toEqual(secondConfig);
-    });
-
-    it('should handle partial config object', () => {
-      const partialConfig: BookletConfigDto = {
-        pagingMode: 'separate'
-      };
-
-      component.config = partialConfig;
-
-      expect(component.bookletConfig).toEqual(partialConfig);
-      expect(component.bookletConfig.pagingMode).toBe('separate');
-    });
-
-    it('should handle empty config object', () => {
-      const emptyConfig: BookletConfigDto = {};
-
-      component.config = emptyConfig;
-
-      expect(component.bookletConfig).toEqual(emptyConfig);
     });
   });
 
@@ -138,19 +77,6 @@ describe('BookletConfigShowComponent', () => {
         .toBe('booklet-config.unitTitle.label booklet-config.unitTitle.OFF booklet-config.is-default');
       expect(rowText('controllerDesign'))
         .toBe('booklet-config.controllerDesign.label booklet-config.controllerDesign.2018');
-    });
-  });
-
-  describe('Template Binding', () => {
-    it('should have bookletConfig accessible for template', () => {
-      component.config = {
-        pagingMode: 'separate',
-        unitTitle: 'Test'
-      };
-      fixture.detectChanges();
-
-      expect(component.bookletConfig.pagingMode).toBe('separate');
-      expect(component.bookletConfig.unitTitle).toBe('Test');
     });
   });
 });

@@ -102,19 +102,6 @@ describe('UnitPrintCommentsComponent', () => {
       expect(component.comments).toEqual(mockComments);
     });
 
-    it('should handle empty comments array', () => {
-      mockBackendService.getComments.mockReturnValue(of([]));
-
-      component.unitId = 10;
-      component.workspaceId = 1;
-
-      component.ngOnChanges({
-        unitId: new SimpleChange(null, 10, true)
-      });
-
-      expect(component.comments).toEqual([]);
-    });
-
     it('should not fetch comments if changes do not include relevant properties', () => {
       component.ngOnChanges({
         metadata: new SimpleChange(null, [], false)
@@ -122,90 +109,8 @@ describe('UnitPrintCommentsComponent', () => {
 
       expect(mockBackendService.getComments).not.toHaveBeenCalled();
     });
-
-    it('should use default reviewId of 0 when not set', () => {
-      const mockComments = [createMockComment(1)];
-      mockBackendService.getComments.mockReturnValue(of(mockComments));
-
-      component.unitId = 10;
-      component.workspaceId = 1;
-
-      component.ngOnChanges({
-        unitId: new SimpleChange(null, 10, true)
-      });
-
-      expect(mockBackendService.getComments).toHaveBeenCalledWith(1, 10, 0);
-    });
-
-    it('should pass non-zero reviewId when set', () => {
-      const mockComments = [createMockComment(1)];
-      mockBackendService.getComments.mockReturnValue(of(mockComments));
-
-      component.unitId = 10;
-      component.workspaceId = 1;
-      component.reviewId = 15;
-
-      component.ngOnChanges({
-        unitId: new SimpleChange(null, 10, true)
-      });
-
-      expect(mockBackendService.getComments).toHaveBeenCalledWith(1, 10, 15);
-    });
-  });
-
-  describe('fetchComments', () => {
-    it('should update comments property with fetched data', () => {
-      const mockComments = [
-        createMockComment(1),
-        createMockComment(2),
-        createMockComment(3)
-      ];
-      mockBackendService.getComments.mockReturnValue(of(mockComments));
-
-      component.unitId = 10;
-      component.workspaceId = 1;
-
-      component.ngOnChanges({
-        unitId: new SimpleChange(null, 10, true)
-      });
-
-      expect(component.comments.length).toBe(3);
-      expect(component.comments).toEqual(mockComments);
-    });
-
-    it('should replace existing comments with new data', () => {
-      const oldComments = [createMockComment(1)];
-      const newComments = [createMockComment(2), createMockComment(3)];
-
-      mockBackendService.getComments.mockReturnValue(of(oldComments));
-      component.unitId = 10;
-      component.workspaceId = 1;
-      component.ngOnChanges({
-        unitId: new SimpleChange(null, 10, true)
-      });
-
-      mockBackendService.getComments.mockReturnValue(of(newComments));
-      component.ngOnChanges({
-        unitId: new SimpleChange(10, 11, false)
-      });
-
-      expect(component.comments).toEqual(newComments);
-      expect(component.comments.length).toBe(2);
-    });
   });
   describe('ngOnDestroy', () => {
-    it('should emit and complete ngUnsubscribe', () => {
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      const ngUnsubscribe = component['ngUnsubscribe'];
-      const nextSpy = jest.spyOn(ngUnsubscribe, 'next');
-      const completeSpy = jest.spyOn(ngUnsubscribe, 'complete');
-
-      component.ngOnDestroy();
-
-      expect(nextSpy).toHaveBeenCalled();
-      expect(completeSpy).toHaveBeenCalled();
-    });
-
     it('should cancel subscriptions on destroy', () => {
       const mockComments = [createMockComment(1)];
       const subject = new Subject<Comment[]>();

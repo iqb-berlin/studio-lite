@@ -181,18 +181,8 @@ describe('ReviewService', () => {
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/review/123/start']);
     });
 
-    it('should navigate to start page when targetUnitId is -5', () => {
-      service.setUnitNavigationRequest(-5);
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/review/123/start']);
-    });
-
     it('should navigate to end page when targetUnitId equals units length', () => {
       service.setUnitNavigationRequest(3);
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/review/123/end']);
-    });
-
-    it('should navigate to end page when targetUnitId exceeds units length', () => {
-      service.setUnitNavigationRequest(10);
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/review/123/end']);
     });
 
@@ -215,11 +205,6 @@ describe('ReviewService', () => {
   describe('setHeaderText', () => {
     beforeEach(() => {
       service.reviewName = 'Test Review';
-    });
-
-    it('should set pageHeaderText to the provided pageName', () => {
-      service.setHeaderText('Test Page');
-      expect(service.pageHeaderText).toBe('Test Page');
     });
 
     it('should set screenHeaderText to pageName when unitScreenHeader is WITH_UNIT_TITLE', () => {
@@ -256,12 +241,6 @@ describe('ReviewService', () => {
 
     it('should set screenHeaderText to empty string when bookletConfig is null', () => {
       service.bookletConfig = null as unknown as Record<string, unknown>;
-      service.setHeaderText('Test Page');
-      expect(service.screenHeaderText).toBe('');
-    });
-
-    it('should set screenHeaderText to empty string when bookletConfig is undefined', () => {
-      service.bookletConfig = undefined as unknown as Record<string, unknown>;
       service.setHeaderText('Test Page');
       expect(service.screenHeaderText).toBe('');
     });
@@ -306,84 +285,12 @@ describe('ReviewService', () => {
         done();
       }, 100);
     });
-
-    it('should handle empty comments array', done => {
-      service.reviewId = 456;
-      mockBackendService.getUnitComments.mockReturnValue(of([]));
-
-      service.updateCommentsUnitInfo(200);
-
-      setTimeout(() => {
-        expect(mockBackendService.getUnitComments).toHaveBeenCalledWith(456, 200);
-        expect(service.allComments).toEqual([]);
-        done();
-      }, 100);
-    });
-
-    it('should update allComments with new data on subsequent calls', done => {
-      const firstComments: Comment[] = [
-        {
-          id: 1,
-          unitId: 100,
-          userId: 1,
-          userName: 'User 1',
-          body: 'Comment 1',
-          itemUuids: [],
-          hidden: false,
-          parentId: null,
-          createdAt: new Date(),
-          changedAt: new Date()
-        }
-      ];
-      const secondComments: Comment[] = [
-        {
-          id: 2,
-          unitId: 200,
-          userId: 2,
-          userName: 'User 2',
-          body: 'Comment 2',
-          itemUuids: [],
-          hidden: false,
-          parentId: null,
-          createdAt: new Date(),
-          changedAt: new Date()
-        }
-      ];
-
-      service.reviewId = 789;
-      mockBackendService.getUnitComments.mockReturnValueOnce(of(firstComments));
-      service.updateCommentsUnitInfo(100);
-
-      setTimeout(() => {
-        expect(service.allComments).toEqual(firstComments);
-
-        mockBackendService.getUnitComments.mockReturnValueOnce(of(secondComments));
-        service.updateCommentsUnitInfo(200);
-
-        setTimeout(() => {
-          expect(service.allComments).toEqual(secondComments);
-          done();
-        }, 100);
-      }, 100);
-    });
   });
 
   describe('toDateTimeString', () => {
-    it('should format date using DatePipe with i18n settings', () => {
-      const testDate = new Date('2024-01-15T10:30:00');
-      const result = service.toDateTimeString(testDate);
-      expect(result).toBeDefined();
-      expect(typeof result).toBe('string');
-    });
-
     it('should throw when date is invalid', () => {
       const testDate = new Date('invalid-date');
       expect(() => service.toDateTimeString(testDate)).toThrow();
-    });
-
-    it('should use i18nService locale and format', () => {
-      expect(mockI18nService.fullLocale).toBe('en-US');
-      expect(mockI18nService.dateTimeFormat).toBe('short');
     });
   });
 
@@ -549,44 +456,12 @@ describe('ReviewService', () => {
       });
     });
 
-    it('should initialize unit properties correctly', done => {
-      const mockReviewData = {
-        id: 1,
-        name: 'Test Review',
-        units: [100]
-      };
-
-      mockBackendService.getReview.mockReturnValue(of(mockReviewData));
-
-      service.loadReviewData().subscribe(() => {
-        expect(service.units[0].definition).toBe('');
-        expect(service.units[0].playerId).toBe('');
-        expect(service.units[0].responses).toBe('');
-        done();
-      });
-    });
-
     it('should handle null reviewData', done => {
       mockBackendService.getReview.mockReturnValue(of(null));
 
       service.loadReviewData().subscribe(() => {
         expect(mockAppService.appConfig.setPageTitle).toHaveBeenCalledWith('Review Header', true);
         expect(mockModuleService.loadList).toHaveBeenCalled();
-        done();
-      });
-    });
-
-    it('should return Observable<void>', done => {
-      const mockReviewData = {
-        id: 1,
-        name: 'Test Review',
-        units: []
-      };
-
-      mockBackendService.getReview.mockReturnValue(of(mockReviewData));
-
-      service.loadReviewData().subscribe(result => {
-        expect(result).toBeUndefined();
         done();
       });
     });

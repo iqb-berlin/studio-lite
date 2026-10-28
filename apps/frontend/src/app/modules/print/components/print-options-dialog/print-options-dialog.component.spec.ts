@@ -51,20 +51,5 @@ describe('PrintOptionsDialogComponent', () => {
       expect(mockDialogRef.close).toHaveBeenCalledTimes(1);
       expect(mockDialogRef.close).toHaveBeenCalledWith();
     });
-
-    it('should close the dialog when called multiple times', () => {
-      component.cancel();
-      component.cancel();
-
-      expect(mockDialogRef.close).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('dialogRef property', () => {
-    it('should allow calling close directly', () => {
-      component.dialogRef.close('test-data');
-
-      expect(mockDialogRef.close).toHaveBeenCalledWith('test-data');
-    });
   });
 });

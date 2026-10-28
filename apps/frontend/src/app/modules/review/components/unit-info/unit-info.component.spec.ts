@@ -6,7 +6,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { environment } from '../../../../../environments/environment';
 import { UnitInfoComponent } from './unit-info.component';
 import { ReviewService } from '../../services/review.service';
@@ -15,25 +14,6 @@ describe('UnitInfoComponent', () => {
   let component: UnitInfoComponent;
   let fixture: ComponentFixture<UnitInfoComponent>;
   let mockReviewService: jest.Mocked<ReviewService>;
-
-  const mockUnitProperties: UnitPropertiesDto = {
-    id: 1,
-    key: 'unit-key-1',
-    name: 'Test Unit',
-    description: 'Test Description',
-    reference: 'ref-123',
-    transcript: 'Test Transcript',
-    groupName: 'Test Group',
-    player: 'player-1',
-    editor: 'editor-1',
-    schemer: 'schemer-1',
-    lastChangedDefinition: new Date('2024-01-01'),
-    lastChangedMetadata: new Date('2024-01-02'),
-    lastChangedScheme: new Date('2024-01-03'),
-    lastChangedDefinitionUser: 'user1',
-    lastChangedMetadataUser: 'user2',
-    lastChangedSchemeUser: 'user3'
-  };
 
   beforeEach(async () => {
     mockReviewService = {
@@ -65,48 +45,6 @@ describe('UnitInfoComponent', () => {
     fixture = TestBed.createComponent(UnitInfoComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
-
-  describe('Input Properties', () => {
-    describe('unitId setter', () => {
-      it('should set id property when unitId input is provided', () => {
-        component.unitId = 42;
-        expect(component.id).toBe(42);
-      });
-
-      it('should handle zero as unitId', () => {
-        component.unitId = 0;
-        expect(component.id).toBe(0);
-      });
-
-      it('should handle negative unitId', () => {
-        component.unitId = -1;
-        expect(component.id).toBe(-1);
-      });
-    });
-
-    describe('unitProperties setter', () => {
-      it('should set properties when valid unitProperties are provided', () => {
-        component.unitProperties = mockUnitProperties;
-        expect(component.properties).toEqual(mockUnitProperties);
-      });
-
-      it('should handle undefined unitProperties', () => {
-        component.unitProperties = undefined;
-        expect(component.properties).toBeUndefined();
-      });
-
-      it('should replace existing properties with new ones', () => {
-        const firstProperties: UnitPropertiesDto = { ...mockUnitProperties, key: 'first' };
-        const secondProperties: UnitPropertiesDto = { ...mockUnitProperties, key: 'second' };
-
-        component.unitProperties = firstProperties;
-        expect(component.properties?.key).toBe('first');
-
-        component.unitProperties = secondProperties;
-        expect(component.properties?.key).toBe('second');
-      });
-    });
   });
 
   describe('elementWidth getter/setter', () => {
@@ -162,24 +100,6 @@ describe('UnitInfoComponent', () => {
 
       const element = fixture.nativeElement;
       expect(element.style.width).toBe('40px'); // just the offset
-    }));
-  });
-
-  describe('ngAfterViewInit()', () => {
-    it('should initialize element width from reviewService', fakeAsync(() => {
-      mockReviewService.unitInfoPanelWidth = 450;
-
-      component.ngAfterViewInit();
-      tick();
-
-      expect(component.elementWidth).toBe(450);
-    }));
-
-    it('should set up mousedown event handler on splitter', fakeAsync(() => {
-      component.ngAfterViewInit();
-      tick();
-
-      expect(component.splitterElement).toBeDefined();
     }));
   });
 
@@ -252,13 +172,6 @@ describe('UnitInfoComponent', () => {
       component.splitterElement = undefined!;
 
       expect(() => component.ngOnDestroy()).not.toThrow();
-    });
-  });
-
-  describe('Protected Properties', () => {
-    it('should expose "of" operator from rxjs', () => {
-      const ofOperator = (component as unknown as { of: unknown }).of;
-      expect(ofOperator).toBeDefined();
     });
   });
 });

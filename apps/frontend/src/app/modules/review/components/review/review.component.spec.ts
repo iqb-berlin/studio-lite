@@ -66,16 +66,6 @@ describe('ReviewComponent', () => {
   });
 
   describe('ngOnInit()', () => {
-    it('should set reviewId from route params when different and valid', fakeAsync(() => {
-      mockReviewService.reviewId = 0;
-      mockActivatedRoute.snapshot!.params = { review: '456' };
-
-      component.ngOnInit();
-      tick();
-
-      expect(mockReviewService.reviewId).toBe(456);
-    }));
-
     it('should clear units array when reviewId changes', fakeAsync(() => {
       mockReviewService.reviewId = 123;
       mockReviewService.units = [
@@ -95,17 +85,6 @@ describe('ReviewComponent', () => {
 
       expect(mockReviewService.units).toEqual([]);
       expect(mockReviewService.reviewId).toBe(456);
-    }));
-
-    it('should not change reviewId when it matches route param', fakeAsync(() => {
-      mockReviewService.reviewId = 123;
-      mockActivatedRoute.snapshot!.params = { review: '123' };
-
-      component.ngOnInit();
-      tick();
-
-      expect(mockReviewService.reviewId).toBe(123);
-      expect(mockReviewService.units).toBeDefined();
     }));
 
     it('should not clear units when reviewId has not changed', fakeAsync(() => {

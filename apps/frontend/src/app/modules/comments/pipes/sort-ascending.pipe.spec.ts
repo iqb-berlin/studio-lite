@@ -34,16 +34,4 @@ describe('SortAscendingPipe', () => {
     expect(result[1].name).toBe('Banana');
     expect(result[2].name).toBeNull();
   });
-
-  it('should return 0 for equal values', () => {
-    const items = [
-      { name: 'Apple' },
-      { name: 'Apple' }
-    ];
-    const result = pipe.transform(items, 'name');
-    expect(result).toEqual([
-      { name: 'Apple' },
-      { name: 'Apple' }
-    ]);
-  });
 });

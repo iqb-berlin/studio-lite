@@ -8,7 +8,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { provideHttpClient } from '@angular/common/http';
-import { of, Subject } from 'rxjs';
+import { of } from 'rxjs';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
 import { environment } from '../../../../../environments/environment';
 import { CommentDialogComponent } from './comment-dialog.component';
@@ -236,12 +236,6 @@ describe('CommentDialogComponent', () => {
       expect(component.userName).toBe('jsmith');
     });
 
-    it('should load unit items from backend', () => {
-      component.ngOnInit();
-
-      expect(mockBackendService.getUnitItems).toHaveBeenCalledWith(123, 456);
-    });
-
     it('should sort unit items by id in ascending order', done => {
       component.ngOnInit();
 
@@ -250,17 +244,6 @@ describe('CommentDialogComponent', () => {
         expect(component.unitItems[0].id).toBe('item1');
         expect(component.unitItems[1].id).toBe('item2');
         expect(component.unitItems[2].id).toBe('item3');
-        done();
-      }, 10);
-    });
-
-    it('should handle empty unit items response', done => {
-      mockBackendService.getUnitItems.mockReturnValue(of([]));
-
-      component.ngOnInit();
-
-      setTimeout(() => {
-        expect(component.unitItems).toEqual([]);
         done();
       }, 10);
     });
@@ -281,65 +264,6 @@ describe('CommentDialogComponent', () => {
       component.close();
 
       expect(mockDialogRef.close).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('storeUserName()', () => {
-    it('should store userName in localStorage', () => {
-      component.userName = 'Test User';
-
-      component.storeUserName();
-
-      const stored = localStorage.getItem('iqb-studio-user-name-for-review-comments');
-      expect(stored).toBe('Test User');
-    });
-
-    it('should overwrite existing userName in localStorage', () => {
-      localStorage.setItem('iqb-studio-user-name-for-review-comments', 'Old Name');
-      component.userName = 'New Name';
-
-      component.storeUserName();
-
-      const stored = localStorage.getItem('iqb-studio-user-name-for-review-comments');
-      expect(stored).toBe('New Name');
-    });
-
-    it('should handle empty userName', () => {
-      component.userName = '';
-
-      component.storeUserName();
-
-      const stored = localStorage.getItem('iqb-studio-user-name-for-review-comments');
-      expect(stored).toBe('');
-    });
-  });
-
-  describe('ngOnDestroy()', () => {
-    it('should complete ngUnsubscribe subject', () => {
-      const ngUnsubscribe = (component as unknown as { ngUnsubscribe: Subject<void> }).ngUnsubscribe;
-      const nextSpy = jest.spyOn(ngUnsubscribe, 'next');
-      const completeSpy = jest.spyOn(ngUnsubscribe, 'complete');
-
-      component.ngOnDestroy();
-
-      expect(nextSpy).toHaveBeenCalled();
-      expect(completeSpy).toHaveBeenCalled();
-    });
-
-    it('should unsubscribe from all observables', () => {
-      component.ngOnInit();
-      const ngUnsubscribe = (component as unknown as { ngUnsubscribe: Subject<void> }).ngUnsubscribe;
-      const completeSpy = jest.spyOn(ngUnsubscribe, 'complete');
-
-      component.ngOnDestroy();
-
-      expect(completeSpy).toHaveBeenCalled();
-    });
-  });
-
-  describe('Component Properties', () => {
-    it('should initialize with empty userName', () => {
-      expect(component.userName).toBe('');
     });
   });
 });

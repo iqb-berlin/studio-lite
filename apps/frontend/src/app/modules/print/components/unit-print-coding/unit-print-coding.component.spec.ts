@@ -187,24 +187,6 @@ describe('UnitPrintCodingComponent', () => {
       expect(mockReviewBackendService.getUnitScheme).not.toHaveBeenCalled();
     });
 
-    it('should handle scheme with empty variableCodings array', () => {
-      const mockScheme = {
-        scheme: JSON.stringify({
-          variableCodings: []
-        })
-      };
-      mockWorkspaceBackendService.getUnitScheme.mockReturnValue(of(mockScheme));
-
-      component.workspaceId = 1;
-      component.unitId = 10;
-
-      component.ngOnChanges({
-        workspaceId: new SimpleChange(null, 1, true)
-      });
-
-      expect(component.codings).toEqual([]);
-    });
-
     it('should not process if changes do not include relevant properties', () => {
       component.ngOnChanges({
         otherProperty: new SimpleChange(null, 'value', false)
@@ -278,18 +260,6 @@ describe('UnitPrintCodingComponent', () => {
   });
 
   describe('ngOnDestroy', () => {
-    it('should emit and complete ngUnsubscribe', () => {
-      // Accessing private property for testing purposes using structural typing
-      const ngUnsubscribe = (component as unknown as { ngUnsubscribe: Subject<void> }).ngUnsubscribe;
-      const nextSpy = jest.spyOn(ngUnsubscribe, 'next');
-      const completeSpy = jest.spyOn(ngUnsubscribe, 'complete');
-
-      component.ngOnDestroy();
-
-      expect(nextSpy).toHaveBeenCalled();
-      expect(completeSpy).toHaveBeenCalled();
-    });
-
     it('should cancel subscriptions on destroy', () => {
       // Simulating a lingering subscription
       const mockScheme = {

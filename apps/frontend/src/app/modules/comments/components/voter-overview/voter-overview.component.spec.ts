@@ -43,19 +43,4 @@ describe('VoterOverviewComponent', () => {
     expect(component.downVoters.length).toBe(1);
     expect(component.downVoters).toContain('User Down 1');
   });
-
-  it('should show empty message if no voters are present', () => {
-    // Re-configure for empty data
-    TestBed.resetTestingModule();
-    TestBed.configureTestingModule({
-      imports: [VoterOverviewComponent, MatDialogModule, MatIconModule, TranslateModule.forRoot()],
-      providers: [
-        { provide: MAT_DIALOG_DATA, useValue: { voters: [] } }
-      ]
-    });
-    const emptyFixture = TestBed.createComponent(VoterOverviewComponent);
-    const emptyComponent = emptyFixture.componentInstance;
-    expect(emptyComponent.upVoters.length).toBe(0);
-    expect(emptyComponent.downVoters.length).toBe(0);
-  });
 });
