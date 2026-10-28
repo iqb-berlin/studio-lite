@@ -49,18 +49,6 @@ describe('AddCommentButtonComponent', () => {
     fixture.detectChanges();
   });
 
-  describe('Input Properties', () => {
-    it('should accept showOthersComments input', () => {
-      component.showOthersComments = true;
-      expect(component.showOthersComments).toBe(true);
-    });
-
-    it('should accept unitDbId input', () => {
-      component.unitDbId = 456;
-      expect(component.unitDbId).toBe(456);
-    });
-  });
-
   describe('showReviewDialog()', () => {
     it('should open comment dialog with correct configuration when showOthersComments is false', () => {
       component.showOthersComments = false;

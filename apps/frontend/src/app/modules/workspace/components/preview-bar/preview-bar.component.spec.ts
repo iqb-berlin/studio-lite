@@ -62,11 +62,7 @@ describe('PreviewBarComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should take inputs', () => {
-    component.pageList = [];
-    component.playerApiVersion = 1;
-    component.playerName = 'player';
-    component.hasFocus = true;
-    expect(component.playerName).toBe('player');
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

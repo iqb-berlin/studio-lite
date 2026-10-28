@@ -31,53 +31,7 @@ describe('AppInfoContentComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should accept isUserLoggedIn input', () => {
-    component.isUserLoggedIn = true;
-    fixture.detectChanges();
-
-    expect(component.isUserLoggedIn).toBe(true);
-  });
-
-  it('should accept hasReviews input', () => {
-    component.hasReviews = true;
-    fixture.detectChanges();
-
-    expect(component.hasReviews).toBe(true);
-  });
-
-  it('should accept userLongName input', () => {
-    component.userLongName = 'Test User Name';
-    fixture.detectChanges();
-
-    expect(component.userLongName).toBe('Test User Name');
-  });
-
-  it('should accept userName input', () => {
-    component.userName = 'testuser';
-    fixture.detectChanges();
-
-    expect(component.userName).toBe('testuser');
-  });
-
-  it('should accept isAdmin input', () => {
-    component.isAdmin = true;
-    fixture.detectChanges();
-
-    expect(component.isAdmin).toBe(true);
-  });
-
-  it('should handle logged in admin user with reviews', () => {
-    component.isUserLoggedIn = true;
-    component.isAdmin = true;
-    component.hasReviews = true;
-    component.userName = 'admin';
-    component.userLongName = 'Admin User';
-    fixture.detectChanges();
-
-    expect(component.isUserLoggedIn).toBe(true);
-    expect(component.isAdmin).toBe(true);
-    expect(component.hasReviews).toBe(true);
-    expect(component.userName).toBe('admin');
-    expect(component.userLongName).toBe('Admin User');
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

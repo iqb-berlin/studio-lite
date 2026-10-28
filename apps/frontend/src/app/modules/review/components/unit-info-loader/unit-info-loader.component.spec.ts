@@ -201,20 +201,4 @@ describe('UnitInfoLoaderComponent', () => {
       intersectionObserverCallback(mockEntries, component.intersectionObserver);
     });
   });
-
-  describe('Spinner Display', () => {
-    it('should display spinner when spinnerOn is true', () => {
-      component.spinnerOn = true;
-      fixture.detectChanges();
-
-      expect(component.spinnerOn).toBe(true);
-    });
-
-    it('should hide spinner when spinnerOn is false', () => {
-      component.spinnerOn = false;
-      fixture.detectChanges();
-
-      expect(component.spinnerOn).toBe(false);
-    });
-  });
 });
