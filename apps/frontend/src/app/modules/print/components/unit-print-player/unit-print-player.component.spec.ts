@@ -149,11 +149,8 @@ describe('UnitPrintPlayerComponent', () => {
   describe('postStore', () => {
     it('should return early if no postMessageTarget', () => {
       component.postMessageTarget = undefined;
-      const postMessageSpy = jest.fn();
 
-      component.postStore('test-definition');
-
-      expect(postMessageSpy).not.toHaveBeenCalled();
+      expect(() => component.postStore('test-definition')).not.toThrow();
     });
 
     it('should post message for API version 1', () => {

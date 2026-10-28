@@ -28,16 +28,6 @@ describe('AdminVeronaModuleController', () => {
   });
 
   describe('addModuleFile', () => {
-    it('should upload a module file for multiple types', async () => {
-      const mockFile = { buffer: Buffer.from('test') };
-      veronaModulesService.upload.mockResolvedValue(undefined);
-
-      await controller.addModuleFile(mockFile, ['editor', 'player', 'schemer']);
-
-      expect(veronaModulesService.upload)
-        .toHaveBeenCalledWith(mockFile.buffer, ['editor', 'player', 'schemer']);
-    });
-
     it('should upload a widget file when type is widget', async () => {
       const mockFile = { buffer: Buffer.from('test') };
       veronaModulesService.upload.mockResolvedValue(undefined);

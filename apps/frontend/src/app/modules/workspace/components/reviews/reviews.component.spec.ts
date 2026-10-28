@@ -406,7 +406,7 @@ describe('ReviewsComponent', () => {
 
     component.saveChanges();
 
-    expect(snackBarMock.open).toHaveBeenCalled();
+    expect(snackBarMock.open).toHaveBeenCalledWith('workspace.review-not-saved', 'workspace.error', expect.anything());
   });
 
   it('should detect no changes for identical data', () => {

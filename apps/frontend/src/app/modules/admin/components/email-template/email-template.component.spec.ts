@@ -116,7 +116,7 @@ describe('EmailTemplateComponent', () => {
 
     expect(backendService.setEmailTemplate).toHaveBeenCalled();
     tick(100);
-    expect(snackBar.open).toHaveBeenCalled();
+    expect(snackBar.open).toHaveBeenCalledWith('email-template.template-not-saved', 'error', expect.anything());
   }));
 
   it('should handle null email template response', fakeAsync(() => {

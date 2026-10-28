@@ -230,11 +230,8 @@ describe('UnitPlayerComponent', () => {
         postMessageTarget: Window | undefined;
       };
       componentWithPrivates.postMessageTarget = undefined;
-      const postMessageSpy = jest.fn();
 
-      component.postStore('test definition');
-
-      expect(postMessageSpy).not.toHaveBeenCalled();
+      expect(() => component.postStore('test definition')).not.toThrow();
     });
 
     it('should post message with API version 1 format', () => {
