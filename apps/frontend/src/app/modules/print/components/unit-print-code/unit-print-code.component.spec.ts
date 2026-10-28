@@ -53,108 +53,62 @@ describe('UnitPrintCodeComponent', () => {
     });
   });
 
-  describe('generateRulesDescription', () => {
-    it('should generate description with UND operator for multiple rule sets', () => {
-      const mockCodeData = createMockCodeData({
-        ruleSets: [
-          {
-            rules: [],
-            ruleOperatorAnd: true
-          },
-          {
-            rules: [],
-            ruleOperatorAnd: true
-          }
-        ],
-        ruleSetOperatorAnd: true
-      });
-
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-
-      expect(component.codeAsText.description).toContain('UND');
-    });
-
-    it('should generate description with ODER operator for multiple rule sets', () => {
-      const mockCodeData = createMockCodeData({
-        ruleSets: [
-          {
-            rules: [],
-            ruleOperatorAnd: true
-          },
-          {
-            rules: [],
-            ruleOperatorAnd: true
-          }
-        ],
-        ruleSetOperatorAnd: false
-      });
-
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-
-      expect(component.codeAsText.description).toContain('ODER');
-    });
-
-    // With a manual instruction the hint that a rule set has no rules is left out (#1974). With more
-    // than one rule set the hint carries a prefix and is still printed (#1975).
-    it.each([
-      ['', ['Keine Regeln definiert.']],
-      ['<p>Bitte von Hand kodieren.</p>', []]
-    ])('should print an empty rule set for manual instruction %j as %j', (manualInstruction, ruleBlocks) => {
-      const mockCodeData = createMockCodeData({
-        type: 'FULL_CREDIT',
-        manualInstruction,
-        ruleSets: [{ rules: [], ruleOperatorAnd: true }]
-      });
-
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
+  describe('rules', () => {
+    const show = (overrides: Partial<CodeData>): HTMLElement => {
+      const code = createMockCodeData({ type: 'FULL_CREDIT', manualInstruction: '', ...overrides });
+      component.ngOnChanges({ codeData: new SimpleChange(null, code, true) });
       fixture.detectChanges();
-
-      const blocks: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.rule-block'));
-      expect(blocks.map(block => block.textContent)).toEqual(ruleBlocks);
+      return fixture.nativeElement;
+    };
+    const ruleSet = (...values: string[]) => ({
+      ruleOperatorAnd: true,
+      rules: values.map(value => ({ method: 'MATCH' as const, parameters: [value] }))
     });
+    const blockTexts = (element: HTMLElement): (string | undefined)[] => Array
+      .from(element.querySelectorAll('.rule-block'))
+      .map(block => block.textContent?.trim());
 
-    // Split at every semicolon, also inside a value (#1975).
-    it('should put each rule of a rule set on a line of its own', () => {
-      const mockCodeData = createMockCodeData({
-        type: 'FULL_CREDIT',
-        ruleSets: [{
-          ruleOperatorAnd: true,
-          rules: [{ method: 'MATCH', parameters: ['a'] }, { method: 'MATCH', parameters: ['b'] }]
-        }]
-      });
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
-      fixture.detectChanges();
+    // Which rule sets are printed and how they are split, ruleBlocks decides (#1974, #1975).
+    it('should print each rule of a rule set on a line of its own', () => {
+      const lines = show({ ruleSets: [ruleSet('a', 'b')] }).querySelectorAll('.rule-line');
 
-      const lines = fixture.nativeElement.querySelectorAll('.rule-line');
       expect(lines.length).toBe(2);
       expect(lines[0].textContent).toContain("'a'");
       expect(lines[1].textContent).toContain("'b'");
     });
 
-    it('should not add operator description for single rule set', () => {
-      const mockCodeData = createMockCodeData({
-        ruleSets: [
-          {
-            rules: [],
-            ruleOperatorAnd: true
-          }
-        ]
+    // Coded by hand without any rule, there is nothing to join either.
+    it('should print neither rules nor their joining for a code coded by hand', () => {
+      const element = show({
+        manualInstruction: '<p>Bitte von Hand kodieren.</p>',
+        ruleSetOperatorAnd: true,
+        ruleSets: [ruleSet(), ruleSet()]
       });
 
-      component.ngOnChanges({
-        codeData: new SimpleChange(null, mockCodeData, true)
-      });
+      expect(blockTexts(element)).toEqual([]);
+    });
 
-      expect(component.codeAsText.description).not.toContain('UND');
-      expect(component.codeAsText.description).not.toContain('ODER');
+    // Printed as HTML, a value such as <b> was taken for markup and vanished (#1975).
+    it('should print a value as text', () => {
+      const line = show({ ruleSets: [ruleSet('<b>fett</b>')] }).querySelector('.rule-line');
+
+      expect(line?.textContent).toContain("'<b>fett</b>'");
+      expect(line?.querySelector('b')).toBeNull();
+    });
+
+    it.each([
+      [true, 'print.rule-sets-and'],
+      [false, 'print.rule-sets-or']
+    ])('should join two rule sets with operator AND %s as %s', (ruleSetOperatorAnd, joining) => {
+      const element = show({ ruleSetOperatorAnd, ruleSets: [ruleSet('a'), ruleSet('b')] });
+
+      expect(blockTexts(element).pop()).toBe(joining);
+    });
+
+    it('should not join a single rule set', () => {
+      const element = show({ ruleSets: [ruleSet('a')] });
+
+      expect(blockTexts(element).length).toBe(1);
     });
   });
 });

@@ -18,13 +18,22 @@
         </td>
       </tr>
     }
-    @if (codeAsText.description) {
+    @if (codeAsText.ruleBlocks.length) {
       <tr>
         <td class="left-cell">
           <p>{{'print.rules' | translate}}</p>
         </td>
         <td>
-          <p [innerHTML]="codeAsText.description"></p>
+          @for (block of codeAsText.ruleBlocks; track $index) {
+            <p class="rule-block">
+              @for (line of block; track $index) {
+                <span class="rule-line">{{line}}</span>
+              }
+            </p>
+          }
+          @if (codeAsText.ruleSetJoining) {
+            <p class="rule-block">{{codeAsText.ruleSetJoining | translate}}</p>
+          }
         </td>
       </tr>
     }

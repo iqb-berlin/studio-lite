@@ -3,14 +3,17 @@ import {
 } from '@angular/core';
 import { CodeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { TranslateModule } from '@ngx-translate/core';
-import { CodeAsText, ToTextFactory } from '@iqb/responses';
+import { ToTextFactory } from '@iqb/responses';
+import { ruleBlocks } from '../../../../utils/rule-blocks.utils';
 
 interface CodeInfo {
   id: number | 'INVALID' | 'INTENDED_INCOMPLETE';
   label: string;
-  description: string;
+  // A block per printed rule set, a line per rule; rendered as text, so a value is never read as markup.
+  ruleBlocks: string[][];
+  // How the printed rule sets are joined, as a translation key; null where there are fewer than two.
+  ruleSetJoining: 'print.rule-sets-and' | 'print.rule-sets-or' | null;
   manualInstruction?: string;
-  ruleSetDescriptions?: string[];
 }
 
 @Component({
@@ -26,70 +29,19 @@ export class UnitPrintCodeComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     const codeData = 'codeData';
-    const updatedCodeData = changes[codeData]?.currentValue;
+    const code: CodeData | undefined = changes[codeData]?.currentValue;
 
-    if (updatedCodeData) {
-      this.codeAsText = this.mapCodeDataToCodeInfo(updatedCodeData);
+    if (code) {
+      const codeAsText = ToTextFactory.codeAsText(code, 'EXTENDED');
+      const blocks = ruleBlocks(code, codeAsText);
+      const joining = code.ruleSetOperatorAnd ? 'print.rule-sets-and' : 'print.rule-sets-or';
+      this.codeAsText = {
+        id: code.id,
+        label: codeAsText.label,
+        ruleBlocks: blocks,
+        ruleSetJoining: blocks.length > 1 ? joining : null,
+        manualInstruction: code.manualInstruction
+      };
     }
-  }
-
-  private mapCodeDataToCodeInfo(code: CodeData): CodeInfo {
-    const codeAsText = ToTextFactory.codeAsText(code, 'EXTENDED');
-    const rulesDescription = this.generateRulesDescription(codeAsText, code);
-
-    // Map the properties into the CodeInfo structure
-    return {
-      id: code.id,
-      label: codeAsText.label,
-      description: rulesDescription,
-      manualInstruction: code.manualInstruction,
-      ruleSetDescriptions: codeAsText.ruleSetDescriptions
-    };
-  }
-
-  /**
-   * Generates HTML-formatted rules descriptions based on the given CodeAsText and CodeData.
-   * Each wrapped text will include additional padding.
-   * @param codeAsText - Represents a textual conversion of CodeData.
-   * @param code - Full CodeData object for calculation of rule descriptions.
-   * @returns The rules description in a HTML string format.
-   */
-  // eslint-disable-next-line class-methods-use-this
-  private generateRulesDescription(
-    codeAsText: CodeAsText,
-    code: CodeData
-  ): string {
-    let rulesDescription = '';
-
-    // Iterate over defined rule set descriptions
-    codeAsText.ruleSetDescriptions.forEach((ruleSetDescription: string) => {
-      if (
-        ruleSetDescription !== 'Keine Regeln definiert.' ||
-        (ruleSetDescription === 'Keine Regeln definiert.' &&
-          !code.manualInstruction)
-      ) {
-        // Check if the ruleSetDescription contains a semicolon
-        if (ruleSetDescription.includes(';')) {
-          // Split on semicolons and wrap to the next line with padding
-          const wrappedText = ruleSetDescription
-            .split(';')
-            .map(
-              linePart => `
-              <span class="rule-line">${linePart.trim()}</span>`
-            )
-            .join('<br />');
-          rulesDescription += `<p class="rule-block">${wrappedText}</p>`;
-        } else {
-          rulesDescription += `<p class="rule-block">${ruleSetDescription}</p>`;
-        }
-      }
-    });
-
-    // Add logical operator description if there are multiple rule sets
-    if (code.ruleSets && code.ruleSets.length > 1) {
-      const operator = code.ruleSetOperatorAnd ? 'UND' : 'ODER';
-      rulesDescription += `<p class="rule-block">Verknüpfung der Regelsätze: ${operator}</p>`;
-    }
-    return rulesDescription;
   }
 }
