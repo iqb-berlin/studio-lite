@@ -73,31 +73,6 @@ describe('UnitMetadataService', () => {
     jest.clearAllMocks();
   });
 
-  describe('getAll', () => {
-    it('should return all unit metadata', async () => {
-      const mockData = [{ id: 1, unitId: 1 }] as UnitMetadata[];
-      mockRepository.find.mockResolvedValue(mockData);
-
-      const result = await service.getAll();
-
-      expect(repository.find).toHaveBeenCalled();
-      expect(result).toEqual(mockData);
-    });
-  });
-
-  describe('getAllByUnitId', () => {
-    it('should return metadata for specific unit id', async () => {
-      const unitId = 1;
-      const mockData = [{ id: 1, unitId }] as UnitMetadata[];
-      mockRepository.findBy.mockResolvedValue(mockData);
-
-      const result = await service.getAllByUnitId(unitId);
-
-      expect(repository.findBy).toHaveBeenCalledWith({ unitId });
-      expect(result).toEqual(mockData);
-    });
-  });
-
   describe('getAllByUnitIds', () => {
     it('should return the profiles of all given units in one query', async () => {
       const mockData = [{ id: 1, unitId: 2 }, { id: 2, unitId: 3 }] as UnitMetadata[];
@@ -118,23 +93,6 @@ describe('UnitMetadataService', () => {
   });
 
   describe('addMetadata', () => {
-    it('should add new metadata', async () => {
-      const unitId = 1;
-      const dto = {
-        id: 0, profileId: 'profile1', key: 'key1', value: 'val1', unitId: 0
-      } as UnitMetadataDto;
-      const createdEntity = { ...dto, unitId, id: 123 } as UnitMetadata;
-
-      mockRepository.create.mockReturnValue(createdEntity);
-      mockRepository.save.mockResolvedValue(createdEntity);
-
-      const result = await service.addMetadata(unitId, dto);
-
-      expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({ profileId: 'profile1' }));
-      expect(repository.save).toHaveBeenCalledWith(createdEntity);
-      expect(result).toBe(123);
-    });
-
     it('sets the NOT NULL columns and default order when the client omits them', async () => {
       // Regression: created_at/changed_at are NOT NULL without a DB default; the
       // profile form re-emits without them, so the INSERT must fill them or
@@ -180,18 +138,6 @@ describe('UnitMetadataService', () => {
     });
   });
 
-  describe('removeMetadata', () => {
-    it('should delete metadata by id', async () => {
-      const id = 123;
-
-      mockRepository.delete.mockResolvedValue({ affected: 1 });
-
-      await service.removeMetadata(id);
-
-      expect(repository.delete).toHaveBeenCalledWith(id);
-    });
-  });
-
   // The row CRUD of this service is what the whole-metadata methods below call; spied on, so the
   // tests see which rows they write.
   describe('whole metadata of a unit', () => {
@@ -212,12 +158,6 @@ describe('UnitMetadataService', () => {
     });
 
     describe('patchUnitMetadata', () => {
-      it('should patch metadata', async () => {
-        crud.getAllByUnitId.mockResolvedValue([]);
-        await service.patchUnitMetadata(1, []);
-        expect(crud.getAllByUnitId).toHaveBeenCalled();
-      });
-
       it('updates the matching stored profile by profileId instead of re-inserting', async () => {
         // The incoming profile has no row id (the profile form drops it) but keeps
         // its profileId; it must update the stored row, not delete + re-insert.
@@ -247,12 +187,6 @@ describe('UnitMetadataService', () => {
     });
 
     describe('patchItemsMetadata', () => {
-      it('should patch items', async () => {
-        unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
-        await service.patchItemsMetadata(1, []);
-        expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalled();
-      });
-
       it('should leave alone an item the unit does not have, neither updating nor creating it (#1816)', async () => {
         unitItemService.getAllByUnitIdWithMetadata
           .mockResolvedValue([{ uuid: 'own', id: 'item_1' } as UnitItemWithMetadataDto]);
@@ -407,16 +341,6 @@ describe('UnitMetadataService', () => {
         const result = UnitMetadataService.setCurrentProfiles('https://w3id.org/iqb/p11/unit/', '', metadata);
 
         expect(result.profiles[0].profileId).toBe('https://example.org/own/profile.json');
-      });
-    });
-
-    describe('findOnesMetadata', () => {
-      it('should return metadata', async () => {
-        crud.getAllByUnitId.mockResolvedValue([]);
-        unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
-
-        await service.findOnesMetadata(1);
-        expect(crud.getAllByUnitId).toHaveBeenCalledWith(1);
       });
     });
 

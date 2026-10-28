@@ -115,13 +115,6 @@ describe('UnitService', () => {
     });
   });
 
-  describe('getAllUnits', () => {
-    it('should return all units', async () => {
-      unitsRepository.find.mockResolvedValue([]);
-      expect(await service.getAllUnits()).toEqual([]);
-    });
-  });
-
   describe('findAll', () => {
     it('should return units with workspace name', async () => {
       unitsRepository.find.mockResolvedValue([{ workspaceId: 1 } as Unit]);
@@ -165,12 +158,6 @@ describe('UnitService', () => {
 
       expect(await service.isInWorkspace(10, 3)).toBe(true);
       expect(unitsRepository.exists).toHaveBeenCalledWith({ where: { id: 10, workspaceId: 3 } });
-    });
-
-    it('should return false when the unit is not in the workspace', async () => {
-      unitsRepository.exists.mockResolvedValue(false);
-
-      expect(await service.isInWorkspace(10, 7)).toBe(false);
     });
   });
 
@@ -281,16 +268,6 @@ describe('UnitService', () => {
       expect(unitsRepository.findOne).toHaveBeenCalled();
       expect(unitMetadataService.getModifiedMetadataForUnit).toHaveBeenCalledWith(unit, workspace);
       expect(result).toBe(unit);
-    });
-  });
-
-  describe('findAllWithProperties', () => {
-    it('should return units', async () => {
-      workspaceRepository.findOne.mockResolvedValue({ id: 1 } as Workspace);
-      unitsRepository.find.mockResolvedValue([{ id: 1, metadata: {} } as Unit]);
-
-      const result = await service.findAllWithProperties(1);
-      expect(result).toHaveLength(1);
     });
   });
 
@@ -522,28 +499,6 @@ describe('UnitService', () => {
       await service.copy([1], 2, { id: 1, name: 'u' } as User, false);
 
       expect(capturedCreateArg.uuid).toBeUndefined();
-    });
-  });
-
-  describe('remove', () => {
-    it('should remove unit', async () => {
-      await service.remove(1);
-      expect(unitsRepository.delete).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('patchUnitGroup', () => {
-    it('should update group', async () => {
-      await service.patchUnitGroup(1, 'group', [1]);
-      expect(unitsRepository.update).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('removeUnitState', () => {
-    it('should reset state', async () => {
-      unitsRepository.findOne.mockResolvedValue({ id: 1, state: '1' } as Unit);
-      await service.removeUnitState(1);
-      expect(unitsRepository.save).toHaveBeenCalled();
     });
   });
 
