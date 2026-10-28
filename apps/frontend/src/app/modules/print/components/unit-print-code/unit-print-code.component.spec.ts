@@ -98,6 +98,47 @@ describe('UnitPrintCodeComponent', () => {
       expect(component.codeAsText.description).toContain('ODER');
     });
 
+    // With a manual instruction the hint that a rule set has no rules is left out (#1974). With more
+    // than one rule set the hint carries a prefix and is still printed (#1975).
+    it.each([
+      ['', ['Keine Regeln definiert.']],
+      ['<p>Bitte von Hand kodieren.</p>', []]
+    ])('should print an empty rule set for manual instruction %j as %j', (manualInstruction, ruleBlocks) => {
+      const mockCodeData = createMockCodeData({
+        type: 'FULL_CREDIT',
+        manualInstruction,
+        ruleSets: [{ rules: [], ruleOperatorAnd: true }]
+      });
+
+      component.ngOnChanges({
+        codeData: new SimpleChange(null, mockCodeData, true)
+      });
+      fixture.detectChanges();
+
+      const blocks: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.rule-block'));
+      expect(blocks.map(block => block.textContent)).toEqual(ruleBlocks);
+    });
+
+    // Split at every semicolon, also inside a value (#1975).
+    it('should put each rule of a rule set on a line of its own', () => {
+      const mockCodeData = createMockCodeData({
+        type: 'FULL_CREDIT',
+        ruleSets: [{
+          ruleOperatorAnd: true,
+          rules: [{ method: 'MATCH', parameters: ['a'] }, { method: 'MATCH', parameters: ['b'] }]
+        }]
+      });
+      component.ngOnChanges({
+        codeData: new SimpleChange(null, mockCodeData, true)
+      });
+      fixture.detectChanges();
+
+      const lines = fixture.nativeElement.querySelectorAll('.rule-line');
+      expect(lines.length).toBe(2);
+      expect(lines[0].textContent).toContain("'a'");
+      expect(lines[1].textContent).toContain("'b'");
+    });
+
     it('should not add operator description for single rule set', () => {
       const mockCodeData = createMockCodeData({
         ruleSets: [
