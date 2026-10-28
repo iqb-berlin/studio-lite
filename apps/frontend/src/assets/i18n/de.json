@@ -805,7 +805,8 @@
     "delete-rich-note-confirm": "Soll dieses Begleitmaterial wirklich gelöscht werden?",
     "delete-rich-note-title": "Begleitmaterial löschen",
     "required": "Pflichtfeld",
-    "unassigned-rich-notes": "Uneindeutiges Begleitmaterial"
+    "unassigned-rich-notes": "Uneindeutiges Begleitmaterial",
+    "rich-notes-not-loaded": "Das Begleitmaterial konnte nicht geladen werden."
   },
   "rich-note": {
     "tag": "Kategorie",

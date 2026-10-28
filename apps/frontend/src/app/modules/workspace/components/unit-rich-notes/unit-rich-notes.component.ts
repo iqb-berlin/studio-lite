@@ -1,4 +1,6 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component, OnDestroy, OnInit, signal
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -49,6 +51,8 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
   unitItems: UnitItemDto[] = [];
   canWrite = false;
   isLoading = true;
+  private readonly notesNotLoadedState = signal(false);
+  readonly notesNotLoaded = this.notesNotLoadedState.asReadonly();
 
   private ngUnsubscribe = new Subject<void>();
 
@@ -82,9 +86,14 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
       })
     ).subscribe((data: UnitRichNotesDto | null) => {
       this.isLoading = false;
+      // Kept after a failed load, the notes of the unit before would be shown as this one's (#1952).
+      this.notesNotLoadedState.set(!data);
       if (data) {
         this.notes = data.notes;
         this.rebuildDisplayNodes();
+      } else {
+        this.notes = [];
+        this.displayNodes = [];
       }
     });
 
