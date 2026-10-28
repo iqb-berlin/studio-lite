@@ -5,6 +5,7 @@ import { AdminVeronaModuleController } from './admin-verona-module.controller';
 import { VeronaModulesService } from '../services/verona-modules.service';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { AuthService } from '../services/auth.service';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 describe('AdminVeronaModuleController', () => {
   let controller: AdminVeronaModuleController;
@@ -26,6 +27,15 @@ describe('AdminVeronaModuleController', () => {
       AdminVeronaModuleController
     );
   });
+
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it.each(['addModuleFile', 'remove'] as const)(
+    'should let only administrators reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', AdminVeronaModuleController.prototype[method]))
+        .toEqual([JwtAuthGuard, IsAdminGuard]);
+    }
+  );
 
   describe('addModuleFile', () => {
     it('should upload a widget file when type is widget', async () => {

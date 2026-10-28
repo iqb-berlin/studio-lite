@@ -37,6 +37,9 @@ import { WriteAccessGuard } from '../guards/write-access.guard';
 import { MoveTargetAccessGuard } from '../guards/move-target-access.guard';
 import { DropBoxTargetGuard } from '../guards/drop-box-target.guard';
 import { CopySourcesAccessibleGuard } from '../guards/copy-sources-accessible.guard';
+import { AppVersionGuard } from '../guards/app-version.guard';
+import { ManageAccessGuard } from '../guards/manage-access.guard';
+import { WorkspaceAccessGuard } from '../guards/workspace-access.guard';
 
 describe('WorkspaceUnitController', () => {
   let controller: WorkspaceUnitController;
@@ -99,6 +102,25 @@ describe('WorkspaceUnitController', () => {
     settingsService = module.get<SettingService>(SettingService);
     unitCommentService = module.get<UnitCommentService>(UnitCommentService);
     unitRichNoteService = module.get<UnitRichNoteService>(UnitRichNoteService);
+  });
+
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it('should let only who has access to the workspace, with a current app version, reach findAll', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype.findAll))
+      .toEqual([JwtAuthGuard, WorkspaceGuard, AppVersionGuard, WorkspaceAccessGuard]);
+  });
+
+  it.each(['getCodingReport', 'downloadCodingBook', 'findAllWithProperties', 'findExportContents'] as const)(
+    'should let only who has access to the workspace reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype[method]))
+        .toEqual([JwtAuthGuard, WorkspaceGuard, WorkspaceAccessGuard]);
+    }
+  );
+
+  it('should let only who may manage the workspace reach patchUnitsGroup', () => {
+    expect(Reflect.getMetadata('__guards__', WorkspaceUnitController.prototype.patchUnitsGroup))
+      .toEqual([JwtAuthGuard, WorkspaceGuard, ManageAccessGuard]);
   });
 
   // The access guards ask about the workspace in the path alone; the unit has to be held to it

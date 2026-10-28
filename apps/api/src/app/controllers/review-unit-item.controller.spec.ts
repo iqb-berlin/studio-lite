@@ -38,6 +38,12 @@ describe('ReviewUnitItemController', () => {
     reviewService.reviewConfigOf.mockResolvedValue({ showMetadata: true });
   });
 
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it('should hold findAll to a review its caller may open', () => {
+    expect(Reflect.getMetadata('__guards__', ReviewUnitItemController.prototype.findAll))
+      .toEqual([JwtAuthGuard, ReviewGuard]);
+  });
+
   describe('findAll', () => {
     const reviewId = 2;
 

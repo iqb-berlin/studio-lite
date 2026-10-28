@@ -13,6 +13,7 @@ import { IsAdminGuard } from '../guards/is-admin.guard';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { AuthService } from '../services/auth.service';
 import { UnitItemService } from '../services/unit-item.service';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 describe('AdminWorkspaceGroupController', () => {
   let controller: AdminWorkspaceGroupController;
@@ -43,6 +44,23 @@ describe('AdminWorkspaceGroupController', () => {
 
     controller = module.get<AdminWorkspaceGroupController>(AdminWorkspaceGroupController);
   });
+
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it.each(['findAll', 'findAllUnits', 'remove', 'patch', 'create', 'findOnesAdmins', 'patchOnesAdmins'] as const)(
+    'should let only administrators reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', AdminWorkspaceGroupController.prototype[method]))
+        .toEqual([JwtAuthGuard, IsAdminGuard]);
+    }
+  );
+
+  it.each(['findOne', 'findOnesWorkspaces', 'findWorkspaceGroupUnits', 'findWorkspaceGroupUnitItems'] as const)(
+    'should let only admins of the group reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', AdminWorkspaceGroupController.prototype[method]))
+        .toEqual([JwtAuthGuard, IsWorkspaceGroupAdminGuard]);
+    }
+  );
 
   describe('findAll', () => {
     it('should return all workspace groups if download is false', async () => {

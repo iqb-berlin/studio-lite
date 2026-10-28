@@ -69,6 +69,15 @@ describe('ReviewUnitCommentController', () => {
     usersService = module.get<UsersService>(UsersService);
   });
 
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it.each(['findOnesComments', 'createComment'] as const)(
+    'should hold %s to a review its caller may open, to commenting and to the settings of the review',
+    method => {
+      expect(Reflect.getMetadata('__guards__', ReviewUnitCommentController.prototype[method]))
+        .toEqual([JwtAuthGuard, ReviewGuard, ReviewCommentAccessGuard, ReviewConfigGuard]);
+    }
+  );
+
   // A comment named in the path has to be one of the unit's before any guard loads it to ask for
   // its author: those answered 403 for a comment of any unit and 404 for none, which told every
   // comment id apart (#1777). ReviewGuard holds the unit itself to the review, ahead of both.

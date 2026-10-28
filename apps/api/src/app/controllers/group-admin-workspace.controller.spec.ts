@@ -8,6 +8,7 @@ import UserEntity from '../entities/user.entity';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { AuthService } from '../services/auth.service';
 import { UserWorkspaceGroupNotAdminException } from '../exceptions/user-workspace-group-not-admin.exception';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 describe('GroupAdminWorkspaceController', () => {
   let controller: GroupAdminWorkspaceController;
@@ -30,6 +31,15 @@ describe('GroupAdminWorkspaceController', () => {
 
     controller = module.get<GroupAdminWorkspaceController>(GroupAdminWorkspaceController);
   });
+
+  // The guards are the authorisation of each method; no other unit test sees them (#1953).
+  it.each(['findOne', 'findOnesUsers', 'patchOnesUsers', 'remove', 'patchGroups', 'create'] as const)(
+    'should let only admins of the group reach %s',
+    method => {
+      expect(Reflect.getMetadata('__guards__', GroupAdminWorkspaceController.prototype[method]))
+        .toEqual([JwtAuthGuard, IsWorkspaceGroupAdminGuard]);
+    }
+  );
 
   describe('remove', () => {
     it('should remove workspaces of a group the user administers', async () => {
