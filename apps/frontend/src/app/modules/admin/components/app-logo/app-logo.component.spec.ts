@@ -7,8 +7,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { createMock } from '@golevelup/ts-jest';
+import { AppLogoDto } from '@studio-lite-lib/api-dto';
 import { environment } from '../../../../../environments/environment';
 import { AppLogoComponent } from './app-logo.component';
 import { BackendService as ReadBackendService } from '../../../../services/backend.service';
@@ -70,6 +71,38 @@ describe('AppLogoComponent', () => {
 
     fixture = TestBed.createComponent(AppLogoComponent);
     component = fixture.componentInstance;
+  });
+
+  // Saving replaces the stored logo and colours; a form without them would offer empty ones (#1969).
+  describe('the form before and after logo and colours are loaded', () => {
+    const notLoaded = (): HTMLElement | null => fixture.nativeElement
+      .querySelector('[data-cy="admin-app-logo-not-loaded"]');
+    const save = (): HTMLElement | null => fixture.nativeElement
+      .querySelector('[data-cy="admin-app-logo-save-button"]');
+
+    it('should be shown only once logo and colours have arrived', () => {
+      const appLogo = new Subject<AppLogoDto | null | false>();
+      readBackendService.getAppLogo.mockReturnValue(appLogo);
+      component.updateFormFields();
+      fixture.detectChanges();
+
+      expect(save()).toBeNull();
+      expect(notLoaded()).toBeNull();
+
+      appLogo.next(null);
+      fixture.detectChanges();
+
+      expect(save()).not.toBeNull();
+    });
+
+    it('should give way to a hint when logo and colours could not be loaded', () => {
+      readBackendService.getAppLogo.mockReturnValue(of(false));
+      component.updateFormFields();
+      fixture.detectChanges();
+
+      expect(notLoaded()).not.toBeNull();
+      expect(save()).toBeNull();
+    });
   });
 
   it('should update form fields with loaded data', done => {

@@ -133,6 +133,14 @@ describe('Admin Settings Tab Configuration', () => {
       cy.get('[formcontrolname="boxBackground"]').should('exist');
     });
 
+    // Saving the empty form shown after a failed load would replace the stored logo (#1969).
+    it('offers no saving of logo and colors that could not be loaded', () => {
+      cy.intercept('GET', '/api/admin/settings/app-logo', { statusCode: 500 });
+      goToSettings();
+      cy.get('[data-cy="admin-app-logo-not-loaded"]').should('exist');
+      cy.get('[formcontrolname="bodyBackground"]').should('not.exist');
+    });
+
     it('replaces the red to black logo', () => {
       goToSettings();
       cy.loadModule('iqb-logo-black.png');

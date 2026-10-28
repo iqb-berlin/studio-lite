@@ -1,9 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component, OnDestroy, OnInit, signal
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -39,6 +41,11 @@ export class AppLogoComponent implements OnInit, OnDestroy {
   configForm: UntypedFormGroup;
   dataChanged = false;
   private configDataChangedSubscription: Subscription | null = null;
+  private readonly logoLoadState = signal<'pending' | 'loaded' | 'failed'>('pending');
+  // Saving replaces the stored logo and colours. The form is shown only once they are in: before,
+  // or after they failed to load, it would offer empty ones in their place (#1969).
+  readonly logoLoad = this.logoLoadState.asReadonly();
+  private ngUnsubscribe = new Subject<void>();
   imageError: string | null = '';
   logoImageBase64 = '';
 
@@ -62,11 +69,16 @@ export class AppLogoComponent implements OnInit, OnDestroy {
   }
 
   updateFormFields(): void {
-    this.readBackendService.getAppLogo().subscribe(appLogo => {
+    this.readBackendService.getAppLogo().pipe(takeUntil(this.ngUnsubscribe)).subscribe(appLogo => {
       if (this.configDataChangedSubscription !== null) {
         this.configDataChangedSubscription.unsubscribe();
         this.configDataChangedSubscription = null;
       }
+      if (appLogo === false) {
+        this.logoLoadState.set('failed');
+        return;
+      }
+      this.logoLoadState.set('loaded');
       if (appLogo) {
         if (appLogo.data && appLogo.data.length > 0) this.logoImageBase64 = appLogo.data;
         this.configForm.setValue({
@@ -175,5 +187,7 @@ export class AppLogoComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.configDataChangedSubscription !== null) this.configDataChangedSubscription.unsubscribe();
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
