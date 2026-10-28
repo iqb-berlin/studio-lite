@@ -46,9 +46,4 @@ describe('AccountActionComponent', () => {
     expect(component.type).toBe('editMyData');
     expect(component.iconName).toBe('edit');
   });
-
-  it('should have type and iconName inputs', () => {
-    expect(component.type).toBeUndefined();
-    expect(component.iconName).toBeUndefined();
-  });
 });

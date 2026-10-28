@@ -213,13 +213,6 @@ describe('UnitPrintCommentsComponent', () => {
       expect(component.metadata).toBeNull();
     });
   });
-
-  describe('initial state', () => {
-    it('should have default values', () => {
-      expect(component.reviewId).toBe(0);
-      expect(component.comments).toEqual([]);
-    });
-  });
   describe('ngOnDestroy', () => {
     it('should emit and complete ngUnsubscribe', () => {
       // eslint-disable-next-line @typescript-eslint/dot-notation

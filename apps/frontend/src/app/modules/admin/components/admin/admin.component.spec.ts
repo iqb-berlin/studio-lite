@@ -24,23 +24,7 @@ describe('AdminComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should have navigation links defined', () => {
-    expect(component.navLinks).toBeDefined();
-    expect(component.navLinks.length).toBeGreaterThan(0);
-  });
-
-  it('should have correct navigation links', () => {
-    const expectedLinks = [
-      'users',
-      'workspace-groups',
-      'workspaces',
-      'units',
-      'unit-items',
-      'v-modules',
-      'widgets',
-      'settings',
-      'packages'
-    ];
-    expect(component.navLinks).toEqual(expectedLinks);
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

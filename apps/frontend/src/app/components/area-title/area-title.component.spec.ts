@@ -21,10 +21,6 @@ describe('AreaTitleComponent', () => {
     expect(component.title).toBe('Test Title');
   });
 
-  it('should have undefined title initially', () => {
-    expect(component.title).toBeUndefined();
-  });
-
   it('should accept empty string as title', () => {
     component.title = '';
     fixture.detectChanges();

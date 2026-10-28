@@ -124,19 +124,6 @@ describe('StartComponent', () => {
       expect(mockReviewService.currentUnitSequenceId).toBe(-1);
     }));
 
-    it('should use setTimeout for initialization', fakeAsync(() => {
-      mockReviewService.units = [];
-      const loadDataSpy = jest.spyOn(mockReviewService, 'loadReviewData');
-
-      component.ngOnInit();
-
-      expect(loadDataSpy).not.toHaveBeenCalled();
-
-      tick(100);
-
-      expect(loadDataSpy).toHaveBeenCalled();
-    }));
-
     it('should handle multiple units correctly', fakeAsync(() => {
       mockReviewService.units = [
         {

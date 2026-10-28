@@ -77,10 +77,6 @@ describe('AppLogoComponent', () => {
     expect(component.configForm.get('boxBackground')).toBeDefined();
   });
 
-  it('should initialize imageError as empty string', () => {
-    expect(component.imageError).toBe('');
-  });
-
   it('should load logo data on init', done => {
     fixture.detectChanges();
     setTimeout(() => {

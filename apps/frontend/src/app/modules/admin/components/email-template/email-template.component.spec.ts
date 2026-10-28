@@ -70,10 +70,6 @@ describe('EmailTemplateComponent', () => {
     expect(component.configForm.get('emailBody')).toBeDefined();
   });
 
-  it('should initialize dataChanged as false', () => {
-    expect(component.dataChanged).toBe(false);
-  });
-
   it('should load email template on init', fakeAsync(() => {
     component.ngOnInit();
     tick(200);

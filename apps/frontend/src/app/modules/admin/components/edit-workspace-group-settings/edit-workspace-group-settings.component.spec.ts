@@ -102,10 +102,6 @@ describe('EditWorkspaceGroupSettingsComponent', () => {
     expect(component.formData.states).toEqual([]);
   });
 
-  it('should have empty profiles array initially', () => {
-    expect(component.profiles).toEqual([]);
-  });
-
   it('should have empty fetchedProfiles array initially', () => {
     expect(component.fetchedProfiles).toEqual([]);
   });

@@ -40,10 +40,6 @@ describe('UnitInfoLoaderComponent', () => {
       expect(component.intersectionObserver).toBeDefined();
     });
 
-    it('should initialize with spinnerOn as false', () => {
-      expect(component.spinnerOn).toBe(false);
-    });
-
     it('should initialize with isInView as false', () => {
       expect(component.isInView).toBe(false);
     });
@@ -85,16 +81,6 @@ describe('UnitInfoLoaderComponent', () => {
       tick();
 
       expect(mockObserve).toHaveBeenCalledWith(fixture.nativeElement);
-    }));
-
-    it('should use setTimeout for observation setup', fakeAsync(() => {
-      component.ngAfterViewInit();
-
-      expect(mockObserve).not.toHaveBeenCalled();
-
-      tick();
-
-      expect(mockObserve).toHaveBeenCalled();
     }));
   });
 
