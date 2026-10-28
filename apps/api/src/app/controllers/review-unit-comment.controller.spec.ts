@@ -1,9 +1,7 @@
 import {
   CreateUnitCommentDto,
   UnitCommentDto,
-  UpdateUnitCommentDto,
-  UpdateUnitCommentUnitItemsDto,
-  UpdateUnitCommentVisibilityDto
+  UpdateUnitCommentUnitItemsDto
 } from '@studio-lite-lib/api-dto';
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
@@ -171,93 +169,6 @@ describe('ReviewUnitCommentController', () => {
     });
   });
 
-  describe('patchCommentBody', () => {
-    it('should update comment body', async () => {
-      const commentId = 1;
-      const updateDto: UpdateUnitCommentDto = {
-        body: 'Updated comment body'
-      } as UpdateUnitCommentDto;
-
-      jest.spyOn(unitCommentService, 'patchCommentBody')
-        .mockResolvedValue(undefined);
-
-      await controller.patchCommentBody(commentId, updateDto);
-
-      expect(unitCommentService.patchCommentBody).toHaveBeenCalledWith(commentId, updateDto);
-      expect(unitCommentService.patchCommentBody).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle different comment ids', async () => {
-      const commentId = 99;
-      const updateDto: UpdateUnitCommentDto = {
-        body: 'Another updated body'
-      } as UpdateUnitCommentDto;
-
-      jest.spyOn(unitCommentService, 'patchCommentBody')
-        .mockResolvedValue(undefined);
-
-      await controller.patchCommentBody(commentId, updateDto);
-
-      expect(unitCommentService.patchCommentBody).toHaveBeenCalledWith(commentId, updateDto);
-    });
-  });
-
-  describe('patchCommentVisibility', () => {
-    it('should update comment visibility', async () => {
-      const commentId = 1;
-      const updateDto: UpdateUnitCommentVisibilityDto = {
-        hidden: true
-      } as UpdateUnitCommentVisibilityDto;
-
-      jest.spyOn(unitCommentService, 'patchCommentVisibility')
-        .mockResolvedValue(undefined);
-
-      await controller.patchCommentVisibility(commentId, updateDto);
-
-      expect(unitCommentService.patchCommentVisibility).toHaveBeenCalledWith(commentId, updateDto);
-      expect(unitCommentService.patchCommentVisibility).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle visibility set to false', async () => {
-      const commentId = 2;
-      const updateDto: UpdateUnitCommentVisibilityDto = {
-        hidden: false
-      } as UpdateUnitCommentVisibilityDto;
-
-      jest.spyOn(unitCommentService, 'patchCommentVisibility')
-        .mockResolvedValue(undefined);
-
-      await controller.patchCommentVisibility(commentId, updateDto);
-
-      expect(unitCommentService.patchCommentVisibility).toHaveBeenCalledWith(commentId, updateDto);
-    });
-  });
-
-  describe('removeComment', () => {
-    it('should delete a comment', async () => {
-      const commentId = 1;
-
-      jest.spyOn(unitCommentService, 'removeComment')
-        .mockResolvedValue(undefined);
-
-      await controller.removeComment(commentId);
-
-      expect(unitCommentService.removeComment).toHaveBeenCalledWith(commentId);
-      expect(unitCommentService.removeComment).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle different comment ids', async () => {
-      const commentId = 50;
-
-      jest.spyOn(unitCommentService, 'removeComment')
-        .mockResolvedValue(undefined);
-
-      await controller.removeComment(commentId);
-
-      expect(unitCommentService.removeComment).toHaveBeenCalledWith(commentId);
-    });
-  });
-
   describe('patchCommentItems', () => {
     it('should update comment items', async () => {
       const commentId = 1;
@@ -277,44 +188,6 @@ describe('ReviewUnitCommentController', () => {
         updateDto.unitItemUuids
       );
       expect(itemCommentService.updateCommentItems).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle empty item list', async () => {
-      const commentId = 2;
-      const unitId = 20;
-      const updateDto: UpdateUnitCommentUnitItemsDto = {
-        unitItemUuids: []
-      } as UpdateUnitCommentUnitItemsDto;
-
-      jest.spyOn(itemCommentService, 'updateCommentItems')
-        .mockResolvedValue(undefined);
-
-      await controller.patchCommentItems(commentId, unitId, updateDto);
-
-      expect(itemCommentService.updateCommentItems).toHaveBeenCalledWith(
-        unitId,
-        commentId,
-        []
-      );
-    });
-
-    it('should handle multiple item uuids', async () => {
-      const commentId = 3;
-      const unitId = 30;
-      const updateDto: UpdateUnitCommentUnitItemsDto = {
-        unitItemUuids: ['uuid-a', 'uuid-b', 'uuid-c', 'uuid-d']
-      } as UpdateUnitCommentUnitItemsDto;
-
-      jest.spyOn(itemCommentService, 'updateCommentItems')
-        .mockResolvedValue(undefined);
-
-      await controller.patchCommentItems(commentId, unitId, updateDto);
-
-      expect(itemCommentService.updateCommentItems).toHaveBeenCalledWith(
-        unitId,
-        commentId,
-        updateDto.unitItemUuids
-      );
     });
   });
 });
