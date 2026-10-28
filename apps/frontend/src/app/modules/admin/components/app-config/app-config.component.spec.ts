@@ -19,6 +19,7 @@ import { AppConfigComponent } from './app-config.component';
 import { environment } from '../../../../../environments/environment';
 import { BackendService as ReadBackendService } from '../../../../services/backend.service';
 import { BackendService as WriteBackendService } from '../../services/backend.service';
+import { defaultAppConfig } from '../../../../services/app.service';
 
 describe('AppConfigComponent', () => {
   let component: AppConfigComponent;
@@ -126,6 +127,44 @@ describe('AppConfigComponent', () => {
 
     expect(stringComponent.appConfig.globalWarningExpiredDay).toBeInstanceOf(Date);
     expect(stringComponent.configForm.get('globalWarningExpiredDay')?.value).toBeInstanceOf(Date);
+  });
+
+  describe('the shared default config (#1964)', () => {
+    const editAndSave = (): void => {
+      fixture.detectChanges();
+      component.configForm.get('appTitle')?.setValue('New Title');
+      writeBackendService.setAppConfig.mockReturnValue(of(true));
+      component.saveData();
+    };
+
+    it('should stay untouched when a config is loaded and saved', () => {
+      editAndSave();
+      expect(defaultAppConfig.appTitle).toBe('IQB-Studio');
+    });
+
+    it('should stay untouched when no config arrives and the form is saved', () => {
+      readBackendService.getConfig.mockReturnValue(of(null));
+      editAndSave();
+      expect(defaultAppConfig.appTitle).toBe('IQB-Studio');
+    });
+  });
+
+  it('should show a text emptied on the server as empty (#1964)', () => {
+    readBackendService.getConfig.mockReturnValue(of({ ...defaultAppConfig, introHtml: '' }));
+    fixture.detectChanges();
+
+    expect(component.configForm.get('introHtml')?.value).toBe('');
+  });
+
+  it('should save the parts of the config the form does not show (#1964)', () => {
+    fixture.detectChanges();
+    writeBackendService.setAppConfig.mockReturnValue(of(true));
+    component.saveData();
+
+    expect(writeBackendService.setAppConfig).toHaveBeenCalledWith(expect.objectContaining({
+      emailSubject: 'Test Email Subject',
+      emailBody: 'Test Email Body'
+    }));
   });
 
   it('should set dataChanged flag when form values change', fakeAsync(() => {

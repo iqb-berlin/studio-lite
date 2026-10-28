@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
+import { createMock } from '@golevelup/ts-jest';
 import { environment } from '../../../../../environments/environment';
 import { AppLogoComponent } from './app-logo.component';
 import { BackendService as ReadBackendService } from '../../../../services/backend.service';
@@ -174,6 +175,47 @@ describe('AppLogoComponent', () => {
     component.imgFileChange(event);
     expect(component.imageError).toBeTruthy();
     expect(translateSpy).toHaveBeenCalledWith('logo.allowed-image-types', expect.any(Object));
+  });
+
+  // An image beyond only one of the two limits was taken (#1964).
+  describe('the size of a logo image', () => {
+    const dataUrl = 'data:image/png;base64,logo';
+
+    afterEach(() => jest.restoreAllMocks());
+
+    const chooseImage = (width: number, height: number): void => {
+      const reader = createMock<FileReader>();
+      reader.readAsDataURL.mockImplementation(() => reader.onload?.call(
+        reader,
+        createMock<ProgressEvent<FileReader>>({ target: createMock<FileReader>({ result: dataUrl }) })
+      ));
+      jest.spyOn(window, 'FileReader').mockReturnValue(reader);
+      const image = createMock<HTMLImageElement>();
+      jest.spyOn(window, 'Image').mockReturnValue(image);
+      const file = new File(['logo'], 'logo.png', { type: 'image/png' });
+
+      component.imgFileChange(createMock<Event>({
+        target: createMock<HTMLInputElement>({ files: createMock<FileList>({ 0: file, length: 1 }) })
+      }));
+      image.onload?.call(image, createMock<Event>({ currentTarget: createMock<HTMLImageElement>({ width, height }) }));
+    };
+
+    it.each([
+      ['too wide', 30000, 100],
+      ['too high', 100, 20000]
+    ])('should refuse an image only %s', (_, width, height) => {
+      chooseImage(width, height);
+
+      expect(component.imageError).toBe('logo.not-allowed-image-size');
+      expect(component.logoImageBase64).not.toBe(dataUrl);
+    });
+
+    it('should take an image within both limits', () => {
+      chooseImage(100, 100);
+
+      expect(component.imageError).toBeNull();
+      expect(component.logoImageBase64).toBe(dataUrl);
+    });
   });
 
   it('should handle empty file input', () => {

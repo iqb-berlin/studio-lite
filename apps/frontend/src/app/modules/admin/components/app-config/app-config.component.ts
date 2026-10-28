@@ -28,7 +28,8 @@ import { BackendService as WriteBackendService } from '../../services/backend.se
 })
 
 export class AppConfigComponent implements OnInit, OnDestroy {
-  appConfig = defaultAppConfig;
+  // A copy: the default is shared, and getConfig answers with it when the request fails (#1964).
+  appConfig = { ...defaultAppConfig };
 
   configForm: UntypedFormGroup;
   dataChanged = false;
@@ -70,17 +71,15 @@ export class AppConfigComponent implements OnInit, OnDestroy {
         this.configDataChangedSubscription.unsubscribe();
         this.configDataChangedSubscription = null;
       }
-      if (appConfig && this.appConfig) {
-        if (appConfig.appTitle) this.appConfig.appTitle = appConfig.appTitle;
-        if (appConfig.introHtml) this.appConfig.introHtml = appConfig.introHtml;
-        if (appConfig.imprintHtml) this.appConfig.imprintHtml = appConfig.imprintHtml;
-        if (appConfig.globalWarningText) this.appConfig.globalWarningText = appConfig.globalWarningText;
-        if (appConfig.globalWarningExpiredDay) {
-          this.appConfig.globalWarningExpiredDay = new Date(appConfig.globalWarningExpiredDay);
-        }
-        if (appConfig.globalWarningExpiredHour) {
-          this.appConfig.globalWarningExpiredHour = appConfig.globalWarningExpiredHour;
-        }
+      if (appConfig) {
+        // Taken whole, so that a text emptied by an admin stays empty and saving keeps the loaded
+        // fields the form does not show (#1964).
+        this.appConfig = {
+          ...defaultAppConfig,
+          ...appConfig,
+          globalWarningExpiredDay: appConfig.globalWarningExpiredDay ?
+            new Date(appConfig.globalWarningExpiredDay) : defaultAppConfig.globalWarningExpiredDay
+        };
         if (this.configForm) {
           this.configForm.setValue({
             appTitle: this.appConfig.appTitle,

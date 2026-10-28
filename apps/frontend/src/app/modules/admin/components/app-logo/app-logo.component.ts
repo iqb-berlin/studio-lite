@@ -148,7 +148,7 @@ export class AppLogoComponent implements OnInit, OnDestroy {
             const imgTargetElement = rs.currentTarget as HTMLImageElement;
             const imgHeight = imgTargetElement.height;
             const imgWidth = imgTargetElement.width;
-            if (imgHeight > maxHeight && imgWidth > maxWidth) {
+            if (imgHeight > maxHeight || imgWidth > maxWidth) {
               this.imageError = this.translateService.instant(
                 'logo.not-allowed-image-size',
                 { maxHeight: maxHeight, maxWidth: maxWidth }
