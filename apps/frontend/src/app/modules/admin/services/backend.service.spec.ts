@@ -58,6 +58,20 @@ describe('Admin BackendService', () => {
     });
   });
 
+  describe('getAppConfig', () => {
+    // The app's getConfig answers with the defaults instead, and the form would offer them for
+    // saving over the stored config (#1968).
+    it('should answer a failed request with null', done => {
+      service.getAppConfig().subscribe(result => {
+        expect(result).toBeNull();
+        done();
+      });
+
+      httpMock.expectOne(`${baseUrl}admin/settings/config`)
+        .flush('error', { status: 500, statusText: 'Server Error' });
+    });
+  });
+
   describe('getUsersFull', () => {
     it('requests users with full param without activity header', done => {
       const users: UserFullDto[] = [{ id: 2 } as UserFullDto];

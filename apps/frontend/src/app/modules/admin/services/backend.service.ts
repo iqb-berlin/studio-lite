@@ -223,6 +223,16 @@ export class BackendService {
       .pipe(succeeded());
   }
 
+  // Unlike getConfig of the app's BackendService, which falls back on the defaults for the start
+  // page, this answers a failure with null: the form must not offer those defaults for saving (#1968).
+  getAppConfig(): Observable<ConfigDto | null> {
+    return this.http
+      .get<ConfigDto>(`${this.serverUrl}admin/settings/config`)
+      .pipe(
+        catchError(() => of(null))
+      );
+  }
+
   setAppConfig(appConfig: ConfigDto): Observable<boolean> {
     return this.http
       .patch(`${this.serverUrl}admin/settings/config`, appConfig)

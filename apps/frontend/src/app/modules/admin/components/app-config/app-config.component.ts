@@ -1,9 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component, OnDestroy, OnInit, signal
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule
 } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -16,8 +18,7 @@ import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field'
 import { ToTimePipe } from '../../pipes/to-time.pipe';
 import { AppConfig } from '../../../../classes/app-config.class';
 import { defaultAppConfig } from '../../../../services/app.service';
-import { BackendService as ReadBackendService } from '../../../../services/backend.service';
-import { BackendService as WriteBackendService } from '../../services/backend.service';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'studio-lite-app-config',
@@ -28,20 +29,23 @@ import { BackendService as WriteBackendService } from '../../services/backend.se
 })
 
 export class AppConfigComponent implements OnInit, OnDestroy {
-  // A copy: the default is shared, and getConfig answers with it when the request fails (#1964).
+  // A copy: the default is shared, among others with the start page, and this form writes into it (#1964).
   appConfig = { ...defaultAppConfig };
 
   configForm: UntypedFormGroup;
   dataChanged = false;
   private configDataChangedSubscription: Subscription | null = null;
+  private readonly configNotLoadedState = signal(false);
+  // Without the stored config the form is not shown: saving it would replace that config (#1968).
+  readonly configNotLoaded = this.configNotLoadedState.asReadonly();
+  private ngUnsubscribe = new Subject<void>();
   warningIsExpired = false;
   expiredHours: number[] = [];
 
   constructor(
     private fb: UntypedFormBuilder,
     private snackBar: MatSnackBar,
-    private writeBackendService: WriteBackendService,
-    private readBackendService: ReadBackendService,
+    private backendService: BackendService,
     private translateService: TranslateService
   ) {
     this.configForm = this.fb.group({
@@ -66,11 +70,12 @@ export class AppConfigComponent implements OnInit, OnDestroy {
   }
 
   updateFormFields(): void {
-    this.readBackendService.getConfig().subscribe(appConfig => {
+    this.backendService.getAppConfig().pipe(takeUntil(this.ngUnsubscribe)).subscribe(appConfig => {
       if (this.configDataChangedSubscription !== null) {
         this.configDataChangedSubscription.unsubscribe();
         this.configDataChangedSubscription = null;
       }
+      this.configNotLoadedState.set(!appConfig);
       if (appConfig) {
         // Taken whole, so that a text emptied by an admin stays empty and saving keeps the loaded
         // fields the form does not show (#1964).
@@ -119,7 +124,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
       this.appConfig.globalWarningText = this.configForm.get('globalWarningText')?.value;
       this.appConfig.globalWarningExpiredDay = this.configForm.get('globalWarningExpiredDay')?.value;
       this.appConfig.globalWarningExpiredHour = this.configForm.get('globalWarningExpiredHour')?.value;
-      this.writeBackendService.setAppConfig(this.appConfig).subscribe(isOk => {
+      this.backendService.setAppConfig(this.appConfig).subscribe(isOk => {
         if (isOk) {
           this.snackBar.open(
             this.translateService.instant('config.config-data-saved'),
@@ -140,5 +145,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.configDataChangedSubscription !== null) this.configDataChangedSubscription.unsubscribe();
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
