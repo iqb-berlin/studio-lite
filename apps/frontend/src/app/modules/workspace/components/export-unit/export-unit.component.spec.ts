@@ -10,6 +10,7 @@ import {
 import { BookletConfigDto } from '@studio-lite-lib/api-dto';
 import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
 import { provideHttpClient } from '@angular/common/http';
+import { createMock } from '@golevelup/ts-jest';
 import { By } from '@angular/platform-browser';
 import { ExportUnitComponent } from './export-unit.component';
 import { environment } from '../../../../../environments/environment';
@@ -18,6 +19,7 @@ import { ExportTestTakerConfigComponent } from '../export-test-taker-config/expo
 import { BookletConfigEditComponent } from '../booklet-config-edit/booklet-config-edit.component';
 import { ExportUnitFileConfigComponent } from '../export-unit-file-config/export-unit-file-config.component';
 import { ExportFileSelection } from '../../utils/export-file-options.utils';
+import { WorkspaceService } from '../../services/workspace.service';
 
 describe('ExportUnitComponent', () => {
   let component: ExportUnitComponent;
@@ -268,6 +270,17 @@ describe('ExportUnitComponent', () => {
     bookletConfig.configChanged.emit({ unitTitle: 'ON' });
 
     expect(component.unitExportSettings.bookletSettings.map(s => s.key)).toContain('toolbar_show_unit_title');
+  });
+
+  it('should start the export of a review from its booklet config, in the current keys', () => {
+    const exportOfReview = new ExportUnitComponent(
+      { units: [1], bookletConfigSettings: { unitTitle: 'ON' } },
+      createMock<WorkspaceService>()
+    );
+
+    expect(exportOfReview.bookletConfigSettings).toEqual({ toolbarShowUnitTitle: 'TRUE' });
+    expect(exportOfReview.unitExportSettings.bookletSettings)
+      .toEqual([{ key: 'toolbar_show_unit_title', value: 'TRUE' }]);
   });
 
   it('should map booklet config to modern keys on setBookletConfigSettings', () => {

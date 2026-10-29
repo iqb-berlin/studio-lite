@@ -38,4 +38,11 @@ describe('ShowResponsesComponent', () => {
     expect(component.displayedColumns).toEqual([]);
     expect(component.dataSource).toEqual([]);
   });
+
+  it('should show a table without columns when there are no responses', async () => {
+    await setup({ responses: [], table: true });
+
+    expect(component.displayedColumns).toEqual([]);
+    expect(component.dataSource).toEqual([]);
+  });
 });

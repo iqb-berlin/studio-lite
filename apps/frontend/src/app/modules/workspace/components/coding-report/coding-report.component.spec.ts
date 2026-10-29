@@ -361,6 +361,20 @@ describe('CodingReportComponent', () => {
     ]);
   });
 
+  it('sorts the other columns by their values', () => {
+    component.toggleChange();
+
+    const sortedRows = component.dataSource.sortData(
+      [...component.dataSource.data],
+      {
+        active: 'variable',
+        direction: 'desc'
+      } as MatSort
+    );
+
+    expect(sortedRows.map(row => row.variable)).toEqual(['V3', 'V2', 'V1', '']);
+  });
+
   it('downloadCodingReport creates and revokes object URL', () => {
     const blobParts: BlobPart[][] = [];
     const OriginalBlob = globalThis.Blob;

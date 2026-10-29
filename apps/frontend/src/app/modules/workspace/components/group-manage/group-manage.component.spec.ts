@@ -203,4 +203,59 @@ describe('GroupManageComponent', () => {
     expect(backendService[method]).toHaveBeenCalled();
     expect(snackBar.open).toHaveBeenCalledWith(message, 'error', { duration: 3000 });
   });
+
+  it('should filter the groups by any part of their name regardless of case', fakeAsync(() => {
+    backendService.getUnitGroups.mockReturnValue(of(['Neue Gruppe', 'Beta']));
+    fixture.detectChanges();
+    flush();
+
+    component.objectsDatasource.filter = 'gru';
+    fixture.detectChanges();
+
+    const rows: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.group-row'));
+    expect(rows.map(row => row.textContent?.trim())).toEqual(['Neue Gruppe']);
+  }));
+
+  it('should keep the group selected with its units after saving them', () => {
+    backendService.getUnitList.mockReturnValue(of([unit(1, 'A'), unit(2, 'A'), unit(3, 'B')]));
+    backendService.setGroupUnits.mockReturnValue(of(true));
+    const unitList = createMock<SelectUnitListComponent>({ selectedUnitIds: [1, 2] });
+    component.unitSelectionTable = unitList;
+    component.selectedGroup = 'A';
+    component.groupUnitsToChange = [1, 2];
+
+    component.saveChanged();
+
+    expect(backendService.setGroupUnits).toHaveBeenCalledWith(1, 'A', [1, 2]);
+    expect(backendService.getUnitList).toHaveBeenCalledWith(1);
+    expect(component.selectedGroup).toBe('A');
+    expect(unitList.selectedUnitIds).toEqual([1, 2]);
+    expect(snackBar.open).toHaveBeenCalledWith('workspace.group-saved', '', { duration: 1000 });
+  });
+
+  it('should say when the backend refuses to save the units of a group', () => {
+    backendService.setGroupUnits.mockReturnValue(of(false));
+    component.selectedGroup = 'A';
+    component.groupUnitsToChange = [1, 2];
+
+    component.saveChanged();
+
+    expect(backendService.getUnitList).not.toHaveBeenCalled();
+    expect(snackBar.open).toHaveBeenCalledWith('workspace.group-not-saved', 'error', { duration: 3000 });
+  });
+
+  it('should reload the groups with none selected after deleting one', () => {
+    backendService.deleteUnitGroup.mockReturnValue(of(true));
+    const unitList = createMock<SelectUnitListComponent>({ selectedUnitIds: [1] });
+    component.unitSelectionTable = unitList;
+    component.selectedGroup = 'A';
+
+    component.deleteGroup();
+
+    expect(backendService.deleteUnitGroup).toHaveBeenCalledWith(1, 'A');
+    expect(backendService.getUnitGroups).toHaveBeenCalledWith(1);
+    expect(component.selectedGroup).toBe('');
+    expect(unitList.selectedUnitIds).toEqual([]);
+    expect(snackBar.open).toHaveBeenCalledWith('workspace.group-deleted', '', { duration: 1000 });
+  });
 });

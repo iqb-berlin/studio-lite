@@ -24,6 +24,16 @@ describe('unitVariables', () => {
     expect(unitVariables(definition, scheme([]))).toEqual([{ id: 'text', alias: 'text' }]);
   });
 
+  it('is empty while neither the definition nor the scheme names variables', () => {
+    expect(unitVariables(undefined, { scheme: '{}', schemeType: '' })).toEqual([]);
+  });
+
+  it('takes the variables of the definition alone while the scheme has no codings', () => {
+    const definition = { variables: [variable('a')] } as UnitDefinitionDto;
+
+    expect(unitVariables(definition, { scheme: '{}', schemeType: '' })).toEqual([{ id: 'a', alias: 'a' }]);
+  });
+
   it('takes the stored list of the scheme when there is no definition', () => {
     expect(unitVariables(undefined, scheme([], [variable('stored', 'string', 'Stored')])))
       .toEqual([{ id: 'stored', alias: 'Stored' }]);
