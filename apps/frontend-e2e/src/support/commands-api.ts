@@ -328,7 +328,8 @@ Cypress.Commands.add('getAdminOfGroupAPI', (groupId: string, token:string) => {
 });
 
 // 16
-Cypress.Commands.add('createWsAPI', (groupId: string, ws:WsData, token:string) => {
+// `extra` adds fields to the body that the route must not take over (#2029)
+Cypress.Commands.add('createWsAPI', (groupId: string, ws:WsData, token:string, extra?: object) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'POST',
@@ -338,6 +339,7 @@ Cypress.Commands.add('createWsAPI', (groupId: string, ws:WsData, token:string) =
       authorization
     },
     body: {
+      ...extra,
       groupId: `${groupId}`,
       name: `${ws.name}`
     },

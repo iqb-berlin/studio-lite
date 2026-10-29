@@ -339,8 +339,11 @@ export class WorkspaceService {
       }
     }
     this.logger.log(`Creating workspace with name: ${workspace.name}`);
+    // Only what the body may decide: nothing validates it, and an `id` sent along had `save`
+    // overwrite that workspace, a `dropBoxId` set any drop box at all (#2029).
     const newWorkspace = this.workspacesRepository.create({
-      ...workspace,
+      name: workspace.name,
+      groupId: workspace.groupId,
       settings: {
         ...new WorkspaceSettingsDto(),
         hiddenRoutes: ['notes']

@@ -372,6 +372,22 @@ describe('WorkspaceService', () => {
       }));
     });
 
+    it('should take nothing from the body but the name and the group (#2029)', async () => {
+      (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, name: 'g' });
+      (workspaceRepository.save as jest.Mock).mockResolvedValue({ id: 5 });
+      // What a client can send: nothing strips the fields CreateWorkspaceDto does not name
+      const body: CreateWorkspaceDto & { id: number, dropBoxId: number } = {
+        name: 'w', groupId: 1, settings: {}, id: 99, dropBoxId: 98
+      };
+
+      await service.create(body);
+
+      const created = (workspaceRepository.create as jest.Mock).mock.calls[0][0];
+      expect(created).toEqual(expect.objectContaining({ name: 'w', groupId: 1 }));
+      expect(created.id).toBeUndefined();
+      expect(created.dropBoxId).toBeUndefined();
+    });
+
     describe('in a group holding workspaces already', () => {
       const givenGroup = (name: string, workspaces: number) => {
         (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, name });
