@@ -492,15 +492,30 @@ describe('WorkspaceService', () => {
   });
 
   describe('dropBoxIdOf', () => {
-    it('should return the drop box of the workspace', async () => {
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, dropBoxId: 7 } as Workspace);
+    const lookup = (workspaces: Workspace[]) => (workspaceRepository.findOne as jest.Mock)
+      .mockImplementation(async ({ where }) => workspaces.find(w => w.id === where.id) ?? null);
 
-      expect(await service.dropBoxIdOf(1)).toBe(7);
-      expect(workspaceRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 }, select: ['id', 'dropBoxId'] });
+    it('should return the drop box of the workspace', async () => {
+      lookup([
+        createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: 100 }),
+        createMock<Workspace>({ id: 100, groupId: 7 })
+      ]);
+
+      expect(await service.dropBoxIdOf(1)).toBe(100);
     });
 
-    it.each([[{ id: 1, dropBoxId: null }], [null]])('should return null for %p', async workspace => {
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(workspace);
+    it.each<[string, Workspace[]]>([
+      ['the workspace has none', [createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: null })]],
+      ['the workspace does not exist', []],
+      ['the drop box does not exist', [createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: 100 })]],
+      ['the drop box is the workspace itself', [createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: 1 })]],
+      // #2027: a move before the fix left drop boxes in the old group
+      ['the drop box is in another group', [
+        createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: 100 }),
+        createMock<Workspace>({ id: 100, groupId: 8 })
+      ]]
+    ])('should return null when %s', async (_, workspaces) => {
+      lookup(workspaces);
 
       expect(await service.dropBoxIdOf(1)).toBeNull();
     });

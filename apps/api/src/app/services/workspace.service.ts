@@ -488,13 +488,26 @@ export class WorkspaceService {
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
-  /** The drop box set for the workspace, or `null` when it has none or does not exist. */
+  /**
+   * The drop box set for the workspace, or `null` when it has none, does not exist, or is no drop
+   * box by the rule of {@link isDropBoxFor} -- such as one a move before #2027 left in another group.
+   */
   async dropBoxIdOf(id: number): Promise<number | null> {
     const workspace = await this.workspacesRepository.findOne({
       where: { id: id },
-      select: ['id', 'dropBoxId']
+      select: { id: true, groupId: true, dropBoxId: true }
     });
-    return workspace?.dropBoxId ?? null;
+    if (!workspace?.dropBoxId) return null;
+    return await this.isDropBoxFor(workspace, workspace.dropBoxId) ? workspace.dropBoxId : null;
+  }
+
+  /** A drop box is another workspace of the same group (#1805): asked when it is set and when it is used. */
+  private async isDropBoxFor(workspace: Workspace, dropBoxId: number): Promise<boolean> {
+    const dropBox = await this.workspacesRepository.findOne({
+      where: { id: dropBoxId },
+      select: { id: true, groupId: true }
+    });
+    return !!dropBox && dropBox.id !== workspace.id && dropBox.groupId === workspace.groupId;
   }
 
   /**
@@ -508,15 +521,8 @@ export class WorkspaceService {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
-    if (dropBoxId) {
-      const dropBox = await this.workspacesRepository.findOne({
-        where: { id: dropBoxId },
-        select: { id: true, groupId: true }
-      });
-      // The route hands the workspace id on as the text it arrives as (see WorkspaceId)
-      if (!dropBox || dropBox.id === Number(id) || dropBox.groupId !== workspaceToUpdate.groupId) {
-        throw new AdminWorkspaceNotFoundException(dropBoxId, 'PATCH');
-      }
+    if (dropBoxId && !await this.isDropBoxFor(workspaceToUpdate, dropBoxId)) {
+      throw new AdminWorkspaceNotFoundException(dropBoxId, 'PATCH');
     }
     workspaceToUpdate.dropBoxId = dropBoxId || null;
     await this.workspacesRepository.save(workspaceToUpdate);

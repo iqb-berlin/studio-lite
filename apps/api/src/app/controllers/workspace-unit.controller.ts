@@ -395,7 +395,10 @@ export class WorkspaceUnitController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
   @ApiOkResponse({ description: 'Unit moved' })
-  @ApiForbiddenResponse({ description: 'No privileges in the workspace, or the target is not its drop box.' })
+  @ApiForbiddenResponse({
+    description: 'No privileges in the workspace, or the target is not its drop box. A drop box in another group ' +
+      'counts as none.'
+  })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit')
   async patchDropBoxHistory(@User() user: UserEntity,
