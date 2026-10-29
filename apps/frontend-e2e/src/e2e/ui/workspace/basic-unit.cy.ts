@@ -11,11 +11,15 @@ import {
   importExercise,
   selectUnit
 } from '../../../support/helpers';
-import { createTestBaseAPI } from '../../../support/helpers/test-base';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Workspace Unit Management (Core CRUD)', () => {
   before(() => {
     createTestBaseAPI();
+  });
+
+  after(() => {
+    deleteTestBaseAPI();
   });
 
   it('imports test units', () => {

@@ -21,8 +21,11 @@ const admin = () => ({ username: Cypress.expose('username'), password: Cypress.e
 /**
  * Builds the base and logs the browser in as the first user. Needs an empty database: the first
  * user can only be created while there is none.
+ * @param units - a zip of units in the fixtures, imported into the primary workspace
+ * @example
+ * createTestBaseAPI({ units: 'test_studio_units_download.zip' });
  */
-export function createTestBaseAPI(): void {
+export function createTestBaseAPI({ units }: { units?: string } = {}): void {
   const { username, password } = admin();
   cy.addFirstUserAPI(username, password).then(init => {
     expect(init.status, 'first user').to.equal(201);
@@ -42,6 +45,9 @@ export function createTestBaseAPI(): void {
                 { id: firstUserId, access: AccessLevel.Admin },
                 { id: standardUserId, access: AccessLevel.Developer }
               ], token).its('status').should('equal', 200);
+              if (units && name === primaryWorkspace) {
+                cy.uploadUnitsAPI(String(ws.body), units, token).its('status').should('equal', 201);
+              }
             });
           });
         });

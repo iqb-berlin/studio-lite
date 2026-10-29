@@ -14,12 +14,21 @@ import {
   waitForSuccess
 } from '../../../support/helpers';
 import { addState } from '../../../support/helpers/group-admin';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 // ---------------------------------------------------------------------------
 // Suite
 // ---------------------------------------------------------------------------
 
 describe('Unit Properties Panel', () => {
+  before(() => {
+    createTestBaseAPI();
+  });
+
+  after(() => {
+    deleteTestBaseAPI();
+  });
+
   // -------------------------------------------------------------------------
   // Setup
   // -------------------------------------------------------------------------

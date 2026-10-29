@@ -3,6 +3,7 @@ import {
   selectUnit
 } from '../../../support/helpers';
 import { importedUnit, lightUnit, primaryWorkspace } from '../../../support/testData';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 /**
  * Puts a stand-in in place of the editor that does what the editor does after an author has deleted
@@ -40,6 +41,14 @@ const reduceUnitToFirstPageInEditor = (): void => {
  * reports as no navigable pages at all (#1531).
  */
 describe('Unit Preview Page Navigation', () => {
+  before(() => {
+    createTestBaseAPI({ units: 'test_studio_units_download.zip' });
+  });
+
+  after(() => {
+    deleteTestBaseAPI();
+  });
+
   it('shows one button per page of a unit with several pages', () => {
     cy.visitWs(primaryWorkspace);
     selectUnit(importedUnit.shortname);

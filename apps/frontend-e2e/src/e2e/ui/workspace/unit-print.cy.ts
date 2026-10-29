@@ -10,10 +10,15 @@ import {
   selectListUnits,
   selectUnit
 } from '../../../support/helpers';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Unit Print Preview', () => {
+  before(() => {
+    createTestBaseAPI({ units: 'test_studio_units_download.zip' });
+  });
+
   after(() => {
-    cy.visitWs(primaryWorkspace);
+    deleteTestBaseAPI();
   });
 
   it('displays unit key, name and properties in studio-lite-unit-properties', () => {

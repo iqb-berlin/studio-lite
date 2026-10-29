@@ -20,15 +20,19 @@ import {
   createWs,
   grantRemovePrivilegeAtWs
 } from '../../../support/helpers/group-admin';
-import { deleteTestBaseAPI } from '../../../support/helpers/test-base';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Unit Rich Notes', () => {
-  beforeEach(() => {
-    cy.intercept('GET', '/api/workspaces/*/units/*/rich-notes').as('getRichNotes');
+  before(() => {
+    createTestBaseAPI({ units: 'test_studio_units_download.zip' });
   });
 
   after(() => {
     deleteTestBaseAPI();
+  });
+
+  beforeEach(() => {
+    cy.intercept('GET', '/api/workspaces/*/units/*/rich-notes').as('getRichNotes');
   });
 
   it('activates Rückmeldung in primaryWorkspace', () => {

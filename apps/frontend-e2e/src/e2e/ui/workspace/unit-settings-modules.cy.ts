@@ -17,8 +17,17 @@ import {
   setRouteVisibility,
   verifyModuleConfiguration
 } from '../../../support/helpers';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Workspace Settings & Verona Modules', () => {
+  before(() => {
+    createTestBaseAPI();
+  });
+
+  after(() => {
+    deleteTestBaseAPI();
+  });
+
   it('selects metadata profile from workspace settings', () => {
     selectProfileForGroup(baseGroup, IqbProfile.DEu);
     selectProfileForGroup(baseGroup, IqbProfile.DEi);

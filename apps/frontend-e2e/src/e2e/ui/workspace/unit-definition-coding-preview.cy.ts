@@ -1,9 +1,13 @@
 import {
+  addUnitPred,
   clickIndexTabWorkspace,
   deleteUnit,
-  selectUnit
+  selectUnit,
+  setModuleWithoutVerification,
+  waitForSuccess
 } from '../../../support/helpers';
 import { definitionAllElementsUnit, primaryWorkspace } from '../../../support/testData';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 interface PlayerMessageData {
   unitState?: {
@@ -56,6 +60,317 @@ const sendRuntimeErrorFromPlayer = (code: string, message: string): void => {
     playerDocument.body.appendChild(script);
   });
 };
+
+// One path through three modules: DEF_ALL1 is written in the editor, coded in the schemer and
+// played in the preview, each describe working on what the one before it saved.
+before(() => {
+  createTestBaseAPI({ units: 'test_studio_units_download.zip' });
+});
+
+after(() => {
+  deleteTestBaseAPI();
+});
+
+describe('Unit Definitions', () => {
+  it('opens unit definition editor', () => {
+    cy.visitWs(primaryWorkspace);
+    selectUnit('M6_AK0012');
+    cy.get('.unit-row.selected').should('contain.text', 'M6_AK0012');
+    clickIndexTabWorkspace('editor');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
+    cy.get('iframe.unitHost').should('exist');
+  });
+
+  it('clicks rapidly between units and preserves the correct unit definition', () => {
+    selectUnit('M6_AK0011');
+    cy.wait(50);
+    selectUnit('M6_AK0012');
+    cy.wait(50);
+    selectUnit('M6_AK0011');
+    cy.get('.unit-row.selected').should('contain.text', 'M6_AK0011');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-editor-dynamic-overlay', { timeout: 30000 })
+        .eq(2)
+        .within(() => {
+          cy.get('aspect-math-table td:contains("2")').should('not.exist');
+          cy.get('aspect-math-table td:contains("1")').should('exist');
+        });
+    });
+  });
+
+  it('preserves unit definition when switching back to previous unit', () => {
+    selectUnit('M6_AK0012');
+    cy.get('.unit-row.selected').should('contain.text', 'M6_AK0012');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-editor-dynamic-overlay', { timeout: 30000 })
+        .eq(2)
+        .within(() => {
+          cy.get('aspect-math-table td:contains("2")').should('exist');
+        });
+    });
+  });
+});
+
+describe('Aspect Editor Elements Creation', () => {
+  it('creates a new unit and opens definition editor', () => {
+    setModuleWithoutVerification(primaryWorkspace, 'Aspect', 'Aspect', 'Schemer');
+    cy.visitWs(primaryWorkspace);
+    addUnitPred(definitionAllElementsUnit);
+    cy.visitWs(primaryWorkspace);
+    selectUnit(definitionAllElementsUnit.shortname);
+    clickIndexTabWorkspace('editor');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
+    cy.get('iframe.unitHost').should('exist');
+  });
+
+  it('adds text element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Text').click();
+      cy.get('aspect-text', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds text-field element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Eingabefeld').click();
+      cy.get('aspect-text-field', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds text-area element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Eingabebereich').click();
+      cy.get('aspect-text-area', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds spell-correct element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Wort korrigieren').click();
+      cy.get('aspect-spell-correct', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds math-table element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Rechenkästchen').click();
+      cy.get('aspect-math-table', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds checkbox element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Kontrollkästchen').click();
+      cy.get('aspect-checkbox', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds dropdown element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Klappliste').click();
+      cy.get('aspect-dropdown', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds likert element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Optionentabelle').click();
+      cy.get('aspect-likert', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds slider element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Schieberegler').click();
+      cy.get('aspect-slider', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds drop-list element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('mat-expansion-panel-header', '(Zu)Ordnung').click();
+      cy.get('aspect-ui-element-toolbox button').contains('Ablegeliste').click();
+      cy.get('aspect-drop-list', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds cloze element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('mat-expansion-panel-header', 'Verbund').click();
+      cy.get('aspect-ui-element-toolbox button').contains('Lückentext').click();
+      cy.get('aspect-cloze', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds table element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Tabelle').click();
+      cy.get('aspect-table', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds button element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('mat-expansion-panel-header', 'Sonstige').click();
+      cy.get('aspect-ui-element-toolbox button').contains('Knopf').click();
+      cy.get('aspect-button', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('adds frame element ', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('aspect-ui-element-toolbox button').contains('Rahmen').click({ force: true });
+      cy.get('aspect-frame', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('saves the unit definition with all added element', () => {
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/definition').as(
+      'saveUnit'
+    );
+    cy.get('[data-cy="workspace-unit-save-button"]', { timeout: 10000 })
+      .should('not.be.disabled')
+      .click();
+    waitForSuccess('@saveUnit');
+    cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
+  });
+});
+
+describe('Aspect Coding Scheme (Kodierung)', () => {
+  it('opens unit and navigates to coding (schemer) tab', () => {
+    cy.visitWs(primaryWorkspace);
+    selectUnit(definitionAllElementsUnit.shortname);
+    cy.get('.unit-row.selected').should('contain.text', definitionAllElementsUnit.shortname);
+    clickIndexTabWorkspace('schemer');
+    cy.get('.wait-animation', { timeout: 30000 }).should('not.exist');
+    cy.get('iframe.unitHost').should('exist');
+  });
+
+  it('verifies schemer iframe and variable list load', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.get('iqb-schemer', { timeout: 30000 }).should('exist');
+      cy.get('.var-scheme-list', { timeout: 30000 }).should('exist');
+    });
+  });
+
+  it('verifies coding variable for text-field element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('.var-list-entry', 'text-field_1', { timeout: 10000 })
+        .should('exist')
+        .click();
+      cy.get('var-coding', { timeout: 10000 }).should('exist');
+      cy.get('var-coding button')
+        .filter((_, el) => el.querySelector('svg[viewBox="0 0 24 24"]') !== null ||
+          (el.getAttribute('mattooltip') || '').includes('Kodierung generieren'))
+        .first()
+        .click();
+      cy.get('mat-dialog-content textarea', { timeout: 10000 })
+        .type('Eingabe Text');
+      cy.contains('mat-dialog-actions button', 'Generiere Kodierung')
+        .click();
+      cy.get('mat-dialog-container').should('not.exist');
+    });
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/scheme').as('saveScheme');
+    cy.get('[data-cy="workspace-unit-save-button"]', { timeout: 10000 })
+      .should('not.be.disabled')
+      .click();
+    waitForSuccess('@saveScheme');
+    cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
+  });
+
+  it('verifies coding variable for text-area element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('.var-list-entry', 'text-area_1', { timeout: 10000 })
+        .should('exist')
+        .click();
+      cy.get('var-coding', { timeout: 10000 }).should('exist');
+      cy.get('var-coding button')
+        .filter((_, el) => el.querySelector('svg[viewBox="0 0 24 24"]') !== null ||
+          (el.getAttribute('mattooltip') || '').includes('Kodierung generieren'))
+        .first()
+        .click();
+      cy.get('mat-dialog-content textarea', { timeout: 10000 })
+        .type('Langer Antworttext');
+      cy.contains('mat-dialog-actions button', 'Generiere Kodierung')
+        .click();
+      cy.get('mat-dialog-container').should('not.exist');
+    });
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/scheme').as('saveScheme');
+    cy.get('[data-cy="workspace-unit-save-button"]', { timeout: 10000 })
+      .should('not.be.disabled')
+      .click();
+    waitForSuccess('@saveScheme');
+    cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
+  });
+
+  it('verifies coding variable for spell-correct element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('.var-list-entry', 'spell-correct_1', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('verifies coding variable for math-table element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('.var-list-entry', 'math-table_1', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('verifies coding variable for checkbox element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('.var-list-entry', 'checkbox_1', { timeout: 10000 })
+        .should('exist')
+        .click();
+      cy.get('var-coding', { timeout: 10000 }).should('exist');
+      cy.get('var-coding button')
+        .filter((_, el) => el.querySelector('svg[viewBox="0 0 24 24"]') !== null ||
+          (el.getAttribute('mattooltip') || '').includes('Kodierung generieren'))
+        .first()
+        .click();
+      cy.contains('mat-list-option', 'Angekreuzt: Beschriftung', { timeout: 10000 })
+        .click();
+      cy.contains('mat-dialog-actions button', 'Generiere Kodierung')
+        .click();
+      cy.get('mat-dialog-container').should('not.exist');
+    });
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/scheme').as('saveScheme');
+    cy.get('[data-cy="workspace-unit-save-button"]', { timeout: 10000 })
+      .should('not.be.disabled')
+      .click();
+    waitForSuccess('@saveScheme');
+    cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
+  });
+
+  it('verifies coding variable for dropdown element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('.var-list-entry', 'dropdown_1', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('verifies coding variable for slider element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('.var-list-entry', 'slider_1', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('verifies coding variable for drop-list element', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('.var-list-entry', 'drop-list_1', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('selects a variable and verifies coding details container displays', () => {
+    cy.getIFrameBody('iframe.unitHost').within(() => {
+      cy.contains('.var-list-entry', 'text-field_1').click();
+      cy.get('var-coding', { timeout: 10000 }).should('exist');
+    });
+  });
+
+  it('verifies coding scheme save button functionality', () => {
+    cy.get('[data-cy="workspace-unit-save-button"]').should('exist');
+  });
+});
 
 describe('Unit Preview (Vorschau)', () => {
   afterEach(() => {

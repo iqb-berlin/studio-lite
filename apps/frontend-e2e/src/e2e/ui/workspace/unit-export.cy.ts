@@ -9,8 +9,17 @@ import {
   selectListUnits,
   waitForSuccess
 } from '../../../support/helpers';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Workspace Unit Export & Reports', () => {
+  before(() => {
+    createTestBaseAPI();
+  });
+
+  after(() => {
+    deleteTestBaseAPI();
+  });
+
   it('exports selected units (default format)', () => {
     ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
     ensureUnitExists(primaryWorkspace, exportUnits.exportUnit2);

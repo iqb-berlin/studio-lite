@@ -122,6 +122,8 @@ export function ensureUnitExists(ws: string, unit: UnitData): void {
       const units: { key: string }[] = resp.body;
       if (!units.some(listedUnit => listedUnit.key === unit.shortname)) {
         addUnitPred(unit);
+        // the new unit is still being opened, and a click into the page would land in that
+        cy.visitWs(ws);
       }
     });
 }

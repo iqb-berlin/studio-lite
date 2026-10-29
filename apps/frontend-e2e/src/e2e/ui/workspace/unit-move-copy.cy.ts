@@ -10,8 +10,17 @@ import {
   goToWsMenu,
   moveUnit
 } from '../../../support/helpers';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Workspace Unit Move & Copy Operations', () => {
+  before(() => {
+    createTestBaseAPI();
+  });
+
+  after(() => {
+    deleteTestBaseAPI();
+  });
+
   it('creates unit from existing unit within same workspace', () => {
     ensureUnitExists(primaryWorkspace, moveCopyUnits.copySource);
     cy.visitWs(primaryWorkspace);

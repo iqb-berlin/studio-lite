@@ -32,8 +32,17 @@ import {
   enableReviewComments
 } from '../../../support/helpers';
 import { grantRemovePrivilegeAtWs } from '../../../support/helpers/group-admin';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Unit Reviews', () => {
+  before(() => {
+    createTestBaseAPI({ units: 'test_studio_units_download.zip' });
+  });
+
+  after(() => {
+    deleteTestBaseAPI();
+  });
+
   const review: string = reviewTestNames.reviewName;
 
   it('allows an admin to create a new review with specific unit selection and configuration', () => {
@@ -418,7 +427,7 @@ describe('Unit Reviews', () => {
     });
 
     after(() => {
-      // Whatever state a failed test left: back to the admin, as the specs after this one expect
+      // Whatever state a failed test left: back to the admin, as the tests after this block expect
       cy.window().then(win => {
         win.localStorage.removeItem('id_token');
         win.localStorage.removeItem('refresh_token');

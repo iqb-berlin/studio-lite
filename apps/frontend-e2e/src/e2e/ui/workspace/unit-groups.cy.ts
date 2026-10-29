@@ -14,8 +14,17 @@ import {
   closeWorkspaceUserListDialog,
   workspaceOfPage
 } from '../../../support/helpers';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Unit Groups and Group Management', () => {
+  before(() => {
+    createTestBaseAPI();
+  });
+
+  after(() => {
+    deleteTestBaseAPI();
+  });
+
   it('creates a new unit group via the add-unit dialog', () => {
     cy.visitWs(primaryWorkspace);
     // The group is new: the workspace knows it after the unit is created, not before. Asked of the API,

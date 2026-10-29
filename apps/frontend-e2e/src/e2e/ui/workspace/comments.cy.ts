@@ -7,8 +7,17 @@ import {
   loginWithUser,
   selectUnit
 } from '../../../support/helpers';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Unit Comments', () => {
+  before(() => {
+    createTestBaseAPI({ units: 'test_studio_units_download.zip' });
+  });
+
+  after(() => {
+    deleteTestBaseAPI();
+  });
+
   beforeEach(() => {
     cy.intercept('GET', '/api/workspaces/*/units/*/comments').as('getComments');
   });
