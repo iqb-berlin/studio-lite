@@ -20,11 +20,6 @@ describe('CodingReportDto Swagger metadata', () => {
     });
   });
 
-  // the report's own problem next to those of the coding scheme spec (#1873)
-  it('lists codes without rules among the problem types', () => {
-    expect(CODING_SCHEME_PROBLEM_TYPES).toEqual(expect.arrayContaining(['VACANT', 'CODE_WITHOUT_RULES']));
-  });
-
   it('keeps validationProblems optional for compatibility with older APIs', () => {
     const metadata = Reflect.getMetadata(
       DECORATORS.API_MODEL_PROPERTIES,

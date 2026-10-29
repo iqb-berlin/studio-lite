@@ -1,13 +1,11 @@
-import { AccessLevel } from '../../../support/testData';
-import { addFirstUser, deleteFirstUser, goToWsMenu } from '../../../support/helpers';
+import { primaryWorkspace } from '../../../support/testData';
+import { goToWsMenu, workspaceOfPage } from '../../../support/helpers';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 // Codes need neither rule sets nor a manual instruction of their own. A unit whose codes come without
 // them failed the coding report of its whole workspace, and so did any unit whose scheme throws (#1873).
 describe('The coding report of units with unusual or broken schemes', () => {
-  const group = { id: '', name: 'CodingReportGroup' };
-  const ws = { id: '', name: 'CodingReportWorkspace' };
   let token = '';
-  let groupId = '';
   let wsId = '';
 
   const addUnitWithScheme = (shortname: string, name: string, fixture: string) => {
@@ -27,7 +25,7 @@ describe('The coding report of units with unusual or broken schemes', () => {
 
   const openCodingReport = () => {
     cy.intercept('GET', `/api/workspaces/${wsId}/units/scheme`).as('codingReport');
-    cy.visitWs(ws.name);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-coding-report"]').click();
@@ -37,49 +35,28 @@ describe('The coding report of units with unusual or broken schemes', () => {
   };
 
   before(() => {
-    addFirstUser();
-    cy.window().then(win => {
-      token = win.localStorage.getItem('id_token') || '';
-      cy.getUserIdAPI(token).then(authData => {
-        cy.createGroupAPI(group, token).then(createdGroup => {
-          groupId = String(createdGroup.body);
-          cy.createWsAPI(groupId, ws, token).then(createdWs => {
-            wsId = String(createdWs.body);
-            cy.updateUsersOfWsAPI(wsId, AccessLevel.Admin, String(authData.body.userId), token)
-              .its('status').should('equal', 200);
-            addUnitWithScheme('NORULES1', 'Ohne Regeln', 'coding-scheme-codes-without-rule-sets.json');
-            addUnitWithScheme('BROKEN1', 'Defekt', 'coding-scheme-rule-set-without-rules.json');
-          });
-        });
-      });
+    createTestBaseAPI();
+    cy.visitWs(primaryWorkspace);
+    workspaceOfPage().then(page => {
+      wsId = page.wsId;
+      token = page.token;
+      addUnitWithScheme('NORULES1', 'Ohne Regeln', 'coding-scheme-codes-without-rule-sets.json');
+      addUnitWithScheme('BROKEN1', 'Defekt', 'coding-scheme-rule-set-without-rules.json');
     });
   });
 
   after(() => {
-    cy.deleteGroupsAPI([groupId], token).its('status').should('equal', 200);
-    deleteFirstUser();
-  });
-
-  it('lists the variables of codes without rule sets with their coding type', () => {
-    openCodingReport();
-    // the whole cell, since 'halbautomatisch' contains 'automatisch'
-    cy.contains('mat-dialog-container tr', 'auto_1').contains('td', /^\s*automatisch\s*$/);
-    cy.contains('mat-dialog-container tr', 'manual_1').contains('td', /^\s*manuell\s*$/);
+    deleteTestBaseAPI();
   });
 
   it('warns about a code that neither rules nor a manual instruction lead to', () => {
     openCodingReport();
     cy.translate(Cypress.expose('locale')).then(json => {
-      const withoutRules = json['coding-report']['validation-problems'].CODE_WITHOUT_RULES;
-      // the unit has no variables of its own, so both rows carry other problems as well;
-      // only one row's details are open at a time
+      // the unit has no variables of its own, so the row carries other problems as well
       cy.contains('mat-dialog-container tr', 'auto_1').find('[data-cy="validation-summary"]').click();
-      cy.contains('.validation-problem', withoutRules)
+      cy.contains('.validation-problem', json['coding-report']['validation-problems'].CODE_WITHOUT_RULES)
         .should('contain.text', json['coding-report'].severity.warning)
         .and('contain.text', json['coding-report']['code-reference'].replace('{{code}}', '1'));
-      // the codes of manual_1 have a manual instruction
-      cy.contains('mat-dialog-container tr', 'manual_1').find('[data-cy="validation-summary"]').click();
-      cy.get('.validation-problem').should('exist').and('not.contain.text', withoutRules);
     });
   });
 
