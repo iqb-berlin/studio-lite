@@ -690,10 +690,4 @@ export class UnitService {
       groupName: groupName
     });
   }
-
-  async removeUnitState(id: number): Promise<void> {
-    const unitToUpdate = await this.unitsRepository.findOne({ where: { id: id } });
-    await this.unitsRepository.save({ ...unitToUpdate, state: '0' }
-    );
-  }
 }

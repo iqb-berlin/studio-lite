@@ -90,7 +90,9 @@ export class WorkspaceController {
   @ApiOkResponse()
   @ApiForbiddenResponse({ description: 'Forbidden.' })
   @ApiForbiddenResponse({ description: 'User has no privileges in the workspace.' })
-  @ApiNotFoundResponse({ description: 'The requested workspace_id does not exist.' })
+  @ApiNotFoundResponse({
+    description: 'The requested workspace_id does not exist. Only administrators get this; anyone else gets 403.'
+  })
   @ApiQuery({
     name: 'download',
     type: Boolean,

@@ -8,7 +8,6 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
-import { BackendService } from '../../services/backend.service';
 import { InputTextComponent } from '../../../../components/input-text/input-text.component';
 import { WorkspaceSettings } from '../../models/workspace-settings.interface';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
@@ -59,7 +58,6 @@ export class WorkspaceMenuComponent implements OnDestroy {
     private editWorkspaceSettingsDialog: MatDialog,
     private confirmDialog: MatDialog,
     private selectDropBoxDialog: MatDialog,
-    private backendService: BackendService,
     private appBackendService: AppBackendService,
     private translateService: TranslateService
   ) {}

@@ -1,7 +1,9 @@
-import { createMock } from '@golevelup/ts-jest';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import {
+  EntityManager, In, Repository, UpdateResult
+} from 'typeorm';
 import {
   CodingReportDto, CreateWorkspaceDto, UnitPropertiesDto, UsersWorkspaceInListDto,
   WorkspaceSettingsDto, RenameGroupNameDto
@@ -252,8 +254,7 @@ describe('WorkspaceService', () => {
 
   it.each([
     ['findOne', () => service.findOne(9)],
-    ['findAllWorkspaceGroups', () => service.findAllWorkspaceGroups(9)],
-    ['patch', () => service.patch({ id: 9, name: 'x' })]
+    ['findAllWorkspaceGroups', () => service.findAllWorkspaceGroups(9)]
   ])('should answer %s for an unknown workspace with not found', async (_, call) => {
     (workspaceRepository.findOne as jest.Mock).mockResolvedValue(null);
 
@@ -398,55 +399,67 @@ describe('WorkspaceService', () => {
     });
   });
 
-  describe('patch', () => {
-    it('should patch workspace', async () => {
-      const ws = { id: 1, name: 'old' };
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
-
-      await service.patch({ id: 1, name: 'new' });
-      expect(ws.name).toBe('new');
-    });
-  });
-
   describe('patchWorkspaceGroups', () => {
+    let manager: DeepMocked<EntityManager>;
+
     beforeEach(() => {
       (workspaceRepository.find as jest.Mock).mockResolvedValue([
         createMock<Workspace>({ id: 1, groupId: 1 }),
         createMock<Workspace>({ id: 2, groupId: 2 })
       ]);
-      (unitService.findAllForWorkspace as jest.Mock).mockResolvedValue([
-        createMock<Unit>({ id: 11 }),
-        createMock<Unit>({ id: 12 })
-      ]);
+      manager = createMock<EntityManager>();
+      Object.defineProperty(workspaceRepository, 'manager', {
+        value: {
+          transaction: jest.fn().mockImplementation(
+            (work: (entityManager: EntityManager) => Promise<void>) => work(manager)
+          )
+        },
+        configurable: true
+      });
     });
 
     it('should move the workspaces and reset the states of their units', async () => {
       await service.patchWorkspaceGroups([1, 2], 3);
 
-      expect(workspaceRepository.update).toHaveBeenCalledWith(1, { groupId: 3 });
-      expect(workspaceRepository.update).toHaveBeenCalledWith(2, { groupId: 3 });
-      expect(unitService.removeUnitState).toHaveBeenCalledWith(11);
-      expect(unitService.removeUnitState).toHaveBeenCalledWith(12);
+      expect(manager.update).toHaveBeenCalledWith(Workspace, { id: In([1, 2]) }, { groupId: 3 });
+      expect(manager.update).toHaveBeenCalledWith(Unit, { workspaceId: In([1, 2]) }, { state: '0' });
     });
 
     it('should leave a workspace that is already in the target group as it is', async () => {
       await service.patchWorkspaceGroups([1, 2], 2);
 
-      expect(workspaceRepository.update).toHaveBeenCalledTimes(1);
-      expect(workspaceRepository.update).toHaveBeenCalledWith(1, { groupId: 2 });
-      expect(unitService.findAllForWorkspace).toHaveBeenCalledTimes(1);
-      expect(unitService.findAllForWorkspace).toHaveBeenCalledWith(1);
+      expect(manager.update).toHaveBeenCalledTimes(2);
+      expect(manager.update).toHaveBeenCalledWith(Workspace, { id: In([1]) }, { groupId: 2 });
+      expect(manager.update).toHaveBeenCalledWith(Unit, { workspaceId: In([1]) }, { state: '0' });
+    });
+
+    it('should recognise the target group when it is sent as a string', async () => {
+      await service.patchWorkspaceGroups([1, 2], '2' as unknown as number);
+
+      expect(manager.update).toHaveBeenCalledWith(Workspace, { id: In([1]) }, { groupId: 2 });
+      expect(manager.update).toHaveBeenCalledWith(Unit, { workspaceId: In([1]) }, { state: '0' });
+    });
+
+    it('should change nothing when no workspace leaves its group', async () => {
+      (workspaceRepository.find as jest.Mock).mockResolvedValue([createMock<Workspace>({ id: 2, groupId: 2 })]);
+
+      await service.patchWorkspaceGroups([2], 2);
+
+      expect(workspaceRepository.manager.transaction).not.toHaveBeenCalled();
+      expect(workspaceRepository.update).not.toHaveBeenCalled();
+      expect(unitsRepository.update).not.toHaveBeenCalled();
     });
 
     it('should not be done before the states are reset (#1984)', async () => {
       let resetDone: () => void = () => undefined;
-      (unitService.removeUnitState as jest.Mock)
-        .mockReturnValue(new Promise<void>(resolve => { resetDone = resolve; }));
+      manager.update.mockImplementation((target: unknown) => (target === Unit ?
+        new Promise(resolve => { resetDone = () => resolve(createMock<UpdateResult>()); }) :
+        Promise.resolve(createMock<UpdateResult>())));
       let moved = false;
 
       const move = service.patchWorkspaceGroups([1], 3).then(() => { moved = true; });
       await new Promise(process.nextTick);
-      expect(unitService.removeUnitState).toHaveBeenCalled();
+      expect(manager.update).toHaveBeenCalledWith(Unit, expect.anything(), { state: '0' });
       expect(moved).toBe(false);
 
       resetDone();

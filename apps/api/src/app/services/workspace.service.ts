@@ -384,38 +384,28 @@ export class WorkspaceService {
     return CodingReportClass.build(id, unitListWithMetadata);
   }
 
-  async patch(workspaceData: Partial<WorkspaceFullDto>): Promise<void> {
-    const workspaceToUpdate = await this.workspacesRepository.findOne({
-      where: { id: workspaceData.id }
-    });
-    if (workspaceToUpdate) {
-      if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
-      if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
-      await this.workspacesRepository.save(workspaceToUpdate);
-    } else {
-      throw new AdminWorkspaceNotFoundException(workspaceData.id, 'PATCH');
-    }
-  }
-
   /**
    * Moves workspaces into another group and resets the state of their units; both groups have been
    * checked by the controller (#1984). Ids that belong to no workspace are passed over, as by
-   * {@link remove}.
+   * {@link remove}. Move and reset happen together or not at all: a workspace left moved with its
+   * old states would be passed over by a second attempt, as it is in the target group already.
    */
   async patchWorkspaceGroups(ids: number[], newWorkspaceGroupId: number): Promise<void> {
+    // Nothing validates the body: a target sent as a string would never equal a stored group,
+    // and the states of workspaces that stay where they are would be reset.
+    const targetId = Number(newWorkspaceGroupId);
     const workspaces = await this.workspacesRepository.find({
       where: { id: In(ids) },
       select: { id: true, groupId: true }
     });
-    await Promise.all(
-      workspaces
-        .filter(workspace => workspace.groupId !== newWorkspaceGroupId)
-        .map(async workspace => {
-          await this.workspacesRepository.update(workspace.id, { groupId: newWorkspaceGroupId });
-          const units = await this.unitService.findAllForWorkspace(workspace.id);
-          await Promise.all(units.map(unit => this.unitService.removeUnitState(unit.id)));
-        })
-    );
+    const movedIds = workspaces
+      .filter(workspace => workspace.groupId !== targetId)
+      .map(workspace => workspace.id);
+    if (!movedIds.length) return;
+    await this.workspacesRepository.manager.transaction(async manager => {
+      await manager.update(Workspace, { id: In(movedIds) }, { groupId: targetId });
+      await manager.update(Unit, { workspaceId: In(movedIds) }, { state: '0' });
+    });
   }
 
   async patchGroupName(

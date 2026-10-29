@@ -14,7 +14,6 @@ import {
   EditWorkspaceSettingsComponent
 } from '../../../../components/edit-workspace-settings/edit-workspace-settings.component';
 import { WorkspaceMenuComponent } from './workspace-menu.component';
-import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 
 @Component({ selector: 'studio-lite-wrapped-icon', template: '', standalone: true })
@@ -26,7 +25,6 @@ class MockWrappedIconComponent {
 describe('WorkspaceMenuComponent', () => {
   let component: WorkspaceMenuComponent;
   let fixture: ComponentFixture<WorkspaceMenuComponent>;
-  let mockBackendService: Record<string, never>;
   let mockAppBackendService: {
     getWorkspaceGroupList: jest.Mock;
     getAuthData: jest.Mock;
@@ -37,7 +35,6 @@ describe('WorkspaceMenuComponent', () => {
   };
 
   beforeEach(async () => {
-    mockBackendService = {};
     mockAppBackendService = {
       getWorkspaceGroupList: jest.fn().mockReturnValue(of([])),
       getAuthData: jest.fn().mockReturnValue(of({ userId: 1 })),
@@ -52,7 +49,6 @@ describe('WorkspaceMenuComponent', () => {
     await TestBed.configureTestingModule({
       imports: [WorkspaceMenuComponent, TranslateModule.forRoot()],
       providers: [
-        { provide: BackendService, useValue: mockBackendService },
         { provide: AppBackendService, useValue: mockAppBackendService },
         { provide: MatDialog, useValue: mockMatDialog }
       ]
