@@ -3,7 +3,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
+import { UnitRichNoteLinkDto, UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 import { UnitRichNoteDialogComponent } from './unit-rich-note-dialog.component';
 import { RichNoteEditorComponent } from '../rich-note-editor/rich-note-editor.component';
 
@@ -26,7 +26,7 @@ describe('UnitRichNoteDialogComponent', () => {
     unitId: number;
     tags: UnitRichNoteTagDto[];
     items: string[];
-    note?: { tagId: string, content: string };
+    note?: { tagId: string, content: string, links?: UnitRichNoteLinkDto[] };
   }
 
   async function setupTestBed(data: DialogData) {
@@ -62,19 +62,6 @@ describe('UnitRichNoteDialogComponent', () => {
     expect(component.flattenedTags.length).toBe(2);
     expect(component.flattenedTags[0].id).toBe('parent');
     expect(component.flattenedTags[1].id).toBe('child');
-  });
-
-  it('should resolve legacy tagId to full path', async () => {
-    const legacyData = {
-      note: { tagId: 'child', content: '<p>test</p>' },
-      workspaceId: 1,
-      unitId: 1,
-      tags: mockTags,
-      items: []
-    };
-
-    await setupTestBed(legacyData);
-    expect(component.noteForm.get('tagId')?.value).toBe('child');
   });
 
   // Each test builds its own dialog: one that relies on the component of the test before it passes
@@ -148,5 +135,91 @@ describe('UnitRichNoteDialogComponent', () => {
       itemReferences: ['item1'],
       id: undefined
     });
+  });
+
+  const editorWith = (text: string, items: string[]) => {
+    component.editorComponent = createMock<RichNoteEditorComponent>({ getEditorData: () => ({ text, items }) });
+  };
+
+  // A note stored with the last part of its tag's id finds the tag by it, as long as one has it.
+  it.each([
+    ['the dotted id', 'parent.child', 'child', 'parent.child'],
+    ['the path of a vocabulary concept', 'https://w3id.org/iqb/t/child', 'child', 'https://w3id.org/iqb/t/child'],
+    ['the fragment of a vocabulary concept', 'https://w3id.org/iqb/t#child', 'child', 'https://w3id.org/iqb/t#child'],
+    ['none, keeping the stored id', 'parent.other', 'child', 'child']
+  ])('should select the tag whose id ends with the stored one: %s', async (_, childId, storedId, selected) => {
+    await setupTestBed({
+      note: { tagId: storedId, content: '<p>test</p>' },
+      workspaceId: 1,
+      unitId: 1,
+      tags: [{ id: 'parent', label: [{ lang: 'de', value: 'Parent' }], children: [{ id: childId, label: [] }] }],
+      items: []
+    });
+
+    expect(component.noteForm.get('tagId')?.value).toBe(selected);
+  });
+
+  it('should list a tag without a label with an empty name', async () => {
+    await setupTestBed({
+      workspaceId: 1, unitId: 1, tags: [{ id: 'bare', label: [] }], items: []
+    });
+
+    expect(component.flattenedTags).toEqual([{
+      id: 'bare', label: '', depth: 0, padding: 0
+    }]);
+  });
+
+  it('should keep the links of the note it edits, one without a type as a competence description', async () => {
+    await setupTestBed({
+      note: {
+        tagId: 'parent',
+        content: '<p>test</p>',
+        links: [
+          {
+            url: 'https://a.de', label: 'A', description: 'about A', type: 'MATERIAL_READ'
+          },
+          { url: 'https://b.de', label: 'B' }
+        ]
+      },
+      workspaceId: 1,
+      unitId: 1,
+      tags: mockTags,
+      items: []
+    });
+    editorWith('<p>test</p>', []);
+
+    component.onSave();
+
+    expect(dialogRefMock.close).toHaveBeenCalledWith(expect.objectContaining({
+      links: [
+        {
+          url: 'https://a.de', type: 'MATERIAL_READ', label: 'A', description: 'about A'
+        },
+        {
+          url: 'https://b.de', type: 'COMPETENCE_DESCRIPTION', label: 'B', description: ''
+        }
+      ]
+    }));
+  });
+
+  // a note may consist of item references or links alone
+  it.each([
+    ['item references', '', ['item1'], false],
+    ['links', '<p></p>', [], true]
+  ])('should save a note without text that has %s', async (_, text: string, items: string[], withLink: boolean) => {
+    await setupNewNote();
+    if (withLink) {
+      component.addLink();
+      component.linksArray.at(0).patchValue({ url: 'https://a.de', label: 'A' });
+    }
+    editorWith(text, items);
+
+    component.onSave();
+
+    expect(dialogRefMock.close).toHaveBeenCalledWith(expect.objectContaining({
+      content: text,
+      itemReferences: items,
+      links: withLink ? [expect.objectContaining({ url: 'https://a.de' })] : []
+    }));
   });
 });
