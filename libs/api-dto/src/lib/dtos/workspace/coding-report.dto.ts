@@ -2,7 +2,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CodingSchemeProblemType } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 
-const codingSchemeProblemTypes = {
+/**
+ * The problems of the coding scheme spec, plus those the studio's coding report finds itself: a code
+ * that is neither coded by rules nor by hand can never be assigned (#1873).
+ */
+export type CodingReportProblemType = CodingSchemeProblemType | 'CODE_WITHOUT_RULES';
+
+const codingReportProblemTypes = {
   VACANT: null,
   SOURCE_MISSING: null,
   INVALID_SOURCE: null,
@@ -13,16 +19,17 @@ const codingSchemeProblemTypes = {
   RULESET_VALUE_ARRAY_POS_INVALID: null,
   MORE_THAN_ONE_SOURCE: null,
   ONLY_ONE_SOURCE: null,
-  VALUE_COPY_NOT_FROM_BASE: null
-} satisfies Record<CodingSchemeProblemType, null>;
+  VALUE_COPY_NOT_FROM_BASE: null,
+  CODE_WITHOUT_RULES: null
+} satisfies Record<CodingReportProblemType, null>;
 
 export const CODING_SCHEME_PROBLEM_TYPES = Object.keys(
-  codingSchemeProblemTypes
-) as CodingSchemeProblemType[];
+  codingReportProblemTypes
+) as CodingReportProblemType[];
 
 export class CodingReportValidationProblemDto {
   @ApiProperty({ enum: CODING_SCHEME_PROBLEM_TYPES })
-  type!: CodingSchemeProblemType;
+  type!: CodingReportProblemType;
 
   @ApiProperty()
   breaking!: boolean;
