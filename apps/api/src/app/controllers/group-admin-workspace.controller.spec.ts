@@ -4,7 +4,6 @@ import { CreateWorkspaceDto, MoveToDto } from '@studio-lite-lib/api-dto';
 import { GroupAdminWorkspaceController } from './group-admin-workspace.controller';
 import { WorkspaceService } from '../services/workspace.service';
 import { UsersService } from '../services/users.service';
-import UserEntity from '../entities/user.entity';
 import { IsWorkspaceGroupAdminGuard } from '../guards/is-workspace-group-admin.guard';
 import { AuthService } from '../services/auth.service';
 import { UserWorkspaceGroupNotAdminException } from '../exceptions/user-workspace-group-not-admin.exception';
@@ -93,38 +92,59 @@ describe('GroupAdminWorkspaceController', () => {
   });
 
   describe('patchGroups', () => {
-    it('should move workspaces to a target group the user administers', async () => {
-      const user = { id: 1 } as UserEntity;
+    it('should move workspaces between groups the user administers', async () => {
       const dto: MoveToDto = { ids: [10, 20], targetId: 2 };
       usersService.getUserIsAdmin.mockResolvedValue(false);
       usersService.isWorkspaceGroupAdmin.mockResolvedValue(true);
+      workspaceService.findGroupIdsOfWorkspaces.mockResolvedValue([7]);
       workspaceService.patchWorkspaceGroups.mockResolvedValue(undefined);
 
-      await controller.patchGroups(user, dto);
+      await controller.patchGroups(1, dto);
 
-      expect(workspaceService.patchWorkspaceGroups).toHaveBeenCalledWith(dto.ids, dto.targetId, user);
+      expect(usersService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(1, 2);
+      expect(usersService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(1, 7);
+      expect(workspaceService.findGroupIdsOfWorkspaces).toHaveBeenCalledWith(dto.ids);
+      expect(workspaceService.patchWorkspaceGroups).toHaveBeenCalledWith(dto.ids, dto.targetId);
     });
 
     it('should refuse a target group the user does not administer (#1005)', async () => {
-      // The service checks the group the workspaces are moved OUT of; this is the one they are
-      // moved INTO, and it stands in the body.
-      const user = { id: 1 } as UserEntity;
+      // The target group stands in the body, where the guard does not look.
       usersService.getUserIsAdmin.mockResolvedValue(false);
       usersService.isWorkspaceGroupAdmin.mockResolvedValue(false);
 
-      await expect(controller.patchGroups(user, { ids: [10], targetId: 2 }))
+      await expect(controller.patchGroups(1, { ids: [10], targetId: 2 }))
         .rejects.toThrow(UserWorkspaceGroupNotAdminException);
       expect(workspaceService.patchWorkspaceGroups).not.toHaveBeenCalled();
+    });
+
+    it('should refuse workspaces of a group the user does not administer before moving any (#1984)', async () => {
+      // Moving resets the states of the units, so the refusal has to come before the service.
+      usersService.getUserIsAdmin.mockResolvedValue(false);
+      usersService.isWorkspaceGroupAdmin
+        .mockImplementation((_userId: number, groupId: number) => Promise.resolve(groupId === 2));
+      workspaceService.findGroupIdsOfWorkspaces.mockResolvedValue([7]);
+
+      await expect(controller.patchGroups(1, { ids: [10], targetId: 2 }))
+        .rejects.toThrow(UserWorkspaceGroupNotAdminException);
+      expect(workspaceService.patchWorkspaceGroups).not.toHaveBeenCalled();
+    });
+
+    it('should let an administrator move workspaces between any groups (#1984)', async () => {
+      usersService.getUserIsAdmin.mockResolvedValue(true);
+      usersService.isWorkspaceGroupAdmin.mockResolvedValue(false);
+
+      await controller.patchGroups(1, { ids: [10], targetId: 2 });
+
+      expect(workspaceService.patchWorkspaceGroups).toHaveBeenCalledWith([10], 2);
     });
 
     it('should refuse a body without a target group instead of asking about it', async () => {
       // Nothing validates the body, and isWorkspaceGroupAdmin without a group answers "administers
       // any group at all" -- the very fallback this change removes.
-      const user = { id: 1 } as UserEntity;
       usersService.getUserIsAdmin.mockResolvedValue(false);
       usersService.isWorkspaceGroupAdmin.mockResolvedValue(true);
 
-      await expect(controller.patchGroups(user, { ids: [10] } as MoveToDto))
+      await expect(controller.patchGroups(1, { ids: [10] } as MoveToDto))
         .rejects.toThrow(UserWorkspaceGroupNotAdminException);
       expect(usersService.isWorkspaceGroupAdmin).not.toHaveBeenCalled();
       expect(workspaceService.patchWorkspaceGroups).not.toHaveBeenCalled();

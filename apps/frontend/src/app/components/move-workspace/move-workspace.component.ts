@@ -2,7 +2,7 @@ import { Component, Inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
-import { WorkspaceGroupFullDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
+import { WorkspaceGroupDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatOption } from '@angular/material/core';
@@ -18,7 +18,7 @@ export interface MoveComponentData {
   content: string,
   default: string,
   okButtonLabel: string,
-  workspaceGroups: WorkspaceGroupFullDto[],
+  workspaceGroups: WorkspaceGroupDto[],
   selectedRows: WorkspaceInListDto[]
 }
 @Component({

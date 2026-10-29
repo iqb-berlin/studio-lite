@@ -156,16 +156,6 @@ export class BackendService {
       );
   }
 
-  getWorkspaceGroupsByUser(userId: number): Observable<WorkspaceGroupFullDto[] | null> {
-    return this.http
-      .get<WorkspaceGroupFullDto[]>(
-        `${this.serverUrl}admin/users/${userId}/workspace-groups`
-      )
-      .pipe(
-        catchError(() => of(null))
-      );
-  }
-
   getXlsWorkspaces(workspaceGroupId: number): Observable<Blob> {
     const queryParams = new HttpParams().set('download', 'true');
     return this.http.get(

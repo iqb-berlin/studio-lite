@@ -27,8 +27,6 @@ import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import { UsersService } from './users.service';
 import { WorkspaceUserService } from './workspace-user.service';
 import { UnitUserService } from './unit-user.service';
-import { UserWorkspaceGroupNotAdminException } from '../exceptions/user-workspace-group-not-admin.exception';
-import User from '../entities/user.entity';
 import { GroupAdminUnprocessableWorkspaceException } from '../exceptions/group-admin-unprocessable-workspace.exception';
 
 /**
@@ -399,39 +397,24 @@ export class WorkspaceService {
     }
   }
 
-  async patchWorkspaceGroups(
-    ids: number[],
-    newWorkspaceGroupId: number,
-    user: User
-  ): Promise<void> {
+  /**
+   * Moves workspaces into another group and resets the state of their units; both groups have been
+   * checked by the controller (#1984). Ids that belong to no workspace are passed over, as by
+   * {@link remove}.
+   */
+  async patchWorkspaceGroups(ids: number[], newWorkspaceGroupId: number): Promise<void> {
+    const workspaces = await this.workspacesRepository.find({
+      where: { id: In(ids) },
+      select: { id: true, groupId: true }
+    });
     await Promise.all(
-      ids.map(async id => {
-        const workspace = await this.findOne(id);
-
-        if (workspace.groupId !== newWorkspaceGroupId) {
-          this.unitService
-            .findAllForWorkspace(workspace.id)
-            .then(async units => {
-              await Promise.all(
-                units.map(async unit => this.unitService.removeUnitState(unit.id)
-                )
-              );
-            });
-        }
-        if (
-          await this.usersService.isWorkspaceGroupAdmin(
-            user.id,
-            workspace.groupId
-          )
-        ) {
-          await this.patch({ id, groupId: newWorkspaceGroupId });
-        } else {
-          throw new UserWorkspaceGroupNotAdminException(
-            newWorkspaceGroupId,
-            'PATCH'
-          );
-        }
-      })
+      workspaces
+        .filter(workspace => workspace.groupId !== newWorkspaceGroupId)
+        .map(async workspace => {
+          await this.workspacesRepository.update(workspace.id, { groupId: newWorkspaceGroupId });
+          const units = await this.unitService.findAllForWorkspace(workspace.id);
+          await Promise.all(units.map(unit => this.unitService.removeUnitState(unit.id)));
+        })
     );
   }
 

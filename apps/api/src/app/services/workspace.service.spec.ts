@@ -18,7 +18,6 @@ import { UsersService } from './users.service';
 import { UnitService } from './unit.service';
 import { UnitMetadataService } from './unit-metadata.service';
 import { UnitUserService } from './unit-user.service';
-import User from '../entities/user.entity';
 import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
 import { GroupAdminUnprocessableWorkspaceException } from '../exceptions/group-admin-unprocessable-workspace.exception';
 
@@ -410,23 +409,49 @@ describe('WorkspaceService', () => {
   });
 
   describe('patchWorkspaceGroups', () => {
-    it('should patch group id', async () => {
-      const IDs = [1];
-      const newGroupId = 2;
-      const user = { id: 1 } as User;
-      const ws = { id: 1, groupId: 1 };
-      const group = { id: 1, name: 'g' };
+    beforeEach(() => {
+      (workspaceRepository.find as jest.Mock).mockResolvedValue([
+        createMock<Workspace>({ id: 1, groupId: 1 }),
+        createMock<Workspace>({ id: 2, groupId: 2 })
+      ]);
+      (unitService.findAllForWorkspace as jest.Mock).mockResolvedValue([
+        createMock<Unit>({ id: 11 }),
+        createMock<Unit>({ id: 12 })
+      ]);
+    });
 
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValueOnce(ws);
-      (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValueOnce(group);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValueOnce(ws);
+    it('should move the workspaces and reset the states of their units', async () => {
+      await service.patchWorkspaceGroups([1, 2], 3);
 
-      (unitService.findAllForWorkspace as jest.Mock).mockResolvedValue([]);
-      (usersService.isWorkspaceGroupAdmin as jest.Mock).mockResolvedValue(true);
+      expect(workspaceRepository.update).toHaveBeenCalledWith(1, { groupId: 3 });
+      expect(workspaceRepository.update).toHaveBeenCalledWith(2, { groupId: 3 });
+      expect(unitService.removeUnitState).toHaveBeenCalledWith(11);
+      expect(unitService.removeUnitState).toHaveBeenCalledWith(12);
+    });
 
-      await service.patchWorkspaceGroups(IDs, newGroupId, user);
+    it('should leave a workspace that is already in the target group as it is', async () => {
+      await service.patchWorkspaceGroups([1, 2], 2);
 
-      expect(workspaceRepository.save).toHaveBeenCalled();
+      expect(workspaceRepository.update).toHaveBeenCalledTimes(1);
+      expect(workspaceRepository.update).toHaveBeenCalledWith(1, { groupId: 2 });
+      expect(unitService.findAllForWorkspace).toHaveBeenCalledTimes(1);
+      expect(unitService.findAllForWorkspace).toHaveBeenCalledWith(1);
+    });
+
+    it('should not be done before the states are reset (#1984)', async () => {
+      let resetDone: () => void = () => undefined;
+      (unitService.removeUnitState as jest.Mock)
+        .mockReturnValue(new Promise<void>(resolve => { resetDone = resolve; }));
+      let moved = false;
+
+      const move = service.patchWorkspaceGroups([1], 3).then(() => { moved = true; });
+      await new Promise(process.nextTick);
+      expect(unitService.removeUnitState).toHaveBeenCalled();
+      expect(moved).toBe(false);
+
+      resetDone();
+      await move;
+      expect(moved).toBe(true);
     });
   });
 

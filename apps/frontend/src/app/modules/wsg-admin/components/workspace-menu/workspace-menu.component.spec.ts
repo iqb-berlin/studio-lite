@@ -3,11 +3,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { Component, Input } from '@angular/core';
-import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
+import { AuthDataDto, WorkspaceGroupDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { WorkspaceMenuComponent } from './workspace-menu.component';
 import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
+import { MoveWorkspaceComponent } from '../../../../components/move-workspace/move-workspace.component';
 
 @Component({ selector: 'studio-lite-wrapped-icon', template: '', standalone: true })
 class MockWrappedIconComponent {
@@ -88,6 +89,44 @@ describe('WorkspaceMenuComponent', () => {
     expect(component.workspaceRenamed.emit).toHaveBeenCalledWith({
       selection: [workspace],
       name: 'renamed-workspace'
+    });
+  });
+
+  describe('moveObject', () => {
+    const group = (id: number, isAdmin: boolean) => ({ id, name: `g${id}`, isAdmin } as WorkspaceGroupDto);
+    const authDataWith = (workspaces: WorkspaceGroupDto[]) => of({ userId: 1, workspaces } as AuthDataDto);
+
+    beforeEach(() => {
+      component.selectedRows = [{ id: 7, name: 'ws7' } as WorkspaceInListDto];
+    });
+
+    it('should offer the groups the user administers as targets (#1984)', () => {
+      mockAppBackendService.getAuthData
+        .mockReturnValue(authDataWith([group(1, true), group(2, false), group(3, true)]));
+      mockMatDialog.open.mockReturnValue({ afterClosed: () => of(3) });
+      jest.spyOn(component.workspaceMoved, 'emit');
+
+      component.moveObject();
+
+      expect(mockMatDialog.open).toHaveBeenCalledWith(MoveWorkspaceComponent, expect.objectContaining({
+        data: expect.objectContaining({ workspaceGroups: [group(1, true), group(3, true)] })
+      }));
+      expect(component.workspaceMoved.emit).toHaveBeenCalledWith({
+        selection: component.selectedRows,
+        workspaceGroupId: 3
+      });
+    });
+
+    it('should show the hint and move nothing when the user administers only one group', () => {
+      mockAppBackendService.getAuthData.mockReturnValue(authDataWith([group(1, true), group(2, false)]));
+      jest.spyOn(component.workspaceMoved, 'emit');
+
+      component.moveObject();
+
+      expect(mockMatDialog.open).toHaveBeenCalledWith(MoveWorkspaceComponent, expect.objectContaining({
+        data: expect.objectContaining({ content: 'wsg-admin.move-workspaces-no-workspace-groups-hint' })
+      }));
+      expect(component.workspaceMoved.emit).not.toHaveBeenCalled();
     });
   });
 });

@@ -7,7 +7,7 @@ import { By } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatSelectModule } from '@angular/material/select';
 import { BehaviorSubject } from 'rxjs';
-import { WorkspaceGroupFullDto } from '@studio-lite-lib/api-dto';
+import { WorkspaceGroupDto } from '@studio-lite-lib/api-dto';
 import { WsgAdminService } from '../../modules/wsg-admin/services/wsg-admin.service';
 import { MoveWorkspaceComponent, MoveComponentData } from './move-workspace.component';
 
@@ -24,9 +24,9 @@ describe('MoveWorkspaceComponent', () => {
     default: '1',
     okButtonLabel: 'Move OK',
     workspaceGroups: [
-      { id: 1, name: 'Group 1' } as WorkspaceGroupFullDto,
-      { id: 2, name: 'Group 2' } as WorkspaceGroupFullDto,
-      { id: 3, name: 'Group 3' } as WorkspaceGroupFullDto
+      { id: 1, name: 'Group 1' } as WorkspaceGroupDto,
+      { id: 2, name: 'Group 2' } as WorkspaceGroupDto,
+      { id: 3, name: 'Group 3' } as WorkspaceGroupDto
     ],
     selectedRows: []
   };
