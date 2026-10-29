@@ -98,8 +98,11 @@ describe('Unit Comments', () => {
       .find('button')
       .click({ force: true });
     cy.get('mat-slide-toggle').should('have.class', 'mat-mdc-slide-toggle-checked');
+    // saved before the page is loaded again, which would otherwise cut the request off
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/comments/*/hidden').as('showComment');
     cy.get('studio-lite-comment')
       .eq(0).contains('mat-icon', 'visibility').click({ force: true });
+    waitForSuccess('@showComment');
 
     cy.visitWs(primaryWorkspace);
     selectUnit(importedUnit.shortname);

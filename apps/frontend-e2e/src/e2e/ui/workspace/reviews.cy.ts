@@ -119,6 +119,7 @@ describe('Unit Reviews', () => {
     cy.intercept('GET', '/api/workspaces/*?download=true*').as('reviewDownload');
     exportReview(review);
     waitForSuccess('@reviewDownload');
+    cy.get('[data-cy="workspace-review-close"]').click();
   });
 
   it('opens the print view of the review units via the admin menu', () => {
@@ -388,8 +389,9 @@ describe('Unit Reviews', () => {
       cy.get('mat-dialog-container').should('be.visible');
     };
 
-    // A review of one unit that may be commented on; updateReviewAPI allows comments and shows
-    // those of others. The password stays unset: the first test sees the link locked without one.
+    // A review of one unit that may be commented on, made with updateReviewAPI: it allows comments
+    // and shows those of others, but also shows coding and metadata, which a review made in the
+    // review admin leaves off. The password stays unset: the first test sees the link locked without one.
     before(() => {
       cy.visitWs(primaryWorkspace);
       // the token of the admin, not of whoever the tests before left logged in
