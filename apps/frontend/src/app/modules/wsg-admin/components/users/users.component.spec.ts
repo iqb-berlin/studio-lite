@@ -340,4 +340,20 @@ describe('UsersComponent', () => {
       expect(component.userWorkspaces.updateHasChanged).not.toHaveBeenCalled();
     });
   });
+
+  it.each<[string, string, string[]]>([
+    ['part of the login name in any case', 'ann', ['Anna']],
+    ['the last name', 'müll', ['Anna']],
+    ['the email, also beside a user without one', 'example.org', ['bert']]
+  ])('should find users by %s', (_, filter, names) => {
+    mockBackendService.getUsersFull.mockReturnValue(of([
+      { id: 1, name: 'Anna', lastName: 'Müller' },
+      { id: 2, name: 'bert', email: 'bert@example.org' }
+    ]));
+    fixture.detectChanges();
+
+    component.objectsDatasource.filter = filter;
+
+    expect(component.objectsDatasource.filteredData.map(user => user.name)).toEqual(names);
+  });
 });

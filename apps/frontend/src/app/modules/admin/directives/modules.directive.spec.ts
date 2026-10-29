@@ -144,4 +144,18 @@ describe('ModulesDirective', () => {
 
     expect(backendService.deleteVeronaModules).not.toHaveBeenCalled();
   });
+
+  it.each<[string, string[], string]>([
+    ['one module', ['m1'], 'modules.delete-module'],
+    ['several modules by their number', ['m1', 'm2'], 'modules.delete-modules']
+  ])('asks before deleting %s', (_, keys, content) => {
+    const { directive, deleteConfirmDialog } = createDirective();
+    directive.selectedModules = keys.map(key => ({ key }) as VeronaModuleClass);
+
+    directive.deleteFiles();
+
+    expect(deleteConfirmDialog.open).toHaveBeenCalledWith(ConfirmDialogComponent, expect.objectContaining({
+      data: expect.objectContaining({ content })
+    }));
+  });
 });

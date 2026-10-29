@@ -122,6 +122,23 @@ describe('AppConfigComponent', () => {
     expect(stringComponent.configForm.get('globalWarningExpiredDay')?.value).toBeInstanceOf(Date);
   });
 
+  it('should offer the default expiry day for a config without one', () => {
+    backendService.getAppConfig.mockReturnValue(of({
+      appTitle: 'Test App',
+      introHtml: '',
+      imprintHtml: '',
+      emailSubject: '',
+      emailBody: '',
+      globalWarningText: 'Test Warning',
+      hasUsers: true
+    }));
+
+    fixture.detectChanges();
+
+    expect(component.configForm.get('globalWarningExpiredDay')?.value)
+      .toEqual(defaultAppConfig.globalWarningExpiredDay);
+  });
+
   describe('the shared default config (#1964)', () => {
     const editAndSave = (): void => {
       fixture.detectChanges();

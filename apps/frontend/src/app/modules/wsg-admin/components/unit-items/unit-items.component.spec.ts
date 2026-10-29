@@ -1,7 +1,7 @@
 import {
   ComponentFixture, fakeAsync, TestBed, tick
 } from '@angular/core/testing';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -150,4 +150,17 @@ describe('UnitItemsComponent', () => {
 
     expect(snackBarSpy).toHaveBeenCalledWith('wsg-admin.unit-item-not-deleted', 'error', { duration: 3000 });
   }));
+
+  // Esc, a click beside the dialog and navigation close it with undefined (#1844)
+  it.each([false, undefined])('should not delete an item when its confirmation closes with %s', result => {
+    const item: UnitItemInViewDto = {
+      uuid: '123', unitId: 1, unitKey: 'UNIT-1', unitName: 'Unit 1', workspaceId: 1, workspaceName: 'Workspace 1'
+    };
+    const deleteSpy = jest.spyOn(backendService, 'deleteUnitItem');
+    jest.spyOn(dialog, 'open').mockReturnValue({ afterClosed: () => of(result) } as MatDialogRef<unknown>);
+
+    component.openDeleteDialog(item);
+
+    expect(deleteSpy).not.toHaveBeenCalled();
+  });
 });
