@@ -1,20 +1,24 @@
 // eslint-disable-next-line max-classes-per-file
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, fakeAsync, TestBed, tick
+} from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { Component, Input } from '@angular/core';
 import { SafeUrl } from '@angular/platform-browser';
-import { provideHttpClient } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
-import { environment } from '../../../environments/environment';
+import { of } from 'rxjs';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { AuthDataDto } from '@studio-lite-lib/api-dto';
 import { HomeComponent } from './home.component';
+import { AppService } from '../../services/app.service';
+import { BackendService } from '../../services/backend.service';
 import { LoginComponent } from '../login/login.component';
 import { UserWorkspacesAreaComponent } from '../user-workspaces-area/user-workspaces-area.component';
 import { UserReviewsAreaComponent } from '../user-reviews-area/user-reviews-area.component';
 import { AppInfoComponent } from '../app-info/app-info.component';
 
 describe('HomeComponent', () => {
-  let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
+  let backendService: DeepMocked<BackendService>;
 
   @Component({ selector: 'studio-lite-app-info', standalone: true, template: '' })
   class MockAppInfoComponent {
@@ -39,18 +43,17 @@ describe('HomeComponent', () => {
   class MockUserReviewsAreaComponent {}
 
   beforeEach(async () => {
+    backendService = createMock<BackendService>({
+      getConfig: jest.fn().mockReturnValue(of(null)),
+      getAuthData: jest.fn().mockReturnValue(of(AppService.defaultAuthData))
+    });
     await TestBed.configureTestingModule({
       imports: [
         HomeComponent,
         TranslateModule.forRoot()
       ],
       providers: [
-        provideHttpClient(),
-        provideRouter([]),
-        {
-          provide: 'SERVER_URL',
-          useValue: environment.backendUrl
-        }
+        { provide: BackendService, useValue: backendService }
       ]
     }).overrideComponent(HomeComponent, {
       remove: {
@@ -70,12 +73,31 @@ describe('HomeComponent', () => {
         ]
       }
     }).compileComponents();
-    fixture = TestBed.createComponent(HomeComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  // Created outside the async setup, so that the timer of ngOnInit runs under fakeAsync.
+  beforeEach(() => {
+    fixture = TestBed.createComponent(HomeComponent);
   });
+
+  afterEach(() => localStorage.removeItem('id_token'));
+
+  // Back on the start page, the workspaces and reviews are read again: they may have changed since the login.
+  it('should reload the auth data of a stored login', fakeAsync(() => {
+    const authData: AuthDataDto = { ...AppService.defaultAuthData, userId: 3, userName: 'anna' };
+    backendService.getAuthData.mockReturnValue(of(authData));
+    localStorage.setItem('id_token', 'token');
+
+    fixture.detectChanges();
+    tick();
+
+    expect(TestBed.inject(AppService).authData).toBe(authData);
+  }));
+
+  it('should not ask for auth data without a stored login', fakeAsync(() => {
+    fixture.detectChanges();
+    tick();
+
+    expect(backendService.getAuthData).not.toHaveBeenCalled();
+  }));
 });

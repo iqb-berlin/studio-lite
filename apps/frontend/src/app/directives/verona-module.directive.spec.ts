@@ -250,6 +250,18 @@ describe('VeronaModuleDirective', () => {
     matchSpy.mockRestore();
   });
 
+  // The module list is loaded once and held; every unit opened after that is matched against it.
+  it('resolves the module id from the list it holds without loading the list again', async () => {
+    const { directive, moduleService } = createDirective();
+    moduleService.players = { 'player@1.2': createModule('player@1.2') };
+    const metadataStore = new UnitMetadataStore({ id: 1, player: 'player@1.1' } as UnitPropertiesDto);
+
+    const moduleId = await firstValueFrom(directive.getVeronaModuleId(metadataStore, 'player'));
+
+    expect(moduleService.loadList).not.toHaveBeenCalled();
+    expect(moduleId).toBe('player@1.2');
+  });
+
   it('builds module when iframe exists and module html is available', async () => {
     const { directive, moduleService } = createDirective();
 

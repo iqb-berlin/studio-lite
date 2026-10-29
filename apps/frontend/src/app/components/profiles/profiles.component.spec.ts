@@ -154,6 +154,17 @@ describe('ProfilesComponent', () => {
     expect(component.profileStoresWithProfiles).toEqual([]);
   }));
 
+  // The admin dialog passes the selection of the group it edits. The group last chosen in the group
+  // administration is another one, and its profiles must not be offered as this group's.
+  it('should not preselect the profiles of the chosen group when a selection is passed in', () => {
+    (mockMetadataBackendService.getRegisteredProfiles as jest.Mock).mockReturnValue(of([]));
+    component.profiles = [];
+
+    fixture.detectChanges();
+
+    expect(component.profilesSelected).toEqual([]);
+  });
+
   it('changeSelection should add profile if checked', () => {
     jest.spyOn(component.hasChanged, 'emit');
     const event = {
