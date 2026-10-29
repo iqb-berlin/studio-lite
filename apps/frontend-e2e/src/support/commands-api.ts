@@ -346,7 +346,7 @@ Cypress.Commands.add('createWsAPI', (groupId: string, ws:WsData, token:string) =
 });
 
 // 17
-Cypress.Commands.add('moveWsAPI', (ws:string, newGroup: string, token:string) => {
+Cypress.Commands.add('moveWsAPI', (ws: string | string[], newGroup: string, token:string) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'PATCH',
@@ -356,7 +356,7 @@ Cypress.Commands.add('moveWsAPI', (ws:string, newGroup: string, token:string) =>
       authorization
     },
     body: {
-      ids: [`${ws}`],
+      ids: (Array.isArray(ws) ? ws : [ws]).map(id => `${id}`),
       targetId: `${newGroup}`
     },
     failOnStatusCode: false

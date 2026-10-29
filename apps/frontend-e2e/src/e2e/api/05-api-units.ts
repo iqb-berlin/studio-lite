@@ -1124,6 +1124,48 @@ describe('Unit API tests', () => {
     });
   });
 
+  // A drop box is a workspace of the same group (#1805). Moving a workspace into another group
+  // left both its own drop box and the workspaces using it as theirs pointing across (#2027).
+  describe('#2027 drop boxes of a workspace moved to another group', () => {
+    const token = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const ids = {
+      moved: '', dropBox: '', user: '', together: ''
+    };
+    const createWorkspace = (name: string, assign: (id: string) => void) => cy
+      .createWsAPI(Cypress.expose(groupVera.id), { id: '', name }, token())
+      .then(resp => {
+        expect(resp.status).to.equal(201);
+        assign(`${resp.body}`);
+      });
+    const dropBoxOf = (wsId: string) => cy.getWsAPI(wsId, token()).its('body.dropBoxId');
+
+    before(() => {
+      createWorkspace('Verschoben-2027', id => { ids.moved = id; });
+      createWorkspace('Ablage-2027', id => { ids.dropBox = id; });
+      createWorkspace('Bleibt-2027', id => { ids.user = id; });
+      createWorkspace('Mitverschoben-2027', id => { ids.together = id; });
+      cy.then(() => {
+        cy.dropboxWsAPI(ids.moved, ids.dropBox, token()).its('status').should('equal', 200);
+        cy.dropboxWsAPI(ids.user, ids.moved, token()).its('status').should('equal', 200);
+        cy.dropboxWsAPI(ids.together, ids.moved, token()).its('status').should('equal', 200);
+      });
+    });
+
+    after(() => {
+      cy.deleteWsAPI([ids.moved, ids.dropBox, ids.user, ids.together], token());
+    });
+
+    it('200 positive test: should drop the drop boxes between moved and remaining workspaces only', () => {
+      cy.moveWsAPI([ids.moved, ids.together], Cypress.expose(group2.id), token())
+        .its('status').should('equal', 200);
+      // its own drop box stayed behind, and it was the drop box of one that stayed behind
+      dropBoxOf(ids.moved).should('equal', null);
+      dropBoxOf(ids.user).should('equal', null);
+      // moved along with its drop box, the link does not cross the boundary
+      cy.then(() => dropBoxOf(ids.together).should('equal', Number(ids.moved)));
+    });
+  });
+
   describe('39. PATCH /api/workspaces/{workspace_id}/name', () => {
     it('200 positive test: should allow an authorized user to rename a workspace', () => {
       cy.renameWsAPI(

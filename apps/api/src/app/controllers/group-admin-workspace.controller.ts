@@ -96,8 +96,8 @@ export class GroupAdminWorkspaceController {
   /**
    * Moves workspaces into another group. Both ends are asked about here, before anything is
    * changed -- the guard cannot, they stand in the body: the target group, and every group the
-   * workspaces are moved out of. A move resets the state of their units, so a refused request
-   * must not get as far as the service (#1984).
+   * workspaces are moved out of. A move resets the state of their units and drops drop boxes
+   * across the new group boundary, so a refused request must not get as far as the service (#1984).
    */
   @Patch('group-id')
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)

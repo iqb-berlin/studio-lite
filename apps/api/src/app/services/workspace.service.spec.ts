@@ -428,9 +428,14 @@ describe('WorkspaceService', () => {
     it('should leave a workspace that is already in the target group as it is', async () => {
       await service.patchWorkspaceGroups([1, 2], 2);
 
-      expect(manager.update).toHaveBeenCalledTimes(2);
       expect(manager.update).toHaveBeenCalledWith(Workspace, { id: In([1]) }, { groupId: 2 });
       expect(manager.update).toHaveBeenCalledWith(Unit, { workspaceId: In([1]) }, { state: '0' });
+      expect(manager.update).not.toHaveBeenCalledWith(
+        Workspace,
+        expect.objectContaining({ id: In([1, 2]) }),
+        expect.anything()
+      );
+      expect(manager.update).not.toHaveBeenCalledWith(Unit, { workspaceId: In([1, 2]) }, expect.anything());
     });
 
     it('should recognise the target group when it is sent as a string', async () => {

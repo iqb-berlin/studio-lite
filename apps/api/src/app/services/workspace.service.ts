@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import {
   CreateWorkspaceDto,
   WorkspaceGroupDto,
@@ -385,10 +385,11 @@ export class WorkspaceService {
   }
 
   /**
-   * Moves workspaces into another group and resets the state of their units; both groups have been
-   * checked by the controller (#1984). Ids that belong to no workspace are passed over, as by
-   * {@link remove}. Move and reset happen together or not at all: a workspace left moved with its
-   * old states would be passed over by a second attempt, as it is in the target group already.
+   * Moves workspaces into another group, resets the state of their units and drops the drop boxes
+   * between moved and remaining workspaces -- including those of remaining workspaces, which share
+   * the group the controller checked (#1984, #2027). Ids that belong to no workspace are passed
+   * over, as by {@link remove}. All of it happens together or not at all: a workspace left moved
+   * with its old states would be passed over by a second attempt, as it is in the target group.
    */
   async patchWorkspaceGroups(ids: number[], newWorkspaceGroupId: number): Promise<void> {
     // Nothing validates the body: a target sent as a string would never equal a stored group,
@@ -405,6 +406,10 @@ export class WorkspaceService {
     await this.workspacesRepository.manager.transaction(async manager => {
       await manager.update(Workspace, { id: In(movedIds) }, { groupId: targetId });
       await manager.update(Unit, { workspaceId: In(movedIds) }, { state: '0' });
+      // A drop box is a workspace of the same group (#1805): links the move would stretch across
+      // the group boundary are dropped, in both directions; moved together, they stay (#2027).
+      await manager.update(Workspace, { id: In(movedIds), dropBoxId: Not(In(movedIds)) }, { dropBoxId: null });
+      await manager.update(Workspace, { id: Not(In(movedIds)), dropBoxId: In(movedIds) }, { dropBoxId: null });
     });
   }
 
