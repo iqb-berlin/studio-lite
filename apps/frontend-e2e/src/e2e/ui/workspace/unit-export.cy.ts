@@ -130,8 +130,9 @@ describe('Workspace Unit Export & Reports', () => {
     cy.intercept('GET', '/api/workspaces/*/units/scheme').as('codingReport');
     cy.get('[data-cy="workspace-edit-unit-show-coding-report"]').click();
     waitForSuccess('@codingReport');
-    cy.get('studio-lite-coding-report table').should('exist');
     cy.get('[data-cy="coding-report-error"]').should('not.exist');
+    // a unit without a scheme still gets its row
+    cy.contains('studio-lite-coding-report tr', exportUnits.exportUnit1.shortname).should('exist');
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickDialogButton(json.close);
     });

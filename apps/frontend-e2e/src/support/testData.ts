@@ -323,6 +323,10 @@ export const lightUnit: UnitData = {
 export const unitCrudUnits = {
   /** Deleted through the interface in basic-unit */
   crud1: { shortname: 'CRUD_D1', name: 'CRUD Unit 1', group: 'Gruppe D' } as UnitData,
+  /** Left with unsaved changes in basic-unit */
+  unsaved: { shortname: 'CRUD_U1', name: 'CRUD Unsaved Unit', group: 'Gruppe D' } as UnitData,
+  /** Switched to while the changes of `unsaved` wait in basic-unit */
+  switchedTo: { shortname: 'CRUD_U2', name: 'CRUD Next Unit', group: 'Gruppe D' } as UnitData,
   /** Printed with coding & comments in unit-print */
   crudPrint: { shortname: 'CRUD_D2', name: 'CRUD Print Unit', group: 'Gruppe D' } as UnitData
 };

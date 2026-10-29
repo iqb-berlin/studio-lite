@@ -112,6 +112,10 @@ describe('Unit Comments', () => {
   });
 
   it('creates comment linked to specific item', () => {
+    cy.visitWs(primaryWorkspace);
+    selectUnit(importedUnit.shortname);
+    clickIndexTabWorkspace('comments');
+    cy.wait('@getComments');
     cy.get('tiptap-editor').type('Neues Kommentar zur Item 01');
     cy.get('[data-cy="comment-editor-link-to-item"]').click();
     cy.contains('mat-option', '01').click();
