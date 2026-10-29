@@ -19,6 +19,7 @@ import UserSession from '../entities/user-session.entity';
 import { RefreshToken } from '../entities/refresh-token.entity';
 import { ACTIVE_THRESHOLD_MS, PASSIVE_THRESHOLD_MS } from '../app.constants';
 import Unit from '../entities/unit.entity';
+import { AdminUserNotFoundException } from '../exceptions/admin-user-not-found.exception';
 import { UnitService } from './unit.service';
 import { UnitUserService } from './unit-user.service';
 
@@ -38,6 +39,36 @@ describe('UsersService', () => {
   let workspaceUsersRepository: Repository<WorkspaceUser>;
   let workspaceGroupAdminRepository: Repository<WorkspaceGroupAdmin>;
   let workspaceRepository: Repository<Workspace>;
+  let userSessionRepository: Repository<UserSession>;
+  let refreshTokenRepository: Repository<RefreshToken>;
+
+  // Rows are built the way the API writes them: expiresAt is always lastActivity + PASSIVE_THRESHOLD_MS.
+  const sessionRow = (activityAgeMs: number, userId = 1, sessionId = 'sid-1'): UserSession => {
+    const lastActivity = new Date(Date.now() - activityAgeMs);
+    return {
+      userId,
+      sessionId,
+      lastActivity,
+      expiresAt: new Date(lastActivity.getTime() + PASSIVE_THRESHOLD_MS)
+    } as UserSession;
+  };
+
+  const givenSessions = (sessions: UserSession[], liveTokenSessionIds: string[] = []): void => {
+    jest.spyOn(userSessionRepository, 'find').mockResolvedValue(sessions);
+    jest.spyOn(refreshTokenRepository, 'find').mockResolvedValue(
+      liveTokenSessionIds.map(sessionId => ({ sessionId } as RefreshToken))
+    );
+  };
+
+  // The first may have the email shown, the second not.
+  const usersWithAndWithoutPublishedEmail = (): User[] => [
+    {
+      id: 1, name: 'a', email: 'a@x.de', emailPublishApproved: true
+    },
+    {
+      id: 2, name: 'b', email: 'b@x.de', emailPublishApproved: false
+    }
+  ] as User[];
 
   const mockRepository = () => ({
     find: jest.fn(),
@@ -79,6 +110,8 @@ describe('UsersService', () => {
     workspaceGroupAdminRepository = module
       .get<Repository<WorkspaceGroupAdmin>>(getRepositoryToken(WorkspaceGroupAdmin));
     workspaceRepository = module.get<Repository<Workspace>>(getRepositoryToken(Workspace));
+    userSessionRepository = module.get<Repository<UserSession>>(getRepositoryToken(UserSession));
+    refreshTokenRepository = module.get<Repository<RefreshToken>>(getRepositoryToken(RefreshToken));
   });
 
   afterEach(() => {
@@ -110,6 +143,14 @@ describe('UsersService', () => {
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe(1);
     });
+
+    it('should mark an email that is not approved for publishing as hidden', async () => {
+      jest.spyOn(usersRepository, 'find').mockResolvedValue(usersWithAndWithoutPublishedEmail());
+
+      const result = await service.findAllUsers();
+
+      expect(result.map(user => user.email)).toEqual(['a@x.de', 'b@x.de (verborgen)']);
+    });
   });
 
   describe('findAllWorkspaceGroupAdmins', () => {
@@ -126,6 +167,93 @@ describe('UsersService', () => {
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe(1);
     });
+
+    it('should leave out an email that is not approved for publishing', async () => {
+      jest.spyOn(workspaceGroupAdminRepository, 'find')
+        .mockResolvedValue([{ userId: 1 }, { userId: 2 }] as WorkspaceGroupAdmin[]);
+      jest.spyOn(usersRepository, 'find').mockResolvedValue(usersWithAndWithoutPublishedEmail());
+
+      const result = await service.findAllWorkspaceGroupAdmins(1);
+
+      expect(result.map(user => user.email)).toEqual(['a@x.de', '']);
+    });
+  });
+
+  describe('findAllWorkspaceUsers', () => {
+    // Each user is listed once, under the highest of their roles; a user without a role there is not listed.
+    it('should list each user under their highest role in the workspace', async () => {
+      givenSessions([]);
+      jest.spyOn(workspaceRepository, 'findOne').mockResolvedValue({ groupId: 3 } as Workspace);
+      jest.spyOn(workspaceGroupAdminRepository, 'find')
+        .mockResolvedValue([{ userId: 1 }, { userId: 2 }] as WorkspaceGroupAdmin[]);
+      jest.spyOn(workspaceUsersRepository, 'find')
+        .mockResolvedValue([{ userId: 1 }, { userId: 2 }, { userId: 3 }] as WorkspaceUser[]);
+      jest.spyOn(usersRepository, 'find').mockResolvedValue([
+        { id: 1, name: 'admin', isAdmin: true },
+        { id: 2, name: 'group admin', isAdmin: false },
+        { id: 3, name: 'user', isAdmin: false },
+        { id: 4, name: 'other', isAdmin: false }
+      ] as User[]);
+
+      const result = await service.findAllWorkspaceUsers(5);
+
+      expect(result.admins.map(user => user.id)).toEqual([1]);
+      expect(result.workspaceGroupAdmins.map(user => user.id)).toEqual([2]);
+      expect(result.users.map(user => user.id)).toEqual([3]);
+    });
+
+    it('should leave out an email that is not approved for publishing', async () => {
+      givenSessions([]);
+      jest.spyOn(workspaceRepository, 'findOne').mockResolvedValue({ groupId: 3 } as Workspace);
+      jest.spyOn(workspaceGroupAdminRepository, 'find').mockResolvedValue([]);
+      jest.spyOn(workspaceUsersRepository, 'find')
+        .mockResolvedValue([{ userId: 1 }, { userId: 2 }] as WorkspaceUser[]);
+      jest.spyOn(usersRepository, 'find').mockResolvedValue(usersWithAndWithoutPublishedEmail());
+
+      const result = await service.findAllWorkspaceUsers(5);
+
+      expect(result.users.map(user => user.email)).toEqual(['a@x.de', '']);
+    });
+  });
+
+  describe('findAllFull', () => {
+    beforeEach(() => {
+      jest.spyOn(usersRepository, 'find').mockResolvedValue([{ id: 1 }] as User[]);
+    });
+
+    it('should show a user without a session as logged out and inactive', async () => {
+      givenSessions([]);
+
+      const [user] = await service.findAllFull();
+
+      expect(user).toEqual(expect.objectContaining({
+        isLoggedIn: false, activityStatus: 'inactive', sessions: [], lastActivity: undefined
+      }));
+    });
+
+    // The last activity is that of any session; whether someone can still be working is
+    // decided by the newest session a token can still reach.
+    it('should take the last activity from the newest session and the status from the newest live one', async () => {
+      const orphaned = sessionRow(ACTIVE_THRESHOLD_MS + 1000, 1, 'sid-orphaned');
+      const passive = sessionRow(ACTIVE_THRESHOLD_MS + 5000, 1, 'sid-passive');
+      givenSessions([passive, orphaned], ['sid-passive']);
+
+      const [user] = await service.findAllFull();
+
+      expect(user.lastActivity).toEqual(orphaned.lastActivity);
+      expect(user.activityStatus).toBe('passive');
+      expect(user.isLoggedIn).toBe(true);
+      expect(user.sessions).toHaveLength(2);
+    });
+
+    it('should show a user whose sessions no token can reach as orphaned and logged out', async () => {
+      givenSessions([sessionRow(ACTIVE_THRESHOLD_MS + 1000)]);
+
+      const [user] = await service.findAllFull();
+
+      expect(user.activityStatus).toBe('orphaned');
+      expect(user.isLoggedIn).toBe(false);
+    });
   });
 
   describe('findOne', () => {
@@ -135,6 +263,39 @@ describe('UsersService', () => {
 
       const result = await service.findOne(1);
       expect(result.id).toBe(1);
+    });
+
+    it('should throw for an unknown user', async () => {
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.findOne(9)).rejects.toThrow(AdminUserNotFoundException);
+    });
+  });
+
+  describe('getUserIsAdmin', () => {
+    it('should not take an unknown user for an administrator', async () => {
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue(null);
+
+      expect(await service.getUserIsAdmin(9)).toBe(false);
+    });
+  });
+
+  describe('isWorkspaceGroupAdmin', () => {
+    beforeEach(() => {
+      const rows = [{ userId: 5, workspaceGroupId: 2 }] as WorkspaceGroupAdmin[];
+      jest.spyOn(workspaceGroupAdminRepository, 'findOne').mockImplementation(async ({ where }) => rows
+        .find(row => Object.entries(where).every(([key, value]) => row[key as keyof WorkspaceGroupAdmin] === value)) ??
+        null);
+    });
+
+    it('should count only the group asked about', async () => {
+      expect(await service.isWorkspaceGroupAdmin(5, 2)).toBe(true);
+      expect(await service.isWorkspaceGroupAdmin(5, 3)).toBe(false);
+    });
+
+    it('should count any group when none is asked about', async () => {
+      expect(await service.isWorkspaceGroupAdmin(5)).toBe(true);
+      expect(await service.isWorkspaceGroupAdmin(6)).toBe(false);
     });
   });
 
@@ -187,6 +348,23 @@ describe('UsersService', () => {
       expect(result).toBe(true);
       expect(usersRepository.save).toHaveBeenCalled();
     });
+
+    it('should keep the password if the old one is wrong', async () => {
+      jest.spyOn(usersRepository, 'findOne')
+        .mockResolvedValueOnce({ name: 'u1' } as User)
+        .mockResolvedValueOnce({ id: 1, password: 'hashed' } as User);
+      jest.spyOn(bcrypt, 'compareSync').mockReturnValue(false);
+
+      expect(await service.setPassword(1, 'wrong', 'new')).toBe(false);
+      expect(usersRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should refuse an unknown user', async () => {
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue(null);
+
+      expect(await service.setPassword(9, 'old', 'new')).toBe(false);
+      expect(usersRepository.save).not.toHaveBeenCalled();
+    });
   });
 
   describe('canAccessWorkSpace', () => {
@@ -237,6 +415,59 @@ describe('UsersService', () => {
       expect(user.name).toBe('new');
       expect(usersRepository.save).toHaveBeenCalled();
     });
+
+    // Leaving the administrator role out of a request must not take it away.
+    it.each([
+      [undefined, true],
+      [false, false]
+    ])('should take isAdmin %p of an administrator as %p', async (isAdmin, expected) => {
+      const user = { id: 1, isAdmin: true } as User;
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue(user);
+
+      await service.patch(1, { id: 1, isAdmin } as UserFullDto);
+
+      expect(user.isAdmin).toBe(expected);
+    });
+
+    it('should store a new password as its hash and keep the fields sent empty', async () => {
+      jest.spyOn(bcrypt, 'hashSync').mockReturnValue('hash-of-new');
+      const user = {
+        id: 1, name: 'old', description: 'd', lastName: 'L', firstName: 'F', email: 'e@x.de'
+      } as User;
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue(user);
+
+      await service.patch(1, {
+        id: 1, name: '', description: '', lastName: '', firstName: '', email: '', password: 'new'
+      } as UserFullDto);
+
+      expect(user).toEqual(expect.objectContaining({
+        name: 'old', description: 'd', lastName: 'L', firstName: 'F', email: 'e@x.de', password: 'hash-of-new'
+      }));
+    });
+
+    it('should throw for an unknown user', async () => {
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.patch(9, { id: 9, name: 'x' } as UserFullDto)).rejects.toThrow(AdminUserNotFoundException);
+      expect(usersRepository.save).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('patchMyData', () => {
+    it('should withdraw the approval to publish the email and keep the fields sent empty', async () => {
+      const user = {
+        id: 1, description: 'd', lastName: 'L', firstName: 'F', email: 'e@x.de', emailPublishApproved: true
+      } as User;
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue(user);
+
+      await service.patchMyData({
+        id: 1, description: '', lastName: '', firstName: '', email: '', emailPublishApproved: false
+      });
+
+      expect(usersRepository.save).toHaveBeenCalledWith(expect.objectContaining({
+        description: 'd', lastName: 'L', firstName: 'F', email: 'e@x.de', emailPublishApproved: false
+      }));
+    });
   });
 
   describe('setUsersByWorkspace', () => {
@@ -255,6 +486,16 @@ describe('UsersService', () => {
 
       expect(workspaceUsersRepository.delete).toHaveBeenCalledWith({ workspaceId });
       expect(workspaceUsersRepository.save).toHaveBeenCalled();
+    });
+
+    it('should take the units from users who left the workspace and give them to those who joined', async () => {
+      mockUnitService.findAllForWorkspace.mockResolvedValue([{ id: 10 } as Unit]);
+      mockUnitUserService.findByUnitId.mockResolvedValue([{ userId: 1, unitId: 10 }, { userId: 2, unitId: 10 }]);
+
+      await service.setUsersByWorkspace(1, [{ id: 1, accessLevel: 1 }, { id: 3, accessLevel: 1 }]);
+
+      expect(mockUnitUserService.deleteUnitUsersByWorkspaceId.mock.calls).toEqual([[1, 2]]);
+      expect(mockUnitUserService.createUnitUser.mock.calls).toEqual([[3, 10]]);
     });
   });
 
@@ -295,29 +536,6 @@ describe('UsersService', () => {
   });
 
   describe('isUserLoggedIn', () => {
-    // Rows are built the way the API writes them: expiresAt is always
-    // lastActivity + PASSIVE_THRESHOLD_MS.
-    const sessionRow = (activityAgeMs: number): UserSession => {
-      const lastActivity = new Date(Date.now() - activityAgeMs);
-      return {
-        userId: 1,
-        sessionId: 'sid-1',
-        lastActivity,
-        expiresAt: new Date(lastActivity.getTime() + PASSIVE_THRESHOLD_MS)
-      } as UserSession;
-    };
-
-    const givenSessions = (sessions: UserSession[], liveTokenSessionIds: string[] = []): void => {
-      const repositories = service as unknown as {
-        userSessionRepository: Repository<UserSession>,
-        refreshTokenRepository: Repository<RefreshToken>
-      };
-      jest.spyOn(repositories.userSessionRepository, 'find').mockResolvedValue(sessions);
-      jest.spyOn(repositories.refreshTokenRepository, 'find').mockResolvedValue(
-        liveTokenSessionIds.map(sessionId => ({ sessionId } as RefreshToken))
-      );
-    };
-
     it('should return true while someone is interacting with the session', async () => {
       givenSessions([sessionRow(0)]);
 
@@ -359,9 +577,6 @@ describe('UsersService', () => {
 
   describe('updateLastActivity', () => {
     it('should scope the update to the given session', async () => {
-      const userSessionRepository = (service as unknown as {
-        userSessionRepository: Repository<UserSession>
-      }).userSessionRepository;
       const updateSpy = jest.spyOn(userSessionRepository, 'update');
 
       await service.updateLastActivity(1, 'session-1');
@@ -376,9 +591,6 @@ describe('UsersService', () => {
     });
 
     it('should keep expiresAt one inactivity window ahead of lastActivity', async () => {
-      const userSessionRepository = (service as unknown as {
-        userSessionRepository: Repository<UserSession>
-      }).userSessionRepository;
       const updateSpy = jest.spyOn(userSessionRepository, 'update');
 
       await service.updateLastActivity(1, 'session-1');
@@ -388,9 +600,6 @@ describe('UsersService', () => {
     });
 
     it('should never touch any session when no sessionId is provided', async () => {
-      const userSessionRepository = (service as unknown as {
-        userSessionRepository: Repository<UserSession>
-      }).userSessionRepository;
       const updateSpy = jest.spyOn(userSessionRepository, 'update');
 
       await service.updateLastActivity(1);
