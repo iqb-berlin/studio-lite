@@ -326,6 +326,82 @@ describe('UnitDownloadClass', () => {
     });
   });
 
+  describe('the JSON index', () => {
+    const exportIndex = async (properties: Partial<UnitPropertiesDto>) => {
+      const unitServiceMock = createMock<UnitService>();
+      const unitDefinitionServiceMock = createMock<UnitDefinitionService>();
+      const settingServiceMock = createMock<SettingService>();
+      const veronaModuleServiceMock = createMock<VeronaModulesService>();
+      settingServiceMock.findUnitExportConfig.mockResolvedValue({} as UnitExportConfigDto);
+      unitServiceMock.findOnesProperties.mockResolvedValue({
+        key: 'U1', metadata: {}, player: 'iqb-player-aspect@3.0', ...properties
+      } as UnitPropertiesDto);
+      unitServiceMock.ensureUuid.mockResolvedValue('uuid-1');
+      unitDefinitionServiceMock.findOnesDefinition
+        .mockResolvedValue({ definition: '', variables: [] } as UnitDefinitionDto);
+      unitDefinitionServiceMock.findOnesScheme.mockResolvedValue({ scheme: '', schemeType: '' } as UnitSchemeDto);
+      veronaModuleServiceMock.findAll.mockResolvedValue([]);
+
+      await UnitDownloadClass.get(
+        1,
+        unitServiceMock,
+        createMock<UnitMetadataService>(),
+        unitDefinitionServiceMock,
+        createMock<UnitCommentService>(),
+        veronaModuleServiceMock,
+        settingServiceMock,
+        createMock<UnitRichNoteService>(),
+        {
+          unitIdList: [1],
+          addPlayers: false,
+          addComments: false,
+          addTestTakersHot: 0,
+          addTestTakersMonitor: 0,
+          addTestTakersReview: 0
+        } as unknown as UnitDownloadSettingsDto,
+        'json'
+      );
+      const [, file] = mockZip.addFile.mock.calls.find(([name]: [string]) => name === 'U1.json');
+      return JSON.parse((file as Buffer).toString());
+    };
+
+    it('should name the editor of the unit, its label and its description', async () => {
+      const index = await exportIndex({ editor: 'iqb-editor-aspect@2.0', name: 'Aufgabe', description: 'Text' });
+
+      expect(index).toEqual(expect.objectContaining({ label: 'Aufgabe', description: 'Text' }));
+      expect(index.userInterface.editor).toBe('iqb-editor-aspect@2.0');
+    });
+
+    it('should leave out an empty label and description, and the editor of a unit that has none', async () => {
+      const index = await exportIndex({ editor: '', name: '', description: '' });
+
+      expect(index).not.toHaveProperty('label');
+      expect(index).not.toHaveProperty('description');
+      expect(index.userInterface).not.toHaveProperty('editor');
+    });
+  });
+
+  describe('addPlayers', () => {
+    // A unit made with an older minor version of a player is played with the latest one installed.
+    it('should add the player a unit names, or a later minor version of it, and skip one not installed', async () => {
+      const veronaModulesService = createMock<VeronaModulesService>();
+      veronaModulesService.findAll.mockResolvedValue(
+        ['aspect-player@2.3', 'aspect-player@2.5', 'other-player@1.0'].map(key => ({ key }) as VeronaModuleInListDto)
+      );
+      veronaModulesService.findFileById.mockImplementation(
+        async key => ({ fileName: `${key}.html`, file: 'html' }) as unknown as VeronaModuleFileDto
+      );
+
+      await UnitDownloadClass.addPlayers(
+        veronaModulesService,
+        mockZip as unknown as Parameters<typeof UnitDownloadClass.addPlayers>[1],
+        ['aspect-player@2.1', 'unknown-player@1.0']
+      );
+
+      expect(mockZip.addFile.mock.calls.map(([name]: [string]) => name)).toEqual(['aspect-player@2.5.html']);
+    });
+  });
+
   describe('get with exportFormat json', () => {
     it('should create key.json index file and not key.xml', async () => {
       const unitServiceMock = createMock<UnitService>();

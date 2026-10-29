@@ -107,6 +107,31 @@ describe('CodingReportClass', () => {
         trainingEffort: ''
       }]);
     });
+
+    it.each([undefined, ''])('reports a unit with the scheme %p with one row', scheme => {
+      const rows = CodingReportClass.build(3, [{
+        id: 12, key: 'K', name: '', schemer: '', scheme
+      }] as UnitPropertiesDto[]);
+
+      expect(rows.map(row => row.validation)).toEqual(['Kodierschema mit Schemer Version ab 1.5 erzeugen!']);
+    });
+
+    // The JSON format of the scheme names no schemer.
+    it('reads a scheme without a schemer, finding the item of a coding without alias by its id', () => {
+      const units = [{
+        id: 13,
+        key: 'K',
+        name: '',
+        schemer: '',
+        variables: [{ id: 'v1', type: 'string' }],
+        metadata: { items: [{ id: 'I1', variableId: 'v1' }] },
+        scheme: JSON.stringify({ version: '3.0', variableCodings: [{ id: 'v1', sourceType: 'BASE', codes: [] }] })
+      }] as unknown as UnitPropertiesDto[];
+
+      expect(CodingReportClass.build(3, units)).toEqual([
+        expect.objectContaining({ variable: 'v1', item: 'I1' })
+      ]);
+    });
   });
 
   describe('coding report validation aggregation', () => {
@@ -147,6 +172,26 @@ describe('CodingReportClass', () => {
       expect(
         CodingReportClass.getValidationStatus(validationProblems)
       ).toBe('Fehler');
+    });
+
+    it('finds the problems of a coding without alias by its id', () => {
+      expect(CodingReportClass.getValidationProblems(
+        [{
+          type: 'VACANT', breaking: false, variableId: 'v1', variableLabel: ''
+        }],
+        { id: 'v1' } as VariableCodingData
+      )).toEqual([{ type: 'VACANT', breaking: false }]);
+    });
+
+    it('sorts problems of the same weight by type, then by code', () => {
+      const problem = (type: string, code: string) => ({
+        type, breaking: false, variableId: 'public-id', variableLabel: '', code
+      }) as CodingSchemeProblem;
+
+      expect(CodingReportClass.getValidationProblems(
+        [problem('VACANT', '1'), problem('SOURCE_MISSING', '2'), problem('SOURCE_MISSING', '1')],
+        codingVariable
+      ).map(({ type, code }) => `${type} ${code}`)).toEqual(['SOURCE_MISSING 1', 'SOURCE_MISSING 2', 'VACANT 1']);
     });
 
     it('reports warnings when no problem is breaking', () => {
@@ -190,6 +235,18 @@ describe('CodingReportClass', () => {
       } as unknown as VariableCodingData);
 
       expect(codingType).toBe('manuell');
+    });
+
+    it('maps codes without instruction and without rules to keine Regeln', () => {
+      const codingType = CodingReportClass.determineCodingType({
+        codes: [{
+          type: 'FULL_CREDIT',
+          manualInstruction: '',
+          ruleSets: [{ rules: [] }]
+        }]
+      } as unknown as VariableCodingData);
+
+      expect(codingType).toBe('keine Regeln');
     });
   });
 
