@@ -4,7 +4,7 @@
  * this replaces are checked once in the admin and group-admin specs (#1967).
  */
 
-import type { UserInListDto, VeronaModuleInListDto, WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
+import type { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import {
   AccessLevel,
   baseGroup,
@@ -56,8 +56,9 @@ export function createTestBaseAPI(): void {
 
 /**
  * Removes the base again and leaves the browser logged out on the login form, so that the next
- * spec finds an empty database. It finds what to delete by name, as the base may be incomplete
- * when its setup failed halfway, and the teardown may run in another file than the setup.
+ * spec finds an empty database. The first user cannot delete their own account (#1949), so the
+ * database is reset, which takes the users and the group with it; the modules are not part of
+ * that and are deleted first, its own and any other a spec installed.
  */
 export function deleteTestBaseAPI(): void {
   const { username, password } = admin();
@@ -68,27 +69,12 @@ export function deleteTestBaseAPI(): void {
   cy.loginAPI(username, password).then(session => {
     expect(session.status, 'login for the teardown').to.equal(201);
     const token: string = session.body.accessToken;
-    cy.getWsGroupsAPI(token).then(groups => {
-      expect(groups.status, 'groups').to.equal(200);
-      const ids = (groups.body as WorkspaceGroupInListDto[])
-        .filter(group => group.name === baseGroup)
-        .map(group => String(group.id));
-      if (ids.length) cy.deleteGroupsAPI(ids, token).its('status').should('equal', 200);
-    });
-    // its own modules and any other a spec installed
     cy.getModulesAPI(token).then(installed => {
       expect(installed.status, 'modules').to.equal(200);
       const keys = (installed.body as VeronaModuleInListDto[]).map(module => module.key);
       if (keys.length) cy.deleteModulesAPI(keys, token).its('status').should('equal', 200);
     });
-    // the users last, as the token belongs to the first of them
-    cy.getUsersAPI(token).then(users => {
-      expect(users.status, 'users').to.equal(200);
-      const ids = (users.body as UserInListDto[])
-        .filter(user => user.name === standardUser.username || user.name === username)
-        .map(user => String(user.id));
-      if (ids.length) cy.deleteUsersAPI(ids, token).its('status').should('equal', 200);
-    });
   });
+  cy.resetDb();
   showLoginFormAfterUserDeleted();
 }

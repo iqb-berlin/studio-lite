@@ -65,6 +65,8 @@ export class UsersComponent implements OnInit, OnDestroy {
   activeSessionCount = 0;
   passiveSessionCount = 0;
   orphanedSessionCount = 0;
+  // Its row offers no delete button: the API refuses to delete the own account (#1949).
+  readonly ownUserId: number;
   private pollingSubscription: Subscription | null = null;
   private readonly ngUnsubscribe = new Subject<void>();
 
@@ -82,6 +84,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     private appBackendService: AppBackendService,
     private router: Router
   ) {
+    this.ownUserId = this.appService.authData.userId;
     this.tableSelectionRow.changed.pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       r => {
         if (r.added.length > 0) {

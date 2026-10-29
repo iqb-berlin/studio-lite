@@ -20,7 +20,7 @@ import {
 import { addState } from '../../../support/helpers/group-admin';
 import { selectProfileForGroupFromAdmin } from '../../../support/metadata/metadata-util';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
-import { secondaryUser } from '../../../support/testData';
+import { secondaryUser, standardUser } from '../../../support/testData';
 
 describe('Admin User Management', () => {
   const editTarget = secondaryUser;
@@ -69,6 +69,25 @@ describe('Admin User Management', () => {
       cy.contains('mat-row', editTarget.username).should('be.visible');
 
       deleteUser(editTarget.username);
+    });
+
+    // The API refuses to delete the own account (#1949), so its row offers no delete button.
+    it('offers no delete button in the row of the logged-in admin (#1949)', () => {
+      cy.window().then(win => {
+        const token = win.localStorage.getItem('id_token') || '';
+        // a user no other test here creates, so that a failure leaves nothing in their way
+        cy.createUserAPI(standardUser, token).then(user => {
+          expect(user.status, standardUser.username).to.equal(201);
+          goToAdminUsers();
+          cy.contains('mat-row', Cypress.expose('username'))
+            .find('[data-cy="admin-users-delete-user"]')
+            .should('not.exist');
+          cy.contains('mat-row', standardUser.username)
+            .find('[data-cy="admin-users-delete-user"]')
+            .should('exist');
+          cy.deleteUsersAPI([String(user.body)], token).its('status').should('equal', 200);
+        });
+      });
     });
 
     it('sorts the table by username column', () => {

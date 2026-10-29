@@ -128,14 +128,16 @@
       <ng-container matColumnDef="delete">
         <mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="true" class="header-right"></mat-header-cell>
         <mat-cell *matCellDef="let row" class="cell-right">
-          <button mat-icon-button
-                  [matTooltip]="'admin.delete-name' | translate: { name: row.name }"
-                  [color]="'warn'"
-                  matTooltipPosition="above"
-                  (click)="$event.stopPropagation(); deleteUsers([row])"
-                  data-cy="admin-users-delete-user">
-            <mat-icon>delete</mat-icon>
-          </button>
+          @if (row.id !== ownUserId) {
+            <button mat-icon-button
+                    [matTooltip]="'admin.delete-name' | translate: { name: row.name }"
+                    [color]="'warn'"
+                    matTooltipPosition="above"
+                    (click)="$event.stopPropagation(); deleteUsers([row])"
+                    data-cy="admin-users-delete-user">
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
         </mat-cell>
       </ng-container>
 

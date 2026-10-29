@@ -1,6 +1,8 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { DeleteResult, EntityManager, Repository } from 'typeorm';
 // `unstable_mockModule` is missing from the global `jest` object's type, so it comes from here.
 // It is aliased because the global `jest` -- used for `jest.fn()` below -- types its mocks
 // loosely, and importing over that name would make every `mockReturnValue` a type error.
@@ -69,6 +71,18 @@ describe('UsersService', () => {
       id: 2, name: 'b', email: 'b@x.de', emailPublishApproved: false
     }
   ] as User[];
+
+  // The transaction hands its callback a manager of its own; the administrators it finds are the
+  // rows it locks.
+  const givenLockedAdmins = (adminIds: number[]): DeepMocked<EntityManager> => {
+    const manager = createMock<EntityManager>();
+    manager.find.mockResolvedValue(adminIds.map(id => ({ id } as User)));
+    Object.defineProperty(usersRepository, 'manager', {
+      value: { transaction: (work: (transactionManager: EntityManager) => Promise<void>) => work(manager) },
+      configurable: true
+    });
+    return manager;
+  };
 
   const mockRepository = () => ({
     find: jest.fn(),
@@ -450,6 +464,36 @@ describe('UsersService', () => {
 
       await expect(service.patch(9, { id: 9, name: 'x' } as UserFullDto)).rejects.toThrow(AdminUserNotFoundException);
       expect(usersRepository.save).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('remove', () => {
+    it('should refuse to delete the own account and delete nothing (#1949)', async () => {
+      const manager = givenLockedAdmins([1, 3]);
+
+      await expect(service.remove([1, 2], 1)).rejects.toThrow(BadRequestException);
+      expect(manager.delete).not.toHaveBeenCalled();
+    });
+
+    // Besides the own account, only two administrators deleting each other at the same time get
+    // here: the later request finds its caller gone and would take the last administrator with it.
+    it('should refuse to delete the last administrator and delete nothing (#1949)', async () => {
+      const manager = givenLockedAdmins([1]);
+
+      await expect(service.remove([1], 2)).rejects.toThrow(BadRequestException);
+      expect(manager.delete).not.toHaveBeenCalled();
+      // unlocked, the later request would not wait for the earlier one and count before it
+      expect(manager.find).toHaveBeenCalledWith(User, expect.objectContaining({
+        lock: { mode: 'for_no_key_update' }
+      }));
+    });
+
+    it('should delete the accounts while another administrator remains', async () => {
+      const manager = givenLockedAdmins([1, 2]);
+
+      await service.remove([2, 3], 1);
+
+      expect(manager.delete).toHaveBeenCalledWith(User, [2, 3]);
     });
   });
 

@@ -1,7 +1,7 @@
 import {
-  Injectable, Logger
+  BadRequestException, Injectable, Logger
 } from '@nestjs/common';
-import { MoreThan, Repository } from 'typeorm';
+import { EntityManager, MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import {
@@ -345,9 +345,42 @@ export class UsersService {
     return user.firstName || '';
   }
 
-  async remove(id: number | number[]): Promise<void> {
-    this.logger.log(`Deleting user with id: ${id}`);
-    await this.usersRepository.delete(id);
+  /**
+   * Deletes the accounts, but not the caller's own and not the last administrator: without one no
+   * one reaches the user administration any more, and without any account `init-login` makes the
+   * next visitor an administrator (#1949).
+   */
+  async remove(ids: number[], ownId: number): Promise<void> {
+    if (ids.includes(ownId)) {
+      throw new BadRequestException('An administrator cannot delete their own account.');
+    }
+    await this.usersRepository.manager.transaction(async manager => {
+      await UsersService.refuseToRemoveLastAdmin(manager, ids);
+      this.logger.log(`Deleting users with ids: ${ids}`);
+      await manager.delete(User, ids);
+    });
+  }
+
+  /**
+   * Throws when no administrator would remain beside the given accounts. Apart from a request
+   * against the caller's own account, this happens only when two administrators remove each other
+   * at the same time; the rows are therefore locked until the caller's transaction ends, so that
+   * the second request waits for the first and then counts what it left. They are found rather
+   * than counted because Postgres refuses a row lock together with an aggregate, and in the order
+   * of their ids so that two requests cannot lock them crosswise. `FOR NO KEY UPDATE` keeps out a
+   * second removal as `FOR UPDATE` would, but not the foreign key checks of a login, which
+   * reference these rows.
+   */
+  private static async refuseToRemoveLastAdmin(manager: EntityManager, ids: number[]): Promise<void> {
+    const admins = await manager.find(User, {
+      where: { isAdmin: true },
+      select: { id: true },
+      order: { id: 'ASC' },
+      lock: { mode: 'for_no_key_update' }
+    });
+    if (admins.every(admin => ids.includes(admin.id))) {
+      throw new BadRequestException('At least one administrator must remain.');
+    }
   }
 
   async patch(userId: number, userData: UserFullDto): Promise<void> {
