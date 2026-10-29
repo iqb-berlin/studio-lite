@@ -1,6 +1,5 @@
 export {
   CODING_SCHEME_PROBLEM_TYPES,
-  CodingReportProblemType,
   CodingReportDto,
   CodingReportValidationProblemDto
 } from './lib/dtos/workspace/coding-report.dto';

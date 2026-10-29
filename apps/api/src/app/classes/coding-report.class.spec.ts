@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { createMock } from '@golevelup/ts-jest';
 import { CodingReportValidationProblemDto, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
-import { CodeData, VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { CodingSchemeProblem } from '@iqb/responses';
 import { CodingReportClass } from './coding-report.class';
 
@@ -95,7 +95,7 @@ describe('CodingReportClass', () => {
     });
 
     // A scheme whose codes carry no rule sets of their own failed the whole report (#1873).
-    it('reports a unit whose codes have no rule sets', () => {
+    it('reports a unit whose codes have no rule sets without adding validation problems (#1873)', () => {
       const units = [createMock<UnitPropertiesDto>({
         id: 13,
         key: 'UNIT1',
@@ -142,11 +142,10 @@ describe('CodingReportClass', () => {
       const result = CodingReportClass.build(1, units);
 
       expect(result.map(row => [row.variable, row.codingType, row.validation])).toEqual([
-        ['auto_1', 'automatisch', 'Warnung'],
+        ['auto_1', 'automatisch', 'OK'],
         ['manual_1', 'manuell', 'OK']
       ]);
-      // code 1 of auto_1 has neither rules of its own nor a manual instruction
-      expect(result[0].validationProblems).toEqual([{ type: 'CODE_WITHOUT_RULES', breaking: false, code: '1' }]);
+      expect(result.map(row => row.validationProblems)).toEqual([[], []]);
     });
 
     it('reports a unit whose scheme cannot be used with one row', () => {
@@ -402,15 +401,16 @@ describe('CodingReportClass', () => {
     });
 
     // the schemer's editor leaves <p></p> behind when an instruction is emptied
-    it('does not count an emptied manual instruction as manual coding', () => {
-      const codingType = CodingReportClass.determineCodingType({
-        id: 'v',
-        sourceType: 'BASE',
-        codes: [{ id: 1, type: 'FULL_CREDIT', manualInstruction: '<p></p>' }]
-      });
-
-      expect(codingType).toBe('keine Regeln');
-    });
+    it.each(['<p>&nbsp;</p>', '<p>&#160;</p>', '<P>&#xa0;</P>', '<p></p>'])(
+      'does not count the emptied instruction %s as manual coding',
+      manualInstruction => {
+        expect(CodingReportClass.determineCodingType({
+          id: 'v',
+          sourceType: 'BASE',
+          codes: [{ id: 1, type: 'FULL_CREDIT', manualInstruction }]
+        })).toBe('keine Regeln');
+      }
+    );
 
     it('maps closed codes without rule sets to automatisch', () => {
       const codingType = CodingReportClass.determineCodingType({
@@ -432,47 +432,6 @@ describe('CodingReportClass', () => {
 
       expect(codingType).toBe('keine Regeln');
     });
-  });
-
-  // A code that neither rules nor a manual instruction lead to can never be assigned (#1873).
-  describe('getCodesWithoutRules', () => {
-    const variableWith = (codes: CodeData[]): VariableCodingData => ({ id: 'v', sourceType: 'BASE', codes });
-
-    it('flags a code without rule sets', () => {
-      expect(CodingReportClass.getCodesWithoutRules(variableWith([{ id: 1, type: 'FULL_CREDIT' }])))
-        .toEqual([{ type: 'CODE_WITHOUT_RULES', breaking: false, code: '1' }]);
-    });
-
-    it('flags a code whose rule sets hold no rule', () => {
-      expect(CodingReportClass.getCodesWithoutRules(variableWith([
-        {
-          id: 2, type: 'PARTIAL_CREDIT', manualInstruction: '', ruleSets: [{ rules: [] }]
-        }
-      ]))).toEqual([{ type: 'CODE_WITHOUT_RULES', breaking: false, code: '2' }]);
-    });
-
-    it('leaves codes with rules, manual codes and residual codes alone', () => {
-      expect(CodingReportClass.getCodesWithoutRules(variableWith([
-        { id: 1, type: 'FULL_CREDIT', ruleSets: [{ rules: [{ method: 'MATCH', parameters: ['a'] }] }] },
-        { id: 2, type: 'PARTIAL_CREDIT', manualInstruction: '<p>Anweisung A</p>' },
-        { id: 0, type: 'RESIDUAL_AUTO' },
-        { id: 9, type: 'RESIDUAL' },
-        { id: 'INTENDED_INCOMPLETE', type: 'INTENDED_INCOMPLETE' }
-      ]))).toEqual([]);
-    });
-
-    it('finds nothing in a variable without codes', () => {
-      expect(CodingReportClass.getCodesWithoutRules({ id: 'v', sourceType: 'BASE' })).toEqual([]);
-    });
-
-    it.each(['<p>&nbsp;</p>', '<p>&#160;</p>', '<P>&#xa0;</P>', '<p></p>'])(
-      'takes the emptied instruction %s for none',
-      manualInstruction => {
-        expect(CodingReportClass.getCodesWithoutRules(variableWith([
-          { id: 1, type: 'FULL_CREDIT', manualInstruction }
-        ]))).toEqual([{ type: 'CODE_WITHOUT_RULES', breaking: false, code: '1' }]);
-      }
-    );
 
     it.each([
       '<p><strong>Anweisung</strong></p>',
@@ -482,24 +441,15 @@ describe('CodingReportClass', () => {
       '<p><audio src="beispiel.mp3"></audio></p>',
       '<iframe src="https://example.org"></iframe>'
     ])(
-      'takes %s for an instruction',
+      'counts the instruction %s as manual coding',
       manualInstruction => {
-        expect(CodingReportClass.getCodesWithoutRules(variableWith([
-          { id: 1, type: 'FULL_CREDIT', manualInstruction }
-        ]))).toEqual([]);
+        expect(CodingReportClass.determineCodingType({
+          id: 'v',
+          sourceType: 'BASE',
+          codes: [{ id: 1, type: 'FULL_CREDIT', manualInstruction }]
+        })).toBe('manuell');
       }
     );
-
-    it.each<[string, Partial<VariableCodingData>]>([
-      ['codes by hand only', { codeModel: 'MANUAL_ONLY' }],
-      ['is a manual variable', { sourceType: 'MANUAL' }],
-      ['has an instruction of its own', { manualInstruction: '<p>Anweisung A</p>' }]
-    ])('finds nothing in a variable that %s', (_, variable) => {
-      expect(CodingReportClass.getCodesWithoutRules({
-        ...variableWith([{ id: 1, type: 'FULL_CREDIT' }]),
-        ...variable
-      })).toEqual([]);
-    });
   });
 
   describe('determineVariableType', () => {
