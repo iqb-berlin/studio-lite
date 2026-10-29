@@ -1,6 +1,7 @@
 import {
   ComponentFixture, fakeAsync, TestBed, tick
 } from '@angular/core/testing';
+import { ElementRef } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -309,5 +310,50 @@ describe('UnitPrintPlayerComponent', () => {
 
       expect(nextSpy).not.toHaveBeenCalled();
     });
+  });
+
+  describe('automatic height', () => {
+    let iframe: HTMLIFrameElement;
+    let heights: number[];
+
+    const loadUnit = (printPreviewAutoHeight: boolean, bodyHeight = 700, documentHeight = 0): void => {
+      iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+      component.hostingIframe = new ElementRef(iframe);
+      component.playerId = 'test-player@1.0.0';
+      component.printPreviewAutoHeight = printPreviewAutoHeight;
+      heights = [];
+      component.iFrameHeightChange.subscribe(height => heights.push(height));
+      component.ngAfterViewInit();
+      Object.defineProperty(iframe.contentDocument?.body, 'offsetHeight', { value: bodyHeight });
+      Object.defineProperty(iframe.contentDocument?.documentElement, 'offsetHeight', { value: documentHeight });
+      iframe.dispatchEvent(new Event('load'));
+    };
+
+    afterEach(() => iframe.remove());
+
+    it('should report the height of the unit once it has loaded', fakeAsync(() => {
+      loadUnit(true);
+
+      tick(1000);
+
+      expect(heights).toEqual([700]);
+    }));
+
+    it('should fall back to the height of the document element when the body has none', fakeAsync(() => {
+      loadUnit(true, 0, 800);
+
+      tick(1000);
+
+      expect(heights).toEqual([800]);
+    }));
+
+    it('should report no height without automatic height', fakeAsync(() => {
+      loadUnit(false);
+
+      tick(1000);
+
+      expect(heights).toEqual([]);
+    }));
   });
 });

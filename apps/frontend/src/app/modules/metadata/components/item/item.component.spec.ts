@@ -11,6 +11,7 @@ import { ItemComponent } from './item.component';
 import { MetadataService } from '../../services/metadata.service';
 import { MetadataBackendService } from '../../services/metadata-backend.service';
 import { IdValidator } from '../../metadata.module';
+import { AliasId } from '../../models/alias-id.interface';
 
 describe('ItemComponent', () => {
   let component: ItemComponent;
@@ -119,5 +120,47 @@ describe('ItemComponent', () => {
     const unused = component.getNotUsedVariables();
     expect(unused.map(v => v.id)).toContain('v1');
     expect(unused.map(v => v.id)).not.toContain('v2');
+  });
+
+  describe('within its unit', () => {
+    const createItem = (
+      metadata: ItemsMetadataValues[], itemIndex: number, variables: AliasId[]
+    ): ComponentFixture<ItemComponent> => {
+      const item = TestBed.createComponent(ItemComponent);
+      item.componentRef.setInput('metadata', metadata);
+      item.componentRef.setInput('itemIndex', itemIndex);
+      item.componentRef.setInput('variables', variables);
+      item.componentRef.setInput('lastUpdatedItemIndex', new BehaviorSubject<number>(-1));
+      item.detectChanges();
+      return item;
+    };
+
+    // The item stores the variable's id; the alias it shows and stores beside it follows the variable.
+    it('should follow a renamed variable with the alias the item is linked to', () => {
+      const item = createItem(
+        [{ id: 'item1', variableReadOnlyId: 'v1', variableId: 'var1' }], 0, [{ id: 'v1', alias: 'var1' }]
+      );
+      const emitted: ItemsMetadataValues[][] = [];
+      item.componentInstance.metadataChange.subscribe(metadata => emitted.push(structuredClone(metadata)));
+
+      item.componentRef.setInput('variables', [{ id: 'v1', alias: 'renamed' }]);
+      item.detectChanges();
+
+      expect(item.nativeElement.querySelector('.linked').textContent.trim()).toBe('renamed');
+      expect(emitted).toEqual([[{ id: 'item1', variableReadOnlyId: 'v1', variableId: 'renamed' }]]);
+    });
+
+    it('should mark an id that another item of the unit has as taken, but not the item\'s own', () => {
+      const item = createItem([{ id: 'item1' }, { id: 'item2' }], 1, []);
+      const idInput: HTMLInputElement = item.nativeElement.querySelector('input');
+      const idTaken = () => item.componentInstance.form.get('id')?.hasError('id');
+      expect(idInput.value).toBe('item2');
+      expect(idTaken()).toBe(false);
+
+      idInput.value = 'item1';
+      idInput.dispatchEvent(new Event('input'));
+
+      expect(idTaken()).toBe(true);
+    });
   });
 });

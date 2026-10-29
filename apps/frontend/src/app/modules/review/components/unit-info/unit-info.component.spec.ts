@@ -145,6 +145,22 @@ describe('UnitInfoComponent', () => {
       const mouseXOffsetAfter = (component as unknown as { mouseXOffset: number }).mouseXOffset;
       expect(mouseXOffsetAfter).toBe(0);
     }));
+
+    it('should widen the panel by the distance the splitter is dragged to the left', () => {
+      mockSplitterElement.dispatchEvent(new MouseEvent('mousedown', { clientX: 100, buttons: 1 }));
+      fixture.nativeElement.dispatchEvent(new MouseEvent('mousemove', { clientX: 40, buttons: 1 }));
+
+      expect(component.elementWidth).toBe(360);
+      expect(mockReviewService.unitInfoPanelWidth).toBe(360);
+    });
+
+    it('should stop resizing once the mouse button was released outside the panel', () => {
+      mockSplitterElement.dispatchEvent(new MouseEvent('mousedown', { clientX: 100, buttons: 1 }));
+      fixture.nativeElement.dispatchEvent(new MouseEvent('mousemove', { clientX: 60, buttons: 0 }));
+      fixture.nativeElement.dispatchEvent(new MouseEvent('mousemove', { clientX: 40, buttons: 1 }));
+
+      expect(component.elementWidth).toBe(300);
+    });
   });
 
   describe('ngOnDestroy()', () => {
