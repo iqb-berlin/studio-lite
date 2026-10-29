@@ -29,7 +29,6 @@ describe('The coding report of units with unusual or broken schemes', () => {
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
     cy.get('[data-cy="workspace-edit-unit-show-coding-report"]').click();
-    // 304 when the report has not changed since the previous test opened it
     cy.wait('@codingReport').its('response.statusCode').should('be.oneOf', [200, 304]);
     cy.get('[data-cy="coding-report-error"]').should('not.exist');
   };
@@ -47,17 +46,6 @@ describe('The coding report of units with unusual or broken schemes', () => {
 
   after(() => {
     deleteTestBaseAPI();
-  });
-
-  it('warns about a code that neither rules nor a manual instruction lead to', () => {
-    openCodingReport();
-    cy.translate(Cypress.expose('locale')).then(json => {
-      // the unit has no variables of its own, so the row carries other problems as well
-      cy.contains('mat-dialog-container tr', 'auto_1').find('[data-cy="validation-summary"]').click();
-      cy.contains('.validation-problem', json['coding-report']['validation-problems'].CODE_WITHOUT_RULES)
-        .should('contain.text', json['coding-report'].severity.warning)
-        .and('contain.text', json['coding-report']['code-reference'].replace('{{code}}', '1'));
-    });
   });
 
   it('gives a unit whose scheme cannot be evaluated one row and reports the others', () => {
