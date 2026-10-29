@@ -108,6 +108,18 @@ describe('UnitCommentService', () => {
     });
   });
 
+  describe('the vote of the user', () => {
+    it('should be none for a user who did not vote', async () => {
+      mockRepository.find.mockResolvedValueOnce([{ id: 1, unitId: 1 }] as UnitComment[]);
+      mockVoteRepository.find.mockResolvedValueOnce([{ commentId: 1, userId: 1, vote: 'up' }] as UnitCommentVote[]);
+      mockItemCommentService.findUnitItemComments.mockResolvedValueOnce([]);
+
+      const [comment] = await service.findOnesComments(1, 4);
+
+      expect(comment.userVote).toBeNull();
+    });
+  });
+
   describe('createCommentConnections', () => {
     it('should create comment connections', async () => {
       const unitId = 1;
@@ -258,6 +270,22 @@ describe('UnitCommentService', () => {
         body: 'Antwort', parentId: 100, unitId: 5
       }));
     });
+
+    it('should link a copied comment to the copies of its items', async () => {
+      mockRepository.create.mockImplementationOnce((dto: Partial<UnitComment>) => ({ ...dto }) as UnitComment);
+      mockRepository.save.mockImplementationOnce(
+        (entity: UnitComment) => Promise.resolve(Object.assign(entity, { id: 100 }))
+      );
+      mockItemCommentService.createCommentItemConnection.mockClear();
+
+      await service.createComments(
+        [{ id: 1, parentId: null, itemUuids: ['old-1'] } as UnitCommentDto],
+        5,
+        [{ oldUuid: 'old-1', newUuid: 'new-1' }]
+      );
+
+      expect(itemCommentService.createCommentItemConnection).toHaveBeenCalledWith(5, 'new-1', 100);
+    });
   });
 
   describe('removeComment', () => {
@@ -292,6 +320,18 @@ describe('UnitCommentService', () => {
       mockRepository.findOne.mockResolvedValue(null);
       await expect(service.findOneComment(1)).rejects.toThrow();
     });
+  });
+
+  it.each([
+    ['patchCommentBody', () => service.patchCommentBody(9, { body: 'x' } as UpdateUnitCommentDto)],
+    [
+      'patchCommentVisibility',
+      () => service.patchCommentVisibility(9, { hidden: true } as UpdateUnitCommentVisibilityDto)
+    ]
+  ])('%s should answer an unknown comment with not found', async (_, call) => {
+    mockRepository.findOne.mockResolvedValueOnce(null);
+
+    await expect(call()).rejects.toThrow(UnitCommentNotFoundException);
   });
 
   describe('patchCommentBody', () => {

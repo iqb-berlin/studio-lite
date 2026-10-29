@@ -10,6 +10,9 @@ import Workspace from '../entities/workspace.entity';
 import { UnitItemService } from './unit-item.service';
 import { UnitMetadataToDeleteService } from './unit-metadata-to-delete.service';
 import { MetadataProfileService } from './metadata-profile.service';
+import { UnitNotFoundException } from '../exceptions/unit-not-found.exception';
+import MetadataProfile from '../entities/metadata-profile.entity';
+import UnitMetadataToDelete from '../entities/unit-metadata-to-delete.entity';
 
 describe('UnitMetadataService', () => {
   let service: UnitMetadataService;
@@ -370,6 +373,19 @@ describe('UnitMetadataService', () => {
         expect(metadataProfileService.getStoredMetadataProfileFromDb).toHaveBeenCalledTimes(1);
       });
 
+      it('takes the flags of a profile only an item uses', async () => {
+        metadataProfileService.getStoredMetadataProfileFromDb.mockResolvedValue(createMock<MetadataProfile>({
+          id: 'item-profile',
+          groups: [{ entries: [{ id: 'e1', parameters: { hideNumbering: true } }] }]
+        }));
+        const metadata = {
+          profiles: [],
+          items: [{ id: 'i1', profiles: [{ profileId: 'item-profile', entries: [] }] }]
+        } as unknown as UnitMetadataValues;
+
+        expect(await service.buildHideNumberingMap(metadata)).toEqual({ 'item-profile': { e1: true } });
+      });
+
       it('returns an empty map when the profile is not stored', async () => {
         metadataProfileService.getStoredMetadataProfileFromDb.mockResolvedValue(null);
         const metadata = { profiles: [{ profileId: 'p1', entries: [] }] } as unknown as UnitMetadataValues;
@@ -415,6 +431,89 @@ describe('UnitMetadataService', () => {
       expect(unitItemService.getAllByUnitIdWithMetadata).toHaveBeenCalledWith(5);
       expect(result.profiles?.[0].entries?.[0].valueAsText).toEqual(text);
       expect(result.items?.[0].profiles[0].entries?.[0].valueAsText).toEqual(text);
+    });
+  });
+
+  // A unit whose metadata was saved since the tables came carries the marker and is read from them;
+  // any other still from its metadata column.
+  describe('reading the metadata of a unit', () => {
+    const column = {
+      profiles: [{ profileId: 'p-a', entries: [] }, { profileId: 'p-b', entries: [] }],
+      items: []
+    } as unknown as UnitMetadataValues;
+
+    beforeEach(() => {
+      mockRepository.findBy.mockResolvedValue([{ profileId: 'from-table', entries: [] } as UnitMetadataDto]);
+      unitItemService.getAllByUnitIdWithMetadata.mockResolvedValue([]);
+      metadataProfileService.getStoredMetadataProfileFromDb.mockResolvedValue(null);
+    });
+
+    it('should read a unit with the marker from the tables', async () => {
+      unitMetadataToDeleteService.getOneByUnit.mockResolvedValue(createMock<UnitMetadataToDelete>({ unitId: 1 }));
+
+      const unit = await service.getModifiedMetadataForUnit({ id: 1, metadata: column } as Unit, {} as Workspace);
+
+      expect((unit.metadata as UnitMetadataValues).profiles.map(profile => profile.profileId)).toEqual(['from-table']);
+    });
+
+    it('should read a unit without the marker from its column, with the current profile flagged', async () => {
+      unitMetadataToDeleteService.getOneByUnit.mockResolvedValue(null);
+      const workspace = { settings: { unitMDProfile: 'p-b' } } as Workspace;
+
+      const unit = await service.getModifiedMetadataForUnit({ id: 1, metadata: column } as Unit, workspace);
+
+      const { profiles } = unit.metadata as UnitMetadataValues;
+      expect(profiles.map(({ profileId, order }) => ({ profileId, order }))).toEqual([
+        { profileId: 'p-a', order: -1 }, { profileId: 'p-b', order: 0 }
+      ]);
+    });
+
+    // A copy takes its metadata from where the source keeps it.
+    it.each([
+      ['the tables of a source with the marker', createMock<UnitMetadataToDelete>({ unitId: 7 }), ['from-table']],
+      ['the column of a source without it', null, ['p-a', 'p-b']]
+    ])('should copy from %s', async (_, marker, profileIds) => {
+      unitMetadataToDeleteService.getOneByUnit.mockResolvedValue(marker);
+
+      const metadata = await service.getMetadataOfUnit({ id: 2, metadata: column } as Unit, 7);
+
+      expect(unitMetadataToDeleteService.getOneByUnit).toHaveBeenCalledWith(7);
+      expect(metadata.profiles.map(profile => profile.profileId)).toEqual(profileIds);
+    });
+  });
+
+  describe('copyItemsWithMetadata', () => {
+    beforeEach(() => {
+      mockRepository.create.mockImplementation(row => row);
+    });
+
+    // The comments and notes of the copy are linked to its items through this lookup.
+    it('should store the profiles and items with the unit and name each new item uuid by its old one', async () => {
+      unitItemService.addItem.mockResolvedValueOnce('new-1').mockResolvedValueOnce('new-2');
+
+      const lookups = await service.copyItemsWithMetadata(5, {
+        profiles: [{ profileId: 'p' }],
+        items: [{ uuid: 'old-1' }, { uuid: 'old-2' }]
+      } as unknown as UnitMetadataValues);
+
+      expect(lookups).toEqual([{ oldUuid: 'old-1', newUuid: 'new-1' }, { oldUuid: 'old-2', newUuid: 'new-2' }]);
+      expect(mockRepository.save).toHaveBeenCalledWith(expect.objectContaining({ unitId: 5, profileId: 'p' }));
+      expect(unitMetadataToDeleteService.upsertOneForUnit).toHaveBeenCalledWith(5);
+    });
+
+    it('should copy a unit without profiles and items, and still mark it', async () => {
+      expect(await service.copyItemsWithMetadata(5, {} as UnitMetadataValues)).toEqual([]);
+      expect(unitMetadataToDeleteService.upsertOneForUnit).toHaveBeenCalledWith(5);
+    });
+  });
+
+  describe('patchMetadata', () => {
+    it('should throw for an unknown unit and write nothing', async () => {
+      unitsRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.patchMetadata(9, { profiles: [] })).rejects.toThrow(UnitNotFoundException);
+      expect(workspaceRepository.findOne).not.toHaveBeenCalled();
+      expect(mockRepository.save).not.toHaveBeenCalled();
     });
   });
 });
