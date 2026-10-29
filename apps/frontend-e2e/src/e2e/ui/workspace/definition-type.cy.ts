@@ -1,6 +1,6 @@
 import { primaryWorkspace } from '../../../support/testData';
 import { clickIndexTabWorkspace, selectUnit } from '../../../support/helpers';
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 /**
  * A unit records the format its definition is written in (`unitDefinitionType`), and the preview
@@ -23,11 +23,11 @@ describe('Workspace Definition Type', () => {
 
   // See module-switch.cy.ts: the base needs an empty database and is torn down again afterwards.
   before(() => {
-    createBasicSpecCy();
+    createTestBaseAPI();
   });
 
   after(() => {
-    deleteBasicSpecCy();
+    deleteTestBaseAPI();
   });
 
   function unitXml(key: string, type: string): string {

@@ -20,7 +20,7 @@ import {
   createWs,
   grantRemovePrivilegeAtWs
 } from '../../../support/helpers/group-admin';
-import { deleteBasicSpecCy } from '../shared/basic.spec.cy';
+import { deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Unit Rich Notes', () => {
   beforeEach(() => {
@@ -28,7 +28,7 @@ describe('Unit Rich Notes', () => {
   });
 
   after(() => {
-    deleteBasicSpecCy();
+    deleteTestBaseAPI();
   });
 
   it('activates Rückmeldung in primaryWorkspace', () => {

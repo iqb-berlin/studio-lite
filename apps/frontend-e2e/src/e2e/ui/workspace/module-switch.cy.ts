@@ -5,7 +5,7 @@ import {
   selectUnit,
   setModuleWithoutVerification
 } from '../../../support/helpers';
-import { createBasicSpecCy, deleteBasicSpecCy } from '../shared/basic.spec.cy';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 /**
  * Units whose players differ are shown in one and the same iframe, which is navigated anew for each
@@ -27,17 +27,14 @@ describe('Workspace Module Switch', () => {
   const aspectPlayerTitle = 'Verona Player Aspect';
   const speedtestPlayerTitle = 'Verona Speedtest Player';
 
-  // createBasicSpecCy creates the first user through /api/init-login, which the API only offers while
-  // no user exists -- so it needs an empty database. Every spec of this suite leaves one behind by
-  // deleting its base afterwards, but a spec whose teardown fails hands the next one a populated
-  // database and its login then goes to /api/login and fails. Reset here rather than depend on the
-  // spec that ran before.
+  // createTestBaseAPI creates the first user through /api/init-login, which the API only offers while
+  // no user exists -- so it needs an empty database, and the teardown leaves one behind again.
   before(() => {
-    createBasicSpecCy();
+    createTestBaseAPI();
   });
 
   after(() => {
-    deleteBasicSpecCy();
+    deleteTestBaseAPI();
   });
 
   // The player has run when its own document is in the frame: an emptied frame has neither scripts
