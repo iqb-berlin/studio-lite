@@ -28,7 +28,8 @@ export class CodingReportClass {
    * One row per coding variable of every unit in the workspace: what is coded, how, and what the
    * validation of the scheme against the unit's variables says. A unit whose scheme cannot be used
    * -- missing, written by a schemer too old for it, unparsable, or failing while it is evaluated --
-   * still gets a row, so the report shows the gap instead of leaving the unit out.
+   * still gets a row, so the report shows the gap instead of leaving the unit out. A scheme that
+   * codes no variables gives no rows: there is nothing in it to report.
    */
   static build(workspaceId: number, unitListWithMetadata: UnitPropertiesDto[]): CodingReportDto[] {
     return unitListWithMetadata.flatMap(unit => CodingReportClass.buildUnitRows(workspaceId, unit));
@@ -167,12 +168,12 @@ export class CodingReportClass {
   }
 
   /**
-   * Whether an instruction says anything: text between its tags, or an image. The schemer's editor
-   * leaves `<p></p>` behind when emptied.
+   * Whether an instruction says anything: text between its tags, or embedded media such as an
+   * image or a video. The schemer's editor leaves `<p></p>` behind when emptied.
    */
   private static hasContent(html: string | undefined): boolean {
     if (!html) return false;
-    return /<img\b/i.test(html) ||
+    return /<(img|video|audio|iframe|svg|object|embed)\b/i.test(html) ||
       html.replace(/&nbsp;|&#160;|&#xA0;/gi, ' ').split(/<[^<>]*>/).some(part => part.trim());
   }
 

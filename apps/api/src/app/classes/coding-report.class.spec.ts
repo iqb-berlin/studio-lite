@@ -474,7 +474,14 @@ describe('CodingReportClass', () => {
       }
     );
 
-    it.each(['<p><strong>Anweisung</strong></p>', '<p><img src="beispiel.png"></p>', '<IMG SRC="beispiel.png">'])(
+    it.each([
+      '<p><strong>Anweisung</strong></p>',
+      '<p><img src="beispiel.png"></p>',
+      '<IMG SRC="beispiel.png">',
+      '<p><video src="beispiel.mp4"></video></p>',
+      '<p><audio src="beispiel.mp3"></audio></p>',
+      '<iframe src="https://example.org"></iframe>'
+    ])(
       'takes %s for an instruction',
       manualInstruction => {
         expect(CodingReportClass.getCodesWithoutRules(variableWith([
