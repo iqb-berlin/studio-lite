@@ -345,4 +345,31 @@ describe('WorkspaceBackendService', () => {
     expect(request.request.params.getAll('id')).toEqual(['7']);
     request.flush(new Blob(['[]']));
   });
+
+  it('should ask for the codes of every training requirement when none is chosen', () => {
+    service.getCodingBook(1, '', {
+      exportFormat: 'json',
+      missingsProfile: '',
+      hasOnlyManualCoding: true,
+      hasGeneralInstructions: true,
+      hasDerivedVars: true,
+      hasClosedVars: false,
+      hasOnlyVarsWithCodes: true,
+      codeLabelToUpper: true,
+      showScore: true,
+      hideItemVarRelation: true
+    }, [7]).subscribe();
+    const request = httpMock.expectOne(req => req.url === `${serverUrl}workspaces/1/units/coding-book`);
+    expect(request.request.params.get('trainingRequirement')).toBe('all');
+    request.flush(new Blob(['[]']));
+  });
+
+  it.each([[5, '5'], [undefined, null]])(
+    'should ask for the rich note tags of workspace group %p with the parameter %p',
+    (workspaceGroupId, param) => {
+      service.getUnitRichNoteTags(workspaceGroupId).subscribe();
+      const request = httpMock.expectOne(req => req.url === `${serverUrl}admin/settings/unit-rich-note-tags`);
+      expect(request.request.params.get('workspaceGroupId')).toBe(param);
+      request.flush([]);
+    });
 });

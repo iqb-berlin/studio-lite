@@ -143,4 +143,72 @@ describe('ItemsComponent', () => {
 
     expect(emitSpy).toHaveBeenCalled();
   });
+
+  it.each([false, undefined])('should keep the item when the delete dialog closes with %s', result => {
+    const emitSpy = jest.spyOn(component.metadataChange, 'emit');
+    component.items = [{ id: 'item1' }];
+    mockMatDialog.open = jest.fn().mockReturnValue({ afterClosed: () => of(result) });
+
+    component.openDeleteDialog(0);
+
+    expect(component.items).toEqual([{ id: 'item1' }]);
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['by its id', 'item1', 'Item item1 löschen?'],
+    ['as one without id', undefined, 'Item metadata.without-id löschen?']
+  ])('should name an item %s in the delete question', (_, id, question) => {
+    const translateService = TestBed.inject(TranslateService);
+    translateService.setTranslation('de', { metadata: { 'delete-item-question': 'Item {{itemId}} löschen?' } });
+    translateService.use('de');
+    component.items = [{ id }];
+
+    component.openDeleteDialog(0);
+
+    expect(mockMatDialog.open).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ data: expect.objectContaining({ content: question }) })
+    );
+  });
+
+  it('should add nothing when the dialog for a new item is dismissed', () => {
+    const emitSpy = jest.spyOn(component.metadataChange, 'emit');
+    component.items = [{ id: 'item1' }];
+    mockMatDialog.open = jest.fn().mockReturnValue({ afterClosed: () => of(undefined) });
+
+    component.add();
+
+    expect(component.items).toEqual([{ id: 'item1' }]);
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  it('should add an empty item when the dialog for a new item copies none', () => {
+    const emitSpy = jest.spyOn(component.metadataChange, 'emit');
+    component.items = [{ id: 'item1' }];
+    mockMatDialog.open = jest.fn().mockReturnValue({ afterClosed: () => of(-1) });
+
+    component.add();
+
+    expect(component.items).toEqual([{ id: 'item1' }, {}]);
+    expect(emitSpy).toHaveBeenCalled();
+  });
+
+  // The host hands in other metadata when another unit is opened.
+  it('should show the items of the metadata the host hands in next', () => {
+    const itemIds = (host: ComponentFixture<ItemsComponent>) => Array
+      .from<HTMLElement>(host.nativeElement.querySelectorAll('.item-id'))
+      .map(element => element.textContent?.trim());
+    const items = TestBed.createComponent(ItemsComponent);
+    items.componentRef.setInput('variablesLoader', new BehaviorSubject<AliasId[]>([]));
+    items.componentRef.setInput('metadata', { items: [{ id: 'a1' }, { id: 'a2' }] });
+    items.componentInstance.togglePresentation(); // the read-only view lists the items by their ids
+    items.detectChanges();
+    expect(itemIds(items)).toEqual(['a1', 'a2']);
+
+    items.componentRef.setInput('metadata', { items: [{ id: 'b1' }] });
+    items.detectChanges();
+
+    expect(itemIds(items)).toEqual(['b1']);
+  });
 });

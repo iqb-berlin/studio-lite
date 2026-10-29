@@ -62,6 +62,15 @@ describe('MissingsProfilesConfigComponent', () => {
     expect(component.dataChanged).toBe(true);
   });
 
+  // An empty list is also what a failed load answers, and the form stays usable then (#1943).
+  it('lets a profile be entered when none is stored', () => {
+    component.updateFormFields();
+
+    component.configForm.get('iqbStandardMissings')?.setValue('[1]');
+
+    expect(component.dataChanged).toBe(true);
+  });
+
   it('saves valid JSON and resets dataChanged on success', () => {
     backendService.setMissingsProfiles.mockReturnValue(of(true));
     component.dataChanged = true;

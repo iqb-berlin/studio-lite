@@ -11,13 +11,15 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { UnitExportContentsDto } from '@studio-lite-lib/api-dto';
+import { UnitExportContentsDto, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
+import { createMock } from '@golevelup/ts-jest';
 import { environment } from '../../../../../environments/environment';
 import { ExportUnitFileConfigComponent } from './export-unit-file-config.component';
 import { WorkspaceService } from '../../services/workspace.service';
 import { ModuleService } from '../../../../services/module.service';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
 import { ExportFileSelection } from '../../utils/export-file-options.utils';
+import { VeronaModuleClass } from '../../../../models/verona-module.class';
 
 class MockWorkspaceService {
   selectedWorkspaceId = 1;
@@ -160,4 +162,35 @@ describe('ExportUnitFileConfigComponent', () => {
       addMetadata: true, addCodingScheme: true, addComments: false, addRichNotes: false
     });
   }));
+
+  describe('players', () => {
+    const createWithPlayers = async (players: (string | undefined)[]): Promise<void> => {
+      TestBed.inject(ModuleService).players = { 'iqb-player@1.0': createMock<VeronaModuleClass>() };
+      jest.spyOn(TestBed.inject(WorkspaceBackendService), 'getUnitListWithProperties').mockReturnValue(of(
+        players.map((player, index) => createMock<UnitPropertiesDto>({ id: index + 1, player }))
+      ));
+      create([1]);
+      // ngModel takes [disabled] over in a promise of its own, out of reach of fakeAsync
+      await fixture.whenStable();
+      fixture.detectChanges();
+    };
+
+    it('should name the units whose player is missing or not installed when players are added', async () => {
+      await createWithPlayers(['iqb-player@1.0', undefined, 'other-player@1.0']);
+      const unitsWithOutPlayer: number[][] = [];
+      component.unitsWithOutPlayerChange.subscribe(units => unitsWithOutPlayer.push(units));
+
+      checkbox('addPlayers')?.querySelector('input')?.click();
+
+      expect(isDisabled('addPlayers')).toBe(false);
+      expect(unitsWithOutPlayer).toEqual([[2, 3]]);
+    });
+
+    it('should offer no players when no unit has an installed one', async () => {
+      await createWithPlayers([undefined, 'other-player@1.0']);
+
+      expect(isDisabled('addPlayers')).toBe(true);
+      expect(fixture.nativeElement.textContent).toContain('unit-download.no-player');
+    });
+  });
 });

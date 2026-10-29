@@ -1,3 +1,5 @@
+import { Logger } from '@nestjs/common';
+import { createMock } from '@golevelup/ts-jest';
 import { CodingReportValidationProblemDto, UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { CodingSchemeProblem } from '@iqb/responses';
@@ -91,6 +93,61 @@ describe('CodingReportClass', () => {
 
       expect(result.every(row => row.validation !== 'Fehler')).toBe(true);
     });
+
+    // A scheme whose codes carry no rule sets of their own failed the whole report (#1873).
+    it('reports a unit whose codes have no rule sets without adding validation problems (#1873)', () => {
+      const units = [createMock<UnitPropertiesDto>({
+        id: 13,
+        key: 'UNIT1',
+        name: '',
+        schemer: 'iqb-schemer@2.8',
+        variables: [
+          { id: 'auto_1', type: 'string' },
+          { id: 'manual_1', type: 'string' }
+        ],
+        metadata: { items: [] },
+        scheme: JSON.stringify({
+          version: '3.0',
+          variableCodings: [{
+            id: 'auto_1',
+            alias: 'auto_1',
+            sourceType: 'BASE',
+            ruleSets: [{
+              ruleSetType: 'MATCH', ruleSetOperator: 'OR', ruleSetValue: 'a', rules: []
+            }],
+            codes: [
+              {
+                id: 1, score: 1, type: 'FULL_CREDIT', ruleSetIndex: 0, manualInstruction: ''
+              },
+              {
+                id: 0, score: 0, type: 'RESIDUAL_AUTO', ruleSetIndex: null, manualInstruction: ''
+              }
+            ]
+          }, {
+            id: 'manual_1',
+            alias: 'manual_1',
+            sourceType: 'BASE',
+            codes: [
+              {
+                id: 1, score: 1, type: 'FULL_CREDIT', ruleSetIndex: null, manualInstruction: '<p>Anweisung A</p>'
+              },
+              {
+                id: 0, score: 0, type: 'NO_CREDIT', ruleSetIndex: null, manualInstruction: '<p>Anweisung B</p>'
+              }
+            ]
+          }]
+        })
+      })];
+
+      const result = CodingReportClass.build(1, units);
+
+      expect(result.map(row => [row.variable, row.codingType, row.validation])).toEqual([
+        ['auto_1', 'automatisch', 'OK'],
+        ['manual_1', 'manuell', 'OK']
+      ]);
+      expect(result.map(row => row.validationProblems)).toEqual([[], []]);
+    });
+
     it('reports a unit whose scheme cannot be used with one row', () => {
       const units = [{
         id: 12, key: 'OLD', name: 'Alt', schemer: 'schemer@1.4.0', scheme: '{}'
@@ -106,6 +163,113 @@ describe('CodingReportClass', () => {
         codingType: '',
         trainingEffort: ''
       }]);
+    });
+
+    it.each([undefined, ''])('reports a unit with the scheme %p with one row', scheme => {
+      const rows = CodingReportClass.build(3, [{
+        id: 12, key: 'K', name: '', schemer: '', scheme
+      }] as UnitPropertiesDto[]);
+
+      expect(rows.map(row => row.validation)).toEqual(['Kodierschema mit Schemer Version ab 1.5 erzeugen!']);
+    });
+
+    // The JSON format of the scheme names no schemer.
+    it('reads a scheme without a schemer, finding the item of a coding without alias by its id', () => {
+      const units = [{
+        id: 13,
+        key: 'K',
+        name: '',
+        schemer: '',
+        variables: [{ id: 'v1', type: 'string' }],
+        metadata: { items: [{ id: 'I1', variableId: 'v1' }] },
+        scheme: JSON.stringify({ version: '3.0', variableCodings: [{ id: 'v1', sourceType: 'BASE', codes: [] }] })
+      }] as unknown as UnitPropertiesDto[];
+
+      expect(CodingReportClass.build(3, units)).toEqual([
+        expect.objectContaining({ variable: 'v1', item: 'I1' })
+      ]);
+    });
+
+    // A scheme that fails while it is evaluated stays with its unit (#1873).
+    describe('with a unit whose scheme cannot be evaluated', () => {
+      const unreadableRow = (id: number, key: string) => ({
+        unit: `<a href=#/a/1/${id}>${key}</a>`,
+        variable: '',
+        variableType: '',
+        item: '',
+        validation: 'Kodierschema kann nicht ausgewertet werden',
+        validationProblems: [] as CodingReportValidationProblemDto[],
+        codingType: '',
+        trainingEffort: ''
+      });
+      const unit = (id: number, key: string, scheme: string) => createMock<UnitPropertiesDto>({
+        id,
+        key,
+        name: '',
+        schemer: '',
+        variables: [{ id: 'v1', type: 'string' }, { id: 'v2', type: 'string' }],
+        metadata: { items: [] },
+        scheme
+      });
+      const codedVariable = (id: string) => ({
+        id,
+        alias: id,
+        sourceType: 'BASE',
+        codes: [{
+          id: 1,
+          type: 'FULL_CREDIT',
+          manualInstruction: '',
+          ruleSets: [{ rules: [{ method: 'MATCH', parameters: ['a'] }] }]
+        }]
+      });
+      let warn: jest.SpyInstance;
+
+      beforeEach(() => {
+        warn = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+      });
+
+      afterEach(() => {
+        warn.mockRestore();
+      });
+
+      it('reports the other units and gives it one row', () => {
+        const units = [
+          unit(1, 'GOOD', JSON.stringify({ version: '3.0', variableCodings: [codedVariable('v1')] })),
+          unit(2, 'BROKEN', JSON.stringify({
+            version: '3.0',
+            variableCodings: [{ ...codedVariable('v1'), codes: [{ id: 1, ruleSets: [{}] }] }]
+          }))
+        ];
+
+        expect(CodingReportClass.build(1, units)).toEqual([
+          expect.objectContaining({ variable: 'v1', codingType: 'halbautomatisch' }),
+          unreadableRow(2, 'BROKEN')
+        ]);
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('unit 2'));
+      });
+
+      it('drops the rows its scheme gave before it failed', () => {
+        const units = [unit(3, 'HALF', JSON.stringify({
+          version: '3.0',
+          variableCodings: [codedVariable('v1'), {
+            id: 'v2', alias: 'v2', sourceType: 'BASE', codes: {}
+          }]
+        }))];
+
+        expect(CodingReportClass.build(1, units)).toEqual([unreadableRow(3, 'HALF')]);
+      });
+
+      it('gives one row to a scheme that is no JSON', () => {
+        expect(CodingReportClass.build(1, [unit(4, 'NOJSON', '{"version": ')]))
+          .toEqual([unreadableRow(4, 'NOJSON')]);
+      });
+
+      it('gives one row to a scheme without version', () => {
+        const units = [unit(5, 'NOVERSION', JSON.stringify({ variableCodings: [codedVariable('v1')] }))];
+
+        expect(CodingReportClass.build(1, units)).toEqual([unreadableRow(5, 'NOVERSION')]);
+        expect(warn).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -147,6 +311,26 @@ describe('CodingReportClass', () => {
       expect(
         CodingReportClass.getValidationStatus(validationProblems)
       ).toBe('Fehler');
+    });
+
+    it('finds the problems of a coding without alias by its id', () => {
+      expect(CodingReportClass.getValidationProblems(
+        [{
+          type: 'VACANT', breaking: false, variableId: 'v1', variableLabel: ''
+        }],
+        { id: 'v1' } as VariableCodingData
+      )).toEqual([{ type: 'VACANT', breaking: false }]);
+    });
+
+    it('sorts problems of the same weight by type, then by code', () => {
+      const problem = (type: string, code: string) => ({
+        type, breaking: false, variableId: 'public-id', variableLabel: '', code
+      }) as CodingSchemeProblem;
+
+      expect(CodingReportClass.getValidationProblems(
+        [problem('VACANT', '1'), problem('SOURCE_MISSING', '2'), problem('SOURCE_MISSING', '1')],
+        codingVariable
+      ).map(({ type, code }) => `${type} ${code}`)).toEqual(['SOURCE_MISSING 1', 'SOURCE_MISSING 2', 'VACANT 1']);
     });
 
     it('reports warnings when no problem is breaking', () => {
@@ -191,6 +375,81 @@ describe('CodingReportClass', () => {
 
       expect(codingType).toBe('manuell');
     });
+
+    it('maps codes without instruction and without rules to keine Regeln', () => {
+      const codingType = CodingReportClass.determineCodingType({
+        codes: [{
+          type: 'FULL_CREDIT',
+          manualInstruction: '',
+          ruleSets: [{ rules: [] }]
+        }]
+      } as unknown as VariableCodingData);
+
+      expect(codingType).toBe('keine Regeln');
+    });
+
+    // Codes without rule sets or manual instruction, both optional in the spec (#1873).
+    it('maps manual codes without rule sets to manuell', () => {
+      const codingType = CodingReportClass.determineCodingType({
+        id: 'v',
+        sourceType: 'BASE',
+        codes: [{ id: 1, type: 'FULL_CREDIT', manualInstruction: '<p>Anweisung A</p>' },
+          { id: 0, type: 'NO_CREDIT', manualInstruction: '<p>Anweisung B</p>' }]
+      });
+
+      expect(codingType).toBe('manuell');
+    });
+
+    // the schemer's editor leaves <p></p> behind when an instruction is emptied
+    it.each(['<p>&nbsp;</p>', '<p>&#160;</p>', '<P>&#xa0;</P>', '<p></p>'])(
+      'does not count the emptied instruction %s as manual coding',
+      manualInstruction => {
+        expect(CodingReportClass.determineCodingType({
+          id: 'v',
+          sourceType: 'BASE',
+          codes: [{ id: 1, type: 'FULL_CREDIT', manualInstruction }]
+        })).toBe('keine Regeln');
+      }
+    );
+
+    it('maps closed codes without rule sets to automatisch', () => {
+      const codingType = CodingReportClass.determineCodingType({
+        id: 'v',
+        sourceType: 'BASE',
+        codes: [{ id: 1, type: 'FULL_CREDIT', manualInstruction: '' },
+          { id: 0, type: 'RESIDUAL_AUTO', manualInstruction: '' }]
+      });
+
+      expect(codingType).toBe('automatisch');
+    });
+
+    it('maps codes without rule sets and manual instruction to keine Regeln', () => {
+      const codingType = CodingReportClass.determineCodingType({
+        id: 'v',
+        sourceType: 'BASE',
+        codes: [{ id: 1, type: 'FULL_CREDIT' }]
+      });
+
+      expect(codingType).toBe('keine Regeln');
+    });
+
+    it.each([
+      '<p><strong>Anweisung</strong></p>',
+      '<p><img src="beispiel.png"></p>',
+      '<IMG SRC="beispiel.png">',
+      '<p><video src="beispiel.mp4"></video></p>',
+      '<p><audio src="beispiel.mp3"></audio></p>',
+      '<iframe src="https://example.org"></iframe>'
+    ])(
+      'counts the instruction %s as manual coding',
+      manualInstruction => {
+        expect(CodingReportClass.determineCodingType({
+          id: 'v',
+          sourceType: 'BASE',
+          codes: [{ id: 1, type: 'FULL_CREDIT', manualInstruction }]
+        })).toBe('manuell');
+      }
+    );
   });
 
   describe('determineVariableType', () => {

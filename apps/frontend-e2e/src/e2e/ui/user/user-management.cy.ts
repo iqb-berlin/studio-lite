@@ -5,7 +5,6 @@ import {
   clearUserFilter,
   createNewUser,
   deleteFirstUser,
-  deleteUser,
   filterUsers,
   goToAdminUsers,
   login,
@@ -22,8 +21,6 @@ describe('UI User Management', () => {
   });
 
   after(() => {
-    login(Cypress.expose('username'), Cypress.expose('password'));
-    deleteUser(standardUser.username);
     deleteFirstUser();
   });
 

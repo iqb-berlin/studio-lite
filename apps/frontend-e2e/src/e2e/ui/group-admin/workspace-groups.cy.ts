@@ -11,8 +11,6 @@ import {
   createGroup,
   createNewUser,
   deleteFirstUser,
-  deleteGroup,
-  deleteUser,
   login,
   logout,
   makeAdminOfGroup,
@@ -183,14 +181,5 @@ describe('Workspace Group Administration', () => {
     cy.get('[data-cy="units-area-no-access-level"]').should('not.exist');
     cy.get('studio-lite-add-unit-button>button')
       .should('not.have.attr', 'disabled');
-  });
-
-  it('cleans up test data', () => {
-    logout();
-    login(Cypress.expose('username'), Cypress.expose('password'));
-    deleteGroup(baseGroup);
-    deleteUser(standardUser.username);
-    cy.findAdminSettings().click();
-    deleteUser(groupAdminUser.username);
   });
 });

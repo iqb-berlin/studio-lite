@@ -93,24 +93,44 @@ describe('WidgetOverlayComponent', () => {
     fixture.detectChanges();
   });
 
-  it('sends vowStartCommand on vowReadyNotification', () => {
-    jest.spyOn(VeronaModuleDirective, 'getSessionId')
-      .mockReturnValue('widget-session-7');
+  const readyFrom = (widgetFixture: ComponentFixture<WidgetOverlayComponent>): jest.SpyInstance => {
+    const widgetWindow: Window = widgetFixture.nativeElement.querySelector('iframe').contentWindow;
+    const startCommand = jest.spyOn(widgetWindow, 'postMessage').mockImplementation();
+    postMessage$.next({ data: { type: 'vowReadyNotification' }, source: widgetWindow } as never as MessageEvent);
+    return startCommand;
+  };
 
-    const iframeEl = fixture.nativeElement.querySelector('iframe');
-    const fakeSource = iframeEl?.contentWindow;
-    if (!fakeSource) return;
+  it('starts the widget with the call of the player and a session of its own', () => {
+    jest.spyOn(VeronaModuleDirective, 'getSessionId').mockReturnValue('widget-session-7');
 
-    const msg = new MessageEvent('message', {
-      data: { type: 'vowReadyNotification' }
-    });
-    Object.defineProperty(msg, 'source', { value: fakeSource });
+    const startCommand = readyFrom(fixture);
 
-    postMessage$.next(msg);
+    expect(startCommand).toHaveBeenCalledWith({
+      type: 'vowStartCommand',
+      sessionId: 'widget-session-7',
+      parameters: { key1: 'val1' },
+      callId: 'call-42',
+      state: 'initial-state',
+      sharedParameters: { shared1: 'sv1' }
+    }, '*');
+  });
 
-    const target = (component as never as WidgetOverlayTestAccess).widgetPostMessageTarget;
-    expect(target).toBe(fakeSource);
-    expect(fakeSource.postMessage).toBeDefined();
+  it('fills in empty values for what the call of the player leaves out', () => {
+    const bareFixture = TestBed.createComponent(WidgetOverlayComponent);
+    bareFixture.componentInstance.widgetCallData = { widgetType: 'CALC' };
+    bareFixture.componentInstance.playerPostMessageTarget = playerPostMessageTarget as never;
+    bareFixture.detectChanges();
+
+    const startCommand = readyFrom(bareFixture);
+    bareFixture.componentInstance.continue();
+
+    expect(startCommand).toHaveBeenCalledWith(expect.objectContaining({
+      parameters: {}, callId: '', state: '', sharedParameters: {}
+    }), '*');
+    expect(playerPostMessageTarget.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'vopWidgetReturn', callId: '', state: '' }),
+      '*'
+    );
   });
 
   it('updates widgetState on vowStateChangedNotification', () => {

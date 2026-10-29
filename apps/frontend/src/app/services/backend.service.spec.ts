@@ -104,6 +104,25 @@ describe('BackendService', () => {
       req.error(new ProgressEvent('error'));
     });
 
+    // The API keeps the session of this browser when the login names it, read from the token's `sid`;
+    // a token that cannot be read must not stand in the way of the login.
+    it.each([
+      [
+        'a stored token',
+        'header.eyJzdWIiOjEsInNpZCI6IjNmOWIxYzJlLThhNGQtNGU2Zi1iMWMyLWQzZTRmNWE2YjdjOCJ9.signature',
+        '3f9b1c2e-8a4d-4e6f-b1c2-d3e4f5a6b7c8'
+      ],
+      ['a stored token that cannot be read', 'not-a-token', undefined]
+    ])('should send the session of %s with the login', (_, token, sessionId) => {
+      localStorage.setItem('id_token', token);
+
+      service.login('user', 'pw', false).subscribe();
+
+      const req = httpMock.expectOne(`${serverUrl}login`);
+      expect(req.request.body).toEqual({ username: 'user', password: 'pw', sessionId });
+      req.flush(null);
+    });
+
     it('should return false when auth-data fails after successful login', done => {
       const mockLoginResponse = { accessToken: 'test-token', refreshToken: 'test-refresh' };
 

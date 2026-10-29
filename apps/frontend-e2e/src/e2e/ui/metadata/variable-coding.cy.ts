@@ -16,7 +16,6 @@ import {
   createItem,
   deleteAllModules,
   deleteFirstUser,
-  deleteGroup,
   goToItem,
   goToWsMenu,
   importExercise,
@@ -150,8 +149,9 @@ describe('Variable and Item Metadata Coherence', () => {
     cy.contains('button', 'send').click({ force: true });
   });
 
-  it('cleans up test data', () => {
-    deleteGroup(group);
+  // A test of its own rather than a step of the after hook: failing there, it would keep the
+  // reset that follows from running. The reset does not take the modules.
+  it('removes its modules', () => {
     deleteAllModules();
   });
 });

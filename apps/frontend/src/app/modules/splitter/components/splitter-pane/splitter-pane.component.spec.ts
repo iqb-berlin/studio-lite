@@ -63,6 +63,16 @@ describe('SplitterPaneComponent', () => {
       expect(component.elementRef.nativeElement.style.flexBasis).toBe('auto');
     });
 
+    // An automatic size is left to the stylesheet; a flex-basis of 0px would collapse the pane.
+    it('should leave the size of a pane with an automatic initial size and no stored size to the stylesheet', () => {
+      component.initialSize = 'auto';
+
+      component.init(0, false);
+
+      expect(component.elementRef.nativeElement.style.flexBasis).toBe('');
+      expect(component.size).toBe(0);
+    });
+
     it('should respect minSize and maxSize', () => {
       component.minSize = 100;
       component.maxSize = 300;

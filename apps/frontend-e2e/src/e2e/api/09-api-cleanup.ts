@@ -1,4 +1,4 @@
-import type { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
+import type { UserInListDto, VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import {
   modules
 } from '../../support/testData';
@@ -14,6 +14,13 @@ import {
 } from '../../support/util-api';
 
 describe('Cleanup API tests', () => {
+  const expectUsersListed = (names: string[]): void => {
+    cy.getUsersAPI(Cypress.expose(`token_${Cypress.expose('username')}`)).then(resp => {
+      expect(resp.status).to.equal(200);
+      expect((resp.body as UserInListDto[]).map(user => user.name)).to.include.members(names);
+    });
+  };
+
   describe('87. DELETE /api/group-admin/workspaces/{ids}', () => {
     it('200/500 negative test: should return success or server error when attempting ' +
       'to delete without a workspace context', () => {
@@ -149,6 +156,26 @@ describe('Cleanup API tests', () => {
       );
     });
 
+    // Without an administrator no one reaches the user administration any more (#1949)
+    it('400 negative test: should refuse to delete the own account and keep it (#1949)', () => {
+      cy.deleteUsersAPI(
+        [Cypress.expose(`id_${Cypress.expose('username')}`)],
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).its('status').should('equal', 400);
+      expectUsersListed([Cypress.expose('username')]);
+    });
+
+    it('400 negative test: should delete nothing when the own account is among the ids (#1949)', () => {
+      cy.deleteUsersAPI(
+        [
+          Cypress.expose(`id_${user3.username}`),
+          Cypress.expose(`id_${Cypress.expose('username')}`)
+        ],
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).its('status').should('equal', 400);
+      expectUsersListed([Cypress.expose('username'), user3.username]);
+    });
+
     it('200 positive test: should allow an authorized administrator to successfully delete user accounts', () => {
       cy.deleteUsersAPI(
         [
@@ -162,16 +189,10 @@ describe('Cleanup API tests', () => {
     });
   });
 
-  describe('90. Delete the first user /api/admin/users/id', () => {
-    it('200 positive test: should allow deleting the primary administrator user account', () => {
-      cy.deleteUsersAPI(
-        [Cypress.expose(`id_${Cypress.expose('username')}`)],
-        Cypress.expose(`token_${Cypress.expose('username')}`)
-      ).then(resp => {
-        Cypress.expose('token_admin', '');
-        expect(resp.status).to.equal(200);
-      });
-    });
+  describe('90. DELETE /api/admin/users/id after the database was emptied', () => {
+    // The first user cannot delete their own account (#1949); the reset removes it and leaves the
+    // database empty for the next spec.
+    before(() => cy.resetDb());
 
     it('403 negative test: should deny deletion of a user account that no longer exists', () => {
       // The token still verifies, but its user is gone and so is the admin flag it would need.
@@ -179,7 +200,6 @@ describe('Cleanup API tests', () => {
         [Cypress.expose(`id_${Cypress.expose('username')}`)],
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
-        Cypress.expose('token_admin', '');
         expect(resp.status).to.equal(403);
       });
     });

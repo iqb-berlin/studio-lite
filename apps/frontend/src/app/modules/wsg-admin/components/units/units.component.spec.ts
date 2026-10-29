@@ -117,4 +117,23 @@ describe('UnitsComponent', () => {
     expect(mockBackendService.deleteWorkspaceUnit).toHaveBeenCalledWith(10, 1);
     expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-admin.unit-deleted', '', expect.anything());
   });
+
+  // Esc, a click beside the dialog and navigation close it with undefined (#1844)
+  it.each([false, undefined])('should not delete a unit when its confirmation closes with %s', result => {
+    mockDialog.open.mockReturnValue({ afterClosed: () => of(result) });
+
+    component.openDeleteDialog({ id: 1, key: 'u1', workspaceId: 10 });
+
+    expect(mockBackendService.deleteWorkspaceUnit).not.toHaveBeenCalled();
+  });
+
+  it('should say when a unit could not be deleted and keep the list', () => {
+    mockDialog.open.mockReturnValue({ afterClosed: () => of(true) });
+    mockBackendService.deleteWorkspaceUnit.mockReturnValue(of(false));
+
+    component.openDeleteDialog({ id: 1, key: 'u1', workspaceId: 10 });
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-admin.unit-not-deleted', 'error', { duration: 3000 });
+    expect(mockBackendService.getAllUnitsForGroup).not.toHaveBeenCalled();
+  });
 });

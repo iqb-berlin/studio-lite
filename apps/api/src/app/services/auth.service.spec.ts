@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import {
-  In, InsertQueryBuilder, LessThan, MoreThan, Repository, SelectQueryBuilder
+  DeleteQueryBuilder, In, InsertQueryBuilder, LessThan, MoreThan, Repository, SelectQueryBuilder
 } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -135,6 +135,62 @@ describe('AuthService', () => {
         { userId: 1, sessionId: validSid },
         expect.any(Object)
       );
+    });
+
+    // The session the client names is gone (logged out, deleted by an admin): it is not revived.
+    it('should open a session of its own when the one handed back no longer exists', async () => {
+      const staleSid = '550e8400-e29b-41d4-a716-446655440000';
+      userSessionRepository.update.mockResolvedValue({ affected: 0, raw: [], generatedMaps: [] });
+      userSessionRepository.create.mockImplementation(session => session as UserSession);
+
+      await service.login({ id: 1, name: 'user', reviewId: 0 }, staleSid);
+
+      const newSid = userSessionRepository.save.mock.calls[0][0].sessionId;
+      expect(newSid).not.toBe(staleSid);
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sid: newSid }));
+    });
+
+    // A review link is no account: nothing is left behind that could be resumed.
+    it('should give a review login neither a session nor a refresh token', async () => {
+      jwtService.sign.mockReturnValue('review-token');
+
+      const result = await service.login({ id: 0, name: '', reviewId: 5 });
+
+      expect(result).toEqual({ accessToken: 'review-token', refreshToken: '' });
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ sub: 0, sub2: 5 }));
+      expect(userSessionRepository.save).not.toHaveBeenCalled();
+      expect(refreshTokenRepository.save).not.toHaveBeenCalled();
+    });
+
+    describe('on a fresh login', () => {
+      let deleteQuery: DeepMocked<DeleteQueryBuilder<RefreshToken>>;
+
+      beforeEach(() => {
+        deleteQuery = createMock<DeleteQueryBuilder<RefreshToken>>();
+        deleteQuery.where.mockReturnValue(deleteQuery);
+        const queryBuilder = createMock<SelectQueryBuilder<RefreshToken>>();
+        queryBuilder.delete.mockReturnValue(deleteQuery);
+        refreshTokenRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+      });
+
+      it('should delete the expired sessions of the user together with their refresh tokens', async () => {
+        userSessionRepository.find.mockResolvedValue([{ sessionId: 'expired-1' } as UserSession]);
+
+        await service.login({ id: 1, name: 'user', reviewId: 0 });
+
+        expect(deleteQuery.where).toHaveBeenCalledWith(expect.any(String), { userId: 1, ids: ['expired-1'] });
+        expect(deleteQuery.execute).toHaveBeenCalled();
+        expect(userSessionRepository.delete).toHaveBeenCalledWith(expect.objectContaining({ userId: 1 }));
+      });
+
+      it('should delete nothing when no session of the user has expired', async () => {
+        userSessionRepository.find.mockResolvedValue([]);
+
+        await service.login({ id: 1, name: 'user', reviewId: 0 });
+
+        expect(deleteQuery.execute).not.toHaveBeenCalled();
+        expect(userSessionRepository.delete).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -287,6 +343,26 @@ describe('AuthService', () => {
       expect(result).toBeNull();
       expect(refreshTokenRepository.delete).not.toHaveBeenCalled();
       expect(userSessionRepository.delete).not.toHaveBeenCalled();
+    });
+
+    // A session past its inactivity window, or deleted, cannot be resumed with a token that is still valid.
+    it.each(['missing', 'expired'])('should refuse a token whose session is %s', async state => {
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+      const expired = new Date();
+      expired.setMinutes(expired.getMinutes() - 10);
+      refreshTokenRepository.findOne.mockResolvedValue({
+        tokenHash: 'token-hash', userId: 1, sessionId: 'session-1', expiresAt
+      } as RefreshToken);
+      userSessionRepository.findOne.mockResolvedValue(state === 'missing' ? null : {
+        userId: 1, sessionId: 'session-1', expiresAt: expired
+      } as UserSession);
+
+      const result = await service.refreshAccessToken('valid-token');
+
+      expect(result).toBeNull();
+      expect(refreshTokenRepository.save).not.toHaveBeenCalled();
+      expect(jwtService.sign).not.toHaveBeenCalled();
     });
 
     it('should return null if token is expired', async () => {

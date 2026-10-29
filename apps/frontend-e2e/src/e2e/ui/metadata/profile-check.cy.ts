@@ -7,8 +7,7 @@ import {
   createGroup,
   createNewUser,
   deleteFirstUser,
-  deleteGroup,
-  deleteUser
+  waitForSuccess
 } from '../../../support/helpers';
 
 describe('Metadata Profile Management', () => {
@@ -79,12 +78,9 @@ describe('Metadata Profile Management', () => {
       .contains('settings')
       .click();
     checkMultipleProfiles(searchProfiles);
+    // waited for, so that the reset in the after hook does not come in the middle of the save
+    cy.intercept('PATCH', '/api/admin/workspace-groups/*').as('saveGroupProfiles');
     cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
-  });
-
-  it('cleans up test data', () => {
-    deleteUser(standardUser.username);
-    deleteGroup(groups[0]);
-    deleteGroup(groups[1]);
+    waitForSuccess('@saveGroupProfiles');
   });
 });

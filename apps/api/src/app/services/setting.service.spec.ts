@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Logger } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
@@ -252,6 +253,109 @@ describe('SettingService', () => {
         expect(result).toEqual([]);
         expect(metadataVocabularyService.getStoredMetadataVocabularyById).not.toHaveBeenCalled();
       });
+  });
+
+  // A configuration is a list of tags, or one or more vocabulary URLs whose top concepts become the tags.
+  describe('tags from vocabularies', () => {
+    const vocabulary = (id: string, conceptId: string) => ({
+      id, hasTopConcept: [{ id: conceptId, prefLabel: { de: conceptId } }]
+    }) as unknown as MetadataVocabularyDto;
+    const globalSetting = (content: unknown) => settingsRepository.findOne
+      .mockResolvedValue({ key: 'unit-rich-note-tags', content: JSON.stringify(content) } as Setting);
+
+    // One vocabulary that cannot be used must not cost the tags of the others.
+    it('should gather the tags of every vocabulary with concepts, skipping what is no web address', async () => {
+      globalSetting(['https://a.org/v', 'https://b.org/v', 'https://c.org/v', 'urn:x']);
+      metadataVocabularyService.getStoredMetadataVocabularyById.mockImplementation(async url => ({
+        'https://a.org/v': vocabulary(url, 'c1'),
+        'https://b.org/v': { id: url } as MetadataVocabularyDto
+      })[url] ?? null);
+
+      const tags = await service.findUnitRichNoteTags();
+
+      expect(tags.map(tag => tag.id)).toEqual(['https://a.org/v#c1']);
+      expect(metadataVocabularyService.getStoredMetadataVocabularyById).not.toHaveBeenCalledWith('urn:x');
+    });
+
+    it.each([
+      ['one URL stored as text', () => globalSetting('https://v.org/')],
+      ['the URL of a group, stored as text', () => {
+        settingsRepository.findOne.mockResolvedValue(null);
+        workspaceGroupRepository.findOneBy.mockResolvedValue(
+          { id: 1, settings: { richNoteTags: 'https://v.org/' } } as unknown as WorkspaceGroup
+        );
+      }]
+    ])('should take the tags of %s', async (_, given) => {
+      given();
+      metadataVocabularyService.getStoredMetadataVocabularyById.mockImplementation(
+        async url => (url === 'https://v.org/' ? vocabulary(url, 'c1') : null)
+      );
+
+      expect((await service.findUnitRichNoteTags(1)).map(tag => tag.id)).toEqual(['https://v.org/#c1']);
+    });
+
+    it('should take the tags of the default vocabulary without any setting', async () => {
+      settingsRepository.findOne.mockResolvedValue(null);
+      metadataVocabularyService.getStoredMetadataVocabularyById.mockImplementation(async url => vocabulary(url, 'c1'));
+
+      const tags = await service.findUnitRichNoteTags();
+
+      expect(tags).toHaveLength(1);
+      expect(tags[0].id).toMatch(/^https:.*#c1$/);
+    });
+
+    it('should name a concept without label by its id, keep an absolute id, nest the narrower ones', async () => {
+      globalSetting('https://v.org/');
+      metadataVocabularyService.getStoredMetadataVocabularyById.mockResolvedValue({
+        id: 'https://v.org/',
+        hasTopConcept: [
+          { id: 'c1' },
+          {
+            id: 'https://other.org/c2',
+            prefLabel: { de: 'Zwei', en: 'Two' },
+            narrower: [{ id: 'c3', prefLabel: { de: 'Drei' } }]
+          }
+        ]
+      } as unknown as MetadataVocabularyDto);
+
+      expect(await service.findUnitRichNoteTags()).toEqual([
+        { id: 'https://v.org/#c1', label: [{ lang: 'de', value: 'c1' }], children: [] },
+        {
+          id: 'https://other.org/c2',
+          label: [{ lang: 'de', value: 'Zwei' }, { lang: 'en', value: 'Two' }],
+          children: [{ id: 'https://v.org/#c3', label: [{ lang: 'de', value: 'Drei' }], children: [] }]
+        }
+      ]);
+    });
+  });
+
+  // What the admin form shows; it edits a list of URLs or tags.
+  describe('findUnitRichNoteTagsConfig', () => {
+    const stored = (content: string) => settingsRepository.findOne
+      .mockResolvedValue({ key: 'unit-rich-note-tags', content } as Setting);
+
+    it.each([
+      ['a list as it is stored', '["https://a.org/v","https://b.org/v"]', ['https://a.org/v', 'https://b.org/v']],
+      ['a single URL as a list', '"https://a.org/v"', ['https://a.org/v']]
+    ])('should give %s', async (_, content, expected) => {
+      stored(content);
+
+      expect(await service.findUnitRichNoteTagsConfig()).toEqual(expected);
+    });
+
+    it('should give the default vocabulary for a setting that is missing or cannot be read', async () => {
+      const logError = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+      try {
+        settingsRepository.findOne.mockResolvedValue(null);
+        const withoutSetting = await service.findUnitRichNoteTagsConfig();
+        stored('{kaputt');
+
+        expect(await service.findUnitRichNoteTagsConfig()).toEqual(withoutSetting);
+        expect(withoutSetting).toEqual([expect.stringMatching(/^https:/)]);
+      } finally {
+        logError.mockRestore();
+      }
+    });
   });
 
   describe('patchUnitRichNoteTags', () => {

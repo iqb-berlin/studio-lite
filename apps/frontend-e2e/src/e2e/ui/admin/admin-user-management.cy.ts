@@ -20,7 +20,7 @@ import {
 import { addState } from '../../../support/helpers/group-admin';
 import { selectProfileForGroupFromAdmin } from '../../../support/metadata/metadata-util';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
-import { secondaryUser } from '../../../support/testData';
+import { secondaryUser, standardUser } from '../../../support/testData';
 
 describe('Admin User Management', () => {
   const editTarget = secondaryUser;
@@ -69,6 +69,25 @@ describe('Admin User Management', () => {
       cy.contains('mat-row', editTarget.username).should('be.visible');
 
       deleteUser(editTarget.username);
+    });
+
+    // The API refuses to delete the own account (#1949), so its row offers no delete button.
+    it('offers no delete button in the row of the logged-in admin (#1949)', () => {
+      cy.window().then(win => {
+        const token = win.localStorage.getItem('id_token') || '';
+        // a user no other test here creates, so that a failure leaves nothing in their way
+        cy.createUserAPI(standardUser, token).then(user => {
+          expect(user.status, standardUser.username).to.equal(201);
+          goToAdminUsers();
+          cy.contains('mat-row', Cypress.expose('username'))
+            .find('[data-cy="admin-users-delete-user"]')
+            .should('not.exist');
+          cy.contains('mat-row', standardUser.username)
+            .find('[data-cy="admin-users-delete-user"]')
+            .should('exist');
+          cy.deleteUsersAPI([String(user.body)], token).its('status').should('equal', 200);
+        });
+      });
     });
 
     it('sorts the table by username column', () => {
@@ -130,6 +149,22 @@ describe('Admin User Management', () => {
       cy.get('[data-cy="admin-edit-user-button"]').should('exist');
       editInput('admin-edit-user-email', 'restored@example.com');
       saveUserEdit('restoreEmail');
+    });
+  });
+
+  // ─── Own account ──────────────────────────────────────────────────────────────
+
+  describe('Own account', () => {
+    // The API refuses it (#1950), so the dialog of the own account keeps the checkbox out of reach.
+    it('offers no way to take away the own administrator right (#1950)', () => {
+      goToAdminUsers();
+      selectUserRow(Cypress.expose('username'));
+      cy.get('[data-cy="admin-users-menu-edit-user"]').click();
+      cy.get('[formcontrolname="isAdmin"] input[type="checkbox"]').should('be.disabled');
+      cy.translate(Cypress.expose('locale')).then(json => {
+        cy.contains(json.admin['own-admin-hint']).should('be.visible');
+        cy.clickDialogButton(json.cancel);
+      });
     });
   });
 

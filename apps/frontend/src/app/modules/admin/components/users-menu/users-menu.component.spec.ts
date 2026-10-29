@@ -107,6 +107,21 @@ describe('UsersMenuComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith({ selection: [mockUser], user: mockFormGroup });
   });
 
+  // The dialog of the own account keeps its administrator right out of reach (#1950).
+  it.each([
+    [1, true],
+    [2, false]
+  ])('should tell the dialog of user %p whether it is the own account (%p)', (id, isOwnAccount) => {
+    fixture.componentRef.setInput('ownUserId', 1);
+    component.selectedRows = [{ id, name: 'test' } as UserFullDto];
+
+    component.editUser();
+
+    expect(mockDialog.open).toHaveBeenCalledWith(EditUserComponent, expect.objectContaining({
+      data: expect.objectContaining({ isOwnAccount })
+    }));
+  });
+
   describe('orphaned session count', () => {
     it('should count the orphaned sessions of a single selected user', () => {
       component.selectedRows = [{
@@ -134,5 +149,21 @@ describe('UsersMenuComponent', () => {
 
       expect(component.orphanedSessionCount).toBe(0);
     });
+  });
+
+  // Esc, a click beside the dialog and navigation close it with undefined, its cancel button with false (#1844).
+  it.each<[string, false | undefined, (menu: UsersMenuComponent) => void, 'userAdded' | 'userEdited']>([
+    ['add a user', undefined, menu => menu.addUser(), 'userAdded'],
+    ['change a user', false, menu => menu.editUser(), 'userEdited'],
+    ['change a user', undefined, menu => menu.editUser(), 'userEdited']
+  ])('should not %s when the dialog closes with %s', (_, result, act, emitter) => {
+    component.selectedRows = [{ id: 1, name: 'test' }];
+    (mockDialog.open as jest.Mock).mockReturnValue({ afterClosed: () => of(result) });
+    const emitSpy = jest.spyOn(component[emitter], 'emit');
+
+    act(component);
+
+    expect(mockDialog.open).toHaveBeenCalledWith(EditUserComponent, expect.anything());
+    expect(emitSpy).not.toHaveBeenCalled();
   });
 });

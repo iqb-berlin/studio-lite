@@ -10,7 +10,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
 import { of, Subject } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { AuthDataDto, UserWorkspaceFullDto } from '@studio-lite-lib/api-dto';
+import { AuthDataDto, UserWorkspaceFullDto, WorkspaceSettingsDto } from '@studio-lite-lib/api-dto';
 import { WorkspaceComponent } from './workspace.component';
 import { AppConfig } from '../../../../classes/app-config.class';
 import { AppService } from '../../../../services/app.service';
@@ -136,6 +136,16 @@ describe('WorkspaceComponent', () => {
     await configure('/a/5/7/editor');
 
     expect(appService.appConfig.setPageTitle).toHaveBeenCalledWith('Gruppe: Bereich');
+  });
+
+  it('should open the workspace with its settings', async () => {
+    const settings: WorkspaceSettingsDto = {
+      defaultEditor: 'editor', defaultPlayer: 'player', defaultSchemer: 'schemer', hiddenRoutes: ['comments']
+    };
+
+    await configure('/a/5/7/editor', { workspace: { ...loadedWorkspace, settings } });
+
+    expect(TestBed.inject(WorkspaceService).workspaceSettings).toBe(settings);
   });
 
   it('should say when the workspace could not be loaded', async () => {

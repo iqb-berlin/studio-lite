@@ -65,6 +65,9 @@ export class UsersComponent implements OnInit, OnDestroy {
   activeSessionCount = 0;
   passiveSessionCount = 0;
   orphanedSessionCount = 0;
+  // Its row offers no delete button, its dialog no way to give up the administrator right: the
+  // API refuses both (#1949, #1950).
+  readonly ownUserId: number;
   private pollingSubscription: Subscription | null = null;
   private readonly ngUnsubscribe = new Subject<void>();
 
@@ -82,6 +85,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     private appBackendService: AppBackendService,
     private router: Router
   ) {
+    this.ownUserId = this.appService.authData.userId;
     this.tableSelectionRow.changed.pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       r => {
         if (r.added.length > 0) {
@@ -162,7 +166,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     if (newIsAdmin !== value.selection[0].isAdmin) changedData.isAdmin = newIsAdmin;
     this.backendService.changeUserData(id, changedData).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       respOk => {
-        if (respOk && changedData.password && id === this.appService.authData.userId) {
+        if (respOk && changedData.password && id === this.ownUserId) {
           this.logOutAfterOwnPasswordChange();
           return;
         }

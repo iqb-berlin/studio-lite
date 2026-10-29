@@ -141,6 +141,18 @@ describe('VeronaModulesService', () => {
       expect(repository.save).toHaveBeenCalled();
     });
 
+    it('should replace the module of the same key instead of adding one', async () => {
+      const existing = { key: 'mod@1.0' } as VeronaModule;
+      mockRepository.findOne.mockResolvedValueOnce(existing);
+      const file = buildModuleBuffer('EDITOR');
+
+      await service.upload(file, ['EDITOR']);
+
+      expect(mockRepository.create).not.toHaveBeenCalled();
+      expect(repository.save).toHaveBeenCalledWith(existing);
+      expect(existing).toEqual(expect.objectContaining({ file, fileSize: file.length }));
+    });
+
     it('rejects a metadata type that is not in allowedTypes', async () => {
       await expect(service.upload(buildModuleBuffer('EDITOR'), ['player'])).rejects.toThrow();
       expect(repository.save).not.toHaveBeenCalled();

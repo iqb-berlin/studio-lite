@@ -126,6 +126,12 @@ describe('UnitSelectionComponent', () => {
     expect(component.groupsInfo).toContain('3 workspace.units');
   });
 
+  it('should name a single group and a single unit in the singular', () => {
+    component.setU = { 'Group 1': [{ id: 1 }] as UnitInListDto[] };
+
+    expect(component.groupsInfo).toBe('1 workspace.group | 1 workspace.unit');
+  });
+
   it('should update expandedGroups count on change', () => {
     component.expandedGroups = 5;
     component.onExpandedChange(true);

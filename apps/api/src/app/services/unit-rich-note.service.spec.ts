@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { In, Repository } from 'typeorm';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -66,6 +67,71 @@ describe('UnitRichNoteService', () => {
         links: [],
         itemReferences: ['new-uuid-1']
       });
+    });
+
+    it('should leave out an item the import does not bring, and link a note without items to none', async () => {
+      const createNote = jest.spyOn(service, 'createNote').mockResolvedValue(1);
+
+      await service.importNotes([
+        { tagId: 'a', content: 'x', itemUuids: ['old-1', 'not-imported'] },
+        { tagId: 'b', content: 'y' }
+      ], 10, [{ oldUuid: 'old-1', newUuid: 'new-1' }]);
+
+      expect(createNote.mock.calls.map(([note]) => note.itemReferences)).toStrictEqual([['new-1'], []]);
+    });
+  });
+
+  describe('createNote', () => {
+    beforeEach(() => {
+      unitRichNoteRepository.create.mockImplementation((note: Partial<UnitRichNote>) => note as UnitRichNote);
+      unitRichNoteRepository.save.mockImplementation(
+        (note: UnitRichNote) => Promise.resolve(Object.assign(note, { id: 7 }))
+      );
+    });
+
+    it.each([
+      [['u1'], [[10, 7, ['u1']]]],
+      [[], []]
+    ])('should link the note to the items %p it refers to', async (itemReferences, links) => {
+      await service.createNote({
+        unitId: 10, tagId: 't', content: 'c', itemReferences
+      });
+
+      expect(itemRichNoteService.updateNoteItems.mock.calls).toEqual(links);
+    });
+  });
+
+  it.each([
+    ['findOneNote', () => service.findOneNote(9)],
+    ['patchNote', () => service.patchNote(9, { content: 'x' })]
+  ])('%s should answer an unknown note with not found', async (_, call) => {
+    unitRichNoteRepository.findOne.mockResolvedValue(null);
+
+    await expect(call()).rejects.toThrow(NotFoundException);
+  });
+
+  describe('patchNote', () => {
+    const links = [{ url: 'https://example.org', label: 'Beispiel' }];
+    let note: UnitRichNote;
+
+    beforeEach(() => {
+      note = {
+        id: 7, unitId: 10, tagId: 't', content: 'c', links
+      } as UnitRichNote;
+      unitRichNoteRepository.findOne.mockResolvedValue(note);
+    });
+
+    it('should change only what is sent, and the item links only when references are sent', async () => {
+      await service.patchNote(7, { content: 'neu' });
+
+      expect(note).toEqual(expect.objectContaining({ tagId: 't', content: 'neu', links }));
+      expect(itemRichNoteService.updateNoteItems).not.toHaveBeenCalled();
+    });
+
+    it('should take an empty list of references as unlinking every item', async () => {
+      await service.patchNote(7, { itemReferences: [] });
+
+      expect(itemRichNoteService.updateNoteItems).toHaveBeenCalledWith(10, 7, []);
     });
   });
 

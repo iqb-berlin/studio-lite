@@ -1,8 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, fakeAsync, TestBed, tick
+} from '@angular/core/testing';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { createMock } from '@golevelup/ts-jest';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -113,6 +115,21 @@ describe('UnitSaveButtonComponent', () => {
       expect(unitStores.changed()).toBe(true);
     });
   });
+
+  it.each([
+    [true, 'workspace.unit-saved', ''],
+    [false, 'workspace.unit-not-saved', 'workspace.error']
+  ])('says whether the unit was saved when the save answers %s', fakeAsync((
+    saved: boolean, message: string, action: string
+  ) => {
+    jest.spyOn(TestBed.inject(WorkspaceService), 'saveUnitData').mockResolvedValue(saved);
+    const snackBar = jest.spyOn(TestBed.inject(MatSnackBar), 'open');
+
+    createButton().componentInstance.saveUnitData();
+    tick();
+
+    expect(snackBar).toHaveBeenCalledWith(message, action, expect.anything());
+  }));
 
   // The button appears only once the user's access level is known, and the unit's properties may
   // have been loaded before that (#1290).

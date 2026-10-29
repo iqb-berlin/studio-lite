@@ -5,6 +5,7 @@ import { MatDialog, MatDialogState } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { Overlay } from '@angular/cdk/overlay';
+import { createMock } from '@golevelup/ts-jest';
 import { AppService } from '../services/app.service';
 import { WorkspaceBackendService } from '../modules/workspace/services/workspace-backend.service';
 import { WorkspaceService } from '../modules/workspace/services/workspace.service';
@@ -75,6 +76,140 @@ describe('PreviewDirective', () => {
     expect(directive.sessionId).toBe('session-1');
     expect(directive.postMessageTarget).toBe(mockWindow as Window);
     expect(directive.sendChangeData).toHaveBeenCalled();
+  });
+
+  // The version decides how the studio talks to the player: the spelling of the navigation command,
+  // and whether a start command still carries stateReportPolicy.
+  it.each([
+    ['vopReadyNotification', { metadata: { specVersion: '6.0' } }, 6],
+    ['vopReadyNotification', { specVersion: '4.1' }, 4],
+    ['vopReadyNotification', {}, 2],
+    ['vo.FromPlayer.ReadyNotification', { apiVersion: '3' }, 1]
+  ])('reads the API version of a player from %s %j as %i', (type, version, apiVersion) => {
+    const directive = createDirective();
+    directive.iFrameElement = createIFrameWithWindow(window);
+
+    directive.handleIncomingMessage(createMessageEvent({ type, ...version }, window));
+
+    expect(directive.playerApiVersion).toBe(apiVersion);
+    expect(directive.postMessageTarget).toBe(window);
+    expect(directive.sendChangeData).toHaveBeenCalled();
+  });
+
+  it('ignores a message that does not come from the frame of its player', () => {
+    const directive = createDirective();
+    directive.iFrameElement = createIFrameWithWindow(window);
+    directive.setPageList(['p1', 'p2'], 'p1');
+    const pageList = [...directive.pageList];
+
+    directive.handleIncomingMessage(createMessageEvent(
+      {
+        type: 'vopStateChangedNotification',
+        playerState: { validPages: [{ id: 'x1' }, { id: 'x2' }, { id: 'x3' }], currentPage: 'x2' },
+        unitState: { presentationProgress: 'complete', responseProgress: 'complete' } as UnitState
+      },
+      {} as Window
+    ));
+
+    expect(directive.pageList).toEqual(pageList);
+    expect(directive.presentationProgress).toBe('none');
+    expect(directive.handleUnitStateData).not.toHaveBeenCalled();
+  });
+
+  // Players of the first Verona version report pages and progress in words of their own.
+  it.each(['vo.FromPlayer.StartedNotification', 'vo.FromPlayer.ChangedDataTransfer'])(
+    'takes the pages and the progress from the legacy %s',
+    type => {
+      const directive = createDirective();
+      directive.iFrameElement = createIFrameWithWindow(window);
+
+      directive.handleIncomingMessage(createMessageEvent(
+        {
+          type, validPages: ['a', 'b'], currentPage: 'b', presentationComplete: 'yes', responsesGiven: 'all'
+        },
+        window
+      ));
+
+      expect(directive.pageList.filter(p => p.type === '#goto').map(p => [p.id, p.disabled]))
+        .toEqual([['a', false], ['b', true]]);
+      expect(directive.presentationProgress).toBe('complete');
+      expect(directive.responseProgress).toBe('complete');
+    }
+  );
+
+  it('takes the progress words of the current Verona version', () => {
+    const directive = createDirective();
+    directive.iFrameElement = createIFrameWithWindow(window);
+
+    directive.handleIncomingMessage(createMessageEvent(
+      {
+        type: 'vopStateChangedNotification',
+        unitState: { presentationProgress: 'some', responseProgress: 'complete' } as UnitState
+      },
+      window
+    ));
+
+    expect(directive.presentationProgress).toBe('some');
+    expect(directive.responseProgress).toBe('complete');
+  });
+
+  // What the player shares is handed to the next unit; a key it reports again replaces the old value.
+  it('merges the shared parameters a player reports into those already held', () => {
+    const directive = createDirective();
+    directive.iFrameElement = createIFrameWithWindow(window);
+    directive.sharedParameters = [{ key: 'a', value: '1' }, { key: 'b', value: '2' }];
+
+    directive.handleIncomingMessage(createMessageEvent(
+      {
+        type: 'vopStateChangedNotification',
+        playerState: { sharedParameters: [{ key: 'b', value: '3' }, { key: 'c', value: '4' }] }
+      },
+      window
+    ));
+
+    expect(directive.sharedParameters).toEqual([
+      { key: 'a', value: '1' }, { key: 'b', value: '3' }, { key: 'c', value: '4' }
+    ]);
+  });
+
+  it('asks the player for the page it names in a vopPageNavigationCommand', () => {
+    const directive = createDirective();
+    directive.iFrameElement = createIFrameWithWindow(window);
+    const postMessageTarget = createMock<Window>({ postMessage: jest.fn() });
+    directive.postMessageTarget = postMessageTarget;
+    directive.sessionId = 'session-3';
+
+    directive.handleIncomingMessage(createMessageEvent({ type: 'vopPageNavigationCommand', target: 'p2' }, window));
+
+    expect(directive.translateService.instant)
+      .toHaveBeenCalledWith('workspace.player-send-page-navigation-request', { target: 'p2' });
+    expect(directive.snackBar.open).toHaveBeenCalled();
+    expect(postMessageTarget.postMessage).toHaveBeenCalledWith(
+      { type: 'vopPageNavigationCommand', sessionId: 'session-3', target: 'p2' },
+      '*'
+    );
+  });
+
+  it('forwards the unit navigation request of a legacy player', () => {
+    const directive = createDirective();
+    directive.iFrameElement = createIFrameWithWindow(window);
+
+    directive.handleIncomingMessage(createMessageEvent(
+      { type: 'vo.FromPlayer.UnitNavigationRequest', navigationTarget: 'next' },
+      window
+    ));
+
+    expect(directive.gotoUnit).toHaveBeenCalledWith('next');
+  });
+
+  it('hands a widget call of the player on to the widget handling', () => {
+    const directive = createDirective();
+    directive.iFrameElement = createIFrameWithWindow(window);
+    const widgetCall = { type: 'vopWidgetCall', callId: 'c1', widgetType: 'CALC' };
+
+    directive.handleIncomingMessage(createMessageEvent(widgetCall, window));
+
+    expect(directive.handleWidgetCall).toHaveBeenCalledWith(widgetCall);
   });
 
   it('updates page list and unit state on vopStateChangedNotification', () => {
@@ -462,7 +597,7 @@ describe('PreviewDirective', () => {
 
   it('sends page navigation commands based on api version', () => {
     const directive = createDirective();
-    const postMessageTarget = { postMessage: jest.fn() } as unknown as Window;
+    const postMessageTarget = createMock<Window>({ postMessage: jest.fn() });
 
     directive.pageList = [
       {
@@ -516,6 +651,25 @@ describe('PreviewDirective', () => {
         sessionId: 'session-2',
         newPage: 'p2'
       },
+      '*'
+    );
+  });
+
+  // The page buttons send '#goto' with the 1-based index of the page, the arrows '#previous' and '#next'.
+  it.each([
+    ['p2', '#previous', undefined],
+    ['p1', '#goto', 1]
+  ])('asks the player for %s on %s from the third page', (target, action, index) => {
+    const directive = createDirective();
+    const postMessageTarget = createMock<Window>({ postMessage: jest.fn() });
+    directive.postMessageTarget = postMessageTarget;
+    directive.sessionId = 'session-4';
+    directive.setPageList(['p1', 'p2', 'p3'], 'p3');
+
+    directive.gotoPage({ action, index });
+
+    expect(postMessageTarget.postMessage).toHaveBeenCalledWith(
+      { type: 'vopPageNavigationCommand', sessionId: 'session-4', target },
       '*'
     );
   });

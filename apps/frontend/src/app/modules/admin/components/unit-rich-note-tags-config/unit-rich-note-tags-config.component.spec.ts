@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {
+  MatSnackBar, MatSnackBarModule, MatSnackBarRef, TextOnlySnackBar
+} from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createMock } from '@golevelup/ts-jest';
+import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 import { UnitRichNoteTagsConfigComponent } from './unit-rich-note-tags-config.component';
 import { BackendService } from '../../services/backend.service';
 
@@ -42,8 +45,12 @@ describe('UnitRichNoteTagsConfigComponent', () => {
 
     fixture = TestBed.createComponent(UnitRichNoteTagsConfigComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
+
+  const fieldValues = (): string[] => Array.from(fixture.nativeElement.querySelectorAll('input'))
+    .map(input => (input as HTMLInputElement).value);
+
+  const infoShown = (): boolean => fixture.nativeElement.querySelector('.info') !== null;
 
   it('should load config on init', () => {
     const config = ['http://test.url'];
@@ -105,5 +112,51 @@ describe('UnitRichNoteTagsConfigComponent', () => {
     });
 
     expect(updateFormSpy).toHaveBeenCalledWith(['http://url2']);
+  });
+
+  const tag: UnitRichNoteTagDto = { id: 'tag-1', label: [{ lang: 'de', value: 'Tag 1' }] };
+
+  // The settings of a group hold URLs, older ones the tags themselves.
+  it.each<[string, UnitRichNoteTagDto[] | string[] | null, string[]]>([
+    ['its urls without the empty ones', ['http://a.org', '', ' ', 'http://b.org'], ['http://a.org', 'http://b.org']],
+    ['tags stored as such in one field', [tag], [JSON.stringify([tag])]],
+    ['no field for a group without urls', null, []]
+  ])('should show %s', (_, config, fields) => {
+    fixture.componentRef.setInput('config', config);
+    fixture.detectChanges();
+
+    expect(fieldValues()).toEqual(fields);
+    expect(infoShown()).toBe(fields.length === 0);
+  });
+
+  // The settings of a group arrive after the form was created, when the page is opened directly.
+  it('should show the urls of a group that arrive after the form was created', () => {
+    fixture.componentRef.setInput('config', null);
+    fixture.detectChanges();
+
+    fixture.componentRef.setInput('config', ['http://a.org', 'http://b.org']);
+    fixture.detectChanges();
+
+    expect(fieldValues()).toEqual(['http://a.org', 'http://b.org']);
+  });
+
+  it('should not save an entry that is no url', () => {
+    component.addUrl('ftp://a.org');
+
+    component.saveData();
+
+    expect(backendServiceMock.setUnitRichNoteTags).not.toHaveBeenCalled();
+  });
+
+  it('should say when the urls could not be saved', () => {
+    const snackBar = fixture.debugElement.injector.get(MatSnackBar);
+    jest.spyOn(snackBar, 'open').mockReturnValue(createMock<MatSnackBarRef<TextOnlySnackBar>>());
+    backendServiceMock.setUnitRichNoteTags.mockReturnValue(of(false));
+    component.addUrl('http://a.org');
+
+    component.saveData();
+
+    expect(snackBar.open).toHaveBeenCalledWith('workspace.tags-saved-error', 'error', { duration: 3000 });
+    expect(component.dataChanged).toBe(true);
   });
 });

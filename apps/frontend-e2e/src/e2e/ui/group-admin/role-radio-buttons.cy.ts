@@ -11,8 +11,6 @@ import {
   createGroup,
   createNewUser,
   deleteFirstUser,
-  deleteGroup,
-  deleteUser,
   makeAdminOfGroup,
   clickIndexTabWsgAdmin,
   openWsTab,
@@ -414,9 +412,6 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
   });
 
   after(() => {
-    deleteUser(standardUser.username);
-    deleteUser(secondaryUser.username);
-    deleteGroup(baseGroup);
     deleteFirstUser();
   });
 });

@@ -127,4 +127,24 @@ describe('WorkspaceGroupsMenuComponent', () => {
     expect(mockDialog.open).toHaveBeenCalledWith(EditWorkspaceGroupSettingsComponent, expect.anything());
     expect(emitSpy).toHaveBeenCalledWith({ profiles: [], selectedRow: 1 });
   });
+
+  type Emitter = 'groupAdded' | 'groupEdited' | 'groupSettingsEdited';
+
+  // Esc, a click beside the dialog and navigation close it with undefined, its cancel button with false (#1844).
+  it.each<[string, false | undefined, (menu: WorkspaceGroupsMenuComponent) => void, Emitter]>([
+    ['add a group', false, menu => menu.addGroup(), 'groupAdded'],
+    ['add a group', undefined, menu => menu.addGroup(), 'groupAdded'],
+    ['rename a group', false, menu => menu.editGroup(), 'groupEdited'],
+    ['rename a group', undefined, menu => menu.editGroup(), 'groupEdited'],
+    ['change the profiles of a group', false, menu => menu.editGroupSettings(), 'groupSettingsEdited']
+  ])('should not %s when the dialog closes with %s', (_, result, act, emitter) => {
+    component.selectedRows = [{ id: 1, name: 'g1' }];
+    (mockDialog.open as jest.Mock).mockReturnValue({ afterClosed: () => of(result) });
+    const emitSpy = jest.spyOn(component[emitter], 'emit');
+
+    act(component);
+
+    expect(mockDialog.open).toHaveBeenCalled();
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
 });

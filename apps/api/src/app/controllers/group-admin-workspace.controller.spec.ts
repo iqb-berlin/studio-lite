@@ -145,6 +145,16 @@ describe('GroupAdminWorkspaceController', () => {
       expect(usersService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(1, 1);
     });
 
+    // An administrator is not entered as admin of every group, and needs not be.
+    it('should let an administrator create a workspace in any group', async () => {
+      const dto = { name: 'new', groupId: 2 } as CreateWorkspaceDto;
+      usersService.getUserIsAdmin.mockResolvedValue(true);
+      usersService.isWorkspaceGroupAdmin.mockResolvedValue(false);
+      workspaceService.create.mockResolvedValue(124);
+
+      expect(await controller.create(1, dto)).toBe(124);
+    });
+
     it('should refuse a group the user does not administer (#1005)', async () => {
       // The group is in the body. Whoever administered any group at all created a workspace in
       // every other one before this check.

@@ -428,6 +428,36 @@ describe('WorkspaceService', () => {
       expect(backendService.setUnitDefinition).not.toHaveBeenCalled();
     });
 
+    it('should keep a definition the backend refuses unsaved and send no scheme after it', async () => {
+      const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
+      definitionStore.setData([], 'new');
+      const schemeStore = new UnitSchemeStore(1, { scheme: 'old', schemeType: 'type' });
+      schemeStore.setData('new', 'newType');
+      unitStores.definitionStore.set(definitionStore);
+      unitStores.schemeStore.set(schemeStore);
+      backendService.setUnitDefinition.mockReturnValue(of(false));
+
+      const result = await service.saveUnitData();
+
+      expect(result).toBe(false);
+      expect(definitionStore.isChanged()).toBe(true);
+      expect(service.lastChangedDefinition).toBeUndefined();
+      expect(backendService.setUnitScheme).not.toHaveBeenCalled();
+    });
+
+    it('should keep a scheme the backend refuses unsaved', async () => {
+      const schemeStore = new UnitSchemeStore(1, { scheme: 'old', schemeType: 'type' });
+      schemeStore.setData('new', 'newType');
+      unitStores.schemeStore.set(schemeStore);
+      backendService.setUnitScheme.mockReturnValue(of(false));
+
+      const result = await service.saveUnitData();
+
+      expect(result).toBe(false);
+      expect(schemeStore.isChanged()).toBe(true);
+      expect(service.lastChangedScheme).toBeUndefined();
+    });
+
     it('should reload unit list when key/name/group/state changed', async () => {
       const metadataStore = new UnitMetadataStore({ id: 1, key: 'old', name: 'Old' });
       metadataStore.setBasicData('new', 'New', '', '', '', '', '');
@@ -635,6 +665,34 @@ describe('WorkspaceService', () => {
 
         expect(backendService.setUnitProperties).not.toHaveBeenCalled();
         expect(backendService.setUnitDefinition).toHaveBeenCalled();
+      });
+
+      it('should send no metadata when the items are in line already', async () => {
+        unitStores.variables.set([{ id: 'text_1', alias: 'old alias' }, { id: 'gone', alias: 'Gone' }]);
+        const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
+        definitionStore.setData([], 'new');
+        unitStores.definitionStore.set(definitionStore);
+
+        await service.saveUnitData();
+
+        expect(backendService.setUnitProperties).not.toHaveBeenCalled();
+        expect(backendService.setUnitDefinition).toHaveBeenCalled();
+      });
+
+      it('should leave the items alone when another unit is opened while the scheme loads', async () => {
+        const definitionStore = new UnitDefinitionStore(1, { definition: 'old', variables: [] });
+        definitionStore.setData([], 'new');
+        unitStores.definitionStore.set(definitionStore);
+        const schemeStore = unitStores.schemeStore();
+        unitStores.loadSchemeStore.mockImplementation(() => {
+          unitStores.metadataStore.set(new UnitMetadataStore({ id: 2 }));
+          return of(schemeStore);
+        });
+
+        await service.saveUnitData();
+
+        expect(metadataStore.isChanged()).toBe(false);
+        expect(backendService.setUnitProperties).not.toHaveBeenCalled();
       });
     });
 

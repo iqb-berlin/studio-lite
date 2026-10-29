@@ -1,10 +1,8 @@
 import { createMock } from '@golevelup/ts-jest';
 import AdmZip from 'adm-zip';
 import { load } from 'cheerio';
-// `unstable_mockModule` is missing from the global `jest` object's type, so it comes from here.
-// It is aliased because the global `jest` -- used for `jest.fn()` below -- types its mocks
-// loosely, and importing over that name would make every `mockResolvedValue` a type error.
-import { jest as jestEsm } from '@jest/globals';
+import Excel from 'exceljs';
+import { BadRequestException } from '@nestjs/common';
 import {
   UnitPropertiesDto,
   CodeBookContentSetting,
@@ -13,17 +11,27 @@ import {
 import type { UnitService } from '../services/unit.service';
 import type { SettingService } from '../services/setting.service';
 import type { WorkspaceService } from '../services/workspace.service';
+import { DownloadWorkspacesClass } from './download-workspaces.class';
 
-// ESM module namespaces are frozen, so a replacement has to be registered before the module is
-// pulled in -- which is why everything that sees a mock is imported dynamically below.
-jestEsm.unstable_mockModule('exceljs', () => ({
-  default: { Workbook: jest.fn() }
-}));
-
-const Excel = (await import('exceljs')).default;
-const { DownloadWorkspacesClass } = await import('./download-workspaces.class');
+// The first sheet as a reader of the file sees it: its name, and the values of each row, header
+// first. An empty cell reads as ''.
+const readSheet = async (file: Buffer): Promise<{ name: string; rows: unknown[][] }> => {
+  const workbook = new Excel.Workbook();
+  await workbook.xlsx.load(file as unknown as Excel.Buffer);
+  const [sheet] = workbook.worksheets;
+  const rows: unknown[][] = [];
+  sheet.eachRow(row => rows.push(
+    Array.from({ length: sheet.columnCount }, (_, i) => row.getCell(i + 1).value ?? '')
+  ));
+  return { name: sheet.name, rows };
+};
 
 describe('DownloadWorkspacesClass', () => {
+  // A unit U1 with one profile; order 0 marks it as the profile the workspace uses.
+  const unitWithProfile = (entries: object[], order = 0) => ({
+    id: 1, key: 'U1', metadata: { profiles: [{ order, entries }] }
+  }) as unknown as UnitPropertiesDto;
+
   describe('setUnitsItemsDataRows', () => {
     it('should map unit metadata to item rows correctly', () => {
       const units = [
@@ -93,6 +101,34 @@ describe('DownloadWorkspacesClass', () => {
 
       expect(result[0].MultiEntry).toBe('Val1<br>Val2');
     });
+
+    it('should list an item without the current profile with what the item itself says', () => {
+      const units = [{
+        key: 'U1',
+        metadata: {
+          items: [{
+            id: 'I1', variableId: 'V1', description: 'Notiz', profiles: [{ order: -1, entries: [] }]
+          }]
+        }
+      }] as unknown as UnitPropertiesDto[];
+
+      expect(DownloadWorkspacesClass.setUnitsItemsDataRows(units)).toEqual([{
+        Aufgabe: 'U1', 'Item-Id': 'I1', Variable: 'V1', Notiz: 'Notiz'
+      }]);
+    });
+
+    it('should write an empty cell for an entry without value', () => {
+      const units = [{
+        key: 'U1',
+        metadata: {
+          items: [{
+            id: 'I1', profiles: [{ order: 0, entries: [{ label: [{ value: 'Thema' }], valueAsText: [] }] }]
+          }]
+        }
+      }] as unknown as UnitPropertiesDto[];
+
+      expect(DownloadWorkspacesClass.setUnitsItemsDataRows(units)[0].Thema).toBe('');
+    });
   });
 
   describe('setUnitsDataRows', () => {
@@ -124,37 +160,67 @@ describe('DownloadWorkspacesClass', () => {
         Aufgabe: 'UNIT1'
       });
     });
+
+    it.each([
+      ['several values joined by commas', [{ value: 'a' }, { value: 'b' }], 'a, b'],
+      ['a single value given as an object', { value: 'c' }, 'c'],
+      ['an empty cell for no value', [], '']
+    ])('should write %s', (_, valueAsText, cell) => {
+      const [row] = DownloadWorkspacesClass.setUnitsDataRows([
+        unitWithProfile([{ label: [{ value: 'Fach' }], valueAsText }])
+      ]);
+
+      expect(row.Fach).toBe(cell);
+    });
+
+    // Only the profile the workspace uses counts; a unit without it is still listed.
+    it('should list a unit without the current profile by its key alone', () => {
+      expect(DownloadWorkspacesClass.setUnitsDataRows([
+        unitWithProfile([{ label: [{ value: 'Fach' }], valueAsText: [{ value: 'x' }] }], -1)
+      ])).toEqual([{ Aufgabe: 'U1' }]);
+    });
   });
 
   describe('getWorkspaceMetadataReport', () => {
-    it('should create an excel workbook with correct data', async () => {
-      const unitServiceMock = createMock<UnitService>();
-      unitServiceMock.findAllWithProperties.mockResolvedValue([
-        { id: 1, key: 'U1', metadata: { profiles: [] } } as unknown as UnitPropertiesDto
-      ]);
+    const unitService = createMock<UnitService>();
+    const entry = (label: string, value: string) => ({ label: [{ value: label }], valueAsText: [{ value }] });
 
-      const mockWorkbook = {
-        addWorksheet: jest.fn().mockReturnValue({
-          addRows: jest.fn(),
-          getRow: jest.fn().mockReturnValue({ font: {} }),
-          columns: []
-        }),
-        xlsx: {
-          writeBuffer: jest.fn().mockResolvedValue(Buffer.from('excel-data'))
+    beforeEach(() => {
+      unitService.findAllWithProperties.mockResolvedValue([1, 2].map(id => ({
+        id,
+        key: `U${id}`,
+        metadata: {
+          profiles: [{ order: 0, entries: [entry('Fach', 'Mathe')] }],
+          items: [{
+            id: `I${id}`,
+            variableId: 'V1',
+            description: 'N',
+            profiles: [{ order: 0, entries: [entry('Thema', 'Bruch')] }]
+          }]
         }
-      };
-      (Excel.Workbook as unknown as jest.Mock).mockImplementation(() => mockWorkbook);
+      })) as unknown as UnitPropertiesDto[]);
+    });
 
-      const result = await DownloadWorkspacesClass.getWorkspaceMetadataReport(
-        'unit',
-        unitServiceMock,
-        1,
-        ['key'],
-        [1]
+    it('should write the units chosen, under the names a reader knows the columns by', async () => {
+      const file = await DownloadWorkspacesClass.getWorkspaceMetadataReport(
+        'unit', unitService, 1, ['key', 'Fach'], [2]
       );
 
-      expect(result).toEqual(Buffer.from('excel-data'));
-      expect(mockWorkbook.addWorksheet).toHaveBeenCalledWith('Aufgaben Metadaten ');
+      expect(await readSheet(file)).toEqual({
+        name: 'Aufgaben Metadaten ',
+        rows: [['Aufgabe', 'Fach'], ['U2', 'Mathe']]
+      });
+    });
+
+    it('should write a row per item of the units chosen for the item report', async () => {
+      const file = await DownloadWorkspacesClass.getWorkspaceMetadataReport(
+        'item', unitService, 1, ['key', 'id', 'variableId', 'description', 'Thema'], [1]
+      );
+
+      expect(await readSheet(file)).toEqual({
+        name: ' Items Metadaten ',
+        rows: [['Aufgabe', 'Item-Id', 'Variable', 'Notiz', 'Thema'], ['U1', 'I1', 'V1', 'N', 'Bruch']]
+      });
     });
   });
 
@@ -291,6 +357,63 @@ describe('DownloadWorkspacesClass', () => {
       expect($('w\\:t').toArray().filter(node => $(node).text() === 'WEITER')).toHaveLength(2);
     });
 
+    // The metadata names the variable by its id; the codebook shows its alias.
+    it('names the items by the alias of their variable and leaves out those without id or variable', async () => {
+      const units = createMock<UnitService>();
+      const settings = createMock<SettingService>();
+      const parsed = JSON.parse(scheme);
+      parsed.variableCodings[0].alias = 'A';
+      units.findAllWithProperties.mockResolvedValue([{
+        id: 1,
+        key: 'U',
+        name: 'Unit',
+        scheme: JSON.stringify(parsed),
+        metadata: {
+          items: [{ id: 'I1', variableId: 'V' }, { id: '', variableId: 'V' }, { id: 'I3' }]
+        }
+      }] as UnitPropertiesDto[]);
+      settings.findMissingsProfiles.mockResolvedValue([]);
+
+      const result = await DownloadWorkspacesClass.getWorkspaceCodingBook(
+        1, units, settings, { ...options, exportFormat: 'docx' }, [1]
+      );
+
+      const $ = load(new AdmZip(result).readAsText('word/document.xml'), { xml: true });
+      expect($('w\\:p').toArray()
+        .map(paragraph => $(paragraph).find('w\\:t').text())
+        .filter(text => text.startsWith('Item(s):'))).toEqual(['Item(s): I1   ']);
+    });
+
+    it('refuses a unit whose scheme cannot be read, naming the unit', async () => {
+      const units = createMock<UnitService>();
+      const settings = createMock<SettingService>();
+      units.findAllWithProperties.mockResolvedValue([{
+        id: 1, key: 'KAPUTT', name: 'Unit', scheme: '{kein json', metadata: { items: [] }
+      }] as UnitPropertiesDto[]);
+      settings.findMissingsProfiles.mockResolvedValue([]);
+
+      const codebook = DownloadWorkspacesClass.getWorkspaceCodingBook(1, units, settings, options, [1]);
+
+      await expect(codebook).rejects.toThrow(BadRequestException);
+      await expect(codebook).rejects.toThrow(/KAPUTT/);
+    });
+
+    it.each([
+      ['a profile of another name', { label: 'Anders', missings: JSON.stringify([{ code: 0, label: 'M' }]) }],
+      ['a profile whose missings cannot be read', { label: 'Profil', missings: '{kaputt' }]
+    ])('writes no missings for %s', async (_, profile) => {
+      const units = createMock<UnitService>();
+      const settings = createMock<SettingService>();
+      units.findAllWithProperties.mockResolvedValue([{
+        id: 1, key: 'U', name: 'Unit', scheme, metadata: { items: [] }
+      }] as UnitPropertiesDto[]);
+      settings.findMissingsProfiles.mockResolvedValue([{ id: 8, ...profile }]);
+
+      const result = await DownloadWorkspacesClass.getWorkspaceCodingBook(1, units, settings, options, [1]);
+
+      expect(JSON.parse(result.toString())[0].missings).toEqual([]);
+    });
+
     it('returns a real DOCX for an empty selection', async () => {
       const units = createMock<UnitService>(); const settings = createMock<SettingService>();
       units.findAllWithProperties.mockResolvedValue([]); settings.findMissingsProfiles.mockResolvedValue([]);
@@ -301,51 +424,43 @@ describe('DownloadWorkspacesClass', () => {
   });
 
   describe('getWorkspaceReport', () => {
-    it('should collect workspace data and create an excel report', async () => {
-      const workspaceServiceMock = createMock<WorkspaceService>();
-      const unitServiceMock = createMock<UnitService>();
+    const workspaceService = createMock<WorkspaceService>();
+    const unitService = createMock<UnitService>();
+    const module = (editor: string) => ({
+      editor, player: 'P', schemer: 'S', lastChangedMetadata: null, lastChangedDefinition: null, lastChangedScheme: null
+    });
 
-      workspaceServiceMock.findAllGroupwise.mockResolvedValue([
-        {
-          id: 1,
-          name: 'Group 1',
-          isAdmin: false,
-          workspaces: [{ id: 10, name: 'WS 1' }]
-        }
+    beforeEach(() => {
+      workspaceService.findAllGroupwise.mockResolvedValue([
+        { id: 1, name: 'G1', workspaces: [{ id: 10, name: 'WS10' }, { id: 11, name: 'WS11' }] },
+        { id: 2, name: 'G2', workspaces: [{ id: 20, name: 'WS20' }] }
       ] as unknown as WorkspaceGroupDto[]);
+      unitService.findAllWithProperties.mockImplementation(async workspaceId => (
+        workspaceId === 10 ? [module('E'), module('E'), module('')] : []
+      ) as unknown as UnitPropertiesDto[]);
+    });
 
-      unitServiceMock.findAllWithProperties.mockResolvedValue([
-        {
-          id: 1,
-          editor: 'EditorA',
-          player: 'PlayerA',
-          schemer: 'SchemerA',
-          lastChangedMetadata: new Date('2023-01-01'),
-          lastChangedDefinition: new Date('2023-01-01'),
-          lastChangedScheme: new Date('2023-01-01')
-        }
-      ] as unknown as UnitPropertiesDto[]);
+    // A column per module in use; a unit without one is counted under "none".
+    it('should count the units of each workspace per module and leave a module it does not use blank', async () => {
+      const { name, rows } = await readSheet(await DownloadWorkspacesClass.getWorkspaceReport(
+        workspaceService, unitService, 1
+      ));
 
-      const mockWorkbook = {
-        addWorksheet: jest.fn().mockReturnValue({
-          addRows: jest.fn(),
-          getRow: jest.fn().mockReturnValue({ font: {} }),
-          columns: []
-        }),
-        xlsx: {
-          writeBuffer: jest.fn().mockResolvedValue(Buffer.from('ws-report'))
-        }
-      };
-      (Excel.Workbook as unknown as jest.Mock).mockImplementation(() => mockWorkbook);
+      expect(name).toBe('Arbeitsbereiche');
+      expect(rows).toEqual([
+        ['Gruppe Name', 'Gruppe Id', 'Arbeitsbereich Name', 'Arbeitsbereich Id', 'Letzte Änderung', 'Anzahl Units',
+          'E', 'Kein Editor', 'P', 'S'],
+        ['G1', 1, 'WS10', 10, '', 3, 2, 1, 3, 3],
+        ['G1', 1, 'WS11', 11, '', 0, '', '', '', '']
+      ]);
+    });
 
-      const result = await DownloadWorkspacesClass.getWorkspaceReport(
-        workspaceServiceMock,
-        unitServiceMock,
-        0
-      );
+    it('should report every group when none is chosen', async () => {
+      const { rows } = await readSheet(await DownloadWorkspacesClass.getWorkspaceReport(
+        workspaceService, unitService, 0
+      ));
 
-      expect(result).toEqual(Buffer.from('ws-report'));
-      expect(mockWorkbook.addWorksheet).toHaveBeenCalledWith('Arbeitsbereiche');
+      expect(rows.slice(1).map(row => row[3])).toEqual([10, 11, 20]);
     });
   });
 });

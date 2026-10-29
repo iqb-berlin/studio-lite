@@ -140,4 +140,27 @@ describe('SelectUnitListComponent', () => {
 
     expect(component.selectedUnitIds).toEqual([1, 3]);
   });
+
+  it('should preselect the open unit', () => {
+    component.selectedUnitId = 2;
+    component.queryParams = new HttpParams();
+
+    component.updateUnitList(10);
+
+    expect(component.selectedUnitIds).toEqual([2]);
+  });
+
+  it.each([
+    ['key', 'x9', [4]],
+    ['name', 'nit 3', [3]],
+    ['group', 'g2', [3]]
+  ])('should filter the units by any part of their %s regardless of case', (_, filter, unitIds) => {
+    backendServiceMock.getUnitList.mockReturnValue(of([...createUnits(), { id: 4, key: 'AB-X9' }]));
+    component.queryParams = new HttpParams();
+    component.updateUnitList(10);
+
+    component.objectsDatasource.filter = filter;
+
+    expect(component.objectsDatasource.filteredData.map(unit => unit.id)).toEqual(unitIds);
+  });
 });

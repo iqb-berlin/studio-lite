@@ -3,6 +3,7 @@ import {
   UnitDownloadBookletSettingsDto, UnitDownloadSettingsDto, UnitExportConfigDto, UnitPropertiesDto
 } from '@studio-lite-lib/api-dto';
 import type AdmZip from 'adm-zip';
+import { load } from 'cheerio';
 import { BookletDownloadClass } from './booklet-download.class';
 
 describe('BookletDownloadClass', () => {
@@ -227,6 +228,61 @@ describe('BookletDownloadClass', () => {
       BookletDownloadClass.addTestTakers(exportConfig, settings, 1, mockZip as unknown as AdmZip);
       const xmlContent = (mockZip.addFile.mock.calls[0][1] as Buffer).toString();
       expect(xmlContent).not.toContain('<Booklet>');
+    });
+
+    describe('the logins', () => {
+      // The name and the password, if any, of each login in the file.
+      const logins = (settings: Partial<UnitDownloadSettingsDto>, loginCount: number) => {
+        BookletDownloadClass.addTestTakers(
+          exportConfig,
+          createMock<UnitDownloadSettingsDto>({ ...baseSettings, ...settings }),
+          loginCount,
+          mockZip as unknown as AdmZip
+        );
+        const $ = load((mockZip.addFile.mock.calls[0][1] as Buffer).toString(), { xml: true });
+        return $('Login').toArray().map(login => ({ name: $(login).attr('name'), pw: $(login).attr('pw') }));
+      };
+      const allKinds = { addTestTakersHot: 1, addTestTakersReview: 1, addTestTakersMonitor: 1 };
+
+      it('should give every login a password', () => {
+        expect(logins({ ...allKinds, passwordLess: false }, 3).map(login => login.pw?.length)).toEqual([4, 4, 4]);
+      });
+
+      it('should give no login a password when they are to go without', () => {
+        expect(logins({ ...allKinds, passwordLess: true }, 3).map(login => login.pw)).toEqual([
+          undefined, undefined, undefined
+        ]);
+      });
+
+      // Codes stay unique among many logins only when they get longer.
+      it.each([
+        [1000, false, 5, 4],
+        [1001, false, 8, 5],
+        [1000, true, 7, undefined]
+      ])('should give %p logins (without passwords: %p) names of %p and passwords of %p characters',
+        (loginCount, passwordLess, nameLength, passwordLength) => {
+          const [login] = logins({
+            addTestTakersHot: 1, addTestTakersReview: 0, addTestTakersMonitor: 0, passwordLess
+          }, loginCount);
+
+          expect(login.name).toHaveLength(nameLength);
+          expect(login.pw?.length).toBe(passwordLength);
+        });
+
+      // Monitors and hot logins are told apart by their prefix.
+      it.each([
+        [
+          'hot logins and several monitors',
+          { addTestTakersHot: 2, addTestTakersMonitor: 2 },
+          ['T01_', 'T02_', 'TL01_', 'TL02_']
+        ],
+        ['a hot login and one monitor', { addTestTakersHot: 1, addTestTakersMonitor: 1 }, ['T01_', 'TL_']],
+        ['a hot login without monitors', { addTestTakersHot: 1, addTestTakersMonitor: 0 }, ['']]
+      ])('should prefix the names of %s', (_, counts, prefixes) => {
+        const names = logins({ ...counts, addTestTakersReview: 0 }, 4).map(login => login.name);
+
+        expect(names.map(name => name.slice(0, name.lastIndexOf('_') + 1))).toEqual(prefixes);
+      });
     });
   });
 });

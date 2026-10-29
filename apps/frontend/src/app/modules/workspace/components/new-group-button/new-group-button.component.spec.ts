@@ -102,4 +102,13 @@ describe('NewGroupButtonComponent', () => {
     expect(mockBackendService.setWorkspaceSettings).not.toHaveBeenCalled();
     expect(mockWorkspaceService.workspaceSettings.unitGroups.length).toBe(1);
   });
+
+  it('should save no group when the dialog is cancelled', () => {
+    mockDialog.open.mockReturnValue({ afterClosed: () => of(false) });
+
+    component.newGroup();
+
+    expect(mockBackendService.setWorkspaceSettings).not.toHaveBeenCalled();
+    expect(mockWorkspaceService.workspaceSettings.unitGroups).toEqual([]);
+  });
 });

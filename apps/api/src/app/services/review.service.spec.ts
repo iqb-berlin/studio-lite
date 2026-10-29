@@ -269,6 +269,17 @@ describe('ReviewService', () => {
       expect(reviewUnitRepository.save).toHaveBeenCalled();
     });
 
+    it('should keep the units, and whatever else is not sent', async () => {
+      const review = { id: 1, name: 'old', password: 'pw' } as Review;
+      reviewRepository.findOne.mockResolvedValue(review);
+
+      await service.patch(3, 1, { id: 1, name: 'new' } as ReviewFullDto);
+
+      expect(reviewRepository.save).toHaveBeenCalledWith(expect.objectContaining({ name: 'new', password: 'pw' }));
+      expect(reviewUnitRepository.delete).not.toHaveBeenCalled();
+      expect(reviewUnitRepository.save).not.toHaveBeenCalled();
+    });
+
     it('should replace the units with their list order in one save', async () => {
       const review = { id: 1, name: 'old' } as Review;
       reviewRepository.findOne.mockResolvedValue(review);

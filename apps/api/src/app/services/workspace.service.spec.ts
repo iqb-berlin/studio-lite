@@ -20,6 +20,7 @@ import { UnitMetadataService } from './unit-metadata.service';
 import { UnitUserService } from './unit-user.service';
 import User from '../entities/user.entity';
 import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
+import { GroupAdminUnprocessableWorkspaceException } from '../exceptions/group-admin-unprocessable-workspace.exception';
 
 describe('WorkspaceService', () => {
   let service: WorkspaceService;
@@ -175,6 +176,52 @@ describe('WorkspaceService', () => {
       const result = await service.findAllGroupwise(userId);
       expect(result).toBeDefined();
     });
+
+    // The workspace report of the administration asks without a user (DownloadWorkspacesClass).
+    it('should list every group with every workspace when asked without a user', async () => {
+      (workspaceGroupRepository.find as jest.Mock).mockResolvedValue([{ id: 1, name: 'g1' }, { id: 2, name: 'g2' }]);
+      (workspaceRepository.find as jest.Mock).mockResolvedValue([{ id: 10, groupId: 1 }, { id: 20, groupId: 1 }]);
+      (unitsRepository.find as jest.Mock).mockResolvedValue([]);
+
+      const groups = await service.findAllGroupwise();
+
+      expect(groups.map(({ id, workspaces }) => ({ id, workspaces: workspaces.map(workspace => workspace.id) })))
+        .toEqual([{ id: 1, workspaces: [10, 20] }, { id: 2, workspaces: [] }]);
+      expect(workspaceUsersRepository.find).not.toHaveBeenCalled();
+    });
+
+    describe('for the groups', () => {
+      beforeEach(() => {
+        (workspaceGroupRepository.find as jest.Mock).mockResolvedValue([
+          { id: 1, name: 'administered, empty' },
+          { id: 2, name: 'foreign, empty' },
+          { id: 3, name: 'foreign, with a workspace of the user' }
+        ] as WorkspaceGroup[]);
+        jest.spyOn(service, 'findAll').mockResolvedValue([{ id: 30, groupId: 3 }] as UsersWorkspaceInListDto[]);
+      });
+
+      it('should let an administrator administer every group and list them all', async () => {
+        (usersService.getUserIsAdmin as jest.Mock).mockResolvedValue(true);
+
+        const groups = await service.findAllGroupwise(5);
+
+        expect(groups.map(({ id, isAdmin }) => ({ id, isAdmin }))).toEqual([
+          { id: 1, isAdmin: true }, { id: 2, isAdmin: true }, { id: 3, isAdmin: true }
+        ]);
+      });
+
+      // A group admin has to reach an empty group to fill it; other groups show only where the user works.
+      it('should list the groups a group admin administers, empty or not, and the others only with a workspace',
+        async () => {
+          (usersService.getUserIsAdmin as jest.Mock).mockResolvedValue(false);
+          (workspaceGroupAdminRepository.find as jest.Mock).mockResolvedValue([{ workspaceGroupId: 1 }]);
+
+          const groups = await service.findAllGroupwise(5);
+
+          expect(groups.map(({ id, isAdmin, workspaces }) => ({ id, isAdmin, workspaces: workspaces.length })))
+            .toEqual([{ id: 1, isAdmin: true, workspaces: 0 }, { id: 3, isAdmin: false, workspaces: 1 }]);
+        });
+    });
   });
 
   describe('findGroupIdsOfWorkspaces', () => {
@@ -202,6 +249,17 @@ describe('WorkspaceService', () => {
       const result = await service.findOne(1);
       expect(result.id).toBe(1);
     });
+  });
+
+  it.each([
+    ['findOne', () => service.findOne(9)],
+    ['findAllWorkspaceGroups', () => service.findAllWorkspaceGroups(9)],
+    ['patch', () => service.patch({ id: 9, name: 'x' })]
+  ])('should answer %s for an unknown workspace with not found', async (_, call) => {
+    (workspaceRepository.findOne as jest.Mock).mockResolvedValue(null);
+
+    await expect(call()).rejects.toThrow(AdminWorkspaceNotFoundException);
+    expect(workspaceRepository.save).not.toHaveBeenCalled();
   });
 
   describe('findOneByUser', () => {
@@ -239,6 +297,60 @@ describe('WorkspaceService', () => {
       expect(result).toContain('g1');
       expect(result).toContain('g2');
     });
+
+    it('should name each group of the units once, sorted, without the empty one', async () => {
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, settings: { unitGroups: ['B'] } });
+      (unitsRepository.find as jest.Mock).mockResolvedValue(
+        [{ groupName: 'C' }, { groupName: '' }, { groupName: 'A' }, { groupName: 'C' }, { groupName: 'B' }]
+      );
+
+      expect(await service.findAllWorkspaceGroups(1)).toEqual(['A', 'B', 'C']);
+    });
+
+    it('should take the groups of the units alone when the settings name none', async () => {
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, settings: {} });
+      (unitsRepository.find as jest.Mock).mockResolvedValue([{ groupName: 'A' }]);
+
+      expect(await service.findAllWorkspaceGroups(1)).toEqual(['A']);
+    });
+  });
+
+  describe('patchGroupName', () => {
+    const groupName = (name: string, operation: 'add' | 'remove') => service
+      .patchGroupName(1, { groupName: name, operation });
+
+    it.each([
+      ['add a group', 'Beta', ['Alpha', 'Beta'], 1],
+      ['not add a group that differs only in case', 'ALPHA', ['Alpha'], 0]
+    ])('should %s', async (_, name, expected, saves) => {
+      const workspace = { id: 1, settings: { unitGroups: ['Alpha'] } };
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(workspace);
+
+      await groupName(name, 'add');
+
+      expect(workspace.settings.unitGroups).toEqual(expected);
+      expect(workspaceRepository.save).toHaveBeenCalledTimes(saves);
+    });
+
+    it('should add the first group to a workspace without settings', async () => {
+      const workspace: Partial<Workspace> = { id: 1, settings: null };
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(workspace);
+
+      await groupName('Alpha', 'add');
+
+      expect(workspace.settings.unitGroups).toEqual(['Alpha']);
+    });
+
+    it('should take a removed group out of the settings and off its units', async () => {
+      const workspace = { id: 1, settings: { unitGroups: ['Alpha', 'Beta'] } };
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(workspace);
+
+      await groupName('Alpha', 'remove');
+
+      expect(workspace.settings.unitGroups).toEqual(['Beta']);
+      expect(workspaceRepository.save).toHaveBeenCalledWith(workspace);
+      expect(unitsRepository.update).toHaveBeenCalledWith({ workspaceId: 1, groupName: 'Alpha' }, { groupName: '' });
+    });
   });
 
   describe('create', () => {
@@ -258,6 +370,32 @@ describe('WorkspaceService', () => {
           hiddenRoutes: ['notes']
         })
       }));
+    });
+
+    describe('in a group holding workspaces already', () => {
+      const givenGroup = (name: string, workspaces: number) => {
+        (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, name });
+        (workspaceRepository.find as jest.Mock).mockResolvedValue(new Array(workspaces).fill({}));
+        (workspaceRepository.save as jest.Mock).mockResolvedValue({ id: 5 });
+      };
+      const create = () => service.create({ name: 'w', groupId: 1 } as CreateWorkspaceDto);
+
+      // The frontend keeps the same limit; this is the one that holds.
+      it('should refuse an eleventh workspace in a backup group', async () => {
+        givenGroup('Backup 2024', 10);
+
+        await expect(create()).rejects.toThrow(GroupAdminUnprocessableWorkspaceException);
+        expect(workspaceRepository.save).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        ['a tenth workspace in a backup group', 'Backup 2024', 9],
+        ['an eleventh workspace in another group', 'Mathe', 10]
+      ])('should create %s', async (_, name, workspaces) => {
+        givenGroup(name, workspaces);
+
+        expect(await create()).toBe(5);
+      });
     });
   });
 

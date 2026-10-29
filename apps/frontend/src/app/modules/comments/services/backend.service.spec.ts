@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { UpdateUnitCommentUnitItemsDto } from '@studio-lite-lib/api-dto';
+import { Observable } from 'rxjs';
 import { Comment } from '../models/comment.interface';
 import { BackendService } from './backend.service';
 
@@ -169,5 +170,18 @@ describe('Comments BackendService', () => {
     const req = httpMock.expectOne(`${serverUrl}workspaces/10/units/20/comments/55/votes`);
     expect(req.request.method).toBe('GET');
     req.flush(voters);
+  });
+
+  // Each call decides on its own which route it takes; a review id of zero means the workspace.
+  it.each<[string, string, (backend: BackendService) => Observable<unknown>]>([
+    ['an edit', 'reviews/30/units/20/', backend => backend.updateComment(55, {}, 10, 20, 30)],
+    ['a hiding', 'workspaces/10/units/20/', backend => backend.updateCommentVisibility(55, {}, 10, 20, 0)],
+    ['a deletion', 'reviews/30/units/20/', backend => backend.deleteComment(55, 10, 20, 30)],
+    ['a vote', 'workspaces/10/units/20/', backend => backend.toggleVote(10, 20, 0, 55, 'up')],
+    ['the question for the voters', 'reviews/30/units/20/', backend => backend.getCommentVoters(10, 20, 30, 55)]
+  ])('should send %s to %s', (_, route, call) => {
+    call(service).subscribe();
+
+    httpMock.expectOne(request => request.url.startsWith(`${serverUrl}${route}`)).flush([]);
   });
 });
