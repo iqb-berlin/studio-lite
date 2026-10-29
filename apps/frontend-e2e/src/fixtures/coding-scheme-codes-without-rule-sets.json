@@ -29,32 +29,6 @@
           "manualInstruction": ""
         }
       ]
-    },
-    {
-      "id": "manual_1",
-      "alias": "manual_1",
-      "label": "",
-      "sourceType": "BASE",
-      "manualInstruction": "",
-      "codeModel": "MANUAL_ONLY",
-      "codes": [
-        {
-          "id": 1,
-          "score": 1,
-          "type": "FULL_CREDIT",
-          "label": "Code 1",
-          "ruleSetIndex": null,
-          "manualInstruction": "<p>Anweisung A</p>"
-        },
-        {
-          "id": 0,
-          "score": 0,
-          "type": "NO_CREDIT",
-          "label": "Code 0",
-          "ruleSetIndex": null,
-          "manualInstruction": "<p>Anweisung B</p>"
-        }
-      ]
     }
   ]
 }

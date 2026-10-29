@@ -96,7 +96,7 @@ describe('CodingReportClass', () => {
 
     // A scheme whose codes carry no rule sets of their own failed the whole report (#1873).
     it('reports a unit whose codes have no rule sets', () => {
-      const units = [{
+      const units = [createMock<UnitPropertiesDto>({
         id: 13,
         key: 'UNIT1',
         name: '',
@@ -137,7 +137,7 @@ describe('CodingReportClass', () => {
             ]
           }]
         })
-      }] as unknown as UnitPropertiesDto[];
+      })];
 
       const result = CodingReportClass.build(1, units);
 
@@ -399,6 +399,17 @@ describe('CodingReportClass', () => {
       });
 
       expect(codingType).toBe('manuell');
+    });
+
+    // the schemer's editor leaves <p></p> behind when an instruction is emptied
+    it('does not count an emptied manual instruction as manual coding', () => {
+      const codingType = CodingReportClass.determineCodingType({
+        id: 'v',
+        sourceType: 'BASE',
+        codes: [{ id: 1, type: 'FULL_CREDIT', manualInstruction: '<p></p>' }]
+      });
+
+      expect(codingType).toBe('keine Regeln');
     });
 
     it('maps closed codes without rule sets to automatisch', () => {

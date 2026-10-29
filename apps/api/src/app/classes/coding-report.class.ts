@@ -191,7 +191,7 @@ export class CodingReportClass {
 
     codingVariable.codes?.forEach((code: CodeData) => {
       // Both are optional in the coding scheme spec, and a code can come without either (#1873).
-      if (!code.manualInstruction) manualCodingOnly = false;
+      if (!CodingReportClass.hasContent(code.manualInstruction)) manualCodingOnly = false;
 
       (code.ruleSets ?? []).forEach((ruleSet: RuleSet) => {
         hasRules ||= ruleSet.rules.length > 0;
