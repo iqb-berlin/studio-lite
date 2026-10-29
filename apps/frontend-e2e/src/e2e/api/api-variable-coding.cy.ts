@@ -2,7 +2,7 @@ import {
   AccessLevel, GroupData, modules, WsData, WsSettings
 } from '../../support/testData';
 import {
-  deleteGroup, deleteAllModules, goToItem, goToWsMenu, login, logout, selectUnit
+  deleteAllModules, goToItem, goToWsMenu, login, logout, selectUnit
 } from '../../support/helpers';
 import { deleteTextField } from '../../support/api';
 
@@ -160,7 +160,6 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('should successfully cleanup all created test data from the system', () => {
-    deleteGroup(group1.name);
     deleteAllModules();
     logout();
   });

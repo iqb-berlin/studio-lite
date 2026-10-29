@@ -4,8 +4,7 @@ import { AccessLevel, metadataMathIIWorkspace } from '../../../support/testData'
 import {
   addFirstUser,
   createGroup,
-  deleteFirstUser,
-  deleteGroup
+  deleteFirstUser
 } from '../../../support/helpers';
 import {
   createWs,
@@ -32,8 +31,7 @@ describe('Metadata Profile Management from Admin', () => {
     selectProfileForGroupFromAdmin(group, IqbProfile.MAi);
   });
 
-  it('cleans up test data', () => {
-    deleteGroup(group);
+  after(() => {
     deleteFirstUser();
   });
 });

@@ -5,7 +5,6 @@ import {
   clickIndexTabWsgAdmin,
   createGroup,
   deleteFirstUser,
-  deleteGroup,
   openWorkspaceSettingsDialog,
   saveWorkspaceSettings,
   setRouteVisibility
@@ -25,7 +24,6 @@ describe('Workspace Settings – hiddenRoutes', () => {
   });
 
   after(() => {
-    deleteGroup(baseGroup);
     deleteFirstUser();
   });
 

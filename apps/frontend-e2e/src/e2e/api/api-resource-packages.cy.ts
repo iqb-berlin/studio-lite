@@ -92,14 +92,6 @@ describe('Admin settings API tests', () => {
     });
   });
 
-  describe('Erase the database', () => {
-    it('Deletes users', () => {
-      cy.deleteUsersAPI([Cypress.expose(`id_${user2.username}`)], Cypress.expose(`token_${Cypress.expose('username')}`))
-        .then(resp => {
-          expect(resp.status).to.equal(200);
-        });
-      // the first user cannot delete their own account (#1949)
-      cy.resetDb();
-    });
-  });
+  // the first user cannot delete their own account (#1949)
+  after(() => cy.resetDb());
 });

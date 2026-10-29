@@ -200,7 +200,6 @@ describe('Cleanup API tests', () => {
         [Cypress.expose(`id_${Cypress.expose('username')}`)],
         Cypress.expose(`token_${Cypress.expose('username')}`)
       ).then(resp => {
-        Cypress.expose('token_admin', '');
         expect(resp.status).to.equal(403);
       });
     });

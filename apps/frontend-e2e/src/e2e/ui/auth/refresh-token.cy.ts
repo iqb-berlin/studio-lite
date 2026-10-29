@@ -3,7 +3,6 @@ import {
   addFirstUser,
   createNewUser,
   deleteFirstUser,
-  deleteUser,
   login,
   loginWithUser,
   clickIndexTabAdmin
@@ -271,10 +270,5 @@ describe('Token Refresh UI Logic', () => {
         .should('contain', json.user.passive)
         .and('match', /\(\d{2}\.\d{2}\., \d{2}:\d{2}\)/);
     });
-  });
-
-  it('deletes user', () => {
-    cy.findAdminSettings().click();
-    deleteUser(standardUser.username);
   });
 });
