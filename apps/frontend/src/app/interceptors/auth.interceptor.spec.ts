@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import {
   HttpClient,
   HttpContext,
@@ -269,6 +269,50 @@ describe('AuthInterceptor', () => {
       expect(appServiceSpy.addErrorMessage).toHaveBeenCalledTimes(1);
       expect((appServiceSpy.addErrorMessage.mock.calls[0][0] as AppHttpError).status).toBe(403);
     });
+  });
+
+  // Tabs of one browser share the tokens. While one of them refreshes, it holds a lock in localStorage.
+  describe('when another tab holds the refresh lock', () => {
+    beforeEach(() => {
+      localStorage.setItem('id_token', 'old-access');
+      localStorage.setItem('refresh_token', 'old-refresh');
+      httpClient.get('/data').subscribe({ error: () => {} });
+      localStorage.setItem('st_refresh_lock', Date.now().toString());
+    });
+
+    it('should repeat the request at once with the token the other tab has already stored', () => {
+      localStorage.setItem('id_token', 'other-tab-access');
+      httpMock.expectOne('/data').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+      const repeated = httpMock.expectOne('/data');
+      expect(repeated.request.headers.get('Authorization')).toBe('Bearer other-tab-access');
+      repeated.flush({});
+      expect(backendServiceSpy.refresh).not.toHaveBeenCalled();
+    });
+
+    it('should refresh on its own when the other tab hands over no token in time', fakeAsync(() => {
+      backendServiceSpy.refresh.mockReturnValue(of({ accessToken: 'own-access', refreshToken: 'own-refresh' }));
+      httpMock.expectOne('/data').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+      tick(1000);
+      expect(backendServiceSpy.refresh).not.toHaveBeenCalled();
+      tick(4000);
+
+      expect(backendServiceSpy.refresh).toHaveBeenCalledWith('old-refresh');
+      httpMock.expectOne('/data').flush({});
+    }));
+  });
+
+  it('should end the session when a request expires and there is no refresh token', () => {
+    let receivedStatus: number | undefined;
+    httpClient.get('/data').subscribe({ error: err => { receivedStatus = err.status; } });
+
+    httpMock.expectOne('/data').flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+    expect(backendServiceSpy.refresh).not.toHaveBeenCalled();
+    expect(backendServiceSpy.logout).toHaveBeenCalled();
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
+    expect(receivedStatus).toBe(401);
   });
 
   // The classification comes from the call site, not from the URL. Every case below uses

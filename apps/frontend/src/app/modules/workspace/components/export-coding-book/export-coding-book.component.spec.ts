@@ -48,6 +48,13 @@ describe('Studio shared codebook wrapper', () => {
     fixture.destroy();
   });
 
+  it('numbers the missings profiles without an id by their position', () => {
+    backend.getMissingsProfiles.mockReturnValue(of([{ label: 'Ohne' }, { id: 8, label: 'Profil' }]));
+    const fixture = TestBed.createComponent(ExportCodingBookComponent); fixture.detectChanges();
+    expect(fixture.componentInstance.missingsProfiles).toEqual([{ id: 1, label: 'Ohne' }, { id: 8, label: 'Profil' }]);
+    fixture.destroy();
+  });
+
   it('uses only the direct endpoint, downloads once and resets loading', () => {
     const fixture = TestBed.createComponent(ExportCodingBookComponent); fixture.detectChanges();
     const c = fixture.componentInstance;

@@ -135,4 +135,20 @@ describe('UsersMenuComponent', () => {
       expect(component.orphanedSessionCount).toBe(0);
     });
   });
+
+  // Esc, a click beside the dialog and navigation close it with undefined, its cancel button with false (#1844).
+  it.each<[string, false | undefined, (menu: UsersMenuComponent) => void, 'userAdded' | 'userEdited']>([
+    ['add a user', undefined, menu => menu.addUser(), 'userAdded'],
+    ['change a user', false, menu => menu.editUser(), 'userEdited'],
+    ['change a user', undefined, menu => menu.editUser(), 'userEdited']
+  ])('should not %s when the dialog closes with %s', (_, result, act, emitter) => {
+    component.selectedRows = [{ id: 1, name: 'test' }];
+    (mockDialog.open as jest.Mock).mockReturnValue({ afterClosed: () => of(result) });
+    const emitSpy = jest.spyOn(component[emitter], 'emit');
+
+    act(component);
+
+    expect(mockDialog.open).toHaveBeenCalledWith(EditUserComponent, expect.anything());
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
 });

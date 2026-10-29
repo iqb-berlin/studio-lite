@@ -8,6 +8,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { WorkspaceInListDto, WorkspaceUserInListDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of, Subject } from 'rxjs';
+import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { AppService } from '../../../../services/app.service';
 import { I18nService } from '../../../../services/i18n.service';
 import { EntriesDividerComponent } from '../../../../components/entries-divider/entries-divider.component';
@@ -62,6 +63,9 @@ describe('WorkspacesComponent', () => {
     setUsersByWorkspace: jest.Mock;
     deleteWorkspaces: jest.Mock;
     moveWorkspaces: jest.Mock;
+    addWorkspace: jest.Mock;
+    selectWorkspaceDropBox: jest.Mock;
+    renameWorkspace: jest.Mock;
   };
   let mockAppBackendService: {
     setWorkspaceSettings?: jest.Mock;
@@ -87,7 +91,10 @@ describe('WorkspacesComponent', () => {
       getUsersByWorkspace: jest.fn().mockReturnValue(of([])),
       setUsersByWorkspace: jest.fn().mockReturnValue(of(true)),
       deleteWorkspaces: jest.fn().mockReturnValue(of(false)),
-      moveWorkspaces: jest.fn().mockReturnValue(of(false))
+      moveWorkspaces: jest.fn().mockReturnValue(of(false)),
+      addWorkspace: jest.fn().mockReturnValue(of(false)),
+      selectWorkspaceDropBox: jest.fn().mockReturnValue(of(false)),
+      renameWorkspace: jest.fn().mockReturnValue(of(false))
     };
     mockAppBackendService = {};
     mockWorkspaceBackendService = {};
@@ -394,5 +401,131 @@ describe('WorkspacesComponent', () => {
       expect(userEntry.isChecked).toBe(true);
       expect(component.workspaceUsers.updateHasChanged).not.toHaveBeenCalled();
     });
+  });
+
+  const workspace = (id: number, name: string, unitsCount: number): WorkspaceInListDto => ({
+    id, name, groupId: 1, dropBoxId: 0, unitsCount
+  });
+
+  const closeConfirmationWith = (result: boolean | undefined) => jest.spyOn(TestBed.inject(MatDialog), 'open')
+    .mockReturnValue({ afterClosed: () => of(result) } as MatDialogRef<unknown>);
+
+  it('should keep the rights unsaved when saving them fails', () => {
+    mockBackendService.getUsers.mockReturnValue(of([{ id: 1, name: 'user1', isAdmin: false }]));
+    mockBackendService.setUsersByWorkspace.mockReturnValue(of(false));
+    fixture.detectChanges();
+    component.tableSelectionRow.select(workspace(1, 'ws1', 0));
+    component.onRoleChange(component.workspaceUsers.entries[0], 2);
+
+    component.saveUsers();
+    fixture.detectChanges();
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.not-changed', 'error', { duration: 3000 });
+    expect(fixture.nativeElement
+      .querySelector('[data-cy="wsg-admin-access-rights-save-button"]').disabled).toBe(false);
+  });
+
+  it.each<[string, string, string[]]>([
+    ['part of the name in any case', 'mat', ['Mathe']],
+    ['the id', '25', ['Deutsch']],
+    ['the number of units', '12', ['Mathe']]
+  ])('should find workspaces by %s', (_, filter, names) => {
+    mockBackendService.getWorkspaces.mockReturnValue(of([workspace(3, 'Mathe', 12), workspace(25, 'Deutsch', 0)]));
+    fixture.detectChanges();
+
+    component.objectsDatasource.filter = filter;
+
+    expect(component.objectsDatasource.filteredData.map(ws => ws.name)).toEqual(names);
+  });
+
+  it('should add up the units of all workspaces of the group', () => {
+    mockBackendService.getWorkspaces
+      .mockReturnValue(of([workspace(1, 'a', 3), workspace(2, 'b', 4), workspace(3, 'c', 0)]));
+
+    fixture.detectChanges();
+
+    expect(component.unitsCount).toBe(7);
+  });
+
+  it.each<[string, number, string]>([
+    ['its units when it has some', 3, 'wsg-admin.delete-workspace-with-units'],
+    ['no units when it has none', 0, 'wsg-admin.delete-workspace']
+  ])('should name %s before a workspace is deleted', (_, unitsCount, content) => {
+    const open = closeConfirmationWith(false);
+
+    component.deleteWorkspace(workspace(3, 'ws3', unitsCount));
+
+    expect(open).toHaveBeenCalledWith(ConfirmDialogComponent, expect.objectContaining({
+      data: expect.objectContaining({ content })
+    }));
+  });
+
+  // Esc, a click beside the dialog and navigation close it with undefined (#1844)
+  it.each([false, undefined])('should not delete a workspace when the confirmation closes with %s', result => {
+    closeConfirmationWith(result);
+
+    component.deleteWorkspace(workspace(3, 'ws3', 0));
+
+    expect(mockBackendService.deleteWorkspaces).not.toHaveBeenCalled();
+  });
+
+  const ws = workspace(3, 'ws3', 0);
+
+  it.each<[string, (workspaces: WorkspacesComponent) => void]>([
+    ['deleting a workspace', workspaces => workspaces.deleteWorkspace(ws)],
+    ['moving workspaces', workspaces => workspaces.moveWorkspace({ selection: [ws], workspaceGroupId: 2 })],
+    ['adding a workspace', workspaces => workspaces.addWorkspace('new')],
+    ['choosing a drop box', workspaces => workspaces.selectDropBox({ selection: [ws], dropBoxId: 2 })],
+    ['renaming a workspace', workspaces => workspaces.renameWorkspace({ selection: [ws], name: 'new' })]
+  ])('should reload the workspaces after %s', (_, act) => {
+    closeConfirmationWith(true);
+    mockBackendService.deleteWorkspaces.mockReturnValue(of(true));
+    mockBackendService.moveWorkspaces.mockReturnValue(of(true));
+    mockBackendService.addWorkspace.mockReturnValue(of(true));
+    mockBackendService.selectWorkspaceDropBox.mockReturnValue(of(true));
+    mockBackendService.renameWorkspace.mockReturnValue(of(true));
+
+    act(component);
+
+    expect(mockBackendService.getWorkspaces).toHaveBeenCalledWith(1);
+  });
+
+  type Change = 'addWorkspace' | 'selectWorkspaceDropBox' | 'renameWorkspace';
+  it.each<[string, (workspaces: WorkspacesComponent) => void, Change, string]>([
+    ['adding', workspaces => workspaces.addWorkspace('new'), 'addWorkspace', 'wsg-admin.workspace-not-added'],
+    [
+      'choosing a drop box',
+      workspaces => workspaces.selectDropBox({ selection: [ws], dropBoxId: 2 }),
+      'selectWorkspaceDropBox',
+      'wsg-admin.drop-box-not-selected'
+    ],
+    [
+      'renaming',
+      workspaces => workspaces.renameWorkspace({ selection: [ws], name: 'new' }),
+      'renameWorkspace',
+      'wsg-admin.workspace-not-renamed'
+    ]
+  ])('should say when %s fails and keep the list', (_, act, method, message) => {
+    act(component);
+
+    expect(mockBackendService[method]).toHaveBeenCalled();
+    expect(mockSnackBar.open).toHaveBeenCalledWith(message, 'error', { duration: 3000 });
+    expect(mockBackendService.getWorkspaces).not.toHaveBeenCalled();
+    expect(mockAppService.dataLoading).toBe(false);
+  });
+
+  it.each<[string, boolean, string, string, string, number]>([
+    ['the new settings once they are saved', true, 'new', 'wsg-admin.workspace-settings-changed', '', 1000],
+    ['the old settings when saving fails', false, 'old', 'wsg-admin.workspace-settings-not-changed', 'error', 3000]
+  ])('should keep %s', (_, isOk, kept, message, label, duration) => {
+    const oldSettings = { defaultEditor: 'old', defaultPlayer: '', defaultSchemer: '' };
+    const newSettings = { defaultEditor: 'new', defaultPlayer: '', defaultSchemer: '' };
+    const row: WorkspaceInListDto = { ...ws, settings: oldSettings };
+    mockAppBackendService.setWorkspaceSettings = jest.fn().mockReturnValue(of(isOk));
+
+    component.changeWorkspace({ selection: [row], settings: newSettings });
+
+    expect(row.settings?.defaultEditor).toBe(kept);
+    expect(mockSnackBar.open).toHaveBeenCalledWith(message, label, { duration });
   });
 });

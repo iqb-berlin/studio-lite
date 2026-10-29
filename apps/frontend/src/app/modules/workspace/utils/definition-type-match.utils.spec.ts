@@ -76,6 +76,10 @@ describe('matchDefinitionType', () => {
       expect(matchDefinitionType('f@4.1.0', 'f@4.0 - 4.12')).toBe('unknown');
     });
 
+    it('should be unknown for a range with an empty alternative, which would take any version', () => {
+      expect(matchDefinitionType('f@9.0.0', 'f@<1.0 ||')).toBe('unknown');
+    });
+
     it('should be unknown for a unit type it cannot read', () => {
       expect(matchDefinitionType('aspect-unit-definition', aspectModel)).toBe('unknown');
       expect(matchDefinitionType('aspect-unit-definition@4.12.0-beta', aspectModel)).toBe('unknown');

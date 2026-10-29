@@ -577,4 +577,55 @@ describe('UsersComponent', () => {
       ]);
     });
   });
+
+  // Esc, a click beside the dialog and navigation close it with undefined (#1844)
+  describe.each([false, undefined])('when the confirmation closes with %s', result => {
+    const user: UserFullDto = {
+      id: 4, name: 'user4', sessions: [{ sessionId: 's4', activityStatus: 'orphaned' }]
+    };
+
+    it.each<[string, (users: UsersComponent) => void, keyof BackendService]>([
+      ['the user', users => users.deleteUsers([user]), 'deleteUsers'],
+      ['an orphaned session', users => users.deleteSession(user, user.sessions![0]), 'deleteUserSession'],
+      ['all orphaned sessions', users => {
+        users.tableSelectionRow.select(user);
+        users.deleteOrphanedSessions();
+      }, 'deleteUserOrphanedSessions']
+    ])('should not delete %s', (_, act, method) => {
+      (mockDialog.open as jest.Mock).mockReturnValue({ afterClosed: () => of(result) });
+
+      act(component);
+
+      expect(mockDialog.open).toHaveBeenCalled();
+      expect(mockBackendService[method]).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should show a user who replaced another between two polls', () => {
+    (mockBackendService.getUsersFullWithActivity as jest.Mock)
+      .mockReturnValue(of([{ id: 1, name: 'anna' }, { id: 2, name: 'bert' }]));
+    component.updateUserList();
+
+    (mockBackendService.getUsersFullWithActivity as jest.Mock)
+      .mockReturnValue(of([{ id: 1, name: 'anna' }, { id: 3, name: 'carl' }]));
+    component.updateUserList(false, true);
+
+    expect(component.objectsDatasource.data.map(user => user.name)).toEqual(['anna', 'carl']);
+  });
+
+  it.each<[string, string, string[]]>([
+    ['part of the login name in any case', 'ann', ['Anna']],
+    ['the last name', 'müll', ['Anna']],
+    ['the email, also beside a user without one', 'example.org', ['bert']]
+  ])('should find users by %s', (_, filter, names) => {
+    (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of([
+      { id: 1, name: 'Anna', lastName: 'Müller' },
+      { id: 2, name: 'bert', email: 'bert@example.org' }
+    ]));
+    component.updateUserList();
+
+    component.objectsDatasource.filter = filter;
+
+    expect(component.objectsDatasource.filteredData.map(user => user.name)).toEqual(names);
+  });
 });

@@ -69,4 +69,32 @@ describe('StatesComponent', () => {
     expect(component.hasChanged.emit).toHaveBeenCalled();
     expect(component.stateDeleted.emit).toHaveBeenCalled();
   });
+
+  it('should rename only the state whose label was typed in', () => {
+    component.addState();
+    fixture.detectChanges();
+    jest.spyOn(component.hasChanged, 'emit');
+    const labelInputs: HTMLInputElement[] = Array.from(fixture.nativeElement.querySelectorAll('input[type="text"]'));
+
+    labelInputs[1].value = 'In Arbeit';
+    labelInputs[1].dispatchEvent(new Event('input'));
+
+    expect(component.hasChanged.emit).toHaveBeenCalledWith([
+      { id: 1, label: 'State 1', color: '#000000' },
+      { id: 2, label: 'In Arbeit', color: '#edb211' }
+    ]);
+  });
+
+  // Deleting saves the group settings at once; Esc and a click beside the dialog give undefined (#1844).
+  it.each([false, undefined])('should keep a state when its deletion closes with %s', result => {
+    mockMatDialog.open.mockReturnValue({ afterClosed: () => of(result) });
+    jest.spyOn(component.hasChanged, 'emit');
+    jest.spyOn(component.stateDeleted, 'emit');
+
+    component.deleteState(component.states[0]);
+
+    expect(component.states).toEqual([{ id: 1, label: 'State 1', color: '#000000' }]);
+    expect(component.hasChanged.emit).not.toHaveBeenCalled();
+    expect(component.stateDeleted.emit).not.toHaveBeenCalled();
+  });
 });
