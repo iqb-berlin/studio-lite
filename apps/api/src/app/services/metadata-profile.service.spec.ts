@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { MetadataProfileDto, MetadataVocabularyDto } from '@studio-lite-lib/api-dto';
 import MetadataProfile from '../entities/metadata-profile.entity';
 import { MetadataProfileService } from './metadata-profile.service';
@@ -86,6 +86,15 @@ describe('MetadataProfileService', () => {
 
       const result = await service.getStoredMetadataProfile('url');
       expect(result).toEqual(profileDto);
+    });
+
+    it('should store nothing for a profile that cannot be fetched', async () => {
+      metadataProfileRepository.findOneBy.mockResolvedValue(null);
+      httpService.get
+        .mockReturnValue(throwError(() => new Error('offline')) as unknown as ReturnType<HttpService['get']>);
+
+      expect(await service.getStoredMetadataProfile('url')).toBeNull();
+      expect(metadataProfileRepository.upsert).not.toHaveBeenCalled();
     });
 
     // Real iqb-vocabs profiles still declare the github spelling as their own id
