@@ -1159,8 +1159,8 @@ describe('Unit API tests', () => {
       cy.moveWsAPI([ids.moved, ids.together], Cypress.expose(group2.id), token())
         .its('status').should('equal', 200);
       // its own drop box stayed behind, and it was the drop box of one that stayed behind
-      dropBoxOf(ids.moved).should('equal', null);
-      dropBoxOf(ids.user).should('equal', null);
+      dropBoxOf(ids.moved).should('be.null');
+      dropBoxOf(ids.user).should('be.null');
       // moved along with its drop box, the link does not cross the boundary
       cy.then(() => dropBoxOf(ids.together).should('equal', Number(ids.moved)));
     });
