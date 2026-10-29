@@ -107,6 +107,17 @@ describe('RegisteredMetadataProfileService', () => {
       expect(registeredMetadataProfileRepository.save).not.toHaveBeenCalled();
     });
 
+    it('should give no profile and store nothing for a profile that cannot be fetched', async () => {
+      settingsService.findUnitProfilesRegistry.mockResolvedValue({ csvUrl: 'csv-url' } as ProfilesRegistryDto);
+      metadataProfileRegistryRepository.findOneBy
+        .mockResolvedValue({ csv: 'Header\none,"two","http://profile3.url"' } as MetadataProfileRegistry);
+      registeredMetadataProfileRepository.findOneBy.mockResolvedValue(null);
+      mockHttpGet(httpService, null as RegisteredMetadataProfile | null);
+
+      expect(await service.getRegisteredMetadataProfiles()).toEqual([null]);
+      expect(registeredMetadataProfileRepository.upsert).not.toHaveBeenCalled();
+    });
+
     it('extracts the url from the classic 3-column format despite a comma in a quoted title', async () => {
       const csvContent = [
         'title,description,url',

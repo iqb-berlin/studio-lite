@@ -67,6 +67,15 @@ describe('WorkspaceGroupService', () => {
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe(1);
     });
+
+    // An empty selection must not fall through to "all groups".
+    it('should return no group to a user who administers none', async () => {
+      mockRepository.find.mockImplementation(args => Promise.resolve(
+        args?.where?.userId ? [] : [{ id: 1, name: 'g1' }] as WorkspaceGroup[]
+      ));
+
+      expect(await service.findAll(1)).toEqual([]);
+    });
   });
 
   describe('findOne', () => {
@@ -164,6 +173,27 @@ describe('WorkspaceGroupService', () => {
       await service.patch(1, { id: 1, name: 'g', settings } as WorkspaceGroupFullDto);
 
       expect(group.settings).toMatchObject({ defaultEditor: 'e' });
+    });
+
+    // A rename and a change of the settings are sent on their own; neither may reset the other (#1960).
+    it('should keep the name when only settings are sent, and add them to the stored ones', async () => {
+      const group = { id: 1, name: 'g', settings: { defaultEditor: 'e' } } as WorkspaceGroup;
+      mockRepository.findOne.mockResolvedValue(group);
+
+      await service.patch(1, { id: 1, settings: { defaultPlayer: 'p' } } as WorkspaceGroupFullDto);
+
+      expect(group.name).toBe('g');
+      expect(group.settings).toEqual({ defaultEditor: 'e', defaultPlayer: 'p' });
+    });
+
+    it('should keep the settings when only the name is sent', async () => {
+      const group = { id: 1, name: 'g', settings: { defaultEditor: 'e' } } as WorkspaceGroup;
+      mockRepository.findOne.mockResolvedValue(group);
+
+      await service.patch(1, { id: 1, name: 'neu' } as WorkspaceGroupFullDto);
+
+      expect(group.name).toBe('neu');
+      expect(group.settings).toEqual({ defaultEditor: 'e' });
     });
   });
 

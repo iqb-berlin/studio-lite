@@ -56,6 +56,14 @@ describe('RichNotesDownloadClass', () => {
       expect(unitDownloadClass.getLabelString(null)).toBeNull();
       expect(unitDownloadClass.getLabelString([])).toBeNull();
     });
+
+    it.each([
+      ['the German one', [{ lang: 'en', value: 'Task' }, { lang: 'de', value: 'Aufgabe' }], 'Aufgabe'],
+      ['the English one without a German one', [{ lang: 'fr', value: 'Tâche' }, { lang: 'en', value: 'Task' }], 'Task'],
+      ['the first without either', [{ lang: 'fr', value: 'Tâche' }, { lang: 'it', value: 'Compito' }], 'Tâche']
+    ])('should take as the label of a tag %s', (_, labels, expected) => {
+      expect(unitDownloadClass.getLabelString(labels)).toBe(expected);
+    });
   });
 
   describe('transformRichNotes', () => {

@@ -68,6 +68,21 @@ describe('AdminVeronaModuleController', () => {
         .toHaveBeenCalledWith(mockFile.buffer, ['editor', 'player', 'schemer']);
     });
 
+    it.each([[[]], [[' ', '']]])('should refuse a request without a module type: %p', async types => {
+      await expect(controller.addModuleFile({ buffer: Buffer.from('test') }, types))
+        .rejects.toThrow(NotAcceptableException);
+      expect(veronaModulesService.upload).not.toHaveBeenCalled();
+    });
+
+    // `?type=PLAYER,` arrives with an empty entry, which is no type of its own.
+    it('should hand on each type once, without blanks around it and without empty ones', async () => {
+      const mockFile = { buffer: Buffer.from('test') };
+
+      await controller.addModuleFile(mockFile, [' PLAYER', 'PLAYER ', '', 'WIDGET']);
+
+      expect(veronaModulesService.upload).toHaveBeenCalledWith(mockFile.buffer, ['PLAYER', 'WIDGET']);
+    });
+
     it('should reject unknown types', async () => {
       const mockFile = { buffer: Buffer.from('test') };
 

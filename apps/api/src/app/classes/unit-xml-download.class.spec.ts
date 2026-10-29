@@ -1,7 +1,11 @@
+import AdmZip from 'adm-zip';
+import { load } from 'cheerio';
+import { createMock } from '@golevelup/ts-jest';
 import {
-  UnitExportConfigDto, UnitPropertiesDto, UnitDefinitionDto, UnitSchemeDto
+  UnitCommentDto, UnitExportConfigDto, UnitPropertiesDto, UnitDefinitionDto, UnitRichNoteDto, UnitSchemeDto
 } from '@studio-lite-lib/api-dto';
 import { UnitXmlDownloadClass } from './unit-xml-download.class';
+import type { UnitRichNoteService } from '../services/unit-rich-note.service';
 
 describe('UnitXmlDownloadClass', () => {
   describe('createUnitXML', () => {
@@ -245,6 +249,109 @@ describe('UnitXmlDownloadClass', () => {
       expect(xmlString).toContain('id="cc" type="string"');
       expect(xmlString).toContain('id="uv" type="boolean"');
       expect(xmlString).toContain('id="mv" type="string"');
+    });
+  });
+
+  // What the unit XML refers to and which files go into the zip beside it.
+  describe('the unit and its files', () => {
+    const changed = new Date('2024-01-02T03:04:05.000Z');
+    const unit = { key: 'K1', name: 'N1', metadata: {} } as unknown as UnitPropertiesDto;
+    let unitXml: ReturnType<typeof UnitXmlDownloadClass.createUnitXML>;
+    let zip: AdmZip;
+    const files = () => zip.getEntries().map(entry => entry.entryName);
+
+    beforeEach(() => {
+      unitXml = UnitXmlDownloadClass.createUnitXML({ unitXsdUrl: 'xsd' } as UnitExportConfigDto, unit);
+      zip = new AdmZip();
+    });
+
+    it('should describe a unit without definition in its XML, with no definition file', () => {
+      UnitXmlDownloadClass.addUnitDefinition(
+        { definition: '' } as UnitDefinitionDto, unitXml, { ...unit, player: 'P', lastChangedDefinition: changed }, zip
+      );
+
+      expect(unitXml.toString()).toContain(`<Definition player="P" editor="" lastChange="${changed.toISOString()}"/>`);
+      expect(files()).toEqual([]);
+    });
+
+    it('should date the definition file the unit refers to', () => {
+      UnitXmlDownloadClass.addUnitDefinition(
+        { definition: '{}' } as UnitDefinitionDto,
+        unitXml,
+        { ...unit, editor: 'E', lastChangedDefinition: changed },
+        zip
+      );
+
+      expect(unitXml.toString())
+        .toContain(`<DefinitionRef player="" editor="E" lastChange="${changed.toISOString()}">K1.voud</DefinitionRef>`);
+      expect(files()).toEqual(['K1.voud']);
+    });
+
+    // A spelling of schemeType went wrong before (#1759).
+    it('should name schemer, scheme type and date on the reference to the scheme file', () => {
+      UnitXmlDownloadClass.addScheme(
+        { scheme: '{}' } as UnitSchemeDto,
+        unitXml,
+        {
+          ...unit, schemer: 'iqb-schemer@2.0', schemeType: 'iqb-standard@3.0', lastChangedScheme: changed
+        },
+        zip
+      );
+
+      const $ = load(unitXml.toString(), { xml: true });
+      expect($('CodingSchemeRef').attr()).toEqual({
+        schemer: 'iqb-schemer@2.0', schemeType: 'iqb-standard@3.0', lastChange: changed.toISOString()
+      });
+      expect($('CodingSchemeRef').text()).toBe('K1.vocs');
+      expect(files()).toEqual(['K1.vocs']);
+    });
+
+    it('should write the values of a variable and the labels of their positions', () => {
+      UnitXmlDownloadClass.addVariables({
+        variables: [{
+          id: 'v1',
+          type: 'string',
+          format: '',
+          multiple: false,
+          nullable: false,
+          page: '',
+          values: [{ label: 'Ja', value: '1' }],
+          valuePositionLabels: ['erste'],
+          valuesComplete: true
+        }]
+      } as unknown as UnitDefinitionDto, unitXml);
+
+      const $ = load(unitXml.toString(), { xml: true });
+      expect($('ValuePositionLabels > ValuePositionLabel').toArray().map(label => $(label).text())).toEqual(['erste']);
+      expect($('Values').attr('complete')).toBe('true');
+      expect($('Values > Value').toArray().map(value => ({
+        label: $(value).children('label').text(), value: $(value).children('value').text()
+      }))).toEqual([{ label: 'Ja', value: '1' }]);
+    });
+
+    const reference = (element: string) => load(unitXml.toString(), { xml: true })(element).text();
+
+    it.each([
+      ['put the comments into a file the unit refers to', [{ id: 1, body: 'b' }], 'K1.vouc'],
+      ['write no comments file for a unit without comments', [], '']
+    ])('should %s', (_, comments, file) => {
+      UnitXmlDownloadClass.addComments(comments as UnitCommentDto[], unitXml, unit, zip);
+
+      expect(files()).toEqual(file ? [file] : []);
+      expect(reference('UnitCommentsRef')).toBe(file);
+    });
+
+    it.each([
+      ['put the notes into a file the unit refers to', [{ id: 1, tagId: 't', content: 'c' }], 'K1.vorn'],
+      ['write no notes file for a unit without notes', [], '']
+    ])('should %s', async (_, notes, file) => {
+      const unitRichNoteService = createMock<UnitRichNoteService>();
+      unitRichNoteService.findNotes.mockResolvedValue({ notes: notes as UnitRichNoteDto[], tags: [] });
+
+      await UnitXmlDownloadClass.addRichNotes(unitRichNoteService, 1, unitXml, unit, zip);
+
+      expect(files()).toEqual(file ? [file] : []);
+      expect(reference('UnitRichNotesRef')).toBe(file);
     });
   });
 });

@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import {
   CreateUnitDto,
+  UnitCommentDto,
   UnitItemDto,
   UnitMetadataDto,
   UnitPropertiesDto,
@@ -107,6 +108,14 @@ describe('UnitService', () => {
     unitDefinitionService = module.get(UnitDefinitionService);
   });
 
+  describe('findOne', () => {
+    it('should throw for an unknown unit', async () => {
+      unitsRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.findOne(9)).rejects.toThrow(UnitNotFoundException);
+    });
+  });
+
   describe('getUnitIdsByWorkspaceId', () => {
     it('should return unit ids', async () => {
       unitsRepository.find.mockResolvedValue([{ id: 1 } as Unit]);
@@ -149,6 +158,59 @@ describe('UnitService', () => {
       const result = await service.findAllForWorkspace(1, 1, true);
       expect(unitCommentService.findOnesLastChangedComment).toHaveBeenCalledWith(1, 1);
       expect(result[0].lastSeenCommentChangedAt).toEqual(new Date(0));
+    });
+
+    // Compared with the time the user last looked, this decides whether the unit shows new comments.
+    it.each([
+      ['the time of its last changed comment', { changedAt: new Date(2024, 0, 1) }, new Date(2024, 0, 1)],
+      ['the epoch without a comment', null, new Date(0)]
+    ])('should give a unit %s', async (_, comment, expected) => {
+      unitsRepository.find.mockResolvedValue([{ id: 1 } as Unit]);
+      unitCommentService.findOnesLastChangedComment.mockResolvedValue(comment as UnitCommentDto);
+
+      const [unit] = await service.findAllForWorkspace(1, 1, true);
+
+      expect(unit.lastCommentChangedAt).toEqual(expected);
+    });
+
+    it.each([
+      ['without the flag', 1, false],
+      ['without a user', null, true]
+    ])('should leave the comment times out %s', async (_, userId, withComments) => {
+      unitsRepository.find.mockResolvedValue([{ id: 1 } as Unit]);
+
+      const [unit] = await service.findAllForWorkspace(1, userId, withComments);
+
+      expect(unit).not.toHaveProperty('lastCommentChangedAt');
+      expect(unitCommentService.findOnesLastChangedComment).not.toHaveBeenCalled();
+    });
+
+    describe('with the drop box history', () => {
+      beforeEach(() => {
+        unitsRepository.find.mockResolvedValue([{ id: 1 }, { id: 2 }] as Unit[]);
+        unitDropBoxHistoryRepository.findOne.mockImplementation(async ({ where }) => (
+          (where as { unitId: number }[])[0].unitId === 1 ?
+            { sourceWorkspaceId: 4, targetWorkspaceId: 9, returned: true } as UnitDropBoxHistory :
+            null
+        ));
+      });
+
+      it('should tell for each unit where it was submitted from and to, and whether it came back', async () => {
+        const units = await service.findAllForWorkspace(4, null, false, 9);
+
+        expect(units.map(({ sourceWorkspaceId, targetWorkspaceId, returned }) => (
+          { sourceWorkspaceId, targetWorkspaceId, returned }
+        ))).toEqual([
+          { sourceWorkspaceId: 4, targetWorkspaceId: 9, returned: true },
+          { sourceWorkspaceId: null, targetWorkspaceId: null, returned: false }
+        ]);
+      });
+
+      it('should keep only the units submitted to the workspace when asked to', async () => {
+        const units = await service.findAllForWorkspace(9, null, false, 4, true);
+
+        expect(units.map(unit => unit.id)).toEqual([1]);
+      });
     });
   });
 
@@ -248,6 +310,107 @@ describe('UnitService', () => {
         /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
       );
     });
+
+    describe('from another unit', () => {
+      const caller = { id: 1 } as User;
+      const changed = new Date(2024, 0, 1);
+      let newUnit: Unit;
+
+      // The unit 7 to copy from, under key K; no unit of the new key exists in the workspace yet.
+      const givenSource = (source: Partial<Unit>) => {
+        unitsRepository.findOne.mockImplementation(async ({ where }) => (
+          (where as { key?: string }).key ? null : { id: 7, key: 'K', ...source } as Unit
+        ));
+      };
+      const copyAs = (key: string, addComments = false) => service
+        .create(3, { key, createFrom: 7 } as CreateUnitDto, caller, addComments);
+
+      beforeEach(() => {
+        unitsRepository.create.mockImplementation((dto: Partial<Unit>) => {
+          newUnit = { ...dto, id: 2 } as Unit;
+          return newUnit;
+        });
+        workspaceRepository.findOne.mockResolvedValue({ id: 3, settings: {} } as Workspace);
+        workspaceUserRepository.find.mockResolvedValue([]);
+        usersRepository.findOne.mockResolvedValue({ name: 'caller', lastName: 'Rufer' } as User);
+        unitMetadataService.getMetadataOfUnit.mockResolvedValue({ profiles: [], items: [] });
+        unitMetadataService.copyItemsWithMetadata.mockResolvedValue([{ oldUuid: 'old', newUuid: 'new' }]);
+        unitDefinitionService.findOnesDefinition.mockResolvedValue({ definition: '' } as UnitDefinitionDto);
+        unitDefinitionService.findOnesScheme.mockResolvedValue({ scheme: '' } as UnitSchemeDto);
+      });
+
+      it('should keep who changed the metadata and when, if the copy keeps the key', async () => {
+        givenSource({ lastChangedMetadata: changed, lastChangedMetadataUser: 'Quelle' });
+
+        await copyAs('K');
+
+        expect(newUnit.lastChangedMetadataUser).toBe('Quelle');
+        expect(newUnit.lastChangedMetadata).toEqual(changed);
+      });
+
+      it('should name the caller as the one who changed the metadata of a copy with a new key', async () => {
+        givenSource({ lastChangedMetadata: changed, lastChangedMetadataUser: 'Quelle' });
+
+        await copyAs('NEU');
+
+        expect(newUnit.lastChangedMetadataUser).toBe('Rufer');
+      });
+
+      it.each([
+        ['with a new key', 'NEU', changed],
+        ['whose source has no date', 'K', null]
+      ])('should date the metadata of a copy %s now', async (_, key, sourceDate) => {
+        givenSource({ lastChangedMetadata: sourceDate, lastChangedMetadataUser: 'Quelle' });
+        const before = Date.now();
+
+        await copyAs(key);
+
+        expect(newUnit.lastChangedMetadata.getTime()).toBeGreaterThanOrEqual(before);
+      });
+
+      // An emptied definition with a date is a change of its own and is copied with it.
+      it.each([
+        [null, false],
+        [changed, true]
+      ])('should copy an empty definition dated %p: %p', async (definitionDate, copied) => {
+        givenSource({ lastChangedDefinition: definitionDate });
+
+        await copyAs('K');
+
+        expect(unitDefinitionService.patchDefinition).toHaveBeenCalledTimes(copied ? 1 : 0);
+      });
+
+      it('should copy no scheme from a source with an empty one', async () => {
+        givenSource({});
+        unitDefinitionService.findOnesScheme.mockResolvedValue({ scheme: '' } as UnitSchemeDto);
+
+        await copyAs('K');
+
+        expect(unitDefinitionService.patchScheme).not.toHaveBeenCalled();
+      });
+
+      it.each([true, false])('should copy the comments onto the new items only if asked to: %p', async addComments => {
+        givenSource({});
+
+        await copyAs('K', addComments);
+
+        expect(unitCommentService.copyComments.mock.calls)
+          .toEqual(addComments ? [[7, 2, [{ oldUuid: 'old', newUuid: 'new' }]]] : []);
+      });
+
+      // Whoever copies keeps their view of the comments; everyone else starts as for a new unit.
+      it('should hand the copying user the time they last saw the comments of the source', async () => {
+        givenSource({});
+        const seen = new Date(2024, 5, 1);
+        workspaceUserRepository.find.mockResolvedValue([{ userId: 1 }, { userId: 3 }] as WorkspaceUser[]);
+        unitUserService.findLastSeenCommentTimestamp.mockResolvedValue(seen);
+
+        await copyAs('K');
+
+        expect(unitUserService.findLastSeenCommentTimestamp).toHaveBeenCalledWith(1, 7);
+        expect(unitUserService.createUnitUser.mock.calls).toEqual([[1, 2, seen], [3, 2]]);
+      });
+    });
   });
 
   describe('findOnesProperties', () => {
@@ -331,6 +494,98 @@ describe('UnitService', () => {
       expect(unitsRepository.save).toHaveBeenCalled();
     });
 
+    it('should hand the metadata on only when it is sent', async () => {
+      unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
+      const metadata = { profiles: [], items: [] };
+
+      await service.patchUnit(1, { name: 'n' } as UnitPropertiesDto, 'user');
+      expect(unitMetadataService.patchMetadata).not.toHaveBeenCalled();
+
+      await service.patchUnit(1, { metadata } as UnitPropertiesDto, 'user');
+      expect(unitMetadataService.patchMetadata).toHaveBeenCalledWith(1, metadata, 'user');
+    });
+
+    describe('of the properties', () => {
+      const stored = new Date(2020, 0, 1);
+      let unit: Unit;
+
+      beforeEach(() => {
+        unit = {
+          id: 1,
+          key: 'K',
+          name: 'N',
+          description: 'D',
+          transcript: 'T',
+          reference: 'R',
+          editor: 'E',
+          player: 'P',
+          schemer: 'S',
+          schemeType: 'ST',
+          state: '3',
+          groupName: 'G',
+          lastChangedMetadata: stored,
+          lastChangedDefinition: stored,
+          lastChangedDefinitionUser: 'old',
+          lastChangedScheme: stored,
+          lastChangedSchemeUser: 'old'
+        } as Unit;
+        unitsRepository.findOne.mockResolvedValue(unit);
+      });
+
+      it('should change only what is sent', async () => {
+        const untouched = { ...unit };
+
+        await service.patchUnitProperties(1, { id: 1, description: 'neu' } as UnitPropertiesDto, 'user');
+
+        expect(unit).toEqual(expect.objectContaining({
+          ...untouched,
+          description: 'neu',
+          lastChangedMetadata: expect.any(Date),
+          lastChangedMetadataUser: 'user'
+        }));
+      });
+
+      it.each([
+        ['an empty group as no group', '', ''],
+        ['a group sent along', 'H', 'H'],
+        ['the group when none is sent', undefined, 'G']
+      ])('should take %s', async (_, groupName, expected) => {
+        await service.patchUnitProperties(1, { id: 1, groupName } as UnitPropertiesDto, 'user');
+
+        expect(unit.groupName).toBe(expected);
+      });
+
+      // A change of the properties is a change of the metadata; definition and scheme change with their editors.
+      it('should date the metadata change now and leave the dates of definition and scheme', async () => {
+        await service.patchUnitProperties(1, { id: 1, name: 'n' } as UnitPropertiesDto, 'user');
+
+        expect(unit.lastChangedMetadata.getTime()).toBeGreaterThan(stored.getTime());
+        expect(unit).toEqual(expect.objectContaining({
+          lastChangedDefinition: stored,
+          lastChangedDefinitionUser: 'old',
+          lastChangedScheme: stored,
+          lastChangedSchemeUser: 'old'
+        }));
+      });
+
+      it('should take the dates sent along, each with the user', async () => {
+        const sent = new Date(2023, 0, 1);
+
+        await service.patchUnitProperties(1, {
+          id: 1, lastChangedMetadata: sent, lastChangedDefinition: sent, lastChangedScheme: sent
+        } as UnitPropertiesDto, 'user');
+
+        expect(unit).toEqual(expect.objectContaining({
+          lastChangedMetadata: sent,
+          lastChangedMetadataUser: 'user',
+          lastChangedDefinition: sent,
+          lastChangedDefinitionUser: 'user',
+          lastChangedScheme: sent,
+          lastChangedSchemeUser: 'user'
+        }));
+      });
+    });
+
     // #1842: renaming did not check what creating and copying refuse
     describe('with a new key', () => {
       beforeEach(() => {
@@ -381,6 +636,46 @@ describe('UnitService', () => {
       await service.patchDropBoxHistory([1], 2, 1, { id: 1 } as User);
       expect(unitMetadataService.patchMetadataCurrentProfile).toHaveBeenCalledWith(1, undefined, undefined);
       expect(unitsRepository.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('patchWorkspace', () => {
+    // Unit 1 under key K, workspace 1 in group 10, workspace 2 in the group given. The unit is read
+    // without its state, so a save leaves the stored state alone unless the move sets one.
+    const given = ({ unitInTarget = false, targetGroupId = 10 } = {}) => {
+      const unitOfTheKeyInTarget = unitInTarget ? { id: 9 } as Unit : null;
+      unitsRepository.findOne.mockImplementation(async ({ where }) => (
+        (where as { key?: string }).key ? unitOfTheKeyInTarget : { id: 1, key: 'K' } as Unit
+      ));
+      workspaceRepository.findOne.mockImplementation(async ({ where }) => (
+        (where as { id: number }).id === 2 ?
+          { groupId: targetGroupId, settings: {} } as Workspace :
+          { groupId: 10 } as Workspace
+      ));
+    };
+
+    it('should refuse a unit whose key the target already carries', async () => {
+      given({ unitInTarget: true });
+
+      const report = await service.patchWorkspace([1], 2, { id: 1 } as User, 1, 'moveTo');
+
+      expect(report.messages).toEqual([{ objectKey: 'K', messageKey: 'unit-patch.duplicate-unit-id' }]);
+      expect(unitsRepository.save).not.toHaveBeenCalled();
+    });
+
+    // The states are defined per group; a moved unit is no longer in any submission.
+    it.each([
+      ['reset the state of a unit moved into another group', 20, '0'],
+      ['leave the state of a unit moved within its group alone', 10, undefined]
+    ])('should %s', async (_, targetGroupId, state) => {
+      given({ targetGroupId });
+
+      await service.patchWorkspace([1], 2, { id: 1 } as User, 1, 'moveTo');
+
+      const saved = unitsRepository.save.mock.calls[0][0] as Unit;
+      expect(saved.workspaceId).toBe(2);
+      expect(saved.state).toBe(state);
+      expect(unitDropBoxHistoryRepository.delete).toHaveBeenCalledWith({ unitId: 1 });
     });
   });
 
@@ -499,6 +794,17 @@ describe('UnitService', () => {
       await service.copy([1], 2, { id: 1, name: 'u' } as User, false);
 
       expect(capturedCreateArg.uuid).toBeUndefined();
+    });
+
+    it('should report a unit whose key the target already carries', async () => {
+      unitsRepository.findOne.mockImplementation(async ({ where }) => (
+        (where as { key?: string }).key ? { id: 9 } as Unit : { id: 1, key: 'K' } as Unit
+      ));
+
+      const report = await service.copy([1], 2, { id: 1 } as User, false);
+
+      expect(report.messages).toEqual([{ objectKey: 'K', messageKey: 'unit-patch.duplicate-unit-id' }]);
+      expect(unitsRepository.create).not.toHaveBeenCalled();
     });
   });
 

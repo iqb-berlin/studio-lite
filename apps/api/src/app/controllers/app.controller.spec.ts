@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { ChangePasswordDto, MyDataDto } from '@studio-lite-lib/api-dto';
@@ -77,6 +77,15 @@ describe('AppController', () => {
 
       expect(result).toBe(mockTokens);
       expect(authService.login).toHaveBeenCalledWith(mockUser, undefined);
+    });
+  });
+
+  describe('refresh', () => {
+    // The client takes a 401 as the sign to log in again.
+    it('should answer a refresh token that cannot be exchanged with 401', async () => {
+      authService.refreshAccessToken.mockResolvedValue(null);
+
+      await expect(controller.refresh({ refreshToken: 'stale' })).rejects.toThrow(UnauthorizedException);
     });
   });
 

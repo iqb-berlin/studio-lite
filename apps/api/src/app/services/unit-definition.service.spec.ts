@@ -64,6 +64,13 @@ describe('UnitDefinitionService', () => {
       const result = await service.findOnesDefinition(1);
       expect(result).not.toHaveProperty('definitionType');
     });
+
+    it('should give a unit without a stored definition an empty one', async () => {
+      unitsRepository.findOne.mockResolvedValue({ id: 1, workspaceId: 1 } as Unit);
+      unitDefinitionsRepository.findOne.mockResolvedValue(null);
+
+      expect((await service.findOnesDefinition(1)).definition).toBe('');
+    });
   });
 
   describe('findOnesScheme', () => {
@@ -135,6 +142,52 @@ describe('UnitDefinitionService', () => {
 
       const stored = unitsRepository.save.mock.calls[0][0] as Unit;
       expect(stored.metadata).toEqual(metadata);
+    });
+
+    // The coding scheme follows the variables a saved definition brings along.
+    describe('with a coding scheme', () => {
+      const patchVariables = async (scheme: string | undefined, variables: Partial<VariableInfo>[]) => {
+        unitsRepository.findOne.mockResolvedValue({ id: 1, scheme } as Unit);
+        unitDefinitionsRepository.findOne.mockResolvedValue({ id: 1 } as UnitDefinition);
+        await service.patchDefinition(1, { definition: 'xml', variables: variables as VariableInfo[] }, 'user', null);
+        return unitsRepository.save.mock.calls[0][0] as Unit;
+      };
+
+      // A coding of a variable without value has nothing to code once the variable is gone; a base
+      // coding stays, so that the schemer shows it as orphaned.
+      it('should drop the codings of variables without value that are gone and update the aliases', async () => {
+        const scheme = JSON.stringify({
+          variableCodings: [
+            { id: 'kept-no-value', sourceType: 'BASE_NO_VALUE', alias: 'old' },
+            { id: 'gone-no-value', sourceType: 'BASE_NO_VALUE', alias: 'old' },
+            { id: 'kept-base', sourceType: 'BASE', alias: 'old' },
+            { id: 'gone-base', sourceType: 'BASE', alias: 'stays' },
+            { id: 'derived', sourceType: 'SUM_CODE', alias: 'stays' }
+          ]
+        });
+
+        const unit = await patchVariables(scheme, [{ id: 'kept-no-value', alias: 'neu' }, { id: 'kept-base' }]);
+
+        expect(JSON.parse(unit.scheme).variableCodings.map(({ id, alias }) => ({ id, alias }))).toEqual([
+          { id: 'kept-no-value', alias: 'neu' },
+          { id: 'kept-base', alias: 'kept-base' },
+          { id: 'gone-base', alias: 'stays' },
+          { id: 'derived', alias: 'stays' }
+        ]);
+      });
+
+      it('should leave a scheme without a list of codings as it is', async () => {
+        const unit = await patchVariables('{"version":"3.0"}', [{ id: 'v1' }]);
+
+        expect(unit.scheme).toBe('{"version":"3.0"}');
+      });
+
+      it('should store the variables of a unit that has no scheme yet', async () => {
+        const unit = await patchVariables(undefined, [{ id: 'v1' }]);
+
+        expect(unit.variables).toEqual([{ id: 'v1' }]);
+        expect(unit.scheme).toBeUndefined();
+      });
     });
 
     // The type belongs to the definition it came with (#1368).

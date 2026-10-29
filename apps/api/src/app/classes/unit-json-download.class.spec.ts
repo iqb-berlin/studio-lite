@@ -131,6 +131,19 @@ describe('UnitJsonDownloadClass', () => {
       expect(result[0].entries[0].value).toEqual({ raw: 'true', asText: [{ lang: 'de', value: 'ja' }] });
     });
 
+    // The spec requires a value: a simple value without raw value is no entry.
+    it('should drop a simple value object without raw value', () => {
+      const result = UnitJsonDownloadClass.transformProfilesToMetadataValues([{
+        profileId: 'p1',
+        entries: [
+          { id: 'empty', value: { raw: '', asText: [{ lang: 'de', value: 'leer' }] }, valueAsText: [] },
+          { id: 'kept', value: { raw: 'x' }, valueAsText: [{ lang: 'de', value: 'X' }] }
+        ]
+      }] as unknown as ProfileValues[]);
+
+      expect(result[0].entries).toEqual([{ id: 'kept', value: { raw: 'x', asText: [{ lang: 'de', value: 'X' }] } }]);
+    });
+
     it('should drop label and asText entries without a valid two-letter language code', () => {
       const result = UnitJsonDownloadClass.transformProfilesToMetadataValues([{
         profileId: 'p1',

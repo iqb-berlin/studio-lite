@@ -1,3 +1,4 @@
+import AdmZip from 'adm-zip';
 import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -18,12 +19,16 @@ describe('WorkspaceImportService', () => {
   let unitService: UnitService;
   let unitMetadataService: UnitMetadataService;
   let unitDefinitionService: UnitDefinitionService;
+  let unitCommentService: UnitCommentService;
+  let unitRichNoteService: UnitRichNoteService;
 
   beforeEach(async () => {
     workspaceRepository = createMock<Repository<Workspace>>();
     unitService = createMock<UnitService>();
     unitMetadataService = createMock<UnitMetadataService>();
     unitDefinitionService = createMock<UnitDefinitionService>();
+    unitCommentService = createMock<UnitCommentService>();
+    unitRichNoteService = createMock<UnitRichNoteService>();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -32,8 +37,8 @@ describe('WorkspaceImportService', () => {
         { provide: UnitService, useValue: unitService },
         { provide: UnitMetadataService, useValue: unitMetadataService },
         { provide: UnitDefinitionService, useValue: unitDefinitionService },
-        { provide: UnitCommentService, useValue: createMock<UnitCommentService>() },
-        { provide: UnitRichNoteService, useValue: createMock<UnitRichNoteService>() }
+        { provide: UnitCommentService, useValue: unitCommentService },
+        { provide: UnitRichNoteService, useValue: unitRichNoteService }
       ]
     }).compile();
 
@@ -69,6 +74,76 @@ describe('WorkspaceImportService', () => {
 
       expect(result.messages).toHaveLength(0);
       expect(unitService.create).toHaveBeenCalled();
+    });
+
+    it('should report a unit whose key the workspace already holds, and import nothing of it', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(0);
+
+      const result = await service.uploadFiles(1, [buildFile('u1.xml', 'text/xml', xmlUnit('U1'))], user);
+
+      expect(result.messages).toEqual([{ objectKey: 'u1.xml', messageKey: 'unit-patch.duplicate-unit-id' }]);
+      expect(unitService.patchUnitProperties).not.toHaveBeenCalled();
+    });
+
+    // Comments and notes on an item follow it to the uuid the import gives it.
+    it('should import the comments and notes of a unit, linked to its imported items', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ settings: {} } as Workspace);
+      const lookups = [{ oldUuid: 'old', newUuid: 'new' }];
+      (unitMetadataService.copyItemsWithMetadata as jest.Mock).mockResolvedValue(lookups);
+      const xml = '<Unit><Metadata><Id>U1</Id><Reference>U1.vomd</Reference></Metadata>' +
+        '<UnitCommentsRef>U1.vouc</UnitCommentsRef><UnitRichNotesRef>U1.vorn</UnitRichNotesRef></Unit>';
+
+      const result = await service.uploadFiles(1, [
+        buildFile('U1.xml', 'text/xml', xml),
+        buildFile('U1.vomd', 'application/octet-stream', JSON.stringify({ profiles: [], items: [{ uuid: 'old' }] })),
+        buildFile('U1.vouc', 'application/octet-stream', JSON.stringify([{ body: 'Kommentar', itemUuids: ['old'] }])),
+        buildFile('U1.vorn', 'application/octet-stream', JSON.stringify([{ tagId: 't', content: 'Notiz' }]))
+      ], user);
+
+      expect(result.messages).toEqual([]);
+      expect(unitCommentService.createComments).toHaveBeenCalledWith(
+        [expect.objectContaining({ body: 'Kommentar', itemUuids: ['old'] })], 10, lookups
+      );
+      expect(unitRichNoteService.importNotes).toHaveBeenCalledWith([{ tagId: 't', content: 'Notiz' }], 10, lookups);
+    });
+
+    describe('from a zip', () => {
+      // Windows reports a zip with this type, other systems with others (ZIP_MIME_TYPES).
+      const zipFile = (buffer: Buffer): FileIo => ({
+        originalname: 'export.zip',
+        mimetype: 'application/x-zip-compressed',
+        buffer,
+        fieldname: 'files',
+        encoding: '7bit',
+        size: buffer.length
+      });
+
+      it('should import the XML and JSON units in it, with the files they refer to', async () => {
+        (unitService.create as jest.Mock).mockImplementation(async (_, unit) => (unit.key === 'U1' ? 10 : 11));
+        (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+        const zip = new AdmZip();
+        zip.addFile('U1.xml', Buffer.from(
+          '<Unit><Metadata><Id>U1</Id></Metadata><DefinitionRef player="p">U1.voud</DefinitionRef></Unit>'
+        ));
+        zip.addFile('U1.voud', Buffer.from('{"definition":1}'));
+        zip.addFile('U2.json', Buffer.from(jsonIndex('U2')));
+
+        const result = await service.uploadFiles(1, [zipFile(zip.toBuffer())], user);
+
+        expect(result.messages).toEqual([]);
+        expect((unitService.create as jest.Mock).mock.calls.map(([, unit]) => unit.key).sort()).toEqual(['U1', 'U2']);
+        expect(unitDefinitionService.patchDefinition).toHaveBeenCalledWith(
+          10, expect.objectContaining({ definition: '{"definition":1}' }), null, undefined
+        );
+      });
+
+      it('should report a zip that cannot be read', async () => {
+        const result = await service.uploadFiles(1, [zipFile(Buffer.from('no zip'))], user);
+
+        expect(result.messages).toEqual([{ objectKey: 'export.zip', messageKey: 'unit-upload.api-error.zip' }]);
+        expect(unitService.create).not.toHaveBeenCalled();
+      });
     });
 
     it('should prefer JSON over XML for the same unit key', async () => {
