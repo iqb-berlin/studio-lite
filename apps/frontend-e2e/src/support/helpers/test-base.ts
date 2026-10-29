@@ -13,7 +13,6 @@ import {
   secondaryWorkspace,
   standardUser
 } from '../testData';
-import { getNameAt } from '../util-api';
 import { showLoginFormAfterUserDeleted } from './admin';
 import { login } from './user';
 
@@ -62,6 +61,10 @@ export function createTestBaseAPI(): void {
  */
 export function deleteTestBaseAPI(): void {
   const { username, password } = admin();
+  // a setup that failed before its login left the browser outside the app, which the reload at
+  // the end would not bring back; visited while the user still exists, the app does not run
+  // with a deleted one
+  cy.visit('/');
   cy.loginAPI(username, password).then(session => {
     expect(session.status, 'login for the teardown').to.equal(201);
     const token: string = session.body.accessToken;
@@ -72,22 +75,19 @@ export function deleteTestBaseAPI(): void {
         .map(group => String(group.id));
       if (ids.length) cy.deleteGroupsAPI(ids, token).its('status').should('equal', 200);
     });
+    // its own modules and any other a spec installed
+    cy.getModulesAPI(token).then(installed => {
+      expect(installed.status, 'modules').to.equal(200);
+      const keys = (installed.body as VeronaModuleInListDto[]).map(module => module.key);
+      if (keys.length) cy.deleteModulesAPI(keys, token).its('status').should('equal', 200);
+    });
+    // the users last, as the token belongs to the first of them
     cy.getUsersAPI(token).then(users => {
       expect(users.status, 'users').to.equal(200);
       const ids = (users.body as UserInListDto[])
-        .filter(user => user.name === standardUser.username)
+        .filter(user => user.name === standardUser.username || user.name === username)
         .map(user => String(user.id));
       if (ids.length) cy.deleteUsersAPI(ids, token).its('status').should('equal', 200);
-    });
-    // its own modules even if the list comes back empty, and any other a spec installed; the API
-    // answers 200 for a key it does not know
-    cy.getModulesAPI(token).then(installed => {
-      const listed = ((installed.body || []) as VeronaModuleInListDto[]).map(module => module.key);
-      const keys = [...new Set([...modules.map(getNameAt), ...listed])];
-      cy.deleteModulesAPI(keys, token).its('status').should('equal', 200);
-    });
-    cy.getUserIdAPI(token).then(authData => {
-      cy.deleteUsersAPI([String(authData.body.userId)], token).its('status').should('equal', 200);
     });
   });
   showLoginFormAfterUserDeleted();
