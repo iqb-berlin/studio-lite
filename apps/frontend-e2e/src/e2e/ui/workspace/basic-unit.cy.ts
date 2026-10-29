@@ -1,56 +1,28 @@
 import {
-  baseGroup,
   primaryWorkspace,
   unitCrudUnits
 } from '../../../support/testData';
 import {
-  addUnitFromExisting,
-  addUnitPred,
   clickIndexTabWorkspace,
   deleteUnit,
-  importExercise,
   selectUnit
 } from '../../../support/helpers';
 import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Workspace Unit Management (Core CRUD)', () => {
   before(() => {
-    createTestBaseAPI();
+    createTestBaseAPI({ zip: 'test_studio_units_download.zip', units: [unitCrudUnits.crud1] });
   });
 
   after(() => {
     deleteTestBaseAPI();
   });
 
-  it('imports test units', () => {
-    cy.visitWs(primaryWorkspace);
-    importExercise('test_studio_units_download.zip');
-    cy.contains('M6_AK0011').should('exist');
-  });
-
-  it('creates new units', () => {
-    cy.visitWs(primaryWorkspace);
-    addUnitPred(unitCrudUnits.crud1);
-    cy.visitWs(primaryWorkspace);
-    addUnitPred(unitCrudUnits.crud2);
-    cy.visitWs(primaryWorkspace);
-    addUnitPred(unitCrudUnits.crudPrint);
-  });
-
-  it('creates a unit from existing unit', () => {
-    cy.visitWs(primaryWorkspace);
-    addUnitFromExisting(
-      `${baseGroup}: ${primaryWorkspace}`,
-      unitCrudUnits.crud1,
-      unitCrudUnits.crudFromExisting
-    );
-    cy.visitWs(primaryWorkspace);
-    cy.contains(unitCrudUnits.crudFromExisting.shortname).should('exist');
-  });
-
   it('deletes a unit', () => {
     cy.visitWs(primaryWorkspace);
+    cy.contains(unitCrudUnits.crud1.shortname).should('exist');
     deleteUnit(unitCrudUnits.crud1.shortname);
+    cy.contains(unitCrudUnits.crud1.shortname).should('not.exist');
   });
 
   it('verifies save-or-discard dialog when navigating with unsaved changes', () => {

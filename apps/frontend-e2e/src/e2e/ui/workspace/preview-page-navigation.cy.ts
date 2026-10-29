@@ -42,7 +42,7 @@ const reduceUnitToFirstPageInEditor = (): void => {
  */
 describe('Unit Preview Page Navigation', () => {
   before(() => {
-    createTestBaseAPI({ units: 'test_studio_units_download.zip' });
+    createTestBaseAPI({ zip: 'test_studio_units_download.zip' });
   });
 
   after(() => {

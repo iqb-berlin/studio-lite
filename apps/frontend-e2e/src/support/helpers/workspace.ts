@@ -103,32 +103,6 @@ export function workspaceOfPage(): Cypress.Chainable<{ wsId: string; token: stri
 }
 
 /**
- * Ensures a unit exists in a workspace. If not found, creates it.
- *
- * Whether it exists is asked of the API, not read from the page: the page may not have rendered the
- * list yet, and the unit was then created a second time (#1820). Asked directly, since the app's own
- * GET may come back as 304 without a body.
- * @param ws - Workspace name
- * @param unit - Unit data object
- * @example
- * ensureUnitExists(ws1, unit3);
- */
-export function ensureUnitExists(ws: string, unit: UnitData): void {
-  cy.visitWs(ws);
-  workspaceOfPage()
-    .then(({ wsId, token }) => cy.getUnitsByWsAPI(wsId, token))
-    .then(resp => {
-      expect(resp.status, 'status of the unit list').to.equal(200);
-      const units: { key: string }[] = resp.body;
-      if (!units.some(listedUnit => listedUnit.key === unit.shortname)) {
-        addUnitPred(unit);
-        // the new unit is still being opened, and a click into the page would land in that
-        cy.visitWs(ws);
-      }
-    });
-}
-
-/**
  * Puts the new unit of the open dialog into a group, and creates the group if the dialog does not
  * offer it (#1789, #1826).
  *
@@ -287,7 +261,11 @@ export function createRichNote(content: string, optionIndex: number = -1, linkIt
  */
 export function editRichNote(addedContent: string): void {
   cy.get('[data-cy="rich-note-edit"]').last().click({ force: true });
-  cy.get('tiptap-editor .ProseMirror').type(addedContent);
+  // Once open, the dialog moves the focus to its first field; what is typed before goes there
+  cy.get('mat-dialog-container')
+    .should('have.class', 'mdc-dialog--open')
+    .and('not.have.class', 'mdc-dialog--opening');
+  cy.get('tiptap-editor .ProseMirror').click().type(addedContent);
   cy.get('[data-cy="rich-note-dialog-save"]').click({ force: true });
 }
 

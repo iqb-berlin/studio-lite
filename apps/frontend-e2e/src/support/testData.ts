@@ -318,18 +318,13 @@ export const lightUnit: UnitData = {
 // =============================================================================
 
 /**
- * Units used in `basic-unit.cy.ts` – core CRUD operations (create, from-existing, delete,
- * save-or-discard dialog).
+ * Units created through the API for `basic-unit.cy.ts` and `unit-print.cy.ts`.
  */
 export const unitCrudUnits = {
-  /** First unit created: tests basic creation & deletion */
+  /** Deleted through the interface in basic-unit */
   crud1: { shortname: 'CRUD_D1', name: 'CRUD Unit 1', group: 'Gruppe D' } as UnitData,
-  /** Second unit created: tests multi-unit creation */
-  crud2: { shortname: 'CRUD_E1', name: 'CRUD Unit 2', group: 'Gruppe E' } as UnitData,
-  /** Third unit: used for print preview with coding & comments */
-  crudPrint: { shortname: 'CRUD_D2', name: 'CRUD Print Unit', group: 'Gruppe D' } as UnitData,
-  /** Unit created from an existing unit */
-  crudFromExisting: { shortname: 'CRUD_EX1', name: 'CRUD Unit From Existing', group: 'Gruppe D' } as UnitData
+  /** Printed with coding & comments in unit-print */
+  crudPrint: { shortname: 'CRUD_D2', name: 'CRUD Print Unit', group: 'Gruppe D' } as UnitData
 };
 
 /**
@@ -356,16 +351,6 @@ export const exportUnits = {
   exportUnit2: { shortname: 'EXP_U2', name: 'Export Unit 2', group: 'Group D' } as UnitData
 };
 
-/**
- * Units used in `unit-groups.cy.ts` – group creation, rename, delete & user list.
- */
-export const groupUnits = {
-  /** First unit created inside a new group */
-  groupUnit1: { shortname: 'GRP_U1', name: 'Group Test Unit 1', group: 'Neue Testgruppe' } as UnitData,
-  /** Second unit added to the same group */
-  groupUnit2: { shortname: 'GRP_U2', name: 'Group Test Unit 2', group: 'Neue Testgruppe' } as UnitData
-};
-
 /** Group names used specifically in `unit-groups.cy.ts` tests */
 export const groupTestNames = {
   /** Group created from the add-unit dialog */
@@ -373,9 +358,7 @@ export const groupTestNames = {
   /** Group created from the group management dialog */
   dialogGroup: 'Dialog Testgruppe',
   /** Renamed version of dialogGroup */
-  dialogGroupRenamed: 'Dialog Testgruppe Umbenannt',
-  /** Custom state added in settings */
-  customState: 'In Bearbeitung'
+  dialogGroupRenamed: 'Dialog Testgruppe Umbenannt'
 } as const;
 
 /**

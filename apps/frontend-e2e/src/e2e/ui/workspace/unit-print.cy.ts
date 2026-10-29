@@ -5,7 +5,6 @@ import {
 } from '../../../support/testData';
 import {
   clickIndexTabWorkspace,
-  ensureUnitExists,
   goToWsMenu,
   selectListUnits,
   selectUnit
@@ -14,7 +13,7 @@ import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/t
 
 describe('Unit Print Preview', () => {
   before(() => {
-    createTestBaseAPI({ units: 'test_studio_units_download.zip' });
+    createTestBaseAPI({ zip: 'test_studio_units_download.zip', units: [unitCrudUnits.crudPrint] });
   });
 
   after(() => {
@@ -256,7 +255,7 @@ describe('Unit Print Preview', () => {
       ]
     }).as('getComments');
 
-    ensureUnitExists(primaryWorkspace, unitCrudUnits.crudPrint);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-preview-units"]').click();
     cy.get('[data-cy="workspace-select-unit-list-filter-units"]')

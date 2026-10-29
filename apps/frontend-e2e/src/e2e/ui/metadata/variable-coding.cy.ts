@@ -110,7 +110,10 @@ describe('Variable and Item Metadata Coherence', () => {
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.get(`.mdc-tab__text-label:contains("${json.metadata.items}")`).click();
     });
-    cy.get('mat-dialog-container:contains("drop-list_1")').should('have.length', 0);
+    // the assigned variable is waited for first, so that the empty table it loads into proves nothing
+    cy.get('mat-dialog-container .mat-mdc-tab-body-active table')
+      .should('contain.text', 'text-field_1')
+      .and('not.contain.text', 'drop-list_1');
     cy.get('[data-cy="metadata-table-view-close"]').click();
   });
 

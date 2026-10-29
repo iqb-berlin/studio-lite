@@ -1,10 +1,10 @@
 import { Interception } from 'cypress/types/net-stubbing';
+import type { WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
 import {
   primaryWorkspace, baseGroup, lightUnit, AccessLevel, richNotesTestNames
 } from '../../../support/testData';
 import {
   clickIndexTabWorkspace,
-  importExercise,
   selectUnit,
   openWorkspaceSettingsDialog,
   setRouteVisibility,
@@ -12,19 +12,13 @@ import {
   clickIndexTabWsgAdmin,
   createRichNote,
   editRichNote,
-  createGroup,
-  deleteGroup,
   waitForSuccess
 } from '../../../support/helpers';
-import {
-  createWs,
-  grantRemovePrivilegeAtWs
-} from '../../../support/helpers/group-admin';
 import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Unit Rich Notes', () => {
   before(() => {
-    createTestBaseAPI({ units: 'test_studio_units_download.zip' });
+    createTestBaseAPI({ zip: 'test_studio_units_download.zip' });
   });
 
   after(() => {
@@ -54,7 +48,10 @@ describe('Unit Rich Notes', () => {
   });
 
   it('edits a rich note', () => {
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/rich-notes/*').as('editNote');
     editRichNote(' (bearbeitet)');
+    waitForSuccess('@editNote');
+    cy.contains('.note-content', '(bearbeitet)').should('exist');
   });
 
   it('creates rich note linked to specific item', () => {
@@ -64,6 +61,7 @@ describe('Unit Rich Notes', () => {
     cy.wait('@getRichNotes');
 
     createRichNote('Neue Rich Note zur Item 01', -1, '01');
+    cy.get('.note-content').should('have.length', '3');
   });
 
   it('exports unit with rich notes', () => {
@@ -112,31 +110,44 @@ describe('Unit Rich Notes', () => {
   });
 
   describe('Block configures personalised rich note tags', () => {
-    it('creates new group, workspace and grants rights', () => {
-      createGroup(richNotesTestNames.customGroup);
-      createWs(richNotesTestNames.customWs, richNotesTestNames.customGroup);
-      grantRemovePrivilegeAtWs([Cypress.expose('username')], richNotesTestNames.customWs, [
-        AccessLevel.Admin
-      ]);
+    const { username, password } = { username: Cypress.expose('username'), password: Cypress.expose('password') };
+
+    // A group of its own, as the tag config belongs to the group, with a workspace and units in it
+    before(() => {
+      cy.loginAPI(username, password).then(session => {
+        expect(session.status, 'login').to.equal(201);
+        const token: string = session.body.accessToken;
+        cy.getUserIdAPI(token).then(authData => {
+          expect(authData.status, 'id of the first user').to.equal(200);
+          cy.createGroupAPI({ id: '', name: richNotesTestNames.customGroup }, token).then(group => {
+            expect(group.status, richNotesTestNames.customGroup).to.equal(201);
+            cy.createWsAPI(String(group.body), { id: '', name: richNotesTestNames.customWs }, token).then(ws => {
+              expect(ws.status, richNotesTestNames.customWs).to.equal(201);
+              cy.setUsersOfWsAPI(String(ws.body), [
+                { id: String(authData.body.userId), access: AccessLevel.Admin }
+              ], token)
+                .its('status').should('equal', 200);
+              cy.uploadUnitsAPI(String(ws.body), 'test2_studio_units_download.zip', token)
+                .its('status').should('equal', 201);
+            });
+          });
+        });
+      });
     });
 
-    it('sets rich note config', () => {
-      cy.visit('/');
-      cy.findAdminGroupSettings(richNotesTestNames.customGroup).click();
-      clickIndexTabWsgAdmin('settings');
-      cy.get('studio-lite-unit-rich-note-tags-config .add-tag-button').click();
-
-      cy.get('studio-lite-unit-rich-note-tags-config input')
-        .last()
-        .clear({ force: true })
-        .type('https://w3id.org/iqb/v06/t1/index.json', { force: true });
-
-      cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
-    });
-
-    it('imports unit', () => {
-      cy.visitWs(`${richNotesTestNames.customWs}`);
-      importExercise('test2_studio_units_download.zip');
+    // by name, also after a test that failed partway; the base's teardown removes only its own group
+    after(() => {
+      cy.loginAPI(username, password).then(session => {
+        expect(session.status, 'login for the cleanup').to.equal(201);
+        const token: string = session.body.accessToken;
+        cy.getWsGroupsAPI(token).then(groups => {
+          expect(groups.status, 'groups').to.equal(200);
+          const ids = (groups.body as WorkspaceGroupInListDto[])
+            .filter(group => group.name === richNotesTestNames.customGroup)
+            .map(group => String(group.id));
+          if (ids.length) cy.deleteGroupsAPI(ids, token).its('status').should('equal', 200);
+        });
+      });
     });
 
     it('activates Rückmeldung in the new workspace', () => {
@@ -145,7 +156,19 @@ describe('Unit Rich Notes', () => {
       saveWorkspaceSettings();
     });
 
-    it('verifies the rich notes config is applied', () => {
+    it('offers the rich note tags configured for the group', () => {
+      cy.visit('/');
+      cy.findAdminGroupSettings(richNotesTestNames.customGroup).click();
+      clickIndexTabWsgAdmin('settings');
+      cy.get('studio-lite-unit-rich-note-tags-config .add-tag-button').click();
+      cy.get('studio-lite-unit-rich-note-tags-config input')
+        .last()
+        .clear({ force: true })
+        .type('https://w3id.org/iqb/v06/t1/index.json', { force: true });
+      cy.intercept('PATCH', '/api/workspace-groups/*').as('saveTagConfig');
+      cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
+      waitForSuccess('@saveTagConfig');
+
       cy.visitWs(`${richNotesTestNames.customWs}`);
 
       cy.get('mat-cell.mat-column-key')
@@ -171,10 +194,6 @@ describe('Unit Rich Notes', () => {
               .click({ force: true });
           });
         });
-    });
-
-    it('cleans up the custom group', () => {
-      deleteGroup(richNotesTestNames.customGroup);
     });
   });
 });

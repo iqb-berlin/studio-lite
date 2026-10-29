@@ -1,7 +1,6 @@
 import {
   addUnitPred,
   clickIndexTabWorkspace,
-  deleteUnit,
   selectUnit,
   setModuleWithoutVerification,
   waitForSuccess
@@ -64,7 +63,7 @@ const sendRuntimeErrorFromPlayer = (code: string, message: string): void => {
 // One path through three modules: DEF_ALL1 is written in the editor, coded in the schemer and
 // played in the preview, each describe working on what the one before it saved.
 before(() => {
-  createTestBaseAPI({ units: 'test_studio_units_download.zip' });
+  createTestBaseAPI({ zip: 'test_studio_units_download.zip' });
 });
 
 after(() => {
@@ -248,16 +247,10 @@ describe('Aspect Coding Scheme (Kodierung)', () => {
     cy.get('iframe.unitHost').should('exist');
   });
 
-  it('verifies schemer iframe and variable list load', () => {
-    cy.getIFrameBody('iframe.unitHost').within(() => {
-      cy.get('iqb-schemer', { timeout: 30000 }).should('exist');
-      cy.get('.var-scheme-list', { timeout: 30000 }).should('exist');
-    });
-  });
-
   it('verifies coding variable for text-field element', () => {
     cy.getIFrameBody('iframe.unitHost').within(() => {
-      cy.contains('.var-list-entry', 'text-field_1', { timeout: 10000 })
+      // the first entry waits for the schemer to load the variables
+      cy.contains('.var-list-entry', 'text-field_1', { timeout: 30000 })
         .should('exist')
         .click();
       cy.get('var-coding', { timeout: 10000 }).should('exist');
@@ -358,17 +351,6 @@ describe('Aspect Coding Scheme (Kodierung)', () => {
     cy.getIFrameBody('iframe.unitHost').within(() => {
       cy.contains('.var-list-entry', 'drop-list_1', { timeout: 10000 }).should('exist');
     });
-  });
-
-  it('selects a variable and verifies coding details container displays', () => {
-    cy.getIFrameBody('iframe.unitHost').within(() => {
-      cy.contains('.var-list-entry', 'text-field_1').click();
-      cy.get('var-coding', { timeout: 10000 }).should('exist');
-    });
-  });
-
-  it('verifies coding scheme save button functionality', () => {
-    cy.get('[data-cy="workspace-unit-save-button"]').should('exist');
   });
 });
 
@@ -542,12 +524,6 @@ describe('Unit Preview (Vorschau)', () => {
     });
   });
 
-  it('verifies preview bar controls', () => {
-    cy.get('studio-lite-preview-bar').should('exist');
-    cy.get('[data-cy="preview-bar-check-coding"]').should('exist');
-    cy.get('[data-cy="preview-bar-print"]').should('exist');
-  });
-
   // #1788: a code of the player specification is explained to the author
   it('explains a runtime error the player reports with a known code', () => {
     sendRuntimeErrorFromPlayer('GEOGEBRA_NOT_LOADING', 'GeoGebra could not be loaded');
@@ -612,13 +588,5 @@ describe('Unit Preview (Vorschau)', () => {
       cy.contains('mat-dialog-container button', json.workspace.reject).click();
     });
     cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
-  });
-
-  it('cleans up the test unit', () => {
-    cy.visitWs(primaryWorkspace);
-    cy.intercept('DELETE', '/api/workspaces/*/units*').as('delUnits');
-    deleteUnit(definitionAllElementsUnit.shortname);
-    cy.wait('@delUnits');
-    cy.contains(definitionAllElementsUnit.shortname).should('not.exist');
   });
 });

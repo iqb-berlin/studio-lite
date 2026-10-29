@@ -53,16 +53,3 @@ export function editInput(data: string, content: string | undefined): void {
       .type(content, { force: true });
   }
 }
-
-/**
- * Adds a status/state to a workspace
- * @param statusName - Name of the status
- * @param position - Position index of the status
- * @example
- * addStatus('In Progress', 0);
- */
-export function addStatus(statusName: string, position: number): void {
-  cy.get('[data-cy="wsg-admin-states-add-state-button"]').click();
-  cy.get('div.state').eq(position).find('input[type="text"]').click()
-    .type(statusName);
-}

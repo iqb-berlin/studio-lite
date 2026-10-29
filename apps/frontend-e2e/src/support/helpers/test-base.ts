@@ -11,7 +11,8 @@ import {
   modules,
   primaryWorkspace,
   secondaryWorkspace,
-  standardUser
+  standardUser,
+  UnitData
 } from '../testData';
 import { showLoginFormAfterUserDeleted } from './admin';
 import { login } from './user';
@@ -21,11 +22,12 @@ const admin = () => ({ username: Cypress.expose('username'), password: Cypress.e
 /**
  * Builds the base and logs the browser in as the first user. Needs an empty database: the first
  * user can only be created while there is none.
- * @param units - a zip of units in the fixtures, imported into the primary workspace
+ * @param zip - a zip of units in the fixtures, imported into the primary workspace
+ * @param units - empty units created in the primary workspace, without editor, player or schemer
  * @example
- * createTestBaseAPI({ units: 'test_studio_units_download.zip' });
+ * createTestBaseAPI({ zip: 'test_studio_units_download.zip', units: [unitCrudUnits.crud1] });
  */
-export function createTestBaseAPI({ units }: { units?: string } = {}): void {
+export function createTestBaseAPI({ zip, units = [] }: { zip?: string; units?: UnitData[] } = {}): void {
   const { username, password } = admin();
   cy.addFirstUserAPI(username, password).then(init => {
     expect(init.status, 'first user').to.equal(201);
@@ -45,9 +47,11 @@ export function createTestBaseAPI({ units }: { units?: string } = {}): void {
                 { id: firstUserId, access: AccessLevel.Admin },
                 { id: standardUserId, access: AccessLevel.Developer }
               ], token).its('status').should('equal', 200);
-              if (units && name === primaryWorkspace) {
-                cy.uploadUnitsAPI(String(ws.body), units, token).its('status').should('equal', 201);
-              }
+              if (name !== primaryWorkspace) return;
+              if (zip) cy.uploadUnitsAPI(String(ws.body), zip, token).its('status').should('equal', 201);
+              units.forEach(unit => {
+                cy.createUnitAPI(String(ws.body), unit, token).its('status').should('equal', 201);
+              });
             });
           });
         });

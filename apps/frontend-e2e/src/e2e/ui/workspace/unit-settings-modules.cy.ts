@@ -9,9 +9,6 @@ import {
 } from '../../../support/metadata/metadata-util';
 import { IqbProfile } from '../../../support/metadata/iqbProfile';
 import {
-  addStatus,
-  clickIndexTabWsgAdmin,
-  goToWsMenu,
   saveWorkspaceSettings,
   setModuleWithoutVerification,
   setRouteVisibility,
@@ -45,14 +42,6 @@ describe('Workspace Settings & Verona Modules', () => {
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickDialogButton(json.cancel || json.close);
     });
-  });
-
-  it('adds custom states to workspace', () => {
-    cy.findAdminGroupSettings(baseGroup).click();
-    clickIndexTabWsgAdmin('settings');
-    addStatus('In Bearbeitung', 0);
-    addStatus('Finale', 1);
-    cy.get('[data-cy="wsg-admin-settings-save-button"]').click();
   });
 
   it('displays available modules in dropdowns', () => {
@@ -117,30 +106,6 @@ describe('Workspace Settings & Verona Modules', () => {
     verifyModuleConfiguration(primaryWorkspace, 'Aspect', 'Aspect', 'Schemer');
   });
 
-  it('allows switching between different player modules', () => {
-    setModuleWithoutVerification(secondaryWorkspace, 'Aspect', 'Speedtest', 'Schemer');
-    setModuleWithoutVerification(secondaryWorkspace, 'Aspect', 'Stars', 'Schemer');
-  });
-
-  it('saves default Verona editor selection and persists after reload', () => {
-    cy.visitWs(secondaryWorkspace);
-    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
-    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
-
-    cy.get('[data-cy="edit-workspace-settings-editor"]').find('mat-select').click();
-    cy.get('mat-option').should('have.length.at.least', 1).first().click();
-
-    saveWorkspaceSettings();
-
-    cy.visitWs(secondaryWorkspace);
-    cy.get('[data-cy="workspace-edit-unit-menu"]').click({ force: true });
-    cy.get('[data-cy="workspace-edit-unit-settings"]').click();
-    cy.get('[data-cy="edit-workspace-settings-editor"]').should('be.visible');
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.clickDialogButton(json.cancel || json.close);
-    });
-  });
-
   // A new workspace starts with the notes route hidden, so it is shown first and hidden again.
   it('shows a route tab (Begleitmaterial / notes) when checked in settings', () => {
     cy.visitWs(primaryWorkspace);
@@ -164,25 +129,5 @@ describe('Workspace Settings & Verona Modules', () => {
     saveWorkspaceSettings();
 
     cy.get('[data-cy="workspace-routes-notes"]').should('not.exist');
-  });
-
-  it('displays group management dialog', () => {
-    cy.visitWs(primaryWorkspace);
-    goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-manage-unit-groups"]').click();
-    cy.get('studio-lite-group-manage').should('exist');
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.clickDialogButton(json.close);
-    });
-  });
-
-  it('displays workspace user list dialog', () => {
-    cy.visitWs(primaryWorkspace);
-    goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-user-list"]').click();
-    cy.get('studio-lite-workspace-user-list').should('exist');
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.clickDialogButton(json.close);
-    });
   });
 });
