@@ -1,3 +1,4 @@
+import { createMock } from '@golevelup/ts-jest';
 import { FilteredCommentsPipe } from './filtered-comments.pipe';
 import { Comment } from '../models/comment.interface';
 
@@ -46,5 +47,28 @@ describe('FilteredCommentsPipe', () => {
       comments[0],
       comments[2]
     ]);
+  });
+
+  describe('vote filters', () => {
+    const comment = (id: number, upVotes?: number, downVotes?: number, itemUuids: string[] = []): Comment => (
+      createMock<Comment>({
+        id, upVotes, downVotes, itemUuids
+      }));
+    const comments = [comment(1, 2, 0), comment(2, 0, 1), comment(3, 1, 1), comment(4)];
+
+    it.each<[string[], number[]]>([
+      [['up'], [1, 3]],
+      [['down'], [2, 3]],
+      [['controversial'], [3]],
+      [['up', 'down'], [1, 2, 3]]
+    ])('should keep the comments that the vote filter %j asks for', (voteFilters, ids) => {
+      expect(pipe.transform(comments, [], voteFilters).map(c => c.id)).toEqual(ids);
+    });
+
+    it('should keep only the comments that pass both the item and the vote filter', () => {
+      const withItems = [comment(1, 1, 0, ['uuid1']), comment(2, 1, 0, ['uuid2']), comment(3, 0, 0, ['uuid1'])];
+
+      expect(pipe.transform(withItems, ['uuid1'], ['up']).map(c => c.id)).toEqual([1]);
+    });
   });
 });

@@ -186,6 +186,14 @@ describe('EditWorkspaceSettingsComponent', () => {
       expect(component.dialogData.hiddenRoutes).not.toBe(initialHiddenRoutes);
     });
 
+    it('should hide a route of a workspace whose settings do not list hidden routes yet', () => {
+      expect(component.dialogData.hiddenRoutes).toBeUndefined();
+
+      component.toggleRouteVisibility('comments', false);
+
+      expect(component.dialogData.hiddenRoutes).toEqual(['comments']);
+    });
+
     it('toggleRouteVisibility should create a new array reference when hiding a route (isVisible=false)', () => {
       const initialHiddenRoutes = ['preview'];
       component.dialogData.hiddenRoutes = initialHiddenRoutes;

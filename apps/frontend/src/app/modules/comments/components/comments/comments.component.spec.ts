@@ -7,10 +7,11 @@ import { By } from '@angular/platform-browser';
 import {
   Component, EventEmitter, Input, Output, Pipe, PipeTransform
 } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { of, Subject } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UnitItemDto } from '@studio-lite-lib/api-dto';
+import { createMock } from '@golevelup/ts-jest';
 import { CommentsComponent } from './comments.component';
 import { BackendService } from '../../services/backend.service';
 import { Comment } from '../../models/comment.interface';
@@ -286,5 +287,91 @@ describe('CommentsComponent', () => {
     const spy = jest.spyOn(component, 'updateCommentVisibility');
     component.toggleVisibility({ id: 1, hidden: false } as unknown as Comment);
     expect(spy).toHaveBeenCalledWith(1, true);
+  });
+
+  it('should say that an edit was not saved, and link no items to it', () => {
+    backendServiceSpy.updateComment.mockReturnValueOnce(of(false));
+
+    component.updateComment({ text: 'updated', commentId: 1, items: ['item1'] });
+
+    expect(snackBarSpy.open).toHaveBeenCalledWith('comment.not-updated', 'error', { duration: 3000 });
+    expect(backendServiceSpy.updateCommentItemConnections).not.toHaveBeenCalled();
+  });
+
+  it('should say that a comment was not sent, and link no items to it', () => {
+    backendServiceSpy.createComment.mockReturnValueOnce(of(null));
+
+    component.addComment({ text: 'new', parentId: null, items: ['item1'] });
+
+    expect(snackBarSpy.open).toHaveBeenCalledWith('comment.not-sent', 'error', { duration: 3000 });
+    expect(backendServiceSpy.updateCommentItemConnections).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [0, 'comments.comment-delete-title', 'comments.comment-delete-question'],
+    [2, 'comments.comments-delete-title', 'comments.comments-delete-question']
+  ])('should ask about deleting a comment with %i replies in its own words', (numberOfReplies, title, content) => {
+    component.deleteComment({ commentId: 1, numberOfReplies });
+
+    expect(dialogSpy.open).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ data: { title, content } })
+    );
+  });
+
+  it.each([false, undefined])('should delete nothing when the delete dialog closes with %s', result => {
+    dialogSpy.open.mockReturnValueOnce(createMock<MatDialogRef<unknown>>({ afterClosed: () => of(result) }));
+
+    component.deleteComment({ commentId: 1, numberOfReplies: 0 });
+
+    expect(backendServiceSpy.deleteComment).not.toHaveBeenCalled();
+  });
+
+  describe('opening the discussion', () => {
+    const comment = (id: number, changedAt: string): Comment => createMock<Comment>({
+      id, parentId: null, changedAt: new Date(changedAt)
+    });
+
+    const open = (inputs: { reviewId?: number; newCommentOnly?: boolean } = {}): CommentsComponent => {
+      jest.clearAllMocks();
+      const discussion = TestBed.createComponent(CommentsComponent);
+      Object.entries({
+        workspaceId: 1, unitId: 1, userId: 1, userName: 'user', ...inputs
+      }).forEach(([name, value]) => discussion.componentRef.setInput(name, value));
+      discussion.detectChanges();
+      return discussion.componentInstance;
+    };
+
+    it('should mark the most recently changed comment as seen, wherever it is in the list', () => {
+      backendServiceSpy.getComments.mockReturnValue(of([
+        comment(1, '2024-01-02'), comment(2, '2024-03-01'), comment(3, '2024-01-01')
+      ]));
+
+      open();
+
+      expect(backendServiceSpy.updateComments).toHaveBeenCalledWith(
+        { lastSeenCommentChangedAt: new Date('2024-03-01'), userId: 1 }, 1, 1
+      );
+    });
+
+    it('should not mark the comments of a review as seen, as a review has no workspace user', () => {
+      const discussion = open({ reviewId: 5 });
+
+      expect(discussion.comments).toHaveLength(2);
+      expect(backendServiceSpy.updateComments).not.toHaveBeenCalled();
+    });
+
+    // The review's comment dialog closes on that announcement when the others' comments are not to be shown.
+    it('should announce a sent comment without loading the others where only a new one may be written', () => {
+      const discussion = open({ newCommentOnly: true });
+      const updated = jest.fn();
+      discussion.onCommentsUpdated.subscribe(updated);
+
+      discussion.addComment({ text: 'new', parentId: null, items: [] });
+
+      expect(backendServiceSpy.createComment).toHaveBeenCalled();
+      expect(backendServiceSpy.getComments).not.toHaveBeenCalled();
+      expect(updated).toHaveBeenCalledTimes(1);
+    });
   });
 });

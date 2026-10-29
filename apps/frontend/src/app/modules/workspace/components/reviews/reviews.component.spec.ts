@@ -440,4 +440,67 @@ describe('ReviewsComponent', () => {
 
     expect(component.reviewDataToChange.settings?.bookletConfig).toEqual(bookletConfig);
   });
+
+  it('should keep the selected review when its changes are not to be discarded', fakeAsync(() => {
+    jest.spyOn(component, 'checkForChangesAndContinue').mockResolvedValue(false);
+    component.selectedReviewId = 1;
+    component.changed = true;
+
+    component.selectReview(2);
+    flushMicrotasks();
+
+    expect(component.checkForChangesAndContinue).toHaveBeenCalledWith(true);
+    expect(backendServiceMock.getReview).not.toHaveBeenCalled();
+    expect(component.selectedReviewId).toBe(1);
+    expect(component.changed).toBe(true);
+  }));
+
+  it.each<[string, Partial<ReviewFullDto>]>([
+    ['password', { password: 'other' }],
+    ['setting', { settings: { bookletConfig: { unitTitle: 'OFF' }, reviewConfig: {} } }]
+  ])('should detect changes when the %s differs', (_, change) => {
+    component.reviewDataOriginal = createReviewFull();
+    component.reviewDataToChange = createReviewFull(change);
+
+    expect(component.detectChanges()).toBe(true);
+  });
+
+  it('should take another unit selection as a change and the original one as none', () => {
+    component.reviewDataOriginal = createReviewFull();
+    component.reviewDataToChange = createReviewFull();
+
+    component.unitSelectionChanged([11]);
+    expect(component.changed).toBe(true);
+
+    component.unitSelectionChanged([11, 12]);
+    expect(component.changed).toBe(false);
+  });
+
+  it.each<[string, (reviews: ReviewsComponent) => void, ReviewFullDto['settings']]>([
+    ['review config', reviews => reviews.reviewConfigSettingsChange({ showCoding: true }),
+      { bookletConfig: { unitTitle: 'OFF' }, reviewConfig: { showCoding: true } }],
+    ['booklet config', reviews => reviews.bookletConfigSettingsChange({ unitTitle: 'ON' }),
+      { bookletConfig: { unitTitle: 'ON' }, reviewConfig: { showCoding: false } }]
+  ])('should change only the %s of the settings', (_, change, settings) => {
+    component.reviewDataToChange = createReviewFull({
+      settings: { bookletConfig: { unitTitle: 'OFF' }, reviewConfig: { showCoding: false } }
+    });
+
+    change(component);
+
+    expect(component.reviewDataToChange.settings).toEqual(settings);
+  });
+
+  it('should filter the reviews by any part of their name regardless of case', fakeAsync(() => {
+    backendServiceMock.getReviewList.mockReturnValue(of([
+      ...createReviewList(), { id: 3, name: 'Erste Probe' }
+    ]));
+    component.loadReviewList();
+    flushMicrotasks();
+    tick();
+
+    component.objectsDatasource.filter = 'pro';
+
+    expect(component.objectsDatasource.filteredData.map(review => review.name)).toEqual(['Erste Probe']);
+  }));
 });

@@ -3,7 +3,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { of, BehaviorSubject } from 'rxjs';
+import { of, BehaviorSubject, NEVER } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { UnitEditorComponent } from './unit-editor.component';
 import { WorkspaceBackendService } from '../../services/workspace-backend.service';
@@ -19,7 +19,7 @@ describe('UnitEditorComponent', () => {
 
   let backendServiceMock: jest.Mocked<WorkspaceBackendService>;
   let workspaceServiceMock: WorkspaceService;
-  let unitStoresMock: { definitionStore: jest.Mock; metadataStore: jest.Mock };
+  let unitStoresMock: { definitionStore: jest.Mock; metadataStore: jest.Mock; loadDefinitionStore: jest.Mock };
   let moduleServiceMock: ModuleService;
   let appServiceMock: AppService;
   let translateServiceMock: TranslateService;
@@ -39,7 +39,8 @@ describe('UnitEditorComponent', () => {
       definitionStore: jest.fn().mockReturnValue({
         setData: jest.fn()
       } as unknown as UnitDefinitionStore),
-      metadataStore: jest.fn()
+      metadataStore: jest.fn(),
+      loadDefinitionStore: jest.fn()
     };
 
     moduleServiceMock = {
@@ -293,5 +294,116 @@ describe('UnitEditorComponent', () => {
 
       expect(target.postMessage.mock.calls[0][0]).not.toHaveProperty('unitDefinitionType');
     });
+
+    it.each([
+      [1, 'vo.ToAuthoringModule.DataTransfer'],
+      [4, 'voeStartCommand']
+    ])('should start an editor of version %s on a unit without definition with an empty one', (version, type) => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.editorApiVersion = version;
+
+      component.postStore({ getData: () => ({}) } as unknown as UnitDefinitionStore);
+
+      expect(target.postMessage).toHaveBeenCalledWith(expect.objectContaining({ type, unitDefinition: '' }), '*');
+    });
+  });
+
+  describe('the conversation with the editor', () => {
+    let editorWindow: Window;
+    let toEditor: jest.SpyInstance;
+    let store: UnitDefinitionStore;
+
+    const fromEditor = (data: object) => component
+      .handleIncomingMessage(new MessageEvent('message', { data, source: editorWindow }));
+
+    beforeEach(() => {
+      const frame = document.createElement('iframe');
+      document.body.appendChild(frame);
+      component.iFrameElement = frame;
+      editorWindow = frame.contentWindow as Window;
+      toEditor = jest.spyOn(editorWindow, 'postMessage').mockImplementation();
+      store = { setData: jest.fn(), getData: () => ({ definition: 'def' }) } as unknown as UnitDefinitionStore;
+      unitStoresMock.definitionStore.mockReturnValue(store);
+      unitStoresMock.loadDefinitionStore.mockReturnValue(of(store));
+    });
+
+    // the version the editor reports decides how it is talked to
+    it.each([
+      [
+        'spec 4.0 in its metadata',
+        { type: 'voeReadyNotification', metadata: { specVersion: '4.0' } },
+        { type: 'voeStartCommand', editorConfig: expect.not.objectContaining({ definitionReportPolicy: 'eager' }) }
+      ],
+      [
+        'API 1.1',
+        { type: 'voeReadyNotification', apiVersion: '1.1.0' },
+        { type: 'voeStartCommand', editorConfig: expect.objectContaining({ definitionReportPolicy: 'eager' }) }
+      ],
+      [
+        'the ready notification of Verona 1',
+        { type: 'vo.FromAuthoringModule.ReadyNotification' },
+        { type: 'vo.ToAuthoringModule.DataTransfer' }
+      ]
+    ])('should start an editor that reports %s in its protocol', (_, ready, start) => {
+      fromEditor(ready);
+
+      expect(unitStoresMock.loadDefinitionStore).toHaveBeenCalledWith(1, 1);
+      expect(toEditor).toHaveBeenCalledWith(
+        expect.objectContaining({ ...start, sessionId: component.sessionId, unitDefinition: 'def' }),
+        '*'
+      );
+      expect(component.sessionId).not.toBe('');
+    });
+
+    // the definition stays as it is; saved, it would otherwise be lost
+    it('should keep the definition when a change notification carries none', () => {
+      component.sessionId = 's1';
+      component.editorApiVersion = 4;
+
+      fromEditor({ type: 'voeDefinitionChangedNotification', sessionId: 's1', variables: [] });
+
+      expect(store.setData).not.toHaveBeenCalled();
+    });
+
+    it('should hand the shared parameters an editor reports to the next start', () => {
+      component.sessionId = 's1';
+      component.editorApiVersion = 4;
+      fromEditor({
+        type: 'voeDefinitionChangedNotification', sessionId: 's1', sharedParameters: [{ key: 'k', value: 'v' }]
+      });
+
+      component.postStore(store);
+
+      expect(toEditor.mock.calls[0][0].editorConfig.sharedParameters).toEqual([{ key: 'k', value: 'v' }]);
+    });
+
+    it('should ask a Verona 1 editor for the definition it reports as changed', () => {
+      component.sessionId = 's1';
+      component.editorApiVersion = 1;
+
+      fromEditor({ type: 'vo.FromAuthoringModule.ChangedNotification', sessionId: 's1' });
+
+      expect(toEditor).toHaveBeenCalledWith({ type: 'vo.ToAuthoringModule.DataRequest', sessionId: 's1' }, '*');
+    });
+
+    it('should ignore a definition a Verona 1 editor of another session transfers', () => {
+      component.sessionId = 's1';
+
+      fromEditor({
+        type: 'vo.FromAuthoringModule.DataTransfer', sessionId: 'old', variables: [], unitDefinition: '<xml />'
+      });
+
+      expect(store.setData).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should load the unit chosen while the one before is still loading', () => {
+    workspaceServiceMock.loadUnitProperties = jest.fn().mockReturnValue(NEVER);
+    component.unitLoaded.next(false);
+
+    workspaceServiceMock.selectedUnit$.next(7);
+
+    expect(workspaceServiceMock.loadUnitProperties).toHaveBeenCalledTimes(1);
   });
 });

@@ -33,6 +33,15 @@ describe('ruleBlocks', () => {
     ]);
   });
 
+  // The coding scheme spec makes ruleSets optional, and the text factory then describes none.
+  it.each(['', byHand])('should print no rule sets for a code without any, manual instruction %j', instruction => {
+    const code: CodeData = {
+      id: 1, label: '', score: 1, type: 'FULL_CREDIT', manualInstruction: instruction
+    };
+
+    expect(ruleBlocks(code)).toEqual([]);
+  });
+
   it('should put each rule on a line of its own', () => {
     const [lines] = blocksOf([{ ruleOperatorAnd: true, rules: [match('a'), match('b')] }]);
 

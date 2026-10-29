@@ -3,23 +3,30 @@ import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
+import {
+  ActivatedRoute, Params, provideRouter, Router
+} from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
-import { of, Subject } from 'rxjs';
+import { Title } from '@angular/platform-browser';
+import { BehaviorSubject, of, Subject } from 'rxjs';
+import { createMock } from '@golevelup/ts-jest';
 import { environment } from '../../../environments/environment';
 import { LoginComponent } from './login.component';
 import { BackendService } from '../../services/backend.service';
-import { AppService } from '../../services/app.service';
+import { AppService, defaultAppConfig } from '../../services/app.service';
+import { AppConfig } from '../../classes/app-config.class';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
   let backendService: { login: jest.Mock };
+  let params: BehaviorSubject<Params>;
+  let queryParams: BehaviorSubject<Params>;
 
   @Component({ selector: 'studio-lite-warning', template: '', standalone: true })
   class MockWarningComponent {
@@ -40,6 +47,8 @@ describe('LoginComponent', () => {
 
   beforeEach(async () => {
     backendService = { login: jest.fn().mockReturnValue(of(true)) };
+    params = new BehaviorSubject<Params>({});
+    queryParams = new BehaviorSubject<Params>({});
     await TestBed.configureTestingModule({
       imports: [
         ReactiveFormsModule,
@@ -59,7 +68,8 @@ describe('LoginComponent', () => {
           provide: 'SERVER_URL',
           useValue: environment.backendUrl
         },
-        { provide: BackendService, useValue: backendService }
+        { provide: BackendService, useValue: backendService },
+        { provide: ActivatedRoute, useValue: createMock<ActivatedRoute>({ params, queryParams }) }
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(LoginComponent);
@@ -155,6 +165,50 @@ describe('LoginComponent', () => {
       await fixture.whenStable();
 
       expect(appService.errorMessagesDisabled).toBe(false);
+    });
+  });
+
+  // A review link carries its login name in the route, so only the password is asked for.
+  it('should preset the login name of a review link', () => {
+    params.next({ login: 'review-17' });
+    fixture.detectChanges();
+
+    expect(component.loginForm.value).toEqual({ name: 'review-17', pw: '' });
+    expect(fixture.nativeElement.textContent).toContain('home.login-with-preset');
+  });
+
+  describe('the page after a login', () => {
+    let appService: AppService;
+    let navigate: jest.SpyInstance;
+
+    beforeEach(() => {
+      appService = TestBed.inject(AppService);
+      navigate = jest.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    });
+
+    it.each([
+      ['the page the user was sent away from', '/a/5/12/editor', true, ['/a/5/12/editor']],
+      ['the administration after the first login of an installation', undefined, false, ['/admin']]
+    ])('should open %s', async (_: string, redirectTo: string | undefined, hasUsers: boolean, page: string[]) => {
+      queryParams.next({ redirectTo });
+      appService.appConfig = new AppConfig(TestBed.inject(Title), { ...defaultAppConfig, hasUsers });
+      fillForm();
+
+      component.login();
+      await fixture.whenStable();
+
+      expect(backendService.login).toHaveBeenCalledWith('user', 'pw', !hasUsers);
+      expect(navigate).toHaveBeenCalledWith(page);
+    });
+
+    // The start page shows the workspaces and reviews of whoever has logged in on it.
+    it('should stay on the start page after an ordinary login', async () => {
+      fillForm();
+
+      component.login();
+      await fixture.whenStable();
+
+      expect(navigate).not.toHaveBeenCalled();
     });
   });
 });

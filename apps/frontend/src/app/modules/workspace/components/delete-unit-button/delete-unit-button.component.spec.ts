@@ -29,7 +29,12 @@ describe('DeleteUnitButtonComponent', () => {
   let workspaceService: { selectedWorkspaceId: number };
   let router: Router;
   let route: ActivatedRoute;
-  let dialog: { open: jest.Mock<{ afterClosed: () => Observable<boolean> }> };
+  let dialog: {
+    open: jest.Mock<{
+      afterClosed: () => Observable<boolean | undefined>;
+      componentInstance?: { selectedUnitIds: number[] };
+    }>;
+  };
 
   beforeEach(async () => {
     dialog = { open: jest.fn(() => ({ afterClosed: () => of(true) })) };
@@ -106,4 +111,56 @@ describe('DeleteUnitButtonComponent', () => {
     );
     expect(appService.dataLoading).toBe(false);
   }));
+
+  describe('through the dialogs', () => {
+    // The dialog results reach the backend call through native async/await, which fakeAsync cannot
+    // flush (the specs compile to es2020); a macrotask runs only after every pending promise callback.
+    const settle = (): Promise<void> => new Promise(resolve => { setTimeout(resolve); });
+
+    const closeDialogsWith = (
+      selection: boolean | undefined, selectedUnitIds: number[], confirmed: boolean | undefined
+    ): void => {
+      dialog.open
+        .mockReturnValueOnce({ afterClosed: () => of(selection), componentInstance: { selectedUnitIds } })
+        .mockReturnValueOnce({ afterClosed: () => of(confirmed) });
+    };
+
+    beforeEach(() => {
+      jest.mocked(router.navigate).mockResolvedValue(true);
+      jest.spyOn(component, 'updateUnitList').mockImplementation(() => {});
+    });
+
+    it('should delete the units chosen and confirmed after leaving the open unit', async () => {
+      closeDialogsWith(true, [4], true);
+
+      component.deleteUnit();
+      await settle();
+
+      expect(router.navigate).toHaveBeenCalledWith(['a/3'], { relativeTo: route.root });
+      expect(backendService.deleteUnits).toHaveBeenCalledWith(3, [4]);
+    });
+
+    it('should offer no units to delete when the open unit cannot be left', async () => {
+      jest.mocked(router.navigate).mockResolvedValue(false);
+
+      component.deleteUnit();
+      await settle();
+
+      expect(dialog.open).not.toHaveBeenCalled();
+    });
+
+    it.each<[string, boolean | undefined, number[], boolean | undefined]>([
+      ['the selection is dismissed', undefined, [4], true],
+      ['the selection is cancelled', false, [4], true],
+      ['no unit is selected', true, [], true],
+      ['the deletion is not confirmed', true, [4], undefined]
+    ])('should delete nothing when %s', async (_, selection, selectedUnitIds, confirmed) => {
+      closeDialogsWith(selection, selectedUnitIds, confirmed);
+
+      component.deleteUnit();
+      await settle();
+
+      expect(backendService.deleteUnits).not.toHaveBeenCalled();
+    });
+  });
 });

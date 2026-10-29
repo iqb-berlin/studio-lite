@@ -4,7 +4,11 @@ import {
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
-import { BehaviorSubject, of, Subject } from 'rxjs';
+import {
+  BehaviorSubject, NEVER, of, Subject
+} from 'rxjs';
+import { createMock } from '@golevelup/ts-jest';
+import { UnitPropertiesDto } from '@studio-lite-lib/api-dto';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
@@ -20,6 +24,7 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitStoresService } from '../../services/unit-stores.service';
 import { UnitSchemeStore } from '../../classes/unit-scheme-store';
+import { UnitMetadataStore } from '../../classes/unit-metadata-store';
 import { PreviewService } from '../../services/preview.service';
 import { ModuleService } from '../../../../services/module.service';
 import { AppService } from '../../../../services/app.service';
@@ -30,6 +35,7 @@ import { PageData } from '../../models/page-data.interface';
 import { Progress } from '../../models/types';
 import { VeronaModuleClass } from '../../../../models/verona-module.class';
 import { WidgetCallData } from '../../models/widget-call-data.interface';
+import { ShowResponsesComponent } from '../show-responses/show-responses.component';
 
 describe('UnitPreviewComponent', () => {
   let component: UnitPreviewComponent;
@@ -433,6 +439,20 @@ describe('UnitPreviewComponent', () => {
       expect(target.postMessage.mock.calls[0][0]).not.toHaveProperty('unitDefinitionType');
     });
 
+    it.each([
+      [1, 'def', 'vo.ToPlayer.DataTransfer', 'def'],
+      [1, undefined, 'vo.ToPlayer.DataTransfer', ''],
+      [6, undefined, 'vopStartCommand', '']
+    ])('should hand a player of version %s the definition %s in its protocol', (version, definition, type, sent) => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.playerApiVersion = version;
+
+      component.postStore({ getData: () => ({ definition }) } as never);
+
+      expect(target.postMessage).toHaveBeenCalledWith(expect.objectContaining({ type, unitDefinition: sent }), '*');
+    });
+
     it('should let the next page report decide the list of the restarted unit', () => {
       component.postMessageTarget = { postMessage: jest.fn() } as never;
       component.playerApiVersion = 6;
@@ -535,6 +555,122 @@ describe('UnitPreviewComponent', () => {
       component.onLoadUnitProperties();
 
       expect(component.pageList).toEqual([]);
+    });
+
+    it('should name the player it loads for the unit', () => {
+      const playerKey = 'iqb-player-aspect@3.0';
+      moduleServiceStub.players = { [playerKey]: createMock<VeronaModuleClass>() };
+      jest.spyOn(unitStoresStub, 'metadataStore').mockReturnValue(createMock<UnitMetadataStore>({
+        getData: () => ({ id: 5, player: playerKey }) as UnitPropertiesDto
+      }));
+
+      component.onLoadUnitProperties();
+
+      expect(component.playerName).toBe(playerKey);
+    });
+  });
+
+  it('should load the unit chosen while the one before is still loading', () => {
+    workspaceServiceStub.loadUnitProperties = jest.fn().mockReturnValue(NEVER);
+    component.unitLoaded.next(false);
+
+    workspaceServiceStub.selectedUnit$.next(6);
+
+    expect(workspaceServiceStub.loadUnitProperties).toHaveBeenCalledTimes(1);
+  });
+
+  describe('the responses the player reports', () => {
+    const report = (unitState: object) => component.handleIncomingMessage(new MessageEvent('message', {
+      data: { type: 'vopStateChangedNotification', unitState },
+      source: fixture.nativeElement.querySelector('iframe').contentWindow
+    }));
+    const response = (id: string, value: string): Response => ({ id, value, status: 'VALUE_CHANGED' });
+    const dataPart = (...responses: Response[]) => JSON.stringify(responses);
+    const withScheme = (scheme: string) => jest.spyOn(unitStoresStub, 'loadSchemeStore')
+      .mockReturnValue(of(new UnitSchemeStore(5, { scheme, schemeType: 'iqb@3.4' })));
+    // the scheme column of a unit without one is null
+    const withoutScheme = () => withScheme(JSON.stringify(null));
+
+    it('should code the last report of every data part', async () => {
+      withScheme(JSON.stringify({ variableCodings: [] }));
+      const code = jest.spyOn(CodingSchemeFactory, 'code').mockReturnValue([]);
+      report({ dataParts: { a: dataPart(response('a1', 'first')) } });
+      report({ dataParts: { b: dataPart(response('b1', 'other')) } });
+      report({ dataParts: { a: dataPart(response('a1', 'second')) } });
+
+      await component.checkCodingChanged();
+
+      expect(code.mock.calls[0][0]).toEqual([response('a1', 'second'), response('b1', 'other')]);
+    });
+
+    it('should name the coded variables of a scheme without aliases by their ids', async () => {
+      withScheme(JSON.stringify({ variableCodings: [{ id: 'v1', sourceType: 'BASE', codes: [{ id: 1 }] }] }));
+      jest.spyOn(CodingSchemeFactory, 'code').mockReturnValue([]);
+
+      await component.checkCodingChanged();
+
+      expect(dialogStub.open).toHaveBeenCalledWith(ShowCodingResultsComponent, expect.objectContaining({
+        data: expect.objectContaining({ varsWithCodes: ['v1'] })
+      }));
+    });
+
+    // a later report without data parts keeps the type of those before
+    it.each([
+      ['iqb-standard@1.0', true],
+      ['other-format@1.0', false],
+      [undefined, false]
+    ])('should show the responses of a unit without a scheme, of data type %s as a table: %s', async (
+      unitStateDataType, table
+    ) => {
+      withoutScheme();
+      report({ dataParts: { a: dataPart(response('a1', 'x')) }, unitStateDataType });
+      report({ presentationProgress: 'some' });
+
+      await component.checkCodingChanged();
+
+      expect(dialogStub.open).toHaveBeenCalledWith(ShowResponsesComponent, expect.objectContaining({
+        data: { responses: [response('a1', 'x')], table }
+      }));
+    });
+
+    it('should say that there is nothing to check without a scheme and without responses', async () => {
+      withoutScheme();
+
+      await component.checkCodingChanged();
+
+      expect(dialogStub.open).not.toHaveBeenCalled();
+      expect(snackBarStub.open).toHaveBeenCalledWith(
+        'workspace.coding-check-error',
+        'workspace.error',
+        expect.anything()
+      );
+    });
+  });
+
+  describe('printing', () => {
+    it('should ask to save the unit first while it has unsaved changes', () => {
+      jest.spyOn(unitStoresStub, 'changed').mockReturnValue(true);
+
+      component.showPrintOptions();
+
+      expect(dialogStub.open).not.toHaveBeenCalled();
+      expect(snackBarStub.open).toHaveBeenCalledWith(
+        'workspace.save-unit-before-check',
+        'workspace.error',
+        expect.anything()
+      );
+    });
+
+    it.each([
+      [[{ key: 'printPreviewHeight', value: 1000 }], true],
+      [undefined, false]
+    ])('should open the print view when the options dialog closes with %j: %s', (options, printed) => {
+      (dialogStub.open as jest.Mock).mockReturnValue({ afterClosed: () => of(options) });
+      jest.spyOn(window, 'open').mockReturnValue(null);
+
+      component.showPrintOptions();
+
+      expect(window.open).toHaveBeenCalledTimes(printed ? 1 : 0);
     });
   });
 });

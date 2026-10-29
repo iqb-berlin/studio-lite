@@ -1,4 +1,6 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import {
+  Component, ElementRef, Injector, runInInjectionContext, ViewChild
+} from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { TrackIframeActivityDirective } from './track-iframe-activity.directive';
@@ -47,5 +49,23 @@ describe('TrackIframeActivityDirective', () => {
     // Check if mousemove listener was attached (called by RxJS fromEvent)
     expect(mockWindow.addEventListener).toHaveBeenCalledWith('mousemove', expect.any(Function), expect.any(Object));
     done();
+  });
+
+  // Inside an @if the frame is created before it is in the page, and has no window yet.
+  it('should wait for the window of a frame that is not in the page yet', () => {
+    const iframe = document.createElement('iframe');
+    const injector = Injector.create({
+      providers: [{ provide: ElementRef, useValue: new ElementRef(iframe) }],
+      parent: TestBed.inject(Injector)
+    });
+    const directive = runInInjectionContext(injector, () => new TrackIframeActivityDirective());
+
+    document.body.appendChild(iframe);
+    iframe.dispatchEvent(new Event('load'));
+    iframe.contentWindow?.dispatchEvent(new Event('keydown'));
+
+    expect(heartbeatServiceMock.refreshActivityPulse).toHaveBeenCalled();
+    directive.ngOnDestroy();
+    iframe.remove();
   });
 });

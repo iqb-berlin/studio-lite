@@ -175,6 +175,36 @@ describe('MetadataService', () => {
       expect(result).toBe(false);
       expect(service.vocabularies.length).toBe(0);
     });
+
+    const profileUsing = (id: string, url: string): MDProfile => createMock<MDProfile>({
+      id, groups: [{ entries: [{ type: 'VOCABULARY', parameters: { url } }] }]
+    });
+    const concept = (id: string, ...narrower: TopConcept[]): TopConcept => ({
+      id, prefLabel: { de: `Label ${id}` }, notation: [], narrower
+    });
+
+    it('should hold a vocabulary that two profiles use only once', async () => {
+      backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of([
+        createMock<MetadataVocabularyDto>({ id: 'v1', hasTopConcept: [concept('c1')] })
+      ]));
+
+      await service.loadProfileVocabularies(profileUsing('p1', 'v1'));
+      await service.loadProfileVocabularies(profileUsing('p2', 'v1'));
+
+      expect(service.getVocabularies().map(vocabulary => vocabulary.url)).toEqual(['v1']);
+    });
+
+    it('should map the concepts of every level of a vocabulary', async () => {
+      backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of([
+        createMock<MetadataVocabularyDto>({
+          id: 'v1', hasTopConcept: [concept('c1', concept('c1.1', concept('c1.1.1')))]
+        })
+      ]));
+
+      await service.loadProfileVocabularies(profileUsing('p1', 'v1'));
+
+      expect(service.vocabulariesIdDictionary).toHaveProperty(['c1.1.1', 'labels', 'de'], 'Label c1.1.1');
+    });
   });
 
   describe('downloadMetadataReport', () => {
