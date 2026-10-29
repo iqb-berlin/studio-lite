@@ -86,7 +86,6 @@ export abstract class RichTextEditorDirective implements OnInit, OnDestroy {
     this.editor = new Editor({
       extensions: this.getExtensions(),
       content: this.initialHTML,
-      parseOptions: { preserveWhitespace: 'full' },
       onTransaction: () => {
         this.updateBaseEditorStates();
         // Child classes can implement `updateEditorStates` if needed

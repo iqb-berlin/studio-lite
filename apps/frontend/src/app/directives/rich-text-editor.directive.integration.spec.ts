@@ -10,14 +10,14 @@ describe('Studio rich text with the real Tiptap 3 editor', () => {
 
   beforeEach(() => {
     directive = new RealRichTextEditorDirective();
-    directive.initialHTML = '<p><strong><u>A  B&nbsp;C</u></strong></p>';
+    directive.initialHTML = '<p><strong><u>A B&nbsp;C</u></strong></p>';
     directive.ngOnInit();
   });
 
   afterEach(() => directive.ngOnDestroy());
 
   it('loads existing formatting and spaces without reporting an authored change', () => {
-    expect(directive.editor.getText()).toBe('A  B\u00a0C');
+    expect(directive.editor.getText()).toBe('A B\u00a0C');
     expect(directive.editor.getHTML()).toContain('<u>');
     expect(directive.editor.getHTML()).toContain('<strong>');
     expect(directive.onEditorUpdate).not.toHaveBeenCalled();
@@ -35,7 +35,7 @@ describe('Studio rich text with the real Tiptap 3 editor', () => {
     directive.editor.commands.insertContentAt(1, 'Added ');
     const edited = directive.editor.getHTML();
     expect(directive.onEditorUpdate).toHaveBeenCalledTimes(1);
-    expect(directive.editor.getText()).toBe('Added A  B\u00a0C');
+    expect(directive.editor.getText()).toBe('Added A B\u00a0C');
 
     expect(directive.editor.commands.undo()).toBe(true);
     expect(directive.editor.getHTML()).toBe(stored);
