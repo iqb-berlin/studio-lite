@@ -69,7 +69,7 @@ describe('ReadOrGroupAdminAccessGuard', () => {
   it('should return true if authService.isWorkspaceGroupAdmin is true', async () => {
     workspaceUserService.hasAccess.mockResolvedValue(false);
     authService.isAdminUser.mockResolvedValue(false);
-    workspaceService.findOne.mockResolvedValue({ id: 10, groupId: 5 } as unknown as never);
+    workspaceService.findGroupIdsOfWorkspaces.mockResolvedValue([5]);
     authService.isWorkspaceGroupAdmin.mockResolvedValue(true);
     const context = createMock<ExecutionContext>({
       switchToHttp: () => ({
@@ -86,7 +86,7 @@ describe('ReadOrGroupAdminAccessGuard', () => {
   it('should throw ForbiddenException if all checks fail', async () => {
     workspaceUserService.hasAccess.mockResolvedValue(false);
     authService.isAdminUser.mockResolvedValue(false);
-    workspaceService.findOne.mockResolvedValue({ id: 10, groupId: 5 } as unknown as never);
+    workspaceService.findGroupIdsOfWorkspaces.mockResolvedValue([5]);
     authService.isWorkspaceGroupAdmin.mockResolvedValue(false);
     const context = createMock<ExecutionContext>({
       switchToHttp: () => ({

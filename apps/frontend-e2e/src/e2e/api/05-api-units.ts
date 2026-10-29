@@ -177,6 +177,16 @@ describe('Unit API tests', () => {
       });
     });
 
+    // An unknown id answered 404 and a foreign workspace 403, which told anyone which ids exist.
+    it('403 negative test: should refuse a workspace that does not exist like a foreign one (#1930)', () => {
+      cy.getWsNormalAPI(
+        noId,
+        Cypress.expose(`token_${userGroupAdmin.username}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(403);
+      });
+    });
+
     it('200 negative test: should allow access to group admin', () => {
       cy.getWsNormalAPI(
         Cypress.expose(ws3.id),

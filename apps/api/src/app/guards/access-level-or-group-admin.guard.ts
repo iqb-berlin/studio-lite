@@ -37,9 +37,12 @@ export abstract class AccessLevelOrGroupAdminGuard implements CanActivate {
       const isAdmin = await this.authService.isAdminUser(userId);
       if (isAdmin) return true;
 
-      const workspaceData = await this.workspaceService.findOne(workspaceId);
-      if (workspaceData) {
-        const isGroupAdmin = await this.authService.isWorkspaceGroupAdmin(userId, workspaceData.groupId);
+      // An unknown workspace is refused like a foreign one, not answered with 404 -- that would
+      // tell anyone which ids exist (#1930). Without a group, `isWorkspaceGroupAdmin` would answer
+      // whether the user administers any group at all, so it is not asked.
+      const [groupId] = await this.workspaceService.findGroupIdsOfWorkspaces([workspaceId]);
+      if (groupId) {
+        const isGroupAdmin = await this.authService.isWorkspaceGroupAdmin(userId, groupId);
         if (isGroupAdmin) return true;
       }
     }
