@@ -10,7 +10,6 @@ describe('An item saved a second time in the same view', () => {
   const unit = { shortname: 'ITEMUUID1', name: 'Item mit UUID', group: '' };
   let token = '';
   let userId = 0;
-  let groupId = '';
   let wsId = '';
   let unitId = '';
 
@@ -21,7 +20,7 @@ describe('An item saved a second time in the same view', () => {
       cy.getUserIdAPI(token).then(authData => {
         userId = authData.body.userId;
         cy.createGroupAPI(group, token).then(createdGroup => {
-          groupId = String(createdGroup.body);
+          const groupId = String(createdGroup.body);
           cy.createWsAPI(groupId, ws, token).then(createdWs => {
             wsId = String(createdWs.body);
             cy.updateUsersOfWsAPI(wsId, AccessLevel.Admin, String(userId), token)
@@ -37,7 +36,6 @@ describe('An item saved a second time in the same view', () => {
   });
 
   after(() => {
-    cy.deleteGroupsAPI([groupId], token).its('status').should('equal', 200);
     deleteFirstUser();
   });
 

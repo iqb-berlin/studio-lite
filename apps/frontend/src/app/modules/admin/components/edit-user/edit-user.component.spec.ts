@@ -84,6 +84,22 @@ describe('EditUserComponent', () => {
     expect(nameControl?.valid).toBe(false);
   });
 
+  // The API refuses it (#1950); the dialog says so before the request would. Disabled, the control
+  // still gives the right the account has, so that UsersComponent leaves it out of the request.
+  it('should keep an administrator from taking away their own administrator right (#1950)', async () => {
+    expect(component.editUserForm.get('isAdmin')?.disabled).toBe(false);
+
+    TestBed.resetTestingModule();
+    await createTestModule({ ...mockDialogData, isAdmin: true, isOwnAccount: true }).compileComponents();
+    const ownFixture = TestBed.createComponent(EditUserComponent);
+    ownFixture.detectChanges();
+
+    const isAdmin = ownFixture.componentInstance.editUserForm.get('isAdmin');
+    expect(isAdmin?.disabled).toBe(true);
+    expect(isAdmin?.value).toBe(true);
+    expect(ownFixture.nativeElement.textContent).toContain('admin.own-admin-hint');
+  });
+
   it('should not require password for existing users', () => {
     const passwordControl = component.editUserForm.get('password');
     passwordControl?.setValue('');

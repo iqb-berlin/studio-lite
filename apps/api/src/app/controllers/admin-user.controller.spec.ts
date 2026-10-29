@@ -49,14 +49,15 @@ describe('AdminUserController', () => {
     }
   );
 
+  // The administrator calling is 9; the account changed is 1.
   describe('patch', () => {
     it('should update a user and leave their sessions alone', async () => {
       const dto = { id: 1, name: 'updated' } as UserFullDto;
       usersService.patch.mockResolvedValue(undefined);
 
-      await controller.patch(1, dto);
+      await controller.patch(9, 1, dto);
 
-      expect(usersService.patch).toHaveBeenCalledWith(1, dto);
+      expect(usersService.patch).toHaveBeenCalledWith(1, dto, 9);
       expect(authService.logout).not.toHaveBeenCalled();
     });
 
@@ -64,9 +65,9 @@ describe('AdminUserController', () => {
       const dto = { id: 1, password: 'new' } as UserFullDto;
       usersService.patch.mockResolvedValue(undefined);
 
-      await controller.patch(1, dto);
+      await controller.patch(9, 1, dto);
 
-      expect(usersService.patch).toHaveBeenCalledWith(1, dto);
+      expect(usersService.patch).toHaveBeenCalledWith(1, dto, 9);
       expect(authService.logout).toHaveBeenCalledWith(1);
     });
 
@@ -74,7 +75,7 @@ describe('AdminUserController', () => {
       const dto = { id: 1, password: 'new' } as UserFullDto;
       usersService.patch.mockRejectedValue(new Error('not found'));
 
-      await expect(controller.patch(1, dto)).rejects.toThrow('not found');
+      await expect(controller.patch(9, 1, dto)).rejects.toThrow('not found');
       expect(authService.logout).not.toHaveBeenCalled();
     });
   });

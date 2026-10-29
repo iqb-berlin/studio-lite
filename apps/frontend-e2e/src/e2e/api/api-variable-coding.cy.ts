@@ -2,7 +2,7 @@ import {
   AccessLevel, GroupData, modules, WsData, WsSettings
 } from '../../support/testData';
 import {
-  deleteGroup, deleteAllModules, goToItem, goToWsMenu, login, logout, selectUnit
+  deleteAllModules, goToItem, goToWsMenu, login, logout, selectUnit
 } from '../../support/helpers';
 import { deleteTextField } from '../../support/api';
 
@@ -44,14 +44,11 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   after(() => {
-    cy.deleteUsersAPI([Cypress.expose(`id_${Cypress.expose('username')}`)],
-      Cypress.expose(`token_${Cypress.expose('username')}`))
-      .then(resp => {
-        Cypress.expose('token_admin', '');
-        expect(resp.status).to.equal(200);
-      });
+    // the first user cannot delete their own account (#1949); after the reset the next first user
+    // gets id 1 again, which a token left in the browser would pass for
+    cy.resetDb();
+    cy.clearLocalStorage();
     cy.visit('/');
-    // cy.resetDb();
   });
 
   it('should initialize the API testing context by adding required Verona modules', () => {
@@ -163,7 +160,6 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
   });
 
   it('should successfully cleanup all created test data from the system', () => {
-    deleteGroup(group1.name);
     deleteAllModules();
     logout();
   });

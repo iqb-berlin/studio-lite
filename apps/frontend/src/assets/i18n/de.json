@@ -257,6 +257,7 @@
     "password": "Kennwort",
     "new-password": "Neues Kennwort",
     "password-hint": "Das Kennwort muss mindestens drei Zeichen lang sein und darf keine Leerzeichen enthalten.",
+    "own-admin-hint": "Das Recht als System-Administrator:in kann man sich nicht selbst entziehen.",
     "user-name-hint": "Der Name muss mindestens drei Zeichen lang sein. Es sind nur Kleinbuchstaben erlaubt.",
     "email-approved": "Zustimmung zur Anzeige der E-Mail-Adresse wurde erteilt.",
     "email-not-approved": "Zustimmung zur Anzeige der E-Mail-Adresse wurde nicht erteilt.",

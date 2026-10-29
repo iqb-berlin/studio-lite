@@ -1,7 +1,9 @@
 import {
-  BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards
+  BadRequestException, Body, Controller, Delete, Get, Param, ParseArrayPipe, ParseIntPipe, Patch, Post, Query,
+  UseGuards
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
@@ -21,6 +23,7 @@ import { AuthService } from '../services/auth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminGuard } from '../guards/is-admin.guard';
 import { WorkspaceGroupService } from '../services/workspace-group.service';
+import { UserId } from '../decorators/user-id.decorator';
 
 /**
  * `admin/users` -- the accounts themselves: creating, changing and deleting them, saying who
@@ -64,6 +67,7 @@ export class AdminUserController {
   @ApiBearerAuth()
   @ApiTags('admin user')
   @ApiOkResponse({ description: 'Users deleted successfully.' })
+  @ApiBadRequestResponse({ description: 'The ids include the own account, or no administrator would remain.' })
   @ApiForbiddenResponse({ description: 'No privileges in the workspace group.' })
   @ApiQuery({
     name: 'id',
@@ -71,8 +75,11 @@ export class AdminUserController {
     isArray: true,
     required: true
   })
-  async remove(@Query('id') ids: number[]): Promise<void> {
-    return this.usersService.remove(ids);
+  async remove(
+    @UserId() ownId: number,
+    @Query('id', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[]
+  ): Promise<void> {
+    return this.usersService.remove(ids, ownId);
   }
 
   @Post()
@@ -95,13 +102,20 @@ export class AdminUserController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'User updated successfully. A new password ends every session of the user.' })
+  @ApiBadRequestResponse({
+    description: 'The administrator right would be taken from the own account, or from the last administrator.'
+  })
   @ApiForbiddenResponse({ description: 'No privileges in the workspace group.' })
   @ApiNotFoundResponse({ description: 'User_id not found.' })
   @ApiParam({ name: 'id', type: Number })
   @ApiBearerAuth()
   @ApiTags('admin user')
-  async patch(@Param('id') userId: number, @Body() userFullDto: UserFullDto): Promise<void> {
-    await this.usersService.patch(userId, userFullDto);
+  async patch(
+    @UserId() ownId: number,
+    @Param('id', ParseIntPipe) userId: number,
+    @Body() userFullDto: UserFullDto
+  ): Promise<void> {
+    await this.usersService.patch(userId, userFullDto, ownId);
     if (userFullDto.password) await this.authService.logout(userId);
   }
 

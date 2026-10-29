@@ -1,5 +1,5 @@
 import { AccessLevel } from '../../../support/testData';
-import { addFirstUser } from '../../../support/helpers';
+import { addFirstUser, deleteFirstUser } from '../../../support/helpers';
 
 describe('Coding instructions saved through the Schemer', () => {
   const group = { id: '', name: 'RichTextGroup' };
@@ -9,8 +9,6 @@ describe('Coding instructions saved through the Schemer', () => {
   const instruction = 'Formatierte Kodieranweisung';
   const schemerKey = 'iqb-schemer@2.8';
   let token = '';
-  let userId = '';
-  let groupId = '';
   let workspaceId = '';
   let unitId = '';
   let savedScheme = '';
@@ -25,9 +23,8 @@ describe('Coding instructions saved through the Schemer', () => {
       token = win.localStorage.getItem('id_token') || '';
       cy.addModuleAPI('iqb-schemer-2.8.4.html', token).its('status').should('equal', 201);
       cy.getUserIdAPI(token).then(authData => {
-        userId = String(authData.body.userId);
         cy.createGroupAPI(group, token).then(createdGroup => {
-          groupId = String(createdGroup.body);
+          const groupId = String(createdGroup.body);
           cy.createWsAPI(groupId, workspace, token).then(createdWorkspace => {
             workspaceId = String(createdWorkspace.body);
             cy.updateUsersOfWsAPI(workspaceId, AccessLevel.Admin, String(authData.body.userId), token)
@@ -63,10 +60,7 @@ describe('Coding instructions saved through the Schemer', () => {
   });
 
   after(() => {
-    cy.deleteGroupsAPI([groupId], token).its('status').should('equal', 200);
-    cy.deleteModulesAPI([schemerKey], token).its('status').should('equal', 200);
-    cy.deleteUsersAPI([userId], token).its('status').should('equal', 200);
-    cy.clearLocalStorage();
+    deleteFirstUser();
   });
 
   it('preserves formatting in the API and reopened editor, and discards cancelled changes', () => {
@@ -118,5 +112,11 @@ describe('Coding instructions saved through the Schemer', () => {
     cy.getUnitSchemeAPI(unitId, workspaceId, token).then(response => {
       expect(response.body.scheme).to.equal(savedScheme);
     });
+  });
+
+  // A test of its own rather than a step of the after hook: failing there, it would keep the
+  // reset that follows from running. The reset does not take the modules.
+  it('removes its module', () => {
+    cy.deleteModulesAPI([schemerKey], token).its('status').should('equal', 200);
   });
 });

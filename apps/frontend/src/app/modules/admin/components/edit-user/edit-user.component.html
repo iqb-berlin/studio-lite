@@ -63,6 +63,9 @@
                   class="consent">
       {{ 'user.admin' | translate }}
     </mat-checkbox>
+    @if (data.isOwnAccount) {
+      <div class="own-admin-hint">{{ 'admin.own-admin-hint' | translate }}</div>
+    }
     <div>{{ 'admin.password-hint' | translate }}</div>
 
     <div class="fx-row-start-start fx-gap-20">
