@@ -462,9 +462,10 @@ describe('Unit API tests part II', () => {
       }
     );
 
+    // An unknown id answered 404 and a foreign workspace 403, which told anyone which ids exist.
     it(
-      '404 negative test: should return an not found error when attempting to download' +
-        ' from an invalid workspace ID',
+      '403 negative test: should refuse a download from a workspace that does not exist' +
+        ' like one from a foreign workspace (#1930)',
       () => {
         const unitIds = [Cypress.expose(unit2.shortname)];
         cy.downloadWsUnitsAPI(
@@ -472,7 +473,7 @@ describe('Unit API tests part II', () => {
           buildDownloadQuery(unitIds),
           Cypress.expose(`token_${userGroupAdmin.username}`)
         ).then(resp => {
-          expect(resp.status).to.equal(404);
+          expect(resp.status).to.equal(403);
         });
       }
     );
