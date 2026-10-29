@@ -70,7 +70,7 @@ describe('Unit Groups and Group Management', () => {
   it('renames a unit group from the group management dialog', () => {
     renameGroupFromManagement(groupTestNames.dialogGroup, groupTestNames.dialogGroupRenamed);
     // compared whole, as the new name contains the old one
-    cy.get('studio-lite-group-manage .group-row .group-name').should($names => {
+    cy.get('studio-lite-group-manage .group-row .group-name > :first-child').should($names => {
       const names = [...$names].map(name => name.innerText.trim());
       expect(names).to.include(groupTestNames.dialogGroupRenamed);
       expect(names).not.to.include(groupTestNames.dialogGroup);

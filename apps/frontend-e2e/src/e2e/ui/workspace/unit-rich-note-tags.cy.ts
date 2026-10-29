@@ -14,7 +14,7 @@ import {
   editRichNote,
   waitForSuccess
 } from '../../../support/helpers';
-import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
+import { createTestBaseAPI, deleteTestBaseAPI, expectImported } from '../../../support/helpers/test-base';
 
 describe('Unit Rich Notes', () => {
   before(() => {
@@ -128,7 +128,7 @@ describe('Unit Rich Notes', () => {
               ], token)
                 .its('status').should('equal', 200);
               cy.uploadUnitsAPI(String(ws.body), 'test2_studio_units_download.zip', token)
-                .its('status').should('equal', 201);
+                .then(upload => expectImported(upload, 'test2_studio_units_download.zip'));
             });
           });
         });

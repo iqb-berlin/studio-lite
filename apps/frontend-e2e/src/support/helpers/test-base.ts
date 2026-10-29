@@ -4,7 +4,7 @@
  * this replaces are checked once in the admin and group-admin specs (#1967).
  */
 
-import type { VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
+import type { RequestReportDto, VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import {
   AccessLevel,
   baseGroup,
@@ -18,6 +18,16 @@ import { showLoginFormAfterUserDeleted } from './admin';
 import { login } from './user';
 
 const admin = () => ({ username: Cypress.expose('username'), password: Cypress.expose('password') });
+
+/**
+ * Fails unless the import of a zip took all its files: rejected ones are reported in the answer,
+ * which is 201 all the same. Sent as form data, the answer comes back as an ArrayBuffer.
+ */
+export function expectImported(upload: Cypress.Response<ArrayBuffer>, zip: string): void {
+  expect(upload.status, zip).to.equal(201);
+  const report: RequestReportDto = JSON.parse(new TextDecoder().decode(upload.body));
+  expect(report.messages, `problems importing ${zip}`).to.deep.equal([]);
+}
 
 /**
  * Builds the base and logs the browser in as the first user. Needs an empty database: the first
@@ -48,7 +58,7 @@ export function createTestBaseAPI({ zip, units = [] }: { zip?: string; units?: U
                 { id: standardUserId, access: AccessLevel.Developer }
               ], token).its('status').should('equal', 200);
               if (name !== primaryWorkspace) return;
-              if (zip) cy.uploadUnitsAPI(String(ws.body), zip, token).its('status').should('equal', 201);
+              if (zip) cy.uploadUnitsAPI(String(ws.body), zip, token).then(upload => expectImported(upload, zip));
               units.forEach(unit => {
                 cy.createUnitAPI(String(ws.body), unit, token).its('status').should('equal', 201);
               });

@@ -265,7 +265,7 @@ export function editRichNote(addedContent: string): void {
   cy.get('mat-dialog-container')
     .should('have.class', 'mdc-dialog--open')
     .and('not.have.class', 'mdc-dialog--opening');
-  cy.get('tiptap-editor .ProseMirror').click().type(addedContent);
+  cy.get('tiptap-editor .ProseMirror').click().type(`{moveToEnd}${addedContent}`);
   cy.get('[data-cy="rich-note-dialog-save"]').click({ force: true });
 }
 
