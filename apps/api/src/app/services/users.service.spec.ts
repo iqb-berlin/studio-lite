@@ -417,17 +417,20 @@ describe('UsersService', () => {
   });
 
   describe('patch', () => {
+    // the caller, an administrator the changes below leave alone
+    const ownId = 9;
+
     it('should update user', async () => {
       const userId = 1;
       const dto = { name: 'new', id: userId } as UserFullDto;
       const user = { id: userId, name: 'old' } as User;
+      const manager = givenLockedAdmins([ownId]);
+      manager.findOne.mockResolvedValue(user);
 
-      jest.spyOn(usersRepository, 'findOne').mockResolvedValue(user);
-
-      await service.patch(userId, dto);
+      await service.patch(userId, dto, ownId);
 
       expect(user.name).toBe('new');
-      expect(usersRepository.save).toHaveBeenCalled();
+      expect(manager.save).toHaveBeenCalled();
     });
 
     // Leaving the administrator role out of a request must not take it away.
@@ -436,9 +439,9 @@ describe('UsersService', () => {
       [false, false]
     ])('should take isAdmin %p of an administrator as %p', async (isAdmin, expected) => {
       const user = { id: 1, isAdmin: true } as User;
-      jest.spyOn(usersRepository, 'findOne').mockResolvedValue(user);
+      givenLockedAdmins([1, ownId]).findOne.mockResolvedValue(user);
 
-      await service.patch(1, { id: 1, isAdmin } as UserFullDto);
+      await service.patch(1, { id: 1, isAdmin } as UserFullDto, ownId);
 
       expect(user.isAdmin).toBe(expected);
     });
@@ -448,11 +451,11 @@ describe('UsersService', () => {
       const user = {
         id: 1, name: 'old', description: 'd', lastName: 'L', firstName: 'F', email: 'e@x.de'
       } as User;
-      jest.spyOn(usersRepository, 'findOne').mockResolvedValue(user);
+      givenLockedAdmins([ownId]).findOne.mockResolvedValue(user);
 
       await service.patch(1, {
         id: 1, name: '', description: '', lastName: '', firstName: '', email: '', password: 'new'
-      } as UserFullDto);
+      } as UserFullDto, ownId);
 
       expect(user).toEqual(expect.objectContaining({
         name: 'old', description: 'd', lastName: 'L', firstName: 'F', email: 'e@x.de', password: 'hash-of-new'
@@ -460,10 +463,47 @@ describe('UsersService', () => {
     });
 
     it('should throw for an unknown user', async () => {
-      jest.spyOn(usersRepository, 'findOne').mockResolvedValue(null);
+      const manager = givenLockedAdmins([ownId]);
+      manager.findOne.mockResolvedValue(null);
 
-      await expect(service.patch(9, { id: 9, name: 'x' } as UserFullDto)).rejects.toThrow(AdminUserNotFoundException);
-      expect(usersRepository.save).not.toHaveBeenCalled();
+      await expect(service.patch(5, { id: 5, name: 'x' } as UserFullDto, ownId))
+        .rejects.toThrow(AdminUserNotFoundException);
+      expect(manager.save).not.toHaveBeenCalled();
+    });
+
+    it('should refuse to take the administrator right from the own account and change nothing (#1950)', async () => {
+      const manager = givenLockedAdmins([ownId, 3]);
+      manager.findOne.mockResolvedValue({ id: ownId, isAdmin: true, name: 'old' } as User);
+
+      await expect(service.patch(ownId, { id: ownId, isAdmin: false, name: 'new' } as UserFullDto, ownId))
+        .rejects.toThrow(BadRequestException);
+      expect(manager.save).not.toHaveBeenCalled();
+    });
+
+    it('should change the other fields of the own account, the administrator right sent along (#1950)', async () => {
+      const user = { id: ownId, isAdmin: true, name: 'old' } as User;
+      const manager = givenLockedAdmins([ownId]);
+      manager.findOne.mockResolvedValue(user);
+
+      await service.patch(ownId, { id: ownId, isAdmin: true, name: 'new' } as UserFullDto, ownId);
+
+      expect(user).toEqual(expect.objectContaining({ isAdmin: true, name: 'new' }));
+      expect(manager.save).toHaveBeenCalledWith(user);
+    });
+
+    // Besides the own account, only two administrators demoting each other at the same time get
+    // here: the later request finds its caller demoted already.
+    it('should refuse to demote the last administrator and change nothing (#1950)', async () => {
+      const manager = givenLockedAdmins([2]);
+      manager.findOne.mockResolvedValue({ id: 2, isAdmin: true } as User);
+
+      await expect(service.patch(2, { id: 2, isAdmin: false } as UserFullDto, ownId))
+        .rejects.toThrow(BadRequestException);
+      expect(manager.save).not.toHaveBeenCalled();
+      // unlocked, the later request would not wait for the earlier one and count before it
+      expect(manager.find).toHaveBeenCalledWith(User, expect.objectContaining({
+        lock: { mode: 'for_no_key_update' }
+      }));
     });
   });
 

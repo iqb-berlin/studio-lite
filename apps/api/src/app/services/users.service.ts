@@ -363,9 +363,10 @@ export class UsersService {
 
   /**
    * Throws when no administrator would remain beside the given accounts. Apart from a request
-   * against the caller's own account, this happens only when two administrators remove each other
-   * at the same time; the rows are therefore locked until the caller's transaction ends, so that
-   * the second request waits for the first and then counts what it left. They are found rather
+   * against the caller's own account, this happens only when two administrators delete or demote
+   * each other at the same time; the rows are therefore locked until the caller's transaction
+   * ends, so that the second request waits for the first and then counts what it left, whether it
+   * deletes or demotes (#1950). They are found rather
    * than counted because Postgres refuses a row lock together with an aggregate, and in the order
    * of their ids so that two requests cannot lock them crosswise. `FOR NO KEY UPDATE` keeps out a
    * second removal as `FOR UPDATE` would, but not the foreign key checks of a login, which
@@ -383,22 +384,34 @@ export class UsersService {
     }
   }
 
-  async patch(userId: number, userData: UserFullDto): Promise<void> {
-    this.logger.log(`Updating user with id: ${userId}`);
-    const userToUpdate = await this.usersRepository.findOne({
-      where: { id: userId },
-      select: {
-        name: true,
-        isAdmin: true,
-        description: true,
-        password: true,
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true
-      }
-    });
-    if (userToUpdate) {
+  /**
+   * Changes an account, but takes the administrator right neither from the caller's own account
+   * nor from the last administrator, for the reasons `remove` gives (#1950). The other fields of
+   * the own account stay open to change.
+   */
+  async patch(userId: number, userData: UserFullDto, ownId: number): Promise<void> {
+    if (userId === ownId && userData.isAdmin === false) {
+      throw new BadRequestException('An administrator cannot take away their own administrator right.');
+    }
+    await this.usersRepository.manager.transaction(async manager => {
+      // Every demotion locks, whatever the read below would show: an account that read as no
+      // administrator could have become one meanwhile, and its demotion would pass the count.
+      if (userData.isAdmin === false) await UsersService.refuseToRemoveLastAdmin(manager, [userId]);
+      this.logger.log(`Updating user with id: ${userId}`);
+      const userToUpdate = await manager.findOne(User, {
+        where: { id: userId },
+        select: {
+          name: true,
+          isAdmin: true,
+          description: true,
+          password: true,
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true
+        }
+      });
+      if (!userToUpdate) throw new AdminUserNotFoundException(userId, 'PATCH');
       if (typeof userData.isAdmin === 'boolean') userToUpdate.isAdmin = userData.isAdmin;
       if (userData.name) userToUpdate.name = userData.name;
       if (userData.description) userToUpdate.description = userData.description;
@@ -406,10 +419,8 @@ export class UsersService {
       if (userData.lastName) userToUpdate.lastName = userData.lastName;
       if (userData.firstName) userToUpdate.firstName = userData.firstName;
       if (userData.email) userToUpdate.email = userData.email;
-      await this.usersRepository.save(userToUpdate);
-    } else {
-      throw new AdminUserNotFoundException(userData.id, 'PATCH');
-    }
+      await manager.save(userToUpdate);
+    });
   }
 
   async patchMyData(userData: MyDataDto): Promise<void> {

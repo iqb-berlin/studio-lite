@@ -107,6 +107,21 @@ describe('UsersMenuComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith({ selection: [mockUser], user: mockFormGroup });
   });
 
+  // The dialog of the own account keeps its administrator right out of reach (#1950).
+  it.each([
+    [1, true],
+    [2, false]
+  ])('should tell the dialog of user %p whether it is the own account (%p)', (id, isOwnAccount) => {
+    fixture.componentRef.setInput('ownUserId', 1);
+    component.selectedRows = [{ id, name: 'test' } as UserFullDto];
+
+    component.editUser();
+
+    expect(mockDialog.open).toHaveBeenCalledWith(EditUserComponent, expect.objectContaining({
+      data: expect.objectContaining({ isOwnAccount })
+    }));
+  });
+
   describe('orphaned session count', () => {
     it('should count the orphaned sessions of a single selected user', () => {
       component.selectedRows = [{

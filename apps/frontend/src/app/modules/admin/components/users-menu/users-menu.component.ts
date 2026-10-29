@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Input, Output
+  Component, EventEmitter, input, Input, Output
 } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -23,6 +23,7 @@ import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrappe
 })
 export class UsersMenuComponent {
   @Input() selectedUser!: number;
+  readonly ownUserId = input(0);
 
   // Counted on input instead of in the template: the admin list polls, so a template
   // expression over the session lists would re-run on every change detection cycle.
@@ -95,7 +96,8 @@ export class UsersMenuComponent {
           firstName: selectedRows[0].firstName,
           lastName: selectedRows[0].lastName,
           email: selectedRows[0].email,
-          emailApproved: selectedRows[0].emailPublishApproved
+          emailApproved: selectedRows[0].emailPublishApproved,
+          isOwnAccount: selectedRows[0].id === this.ownUserId()
         }
       });
 

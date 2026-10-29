@@ -152,6 +152,22 @@ describe('Admin User Management', () => {
     });
   });
 
+  // ─── Own account ──────────────────────────────────────────────────────────────
+
+  describe('Own account', () => {
+    // The API refuses it (#1950), so the dialog of the own account keeps the checkbox out of reach.
+    it('offers no way to take away the own administrator right (#1950)', () => {
+      goToAdminUsers();
+      selectUserRow(Cypress.expose('username'));
+      cy.get('[data-cy="admin-users-menu-edit-user"]').click();
+      cy.get('[formcontrolname="isAdmin"] input[type="checkbox"]').should('be.disabled');
+      cy.translate(Cypress.expose('locale')).then(json => {
+        cy.contains(json.admin['own-admin-hint']).should('be.visible');
+        cy.clickDialogButton(json.cancel);
+      });
+    });
+  });
+
   // ─── Workspace groups: rename and assign admin ────────────────────────────────
 
   describe('Workspace Groups menu', () => {

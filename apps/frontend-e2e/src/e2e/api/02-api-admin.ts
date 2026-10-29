@@ -1,4 +1,4 @@
-import type { WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
+import type { UserInListDto, WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
 import {
   noId,
   fakeUser,
@@ -110,6 +110,21 @@ describe('Admin API tests', () => {
         .then(resp => {
           expect(resp.status).to.equal(404);
         });
+    });
+
+    // Without an administrator no one reaches the system administration any more (#1950)
+    it('400 negative test: should refuse to take the administrator right from the own account (#1950)', () => {
+      const admin = { username: Cypress.expose('username'), password: Cypress.expose('password') };
+      cy.updateUserAPI(Cypress.expose(`id_${admin.username}`),
+        admin,
+        false,
+        Cypress.expose(`token_${admin.username}`))
+        .its('status').should('equal', 400);
+      cy.getUsersAPI(Cypress.expose(`token_${admin.username}`)).then(resp => {
+        expect(resp.status).to.equal(200);
+        const own = (resp.body as UserInListDto[]).find(user => user.name === admin.username);
+        expect(own?.isAdmin, 'still an administrator').to.equal(true);
+      });
     });
 
     // A password set by an administrator ends the user's sessions as a change of their own does

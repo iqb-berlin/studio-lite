@@ -42,7 +42,8 @@ export class EditUserComponent implements OnInit {
       firstName: this.fb.control(this.data.firstName),
       email: this.fb.control(this.data.email),
       description: this.fb.control(this.data.description),
-      isAdmin: this.fb.control(this.data.isAdmin),
+      // disabled, the control keeps its value, so that UsersComponent does not send it (#1950)
+      isAdmin: this.fb.control({ value: this.data.isAdmin, disabled: !!this.data.isOwnAccount }),
       password: this.fb.control(this.data.password,
         data.newUser ?
           [Validators.pattern(/^\S{3,}$/), Validators.required] :

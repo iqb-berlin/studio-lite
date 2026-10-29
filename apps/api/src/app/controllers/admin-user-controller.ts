@@ -1,5 +1,6 @@
 import {
-  BadRequestException, Body, Controller, Delete, Get, Param, ParseArrayPipe, Patch, Post, Query, UseGuards
+  BadRequestException, Body, Controller, Delete, Get, Param, ParseArrayPipe, ParseIntPipe, Patch, Post, Query,
+  UseGuards
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -101,13 +102,20 @@ export class AdminUserController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOkResponse({ description: 'User updated successfully. A new password ends every session of the user.' })
+  @ApiBadRequestResponse({
+    description: 'The administrator right would be taken from the own account, or from the last administrator.'
+  })
   @ApiForbiddenResponse({ description: 'No privileges in the workspace group.' })
   @ApiNotFoundResponse({ description: 'User_id not found.' })
   @ApiParam({ name: 'id', type: Number })
   @ApiBearerAuth()
   @ApiTags('admin user')
-  async patch(@Param('id') userId: number, @Body() userFullDto: UserFullDto): Promise<void> {
-    await this.usersService.patch(userId, userFullDto);
+  async patch(
+    @UserId() ownId: number,
+    @Param('id', ParseIntPipe) userId: number,
+    @Body() userFullDto: UserFullDto
+  ): Promise<void> {
+    await this.usersService.patch(userId, userFullDto, ownId);
     if (userFullDto.password) await this.authService.logout(userId);
   }
 

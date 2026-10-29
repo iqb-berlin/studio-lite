@@ -2,6 +2,7 @@
   <div class="object-list fx-column-start-stretch fx-flex-row-60">
     <studio-lite-users-menu [selectedUser]="selectedUser"
       [selectedRows]="tableSelectionRow.selected"
+      [ownUserId]="ownUserId"
       (userAdded)="addUser($event)"
       (userEdited)="editUser($event)"
       (orphanedSessionsCleared)="deleteOrphanedSessions()">
