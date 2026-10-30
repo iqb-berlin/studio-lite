@@ -1,4 +1,6 @@
-@if (settings) {
+@if (wsgAdminService.settingsLoad() === 'failed') {
+  <p class="info" data-cy="wsg-admin-settings-not-loaded">{{'wsg-settings.settings-not-loaded' | translate}}</p>
+} @else if (wsgAdminService.settingsLoad() === 'loaded') {
   <div class="scroll-area">
     <div class="fx-row-start-stretch container">
       <div class="fx-flex-row-50 profiles-container">

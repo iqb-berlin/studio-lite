@@ -358,7 +358,8 @@
     "unit-rich-note-tags-info": "Wenn hier keine Kategorien für Begleitmaterial angegeben werden, werden die allgemeinen Kategorien für Begleitmaterial des IQB-Studios verwendet.",
     "use-global-tags": "Kategorien für Begleitmaterial aus den allgemeinen Einstellungen kopieren",
     "unit-rich-note-tags-group": "Kategorien für Begleitmaterial der Bereichsgruppen",
-    "global-tags-preview": "Allgemeine Kategorien für Begleitmaterial"
+    "global-tags-preview": "Allgemeine Kategorien für Begleitmaterial",
+    "settings-not-loaded": "Die Einstellungen der Bereichsgruppe konnten nicht geladen werden."
   },
   "settings": {
     "texts": "Texte",
