@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
-  EntityManager, In, Not, QueryFailedError, Repository
+  EntityManager, FindOperator, FindOptionsWhere, In, Not, QueryFailedError, Repository
 } from 'typeorm';
 import {
   CreateUnitDto,
@@ -680,6 +680,15 @@ describe('UnitService', () => {
   });
 
   describe('patchReturnDropBoxHistory', () => {
+    // Answers only the workspaces asked for, so a question about the wrong ones gets the wrong groups
+    const givenWorkspaces = (workspaces: Workspace[]) => workspaceRepository.find.mockImplementation(
+      async options => {
+        const { id } = options?.where as FindOptionsWhere<Workspace>;
+        const asked: unknown = (id as FindOperator<number>).value;
+        return workspaces.filter(workspace => Array.isArray(asked) && asked.includes(workspace.id));
+      }
+    );
+
     beforeEach(() => {
       unitsRepository.findOne.mockImplementation(async ({ where }) => {
         const { id, key } = where as { id?: number; key?: string };
@@ -692,6 +701,11 @@ describe('UnitService', () => {
           null
       ));
       workspaceRepository.findOne.mockResolvedValue({ id: 5 } as Workspace);
+      givenWorkspaces([
+        createMock<Workspace>({ id: 5, groupId: 1 }),
+        createMock<Workspace>({ id: 9, groupId: 1 }),
+        createMock<Workspace>({ id: 7, groupId: 2 })
+      ]);
     });
 
     it('should return a submitted unit to where it came from', async () => {
@@ -715,6 +729,30 @@ describe('UnitService', () => {
       expect(unitsRepository.save).toHaveBeenCalledTimes(1);
       expect(unitsRepository.save).toHaveBeenCalledWith(expect.objectContaining({ id: 1, workspaceId: 5 }));
       expect(unitDropBoxHistoryRepository.upsert).toHaveBeenCalledTimes(1);
+    });
+
+    // #2027: the workspace it came from has been moved into another group since
+    it('should report a unit submitted from a workspace of another group, and leave it in the drop box', async () => {
+      unitDropBoxHistoryRepository.findOne.mockResolvedValue(
+        createMock<UnitDropBoxHistory>({ unitId: 1, sourceWorkspaceId: 7, targetWorkspaceId: 9 })
+      );
+
+      const report = await service.patchReturnDropBoxHistory([1], 9, { id: 1 } as User);
+
+      expect(report.messages).toEqual([{ objectKey: 'SUBMITTED', messageKey: 'unit-patch.other-group' }]);
+      expect(unitsRepository.save).not.toHaveBeenCalled();
+      expect(unitDropBoxHistoryRepository.upsert).not.toHaveBeenCalled();
+    });
+
+    // A workspace set as its own drop box before #1805 is in its own group, not in another one
+    it('should not report a submission within the same workspace as one from another group', async () => {
+      unitDropBoxHistoryRepository.findOne.mockResolvedValue(
+        createMock<UnitDropBoxHistory>({ unitId: 1, sourceWorkspaceId: 9, targetWorkspaceId: 9 })
+      );
+
+      const report = await service.patchReturnDropBoxHistory([1], 9, { id: 1 } as User);
+
+      expect(report.messages).not.toContainEqual(expect.objectContaining({ messageKey: 'unit-patch.other-group' }));
     });
 
     // #1806: an older, already returned submission from another workspace must not decide the target

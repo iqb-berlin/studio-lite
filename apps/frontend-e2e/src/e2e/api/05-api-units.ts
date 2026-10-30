@@ -1166,6 +1166,54 @@ describe('Unit API tests', () => {
     });
   });
 
+  // Submitting and returning stay within a group (#1805). A unit submitted from a workspace that
+  // has been moved into another group since stays in the drop box; moving it crosses groups (#2027).
+  describe('#2027 returning a unit to a workspace moved to another group', () => {
+    const token = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+    const unit: UnitData = { shortname: 'D2027', name: 'Abgabe', group: '' };
+    const ids = { source: '', dropBox: '', unit: '' };
+    const createWorkspace = (name: string, assign: (id: string) => void) => cy
+      .createWsAPI(Cypress.expose(groupVera.id), { id: '', name }, token())
+      .then(resp => {
+        expect(resp.status).to.equal(201);
+        assign(`${resp.body}`);
+        const adminId = Cypress.expose(`id_${Cypress.expose('username')}`);
+        cy.updateUsersOfWsAPI(`${resp.body}`, AccessLevel.Admin, adminId, token())
+          .its('status').should('equal', 200);
+      });
+    const unitKeysOf = (wsId: string) => cy.getUnitsByWsAPI(wsId, token())
+      .then(resp => (resp.body as { key: string }[]).map(u => u.key));
+
+    before(() => {
+      createWorkspace('Abgebend-2027', id => { ids.source = id; });
+      createWorkspace('Ablage-Rueckgabe-2027', id => { ids.dropBox = id; });
+      cy.then(() => {
+        cy.createUnitAPI(ids.source, unit, token()).then(resp => {
+          expect(resp.status).to.equal(201);
+          ids.unit = `${resp.body}`;
+        });
+        cy.dropboxWsAPI(ids.source, ids.dropBox, token()).its('status').should('equal', 200);
+      });
+      cy.then(() => {
+        cy.submitUnitsAPI(ids.source, ids.dropBox, ids.unit, token()).its('status').should('equal', 200);
+        cy.moveWsAPI(ids.source, Cypress.expose(group2.id), token()).its('status').should('equal', 200);
+      });
+    });
+
+    after(() => {
+      cy.deleteWsAPI([ids.source, ids.dropBox], token());
+    });
+
+    it('200 positive test: should report the unit and leave it in the drop box', () => {
+      cy.submitUnitsAPI(ids.dropBox, '', ids.unit, token()).then(resp => {
+        expect(resp.status).to.equal(200);
+        expect(resp.body.messages).to.deep.equal([{ objectKey: unit.shortname, messageKey: 'unit-patch.other-group' }]);
+      });
+      unitKeysOf(ids.dropBox).should('include', unit.shortname);
+      unitKeysOf(ids.source).should('not.include', unit.shortname);
+    });
+  });
+
   describe('39. PATCH /api/workspaces/{workspace_id}/name', () => {
     it('200 positive test: should allow an authorized user to rename a workspace', () => {
       cy.renameWsAPI(

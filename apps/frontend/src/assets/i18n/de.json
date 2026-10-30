@@ -23,7 +23,8 @@
   "id": "ID",
   "unit-patch": {
     "duplicate-unit-id": "Aufgabe bereits im Arbeitsbereich vorhanden",
-    "not-submitted": "Keine Abgabe in diese Drop-Box bekannt, Aufgabe kann nicht zurückgegeben werden"
+    "not-submitted": "Keine Abgabe in diese Drop-Box bekannt, Aufgabe kann nicht zurückgegeben werden",
+    "other-group": "Der abgebende Arbeitsbereich liegt in einer anderen Bereichsgruppe, Aufgabe kann nicht zurückgegeben werden"
   },
   "unit-upload": {
     "api-error": {
@@ -464,7 +465,7 @@
     "workspace-not-loaded": "Konnte Daten für Arbeitsbereich nicht laden",
     "delete-workspaces": "Sollen {{count}} Arbeitsbereiche mit allen enthaltenen Aufgaben gelöscht werden?",
     "move-workspaces": "Sollen {{count}} Arbeitsbereiche mit allen enthaltenen Aufgaben verschoben werden?",
-    "move-workspaces-warning": "Befindet sich der Ziel Arbeitsbereich in einer anderen Bereichsgruppe, werden alle Aufgabenstatus zurückgesetzt! Ablagen zwischen verschobenen und verbleibenden Arbeitsbereichen werden entfernt.",
+    "move-workspaces-warning": "Befindet sich der Ziel Arbeitsbereich in einer anderen Bereichsgruppe, werden alle Aufgabenstatus zurückgesetzt! Ablagen zwischen verschobenen und verbleibenden Arbeitsbereichen werden entfernt, dort abgegebene Aufgaben können nicht mehr zurückgegeben werden.",
     "add-workspace": "Neuer Arbeitsbereich",
     "move-selected-workspaces": "Arbeitsbereich verschieben",
     "change-workspace-settings": "Arbeitsbereichseinstellungen ändern",
