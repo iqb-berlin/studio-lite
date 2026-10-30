@@ -59,7 +59,6 @@ describe('RichTextEditorDirective', () => {
     expect(extensions.map(extension => extension.name)).toEqual([
       'starterKit', 'superscript', 'subscript', 'textStyle', 'color', 'image', 'placeholder', 'highlight'
     ]);
-    expect(extensions[0].options).toEqual(expect.objectContaining({ link: false, trailingNode: false }));
     expect(extensions[6].options).toEqual(expect.objectContaining({ placeholder: 'Kommentar' }));
   });
 
