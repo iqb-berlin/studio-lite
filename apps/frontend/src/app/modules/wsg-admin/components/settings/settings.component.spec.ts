@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
-  Component, Input, Output, EventEmitter
+  Component, Input, Output, EventEmitter, WritableSignal, signal
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
@@ -11,7 +11,7 @@ import {
 import { BehaviorSubject, of } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { CoreProfile, ProfilesComponent } from '../../../../components/profiles/profiles.component';
-import { WsgAdminService } from '../../services/wsg-admin.service';
+import { SettingsLoad, WsgAdminService } from '../../services/wsg-admin.service';
 import { StatesComponent } from '../states/states.component';
 import {
   UnitRichNoteTagsConfigComponent
@@ -57,6 +57,7 @@ describe('WorkspaceSettingsComponent', () => {
     selectedWorkspaceGroupId: BehaviorSubject<number>;
     setWorkspaceGroupSettings: jest.Mock;
     settingsChanged: boolean;
+    settingsLoad: WritableSignal<SettingsLoad>;
   };
   let mockSnackBar: { open: jest.Mock };
   let mockMatDialogRef: { close: jest.Mock; afterClosed: jest.Mock };
@@ -72,7 +73,8 @@ describe('WorkspaceSettingsComponent', () => {
       }),
       selectedWorkspaceGroupId: new BehaviorSubject<number>(1),
       setWorkspaceGroupSettings: jest.fn().mockReturnValue(of(true)),
-      settingsChanged: false
+      settingsChanged: false,
+      settingsLoad: signal<SettingsLoad>('loaded')
     };
 
     mockSnackBar = {
@@ -147,5 +149,21 @@ describe('WorkspaceSettingsComponent', () => {
     component.stateSettingsChange([{ id: 1, label: 'State 1', color: '#ffffff' }]);
 
     expect(component.settings.lastStateId).toBe(2);
+  });
+
+  // Saving settings that were not loaded would lay substitutes over the stored ones (#2010).
+  it('should say that the settings were not loaded and offer nothing to save', () => {
+    mockWsgAdminService.settingsLoad.set('failed');
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('[data-cy="wsg-admin-settings-not-loaded"]')).not.toBeNull();
+    expect(element.querySelector('[data-cy="wsg-admin-settings-save-button"]')).toBeNull();
+  });
+
+  it('should offer the settings to save once they are loaded', () => {
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('[data-cy="wsg-admin-settings-not-loaded"]')).toBeNull();
+    expect(element.querySelector('[data-cy="wsg-admin-settings-save-button"]')).not.toBeNull();
   });
 });

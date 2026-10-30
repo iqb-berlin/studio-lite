@@ -4,9 +4,7 @@ import { clickIndexTabWsgAdmin } from '../../../support/helpers';
 import { addState, deleteState } from '../../../support/helpers/group-admin';
 import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
-// Deleting a state saves the group settings at once. It saved the states as they were loaded, without what had
-// been changed before, and the next state got the id of the deleted one, which units keep (#2009).
-describe('The unit states of a workspace group', () => {
+describe('The settings page of a workspace group', () => {
   let token = '';
   let groupId = '';
 
@@ -37,6 +35,8 @@ describe('The unit states of a workspace group', () => {
     deleteTestBaseAPI();
   });
 
+  // Deleting a state saves the group settings at once. It saved the states as they were loaded, without what had
+  // been changed before, and the next state got the id of the deleted one, which units keep (#2009).
   it('saves a renamed state along with a deletion, and gives the next state an id of its own', () => {
     cy.findAdminGroupSettings(baseGroup).click();
     clickIndexTabWsgAdmin('settings');
@@ -53,5 +53,15 @@ describe('The unit states of a workspace group', () => {
     storedStates().then(states => {
       expect(states.map(state => state.id)).to.deep.equal([1, 3]);
     });
+  });
+
+  // After a failed load the page offered substitutes with empty default modules for saving, and the API lays what
+  // it gets over the stored settings (#2010). A group that does not exist fails to load without a faked answer.
+  it('offers nothing to save when the group cannot be loaded', () => {
+    cy.visit('/#/wsg-admin/999999/settings');
+    // coming from another group's page, the router keeps the page and loads nothing
+    cy.reload();
+    cy.get('[data-cy="wsg-admin-settings-not-loaded"]').should('be.visible');
+    cy.get('[data-cy="wsg-admin-settings-save-button"]').should('not.exist');
   });
 });
