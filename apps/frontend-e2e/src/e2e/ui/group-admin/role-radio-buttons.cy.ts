@@ -10,7 +10,6 @@ import {
   addFirstUser,
   createGroup,
   createNewUser,
-  deleteFirstUser,
   makeAdminOfGroup,
   clickIndexTabWsgAdmin,
   openWsTab,
@@ -409,9 +408,5 @@ describe('Role Radio Buttons – wsg-admin access rights', () => {
       assertRoleRadioChecked(secondaryWorkspace, AccessLevel.Admin, true);
       assertRoleRadioChecked(secondaryWorkspace, AccessLevel.Basic, false);
     });
-  });
-
-  after(() => {
-    deleteFirstUser();
   });
 });

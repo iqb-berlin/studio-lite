@@ -1,4 +1,4 @@
-import { addFirstUser, deleteFirstUser } from '../../../support/helpers';
+import { addFirstUser } from '../../../support/helpers';
 
 /**
  * Until the app has loaded its config it assumes there are users, so a login sent in that window
@@ -8,10 +8,6 @@ import { addFirstUser, deleteFirstUser } from '../../../support/helpers';
  */
 describe('First login', () => {
   let delayConfig = true;
-
-  after(() => {
-    deleteFirstUser();
-  });
 
   it('should create the first user even when the config answers late', () => {
     cy.intercept('GET', '/api/admin/settings/config', req => {

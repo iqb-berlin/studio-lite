@@ -1,5 +1,5 @@
 import { AccessLevel, CommentData } from '../../../support/testData';
-import { addFirstUser, deleteFirstUser, FIRST_WORKSPACE_REQUEST_TIMEOUT } from '../../../support/helpers';
+import { addFirstUser, FIRST_WORKSPACE_REQUEST_TIMEOUT } from '../../../support/helpers';
 
 // A new item gets its uuid from the server when the unit is saved. Until #1830 the frontend did not
 // take it over: the next save in the same view sent the item as a new one, the server deleted it and
@@ -33,10 +33,6 @@ describe('An item saved a second time in the same view', () => {
         });
       });
     });
-  });
-
-  after(() => {
-    deleteFirstUser();
   });
 
   it('keeps its uuid and the comment linked to it', () => {

@@ -1,7 +1,6 @@
 import {
   addFirstUser,
   clearFormControl,
-  deleteFirstUser,
   goToSettings,
   saveAndExpect,
   setFormControl,
@@ -15,9 +14,6 @@ import { baseGroup } from '../../../support/testData';
 
 describe('Admin Settings Tab Configuration', () => {
   before(() => addFirstUser());
-  after(() => {
-    deleteFirstUser();
-  });
 
   // -------------------------------------------------------------------------
   describe('App Config – Texts card', () => {

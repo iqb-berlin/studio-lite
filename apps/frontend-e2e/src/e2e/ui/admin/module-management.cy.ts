@@ -1,7 +1,6 @@
 import {
   addFirstUser,
   addModules,
-  deleteFirstUser,
   deleteAllModules,
   clickIndexTabAdmin
 } from '../../../support/helpers';
@@ -10,10 +9,6 @@ import { modules } from '../../../support/testData';
 describe('Verona Module Management', () => {
   before(() => {
     addFirstUser();
-  });
-
-  after(() => {
-    deleteFirstUser();
   });
 
   it('uploads Verona modules successfully', () => {

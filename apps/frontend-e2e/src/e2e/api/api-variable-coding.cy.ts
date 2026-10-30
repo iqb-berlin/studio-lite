@@ -43,14 +43,6 @@ describe('API variable coherence in Scheme, Aspect and Metadata', () => {
       });
   });
 
-  after(() => {
-    // the first user cannot delete their own account (#1949); after the reset the next first user
-    // gets id 1 again, which a token left in the browser would pass for
-    cy.resetDb();
-    cy.clearLocalStorage();
-    cy.visit('/');
-  });
-
   it('should initialize the API testing context by adding required Verona modules', () => {
     modules.forEach(m => {
       cy.addModuleAPI(m, Cypress.expose(`token_${Cypress.expose('username')}`))

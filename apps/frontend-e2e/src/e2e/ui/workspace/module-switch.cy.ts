@@ -27,8 +27,6 @@ describe('Workspace Module Switch', () => {
   const aspectPlayerTitle = 'Verona Player Aspect';
   const speedtestPlayerTitle = 'Verona Speedtest Player';
 
-  // createTestBaseAPI creates the first user through /api/init-login, which the API only offers while
-  // no user exists -- so it needs an empty database, and the teardown leaves one behind again.
   before(() => {
     createTestBaseAPI();
   });
