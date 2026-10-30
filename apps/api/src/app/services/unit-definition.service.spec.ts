@@ -267,8 +267,9 @@ describe('UnitDefinitionService', () => {
       expect(unitsRepository.save).toHaveBeenCalled();
     });
 
-    it.each(['{broken', 'null', '{}'])('should refuse the scheme %s without a list of codings', async scheme => {
-      await expect(service.patchScheme(1, { scheme, schemeType: 't' }, 'user', new Date()))
+    // what counts as a scheme is tested in utils/coding-scheme.spec.ts
+    it('should refuse a scheme without a list of codings', async () => {
+      await expect(service.patchScheme(1, { scheme: '{}', schemeType: 't' }, 'user', new Date()))
         .rejects.toThrow(BadRequestException);
       expect(unitsRepository.save).not.toHaveBeenCalled();
     });

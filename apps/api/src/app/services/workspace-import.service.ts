@@ -21,6 +21,7 @@ import User from '../entities/user.entity';
 import { ItemUuidLookup } from '../interfaces/item-uuid-lookup.interface';
 import { ZIP_MIME_TYPES } from '../constants/zip-mime-types';
 import { EXPORT_REPORT_FILENAME, UnitItemJson } from '../interfaces/unit-json-specs.interface';
+import { isCodingScheme } from '../utils/coding-scheme';
 
 import {
   ImportedComment,
@@ -278,7 +279,15 @@ export class WorkspaceImportService {
           unitImportData.codingScheme =
             notXmlFiles[unitImportData.codingSchemeFileName].buffer.toString();
           usedFiles.push(unitImportData.codingSchemeFileName);
-          await this.importScheme(newUnitId, unitImportData);
+          if (isCodingScheme(unitImportData.codingScheme)) {
+            await this.importScheme(newUnitId, unitImportData);
+          } else {
+            // The scheme endpoint refuses it, and its error would fail the whole upload (#1986)
+            functionReturn.messages.push({
+              objectKey: unitImportData.codingSchemeFileName,
+              messageKey: 'unit-upload.api-warning.coding-scheme'
+            });
+          }
         } else {
           WorkspaceImportService.warnMissingFile(unitImportData.codingSchemeFileName, functionReturn);
         }

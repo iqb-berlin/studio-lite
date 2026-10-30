@@ -34,7 +34,8 @@
       "xml-parse": "Nicht als Unit-Xml erkannt",
       "json-parse": "Nicht als Unit-Json-Index erkannt",
       "missing-file": "Referenzierte Datei nicht im Upload gefunden",
-      "ignore-file": "Datei wurde ignoriert"
+      "ignore-file": "Datei wurde ignoriert",
+      "coding-scheme": "Kein gültiges Kodierschema, Unit wurde ohne Schema angelegt"
     },
     "menu-label": {
       "import": "Import",

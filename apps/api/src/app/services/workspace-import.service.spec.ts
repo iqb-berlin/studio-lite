@@ -1,5 +1,6 @@
 import AdmZip from 'adm-zip';
 import { createMock } from '@golevelup/ts-jest';
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -291,6 +292,29 @@ describe('WorkspaceImportService', () => {
         null,
         undefined
       );
+    });
+
+    // The scheme endpoint refuses such a scheme, and its exception failed the whole upload (#1986).
+    it('should report a scheme without a list of codings and import the rest of the unit', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      (unitDefinitionService.patchScheme as jest.Mock)
+        .mockRejectedValue(new BadRequestException('The coding scheme has no list of variable codings'));
+
+      const result = await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          userInterface: { player: 'p', definition: 'unit01.voud' },
+          codingScheme: { id: 'unit01.vocs.json' }
+        })),
+        buildFile('unit01.voud', 'application/octet-stream', '{"type":"aspect-unit-definition"}'),
+        buildFile('unit01.vocs.json', 'application/json', '{"version":"3.0"}')
+      ], user);
+
+      expect(result.messages).toEqual([
+        { objectKey: 'unit01.vocs.json', messageKey: 'unit-upload.api-warning.coding-scheme' }
+      ]);
+      expect(unitDefinitionService.patchScheme).not.toHaveBeenCalled();
+      expect(unitDefinitionService.patchDefinition).toHaveBeenCalled();
     });
 
     it('should warn when definition file referenced in index is missing from upload', async () => {

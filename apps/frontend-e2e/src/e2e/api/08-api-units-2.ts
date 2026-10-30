@@ -1051,6 +1051,38 @@ describe('Unit API tests part II', () => {
     });
   });
 
+  // The scheme endpoint refuses a scheme without a list of codings, and on import its error failed
+  // the whole upload (#1986).
+  describe('a coding scheme without a list of codings', () => {
+    it('201 positive test: is reported, and its unit is imported without it beside the others', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      const fixtures = ['IS_BROKEN.xml', 'IS_BROKEN.voud', 'IS_BROKEN.vocs', 'IS_INTACT.xml', 'IS_INTACT.voud',
+        'IS_INTACT.vocs'].map(file => `invalid-scheme/${file}`);
+      cy.uploadUnitFilesAPI(Cypress.expose(ws1.id), fixtures, adminToken).then(imported => {
+        cy.getUnitsByWsAPI(Cypress.expose(ws1.id), adminToken).then(units => {
+          const broken = units.body.find((u: { key: string }) => u.key === 'IS_BROKEN');
+          const intact = units.body.find((u: { key: string }) => u.key === 'IS_INTACT');
+          expect(broken, 'unit with the broken scheme').not.to.equal(undefined);
+          expect(intact, 'unit with the intact scheme').not.to.equal(undefined);
+          cy.getUnitSchemeAPI(String(broken.id), Cypress.expose(ws1.id), adminToken).then(brokenScheme => {
+            cy.getUnitSchemeAPI(String(intact.id), Cypress.expose(ws1.id), adminToken).then(intactScheme => {
+              // cleaned up before anything else is asserted, so that a failure leaves ws1 as it was
+              cy.deleteUnitsAPI([String(broken.id), String(intact.id)], Cypress.expose(ws1.id), adminToken);
+              cy.then(() => {
+                expect(imported.status).to.equal(201);
+                expect(imported.body.messages).to.deep.equal([
+                  { objectKey: 'IS_BROKEN.vocs', messageKey: 'unit-upload.api-warning.coding-scheme' }
+                ]);
+                expect(brokenScheme.body.scheme ?? '').to.equal('');
+                expect(JSON.parse(intactScheme.body.scheme)).to.deep.equal({ version: '3.2', variableCodings: [] });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+
   describe('85. GET /api/admin/users/{id}/workspace-groups', () => {
     it(
       '200 positive test: should successfully retrieve the list of workspace groups' +

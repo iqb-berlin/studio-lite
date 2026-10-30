@@ -9,6 +9,7 @@ import {
 import { toVariableInfoListV1 } from '@studio-lite/shared-code';
 import Unit from '../entities/unit.entity';
 import UnitDefinition from '../entities/unit-definition.entity';
+import { isCodingScheme } from '../utils/coding-scheme';
 
 /**
  * What a unit is played and coded from: its definition, written by the editor, and its coding
@@ -138,21 +139,13 @@ export class UnitDefinitionService {
     return scheme;
   }
 
-  private static isCodingScheme(text: string): boolean {
-    try {
-      return Array.isArray(JSON.parse(text)?.variableCodings);
-    } catch {
-      return false;
-    }
-  }
-
   async patchScheme(unitId: number,
                     unitSchemeDto: UnitSchemeDto,
                     userName: string | null,
                     schemeDate: Date | null): Promise<void> {
     // Only a scheme with its list of variable codings is stored: getUpdatedScheme parses it on every
     // later save of the definition, and the coding check in the preview reads the list.
-    if (!UnitDefinitionService.isCodingScheme(unitSchemeDto.scheme)) {
+    if (!isCodingScheme(unitSchemeDto.scheme)) {
       throw new BadRequestException('The coding scheme has no list of variable codings');
     }
     const unitToUpdate = await this.unitsRepository.findOne({
