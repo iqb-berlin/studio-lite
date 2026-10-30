@@ -209,5 +209,8 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.70.1",
     "webpack-merge": "5.8.0"
+  },
+  "allowScripts": {
+    "cypress": true
   }
 }
