@@ -29,8 +29,7 @@ export class SelectModuleComponent implements OnDestroy {
   @Input()
   set modules(value: { [key: string]: VeronaModuleClass }) {
     this.allModules = Object.keys(value).map(m => value[m]);
-    this.moduleList = this.allModules.filter(m => m.metadata.isStable ||
-      !this.stableOnly || this.selectedModuleId === m.key);
+    this.filterModules();
     this.setData();
   }
 
@@ -42,8 +41,7 @@ export class SelectModuleComponent implements OnDestroy {
 
   set stableOnly(value: boolean) {
     this._stableOnly = value;
-    this.moduleList = this.allModules.filter(m => m.metadata.isStable ||
-      !this.stableOnly || this.selectedModuleId === m.key);
+    this.filterModules();
     this.setData();
   }
 
@@ -52,8 +50,10 @@ export class SelectModuleComponent implements OnDestroy {
     return this.selectedModuleId;
   }
 
+  // the unit properties set the module of the unit only after the list and stableOnly (#2001)
   set value(value: string) {
     this.selectedModuleId = value;
+    this.filterModules();
     this.setData();
   }
 
@@ -74,6 +74,11 @@ export class SelectModuleComponent implements OnDestroy {
     this.moduleForm = this.fb.group({
       moduleSelector: this.fb.control('')
     });
+  }
+
+  private filterModules(): void {
+    this.moduleList = this.allModules.filter(m => m.metadata.isStable ||
+      !this.stableOnly || this.selectedModuleId === m.key);
   }
 
   private setData(): void {
