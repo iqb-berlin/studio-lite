@@ -547,14 +547,13 @@ export class UnitService {
         where: { unitId: unitId, targetWorkspaceId: workspaceId, returned: false },
         order: { changedAt: 'DESC' }
       });
-      if (!submission) {
-        // Created in the drop box, moved into it, or the workspace it came from is gone along with
-        // its submission: there is nowhere to return it to (#1793)
-        const unit = await this.unitsRepository.findOne({ where: { id: unitId }, select: ['key'] });
-        return <RequestReportDto>{
-          source: 'unit-return-submitted',
-          messages: [{ objectKey: unit?.key ?? `${unitId}`, messageKey: 'unit-patch.not-submitted' }]
-        };
+      // Created in the drop box, moved into it, or the workspace it came from is gone along with
+      // its submission: there is nowhere to return it to (#1793)
+      if (!submission) return this.notReturned(unitId, 'unit-patch.not-submitted');
+      // Submitting and returning stay within a group (#1805). After either workspace has been moved
+      // into another group the unit stays in the drop box; moving it is what crosses groups (#2027).
+      if (!await this.inSameGroup(submission.sourceWorkspaceId, workspaceId)) {
+        return this.notReturned(unitId, 'unit-patch.other-group');
       }
       return this.patchWorkspace([unitId], submission.sourceWorkspaceId, user, workspaceId, 'return');
     }));
@@ -562,6 +561,23 @@ export class UnitService {
       source: 'unit-return-submitted',
       messages: reports.map(r => r.messages).flat()
     };
+  }
+
+  private async notReturned(unitId: number, messageKey: string): Promise<RequestReportDto> {
+    const unit = await this.unitsRepository.findOne({ where: { id: unitId }, select: ['key'] });
+    return {
+      source: 'unit-return-submitted',
+      messages: [{ objectKey: unit?.key ?? `${unitId}`, messageKey }]
+    };
+  }
+
+  /** Whether the two workspaces belong to one group -- trivially so when they are the same. */
+  private async inSameGroup(workspaceId: number, otherWorkspaceId: number): Promise<boolean> {
+    const workspaces = await this.workspaceRepository.find({
+      where: { id: In([workspaceId, otherWorkspaceId]) },
+      select: { id: true, groupId: true }
+    });
+    return new Set(workspaces.map(workspace => workspace.groupId)).size === 1;
   }
 
   async patchWorkspace(unitIds: number[],
@@ -689,11 +705,5 @@ export class UnitService {
     {
       groupName: groupName
     });
-  }
-
-  async removeUnitState(id: number): Promise<void> {
-    const unitToUpdate = await this.unitsRepository.findOne({ where: { id: id } });
-    await this.unitsRepository.save({ ...unitToUpdate, state: '0' }
-    );
   }
 }

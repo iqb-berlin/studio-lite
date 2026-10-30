@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import {
   CreateWorkspaceDto,
   WorkspaceGroupDto,
@@ -27,8 +27,6 @@ import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 import { UsersService } from './users.service';
 import { WorkspaceUserService } from './workspace-user.service';
 import { UnitUserService } from './unit-user.service';
-import { UserWorkspaceGroupNotAdminException } from '../exceptions/user-workspace-group-not-admin.exception';
-import User from '../entities/user.entity';
 import { GroupAdminUnprocessableWorkspaceException } from '../exceptions/group-admin-unprocessable-workspace.exception';
 
 /**
@@ -341,8 +339,11 @@ export class WorkspaceService {
       }
     }
     this.logger.log(`Creating workspace with name: ${workspace.name}`);
+    // Only what the body may decide: nothing validates it, and an `id` sent along had `save`
+    // overwrite that workspace, a `dropBoxId` set any drop box at all (#2029).
     const newWorkspace = this.workspacesRepository.create({
-      ...workspace,
+      name: workspace.name,
+      groupId: workspace.groupId,
       settings: {
         ...new WorkspaceSettingsDto(),
         hiddenRoutes: ['notes']
@@ -386,53 +387,33 @@ export class WorkspaceService {
     return CodingReportClass.build(id, unitListWithMetadata);
   }
 
-  async patch(workspaceData: Partial<WorkspaceFullDto>): Promise<void> {
-    const workspaceToUpdate = await this.workspacesRepository.findOne({
-      where: { id: workspaceData.id }
+  /**
+   * Moves workspaces into another group, resets the state of their units and drops the drop boxes
+   * between moved and remaining workspaces -- including those of remaining workspaces, which share
+   * the group the controller checked (#1984, #2027). Ids that belong to no workspace are passed
+   * over, as by {@link remove}. All of it happens together or not at all: a workspace left moved
+   * with its old states would be passed over by a second attempt, as it is in the target group.
+   */
+  async patchWorkspaceGroups(ids: number[], newWorkspaceGroupId: number): Promise<void> {
+    // Nothing validates the body: a target sent as a string would never equal a stored group,
+    // and the states of workspaces that stay where they are would be reset.
+    const targetId = Number(newWorkspaceGroupId);
+    const workspaces = await this.workspacesRepository.find({
+      where: { id: In(ids) },
+      select: { id: true, groupId: true }
     });
-    if (workspaceToUpdate) {
-      if (workspaceData.name) workspaceToUpdate.name = workspaceData.name;
-      if (workspaceData.groupId) workspaceToUpdate.groupId = workspaceData.groupId;
-      await this.workspacesRepository.save(workspaceToUpdate);
-    } else {
-      throw new AdminWorkspaceNotFoundException(workspaceData.id, 'PATCH');
-    }
-  }
-
-  async patchWorkspaceGroups(
-    ids: number[],
-    newWorkspaceGroupId: number,
-    user: User
-  ): Promise<void> {
-    await Promise.all(
-      ids.map(async id => {
-        const workspace = await this.findOne(id);
-
-        if (workspace.groupId !== newWorkspaceGroupId) {
-          this.unitService
-            .findAllForWorkspace(workspace.id)
-            .then(async units => {
-              await Promise.all(
-                units.map(async unit => this.unitService.removeUnitState(unit.id)
-                )
-              );
-            });
-        }
-        if (
-          await this.usersService.isWorkspaceGroupAdmin(
-            user.id,
-            workspace.groupId
-          )
-        ) {
-          await this.patch({ id, groupId: newWorkspaceGroupId });
-        } else {
-          throw new UserWorkspaceGroupNotAdminException(
-            newWorkspaceGroupId,
-            'PATCH'
-          );
-        }
-      })
-    );
+    const movedIds = workspaces
+      .filter(workspace => workspace.groupId !== targetId)
+      .map(workspace => workspace.id);
+    if (!movedIds.length) return;
+    await this.workspacesRepository.manager.transaction(async manager => {
+      await manager.update(Workspace, { id: In(movedIds) }, { groupId: targetId });
+      await manager.update(Unit, { workspaceId: In(movedIds) }, { state: '0' });
+      // A drop box is a workspace of the same group (#1805): links the move would stretch across
+      // the group boundary are dropped, in both directions; moved together, they stay (#2027).
+      await manager.update(Workspace, { id: In(movedIds), dropBoxId: Not(In(movedIds)) }, { dropBoxId: null });
+      await manager.update(Workspace, { id: Not(In(movedIds)), dropBoxId: In(movedIds) }, { dropBoxId: null });
+    });
   }
 
   async patchGroupName(
@@ -510,13 +491,26 @@ export class WorkspaceService {
     await this.workspacesRepository.save(workspaceToUpdate);
   }
 
-  /** The drop box set for the workspace, or `null` when it has none or does not exist. */
+  /**
+   * The drop box set for the workspace, or `null` when it has none, does not exist, or is no drop
+   * box by the rule of {@link isDropBoxFor} -- such as one a move before #2027 left in another group.
+   */
   async dropBoxIdOf(id: number): Promise<number | null> {
     const workspace = await this.workspacesRepository.findOne({
       where: { id: id },
-      select: ['id', 'dropBoxId']
+      select: { id: true, groupId: true, dropBoxId: true }
     });
-    return workspace?.dropBoxId ?? null;
+    if (!workspace?.dropBoxId) return null;
+    return await this.isDropBoxFor(workspace, workspace.dropBoxId) ? workspace.dropBoxId : null;
+  }
+
+  /** A drop box is another workspace of the same group (#1805): asked when it is set and when it is used. */
+  private async isDropBoxFor(workspace: Workspace, dropBoxId: number): Promise<boolean> {
+    const dropBox = await this.workspacesRepository.findOne({
+      where: { id: dropBoxId },
+      select: { id: true, groupId: true }
+    });
+    return !!dropBox && dropBox.id !== workspace.id && dropBox.groupId === workspace.groupId;
   }
 
   /**
@@ -530,15 +524,8 @@ export class WorkspaceService {
     const workspaceToUpdate = await this.workspacesRepository.findOne({
       where: { id: id }
     });
-    if (dropBoxId) {
-      const dropBox = await this.workspacesRepository.findOne({
-        where: { id: dropBoxId },
-        select: { id: true, groupId: true }
-      });
-      // The route hands the workspace id on as the text it arrives as (see WorkspaceId)
-      if (!dropBox || dropBox.id === Number(id) || dropBox.groupId !== workspaceToUpdate.groupId) {
-        throw new AdminWorkspaceNotFoundException(dropBoxId, 'PATCH');
-      }
+    if (dropBoxId && !await this.isDropBoxFor(workspaceToUpdate, dropBoxId)) {
+      throw new AdminWorkspaceNotFoundException(dropBoxId, 'PATCH');
     }
     workspaceToUpdate.dropBoxId = dropBoxId || null;
     await this.workspacesRepository.save(workspaceToUpdate);

@@ -4,7 +4,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { Component, Input } from '@angular/core';
 import {
-  WorkspaceFullDto, WorkspaceGroupFullDto, WorkspaceInListDto, WorkspaceSettingsDto
+  AuthDataDto, WorkspaceFullDto, WorkspaceGroupDto, WorkspaceInListDto, WorkspaceSettingsDto
 } from '@studio-lite-lib/api-dto';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
@@ -14,7 +14,6 @@ import {
   EditWorkspaceSettingsComponent
 } from '../../../../components/edit-workspace-settings/edit-workspace-settings.component';
 import { WorkspaceMenuComponent } from './workspace-menu.component';
-import { BackendService } from '../../services/backend.service';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
 
 @Component({ selector: 'studio-lite-wrapped-icon', template: '', standalone: true })
@@ -26,9 +25,6 @@ class MockWrappedIconComponent {
 describe('WorkspaceMenuComponent', () => {
   let component: WorkspaceMenuComponent;
   let fixture: ComponentFixture<WorkspaceMenuComponent>;
-  let mockBackendService: {
-    getWorkspaceGroupsByUser: jest.Mock;
-  };
   let mockAppBackendService: {
     getWorkspaceGroupList: jest.Mock;
     getAuthData: jest.Mock;
@@ -39,9 +35,6 @@ describe('WorkspaceMenuComponent', () => {
   };
 
   beforeEach(async () => {
-    mockBackendService = {
-      getWorkspaceGroupsByUser: jest.fn().mockReturnValue(of([]))
-    };
     mockAppBackendService = {
       getWorkspaceGroupList: jest.fn().mockReturnValue(of([])),
       getAuthData: jest.fn().mockReturnValue(of({ userId: 1 })),
@@ -56,7 +49,6 @@ describe('WorkspaceMenuComponent', () => {
     await TestBed.configureTestingModule({
       imports: [WorkspaceMenuComponent, TranslateModule.forRoot()],
       providers: [
-        { provide: BackendService, useValue: mockBackendService },
         { provide: AppBackendService, useValue: mockAppBackendService },
         { provide: MatDialog, useValue: mockMatDialog }
       ]
@@ -110,7 +102,14 @@ describe('WorkspaceMenuComponent', () => {
   });
   const ws1 = workspace(1, 'ws1');
   const ws2 = workspace(2, 'ws2');
-  const groups: WorkspaceGroupFullDto[] = [{ id: 1, name: 'group1' }, { id: 7, name: 'group7' }];
+  const group = (id: number, isAdmin: boolean): WorkspaceGroupDto => ({
+    id, name: `group${id}`, isAdmin, workspaces: []
+  });
+  // The targets are the groups the user administers, read from the auth data (#1984).
+  const groups = [group(1, true), group(7, true)];
+  const authDataWith = (workspaces: WorkspaceGroupDto[]) => of<AuthDataDto>({
+    userId: 1, userName: 'user', userLongName: '', isAdmin: false, workspaces, reviews: []
+  });
 
   const closeDialogWith = (result: unknown) => mockMatDialog.open.mockReturnValue({ afterClosed: () => of(result) });
 
@@ -143,8 +142,8 @@ describe('WorkspaceMenuComponent', () => {
   it.each<[string, WorkspaceInListDto[], string]>([
     ['one workspace by its name', [ws1], 'wsg-admin.move-workspace-with-units'],
     ['several workspaces by their number', [ws1, ws2], 'wsg-admin.move-workspaces']
-  ])('should offer the groups of the user for moving %s', (_, selectedRows, content) => {
-    mockBackendService.getWorkspaceGroupsByUser.mockReturnValue(of(groups));
+  ])('should offer the groups the user administers for moving %s (#1984)', (_, selectedRows, content) => {
+    mockAppBackendService.getAuthData.mockReturnValue(authDataWith([...groups, group(3, false)]));
     closeDialogWith(7);
     component.selectedRows = selectedRows;
     jest.spyOn(component.workspaceMoved, 'emit');
@@ -158,7 +157,7 @@ describe('WorkspaceMenuComponent', () => {
   });
 
   it('should only say that there is no other group when the user administers just this one', () => {
-    mockBackendService.getWorkspaceGroupsByUser.mockReturnValue(of([groups[0]]));
+    mockAppBackendService.getAuthData.mockReturnValue(authDataWith([groups[0], group(3, false)]));
     closeDialogWith(1);
     component.selectedRows = [ws1];
     jest.spyOn(component.workspaceMoved, 'emit');
@@ -242,7 +241,7 @@ describe('WorkspaceMenuComponent', () => {
       ['move a workspace', menu => menu.moveObject(), 'workspaceMoved'],
       ['change the settings of a workspace', menu => menu.changeObject(), 'workspaceChanged']
     ])('should not %s', (_, act, emitter) => {
-      mockBackendService.getWorkspaceGroupsByUser.mockReturnValue(of(groups));
+      mockAppBackendService.getAuthData.mockReturnValue(authDataWith(groups));
       mockAppBackendService.getWorkspaceData.mockReturnValue(of({ id: 1, dropBoxId: 0 }));
       closeDialogWith(result);
       component.selectedRows = [ws1];

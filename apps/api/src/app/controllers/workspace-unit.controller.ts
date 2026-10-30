@@ -388,14 +388,19 @@ export class WorkspaceUnitController {
   /**
    * Submits units to a drop box, or sends submitted ones back -- which of the two follows from the
    * body: with a `targetId` it is a submission, without it a return. Both move the units and record
-   * the move in {@link UnitDropBoxHistory}.
+   * the move in {@link UnitDropBoxHistory}. A unit that cannot be returned -- never submitted, or
+   * submitted from a workspace now in another group (#2027) -- stays where it is and is named in
+   * the answer.
    */
   @Patch('drop-box-history')
   @UseGuards(JwtAuthGuard, WorkspaceGuard, UnitsInWorkspaceGuard, CommentAccessGuard, DropBoxTargetGuard)
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_id', type: Number })
-  @ApiOkResponse({ description: 'Unit moved' })
-  @ApiForbiddenResponse({ description: 'No privileges in the workspace, or the target is not its drop box.' })
+  @ApiOkResponse({ description: 'Units moved; those that could not be returned are named in the report.' })
+  @ApiForbiddenResponse({
+    description: 'No privileges in the workspace, or the target is not its drop box. A drop box in another group ' +
+      'counts as none.'
+  })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiTags('workspace unit')
   async patchDropBoxHistory(@User() user: UserEntity,

@@ -71,7 +71,7 @@ describe('WriteOrGroupAdminAccessGuard', () => {
   it('should return true if authService.isWorkspaceGroupAdmin is true', async () => {
     workspaceUserService.canWrite.mockResolvedValue(false);
     authService.isAdminUser.mockResolvedValue(false);
-    workspaceService.findOne.mockResolvedValue({ id: 10, groupId: 5 } as unknown as never);
+    workspaceService.findGroupIdsOfWorkspaces.mockResolvedValue([5]);
     authService.isWorkspaceGroupAdmin.mockResolvedValue(true);
     const context = createMock<ExecutionContext>({
       switchToHttp: () => ({
@@ -83,14 +83,14 @@ describe('WriteOrGroupAdminAccessGuard', () => {
     });
 
     expect(await guard.canActivate(context)).toBe(true);
-    expect(workspaceService.findOne).toHaveBeenCalledWith(10);
+    expect(workspaceService.findGroupIdsOfWorkspaces).toHaveBeenCalledWith([10]);
     expect(authService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(1, 5);
   });
 
   it('should throw ForbiddenException if all checks fail', async () => {
     workspaceUserService.canWrite.mockResolvedValue(false);
     authService.isAdminUser.mockResolvedValue(false);
-    workspaceService.findOne.mockResolvedValue({ id: 10, groupId: 5 } as unknown as never);
+    workspaceService.findGroupIdsOfWorkspaces.mockResolvedValue([5]);
     authService.isWorkspaceGroupAdmin.mockResolvedValue(false);
     const context = createMock<ExecutionContext>({
       switchToHttp: () => ({

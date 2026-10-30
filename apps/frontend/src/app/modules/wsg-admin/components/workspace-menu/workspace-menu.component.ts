@@ -3,12 +3,11 @@ import {
 } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { WorkspaceGroupFullDto, WorkspaceInListDto } from '@studio-lite-lib/api-dto';
+import { WorkspaceInListDto } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@studio-lite-lib/iqb-components';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
-import { BackendService } from '../../services/backend.service';
 import { InputTextComponent } from '../../../../components/input-text/input-text.component';
 import { WorkspaceSettings } from '../../models/workspace-settings.interface';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
@@ -59,13 +58,9 @@ export class WorkspaceMenuComponent implements OnDestroy {
     private editWorkspaceSettingsDialog: MatDialog,
     private confirmDialog: MatDialog,
     private selectDropBoxDialog: MatDialog,
-    private backendService: BackendService,
     private appBackendService: AppBackendService,
     private translateService: TranslateService
   ) {}
-
-  workspaceGroupsByUser: WorkspaceGroupFullDto[] | null = [];
-  userId: number = 0;
 
   addObject(): void {
     if (this.isBackUpWorkspaceGroup && this.workspaces.length >= this.maxWorkspaceCount) {
@@ -103,59 +98,59 @@ export class WorkspaceMenuComponent implements OnDestroy {
     }
   }
 
+  /**
+   * The targets are the groups the user administers -- for an administrator all of them --, as
+   * the auth data lists them. The group the workspaces are in is left out by the dialog.
+   */
   moveObject() {
     const selectedRows = this.selectedRows;
     this.appBackendService.getAuthData()
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(user => {
-        this.backendService.getWorkspaceGroupsByUser(user.userId)
-          .pipe(takeUntil(this.ngUnsubscribe))
-          .subscribe(dat => {
-            this.workspaceGroupsByUser = dat;
-            if (this.workspaceGroupsByUser && this.workspaceGroupsByUser.length > 1) {
-              let prompt;
-              if (selectedRows.length === 1) {
-                prompt = this.translateService.instant('wsg-admin.move-workspace-with-units', {
-                  name: selectedRows[0].name
-                });
-              } else {
-                prompt = this.translateService
-                  .instant('wsg-admin.move-workspaces', { count: selectedRows.length });
-              }
-              const dialogRef = this.moveWorkspaceDialog.open(MoveWorkspaceComponent, {
-                width: '600px',
-                data: {
-                  title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
-                  content: prompt,
-                  warning: this.translateService.instant('wsg-admin.move-workspaces-warning'),
-                  workspaceGroups: this.workspaceGroupsByUser,
-                  selectedRows: selectedRows,
-                  okButtonLabel: this.translateService.instant('move')
-                }
-              });
-              dialogRef.afterClosed()
-                .pipe(takeUntil(this.ngUnsubscribe))
-                .subscribe(result => {
-                  if (result) {
-                    this.workspaceMoved.emit({
-                      selection: selectedRows,
-                      workspaceGroupId: result as number
-                    });
-                  }
-                });
-            } else {
-              this.moveWorkspaceDialog.open(MoveWorkspaceComponent, {
-                width: '600px',
-                data: {
-                  title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
-                  content: this.translateService.instant('wsg-admin.move-workspaces-no-workspace-groups-hint'),
-                  warning: this.translateService.instant('wsg-admin.move-workspaces-warning'),
-                  workspaceGroups: this.workspaceGroupsByUser,
-                  okButtonLabel: this.translateService.instant('close')
-                }
-              });
+      .subscribe(authData => {
+        const workspaceGroups = authData.workspaces.filter(group => group.isAdmin);
+        if (workspaceGroups.length > 1) {
+          let prompt;
+          if (selectedRows.length === 1) {
+            prompt = this.translateService.instant('wsg-admin.move-workspace-with-units', {
+              name: selectedRows[0].name
+            });
+          } else {
+            prompt = this.translateService
+              .instant('wsg-admin.move-workspaces', { count: selectedRows.length });
+          }
+          const dialogRef = this.moveWorkspaceDialog.open(MoveWorkspaceComponent, {
+            width: '600px',
+            data: {
+              title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
+              content: prompt,
+              warning: this.translateService.instant('wsg-admin.move-workspaces-warning'),
+              workspaceGroups: workspaceGroups,
+              selectedRows: selectedRows,
+              okButtonLabel: this.translateService.instant('move')
             }
           });
+          dialogRef.afterClosed()
+            .pipe(takeUntil(this.ngUnsubscribe))
+            .subscribe(result => {
+              if (result) {
+                this.workspaceMoved.emit({
+                  selection: selectedRows,
+                  workspaceGroupId: result as number
+                });
+              }
+            });
+        } else {
+          this.moveWorkspaceDialog.open(MoveWorkspaceComponent, {
+            width: '600px',
+            data: {
+              title: this.translateService.instant('wsg-admin.moving-of-workspaces'),
+              content: this.translateService.instant('wsg-admin.move-workspaces-no-workspace-groups-hint'),
+              warning: this.translateService.instant('wsg-admin.move-workspaces-warning'),
+              workspaceGroups: workspaceGroups,
+              okButtonLabel: this.translateService.instant('close')
+            }
+          });
+        }
       });
   }
 

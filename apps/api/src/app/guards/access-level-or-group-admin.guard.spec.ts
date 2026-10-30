@@ -1,11 +1,9 @@
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import { AccessLevelOrGroupAdminGuard } from './access-level-or-group-admin.guard';
 import { AccessLevelCheck } from './access-level.guard';
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
-import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
 
 const hasLevel = jest.fn<ReturnType<AccessLevelCheck>, Parameters<AccessLevelCheck>>();
 
@@ -37,7 +35,7 @@ describe('AccessLevelOrGroupAdminGuard', () => {
     hasLevel.mockResolvedValue(false);
     authService.isAdminUser.mockResolvedValue(false);
     authService.isWorkspaceGroupAdmin.mockResolvedValue(false);
-    workspaceService.findOne.mockResolvedValue(createMock<WorkspaceFullDto>({ id: 10, groupId: 5 }));
+    workspaceService.findGroupIdsOfWorkspaces.mockResolvedValue([5]);
     guard = new TestAccessLevelOrGroupAdminGuard(authService, workspaceService);
   });
 
@@ -54,14 +52,14 @@ describe('AccessLevelOrGroupAdminGuard', () => {
 
     expect(await guard.canActivate(contextFor({ workspace_id: 10 }))).toBe(true);
     expect(authService.isAdminUser).toHaveBeenCalledWith(1);
-    expect(workspaceService.findOne).not.toHaveBeenCalled();
+    expect(workspaceService.findGroupIdsOfWorkspaces).not.toHaveBeenCalled();
   });
 
   it('passes for the admin of the workspace group', async () => {
     authService.isWorkspaceGroupAdmin.mockResolvedValue(true);
 
     expect(await guard.canActivate(contextFor({ workspace_id: 10 }))).toBe(true);
-    expect(workspaceService.findOne).toHaveBeenCalledWith(10);
+    expect(workspaceService.findGroupIdsOfWorkspaces).toHaveBeenCalledWith([10]);
     expect(authService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(1, 5);
   });
 
@@ -69,10 +67,10 @@ describe('AccessLevelOrGroupAdminGuard', () => {
     await expect(guard.canActivate(contextFor({ workspace_id: 10 }))).rejects.toThrow(ForbiddenException);
   });
 
-  it('lets the not-found answer for an unknown workspace through', async () => {
-    workspaceService.findOne.mockRejectedValue(new AdminWorkspaceNotFoundException(10, 'GET'));
+  it('refuses an unknown workspace like a foreign one, without asking about groups (#1930)', async () => {
+    workspaceService.findGroupIdsOfWorkspaces.mockResolvedValue([]);
 
-    await expect(guard.canActivate(contextFor({ workspace_id: 10 }))).rejects.toThrow(AdminWorkspaceNotFoundException);
+    await expect(guard.canActivate(contextFor({ workspace_id: 10 }))).rejects.toThrow(ForbiddenException);
     expect(authService.isWorkspaceGroupAdmin).not.toHaveBeenCalled();
   });
 

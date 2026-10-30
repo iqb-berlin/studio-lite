@@ -1,7 +1,9 @@
-import { createMock } from '@golevelup/ts-jest';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import {
+  EntityManager, In, Repository, UpdateResult
+} from 'typeorm';
 import {
   CodingReportDto, CreateWorkspaceDto, UnitPropertiesDto, UsersWorkspaceInListDto,
   WorkspaceSettingsDto, RenameGroupNameDto
@@ -18,7 +20,6 @@ import { UsersService } from './users.service';
 import { UnitService } from './unit.service';
 import { UnitMetadataService } from './unit-metadata.service';
 import { UnitUserService } from './unit-user.service';
-import User from '../entities/user.entity';
 import { AdminWorkspaceNotFoundException } from '../exceptions/admin-workspace-not-found.exception';
 import { GroupAdminUnprocessableWorkspaceException } from '../exceptions/group-admin-unprocessable-workspace.exception';
 
@@ -253,8 +254,7 @@ describe('WorkspaceService', () => {
 
   it.each([
     ['findOne', () => service.findOne(9)],
-    ['findAllWorkspaceGroups', () => service.findAllWorkspaceGroups(9)],
-    ['patch', () => service.patch({ id: 9, name: 'x' })]
+    ['findAllWorkspaceGroups', () => service.findAllWorkspaceGroups(9)]
   ])('should answer %s for an unknown workspace with not found', async (_, call) => {
     (workspaceRepository.findOne as jest.Mock).mockResolvedValue(null);
 
@@ -372,6 +372,22 @@ describe('WorkspaceService', () => {
       }));
     });
 
+    it('should take nothing from the body but the name and the group (#2029)', async () => {
+      (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, name: 'g' });
+      (workspaceRepository.save as jest.Mock).mockResolvedValue({ id: 5 });
+      // What a client can send: nothing strips the fields CreateWorkspaceDto does not name
+      const body: CreateWorkspaceDto & { id: number, dropBoxId: number } = {
+        name: 'w', groupId: 1, settings: {}, id: 99, dropBoxId: 98
+      };
+
+      await service.create(body);
+
+      const created = (workspaceRepository.create as jest.Mock).mock.calls[0][0];
+      expect(created).toEqual(expect.objectContaining({ name: 'w', groupId: 1 }));
+      expect(created.id).toBeUndefined();
+      expect(created.dropBoxId).toBeUndefined();
+    });
+
     describe('in a group holding workspaces already', () => {
       const givenGroup = (name: string, workspaces: number) => {
         (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, name });
@@ -399,34 +415,77 @@ describe('WorkspaceService', () => {
     });
   });
 
-  describe('patch', () => {
-    it('should patch workspace', async () => {
-      const ws = { id: 1, name: 'old' };
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(ws);
-
-      await service.patch({ id: 1, name: 'new' });
-      expect(ws.name).toBe('new');
-    });
-  });
-
   describe('patchWorkspaceGroups', () => {
-    it('should patch group id', async () => {
-      const IDs = [1];
-      const newGroupId = 2;
-      const user = { id: 1 } as User;
-      const ws = { id: 1, groupId: 1 };
-      const group = { id: 1, name: 'g' };
+    let manager: DeepMocked<EntityManager>;
 
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValueOnce(ws);
-      (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValueOnce(group);
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValueOnce(ws);
+    beforeEach(() => {
+      (workspaceRepository.find as jest.Mock).mockResolvedValue([
+        createMock<Workspace>({ id: 1, groupId: 1 }),
+        createMock<Workspace>({ id: 2, groupId: 2 })
+      ]);
+      manager = createMock<EntityManager>();
+      Object.defineProperty(workspaceRepository, 'manager', {
+        value: {
+          transaction: jest.fn().mockImplementation(
+            (work: (entityManager: EntityManager) => Promise<void>) => work(manager)
+          )
+        },
+        configurable: true
+      });
+    });
 
-      (unitService.findAllForWorkspace as jest.Mock).mockResolvedValue([]);
-      (usersService.isWorkspaceGroupAdmin as jest.Mock).mockResolvedValue(true);
+    it('should move the workspaces and reset the states of their units', async () => {
+      await service.patchWorkspaceGroups([1, 2], 3);
 
-      await service.patchWorkspaceGroups(IDs, newGroupId, user);
+      expect(manager.update).toHaveBeenCalledWith(Workspace, { id: In([1, 2]) }, { groupId: 3 });
+      expect(manager.update).toHaveBeenCalledWith(Unit, { workspaceId: In([1, 2]) }, { state: '0' });
+    });
 
-      expect(workspaceRepository.save).toHaveBeenCalled();
+    it('should leave a workspace that is already in the target group as it is', async () => {
+      await service.patchWorkspaceGroups([1, 2], 2);
+
+      expect(manager.update).toHaveBeenCalledWith(Workspace, { id: In([1]) }, { groupId: 2 });
+      expect(manager.update).toHaveBeenCalledWith(Unit, { workspaceId: In([1]) }, { state: '0' });
+      expect(manager.update).not.toHaveBeenCalledWith(
+        Workspace,
+        expect.objectContaining({ id: In([1, 2]) }),
+        expect.anything()
+      );
+      expect(manager.update).not.toHaveBeenCalledWith(Unit, { workspaceId: In([1, 2]) }, expect.anything());
+    });
+
+    it('should recognise the target group when it is sent as a string', async () => {
+      await service.patchWorkspaceGroups([1, 2], '2' as unknown as number);
+
+      expect(manager.update).toHaveBeenCalledWith(Workspace, { id: In([1]) }, { groupId: 2 });
+      expect(manager.update).toHaveBeenCalledWith(Unit, { workspaceId: In([1]) }, { state: '0' });
+    });
+
+    it('should change nothing when no workspace leaves its group', async () => {
+      (workspaceRepository.find as jest.Mock).mockResolvedValue([createMock<Workspace>({ id: 2, groupId: 2 })]);
+
+      await service.patchWorkspaceGroups([2], 2);
+
+      expect(workspaceRepository.manager.transaction).not.toHaveBeenCalled();
+      expect(workspaceRepository.update).not.toHaveBeenCalled();
+      expect(unitsRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('should not be done before the states are reset (#1984)', async () => {
+      let resetDone: () => void = () => undefined;
+      manager.update.mockImplementation((target: unknown) => (target === Unit ?
+        new Promise(resolve => { resetDone = () => resolve(createMock<UpdateResult>()); }) :
+        Promise.resolve(createMock<UpdateResult>())));
+      let moved = false;
+
+      const move = service.patchWorkspaceGroups([1], 3).then(() => { moved = true; });
+      await new Promise(process.nextTick);
+      expect(manager.update).toHaveBeenCalledWith(Unit, expect.anything(), { state: '0' });
+      expect(moved).toBe(false);
+
+      resetDone();
+      await move;
+      expect(moved).toBe(true);
     });
   });
 
@@ -449,15 +508,30 @@ describe('WorkspaceService', () => {
   });
 
   describe('dropBoxIdOf', () => {
-    it('should return the drop box of the workspace', async () => {
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, dropBoxId: 7 } as Workspace);
+    const lookup = (workspaces: Workspace[]) => (workspaceRepository.findOne as jest.Mock)
+      .mockImplementation(async ({ where }) => workspaces.find(w => w.id === where.id) ?? null);
 
-      expect(await service.dropBoxIdOf(1)).toBe(7);
-      expect(workspaceRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 }, select: ['id', 'dropBoxId'] });
+    it('should return the drop box of the workspace', async () => {
+      lookup([
+        createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: 100 }),
+        createMock<Workspace>({ id: 100, groupId: 7 })
+      ]);
+
+      expect(await service.dropBoxIdOf(1)).toBe(100);
     });
 
-    it.each([[{ id: 1, dropBoxId: null }], [null]])('should return null for %p', async workspace => {
-      (workspaceRepository.findOne as jest.Mock).mockResolvedValue(workspace);
+    it.each<[string, Workspace[]]>([
+      ['the workspace has none', [createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: null })]],
+      ['the workspace does not exist', []],
+      ['the drop box does not exist', [createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: 100 })]],
+      ['the drop box is the workspace itself', [createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: 1 })]],
+      // #2027: a move before the fix left drop boxes in the old group
+      ['the drop box is in another group', [
+        createMock<Workspace>({ id: 1, groupId: 7, dropBoxId: 100 }),
+        createMock<Workspace>({ id: 100, groupId: 8 })
+      ]]
+    ])('should return null when %s', async (_, workspaces) => {
+      lookup(workspaces);
 
       expect(await service.dropBoxIdOf(1)).toBeNull();
     });

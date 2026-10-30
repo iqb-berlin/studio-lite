@@ -62,6 +62,35 @@ describe('Workspace API tests', () => {
       });
     });
 
+    describe('with the id of a foreign workspace in the body (#2029)', () => {
+      // The body went into the new workspace as it came, so an `id` sent along had the foreign
+      // workspace overwritten and moved into the group of the request.
+      const adminToken = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+      let createdId = '';
+
+      after(() => {
+        // Never ws3: that is what the request would have overwritten
+        if (createdId && createdId !== `${Cypress.expose(ws3.id)}`) cy.deleteWsAPI([createdId], adminToken());
+      });
+
+      it('201 positive test: should create a new workspace and leave the foreign one as it was', () => {
+        cy.createWsAPI(
+          Cypress.expose(groupVera.id),
+          { id: '', name: 'Fremd-2029' },
+          Cypress.expose(`token_${userGroupAdmin.username}`),
+          { id: Cypress.expose(ws3.id) }
+        ).then(resp => {
+          expect(resp.status).to.equal(201);
+          createdId = `${resp.body}`;
+          expect(createdId).not.to.equal(`${Cypress.expose(ws3.id)}`);
+        });
+        cy.getWsAPI(Cypress.expose(ws3.id), adminToken()).then(foreign => {
+          expect(foreign.body.groupId).to.equal(Number(Cypress.expose(group2.id)));
+          expect(foreign.body.name).to.equal(ws3.name);
+        });
+      });
+    });
+
     it('401 negative test: should deny workspace creation with an invalid authentication token', () => {
       cy.createWsAPI(Cypress.expose(group2.id), ws1, noId).then(resp => {
         expect(resp.status).to.equal(401);
@@ -145,6 +174,33 @@ describe('Workspace API tests', () => {
         ).then(resp1 => {
           expect(resp1.status).to.equal(403);
         });
+      });
+    });
+
+    // Until #1984 the service asked about the group the workspace leaves without knowing
+    // administrators, and refused one who is not entered as that group's admin.
+    describe('by an administrator who does not administer the group', () => {
+      const adminToken = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+
+      // The sections below expect ws3 in group2, administered by the administrator alone. Restored
+      // here, so a failing test does not leave userzwei as group2's admin for them.
+      after(() => {
+        cy.moveWsAPI(Cypress.expose(ws3.id), Cypress.expose(group2.id), adminToken());
+        cy.setAdminsOfGroupAPI(
+          [Cypress.expose(`id_${Cypress.expose('username')}`)],
+          Cypress.expose(group2.id),
+          adminToken()
+        );
+      });
+
+      it('200 positive test: should move the workspace out of that group', () => {
+        cy.setAdminsOfGroupAPI(
+          [Cypress.expose(`id_${userGroupAdmin.username}`)],
+          Cypress.expose(group2.id),
+          adminToken()
+        ).its('status').should('equal', 200);
+        cy.moveWsAPI(Cypress.expose(ws3.id), Cypress.expose(groupVera.id), adminToken())
+          .its('status').should('equal', 200);
       });
     });
 

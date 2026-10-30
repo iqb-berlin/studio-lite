@@ -5,7 +5,6 @@ import { ManageOrGroupAdminAccessGuard } from './manage-or-group-admin-access.gu
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
 import { WorkspaceUserService } from '../services/workspace-user.service';
-import Workspace from '../entities/workspace.entity';
 
 describe('ManageOrGroupAdminAccessGuard', () => {
   let guard: ManageOrGroupAdminAccessGuard;
@@ -84,7 +83,7 @@ describe('ManageOrGroupAdminAccessGuard', () => {
       workspaceUserService.canManage.mockResolvedValue(false);
       authService.isAdminUser.mockResolvedValue(false);
       authService.isWorkspaceGroupAdmin.mockResolvedValue(true);
-      workspaceService.findOne.mockResolvedValue(createMock<Workspace>({ groupId: 2 }));
+      workspaceService.findGroupIdsOfWorkspaces.mockResolvedValue([2]);
 
       const mockContext = createMock<ExecutionContext>({
         switchToHttp: () => ({
