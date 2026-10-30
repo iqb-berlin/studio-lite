@@ -182,6 +182,15 @@ describe('UnitDefinitionService', () => {
         expect(unit.scheme).toBe('{"version":"3.0"}');
       });
 
+      // A scheme stored before 9.3.0 may be no JSON object at all; saving the definition then failed
+      // and stored the definition without its variables (#2057)
+      it.each(['{broken', 'null'])('should store the variables and leave the scheme %s as it is', async scheme => {
+        const unit = await patchVariables(scheme, [{ id: 'v1' }]);
+
+        expect(unit.variables).toEqual([{ id: 'v1' }]);
+        expect(unit.scheme).toBe(scheme);
+      });
+
       it('should store the variables of a unit that has no scheme yet', async () => {
         const unit = await patchVariables(undefined, [{ id: 'v1' }]);
 

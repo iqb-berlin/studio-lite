@@ -11,7 +11,6 @@ import {
   UnitItemDto,
   UnitMetadataDto,
   UnitPropertiesDto,
-  UnitSchemeDto,
   UnitDefinitionDto
 } from '@studio-lite-lib/api-dto';
 import { UnitService } from './unit.service';
@@ -336,7 +335,6 @@ describe('UnitService', () => {
         unitMetadataService.getMetadataOfUnit.mockResolvedValue({ profiles: [], items: [] });
         unitMetadataService.copyItemsWithMetadata.mockResolvedValue([{ oldUuid: 'old', newUuid: 'new' }]);
         unitDefinitionService.findOnesDefinition.mockResolvedValue({ definition: '' } as UnitDefinitionDto);
-        unitDefinitionService.findOnesScheme.mockResolvedValue({ scheme: '' } as UnitSchemeDto);
       });
 
       it('should keep who changed the metadata and when, if the copy keeps the key', async () => {
@@ -380,12 +378,15 @@ describe('UnitService', () => {
         expect(unitDefinitionService.patchDefinition).toHaveBeenCalledTimes(copied ? 1 : 0);
       });
 
-      it('should copy no scheme from a source with an empty one', async () => {
-        givenSource({});
-        unitDefinitionService.findOnesScheme.mockResolvedValue({ scheme: '' } as UnitSchemeDto);
+      // patchScheme refuses a scheme without a list of codings, as units from before 9.3.0 may carry;
+      // the copy failed, and remained without its scheme and the comments (#2057)
+      it('should take over the scheme of the source as it is, also one without a list of codings', async () => {
+        givenSource({ scheme: '{}', schemeType: 'iqb@1.0' });
 
         await copyAs('K');
 
+        expect(newUnit.scheme).toBe('{}');
+        expect(newUnit.schemeType).toBe('iqb@1.0');
         expect(unitDefinitionService.patchScheme).not.toHaveBeenCalled();
       });
 
@@ -779,7 +780,7 @@ describe('UnitService', () => {
       // 1. copy: findOne -> unit
       // 2. create: findOne(existing) -> null
       // 3. create: findOne(source) -> unit
-      // Definition and scheme are copied through UnitDefinitionService.
+      // The definition is copied through UnitDefinitionService.
       unitsRepository.findOne
         .mockResolvedValueOnce(unit)
         .mockResolvedValueOnce(null)
@@ -791,15 +792,12 @@ describe('UnitService', () => {
       usersRepository.findOne.mockResolvedValue({ firstName: 'F', lastName: 'L', name: 'N' } as User);
       unitMetadataService.getMetadataOfUnit.mockResolvedValue({ profiles: [], items: [] });
       unitDefinitionService.findOnesDefinition.mockResolvedValue({ definition: 'xml' } as UnitDefinitionDto);
-      unitDefinitionService.findOnesScheme.mockResolvedValue({ scheme: '{"variableCodings": []}' } as UnitSchemeDto);
 
       await service.copy([1], 2, { id: 1, name: 'u' } as User, false);
       expect(unitsRepository.create).toHaveBeenCalled();
       expect(unitDefinitionService.findOnesDefinition).toHaveBeenCalledWith(1);
       expect(unitDefinitionService.patchDefinition)
         .toHaveBeenCalledWith(2, { definition: 'xml' }, undefined, null);
-      expect(unitDefinitionService.patchScheme)
-        .toHaveBeenCalledWith(2, { scheme: '{"variableCodings": []}' }, undefined, null);
       expect(unitMetadataService.copyItemsWithMetadata).toHaveBeenCalledWith(2, { profiles: [], items: [] });
     });
 
@@ -827,7 +825,6 @@ describe('UnitService', () => {
       usersRepository.findOne.mockResolvedValue({ firstName: 'F', lastName: 'L', name: 'N' } as User);
       unitMetadataService.getMetadataOfUnit.mockResolvedValue({ profiles: [], items: [] });
       unitDefinitionService.findOnesDefinition.mockResolvedValue({ definition: 'xml' } as UnitDefinitionDto);
-      unitDefinitionService.findOnesScheme.mockResolvedValue({ scheme: '{"variableCodings": []}' } as UnitSchemeDto);
 
       await service.copy([1], 2, { id: 1, name: 'u' } as User, false);
 
