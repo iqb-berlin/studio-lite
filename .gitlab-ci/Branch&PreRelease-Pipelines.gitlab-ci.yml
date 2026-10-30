@@ -962,6 +962,22 @@ typecheck-app:
   script:
     - npx nx run frontend-e2e:typecheck
 
+# The api image installs its runtime dependencies from apps/api/runtime-package.json, and the
+# Dockerfile stops when they have drifted from what the build generates -- but only develop and
+# main build that image, so a drift showed after the merge, and a changed override not at all
+# (#1878). The check builds the api itself: build-app builds only what the last commit touched.
+# It hands nothing on, so it has no artifacts.
+verify-api-runtime-deps:
+  stage: lint
+  interruptible: true
+  rules:
+    - !reference [ .default_rules, rules ]
+  needs:
+    - install-dependencies
+  image: ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
+  script:
+    - node scripts/update-api-runtime-deps.mjs --check
+
 audit-app:
   stage: audit
   interruptible: true

@@ -23,6 +23,11 @@
  *
  * (builds the api first, so dist/apps/api/package.json is current).
  *
+ * With --check it writes nothing and fails if the run would change the
+ * dependencies or overrides of runtime-package.json. Every branch pipeline
+ * runs it, so that a drift no longer shows only in the image build after the
+ * merge, and a changed override not at all (#1878).
+ *
  * EXTRA_DEPENDENCIES lists runtime requirements nx cannot see because no
  * static import names them: typeorm loads its database driver dynamically.
  * Versions come from the root package-lock.json, so the driver is pinned to
@@ -36,6 +41,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const EXTRA_DEPENDENCIES = ['pg'];
+const CHECK = process.argv.includes('--check');
 
 const repoRoot = join(import.meta.dirname, '..');
 const generatedPath = join(repoRoot, 'dist/apps/api/package.json');
@@ -80,6 +86,28 @@ const runtimePackage = {
   // the override only exists for the resolver's consistency check.
   overrides: rootPackage.overrides
 };
+
+if (CHECK) {
+  // name, version and description are left out: the version only moves with a release
+  const committed = JSON.parse(readFileSync(runtimePath, 'utf8'));
+  const drift = ['dependencies', 'overrides'].flatMap(field => {
+    const expected = runtimePackage[field] || {};
+    const actual = committed[field] || {};
+    return [...new Set([...Object.keys(expected), ...Object.keys(actual)])]
+      .filter(name => JSON.stringify(expected[name]) !== JSON.stringify(actual[name]))
+      .map(name => `  ${field} ${name}: expected ${JSON.stringify(expected[name])}, `
+        + `committed ${JSON.stringify(actual[name])}`);
+  });
+  if (drift.length) {
+    console.error(`${runtimePath} has drifted:`);
+    drift.forEach(line => console.error(line));
+    console.error('Run: node scripts/update-api-runtime-deps.mjs');
+    process.exit(1);
+  }
+  console.log(`${runtimePath} is current.`);
+  process.exit(0);
+}
+
 writeFileSync(runtimePath, `${JSON.stringify(runtimePackage, null, 2)}\n`);
 
 // npm resolves the lockfile in an empty temp directory so that neither the
