@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Verona-Testplayer</title>
+  <!--
+    A player for the e2e tests of the studio as host (#1763), written against the player API and not
+    against one release of a real player. It does no more than the tests ask of it: it starts, calls
+    a widget at the click of a button and shows what the host returns.
+  -->
+  <script id="metadata" type="application/ld+json">
+    {
+      "id": "verona-test-player",
+      "version": "1.0.0",
+      "type": "PLAYER",
+      "name": [
+        { "lang": "de", "value": "Verona-Testplayer" },
+        { "lang": "en", "value": "Verona test player" }
+      ],
+      "specVersion": "6.0",
+      "metadataVersion": "3.1"
+    }
+  </script>
+</head>
+<body>
+  <p id="status">waiting</p>
+  <button id="call-widget" type="button">Widget aufrufen</button>
+  <p id="return-call-id"></p>
+  <p id="return-state"></p>
+  <script>
+    let sessionId = '';
+    // The frame is a srcdoc of the host and shares its origin: messages go there and nowhere else
+    const hostOrigin = window.parent.location.origin;
+
+    window.addEventListener('message', event => {
+      if (event.source !== window.parent) return;
+      const message = event.data;
+      if (message.type === 'vopStartCommand') {
+        sessionId = message.sessionId;
+        document.getElementById('status').textContent = 'started';
+      } else if (message.type === 'vopWidgetReturn' && message.sessionId === sessionId) {
+        document.getElementById('return-call-id').textContent = message.callId;
+        document.getElementById('return-state').textContent = message.state;
+      }
+    });
+
+    document.getElementById('call-widget').addEventListener('click', () => {
+      window.parent.postMessage({
+        type: 'vopWidgetCall',
+        sessionId,
+        callId: 'test-call-1',
+        widgetType: 'CALC',
+        parameters: [{ key: 'MODE', value: 'TEST' }],
+        state: 'state-of-the-player'
+      }, hostOrigin);
+    });
+
+    window.parent.postMessage({
+      type: 'vopReadyNotification',
+      metadata: document.getElementById('metadata').textContent
+    }, hostOrigin);
+  </script>
+</body>
+</html>

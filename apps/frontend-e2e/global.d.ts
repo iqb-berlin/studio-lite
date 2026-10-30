@@ -61,7 +61,7 @@ declare namespace Cypress {
     updateUserListOfWsAPI(wsId: string, list: AccessUser[], token: string): Chainable<Response>; // 19a
     getUsersOfWsAPI(wsId: string, token: string): Chainable<Response>; // 20
     getWsByGroupAPI(groupId: string, token: string): Chainable<Response>; // 21
-    addModuleAPI(module:string, token:string): Chainable<Response>; // 22
+    addModuleAPI(module:string, token:string, types?: string[]): Chainable<Response>; // 22
     getModulesAPI(token: string): Chainable<Response>; // 23
     getModuleAPI(module: string, token: string): Chainable<Response>; // 24
     createUnitAPI(wsId: string, unit: UnitData, token: string): Chainable<Response>; // 25

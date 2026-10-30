@@ -1,35 +1,32 @@
 import {
   addWidgets,
-  deleteAllWidgets,
   addFirstUser
 } from '../../../support/helpers';
 import { widgets as widgetFiles } from '../../../support/testData';
+import { deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Widget Management', () => {
   before(() => {
     addFirstUser();
   });
 
+  // The deletion test removes the widget as well, but only if it gets that far
+  after(() => {
+    deleteTestBaseAPI();
+  });
+
   it('should upload widgets and display them in the table', () => {
     addWidgets(widgetFiles);
-    // Verify both widgets are in the table
-    cy.get('studio-lite-widgets mat-table').should('have.length', 2);
 
-    // Verify upload for Molecule Editor
-    cy.contains('mat-row', 'IQB-Widget Molekül-Editor').within(() => {
-      cy.get('.cdk-column-id').should('contain', 'molecule-editor-widget');
-      cy.get('.cdk-column-version').should('contain', '0.2.0');
-    });
-
-    // Verify upload for Periodic System Select
-    cy.contains('mat-row', 'IQB Widget Periodensystem Auswahl').within(() => {
-      cy.get('.cdk-column-id').should('contain', 'periodic-system-select-widget');
-      cy.get('.cdk-column-version').should('contain', '0.2.0');
+    // Verify upload for the test widget
+    cy.contains('mat-row', 'Verona-Testwidget').within(() => {
+      cy.get('.cdk-column-id').should('contain', 'verona-test-widget');
+      cy.get('.cdk-column-version').should('contain', '1.0.0');
     });
   });
 
   it('should allow deleting widget', () => {
-    const widgetToDelete = 'IQB-Widget Molekül-Editor';
+    const widgetToDelete = 'Verona-Testwidget';
 
     // Checks the widget exists
     cy.get('mat-row').filter(`:contains("${widgetToDelete}")`).should('exist');
@@ -42,11 +39,7 @@ describe('Widget Management', () => {
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickButtonWithResponseCheck(json.delete, [200], '/api/admin/verona-modules*', 'DELETE', 'deleteModule');
     });
-    // Verify it is gone
-    cy.get('mat-row').filter(`:contains("${widgetToDelete}")`).should('not.exist');
-  });
-
-  it('deletes all widgets', () => {
-    deleteAllWidgets();
+    // Verify it is gone: with it goes the last row, so it cannot be looked for among the rows
+    cy.contains('mat-row', widgetToDelete).should('not.exist');
   });
 });

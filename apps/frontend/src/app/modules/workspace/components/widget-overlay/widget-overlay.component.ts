@@ -106,15 +106,18 @@ export class WidgetOverlayComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * The start command allows no more than the widget API names: the parameters as lists, and no
+   * callId -- that one stays between player and host and goes back in vopWidgetReturn (#2047).
+   */
   private sendWidgetStartCommand(): void {
     if (this.widgetPostMessageTarget) {
       this.widgetPostMessageTarget.postMessage({
         type: 'vowStartCommand',
         sessionId: this.widgetSessionId,
-        parameters: this.widgetCallData.parameters || {},
-        callId: this.widgetCallData.callId || '',
+        parameters: this.widgetCallData.parameters || [],
         state: this.widgetState,
-        sharedParameters: this.widgetCallData.sharedParameters || {}
+        sharedParameters: this.widgetCallData.sharedParameters || []
       }, '*');
     }
   }
