@@ -110,7 +110,7 @@ describe('Variable and Item Metadata Coherence', () => {
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.get(`.mdc-tab__text-label:contains("${json.metadata.items}")`).click();
     });
-    // the assigned variable is waited for first, so that the empty table it loads into proves nothing
+    // waits for the assigned variable first: against the table still loading, the absence would prove nothing
     cy.get('mat-dialog-container .mat-mdc-tab-body-active table')
       .should('contain.text', 'text-field_1')
       .and('not.contain.text', 'drop-list_1');

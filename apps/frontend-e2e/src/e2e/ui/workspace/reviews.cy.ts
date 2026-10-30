@@ -46,6 +46,8 @@ describe('Unit Reviews', () => {
   });
 
   const review: string = reviewTestNames.reviewName;
+  // The unit the comment written in the review went to, for the workspace to show it
+  let reviewCommentUnitId = '';
 
   it('allows an admin to create a new review with specific unit selection and configuration', () => {
     cy.visitWs(primaryWorkspace);
@@ -234,6 +236,10 @@ describe('Unit Reviews', () => {
       });
     });
     cy.get('mat-dialog-container').should('not.exist');
+    cy.get<Interception>('@postReviewComment').then(({ request }) => {
+      // `/api/reviews/<review>/units/<unit>/comments`
+      reviewCommentUnitId = new URL(request.url).pathname.split('/')[5];
+    });
   });
 
   it('displays unit technical details in the expandable info panel', () => {
@@ -274,17 +280,23 @@ describe('Unit Reviews', () => {
     cy.url().should('include', '/u/2');
   });
 
-  // the comment written in the review above went to its first unit
   it('shows no dot for comments inserted by himself in the workspace unit list', () => {
     cy.visitWs(primaryWorkspace);
-    cy.get('mat-row').contains('M6_AK0011').parents('mat-row').within(() => {
-      cy.get('.new-comments').should('have.css', 'opacity', '0');
-    });
+    workspaceOfPage()
+      .then(({ wsId, token }) => cy.getUnitsByWsAPI(wsId, token))
+      .then(units => {
+        const [unit] = (units.body as { id: number; key: string }[])
+          .filter(listed => String(listed.id) === reviewCommentUnitId);
+        expect(unit?.key, 'unit of the review comment').to.be.a('string');
+        cy.get('mat-row').contains(unit.key).parents('mat-row').within(() => {
+          cy.get('.new-comments').should('have.css', 'opacity', '0');
+        });
 
-    cy.get('mat-row').contains('M6_AK0011').click();
-    clickIndexTabWorkspace('comments');
-    cy.contains('studio-lite-comment', 'Test comment from Review', { timeout: 10000 }).should('exist');
-    clickIndexTabWorkspace('properties');
+        cy.get('mat-row').contains(unit.key).click();
+        clickIndexTabWorkspace('comments');
+        cy.contains('studio-lite-comment', 'Test comment from Review', { timeout: 10000 }).should('exist');
+        clickIndexTabWorkspace('properties');
+      });
   });
 
   it('clears the new comment dot after viewing comments as different users', () => {
