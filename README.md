@@ -280,11 +280,12 @@ A branch name carries the issue it belongs to: `fix/1629-group-admin-guard`.
 5. **The pipeline runs on GitLab**, mirrored from GitHub. The only workflow in `.github/workflows`
    builds the documentation; besides it GitHub runs CodeQL and Dependabot from their default
    setups, and nothing of that gates a merge. A push to a branch runs `build-app`, `test-app`,
-   `lint-app`, `typecheck-app` and `audit-app`. On a pull request the database jobs come along; on
-   a plain branch push they wait for a change to `database/*`, and that glob does not reach into
-   `database/changelog/`, so a new changeset alone does not bring them out. **The e2e suite runs
-   only on a pull request against `develop`**, and there only the API specs and Chrome
-   automatically — Firefox, Edge and the mobile viewports are manual jobs on the pipeline page.
+   `lint-app`, `typecheck-app`, `verify-api-runtime-deps` and `audit-app`. On a pull request the
+   database jobs come along; on a plain branch push they wait for a change to `database/*`, and
+   that glob does not reach into `database/changelog/`, so a new changeset alone does not bring
+   them out. **The e2e suite runs only on a pull request against `develop`**, and there only the
+   API specs and Chrome automatically — Firefox, Edge and the mobile viewports are manual jobs on
+   the pipeline page.
 6. **Read the jobs, not the badge.** The badge at the top of this file is `main`'s last pipeline,
    not yours. In the pipeline, every job gates a merge except `audit-app`, the `check-*` rule
    jobs, the image scans and the manual browser jobs (Firefox, Edge and the mobile viewports),
@@ -293,8 +294,12 @@ A branch name carries the issue it belongs to: `fix/1629-group-admin-guard`.
    `test-app-e2e-ui-workspace-chrome`): a flaky spec blocks the merge just like a real regression,
    so read the log before restarting the job. `typecheck-app` gates deliberately, because Cypress
    transpiles the e2e sources without type checking and a renamed member surfaces nowhere else
-   (#1586, #1590). `build-app`, `test-app` and `lint-app` run `nx affected --base=HEAD~1`, so they
-   cover what the last commit touched, not the branch.
+   (#1586, #1590). `verify-api-runtime-deps` fails when `apps/api/runtime-package.json` no longer
+   matches what the api build generates or the root's overrides; running
+   `node scripts/update-api-runtime-deps.mjs` brings it up to date (#1878). `build-app` runs
+   `nx affected --base=HEAD~1` and covers what the last commit touched. `test-app` and `lint-app`
+   do the same on a plain branch push; in a pull request they compare with the branch it goes
+   into and cover all of its commits (#1659).
 7. **Rebase when `develop` moves**, then force-push with `--force-with-lease`. A pipeline result
    belongs to a commit, not to a pull request.
 8. **Merge as a merge commit** once the pipeline is green.
