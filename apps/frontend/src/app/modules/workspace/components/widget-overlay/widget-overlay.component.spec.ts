@@ -32,9 +32,9 @@ describe('WidgetOverlayComponent', () => {
   const callData: WidgetCallData = {
     callId: 'call-42',
     widgetType: 'CALC',
-    parameters: { key1: 'val1' },
+    parameters: [{ key: 'KEY_1', value: 'val1' }],
     state: 'initial-state',
-    sharedParameters: { shared1: 'sv1' }
+    sharedParameters: [{ key: 'SHARED_1', value: 'sv1' }]
   };
 
   beforeEach(async () => {
@@ -100,7 +100,8 @@ describe('WidgetOverlayComponent', () => {
     return startCommand;
   };
 
-  it('starts the widget with the call of the player and a session of its own', () => {
+  // The widget API allows no callId in the start command
+  it('starts the widget with the call of the player, without its callId, and a session of its own (#2047)', () => {
     jest.spyOn(VeronaModuleDirective, 'getSessionId').mockReturnValue('widget-session-7');
 
     const startCommand = readyFrom(fixture);
@@ -108,14 +109,14 @@ describe('WidgetOverlayComponent', () => {
     expect(startCommand).toHaveBeenCalledWith({
       type: 'vowStartCommand',
       sessionId: 'widget-session-7',
-      parameters: { key1: 'val1' },
-      callId: 'call-42',
+      parameters: [{ key: 'KEY_1', value: 'val1' }],
       state: 'initial-state',
-      sharedParameters: { shared1: 'sv1' }
+      sharedParameters: [{ key: 'SHARED_1', value: 'sv1' }]
     }, '*');
   });
 
-  it('fills in empty values for what the call of the player leaves out', () => {
+  // The parameters are lists in the widget API, so a call without them starts the widget with empty ones
+  it('fills in empty values for what the call of the player leaves out (#2047)', () => {
     const bareFixture = TestBed.createComponent(WidgetOverlayComponent);
     bareFixture.componentInstance.widgetCallData = { widgetType: 'CALC' };
     bareFixture.componentInstance.playerPostMessageTarget = playerPostMessageTarget as never;
@@ -125,7 +126,7 @@ describe('WidgetOverlayComponent', () => {
     bareFixture.componentInstance.continue();
 
     expect(startCommand).toHaveBeenCalledWith(expect.objectContaining({
-      parameters: {}, callId: '', state: '', sharedParameters: {}
+      parameters: [], state: '', sharedParameters: []
     }), '*');
     expect(playerPostMessageTarget.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'vopWidgetReturn', callId: '', state: '' }),

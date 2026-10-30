@@ -284,7 +284,7 @@ describe('UnitPreviewComponent', () => {
       component.handleWidgetCall({
         callId: 'c1',
         widgetType: 'CALC',
-        parameters: { k: 'v' },
+        parameters: [{ key: 'K', value: 'v' }],
         state: 's'
       });
 
@@ -372,7 +372,7 @@ describe('UnitPreviewComponent', () => {
       const callData = {
         callId: 'c4',
         widgetType: 'CALC',
-        parameters: { p: '1' },
+        parameters: [{ key: 'P', value: '1' }],
         state: 'saved-state'
       };
 
