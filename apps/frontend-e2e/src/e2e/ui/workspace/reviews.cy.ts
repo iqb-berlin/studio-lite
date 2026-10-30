@@ -373,8 +373,9 @@ describe('Unit Reviews', () => {
     cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     deleteReview(review);
-    cy.get('[data-cy="workspace-review-close"]').click();
+    // while the review admin is open: once closed, it has no rows left to check
     cy.contains('mat-row', review).should('not.exist');
+    cy.get('[data-cy="workspace-review-close"]').click();
   });
 
   // Externals reach a review through the link the copy button hands out, with the review's password
