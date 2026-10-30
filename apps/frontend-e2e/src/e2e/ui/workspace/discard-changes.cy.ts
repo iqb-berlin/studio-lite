@@ -1,14 +1,10 @@
-import { AccessLevel } from '../../../support/testData';
-import { addFirstUser, deleteFirstUser, FIRST_WORKSPACE_REQUEST_TIMEOUT } from '../../../support/helpers';
+import { FIRST_WORKSPACE_REQUEST_TIMEOUT } from '../../../support/helpers';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 // Only the discard button of the confirmation discards. Esc and a click beside the dialog close it
 // without an answer, and until #1844 that counted as one.
 describe('Discarding the unsaved changes of a unit', () => {
-  const group = { id: '', name: 'DiscardGroup' };
-  const ws = { id: '', name: 'DiscardWorkspace' };
   const unit = { shortname: 'DISCARD1', name: 'Verwerfen', group: '' };
-  let token = '';
-  let groupId = '';
   let wsId = '';
   let unitId = '';
 
@@ -16,30 +12,14 @@ describe('Discarding the unsaved changes of a unit', () => {
   const saveButton = () => cy.get('[data-cy="workspace-unit-save-button"]');
 
   before(() => {
-    addFirstUser();
-    cy.window().then(win => {
-      token = win.localStorage.getItem('id_token') || '';
-      cy.getUserIdAPI(token).then(authData => {
-        const userId = authData.body.userId;
-        cy.createGroupAPI(group, token).then(createdGroup => {
-          groupId = String(createdGroup.body);
-          cy.createWsAPI(groupId, ws, token).then(createdWs => {
-            wsId = String(createdWs.body);
-            cy.updateUsersOfWsAPI(wsId, AccessLevel.Admin, String(userId), token)
-              .its('status').should('equal', 200);
-            cy.createUnitAPI(wsId, unit, token).then(createdUnit => {
-              expect(createdUnit.status).to.equal(201);
-              unitId = String(createdUnit.body);
-            });
-          });
-        });
-      });
+    createTestBaseAPI({ units: [unit] }).then(base => {
+      wsId = base.wsId;
+      [unitId] = base.unitIds;
     });
   });
 
   after(() => {
-    cy.deleteGroupsAPI([groupId], token).its('status').should('equal', 200);
-    deleteFirstUser();
+    deleteTestBaseAPI();
   });
 
   it('keeps them when the dialog is closed with Esc or beside it, and discards them on confirmation', () => {

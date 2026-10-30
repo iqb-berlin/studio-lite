@@ -1,14 +1,11 @@
-import { AccessLevel } from '../../../support/testData';
-import { addFirstUser, deleteFirstUser, FIRST_WORKSPACE_REQUEST_TIMEOUT } from '../../../support/helpers';
+import { FIRST_WORKSPACE_REQUEST_TIMEOUT } from '../../../support/helpers';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 // Saving takes a while and blocks nothing. What is typed meanwhile was not sent, and must stay
 // unsaved rather than count as saved; and a second save must not start while one runs (#1845).
 describe('Edits made while a unit is being saved', () => {
-  const group = { id: '', name: 'EditsDuringSaveGroup' };
-  const ws = { id: '', name: 'EditsDuringSaveWorkspace' };
   const unit = { shortname: 'DURING1', name: 'Waehrend', group: '' };
   let token = '';
-  let groupId = '';
   let wsId = '';
   let unitId = '';
 
@@ -16,29 +13,14 @@ describe('Edits made while a unit is being saved', () => {
   const saveButton = () => cy.get('[data-cy="workspace-unit-save-button"]');
 
   before(() => {
-    addFirstUser();
-    cy.window().then(win => {
-      token = win.localStorage.getItem('id_token') || '';
-      cy.getUserIdAPI(token).then(authData => {
-        cy.createGroupAPI(group, token).then(createdGroup => {
-          groupId = String(createdGroup.body);
-          cy.createWsAPI(groupId, ws, token).then(createdWs => {
-            wsId = String(createdWs.body);
-            cy.updateUsersOfWsAPI(wsId, AccessLevel.Admin, String(authData.body.userId), token)
-              .its('status').should('equal', 200);
-            cy.createUnitAPI(wsId, unit, token).then(createdUnit => {
-              expect(createdUnit.status).to.equal(201);
-              unitId = String(createdUnit.body);
-            });
-          });
-        });
-      });
+    createTestBaseAPI({ units: [unit] }).then(base => {
+      ({ token, wsId } = base);
+      [unitId] = base.unitIds;
     });
   });
 
   after(() => {
-    cy.deleteGroupsAPI([groupId], token).its('status').should('equal', 200);
-    deleteFirstUser();
+    deleteTestBaseAPI();
   });
 
   it('keeps what was typed during the save unsaved, and sends it with the next save', () => {

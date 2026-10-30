@@ -19,6 +19,18 @@ import { login } from './user';
 
 const admin = () => ({ username: Cypress.expose('username'), password: Cypress.expose('password') });
 
+/** What a spec needs to reach the base through the API or by its URL */
+export interface TestBase {
+  /** of the first user, for the API: a session of its own, not the one the browser logs in with */
+  token: string;
+  /** of the first user */
+  userId: string;
+  /** of the primary workspace */
+  wsId: string;
+  /** of the units given to createTestBaseAPI, in their order */
+  unitIds: string[];
+}
+
 /**
  * Imports a zip of units from the fixtures and fails unless all its files were taken: rejected
  * ones are reported in the answer, which is 201 all the same.
@@ -41,15 +53,23 @@ export function importZipAPI(wsId: string, zip: string, token: string): void {
  * @param units - empty units created in the primary workspace, without editor, player or schemer
  * @example
  * createTestBaseAPI({ zip: 'test_studio_units_download.zip', units: [unitCrudUnits.crud1] });
+ * createTestBaseAPI({ units: [unit] }).then(base => cy.visit(`/#/a/${base.wsId}/${base.unitIds[0]}`));
  */
-export function createTestBaseAPI({ zip, units = [] }: { zip?: string; units?: UnitData[] } = {}): void {
+export function createTestBaseAPI(
+  { zip, units = [] }: { zip?: string; units?: UnitData[] } = {}
+): Cypress.Chainable<TestBase> {
   const { username, password } = admin();
+  const base: TestBase = {
+    token: '', userId: '', wsId: '', unitIds: []
+  };
   cy.addFirstUserAPI(username, password).then(init => {
     expect(init.status, 'first user').to.equal(201);
     const token: string = init.body.accessToken;
+    base.token = token;
     cy.getUserIdAPI(token).then(authData => {
       expect(authData.status, 'id of the first user').to.equal(200);
       const firstUserId = String(authData.body.userId);
+      base.userId = firstUserId;
       cy.createUserAPI(standardUser, token).then(user => {
         expect(user.status, standardUser.username).to.equal(201);
         const standardUserId = String(user.body);
@@ -63,9 +83,13 @@ export function createTestBaseAPI({ zip, units = [] }: { zip?: string; units?: U
                 { id: standardUserId, access: AccessLevel.Developer }
               ], token).its('status').should('equal', 200);
               if (name !== primaryWorkspace) return;
-              if (zip) importZipAPI(String(ws.body), zip, token);
+              base.wsId = String(ws.body);
+              if (zip) importZipAPI(base.wsId, zip, token);
               units.forEach(unit => {
-                cy.createUnitAPI(String(ws.body), unit, token).its('status').should('equal', 201);
+                cy.createUnitAPI(base.wsId, unit, token).then(created => {
+                  expect(created.status, unit.shortname).to.equal(201);
+                  base.unitIds.push(String(created.body));
+                });
               });
             });
           });
@@ -77,6 +101,7 @@ export function createTestBaseAPI({ zip, units = [] }: { zip?: string; units?: U
     });
   });
   login(username, password);
+  return cy.then(() => base);
 }
 
 /**
