@@ -1303,6 +1303,32 @@ describe('Unit API tests', () => {
         expect(resp.status).to.equal(201);
       });
     });
+
+    // A scheme stored before 9.3.0 may have no list of codings, which the scheme endpoint refuses: the copy
+    // went through it, failed and remained without its scheme (#2057). The source is created with the
+    // scheme in the body, as a copy into another workspace passes on the row of its source.
+    it('201 positive test: should duplicate a unit with a scheme without a list of codings (#2057)', () => {
+      const token = Cypress.expose(`token_${Cypress.expose('username')}`);
+      const wsId = Cypress.expose(ws2.id);
+      cy.requestWorkspaceAPI('POST', `${wsId}/units`, token, { key: 'D2057_SOURCE', name: 'Alt', scheme: '{}' })
+        .then(source => {
+          expect(source.status, 'source').to.equal(201);
+          cy.copyToAPI(wsId, {
+            createFrom: source.body, groupName: '', key: 'D2057_COPY', name: 'Kopie'
+          }, token).then(copy => {
+            cy.getUnitSchemeAPI(String(copy.body), wsId, token).then(read => {
+              // cleaned up before anything else is asserted, so that a failure leaves ws2 as it was; a failed
+              // copy answers with an error instead of an id
+              const created = [source.body, copy.body].filter(id => typeof id === 'number').map(String);
+              cy.deleteUnitsAPI(created, wsId, token);
+              cy.then(() => {
+                expect(copy.status).to.equal(201);
+                expect(read.body.scheme).to.equal('{}');
+              });
+            });
+          });
+        });
+    });
   });
 
   // ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************

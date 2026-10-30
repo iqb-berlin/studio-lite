@@ -1111,17 +1111,55 @@ describe('Unit API tests part II', () => {
     });
   });
 
+  const jsonSchemeFixtures = ['JS_SCHEME.json', 'JS_SCHEME.voud', 'JS_SCHEME.vocs.json']
+    .map(file => `json-scheme/${file}`);
+
+  // The JSON format names no schemer: a unit from a JSON import had none, and its scheme could not be
+  // edited until one was chosen for it. It gets the default of the workspace now, as a unit created in
+  // the studio does (#2058); ws1 has one since 34.
+  describe('the schemer of a unit from a JSON import', () => {
+    it('201 positive test: is the default schemer of the workspace', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      const wsId = Cypress.expose(ws1.id);
+      cy.getWsAPI(wsId, adminToken).then(workspace => {
+        const defaultSchemer = workspace.body.settings?.defaultSchemer;
+        expect(defaultSchemer, 'default schemer of ws1').to.be.a('string').and.not.equal('');
+        cy.uploadUnitFilesAPI(wsId, jsonSchemeFixtures, adminToken).then(uploaded => {
+          cy.getUnitsByWsAPI(wsId, adminToken).then(units => {
+            const imported = units.body.find((u: { key: string }) => u.key === 'JS_SCHEME');
+            expect(imported, 'unit imported from JSON').not.to.equal(undefined);
+            cy.getUnitPropertiesAPI(wsId, String(imported.id), adminToken).then(properties => {
+              // cleaned up before anything else is asserted, so that a failure leaves ws1 as it was
+              cy.deleteUnitsAPI([String(imported.id)], wsId, adminToken);
+              cy.then(() => {
+                expect(uploaded.status).to.equal(201);
+                expect(properties.body.schemer).to.equal(defaultSchemer);
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+
   // The JSON format names no schemer, and the XML export referred to the scheme only with one: a unit
   // from a JSON import, exported as XML and imported again, lost its scheme (#1990).
   describe('the coding scheme of a unit without a schemer', () => {
     it('201 positive test: is imported again from the XML export', () => {
       const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
       const wsId = Cypress.expose(ws1.id);
-      const fixtures = ['JS_SCHEME.json', 'JS_SCHEME.voud', 'JS_SCHEME.vocs.json'].map(file => `json-scheme/${file}`);
-      cy.uploadUnitFilesAPI(wsId, fixtures, adminToken).then(uploaded => {
+      cy.uploadUnitFilesAPI(wsId, jsonSchemeFixtures, adminToken).then(uploaded => {
         cy.getUnitsByWsAPI(wsId, adminToken).then(units => {
           const fromJson = units.body.find((u: { key: string }) => u.key === 'JS_SCHEME');
           expect(fromJson, 'unit imported from JSON').not.to.equal(undefined);
+          // The import gives it the default schemer of ws1 (#2058); taken away again, so that the export
+          // runs without one, as for a unit of a workspace without a default
+          cy.requestWorkspaceAPI(
+            'PATCH',
+            `${wsId}/units/${fromJson.id}/properties`,
+            adminToken,
+            { id: fromJson.id, schemer: '' }
+          ).its('status').should('equal', 200);
           cy.exportUnitsAPI(wsId, buildDownloadQuery([String(fromJson.id)]), adminToken).then(exported => {
             cy.deleteUnitsAPI([String(fromJson.id)], wsId, adminToken);
             cy.importUnitsAPI(wsId, exported.body, adminToken).then(reimported => {

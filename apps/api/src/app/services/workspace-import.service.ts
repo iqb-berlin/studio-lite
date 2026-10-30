@@ -351,13 +351,18 @@ export class WorkspaceImportService {
     unitImportData: UnitImportData | UnitImportJsonData
   ): Promise<ItemUuidLookup[]> {
     let itemUuidLookups: ItemUuidLookup[] = [];
+    const workspace = await this.workspacesRepository.findOne({
+      where: { id: workspaceId }
+    });
     await this.unitService.patchUnitProperties(
       newUnitId,
       {
         id: newUnitId,
         editor: unitImportData.editor,
         player: unitImportData.player,
-        schemer: unitImportData.schemer,
+        // The JSON format names no schemer, and an XML file may leave it out. Such a unit gets the
+        // default of the workspace, as one created in the studio does (#2058).
+        schemer: unitImportData.schemer || workspace.settings?.defaultSchemer,
         description: unitImportData.description,
         transcript: unitImportData.transcript,
         lastChangedMetadata: unitImportData.lastChangedMetadata,
@@ -370,9 +375,6 @@ export class WorkspaceImportService {
       null
     );
     if (unitImportData.metadata) {
-      const workspace = await this.workspacesRepository.findOne({
-        where: { id: workspaceId }
-      });
       const metadata = UnitMetadataService.setCurrentProfiles(
         workspace.settings?.unitMDProfile,
         workspace.settings?.itemMDProfile,

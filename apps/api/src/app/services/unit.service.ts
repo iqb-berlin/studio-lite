@@ -268,7 +268,7 @@ export class UnitService {
     if (unit.createFrom) {
       const unitSourceData = await this.unitsRepository.findOne({
         where: { id: unit.createFrom },
-        select: ['id', 'key', 'editor', 'schemer', 'metadata', 'schemeType',
+        select: ['id', 'key', 'editor', 'schemer', 'metadata', 'scheme', 'schemeType',
           'player', 'description', 'reference', 'transcript',
           'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme',
           'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser']
@@ -281,6 +281,9 @@ export class UnitService {
         newUnit.metadata = unitSourceData.metadata;
         newUnit.editor = unitSourceData.editor;
         newUnit.schemer = unitSourceData.schemer;
+        // Taken over as it is, not through patchScheme: that refuses a scheme without a list of codings,
+        // as units from before 9.3.0 may carry, and failed the copy halfway (#2057)
+        newUnit.scheme = unitSourceData.scheme;
         newUnit.schemeType = unitSourceData.schemeType;
         newUnit.lastChangedDefinitionUser = unitSourceData.lastChangedDefinitionUser;
         newUnit.lastChangedMetadataUser = await this.getLastChangedMetadataUser(unitSourceData, newUnit.key, user);
@@ -306,14 +309,6 @@ export class UnitService {
             unitSourceDefinition,
             newUnit.lastChangedDefinitionUser,
             newUnit.lastChangedDefinition);
-        }
-        const unitSourceScheme = await this.unitDefinitionService.findOnesScheme(unit.createFrom);
-        if (unitSourceScheme && unitSourceScheme.scheme) {
-          await this.unitDefinitionService.patchScheme(
-            newUnit.id,
-            unitSourceScheme,
-            newUnit.lastChangedSchemeUser,
-            newUnit.lastChangedScheme);
         }
         if (addComments) await this.unitCommentService.copyComments(unit.createFrom, newUnit.id, itemUuidLookups);
       }

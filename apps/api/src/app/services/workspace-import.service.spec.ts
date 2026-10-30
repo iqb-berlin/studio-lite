@@ -317,6 +317,51 @@ describe('WorkspaceImportService', () => {
       expect(unitDefinitionService.patchDefinition).toHaveBeenCalled();
     });
 
+    // The JSON format names no schemer, and an XML file may leave it out: such a unit gets the default of
+    // the workspace, as one created in the studio does, instead of none (#2058).
+    describe('the schemer', () => {
+      const xmlWithScheme = (attributes: string) => '<Unit><Metadata><Id>U1</Id><Label>L</Label></Metadata>' +
+        `<CodingSchemeRef ${attributes}>U1.vocs</CodingSchemeRef></Unit>`;
+      const importedSchemer = () => (unitService.patchUnitProperties as jest.Mock).mock.calls[0][1].schemer;
+      const givenDefault = (defaultSchemer?: string) => (workspaceRepository.findOne as jest.Mock)
+        .mockResolvedValue({ settings: { defaultSchemer } } as Workspace);
+
+      beforeEach(() => {
+        (unitService.create as jest.Mock).mockResolvedValue(10);
+        (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+      });
+
+      it.each([
+        ['a JSON unit', buildFile('U1.json', 'application/json', jsonIndex('U1'))],
+        ['an XML unit with an empty schemer', buildFile('U1.xml', 'text/xml', xmlWithScheme('schemer=""'))],
+        ['an XML unit without one', buildFile('U1.xml', 'text/xml', xmlWithScheme('schemeType="iqb@3.0"'))]
+      ])('should give %s the default schemer of the workspace', async (_, file) => {
+        givenDefault('iqb-schemer@2.9');
+
+        await service.uploadFiles(1, [file], user);
+
+        expect(importedSchemer()).toBe('iqb-schemer@2.9');
+      });
+
+      it('should keep the schemer an XML unit names', async () => {
+        givenDefault('iqb-schemer@2.9');
+
+        const file = buildFile('U1.xml', 'text/xml', xmlWithScheme('schemer="iqb-schemer@1.5"'));
+
+        await service.uploadFiles(1, [file], user);
+
+        expect(importedSchemer()).toBe('iqb-schemer@1.5');
+      });
+
+      it('should leave the schemer empty in a workspace without a default', async () => {
+        givenDefault(undefined);
+
+        await service.uploadFiles(1, [buildFile('U1.json', 'application/json', jsonIndex('U1'))], user);
+
+        expect(importedSchemer()).toBeFalsy();
+      });
+    });
+
     it('should warn when definition file referenced in index is missing from upload', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
       (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
