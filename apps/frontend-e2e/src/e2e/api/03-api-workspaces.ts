@@ -179,32 +179,29 @@ describe('Workspace API tests', () => {
 
     // Until #1984 the service asked about the group the workspace leaves without knowing
     // administrators, and refused one who is not entered as that group's admin.
-    it('200 positive test: should let an administrator move a workspace out of a group they do not administer', () => {
-      cy.setAdminsOfGroupAPI(
-        [Cypress.expose(`id_${userGroupAdmin.username}`)],
-        Cypress.expose(group2.id),
-        Cypress.expose(`token_${Cypress.expose('username')}`)
-      ).then(resp => {
-        expect(resp.status).to.equal(200);
-        cy.moveWsAPI(
-          Cypress.expose(ws3.id),
-          Cypress.expose(groupVera.id),
-          Cypress.expose(`token_${Cypress.expose('username')}`)
-        ).then(resp1 => {
-          expect(resp1.status).to.equal(200);
-        });
+    describe('by an administrator who does not administer the group', () => {
+      const adminToken = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+
+      // The sections below expect ws3 in group2, administered by the administrator alone. Restored
+      // here, so a failing test does not leave userzwei as group2's admin for them.
+      after(() => {
+        cy.moveWsAPI(Cypress.expose(ws3.id), Cypress.expose(group2.id), adminToken());
+        cy.setAdminsOfGroupAPI(
+          [Cypress.expose(`id_${Cypress.expose('username')}`)],
+          Cypress.expose(group2.id),
+          adminToken()
+        );
       });
-      // The sections below expect ws3 in group2, administered by the administrator alone.
-      cy.moveWsAPI(
-        Cypress.expose(ws3.id),
-        Cypress.expose(group2.id),
-        Cypress.expose(`token_${Cypress.expose('username')}`)
-      ).its('status').should('equal', 200);
-      cy.setAdminsOfGroupAPI(
-        [Cypress.expose(`id_${Cypress.expose('username')}`)],
-        Cypress.expose(group2.id),
-        Cypress.expose(`token_${Cypress.expose('username')}`)
-      ).its('status').should('equal', 200);
+
+      it('200 positive test: should move the workspace out of that group', () => {
+        cy.setAdminsOfGroupAPI(
+          [Cypress.expose(`id_${userGroupAdmin.username}`)],
+          Cypress.expose(group2.id),
+          adminToken()
+        ).its('status').should('equal', 200);
+        cy.moveWsAPI(Cypress.expose(ws3.id), Cypress.expose(groupVera.id), adminToken())
+          .its('status').should('equal', 200);
+      });
     });
 
     it('401 negative test: should deny moving a workspace when no authentication token is provided', () => {

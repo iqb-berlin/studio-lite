@@ -1864,17 +1864,22 @@ describe('Unit API tests', () => {
 
       // The states belong to the group's settings, so a move resets them, for all units of the
       // workspace in one statement (#1984).
-      it('200 positive test: should reset the state of the units of a workspace moved to another group', () => {
-        const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
-        cy.updateUnitStateAPI(Cypress.expose(ws1.id), Cypress.expose(unit3.shortname), '1', adminToken)
-          .its('status').should('equal', 200);
-        cy.moveWsAPI(Cypress.expose(ws1.id), Cypress.expose(group2.id), adminToken)
-          .its('status').should('equal', 200);
-        cy.getUnitPropertiesAPI(Cypress.expose(ws1.id), Cypress.expose(unit3.shortname), adminToken)
-          .its('body.state').should('equal', '0');
-        // The sections below expect ws1 in groupVera.
-        cy.moveWsAPI(Cypress.expose(ws1.id), Cypress.expose(groupVera.id), adminToken)
-          .its('status').should('equal', 200);
+      describe('of a workspace moved to another group', () => {
+        const adminToken = () => Cypress.expose(`token_${Cypress.expose('username')}`);
+
+        // The sections below expect ws1 in groupVera, also when the test fails.
+        after(() => {
+          cy.moveWsAPI(Cypress.expose(ws1.id), Cypress.expose(groupVera.id), adminToken());
+        });
+
+        it('200 positive test: should reset the state of its units', () => {
+          cy.updateUnitStateAPI(Cypress.expose(ws1.id), Cypress.expose(unit3.shortname), '1', adminToken())
+            .its('status').should('equal', 200);
+          cy.moveWsAPI(Cypress.expose(ws1.id), Cypress.expose(group2.id), adminToken())
+            .its('status').should('equal', 200);
+          cy.getUnitPropertiesAPI(Cypress.expose(ws1.id), Cypress.expose(unit3.shortname), adminToken())
+            .its('body.state').should('equal', '0');
+        });
       });
 
       it(
