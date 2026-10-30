@@ -20,13 +20,18 @@ import { login } from './user';
 const admin = () => ({ username: Cypress.expose('username'), password: Cypress.expose('password') });
 
 /**
- * Fails unless the import of a zip took all its files: rejected ones are reported in the answer,
- * which is 201 all the same. Sent as form data, the answer comes back as an ArrayBuffer.
+ * Imports a zip of units from the fixtures and fails unless all its files were taken: rejected
+ * ones are reported in the answer, which is 201 all the same.
+ * @example
+ * importZipAPI(wsId, 'test_studio_units_download.zip', token);
  */
-export function expectImported(upload: Cypress.Response<ArrayBuffer>, zip: string): void {
-  expect(upload.status, zip).to.equal(201);
-  const report: RequestReportDto = JSON.parse(new TextDecoder().decode(upload.body));
-  expect(report.messages, `problems importing ${zip}`).to.deep.equal([]);
+export function importZipAPI(wsId: string, zip: string, token: string): void {
+  cy.fixture(zip, 'binary')
+    .then(content => cy.importUnitsAPI(wsId, content, token))
+    .then(upload => {
+      expect(upload.status, zip).to.equal(201);
+      expect((upload.body as RequestReportDto).messages, `problems importing ${zip}`).to.deep.equal([]);
+    });
 }
 
 /**
@@ -58,7 +63,7 @@ export function createTestBaseAPI({ zip, units = [] }: { zip?: string; units?: U
                 { id: standardUserId, access: AccessLevel.Developer }
               ], token).its('status').should('equal', 200);
               if (name !== primaryWorkspace) return;
-              if (zip) cy.uploadUnitsAPI(String(ws.body), zip, token).then(upload => expectImported(upload, zip));
+              if (zip) importZipAPI(String(ws.body), zip, token);
               units.forEach(unit => {
                 cy.createUnitAPI(String(ws.body), unit, token).its('status').should('equal', 201);
               });

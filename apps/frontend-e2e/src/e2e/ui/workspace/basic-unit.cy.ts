@@ -48,13 +48,19 @@ describe('Workspace Unit Management (Core CRUD)', () => {
         });
 
       cy.get('button').contains(json.cancel).click();
-      cy.url().should('include', '/properties');
     });
+    // cancelled: the unit stays, and so does what was typed
+    cy.get('.unit-row.selected').should('contain.text', unitCrudUnits.unsaved.shortname);
+    cy.get('input[formControlName="name"]').should('have.value', `${unitCrudUnits.unsaved.name} New Title`);
 
     selectUnit(unitCrudUnits.switchedTo.shortname);
 
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.get('button').contains(json.workspace['reject-changes-label']).click();
     });
+    // rejected: the other unit opens, and the edited one keeps its name
+    cy.get('.unit-row.selected').should('contain.text', unitCrudUnits.switchedTo.shortname);
+    selectUnit(unitCrudUnits.unsaved.shortname);
+    cy.get('input[formControlName="name"]').should('have.value', unitCrudUnits.unsaved.name);
   });
 });

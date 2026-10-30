@@ -1,5 +1,4 @@
 import { Interception } from 'cypress/types/net-stubbing';
-import type { WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
 import {
   primaryWorkspace, baseGroup, lightUnit, AccessLevel, richNotesTestNames
 } from '../../../support/testData';
@@ -14,7 +13,7 @@ import {
   editRichNote,
   waitForSuccess
 } from '../../../support/helpers';
-import { createTestBaseAPI, deleteTestBaseAPI, expectImported } from '../../../support/helpers/test-base';
+import { createTestBaseAPI, deleteTestBaseAPI, importZipAPI } from '../../../support/helpers/test-base';
 
 describe('Unit Rich Notes', () => {
   before(() => {
@@ -110,11 +109,10 @@ describe('Unit Rich Notes', () => {
   });
 
   describe('Block configures personalised rich note tags', () => {
-    const { username, password } = { username: Cypress.expose('username'), password: Cypress.expose('password') };
-
-    // A group of its own, as the tag config belongs to the group, with a workspace and units in it
+    // A group of its own, as the tag config belongs to the group, with a workspace and units in it.
+    // The base's teardown deletes it with every other group.
     before(() => {
-      cy.loginAPI(username, password).then(session => {
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(session => {
         expect(session.status, 'login').to.equal(201);
         const token: string = session.body.accessToken;
         cy.getUserIdAPI(token).then(authData => {
@@ -127,25 +125,9 @@ describe('Unit Rich Notes', () => {
                 { id: String(authData.body.userId), access: AccessLevel.Admin }
               ], token)
                 .its('status').should('equal', 200);
-              cy.uploadUnitsAPI(String(ws.body), 'test2_studio_units_download.zip', token)
-                .then(upload => expectImported(upload, 'test2_studio_units_download.zip'));
+              importZipAPI(String(ws.body), 'test2_studio_units_download.zip', token);
             });
           });
-        });
-      });
-    });
-
-    // by name, also after a test that failed partway; the base's teardown removes only its own group
-    after(() => {
-      cy.loginAPI(username, password).then(session => {
-        expect(session.status, 'login for the cleanup').to.equal(201);
-        const token: string = session.body.accessToken;
-        cy.getWsGroupsAPI(token).then(groups => {
-          expect(groups.status, 'groups').to.equal(200);
-          const ids = (groups.body as WorkspaceGroupInListDto[])
-            .filter(group => group.name === richNotesTestNames.customGroup)
-            .map(group => String(group.id));
-          if (ids.length) cy.deleteGroupsAPI(ids, token).its('status').should('equal', 200);
         });
       });
     });

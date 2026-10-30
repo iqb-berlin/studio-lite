@@ -4,7 +4,8 @@ import {
   baseGroup,
   standardUser,
   reviewTestNames,
-  primaryWorkspace
+  primaryWorkspace,
+  importedUnit
 } from '../../../support/testData';
 
 import {
@@ -402,8 +403,9 @@ describe('Unit Reviews', () => {
       }).then(({ wsId, token }) => {
         cy.getUnitsByWsAPI(wsId, token).then(units => {
           expect(units.status, 'units').to.equal(200);
-          const [unit] = (units.body as { id: number; key: string }[]).filter(listed => listed.key === 'M6_AK0011');
-          expect(unit?.id, 'id of M6_AK0011').to.be.a('number');
+          const [unit] = (units.body as { id: number; key: string }[])
+            .filter(listed => listed.key === importedUnit.shortname);
+          expect(unit?.id, `id of ${importedUnit.shortname}`).to.be.a('number');
           cy.addReviewAPI(wsId, externalReview, token).then(created => {
             expect(created.status, externalReview).to.equal(201);
             cy.getReviewAPI(wsId, String(created.body), token).then(stored => {
