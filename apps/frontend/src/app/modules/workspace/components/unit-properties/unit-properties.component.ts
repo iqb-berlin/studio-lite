@@ -1,4 +1,6 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import {
+  Component, OnDestroy, signal, ViewChild
+} from '@angular/core';
 import {
   FormGroup,
   UntypedFormBuilder,
@@ -132,6 +134,8 @@ export class UnitPropertiesComponent
   itemProfile!: MDProfile;
   variablesLoaded: boolean = false;
   metadataLoaded: boolean = false;
+  private readonly propertiesNotLoadedState = signal(false);
+  readonly propertiesNotLoaded = this.propertiesNotLoadedState.asReadonly();
 
   constructor(
     private fb: UntypedFormBuilder,
@@ -184,6 +188,7 @@ export class UnitPropertiesComponent
     this.selectedUnitId = unitId;
     this.variablesLoaded = false;
     this.metadataLoaded = false;
+    this.propertiesNotLoadedState.set(false);
     this.readData();
   }
 
@@ -200,6 +205,8 @@ export class UnitPropertiesComponent
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(() => {
         this.setupForm();
+        // nothing more is asked for a unit whose properties the server did not answer for
+        if (this.propertiesNotLoaded()) return;
         this.updateVariables();
         this.loadMetaData();
       });
@@ -208,7 +215,10 @@ export class UnitPropertiesComponent
   private setupForm() {
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
     const unitMetadataStore = this.unitStores.metadataStore();
-    if (selectedUnitId > 0 && unitMetadataStore) {
+    // the store of a unit the server did not answer for holds its id alone, and filling the form
+    // with it failed, so that the form went on showing the unit before (#2004)
+    this.propertiesNotLoadedState.set(selectedUnitId > 0 && !!unitMetadataStore && !unitMetadataStore.loaded);
+    if (selectedUnitId > 0 && unitMetadataStore?.loaded) {
       const unitMetadata = unitMetadataStore.getData();
       this.selectedStateId = unitMetadata.state || null;
       const keyControl = this.unitForm.get('key');
@@ -280,6 +290,9 @@ export class UnitPropertiesComponent
           (this.selectedStateColor = '');
       }, 1);
     } else {
+      // bound to the state select beside the form, it would put back the state of the unit before
+      this.selectedStateId = null;
+      this.selectedStateColor = '';
       this.unitForm.setValue(
         {
           key: '',
@@ -341,7 +354,7 @@ export class UnitPropertiesComponent
   private loadMetaData() {
     const selectedUnitId = this.workspaceService.selectedUnit$.getValue();
     const unitMetadataStore = this.unitStores.metadataStore();
-    if (selectedUnitId > 0 && unitMetadataStore) {
+    if (selectedUnitId > 0 && unitMetadataStore?.loaded) {
       this.workspaceSettings = this.workspaceService.workspaceSettings;
       const unitMetadata = unitMetadataStore.getData();
       this.metadataLoader.next(

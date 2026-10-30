@@ -879,7 +879,8 @@
     "title": "Aufgaben-Eigenschaften",
     "modules": "Verona-Module",
     "deprecated": "Veraltet",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "not-loaded": "Die Eigenschaften der Aufgabe konnten nicht geladen werden."
   },
   "status": {
     "true": "Ja",

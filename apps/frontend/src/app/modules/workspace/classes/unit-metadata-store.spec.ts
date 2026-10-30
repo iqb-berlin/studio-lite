@@ -65,6 +65,19 @@ describe('UnitMetadataStore', () => {
     expect(store.getChangedData()).toEqual({ id: 10 });
   });
 
+  // #1992: an emptied value set back was kept as a change, and saving emptied the unit's group
+  it('clears a change to an empty value when the loaded value is set again', () => {
+    const store = new UnitMetadataStore(buildBaseProperties());
+
+    store.setBasicData('k1', 'n1', 'd1', '', 't1', 'r1', 'draft');
+    store.setBasicData('k1', 'n1', 'd1', 'g1', 't1', 'r1', 'draft');
+    store.setPlayer('');
+    store.setPlayer('p1');
+
+    expect(store.changed()).toBe(false);
+    expect(store.getChangedData()).toEqual({ id: 10 });
+  });
+
   it('clones metadata changes and does not share references', () => {
     const store = new UnitMetadataStore(buildBaseProperties());
     const metadata: UnitMetadataValues = {

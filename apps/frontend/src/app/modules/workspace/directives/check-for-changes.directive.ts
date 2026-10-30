@@ -24,6 +24,6 @@ export abstract class CheckForChangesDirective {
           showCancel: true
         }
       }).afterClosed());
-    return dialogResult !== false;
+    return dialogResult === true;
   }
 }

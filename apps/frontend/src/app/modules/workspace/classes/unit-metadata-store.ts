@@ -2,6 +2,9 @@ import { UnitMetadataValues, UnitPropertiesDto } from '@studio-lite-lib/api-dto'
 import { EventEmitter, Signal, signal } from '@angular/core';
 import { dropSavedChanges } from '../utils/saved-changes.utils';
 
+type TextField =
+  'key' | 'name' | 'description' | 'groupName' | 'transcript' | 'reference' | 'state' | 'player' | 'editor' | 'schemer';
+
 /**
  * The unit's properties and metadata while they are being edited, in the same shape as
  * {@link UnitDefinitionStore}: the loaded state, and beside it the fields that differ from it. The
@@ -15,35 +18,27 @@ export class UnitMetadataStore {
   private originalData: UnitPropertiesDto;
   private changedData: UnitPropertiesDto;
 
-  constructor(originalData: UnitPropertiesDto) {
+  /**
+   * @param loaded false for the store of a unit the server did not answer for: it holds the id alone,
+   * and what it lacks is not empty but unknown (#2004).
+   */
+  constructor(originalData: UnitPropertiesDto, readonly loaded = true) {
     this.originalData = originalData;
     this.changedData = <UnitPropertiesDto>{ id: originalData.id };
   }
 
   setPlayer(newPlayer: string): void {
-    if (newPlayer === this.originalData.player) {
-      if (this.changedData.player) delete this.changedData.player;
-    } else {
-      this.changedData.player = newPlayer;
-    }
+    this.setField('player', newPlayer);
     this.notifyChange();
   }
 
   setEditor(newEditor: string): void {
-    if (newEditor === this.originalData.editor) {
-      if (this.changedData.editor) delete this.changedData.editor;
-    } else {
-      this.changedData.editor = newEditor;
-    }
+    this.setField('editor', newEditor);
     this.notifyChange();
   }
 
   setSchemer(newSchemer: string): void {
-    if (newSchemer === this.originalData.schemer) {
-      if (this.changedData.schemer) delete this.changedData.schemer;
-    } else {
-      this.changedData.schemer = newSchemer;
-    }
+    this.setField('schemer', newSchemer);
     this.notifyChange();
   }
 
@@ -56,41 +51,13 @@ export class UnitMetadataStore {
     newReference: string,
     newState:string
   ) {
-    if (newKey === this.originalData.key) {
-      if (this.changedData.key) delete this.changedData.key;
-    } else {
-      this.changedData.key = newKey;
-    }
-    if (newName === this.originalData.name) {
-      if (this.changedData.name) delete this.changedData.name;
-    } else {
-      this.changedData.name = newName;
-    }
-    if (newDescription === this.originalData.description) {
-      if (this.changedData.description) delete this.changedData.description;
-    } else {
-      this.changedData.description = newDescription;
-    }
-    if (newGroup === this.originalData.groupName) {
-      if (this.changedData.groupName) delete this.changedData.groupName;
-    } else {
-      this.changedData.groupName = newGroup;
-    }
-    if (newTranscript === this.originalData.transcript) {
-      if (this.changedData.transcript) delete this.changedData.transcript;
-    } else {
-      this.changedData.transcript = newTranscript;
-    }
-    if (newReference === this.originalData.reference) {
-      if (this.changedData.reference) delete this.changedData.reference;
-    } else {
-      this.changedData.reference = newReference;
-    }
-    if (newState === this.originalData.state) {
-      if (this.changedData.state) delete this.changedData.state;
-    } else {
-      this.changedData.state = newState;
-    }
+    this.setField('key', newKey);
+    this.setField('name', newName);
+    this.setField('description', newDescription);
+    this.setField('groupName', newGroup);
+    this.setField('transcript', newTranscript);
+    this.setField('reference', newReference);
+    this.setField('state', newState);
     this.notifyChange();
   }
 
@@ -148,6 +115,18 @@ export class UnitMetadataStore {
   restore(): void {
     this.changedData = <UnitPropertiesDto>{ id: this.originalData.id };
     this.notifyChange();
+  }
+
+  /**
+   * A value set back to the loaded one is no change any more, whatever it was changed to before: an
+   * empty one was kept, and saving emptied the field (#1992).
+   */
+  private setField(field: TextField, newValue: string): void {
+    if (newValue === this.originalData[field]) {
+      delete this.changedData[field];
+    } else {
+      this.changedData[field] = newValue;
+    }
   }
 
   private notifyChange(): void {
