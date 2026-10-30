@@ -1,5 +1,5 @@
 import { AccessLevel } from '../../../support/testData';
-import { addFirstUser, deleteFirstUser } from '../../../support/helpers';
+import { addFirstUser } from '../../../support/helpers';
 
 describe('Coding instructions saved through the Schemer', () => {
   const group = { id: '', name: 'RichTextGroup' };
@@ -59,10 +59,6 @@ describe('Coding instructions saved through the Schemer', () => {
     });
   });
 
-  after(() => {
-    deleteFirstUser();
-  });
-
   it('preserves formatting in the API and reopened editor, and discards cancelled changes', () => {
     const schemeUrl = `/api/workspaces/${workspaceId}/units/${unitId}/scheme`;
     cy.intercept('GET', schemeUrl).as('loadScheme');
@@ -114,8 +110,7 @@ describe('Coding instructions saved through the Schemer', () => {
     });
   });
 
-  // A test of its own rather than a step of the after hook: failing there, it would keep the
-  // reset that follows from running. The reset does not take the modules.
+  // The reset before the next spec does not take the modules.
   it('removes its module', () => {
     cy.deleteModulesAPI([schemerKey], token).its('status').should('equal', 200);
   });

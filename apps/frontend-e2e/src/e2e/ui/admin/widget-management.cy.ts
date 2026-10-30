@@ -1,18 +1,13 @@
 import {
   addWidgets,
   deleteAllWidgets,
-  addFirstUser,
-  deleteFirstUser
+  addFirstUser
 } from '../../../support/helpers';
 import { widgets as widgetFiles } from '../../../support/testData';
 
 describe('Widget Management', () => {
   before(() => {
     addFirstUser();
-  });
-
-  after(() => {
-    deleteFirstUser();
   });
 
   it('should upload widgets and display them in the table', () => {

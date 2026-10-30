@@ -10,7 +10,6 @@ import {
   addResourcePackage,
   createGroup,
   createNewUser,
-  deleteFirstUser,
   deleteGroup,
   deleteResource,
   deleteUser
@@ -25,9 +24,6 @@ describe('UI Administration Management', () => {
   const ws1 = adminMathWorkspace;
   before(() => {
     addFirstUser();
-  });
-  after(() => {
-    deleteFirstUser();
   });
 
   it('displays admin settings button for admin users', () => {

@@ -33,37 +33,6 @@ export function addFirstUser(): void {
 }
 
 /**
- * Removes the first admin user and leaves the browser logged out, on the login form. An admin
- * cannot delete their own account (#1949), so the database is emptied instead: the users, groups,
- * workspaces and resource packages go, the modules stay.
- * @example
- * deleteFirstUser();
- */
-export function deleteFirstUser(): void {
-  // a test that failed outside the app left the browser there, where the reload at the end would
-  // not bring it back
-  cy.visit('/');
-  cy.resetDb();
-  showLoginFormAfterUserDeleted();
-}
-
-/**
- * Leaves the browser on the login form after the logged-in user was deleted.
- * @example
- * showLoginFormAfterUserDeleted();
- */
-export function showLoginFormAfterUserDeleted(): void {
-  // The deleted user would otherwise stay in the browser: its tokens in localStorage and its auth
-  // data in the running app. Clearing the storage alone is not enough, and visiting '/' from
-  // '/#/admin/...' only changes the hash, so the app is reloaded to start from nothing (#1754).
-  // After a reset of the database the next first user gets id 1 again, and a token left behind
-  // would pass for theirs.
-  cy.clearLocalStorage();
-  cy.reload();
-  cy.get('[data-cy="home-user-name"]').should('be.visible');
-}
-
-/**
  * @param newUser - User data including username, password, email, etc.
  * @example
  * createNewUser({

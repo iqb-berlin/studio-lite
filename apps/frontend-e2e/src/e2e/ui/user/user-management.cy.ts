@@ -4,7 +4,6 @@ import {
   changePassword,
   clearUserFilter,
   createNewUser,
-  deleteFirstUser,
   filterUsers,
   goToAdminUsers,
   login,
@@ -18,10 +17,6 @@ describe('UI User Management', () => {
     addFirstUser();
     createNewUser(standardUser);
     logout();
-  });
-
-  after(() => {
-    deleteFirstUser();
   });
 
   // ─── Self-service (logged in as normal user) ─────────────────────────────────

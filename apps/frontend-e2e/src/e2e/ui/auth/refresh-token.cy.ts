@@ -2,7 +2,6 @@ import { standardUser } from '../../../support/testData';
 import {
   addFirstUser,
   createNewUser,
-  deleteFirstUser,
   login,
   loginWithUser,
   clickIndexTabAdmin
@@ -13,10 +12,6 @@ describe('Token Refresh UI Logic', () => {
     addFirstUser();
     cy.findAdminSettings().click();
     createNewUser(standardUser);
-  });
-
-  after(() => {
-    deleteFirstUser();
   });
 
   it('successfully refreshes the token and retries the failed request', () => {

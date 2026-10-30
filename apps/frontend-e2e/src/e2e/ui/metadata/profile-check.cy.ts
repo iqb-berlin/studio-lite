@@ -6,7 +6,6 @@ import {
   clickIndexTabWsgAdmin,
   createGroup,
   createNewUser,
-  deleteFirstUser,
   waitForSuccess
 } from '../../../support/helpers';
 
@@ -14,9 +13,6 @@ describe('Metadata Profile Management', () => {
   const groups = [metadataMathGroup, metadataGermanGroup];
   before(() => {
     addFirstUser();
-  });
-  after(() => {
-    deleteFirstUser();
   });
 
   it('sets up groups and users', () => {
@@ -78,7 +74,7 @@ describe('Metadata Profile Management', () => {
       .contains('settings')
       .click();
     checkMultipleProfiles(searchProfiles);
-    // waited for, so that the reset in the after hook does not come in the middle of the save
+    // waited for, so that the reset before the next spec does not come in the middle of the save
     cy.intercept('PATCH', '/api/admin/workspace-groups/*').as('saveGroupProfiles');
     cy.get('[data-cy="admin-edit-workspace-group-settings-save-button"]').click();
     waitForSuccess('@saveGroupProfiles');

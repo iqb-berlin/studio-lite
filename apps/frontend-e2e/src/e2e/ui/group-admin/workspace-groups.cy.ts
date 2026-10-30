@@ -10,7 +10,6 @@ import {
   addFirstUser,
   createGroup,
   createNewUser,
-  deleteFirstUser,
   login,
   logout,
   makeAdminOfGroup,
@@ -31,9 +30,6 @@ import {
 describe('Workspace Group Administration', () => {
   before(() => {
     addFirstUser();
-  });
-  after(() => {
-    deleteFirstUser();
   });
 
   it('sets up test workspace and users', () => {

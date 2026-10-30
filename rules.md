@@ -86,6 +86,7 @@
 - **Rule**: Test data comes from the API commands in `support/` (`cy.*API`, `createTestBaseAPI`). Only what the spec checks goes through the interface; a spec that is about the coding report does not click its user, group and workspace into being.
 - **Rule**: A UI spec does not test the API itself: status codes, permissions and error cases belong in `e2e/api`. It asserts that its setup succeeded, so that a failure shows where it happened, and it may read back through the API what the interface saved.
 - **Rule**: Specs in `e2e/ui` import nothing from `e2e/api`, nor the other way round. What both need lives in `support/`.
+- **Rule**: A spec does not reset the database at its end. The hook in `support/e2e.ts` resets it and empties the storage before every spec, so that a spec that fails before its end takes no other with it (#2028). The reset leaves the Verona modules, as well as settings and metadata profiles; a spec removes the modules it installed.
 - **Note**: Creating users, groups and workspaces and uploading modules through the interface stays checked once, in the admin and group-admin specs.
 - **Rationale**: Cypress recommends specs that run in isolation and state that is set up programmatically, not through the interface ([best practices](https://docs.cypress.io/app/core-concepts/best-practices#Organizing-Tests-Logging-In-Controlling-State)). A test base clicked through the admin screens cost half a minute per spec, and to save it, fourteen files came to share one spec and its data (#1967).
 

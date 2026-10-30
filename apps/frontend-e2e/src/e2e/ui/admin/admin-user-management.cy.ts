@@ -6,7 +6,6 @@ import {
   clickIndexTabWsgAdmin,
   createGroup,
   createNewUser,
-  deleteFirstUser,
   deleteGroup,
   deleteUser,
   editInput,
@@ -29,10 +28,6 @@ describe('Admin User Management', () => {
     cy.clearLocalStorage();
     cy.clearCookies();
     addFirstUser();
-  });
-
-  after(() => {
-    deleteFirstUser();
   });
 
   // ─── Users tab: component visibility ─────────────────────────────────────────

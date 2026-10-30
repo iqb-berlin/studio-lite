@@ -190,8 +190,7 @@ describe('Cleanup API tests', () => {
   });
 
   describe('90. DELETE /api/admin/users/id after the database was emptied', () => {
-    // The first user cannot delete their own account (#1949); the reset removes it and leaves the
-    // database empty for the next spec.
+    // The first user cannot delete their own account (#1949); the reset removes it.
     before(() => cy.resetDb());
 
     it('403 negative test: should deny deletion of a user account that no longer exists', () => {

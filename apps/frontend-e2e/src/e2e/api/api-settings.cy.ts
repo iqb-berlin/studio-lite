@@ -29,10 +29,6 @@ describe('Admin settings API tests', () => {
           });
       });
   });
-  after(() => {
-    // the first user cannot delete their own account (#1949)
-    cy.resetDb();
-  });
 
   describe('100. GET /api/admin/settings/config', () => {
     it('200 positive test: should successfully retrieve the current configuration ' +

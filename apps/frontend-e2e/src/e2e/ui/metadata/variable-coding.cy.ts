@@ -15,7 +15,6 @@ import {
   createGroup,
   createItem,
   deleteAllModules,
-  deleteFirstUser,
   goToItem,
   goToWsMenu,
   importExercise,
@@ -32,10 +31,6 @@ describe('Variable and Item Metadata Coherence', () => {
 
   before(() => {
     addFirstUser();
-  });
-
-  after(() => {
-    deleteFirstUser();
   });
 
   it('sets up workspace with modules and profile', () => {
@@ -152,8 +147,7 @@ describe('Variable and Item Metadata Coherence', () => {
     cy.contains('button', 'send').click({ force: true });
   });
 
-  // A test of its own rather than a step of the after hook: failing there, it would keep the
-  // reset that follows from running. The reset does not take the modules.
+  // The reset before the next spec does not take the modules.
   it('removes its modules', () => {
     deleteAllModules();
   });

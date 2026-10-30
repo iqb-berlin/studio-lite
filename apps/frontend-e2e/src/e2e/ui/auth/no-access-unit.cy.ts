@@ -2,7 +2,6 @@ import { AccessLevel, standardUser } from '../../../support/testData';
 import {
   addFirstUser,
   createNewUser,
-  deleteFirstUser,
   FIRST_WORKSPACE_REQUEST_TIMEOUT,
   loginWithUser
 } from '../../../support/helpers';
@@ -39,10 +38,6 @@ describe('A unit link into a workspace without access', () => {
         });
       });
     });
-  });
-
-  after(() => {
-    deleteFirstUser();
   });
 
   it('keeps the user logged in and says that the access is missing', () => {

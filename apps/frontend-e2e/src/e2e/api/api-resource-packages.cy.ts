@@ -91,7 +91,4 @@ describe('Admin settings API tests', () => {
         });
     });
   });
-
-  // the first user cannot delete their own account (#1949)
-  after(() => cy.resetDb());
 });

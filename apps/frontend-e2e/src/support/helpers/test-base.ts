@@ -14,7 +14,6 @@ import {
   standardUser,
   UnitData
 } from '../testData';
-import { showLoginFormAfterUserDeleted } from './admin';
 import { login } from './user';
 
 const admin = () => ({ username: Cypress.expose('username'), password: Cypress.expose('password') });
@@ -47,8 +46,8 @@ export function importZipAPI(wsId: string, zip: string, token: string): void {
 }
 
 /**
- * Builds the base and logs the browser in as the first user. Needs an empty database: the first
- * user can only be created while there is none.
+ * Builds the base and logs the browser in as the first user. Needs an empty database, as the reset
+ * before every spec leaves it: the first user can only be created while there is none.
  * @param zip - a zip of units in the fixtures, imported into the primary workspace
  * @param units - empty units created in the primary workspace, without editor, player or schemer
  * @example
@@ -105,28 +104,18 @@ export function createTestBaseAPI(
 }
 
 /**
- * Removes the base again and leaves the browser logged out on the login form, so that the next
- * spec can build its own: no user, group, workspace or module is left, while the app settings and
- * the metadata profiles stay as the spec left them.
+ * Removes what of the base the reset before the next spec does not take: its modules, and any
+ * other a spec installed. Users, groups, workspaces, units and reviews go with the reset (#2028).
  */
 export function deleteTestBaseAPI(): void {
   const { username, password } = admin();
-  // a setup that failed before its login left the browser outside the app, which the reload at
-  // the end would not bring back; visited while the user still exists, the app does not run
-  // with a deleted one
-  cy.visit('/');
   cy.loginAPI(username, password).then(session => {
     expect(session.status, 'login for the teardown').to.equal(201);
     const token: string = session.body.accessToken;
-    // its own modules and any other a spec installed, as the reset does not take them
     cy.getModulesAPI(token).then(installed => {
       expect(installed.status, 'modules').to.equal(200);
       const keys = (installed.body as VeronaModuleInListDto[]).map(module => module.key);
       if (keys.length) cy.deleteModulesAPI(keys, token).its('status').should('equal', 200);
     });
   });
-  // the first user cannot delete their own account (#1949), so the database is reset, which
-  // takes every user and group with it, and the workspaces, units and reviews in them
-  cy.resetDb();
-  showLoginFormAfterUserDeleted();
 }

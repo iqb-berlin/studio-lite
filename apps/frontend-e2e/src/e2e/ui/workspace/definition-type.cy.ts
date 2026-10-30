@@ -21,7 +21,6 @@ describe('Workspace Definition Type', () => {
     untyped: { key: 'DT_UNTYPED', type: '' }
   };
 
-  // See module-switch.cy.ts: the base needs an empty database and is torn down again afterwards.
   before(() => {
     createTestBaseAPI();
   });
