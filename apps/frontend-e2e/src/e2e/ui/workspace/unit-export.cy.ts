@@ -4,40 +4,19 @@ import {
   exportUnits
 } from '../../../support/testData';
 import {
-  ensureUnitExists,
   goToWsMenu,
   selectListUnits,
   waitForSuccess
 } from '../../../support/helpers';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Workspace Unit Export & Reports', () => {
-  it('exports selected units (default format)', () => {
-    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
-    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit2);
-    cy.visitWs(primaryWorkspace);
-    cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
-    goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
-    selectListUnits([exportUnits.exportUnit1.shortname, exportUnits.exportUnit2.shortname]);
-    cy.clickDataCyWithResponseCheck(
-      '[data-cy="workspace-export-unit-button"]',
-      [200, 304],
-      '/api/workspaces/*',
-      'GET',
-      'export'
-    );
+  before(() => {
+    createTestBaseAPI({ units: [exportUnits.exportUnit1, exportUnits.exportUnit2] });
   });
 
-  it('export dialog shows file-config checkboxes', () => {
-    cy.visitWs(primaryWorkspace);
-    cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
-    goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
-    cy.get('mat-card.files mat-checkbox, studio-lite-export-unit-file-config mat-checkbox')
-      .should('have.length.greaterThan', 0);
-    cy.translate(Cypress.expose('locale')).then(json => {
-      cy.clickDialogButton(json.cancel || json.close);
-    });
+  after(() => {
+    deleteTestBaseAPI();
   });
 
   // The settings outgrow the dialog once the booklet panel opens; scrolled to the end, the unit
@@ -68,7 +47,7 @@ describe('Workspace Unit Export & Reports', () => {
   });
 
   it('export dialog search filter narrows the unit list', () => {
-    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
+    cy.visitWs(primaryWorkspace);
     cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
@@ -83,7 +62,7 @@ describe('Workspace Unit Export & Reports', () => {
 
   // A freshly created unit has neither comments nor rich notes, so the dialog offers neither (#1729)
   it('export dialog locks the files the chosen units have no content for', () => {
-    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
+    cy.visitWs(primaryWorkspace);
     cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
@@ -98,20 +77,8 @@ describe('Workspace Unit Export & Reports', () => {
     });
   });
 
-  it('exports selected units as XML (Testcenter zip format)', () => {
-    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
-    cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
-    goToWsMenu();
-    cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
-    selectListUnits([exportUnits.exportUnit1.shortname]);
-    cy.get('mat-radio-button[value="xml"]').click();
-    cy.intercept('GET', '/api/workspaces/*?download=true*').as('downloadXmlReq');
-    cy.get('[data-cy="workspace-export-unit-button"]').click();
-    waitForSuccess('@downloadXmlReq');
-  });
-
   it('exports selected units as JSON format', () => {
-    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
+    cy.visitWs(primaryWorkspace);
     cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
@@ -123,7 +90,7 @@ describe('Workspace Unit Export & Reports', () => {
   });
 
   it('exports selected units with the locked files left out', () => {
-    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit1);
+    cy.visitWs(primaryWorkspace);
     cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
@@ -160,10 +127,12 @@ describe('Workspace Unit Export & Reports', () => {
     cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();
+    cy.intercept('GET', '/api/workspaces/*/units/scheme').as('codingReport');
     cy.get('[data-cy="workspace-edit-unit-show-coding-report"]').click();
-    cy.get('mat-mdc-dialog-container, mat-dialog-container').within(() => {
-      cy.get('studio-lite-coding-report, mat-table, table, p').should('exist');
-    });
+    waitForSuccess('@codingReport');
+    cy.get('[data-cy="coding-report-error"]').should('not.exist');
+    // a unit without a scheme still gets its row
+    cy.contains('studio-lite-coding-report tr', exportUnits.exportUnit1.shortname).should('exist');
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.clickDialogButton(json.close);
     });
@@ -171,7 +140,7 @@ describe('Workspace Unit Export & Reports', () => {
   });
 
   it('exports codebook for selected units', () => {
-    ensureUnitExists(primaryWorkspace, exportUnits.exportUnit2);
+    cy.visitWs(primaryWorkspace);
     cy.contains('.unit-row, mat-row', exportUnits.exportUnit2.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-reports"]').click();

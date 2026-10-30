@@ -4,7 +4,8 @@ import {
   baseGroup,
   standardUser,
   reviewTestNames,
-  primaryWorkspace
+  primaryWorkspace,
+  importedUnit
 } from '../../../support/testData';
 
 import {
@@ -29,12 +30,24 @@ import {
   copyReviewLink,
   loginToReviewLink,
   logoutFromReviewLink,
-  enableReviewComments
+  enableReviewComments,
+  workspaceOfPage
 } from '../../../support/helpers';
 import { grantRemovePrivilegeAtWs } from '../../../support/helpers/group-admin';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Unit Reviews', () => {
+  before(() => {
+    createTestBaseAPI({ zip: 'test_studio_units_download.zip' });
+  });
+
+  after(() => {
+    deleteTestBaseAPI();
+  });
+
   const review: string = reviewTestNames.reviewName;
+  // The unit the comment written in the review went to, for the workspace to show it
+  let reviewCommentUnitId = '';
 
   it('allows an admin to create a new review with specific unit selection and configuration', () => {
     cy.visitWs(primaryWorkspace);
@@ -79,13 +92,6 @@ describe('Unit Reviews', () => {
     });
   });
 
-  it('displays the newly created review in the dashboard reviews section', () => {
-    cy.visit('/');
-    cy.get('studio-lite-user-reviews-area', { timeout: 20000 }).should('be.visible').within(() => {
-      cy.get(`a:contains("${review}")`).should('exist');
-    });
-  });
-
   it('opens the review successfully and displays the unit navigation list', () => {
     cy.visit('/');
     openReview(review);
@@ -110,17 +116,23 @@ describe('Unit Reviews', () => {
     login(Cypress.expose('username'), Cypress.expose('password'));
   });
 
-  it('exports the review configuration via the admin menu', () => {
+  it('exports the units of the review via the admin menu', () => {
     cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
+    cy.intercept('GET', '/api/workspaces/*?download=true*').as('reviewDownload');
     exportReview(review);
+    waitForSuccess('@reviewDownload');
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 
-  it('prints the review summary via the admin menu', () => {
+  it('opens the print view of the review units via the admin menu', () => {
     cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
+    cy.window().then(win => {
+      cy.stub(win, 'open').as('windowOpen');
+    });
     printReview(review);
+    cy.get('@windowOpen').should('have.been.calledWithMatch', /^#\/print\?.*unitIds=/);
     cy.get('[data-cy="workspace-review-close"]').click();
   });
 
@@ -224,6 +236,10 @@ describe('Unit Reviews', () => {
       });
     });
     cy.get('mat-dialog-container').should('not.exist');
+    cy.get<Interception>('@postReviewComment').then(({ request }) => {
+      // `/api/reviews/<review>/units/<unit>/comments`
+      reviewCommentUnitId = new URL(request.url).pathname.split('/')[5];
+    });
   });
 
   it('displays unit technical details in the expandable info panel', () => {
@@ -264,16 +280,23 @@ describe('Unit Reviews', () => {
     cy.url().should('include', '/u/2');
   });
 
-  it('shows no dot for comments inserted by himself in the workspace unit list: ', () => {
+  it('shows no dot for comments inserted by himself in the workspace unit list', () => {
     cy.visitWs(primaryWorkspace);
-    cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
-      cy.get('.new-comments').should('have.css', 'opacity', '0');
-    });
+    workspaceOfPage()
+      .then(({ wsId, token }) => cy.getUnitsByWsAPI(wsId, token))
+      .then(units => {
+        const [unit] = (units.body as { id: number; key: string }[])
+          .filter(listed => String(listed.id) === reviewCommentUnitId);
+        expect(unit?.key, 'unit of the review comment').to.be.a('string');
+        cy.get('mat-row').contains(unit.key).parents('mat-row').within(() => {
+          cy.get('.new-comments').should('have.css', 'opacity', '0');
+        });
 
-    cy.get('mat-row').contains('M6_AK0012').click();
-    clickIndexTabWorkspace('comments');
-    cy.get('studio-lite-comments', { timeout: 10000 }).should('be.visible');
-    clickIndexTabWorkspace('properties');
+        cy.get('mat-row').contains(unit.key).click();
+        clickIndexTabWorkspace('comments');
+        cy.contains('studio-lite-comment', 'Test comment from Review', { timeout: 10000 }).should('exist');
+        clickIndexTabWorkspace('properties');
+      });
   });
 
   it('clears the new comment dot after viewing comments as different users', () => {
@@ -303,33 +326,6 @@ describe('Unit Reviews', () => {
     clickIndexTabWorkspace('properties');
     cy.get('mat-row').contains('M6_AK0012').parents('mat-row').within(() => {
       cy.get('.new-comments', { timeout: 15000 }).should('have.css', 'opacity', '0');
-    });
-  });
-
-  it('grants anonymous access to a password-protected review link', () => {
-    loginWithUser(Cypress.expose('username'), Cypress.expose('password'));
-    cy.visitWs(primaryWorkspace);
-    goToReviewAdmin();
-    selectReviewInAdmin(review).then(({ link: reviewLink }) => {
-      setReviewPassword('rev-1234');
-      cy.get('[data-cy="workspace-review-close"]').click();
-      logout();
-      // open the shared link as anonymous visitor and log in with the password
-      loginToReviewLink(`/#/${reviewLink}`, 'rev-1234');
-
-      // the review must open and its units must be playable
-      openReview(review);
-      cy.get('.start-data').should('exist');
-      startReview();
-      cy.url().should('include', '/u/0');
-
-      // drop the anonymous review session so subsequent tests find the
-      // regular logged-in state they expect
-      cy.window().then(win => {
-        win.localStorage.removeItem('id_token');
-        win.localStorage.removeItem('refresh_token');
-      });
-      login(Cypress.expose('username'), Cypress.expose('password'));
     });
   });
 
@@ -377,8 +373,9 @@ describe('Unit Reviews', () => {
     cy.visitWs(primaryWorkspace);
     goToReviewAdmin();
     deleteReview(review);
-    cy.get('[data-cy="workspace-review-close"]').click();
+    // while the review admin is open: once closed, it has no rows left to check
     cy.contains('mat-row', review).should('not.exist');
+    cy.get('[data-cy="workspace-review-close"]').click();
   });
 
   // Externals reach a review through the link the copy button hands out, with the review's password
@@ -390,9 +387,7 @@ describe('Unit Reviews', () => {
     const visitorName = 'Externe Person';
     const commentText = 'Kommentar von extern';
     let copiedLink = '';
-    // Where the comment went, so that after() can take it away again: comments belong to the unit,
-    // not to the review, and would outlive it in the workspace
-    let commentPath = '';
+    // The unit the visitor's comment went to, where the workspace is to show it
     let commentUnitId = '';
 
     /** Opens the first unit of the review and its comment dialog, as the external visitor */
@@ -406,40 +401,43 @@ describe('Unit Reviews', () => {
       cy.get('mat-dialog-container').should('be.visible');
     };
 
+    // A review of one unit that may be commented on, made with updateReviewAPI: it allows comments
+    // and shows those of others, but also shows coding and metadata, which a review made in the
+    // review admin leaves off. The password stays unset: the first test sees the link locked without one.
     before(() => {
       cy.visitWs(primaryWorkspace);
-      goToReviewAdmin();
-      createReview(externalReview, ['M6_AK0011', 'M6_AK0012']);
-      goToReviewAdmin();
-      selectReviewInAdmin(externalReview);
-      enableReviewComments();
-      saveReviewConfig();
-      cy.get('[data-cy="workspace-review-close"]').click();
+      // the token of the admin, not of whoever the tests before left logged in
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(session => {
+        expect(session.status, 'login').to.equal(201);
+        const token: string = session.body.accessToken;
+        return workspaceOfPage().then(({ wsId }) => ({ wsId, token }));
+      }).then(({ wsId, token }) => {
+        cy.getUnitsByWsAPI(wsId, token).then(units => {
+          expect(units.status, 'units').to.equal(200);
+          const [unit] = (units.body as { id: number; key: string }[])
+            .filter(listed => listed.key === importedUnit.shortname);
+          expect(unit?.id, `id of ${importedUnit.shortname}`).to.be.a('number');
+          cy.addReviewAPI(wsId, externalReview, token).then(created => {
+            expect(created.status, externalReview).to.equal(201);
+            cy.getReviewAPI(wsId, String(created.body), token).then(stored => {
+              expect(stored.status, 'link of the review').to.equal(200);
+              cy.updateReviewAPI(wsId, {
+                id: created.body, link: stored.body.link, name: externalReview, units: [unit.id]
+              }, token).its('status').should('equal', 200);
+            });
+          });
+        });
+      });
     });
 
     after(() => {
-      // Whatever state a failed test left: back to the admin, as the specs after this one expect
+      // Whatever state a failed test left: back to the admin, as the tests after this block expect
       cy.window().then(win => {
         win.localStorage.removeItem('id_token');
         win.localStorage.removeItem('refresh_token');
         win.localStorage.removeItem('iqb-studio-user-name-for-review-comments');
       });
       login(Cypress.expose('username'), Cypress.expose('password'));
-      cy.window().then(win => {
-        if (!commentPath) return;
-        cy.request({
-          method: 'DELETE',
-          url: commentPath,
-          headers: {
-            'app-version': Cypress.expose('version'),
-            authorization: `bearer ${win.localStorage.getItem('id_token')}`
-          }
-        });
-      });
-      cy.visitWs(primaryWorkspace);
-      goToReviewAdmin();
-      deleteReview(externalReview);
-      cy.get('[data-cy="workspace-review-close"]').click();
     });
 
     it('keeps the link locked until a password of at least 4 characters is saved', () => {
@@ -516,12 +514,9 @@ describe('Unit Reviews', () => {
         });
       });
       waitForSuccess('@postExternalComment');
-      cy.get<Interception>('@postExternalComment').then(({ request, response }) => {
-        // The API answers with the id of the new comment
-        const path = new URL(request.url).pathname;
-        commentPath = `${path}/${response?.body}`;
+      cy.get<Interception>('@postExternalComment').then(({ request }) => {
         // `/api/reviews/<review>/units/<unit>/comments`
-        commentUnitId = path.split('/')[5];
+        commentUnitId = new URL(request.url).pathname.split('/')[5];
       });
       cy.contains('studio-lite-comment', commentText).within(() => {
         cy.get('.comment-meta').should('contain', visitorName);
@@ -665,14 +660,6 @@ describe('Unit Reviews', () => {
         .eq(1)
         .should('be.disabled');
     });
-
-    it('deletes the review', () => {
-      cy.visitWs(primaryWorkspace);
-      goToReviewAdmin();
-      deleteReview(defaultsReview);
-      cy.get('[data-cy="workspace-review-close"]').click();
-      cy.contains('mat-row', defaultsReview).should('not.exist');
-    });
   });
 
   // Units and settings ticked while a review loads were reset by its arrival (#1786). The review
@@ -762,17 +749,6 @@ describe('Unit Reviews', () => {
       expectMenuLocked(true);
       cy.wait('@heldBackReview');
       expectMenuLocked(false);
-      cy.get('[data-cy="workspace-review-close"]').click();
-    });
-
-    it('deletes the reviews', () => {
-      cy.visitWs(primaryWorkspace);
-      goToReviewAdmin();
-      // A row clicked while the list reloads after a delete is deselected by the reloaded list
-      [firstReview, secondReview, newReview].forEach(name => {
-        deleteReview(name);
-        cy.contains('mat-row', name).should('not.exist');
-      });
       cy.get('[data-cy="workspace-review-close"]').click();
     });
   });

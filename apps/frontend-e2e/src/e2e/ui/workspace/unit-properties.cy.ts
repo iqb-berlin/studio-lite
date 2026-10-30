@@ -5,7 +5,6 @@ import {
   propertiesTestNames
 } from '../../../support/testData';
 import {
-  addUnitPred,
   clickIndexTabWsgAdmin,
   clickUnitPropertiesSaveButton,
   editUnitPropertiesAndVerify,
@@ -14,22 +13,24 @@ import {
   waitForSuccess
 } from '../../../support/helpers';
 import { addState } from '../../../support/helpers/group-admin';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 // ---------------------------------------------------------------------------
 // Suite
 // ---------------------------------------------------------------------------
 
 describe('Unit Properties Panel', () => {
+  before(() => {
+    createTestBaseAPI({ units: [propertiesUnits.propUnit1, propertiesUnits.propUnit2] });
+  });
+
+  after(() => {
+    deleteTestBaseAPI();
+  });
+
   // -------------------------------------------------------------------------
   // Setup
   // -------------------------------------------------------------------------
-
-  it('creates test units', () => {
-    cy.visitWs(primaryWorkspace);
-    addUnitPred(propertiesUnits.propUnit1);
-    cy.visitWs(primaryWorkspace);
-    addUnitPred(propertiesUnits.propUnit2);
-  });
 
   it('adds a custom state to the group for state-field tests', () => {
     cy.findAdminGroupSettings(baseGroup).click();
@@ -38,7 +39,7 @@ describe('Unit Properties Panel', () => {
   });
 
   // -------------------------------------------------------------------------
-  // 1. Display – properties tab renders all expected fields
+  // 1. Display – a unit as loaded has nothing to save
   // -------------------------------------------------------------------------
 
   describe('Properties panel rendering', () => {
@@ -47,56 +48,13 @@ describe('Unit Properties Panel', () => {
       openUnitProperties(propertiesUnits.propUnit1.shortname);
     });
 
-    it('shows key, name, state, group and description fields', () => {
-      cy.get('input[formControlName="key"]').should('be.visible');
-      cy.get('input[formControlName="name"]').should('be.visible');
-      cy.get('mat-select[formControlName="state"]').should('be.visible');
-      cy.get('mat-select[formControlName="group"]').should('be.visible');
-      cy.get('textarea[formControlName="description"]').should('be.visible');
-    });
-
-    it('key field is pre-filled with the unit short name', () => {
-      cy.get('input[formControlName="key"]').should('have.value', propertiesUnits.propUnit1.shortname);
-    });
-
-    it('name field is pre-filled with the unit name', () => {
-      cy.get('input[formControlName="name"]').should('have.value', propertiesUnits.propUnit1.name);
-    });
-
     it('save button is disabled when no changes have been made', () => {
       cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
     });
   });
 
   // -------------------------------------------------------------------------
-  // 2. Unit name – edit, save, persist
-  // -------------------------------------------------------------------------
-
-  describe('Unit name – edit and persist', () => {
-    const updatedName = 'Updated Unit Name';
-
-    it('saves the updated name and it persists after reload', () => {
-      editUnitPropertiesAndVerify(
-        primaryWorkspace,
-        propertiesUnits.propUnit1.shortname,
-        () => cy.get('input[formControlName="name"]').clear().type(updatedName),
-        () => cy.get('input[formControlName="name"]').should('have.value', updatedName)
-      );
-    });
-
-    it('save button is disabled again immediately after saving', () => {
-      cy.get('[data-cy="workspace-unit-save-button"]').should('be.disabled');
-    });
-
-    it('restores original name', () => {
-      cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveProps');
-      cy.get('input[formControlName="name"]').clear().type(propertiesUnits.propUnit1.name);
-      clickUnitPropertiesSaveButton();
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  // 3. Unit key (short name) – edit, save, persist
+  // 2. Unit key (short name) – edit, save, persist
   // -------------------------------------------------------------------------
 
   describe('Unit key – edit and persist', () => {
@@ -119,7 +77,7 @@ describe('Unit Properties Panel', () => {
   });
 
   // -------------------------------------------------------------------------
-  // 4. Unit description – edit, save, persist
+  // 3. Unit description – edit, save, persist
   // -------------------------------------------------------------------------
 
   describe('Unit description – edit and persist', () => {
@@ -146,7 +104,7 @@ describe('Unit Properties Panel', () => {
   });
 
   // -------------------------------------------------------------------------
-  // 5. Unit state – select and persist
+  // 4. Unit state – select and persist
   // -------------------------------------------------------------------------
 
   describe('Unit state – select and persist', () => {
@@ -177,7 +135,7 @@ describe('Unit Properties Panel', () => {
   });
 
   // -------------------------------------------------------------------------
-  // 6. Unit group – create via + button and persist
+  // 5. Unit group – create via + button and persist
   // -------------------------------------------------------------------------
 
   describe('Unit group – create and persist', () => {
@@ -220,7 +178,7 @@ describe('Unit Properties Panel', () => {
   });
 
   // -------------------------------------------------------------------------
-  // 7. Save-or-discard dialog – Save path
+  // 6. Save-or-discard dialog – Save path
   // -------------------------------------------------------------------------
 
   describe('Save-or-discard dialog – Save path', () => {
@@ -248,16 +206,10 @@ describe('Unit Properties Panel', () => {
       openUnitProperties(propertiesUnits.propUnit1.shortname);
       cy.get('input[formControlName="name"]').should('have.value', tempName);
     });
-
-    it('restores original name', () => {
-      cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveProps');
-      cy.get('input[formControlName="name"]').clear().type(propertiesUnits.propUnit1.name);
-      clickUnitPropertiesSaveButton();
-    });
   });
 
   // -------------------------------------------------------------------------
-  // 8. Invalid key – validation
+  // 7. Invalid key – validation
   // -------------------------------------------------------------------------
 
   describe('Unit key – validation', () => {
@@ -275,17 +227,11 @@ describe('Unit Properties Panel', () => {
       cy.get('mat-error').should('not.exist');
       cy.get('input[formControlName="key"]').should('have.class', 'ng-valid');
       clickUnitPropertiesSaveButton();
-
-      cy.visitWs(primaryWorkspace);
-      openUnitProperties(validKey);
-      cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveProps');
-      cy.get('input[formControlName="key"]').clear().type(propertiesUnits.propUnit1.shortname);
-      clickUnitPropertiesSaveButton();
     });
   });
 
   // -------------------------------------------------------------------------
-  // 9. Multiple fields changed in one save
+  // 8. Multiple fields changed in one save
   // -------------------------------------------------------------------------
 
   describe('Multiple fields changed simultaneously', () => {

@@ -5,15 +5,19 @@ import {
 } from '../../../support/testData';
 import {
   clickIndexTabWorkspace,
-  ensureUnitExists,
   goToWsMenu,
   selectListUnits,
   selectUnit
 } from '../../../support/helpers';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Unit Print Preview', () => {
+  before(() => {
+    createTestBaseAPI({ zip: 'test_studio_units_download.zip', units: [unitCrudUnits.crudPrint] });
+  });
+
   after(() => {
-    cy.visitWs(primaryWorkspace);
+    deleteTestBaseAPI();
   });
 
   it('displays unit key, name and properties in studio-lite-unit-properties', () => {
@@ -251,7 +255,7 @@ describe('Unit Print Preview', () => {
       ]
     }).as('getComments');
 
-    ensureUnitExists(primaryWorkspace, unitCrudUnits.crudPrint);
+    cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-preview-units"]').click();
     cy.get('[data-cy="workspace-select-unit-list-filter-units"]')

@@ -1,63 +1,39 @@
 import {
-  baseGroup,
   primaryWorkspace,
   unitCrudUnits
 } from '../../../support/testData';
 import {
-  addUnitFromExisting,
-  addUnitPred,
   clickIndexTabWorkspace,
   deleteUnit,
-  importExercise,
   selectUnit
 } from '../../../support/helpers';
-import { createTestBaseAPI } from '../../../support/helpers/test-base';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Workspace Unit Management (Core CRUD)', () => {
   before(() => {
-    createTestBaseAPI();
+    createTestBaseAPI({ units: [unitCrudUnits.crud1, unitCrudUnits.unsaved, unitCrudUnits.switchedTo] });
   });
 
-  it('imports test units', () => {
-    cy.visitWs(primaryWorkspace);
-    importExercise('test_studio_units_download.zip');
-    cy.contains('M6_AK0011').should('exist');
-  });
-
-  it('creates new units', () => {
-    cy.visitWs(primaryWorkspace);
-    addUnitPred(unitCrudUnits.crud1);
-    cy.visitWs(primaryWorkspace);
-    addUnitPred(unitCrudUnits.crud2);
-    cy.visitWs(primaryWorkspace);
-    addUnitPred(unitCrudUnits.crudPrint);
-  });
-
-  it('creates a unit from existing unit', () => {
-    cy.visitWs(primaryWorkspace);
-    addUnitFromExisting(
-      `${baseGroup}: ${primaryWorkspace}`,
-      unitCrudUnits.crud1,
-      unitCrudUnits.crudFromExisting
-    );
-    cy.visitWs(primaryWorkspace);
-    cy.contains(unitCrudUnits.crudFromExisting.shortname).should('exist');
+  after(() => {
+    deleteTestBaseAPI();
   });
 
   it('deletes a unit', () => {
     cy.visitWs(primaryWorkspace);
+    cy.contains(unitCrudUnits.crud1.shortname).should('exist');
     deleteUnit(unitCrudUnits.crud1.shortname);
+    cy.contains(unitCrudUnits.crud1.shortname).should('not.exist');
   });
 
   it('verifies save-or-discard dialog when navigating with unsaved changes', () => {
     cy.visitWs(primaryWorkspace);
-    selectUnit('M6_AK0011');
-    cy.get('.unit-row.selected').should('contain.text', 'M6_AK0011');
+    selectUnit(unitCrudUnits.unsaved.shortname);
+    cy.get('.unit-row.selected').should('contain.text', unitCrudUnits.unsaved.shortname);
     clickIndexTabWorkspace('properties');
 
     cy.get('input[formControlName="name"]').type(' New Title');
 
-    selectUnit('M6_AK0012');
+    selectUnit(unitCrudUnits.switchedTo.shortname);
 
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.get('studio-lite-save-or-discard, mat-dialog-container', {
@@ -72,13 +48,19 @@ describe('Workspace Unit Management (Core CRUD)', () => {
         });
 
       cy.get('button').contains(json.cancel).click();
-      cy.url().should('include', '/properties');
     });
+    // cancelled: the unit stays, and so does what was typed
+    cy.get('.unit-row.selected').should('contain.text', unitCrudUnits.unsaved.shortname);
+    cy.get('input[formControlName="name"]').should('have.value', `${unitCrudUnits.unsaved.name} New Title`);
 
-    selectUnit('M6_AK0012');
+    selectUnit(unitCrudUnits.switchedTo.shortname);
 
     cy.translate(Cypress.expose('locale')).then(json => {
       cy.get('button').contains(json.workspace['reject-changes-label']).click();
     });
+    // rejected: the other unit opens, and the edited one keeps its name
+    cy.get('.unit-row.selected').should('contain.text', unitCrudUnits.switchedTo.shortname);
+    selectUnit(unitCrudUnits.unsaved.shortname);
+    cy.get('input[formControlName="name"]').should('have.value', unitCrudUnits.unsaved.name);
   });
 });

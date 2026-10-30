@@ -6,14 +6,23 @@ import {
 } from '../../../support/testData';
 import {
   addUnitFromExisting,
-  ensureUnitExists,
   goToWsMenu,
   moveUnit
 } from '../../../support/helpers';
+import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 describe('Workspace Unit Move & Copy Operations', () => {
+  before(() => {
+    createTestBaseAPI({
+      units: [moveCopyUnits.copySource, moveCopyUnits.moveTarget, moveCopyUnits.copyTarget]
+    });
+  });
+
+  after(() => {
+    deleteTestBaseAPI();
+  });
+
   it('creates unit from existing unit within same workspace', () => {
-    ensureUnitExists(primaryWorkspace, moveCopyUnits.copySource);
     cy.visitWs(primaryWorkspace);
     addUnitFromExisting(`${baseGroup}: ${primaryWorkspace}`, moveCopyUnits.copySource, moveCopyUnits.newFromExisting);
     cy.visitWs(primaryWorkspace);
@@ -22,7 +31,6 @@ describe('Workspace Unit Move & Copy Operations', () => {
   });
 
   it('moves unit to another workspace and verifies removal from source workspace', () => {
-    ensureUnitExists(primaryWorkspace, moveCopyUnits.moveTarget);
     moveUnit(primaryWorkspace, secondaryWorkspace, moveCopyUnits.moveTarget);
     cy.visitWs(secondaryWorkspace);
     cy.contains(moveCopyUnits.moveTarget.shortname).should('exist');
@@ -31,7 +39,6 @@ describe('Workspace Unit Move & Copy Operations', () => {
   });
 
   it('copies unit to another workspace and verifies target workspace', () => {
-    ensureUnitExists(primaryWorkspace, moveCopyUnits.copyTarget);
     cy.visitWs(primaryWorkspace);
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-copy-unit"]').click();
