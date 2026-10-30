@@ -238,6 +238,16 @@ describe('Aspect Editor Elements Creation', () => {
 });
 
 describe('Aspect Coding Scheme (Kodierung)', () => {
+  // The dialog that generates a coding gives the focus to its first field once it has opened, and
+  // what was typed before goes there. Since Schemer 2.9 that can happen during the typing: the space
+  // in the text ticked the checkbox that reads the input as a number, and the dialog could no
+  // longer generate anything (#2053).
+  const waitForDialogFocus = () => {
+    cy.get('mat-dialog-container').should($dialog => {
+      expect($dialog[0].contains($dialog[0].ownerDocument.activeElement), 'focus in the dialog').to.equal(true);
+    });
+  };
+
   it('opens unit and navigates to coding (schemer) tab', () => {
     cy.visitWs(primaryWorkspace);
     selectUnit(definitionAllElementsUnit.shortname);
@@ -259,6 +269,7 @@ describe('Aspect Coding Scheme (Kodierung)', () => {
           (el.getAttribute('mattooltip') || '').includes('Kodierung generieren'))
         .first()
         .click();
+      waitForDialogFocus();
       cy.get('mat-dialog-content textarea', { timeout: 10000 })
         .type('Eingabe Text');
       cy.contains('mat-dialog-actions button', 'Generiere Kodierung')
@@ -284,6 +295,7 @@ describe('Aspect Coding Scheme (Kodierung)', () => {
           (el.getAttribute('mattooltip') || '').includes('Kodierung generieren'))
         .first()
         .click();
+      waitForDialogFocus();
       cy.get('mat-dialog-content textarea', { timeout: 10000 })
         .type('Langer Antworttext');
       cy.contains('mat-dialog-actions button', 'Generiere Kodierung')
