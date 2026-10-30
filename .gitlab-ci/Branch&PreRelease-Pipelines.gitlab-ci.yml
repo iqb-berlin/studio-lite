@@ -208,6 +208,9 @@ install-dependencies:
       - cache/Cypress
   script:
     - npm ci --cache .npm --prefer-offline --no-fund
+    # a cache holding only part of the binary makes the postinstall take it as installed (#2042)
+    - test -x "${CYPRESS_CACHE_FOLDER}/$(node -p "require('cypress/package.json').version")/Cypress/Cypress"
+      || npx cypress install --force
   artifacts:
     paths:
       - node_modules
