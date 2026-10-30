@@ -1,7 +1,4 @@
-@if (isLoading) {
-  <mat-spinner class="spinner"></mat-spinner>
-}
-@if (!isLoading && !isError) {
+@if (!isError) {
   <div class="state-container">
     @for (state of states ; track state) {
       <div class="state" >

@@ -136,4 +136,16 @@ describe('WorkspaceSettingsComponent', () => {
     expect(component.settings.states).toEqual(newStates);
     expect(mockWsgAdminService.settingsChanged).toBe(true);
   });
+
+  // Units keep the id of a deleted state, so it stays given out (#2009).
+  it('should keep the id of a deleted state as given out', () => {
+    mockWsgAdminService.selectedWorkspaceGroupSettings.next({
+      ...mockWsgAdminService.selectedWorkspaceGroupSettings.value,
+      states: [{ id: 1, label: 'State 1', color: '#ffffff' }, { id: 2, label: 'State 2', color: '#ffffff' }]
+    });
+
+    component.stateSettingsChange([{ id: 1, label: 'State 1', color: '#ffffff' }]);
+
+    expect(component.settings.lastStateId).toBe(2);
+  });
 });

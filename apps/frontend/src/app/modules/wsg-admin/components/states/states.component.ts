@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Output, OnInit, OnDestroy
+  Component, EventEmitter, Output, OnInit, OnDestroy, signal
 } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
@@ -9,7 +9,6 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatError } from '@angular/material/form-field';
 import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { State } from '@studio-lite-lib/api-dto';
 import { DeleteStateComponent } from '../delete-state/delete-state.component';
 import { WsgAdminService } from '../../services/wsg-admin.service';
@@ -19,13 +18,14 @@ import { WsgAdminService } from '../../services/wsg-admin.service';
   templateUrl: './states.component.html',
   styleUrls: ['./states.component.scss'],
 
-  imports: [MatProgressSpinner, MatFormField, MatInput, MatIconButton, MatTooltip, MatIcon, MatError, TranslateModule, MatButton]
+  imports: [MatFormField, MatInput, MatIconButton, MatTooltip, MatIcon, MatError, TranslateModule, MatButton]
 })
 export class StatesComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
   states: State[] = [];
   changedStates!: State[];
-  isLoading: boolean = false;
+  // Units keep the id of a deleted state, and would show a new state that got it again (#2009).
+  private readonly lastStateId = signal(0);
   isError: boolean = false;
 
   @Output() hasChanged = new EventEmitter<State[]>();
@@ -56,22 +56,13 @@ export class StatesComponent implements OnInit, OnDestroy {
   }
 
   addState() {
-    if (this.changedStates.length) {
-      const newId = this.changedStates[this.changedStates.length - 1].id + 1;
-      this.changedStates.push({
-        id: newId,
-        label: '',
-        color: '#edb211'
-      });
-      this.states = this.changedStates;
-    } else {
-      this.changedStates = [{
-        id: 1,
-        label: '',
-        color: '#edb211'
-      }];
-      this.states = this.changedStates;
-    }
+    this.lastStateId.update(id => id + 1);
+    this.changedStates = [...this.changedStates, {
+      id: this.lastStateId(),
+      label: '',
+      color: '#edb211'
+    }];
+    this.states = this.changedStates;
     this.hasChanged.emit(this.changedStates);
   }
 
@@ -90,8 +81,8 @@ export class StatesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(result => {
         if (result) {
-          this.states = this.states?.filter((s: State) => s.id !== state.id);
-          this.changedStates = this.states as State[];
+          this.changedStates = this.changedStates.filter((s: State) => s.id !== state.id);
+          this.states = this.changedStates;
           this.hasChanged.emit(this.changedStates);
           this.stateDeleted.emit(this.changedStates);
         }
@@ -99,18 +90,13 @@ export class StatesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const currentSettings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
-    if (!currentSettings.states) {
-      this.isLoading = true;
-      setTimeout(() => {
-        const settings = this.wsgAdminService.selectedWorkspaceGroupSettings.getValue();
+    this.wsgAdminService.selectedWorkspaceGroupSettings
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(settings => {
         this.states = settings.states || [];
         this.changedStates = this.states;
-        this.isLoading = false;
-      }, 200);
-    }
-    this.states = currentSettings.states || [];
-    this.changedStates = this.states;
+        this.lastStateId.set(Math.max(settings.lastStateId ?? 0, ...this.states.map(state => state.id)));
+      });
   }
 
   ngOnDestroy(): void {

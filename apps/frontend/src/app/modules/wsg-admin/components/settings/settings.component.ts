@@ -82,6 +82,12 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
 
   stateSettingsChange(states:State[]) {
     this.wsgAdminService.settingsChanged = true;
+    // A deleted state is only in the states before the change, and units keep its id (#2009).
+    this.settings.lastStateId = Math.max(
+      this.settings.lastStateId ?? 0,
+      ...(this.settings.states || []).map(state => state.id),
+      ...states.map(state => state.id)
+    );
     this.settings.states = states;
   }
 
