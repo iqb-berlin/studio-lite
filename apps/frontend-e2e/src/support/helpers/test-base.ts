@@ -81,9 +81,8 @@ export function createTestBaseAPI({ zip, units = [] }: { zip?: string; units?: U
 
 /**
  * Removes the base again and leaves the browser logged out on the login form, so that the next
- * spec finds an empty database. The first user cannot delete their own account (#1949), so the
- * database is reset, which takes the users and the group with it; the modules are not part of
- * that and are deleted first, its own and any other a spec installed.
+ * spec can build its own: no user, group, workspace or module is left, while the app settings and
+ * the metadata profiles stay as the spec left them.
  */
 export function deleteTestBaseAPI(): void {
   const { username, password } = admin();
@@ -94,12 +93,15 @@ export function deleteTestBaseAPI(): void {
   cy.loginAPI(username, password).then(session => {
     expect(session.status, 'login for the teardown').to.equal(201);
     const token: string = session.body.accessToken;
+    // its own modules and any other a spec installed, as the reset does not take them
     cy.getModulesAPI(token).then(installed => {
       expect(installed.status, 'modules').to.equal(200);
       const keys = (installed.body as VeronaModuleInListDto[]).map(module => module.key);
       if (keys.length) cy.deleteModulesAPI(keys, token).its('status').should('equal', 200);
     });
   });
+  // the first user cannot delete their own account (#1949), so the database is reset, which
+  // takes every user and group with it, and the workspaces, units and reviews in them
   cy.resetDb();
   showLoginFormAfterUserDeleted();
 }
