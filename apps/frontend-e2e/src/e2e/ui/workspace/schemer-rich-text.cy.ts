@@ -7,7 +7,7 @@ describe('Coding instructions saved through the Schemer', () => {
   const unit = { shortname: 'RICH_TEXT', name: 'Rich text instruction', group: '' };
   const variableId = 'response_1';
   const instruction = 'Formatierte Kodieranweisung';
-  const schemerKey = 'iqb-schemer@2.8';
+  const schemerKey = 'iqb-schemer@2.9';
   let token = '';
   let workspaceId = '';
   let unitId = '';
@@ -21,7 +21,7 @@ describe('Coding instructions saved through the Schemer', () => {
     addFirstUser();
     cy.window().then(win => {
       token = win.localStorage.getItem('id_token') || '';
-      cy.addModuleAPI('iqb-schemer-2.8.4.html', token).its('status').should('equal', 201);
+      cy.addModuleAPI('iqb-schemer-2.9.0.html', token).its('status').should('equal', 201);
       cy.getUserIdAPI(token).then(authData => {
         cy.createGroupAPI(group, token).then(createdGroup => {
           const groupId = String(createdGroup.body);

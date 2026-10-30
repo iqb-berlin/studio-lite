@@ -209,10 +209,10 @@ export const resource = 'GeoGebra.itcr.zip';
  * Verona modules for testing
  */
 export const modules: string[] = [
-  'iqb-schemer-2.8.4.html',
-  'iqb-editor-aspect-3.0.1.html',
+  'iqb-schemer-2.9.0.html',
+  'iqb-editor-aspect-3.1.0.html',
   'iqb-editor-speedtest-3.2.0.html',
-  'iqb-player-aspect-3.0.1.html',
+  'iqb-player-aspect-3.1.0.html',
   'iqb-player-speedtest-3.3.0.html',
   'iqb-player-stars-0.6.26.html'
 ];
