@@ -57,9 +57,9 @@ describe('RichTextEditorDirective', () => {
     const extensions = directive.extensions();
 
     expect(extensions.map(extension => extension.name)).toEqual([
-      'starterKit', 'underline', 'superscript', 'subscript', 'textStyle', 'color', 'image', 'placeholder', 'highlight'
+      'starterKit', 'superscript', 'subscript', 'textStyle', 'color', 'image', 'placeholder', 'highlight'
     ]);
-    expect(extensions[7].options).toEqual(expect.objectContaining({ placeholder: 'Kommentar' }));
+    expect(extensions[6].options).toEqual(expect.objectContaining({ placeholder: 'Kommentar' }));
   });
 
   it('should update color button styles', () => {

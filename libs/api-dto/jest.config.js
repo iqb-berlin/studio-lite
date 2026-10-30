@@ -5,6 +5,7 @@ module.exports = {
   // ESM mode, like the api's (see .env here). It has no `jest` global: a spec that mocks imports
   // it from '@jest/globals', and `jest.mock()` replaces nothing (see apps/api/jest.setup.esm.ts).
   extensionsToTreatAsEsm: ['.ts'],
+  globalSetup: '<rootDir>/../../jest.vm-modules.cjs',
   transform: {
     '^.+\\.[tj]sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json', useESM: true }]
   },

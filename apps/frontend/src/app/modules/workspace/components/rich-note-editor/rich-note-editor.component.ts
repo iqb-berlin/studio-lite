@@ -55,6 +55,8 @@ export class RichNoteEditorComponent extends RichTextEditorDirective {
   protected override getExtensions(): AnyExtension[] {
     return [
       StarterKit.configure({
+        link: false,
+        trailingNode: false,
         bulletList: false,
         orderedList: false
       }),

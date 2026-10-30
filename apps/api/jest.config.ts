@@ -3,6 +3,7 @@ export default {
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
+  globalSetup: '<rootDir>/../../jest.vm-modules.cjs',
   setupFiles: ['<rootDir>/jest.setup.esm.ts'],
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json', useESM: true }]
