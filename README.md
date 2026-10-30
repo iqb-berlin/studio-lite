@@ -296,9 +296,10 @@ A branch name carries the issue it belongs to: `fix/1629-group-admin-guard`.
    transpiles the e2e sources without type checking and a renamed member surfaces nowhere else
    (#1586, #1590). `verify-api-runtime-deps` fails when `apps/api/runtime-package.json` no longer
    matches what the api build generates or the root's overrides; running
-   `node scripts/update-api-runtime-deps.mjs` brings it up to date (#1878). `build-app`,
-   `test-app` and `lint-app` run `nx affected --base=HEAD~1`, so they cover what the last commit
-   touched, not the branch.
+   `node scripts/update-api-runtime-deps.mjs` brings it up to date (#1878). `build-app` runs
+   `nx affected --base=HEAD~1` and covers what the last commit touched. `test-app` and `lint-app`
+   do the same on a plain branch push; in a pull request they compare with the branch it goes
+   into and cover all of its commits (#1659).
 7. **Rebase when `develop` moves**, then force-push with `--force-with-lease`. A pipeline result
    belongs to a commit, not to a pull request.
 8. **Merge as a merge commit** once the pipeline is green.

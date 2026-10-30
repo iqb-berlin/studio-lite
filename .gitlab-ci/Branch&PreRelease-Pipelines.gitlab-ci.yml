@@ -317,6 +317,24 @@ build-e2e-base-image:
       - node_modules/.cache/nx
       - cache/Cypress
 
+# The base nx affected compares with. In a pull request that is the branch it goes into, so that
+# every commit of the pull request counts and not only the last one (#1659). The runner clones a
+# few commits of the source branch only; the largest depth fetches the target branch and the
+# history down to where the two part, and leaves a full clone as it is. The branch rather than
+# CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_SHA: the mirror pulls GitHub on a timer and may not hold
+# that commit yet, and an older target only makes nx test more. A push without a pull request,
+# a merge queue branch among them, compares with the commit before.
+.affected_base:
+  script:
+    - if [ -n "${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME}" ]; then
+        git fetch --quiet --no-tags --depth=2147483647 origin "${CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME}";
+        NX_BASE="$(git rev-parse FETCH_HEAD)";
+      else
+        NX_BASE="$(git rev-parse HEAD~1)";
+      fi;
+      export NX_BASE
+    - echo "nx affected compares with $(git log -1 --format='%h %s' "${NX_BASE}")"
+
 # The e2e jobs run the API on the runner instead of through compose, which skips the compose
 # `backend` service -- and with it the `liquibase: condition: service_completed_successfully`
 # that waits for the migration. Nest binds 3333 whether the schema is there or not, so both
@@ -542,10 +560,11 @@ test-app:
     - !reference [ .default_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
   script:
+    - !reference [ .affected_base, script ]
     # One project at a time and a bounded number of jest workers: two projects in
     # parallel, each defaulting to (cores - 1) workers, oversubscribes the runner
     # so far that specs which take milliseconds locally hit the jest timeout.
-    - npx nx affected --base=HEAD~1 --target=test --parallel=1 --maxWorkers=2
+    - npx nx affected --base="${NX_BASE}" --target=test --parallel=1 --maxWorkers=2
 
 #test-app-e2e:
 #  stage: test-e2e
@@ -944,7 +963,8 @@ lint-app:
     - !reference [ .default_rules, rules ]
   image: ${CI_REGISTRY_IMAGE}/${CICD_BASE_IMAGE}
   script:
-    - npx nx affected --base=HEAD~1 --target=lint --parallel=2
+    - !reference [ .affected_base, script ]
+    - npx nx affected --base="${NX_BASE}" --target=lint --parallel=2
 
 # Deliberately NOT allow_failure: the e2e sources are transpiled without type
 # checking (Cypress' webpack) and eslint does not know whether an enum member
