@@ -18,7 +18,11 @@ export class UnitMetadataStore {
   private originalData: UnitPropertiesDto;
   private changedData: UnitPropertiesDto;
 
-  constructor(originalData: UnitPropertiesDto) {
+  /**
+   * @param loaded false for the store of a unit the server did not answer for: it holds the id alone,
+   * and what it lacks is not empty but unknown (#2004).
+   */
+  constructor(originalData: UnitPropertiesDto, readonly loaded = true) {
     this.originalData = originalData;
     this.changedData = <UnitPropertiesDto>{ id: originalData.id };
   }

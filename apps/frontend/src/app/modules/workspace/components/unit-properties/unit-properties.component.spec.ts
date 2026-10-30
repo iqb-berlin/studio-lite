@@ -247,8 +247,8 @@ describe('UnitPropertiesComponent', () => {
     });
 
     // opens the unit as the workspace does: select it, then read its properties from its store
-    const openUnit = (data: UnitPropertiesDto): UnitMetadataStore => {
-      const store = new UnitMetadataStore(data);
+    const openUnit = (data: UnitPropertiesDto, loaded = true): UnitMetadataStore => {
+      const store = new UnitMetadataStore(data, loaded);
       jest.spyOn(component.unitStores, 'metadataStore').mockReturnValue(store);
       component.workspaceService.selectedUnit$.next(data.id);
       flush();
@@ -296,6 +296,31 @@ describe('UnitPropertiesComponent', () => {
       fixture.detectChanges();
 
       expect(fixture.nativeElement.querySelector('mat-error')).not.toBeNull();
+    }));
+
+    // #2004: the store of a unit the server did not answer for holds its id alone, and the form went
+    // on showing the unit before
+    it('shows no unit, but says so, when the properties of the unit could not be loaded', fakeAsync(() => {
+      const notLoadedHint = () => fixture.nativeElement.querySelector('[data-cy="unit-properties-not-loaded"]');
+      const loadScheme = jest.spyOn(component.unitStores, 'loadSchemeStore');
+      openUnit(unitData());
+      loadScheme.mockClear();
+
+      openUnit({ id: 6 }, false);
+      fixture.detectChanges();
+
+      expect(component.unitForm.disabled).toBe(true);
+      expect(component.unitForm.getRawValue()).toEqual({
+        key: '', name: '', description: '', state: '', group: '', transcript: '', reference: ''
+      });
+      expect(notLoadedHint()).not.toBeNull();
+      expect(loadScheme).not.toHaveBeenCalled();
+
+      openUnit(unitData({ id: 7 }));
+      fixture.detectChanges();
+
+      expect(component.unitForm.enabled).toBe(true);
+      expect(notLoadedHint()).toBeNull();
     }));
 
     it.each([

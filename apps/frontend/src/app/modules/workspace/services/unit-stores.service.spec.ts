@@ -42,15 +42,17 @@ describe('UnitStoresService', () => {
       expect(backendService.getUnitProperties).toHaveBeenCalledWith(1, 3);
       expect(loaded).toBe(service.metadataStore());
       expect(service.metadataStore()?.getData().key).toBe('U3');
+      expect(service.metadataStore()?.loaded).toBe(true);
       expect(reported).toHaveBeenCalledWith(properties);
     });
 
-    it('should create an empty store for the unit when the server does not answer', () => {
+    it('should create an empty store for the unit, marked as not loaded, when the server does not answer', () => {
       backendService.getUnitProperties.mockReturnValue(of(null));
 
       service.loadMetadataStore(1, 5).subscribe();
 
       expect(service.metadataStore()?.getData().id).toBe(5);
+      expect(service.metadataStore()?.loaded).toBe(false);
     });
 
     it('should hand out the store it has without asking the server again', () => {

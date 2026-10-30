@@ -61,13 +61,18 @@ export class UnitStoresService {
 
   constructor(private backendService: WorkspaceBackendService) {}
 
-  /** The unit's properties and metadata; a unit the server does not answer for gets an empty store. */
+  /**
+   * The unit's properties and metadata; a unit the server does not answer for gets an empty store,
+   * marked as not loaded.
+   */
   loadMetadataStore(workspaceId: number, unitId: number): Observable<UnitMetadataStore | undefined> {
     return this.load(
       this.metadata,
       () => this.backendService
         .getUnitProperties(workspaceId, unitId)
-        .pipe(map(unitData => new UnitMetadataStore(unitData || <UnitPropertiesDto>{ id: unitId }))),
+        .pipe(map(unitData => (unitData ?
+          new UnitMetadataStore(unitData) :
+          new UnitMetadataStore(<UnitPropertiesDto>{ id: unitId }, false)))),
       store => this.metadataLoadedSubject.next(store.getData())
     );
   }
