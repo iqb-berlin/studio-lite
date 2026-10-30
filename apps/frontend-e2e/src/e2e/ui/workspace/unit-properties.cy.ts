@@ -227,12 +227,6 @@ describe('Unit Properties Panel', () => {
       cy.get('mat-error').should('not.exist');
       cy.get('input[formControlName="key"]').should('have.class', 'ng-valid');
       clickUnitPropertiesSaveButton();
-
-      cy.visitWs(primaryWorkspace);
-      openUnitProperties(validKey);
-      cy.intercept('PATCH', '/api/workspaces/*/units/*/properties').as('saveProps');
-      cy.get('input[formControlName="key"]').clear().type(propertiesUnits.propUnit1.shortname);
-      clickUnitPropertiesSaveButton();
     });
   });
 

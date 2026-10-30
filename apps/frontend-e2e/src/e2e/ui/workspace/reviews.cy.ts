@@ -374,9 +374,7 @@ describe('Unit Reviews', () => {
     const visitorName = 'Externe Person';
     const commentText = 'Kommentar von extern';
     let copiedLink = '';
-    // Where the comment went, so that after() can take it away again: comments belong to the unit,
-    // not to the review, and would outlive it in the workspace
-    let commentPath = '';
+    // The unit the visitor's comment went to, where the workspace is to show it
     let commentUnitId = '';
 
     /** Opens the first unit of the review and its comment dialog, as the external visitor */
@@ -427,21 +425,6 @@ describe('Unit Reviews', () => {
         win.localStorage.removeItem('iqb-studio-user-name-for-review-comments');
       });
       login(Cypress.expose('username'), Cypress.expose('password'));
-      cy.window().then(win => {
-        if (!commentPath) return;
-        cy.request({
-          method: 'DELETE',
-          url: commentPath,
-          headers: {
-            'app-version': Cypress.expose('version'),
-            authorization: `bearer ${win.localStorage.getItem('id_token')}`
-          }
-        });
-      });
-      cy.visitWs(primaryWorkspace);
-      goToReviewAdmin();
-      deleteReview(externalReview);
-      cy.get('[data-cy="workspace-review-close"]').click();
     });
 
     it('keeps the link locked until a password of at least 4 characters is saved', () => {
@@ -518,12 +501,9 @@ describe('Unit Reviews', () => {
         });
       });
       waitForSuccess('@postExternalComment');
-      cy.get<Interception>('@postExternalComment').then(({ request, response }) => {
-        // The API answers with the id of the new comment
-        const path = new URL(request.url).pathname;
-        commentPath = `${path}/${response?.body}`;
+      cy.get<Interception>('@postExternalComment').then(({ request }) => {
         // `/api/reviews/<review>/units/<unit>/comments`
-        commentUnitId = path.split('/')[5];
+        commentUnitId = new URL(request.url).pathname.split('/')[5];
       });
       cy.contains('studio-lite-comment', commentText).within(() => {
         cy.get('.comment-meta').should('contain', visitorName);

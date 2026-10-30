@@ -39,11 +39,12 @@ describe('Unit Comments', () => {
     cy.intercept('PATCH', '/api/workspaces/*/units/*/comments/*').as('editComment');
     cy.get('studio-lite-comment').eq(-1).within(() => {
       cy.contains('button', 'edit').click();
-      cy.get('tiptap-editor .ProseMirror').type(' verändert');
+      cy.get('tiptap-editor .ProseMirror').click().type('{moveToEnd} verändert');
       cy.contains('button', 'send').click();
     });
     waitForSuccess('@editComment');
-    cy.contains('studio-lite-comment .comment-html', 'verändert').should('exist');
+    cy.contains('studio-lite-comment .comment-html', /^\s*Neue allgemein Kommentar \d verändert\s*$/)
+      .should('exist');
   });
 
   it('replies to a comment and hides it with its reply', () => {
