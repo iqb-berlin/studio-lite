@@ -292,10 +292,13 @@ export class UnitXmlDownloadClass {
       zip.addFile(`${unitMetadata.key}.vocs`, Buffer.from(schemeData.scheme));
     }
 
-    if (unitMetadata?.schemer) {
+    // A unit from a JSON import has a scheme but no schemer, as the JSON format names none. Without the
+    // reference a new import of the export loses the scheme (#1990). Every unit XSD requires the
+    // attribute, and the testcenter does not read its value, so it stays empty.
+    if (unitMetadata?.schemer || schemeData?.scheme) {
       unitXml.root().ele({
         CodingSchemeRef: {
-          '@schemer': unitMetadata.schemer,
+          '@schemer': unitMetadata?.schemer ?? '',
           ...(unitMetadata.schemeType && {
             '@schemeType': unitMetadata.schemeType
           }),

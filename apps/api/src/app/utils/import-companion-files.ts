@@ -7,7 +7,9 @@ import {
   UnitMetadataValues
 } from '@studio-lite-lib/api-dto';
 import { orderFromCurrent } from '@studio-lite/shared-code';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { FileIo } from '../interfaces/file-io.interface';
+import { readXsdBoolean } from './xsd-boolean';
 import {
   LanguageCodedText,
   MetadataEntryJson,
@@ -172,6 +174,18 @@ export function mapImportedItems(items: UnitItemJson[]): ItemsMetadataValues[] {
       changedAt: item.changedAt ? new Date(item.changedAt) : undefined,
       profiles: mapMetadataValuesJson(item.metadata ?? [])
     }));
+}
+
+/**
+ * The variables of an imported *.vova.json, kept as sent (#1708) but for `valuesComplete`: up to #1987
+ * the XML import took that attribute over as text, and JSON exports of such units carry it so.
+ */
+export function mapImportedVariables(variables: VariableInfo[] | undefined): VariableInfo[] {
+  return (Array.isArray(variables) ? variables : []).map(variable => {
+    const valuesComplete: unknown = variable?.valuesComplete;
+    if (typeof valuesComplete !== 'string') return variable;
+    return { ...variable, valuesComplete: readXsdBoolean(valuesComplete) };
+  });
 }
 
 // Maps a comment from the iqb unit-comments@0.1 spec shape (commentator/

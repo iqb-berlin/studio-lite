@@ -1051,6 +1051,103 @@ describe('Unit API tests part II', () => {
     });
   });
 
+  // The import took `complete` over as text, and "false" counted as true (#1987).
+  describe('whether the values of an imported XML variable are complete', () => {
+    it('201 positive test: is stored as a boolean', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      cy.uploadUnitFilesAPI(
+        Cypress.expose(ws1.id),
+        ['values-complete/VC_IMPORT.xml', 'values-complete/VC_IMPORT.voud'],
+        adminToken
+      ).then(imported => {
+        cy.getUnitsByWsAPI(Cypress.expose(ws1.id), adminToken).then(units => {
+          const unit = units.body.find((u: { key: string }) => u.key === 'VC_IMPORT');
+          expect(unit, 'imported unit').not.to.equal(undefined);
+          const unitId = String(unit.id);
+          cy.getUnitDefinitionAPI(unitId, Cypress.expose(ws1.id), adminToken).then(read => {
+            // cleaned up before anything else is asserted, so that a failure leaves ws1 as it was
+            cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
+            cy.then(() => {
+              expect(imported.status).to.equal(201);
+              expect(imported.body.messages).to.deep.equal([]);
+              expect(read.body.variables.map((v: { id: string, valuesComplete: unknown }) => [v.id, v.valuesComplete]))
+                .to.deep.equal([['open', false], ['closed', true]]);
+            });
+          });
+        });
+      });
+    });
+  });
+
+  // The scheme endpoint refuses a scheme without a list of codings, and on import its error failed
+  // the whole upload (#1986).
+  describe('a coding scheme without a list of codings', () => {
+    it('201 positive test: is reported, and its unit is imported without it beside the others', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      const fixtures = ['IS_BROKEN.xml', 'IS_BROKEN.voud', 'IS_BROKEN.vocs', 'IS_INTACT.xml', 'IS_INTACT.voud',
+        'IS_INTACT.vocs'].map(file => `invalid-scheme/${file}`);
+      cy.uploadUnitFilesAPI(Cypress.expose(ws1.id), fixtures, adminToken).then(imported => {
+        cy.getUnitsByWsAPI(Cypress.expose(ws1.id), adminToken).then(units => {
+          const broken = units.body.find((u: { key: string }) => u.key === 'IS_BROKEN');
+          const intact = units.body.find((u: { key: string }) => u.key === 'IS_INTACT');
+          expect(broken, 'unit with the broken scheme').not.to.equal(undefined);
+          expect(intact, 'unit with the intact scheme').not.to.equal(undefined);
+          cy.getUnitSchemeAPI(String(broken.id), Cypress.expose(ws1.id), adminToken).then(brokenScheme => {
+            cy.getUnitSchemeAPI(String(intact.id), Cypress.expose(ws1.id), adminToken).then(intactScheme => {
+              // cleaned up before anything else is asserted, so that a failure leaves ws1 as it was
+              cy.deleteUnitsAPI([String(broken.id), String(intact.id)], Cypress.expose(ws1.id), adminToken);
+              cy.then(() => {
+                expect(imported.status).to.equal(201);
+                expect(imported.body.messages).to.deep.equal([
+                  { objectKey: 'IS_BROKEN.vocs', messageKey: 'unit-upload.api-warning.coding-scheme' }
+                ]);
+                expect(brokenScheme.body.scheme ?? '').to.equal('');
+                expect(JSON.parse(intactScheme.body.scheme)).to.deep.equal({ version: '3.2', variableCodings: [] });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+
+  // The JSON format names no schemer, and the XML export referred to the scheme only with one: a unit
+  // from a JSON import, exported as XML and imported again, lost its scheme (#1990).
+  describe('the coding scheme of a unit without a schemer', () => {
+    it('201 positive test: is imported again from the XML export', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      const wsId = Cypress.expose(ws1.id);
+      const fixtures = ['JS_SCHEME.json', 'JS_SCHEME.voud', 'JS_SCHEME.vocs.json'].map(file => `json-scheme/${file}`);
+      cy.uploadUnitFilesAPI(wsId, fixtures, adminToken).then(uploaded => {
+        cy.getUnitsByWsAPI(wsId, adminToken).then(units => {
+          const fromJson = units.body.find((u: { key: string }) => u.key === 'JS_SCHEME');
+          expect(fromJson, 'unit imported from JSON').not.to.equal(undefined);
+          cy.exportUnitsAPI(wsId, buildDownloadQuery([String(fromJson.id)]), adminToken).then(exported => {
+            cy.deleteUnitsAPI([String(fromJson.id)], wsId, adminToken);
+            cy.importUnitsAPI(wsId, exported.body, adminToken).then(reimported => {
+              cy.getUnitsByWsAPI(wsId, adminToken).then(after => {
+                const fromXml = after.body.find((u: { key: string }) => u.key === 'JS_SCHEME');
+                expect(fromXml, 'unit imported from the XML export').not.to.equal(undefined);
+                cy.getUnitSchemeAPI(String(fromXml.id), wsId, adminToken).then(read => {
+                  // cleaned up before anything else is asserted, so that a failure leaves ws1 as it was
+                  cy.deleteUnitsAPI([String(fromXml.id)], wsId, adminToken);
+                  cy.then(() => {
+                    expect(uploaded.status).to.equal(201);
+                    expect(uploaded.body.messages).to.deep.equal([]);
+                    expect(exported.status).to.equal(200);
+                    expect(reimported.status).to.equal(201);
+                    expect(reimported.body.messages).to.deep.equal([]);
+                    expect(JSON.parse(read.body.scheme)).to.deep.equal({ version: '3.2', variableCodings: [] });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+
   describe('85. GET /api/admin/users/{id}/workspace-groups', () => {
     it(
       '200 positive test: should successfully retrieve the list of workspace groups' +

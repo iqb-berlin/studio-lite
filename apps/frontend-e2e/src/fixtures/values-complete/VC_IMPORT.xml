@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<Unit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://w3id.org/iqb/spec/unit-xml/17.6">
+  <Metadata>
+    <Id>VC_IMPORT</Id>
+    <Label>Complete and open value lists</Label>
+  </Metadata>
+  <DefinitionRef player="iqb-player-aspect@3.0" editor="iqb-editor-aspect@3.0">VC_IMPORT.voud</DefinitionRef>
+  <BaseVariables>
+    <Variable id="open" alias="open" type="string" format="" nullable="false" multiple="false">
+      <Values complete="false">
+        <Value><label>Ja</label><value>1</value></Value>
+      </Values>
+    </Variable>
+    <Variable id="closed" alias="closed" type="string" format="" nullable="false" multiple="false">
+      <Values complete="true">
+        <Value><label>Ja</label><value>1</value></Value>
+      </Values>
+    </Variable>
+  </BaseVariables>
+</Unit>

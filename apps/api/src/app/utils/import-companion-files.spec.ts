@@ -1,5 +1,6 @@
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
-  mapImportedComment, mapImportedItems, mapImportedMetadata, parseCompanionJson
+  mapImportedComment, mapImportedItems, mapImportedMetadata, mapImportedVariables, parseCompanionJson
 } from './import-companion-files';
 import { FileIo } from '../interfaces/file-io.interface';
 
@@ -283,6 +284,26 @@ describe('import companion files', () => {
 
       expect(mapped).toHaveLength(1);
       expect(mapped[0].id).toBe('ITEM1');
+    });
+  });
+
+  // Up to #1987 the XML import kept `complete` as text, and JSON exports of such units carry it so.
+  describe('mapImportedVariables', () => {
+    it('turns a valuesComplete given as text into a boolean', () => {
+      const sent = [{ id: 'a', valuesComplete: 'false' }, { id: 'b', valuesComplete: 'true' }];
+
+      expect(mapImportedVariables(sent as unknown as VariableInfo[]).map(v => v.valuesComplete))
+        .toEqual([false, true]);
+    });
+
+    it('keeps everything else as it was sent', () => {
+      const sent = [{ id: 'a', type: 'STRING', valuesComplete: true }, { id: 'b' }] as unknown as VariableInfo[];
+
+      expect(mapImportedVariables(sent)).toEqual(sent);
+    });
+
+    it('makes a missing list an empty one', () => {
+      expect(mapImportedVariables(undefined)).toEqual([]);
     });
   });
 });

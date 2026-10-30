@@ -45,3 +45,25 @@ UPDATE "public"."workspace_group" AS "wsg"
   ) AS "given"
   WHERE "given"."group_id" = "wsg"."id" AND "given"."id" IS NOT NULL;
 -- rollback UPDATE "public"."workspace_group" SET "settings" = "settings" - 'lastStateId';
+
+-- changeset jojohoch:3
+-- The XML import took the attribute `complete` of a value list over as text up to #1987, so units
+-- imported from XML carry "valuesComplete": "false" -- a string, which JavaScript takes for true.
+-- The editor writes a boolean when the definition is saved; units not saved since keep the text.
+-- The attribute is an xs:boolean: "1" is true as well, and white space around the value is ignored.
+UPDATE "public"."unit" AS "u"
+  SET "variables" = (
+    SELECT jsonb_agg(
+      CASE WHEN jsonb_typeof("v"->'valuesComplete') = 'string'
+        THEN jsonb_set("v", '{valuesComplete}',
+          to_jsonb(btrim("v"->>'valuesComplete', E' \t\n\r') IN ('true', '1')))
+        ELSE "v" END
+      ORDER BY "position")
+    FROM jsonb_array_elements("u"."variables") WITH ORDINALITY AS "list"("v", "position"))
+  -- CASE, not AND: AND leaves the order open, and the list functions fail on anything but an array
+  WHERE CASE WHEN jsonb_typeof("u"."variables") = 'array'
+    THEN EXISTS (
+      SELECT 1 FROM jsonb_array_elements("u"."variables") AS "list"("v")
+      WHERE jsonb_typeof("v"->'valuesComplete') = 'string')
+    ELSE FALSE END;
+-- rollback SELECT 1;

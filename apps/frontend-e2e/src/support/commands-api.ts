@@ -798,12 +798,15 @@ function postUnitFiles(wsId: string, formData: FormData, token: string) {
   }).then(resp => ({ ...resp, body: JSON.parse(new TextDecoder().decode(resp.body)) }));
 }
 
-// Uploads fixture files side by side and unzipped, e.g. a unit XML with its definition
+// Uploads fixture files side by side and unzipped, e.g. a unit XML or JSON index with its definition
 Cypress.Commands.add('uploadUnitFilesAPI', (wsId: string, fixtures: string[], token: string) => {
   const formData = new FormData();
   fixtures.forEach(fixture => {
     cy.fixture(fixture, 'binary').then(content => {
-      const mimeType = fixture.endsWith('.xml') ? 'text/xml' : 'application/octet-stream';
+      // the import tells a unit XML and a JSON unit index by the type a browser sends with them
+      let mimeType = 'application/octet-stream';
+      if (fixture.endsWith('.xml')) mimeType = 'text/xml';
+      if (fixture.endsWith('.json')) mimeType = 'application/json';
       formData.append('files', Cypress.Blob.binaryStringToBlob(content, mimeType), fixture.split('/').pop());
     });
   });
