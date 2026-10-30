@@ -306,6 +306,23 @@ describe('UnitXmlDownloadClass', () => {
       expect(files()).toEqual(['K1.vocs']);
     });
 
+    // A unit from a JSON import has no schemer; without the reference a new import lost the scheme (#1990).
+    it('should refer to the scheme file of a unit without a schemer, with an empty schemer', () => {
+      UnitXmlDownloadClass.addScheme({ scheme: '{}' } as UnitSchemeDto, unitXml, { ...unit, schemer: '' }, zip);
+
+      const $ = load(unitXml.toString(), { xml: true });
+      expect($('CodingSchemeRef').attr()).toEqual({ schemer: '' });
+      expect($('CodingSchemeRef').text()).toBe('K1.vocs');
+      expect(files()).toEqual(['K1.vocs']);
+    });
+
+    it('should leave out the reference of a unit with neither scheme nor schemer', () => {
+      UnitXmlDownloadClass.addScheme({ scheme: '' } as UnitSchemeDto, unitXml, { ...unit, schemer: '' }, zip);
+
+      expect(load(unitXml.toString(), { xml: true })('CodingSchemeRef')).toHaveLength(0);
+      expect(files()).toEqual([]);
+    });
+
     it('should write the values of a variable and the labels of their positions', () => {
       UnitXmlDownloadClass.addVariables({
         variables: [{
