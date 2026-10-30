@@ -13,7 +13,7 @@ import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/t
  * unit edited elsewhere arrives anyway.
  */
 describe('Workspace Definition Type', () => {
-  const player = 'iqb-player-aspect@3.0';
+  const player = 'iqb-player-aspect@3.1';
   const aspectPlayerTitle = 'Verona Player Aspect';
   const units = {
     future: { key: 'DT_FUTURE', type: 'aspect-unit-definition@5.0.0' },

@@ -79,9 +79,9 @@ export const unit4: UnitData = {
 };
 
 export const setEditor: WsSettings = {
-  defaultEditor: 'iqb-editor-aspect@3.0',
-  defaultPlayer: 'iqb-player-aspect@3.0',
-  defaultSchemer: 'iqb-schemer@2.8',
+  defaultEditor: 'iqb-editor-aspect@3.1',
+  defaultPlayer: 'iqb-player-aspect@3.1',
+  defaultSchemer: 'iqb-schemer@2.9',
   unitGroups: ['Bista1', 'Bista2'],
   stableModulesOnly: false,
   unitMDProfile: '',

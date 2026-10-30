@@ -10,7 +10,7 @@ import { saveWorkspaceSettings } from './admin';
  * Adds Verona modules through the admin interface
  * @param filenames - Array of module filenames to upload
  * @example
- * addModules(['iqb-editor-aspect-3.0.1.html', 'iqb-player-aspect-3.0.1.html']);
+ * addModules(['iqb-editor-aspect-3.1.0.html', 'iqb-player-aspect-3.1.0.html']);
  */
 export function addModules(filenames: string[]): void {
   // The admin button toggles: on an admin page it leads back home. Right after a first login the app
