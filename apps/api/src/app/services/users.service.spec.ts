@@ -324,6 +324,21 @@ describe('UsersService', () => {
       expect(bcrypt.hashSync).toHaveBeenCalledWith('secret', expect.any(Number));
       expect(usersRepository.save).toHaveBeenCalledWith(expect.objectContaining({ password: 'hash-of-secret' }));
     });
+
+    // Nothing validates the body: an id sent along had save overwrite the name, the password and the
+    // admin flag of that user (#2030)
+    it('should take no id from the body', async () => {
+      jest.spyOn(bcrypt, 'hashSync').mockReturnValue('hash-of-secret');
+      const create = jest.spyOn(usersRepository, 'create').mockImplementation(user => ({ ...user }) as User);
+      const body: CreateUserDto & { id: number } = {
+        name: 'u1', password: 'secret', isAdmin: false, description: '', id: 99
+      };
+
+      await service.create(body);
+
+      expect(create.mock.calls[0][0]).not.toHaveProperty('id');
+      expect(create.mock.calls[0][0]).toEqual(expect.objectContaining({ name: 'u1', password: 'hash-of-secret' }));
+    });
   });
 
   describe('getUserByNameAndPassword', () => {
