@@ -77,8 +77,10 @@ export class ReviewService {
       throw new ReviewUnprocessableException(0, 'POST');
     }
     const timeStamp = new Date();
+    // Only what the body may decide: nothing validates it, and an `id` sent along had `save`
+    // overwrite that review, also one of another workspace, which then moved into this one (#2030).
     const newReview = this.reviewRepository.create({
-      ...createReview,
+      name: createReview.name,
       workspaceId,
       link: uuIdv4(),
       createdAt: timeStamp,

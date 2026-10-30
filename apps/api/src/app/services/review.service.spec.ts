@@ -80,6 +80,20 @@ describe('ReviewService', () => {
 
       expect(reviewRepository.create).toHaveBeenCalledWith(expect.objectContaining({ workspaceId: 3 }));
     });
+
+    // Nothing validates the body: an id sent along had save overwrite that review, also one of
+    // another workspace, which then moved into this one (#2030)
+    it('should take nothing from the body but the name', async () => {
+      reviewRepository.create.mockImplementation(entity => entity as Review);
+      const body: CreateReviewDto & { id: number, password: string } = { name: 'test', id: 99, password: 'p' };
+
+      await service.create(3, body);
+
+      const created = reviewRepository.create.mock.calls[0][0];
+      expect(created.name).toBe('test');
+      expect(created).not.toHaveProperty('id');
+      expect(created).not.toHaveProperty('password');
+    });
   });
 
   describe('findOne', () => {

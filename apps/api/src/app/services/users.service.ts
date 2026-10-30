@@ -234,8 +234,19 @@ export class UsersService {
 
   async create(user: CreateUserDto): Promise<number> {
     this.logger.log(`Creating user with name: ${user.name}`);
-    user.password = UsersService.getPasswordHash(user.password);
-    const newUser = this.usersRepository.create(user);
+    // Only the fields of a new user: nothing validates the body, and an `id` sent along had `save`
+    // overwrite the name, the password and the admin flag of that user (#2030).
+    const newUser = this.usersRepository.create({
+      name: user.name,
+      password: UsersService.getPasswordHash(user.password),
+      isAdmin: user.isAdmin,
+      description: user.description,
+      email: user.email,
+      lastName: user.lastName,
+      firstName: user.firstName,
+      issuer: user.issuer,
+      identity: user.identity
+    });
     await this.usersRepository.save(newUser);
     return newUser.id;
   }

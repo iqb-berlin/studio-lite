@@ -121,6 +121,17 @@ describe('WorkspaceGroupService', () => {
         })
       );
     });
+
+    // Nothing validates the body: an id sent along had save overwrite that group (#2030)
+    it('should take nothing from the body but the name and the settings', async () => {
+      mockRepository.create.mockImplementation(group => group as WorkspaceGroup);
+      mockRepository.save.mockResolvedValue({ id: 7 } as WorkspaceGroup);
+      const body: CreateWorkspaceGroupDto & { id: number } = { name: 'neu', settings: {}, id: 99 };
+
+      await service.create(body);
+
+      expect(mockRepository.create.mock.calls[0][0]).toEqual({ name: 'neu', settings: {} });
+    });
   });
 
   describe('patch', () => {
