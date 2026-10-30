@@ -457,8 +457,8 @@ Cypress.Commands.add('getWsByGroupAPI',
     });
   });
 
-// 22
-Cypress.Commands.add('addModuleAPI', (module:string, token: string) => {
+// 22: a widget only with types ['WIDGET'] -- the API turns away a module of a type it was not offered
+Cypress.Commands.add('addModuleAPI', (module:string, token: string, types = ['editor', 'player', 'schemer']) => {
   const authorization = `bearer ${token}`;
   cy.fixture(module, 'binary')
     .then(fileContent => {
@@ -466,7 +466,7 @@ Cypress.Commands.add('addModuleAPI', (module:string, token: string) => {
       formData.append('file', new Blob([fileContent], { type: 'html' }), module);
       cy.request({
         method: 'POST',
-        url: '/api/admin/verona-modules?type=editor&type=player&type=schemer',
+        url: `/api/admin/verona-modules?${types.map(type => `type=${type}`).join('&')}`,
         headers: {
           'app-version': Cypress.expose('version'),
           'Content-Type': 'multipart/form-data',
@@ -519,7 +519,8 @@ Cypress.Commands.add('createUnitAPI', (wsId:string, unit: UnitData, token:string
     body: {
       key: `${unit.shortname}`,
       name: `${unit.name}`,
-      groupName: `${unit.group}`
+      groupName: `${unit.group}`,
+      ...(unit.player && { player: unit.player })
     },
     failOnStatusCode: false
   });

@@ -30,6 +30,8 @@ export interface UnitData {
   name: string;
   /** Group the unit belongs to */
   group: string;
+  /** Key of the player the unit is created with, such as `verona-test-player@1.0` */
+  player?: string;
 }
 
 /**
@@ -218,11 +220,10 @@ export const modules: string[] = [
 ];
 
 /**
- * Widgets for testing
+ * Widgets for testing: written against the widget API, not a release of a real widget (#1763)
  */
 export const widgets: string[] = [
-  'molecule-editor-widget-0.2.0.html',
-  'periodic-system-select-widget-0.2.0.html'
+  'verona-test-widget-1.0.0.html'
 ];
 
 // =============================================================================
