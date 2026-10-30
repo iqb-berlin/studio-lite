@@ -365,6 +365,28 @@ describe('WorkspaceImportService', () => {
       );
     });
 
+    // JSON exports of units the XML import had given the text "false" carry it on (#1987).
+    it('should store a valuesComplete from vova.json given as text as a boolean', async () => {
+      (unitService.create as jest.Mock).mockResolvedValue(10);
+      (unitService.patchUnitProperties as jest.Mock).mockResolvedValue([]);
+
+      await service.uploadFiles(1, [
+        buildFile('unit01.json', 'application/json', jsonIndex('UNIT01', {
+          userInterface: { player: 'p', definition: 'unit01.voud' },
+          variables: { id: 'unit01.vova.json', type: 'unit-variables' }
+        })),
+        buildFile('unit01.voud', 'application/octet-stream', '<definition/>'),
+        buildFile('unit01.vova.json', 'application/json', '{"baseVariables":[{"id":"V1","valuesComplete":"false"}]}')
+      ], user);
+
+      expect(unitDefinitionService.patchDefinition).toHaveBeenCalledWith(
+        10,
+        expect.objectContaining({ variables: [{ id: 'V1', valuesComplete: false }] }),
+        null,
+        undefined
+      );
+    });
+
     it('should hand the definition type of the index on with the definition (#1368)', async () => {
       (unitService.create as jest.Mock).mockResolvedValue(10);
       (unitDefinitionService.patchDefinition as jest.Mock).mockResolvedValue(undefined);

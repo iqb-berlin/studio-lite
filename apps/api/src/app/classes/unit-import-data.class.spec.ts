@@ -116,6 +116,25 @@ describe('UnitImportData', () => {
     expect(data.baseVariables[0].values).toEqual([{ label: 'L1', value: '1' }]);
   });
 
+  // The attribute came over as text, and "false" counted as true (#1987).
+  describe('whether the values of a variable are complete', () => {
+    const valuesComplete = (attribute: string) => new UnitImportData(createMock<FileIo>({
+      originalname: 'unit01.xml',
+      buffer: Buffer.from('<Unit><Metadata><Id>UNIT01</Id><Label>L</Label></Metadata><BaseVariables>' +
+        `<Variable id="V1" type="string"><Values${attribute}><Value><label>L</label><value>1</value></Value>` +
+        '</Values></Variable></BaseVariables></Unit>')
+    })).baseVariables[0].valuesComplete;
+
+    // what else an xs:boolean may be written as is tested in utils/xsd-boolean.spec.ts
+    it.each([
+      [' complete="true"', true],
+      [' complete="false"', false],
+      ['', false]
+    ])('should read <Values%s> as %s', (attribute, expected) => {
+      expect(valuesComplete(attribute)).toBe(expected);
+    });
+  });
+
   it('should throw error if metadata is missing', () => {
     const invalidFile = createMock<FileIo>({
       originalname: 'test.xml',

@@ -4,6 +4,7 @@ import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { UnitMetadataValues } from '@studio-lite-lib/api-dto';
 import { FileIo } from '../interfaces/file-io.interface';
 import { NotAUnitXmlError } from '../exceptions/not-a-unit-xml.error';
+import { readXsdBoolean } from '../utils/xsd-boolean';
 
 export class UnitImportData {
   key: string;
@@ -160,7 +161,7 @@ export class UnitImportData {
             page: variableRecord.attribs['page'],
 
             valuePositionLabels: UnitImportData.getValuePositionLabelsForVariable(valuePositionLabelsElement),
-            valuesComplete: valuesElement.length ? valuesElement.attr('complete') as unknown as boolean : false,
+            valuesComplete: readXsdBoolean(valuesElement.attr('complete')),
             values: UnitImportData.getValuesForVariable(valuesElement)
           });
         });

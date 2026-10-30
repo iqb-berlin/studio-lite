@@ -28,6 +28,7 @@ import {
   mapImportedComment,
   mapImportedItems,
   mapImportedMetadata,
+  mapImportedVariables,
   parseCompanionJson
 } from '../utils/import-companion-files';
 
@@ -185,7 +186,7 @@ export class WorkspaceImportService {
           const variablesData = parseCompanionJson<{ baseVariables?: VariableInfo[] }>(
             notXmlFiles[unitImportData.variablesFileName], functionReturn
           );
-          if (variablesData) unitImportData.baseVariables = variablesData.baseVariables ?? [];
+          if (variablesData) unitImportData.baseVariables = mapImportedVariables(variablesData.baseVariables);
           usedFiles.push(unitImportData.variablesFileName);
         } else {
           WorkspaceImportService.warnMissingFile(unitImportData.variablesFileName, functionReturn);

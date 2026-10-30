@@ -1051,6 +1051,34 @@ describe('Unit API tests part II', () => {
     });
   });
 
+  // The import took `complete` over as text, and "false" counted as true (#1987).
+  describe('whether the values of an imported XML variable are complete', () => {
+    it('201 positive test: is stored as a boolean', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      cy.uploadUnitFilesAPI(
+        Cypress.expose(ws1.id),
+        ['values-complete/VC_IMPORT.xml', 'values-complete/VC_IMPORT.voud'],
+        adminToken
+      ).then(imported => {
+        cy.getUnitsByWsAPI(Cypress.expose(ws1.id), adminToken).then(units => {
+          const unit = units.body.find((u: { key: string }) => u.key === 'VC_IMPORT');
+          expect(unit, 'imported unit').not.to.equal(undefined);
+          const unitId = String(unit.id);
+          cy.getUnitDefinitionAPI(unitId, Cypress.expose(ws1.id), adminToken).then(read => {
+            // cleaned up before anything else is asserted, so that a failure leaves ws1 as it was
+            cy.deleteUnitsAPI([unitId], Cypress.expose(ws1.id), adminToken);
+            cy.then(() => {
+              expect(imported.status).to.equal(201);
+              expect(imported.body.messages).to.deep.equal([]);
+              expect(read.body.variables.map((v: { id: string, valuesComplete: unknown }) => [v.id, v.valuesComplete]))
+                .to.deep.equal([['open', false], ['closed', true]]);
+            });
+          });
+        });
+      });
+    });
+  });
+
   // The scheme endpoint refuses a scheme without a list of codings, and on import its error failed
   // the whole upload (#1986).
   describe('a coding scheme without a list of codings', () => {
