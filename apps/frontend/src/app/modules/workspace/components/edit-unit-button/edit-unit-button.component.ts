@@ -368,7 +368,7 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
           const settings = this.workspaceService.workspaceSettings;
           this.metadataService
             .loadProfileColumns(settings?.unitMDProfile, settings?.itemMDProfile)
-            .then(() => this.metadataService.createMetadataReport()
+            .then(failedProfileUrls => this.metadataService.createMetadataReport()
               .subscribe((units: UnitPropertiesDto[] | boolean) => {
                 const selectedUnits = (units as UnitPropertiesDto[])
                   .filter((unit: UnitPropertiesDto) => res.selectedUnits.includes(unit.id));
@@ -377,7 +377,10 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
                   height: '80%',
                   data: {
                     units: selectedUnits,
-                    warning: ''
+                    // the report lacks the columns of these profiles (#2002)
+                    warning: failedProfileUrls
+                      .map(profileUrl => this.translateService.instant('workspace.profile-not-loaded', { profileUrl }))
+                      .join('\n')
                   },
                   autoFocus: false
                 });

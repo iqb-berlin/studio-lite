@@ -78,6 +78,21 @@ describe('TableViewComponent', () => {
     expect(component.dataSource.data.length).toBe(1);
   });
 
+  // The report lacks the columns of a profile that could not be loaded, and says so (#2002).
+  it.each([['Metadatenprofil "p" kann aktuell nicht geladen werden', 1], ['', 0]])(
+    'shows the warning "%s" above the tables',
+    (warning, shown) => {
+      component.data = { units: [], warning };
+      fixture.detectChanges();
+
+      const hints: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('[data-cy="metadata-table-view-profile-not-loaded"]')
+      );
+      expect(hints).toHaveLength(shown);
+      expect(hints.map(hint => hint.textContent?.trim())).toEqual(warning ? [warning] : []);
+    }
+  );
+
   it('should change view mode on tabChanged', () => {
     component.tabChanged({ index: 1, tab: null as unknown as MatTab } as MatTabChangeEvent);
     expect(component.viewMode).toBe('items');

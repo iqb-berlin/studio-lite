@@ -499,7 +499,7 @@ describe('EditUnitButtonComponent', () => {
       mockDialog.open.mockReturnValue(createMock<MatDialogRef<ShowMetadataComponent>>({
         afterClosed: () => of({ selectedUnits: [2] })
       }));
-      mockMetadataService.loadProfileColumns.mockResolvedValue();
+      mockMetadataService.loadProfileColumns.mockResolvedValue([]);
       mockMetadataService.createMetadataReport.mockReturnValue(of([unitProperties(1), unitProperties(2)]));
 
       component.showMetadata();
@@ -507,6 +507,28 @@ describe('EditUnitButtonComponent', () => {
 
       expect(mockDialog.open).toHaveBeenLastCalledWith(TableViewComponent, expect.objectContaining({
         data: { units: [unitProperties(2)], warning: '' }
+      }));
+    }));
+
+    // The columns of a profile that could not be loaded are missing from the report (#2002).
+    it('should name each profile that could not be loaded in the report', fakeAsync(() => {
+      mockDialog.open.mockReturnValue(createMock<MatDialogRef<ShowMetadataComponent>>({
+        afterClosed: () => of({ selectedUnits: [] })
+      }));
+      mockMetadataService.loadProfileColumns.mockResolvedValue(['unit-url', 'item-url']);
+      mockMetadataService.createMetadataReport.mockReturnValue(of([]));
+      jest.spyOn(component.translateService, 'instant').mockImplementation(
+        (key, params) => `${key}: ${(params as { profileUrl: string }).profileUrl}`
+      );
+
+      component.showMetadata();
+      flush();
+
+      expect(mockDialog.open).toHaveBeenLastCalledWith(TableViewComponent, expect.objectContaining({
+        data: {
+          units: [],
+          warning: 'workspace.profile-not-loaded: unit-url\nworkspace.profile-not-loaded: item-url'
+        }
       }));
     }));
 

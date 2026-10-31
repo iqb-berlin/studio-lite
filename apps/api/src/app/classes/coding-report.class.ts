@@ -168,7 +168,8 @@ export class CodingReportClass {
 
   static determineCodingType(codingVariable: VariableCodingData): string {
     let closedCoding = false;
-    let manualCodingOnly = true;
+    // A variable without codes is not coded at all, not coded by hand (#1988)
+    let manualCodingOnly = (codingVariable.codes?.length ?? 0) > 0;
     let hasRules = false;
 
     codingVariable.codes?.forEach((code: CodeData) => {

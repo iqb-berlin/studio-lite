@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { Inject, Injectable, signal } from '@angular/core';
 import { MDProfile, MDProfileGroup, ProfileEntryParametersVocabulary } from '@iqbspecs/metadata-profile';
 import { Observable, of, firstValueFrom } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -29,6 +29,9 @@ export class MetadataService implements VocabularyProvider {
   vocabularies: Vocab[] = [];
   unitProfileColumns: MDProfileGroup[] = [];
   itemProfileColumns: MDProfileGroup = {} as MDProfileGroup;
+  // The profile the unit and the item columns were loaded from. The service outlives the
+  // workspace, so columns kept after a failed load may come from another workspace's profile.
+  private readonly columnsProfileUrls = signal<Partial<Record<'unit' | 'item', string>>>({});
 
   getVocabularies(): Vocab[] {
     return this.vocabularies;
@@ -55,28 +58,31 @@ export class MetadataService implements VocabularyProvider {
 
   // Loads the report column definitions (read by TableViewComponent) directly from
   // the configured workspace profiles, so the metadata report works regardless of
-  // whether a unit metadata tab was opened before.
-  async loadProfileColumns(unitMDProfile?: string, itemMDProfile?: string): Promise<void> {
-    await Promise.all([
+  // whether a unit metadata tab was opened before. Resolves to the urls of the profiles
+  // whose columns are missing because they could not be loaded.
+  async loadProfileColumns(unitMDProfile?: string, itemMDProfile?: string): Promise<string[]> {
+    const failedProfileUrls = await Promise.all([
       this.loadProfileColumnsForTarget('unit', unitMDProfile),
       this.loadProfileColumnsForTarget('item', itemMDProfile)
     ]);
+    return failedProfileUrls.filter((url): url is string => !!url);
   }
 
-  private async loadProfileColumnsForTarget(target: 'unit' | 'item', url?: string): Promise<void> {
+  private async loadProfileColumnsForTarget(target: 'unit' | 'item', url?: string): Promise<string | undefined> {
     if (!url) {
       // No profile configured for this workspace: clear columns that may still be set
-      // from a previously viewed workspace. (A transient fetch failure below instead
-      // keeps the existing columns rather than wiping them.)
-      if (target === 'unit') {
-        this.unitProfileColumns = [];
-      } else {
-        this.itemProfileColumns = {} as MDProfileGroup;
-      }
-      return;
+      // from a previously viewed workspace.
+      this.clearProfileColumns(target);
+      return undefined;
     }
     const profile = await firstValueFrom(this.backendService.getMetadataProfile(url));
-    if (!profile || profile === true) return;
+    if (!profile || profile === true) {
+      // A transient failure keeps the columns only if they come from this very profile;
+      // otherwise the report would show the fields of another workspace (#2002).
+      if (this.columnsProfileUrls()[target] === url) return undefined;
+      this.clearProfileColumns(target);
+      return url;
+    }
     const mdProfile = profile as unknown as MDProfile;
     await this.loadProfileVocabularies(mdProfile);
     if (target === 'unit') {
@@ -84,6 +90,17 @@ export class MetadataService implements VocabularyProvider {
     } else {
       [this.itemProfileColumns] = mdProfile.groups?.length ? mdProfile.groups : [{} as MDProfileGroup];
     }
+    this.columnsProfileUrls.update(urls => ({ ...urls, [target]: url }));
+    return undefined;
+  }
+
+  private clearProfileColumns(target: 'unit' | 'item'): void {
+    if (target === 'unit') {
+      this.unitProfileColumns = [];
+    } else {
+      this.itemProfileColumns = {} as MDProfileGroup;
+    }
+    this.columnsProfileUrls.update(urls => ({ ...urls, [target]: undefined }));
   }
 
   async loadProfileVocabularies(profile: MDProfile): Promise<boolean> {
