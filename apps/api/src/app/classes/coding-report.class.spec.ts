@@ -388,6 +388,15 @@ describe('CodingReportClass', () => {
       expect(codingType).toBe('keine Regeln');
     });
 
+    // A variable without codes counted as coded by hand (#1988).
+    it.each([[[]], [undefined]])('maps a variable with codes %j to keine Regeln', codes => {
+      const codingType = CodingReportClass.determineCodingType({
+        id: 'v', sourceType: 'BASE', codes
+      } as unknown as VariableCodingData);
+
+      expect(codingType).toBe('keine Regeln');
+    });
+
     // Codes without rule sets or manual instruction, both optional in the spec (#1873).
     it('maps manual codes without rule sets to manuell', () => {
       const codingType = CodingReportClass.determineCodingType({
