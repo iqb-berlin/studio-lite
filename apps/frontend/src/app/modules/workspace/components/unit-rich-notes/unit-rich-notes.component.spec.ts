@@ -179,6 +179,21 @@ describe('UnitRichNotesComponent', () => {
     }));
   });
 
+  // The ids of a vocabulary are URLs: split at the first dot, they named no tag, and all were offered
+  // (#2006).
+  it('should offer only the tags of its top-level tag for a note added under a vocabulary tag', () => {
+    const base = 'https://w3id.org/iqb/v06/t1';
+    const tags = [tag(`${base}/transcript`, [tag(`${base}/original`)]), tag(`${base}/didactical_guide`)];
+    loadNotes(tags, []);
+    closeDialogWith(undefined);
+
+    component.openNoteDialog(undefined, `${base}/original`);
+
+    expect(dialogMock.open).toHaveBeenCalledWith(UnitRichNoteDialogComponent, expect.objectContaining({
+      data: expect.objectContaining({ tags: [tags[0]] })
+    }));
+  });
+
   it('should save an edited note and show it as saved', () => {
     loadNotes(mockTags, [note(1, 't1', 'old')]);
     const edited = {

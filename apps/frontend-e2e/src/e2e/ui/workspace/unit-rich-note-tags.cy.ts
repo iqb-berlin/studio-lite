@@ -162,6 +162,8 @@ describe('Unit Rich Notes', () => {
           clickIndexTabWorkspace('notes');
           cy.wait('@getRichNotes');
           cy.get('.loading-spinner', { timeout: 15000 }).should('not.exist');
+          // a tag of the second branch, which the dialog below must not offer
+          cy.contains('.node-card h3', 'Didaktische Handreichungen 2').should('exist');
 
           cy.get('[data-cy="rich-note-add"]', { timeout: 20000 })
             .first()
@@ -170,6 +172,9 @@ describe('Unit Rich Notes', () => {
 
           cy.get('mat-option').should('have.length.greaterThan', 0);
           cy.get('mat-option').contains('Transkript 2 der Originalquelle').should('exist');
+          // Added under the first tag, a note is offered the tags of that branch only: the
+          // vocabulary's ids are URLs, which the dialog once could not find a branch for (#2006)
+          cy.contains('mat-option', 'Didaktische Handreichungen 2').should('not.exist');
           cy.translate(Cypress.expose('locale')).then(json => {
             cy.get('mat-dialog-actions button')
               .contains(json.cancel, { matchCase: false })

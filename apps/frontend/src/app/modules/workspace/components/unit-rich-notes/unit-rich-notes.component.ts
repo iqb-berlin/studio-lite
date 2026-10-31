@@ -19,6 +19,7 @@ import { WorkspaceBackendService } from '../../services/workspace-backend.servic
 import { WorkspaceService } from '../../services/workspace.service';
 import { UnitRichNoteDialogComponent } from '../unit-rich-note-dialog/unit-rich-note-dialog.component';
 import { RichNoteNode, UnitRichNoteNodeComponent } from '../unit-rich-note-node/unit-rich-note-node.component';
+import { findRootTag } from '../../../../utils/rich-note-tags.utils';
 
 /**
  * The notes on a unit, arranged under the tags the workspace group offers. Every top-level tag is
@@ -160,8 +161,7 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
 
     let availableTags = this.workspaceService.richNoteTags;
     if (preSelectedTagId) {
-      const rootId = preSelectedTagId.split('.')[0];
-      const rootTag = this.workspaceService.richNoteTags.find(t => t.id === rootId);
+      const rootTag = findRootTag(this.workspaceService.richNoteTags, preSelectedTagId);
       if (rootTag) {
         availableTags = [rootTag];
       }
