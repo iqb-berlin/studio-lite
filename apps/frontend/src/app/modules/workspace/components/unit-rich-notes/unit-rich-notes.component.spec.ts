@@ -2,8 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import {
   UnitRichNoteDto, UnitRichNotesDto, UnitRichNoteTagDto
@@ -20,6 +21,7 @@ describe('UnitRichNotesComponent', () => {
   let workspaceServiceMock: DeepMocked<WorkspaceService>;
   let workspaceBackendServiceMock: DeepMocked<WorkspaceBackendService>;
   let dialogMock: DeepMocked<MatDialog>;
+  let snackBarMock: DeepMocked<MatSnackBar>;
   // the tags the workspace holds; a test that needs others puts them in here
   let richNoteTags: UnitRichNoteTagDto[];
 
@@ -44,6 +46,7 @@ describe('UnitRichNotesComponent', () => {
     });
 
     dialogMock = createMock<MatDialog>();
+    snackBarMock = createMock<MatSnackBar>();
 
     await TestBed.configureTestingModule({
       imports: [
@@ -57,7 +60,8 @@ describe('UnitRichNotesComponent', () => {
         provideHttpClientTesting(),
         { provide: WorkspaceService, useValue: workspaceServiceMock },
         { provide: WorkspaceBackendService, useValue: workspaceBackendServiceMock },
-        { provide: MatDialog, useValue: dialogMock }
+        { provide: MatDialog, useValue: dialogMock },
+        { provide: MatSnackBar, useValue: snackBarMock }
       ]
     })
       .compileComponents();
@@ -233,6 +237,112 @@ describe('UnitRichNotesComponent', () => {
 
     expect(workspaceBackendServiceMock.deleteUnitRichNote).toHaveBeenCalledWith(1, 10, 1);
     expect(shapeOf(component.displayNodes)).toEqual([{ tagId: 't1', notes: [2], children: [] }]);
+  });
+
+  // The dialog is closed by the time the answer comes: the text was gone, and only the general error
+  // box said that something failed (#2005).
+  describe('when saving, deleting or loading the notes again fails', () => {
+    const closeDialogWithOnce = (result: unknown) => dialogMock.open.mockReturnValueOnce(
+      createMock<MatDialogRef<unknown>>({ afterClosed: () => of(result) })
+    );
+    const dialogNote = (call: number) => (dialogMock.open.mock.calls[call][1]?.data as { note?: unknown }).note;
+
+    it('should say so and open the edited note again', () => {
+      loadNotes(mockTags, [note(1, 't1', 'old')]);
+      const edited = {
+        id: 1, tagId: 't1', content: 'new', links: [], itemReferences: []
+      };
+      closeDialogWithOnce(edited);
+      closeDialogWithOnce(undefined);
+      workspaceBackendServiceMock.patchUnitRichNote.mockReturnValue(of(false));
+
+      component.openNoteDialog(component.notes[0]);
+
+      expect(snackBarMock.open).toHaveBeenCalledWith('workspace.rich-note-not-saved', 'error', { duration: 3000 });
+      expect(dialogNote(1)).toEqual(edited);
+      expect(component.displayNodes[0].notes[0].content).toBe('old');
+    });
+
+    it('should say so and open the new note again', () => {
+      loadNotes(mockTags, []);
+      const written = {
+        tagId: 't1', content: 'new', links: [], itemReferences: ['i1']
+      };
+      closeDialogWithOnce(written);
+      closeDialogWithOnce(undefined);
+      workspaceBackendServiceMock.addUnitRichNote.mockReturnValue(of(null));
+
+      component.openNoteDialog(undefined, 't1');
+
+      expect(snackBarMock.open).toHaveBeenCalledWith('workspace.rich-note-not-saved', 'error', { duration: 3000 });
+      expect(dialogNote(1)).toEqual(written);
+    });
+
+    // Stored, but not shown, a note invites a second save that stores it twice
+    it('should show the stored note when the notes cannot be loaded again', () => {
+      loadNotes(mockTags, []);
+      closeDialogWith({
+        tagId: 't1', content: 'new', links: [], itemReferences: []
+      });
+      workspaceBackendServiceMock.addUnitRichNote.mockReturnValue(of(7));
+      workspaceBackendServiceMock.getUnitRichNotes.mockReturnValue(of(null));
+
+      component.openNoteDialog(undefined, 't1');
+
+      expect(shapeOf(component.displayNodes)).toEqual([{ tagId: 't1', notes: [7], children: [] }]);
+      expect(component.displayNodes[0].notes[0].content).toBe('new');
+    });
+
+    // The notes loaded again for the unit the note was written for came after those of the unit
+    // shown by then, and stood there in their place
+    it('should not show the notes of the unit before when they are loaded again too late', () => {
+      const tags = [tag('t1')];
+      loadNotes(tags, []);
+      const notesOfUnit10 = new Subject<UnitRichNotesDto | null>();
+      workspaceBackendServiceMock.getUnitRichNotes.mockImplementation((_, unitId) => (unitId === 10 ?
+        notesOfUnit10 : of({ notes: [note(8, 't1')], tags })));
+      closeDialogWith({
+        tagId: 't1', content: 'new', links: [], itemReferences: []
+      });
+      workspaceBackendServiceMock.addUnitRichNote.mockReturnValue(of(7));
+      component.openNoteDialog(undefined, 't1');
+      workspaceServiceMock.selectedUnit$.next(11);
+
+      notesOfUnit10.next({ notes: [note(7, 't1', 'new')], tags });
+
+      expect(shapeOf(component.displayNodes)).toEqual([{ tagId: 't1', notes: [8], children: [] }]);
+    });
+
+    // Opened over the notes of another unit, a second save would file the note there
+    it.each<[string, () => void]>([
+      ['another unit is shown', () => workspaceServiceMock.selectedUnit$.next(11)],
+      ['the notes were left', () => fixture.destroy()]
+    ])('should only say so when %s by the time saving fails', (_, moveOn) => {
+      loadNotes(mockTags, []);
+      const answer = new Subject<number | null>();
+      closeDialogWithOnce({
+        tagId: 't1', content: 'new', links: [], itemReferences: []
+      });
+      workspaceBackendServiceMock.addUnitRichNote.mockReturnValue(answer);
+      component.openNoteDialog(undefined, 't1');
+      moveOn();
+
+      answer.next(null);
+
+      expect(snackBarMock.open).toHaveBeenCalledWith('workspace.rich-note-not-saved', 'error', { duration: 3000 });
+      expect(dialogMock.open).toHaveBeenCalledTimes(1);
+    });
+
+    it('should say so and keep the note when deleting it fails', () => {
+      loadNotes(mockTags, [note(1, 't1')]);
+      closeDialogWith(true);
+      workspaceBackendServiceMock.deleteUnitRichNote.mockReturnValue(of(false));
+
+      component.deleteNote(1);
+
+      expect(snackBarMock.open).toHaveBeenCalledWith('workspace.rich-note-not-deleted', 'error', { duration: 3000 });
+      expect(shapeOf(component.displayNodes)).toEqual([{ tagId: 't1', notes: [1], children: [] }]);
+    });
   });
 
   // Esc, a click beside the dialog and navigation close it with undefined (#1844)

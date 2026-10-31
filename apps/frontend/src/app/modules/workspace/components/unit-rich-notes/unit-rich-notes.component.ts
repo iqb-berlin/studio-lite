@@ -3,6 +3,7 @@ import {
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
@@ -54,6 +55,7 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
   isLoading = true;
   private readonly notesNotLoadedState = signal(false);
   readonly notesNotLoaded = this.notesNotLoadedState.asReadonly();
+  private readonly destroyed = signal(false);
 
   private ngUnsubscribe = new Subject<void>();
 
@@ -61,7 +63,8 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
     public workspaceService: WorkspaceService,
     private workspaceBackendService: WorkspaceBackendService,
     private translateService: TranslateService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -180,10 +183,14 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
       data: dialogData
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
       if (result) {
+        // The unit the note is written for: the page stays when the user moves to another unit
+        const writtenFor = { workspaceId: this.workspaceId, unitId: this.unitId };
         if (result.id) {
-          this.workspaceBackendService.patchUnitRichNote(this.workspaceId, this.unitId, result.id, result)
+          // The writes are not cancelled with the page: a note the dialog took would be lost.
+          this.workspaceBackendService
+            .patchUnitRichNote(writtenFor.workspaceId, writtenFor.unitId, result.id, result)
             .subscribe(success => {
               if (success) {
                 const index = this.notes.findIndex(n => n.id === result.id);
@@ -191,11 +198,13 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
                   this.notes[index] = { ...this.notes[index], ...result };
                   this.rebuildDisplayNodes();
                 }
+              } else {
+                this.reopenAfterFailedSave(result, writtenFor, preSelectedTagId);
               }
             });
         } else {
           const newNote = {
-            unitId: this.unitId,
+            unitId: writtenFor.unitId,
             tagId: result.tagId,
             content: result.content,
             format: result.format || 'html',
@@ -203,21 +212,61 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
             links: result.links,
             itemReferences: result.itemReferences
           };
-          this.workspaceBackendService.addUnitRichNote(this.workspaceId, this.unitId, newNote)
+          this.workspaceBackendService.addUnitRichNote(writtenFor.workspaceId, writtenFor.unitId, newNote)
             .subscribe(id => {
               if (id) {
-                this.workspaceBackendService.getUnitRichNotes(this.workspaceId, this.unitId)
+                this.workspaceBackendService.getUnitRichNotes(writtenFor.workspaceId, writtenFor.unitId)
+                  .pipe(takeUntil(this.ngUnsubscribe))
                   .subscribe(data => {
+                    // Shown over another unit, they would stand in place of its notes
+                    if (!this.isShowing(writtenFor)) return;
                     if (data) {
                       this.notes = data.notes;
                       this.rebuildDisplayNodes();
+                    } else {
+                      // Stored, but not shown, the note would invite a second save that stores it twice
+                      const now = new Date();
+                      this.notes = [...this.notes, {
+                        ...newNote, id, createdAt: now, changedAt: now
+                      }];
+                      this.rebuildDisplayNodes();
                     }
                   });
+              } else {
+                this.reopenAfterFailedSave(result, writtenFor, preSelectedTagId);
               }
             });
         }
       }
     });
+  }
+
+  // The dialog is closed by the time the answer comes. Opened again with what was written, the
+  // note is not lost and can be saved once more -- but only over the notes of the unit it was
+  // written for: anywhere else a second save would file it there (#2005). The message comes after
+  // the dialog, so that its backdrop does not cover it.
+  private reopenAfterFailedSave(
+    written: UnitRichNoteDto,
+    writtenFor: { workspaceId: number, unitId: number },
+    preSelectedTagId?: string
+  ): void {
+    if (this.isShowing(writtenFor)) {
+      this.openNoteDialog(written, preSelectedTagId);
+    }
+    this.showError('workspace.rich-note-not-saved');
+  }
+
+  // whether the page still shows the notes of that unit
+  private isShowing(unit: { workspaceId: number, unitId: number }): boolean {
+    return !this.destroyed() && unit.workspaceId === this.workspaceId && unit.unitId === this.unitId;
+  }
+
+  private showError(key: string): void {
+    this.snackBar.open(
+      this.translateService.instant(key),
+      this.translateService.instant('error'),
+      { duration: 3000 }
+    );
   }
 
   deleteNote(noteId: number): void {
@@ -234,13 +283,15 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
       }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
+    dialogRef.afterClosed().pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
+      if (result === true) {
         this.workspaceBackendService.deleteUnitRichNote(this.workspaceId, this.unitId, noteId)
           .subscribe(success => {
             if (success) {
               this.notes = this.notes.filter(n => n.id !== noteId);
               this.rebuildDisplayNodes();
+            } else {
+              this.showError('workspace.rich-note-not-deleted');
             }
           });
       }
@@ -248,6 +299,7 @@ export class UnitRichNotesComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed.set(true);
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }
