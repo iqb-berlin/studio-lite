@@ -189,16 +189,16 @@ describe('WorkspacesComponent', () => {
     const ws2 = {
       id: 2, name: 'ws2', groupId: 1, unitsCount: 0
     } as WorkspaceInListDto;
-    let usersOfWs1: Subject<WorkspaceUserInListDto[]>;
-    let usersOfWs2: Subject<WorkspaceUserInListDto[]>;
+    let usersOfWs1: Subject<WorkspaceUserInListDto[] | null>;
+    let usersOfWs2: Subject<WorkspaceUserInListDto[] | null>;
 
     const radioInputs = (): HTMLInputElement[] => Array.from(
       fixture.nativeElement.querySelectorAll('[data-cy="access-rights-row"] input[type="radio"]')
     );
 
     beforeEach(() => {
-      usersOfWs1 = new Subject<WorkspaceUserInListDto[]>();
-      usersOfWs2 = new Subject<WorkspaceUserInListDto[]>();
+      usersOfWs1 = new Subject<WorkspaceUserInListDto[] | null>();
+      usersOfWs2 = new Subject<WorkspaceUserInListDto[] | null>();
       mockBackendService.getUsers.mockReturnValue(of([
         {
           id: 1, name: 'user1', isAdmin: false, description: ''
@@ -276,6 +276,52 @@ describe('WorkspacesComponent', () => {
       expect(component.isLoadingAccessRights).toBe(false);
       expect(mockAppService.dataLoading).toBe(false);
       expect(usersOfWs1.observed).toBe(false);
+    });
+
+    // Without them the workspace had no users, and saving one role removed everyone else from it
+    // (#2074).
+    it('should keep the roles locked when the rights could not be loaded', () => {
+      const notLoadedHint = (): HTMLElement | null => fixture.nativeElement
+        .querySelector('[data-cy="wsg-admin-access-rights-not-loaded"]');
+      component.tableSelectionRow.select(ws1);
+      usersOfWs1.next(null);
+      fixture.detectChanges();
+
+      expect(notLoadedHint()).not.toBeNull();
+      expect(radioInputs()).toHaveLength(0);
+      expect(mockAppService.dataLoading).toBe(false);
+
+      const user = component.workspaceUsers.entries[0];
+      component.onRoleChange(user, 2);
+
+      expect(component.workspaceUsers.hasChanged).toBe(false);
+
+      user.isChecked = true;
+      user.accessLevel = 2;
+      component.onRoleClick(user, 2);
+
+      expect(user.isChecked).toBe(true);
+
+      component.workspaceUsers.updateHasChanged();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement
+        .querySelector('[data-cy="wsg-admin-access-rights-save-button"]').disabled).toBe(true);
+
+      component.saveUsers();
+
+      expect(mockBackendService.setUsersByWorkspace).not.toHaveBeenCalled();
+
+      component.tableSelectionRow.deselect(ws1);
+      fixture.detectChanges();
+
+      expect(notLoadedHint()).toBeNull();
+
+      component.tableSelectionRow.select(ws2);
+      usersOfWs2.next([]);
+      fixture.detectChanges();
+
+      expect(radioInputs().every(input => !input.disabled)).toBe(true);
     });
   });
 

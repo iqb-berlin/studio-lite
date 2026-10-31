@@ -75,11 +75,13 @@ export class BackendService {
       );
   }
 
-  getWorkspacesByUser(userId: number): Observable<UsersWorkspaceInListDto[]> {
+  // A failure is answered with null, not with an empty list: saving a role onto that list would
+  // remove the user from every other workspace of the group (#2074).
+  getWorkspacesByUser(userId: number): Observable<UsersWorkspaceInListDto[] | null> {
     return this.http
       .get<UsersWorkspaceInListDto[]>(`${this.serverUrl}group-admin/users/${userId}/workspaces`)
       .pipe(
-        catchError(() => of([]))
+        catchError(() => of(null))
       );
   }
 
@@ -132,11 +134,13 @@ export class BackendService {
   }
 
   // *******************************************************************
-  getUsersByWorkspace(workspaceId: number): Observable<WorkspaceUserInListDto[]> {
+  // A failure is answered with null, not with an empty list: saving a role onto that list would
+  // remove everyone else from the workspace (#2074).
+  getUsersByWorkspace(workspaceId: number): Observable<WorkspaceUserInListDto[] | null> {
     return this.http
       .get<WorkspaceUserInListDto[]>(`${this.serverUrl}group-admin/workspaces/${workspaceId}/users`)
       .pipe(
-        catchError(() => of([]))
+        catchError(() => of(null))
       );
   }
 
