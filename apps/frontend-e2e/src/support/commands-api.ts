@@ -2123,6 +2123,20 @@ Cypress.Commands.add('getUnitExportContentsAPI', (wsId: string, token: string) =
   });
 });
 
+// All units, as the admin view "Aufgaben" lists and exports them
+Cypress.Commands.add('getAdminUnitsAPI', (token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'GET',
+    url: '/api/admin/units',
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    failOnStatusCode: false
+  });
+});
+
 // The items of all units, as the admin view "Unit-Items" lists them
 Cypress.Commands.add('getAdminUnitItemsAPI', (token: string) => {
   const authorization = `bearer ${token}`;

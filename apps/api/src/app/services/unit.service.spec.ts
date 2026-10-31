@@ -123,6 +123,24 @@ describe('UnitService', () => {
     });
   });
 
+  describe('getAllUnits', () => {
+    // The CSV of the admin's unit list has a column for it, which stayed empty (#2012).
+    it('should name the workspace of each unit', async () => {
+      unitsRepository.find.mockResolvedValue([
+        { id: 1, workspaceId: 2 } as Unit,
+        { id: 2, workspaceId: 1 } as Unit
+      ]);
+      workspaceRepository.find.mockResolvedValue([
+        { id: 1, name: 'ws1' } as Workspace,
+        { id: 2, name: 'ws2' } as Workspace
+      ]);
+
+      const result = await service.getAllUnits();
+
+      expect(result.map(unit => unit.workspaceName)).toEqual(['ws2', 'ws1']);
+    });
+  });
+
   describe('findAll', () => {
     it('should return units with workspace name', async () => {
       unitsRepository.find.mockResolvedValue([{ workspaceId: 1 } as Unit]);

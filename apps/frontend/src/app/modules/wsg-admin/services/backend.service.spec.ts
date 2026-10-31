@@ -26,6 +26,34 @@ describe('WsgAdmin BackendService', () => {
     httpMock.verify();
   });
 
+  describe('getWorkspacesByUser', () => {
+    // An empty list instead would show the user without rights in the group, and saving one role
+    // would remove the user from every other workspace of the group (#2074).
+    it('should answer a failed request with null', done => {
+      service.getWorkspacesByUser(7).subscribe(result => {
+        expect(result).toBeNull();
+        done();
+      });
+
+      httpMock.expectOne(`${serverUrl}group-admin/users/7/workspaces`)
+        .flush('error', { status: 500, statusText: 'Server Error' });
+    });
+  });
+
+  describe('getUsersByWorkspace', () => {
+    // An empty list instead would show the workspace without users, and saving one role would
+    // remove everyone else from it (#2074).
+    it('should answer a failed request with null', done => {
+      service.getUsersByWorkspace(3).subscribe(result => {
+        expect(result).toBeNull();
+        done();
+      });
+
+      httpMock.expectOne(`${serverUrl}group-admin/workspaces/3/users`)
+        .flush('error', { status: 500, statusText: 'Server Error' });
+    });
+  });
+
   describe('deleteWorkspaces', () => {
     it('returns true on success', done => {
       service.deleteWorkspaces([1, 2]).subscribe(result => {

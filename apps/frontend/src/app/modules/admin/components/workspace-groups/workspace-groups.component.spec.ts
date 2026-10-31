@@ -232,8 +232,8 @@ describe('WorkspaceGroupsComponent', () => {
 
   // A check set before the admins of the selected group arrived was reset by them (#2056).
   describe('while the admins of the selected group load', () => {
-    let adminsOf5: Subject<UserInListDto[]>;
-    let adminsOf6: Subject<UserInListDto[]>;
+    let adminsOf5: Subject<UserInListDto[] | null>;
+    let adminsOf6: Subject<UserInListDto[] | null>;
 
     const checkboxes = (): HTMLInputElement[] => Array.from(
       fixture.nativeElement.querySelectorAll('mat-checkbox input[type="checkbox"]')
@@ -249,8 +249,8 @@ describe('WorkspaceGroupsComponent', () => {
     };
 
     beforeEach(() => {
-      adminsOf5 = new Subject<UserInListDto[]>();
-      adminsOf6 = new Subject<UserInListDto[]>();
+      adminsOf5 = new Subject<UserInListDto[] | null>();
+      adminsOf6 = new Subject<UserInListDto[] | null>();
       (mockBackendService.getUsers as jest.Mock).mockReturnValue(of([anna, bert]));
       (mockBackendService.getWorkspaceGroupAdmins as jest.Mock)
         .mockImplementation((id: number) => (id === 5 ? adminsOf5 : adminsOf6));
@@ -306,6 +306,42 @@ describe('WorkspaceGroupsComponent', () => {
       fixture.destroy();
 
       expect(mockAppService.dataLoading).toBe(false);
+    });
+
+    // Without them the group showed no admins, and saving one check replaced the stored ones (#2070).
+    it('should keep the checks locked when the admins could not be loaded', async () => {
+      const notLoadedHint = (): HTMLElement | null => fixture.nativeElement
+        .querySelector('[data-cy="admin-workspace-groups-admins-not-loaded"]');
+      await render();
+      component.tableSelectionRow.select(group5);
+      adminsOf5.next(null);
+      await render();
+
+      expect(notLoadedHint()).not.toBeNull();
+      expect(checkboxes()).toHaveLength(0);
+      expect(mockAppService.dataLoading).toBe(false);
+
+      component.workspaceUsers.entries.find(user => user.id === 1)!.isChecked = true;
+      component.workspaceUsers.updateHasChanged();
+      fixture.detectChanges();
+
+      expect(saveButton().disabled).toBe(true);
+
+      component.saveUsers();
+
+      expect(mockBackendService.setWorkspaceGroupAdmins).not.toHaveBeenCalled();
+
+      component.tableSelectionRow.clear();
+      fixture.detectChanges();
+
+      expect(notLoadedHint()).toBeNull();
+
+      component.tableSelectionRow.select(group6);
+      adminsOf6.next([anna]);
+      await render();
+
+      expect(notLoadedHint()).toBeNull();
+      expect(checkboxes().every(input => !input.disabled)).toBe(true);
     });
   });
 

@@ -149,11 +149,13 @@ export class BackendService {
       .pipe(succeeded());
   }
 
-  getWorkspaceGroupsByAdmin(userId: number): Observable<WorkspaceGroupInListDto[]> {
+  // A failure is answered with null, not with an empty list: saving a check onto that list would
+  // replace the stored groups (#2070).
+  getWorkspaceGroupsByAdmin(userId: number): Observable<WorkspaceGroupInListDto[] | null> {
     return this.http
       .get<WorkspaceGroupInListDto[]>(`${this.serverUrl}admin/users/${userId}/workspace-groups`)
       .pipe(
-        catchError(() => of([]))
+        catchError(() => of(null))
       );
   }
 
@@ -163,11 +165,13 @@ export class BackendService {
       .pipe(succeeded());
   }
 
-  getWorkspaceGroupAdmins(workspaceGroupId: number): Observable<UserInListDto[]> {
+  // A failure is answered with null, not with an empty list: saving a check onto that list would
+  // replace the stored admins (#2070).
+  getWorkspaceGroupAdmins(workspaceGroupId: number): Observable<UserInListDto[] | null> {
     return this.http
       .get<UserInListDto[]>(`${this.serverUrl}admin/workspace-groups/${workspaceGroupId}/admins`)
       .pipe(
-        catchError(() => of([]))
+        catchError(() => of(null))
       );
   }
 

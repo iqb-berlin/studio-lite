@@ -168,45 +168,51 @@
                 [matTooltip]="'save' | translate"
                 matTooltipPosition="above"
                 [color]="'primary'"
-                [disabled]="!workspaceUsers.hasChanged || isLoadingAccessRights"
+                [disabled]="!workspaceUsers.hasChanged || isLoadingAccessRights || accessRightsNotLoaded()"
                 (click)="saveUsers()">
           <mat-icon>save</mat-icon>
         </button>
       </div>
     </div>
 
-    @if (workspaceUsers.entries.length) {
-      <studio-lite-roles-header></studio-lite-roles-header>
-    }
-
-    <div class="scroll-area fx-column-start-stretch">
-      @for (u of workspaceUsers.entries; track u; let index = $index;) {
-        @if (workspaceUsers.checkedCount > 0 && index === workspaceUsers.checkedCount) {
-          <studio-lite-entries-divider class="divider"></studio-lite-entries-divider>
-        }
-        <div class="fx-row-start-center" data-cy="access-rights-row">
-          <div class="fx-row-start-center fx-flex-fill fx-gap-15">
-            <div class="fx-row-start-center">
-              @for (level of accessLevels; track level) {
-                <mat-radio-button
-                  class="access-rights-radio"
-                  [name]="'u-role-' + u.id"
-                  [checked]="!!selectedWorkspaceId && u.accessLevel === level && u.isChecked"
-                  [disabled]="!selectedWorkspaceId || isLoadingAccessRights"
-                  [matTooltip]="'access-rights.access-level-'+level | translate"
-                  [attr.data-cy]="'access-rights-radio-button-' + level"
-                  (change)="onRoleChange(u, level)"
-                  (click)="onRoleClick(u, level)">
-                </mat-radio-button>
-              }
-            </div>
-            <div data-cy="access-rights">{{u.displayName}} ({{u.name}})</div>
-          </div>
-          <div class="fx-flex-fill secondary-text" >
-            {{u.description}}
-          </div>
-        </div>
+    @if (accessRightsNotLoaded()) {
+      <p class="info" data-cy="wsg-admin-access-rights-not-loaded">
+        {{'access-rights.not-loaded' | translate}}
+      </p>
+    } @else {
+      @if (workspaceUsers.entries.length) {
+        <studio-lite-roles-header></studio-lite-roles-header>
       }
-    </div>
+
+      <div class="scroll-area fx-column-start-stretch">
+        @for (u of workspaceUsers.entries; track u; let index = $index;) {
+          @if (workspaceUsers.checkedCount > 0 && index === workspaceUsers.checkedCount) {
+            <studio-lite-entries-divider class="divider"></studio-lite-entries-divider>
+          }
+          <div class="fx-row-start-center" data-cy="access-rights-row">
+            <div class="fx-row-start-center fx-flex-fill fx-gap-15">
+              <div class="fx-row-start-center">
+                @for (level of accessLevels; track level) {
+                  <mat-radio-button
+                    class="access-rights-radio"
+                    [name]="'u-role-' + u.id"
+                    [checked]="!!selectedWorkspaceId && u.accessLevel === level && u.isChecked"
+                    [disabled]="!selectedWorkspaceId || isLoadingAccessRights"
+                    [matTooltip]="'access-rights.access-level-'+level | translate"
+                    [attr.data-cy]="'access-rights-radio-button-' + level"
+                    (change)="onRoleChange(u, level)"
+                    (click)="onRoleClick(u, level)">
+                  </mat-radio-button>
+                }
+              </div>
+              <div data-cy="access-rights">{{u.displayName}} ({{u.name}})</div>
+            </div>
+            <div class="fx-flex-fill secondary-text" >
+              {{u.description}}
+            </div>
+          </div>
+        }
+      </div>
+    }
   </div>
 </div>

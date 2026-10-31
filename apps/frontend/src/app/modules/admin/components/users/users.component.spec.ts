@@ -427,8 +427,8 @@ describe('UsersComponent', () => {
   describe('while the groups of the selected user load', () => {
     const groups = [{ id: 1, name: 'g1' }, { id: 2, name: 'g2' }] as WorkspaceGroupInListDto[];
     const users = [{ id: 1, name: 'u1' }, { id: 2, name: 'u2' }] as UserFullDto[];
-    let groupsOf1: Subject<WorkspaceGroupInListDto[]>;
-    let groupsOf2: Subject<WorkspaceGroupInListDto[]>;
+    let groupsOf1: Subject<WorkspaceGroupInListDto[] | null>;
+    let groupsOf2: Subject<WorkspaceGroupInListDto[] | null>;
 
     const checkboxes = (): HTMLInputElement[] => Array.from(
       fixture.nativeElement.querySelectorAll('mat-checkbox input[type="checkbox"]')
@@ -451,8 +451,8 @@ describe('UsersComponent', () => {
     };
 
     beforeEach(() => {
-      groupsOf1 = new Subject<WorkspaceGroupInListDto[]>();
-      groupsOf2 = new Subject<WorkspaceGroupInListDto[]>();
+      groupsOf1 = new Subject<WorkspaceGroupInListDto[] | null>();
+      groupsOf2 = new Subject<WorkspaceGroupInListDto[] | null>();
       (mockBackendService.getWorkspaceGroupList as jest.Mock).mockReturnValue(of(groups));
       (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of(users));
       (mockBackendService.getWorkspaceGroupsByAdmin as jest.Mock)
@@ -508,6 +508,42 @@ describe('UsersComponent', () => {
       fixture.destroy();
 
       expect(mockAppService.dataLoading).toBe(false);
+    });
+
+    // Without them the user administered no group, and saving one check replaced the stored ones
+    // (#2070).
+    it('should keep the checks locked when the groups could not be loaded', async () => {
+      const notLoadedHint = (): HTMLElement | null => fixture.nativeElement
+        .querySelector('[data-cy="admin-users-groups-not-loaded"]');
+      await render();
+      selectUser(0);
+      groupsOf1.next(null);
+      await render();
+
+      expect(notLoadedHint()).not.toBeNull();
+      expect(checkboxes()).toHaveLength(0);
+      expect(mockAppService.dataLoading).toBe(false);
+
+      checkGroup(1);
+      fixture.detectChanges();
+
+      expect(saveButton().disabled).toBe(true);
+
+      component.saveWorkspaces();
+
+      expect(mockBackendService.setWorkspaceGroupsByAdmin).not.toHaveBeenCalled();
+
+      component.tableSelectionRow.clear();
+      fixture.detectChanges();
+
+      expect(notLoadedHint()).toBeNull();
+
+      selectUser(1);
+      groupsOf2.next([groups[1]]);
+      await render();
+
+      expect(notLoadedHint()).toBeNull();
+      expect(checkboxes().every(input => !input.disabled)).toBe(true);
     });
 
     it('should keep an unsaved check when a poll selects the same user again', () => {

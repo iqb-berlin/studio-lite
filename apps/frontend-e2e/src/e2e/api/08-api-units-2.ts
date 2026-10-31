@@ -930,6 +930,26 @@ describe('Unit API tests part II', () => {
     });
   });
 
+  // The admin view exports the list as CSV, whose column for the workspace stayed empty (#2012).
+  describe('GET /api/admin/units', () => {
+    it('200 positive test: names the workspace each unit is in', () => {
+      const adminToken = Cypress.expose(`token_${Cypress.expose('username')}`);
+      // section 84 imported M6_AK0011 into ws1 and ws2, and section 39 renamed ws1
+      cy.getAdminUnitsAPI(adminToken).then(resp => {
+        expect(resp.status).to.equal(200);
+        const units = resp.body.filter((u: { key: string }) => u.key === 'M6_AK0011');
+        expect(units.map((u: { workspaceId: number }) => String(u.workspaceId)).sort())
+          .to.deep.equal([String(Cypress.expose(ws1.id)), String(Cypress.expose(ws2.id))].sort());
+        units.forEach((unit: { workspaceId: number, workspaceName: string }) => {
+          cy.getWsAPI(String(unit.workspaceId), adminToken).then(workspace => {
+            expect(workspace.body.name, `name of workspace ${unit.workspaceId}`).to.be.a('string').and.not.equal('');
+            expect(unit.workspaceName, `workspace of unit ${unit.workspaceId}`).to.equal(workspace.body.name);
+          });
+        });
+      });
+    });
+  });
+
   describe('a variable list in the VariableInfo 2.0 spelling (#1606, #1708)', () => {
     // What the schemer gets: the 1.x spelling, and `page` back as the empty value that 2.0 dropped.
     // Compared as text, so that a failure shows which variable came back in which spelling

@@ -4,7 +4,7 @@ import {
 } from '@angular/material/table';
 import { DatePipe } from '@angular/common';
 import {
-  ViewChild, Component, OnInit, OnDestroy, inject, signal
+  ViewChild, Component, OnInit, OnDestroy, computed, inject, signal
 } from '@angular/core';
 import {
   fromEvent, Subject, Subscription, timer
@@ -71,6 +71,10 @@ export class UsersComponent implements OnInit, OnDestroy {
   private readonly loadingGroupsState = signal(false);
   // A check set before the groups of the selected user arrive would be reset by them (#2056).
   readonly loadingGroups = this.loadingGroupsState.asReadonly();
+  private readonly groupsNotLoadedState = signal(false);
+  // Saving a check onto the empty list would replace the stored groups (#2070).
+  readonly groupsNotLoaded = this.groupsNotLoadedState.asReadonly();
+  readonly groupsLocked = computed(() => this.loadingGroups() || this.groupsNotLoaded());
   private groupsRequest?: Subscription;
   private pollingSubscription: Subscription | null = null;
   private readonly ngUnsubscribe = new Subject<void>();
@@ -303,14 +307,16 @@ export class UsersComponent implements OnInit, OnDestroy {
       this.loadingGroupsState.set(false);
       this.appService.dataLoading = false;
     }
+    this.groupsNotLoadedState.set(false);
     if (this.selectedUser > 0) {
       this.appService.dataLoading = true;
       this.loadingGroupsState.set(true);
       this.groupsRequest = this.backendService.getWorkspaceGroupsByAdmin(this.selectedUser)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(
-          (workspaceGroups: WorkspaceGroupInListDto[]) => {
-            this.userWorkspaceGroups.setChecks(workspaceGroups);
+          (workspaceGroups: WorkspaceGroupInListDto[] | null) => {
+            this.userWorkspaceGroups.setChecks(workspaceGroups ?? undefined);
+            this.groupsNotLoadedState.set(!workspaceGroups);
             this.loadingGroupsState.set(false);
             this.appService.dataLoading = false;
           }
@@ -321,8 +327,8 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   saveWorkspaces(): void {
-    // The entries still hold the checks of the user selected before.
-    if (this.loadingGroups()) return;
+    // The entries hold the checks of the user selected before, or of no group.
+    if (this.groupsLocked()) return;
     if (this.selectedUser > 0) {
       if (this.userWorkspaceGroups.hasChanged) {
         this.appService.dataLoading = true;

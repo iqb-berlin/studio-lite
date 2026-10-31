@@ -3,7 +3,7 @@ import {
   MatHeaderRow, MatRowDef, MatRow
 } from '@angular/material/table';
 import {
-  ViewChild, Component, OnInit, OnDestroy, inject
+  ViewChild, Component, OnInit, OnDestroy, inject, signal
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
@@ -68,6 +68,9 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   // True while the rights of the selected workspace are on their way: a role picked now
   // would be reset by their arrival, so the radio buttons stay disabled until then.
   isLoadingAccessRights = false;
+  private readonly accessRightsNotLoadedState = signal(false);
+  // Saving a role onto the empty list would remove everyone else from the workspace (#2074).
+  readonly accessRightsNotLoaded = this.accessRightsNotLoadedState.asReadonly();
   readonly accessLevels = ACCESS_LEVELS;
   isWorkspaceGroupAdmin = false;
   isBackUpWorkspaceGroup = false;
@@ -121,14 +124,14 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   }
 
   onRoleChange(user: WorkspaceUserChecked, level: number): void {
-    if (!this.selectedWorkspaceId || this.isLoadingAccessRights) return;
+    if (!this.selectedWorkspaceId || this.isLoadingAccessRights || this.accessRightsNotLoaded()) return;
     user.accessLevel = level;
     user.isChecked = true;
     this.workspaceUsers.updateHasChanged();
   }
 
   onRoleClick(user: WorkspaceUserChecked, level: number): void {
-    if (!this.selectedWorkspaceId || this.isLoadingAccessRights) return;
+    if (!this.selectedWorkspaceId || this.isLoadingAccessRights || this.accessRightsNotLoaded()) return;
     if (user.isChecked && user.accessLevel === level) {
       user.accessLevel = 0;
       user.isChecked = false;
@@ -150,14 +153,16 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
       this.isLoadingAccessRights = false;
       this.appService.dataLoading = false;
     }
+    this.accessRightsNotLoadedState.set(false);
     if (this.selectedWorkspaceId > 0) {
       this.appService.dataLoading = true;
       this.isLoadingAccessRights = true;
       this.accessRightsRequest = this.backendService.getUsersByWorkspace(this.selectedWorkspaceId)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(
-          (dataResponse: WorkspaceUserInListDto[]) => {
-            this.workspaceUsers.setChecks(dataResponse);
+          (users: WorkspaceUserInListDto[] | null) => {
+            this.workspaceUsers.setChecks(users ?? undefined);
+            this.accessRightsNotLoadedState.set(!users);
             this.isLoadingAccessRights = false;
             this.appService.dataLoading = false;
           }
@@ -168,8 +173,8 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   }
 
   saveUsers(): void {
-    // The entries still hold the edits of the workspace selected before.
-    if (this.isLoadingAccessRights) return;
+    // The entries hold the edits of the workspace selected before, or no rights at all.
+    if (this.isLoadingAccessRights || this.accessRightsNotLoaded()) return;
     if (this.selectedWorkspaceId) {
       if (this.workspaceUsers.hasChanged) {
         this.appService.dataLoading = true;

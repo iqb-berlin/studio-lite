@@ -12,7 +12,7 @@ import {
   MatTableDataSource
 } from '@angular/material/table';
 import {
-  Component, OnDestroy, OnInit, ViewChild, inject, signal
+  Component, OnDestroy, OnInit, ViewChild, computed, inject, signal
 } from '@angular/core';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -61,6 +61,10 @@ export class WorkspaceGroupsComponent implements OnInit, OnDestroy {
   private readonly loadingAdminsState = signal(false);
   // A check set before the admins of the selected group arrive would be reset by them (#2056).
   readonly loadingAdmins = this.loadingAdminsState.asReadonly();
+  private readonly adminsNotLoadedState = signal(false);
+  // Saving a check onto the empty list would replace the stored admins (#2070).
+  readonly adminsNotLoaded = this.adminsNotLoadedState.asReadonly();
+  readonly adminsLocked = computed(() => this.loadingAdmins() || this.adminsNotLoaded());
   private adminsRequest?: Subscription;
   private readonly ngUnsubscribe = new Subject<void>();
 
@@ -188,14 +192,16 @@ export class WorkspaceGroupsComponent implements OnInit, OnDestroy {
       this.loadingAdminsState.set(false);
       this.appService.dataLoading = false;
     }
+    this.adminsNotLoadedState.set(false);
     if (this.selectedWorkspaceGroupId > 0) {
       this.appService.dataLoading = true;
       this.loadingAdminsState.set(true);
       this.adminsRequest = this.backendService.getWorkspaceGroupAdmins(this.selectedWorkspaceGroupId)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(
-          (dataResponse: UserInListDto[]) => {
-            this.workspaceUsers.setChecks(dataResponse);
+          (admins: UserInListDto[] | null) => {
+            this.workspaceUsers.setChecks(admins ?? undefined);
+            this.adminsNotLoadedState.set(!admins);
             this.loadingAdminsState.set(false);
             this.appService.dataLoading = false;
           }
@@ -206,8 +212,8 @@ export class WorkspaceGroupsComponent implements OnInit, OnDestroy {
   }
 
   saveUsers(): void {
-    // The entries still hold the checks of the group selected before.
-    if (this.loadingAdmins()) return;
+    // The entries hold the checks of the group selected before, or of nobody.
+    if (this.adminsLocked()) return;
     if (this.selectedWorkspaceGroupId > 0) {
       if (this.workspaceUsers.hasChanged) {
         this.appService.dataLoading = true;
