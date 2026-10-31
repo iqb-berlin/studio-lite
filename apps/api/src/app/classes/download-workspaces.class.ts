@@ -248,14 +248,12 @@ export class DownloadWorkspacesClass {
                 schemers: {}
               };
               unitData.forEach(u => {
-                if (u.lastChangedMetadata !== null) {
-                  returnData.latestChange = u.lastChangedMetadata;
-                } else {
-                  returnData.latestChange = null;
-                }
-
-                if (returnData.latestChange < u.lastChangedDefinition) returnData.latestChange = u.lastChangedDefinition;
-                if (returnData.latestChange < u.lastChangedScheme) returnData.latestChange = u.lastChangedScheme;
+                // The newest change across all units, not the change of the last one (#1983)
+                returnData.latestChange = [u.lastChangedMetadata, u.lastChangedDefinition, u.lastChangedScheme]
+                  .reduce(
+                    (latest, changed) => (changed && (!latest || changed > latest) ? changed : latest),
+                    returnData.latestChange
+                  );
                 if (returnData.editors[u.editor]) {
                   returnData.editors[u.editor] += 1;
                 } else {

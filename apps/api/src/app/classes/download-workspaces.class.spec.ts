@@ -462,5 +462,24 @@ describe('DownloadWorkspacesClass', () => {
 
       expect(rows.slice(1).map(row => row[3])).toEqual([10, 11, 20]);
     });
+
+    // The units come sorted by key; the column showed the change of the last one (#1983).
+    it('should show the newest change of any unit as the latest change of the workspace', async () => {
+      unitService.findAllWithProperties.mockImplementation(async workspaceId => (workspaceId === 10 ? [
+        {
+          ...module('E'),
+          key: 'A1',
+          lastChangedMetadata: new Date(2026, 9, 1, 12),
+          lastChangedScheme: new Date(2026, 9, 30, 12)
+        },
+        { ...module('E'), key: 'Z9', lastChangedMetadata: new Date(2022, 4, 3, 12) }
+      ] : []) as unknown as UnitPropertiesDto[]);
+
+      const { rows } = await readSheet(await DownloadWorkspacesClass.getWorkspaceReport(
+        workspaceService, unitService, 1
+      ));
+
+      expect(rows[1][4]).toBe('30.10.2026');
+    });
   });
 });
