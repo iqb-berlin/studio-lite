@@ -356,6 +356,24 @@ describe('UnitEditorComponent', () => {
       expect(component.sessionId).not.toBe('');
     });
 
+    // Reading the version threw, and the editor never got its unit (#2007).
+    it.each([
+      ['no version', { type: 'voeReadyNotification' }],
+      ['metadata without a spec version', { type: 'voeReadyNotification', metadata: {} }],
+      ['a version without a digit', { type: 'voeReadyNotification', metadata: { specVersion: 'latest' } }]
+    ])('should start an editor that reports %s as one of version 2', (_, ready) => {
+      fromEditor(ready);
+
+      expect(component.editorApiVersion).toBe(2);
+      expect(toEditor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'voeStartCommand',
+          editorConfig: expect.objectContaining({ definitionReportPolicy: 'eager' })
+        }),
+        '*'
+      );
+    });
+
     // the definition stays as it is; saved, it would otherwise be lost
     it('should keep the definition when a change notification carries none', () => {
       component.sessionId = 's1';

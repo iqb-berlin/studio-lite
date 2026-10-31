@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Verona-Testeditor</title>
+  <!--
+    An editor for the e2e tests of the studio as host, written against the editor API 5.0 and not
+    against one release of a real editor (#2007). It does no more than the tests ask of it: it reports
+    ready with its metadata as a string, as the API demands, and shows that the start command came.
+  -->
+  <script id="metadata" type="application/ld+json">
+    {
+      "id": "verona-test-editor",
+      "version": "1.0.0",
+      "type": "EDITOR",
+      "name": [
+        { "lang": "de", "value": "Verona-Testeditor" },
+        { "lang": "en", "value": "Verona test editor" }
+      ],
+      "specVersion": "5.0",
+      "metadataVersion": "3.1"
+    }
+  </script>
+</head>
+<body>
+  <p id="status">waiting</p>
+  <script>
+    // The frame is a srcdoc of the host and shares its origin: messages go there and nowhere else
+    const hostOrigin = window.parent.location.origin;
+
+    window.addEventListener('message', event => {
+      if (event.source !== window.parent) return;
+      if (event.data.type === 'voeStartCommand') {
+        document.getElementById('status').textContent = 'started';
+      }
+    });
+
+    window.parent.postMessage({
+      type: 'voeReadyNotification',
+      metadata: document.getElementById('metadata').textContent
+    }, hostOrigin);
+  </script>
+</body>
+</html>

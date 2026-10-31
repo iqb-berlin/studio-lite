@@ -52,7 +52,8 @@ export function importZipAPI(wsId: string, zip: string, token: string): void {
  * Builds the base and logs the browser in as the first user. Needs an empty database, as the reset
  * before every spec leaves it: the first user can only be created while there is none.
  * @param zip - a zip of units in the fixtures, imported into the primary workspace
- * @param units - empty units created in the primary workspace, without editor, player or schemer
+ * @param units - empty units created in the primary workspace, with no module but the player or editor
+ *   their data name
  * @example
  * createTestBaseAPI({ zip: 'test_studio_units_download.zip', units: [unitCrudUnits.crud1] });
  * createTestBaseAPI({ units: [unit] }).then(base => cy.visit(`/#/a/${base.wsId}/${base.unitIds[0]}`));

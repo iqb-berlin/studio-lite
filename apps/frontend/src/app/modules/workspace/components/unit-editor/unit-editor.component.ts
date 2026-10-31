@@ -5,6 +5,7 @@ import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { RolePipe } from '../../pipes/role.pipe';
 import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
+import { readSpecVersion } from '../../../../utils/spec-version.utils';
 
 /**
  * Hosts the EDITOR a unit names and keeps the definition store in step with what it reports.
@@ -66,16 +67,8 @@ export class UnitEditorComponent extends VeronaModuleDirective {
       case 'voeReadyNotification':
       case 'vo.FromAuthoringModule.ReadyNotification':
         if (msgType === 'voeReadyNotification') {
-          const majorVersion = msgData.metadata ?
-            msgData.metadata.specVersion.match(/\d+/) :
-            msgData.apiVersion.match(/\d+/);
-          if (majorVersion.length > 0) {
-            const majorVersionNumber = Number(majorVersion[0]);
-            this.editorApiVersion =
-              majorVersionNumber < 3 ? 2 : majorVersionNumber;
-          } else {
-            this.editorApiVersion = 2;
-          }
+          const specVersion = readSpecVersion(msgData);
+          this.editorApiVersion = specVersion !== undefined && specVersion >= 3 ? specVersion : 2;
         } else {
           this.editorApiVersion = 1;
         }

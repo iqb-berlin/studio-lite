@@ -520,7 +520,8 @@ Cypress.Commands.add('createUnitAPI', (wsId:string, unit: UnitData, token:string
       key: `${unit.shortname}`,
       name: `${unit.name}`,
       groupName: `${unit.group}`,
-      ...(unit.player && { player: unit.player })
+      ...(unit.player && { player: unit.player }),
+      ...(unit.editor && { editor: unit.editor })
     },
     failOnStatusCode: false
   });
