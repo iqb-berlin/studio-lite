@@ -1,5 +1,4 @@
 import {
-  addFirstUser,
   clearFormControl,
   goToSettings,
   saveAndExpect,
@@ -13,18 +12,14 @@ import {
 import { baseGroup } from '../../../support/testData';
 
 describe('Admin Settings Tab Configuration', () => {
-  before(() => addFirstUser());
+  before(() => {
+    cy.addFirstUserAPI(Cypress.expose('username'), Cypress.expose('password'))
+      .its('status').should('equal', 201);
+    login(Cypress.expose('username'), Cypress.expose('password'));
+  });
 
   // -------------------------------------------------------------------------
   describe('App Config – Texts card', () => {
-    it('displays the Texts card fields', () => {
-      goToSettings();
-      cy.get('[formcontrolname="globalWarningText"]').should('exist');
-      cy.get('[formcontrolname="appTitle"]').should('exist');
-      cy.get('[formcontrolname="introHtml"]').should('exist');
-      cy.get('[formcontrolname="imprintHtml"]').should('exist');
-    });
-
     it('saves a start-page warning message', () => {
       goToSettings();
       setFormControl('globalWarningText', 'System-Wartung am 01.01.2026');
@@ -87,12 +82,6 @@ describe('Admin Settings Tab Configuration', () => {
 
   // -------------------------------------------------------------------------
   describe('Email Template card', () => {
-    it('displays the Email Template fields', () => {
-      goToSettings();
-      cy.get('[formcontrolname="emailSubject"]').should('exist');
-      cy.get('[formcontrolname="emailBody"]').should('exist');
-    });
-
     it('saves a custom email template', () => {
       goToSettings();
       setFormControl('emailSubject', 'Welcome to Studio Lite!');
@@ -123,12 +112,6 @@ describe('Admin Settings Tab Configuration', () => {
 
   // -------------------------------------------------------------------------
   describe('Logo and Colors card', () => {
-    it('checks that the Colors card fields exist', () => {
-      goToSettings();
-      cy.get('[formcontrolname="bodyBackground"]').should('exist');
-      cy.get('[formcontrolname="boxBackground"]').should('exist');
-    });
-
     // Saving the empty form shown after a failed load would replace the stored logo (#1969).
     it('offers no saving of logo and colors that could not be loaded', () => {
       cy.intercept('GET', '/api/admin/settings/app-logo', { statusCode: 500 });
@@ -210,13 +193,6 @@ describe('Admin Settings Tab Configuration', () => {
     const testTakersXsdUrl =
       'https://w3id.org/iqb/spec/testcenter-testtaker-xml/18.0';
 
-    it('displays the Unit Export Config fields', () => {
-      goToSettings();
-      cy.get('[formcontrolname="unitXsdUrl"]').should('exist');
-      cy.get('[formcontrolname="bookletXsdUrl"]').should('exist');
-      cy.get('[formcontrolname="testTakersXsdUrl"]').should('exist');
-    });
-
     it('clears the XSD URL fields', () => {
       goToSettings();
       clearFormControl('unitXsdUrl');
@@ -253,11 +229,6 @@ describe('Admin Settings Tab Configuration', () => {
     // the retired registry and undo the 19.0.0 migration (#1570). Spelled without
     // the `www.` alias, which is the one form the 19.0.0 changesets write.
     const originalUrl = 'https://w3id.org/iqb/metadata-registry';
-    it('displays the Profiles Registry CSV URL field', () => {
-      goToSettings();
-      cy.get('[formcontrolname="csvUrl"]').should('exist');
-    });
-
     it('clears the profiles registry URL', () => {
       goToSettings();
       clearFormControl('csvUrl');
@@ -327,11 +298,6 @@ describe('Admin Settings Tab Configuration', () => {
     const validJson =
       '[{"id":"missing_by_intention","label":"missing by intention","description":"","code":-99}]';
 
-    it('displays the Missings Profiles IQB-Standard field', () => {
-      goToSettings();
-      cy.get('[formcontrolname="iqbStandardMissings"]').should('exist');
-    });
-
     it('sets the original valid IQB-standard missings profile JSON', () => {
       goToSettings();
       clearFormControl('iqbStandardMissings');
@@ -359,11 +325,6 @@ describe('Admin Settings Tab Configuration', () => {
 
   // -------------------------------------------------------------------------
   describe('Unit Rich Note Tags Config card', () => {
-    it('displays the Unit Rich Note Tags JSON field', () => {
-      goToSettings();
-      cy.get('studio-lite-unit-rich-note-tags-config mat-form-field').should('exist');
-    });
-
     it('sets a new valid rich note tags JSON', () => {
       goToSettings();
       cy.get('studio-lite-unit-rich-note-tags-config input').last()

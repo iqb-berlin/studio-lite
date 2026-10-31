@@ -1,18 +1,21 @@
 /**
- * The test base of the workspace specs, built through the API: the first user, a standard user,
- * a group with two workspaces both of them work in, and the Verona modules. The interface steps
- * this replaces are checked once in the admin and group-admin specs (#1967).
+ * The test bases built through the API. That of the workspace specs: the first user, a standard
+ * user, a group with two workspaces both of them work in, and the Verona modules. That of the
+ * group-admin specs: the first user as an admin of such a group, with the users a spec names. The
+ * interface steps they replace are checked once in the admin and group-admin specs (#1967).
  */
 
 import type { RequestReportDto, VeronaModuleInListDto } from '@studio-lite-lib/api-dto';
 import {
   AccessLevel,
+  AccessUser,
   baseGroup,
   modules,
   primaryWorkspace,
   secondaryWorkspace,
   standardUser,
-  UnitData
+  UnitData,
+  UserData
 } from '../testData';
 import { login } from './user';
 
@@ -101,6 +104,64 @@ export function createTestBaseAPI(
   });
   login(username, password);
   return cy.then(() => base);
+}
+
+/** A user of the group-admin base: the level in both workspaces, if any, and whether a group admin */
+export interface GroupBaseUser {
+  user: UserData;
+  access?: AccessLevel;
+  groupAdmin?: boolean;
+}
+
+/**
+ * Builds the base of the group-admin specs and logs the browser in as the first user, who is an
+ * admin of the group with the two workspaces. Needs an empty database, as the reset before every
+ * spec leaves it.
+ * @param users - created besides the first user
+ * @param firstUserAccess - the level of the first user in both workspaces; none if left out
+ * @param zip - a zip of units in the fixtures, imported into the primary workspace
+ * @example
+ * createGroupAdminBaseAPI({ users: [{ user: standardUser }, { user: secondaryUser }] });
+ */
+export function createGroupAdminBaseAPI(
+  { users, firstUserAccess, zip }: { users: GroupBaseUser[]; firstUserAccess?: AccessLevel; zip?: string }
+): void {
+  const { username, password } = admin();
+  cy.addFirstUserAPI(username, password).then(init => {
+    expect(init.status, 'first user').to.equal(201);
+    const token: string = init.body.accessToken;
+    cy.getUserIdAPI(token).then(authData => {
+      expect(authData.status, 'id of the first user').to.equal(200);
+      const firstUserId = String(authData.body.userId);
+      // at the index of their user
+      const userIds: string[] = [];
+      users.forEach(({ user }, i) => {
+        cy.createUserAPI(user, token).then(created => {
+          expect(created.status, user.username).to.equal(201);
+          userIds[i] = String(created.body);
+        });
+      });
+      cy.createGroupAPI({ id: '', name: baseGroup }, token).then(group => {
+        expect(group.status, baseGroup).to.equal(201);
+        const groupId = String(group.body);
+        const admins = [firstUserId, ...userIds.filter((_, i) => users[i].groupAdmin)];
+        cy.setAdminsOfGroupAPI(admins, groupId, token).its('status').should('equal', 200);
+        const access: AccessUser[] = [
+          ...(firstUserAccess ? [{ id: firstUserId, access: firstUserAccess }] : []),
+          ...users.flatMap(({ access: level }, i) => (level ? [{ id: userIds[i], access: level }] : []))
+        ];
+        [primaryWorkspace, secondaryWorkspace].forEach(name => {
+          cy.createWsAPI(groupId, { id: '', name }, token).then(ws => {
+            expect(ws.status, name).to.equal(201);
+            const wsId = String(ws.body);
+            if (access.length) cy.setUsersOfWsAPI(wsId, access, token).its('status').should('equal', 200);
+            if (zip && name === primaryWorkspace) importZipAPI(wsId, zip, token);
+          });
+        });
+      });
+    });
+  });
+  login(username, password);
 }
 
 /**
