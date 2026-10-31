@@ -71,6 +71,63 @@ describe('Studio rich text with the real Tiptap 3 editor', () => {
     }
   });
 
+  // The note dialog marks its text as touched once the editor is left
+  it('tells the note editor when the editor loses the focus', () => {
+    const note = new RichNoteEditorComponent();
+    const blurred = jest.fn();
+    note.editorBlur.subscribe(blurred);
+    note.ngOnInit();
+    try {
+      note.editor.view.dom.dispatchEvent(new FocusEvent('blur'));
+
+      expect(blurred).toHaveBeenCalledTimes(1);
+    } finally {
+      note.ngOnDestroy();
+    }
+  });
+
+  // what a colour field of the toolbar hands on when a colour is picked
+  const pickColour = (colour: string, onInput: (event: Event) => void): void => {
+    const field = document.createElement('input');
+    field.value = colour;
+    field.addEventListener('input', onInput);
+    field.dispatchEvent(new Event('input'));
+  };
+
+  it('colours the selected text and the button with the font colour picked', () => {
+    directive.editor.commands.selectAll();
+
+    pickColour('#ff0000', event => directive.onFontColorInput(event));
+
+    expect(directive.editor.getAttributes('textStyle')).toEqual(expect.objectContaining({ color: '#ff0000' }));
+    expect(directive.fontColorButtonStyle).toContain('#ff0000');
+  });
+
+  it('highlights the selected text and the button with the highlight colour picked', () => {
+    directive.editor.commands.selectAll();
+
+    pickColour('#00ff00', event => directive.onHighlightColorInput(event));
+
+    expect(directive.editor.getAttributes('highlight')).toEqual(expect.objectContaining({ color: '#00ff00' }));
+    expect(directive.highlightColorButtonStyle).toContain('#00ff00');
+  });
+
+  it('puts a picked image into the text as a data URL', async () => {
+    const image = new File(['pixel'], 'pixel.png', { type: 'image/png' });
+    const pick = jest.spyOn(HTMLInputElement.prototype, 'click')
+      .mockImplementation(function pickImage(this: HTMLInputElement) {
+        Object.defineProperty(this, 'files', { value: [image] });
+        this.dispatchEvent(new Event('change'));
+      });
+    try {
+      await directive.addImage();
+
+      expect(directive.editor.getHTML()).toContain('src="data:image/png;base64,cGl4ZWw="');
+    } finally {
+      pick.mockRestore();
+    }
+  });
+
   [
     { name: 'comment', create: () => new RealRichTextEditorDirective() },
     { name: 'note', create: () => new RichNoteEditorComponent() }
