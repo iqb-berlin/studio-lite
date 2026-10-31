@@ -292,6 +292,20 @@ describe('UnitPlayerComponent', () => {
       );
     });
 
+    // An empty string is not the definition of a unit that has none; the testcenter leaves it out (#719).
+    it('should start a player on a unit without definition without one', () => {
+      const componentWithPrivates = component as {
+        postMessageTarget: Window | undefined;
+        playerApiVersion: number;
+      };
+      componentWithPrivates.playerApiVersion = 6;
+      const postMessageSpy = jest.spyOn(componentWithPrivates.postMessageTarget!, 'postMessage');
+
+      component.postStore('');
+
+      expect(postMessageSpy.mock.calls[0][0]).not.toHaveProperty('unitDefinition');
+    });
+
     it('should send stateReportPolicy to players below spec version 5', () => {
       const componentWithPrivates = component as {
         postMessageTarget: Window | undefined;

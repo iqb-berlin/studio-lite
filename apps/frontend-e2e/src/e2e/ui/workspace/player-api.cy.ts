@@ -49,6 +49,17 @@ describe('Player API 7.0', () => {
     cy.get('[data-cy="status-response-progress"]').should('have.class', 'complete');
   });
 
+  // The units have no definition, and the start command carried an empty one (#719).
+  it('starts a player on a unit without definition without one', () => {
+    cy.visitWs(primaryWorkspace);
+    selectUnit(units[1].shortname);
+    clickIndexTabWorkspace('preview');
+    cy.getIFrameBody(previewFrame).within(() => {
+      cy.get('#status', { timeout: 30000 }).should('have.text', 'started');
+      cy.get('#definition').should('have.text', 'no definition');
+    });
+  });
+
   // The target comes in capitals, and the review only showed a message (#2064).
   it('follows the request of a player of spec 7.0 for the next unit of a review', () => {
     cy.addReviewAPI(wsId, reviewName, token).then(created => {

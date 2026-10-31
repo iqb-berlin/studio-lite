@@ -74,7 +74,8 @@ export class UnitPrintPlayerComponent extends PreviewDirective implements AfterV
           directDownloadUrl: this.backendService.getDirectDownloadLink(),
           sharedParameters: this.sharedParameters
         },
-        unitDefinition: definition || '',
+        // a unit without a definition sends none, as the testcenter does, not an empty one (#719)
+        ...(definition && { unitDefinition: definition }),
         ...(definitionType && { unitDefinitionType: definitionType })
       }, '*');
     }

@@ -172,7 +172,8 @@ export class UnitPlayerComponent extends PreviewDirective {
             directDownloadUrl: this.backendService.getDirectDownloadLink(),
             sharedParameters: this.sharedParameters
           },
-          unitDefinition: definition || '',
+          // a unit without a definition sends none, as the testcenter does, not an empty one (#719)
+          ...(definition && { unitDefinition: definition }),
           ...(this.unitData.definitionType && { unitDefinitionType: this.unitData.definitionType })
         },
         '*'

@@ -6,8 +6,9 @@
   <!--
     A player for the e2e tests of the studio as host (#1763), written against the player API 7.0 and
     not against one release of a real player (#2064). It does no more than the tests ask of it: it
-    starts, reports progress and asks for the next unit in the capitals of 7.0, calls a widget at the
-    click of a button and shows what the host returns.
+    starts and shows whether a definition came with the start command (#719), reports progress and
+    asks for the next unit in the capitals of 7.0, calls a widget at the click of a button and shows
+    what the host returns.
   -->
   <script id="metadata" type="application/ld+json">
     {
@@ -25,6 +26,7 @@
 </head>
 <body>
   <p id="status">waiting</p>
+  <p id="definition"></p>
   <button id="report-progress" type="button">Fortschritt melden</button>
   <button id="request-next" type="button">Nächste Aufgabe</button>
   <button id="call-widget" type="button">Widget aufrufen</button>
@@ -41,6 +43,8 @@
       if (message.type === 'vopStartCommand') {
         sessionId = message.sessionId;
         document.getElementById('status').textContent = 'started';
+        document.getElementById('definition').textContent =
+          'unitDefinition' in message ? `definition: ${JSON.stringify(message.unitDefinition)}` : 'no definition';
       } else if (message.type === 'vopWidgetReturn' && message.sessionId === sessionId) {
         document.getElementById('return-call-id').textContent = message.callId;
         document.getElementById('return-state').textContent = message.state;

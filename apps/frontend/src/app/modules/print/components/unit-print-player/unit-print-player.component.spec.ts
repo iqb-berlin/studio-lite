@@ -224,6 +224,17 @@ describe('UnitPrintPlayerComponent', () => {
       expect(message.playerConfig).not.toHaveProperty('unitDefinitionType');
     });
 
+    // An empty string is not the definition of a unit that has none; the testcenter leaves it out (#719).
+    it('should start a player on a unit without definition without one', () => {
+      const mockWindow = { postMessage: jest.fn() };
+      component.postMessageTarget = mockWindow as never;
+      component.playerApiVersion = 6;
+
+      component.postStore('');
+
+      expect(mockWindow.postMessage.mock.calls[0][0]).not.toHaveProperty('unitDefinition');
+    });
+
     it('should send no definition type when none is known', () => {
       const mockWindow = { postMessage: jest.fn() };
       component.postMessageTarget = mockWindow as never;

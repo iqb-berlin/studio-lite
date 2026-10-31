@@ -442,7 +442,7 @@ describe('UnitPreviewComponent', () => {
     it.each([
       [1, 'def', 'vo.ToPlayer.DataTransfer', 'def'],
       [1, undefined, 'vo.ToPlayer.DataTransfer', ''],
-      [6, undefined, 'vopStartCommand', '']
+      [6, 'def', 'vopStartCommand', 'def']
     ])('should hand a player of version %s the definition %s in its protocol', (version, definition, type, sent) => {
       const target = { postMessage: jest.fn() };
       component.postMessageTarget = target as never;
@@ -451,6 +451,17 @@ describe('UnitPreviewComponent', () => {
       component.postStore({ getData: () => ({ definition }) } as never);
 
       expect(target.postMessage).toHaveBeenCalledWith(expect.objectContaining({ type, unitDefinition: sent }), '*');
+    });
+
+    // An empty string is not the definition of a unit that has none; the testcenter leaves it out (#719).
+    it.each([undefined, ''])('should start a player on a unit with the definition %j without one', definition => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.playerApiVersion = 6;
+
+      component.postStore({ getData: () => ({ definition }) } as never);
+
+      expect(target.postMessage.mock.calls[0][0]).not.toHaveProperty('unitDefinition');
     });
 
     it('should let the next page report decide the list of the restarted unit', () => {

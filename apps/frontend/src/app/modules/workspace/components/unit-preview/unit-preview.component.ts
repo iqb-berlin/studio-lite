@@ -154,7 +154,8 @@ export class UnitPreviewComponent extends PreviewDirective {
               directDownloadUrl: this.backendService.getDirectDownloadLink(),
               sharedParameters: this.sharedParameters
             },
-            unitDefinition: unitDef.definition || '',
+            // a unit without a definition sends none, as the testcenter does, not an empty one (#719)
+            ...(unitDef.definition && { unitDefinition: unitDef.definition }),
             ...(unitDef.definitionType && { unitDefinitionType: unitDef.definitionType })
           },
           '*'
