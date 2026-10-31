@@ -1703,7 +1703,7 @@ Cypress.Commands.add('updateReviewAPI', (wsId:string, review: ReviewData, token:
             showOthersComments: true
           }
         },
-        units: [review.units[0]]
+        units: review.units
       },
       failOnStatusCode: false
     });

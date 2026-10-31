@@ -4,26 +4,29 @@
   <meta charset="utf-8">
   <title>Verona-Testplayer</title>
   <!--
-    A player for the e2e tests of the studio as host (#1763), written against the player API and not
-    against one release of a real player. It does no more than the tests ask of it: it starts, calls
-    a widget at the click of a button and shows what the host returns.
+    A player for the e2e tests of the studio as host (#1763), written against the player API 7.0 and
+    not against one release of a real player (#2064). It does no more than the tests ask of it: it
+    starts, reports progress and asks for the next unit in the capitals of 7.0, calls a widget at the
+    click of a button and shows what the host returns.
   -->
   <script id="metadata" type="application/ld+json">
     {
       "id": "verona-test-player",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "type": "PLAYER",
       "name": [
         { "lang": "de", "value": "Verona-Testplayer" },
         { "lang": "en", "value": "Verona test player" }
       ],
-      "specVersion": "6.0",
+      "specVersion": "7.0",
       "metadataVersion": "3.1"
     }
   </script>
 </head>
 <body>
   <p id="status">waiting</p>
+  <button id="report-progress" type="button">Fortschritt melden</button>
+  <button id="request-next" type="button">Nächste Aufgabe</button>
   <button id="call-widget" type="button">Widget aufrufen</button>
   <p id="return-call-id"></p>
   <p id="return-state"></p>
@@ -42,6 +45,23 @@
         document.getElementById('return-call-id').textContent = message.callId;
         document.getElementById('return-state').textContent = message.state;
       }
+    });
+
+    document.getElementById('report-progress').addEventListener('click', () => {
+      window.parent.postMessage({
+        type: 'vopStateChangedNotification',
+        sessionId,
+        timeStamp: new Date().toISOString(),
+        unitState: { presentationProgress: 'SOME', responseProgress: 'COMPLETE' }
+      }, hostOrigin);
+    });
+
+    document.getElementById('request-next').addEventListener('click', () => {
+      window.parent.postMessage({
+        type: 'vopUnitNavigationRequestedNotification',
+        sessionId,
+        target: 'NEXT'
+      }, hostOrigin);
     });
 
     document.getElementById('call-widget').addEventListener('click', () => {

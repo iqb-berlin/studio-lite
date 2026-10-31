@@ -161,19 +161,14 @@ export class UnitPlayerComponent extends PreviewDirective {
           sessionId: this.sessionId,
           unitState: {
             dataParts: this.unitData.responses || {},
-            presentationProgress: 'none',
-            responseProgress: 'none'
+            presentationProgress: this.toPlayerValue('none'),
+            responseProgress: this.toPlayerValue('none')
           },
           playerConfig: {
             ...this.legacyStateReportPolicy(),
-            pagingMode: this.reviewService.bookletConfig?.pagingMode,
-            enabledNavigationTargets: [
-              'next',
-              'previous',
-              'first',
-              'last',
-              'end'
-            ],
+            pagingMode: this.toPlayerValue(this.reviewService.bookletConfig?.pagingMode),
+            enabledNavigationTargets: ['next', 'previous', 'first', 'last', 'end']
+              .map(target => this.toPlayerValue(target)),
             directDownloadUrl: this.backendService.getDirectDownloadLink(),
             sharedParameters: this.sharedParameters
           },
@@ -192,7 +187,9 @@ export class UnitPlayerComponent extends PreviewDirective {
 
   gotoUnit(target: string): void {
     const sequenceId = this.reviewService.currentUnitSequenceId;
-    switch (target) {
+    // Player spec 7.0 names the target in capitals, older players in lower case (#2064); anything but a
+    // string from the player gets the message for an unknown target instead of throwing.
+    switch (typeof target === 'string' ? target.toLowerCase() : target) {
       case 'next':
         this.reviewService.setUnitNavigationRequest(sequenceId + 1);
         break;

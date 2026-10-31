@@ -465,6 +465,59 @@ describe('UnitPreviewComponent', () => {
     });
   });
 
+  // Player spec 7.0 writes the values of its enumerations in capitals; older players keep the spelling
+  // the studio stores (#2064).
+  describe('the spelling of the values sent to the player', () => {
+    const previewService = () => TestBed.inject(PreviewService);
+    const sentTo = (target: { postMessage: jest.Mock }) => target.postMessage.mock.calls[0][0];
+
+    it.each([
+      [6, 'concat-scroll', 'none'],
+      [7, 'CONCAT_SCROLL', 'NONE']
+    ])('should start a player of version %s with the paging mode %s and the progress %s',
+      (version, pagingMode, progress) => {
+        previewService().pagingMode.next('concat-scroll');
+        const target = { postMessage: jest.fn() };
+        component.postMessageTarget = target as never;
+        component.playerApiVersion = version;
+
+        component.postStore({ getData: () => ({ definition: 'def' }) } as never);
+
+        expect(sentTo(target).playerConfig.pagingMode).toBe(pagingMode);
+        expect(sentTo(target).unitState).toEqual(expect.objectContaining({
+          presentationProgress: progress, responseProgress: progress
+        }));
+      });
+
+    it.each([
+      [6, 'concat-scroll'],
+      [7, 'CONCAT_SCROLL']
+    ])('should tell a player of version %s of a new paging mode as %s', (version, pagingMode) => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.playerApiVersion = version;
+
+      previewService().pagingMode.next('concat-scroll');
+
+      expect(sentTo(target)).toEqual(expect.objectContaining({
+        type: 'vopPlayerConfigChangedNotification', playerConfig: { pagingMode }
+      }));
+    });
+
+    it.each([
+      [6, ['presentationIncomplete', 'responsesIncomplete']],
+      [7, ['PRESENTATION_INCOMPLETE', 'RESPONSES_INCOMPLETE']]
+    ])('should give a player of version %s the reasons of a denied navigation as %j', (version, reason) => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.playerApiVersion = version;
+
+      component.postNavigationDenied();
+
+      expect(sentTo(target).reason).toEqual(reason);
+    });
+  });
+
   describe('definition type warning', () => {
     const aspectModel = 'aspect-unit-definition@>=4.0 <=4.12';
     const player = (key: string, version: string, model?: string) => new VeronaModuleClass({

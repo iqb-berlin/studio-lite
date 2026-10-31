@@ -64,13 +64,13 @@ export class UnitPrintPlayerComponent extends PreviewDirective implements AfterV
         sessionId: this.sessionId,
         unitState: {
           dataParts: {},
-          presentationProgress: 'none',
-          responseProgress: 'none'
+          presentationProgress: this.toPlayerValue('none'),
+          responseProgress: this.toPlayerValue('none')
         },
         playerConfig: {
           ...this.legacyStateReportPolicy(),
-          pagingMode: 'concat-scroll',
-          printMode: this.printElementIds ? 'on-with-ids' : 'on',
+          pagingMode: this.toPlayerValue('concat-scroll'),
+          printMode: this.toPlayerValue(this.printElementIds ? 'on-with-ids' : 'on'),
           directDownloadUrl: this.backendService.getDirectDownloadLink(),
           sharedParameters: this.sharedParameters
         },
