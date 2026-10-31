@@ -90,4 +90,21 @@ describe('RichNoteTagsService', () => {
 
     expect(backendServiceMock.getUnitRichNoteTags.mock.calls).toEqual([[3], [4]]);
   });
+
+  // Notes opened by a link ask for the tags before the workspace is in, and so before its group is
+  // known; that answer came last and replaced the tags of the group (#2008).
+  it('should keep the tags of the group when an earlier request answers last', () => {
+    const withoutGroup = new Subject<UnitRichNoteTagDto[]>();
+    const ofGroup = new Subject<UnitRichNoteTagDto[]>();
+    backendServiceMock.getUnitRichNoteTags
+      .mockImplementation(groupId => (groupId === 3 ? ofGroup : withoutGroup));
+    const groupTags = [{ id: 'group', label: [{ lang: 'de', value: 'Gruppe' }], children: [] }];
+
+    service.loadTags();
+    service.loadTags(3);
+    ofGroup.next(groupTags);
+    withoutGroup.next(mockTags);
+
+    expect(service.tags).toEqual(groupTags);
+  });
 });
