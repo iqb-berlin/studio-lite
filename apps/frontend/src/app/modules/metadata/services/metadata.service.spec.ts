@@ -308,5 +308,34 @@ describe('MetadataService', () => {
       expect(service.unitProfileColumns).toEqual([]);
       expect(service.itemProfileColumns).toEqual({});
     });
+
+    // The service outlives the workspace: columns kept after a failed load could come from the
+    // profile of another workspace (#2002).
+    describe('when the profile cannot be loaded', () => {
+      beforeEach(async () => {
+        backendServiceMock.getMetadataProfile.mockImplementation((url: string) => of({
+          id: url, groups: [{ label: [], entries: [] }]
+        } as unknown as MetadataProfileDto));
+        backendServiceMock.getMetadataVocabulariesForProfile.mockReturnValue(of(true));
+        await service.loadProfileColumns('unit-a', 'item-a');
+        backendServiceMock.getMetadataProfile.mockReturnValue(of(false));
+      });
+
+      it('keeps the columns loaded from the same profile and reports nothing', async () => {
+        const failedProfileUrls = await service.loadProfileColumns('unit-a', 'item-a');
+
+        expect(failedProfileUrls).toEqual([]);
+        expect(service.unitProfileColumns).toHaveLength(1);
+        expect(service.itemProfileColumns).toEqual({ label: [], entries: [] });
+      });
+
+      it('clears the columns of another profile and reports the profile', async () => {
+        const failedProfileUrls = await service.loadProfileColumns('unit-b', 'item-b');
+
+        expect(failedProfileUrls).toEqual(['unit-b', 'item-b']);
+        expect(service.unitProfileColumns).toEqual([]);
+        expect(service.itemProfileColumns).toEqual({});
+      });
+    });
   });
 });
