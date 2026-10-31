@@ -72,6 +72,20 @@ describe('Admin BackendService', () => {
     });
   });
 
+  describe('getUnitRichNoteTagsConfig', () => {
+    // An empty config instead would show the form an empty field to save over the stored URLs
+    // (#1993).
+    it('should answer a failed request with null', done => {
+      service.getUnitRichNoteTagsConfig().subscribe(result => {
+        expect(result).toBeNull();
+        done();
+      });
+
+      httpMock.expectOne(`${baseUrl}admin/settings/unit-rich-note-tags-config`)
+        .flush('error', { status: 500, statusText: 'Server Error' });
+    });
+  });
+
   describe('getUsersFull', () => {
     it('requests users with full param without activity header', done => {
       const users: UserFullDto[] = [{ id: 2 } as UserFullDto];

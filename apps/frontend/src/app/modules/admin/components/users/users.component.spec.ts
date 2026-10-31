@@ -11,13 +11,13 @@ import {
 } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
-import { UserFullDto } from '@studio-lite-lib/api-dto';
+import { UserFullDto, WorkspaceGroupInListDto } from '@studio-lite-lib/api-dto';
 import { FormControl, FormGroup, UntypedFormGroup } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { ADMIN_USER_LIST_POLL_INTERVAL_MS } from '@studio-lite/shared-code';
 import { AppConfig } from '../../../../classes/app-config.class';
 import { WorkspaceGroupToCheckCollection } from '../../models/workspace-group-to-check-collection.class';
@@ -420,6 +420,123 @@ describe('UsersComponent', () => {
     expect(component.tableSelectionRow.selected).not.toBe(selectionBefore);
     expect(component.tableSelectionRow.selected[0].sessions?.map(s => s.activityStatus))
       .toEqual(['active', 'orphaned']);
+  });
+
+  // A check set before the groups of the selected user arrived was reset by them, and so was one
+  // set before a poll selected the fresh row of the same user again (#2056).
+  describe('while the groups of the selected user load', () => {
+    const groups = [{ id: 1, name: 'g1' }, { id: 2, name: 'g2' }] as WorkspaceGroupInListDto[];
+    const users = [{ id: 1, name: 'u1' }, { id: 2, name: 'u2' }] as UserFullDto[];
+    let groupsOf1: Subject<WorkspaceGroupInListDto[]>;
+    let groupsOf2: Subject<WorkspaceGroupInListDto[]>;
+
+    const checkboxes = (): HTMLInputElement[] => Array.from(
+      fixture.nativeElement.querySelectorAll('mat-checkbox input[type="checkbox"]')
+    );
+    const saveButton = (): HTMLButtonElement => fixture.nativeElement
+      .querySelector('[data-cy="admin-users-save-button"]');
+    // ngModel hands a changed disabled on to the checkbox in a promise of its own, which
+    // fakeAsync does not reach
+    const render = async (): Promise<void> => {
+      fixture.detectChanges();
+      await Promise.resolve();
+      fixture.detectChanges();
+    };
+    const selectUser = (index: number): void => {
+      component.tableSelectionRow.select(component.objectsDatasource.data[index]);
+    };
+    const checkGroup = (id: number): void => {
+      component.userWorkspaceGroups.entries.find(group => group.id === id)!.isChecked = true;
+      component.userWorkspaceGroups.updateHasChanged();
+    };
+
+    beforeEach(() => {
+      groupsOf1 = new Subject<WorkspaceGroupInListDto[]>();
+      groupsOf2 = new Subject<WorkspaceGroupInListDto[]>();
+      (mockBackendService.getWorkspaceGroupList as jest.Mock).mockReturnValue(of(groups));
+      (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(of(users));
+      (mockBackendService.getWorkspaceGroupsByAdmin as jest.Mock)
+        .mockImplementation((id: number) => (id === 1 ? groupsOf1 : groupsOf2));
+      component.createWorkspaceList();
+    });
+
+    it('should lock the checks until the groups have arrived', async () => {
+      await render();
+      selectUser(0);
+      fixture.detectChanges();
+
+      expect(checkboxes()).toHaveLength(2);
+      expect(checkboxes().every(input => input.disabled)).toBe(true);
+
+      groupsOf1.next([]);
+      await render();
+
+      expect(checkboxes().every(input => !input.disabled)).toBe(true);
+    });
+
+    it('should not save the checks of the user before onto the one still loading', () => {
+      selectUser(0);
+      groupsOf1.next([]);
+      checkGroup(1);
+      selectUser(1);
+      fixture.detectChanges();
+
+      expect(saveButton().disabled).toBe(true);
+
+      component.saveWorkspaces();
+
+      expect(mockBackendService.setWorkspaceGroupsByAdmin).not.toHaveBeenCalled();
+    });
+
+    it('should drop the late groups of the user selected before', () => {
+      selectUser(0);
+      selectUser(1);
+
+      groupsOf1.next([groups[0]]);
+
+      expect(component.userWorkspaceGroups.getChecks()).toEqual([]);
+
+      groupsOf2.next([groups[1]]);
+
+      expect(component.userWorkspaceGroups.getChecks()).toEqual([2]);
+      expect(mockAppService.dataLoading).toBe(false);
+    });
+
+    it('should take the spinner down when the page is left before the groups arrive', () => {
+      selectUser(0);
+
+      fixture.destroy();
+
+      expect(mockAppService.dataLoading).toBe(false);
+    });
+
+    it('should keep an unsaved check when a poll selects the same user again', () => {
+      selectUser(0);
+      groupsOf1.next([]);
+      checkGroup(1);
+      (mockBackendService.getUsersFullWithActivity as jest.Mock)
+        .mockReturnValue(of(users.map(user => ({ ...user }))));
+
+      component.updateUserList(false, true);
+
+      expect(mockBackendService.getWorkspaceGroupsByAdmin).toHaveBeenCalledTimes(1);
+      expect(component.userWorkspaceGroups.getChecks()).toEqual([1]);
+      expect(component.userWorkspaceGroups.hasChanged).toBe(true);
+      expect(mockSnackBar.open).not.toHaveBeenCalledWith('access-rights.not-saved', 'warning', { duration: 3000 });
+    });
+
+    it('should deselect the selected user with one click after a poll', () => {
+      selectUser(0);
+      groupsOf1.next([]);
+      (mockBackendService.getUsersFullWithActivity as jest.Mock)
+        .mockReturnValue(of(users.map(user => ({ ...user }))));
+      component.updateUserList(false, true);
+
+      component.toggleRowSelection(component.objectsDatasource.data[0]);
+
+      expect(component.tableSelectionRow.selected).toEqual([]);
+      expect(component.selectedUser).toBe(0);
+    });
   });
 
   it('should handle delete users failure', () => {

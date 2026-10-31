@@ -372,7 +372,8 @@
     "email-replace-values": "Folgende Platzhalter werden im E-Mail-Body durch die Nutzer:innen-Angaben ersetzt: {{firstname}}, {{lastname}}, {{user}}, {{password}}",
     "email-subject": "E-Mail-Betreff",
     "email-body": "E-Mail-Body",
-    "unit-rich-note-tags": "Kategorien für Begleitmaterial"
+    "unit-rich-note-tags": "Kategorien für Begleitmaterial",
+    "unit-rich-note-tags-not-loaded": "Die Kategorien für Begleitmaterial konnten nicht geladen werden."
   },
   "profiles-registry": {
     "csv-url": "URL der CSV-Datei",

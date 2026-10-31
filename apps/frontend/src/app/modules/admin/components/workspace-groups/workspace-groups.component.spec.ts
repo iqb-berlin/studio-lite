@@ -15,7 +15,7 @@ import {
 } from '@studio-lite-lib/api-dto';
 import { UntypedFormGroup, FormControl } from '@angular/forms';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { WorkspaceGroupsComponent } from './workspace-groups.component';
 import { environment } from '../../../../../environments/environment';
 import { AppService } from '../../../../services/app.service';
@@ -228,6 +228,85 @@ describe('WorkspaceGroupsComponent', () => {
     expect(mockSnackBar.open).toHaveBeenCalledWith('access-rights.not-changed', 'error', { duration: 3000 });
     expect(fixture.nativeElement
       .querySelector('[data-cy="admin-workspace-groups-save-button"]').disabled).toBe(false);
+  });
+
+  // A check set before the admins of the selected group arrived was reset by them (#2056).
+  describe('while the admins of the selected group load', () => {
+    let adminsOf5: Subject<UserInListDto[]>;
+    let adminsOf6: Subject<UserInListDto[]>;
+
+    const checkboxes = (): HTMLInputElement[] => Array.from(
+      fixture.nativeElement.querySelectorAll('mat-checkbox input[type="checkbox"]')
+    );
+    const saveButton = (): HTMLButtonElement => fixture.nativeElement
+      .querySelector('[data-cy="admin-workspace-groups-save-button"]');
+    // ngModel hands a changed disabled on to the checkbox in a promise of its own, which
+    // fakeAsync does not reach
+    const render = async (): Promise<void> => {
+      fixture.detectChanges();
+      await Promise.resolve();
+      fixture.detectChanges();
+    };
+
+    beforeEach(() => {
+      adminsOf5 = new Subject<UserInListDto[]>();
+      adminsOf6 = new Subject<UserInListDto[]>();
+      (mockBackendService.getUsers as jest.Mock).mockReturnValue(of([anna, bert]));
+      (mockBackendService.getWorkspaceGroupAdmins as jest.Mock)
+        .mockImplementation((id: number) => (id === 5 ? adminsOf5 : adminsOf6));
+      component.createUserList();
+    });
+
+    it('should lock the checks until the admins have arrived', async () => {
+      await render();
+      component.tableSelectionRow.select(group5);
+      fixture.detectChanges();
+
+      expect(checkboxes()).toHaveLength(2);
+      expect(checkboxes().every(input => input.disabled)).toBe(true);
+
+      adminsOf5.next([bert]);
+      await render();
+
+      expect(checkboxes().every(input => !input.disabled)).toBe(true);
+    });
+
+    it('should not save the checks of the group before onto the one still loading', () => {
+      component.tableSelectionRow.select(group5);
+      adminsOf5.next([]);
+      component.workspaceUsers.entries.find(user => user.id === 1)!.isChecked = true;
+      component.workspaceUsers.updateHasChanged();
+      component.tableSelectionRow.select(group6);
+      fixture.detectChanges();
+
+      expect(saveButton().disabled).toBe(true);
+
+      component.saveUsers();
+
+      expect(mockBackendService.setWorkspaceGroupAdmins).not.toHaveBeenCalled();
+    });
+
+    it('should drop the late admins of the group selected before', () => {
+      component.tableSelectionRow.select(group5);
+      component.tableSelectionRow.select(group6);
+
+      adminsOf5.next([bert]);
+
+      expect(component.workspaceUsers.getChecks()).toEqual([]);
+
+      adminsOf6.next([anna]);
+
+      expect(component.workspaceUsers.getChecks()).toEqual([1]);
+      expect(mockAppService.dataLoading).toBe(false);
+    });
+
+    it('should take the spinner down when the page is left before the admins arrive', () => {
+      component.tableSelectionRow.select(group5);
+
+      fixture.destroy();
+
+      expect(mockAppService.dataLoading).toBe(false);
+    });
   });
 
   const groupForm = new UntypedFormGroup({ name: new FormControl('newGroup') });
