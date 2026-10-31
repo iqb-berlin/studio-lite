@@ -36,13 +36,18 @@ export class RichNoteTagsService {
     if (this._loading && this.currentGroupId === workspaceGroupId) return;
     this._loading = true;
     this.currentGroupId = workspaceGroupId;
+    // Only the answer for the group asked for last counts: one for the group before, or for none,
+    // would replace its tags when it came last (#2008).
+    const isCurrent = () => workspaceGroupId === this.currentGroupId;
     this.backendService.getUnitRichNoteTags(workspaceGroupId)
       .subscribe({
         next: tags => {
+          if (!isCurrent()) return;
           this._tags$.next(tags);
           this._loading = false;
         },
         error: () => {
+          if (!isCurrent()) return;
           this._tags$.next([]);
           this._loading = false;
         }

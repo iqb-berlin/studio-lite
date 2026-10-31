@@ -162,6 +162,8 @@ describe('Unit Rich Notes', () => {
           clickIndexTabWorkspace('notes');
           cy.wait('@getRichNotes');
           cy.get('.loading-spinner', { timeout: 15000 }).should('not.exist');
+          // a tag of the second branch, which the dialog below must not offer
+          cy.contains('.node-card h3', 'Didaktische Handreichungen 2').should('exist');
 
           cy.get('[data-cy="rich-note-add"]', { timeout: 20000 })
             .first()
@@ -170,12 +172,52 @@ describe('Unit Rich Notes', () => {
 
           cy.get('mat-option').should('have.length.greaterThan', 0);
           cy.get('mat-option').contains('Transkript 2 der Originalquelle').should('exist');
+          // Added under the first tag, a note is offered the tags of that branch only: the
+          // vocabulary's ids are URLs, which the dialog once could not find a branch for (#2006)
+          cy.contains('mat-option', 'Didaktische Handreichungen 2').should('not.exist');
           cy.translate(Cypress.expose('locale')).then(json => {
             cy.get('mat-dialog-actions button')
               .contains(json.cancel, { matchCase: false })
               .click({ force: true });
           });
         });
+    });
+
+    // Notes opened by a link ask for the tags before the workspace is in, so without a group; when
+    // that answer, the standard vocabulary, came last, it replaced the group's (#2008).
+    it('keeps the tags of the group for notes opened by a link', () => {
+      const text = 'Notiz unter einem Tag der Gruppe';
+      cy.visitWs(`${richNotesTestNames.customWs}`);
+      cy.get('mat-cell.mat-column-key').then(keys => {
+        const [unit, otherUnit] = [keys.eq(0).text().trim(), keys.eq(1).text().trim()];
+        selectUnit(unit);
+        clickIndexTabWorkspace('notes');
+        cy.wait('@getRichNotes');
+        createRichNote(text, 0);
+        cy.contains('.node-card', 'Transkript 3 für das Haupt-Audio').should('contain.text', text);
+
+        cy.intercept({ method: 'GET', pathname: '/api/admin/settings/unit-rich-note-tags' }, req => {
+          if (req.url.includes('workspaceGroupId=')) return;
+          req.alias = 'getTagsWithoutGroup';
+          req.on('response', res => { res.setDelay(2000); });
+        });
+        // Loaded anew on the link of the notes, the app starts as it does for a link opened from outside
+        cy.reload();
+        cy.wait('@getTagsWithoutGroup').its('response.body').then(tags => {
+          // Were the standard tags the group's, a late answer could not be told apart
+          expect(JSON.stringify(tags)).not.to.contain('/v06/t1/');
+        });
+        // Drawn again after the late answer, the notes show the tags held by then
+        cy.intercept('GET', '/api/workspaces/*/units/*/rich-notes').as('getRichNotesAgain');
+        selectUnit(otherUnit);
+        cy.wait('@getRichNotesAgain');
+        selectUnit(unit);
+        cy.wait('@getRichNotesAgain');
+        cy.contains('.node-card', 'Transkript 3 für das Haupt-Audio').should('contain.text', text);
+        cy.translate(Cypress.expose('locale')).then(json => {
+          cy.contains(json.workspace['unassigned-rich-notes']).should('not.exist');
+        });
+      });
     });
   });
 });
