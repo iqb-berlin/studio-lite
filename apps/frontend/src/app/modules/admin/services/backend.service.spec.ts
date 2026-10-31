@@ -72,6 +72,34 @@ describe('Admin BackendService', () => {
     });
   });
 
+  describe('getWorkspaceGroupAdmins', () => {
+    // An empty list instead would show the group without admins, and saving one check would
+    // replace the stored ones (#2070).
+    it('should answer a failed request with null', done => {
+      service.getWorkspaceGroupAdmins(5).subscribe(result => {
+        expect(result).toBeNull();
+        done();
+      });
+
+      httpMock.expectOne(`${baseUrl}admin/workspace-groups/5/admins`)
+        .flush('error', { status: 500, statusText: 'Server Error' });
+    });
+  });
+
+  describe('getWorkspaceGroupsByAdmin', () => {
+    // An empty list instead would show the user administering no group, and saving one check
+    // would replace the stored ones (#2070).
+    it('should answer a failed request with null', done => {
+      service.getWorkspaceGroupsByAdmin(7).subscribe(result => {
+        expect(result).toBeNull();
+        done();
+      });
+
+      httpMock.expectOne(`${baseUrl}admin/users/7/workspace-groups`)
+        .flush('error', { status: 500, statusText: 'Server Error' });
+    });
+  });
+
   describe('getUnitRichNoteTagsConfig', () => {
     // An empty config instead would show the form an empty field to save over the stored URLs
     // (#1993).

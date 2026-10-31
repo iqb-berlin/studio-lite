@@ -193,6 +193,8 @@
     "not-saved": "Zugriffsrechte nicht gespeichert.",
     "changed": "Zugriffsrechte geändert",
     "not-changed": "Konnte Zugriffsrechte nicht ändern",
+    "admins-not-loaded": "Die Admins der Bereichsgruppe konnten nicht geladen werden.",
+    "groups-not-loaded": "Die verwalteten Bereichsgruppen konnten nicht geladen werden.",
     "access-level-0": "Gast",
     "access-level-1": "Kommentierer:in",
     "access-level-2": "Entwickler:in",

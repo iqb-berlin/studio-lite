@@ -83,27 +83,33 @@
               [matTooltip]="'save' | translate"
               matTooltipPosition="above"
               [color]="'primary'"
-              [disabled]="!workspaceUsers.hasChanged || loadingAdmins()"
+              [disabled]="!workspaceUsers.hasChanged || adminsLocked()"
               (click)="saveUsers()">
         <mat-icon>save</mat-icon>
       </button>
     </div>
 
     <div class="scroll-area fx-column-start-stretch">
-      @for (entry of workspaceUsers.entries; track entry; let index = $index;) {
-        @if (workspaceUsers.checkedCount > 0 && index === workspaceUsers.checkedCount) {
-          <studio-lite-entries-divider></studio-lite-entries-divider>
+      @if (adminsNotLoaded()) {
+        <p class="info" data-cy="admin-workspace-groups-admins-not-loaded">
+          {{'access-rights.admins-not-loaded' | translate}}
+        </p>
+      } @else {
+        @for (entry of workspaceUsers.entries; track entry; let index = $index;) {
+          @if (workspaceUsers.checkedCount > 0 && index === workspaceUsers.checkedCount) {
+            <studio-lite-entries-divider></studio-lite-entries-divider>
+          }
+          <div
+            class="fx-row-start-start" >
+            <mat-checkbox class="fx-flex-fill"
+              [(ngModel)]="entry.isChecked"
+              [disabled]="!selectedWorkspaceGroupId || loadingAdmins()"
+              (change)="workspaceUsers.updateHasChanged()">
+              {{entry.displayName}} ({{entry.name}})
+            </mat-checkbox>
+            <div class="secondary-text fx-flex-fill">{{entry.description}}</div>
+          </div>
         }
-        <div
-          class="fx-row-start-start" >
-          <mat-checkbox class="fx-flex-fill"
-            [(ngModel)]="entry.isChecked"
-            [disabled]="!selectedWorkspaceGroupId || loadingAdmins()"
-            (change)="workspaceUsers.updateHasChanged()">
-            {{entry.displayName}} ({{entry.name}})
-          </mat-checkbox>
-          <div class="secondary-text fx-flex-fill">{{entry.description}}</div>
-        </div>
       }
     </div>
   </div>
