@@ -102,7 +102,7 @@ export class UnitService {
 
   async getAllUnits(): Promise<UnitInViewDto[]> {
     this.logger.log('Retrieving all units');
-    return this.unitsRepository.find({
+    const units = await this.unitsRepository.find({
       order: { id: 'ASC' },
       select: {
         key: true,
@@ -119,7 +119,14 @@ export class UnitService {
         metadata: false,
         variables: false
       }
-    });
+    }) as UnitInViewDto[];
+    // The admin's unit list exports it in its CSV (#2012).
+    const workspaces = await this.workspaceRepository.find({ select: ['id', 'name'] });
+    const workspaceNames = new Map(workspaces.map(workspace => [workspace.id, workspace.name]));
+    return units.map(unit => ({
+      ...unit,
+      workspaceName: workspaceNames.get(unit.workspaceId) || ''
+    }));
   }
 
   async findAll(): Promise<UnitInViewDto[]> {
