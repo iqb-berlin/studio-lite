@@ -30,8 +30,10 @@ export interface UnitData {
   name: string;
   /** Group the unit belongs to */
   group: string;
-  /** Key of the player the unit is created with, such as `verona-test-player@1.0` */
+  /** Key of the player the unit is created with, such as `verona-test-player@2.0` */
   player?: string;
+  /** Key of the editor the unit is created with, such as `verona-test-editor@1.0` */
+  editor?: string;
 }
 
 /**

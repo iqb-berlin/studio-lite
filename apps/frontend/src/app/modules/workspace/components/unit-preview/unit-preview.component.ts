@@ -145,16 +145,17 @@ export class UnitPreviewComponent extends PreviewDirective {
             sessionId: this.sessionId,
             unitState: {
               dataParts: {},
-              presentationProgress: 'none',
-              responseProgress: 'none'
+              presentationProgress: this.toPlayerValue('none'),
+              responseProgress: this.toPlayerValue('none')
             },
             playerConfig: {
               ...this.legacyStateReportPolicy(),
-              pagingMode: this.previewService.pagingMode.value,
+              pagingMode: this.toPlayerValue(this.previewService.pagingMode.value),
               directDownloadUrl: this.backendService.getDirectDownloadLink(),
               sharedParameters: this.sharedParameters
             },
-            unitDefinition: unitDef.definition || '',
+            // a unit without a definition sends none, as the testcenter does, not an empty one (#719)
+            ...(unitDef.definition && { unitDefinition: unitDef.definition }),
             ...(unitDef.definitionType && { unitDefinitionType: unitDef.definitionType })
           },
           '*'
@@ -201,7 +202,7 @@ export class UnitPreviewComponent extends PreviewDirective {
       {
         type: 'vopPlayerConfigChangedNotification',
         sessionId: this.sessionId,
-        playerConfig: { pagingMode: this.previewService.pagingMode.value }
+        playerConfig: { pagingMode: this.toPlayerValue(this.previewService.pagingMode.value) }
       },
       '*'
     );
@@ -212,7 +213,7 @@ export class UnitPreviewComponent extends PreviewDirective {
       {
         type: 'vopNavigationDeniedNotification',
         sessionId: this.sessionId,
-        reason: ['presentationIncomplete', 'responsesIncomplete']
+        reason: ['presentationIncomplete', 'responsesIncomplete'].map(reason => this.toPlayerValue(reason))
       },
       '*'
     );

@@ -191,6 +191,27 @@ describe('UnitPrintPlayerComponent', () => {
       );
     });
 
+    // Player spec 7.0 writes the values of its enumerations in capitals (#2064).
+    it.each([
+      [6, false, 'concat-scroll', 'on', 'none'],
+      [7, false, 'CONCAT_SCROLL', 'ON', 'NONE'],
+      [7, true, 'CONCAT_SCROLL', 'ON_WITH_IDS', 'NONE']
+    ])('should print with a player of version %s (ids %s) in paging mode %s, print mode %s and progress %s',
+      (version, printElementIds, pagingMode, printMode, progress) => {
+        const mockWindow = { postMessage: jest.fn() };
+        component.postMessageTarget = mockWindow as never;
+        component.playerApiVersion = version;
+        component.printElementIds = printElementIds;
+
+        component.postStore('test-definition');
+
+        const message = mockWindow.postMessage.mock.calls[0][0];
+        expect(message.playerConfig).toEqual(expect.objectContaining({ pagingMode, printMode }));
+        expect(message.unitState).toEqual(expect.objectContaining({
+          presentationProgress: progress, responseProgress: progress
+        }));
+      });
+
     it('should send the definition type at the top level when it is known', () => {
       const mockWindow = { postMessage: jest.fn() };
       component.postMessageTarget = mockWindow as never;
@@ -201,6 +222,17 @@ describe('UnitPrintPlayerComponent', () => {
       const message = mockWindow.postMessage.mock.calls[0][0];
       expect(message.unitDefinitionType).toBe('aspect-unit-definition@4.12.0');
       expect(message.playerConfig).not.toHaveProperty('unitDefinitionType');
+    });
+
+    // An empty string is not the definition of a unit that has none; the testcenter leaves it out (#719).
+    it('should start a player on a unit without definition without one', () => {
+      const mockWindow = { postMessage: jest.fn() };
+      component.postMessageTarget = mockWindow as never;
+      component.playerApiVersion = 6;
+
+      component.postStore('');
+
+      expect(mockWindow.postMessage.mock.calls[0][0]).not.toHaveProperty('unitDefinition');
     });
 
     it('should send no definition type when none is known', () => {

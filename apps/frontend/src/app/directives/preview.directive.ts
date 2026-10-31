@@ -15,6 +15,7 @@ import {
 import { WidgetCallData } from '../modules/workspace/models/widget-call-data.interface';
 import { ModuleService } from '../services/module.service';
 import { WidgetOverlayComponent } from '../modules/workspace/components/widget-overlay/widget-overlay.component';
+import { readSpecVersion } from '../utils/spec-version.utils';
 
 /**
  * Hosting a PLAYER, on top of {@link VeronaModuleDirective}: it speaks the player's half of the
@@ -257,15 +258,19 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
     }
   }
 
-  setPresentationStatus(s: string): void {
-    if (s === 'yes' || s === 'complete') this.presentationProgress = 'complete';
-    else if (s === 'some') this.presentationProgress = 'some';
+  // Player spec 7.0 reports the progress in capitals, older players in lower case (#2064). The value
+  // comes from the player as it is: anything but a string counts as none instead of throwing.
+  setPresentationStatus(s?: unknown): void {
+    const status = typeof s === 'string' ? s.toLowerCase() : undefined;
+    if (status === 'yes' || status === 'complete') this.presentationProgress = 'complete';
+    else if (status === 'some') this.presentationProgress = 'some';
     else this.presentationProgress = 'none';
   }
 
-  setResponsesStatus(s: string): void {
-    if (s === 'all' || s === 'complete') this.responseProgress = 'complete';
-    else if (s === 'yes' || s === 'some') this.responseProgress = 'some';
+  setResponsesStatus(s?: unknown): void {
+    const status = typeof s === 'string' ? s.toLowerCase() : undefined;
+    if (status === 'all' || status === 'complete') this.responseProgress = 'complete';
+    else if (status === 'yes' || status === 'some') this.responseProgress = 'some';
     else this.responseProgress = 'none';
   }
 
@@ -284,17 +289,52 @@ export abstract class PreviewDirective extends UnitDefinitionDirective {
 
   protected static detectApiVersion(msgData: {
     type: string;
-    metadata?: { specVersion: string };
-    apiVersion?: string;
-    specVersion?: string;
+    metadata?: unknown;
+    apiVersion?: unknown;
+    specVersion?: unknown;
   }): number {
     if (msgData.type === 'vo.FromPlayer.ReadyNotification') return 1;
-    const versionSource =
-      msgData.metadata?.specVersion ||
-      msgData.apiVersion ||
-      msgData.specVersion;
-    const major = versionSource?.match(/\d+/);
-    return major ? Number(major[0]) : 2;
+    return readSpecVersion(msgData) ?? 2;
+  }
+
+  // Player spec 7.0 writes every value of an enumeration in capitals: CONCAT_SCROLL, ON_WITH_IDS, NEXT,
+  // COMPLETE, PRESENTATION_INCOMPLETE (#2064).
+  private static readonly VALUES_IN_CAPITALS_FROM = 7;
+
+  /**
+   * A value of an enumeration as the player reads it: in capitals with underscores from spec 7.0 on,
+   * in the spelling the studio keeps for older players. What is stored stays in lower case, since the
+   * booklet config goes to the testcenter as well.
+   */
+  protected toPlayerValue(value: string): string;
+  protected toPlayerValue(value: string | undefined): string | undefined;
+  protected toPlayerValue(value: string | undefined): string | undefined {
+    if (value === undefined || this.playerApiVersion < PreviewDirective.VALUES_IN_CAPITALS_FROM) return value;
+    return value
+      .replace(/([a-z])([A-Z])/g, '$1_$2')
+      .replace(/-/g, '_')
+      .toUpperCase();
+  }
+
+  // Player spec 7.0 dropped vopWindowFocusChangedNotification: whether the player has the focus is
+  // whether the window in the frame has it, and the host can see that for itself (#2064).
+  private static readonly FOCUS_FROM_WINDOW_FROM = 7;
+
+  override ngAfterViewInit(): void {
+    super.ngAfterViewInit();
+    // every srcdoc gives the frame a new window, without the listeners of the one before
+    this.iFrameElement?.addEventListener('load', () => this.watchPlayerWindowFocus());
+  }
+
+  private watchPlayerWindowFocus(): void {
+    const playerWindow = this.iFrameElement?.contentWindow;
+    if (!playerWindow) return;
+    playerWindow.addEventListener('focus', () => this.setFocusFromPlayerWindow(true));
+    playerWindow.addEventListener('blur', () => this.setFocusFromPlayerWindow(false));
+  }
+
+  private setFocusFromPlayerWindow(hasFocus: boolean): void {
+    if (this.playerApiVersion >= PreviewDirective.FOCUS_FROM_WINDOW_FROM) this.setFocusStatus(hasFocus);
   }
 
   // Player spec 5.0 dropped stateReportPolicy together with vopGetStateRequest: from then on a player

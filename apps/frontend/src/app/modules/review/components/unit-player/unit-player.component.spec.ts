@@ -174,6 +174,23 @@ describe('UnitPlayerComponent', () => {
       expect(mockReviewService.setUnitNavigationRequest).toHaveBeenCalledWith(10);
     });
 
+    // Player spec 7.0 names the target in capitals (#2064).
+    it.each([
+      ['NEXT', 6],
+      ['END', 10]
+    ])('should follow the target %s a player of spec 7.0 names in capitals', (target, sequenceId) => {
+      component.gotoUnit(target);
+
+      expect(mockReviewService.setUnitNavigationRequest).toHaveBeenCalledWith(sequenceId);
+    });
+
+    it('should show the message for an unknown target when the target is no string', () => {
+      expect(() => component.gotoUnit({ id: 'next' } as unknown as string)).not.toThrow();
+
+      expect(mockReviewService.setUnitNavigationRequest).not.toHaveBeenCalled();
+      expect(mockSnackBar.open).toHaveBeenCalled();
+    });
+
     it('should show snackbar for unknown navigation target', () => {
       component.gotoUnit('unknown');
 
@@ -275,6 +292,20 @@ describe('UnitPlayerComponent', () => {
       );
     });
 
+    // An empty string is not the definition of a unit that has none; the testcenter leaves it out (#719).
+    it('should start a player on a unit without definition without one', () => {
+      const componentWithPrivates = component as {
+        postMessageTarget: Window | undefined;
+        playerApiVersion: number;
+      };
+      componentWithPrivates.playerApiVersion = 6;
+      const postMessageSpy = jest.spyOn(componentWithPrivates.postMessageTarget!, 'postMessage');
+
+      component.postStore('');
+
+      expect(postMessageSpy.mock.calls[0][0]).not.toHaveProperty('unitDefinition');
+    });
+
     it('should send stateReportPolicy to players below spec version 5', () => {
       const componentWithPrivates = component as {
         postMessageTarget: Window | undefined;
@@ -288,6 +319,35 @@ describe('UnitPlayerComponent', () => {
       expect((postMessageSpy.mock.calls[0][0] as { playerConfig: object }).playerConfig)
         .toHaveProperty('stateReportPolicy', 'eager');
     });
+
+    // Player spec 7.0 writes the values of its enumerations in capitals; the booklet config keeps the
+    // lower case it is stored in (#2064).
+    it.each([
+      [6, 'concat-scroll', ['next', 'previous', 'first', 'last', 'end'], 'none'],
+      [7, 'CONCAT_SCROLL', ['NEXT', 'PREVIOUS', 'FIRST', 'LAST', 'END'], 'NONE']
+    ])('should start a player of version %s with the paging mode %s, the targets %j and the progress %s',
+      (version, pagingMode, targets, progress) => {
+        mockReviewService.bookletConfig = { pagingMode: 'concat-scroll' } as never;
+        const componentWithPrivates = component as {
+          postMessageTarget: Window | undefined;
+          playerApiVersion: number;
+        };
+        componentWithPrivates.playerApiVersion = version;
+        const postMessageSpy = jest.spyOn(componentWithPrivates.postMessageTarget!, 'postMessage');
+
+        component.postStore('test definition');
+
+        const message = postMessageSpy.mock.calls[0][0] as {
+          playerConfig: { pagingMode: string, enabledNavigationTargets: string[] },
+          unitState: { presentationProgress: string, responseProgress: string }
+        };
+        expect(message.playerConfig.pagingMode).toBe(pagingMode);
+        expect(message.playerConfig.enabledNavigationTargets).toEqual(targets);
+        expect(message.unitState).toEqual(expect.objectContaining({
+          presentationProgress: progress, responseProgress: progress
+        }));
+        expect(mockReviewService.bookletConfig.pagingMode).toBe('concat-scroll');
+      });
 
     it('should omit stateReportPolicy from spec version 5 on', () => {
       const componentWithPrivates = component as {

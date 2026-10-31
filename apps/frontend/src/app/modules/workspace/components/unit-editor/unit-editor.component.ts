@@ -5,6 +5,7 @@ import { UnitDefinitionStore } from '../../classes/unit-definition-store';
 import { RolePipe } from '../../pipes/role.pipe';
 import { VeronaModuleDirective } from '../../../../directives/verona-module.directive';
 import { TrackIframeActivityDirective } from '../../../../directives/track-iframe-activity.directive';
+import { readSpecVersion } from '../../../../utils/spec-version.utils';
 
 /**
  * Hosts the EDITOR a unit names and keeps the definition store in step with what it reports.
@@ -38,6 +39,14 @@ export class UnitEditorComponent extends VeronaModuleDirective {
       {};
   }
 
+  // Editor spec 5.0 writes the role in capitals: GUEST, COMMENTER, DEVELOPER, MAINTAINER, SUPER (#2065).
+  private static readonly ROLE_IN_CAPITALS_FROM = 5;
+
+  private role(): string {
+    const role = new RolePipe().transform(this.workspaceService.userAccessLevel);
+    return this.editorApiVersion >= UnitEditorComponent.ROLE_IN_CAPITALS_FROM ? role.toUpperCase() : role;
+  }
+
   protected startSubscriptions(): void {
     this.subscribeForPostMessages();
     this.subscribeForSelectedUnitChange();
@@ -66,16 +75,8 @@ export class UnitEditorComponent extends VeronaModuleDirective {
       case 'voeReadyNotification':
       case 'vo.FromAuthoringModule.ReadyNotification':
         if (msgType === 'voeReadyNotification') {
-          const majorVersion = msgData.metadata ?
-            msgData.metadata.specVersion.match(/\d+/) :
-            msgData.apiVersion.match(/\d+/);
-          if (majorVersion.length > 0) {
-            const majorVersionNumber = Number(majorVersion[0]);
-            this.editorApiVersion =
-              majorVersionNumber < 3 ? 2 : majorVersionNumber;
-          } else {
-            this.editorApiVersion = 2;
-          }
+          const specVersion = readSpecVersion(msgData);
+          this.editorApiVersion = specVersion !== undefined && specVersion >= 3 ? specVersion : 2;
         } else {
           this.editorApiVersion = 1;
         }
@@ -168,9 +169,7 @@ export class UnitEditorComponent extends VeronaModuleDirective {
             editorConfig: {
               ...this.legacyDefinitionReportPolicy(),
               directDownloadUrl: this.backendService.getDirectDownloadLink(),
-              role: new RolePipe().transform(
-                this.workspaceService.userAccessLevel
-              ),
+              role: this.role(),
               sharedParameters: this.sharedParameters
             },
             unitDefinition: unitDef.definition ? unitDef.definition : '',

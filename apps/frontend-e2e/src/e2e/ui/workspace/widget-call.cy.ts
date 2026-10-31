@@ -11,13 +11,13 @@ import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/t
  */
 describe('Widget call in the preview', () => {
   const unit: UnitData = {
-    shortname: 'WIDGET_CALL', name: 'Widget call', group: '', player: 'verona-test-player@1.0'
+    shortname: 'WIDGET_CALL', name: 'Widget call', group: '', player: 'verona-test-player@2.0'
   };
   const playerFrame = '[data-cy="unit-preview-iframe"]';
 
   before(() => {
     createTestBaseAPI({ units: [unit] }).then(base => {
-      cy.addModuleAPI('verona-test-player-1.0.0.html', base.token).its('status').should('equal', 201);
+      cy.addModuleAPI('verona-test-player-2.0.0.html', base.token).its('status').should('equal', 201);
       cy.addModuleAPI('verona-test-widget-1.0.0.html', base.token, ['WIDGET']).its('status').should('equal', 201);
     });
   });

@@ -21,6 +21,16 @@ describe('Admin verona API tests', () => {
         });
       });
     });
+
+    // The missing metadata block ended in a SyntaxError and a 500 (#1985).
+    it('406 negative test: should refuse a file without Verona metadata', () => {
+      cy.addModuleAPI(
+        'verona-module-without-metadata.html',
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(406);
+      });
+    });
   });
 
   describe('23. GET /api/verona-modules', () => {

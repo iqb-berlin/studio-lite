@@ -442,7 +442,7 @@ describe('UnitPreviewComponent', () => {
     it.each([
       [1, 'def', 'vo.ToPlayer.DataTransfer', 'def'],
       [1, undefined, 'vo.ToPlayer.DataTransfer', ''],
-      [6, undefined, 'vopStartCommand', '']
+      [6, 'def', 'vopStartCommand', 'def']
     ])('should hand a player of version %s the definition %s in its protocol', (version, definition, type, sent) => {
       const target = { postMessage: jest.fn() };
       component.postMessageTarget = target as never;
@@ -451,6 +451,17 @@ describe('UnitPreviewComponent', () => {
       component.postStore({ getData: () => ({ definition }) } as never);
 
       expect(target.postMessage).toHaveBeenCalledWith(expect.objectContaining({ type, unitDefinition: sent }), '*');
+    });
+
+    // An empty string is not the definition of a unit that has none; the testcenter leaves it out (#719).
+    it.each([undefined, ''])('should start a player on a unit with the definition %j without one', definition => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.playerApiVersion = 6;
+
+      component.postStore({ getData: () => ({ definition }) } as never);
+
+      expect(target.postMessage.mock.calls[0][0]).not.toHaveProperty('unitDefinition');
     });
 
     it('should let the next page report decide the list of the restarted unit', () => {
@@ -462,6 +473,59 @@ describe('UnitPreviewComponent', () => {
       component.setPageList(['0'], '0');
 
       expect(component.pageList).toEqual([]);
+    });
+  });
+
+  // Player spec 7.0 writes the values of its enumerations in capitals; older players keep the spelling
+  // the studio stores (#2064).
+  describe('the spelling of the values sent to the player', () => {
+    const previewService = () => TestBed.inject(PreviewService);
+    const sentTo = (target: { postMessage: jest.Mock }) => target.postMessage.mock.calls[0][0];
+
+    it.each([
+      [6, 'concat-scroll', 'none'],
+      [7, 'CONCAT_SCROLL', 'NONE']
+    ])('should start a player of version %s with the paging mode %s and the progress %s',
+      (version, pagingMode, progress) => {
+        previewService().pagingMode.next('concat-scroll');
+        const target = { postMessage: jest.fn() };
+        component.postMessageTarget = target as never;
+        component.playerApiVersion = version;
+
+        component.postStore({ getData: () => ({ definition: 'def' }) } as never);
+
+        expect(sentTo(target).playerConfig.pagingMode).toBe(pagingMode);
+        expect(sentTo(target).unitState).toEqual(expect.objectContaining({
+          presentationProgress: progress, responseProgress: progress
+        }));
+      });
+
+    it.each([
+      [6, 'concat-scroll'],
+      [7, 'CONCAT_SCROLL']
+    ])('should tell a player of version %s of a new paging mode as %s', (version, pagingMode) => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.playerApiVersion = version;
+
+      previewService().pagingMode.next('concat-scroll');
+
+      expect(sentTo(target)).toEqual(expect.objectContaining({
+        type: 'vopPlayerConfigChangedNotification', playerConfig: { pagingMode }
+      }));
+    });
+
+    it.each([
+      [6, ['presentationIncomplete', 'responsesIncomplete']],
+      [7, ['PRESENTATION_INCOMPLETE', 'RESPONSES_INCOMPLETE']]
+    ])('should give a player of version %s the reasons of a denied navigation as %j', (version, reason) => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.playerApiVersion = version;
+
+      component.postNavigationDenied();
+
+      expect(sentTo(target).reason).toEqual(reason);
     });
   });
 

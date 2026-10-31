@@ -271,6 +271,22 @@ describe('UnitEditorComponent', () => {
       expect(editorConfigOf(target)).toHaveProperty('definitionReportPolicy', 'eager');
     });
 
+    // Editor spec 5.0 writes the role in capitals (#2065).
+    it.each([
+      [4, 1, 'commenter'],
+      [5, 1, 'COMMENTER'],
+      [5, 4, 'SUPER']
+    ])('should give an editor of version %s the access level %s as the role %s', (version, accessLevel, role) => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.editorApiVersion = version;
+      workspaceServiceMock.userAccessLevel = accessLevel;
+
+      component.postStore(store);
+
+      expect(editorConfigOf(target).role).toBe(role);
+    });
+
     it('should send the definition type at the top level when it is known', () => {
       const target = { postMessage: jest.fn() };
       component.postMessageTarget = target as never;
@@ -354,6 +370,24 @@ describe('UnitEditorComponent', () => {
         '*'
       );
       expect(component.sessionId).not.toBe('');
+    });
+
+    // Reading the version threw, and the editor never got its unit (#2007).
+    it.each([
+      ['no version', { type: 'voeReadyNotification' }],
+      ['metadata without a spec version', { type: 'voeReadyNotification', metadata: {} }],
+      ['a version without a digit', { type: 'voeReadyNotification', metadata: { specVersion: 'latest' } }]
+    ])('should start an editor that reports %s as one of version 2', (_, ready) => {
+      fromEditor(ready);
+
+      expect(component.editorApiVersion).toBe(2);
+      expect(toEditor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'voeStartCommand',
+          editorConfig: expect.objectContaining({ definitionReportPolicy: 'eager' })
+        }),
+        '*'
+      );
     });
 
     // the definition stays as it is; saved, it would otherwise be lost

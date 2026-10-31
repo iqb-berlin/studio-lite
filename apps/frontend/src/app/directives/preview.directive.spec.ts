@@ -84,6 +84,8 @@ describe('PreviewDirective', () => {
     ['vopReadyNotification', { metadata: { specVersion: '6.0' } }, 6],
     ['vopReadyNotification', { specVersion: '4.1' }, 4],
     ['vopReadyNotification', {}, 2],
+    // the player API sends the metadata as the JSON string of the metadata block (#2064)
+    ['vopReadyNotification', { metadata: '{"id":"p","specVersion":"7.0"}' }, 7],
     ['vo.FromPlayer.ReadyNotification', { apiVersion: '3' }, 1]
   ])('reads the API version of a player from %s %j as %i', (type, version, apiVersion) => {
     const directive = createDirective();
@@ -151,6 +153,73 @@ describe('PreviewDirective', () => {
 
     expect(directive.presentationProgress).toBe('some');
     expect(directive.responseProgress).toBe('complete');
+  });
+
+  // Player spec 7.0 reports the progress in capitals (#2064).
+  it('takes the progress words of spec 7.0 in capitals', () => {
+    const directive = createDirective();
+    directive.iFrameElement = createIFrameWithWindow(window);
+
+    directive.handleIncomingMessage(createMessageEvent(
+      {
+        type: 'vopStateChangedNotification',
+        unitState: { presentationProgress: 'SOME', responseProgress: 'COMPLETE' } as unknown as UnitState
+      },
+      window
+    ));
+
+    expect(directive.presentationProgress).toBe('some');
+    expect(directive.responseProgress).toBe('complete');
+  });
+
+  // What the player reports is read as it comes; a value that is no string must not end the conversation.
+  it('takes a progress that is no string as none', () => {
+    const directive = createDirective();
+    directive.iFrameElement = createIFrameWithWindow(window);
+
+    expect(() => directive.handleIncomingMessage(createMessageEvent(
+      {
+        type: 'vopStateChangedNotification',
+        unitState: { presentationProgress: 1, responseProgress: { value: 'SOME' } } as unknown as UnitState
+      },
+      window
+    ))).not.toThrow();
+    expect(directive.presentationProgress).toBe('none');
+    expect(directive.responseProgress).toBe('none');
+  });
+
+  // Player spec 7.0 dropped vopWindowFocusChangedNotification; the focus is that of the window in the
+  // frame, whose window is new after every load (#2064).
+  describe('the focus of the window in the frame', () => {
+    const loadedDirective = (version: number): { directive: TestPreviewDirective; playerWindow: Window } => {
+      const directive = createDirective();
+      const frame = directive.hostingIframe.nativeElement as HTMLIFrameElement;
+      document.body.appendChild(frame);
+      directive.ngAfterViewInit();
+      directive.playerApiVersion = version;
+      frame.dispatchEvent(new Event('load'));
+      return { directive, playerWindow: frame.contentWindow as Window };
+    };
+
+    it('follows focus and blur of the window for a player of spec 7.0', () => {
+      const { directive, playerWindow } = loadedDirective(7);
+
+      playerWindow.dispatchEvent(new Event('focus'));
+
+      expect(directive.hasFocus).toBe(true);
+
+      playerWindow.dispatchEvent(new Event('blur'));
+
+      expect(directive.hasFocus).toBe(false);
+    });
+
+    it('leaves the focus of an older player to its own notification', () => {
+      const { directive, playerWindow } = loadedDirective(6);
+
+      playerWindow.dispatchEvent(new Event('focus'));
+
+      expect(directive.hasFocus).toBe(false);
+    });
   });
 
   // What the player shares is handed to the next unit; a key it reports again replaces the old value.
