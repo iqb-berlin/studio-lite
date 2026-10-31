@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, OnDestroy, OnChanges, Input, Output, EventEmitter, SimpleChanges
+  Component, OnInit, OnDestroy, OnChanges, Input, Output, EventEmitter, SimpleChanges, signal
 } from '@angular/core';
 import {
   FormBuilder, FormGroup, FormArray, FormsModule, ReactiveFormsModule, Validators
@@ -47,6 +47,9 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy, OnCha
 
   configForm: FormGroup;
   dataChanged = false;
+  private readonly configNotLoadedState = signal(false);
+  // Without the stored URLs the form is not shown: saving it would replace them (#1993).
+  readonly configNotLoaded = this.configNotLoadedState.asReadonly();
   private ngUnsubscribe = new Subject<void>();
   private isUpdatingForm = false;
 
@@ -100,7 +103,8 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy, OnCha
     this.backendService.getUnitRichNoteTagsConfig()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(config => {
-        this.updateForm(config);
+        this.configNotLoadedState.set(config === null);
+        if (config !== null) this.updateForm(config);
       });
   }
 

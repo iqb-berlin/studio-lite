@@ -310,11 +310,13 @@ export class BackendService {
       );
   }
 
-  getUnitRichNoteTagsConfig(): Observable<UnitRichNoteTagDto[] | string[] | string> {
+  // A failure is answered with null, not with an empty config: the form would offer an empty field
+  // for saving over the stored URLs (#1993).
+  getUnitRichNoteTagsConfig(): Observable<UnitRichNoteTagDto[] | string[] | string | null> {
     return this.http
       .get<UnitRichNoteTagDto[] | string[] | string>(`${this.serverUrl}admin/settings/unit-rich-note-tags-config`)
       .pipe(
-        catchError(() => of([]))
+        catchError(() => of(null))
       );
   }
 

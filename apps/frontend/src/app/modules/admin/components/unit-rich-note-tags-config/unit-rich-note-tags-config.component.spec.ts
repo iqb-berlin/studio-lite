@@ -8,7 +8,6 @@ import { of } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createMock } from '@golevelup/ts-jest';
 import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 import { UnitRichNoteTagsConfigComponent } from './unit-rich-note-tags-config.component';
@@ -34,7 +33,6 @@ describe('UnitRichNoteTagsConfigComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         MatIconModule,
-        NoopAnimationsModule,
         UnitRichNoteTagsConfigComponent
       ],
       providers: [
@@ -58,6 +56,18 @@ describe('UnitRichNoteTagsConfigComponent', () => {
     component.loadData();
     expect(backendServiceMock.getUnitRichNoteTagsConfig).toHaveBeenCalled();
     expect(component.urls.at(0).value).toBe('http://test.url');
+  });
+
+  // Saving the empty field shown after a failed load would replace the stored URLs (#1993).
+  it('should offer no saving of URLs that could not be loaded', () => {
+    backendServiceMock.getUnitRichNoteTagsConfig.mockReturnValue(of(null));
+    component.isGlobal = true;
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-cy="admin-unit-rich-note-tags-not-loaded"]'))
+      .not.toBeNull();
+    expect(fixture.nativeElement.querySelector('input')).toBeNull();
+    expect(fixture.nativeElement.querySelector('button')).toBeNull();
   });
 
   it('should add and remove urls', () => {
