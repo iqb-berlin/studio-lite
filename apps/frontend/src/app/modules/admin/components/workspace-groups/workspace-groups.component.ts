@@ -12,8 +12,9 @@ import {
   MatTableDataSource
 } from '@angular/material/table';
 import {
-  Component, OnInit, ViewChild, inject
+  Component, OnDestroy, OnInit, ViewChild, inject, signal
 } from '@angular/core';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { FormsModule, UntypedFormGroup } from '@angular/forms';
@@ -51,12 +52,17 @@ import { ChangeResultService } from '../../../../services/change-result.service'
 
   imports: [WorkspaceGroupsMenuComponent, SearchFilterComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatTooltip, FormsModule, TranslateModule, IsSelectedIdPipe, MatFabButton, MatIconButton, MatIcon, EntriesDividerComponent]
 })
-export class WorkspaceGroupsComponent implements OnInit {
+export class WorkspaceGroupsComponent implements OnInit, OnDestroy {
   objectsDatasource = new MatTableDataSource<WorkspaceGroupInListDto>();
   displayedColumns = ['id', 'name', 'delete'];
   tableSelectionRow = new SelectionModel<WorkspaceGroupInListDto>(false, []);
   selectedWorkspaceGroupId = 0;
   workspaceUsers = new UserToCheckCollection([]);
+  private readonly loadingAdminsState = signal(false);
+  // A check set before the admins of the selected group arrive would be reset by them (#2056).
+  readonly loadingAdmins = this.loadingAdminsState.asReadonly();
+  private adminsRequest?: Subscription;
+  private readonly ngUnsubscribe = new Subject<void>();
 
   @ViewChild(MatSort) sort = new MatSort();
 
@@ -69,7 +75,7 @@ export class WorkspaceGroupsComponent implements OnInit {
     private deleteConfirmDialog: MatDialog,
     private translateService: TranslateService
   ) {
-    this.tableSelectionRow.changed.subscribe(
+    this.tableSelectionRow.changed.pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       r => {
         if (r.added.length > 0) {
           this.selectedWorkspaceGroupId = r.added[0].id;
@@ -176,12 +182,21 @@ export class WorkspaceGroupsComponent implements OnInit {
         this.translateService.instant('warning'),
         { duration: 3000 });
     }
+    // A late answer for the group selected before would overwrite the admins of this one.
+    if (this.loadingAdmins()) {
+      this.adminsRequest?.unsubscribe();
+      this.loadingAdminsState.set(false);
+      this.appService.dataLoading = false;
+    }
     if (this.selectedWorkspaceGroupId > 0) {
       this.appService.dataLoading = true;
-      this.backendService.getWorkspaceGroupAdmins(this.selectedWorkspaceGroupId)
+      this.loadingAdminsState.set(true);
+      this.adminsRequest = this.backendService.getWorkspaceGroupAdmins(this.selectedWorkspaceGroupId)
+        .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(
           (dataResponse: UserInListDto[]) => {
             this.workspaceUsers.setChecks(dataResponse);
+            this.loadingAdminsState.set(false);
             this.appService.dataLoading = false;
           }
         );
@@ -191,6 +206,8 @@ export class WorkspaceGroupsComponent implements OnInit {
   }
 
   saveUsers(): void {
+    // The entries still hold the checks of the group selected before.
+    if (this.loadingAdmins()) return;
     if (this.selectedWorkspaceGroupId > 0) {
       if (this.workspaceUsers.hasChanged) {
         this.appService.dataLoading = true;
@@ -244,5 +261,12 @@ export class WorkspaceGroupsComponent implements OnInit {
 
   toggleRowSelection(row: UserInListDto): void {
     this.tableSelectionRow.toggle(row);
+  }
+
+  ngOnDestroy(): void {
+    // The cancelled answer cannot take the spinner down any more
+    if (this.loadingAdmins()) this.appService.dataLoading = false;
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

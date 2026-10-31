@@ -161,7 +161,12 @@ export function makeAdminOfGroup(group: string, admins: string[]): void {
   clickIndexTabAdmin('workspace-groups');
   cy.get(`mat-row:contains("${group}")`)
     .click();
+  // The checks stay locked until the admins of the group are in; a click before would be reset
+  // by them (#2056).
   admins.forEach(user => {
+    cy.get(`mat-checkbox:contains((${user}))`)
+      .find('input[type="checkbox"]')
+      .should('be.enabled');
     cy.get(`mat-checkbox:contains((${user}))`)
       .find('label')
       .click();

@@ -227,4 +227,52 @@ describe('Admin User Management', () => {
       deleteUser(editTarget.username);
     });
   });
+
+  // ─── Group admins: no check lost while they load ──────────────────────────────
+
+  // A check set before the admins of a group, or the groups of a user, arrived was reset by them
+  // (#2056). The answer is held back, so that the lock can be seen while it lasts.
+  describe('Group admins while they load', () => {
+    const group = 'Gruppe mit später Antwort';
+    const holdBack = (url: string, alias: string): void => {
+      cy.intercept('GET', url, req => {
+        req.on('response', res => { res.setDelay(1500); });
+      }).as(alias);
+    };
+
+    before(() => {
+      cy.window().then(win => {
+        cy.createGroupAPI({ id: '', name: group }, win.localStorage.getItem('id_token') || '')
+          .its('status').should('equal', 201);
+      });
+    });
+
+    it('locks the checks while the admins of the selected group load (#2056)', () => {
+      cy.visit('/');
+      cy.findAdminSettings().click();
+      clickIndexTabAdmin('workspace-groups');
+      holdBack('/api/admin/workspace-groups/*/admins', 'groupAdmins');
+      cy.contains('mat-row', group).click();
+      cy.contains('mat-checkbox', `(${Cypress.expose('username')})`)
+        .find('input[type="checkbox"]')
+        .should('be.disabled');
+      cy.wait('@groupAdmins');
+      cy.contains('mat-checkbox', `(${Cypress.expose('username')})`)
+        .find('input[type="checkbox"]')
+        .should('be.enabled');
+    });
+
+    it('locks the checks while the groups of the selected user load (#2056)', () => {
+      goToAdminUsers();
+      holdBack('/api/admin/users/*/workspace-groups', 'userGroups');
+      selectUserRow(Cypress.expose('username'));
+      cy.contains('mat-checkbox', group)
+        .find('input[type="checkbox"]')
+        .should('be.disabled');
+      cy.wait('@userGroups');
+      cy.contains('mat-checkbox', group)
+        .find('input[type="checkbox"]')
+        .should('be.enabled');
+    });
+  });
 });

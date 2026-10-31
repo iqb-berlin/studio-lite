@@ -83,7 +83,7 @@
               [matTooltip]="'save' | translate"
               matTooltipPosition="above"
               [color]="'primary'"
-              [disabled]="!workspaceUsers.hasChanged"
+              [disabled]="!workspaceUsers.hasChanged || loadingAdmins()"
               (click)="saveUsers()">
         <mat-icon>save</mat-icon>
       </button>
@@ -98,7 +98,7 @@
           class="fx-row-start-start" >
           <mat-checkbox class="fx-flex-fill"
             [(ngModel)]="entry.isChecked"
-            [disabled]="!selectedWorkspaceGroupId"
+            [disabled]="!selectedWorkspaceGroupId || loadingAdmins()"
             (change)="workspaceUsers.updateHasChanged()">
             {{entry.displayName}} ({{entry.name}})
           </mat-checkbox>

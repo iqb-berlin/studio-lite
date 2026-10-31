@@ -4,7 +4,7 @@ import {
 } from '@angular/material/table';
 import { DatePipe } from '@angular/common';
 import {
-  ViewChild, Component, OnInit, OnDestroy, inject
+  ViewChild, Component, OnInit, OnDestroy, inject, signal
 } from '@angular/core';
 import {
   fromEvent, Subject, Subscription, timer
@@ -14,7 +14,7 @@ import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { UntypedFormGroup, FormsModule } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
-  CreateUserDto, UserFullDto, UserInListDto, WorkspaceGroupInListDto, UserSessionInfoDto
+  CreateUserDto, UserFullDto, WorkspaceGroupInListDto, UserSessionInfoDto
 } from '@studio-lite-lib/api-dto';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -68,6 +68,10 @@ export class UsersComponent implements OnInit, OnDestroy {
   // Its row offers no delete button, its dialog no way to give up the administrator right: the
   // API refuses both (#1949, #1950).
   readonly ownUserId: number;
+  private readonly loadingGroupsState = signal(false);
+  // A check set before the groups of the selected user arrive would be reset by them (#2056).
+  readonly loadingGroups = this.loadingGroupsState.asReadonly();
+  private groupsRequest?: Subscription;
   private pollingSubscription: Subscription | null = null;
   private readonly ngUnsubscribe = new Subject<void>();
 
@@ -88,11 +92,11 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.ownUserId = this.appService.authData.userId;
     this.tableSelectionRow.changed.pipe(takeUntil(this.ngUnsubscribe)).subscribe(
       r => {
-        if (r.added.length > 0) {
-          this.selectedUser = r.added[0].id;
-        } else {
-          this.selectedUser = 0;
-        }
+        const selectedUser = r.added.length > 0 ? r.added[0].id : 0;
+        // A poll selects the fresh row of the user already selected; loading the user's groups
+        // again would reset the checks not saved yet (#2056).
+        if (selectedUser && selectedUser === this.selectedUser) return;
+        this.selectedUser = selectedUser;
         this.updateWorkspaceGroupList();
       }
     );
@@ -123,6 +127,8 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopPolling();
+    // The cancelled answer cannot take the spinner down any more
+    if (this.loadingGroups()) this.appService.dataLoading = false;
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }
@@ -291,20 +297,32 @@ export class UsersComponent implements OnInit, OnDestroy {
         { duration: 3000 }
       );
     }
+    // A late answer for the user selected before would overwrite the groups of this one.
+    if (this.loadingGroups()) {
+      this.groupsRequest?.unsubscribe();
+      this.loadingGroupsState.set(false);
+      this.appService.dataLoading = false;
+    }
     if (this.selectedUser > 0) {
       this.appService.dataLoading = true;
-      this.backendService.getWorkspaceGroupsByAdmin(this.selectedUser).pipe(takeUntil(this.ngUnsubscribe)).subscribe(
-        (workspaceGroups: WorkspaceGroupInListDto[]) => {
-          this.userWorkspaceGroups.setChecks(workspaceGroups);
-          this.appService.dataLoading = false;
-        }
-      );
+      this.loadingGroupsState.set(true);
+      this.groupsRequest = this.backendService.getWorkspaceGroupsByAdmin(this.selectedUser)
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(
+          (workspaceGroups: WorkspaceGroupInListDto[]) => {
+            this.userWorkspaceGroups.setChecks(workspaceGroups);
+            this.loadingGroupsState.set(false);
+            this.appService.dataLoading = false;
+          }
+        );
     } else {
       this.userWorkspaceGroups.setChecks();
     }
   }
 
   saveWorkspaces(): void {
+    // The entries still hold the checks of the user selected before.
+    if (this.loadingGroups()) return;
     if (this.selectedUser > 0) {
       if (this.userWorkspaceGroups.hasChanged) {
         this.appService.dataLoading = true;
@@ -458,7 +476,13 @@ export class UsersComponent implements OnInit, OnDestroy {
     });
   }
 
-  toggleRowSelection(row: UserInListDto): void {
-    this.tableSelectionRow.toggle(row);
+  // After a poll the selection holds the fresh row of the user and the table the one it updated in
+  // place: told apart by identity, a click on the selected row would select it again (#2056).
+  toggleRowSelection(row: UserFullDto): void {
+    if (this.tableSelectionRow.selected[0]?.id === row.id) {
+      this.tableSelectionRow.clear();
+    } else {
+      this.tableSelectionRow.select(row);
+    }
   }
 }
