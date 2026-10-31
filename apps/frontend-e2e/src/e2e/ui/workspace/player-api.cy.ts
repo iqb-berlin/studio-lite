@@ -3,18 +3,22 @@ import { clickIndexTabWorkspace, selectUnit } from '../../../support/helpers';
 import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
 
 /**
- * The studio as host of a player written against the player API 7.0. The player is a test module
- * after the pattern of #1763, so what is tested is the studio as host, not a release of a real
- * player. The form of the messages is checked in the unit tests of PreviewDirective and of the
- * components that start a player; here only that they arrive.
+ * The studio as host of a player written against the player API 7.0, and of one written against the
+ * API 3.0 that is still in use. The players are test modules after the pattern of #1763, so what is
+ * tested is the studio as host, not a release of a real player. The form of the messages is checked
+ * in the unit tests of PreviewDirective and of the components that start a player; here only that
+ * they arrive.
  */
-describe('Player API 7.0', () => {
+describe('Player API 7.0 and older', () => {
   const units: UnitData[] = [
     {
       shortname: 'PLAYER_API_1', name: 'Player API 1', group: '', player: 'verona-test-player@2.0'
     },
     {
       shortname: 'PLAYER_API_2', name: 'Player API 2', group: '', player: 'verona-test-player@2.0'
+    },
+    {
+      shortname: 'PLAYER_API_3', name: 'Player API 3', group: '', player: 'verona-test-player-legacy@1.0'
     }
   ];
   const previewFrame = '[data-cy="unit-preview-iframe"]';
@@ -29,6 +33,8 @@ describe('Player API 7.0', () => {
       wsId = base.wsId;
       unitIds = base.unitIds;
       cy.addModuleAPI('verona-test-player-2.0.0.html', base.token).its('status').should('equal', 201);
+      // its metadata take the old JSON-LD branch of VeronaModuleMetadataDto.getFromJsonLd
+      cy.addModuleAPI('verona-test-player-legacy-1.0.0.html', base.token).its('status').should('equal', 201);
     });
   });
 
@@ -58,6 +64,18 @@ describe('Player API 7.0', () => {
       cy.get('#status', { timeout: 30000 }).should('have.text', 'started');
       cy.get('#definition').should('have.text', 'no definition');
     });
+  });
+
+  // A player of the API 3.0 reports its state only when asked to; the version check decides that it
+  // is (#1607).
+  it('asks a player of the API 3.0 for its state', () => {
+    cy.visitWs(primaryWorkspace);
+    selectUnit(units[2].shortname);
+    clickIndexTabWorkspace('preview');
+    cy.getIFrameBody(previewFrame).within(() => {
+      cy.get('#status', { timeout: 30000 }).should('have.text', 'started');
+    });
+    cy.get('[data-cy="status-response-progress"]').should('have.class', 'some');
   });
 
   // The target comes in capitals, and the review only showed a message (#2064).
