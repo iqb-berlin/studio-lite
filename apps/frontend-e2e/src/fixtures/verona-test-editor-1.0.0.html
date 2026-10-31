@@ -6,7 +6,8 @@
   <!--
     An editor for the e2e tests of the studio as host, written against the editor API 5.0 and not
     against one release of a real editor (#2007). It does no more than the tests ask of it: it reports
-    ready with its metadata as a string, as the API demands, and shows that the start command came.
+    ready with its metadata as a string, as the API demands, and shows that the start command came and
+    the role it brought (#2065).
   -->
   <script id="metadata" type="application/ld+json">
     {
@@ -24,6 +25,7 @@
 </head>
 <body>
   <p id="status">waiting</p>
+  <p id="role"></p>
   <script>
     // The frame is a srcdoc of the host and shares its origin: messages go there and nowhere else
     const hostOrigin = window.parent.location.origin;
@@ -32,6 +34,7 @@
       if (event.source !== window.parent) return;
       if (event.data.type === 'voeStartCommand') {
         document.getElementById('status').textContent = 'started';
+        document.getElementById('role').textContent = event.data.editorConfig?.role ?? '';
       }
     });
 

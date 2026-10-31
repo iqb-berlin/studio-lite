@@ -33,4 +33,16 @@ describe('Editor API 5.0 in the editor tab', () => {
       cy.get('#status', { timeout: 30000 }).should('have.text', 'started');
     });
   });
+
+  // The role came in lower case, which the editor API 5.0 no longer knows (#2065).
+  it('gives an editor of spec 5.0 the role in capitals', () => {
+    cy.visitWs(primaryWorkspace);
+    selectUnit(unit.shortname);
+    clickIndexTabWorkspace('editor');
+    cy.getIFrameBody(editorFrame).within(() => {
+      cy.get('#status', { timeout: 30000 }).should('have.text', 'started');
+      // the first user administers the workspace
+      cy.get('#role').should('have.text', 'SUPER');
+    });
+  });
 });

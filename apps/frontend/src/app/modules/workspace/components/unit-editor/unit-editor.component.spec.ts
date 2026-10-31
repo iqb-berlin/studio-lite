@@ -271,6 +271,22 @@ describe('UnitEditorComponent', () => {
       expect(editorConfigOf(target)).toHaveProperty('definitionReportPolicy', 'eager');
     });
 
+    // Editor spec 5.0 writes the role in capitals (#2065).
+    it.each([
+      [4, 1, 'commenter'],
+      [5, 1, 'COMMENTER'],
+      [5, 4, 'SUPER']
+    ])('should give an editor of version %s the access level %s as the role %s', (version, accessLevel, role) => {
+      const target = { postMessage: jest.fn() };
+      component.postMessageTarget = target as never;
+      component.editorApiVersion = version;
+      workspaceServiceMock.userAccessLevel = accessLevel;
+
+      component.postStore(store);
+
+      expect(editorConfigOf(target).role).toBe(role);
+    });
+
     it('should send the definition type at the top level when it is known', () => {
       const target = { postMessage: jest.fn() };
       component.postMessageTarget = target as never;

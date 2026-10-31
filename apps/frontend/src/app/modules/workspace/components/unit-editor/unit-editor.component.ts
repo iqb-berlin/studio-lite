@@ -39,6 +39,14 @@ export class UnitEditorComponent extends VeronaModuleDirective {
       {};
   }
 
+  // Editor spec 5.0 writes the role in capitals: GUEST, COMMENTER, DEVELOPER, MAINTAINER, SUPER (#2065).
+  private static readonly ROLE_IN_CAPITALS_FROM = 5;
+
+  private role(): string {
+    const role = new RolePipe().transform(this.workspaceService.userAccessLevel);
+    return this.editorApiVersion >= UnitEditorComponent.ROLE_IN_CAPITALS_FROM ? role.toUpperCase() : role;
+  }
+
   protected startSubscriptions(): void {
     this.subscribeForPostMessages();
     this.subscribeForSelectedUnitChange();
@@ -161,9 +169,7 @@ export class UnitEditorComponent extends VeronaModuleDirective {
             editorConfig: {
               ...this.legacyDefinitionReportPolicy(),
               directDownloadUrl: this.backendService.getDirectDownloadLink(),
-              role: new RolePipe().transform(
-                this.workspaceService.userAccessLevel
-              ),
+              role: this.role(),
               sharedParameters: this.sharedParameters
             },
             unitDefinition: unitDef.definition ? unitDef.definition : '',
