@@ -35,7 +35,9 @@ export class IsWorkspaceGroupAdminGuard implements CanActivate {
     const isAdmin = await this.authService.isAdminUser(userId);
     if (isAdmin) return true;
     const workspaceGroupId = await this.resolveWorkspaceGroupId(req.params);
-    if (!workspaceGroupId) {
+    // A workspace that does not exist is refused like a foreign one (#2023)
+    if (workspaceGroupId === 0) throw new ForbiddenException();
+    if (workspaceGroupId === undefined) {
       // Read from the handler first, then the controller, so a whole controller can be marked.
       const isGroupless = this.reflector.getAllAndOverride<boolean>(
         ANY_WORKSPACE_GROUP_ADMIN_KEY,
@@ -52,16 +54,18 @@ export class IsWorkspaceGroupAdminGuard implements CanActivate {
   }
 
   /**
-   * The group the route is about, or 0 when it names none. A `workspace_id` that belongs to no
-   * workspace does not end up here: {@link WorkspaceService.findOne} answers that with a 404.
+   * The group the route is about, undefined when it names none, and 0 for a `workspace_id` that
+   * belongs to no workspace. That one used to be answered with a 404 by
+   * {@link WorkspaceService.findOne}, and a foreign one with 403, which told anyone which ids exist
+   * (#2023, as #1930 for {@link AccessLevelOrGroupAdminGuard}).
    */
   private async resolveWorkspaceGroupId(params: { workspace_id?: string, workspace_group_id?: string }
-  ): Promise<number> {
+  ): Promise<number | undefined> {
     if (params.workspace_id) {
-      const workspaceData = await this.workspaceService.findOne(Number(params.workspace_id));
-      return workspaceData ? workspaceData.groupId : 0;
+      const [groupId] = await this.workspaceService.findGroupIdsOfWorkspaces([Number(params.workspace_id)]);
+      return groupId || 0;
     }
     if (params.workspace_group_id) return Number(params.workspace_group_id);
-    return 0;
+    return undefined;
   }
 }
