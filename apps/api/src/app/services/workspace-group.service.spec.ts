@@ -224,6 +224,30 @@ describe('WorkspaceGroupService', () => {
         .rejects.toThrow(BadRequestException);
       expect(mockRepository.save).not.toHaveBeenCalled();
     });
+
+    // #2092: the interface trips over these: the unit list over states, the settings dialogs over profiles
+    it.each([
+      [{ states: 'x' }], [{ states: [null] }], [{ profiles: 5 }], [{ profiles: ['id'] }], [{ lastStateId: 'abc' }]
+    ])('should refuse malformed fields in the settings: %j', async settings => {
+      mockRepository.findOne.mockResolvedValue({ id: 1, name: 'g', settings: {} });
+
+      await expect(service.patch(1, { id: 1, settings } as unknown as WorkspaceGroupFullDto))
+        .rejects.toThrow(BadRequestException);
+      expect(mockRepository.save).not.toHaveBeenCalled();
+    });
+
+    // #2092: rich note tags may name a vocabulary by its URL, and every reader takes null for none
+    it('should take the fields it does not check, and null for the ones it does', async () => {
+      const group = { id: 1, name: 'g', settings: {} } as WorkspaceGroup;
+      mockRepository.findOne.mockResolvedValue(group);
+      const settings = {
+        states: null, profiles: [], lastStateId: null, richNoteTags: 'https://example.org/vocabulary'
+      };
+
+      await service.patch(1, { id: 1, settings } as unknown as WorkspaceGroupFullDto);
+
+      expect(group.settings).toEqual(settings);
+    });
   });
 
   describe('setWorkspaceGroupAdminsByUser', () => {

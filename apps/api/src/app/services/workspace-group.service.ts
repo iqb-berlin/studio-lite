@@ -13,6 +13,14 @@ import WorkspaceGroup from '../entities/workspace-group.entity';
 import { AdminWorkspaceGroupNotFoundException } from '../exceptions/admin-workspace-group-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isListOfObjects(value: unknown): boolean {
+  return value == null || (Array.isArray(value) && value.every(isPlainObject));
+}
+
 /**
  * The workspace groups and who administers them. {@link findAll} answers either every group or, for
  * a user id, only the groups that user administers -- the same call serves the administrator's view
@@ -99,11 +107,24 @@ export class WorkspaceGroupService {
    * Nothing else checks the body, and the migrations on this column take the settings for an object.
    * So does {@link patch}, which spreads them into the stored ones: a list or a text left keys "0",
    * "1", ... there (#2091). Settings left out are fine; `null` is not, though `typeof` calls it an object.
+   *
+   * Inside, only what the interface trips over is checked (#2092): `states` and `profiles` are lists of
+   * objects, `lastStateId` is a number, and each may be null, which every reader takes for none. The
+   * ids of states are not checked, older data holds them as text; `richNoteTags` may be a URL as well
+   * as a list; the rest is not read at group level.
    */
   private static checkSettings(settings: unknown): void {
     if (settings === undefined) return;
-    if (typeof settings !== 'object' || settings === null || Array.isArray(settings)) {
+    if (!isPlainObject(settings)) {
       throw new BadRequestException('The settings of a workspace group must be an object.');
+    }
+    const malformed = [
+      isListOfObjects(settings.states) ? '' : 'states',
+      isListOfObjects(settings.profiles) ? '' : 'profiles',
+      settings.lastStateId == null || typeof settings.lastStateId === 'number' ? '' : 'lastStateId'
+    ].filter(Boolean);
+    if (malformed.length) {
+      throw new BadRequestException(`Malformed workspace group settings: ${malformed.join(', ')}.`);
     }
   }
 
