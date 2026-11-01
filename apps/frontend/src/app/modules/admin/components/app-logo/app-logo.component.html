@@ -53,7 +53,7 @@
           {{ 'admin.reload-page' | translate }}
         </div>
       }
-      <button mat-raised-button color="primary" [disabled]="!dataChanged" (click)="saveData()"
+      <button mat-raised-button color="primary" [disabled]="!dataChanged || save.saving()" (click)="saveData()"
         data-cy="admin-app-logo-save-button">
         {{ 'save' | translate }}
       </button>

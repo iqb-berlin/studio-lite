@@ -17,8 +17,9 @@
   <div class="fx-row-end-center">
     <button mat-raised-button
             color="primary"
-            [disabled]="!dataChanged"
-            (click)="saveData()">
+            [disabled]="!dataChanged || save.saving()"
+            (click)="saveData()"
+            data-cy="admin-email-template-save-button">
       {{'save' | translate}}
     </button>
   </div>

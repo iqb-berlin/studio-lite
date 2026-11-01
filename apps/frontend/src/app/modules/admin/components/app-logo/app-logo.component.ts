@@ -16,6 +16,7 @@ import { MatIcon } from '@angular/material/icon';
 
 import { BackendService as ReadBackendService } from '../../../../services/backend.service';
 import { BackendService as WriteBackendService } from '../../services/backend.service';
+import { SaveLock } from '../../../../classes/save-lock.class';
 
 @Component({
   selector: 'studio-lite-app-logo',
@@ -40,6 +41,8 @@ import { BackendService as WriteBackendService } from '../../services/backend.se
 export class AppLogoComponent implements OnInit, OnDestroy {
   configForm: UntypedFormGroup;
   dataChanged = false;
+  // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
+  readonly save = new SaveLock();
   private configDataChangedSubscription: Subscription | null = null;
   private readonly logoLoadState = signal<'pending' | 'loaded' | 'failed'>('pending');
   // Saving replaces the stored logo and colours. The form is shown only once they are in: before,
@@ -99,18 +102,21 @@ export class AppLogoComponent implements OnInit, OnDestroy {
 
   saveData(): void {
     if (this.configForm) {
+      // the image is not part of the form
+      if (!this.save.start([this.configForm.getRawValue(), this.logoImageBase64])) return;
       this.writeBackendService.setAppLogo({
         data: this.logoImageBase64,
         bodyBackground: this.configForm.get('bodyBackground')?.value,
         boxBackground: this.configForm.get('boxBackground')?.value
       }).subscribe(isOk => {
+        this.save.finish();
         if (isOk) {
           this.snackBar.open(
             this.translateService.instant('logo.logo-and-colors-saved'),
             '',
             { duration: 3000 }
           );
-          this.dataChanged = false;
+          this.dataChanged = this.save.differsFromSent([this.configForm.getRawValue(), this.logoImageBase64]);
         } else {
           this.snackBar.open(
             this.translateService.instant('logo.logo-and-colors-not-saved'),
