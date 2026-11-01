@@ -30,6 +30,8 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   settings!: WorkspaceGroupSettingsDto;
   // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
   readonly save = new SaveLock();
+  // Asked for while a save is under way, by deleting a state (#2009): sent once that save is answered.
+  private saveRequested = false;
   private ngUnsubscribe = new Subject<void>();
 
   constructor(
@@ -55,8 +57,10 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   async saveGroupSettings() {
     // a copy: what is sent must not change with the edits made while it is under way
     const sent = structuredClone(this.settings);
-    // also asked for by deleting a state (#2009): a deletion while a save is under way stays a change
-    if (!this.save.start(sent)) return;
+    if (!this.save.start(sent)) {
+      this.saveRequested = true;
+      return;
+    }
     this.wsgAdminService.setWorkspaceGroupSettings(
       this.wsgAdminService.selectedWorkspaceGroupId.value, sent)
       .pipe(
@@ -81,6 +85,10 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
               this.translateService.instant('error'),
               { duration: 3000 }
             );
+          }
+          if (this.saveRequested) {
+            this.saveRequested = false;
+            this.saveGroupSettings();
           }
         }
       );

@@ -118,14 +118,13 @@ describe('WorkspaceSettingsComponent', () => {
     expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-settings.changed', '', { duration: 1000 });
   });
 
-  // #2094: what is entered while the save is under way was not sent, and a second save waits
-  it('keeps an entry made while saving unsaved and does not save twice meanwhile', () => {
+  // #2094: what is entered while the save is under way was not sent
+  it('keeps an entry made while saving unsaved', () => {
     const answer = new Subject<boolean>();
     mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(answer);
     component.richNoteTagsSettingsChange(['http://gesendet']);
     component.saveGroupSettings();
     component.richNoteTagsSettingsChange(['http://danach']);
-    component.saveGroupSettings();
     answer.next(true);
 
     expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledTimes(1);
@@ -134,6 +133,28 @@ describe('WorkspaceSettingsComponent', () => {
     // the page builds its form from what is published: the stored settings would reset the entry
     expect(component.settings.richNoteTags).toEqual(['http://danach']);
     expect(mockWsgAdminService.selectedWorkspaceGroupSettings.value.richNoteTags).toEqual(['http://danach']);
+  });
+
+  // #2009 with #2094: deleting a state saves at once; while another save is under way, it waits for that one
+  it('saves a state deleted while saving once that save is answered', () => {
+    const first = new Subject<boolean>();
+    const second = new Subject<boolean>();
+    mockWsgAdminService.setWorkspaceGroupSettings
+      .mockReturnValueOnce(first)
+      .mockReturnValueOnce(second);
+    const kept: State = { id: 1, label: 'State 1', color: '#ffffff' };
+    component.stateSettingsChange([kept, { id: 2, label: 'State 2', color: '#ffffff' }]);
+    component.saveGroupSettings();
+    component.stateSettingsChange([kept]);
+    component.saveGroupSettings();
+
+    expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledTimes(1);
+    first.next(true);
+
+    expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledTimes(2);
+    expect(mockWsgAdminService.setWorkspaceGroupSettings.mock.calls[1][1].states).toEqual([kept]);
+    second.next(true);
+    expect(mockWsgAdminService.settingsChanged).toBe(false);
   });
 
   it('should handle save error', () => {
