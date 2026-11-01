@@ -58,7 +58,8 @@ export class ExportReviewButtonComponent implements OnDestroy {
           download$.pipe(takeUntil(this.ngUnsubscribe)).subscribe(b => {
             if (b) {
               if (typeof b === 'number') {
-                this.appService.dataLoading = b;
+                // -1: the download failed, and the spinner turned on for good (#1994)
+                this.appService.dataLoading = b < 0 ? false : b;
               } else {
                 const thisMoment = format(new Date(), 'yyyy-MM-dd');
                 saveAs(b, `${thisMoment} studio unit download.zip`);

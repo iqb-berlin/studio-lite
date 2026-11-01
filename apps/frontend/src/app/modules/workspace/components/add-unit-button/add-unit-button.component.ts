@@ -272,6 +272,9 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
               }
             }
           });
+        // The files are in the request already. Without this, choosing the same file again raised no
+        // change, and an upload that had failed could not be retried with it (#1994).
+        inputElement.value = '';
       }
     }
   }

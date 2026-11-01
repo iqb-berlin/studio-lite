@@ -85,8 +85,7 @@ export class UnitSchemerComponent extends UnitDefinitionDirective {
 
   private sendScheme(unitId: number) {
     if (!unitId) {
-      this.message = this.translateService.instant('workspace.unit-not-found');
-      this.postMessageTarget = undefined;
+      this.showNoModule(this.translateService.instant('workspace.unit-not-found'));
       return;
     }
     this.unitStores
@@ -96,13 +95,7 @@ export class UnitSchemerComponent extends UnitDefinitionDirective {
         if (unitSchemeStore) {
           this.postStore(unitSchemeStore);
         } else {
-          this.snackBar.open(
-            this.translateService.instant(
-              'workspace.coding-scheme-not-loaded'
-            ),
-            this.translateService.instant('workspace.error'),
-            { duration: 3000 }
-          );
+          this.showNoModule(this.translateService.instant('workspace.coding-scheme-not-loaded'));
         }
       });
   }

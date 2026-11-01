@@ -150,15 +150,42 @@ describe('VeronaModuleDirective', () => {
     return assigned;
   };
 
-  it('handles missing unit id by clearing post target and setting message', () => {
-    const { directive, translateService } = createDirective();
+  // A module kept running showed the unit before and could report into the one now chosen (#2085).
+  describe('when there is no unit to show', () => {
+    const withModuleOfTheUnitBefore = (directive: TestVeronaModuleDirective): HTMLIFrameElement => {
+      const iframe = document.createElement('iframe');
+      iframe.srcdoc = 'the unit before';
+      directive.iFrameElement = iframe;
+      directive.sessionId = 'session-of-the-unit-before';
+      directive.lastVeronaModuleId = 'player-1';
+      directive.postMessageTarget = window;
+      directive.unitLoaded.next(false);
+      return iframe;
+    };
 
-    directive.postMessageTarget = window;
-    directive.sendUnitDefinition(0);
+    it.each([
+      ['the unit names no module', 'workspace.no-player',
+        (directive: TestVeronaModuleDirective) => directive.show('', 'player', jest.fn())],
+      ['the unit id is missing', 'workspace.unit-not-found',
+        (directive: TestVeronaModuleDirective) => directive.sendUnitDefinition(0)],
+      ['the definition cannot be loaded', 'workspace.unit-definition-not-loaded',
+        (directive: TestVeronaModuleDirective, backendService: jest.Mocked<WorkspaceBackendService>) => {
+          backendService.getUnitDefinition.mockReturnValue(of(null));
+          directive.sendUnitDefinition(5);
+        }]
+    ])('empties the frame, forgets the module and says why when %s', (_case, message, showNoUnit) => {
+      const { directive, backendService } = createDirective();
+      const iframe = withModuleOfTheUnitBefore(directive);
 
-    expect(translateService.instant).toHaveBeenCalledWith('workspace.unit-not-found');
-    expect(directive.message).toBe('workspace.unit-not-found');
-    expect(directive.postMessageTarget).toBeUndefined();
+      showNoUnit(directive, backendService);
+
+      expect(iframe.srcdoc).toBe('');
+      expect(directive.sessionId).toBe('');
+      expect(directive.lastVeronaModuleId).toBe('');
+      expect(directive.postMessageTarget).toBeUndefined();
+      expect(directive.message).toBe(message);
+      expect(directive.unitLoaded.value).toBe(true);
+    });
   });
 
   it('loads unit definition when missing store and posts it', () => {
@@ -188,23 +215,6 @@ describe('VeronaModuleDirective', () => {
 
     expect(directive.postStore).toHaveBeenCalledWith(unitStores.definitionStore());
     expect(backendService.getUnitDefinition).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows error when unit definition cannot be loaded', () => {
-    const {
-      directive, backendService, snackBar, translateService
-    } = createDirective();
-
-    backendService.getUnitDefinition.mockReturnValue(of(null));
-
-    directive.sendUnitDefinition(5);
-
-    expect(snackBar.open).toHaveBeenCalledWith(
-      'workspace.unit-definition-not-loaded',
-      'workspace.error',
-      { duration: 3000 }
-    );
-    expect(translateService.instant).toHaveBeenCalledWith('workspace.unit-definition-not-loaded');
   });
 
   it('returns empty module id when metadata store is missing', async () => {
@@ -290,6 +300,7 @@ describe('VeronaModuleDirective', () => {
     document.body.appendChild(iframe);
     iframe.srcdoc = 'the module shown so far';
     directive.iFrameElement = iframe;
+    directive.unitLoaded.next(false);
 
     moduleService.players = { 'module-3': createModule('module-3') };
     moduleService.getModuleHtml = jest.fn().mockResolvedValue('');
@@ -301,6 +312,8 @@ describe('VeronaModuleDirective', () => {
     expect(translateService.instant).toHaveBeenCalledWith('workspace.player-not-loaded', { id: 'module-3' });
     expect(directive.lastVeronaModuleId).toBe('');
     expect(iframe.srcdoc).toBe('');
+    // nothing more comes for this unit: the spinner turned on for good (#2085)
+    expect(directive.unitLoaded.value).toBe(true);
 
     document.body.removeChild(iframe);
   });

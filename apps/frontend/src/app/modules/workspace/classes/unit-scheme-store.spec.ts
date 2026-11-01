@@ -55,7 +55,7 @@ describe('UnitSchemeStore', () => {
     expect(emitSpy).toHaveBeenCalledTimes(2);
   });
 
-  it('does not mark changed when only scheme changes', () => {
+  it('marks changed when only the scheme changes, and sends it with its type', () => {
     const original: UnitSchemeDto = { scheme: 's1', schemeType: 't1' };
     const store = new UnitSchemeStore(1, original);
 
@@ -65,14 +65,40 @@ describe('UnitSchemeStore', () => {
     expect(store.getChangedData()).toEqual({ scheme: 's2', schemeType: 't1' });
   });
 
-  it('does not mark changed when only schemeType changes', () => {
+  // the type travels with the scheme, as the definition's does with the definition
+  it('does not mark changed when only the scheme type changes', () => {
     const original: UnitSchemeDto = { scheme: 's1', schemeType: 't1' };
     const store = new UnitSchemeStore(1, original);
 
     store.setData('s1', 't2');
 
+    expect(store.isChanged()).toBe(false);
+    expect(store.getChangedData()).toEqual({});
+  });
+
+  // edited back, the scheme was saved anyway and stamped the unit as changed (#1333)
+  it('does not mark changed when the scheme is edited back to the one loaded', () => {
+    const store = new UnitSchemeStore(1, { scheme: 's1', schemeType: 't1' });
+
+    store.setData('s2', 't1');
+    store.setData('s1', 't1');
+
+    expect(store.isChanged()).toBe(false);
+    expect(store.changed()).toBe(false);
+    expect(store.getChangedData()).toEqual({});
+  });
+
+  // what was saved is s2 now, and the schemer shows s1 (#1845)
+  it('marks changed a scheme edited back to the old one while the save is under way', () => {
+    const store = new UnitSchemeStore(1, { scheme: 's1', schemeType: 't1' });
+    store.setData('s2', 't1');
+    const sent = store.getChangedData();
+
+    store.setData('s1', 't1');
+    store.applyChanges(sent);
+
     expect(store.isChanged()).toBe(true);
-    expect(store.getChangedData()).toEqual({ scheme: 's1', schemeType: 't2' });
+    expect(store.getChangedData()).toEqual({ scheme: 's1', schemeType: 't1' });
   });
 
   it('holds in changed whether a scheme has arrived', () => {

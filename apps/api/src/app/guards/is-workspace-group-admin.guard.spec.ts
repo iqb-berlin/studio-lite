@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { WorkspaceFullDto } from '@studio-lite-lib/api-dto';
 import { IsWorkspaceGroupAdminGuard } from './is-workspace-group-admin.guard';
 import { AuthService } from '../services/auth.service';
 import { WorkspaceService } from '../services/workspace.service';
@@ -61,13 +60,28 @@ describe('IsWorkspaceGroupAdminGuard', () => {
     const userId = 1;
     const groupId = 2;
     authService.isAdminUser.mockResolvedValue(false);
-    workspaceService.findOne.mockResolvedValue({ groupId } as WorkspaceFullDto);
+    workspaceService.findGroupIdsOfWorkspaces.mockResolvedValue([groupId]);
     authService.isWorkspaceGroupAdmin.mockResolvedValue(true);
 
     expect(await guard.canActivate(contextFor(userId, { workspace_id: '5' }))).toBe(true);
-    expect(workspaceService.findOne).toHaveBeenCalledWith(5);
+    expect(workspaceService.findGroupIdsOfWorkspaces).toHaveBeenCalledWith([5]);
     expect(authService.isWorkspaceGroupAdmin).toHaveBeenCalledWith(userId, groupId);
   });
+
+  // A 404 for an unknown id beside the 403 for a foreign one told anyone which ids exist (#2023).
+  // On a marked route the unknown workspace must not fall back to "administers any group".
+  it.each([[undefined], [true]])(
+    'should refuse a workspace that does not exist like a foreign one, the route marked: %s',
+    async marked => {
+      authService.isAdminUser.mockResolvedValue(false);
+      authService.isWorkspaceGroupAdmin.mockResolvedValue(true);
+      workspaceService.findGroupIdsOfWorkspaces.mockResolvedValue([]);
+      reflector.getAllAndOverride.mockReturnValue(marked);
+
+      await expect(guard.canActivate(contextFor(1, { workspace_id: '9988' }))).rejects.toThrow(ForbiddenException);
+      expect(authService.isWorkspaceGroupAdmin).not.toHaveBeenCalled();
+    }
+  );
 
   it('should return true if user is group admin of workspace_group_id', async () => {
     const userId = 1;

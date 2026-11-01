@@ -164,6 +164,7 @@ export class WorkspaceBackendService {
    * Turns the stream of a download into what a caller can bind to: a percentage while it runs (or
    * the bytes so far when the size is unknown), the blob when it arrives, and -1 for nothing at all.
    * An export can take minutes, so the dialog has to be able to show that something is happening.
+   * A failed download is -1 as well, as a failed upload is in {@link uploadUnits} (#1994).
    */
   private static mapDownloadEvent(event: HttpEvent<Blob>): Blob | number | null {
     if (event) {
@@ -190,7 +191,10 @@ export class WorkspaceBackendService {
       responseType: 'blob',
       reportProgress: true,
       observe: 'events'
-    }).pipe(map(WorkspaceBackendService.mapDownloadEvent));
+    }).pipe(
+      map(WorkspaceBackendService.mapDownloadEvent),
+      catchError(() => of(-1))
+    );
   }
 
   downloadUnitsJson(
@@ -205,7 +209,10 @@ export class WorkspaceBackendService {
         reportProgress: true,
         observe: 'events'
       }
-    ).pipe(map(WorkspaceBackendService.mapDownloadEvent));
+    ).pipe(
+      map(WorkspaceBackendService.mapDownloadEvent),
+      catchError(() => of(-1))
+    );
   }
 
   getCodingBook(workspaceId: number, missingsProfile:string, contentOptions: CodeBookContentSetting,
@@ -302,7 +309,9 @@ export class WorkspaceBackendService {
             return 0;
           }
           return -1;
-        })
+        }),
+        // the caller ends the loading indicator on -1; a failed upload left it turning (#1994)
+        catchError(() => of(-1))
       );
     }
     return of(-1);

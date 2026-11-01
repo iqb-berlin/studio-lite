@@ -271,6 +271,13 @@ describe('Workspace API tests', () => {
         }
       );
     });
+
+    // A 404 here and a 403 for a workspace of another group told a group admin which ids exist (#2023)
+    it('403 negative test: should refuse a group admin a workspace that does not exist like a foreign one', () => {
+      cy.getWsAPI(noId, Cypress.expose(`token_${userGroupAdmin.username}`)).then(resp => {
+        expect(resp.status).to.equal(403);
+      });
+    });
   });
 
   describe('19. PATCH /api/group-admin/workspaces/{id}/users', () => {

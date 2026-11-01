@@ -105,8 +105,7 @@ export abstract class VeronaModuleDirective implements AfterViewInit, OnDestroy 
   /** Hands the unit's definition to the module, from the store if it is there, else loaded into it. */
   sendUnitDefinition(unitId: number): void {
     if (!unitId) {
-      this.message = this.translateService.instant('workspace.unit-not-found');
-      this.postMessageTarget = undefined;
+      this.showNoModule(this.translateService.instant('workspace.unit-not-found'));
       return;
     }
     this.unitStores
@@ -116,15 +115,28 @@ export abstract class VeronaModuleDirective implements AfterViewInit, OnDestroy 
         if (unitDefinitionStore) {
           this.postStore(unitDefinitionStore);
         } else {
-          this.snackBar.open(
-            this.translateService.instant(
-              'workspace.unit-definition-not-loaded'
-            ),
-            this.translateService.instant('workspace.error'),
-            { duration: 3000 }
-          );
+          this.showNoModule(this.translateService.instant('workspace.unit-definition-not-loaded'));
         }
       });
+  }
+
+  /**
+   * Shows no unit, with the message why. The module goes with the frame: a module kept running
+   * still showed the unit before and could report into the one now chosen (#2085). Nothing is left
+   * to load either, so the host counts the unit as done.
+   */
+  protected showNoModule(message: string): void {
+    this.dropModule();
+    this.message = message;
+    this.unitLoaded.next(true);
+  }
+
+  /** Empties the frame and forgets the module that ran in it, its session and its window. */
+  private dropModule(): void {
+    this.sessionId = '';
+    this.postMessageTarget = undefined;
+    this.lastVeronaModuleId = '';
+    this.clearIFrame();
   }
 
   private getModulesByType(
@@ -185,8 +197,7 @@ export abstract class VeronaModuleDirective implements AfterViewInit, OnDestroy 
   ): boolean {
     if (!moduleId) {
       // workspace.no-player, workspace.no-editor, workspace.no-schemer
-      this.message = this.translateService.instant(`workspace.no-${moduleType}`);
-      this.postMessageTarget = undefined;
+      this.showNoModule(this.translateService.instant(`workspace.no-${moduleType}`));
       return false;
     }
     if (moduleId === this.lastVeronaModuleId && this.postMessageTarget) {
@@ -233,8 +244,7 @@ export abstract class VeronaModuleDirective implements AfterViewInit, OnDestroy 
     this.sessionId = '';
 
     if (!moduleId) {
-      this.clearIFrame();
-      this.lastVeronaModuleId = '';
+      this.dropModule();
       return;
     }
 
@@ -249,12 +259,10 @@ export abstract class VeronaModuleDirective implements AfterViewInit, OnDestroy 
           this.lastVeronaModuleId = moduleId;
           this.message = '';
         } else {
-          this.clearIFrame();
-          this.message = this.translateService.instant(
+          this.showNoModule(this.translateService.instant(
             `workspace.${moduleType}-not-loaded`,
             { id: moduleId }
-          );
-          this.lastVeronaModuleId = '';
+          ));
         }
       });
   }

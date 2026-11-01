@@ -434,19 +434,18 @@ describe('UnitPlayerComponent', () => {
       expect(postStoreSpy).toHaveBeenCalledWith('shown before');
     });
 
-    it('should say when the definition could not be loaded', () => {
+    // a player kept running for the unit before still showed it (#2003)
+    it('should empty the player and say so when the definition could not be loaded', () => {
       component.unitData.definition = '';
+      component.iFrameElement!.srcdoc = 'the player with the unit before';
       mockReviewBackendService.getUnitDefinition.mockReturnValue(of(null));
       const postStoreSpy = jest.spyOn(component, 'postStore');
 
       component.sendChangeData();
 
-      expect(mockSnackBar.open).toHaveBeenCalledWith(
-        'workspace.unit-definition-not-loaded',
-        'workspace.error',
-        { duration: 3000 }
-      );
       expect(postStoreSpy).not.toHaveBeenCalled();
+      expect(component.message).toBe('workspace.unit-definition-not-loaded');
+      expect(component.iFrameElement!.srcdoc).toBe('');
     });
   });
 
@@ -471,6 +470,20 @@ describe('UnitPlayerComponent', () => {
       component.onLoadUnitProperties();
 
       expect(mockReviewService.setHeaderText).toHaveBeenCalledWith(header);
+    });
+
+    // The player and the header went on showing the unit before, while a comment went to the
+    // unit the route names (#2003).
+    it('should show neither the player nor the header of the unit before when the unit cannot be loaded', () => {
+      component.unitData = { ...mockUnitData, name: 'Aufgabe 2' };
+      component.iFrameElement!.srcdoc = 'the player with the unit before';
+      mockReviewBackendService.getUnitProperties.mockReturnValue(of(null));
+
+      component.onLoadUnitProperties();
+
+      expect(component.message).toBe('workspace.unit-not-found');
+      expect(component.iFrameElement!.srcdoc).toBe('');
+      expect(mockReviewService.setHeaderText).toHaveBeenCalledWith('Aufgabe 2');
     });
   });
 

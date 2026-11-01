@@ -228,7 +228,8 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
           download$.pipe(takeUntil(this.ngUnsubscribe)).subscribe(b => {
             if (b) {
               if (typeof b === 'number') {
-                this.appService.dataLoading = b;
+                // -1: the download failed, and the spinner turned on for good (#1994)
+                this.appService.dataLoading = b < 0 ? false : b;
               } else {
                 const thisMoment = format(new Date(), 'yyyy-MM-dd');
                 saveAs(b, `${thisMoment} studio unit download.zip`);
@@ -370,7 +371,9 @@ export class EditUnitButtonComponent extends RequestMessageDirective implements 
             .loadProfileColumns(settings?.unitMDProfile, settings?.itemMDProfile)
             .then(failedProfileUrls => this.metadataService.createMetadataReport()
               .subscribe((units: UnitPropertiesDto[] | boolean) => {
-                const selectedUnits = (units as UnitPropertiesDto[])
+                // a failed report is false, and filtering it threw; the interceptor reports the failure (#1994)
+                if (!Array.isArray(units)) return;
+                const selectedUnits = units
                   .filter((unit: UnitPropertiesDto) => res.selectedUnits.includes(unit.id));
                 this.showMetadataDialog.open(TableViewComponent, {
                   width: '80%',

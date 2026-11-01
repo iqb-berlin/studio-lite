@@ -98,6 +98,18 @@ describe('ExportReviewButtonComponent', () => {
       expect(mockWorkspaceBackendService.downloadUnitsJson).not.toHaveBeenCalled();
     });
 
+    // After a failed download the spinner turned on for good (#1994).
+    it('should end the loading indicator when the download fails', () => {
+      mockWorkspaceBackendService.downloadUnitsJson.mockReturnValue(of(-1));
+      mockDialog.open.mockReturnValue(createMock<MatDialogRef<ExportUnitComponent>>({
+        afterClosed: () => of(buildSettings('json'))
+      }));
+
+      component.exportReview();
+
+      expect(mockAppService.dataLoading).toBe(false);
+    });
+
     // Esc, a click beside the dialog and navigation close it with undefined (#1844)
     it.each([false, undefined])('should not call any download when the dialog closes with %s', result => {
       mockDialog.open.mockReturnValue(createMock<MatDialogRef<ExportUnitComponent>>({
