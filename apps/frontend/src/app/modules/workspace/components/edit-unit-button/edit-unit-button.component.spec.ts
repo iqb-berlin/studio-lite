@@ -167,6 +167,18 @@ describe('EditUnitButtonComponent', () => {
       );
       expect(mockWorkspaceBackendService.downloadUnitsJson).not.toHaveBeenCalled();
     });
+
+    // After a failed download the spinner turned on for good (#1994).
+    it('should end the loading indicator when the download fails', () => {
+      mockWorkspaceBackendService.downloadUnits.mockReturnValue(of(-1));
+      mockDialog.open.mockReturnValue(createMock<MatDialogRef<ExportUnitComponent>>({
+        afterClosed: () => of(buildSettings('xml'))
+      }));
+
+      component.exportUnit();
+
+      expect(mockAppService.dataLoading).toBe(false);
+    });
   });
 
   it('should update workspace settings and call backend when settings dialog is closed with result', async () => {
@@ -530,6 +542,20 @@ describe('EditUnitButtonComponent', () => {
           warning: 'workspace.profile-not-loaded: unit-url\nworkspace.profile-not-loaded: item-url'
         }
       }));
+    }));
+
+    // A failed report came as false, and filtering it threw (#1994).
+    it('should open no report when the report cannot be loaded', fakeAsync(() => {
+      mockDialog.open.mockReturnValue(createMock<MatDialogRef<ShowMetadataComponent>>({
+        afterClosed: () => of({ selectedUnits: [2] })
+      }));
+      mockMetadataService.loadProfileColumns.mockResolvedValue([]);
+      mockMetadataService.createMetadataReport.mockReturnValue(of(false));
+
+      component.showMetadata();
+      flush();
+
+      expect(mockDialog.open).not.toHaveBeenCalledWith(TableViewComponent, expect.anything());
     }));
 
     it('should load no report when the metadata dialog is cancelled', fakeAsync(() => {

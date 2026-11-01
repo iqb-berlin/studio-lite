@@ -348,6 +348,17 @@ describe('AddUnitButtonComponent', () => {
     expect(appService.dataLoading).toBe(true);
   });
 
+  // The same file chosen again raised no change, so a failed upload could not be retried with it (#1994)
+  it('should clear the choice once the upload has the files, so the same file can be chosen again', () => {
+    const input = createMock<HTMLInputElement>({ files: createMock<FileList>({ length: 1 }), value: 'units.zip' });
+    backendService.uploadUnits.mockReturnValue(of(-1));
+
+    component.onFileSelected(input);
+
+    expect(input.value).toBe('');
+    expect(appService.dataLoading).toBe(false);
+  });
+
   it('should upload nothing when the file selection is empty', () => {
     component.onFileSelected(createMock<HTMLInputElement>({ files: createMock<FileList>({ length: 0 }) }));
 
