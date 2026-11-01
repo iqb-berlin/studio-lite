@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -132,6 +133,13 @@ describe('WorkspaceGroupService', () => {
 
       expect(mockRepository.create.mock.calls[0][0]).toEqual({ name: 'neu', settings: {} });
     });
+
+    // #2091: the migrations on the settings column take them for an object
+    it.each([[['a']], ['text']])('should refuse settings that are no object: %j', async settings => {
+      await expect(service.create({ name: 'neu', settings } as CreateWorkspaceGroupDto))
+        .rejects.toThrow(BadRequestException);
+      expect(mockRepository.save).not.toHaveBeenCalled();
+    });
   });
 
   describe('patch', () => {
@@ -205,6 +213,15 @@ describe('WorkspaceGroupService', () => {
 
       expect(group.name).toBe('neu');
       expect(group.settings).toEqual({ defaultEditor: 'e' });
+    });
+
+    // #2091: spread into the stored settings, a list or a text left keys "0", "1", ... there
+    it.each([[['a']], ['text']])('should refuse settings that are no object: %j', async settings => {
+      mockRepository.findOne.mockResolvedValue({ id: 1, name: 'g', settings: { defaultEditor: 'e' } });
+
+      await expect(service.patch(1, { id: 1, settings } as unknown as WorkspaceGroupFullDto))
+        .rejects.toThrow(BadRequestException);
+      expect(mockRepository.save).not.toHaveBeenCalled();
     });
   });
 

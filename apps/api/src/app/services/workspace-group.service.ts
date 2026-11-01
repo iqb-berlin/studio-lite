@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -85,6 +85,7 @@ export class WorkspaceGroupService {
     // strip it, so this path must not be the one that puts the retired spelling back.
     // Only the name and the settings are taken from the body: an `id` sent along had
     // `save` overwrite that group (#2030).
+    WorkspaceGroupService.checkSettings(workspaceGroup.settings);
     const newWorkspaceGroup = await this.workspaceGroupsRepository.create({
       name: workspaceGroup.name,
       settings: WorkspaceGroupService
@@ -92,6 +93,18 @@ export class WorkspaceGroupService {
     });
     await this.workspaceGroupsRepository.save(newWorkspaceGroup);
     return newWorkspaceGroup.id;
+  }
+
+  /**
+   * Nothing else checks the body, and the migrations on this column take the settings for an object.
+   * So does {@link patch}, which spreads them into the stored ones: a list or a text left keys "0",
+   * "1", ... there (#2091). Settings left out are fine; `null` is not.
+   */
+  private static checkSettings(settings: unknown): void {
+    if (settings === undefined) return;
+    if (typeof settings !== 'object' || settings === null || Array.isArray(settings)) {
+      throw new BadRequestException('The settings of a workspace group must be an object.');
+    }
   }
 
   /**
@@ -119,6 +132,7 @@ export class WorkspaceGroupService {
       });
       if (workspaceGroupData.name !== undefined) workspaceGroupToUpdate.name = workspaceGroupData.name;
       if (workspaceGroupData.settings !== undefined) {
+        WorkspaceGroupService.checkSettings(workspaceGroupData.settings);
         workspaceGroupToUpdate.settings = {
           ...workspaceGroupToUpdate.settings,
           ...WorkspaceGroupService.normalizeProfileSelection(workspaceGroupData.settings)
