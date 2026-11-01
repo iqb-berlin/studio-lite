@@ -1,5 +1,5 @@
 import {
-  Component, OnDestroy, OnInit, ViewChild
+  Component, OnDestroy, OnInit, signal, ViewChild
 } from '@angular/core';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import {
@@ -59,10 +59,10 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   // Counts the loads of the selected review's data, so that the answer to a save applies only to the data it
   // was sent from: switched away and back meanwhile, the review was loaded anew, perhaps before the save; a
   // discard counts too.
-  private reviewLoads = 0;
+  private readonly reviewLoads = signal(0);
   // Counts the loads of the list: a list loaded after a rename and one loaded for another reason may answer in
   // either order, and only the one begun last has every review created or deleted meanwhile.
-  private listLoads = 0;
+  private readonly listLoads = signal(0);
   reviews: ReviewInListDto[] = [];
   reviewDataOriginal: ReviewFullDto = { id: 0 };
   reviewDataToChange: ReviewFullDto = { id: 0 };
@@ -94,7 +94,7 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   selectReview(id: number) {
     this.checkForChangesAndContinue(this.changed).then(go => {
       if (go) {
-        this.reviewLoads += 1;
+        this.reviewLoads.update(loads => loads + 1);
         this.changed = false;
         this.selectedReviewId = id;
         // A late answer for the review selected before would overwrite this one.
@@ -132,12 +132,12 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
     this.reviewRequest?.unsubscribe();
     this.isLoadingReviewList = true;
     this.isLoadingReview = true;
-    this.listLoads += 1;
-    const load = this.listLoads;
+    this.listLoads.update(loads => loads + 1);
+    const load = this.listLoads();
     this.backendService.getReviewList(this.workspaceService.selectedWorkspaceId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(reviews => {
-        if (this.listLoads === load) this.reviews = reviews;
+        if (this.listLoads() === load) this.reviews = reviews;
         this.reviewDataOriginal = { id: 0 };
         this.reviewDataToChange = { id: 0 };
         this.appService.dataLoading = false;
@@ -155,12 +155,12 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
    * replace what was entered while the save was under way (#2094).
    */
   private reloadReviewNames(): void {
-    this.listLoads += 1;
-    const load = this.listLoads;
+    this.listLoads.update(loads => loads + 1);
+    const load = this.listLoads();
     this.backendService.getReviewList(this.workspaceService.selectedWorkspaceId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(reviews => {
-        if (this.listLoads !== load) return;
+        if (this.listLoads() !== load) return;
         this.reviews = reviews;
         this.setObjectsDatasource(this.reviews);
       });
@@ -186,7 +186,7 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   discardChanges() {
     // Back to the data loaded before a save that may be under way: its answer then loads what is stored,
     // as after switching away and back, instead of taking this data for a change to save over it (#2094).
-    this.reviewLoads += 1;
+    this.reviewLoads.update(loads => loads + 1);
     this.changed = false;
     this.reviewDataToChange = this.reviewDataOriginal ? ReviewsComponent.copyFrom(this.reviewDataOriginal) : { id: 0 };
   }
@@ -196,7 +196,7 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
     if (this.isLoadingReview) return;
     if (this.reviewDataToChange) {
       const reviewId = this.selectedReviewId;
-      const load = this.reviewLoads;
+      const load = this.reviewLoads();
       // a copy: what is sent must not change with the edits made while it is under way
       const sent = structuredClone(this.reviewDataToChange);
       const renamed = this.reviewDataOriginal.name !== sent.name;
@@ -210,7 +210,7 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
         if (ok) {
           // sent as it is, not in the shape of copyFrom, which fills in configs the review lacks and would
           // make it differ from the data edited
-          if (this.reviewLoads === load) {
+          if (this.reviewLoads() === load) {
             this.reviewDataOriginal = sent;
             this.changed = this.detectChanges();
           } else if (this.selectedReviewId === reviewId && !this.changed) {
