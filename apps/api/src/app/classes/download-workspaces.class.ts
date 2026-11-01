@@ -315,9 +315,9 @@ export class DownloadWorkspacesClass {
     wsDataWithMetadata.forEach(wsData => {
       let date = '';
       if (wsData.latestChange !== null) {
-        date = `${wsData.latestChange.getDate()}.${
-          wsData.latestChange.getMonth() + 1
-        }.${wsData.latestChange.getFullYear()}`;
+        // The day in German time: the API runs in UTC, and a change shortly after midnight fell
+        // on the day before (#2082)
+        date = wsData.latestChange.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' });
       }
       const rowData = [
         wsData.groupName,

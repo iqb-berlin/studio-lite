@@ -283,6 +283,18 @@ describe('WorkspaceService', () => {
 
       await expect(service.findOneByUser(1, 5)).rejects.toThrow(AdminWorkspaceNotFoundException);
     });
+
+    // Left in the settings of workspaces where a group was renamed onto another one (#1989)
+    it('should name a group once that the settings hold twice', async () => {
+      (workspaceRepository.findOne as jest.Mock)
+        .mockResolvedValue({ id: 1, groupId: 2, settings: { defaultEditor: 'e', unitGroups: ['B', 'B'] } });
+      (workspaceUserService.accessLevel as jest.Mock).mockResolvedValue(1);
+      (workspaceGroupRepository.findOne as jest.Mock).mockResolvedValue({ name: 'g' });
+
+      const result = await service.findOneByUser(1, 5);
+
+      expect(result.settings).toEqual({ defaultEditor: 'e', unitGroups: ['B'] });
+    });
   });
 
   describe('findAllWorkspaceGroups', () => {
@@ -312,6 +324,14 @@ describe('WorkspaceService', () => {
       (unitsRepository.find as jest.Mock).mockResolvedValue([{ groupName: 'A' }]);
 
       expect(await service.findAllWorkspaceGroups(1)).toEqual(['A']);
+    });
+
+    // Left in the settings of workspaces where a group was renamed onto another one (#1989)
+    it('should name a group once that the settings hold twice', async () => {
+      (workspaceRepository.findOne as jest.Mock).mockResolvedValue({ id: 1, settings: { unitGroups: ['B', 'B'] } });
+      (unitsRepository.find as jest.Mock).mockResolvedValue([]);
+
+      expect(await service.findAllWorkspaceGroups(1)).toEqual(['B']);
     });
   });
 
@@ -504,6 +524,26 @@ describe('WorkspaceService', () => {
       expect(ws.settings.unitGroups).toContain('new');
       expect(workspaceRepository.save).toHaveBeenCalled();
       expect(unitsRepository.update).toHaveBeenCalled();
+    });
+
+    // The name stood twice in the settings and in every list of groups (#1989)
+    it('should merge a group renamed onto an existing one', async () => {
+      const ws = { id: 1, settings: { unitGroups: ['Alpha', 'Beta'] } };
+      jest.spyOn(workspaceRepository, 'findOne').mockResolvedValue(ws as unknown as Workspace);
+      jest.spyOn(workspaceRepository, 'save').mockResolvedValue({} as never);
+      jest.spyOn(unitsRepository, 'update').mockResolvedValue({} as never);
+
+      await service.patchGroupName(1, {
+        operation: 'rename',
+        groupName: 'Alpha',
+        newGroupName: 'Beta'
+      } as unknown as RenameGroupNameDto);
+
+      expect(ws.settings.unitGroups).toEqual(['Beta']);
+      expect(unitsRepository.update).toHaveBeenCalledWith(
+        { workspaceId: 1, groupName: 'Alpha' },
+        { groupName: 'Beta' }
+      );
     });
   });
 

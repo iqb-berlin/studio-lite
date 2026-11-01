@@ -1,3 +1,7 @@
+// The API runs in UTC, as no time zone is set for it; its tests see the dates as it does (#2082).
+// Set here because the workers inherit it; in a spec process.env is a copy and TZ has no effect.
+process.env.TZ = 'UTC';
+
 export default {
   displayName: 'api',
   preset: '../../jest.preset.js',

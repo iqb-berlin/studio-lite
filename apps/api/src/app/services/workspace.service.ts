@@ -291,7 +291,10 @@ export class WorkspaceService {
         dropBoxId: workspace.dropBoxId,
         groupName: workspaceGroup.name,
         userAccessLevel: userAccessLevel,
-        settings: workspace.settings
+        // A rename onto an existing group left its name twice in the settings until #1989
+        settings: workspace.settings?.unitGroups ?
+          { ...workspace.settings, unitGroups: [...new Set(workspace.settings.unitGroups)] } :
+          workspace.settings
       };
     }
     throw new AdminWorkspaceNotFoundException(id, 'GET');
@@ -308,12 +311,10 @@ export class WorkspaceService {
         where: { workspaceId: id },
         select: { groupName: true }
       });
-      const groups = unitGroups
-        .map(u => u.groupName)
-        .filter(
-          (value, index, self) => self.indexOf(value) === index && settingsGroups.indexOf(value) < 0
-        );
-      return [...groups, ...settingsGroups].filter(g => !!g).sort();
+      // Each name once: a rename onto an existing group left it twice in the settings until #1989
+      return [...new Set([...unitGroups.map(u => u.groupName), ...settingsGroups])]
+        .filter(g => !!g)
+        .sort();
     }
     throw new AdminWorkspaceNotFoundException(id, 'GET');
   }
@@ -446,7 +447,8 @@ export class WorkspaceService {
     if (!settings.unitGroups) settings.unitGroups = [];
     const groupPos = settings.unitGroups.indexOf(oldName);
     if (groupPos >= 0) settings.unitGroups = settings.unitGroups.filter(g => g !== oldName);
-    settings.unitGroups.push(newName);
+    // Renamed onto an existing group, the two become one: its units join it below (#1989)
+    if (!settings.unitGroups.includes(newName)) settings.unitGroups.push(newName);
     workspaceToUpdate.settings = settings;
     await this.workspacesRepository.save(workspaceToUpdate);
     await this.unitsRepository.update(
