@@ -9,6 +9,7 @@ import {
   UseGuards
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse, ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
@@ -163,6 +164,7 @@ export class AdminWorkspaceGroupController {
   @ApiBearerAuth()
   @ApiParam({ name: 'workspace_group_id', type: Number })
   @ApiOkResponse({ description: 'Workspace-group updated successfully.' })
+  @ApiBadRequestResponse({ description: 'The settings are no object.' })
   @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiInternalServerErrorResponse({ description: 'Internal error.' })
   @ApiTags('admin workspace-group')
@@ -177,6 +179,7 @@ export class AdminWorkspaceGroupController {
     description: 'Sends back the id of the new workspace group in database',
     type: Number
   })
+  @ApiBadRequestResponse({ description: 'The settings are no object.' })
   @ApiForbiddenResponse({ description: 'No admin privileges.' })
   @ApiTags('admin workspace-group')
   async create(@Body() createWorkspaceGroupDto: CreateWorkspaceGroupDto) {

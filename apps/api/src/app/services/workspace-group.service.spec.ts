@@ -134,8 +134,8 @@ describe('WorkspaceGroupService', () => {
       expect(mockRepository.create.mock.calls[0][0]).toEqual({ name: 'neu', settings: {} });
     });
 
-    // #2091: the migrations on the settings column take them for an object
-    it.each([[['a']], ['text']])('should refuse settings that are no object: %j', async settings => {
+    // #2091: the migrations on the settings column take them for an object; the body is mistyped on purpose
+    it.each([[['a']], ['text'], [null]])('should refuse settings that are no object: %j', async settings => {
       await expect(service.create({ name: 'neu', settings } as CreateWorkspaceGroupDto))
         .rejects.toThrow(BadRequestException);
       expect(mockRepository.save).not.toHaveBeenCalled();
@@ -215,11 +215,12 @@ describe('WorkspaceGroupService', () => {
       expect(group.settings).toEqual({ defaultEditor: 'e' });
     });
 
-    // #2091: spread into the stored settings, a list or a text left keys "0", "1", ... there
-    it.each([[['a']], ['text']])('should refuse settings that are no object: %j', async settings => {
-      mockRepository.findOne.mockResolvedValue({ id: 1, name: 'g', settings: { defaultEditor: 'e' } });
+    // #2091: spread into the stored settings, a list or a text left keys "0", "1", ... there. The body is
+    // mistyped on purpose, and it is refused before the group is read, so a missing group answers 400 as well.
+    it.each([[['a']], ['text'], [null]])('should refuse settings that are no object: %j', async settings => {
+      mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.patch(1, { id: 1, settings } as unknown as WorkspaceGroupFullDto))
+      await expect(service.patch(1, { id: 1, name: 'g', settings } as unknown as WorkspaceGroupFullDto))
         .rejects.toThrow(BadRequestException);
       expect(mockRepository.save).not.toHaveBeenCalled();
     });

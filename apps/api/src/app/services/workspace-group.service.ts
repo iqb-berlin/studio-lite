@@ -98,7 +98,7 @@ export class WorkspaceGroupService {
   /**
    * Nothing else checks the body, and the migrations on this column take the settings for an object.
    * So does {@link patch}, which spreads them into the stored ones: a list or a text left keys "0",
-   * "1", ... there (#2091). Settings left out are fine; `null` is not.
+   * "1", ... there (#2091). Settings left out are fine; `null` is not, though `typeof` calls it an object.
    */
   private static checkSettings(settings: unknown): void {
     if (settings === undefined) return;
@@ -126,13 +126,13 @@ export class WorkspaceGroupService {
 
   async patch(id: number, workspaceGroupData: WorkspaceGroupFullDto): Promise<void> {
     this.logger.log(`Updating workspace group with id: ${workspaceGroupData.id}`);
+    WorkspaceGroupService.checkSettings(workspaceGroupData.settings);
     if (id) {
       const workspaceGroupToUpdate = await this.workspaceGroupsRepository.findOne({
         where: { id: id }
       });
       if (workspaceGroupData.name !== undefined) workspaceGroupToUpdate.name = workspaceGroupData.name;
       if (workspaceGroupData.settings !== undefined) {
-        WorkspaceGroupService.checkSettings(workspaceGroupData.settings);
         workspaceGroupToUpdate.settings = {
           ...workspaceGroupToUpdate.settings,
           ...WorkspaceGroupService.normalizeProfileSelection(workspaceGroupData.settings)
