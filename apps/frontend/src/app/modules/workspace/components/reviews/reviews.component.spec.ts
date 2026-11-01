@@ -483,6 +483,27 @@ describe('ReviewsComponent', () => {
     expect(component.changed).toBe(false);
   }));
 
+  // #2094: discarded while the save was under way, the form went back to the state before it, and the answer
+  // took that for a change to save over what had just been stored
+  it('shows what is stored when the changes were discarded while the save was under way', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    backendServiceMock.setReview.mockReturnValue(answer);
+    jest.spyOn(component, 'checkForChangesAndContinue').mockResolvedValue(true);
+    backendServiceMock.getReview.mockReturnValue(of(createReviewFull({ password: 'gesendet' })));
+    component.reviewDataOriginal = createReviewFull({ password: 'vorher' });
+    component.reviewDataToChange = createReviewFull({ password: 'gesendet' });
+    component.selectedReviewId = 1;
+    component.changed = true;
+
+    component.saveChanges();
+    component.discardChanges();
+    answer.next(true);
+    flushMicrotasks();
+
+    expect(component.reviewDataToChange).toEqual(createReviewFull({ password: 'gesendet' }));
+    expect(component.changed).toBe(false);
+  }));
+
   it('leaves a review selected while the save of another one was under way alone', fakeAsync(() => {
     const answer = new Subject<boolean>();
     backendServiceMock.setReview.mockReturnValue(answer);

@@ -57,7 +57,8 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
   readonly save = new SaveLock();
   // Counts the loads of the selected review's data, so that the answer to a save applies only to the data it
-  // was sent from: switched away and back meanwhile, the review was loaded anew, perhaps before the save.
+  // was sent from: switched away and back meanwhile, the review was loaded anew, perhaps before the save; a
+  // discard counts too.
   private reviewLoads = 0;
   // Counts the loads of the list: a list loaded after a rename and one loaded for another reason may answer in
   // either order, and only the one begun last has every review created or deleted meanwhile.
@@ -183,6 +184,9 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   }
 
   discardChanges() {
+    // Back to the data loaded before a save that may be under way: its answer then loads what is stored,
+    // as after switching away and back, instead of taking this data for a change to save over it (#2094).
+    this.reviewLoads += 1;
     this.changed = false;
     this.reviewDataToChange = this.reviewDataOriginal ? ReviewsComponent.copyFrom(this.reviewDataOriginal) : { id: 0 };
   }
