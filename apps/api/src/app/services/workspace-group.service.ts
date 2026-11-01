@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -12,6 +12,31 @@ import { toW3idProfileId } from '@studio-lite/shared-code';
 import WorkspaceGroup from '../entities/workspace-group.entity';
 import { AdminWorkspaceGroupNotFoundException } from '../exceptions/admin-workspace-group-not-found.exception';
 import WorkspaceGroupAdmin from '../entities/workspace-group-admin.entity';
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** A list whose entries all pass `isEntry`, or null, which every reader takes for none. */
+function isListOf(value: unknown, isEntry: (entry: unknown) => boolean): boolean {
+  return value == null || (Array.isArray(value) && value.every(isEntry));
+}
+
+// The id of a new state is one above the highest id, so each must count as a number; older data holds text.
+function isState(entry: unknown): boolean {
+  return isPlainObject(entry) &&
+    (typeof entry.id === 'number' || (typeof entry.id === 'string' && /^\d+$/.test(entry.id)));
+}
+
+function isProfile(entry: unknown): boolean {
+  return isPlainObject(entry) && typeof entry.id === 'string';
+}
+
+// The URL of a vocabulary, its URLs, or the tags themselves; the form takes a list for one or the other.
+function isRichNoteTags(value: unknown): boolean {
+  return value == null || typeof value === 'string' || (Array.isArray(value) &&
+    (value.every(tag => typeof tag === 'string') || value.every(isPlainObject)));
+}
 
 /**
  * The workspace groups and who administers them. {@link findAll} answers either every group or, for
@@ -85,6 +110,7 @@ export class WorkspaceGroupService {
     // strip it, so this path must not be the one that puts the retired spelling back.
     // Only the name and the settings are taken from the body: an `id` sent along had
     // `save` overwrite that group (#2030).
+    WorkspaceGroupService.checkSettings(workspaceGroup.settings);
     const newWorkspaceGroup = await this.workspaceGroupsRepository.create({
       name: workspaceGroup.name,
       settings: WorkspaceGroupService
@@ -92,6 +118,31 @@ export class WorkspaceGroupService {
     });
     await this.workspaceGroupsRepository.save(newWorkspaceGroup);
     return newWorkspaceGroup.id;
+  }
+
+  /**
+   * Nothing else checks the body, and the migrations on this column take the settings for an object.
+   * So does {@link patch}, which spreads them into the stored ones: a list or a text left keys "0",
+   * "1", ... there (#2091). Settings left out are fine; `null` is not, though `typeof` calls it an object.
+   *
+   * Inside, only what the interface trips over is checked (#2092): the states, the profiles, the
+   * highest state id and the rich note tags. Each may be null, which every reader takes for none; the
+   * rest is not read at group level.
+   */
+  private static checkSettings(settings: unknown): void {
+    if (settings === undefined) return;
+    if (!isPlainObject(settings)) {
+      throw new BadRequestException('The settings of a workspace group must be an object.');
+    }
+    const malformed = Object.entries({
+      states: isListOf(settings.states, isState),
+      profiles: isListOf(settings.profiles, isProfile),
+      lastStateId: settings.lastStateId == null || typeof settings.lastStateId === 'number',
+      richNoteTags: isRichNoteTags(settings.richNoteTags)
+    }).filter(([, valid]) => !valid).map(([field]) => field);
+    if (malformed.length) {
+      throw new BadRequestException(`Malformed workspace group settings: ${malformed.join(', ')}.`);
+    }
   }
 
   /**
@@ -113,6 +164,7 @@ export class WorkspaceGroupService {
 
   async patch(id: number, workspaceGroupData: WorkspaceGroupFullDto): Promise<void> {
     this.logger.log(`Updating workspace group with id: ${workspaceGroupData.id}`);
+    WorkspaceGroupService.checkSettings(workspaceGroupData.settings);
     if (id) {
       const workspaceGroupToUpdate = await this.workspaceGroupsRepository.findOne({
         where: { id: id }

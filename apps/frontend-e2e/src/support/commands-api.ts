@@ -235,7 +235,7 @@ Cypress.Commands.add('deleteOrphanedSessionsAPI', (userId: string, token: string
 });
 
 // 10
-Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string) => {
+Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string, settings?: unknown) => {
   const authorization = `bearer ${token}`;
   cy.request({
     method: 'POST',
@@ -246,7 +246,7 @@ Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string) => {
     },
     body: {
       name: `${group.name}`,
-      setting: {}
+      ...(settings === undefined ? {} : { settings })
     },
     failOnStatusCode: false
   });
@@ -1353,6 +1353,24 @@ Cypress.Commands.add('updateGroupPropertiesAPI', (groupId: string, token:string)
             label: 'Finale'
           }]
       }
+    },
+    failOnStatusCode: false
+  });
+});
+
+// 50a: the settings as given, to send what the interface never would
+Cypress.Commands.add('updateGroupSettingsAPI', (groupId: string, settings: unknown, token: string) => {
+  const authorization = `bearer ${token}`;
+  cy.request({
+    method: 'PATCH',
+    url: `/api/workspace-groups/${groupId}`,
+    headers: {
+      'app-version': Cypress.expose('version'),
+      authorization
+    },
+    body: {
+      id: `${groupId}`,
+      settings
     },
     failOnStatusCode: false
   });

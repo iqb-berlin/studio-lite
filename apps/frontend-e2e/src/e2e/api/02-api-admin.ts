@@ -170,6 +170,16 @@ describe('Admin API tests', () => {
             });
         });
     });
+
+    // Settings that are no object broke the migrations on this column (#2091)
+    it('400 negative test: should refuse settings that are no object and create no group (#2091)', () => {
+      const token = Cypress.expose(`token_${Cypress.expose('username')}`);
+      const name = 'settings-no-object';
+      cy.createGroupAPI({ id: '', name }, token, ['a']).its('status').should('equal', 400);
+      cy.getWsGroupsAPI(token).then(resp => {
+        expect((resp.body as WorkspaceGroupInListDto[]).map(group => group.name)).not.to.include(name);
+      });
+    });
   });
 
   describe('11. GET /api/admin/workspace-groups/{workspace_group_id}', () => {

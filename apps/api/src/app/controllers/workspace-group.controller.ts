@@ -3,6 +3,7 @@ import {
   Controller, Get, Patch, Query, Res, StreamableFile, UseGuards
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
@@ -81,6 +82,7 @@ export class WorkspaceGroupController {
   @Patch()
   @UseGuards(JwtAuthGuard, IsWorkspaceGroupAdminGuard)
   @ApiOkResponse({ description: 'Workspace-group updated successfully.' })
+  @ApiBadRequestResponse({ description: 'The settings are no object, or a field in them has the wrong type.' })
   @ApiUnauthorizedResponse({ description: 'No privileges in the workspace-group' })
   @ApiInternalServerErrorResponse({ description: 'Internal error. ' })
   @ApiBearerAuth()

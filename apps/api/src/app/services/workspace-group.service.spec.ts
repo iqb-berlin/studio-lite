@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -132,6 +133,13 @@ describe('WorkspaceGroupService', () => {
 
       expect(mockRepository.create.mock.calls[0][0]).toEqual({ name: 'neu', settings: {} });
     });
+
+    // #2091: the migrations on the settings column take them for an object; the body is mistyped on purpose
+    it.each([[['a']], ['text'], [null]])('should refuse settings that are no object: %j', async settings => {
+      await expect(service.create({ name: 'neu', settings } as CreateWorkspaceGroupDto))
+        .rejects.toThrow(BadRequestException);
+      expect(mockRepository.save).not.toHaveBeenCalled();
+    });
   });
 
   describe('patch', () => {
@@ -205,6 +213,47 @@ describe('WorkspaceGroupService', () => {
 
       expect(group.name).toBe('neu');
       expect(group.settings).toEqual({ defaultEditor: 'e' });
+    });
+
+    // #2091: spread into the stored settings, a list or a text left keys "0", "1", ... there. The body is
+    // mistyped on purpose, and it is refused before the group is read, so a missing group answers 400 as well.
+    it.each([[['a']], ['text'], [null]])('should refuse settings that are no object: %j', async settings => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.patch(1, { id: 1, name: 'g', settings } as unknown as WorkspaceGroupFullDto))
+        .rejects.toThrow(BadRequestException);
+      expect(mockRepository.save).not.toHaveBeenCalled();
+    });
+
+    // #2092: the interface trips over these: the unit list and the states page over states, the settings
+    // dialogs over profiles, the tags form over a list that mixes texts with anything else
+    it.each([
+      [{ states: 'x' }], [{ states: [null] }], [{ states: [{ label: 'a' }] }], [{ states: [{ id: 'abc' }] }],
+      [{ profiles: 5 }], [{ profiles: ['id'] }], [{ profiles: [{ id: 5 }] }],
+      [{ lastStateId: 'abc' }], [{ richNoteTags: ['https://a.example', 5] }]
+    ])('should refuse malformed fields in the settings: %j', async settings => {
+      mockRepository.findOne.mockResolvedValue({ id: 1, name: 'g', settings: {} });
+
+      await expect(service.patch(1, { id: 1, settings } as unknown as WorkspaceGroupFullDto))
+        .rejects.toThrow(BadRequestException);
+      expect(mockRepository.save).not.toHaveBeenCalled();
+    });
+
+    // #2092: older data holds state ids as text, rich note tags may name a vocabulary by its URL,
+    // and every reader takes null for none
+    it('should take state ids as text, a vocabulary URL as tags, and null', async () => {
+      const group = { id: 1, name: 'g', settings: {} } as WorkspaceGroup;
+      mockRepository.findOne.mockResolvedValue(group);
+      const settings = {
+        states: [{ id: '3', label: 'alt' }],
+        profiles: null,
+        lastStateId: null,
+        richNoteTags: 'https://example.org/vocabulary'
+      };
+
+      await service.patch(1, { id: 1, settings } as unknown as WorkspaceGroupFullDto);
+
+      expect(group.settings).toEqual(settings);
     });
   });
 
