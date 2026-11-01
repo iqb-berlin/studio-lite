@@ -56,6 +56,9 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   private readonly savingState = signal(false);
   // While a save is under way the button is locked, and what is entered meanwhile stays a change (#2094).
   readonly saving = this.savingState.asReadonly();
+  // Counts the loads of the selected review's data, so that the answer to a save applies only to the data it
+  // was sent from: switched away and back meanwhile, the review was loaded anew, perhaps before the save.
+  private reviewLoads = 0;
   reviews: ReviewInListDto[] = [];
   reviewDataOriginal: ReviewFullDto = { id: 0 };
   reviewDataToChange: ReviewFullDto = { id: 0 };
@@ -87,6 +90,7 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   selectReview(id: number) {
     this.checkForChangesAndContinue(this.changed).then(go => {
       if (go) {
+        this.reviewLoads += 1;
         this.changed = false;
         this.selectedReviewId = id;
         // A late answer for the review selected before would overwrite this one.
@@ -180,6 +184,7 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
     if (this.isLoadingReview || this.saving()) return;
     if (this.reviewDataToChange) {
       const reviewId = this.selectedReviewId;
+      const load = this.reviewLoads;
       // a copy: what is sent must not change with the edits made while it is under way
       const sent = structuredClone(this.reviewDataToChange);
       const renamed = this.reviewDataOriginal.name !== sent.name;
@@ -191,11 +196,14 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
       ).pipe(takeUntil(this.ngUnsubscribe)).subscribe(ok => {
         this.savingState.set(false);
         if (ok) {
-          // another review may have been selected meanwhile; sent as it is, not in the shape of copyFrom,
-          // which fills in configs the review lacks and would make it differ from the data being edited
-          if (this.selectedReviewId === reviewId) {
+          // sent as it is, not in the shape of copyFrom, which fills in configs the review lacks and would
+          // make it differ from the data edited
+          if (this.reviewLoads === load) {
             this.reviewDataOriginal = sent;
             this.changed = this.detectChanges();
+          } else if (this.selectedReviewId === reviewId && !this.changed) {
+            // loaded anew meanwhile, perhaps before the save had arrived: once more, to show what is stored
+            this.selectReview(reviewId);
           }
           if (renamed) this.reloadReviewNames();
           this.snackBar.open(

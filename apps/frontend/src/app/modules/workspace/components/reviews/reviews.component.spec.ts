@@ -434,23 +434,49 @@ describe('ReviewsComponent', () => {
     expect(component.changed).toBe(false);
   });
 
-  it('leaves a review selected while the save of another one was under way alone', () => {
+  // #2094: switched away and back while the save was under way, the review was loaded anew before the save had
+  // arrived, and the answer took the save for that data: the form showed the old state as a change to save over it
+  it('shows what is stored when a review was loaded anew while its save was under way', fakeAsync(() => {
     const answer = new Subject<boolean>();
     backendServiceMock.setReview.mockReturnValue(answer);
+    jest.spyOn(component, 'checkForChangesAndContinue').mockResolvedValue(true);
+    const loadsOfReviewA = [createReviewFull({ password: 'vorher' }), createReviewFull({ password: 'gesendet' })];
+    backendServiceMock.getReview.mockImplementation((wsId: number, reviewId: number) => (
+      of(reviewId === 1 ? loadsOfReviewA.shift() || null : createReviewFull({ id: 2, name: 'Review B' }))));
+    component.reviewDataOriginal = createReviewFull({ password: 'vorher' });
+    component.reviewDataToChange = createReviewFull({ password: 'gesendet' });
+    component.selectedReviewId = 1;
+
+    component.saveChanges();
+    component.selectReview(2);
+    flushMicrotasks();
+    component.selectReview(1);
+    flushMicrotasks();
+    answer.next(true);
+    flushMicrotasks();
+
+    expect(component.reviewDataOriginal).toEqual(createReviewFull({ password: 'gesendet' }));
+    expect(component.reviewDataToChange).toEqual(createReviewFull({ password: 'gesendet' }));
+    expect(component.changed).toBe(false);
+  }));
+
+  it('leaves a review selected while the save of another one was under way alone', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    backendServiceMock.setReview.mockReturnValue(answer);
+    jest.spyOn(component, 'checkForChangesAndContinue').mockResolvedValue(true);
+    backendServiceMock.getReview.mockReturnValue(of(createReviewFull({ id: 2, name: 'Review B' })));
     component.reviewDataOriginal = createReviewFull();
     component.reviewDataToChange = createReviewFull({ password: 'gesendet' });
     component.selectedReviewId = 1;
 
     component.saveChanges();
-    component.selectedReviewId = 2;
-    component.reviewDataOriginal = createReviewFull({ id: 2, name: 'Review B' });
-    component.reviewDataToChange = createReviewFull({ id: 2, name: 'Review B' });
-    component.changed = false;
+    component.selectReview(2);
+    flushMicrotasks();
     answer.next(true);
 
     expect(component.reviewDataOriginal).toEqual(createReviewFull({ id: 2, name: 'Review B' }));
     expect(component.changed).toBe(false);
-  });
+  }));
 
   it('should show error snackbar when save fails', () => {
     component.reviewDataOriginal = createReviewFull();
