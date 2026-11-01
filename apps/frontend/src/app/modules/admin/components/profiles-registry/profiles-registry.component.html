@@ -8,7 +8,7 @@
   <div class="fx-row-end-center">
     <button mat-raised-button
             color="primary"
-            [disabled]="!dataChanged"
+            [disabled]="!dataChanged || saving()"
             (click)="saveData()">
       {{'save' | translate}}
     </button>

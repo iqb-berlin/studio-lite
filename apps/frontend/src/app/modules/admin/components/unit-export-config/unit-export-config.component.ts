@@ -1,4 +1,6 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component, OnDestroy, OnInit, signal
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule
@@ -20,6 +22,9 @@ import { BackendService } from '../../services/backend.service';
 export class UnitExportConfigComponent implements OnInit, OnDestroy {
   configForm: UntypedFormGroup;
   dataChanged = false;
+  private readonly savingState = signal(false);
+  // While a save is under way the button is locked, and what is entered meanwhile stays a change (#2094).
+  readonly saving = this.savingState.asReadonly();
   private configDataChangedSubscription: Subscription | null = null;
 
   constructor(
@@ -61,19 +66,23 @@ export class UnitExportConfigComponent implements OnInit, OnDestroy {
   }
 
   saveData(): void {
+    if (this.saving()) return;
     if (this.configForm) {
+      const sent = JSON.stringify(this.configForm.getRawValue());
+      this.savingState.set(true);
       this.backendService.setUnitExportConfig({
         unitXsdUrl: this.configForm.get('unitXsdUrl')?.value,
         bookletXsdUrl: this.configForm.get('bookletXsdUrl')?.value,
         testTakersXsdUrl: this.configForm.get('testTakersXsdUrl')?.value
       }).subscribe(isOk => {
+        this.savingState.set(false);
         if (isOk) {
           this.snackBar.open(
             this.translateService.instant('unit-export-config.params-saved'),
             '',
             { duration: 3000 }
           );
-          this.dataChanged = false;
+          this.dataChanged = JSON.stringify(this.configForm.getRawValue()) !== sent;
         } else {
           this.snackBar.open(
             this.translateService.instant('unit-export-config.params-not-saved'),

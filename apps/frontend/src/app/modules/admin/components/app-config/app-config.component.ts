@@ -34,6 +34,9 @@ export class AppConfigComponent implements OnInit, OnDestroy {
 
   configForm: UntypedFormGroup;
   dataChanged = false;
+  private readonly savingState = signal(false);
+  // While a save is under way the button is locked, and what is entered meanwhile stays a change (#2094).
+  readonly saving = this.savingState.asReadonly();
   private configDataChangedSubscription: Subscription | null = null;
   private readonly configNotLoadedState = signal(false);
   // Without the stored config the form is not shown: saving it would replace that config (#1968).
@@ -117,21 +120,25 @@ export class AppConfigComponent implements OnInit, OnDestroy {
   }
 
   saveData(): void {
+    if (this.saving()) return;
     if (this.appConfig && this.configForm) {
+      const sent = JSON.stringify(this.configForm.getRawValue());
       this.appConfig.appTitle = this.configForm.get('appTitle')?.value;
       this.appConfig.introHtml = this.configForm.get('introHtml')?.value;
       this.appConfig.imprintHtml = this.configForm.get('imprintHtml')?.value;
       this.appConfig.globalWarningText = this.configForm.get('globalWarningText')?.value;
       this.appConfig.globalWarningExpiredDay = this.configForm.get('globalWarningExpiredDay')?.value;
       this.appConfig.globalWarningExpiredHour = this.configForm.get('globalWarningExpiredHour')?.value;
+      this.savingState.set(true);
       this.backendService.setAppConfig(this.appConfig).subscribe(isOk => {
+        this.savingState.set(false);
         if (isOk) {
           this.snackBar.open(
             this.translateService.instant('config.config-data-saved'),
             '',
             { duration: 3000 }
           );
-          this.dataChanged = false;
+          this.dataChanged = JSON.stringify(this.configForm.getRawValue()) !== sent;
         } else {
           this.snackBar.open(
             this.translateService.instant('config.config-data-not-saved'),

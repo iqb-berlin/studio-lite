@@ -13,7 +13,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSelectModule } from '@angular/material/select';
 import { Pipe, PipeTransform } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { ConfigDto } from '@studio-lite-lib/api-dto';
 import { AppConfigComponent } from './app-config.component';
 import { environment } from '../../../../../environments/environment';
@@ -256,4 +256,20 @@ describe('AppConfigComponent', () => {
 
     expect(newComponent.warningIsExpired).toBe(true);
   });
+
+  // #2094: what is entered while the save is under way was not sent, and a second save waits
+  it('keeps an entry made while saving unsaved and does not save twice meanwhile', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    backendService.setAppConfig.mockReturnValue(answer);
+    fixture.detectChanges();
+    tick(50);
+    component.configForm.get('appTitle')?.setValue('Gesendet');
+    component.saveData();
+    component.configForm.get('appTitle')?.setValue('Danach');
+    component.saveData();
+    answer.next(true);
+
+    expect(backendService.setAppConfig).toHaveBeenCalledTimes(1);
+    expect(component.dataChanged).toBe(true);
+  }));
 });

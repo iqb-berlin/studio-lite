@@ -40,6 +40,9 @@ import { BackendService as WriteBackendService } from '../../services/backend.se
 export class AppLogoComponent implements OnInit, OnDestroy {
   configForm: UntypedFormGroup;
   dataChanged = false;
+  private readonly savingState = signal(false);
+  // While a save is under way the button is locked, and what is entered meanwhile stays a change (#2094).
+  readonly saving = this.savingState.asReadonly();
   private configDataChangedSubscription: Subscription | null = null;
   private readonly logoLoadState = signal<'pending' | 'loaded' | 'failed'>('pending');
   // Saving replaces the stored logo and colours. The form is shown only once they are in: before,
@@ -98,19 +101,24 @@ export class AppLogoComponent implements OnInit, OnDestroy {
   }
 
   saveData(): void {
+    if (this.saving()) return;
     if (this.configForm) {
+      // the image is not part of the form
+      const sent = JSON.stringify([this.configForm.getRawValue(), this.logoImageBase64]);
+      this.savingState.set(true);
       this.writeBackendService.setAppLogo({
         data: this.logoImageBase64,
         bodyBackground: this.configForm.get('bodyBackground')?.value,
         boxBackground: this.configForm.get('boxBackground')?.value
       }).subscribe(isOk => {
+        this.savingState.set(false);
         if (isOk) {
           this.snackBar.open(
             this.translateService.instant('logo.logo-and-colors-saved'),
             '',
             { duration: 3000 }
           );
-          this.dataChanged = false;
+          this.dataChanged = JSON.stringify([this.configForm.getRawValue(), this.logoImageBase64]) !== sent;
         } else {
           this.snackBar.open(
             this.translateService.instant('logo.logo-and-colors-not-saved'),

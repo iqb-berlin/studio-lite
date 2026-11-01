@@ -47,6 +47,9 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy, OnCha
 
   configForm: FormGroup;
   dataChanged = false;
+  private readonly savingState = signal(false);
+  // While a save is under way the button is locked, and what is entered meanwhile stays a change (#2094).
+  readonly saving = this.savingState.asReadonly();
   private readonly configNotLoadedState = signal(false);
   // Without the stored URLs the form is not shown: saving it would replace them (#1993).
   readonly configNotLoaded = this.configNotLoadedState.asReadonly();
@@ -156,18 +159,22 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy, OnCha
   }
 
   saveData(): void {
+    if (this.saving()) return;
     if (this.configForm.valid) {
       const urls = this.urls.value;
+      const sent = JSON.stringify(urls);
+      this.savingState.set(true);
       this.backendService.setUnitRichNoteTags(urls)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(success => {
+          this.savingState.set(false);
           if (success) {
             this.snackBar.open(
               this.translateService.instant('workspace.tags-saved-success'),
               '',
               { duration: 3000 }
             );
-            this.dataChanged = false;
+            this.dataChanged = JSON.stringify(this.urls.value) !== sent;
           } else {
             this.snackBar.open(
               this.translateService.instant('workspace.tags-saved-error'),

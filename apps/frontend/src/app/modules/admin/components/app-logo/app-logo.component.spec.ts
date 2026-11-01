@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, TestBed, fakeAsync, tick
+} from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -262,4 +264,20 @@ describe('AppLogoComponent', () => {
     component.imgFileChange(event);
     expect(component.imageError).toBeNull();
   });
+
+  // #2094: what is entered while the save is under way was not sent, and a second save waits
+  it('keeps an entry made while saving unsaved and does not save twice meanwhile', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    writeBackendService.setAppLogo.mockReturnValue(answer);
+    fixture.detectChanges();
+    tick(100);
+    component.configForm.get('bodyBackground')?.setValue('#000000');
+    component.saveData();
+    component.logoImageBase64 = 'data:image/png;base64,danach';
+    component.saveData();
+    answer.next(true);
+
+    expect(writeBackendService.setAppLogo).toHaveBeenCalledTimes(1);
+    expect(component.dataChanged).toBe(true);
+  }));
 });
