@@ -131,6 +131,21 @@ describe('SelectUnitListComponent', () => {
     });
   });
 
+  // The group management hides the group column, and lost the name with it (#2014)
+  it.each([
+    [false, ['U1', 'Unit 1']],
+    [true, ['U1', 'Unit 1', 'G1']]
+  ])('should show the name of each unit with show-groups %s', (showGroups, cells) => {
+    fixture.componentRef.setInput('show-groups', showGroups);
+    fixture.componentRef.setInput('workspace', 10);
+    fixture.detectChanges();
+
+    const firstRowCells: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('mat-row:first-of-type mat-cell')
+    );
+    expect(firstRowCells.slice(1).map(cell => cell.textContent?.trim())).toEqual(cells);
+  });
+
   it('should deselect disabled units', () => {
     component.queryParams = new HttpParams();
     component.updateUnitList(10);
