@@ -246,7 +246,6 @@ Cypress.Commands.add('createGroupAPI', (group:GroupData, token:string, settings?
     },
     body: {
       name: `${group.name}`,
-      setting: {},
       ...(settings === undefined ? {} : { settings })
     },
     failOnStatusCode: false
