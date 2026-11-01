@@ -384,18 +384,72 @@ describe('ReviewsComponent', () => {
     expect(snackBarMock.open).toHaveBeenCalled();
   });
 
-  it('should save changes and reload list when name changes', () => {
+  // reloading the whole review would replace what was entered while the save was under way (#2094)
+  it('should save changes and reload only the list when the name changes', () => {
     component.reviewDataOriginal = createReviewFull({ name: 'Old' });
     component.reviewDataToChange = createReviewFull({ name: 'New' });
     component.selectedReviewId = 1;
     backendServiceMock.setReview.mockReturnValue(of(true));
+    backendServiceMock.getReviewList.mockReturnValue(of([{ id: 1, name: 'New' }]));
     const loadSpy = jest.spyOn(component, 'loadReviewList');
 
     component.saveChanges();
 
-    expect(loadSpy).toHaveBeenCalledWith(1);
+    expect(loadSpy).not.toHaveBeenCalled();
+    expect(component.reviews).toEqual([{ id: 1, name: 'New' }]);
+    expect(component.selectedReviewId).toBe(1);
+    expect(component.reviewDataToChange.name).toBe('New');
     expect(component.changed).toBe(false);
     expect(snackBarMock.open).toHaveBeenCalled();
+  });
+
+  // #2094: what is entered while the save is under way was not sent, and a second save waits
+  it('keeps an entry made while saving unsaved and does not save twice meanwhile', () => {
+    const answer = new Subject<boolean>();
+    backendServiceMock.setReview.mockReturnValue(answer);
+    component.reviewDataOriginal = createReviewFull();
+    component.reviewDataToChange = createReviewFull({ password: 'gesendet' });
+    component.selectedReviewId = 1;
+
+    component.saveChanges();
+    component.reviewDataToChange.password = 'danach';
+    component.saveChanges();
+    answer.next(true);
+
+    expect(backendServiceMock.setReview).toHaveBeenCalledTimes(1);
+    expect(backendServiceMock.setReview.mock.calls[0][2].password).toBe('gesendet');
+    expect(component.reviewDataOriginal.password).toBe('gesendet');
+    expect(component.changed).toBe(true);
+  });
+
+  // copyFrom fills in configs a review lacks: compared with that, every review without them was changed
+  it('leaves nothing changed after a save without entries meanwhile, whatever configs the review has', () => {
+    backendServiceMock.setReview.mockReturnValue(of(true));
+    component.reviewDataOriginal = createReviewFull({ settings: { reviewConfig: {} } });
+    component.reviewDataToChange = createReviewFull({ name: 'New', settings: { reviewConfig: {} } });
+    component.selectedReviewId = 1;
+
+    component.saveChanges();
+
+    expect(component.changed).toBe(false);
+  });
+
+  it('leaves a review selected while the save of another one was under way alone', () => {
+    const answer = new Subject<boolean>();
+    backendServiceMock.setReview.mockReturnValue(answer);
+    component.reviewDataOriginal = createReviewFull();
+    component.reviewDataToChange = createReviewFull({ password: 'gesendet' });
+    component.selectedReviewId = 1;
+
+    component.saveChanges();
+    component.selectedReviewId = 2;
+    component.reviewDataOriginal = createReviewFull({ id: 2, name: 'Review B' });
+    component.reviewDataToChange = createReviewFull({ id: 2, name: 'Review B' });
+    component.changed = false;
+    answer.next(true);
+
+    expect(component.reviewDataOriginal).toEqual(createReviewFull({ id: 2, name: 'Review B' }));
+    expect(component.changed).toBe(false);
   });
 
   it('should show error snackbar when save fails', () => {

@@ -1,5 +1,5 @@
 import {
-  Component, OnDestroy, OnInit, ViewChild
+  Component, OnDestroy, OnInit, signal, ViewChild
 } from '@angular/core';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import {
@@ -53,6 +53,9 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   // True while the review list or the selected review are on their way: a change to units or
   // settings made now would be reset by their arrival, so both stay disabled until then, and save too.
   isLoadingReview = false;
+  private readonly savingState = signal(false);
+  // While a save is under way the button is locked, and what is entered meanwhile stays a change (#2094).
+  readonly saving = this.savingState.asReadonly();
   reviews: ReviewInListDto[] = [];
   reviewDataOriginal: ReviewFullDto = { id: 0 };
   reviewDataToChange: ReviewFullDto = { id: 0 };
@@ -137,6 +140,19 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
       });
   }
 
+  /**
+   * The list alone, for the new name and the time of the change: reloading the whole review would
+   * replace what was entered while the save was under way (#2094).
+   */
+  private reloadReviewNames(): void {
+    this.backendService.getReviewList(this.workspaceService.selectedWorkspaceId)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(reviews => {
+        this.reviews = reviews;
+        this.setObjectsDatasource(this.reviews);
+      });
+  }
+
   private setObjectsDatasource(reviews: ReviewInListDto[]): void {
     this.objectsDatasource = new MatTableDataSource(reviews);
     this.objectsDatasource
@@ -161,20 +177,27 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
 
   saveChanges() {
     // The data still belongs to the review selected before, or is about to be replaced.
-    if (this.isLoadingReview) return;
+    if (this.isLoadingReview || this.saving()) return;
     if (this.reviewDataToChange) {
+      const reviewId = this.selectedReviewId;
+      // a copy: what is sent must not change with the edits made while it is under way
+      const sent = structuredClone(this.reviewDataToChange);
+      const renamed = this.reviewDataOriginal.name !== sent.name;
+      this.savingState.set(true);
       this.backendService.setReview(
         this.workspaceService.selectedWorkspaceId,
-        this.selectedReviewId,
-        this.reviewDataToChange
+        reviewId,
+        sent
       ).pipe(takeUntil(this.ngUnsubscribe)).subscribe(ok => {
+        this.savingState.set(false);
         if (ok) {
-          if (this.reviewDataOriginal.name === this.reviewDataToChange.name) {
-            this.reviewDataOriginal = ReviewsComponent.copyFrom(this.reviewDataToChange);
-          } else {
-            this.loadReviewList(this.selectedReviewId);
+          // another review may have been selected meanwhile; sent as it is, not in the shape of copyFrom,
+          // which fills in configs the review lacks and would make it differ from the data being edited
+          if (this.selectedReviewId === reviewId) {
+            this.reviewDataOriginal = sent;
+            this.changed = this.detectChanges();
           }
-          this.changed = false;
+          if (renamed) this.reloadReviewNames();
           this.snackBar.open(
             this.translateService.instant('workspace.review-saved'),
             '',

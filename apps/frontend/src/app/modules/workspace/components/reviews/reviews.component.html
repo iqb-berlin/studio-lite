@@ -83,7 +83,7 @@
         </studio-lite-review-config>
       </div>
       <studio-lite-save-changes [changed]="changed"
-                                [disabled]="!reviewDataToChange.name || isLoadingReview"
+                                [disabled]="!reviewDataToChange.name || isLoadingReview || saving()"
                                 (discardChanges)="discardChanges()"
                                 (saveChanges)="saveChanges()">
       </studio-lite-save-changes>
