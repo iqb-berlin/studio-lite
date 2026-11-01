@@ -8,6 +8,27 @@ const TEXT_FIELDS = [
 type TextField = typeof TEXT_FIELDS[number];
 
 /**
+ * Metadata edited again while their save was under way, with the uuids the save gave its new items. Named
+ * without them, the next save would have the server delete these items and create them anew, links and all
+ * (#1830). The server keeps the item's id, so the new items are found by it, each uuid given out once.
+ */
+function withSavedItemUuids(edited: UnitMetadataValues, saved: UnitMetadataValues): UnitMetadataValues {
+  if (!edited.items) return edited;
+  const known = new Set(edited.items.map(item => item.uuid).filter(uuid => uuid));
+  const created = (saved.items || []).filter(item => item.uuid && !known.has(item.uuid));
+  return {
+    ...edited,
+    items: edited.items.map(item => {
+      if (item.uuid || item.id === undefined) return item;
+      const index = created.findIndex(savedItem => savedItem.id === item.id);
+      if (index < 0) return item;
+      const [savedItem] = created.splice(index, 1);
+      return { ...item, uuid: savedItem.uuid };
+    })
+  };
+}
+
+/**
  * The unit's properties and metadata while they are being edited, in the same shape as
  * {@link UnitDefinitionStore}: the loaded state, and beside it the latest value entered for each
  * field. A field is a change while that value differs from what is saved, which is measured again
@@ -128,6 +149,7 @@ export class UnitMetadataStore {
    */
   reloadMetadata(metadata: UnitMetadataValues): void {
     this.originalData = { ...this.originalData, metadata };
+    if (this.reported.metadata) this.reported.metadata = withSavedItemUuids(this.reported.metadata, metadata);
     this.notifyChange();
   }
 

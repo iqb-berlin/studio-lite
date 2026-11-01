@@ -185,8 +185,24 @@ describe('UnitMetadataStore', () => {
     store.applyChanges(sent);
     store.reloadMetadata({ items: [{ id: 'item1', uuid: 'uuid-1' }] });
 
-    expect(store.getData().metadata).toEqual({ items: [{ id: 'item1' }, { id: 'item2' }] });
+    expect(store.getData().metadata).toEqual({ items: [{ id: 'item1', uuid: 'uuid-1' }, { id: 'item2' }] });
     expect(store.changed()).toBe(true);
+  });
+
+  // #2094: a new item edited again while its save was under way kept no uuid, and the next save had the
+  // server delete it and create it anew, links and all (#1830); an item added meanwhile stays new
+  it('gives an item edited while its save was under way the uuid the save gave it', () => {
+    const store = new UnitMetadataStore(buildBaseProperties());
+    store.setMetadata({ items: [{ id: 'item1', description: 'gesendet' }] });
+    const sent = store.getChangedData();
+
+    store.setMetadata({ items: [{ id: 'item1', description: 'danach' }, { id: 'item2' }] });
+    store.applyChanges(sent);
+    store.reloadMetadata({ items: [{ id: 'item1', description: 'gesendet', uuid: 'uuid-1' }] });
+
+    expect(store.getChangedData().metadata).toEqual({
+      items: [{ id: 'item1', description: 'danach', uuid: 'uuid-1' }, { id: 'item2' }]
+    });
   });
 
   it('holds in changed whether anything is unsaved', () => {
