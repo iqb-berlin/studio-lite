@@ -57,17 +57,17 @@ export class UnitMetadataStore {
 
   setPlayer(newPlayer: string): void {
     this.setField('player', newPlayer);
-    this.notifyChange();
+    this.notifyChange(false);
   }
 
   setEditor(newEditor: string): void {
     this.setField('editor', newEditor);
-    this.notifyChange();
+    this.notifyChange(false);
   }
 
   setSchemer(newSchemer: string): void {
     this.setField('schemer', newSchemer);
-    this.notifyChange();
+    this.notifyChange(false);
   }
 
   setBasicData(
@@ -86,7 +86,7 @@ export class UnitMetadataStore {
     this.setField('transcript', newTranscript);
     this.setField('reference', newReference);
     this.setField('state', newState);
-    this.notifyChange();
+    this.notifyChange(false);
   }
 
   setMetadata(newMetadata: UnitMetadataValues): void {
@@ -116,19 +116,26 @@ export class UnitMetadataStore {
   /**
    * The id and the fields entered that differ from what is saved. A value set back to the loaded
    * one is no change any more, whatever it was changed to before: an empty one was kept, and saving
-   * emptied the field (#1992).
+   * emptied the field (#1992). The metadata are compared again only when they or the saved ones
+   * may have changed: the comparison runs over all of them, and the text fields report every keystroke.
    */
-  private computeChangedData(): UnitPropertiesDto {
+  private computeChangedData(measureMetadata: boolean): UnitPropertiesDto {
     const changes = <UnitPropertiesDto>{ id: this.originalData.id };
     TEXT_FIELDS.forEach(field => {
       const value = this.reported[field];
       if (value !== undefined && value !== this.originalData[field]) changes[field] = value;
     });
-    const metadata = this.reported.metadata;
-    if (metadata !== undefined && JSON.stringify(metadata) !== JSON.stringify(this.originalData.metadata)) {
-      changes.metadata = metadata;
-    }
+    const metadata = measureMetadata ? this.changedMetadata() : this.changedData.metadata;
+    if (metadata !== undefined) changes.metadata = metadata;
     return changes;
+  }
+
+  private changedMetadata(): UnitMetadataValues | undefined {
+    const metadata = this.reported.metadata;
+    if (metadata === undefined || JSON.stringify(metadata) === JSON.stringify(this.originalData.metadata)) {
+      return undefined;
+    }
+    return metadata;
   }
 
   /**
@@ -165,8 +172,8 @@ export class UnitMetadataStore {
     this.reported[field] = newValue;
   }
 
-  private notifyChange(): void {
-    this.changedData = this.computeChangedData();
+  private notifyChange(measureMetadata = true): void {
+    this.changedData = this.computeChangedData(measureMetadata);
     this.changedState.set(this.isChanged());
     this.dataChange.emit();
   }

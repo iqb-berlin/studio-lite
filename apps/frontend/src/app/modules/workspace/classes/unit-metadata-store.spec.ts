@@ -205,6 +205,22 @@ describe('UnitMetadataStore', () => {
     });
   });
 
+  // the text fields do not compare the metadata again, but keep what was measured for them
+  it('keeps a metadata change, and its absence, through edits of the text fields', () => {
+    const store = new UnitMetadataStore(buildBaseProperties());
+    store.setMetadata({ items: [{ id: 'item1' }] });
+
+    store.setBasicData('k1', 'n2', 'd1', 'g1', 't1', 'r1', 'draft');
+    store.setPlayer('p2');
+    expect(store.getChangedData()).toEqual({
+      id: 10, name: 'n2', player: 'p2', metadata: { items: [{ id: 'item1' }] }
+    });
+
+    store.applyChanges(store.getChangedData());
+    store.setBasicData('k1', 'n3', 'd1', 'g1', 't1', 'r1', 'draft');
+    expect(store.getChangedData()).toEqual({ id: 10, name: 'n3' });
+  });
+
   it('holds in changed whether anything is unsaved', () => {
     const store = new UnitMetadataStore(buildBaseProperties());
     expect(store.changed()).toBe(false);
