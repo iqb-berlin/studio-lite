@@ -104,6 +104,11 @@ export class UnitPlayerComponent extends PreviewDirective {
           }`;
           this.reviewService.setHeaderText(this.unitData.name);
           this.showVeronaModule(playerId, 'player', () => this.sendChangeData());
+        } else {
+          // The route already names this unit, and a comment goes to it: the player and the header
+          // must not go on showing the unit before (#2003).
+          this.showNoModule(this.translateService.instant('workspace.unit-not-found'));
+          this.reviewService.setHeaderText(this.unitData.name);
         }
       });
   }
@@ -131,13 +136,8 @@ export class UnitPlayerComponent extends PreviewDirective {
             this.unitData.definitionType = ued.definitionType;
             this.postStore(this.unitData.definition);
           } else {
-            this.snackBar.open(
-              this.translateService.instant(
-                'workspace.unit-definition-not-loaded'
-              ),
-              this.translateService.instant('workspace.error'),
-              { duration: 3000 }
-            );
+            // a player kept running for the unit before still showed it (#2003)
+            this.showNoModule(this.translateService.instant('workspace.unit-definition-not-loaded'));
           }
         });
     }
