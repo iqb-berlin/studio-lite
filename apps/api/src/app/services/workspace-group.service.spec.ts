@@ -225,9 +225,12 @@ describe('WorkspaceGroupService', () => {
       expect(mockRepository.save).not.toHaveBeenCalled();
     });
 
-    // #2092: the interface trips over these: the unit list over states, the settings dialogs over profiles
+    // #2092: the interface trips over these: the unit list and the states page over states, the settings
+    // dialogs over profiles, the tags form over a list that mixes texts with anything else
     it.each([
-      [{ states: 'x' }], [{ states: [null] }], [{ profiles: 5 }], [{ profiles: ['id'] }], [{ lastStateId: 'abc' }]
+      [{ states: 'x' }], [{ states: [null] }], [{ states: [{ label: 'a' }] }], [{ states: [{ id: 'abc' }] }],
+      [{ profiles: 5 }], [{ profiles: ['id'] }], [{ profiles: [{ id: 5 }] }],
+      [{ lastStateId: 'abc' }], [{ richNoteTags: ['https://a.example', 5] }]
     ])('should refuse malformed fields in the settings: %j', async settings => {
       mockRepository.findOne.mockResolvedValue({ id: 1, name: 'g', settings: {} });
 
@@ -236,12 +239,16 @@ describe('WorkspaceGroupService', () => {
       expect(mockRepository.save).not.toHaveBeenCalled();
     });
 
-    // #2092: rich note tags may name a vocabulary by its URL, and every reader takes null for none
-    it('should take the fields it does not check, and null for the ones it does', async () => {
+    // #2092: older data holds state ids as text, rich note tags may name a vocabulary by its URL,
+    // and every reader takes null for none
+    it('should take state ids as text, a vocabulary URL as tags, and null', async () => {
       const group = { id: 1, name: 'g', settings: {} } as WorkspaceGroup;
       mockRepository.findOne.mockResolvedValue(group);
       const settings = {
-        states: null, profiles: [], lastStateId: null, richNoteTags: 'https://example.org/vocabulary'
+        states: [{ id: '3', label: 'alt' }],
+        profiles: null,
+        lastStateId: null,
+        richNoteTags: 'https://example.org/vocabulary'
       };
 
       await service.patch(1, { id: 1, settings } as unknown as WorkspaceGroupFullDto);
