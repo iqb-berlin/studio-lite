@@ -8,7 +8,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import {
   State, WorkspaceGroupSettingsDto
 } from '@studio-lite-lib/api-dto';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { CoreProfile, ProfilesComponent } from '../../../../components/profiles/profiles.component';
 import { SettingsLoad, WsgAdminService } from '../../services/wsg-admin.service';
@@ -116,6 +116,21 @@ describe('WorkspaceSettingsComponent', () => {
     expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledWith(1, component.settings);
     expect(mockWsgAdminService.settingsChanged).toBe(false);
     expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-settings.changed', '', { duration: 1000 });
+  });
+
+  // #2094: what is entered while the save is under way was not sent, and a second save waits
+  it('keeps an entry made while saving unsaved and does not save twice meanwhile', () => {
+    const answer = new Subject<boolean>();
+    mockWsgAdminService.setWorkspaceGroupSettings.mockReturnValue(answer);
+    component.richNoteTagsSettingsChange(['http://gesendet']);
+    component.saveGroupSettings();
+    component.richNoteTagsSettingsChange(['http://danach']);
+    component.saveGroupSettings();
+    answer.next(true);
+
+    expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledTimes(1);
+    expect(mockWsgAdminService.setWorkspaceGroupSettings.mock.calls[0][1].richNoteTags).toEqual(['http://gesendet']);
+    expect(mockWsgAdminService.settingsChanged).toBe(true);
   });
 
   it('should handle save error', () => {

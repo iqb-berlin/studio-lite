@@ -1,4 +1,6 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component, OnDestroy, OnInit, signal
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   State, WorkspaceGroupSettingsDto
@@ -27,6 +29,9 @@ import {
 })
 export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   settings!: WorkspaceGroupSettingsDto;
+  private readonly savingState = signal(false);
+  // While a save is under way the button is locked, and what is entered meanwhile stays a change (#2094).
+  readonly saving = this.savingState.asReadonly();
   private ngUnsubscribe = new Subject<void>();
 
   constructor(
@@ -50,14 +55,20 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   }
 
   async saveGroupSettings() {
+    // also asked for by deleting a state (#2009): a deletion while a save is under way stays a change
+    if (this.saving()) return;
+    // a copy: what is sent must not change with the edits made while it is under way
+    const sent = structuredClone(this.settings);
+    this.savingState.set(true);
     this.wsgAdminService.setWorkspaceGroupSettings(
-      this.wsgAdminService.selectedWorkspaceGroupId.value, this.settings)
+      this.wsgAdminService.selectedWorkspaceGroupId.value, sent)
       .pipe(
         takeUntil(this.ngUnsubscribe))
       .subscribe(
         respOk => {
+          this.savingState.set(false);
           if (respOk) {
-            this.wsgAdminService.settingsChanged = false;
+            this.wsgAdminService.settingsChanged = JSON.stringify(this.settings) !== JSON.stringify(sent);
             this.wsgAdminService.selectedWorkspaceGroupSettings.next(this.settings);
             this.snackBar.open(
               this.translateService.instant('wsg-settings.changed'),
