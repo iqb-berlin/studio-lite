@@ -28,6 +28,8 @@ CREATE INDEX "idx_used_refresh_token_user_session" ON "public"."used_refresh_tok
 -- Group settings: the highest id the group ever gave a unit state (#2009). A new state gets an id above it,
 -- because units keep the id of a deleted state and would show a new state that got it again. A group that
 -- deleted its highest state before this release has that id only on its units, so they count as well.
+-- Settings holding JSON other than an object (null, an array) stay as they are, both ways: `||` would turn
+-- them into an array, and `-` fails on a scalar.
 UPDATE "public"."workspace_group" AS "wsg"
   SET "settings" = COALESCE("wsg"."settings", '{}'::jsonb) || jsonb_build_object('lastStateId', "given"."id")
   FROM (
@@ -43,8 +45,9 @@ UPDATE "public"."workspace_group" AS "wsg"
     ) AS "id"
     FROM "public"."workspace_group" AS "g"
   ) AS "given"
-  WHERE "given"."group_id" = "wsg"."id" AND "given"."id" IS NOT NULL;
--- rollback UPDATE "public"."workspace_group" SET "settings" = "settings" - 'lastStateId';
+  WHERE "given"."group_id" = "wsg"."id" AND "given"."id" IS NOT NULL
+    AND ("wsg"."settings" IS NULL OR jsonb_typeof("wsg"."settings") = 'object');
+-- rollback UPDATE "public"."workspace_group" SET "settings" = "settings" - 'lastStateId' WHERE jsonb_typeof("settings") = 'object';
 
 -- changeset jojohoch:3
 -- The XML import took the attribute `complete` of a value list over as text up to #1987, so units
