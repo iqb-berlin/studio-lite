@@ -18,7 +18,8 @@
     <button mat-raised-button
             color="primary"
             [disabled]="!dataChanged || saving()"
-            (click)="saveData()">
+            (click)="saveData()"
+            data-cy="admin-email-template-save-button">
       {{'save' | translate}}
     </button>
   </div>

@@ -752,4 +752,47 @@ describe('Unit Reviews', () => {
       cy.get('[data-cy="workspace-review-close"]').click();
     });
   });
+
+  // What is typed while a review is saved was not sent: it stays unsaved, and the button stays locked until the
+  // answer. A rename reloads the list only, since reloading the review replaced what was typed (#2094).
+  describe('#2094 entries made while a review is saved', () => {
+    const savingReview = 'SavingReview';
+    const reviewName = '[data-cy="workspace-review-config-name"]';
+    const saveButton = (timeout?: number): Cypress.Chainable<JQuery<HTMLButtonElement>> => cy
+      .translate(Cypress.expose('locale'))
+      .then(json => cy.get('studio-lite-save-changes')
+        .contains('button', json.workspace.save, timeout === undefined ? {} : { timeout }));
+
+    it('keeps a name typed while saving unsaved and saves it with the next save', () => {
+      cy.visitWs(primaryWorkspace);
+      workspaceOfPage().then(({ wsId, token }) => {
+        cy.addReviewAPI(wsId, savingReview, token).its('status').should('equal', 201);
+      });
+      goToReviewAdmin();
+      selectReviewInAdmin(savingReview);
+      // the answer to the first save is held back until the test has typed on
+      let release = (): void => undefined;
+      const held = new Promise<void>(resolve => { release = resolve; });
+      let saves = 0;
+      cy.intercept('PATCH', '/api/workspaces/*/reviews/*', req => {
+        saves += 1;
+        if (saves === 1) req.on('response', () => held);
+      }).as('saveReviewSlowly');
+
+      cy.get(reviewName).clear().type('Vorher');
+      saveButton().click();
+      cy.get(reviewName).type(' danach');
+      // within the 10 s the held answer may wait, so that a missing lock fails here and says so
+      saveButton(2000).should('be.disabled');
+      cy.then(() => release());
+      cy.wait('@saveReviewSlowly').its('request.body.name').should('equal', 'Vorher');
+
+      cy.get(reviewName).should('have.value', 'Vorher danach');
+      saveButton().should('be.enabled').click();
+      cy.wait('@saveReviewSlowly').its('request.body.name').should('equal', 'Vorher danach');
+      saveButton().should('be.disabled');
+      cy.contains('mat-row', 'Vorher danach').should('exist');
+      cy.get('[data-cy="workspace-review-close"]').click();
+    });
+  });
 });
