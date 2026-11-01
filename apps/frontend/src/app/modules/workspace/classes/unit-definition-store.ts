@@ -34,6 +34,8 @@ export class UnitDefinitionStore {
   readonly data: Signal<UnitDefinitionDto>;
   private originalData: UnitDefinitionDto;
   private reported: EditorReport | undefined;
+  // computed once per change: comparing the variables runs over the whole list
+  private changedData: UnitDefinitionDto = {};
   private unitId: number;
 
   constructor(unitId: number, originalData: UnitDefinitionDto) {
@@ -60,7 +62,7 @@ export class UnitDefinitionStore {
     this.notifyChange();
   }
 
-  private get changedData(): UnitDefinitionDto {
+  private computeChangedData(): UnitDefinitionDto {
     const changes = <UnitDefinitionDto>{};
     if (!this.reported) return changes;
     if (!sameVariableLists(this.reported.variables, this.originalData.variables)) {
@@ -111,6 +113,7 @@ export class UnitDefinitionStore {
   }
 
   private notifyChange(): void {
+    this.changedData = this.computeChangedData();
     this.changedState.set(this.isChanged());
     this.dataState.set(this.getData());
     this.dataChange.emit();

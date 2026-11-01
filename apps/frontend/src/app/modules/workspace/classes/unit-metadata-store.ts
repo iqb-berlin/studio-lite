@@ -43,6 +43,8 @@ export class UnitMetadataStore {
   readonly changed: Signal<boolean> = this.changedState.asReadonly();
   private originalData: UnitPropertiesDto;
   private reported: Partial<UnitPropertiesDto> = {};
+  // computed once per change: comparing the metadata runs over all of it
+  private changedData: UnitPropertiesDto;
 
   /**
    * @param loaded false for the store of a unit the server did not answer for: it holds the id alone,
@@ -50,6 +52,7 @@ export class UnitMetadataStore {
    */
   constructor(originalData: UnitPropertiesDto, readonly loaded = true) {
     this.originalData = originalData;
+    this.changedData = { id: originalData.id };
   }
 
   setPlayer(newPlayer: string): void {
@@ -115,7 +118,7 @@ export class UnitMetadataStore {
    * one is no change any more, whatever it was changed to before: an empty one was kept, and saving
    * emptied the field (#1992).
    */
-  private get changedData(): UnitPropertiesDto {
+  private computeChangedData(): UnitPropertiesDto {
     const changes = <UnitPropertiesDto>{ id: this.originalData.id };
     TEXT_FIELDS.forEach(field => {
       const value = this.reported[field];
@@ -163,6 +166,7 @@ export class UnitMetadataStore {
   }
 
   private notifyChange(): void {
+    this.changedData = this.computeChangedData();
     this.changedState.set(this.isChanged());
     this.dataChange.emit();
   }
