@@ -4,12 +4,19 @@ import {
 } from '@angular/core';
 import { sameVariableLists, VariableInfoInEitherSpelling } from '@studio-lite/shared-code';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { dropSavedChanges } from '../utils/saved-changes.utils';
+
+type EditorReport = {
+  variables: VariableInfoInEitherSpelling[];
+  definition: string;
+  definitionType?: string;
+};
 
 /**
- * The unit's definition while it is being worked on: what was loaded, and beside it only what has
- * actually changed. A value edited back to what it was is removed again, so "is there anything to
- * save" is answered by whether that second object holds anything at all.
+ * The unit's definition while it is being worked on: what was loaded, and beside it the editor's
+ * latest report. What is changed is what that report has that differs from what is saved, measured
+ * again after each save: a report set back to the old state while the save was under way differs
+ * from the state just saved (#2087). "Is there anything to save" is answered by whether anything
+ * differs at all.
  *
  * Only the changed part is sent when the unit is saved, which is why a definition and its variables
  * are tracked separately here.
@@ -26,13 +33,12 @@ export class UnitDefinitionStore {
   /** What {@link getData} answers, as a signal for whoever derives from it (#1361). */
   readonly data: Signal<UnitDefinitionDto>;
   private originalData: UnitDefinitionDto;
-  private changedData: UnitDefinitionDto;
+  private reported: EditorReport | undefined;
   private unitId: number;
 
   constructor(unitId: number, originalData: UnitDefinitionDto) {
     this.unitId = unitId;
     this.originalData = originalData;
-    this.changedData = <UnitDefinitionDto>{};
     this.dataState = signal(this.getData());
     this.data = this.dataState.asReadonly();
   }
@@ -50,23 +56,22 @@ export class UnitDefinitionStore {
    * longer describe what the editor wrote (#1368).
    */
   setData(newVariables: VariableInfoInEitherSpelling[], newDefinition: string, newDefinitionType?: string) {
-    if (sameVariableLists(newVariables, this.originalData.variables)) {
-      if (this.changedData.variables) delete this.changedData.variables;
-    } else {
-      // the DTO is typed with the 1.x spelling; the list is stored as reported
-      this.changedData.variables = newVariables as VariableInfo[];
-    }
-    if (newDefinition === this.originalData.definition) {
-      if (this.changedData.definition) delete this.changedData.definition;
-    } else {
-      this.changedData.definition = newDefinition;
-    }
-    if (this.changedData.definition !== undefined && newDefinitionType) {
-      this.changedData.definitionType = newDefinitionType;
-    } else {
-      delete this.changedData.definitionType;
-    }
+    this.reported = { variables: newVariables, definition: newDefinition, definitionType: newDefinitionType };
     this.notifyChange();
+  }
+
+  private get changedData(): UnitDefinitionDto {
+    const changes = <UnitDefinitionDto>{};
+    if (!this.reported) return changes;
+    if (!sameVariableLists(this.reported.variables, this.originalData.variables)) {
+      // the DTO is typed with the 1.x spelling; the list is stored as reported
+      changes.variables = this.reported.variables as VariableInfo[];
+    }
+    if (this.reported.definition !== this.originalData.definition) {
+      changes.definition = this.reported.definition;
+      if (this.reported.definitionType) changes.definitionType = this.reported.definitionType;
+    }
+    return changes;
   }
 
   isChanged(): boolean {
@@ -88,20 +93,20 @@ export class UnitDefinitionStore {
   }
 
   /**
-   * Takes what was sent as saved. What the editor reported since then stays a change: nobody sent
-   * it yet, and taking it as saved lost it (#1845).
+   * Takes what was sent as saved. What the editor reported since then stays a change, as its latest
+   * report is measured against the state now saved: nobody sent it yet, and taking it as saved lost
+   * it (#1845).
    */
   applyChanges(sent: UnitDefinitionDto) {
     const saved = { ...this.originalData, ...sent };
     // as in getData: a definition sent without a type of its own does not keep the stored one
     if (sent.definition !== undefined && !sent.definitionType) delete saved.definitionType;
     this.originalData = saved;
-    dropSavedChanges(this.changedData, sent);
     this.notifyChange();
   }
 
   restore() {
-    this.changedData = <UnitDefinitionDto>{};
+    this.reported = undefined;
     this.notifyChange();
   }
 

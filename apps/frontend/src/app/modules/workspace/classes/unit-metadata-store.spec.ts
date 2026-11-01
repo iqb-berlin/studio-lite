@@ -148,6 +148,24 @@ describe('UnitMetadataStore', () => {
     expect(store.changed()).toBe(true);
   });
 
+  // #2087: set back to the loaded value while the save was under way, a field differs from what was saved
+  it.each<[string, (store: UnitMetadataStore, back: boolean) => void, Partial<UnitPropertiesDto>]>([
+    ['name', (store, back) => store.setBasicData('k1', back ? 'n1' : 'n2', 'd1', 'g1', 't1', 'r1', 'draft'),
+      { name: 'n1' }],
+    ['metadata', (store, back) => store.setMetadata(back ? { profiles: [] } : { items: [{ id: 'i1', uuid: 'u1' }] }),
+      { metadata: { profiles: [] } }]
+  ])('keeps the %s set back while the save is under way as a change', (_, edit, setBack) => {
+    const store = new UnitMetadataStore(buildBaseProperties());
+    edit(store, false);
+    const sent = store.getChangedData();
+
+    edit(store, true);
+    store.applyChanges(sent);
+
+    expect(store.changed()).toBe(true);
+    expect(store.getChangedData()).toEqual({ id: 10, ...setBack });
+  });
+
   it('hands out a copy that later edits do not change', () => {
     const store = new UnitMetadataStore(buildBaseProperties());
     store.setMetadata({ items: [{ id: 'item1' }] });
