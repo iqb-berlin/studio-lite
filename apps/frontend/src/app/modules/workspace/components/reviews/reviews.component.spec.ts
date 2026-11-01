@@ -403,6 +403,29 @@ describe('ReviewsComponent', () => {
     expect(snackBarMock.open).toHaveBeenCalled();
   });
 
+  // #2094: the list reloaded after a rename and a list load begun before it answer in either order
+  it('keeps the list of the load begun last, whichever answers first', fakeAsync(() => {
+    const begunFirst = new Subject<ReviewInListDto[]>();
+    const begunLast = new Subject<ReviewInListDto[]>();
+    backendServiceMock.getReviewList.mockReturnValueOnce(begunFirst).mockReturnValueOnce(begunLast);
+    backendServiceMock.setReview.mockReturnValue(of(true));
+    jest.spyOn(component, 'checkForChangesAndContinue').mockResolvedValue(true);
+    component.loadReviewList(1);
+    component.reviewDataOriginal = createReviewFull({ name: 'Old' });
+    component.reviewDataToChange = createReviewFull({ name: 'New' });
+    component.selectedReviewId = 1;
+    component.isLoadingReview = false;
+
+    component.saveChanges();
+    begunLast.next([{ id: 1, name: 'New' }, { id: 2, name: 'Created' }]);
+    begunFirst.next([{ id: 1, name: 'Old' }]);
+    flushMicrotasks();
+    tick();
+
+    expect(component.reviews).toEqual([{ id: 1, name: 'New' }, { id: 2, name: 'Created' }]);
+    expect(component.objectsDatasource.data).toEqual([{ id: 1, name: 'New' }, { id: 2, name: 'Created' }]);
+  }));
+
   // #2094: what is entered while the save is under way was not sent, and a second save waits
   it('keeps an entry made while saving unsaved and does not save twice meanwhile', () => {
     const answer = new Subject<boolean>();

@@ -59,6 +59,9 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   // Counts the loads of the selected review's data, so that the answer to a save applies only to the data it
   // was sent from: switched away and back meanwhile, the review was loaded anew, perhaps before the save.
   private reviewLoads = 0;
+  // Counts the loads of the list: a list loaded after a rename and one loaded for another reason may answer in
+  // either order, and only the one begun last has every review created or deleted meanwhile.
+  private listLoads = 0;
   reviews: ReviewInListDto[] = [];
   reviewDataOriginal: ReviewFullDto = { id: 0 };
   reviewDataToChange: ReviewFullDto = { id: 0 };
@@ -128,10 +131,12 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
     this.reviewRequest?.unsubscribe();
     this.isLoadingReviewList = true;
     this.isLoadingReview = true;
+    this.listLoads += 1;
+    const load = this.listLoads;
     this.backendService.getReviewList(this.workspaceService.selectedWorkspaceId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(reviews => {
-        this.reviews = reviews;
+        if (this.listLoads === load) this.reviews = reviews;
         this.reviewDataOriginal = { id: 0 };
         this.reviewDataToChange = { id: 0 };
         this.appService.dataLoading = false;
@@ -149,9 +154,12 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
    * replace what was entered while the save was under way (#2094).
    */
   private reloadReviewNames(): void {
+    this.listLoads += 1;
+    const load = this.listLoads;
     this.backendService.getReviewList(this.workspaceService.selectedWorkspaceId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(reviews => {
+        if (this.listLoads !== load) return;
         this.reviews = reviews;
         this.setObjectsDatasource(this.reviews);
       });
