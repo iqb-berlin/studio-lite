@@ -128,14 +128,18 @@ describe('UnitSchemerComponent', () => {
       }), '*');
     });
 
-    it('says so when the scheme of the unit cannot be loaded', () => {
+    // the schemer stayed with the scheme of the unit before, and its reports still counted (#2085)
+    it('empties the frame and says so when the scheme of the unit cannot be loaded', () => {
       loadSchemeStoreWith(undefined);
-      const snackBar = jest.spyOn(component.snackBar, 'open');
+      const frame: HTMLIFrameElement = fixture.nativeElement.querySelector('iframe');
+      frame.srcdoc = 'the schemer with the scheme of the unit before';
 
       fromSchemer({ type: 'vosReadyNotification' });
 
       expect(toSchemer).not.toHaveBeenCalled();
-      expect(snackBar).toHaveBeenCalledWith('workspace.coding-scheme-not-loaded', 'workspace.error', expect.anything());
+      expect(component.message).toBe('workspace.coding-scheme-not-loaded');
+      expect(frame.srcdoc).toBe('');
+      expect(component.sessionId).toBe('');
     });
 
     // the scheme store takes only a scheme the schemer of this session reports from its frame

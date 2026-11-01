@@ -632,6 +632,19 @@ describe('UnitPreviewComponent', () => {
 
       expect(component.playerName).toBe(playerKey);
     });
+
+    // the bar below the frame named the player of the unit before (#2085)
+    it('should name no player for a unit without one', () => {
+      moduleServiceStub.players = { 'iqb-player-aspect@3.0': createMock<VeronaModuleClass>() };
+      component.playerName = 'iqb-player-aspect@3.0';
+      jest.spyOn(unitStoresStub, 'metadataStore').mockReturnValue(createMock<UnitMetadataStore>({
+        getData: () => ({ id: 6, player: '' }) as UnitPropertiesDto
+      }));
+
+      component.onLoadUnitProperties();
+
+      expect(component.playerName).toBe('');
+    });
   });
 
   it('should load the unit chosen while the one before is still loading', () => {

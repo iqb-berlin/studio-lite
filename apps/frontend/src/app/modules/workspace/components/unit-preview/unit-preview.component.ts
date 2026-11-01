@@ -101,9 +101,9 @@ export class UnitPreviewComponent extends PreviewDirective {
     )
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(playerId => {
-        if (this.showVeronaModule(playerId, 'player', () => this.sendChangeData())) {
-          this.playerName = playerId;
-        }
+        // also when there is none: the bar named the player of the unit before (#2085)
+        this.playerName = playerId;
+        this.showVeronaModule(playerId, 'player', () => this.sendChangeData());
       });
   }
 
