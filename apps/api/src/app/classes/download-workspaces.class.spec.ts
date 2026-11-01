@@ -481,5 +481,21 @@ describe('DownloadWorkspacesClass', () => {
 
       expect(rows[1][4]).toBe('30.10.2026');
     });
+
+    // The API runs in UTC; a change shortly after midnight in German time showed the day before (#2082).
+    it.each([
+      ['winter', Date.UTC(2026, 9, 29, 23, 30), '30.10.2026'],
+      ['summer', Date.UTC(2026, 4, 2, 22, 30), '3.5.2026']
+    ])('should show the day of the latest change in German time in %s', async (_, changed, day) => {
+      unitService.findAllWithProperties.mockImplementation(async workspaceId => (workspaceId === 10 ? [
+        { ...module('E'), lastChangedMetadata: new Date(changed) }
+      ] : []) as unknown as UnitPropertiesDto[]);
+
+      const { rows } = await readSheet(await DownloadWorkspacesClass.getWorkspaceReport(
+        workspaceService, unitService, 1
+      ));
+
+      expect(rows[1][4]).toBe(day);
+    });
   });
 });
