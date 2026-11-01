@@ -69,6 +69,9 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
           this.savingState.set(false);
           if (respOk) {
             this.wsgAdminService.settingsChanged = JSON.stringify(this.settings) !== JSON.stringify(sent);
+            // What the page shows, not only what was sent: the form, the states and the profiles are built anew
+            // from what is published here, and also when the page is opened again, so the stored settings alone
+            // would drop what was entered while the save was under way. No reader takes it for what is stored.
             this.wsgAdminService.selectedWorkspaceGroupSettings.next(this.settings);
             this.snackBar.open(
               this.translateService.instant('wsg-settings.changed'),

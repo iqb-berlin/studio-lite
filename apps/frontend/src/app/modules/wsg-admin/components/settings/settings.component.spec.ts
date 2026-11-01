@@ -131,6 +131,9 @@ describe('WorkspaceSettingsComponent', () => {
     expect(mockWsgAdminService.setWorkspaceGroupSettings).toHaveBeenCalledTimes(1);
     expect(mockWsgAdminService.setWorkspaceGroupSettings.mock.calls[0][1].richNoteTags).toEqual(['http://gesendet']);
     expect(mockWsgAdminService.settingsChanged).toBe(true);
+    // the page builds its form from what is published: the stored settings would reset the entry
+    expect(component.settings.richNoteTags).toEqual(['http://danach']);
+    expect(mockWsgAdminService.selectedWorkspaceGroupSettings.value.richNoteTags).toEqual(['http://danach']);
   });
 
   it('should handle save error', () => {
