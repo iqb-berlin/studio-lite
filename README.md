@@ -67,9 +67,11 @@ cores from each other and specs that take milliseconds locally run into the Jest
 
 ## Requirements
 
-- **Node.js 24**, the major that `node:lts-bookworm-slim` resolves to — the pipeline's base image,
-  and the version the documentation workflow pins. There is no `.nvmrc` and no `engines` field, so
-  nothing enforces it locally.
+- **Node.js, the current LTS** — the major that `node:lts-bookworm-slim` resolves to, 26 at the
+  moment. The pipeline builds and tests on that image, the backend image runs on it, and the
+  documentation workflow follows the same LTS (`lts/*`). Only the e2e jobs run on the Node of the
+  Cypress image (`CYPRESS_IMAGE` in `.gitlab-ci.yml`, Node 22). There is no `.nvmrc` and no
+  `engines` field, so nothing enforces it locally.
 - **npm**, **Docker**, **Docker Compose** and **Make**. Every `dev-*` target reads `.env.dev` — the
   `studio-lite-*` targets of a server installation read `.env.studio-lite` — so none of them works
   before that file exists.
