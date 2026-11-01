@@ -138,9 +138,12 @@ make dev-volumes-clean   # deletes the data as well
 ### End-to-end tests
 
 The e2e container drives the frontend inside the Docker network `app-net`, so it runs **only
-together with `make dev-up`** — not against the npm servers. Start a fresh instance with an empty
-database before a run: the specs create users, groups and workspaces and expect to be the only ones
-doing so.
+together with `make dev-up`** — not against the npm servers. A fresh instance is not needed: before
+every spec, the hook in `apps/frontend-e2e/src/support/e2e.ts` empties the database of users,
+workspace groups and resource packages and clears the browser storage, so that no spec depends on
+what the one before left behind (#2028). Verona modules, settings and metadata profiles stay. The
+reset connects to the database itself, as `db` with the credentials of `.env.dev.template`; the
+container is given no others, so credentials changed in `.env.dev` keep it from connecting.
 
 ```bash
 make dev-test-build-e2e   # after an nx workspace update
@@ -194,8 +197,12 @@ policy.
 | `npm run test-e2e-coverage` | The suite against the instrumented build. Nothing publishes that report: `scripts/merge-coverage.sh` merges an e2e report in when one lies at `coverage/by-project/e2e/`, and no run puts it there yet (#1624) |
 
 The npm e2e scripts bring the frontend up themselves — Nx serves it as their dev server target —
-but not the rest: the API and the database have to be running, and the database has to be empty.
-The `make dev-test-e2e*` targets are the containerised variant of the same suite.
+but not the rest: the API and the database have to be running. The database is reset before every
+spec, as in the container, and the reset looks for it as `db`, which only the Docker network knows.
+Run the scripts with `POSTGRES_HOST=localhost`, and with `POSTGRES_PORT`, `POSTGRES_USER`,
+`POSTGRES_PASSWORD` and `POSTGRES_DB` as well if `.env.dev` changes them
+(`apps/frontend-e2e/cypress.config.ts`, task `resetDatabase`). The `make dev-test-e2e*` targets are
+the containerised variant of the same suite.
 
 ### Docker, via make
 
@@ -249,7 +256,7 @@ scripts              install.sh, update.sh, make targets, migration helpers
 ## How work flows through this repository
 
 ```
-issue → branch → /code-review → pull request → green pipeline → review → merge into develop → release to main
+issue → branch → /code-review → pull request → green pipeline → review → merge queue → develop → release to main
 ```
 
 ### Branches
@@ -302,15 +309,19 @@ A branch name carries the issue it belongs to: `fix/1629-group-admin-guard`.
    `nx affected --base=HEAD~1` and covers what the last commit touched. `test-app` and `lint-app`
    do the same on a plain branch push; in a pull request they compare with the branch it goes
    into and cover all of its commits (#1659).
-7. **Rebase when `develop` moves**, then force-push with `--force-with-lease`. A pipeline result
-   belongs to a commit, not to a pull request.
-8. **Merge as a merge commit** once the pipeline is green.
+7. **Rebase only on a conflict.** `develop` does not require a pull request to be up to date with
+   it; when `develop` has moved on, the merge queue tests the combination. Only a pull request that
+   conflicts with `develop` needs a rebase, force-pushed with `--force-with-lease`.
+8. **Add the pull request to the merge queue** once its pipeline is green, the e2e jobs included.
+   The queue merges it into `develop` on a `gh-readonly-queue/develop/…` branch, runs the branch
+   pipeline of step 5 there — without e2e — and merges with a merge commit when that is green.
+   Merging directly or pushing to `develop` is not possible.
 
-Tickets live on [project board 18](https://github.com/orgs/iqb-berlin/projects/18). A card moves to
-*In progress* when work starts and to *zu testen* once the fix is merged into `develop`; a change
-that ships with its own end-to-end test goes to *Zu veröffentlichen* instead. *In review* means
-released and awaiting validation, not code-reviewed — a ticket stays open until then and is closed
-in *Done*.
+Tickets live on [project board 18](https://github.com/orgs/iqb-berlin/projects/18). When a card moves
+to *In progress*, and whether it goes to *zu testen* or *Zu veröffentlichen* after the merge — the
+latter needs an end-to-end test of its own, with a few exceptions — is set out in `rules.md` under
+*Board 18*. *In review* means released and awaiting validation, not code-reviewed — a ticket stays
+open until then and is closed in *Done*.
 
 ### Releases
 
