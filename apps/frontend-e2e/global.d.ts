@@ -47,7 +47,7 @@ declare namespace Cypress {
     updateUserAPI(id:string, user: UserData, credentials: boolean, token: string, password?: string): Chainable<Response>; // 9
     deleteSessionAPI(userId: string, sessionId: string, token: string): Chainable<Response>; // 9a
     deleteOrphanedSessionsAPI(userId: string, token: string): Chainable<Response>; // 9b
-    createGroupAPI(group: GroupData, token: string): Chainable<Response>; // 10
+    createGroupAPI(group: GroupData, token: string, settings?: unknown): Chainable<Response>; // 10
     getGroupByIdAPI(groupId: string, token: string): Chainable<Response>; // 11
     getWsGroupsAPI(token: string): Chainable<Response>; // 12
 
@@ -90,6 +90,7 @@ declare namespace Cypress {
     getWsSchemeAPI(wsId: string, token:string): Chainable<Response>; // 48
     getWsCodingBookAPI(units: string[], wsId: string, token:string): Chainable<Response>; // 49
     updateGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 50
+    updateGroupSettingsAPI(groupId: string, settings: unknown, token: string): Chainable<Response>; // 50a
     getGroupPropertiesAPI(groupId: string, token:string): Chainable<Response>; // 51
     updateUnitStateAPI(wsId: string, unitId: string, state: string, token:string): Chainable<Response>; // 52
     getUnitMetadataAPI(wsId: string, unitId: string, token:string): Chainable<Response>; // 53

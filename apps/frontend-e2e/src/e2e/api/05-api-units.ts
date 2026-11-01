@@ -1,4 +1,4 @@
-import type { UnitInViewDto } from '@studio-lite-lib/api-dto';
+import type { UnitInViewDto, WorkspaceGroupFullDto } from '@studio-lite-lib/api-dto';
 import {
   AccessLevel,
   DefinitionUnit,
@@ -1840,6 +1840,17 @@ describe('Unit API tests', () => {
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
           expect(resp.status).to.equal(200);
+        });
+      });
+
+      // A text as states broke the unit list in every workspace of the group (#2092)
+      it('400 negative test: should refuse states that are no list and keep the stored ones (#2092)', () => {
+        const token = Cypress.expose(`token_${Cypress.expose('username')}`);
+        cy.updateGroupSettingsAPI(Cypress.expose(groupVera.id), { states: 'x' }, token)
+          .its('status').should('equal', 400);
+        cy.getGroupPropertiesAPI(Cypress.expose(groupVera.id), token).then(resp => {
+          const states = (resp.body as WorkspaceGroupFullDto).settings?.states;
+          expect(states?.map(state => state.label)).to.deep.equal(['Initial', 'Finale']);
         });
       });
 
