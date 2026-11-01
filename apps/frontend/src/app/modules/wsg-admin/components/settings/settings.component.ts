@@ -1,6 +1,4 @@
-import {
-  Component, OnDestroy, OnInit, signal
-} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   State, WorkspaceGroupSettingsDto
@@ -19,6 +17,7 @@ import { StatesComponent } from '../states/states.component';
 import {
   UnitRichNoteTagsConfigComponent
 } from '../../../admin/components/unit-rich-note-tags-config/unit-rich-note-tags-config.component';
+import { SaveLock } from '../../../../classes/save-lock.class';
 
 @Component({
   selector: 'studio-lite-settings',
@@ -29,9 +28,8 @@ import {
 })
 export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   settings!: WorkspaceGroupSettingsDto;
-  private readonly savingState = signal(false);
-  // While a save is under way the button is locked, and what is entered meanwhile stays a change (#2094).
-  readonly saving = this.savingState.asReadonly();
+  // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
+  readonly save = new SaveLock();
   private ngUnsubscribe = new Subject<void>();
 
   constructor(
@@ -55,20 +53,19 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   }
 
   async saveGroupSettings() {
-    // also asked for by deleting a state (#2009): a deletion while a save is under way stays a change
-    if (this.saving()) return;
     // a copy: what is sent must not change with the edits made while it is under way
     const sent = structuredClone(this.settings);
-    this.savingState.set(true);
+    // also asked for by deleting a state (#2009): a deletion while a save is under way stays a change
+    if (!this.save.start(sent)) return;
     this.wsgAdminService.setWorkspaceGroupSettings(
       this.wsgAdminService.selectedWorkspaceGroupId.value, sent)
       .pipe(
         takeUntil(this.ngUnsubscribe))
       .subscribe(
         respOk => {
-          this.savingState.set(false);
+          this.save.finish();
           if (respOk) {
-            this.wsgAdminService.settingsChanged = JSON.stringify(this.settings) !== JSON.stringify(sent);
+            this.wsgAdminService.settingsChanged = this.save.differsFromSent(this.settings);
             // What the page shows, not only what was sent: the form, the states and the profiles are built anew
             // from what is published here, and also when the page is opened again, so the stored settings alone
             // would drop what was entered while the save was under way. No reader takes it for what is stored.

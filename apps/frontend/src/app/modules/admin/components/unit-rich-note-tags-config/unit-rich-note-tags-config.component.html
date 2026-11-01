@@ -43,7 +43,7 @@
           </div>
         }
         <button mat-raised-button color="primary" type="button" (click)="saveData()"
-                [disabled]="configForm.invalid || !dataChanged || saving()">
+                [disabled]="configForm.invalid || !dataChanged || save.saving()">
           {{ 'save' | translate }}
         </button>
       </div>

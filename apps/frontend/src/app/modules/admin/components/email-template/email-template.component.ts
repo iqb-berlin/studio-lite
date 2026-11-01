@@ -1,6 +1,4 @@
-import {
-  Component, OnDestroy, OnInit, signal
-} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule
@@ -14,6 +12,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 
 import { EmailTemplateDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../../../../services/backend.service';
+import { SaveLock } from '../../../../classes/save-lock.class';
 
 @Component({
   selector: 'studio-lite-email-template',
@@ -26,9 +25,8 @@ import { BackendService } from '../../../../services/backend.service';
 export class EmailTemplateComponent implements OnInit, OnDestroy {
   configForm: UntypedFormGroup;
   dataChanged = false;
-  private readonly savingState = signal(false);
-  // While a save is under way the button is locked, and what is entered meanwhile stays a change (#2094).
-  readonly saving = this.savingState.asReadonly();
+  // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
+  readonly save = new SaveLock();
   private configDataChangedSubscription: Subscription | null = null;
 
   constructor(
@@ -75,24 +73,22 @@ export class EmailTemplateComponent implements OnInit, OnDestroy {
   }
 
   saveData(): void {
-    if (this.saving()) return;
     if (this.configForm) {
-      const sent = JSON.stringify(this.configForm.getRawValue());
+      if (!this.save.start(this.configForm.getRawValue())) return;
       const emailTemplate: EmailTemplateDto = {
         emailSubject: this.configForm.get('emailSubject')?.value,
         emailBody: this.configForm.get('emailBody')?.value
       };
-      this.savingState.set(true);
       this.backendService.setEmailTemplate(emailTemplate)
         .subscribe(isOk => {
-          this.savingState.set(false);
+          this.save.finish();
           if (isOk) {
             this.snackBar.open(
               this.translateService.instant('email-template.template-saved'),
               '',
               { duration: 3000 }
             );
-            this.dataChanged = JSON.stringify(this.configForm.getRawValue()) !== sent;
+            this.dataChanged = this.save.differsFromSent(this.configForm.getRawValue());
           } else {
             this.snackBar.open(
               this.translateService.instant('email-template.template-not-saved'),

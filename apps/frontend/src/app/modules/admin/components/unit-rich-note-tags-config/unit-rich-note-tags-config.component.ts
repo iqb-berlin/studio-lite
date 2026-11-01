@@ -16,6 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { UnitRichNoteTagDto } from '@studio-lite-lib/api-dto';
 
 import { BackendService } from '../../services/backend.service';
+import { SaveLock } from '../../../../classes/save-lock.class';
 
 /**
  * The editor for the rich-note tags: either the tags themselves, or the URL of a vocabulary they are
@@ -47,9 +48,8 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy, OnCha
 
   configForm: FormGroup;
   dataChanged = false;
-  private readonly savingState = signal(false);
-  // While a save is under way the button is locked, and what is entered meanwhile stays a change (#2094).
-  readonly saving = this.savingState.asReadonly();
+  // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
+  readonly save = new SaveLock();
   private readonly configNotLoadedState = signal(false);
   // Without the stored URLs the form is not shown: saving it would replace them (#1993).
   readonly configNotLoaded = this.configNotLoadedState.asReadonly();
@@ -159,22 +159,20 @@ export class UnitRichNoteTagsConfigComponent implements OnInit, OnDestroy, OnCha
   }
 
   saveData(): void {
-    if (this.saving()) return;
     if (this.configForm.valid) {
       const urls = this.urls.value;
-      const sent = JSON.stringify(urls);
-      this.savingState.set(true);
+      if (!this.save.start(urls)) return;
       this.backendService.setUnitRichNoteTags(urls)
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(success => {
-          this.savingState.set(false);
+          this.save.finish();
           if (success) {
             this.snackBar.open(
               this.translateService.instant('workspace.tags-saved-success'),
               '',
               { duration: 3000 }
             );
-            this.dataChanged = JSON.stringify(this.urls.value) !== sent;
+            this.dataChanged = this.save.differsFromSent(this.urls.value);
           } else {
             this.snackBar.open(
               this.translateService.instant('workspace.tags-saved-error'),

@@ -1,5 +1,5 @@
 import {
-  Component, OnDestroy, OnInit, signal, ViewChild
+  Component, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import {
@@ -27,6 +27,7 @@ import { SelectUnitListComponent } from '../select-unit-list/select-unit-list.co
 import { ReviewMenuComponent } from '../review-menu/review-menu.component';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
 import { I18nService } from '../../../../services/i18n.service';
+import { SaveLock } from '../../../../classes/save-lock.class';
 
 /**
  * The reviews of a workspace: which units each contains, what a reviewer may do in it, and the
@@ -53,9 +54,8 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
   // True while the review list or the selected review are on their way: a change to units or
   // settings made now would be reset by their arrival, so both stay disabled until then, and save too.
   isLoadingReview = false;
-  private readonly savingState = signal(false);
-  // While a save is under way the button is locked, and what is entered meanwhile stays a change (#2094).
-  readonly saving = this.savingState.asReadonly();
+  // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
+  readonly save = new SaveLock();
   // Counts the loads of the selected review's data, so that the answer to a save applies only to the data it
   // was sent from: switched away and back meanwhile, the review was loaded anew, perhaps before the save.
   private reviewLoads = 0;
@@ -181,20 +181,20 @@ export class ReviewsComponent extends CheckForChangesDirective implements OnInit
 
   saveChanges() {
     // The data still belongs to the review selected before, or is about to be replaced.
-    if (this.isLoadingReview || this.saving()) return;
+    if (this.isLoadingReview) return;
     if (this.reviewDataToChange) {
       const reviewId = this.selectedReviewId;
       const load = this.reviewLoads;
       // a copy: what is sent must not change with the edits made while it is under way
       const sent = structuredClone(this.reviewDataToChange);
       const renamed = this.reviewDataOriginal.name !== sent.name;
-      this.savingState.set(true);
+      if (!this.save.start(sent)) return;
       this.backendService.setReview(
         this.workspaceService.selectedWorkspaceId,
         reviewId,
         sent
       ).pipe(takeUntil(this.ngUnsubscribe)).subscribe(ok => {
-        this.savingState.set(false);
+        this.save.finish();
         if (ok) {
           // sent as it is, not in the shape of copyFrom, which fills in configs the review lacks and would
           // make it differ from the data edited
