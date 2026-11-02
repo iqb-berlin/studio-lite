@@ -59,7 +59,7 @@ export class UnitDefinitionService {
   async findOnesScheme(unitId: number): Promise<UnitSchemeDto> {
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId },
-      select: ['scheme', 'schemeType', 'variables']
+      select: { scheme: true, schemeType: true, variables: true }
     });
     return {
       variables: unit.variables && toVariableInfoListV1(unit.variables),

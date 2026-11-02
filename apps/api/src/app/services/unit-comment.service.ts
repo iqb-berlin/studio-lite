@@ -245,7 +245,7 @@ export class UnitCommentService {
   async getCommentVoters(commentId: number): Promise<UnitCommentVoterDto[]> {
     const votesWithUsers = await this.unitCommentVoteRepository.find({
       where: { commentId },
-      relations: ['user'],
+      relations: { user: true },
       order: {
         user: {
           lastName: 'ASC',

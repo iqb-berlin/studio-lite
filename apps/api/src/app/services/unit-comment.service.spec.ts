@@ -429,7 +429,7 @@ describe('UnitCommentService', () => {
 
       expect(voteRepository.find).toHaveBeenCalledWith({
         where: { commentId },
-        relations: ['user'],
+        relations: { user: true },
         order: {
           user: {
             lastName: 'ASC',

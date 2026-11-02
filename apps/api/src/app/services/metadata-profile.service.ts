@@ -80,14 +80,18 @@ export class MetadataProfileService {
 
   async getProfileVocabularies(url: string): Promise<MetadataVocabularyDto[]> {
     const profile = await this.getStoredMetadataProfile(url);
+    // A profile that is neither stored nor can be fetched has no vocabularies to offer
+    if (!profile) return [];
     const vocabularies: MetadataVocabularyDto[] = [];
     const vocabularyIds = profile.groups
       .map(group => group.entries)
       .flat()
       .filter(entry => entry.type.toLowerCase() === 'vocabulary')
       .map(
-        entry => (entry.parameters as unknown as ProfileEntryParametersVocabulary).url
-      );
+        entry => (entry.parameters as unknown as ProfileEntryParametersVocabulary)?.url
+      )
+      // The profile comes from outside and is not validated; looking up a missing url would throw (#2095)
+      .filter(id => !!id);
     await Promise.all(vocabularyIds
       .map(async id => {
         vocabularies.push(await this.metadataVocabularyService.getStoredMetadataVocabularyById(id));

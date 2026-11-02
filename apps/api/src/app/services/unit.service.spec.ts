@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
@@ -247,7 +247,7 @@ describe('UnitService', () => {
       expect(await service.idsNotInWorkspace([10, 11, 10], 3)).toEqual([11]);
       expect(unitsRepository.find).toHaveBeenCalledWith({
         where: { id: In([10, 11]), workspaceId: 3 },
-        select: ['id']
+        select: { id: true }
       });
     });
 
@@ -272,7 +272,7 @@ describe('UnitService', () => {
       expect(await service.workspacesOfUnits([10, 11, 12, 10])).toEqual(new Map([[10, 3], [11, 4]]));
       expect(unitsRepository.find).toHaveBeenCalledWith({
         where: { id: In([10, 11, 12]) },
-        select: ['id', 'workspaceId']
+        select: { id: true, workspaceId: true }
       });
     });
 
@@ -311,6 +311,14 @@ describe('UnitService', () => {
       unitsRepository.findOne.mockResolvedValue({ id: 1 } as Unit);
       const result = await service.create(1, { key: 'u1' } as CreateUnitDto, { id: 1 } as User, false);
       expect(result).toBe(0);
+    });
+
+    // TypeORM 1 throws on an undefined value in a where (#2095)
+    it('should refuse a unit without a key before looking for a duplicate', async () => {
+      await expect(service.create(1, {} as CreateUnitDto, { id: 1 } as User, false))
+        .rejects.toBeInstanceOf(BadRequestException);
+      expect(unitsRepository.findOne).not.toHaveBeenCalled();
+      expect(unitsRepository.save).not.toHaveBeenCalled();
     });
 
     it('should assign a uuid to the new unit', async () => {
@@ -466,7 +474,7 @@ describe('UnitService', () => {
       expect(result).toEqual([{ id: 1, metadata, scheme: '{}' }]);
       expect(unitsRepository.find).toHaveBeenCalledWith({
         where: { workspaceId: 4 },
-        select: ['id', 'metadata', 'scheme']
+        select: { id: true, metadata: true, scheme: true }
       });
       expect(unitMetadataService.buildHideNumberingMap).not.toHaveBeenCalled();
     });

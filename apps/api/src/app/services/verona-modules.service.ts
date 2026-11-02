@@ -50,7 +50,7 @@ export class VeronaModulesService {
     this.logger.log(`Returning verona module with key: ${key}`);
     const file = await this.veronaModulesRepository.findOne({
       where: { key: key },
-      select: ['file', 'key', 'metadata']
+      select: { file: true, key: true, metadata: true }
     });
     if (file) {
       return <VeronaModuleFileDto>{
@@ -66,7 +66,9 @@ export class VeronaModulesService {
   async findAll(type?: string): Promise<VeronaModuleInListDto[]> {
     this.logger.log('Returning verona modules.');
     const veronaModules = (await this.veronaModulesRepository.find({
-      select: ['key', 'metadata', 'fileSize', 'fileDateTime']
+      select: {
+        key: true, metadata: true, fileSize: true, fileDateTime: true
+      }
     })) ?? [];
     return veronaModules
       .filter(vm => !type || veronaModuleTypesMatch(vm.metadata?.type, type))

@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   In, Not, QueryFailedError, Repository
@@ -74,7 +74,7 @@ export class UnitService {
     if (distinctIds.length === 0) return [];
     const found = await this.unitsRepository.find({
       where: { id: In(distinctIds), workspaceId: workspaceId },
-      select: ['id']
+      select: { id: true }
     });
     const foundIds = new Set(found.map(unit => unit.id));
     return distinctIds.filter(id => !foundIds.has(id));
@@ -86,7 +86,7 @@ export class UnitService {
     if (distinctIds.length === 0) return new Map();
     const units = await this.unitsRepository.find({
       where: { id: In(distinctIds) },
-      select: ['id', 'workspaceId']
+      select: { id: true, workspaceId: true }
     });
     return new Map(units.map(unit => [unit.id, unit.workspaceId]));
   }
@@ -95,7 +95,7 @@ export class UnitService {
     const units = await this.unitsRepository
       .find({
         where: { workspaceId: workspaceId },
-        select: ['id']
+        select: { id: true }
       });
     return units.map(unit => unit.id);
   }
@@ -121,7 +121,7 @@ export class UnitService {
       }
     }) as UnitInViewDto[];
     // The admin's unit list exports it in its CSV (#2012).
-    const workspaces = await this.workspaceRepository.find({ select: ['id', 'name'] });
+    const workspaces = await this.workspaceRepository.find({ select: { id: true, name: true } });
     const workspaceNames = new Map(workspaces.map(workspace => [workspace.id, workspace.name]));
     return units.map(unit => ({
       ...unit,
@@ -160,7 +160,7 @@ export class UnitService {
   async findAllForGroup(workspaceGroupId: number): Promise<UnitInViewDto[]> {
     const workspaces = await this.workspaceRepository.find({
       where: { groupId: workspaceGroupId },
-      select: ['id', 'name']
+      select: { id: true, name: true }
     });
     const workspaceIds = workspaces.map(w => w.id);
     if (workspaceIds.length === 0) return [];
@@ -259,9 +259,11 @@ export class UnitService {
   }
 
   async create(workspaceId: number, unit: CreateUnitDto, user: User, addComments: boolean): Promise<number> {
+    // TypeORM throws on an undefined key in the lookup below; a request without one is the caller's error (#2095)
+    if (!unit.key) throw new BadRequestException('A unit needs a key.');
     const existingUnitId = await this.unitsRepository.findOne({
       where: { workspaceId: workspaceId, key: unit.key },
-      select: ['id']
+      select: { id: true }
     });
     if (existingUnitId) return 0;
     // A unit is created here, never overwritten: an id sent along would have save() update that
@@ -275,10 +277,25 @@ export class UnitService {
     if (unit.createFrom) {
       const unitSourceData = await this.unitsRepository.findOne({
         where: { id: unit.createFrom },
-        select: ['id', 'key', 'editor', 'schemer', 'metadata', 'scheme', 'schemeType',
-          'player', 'description', 'reference', 'transcript',
-          'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme',
-          'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser']
+        select: {
+          id: true,
+          key: true,
+          editor: true,
+          schemer: true,
+          metadata: true,
+          scheme: true,
+          schemeType: true,
+          player: true,
+          description: true,
+          reference: true,
+          transcript: true,
+          lastChangedMetadata: true,
+          lastChangedDefinition: true,
+          lastChangedScheme: true,
+          lastChangedMetadataUser: true,
+          lastChangedDefinitionUser: true,
+          lastChangedSchemeUser: true
+        }
       });
       if (unitSourceData) {
         newUnit.description = unitSourceData.description;
@@ -357,7 +374,7 @@ export class UnitService {
   async adoptUuidIfFree(unitId: number, uuid: string): Promise<void> {
     const existing = await this.unitsRepository.findOne({
       where: { uuid },
-      select: ['id']
+      select: { id: true }
     });
     if (existing) return;
     try {
@@ -376,7 +393,7 @@ export class UnitService {
     return this.unitsRepository.manager.transaction(async manager => {
       const unit = await manager.findOne(Unit, {
         where: { id: unitId },
-        select: ['id', 'uuid'],
+        select: { id: true, uuid: true },
         lock: { mode: 'pessimistic_write' }
       });
       if (!unit) throw new UnitNotFoundException(unitId, 0, 'GET');
@@ -391,12 +408,28 @@ export class UnitService {
     this.logger.log(`Returning metadata for unit wit id: ${unitId}`);
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId, workspaceId: workspaceId },
-      select: [
-        'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
-        'player', 'description', 'transcript', 'reference', 'uuid',
-        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state',
-        'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser'
-      ]
+      select: {
+        id: true,
+        key: true,
+        name: true,
+        groupName: true,
+        editor: true,
+        schemer: true,
+        metadata: true,
+        schemeType: true,
+        player: true,
+        description: true,
+        transcript: true,
+        reference: true,
+        uuid: true,
+        lastChangedMetadata: true,
+        lastChangedDefinition: true,
+        lastChangedScheme: true,
+        state: true,
+        lastChangedMetadataUser: true,
+        lastChangedDefinitionUser: true,
+        lastChangedSchemeUser: true
+      }
     });
     if (!unit) throw new UnitNotFoundException(unitId, workspaceId, 'GET');
     const workspace = await this.workspaceRepository.findOne({
@@ -412,12 +445,29 @@ export class UnitService {
     const units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
       order: { key: 'ASC' },
-      select: [
-        'id', 'key', 'name', 'groupName', 'editor', 'schemer', 'metadata', 'schemeType',
-        'player', 'description', 'transcript', 'reference', 'scheme', 'variables',
-        'lastChangedMetadata', 'lastChangedDefinition', 'lastChangedScheme', 'state',
-        'lastChangedMetadataUser', 'lastChangedDefinitionUser', 'lastChangedSchemeUser'
-      ]
+      select: {
+        id: true,
+        key: true,
+        name: true,
+        groupName: true,
+        editor: true,
+        schemer: true,
+        metadata: true,
+        schemeType: true,
+        player: true,
+        description: true,
+        transcript: true,
+        reference: true,
+        scheme: true,
+        variables: true,
+        lastChangedMetadata: true,
+        lastChangedDefinition: true,
+        lastChangedScheme: true,
+        state: true,
+        lastChangedMetadataUser: true,
+        lastChangedDefinitionUser: true,
+        lastChangedSchemeUser: true
+      }
     });
     const profileCache: ProfileFetchCache = new Map();
     return Promise.all(units.map(async unit => this.unitMetadataService
@@ -438,7 +488,7 @@ export class UnitService {
   ): Promise<{ id: number; metadata: UnitMetadataValues; scheme: string }[]> {
     const units = await this.unitsRepository.find({
       where: { workspaceId: workspaceId },
-      select: ['id', 'metadata', 'scheme']
+      select: { id: true, metadata: true, scheme: true }
     });
     const markedUnitIds = await this.unitMetadataToDeleteService
       .findMarkedUnitIds(units.map(unit => unit.id));
@@ -524,7 +574,7 @@ export class UnitService {
     const normalisedKey = key.toUpperCase().trim();
     const unitsOfWorkspace = await this.unitsRepository.find({
       where: { workspaceId: unit.workspaceId },
-      select: ['id', 'key']
+      select: { id: true, key: true }
     });
     if (unitsOfWorkspace.some(other => other.id !== unit.id && other.key?.toUpperCase().trim() === normalisedKey)) {
       throw new UnitKeyExistsException(unit.id, unit.workspaceId, key);
@@ -566,7 +616,7 @@ export class UnitService {
   }
 
   private async notReturned(unitId: number, messageKey: string): Promise<RequestReportDto> {
-    const unit = await this.unitsRepository.findOne({ where: { id: unitId }, select: ['key'] });
+    const unit = await this.unitsRepository.findOne({ where: { id: unitId }, select: { key: true } });
     return {
       source: 'unit-return-submitted',
       messages: [{ objectKey: unit?.key ?? `${unitId}`, messageKey }]
@@ -591,11 +641,13 @@ export class UnitService {
     const reports = await Promise.all(unitIds.map(async unitId => {
       const unit = await this.unitsRepository.findOne({
         where: { id: unitId },
-        select: ['id', 'key', 'workspaceId', 'variables', 'metadata']
+        select: {
+          id: true, key: true, workspaceId: true, variables: true, metadata: true
+        }
       });
       const existingUnit = await this.unitsRepository.findOne({
         where: { workspaceId: newWorkspaceId, key: unit.key },
-        select: ['id']
+        select: { id: true }
       });
       if (existingUnit) {
         return <RequestReportDto>{
@@ -612,7 +664,7 @@ export class UnitService {
       unit.groupName = '';
       const newWorkspace = await this.workspaceRepository.findOne({
         where: { id: newWorkspaceId },
-        select: ['groupId', 'settings']
+        select: { groupId: true, settings: true }
       });
       if ((action === 'submit' || action === 'return') && workspaceId) {
         await this.unitDropBoxHistoryRepository.upsert({
@@ -626,7 +678,7 @@ export class UnitService {
         await this.unitDropBoxHistoryRepository.delete({ unitId: unit.id });
         const workspace = await this.workspaceRepository.findOne({
           where: { id: workspaceId },
-          select: ['groupId']
+          select: { groupId: true }
         });
         if (workspace.groupId !== newWorkspace.groupId) {
           unit.state = '0';

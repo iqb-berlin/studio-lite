@@ -341,17 +341,18 @@ describe('Unit API tests', () => {
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
           expect(resp.status).to.equal(200);
+          // the registry's first profile names vocabularies; an empty list means it was not loaded
+          expect(resp.body).to.be.an('array').with.length.greaterThan(0);
         });
       });
 
-      // At sweagger if we pass an incorrect url, it returns 500
-      it('500/200 negative test: should return success but fail to retrieve vocabulary for an invalid profile', () => {
+      it('200 negative test: should return no vocabulary for a profile that cannot be loaded (#2095)', () => {
         cy.getVocabularyMetadataAPI(
           noId,
           Cypress.expose(`token_${Cypress.expose('username')}`)
         ).then(resp => {
           expect(resp.status).to.equal(200);
-          // expect(resp.status).to.equal(500); // should
+          expect(resp.body).to.deep.equal([]);
         });
       });
 
@@ -1265,20 +1266,15 @@ describe('Unit API tests', () => {
       });
     });
 
-    it(
-      '500/201 negative test: should return success but fail to duplicate a unit' +
-        ' when an invalid request structure is provided',
-      () => {
-        cy.copyToAPI(
-          Cypress.expose(ws2.id),
-          noId,
-          Cypress.expose(`token_${Cypress.expose('username')}`)
-        ).then(resp => {
-          expect(resp.status).to.equal(201);
-          // expect(resp.status).to.equal(500); // should
-        });
-      }
-    );
+    it('400 negative test: should refuse a unit without a key (#2095)', () => {
+      cy.copyToAPI(
+        Cypress.expose(ws2.id),
+        noId,
+        Cypress.expose(`token_${Cypress.expose('username')}`)
+      ).then(resp => {
+        expect(resp.status).to.equal(400);
+      });
+    });
 
     it(
       '403 negative test: should be refused when trying to duplicate' +
