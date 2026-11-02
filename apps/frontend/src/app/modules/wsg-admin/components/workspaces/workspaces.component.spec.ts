@@ -8,6 +8,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { WorkspaceInListDto, WorkspaceUserInListDto } from '@studio-lite-lib/api-dto';
 import { BehaviorSubject, of, Subject } from 'rxjs';
+import { saveAs } from 'file-saver-es';
 import { ConfirmDialogComponent } from '@studio-lite-lib/iqb-components';
 import { AppService } from '../../../../services/app.service';
 import { I18nService } from '../../../../services/i18n.service';
@@ -22,6 +23,8 @@ import { WorkspaceMenuComponent } from '../workspace-menu/workspace-menu.compone
 import { WorkspacesComponent } from './workspaces.component';
 import { WorkspaceUserChecked } from '../../models/workspace-user-checked.class';
 import { BackendService as AppBackendService } from '../../../../services/backend.service';
+
+jest.mock('file-saver-es', () => ({ saveAs: jest.fn() }));
 
 @Component({ selector: 'studio-lite-workspace-menu', template: '', standalone: true })
 class MockWorkspaceMenuComponent {
@@ -66,6 +69,7 @@ describe('WorkspacesComponent', () => {
     addWorkspace: jest.Mock;
     selectWorkspaceDropBox: jest.Mock;
     renameWorkspace: jest.Mock;
+    getXlsWorkspaces: jest.Mock;
   };
   let mockAppBackendService: {
     setWorkspaceSettings?: jest.Mock;
@@ -94,7 +98,8 @@ describe('WorkspacesComponent', () => {
       moveWorkspaces: jest.fn().mockReturnValue(of(false)),
       addWorkspace: jest.fn().mockReturnValue(of(false)),
       selectWorkspaceDropBox: jest.fn().mockReturnValue(of(false)),
-      renameWorkspace: jest.fn().mockReturnValue(of(false))
+      renameWorkspace: jest.fn().mockReturnValue(of(false)),
+      getXlsWorkspaces: jest.fn().mockReturnValue(of(null))
     };
     mockAppBackendService = {};
     mockWorkspaceBackendService = {};
@@ -363,6 +368,17 @@ describe('WorkspacesComponent', () => {
 
     expect(mockBackendService.moveWorkspaces).toHaveBeenCalledWith(2, [3]);
     expect(mockSnackBar.open).toHaveBeenCalledWith('wsg-admin.workspaces-not-moved', 'error', { duration: 3000 });
+    expect(mockAppService.dataLoading).toBe(false);
+  });
+
+  // A failed report never reached the component, and the spinner stayed (#2106)
+  it('should save no file and take the spinner down when the report could not be loaded', () => {
+    jest.mocked(saveAs).mockClear();
+    mockBackendService.getXlsWorkspaces.mockReturnValue(of(null));
+
+    component.xlsxDownloadWorkspaceReport();
+
+    expect(saveAs).not.toHaveBeenCalled();
     expect(mockAppService.dataLoading).toBe(false);
   });
 
