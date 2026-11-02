@@ -139,6 +139,8 @@ export class UnitsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // The requests cancelled below cannot take the spinner down any more (#2105)
+    this.appService.dataLoading = false;
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }

@@ -348,6 +348,16 @@ describe('AddUnitButtonComponent', () => {
     expect(appService.dataLoading).toBe(true);
   });
 
+  // Leaving the workspace cancelled the upload, whose end alone took the spinner down (#2105)
+  it('should take the spinner down when the workspace is left during the upload', () => {
+    component.onFileSelected(createMock<HTMLInputElement>({ files: createMock<FileList>({ length: 1 }) }));
+    expect(appService.dataLoading).toBe(true);
+
+    fixture.destroy();
+
+    expect(appService.dataLoading).toBe(false);
+  });
+
   // The same file chosen again raised no change, so a failed upload could not be retried with it (#1994)
   it('should clear the choice once the upload has the files, so the same file can be chosen again', () => {
     const input = createMock<HTMLInputElement>({ files: createMock<FileList>({ length: 1 }), value: 'units.zip' });

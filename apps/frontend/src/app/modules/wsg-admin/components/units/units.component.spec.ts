@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, TestBed, fakeAsync, tick
+} from '@angular/core/testing';
 import {
   Component, Input, Output, EventEmitter
 } from '@angular/core';
@@ -7,7 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { UnitInViewDto } from '@studio-lite-lib/api-dto';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { AppService } from '../../../../services/app.service';
 import { I18nService } from '../../../../services/i18n.service';
 import { SearchFilterComponent } from '../../../../components/search-filter/search-filter.component';
@@ -102,6 +104,18 @@ describe('UnitsComponent', () => {
     expect(mockBackendService.getAllUnitsForGroup).toHaveBeenCalledWith(1);
     expect(component.dataSource.data).toEqual(units);
   });
+
+  // Switching to another tab cancelled the list, whose answer alone took the spinner down (#2105)
+  it('should take the spinner down when the page is left while the list loads', fakeAsync(() => {
+    mockBackendService.getAllUnitsForGroup.mockReturnValue(new Subject<UnitInViewDto[]>());
+    component.ngOnInit();
+    tick();
+    expect(mockAppService.dataLoading).toBe(true);
+
+    fixture.destroy();
+
+    expect(mockAppService.dataLoading).toBe(false);
+  }));
 
   it('should delete unit', () => {
     fixture.detectChanges();

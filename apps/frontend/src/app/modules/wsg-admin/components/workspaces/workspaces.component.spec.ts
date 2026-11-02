@@ -182,6 +182,17 @@ describe('WorkspacesComponent', () => {
     expect(mockBackendService.getUsersByWorkspace).toHaveBeenCalledWith(1);
   });
 
+  // Switching to another tab cancelled the list, whose answer alone took the spinner down (#2105)
+  it('should take the spinner down when the page is left while the list loads', () => {
+    mockBackendService.getWorkspaces.mockReturnValue(new Subject<WorkspaceInListDto[]>());
+    fixture.detectChanges();
+    expect(mockAppService.dataLoading).toBe(true);
+
+    fixture.destroy();
+
+    expect(mockAppService.dataLoading).toBe(false);
+  });
+
   describe('while the rights of the selected workspace load', () => {
     const ws1 = {
       id: 1, name: 'ws1', groupId: 1, unitsCount: 0

@@ -290,5 +290,7 @@ export class AddUnitButtonComponent extends SelectUnitDirective implements OnDes
     if (this.uploadSubscription !== null) {
       this.uploadSubscription.unsubscribe();
     }
+    // The upload cancelled above cannot take the spinner down any more (#2105)
+    this.appService.dataLoading = false;
   }
 }

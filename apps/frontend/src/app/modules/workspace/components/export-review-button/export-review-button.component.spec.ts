@@ -4,7 +4,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { UnitDownloadSettingsDto } from '@studio-lite-lib/api-dto';
 import { ExportReviewButtonComponent } from './export-review-button.component';
@@ -19,13 +19,15 @@ describe('ExportReviewButtonComponent', () => {
   let fixture: ComponentFixture<ExportReviewButtonComponent>;
   let mockWorkspaceService: DeepMocked<WorkspaceService>;
   let mockWorkspaceBackendService: DeepMocked<WorkspaceBackendService>;
-  let mockAppService: DeepMocked<AppService>;
+  let mockAppService: Pick<AppService, 'dataLoading'>;
   let mockDialog: DeepMocked<MatDialog>;
 
   beforeEach(async () => {
     mockWorkspaceService = createMock<WorkspaceService>({ selectedWorkspaceId: 1 });
     mockWorkspaceBackendService = createMock<WorkspaceBackendService>();
-    mockAppService = createMock<AppService>({ dataLoading: false });
+    // A plain object: createMock answers every read with the value read first, so a test would not see
+    // the spinner change
+    mockAppService = { dataLoading: false };
     mockDialog = createMock<MatDialog>();
 
     await TestBed.configureTestingModule({
@@ -106,6 +108,22 @@ describe('ExportReviewButtonComponent', () => {
       }));
 
       component.exportReview();
+
+      expect(mockAppService.dataLoading).toBe(false);
+    });
+
+    // Closing the review dialog cancelled the export, whose end alone took the spinner down (#2105)
+    it('should take the spinner down when the dialog is closed during the download', () => {
+      const download = new Subject<Blob | number | null>();
+      mockWorkspaceBackendService.downloadUnitsJson.mockReturnValue(download);
+      mockDialog.open.mockReturnValue(createMock<MatDialogRef<ExportUnitComponent>>({
+        afterClosed: () => of(buildSettings('json'))
+      }));
+      component.exportReview();
+      download.next(40);
+      expect(mockAppService.dataLoading).toBe(40);
+
+      fixture.destroy();
 
       expect(mockAppService.dataLoading).toBe(false);
     });

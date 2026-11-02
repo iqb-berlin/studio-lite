@@ -160,6 +160,17 @@ describe('UsersComponent', () => {
     expect(component.selectedUser).toBe(0);
   });
 
+  // Switching to another tab cancelled the list, whose answer alone took the spinner down (#2105)
+  it('should take the spinner down when the page is left while the list loads', () => {
+    mockBackendService.getUsersFull.mockReturnValue(new Subject<UserFullDto[]>());
+    fixture.detectChanges();
+    expect(mockAppService.dataLoading).toBe(true);
+
+    fixture.destroy();
+
+    expect(mockAppService.dataLoading).toBe(false);
+  });
+
   describe('while the rights of the selected user load', () => {
     const user1 = {
       id: 1, name: 'user1', isAdmin: false, description: ''
