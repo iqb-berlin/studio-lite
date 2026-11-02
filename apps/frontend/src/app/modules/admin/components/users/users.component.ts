@@ -131,8 +131,8 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopPolling();
-    // The cancelled answer cannot take the spinner down any more
-    if (this.loadingGroups()) this.appService.dataLoading = false;
+    // The requests cancelled below cannot take the spinner down any more (#2105)
+    this.appService.dataLoading = false;
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }

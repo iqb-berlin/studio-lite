@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterTestingModule } from '@angular/router/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { UnitItemInViewDto } from '@studio-lite-lib/api-dto';
 import { UnitItemsComponent } from './unit-items.component';
 import { BackendService } from '../../services/backend.service';
@@ -115,6 +115,19 @@ describe('UnitItemsComponent', () => {
 
     expect(spy).toHaveBeenCalledWith(1);
     expect(component.dataSource.data).toEqual(mockItems);
+  }));
+
+  // Switching to another tab cancelled the list, whose answer alone took the spinner down (#2105)
+  it('should take the spinner down when the page is left while the list loads', fakeAsync(() => {
+    const appService = TestBed.inject(AppService);
+    jest.spyOn(backendService, 'getAllUnitItemsForGroup').mockReturnValue(new Subject<UnitItemInViewDto[]>());
+    component.ngOnInit();
+    tick();
+    expect(appService.dataLoading).toBe(true);
+
+    fixture.destroy();
+
+    expect(appService.dataLoading).toBe(false);
   }));
 
   it('should format UUID correctly', () => {

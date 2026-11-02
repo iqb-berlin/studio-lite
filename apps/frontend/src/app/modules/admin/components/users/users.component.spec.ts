@@ -422,6 +422,17 @@ describe('UsersComponent', () => {
       .toEqual(['active', 'orphaned']);
   });
 
+  // Switching to another tab cancelled the list, whose answer alone took the spinner down (#2105)
+  it('should take the spinner down when the page is left while the list loads', () => {
+    (mockBackendService.getUsersFullWithActivity as jest.Mock).mockReturnValue(new Subject<UserFullDto[]>());
+    component.updateUserList();
+    expect(mockAppService.dataLoading).toBe(true);
+
+    fixture.destroy();
+
+    expect(mockAppService.dataLoading).toBe(false);
+  });
+
   // A check set before the groups of the selected user arrived was reset by them, and so was one
   // set before a poll selected the fresh row of the same user again (#2056).
   describe('while the groups of the selected user load', () => {

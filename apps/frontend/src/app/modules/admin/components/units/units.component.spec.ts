@@ -11,6 +11,7 @@ import { UnitsComponent } from './units.component';
 import { UnitsMenuComponent } from '../units-menu/units-menu.component';
 import { BackendService } from '../../services/backend.service';
 import { I18nService } from '../../../../services/i18n.service';
+import { AppService } from '../../../../services/app.service';
 
 jest.mock('file-saver-es', () => ({ saveAs: jest.fn() }));
 
@@ -79,5 +80,16 @@ describe('UnitsComponent', () => {
         'lastChangedScheme,lastChangedDefinitionUser,lastChangedMetadataUser,lastChangedSchemeUser',
       '"M1","Mathe, Teil 1","",4,"WS",2,"2026-10-01T10:00:00.000Z","","2026-10-02T10:00:00.000Z","anna","","bert"'
     ]);
+  });
+
+  // Without units the header of the CSV could not be read, and the spinner stayed (#2106)
+  it('should save no file and take the spinner down when there are no units', () => {
+    jest.mocked(saveAs).mockClear();
+    backendService.getAllUnits.mockReturnValue(of([]));
+
+    component.downloadUnits();
+
+    expect(saveAs).not.toHaveBeenCalled();
+    expect(TestBed.inject(AppService).dataLoading).toBe(false);
   });
 });

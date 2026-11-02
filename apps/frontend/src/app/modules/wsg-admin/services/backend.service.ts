@@ -160,7 +160,9 @@ export class BackendService {
       );
   }
 
-  getXlsWorkspaces(workspaceGroupId: number): Observable<Blob> {
+  // A failure is answered with null: passed on as an error, it never reached the handler that takes
+  // the spinner down (#2106).
+  getXlsWorkspaces(workspaceGroupId: number): Observable<Blob | null> {
     const queryParams = new HttpParams().set('download', 'true');
     return this.http.get(
       `${this.serverUrl}workspace-groups/${workspaceGroupId}`,
@@ -171,6 +173,8 @@ export class BackendService {
         params: queryParams,
         responseType: 'blob'
       }
+    ).pipe(
+      catchError(() => of(null))
     );
   }
 }

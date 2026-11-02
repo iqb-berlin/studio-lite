@@ -244,12 +244,14 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
     this.backendService.getXlsWorkspaces(this.wsgAdminService.selectedWorkspaceGroupId.value)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(workspace => {
-        const datePipe = new DatePipe(this.i18nService.fullLocale);
-        const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
-        saveAs(
-          workspace,
-          this.translateService.instant('wsg-admin.workspaces-excel-name', { date: thisDate })
-        );
+        if (workspace) {
+          const datePipe = new DatePipe(this.i18nService.fullLocale);
+          const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
+          saveAs(
+            workspace,
+            this.translateService.instant('wsg-admin.workspaces-excel-name', { date: thisDate })
+          );
+        }
         this.appService.dataLoading = false;
       });
   }
@@ -389,6 +391,8 @@ export class WorkspacesComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // The requests cancelled below cannot take the spinner down any more (#2105)
+    this.appService.dataLoading = false;
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }

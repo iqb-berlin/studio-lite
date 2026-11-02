@@ -426,6 +426,17 @@ describe('ReviewsComponent', () => {
     expect(component.objectsDatasource.data).toEqual([{ id: 1, name: 'New' }, { id: 2, name: 'Created' }]);
   }));
 
+  // Closing the dialog cancelled the list, whose answer alone took the spinner down (#2105)
+  it('should take the spinner down when the dialog is closed while the list loads', () => {
+    backendServiceMock.getReviewList.mockReturnValue(new Subject<ReviewInListDto[]>());
+    component.loadReviewList();
+    expect(appServiceMock.dataLoading).toBe(true);
+
+    fixture.destroy();
+
+    expect(appServiceMock.dataLoading).toBe(false);
+  });
+
   // #2094: what is entered while the save is under way was not sent, and a second save waits
   it('keeps an entry made while saving unsaved and does not save twice meanwhile', () => {
     const answer = new Subject<boolean>();

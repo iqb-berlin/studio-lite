@@ -71,16 +71,14 @@ export class WorkspacesComponent implements OnInit, AfterViewInit {
 
   xlsxDownloadWorkspaceReport(): void {
     this.appService.dataLoading = true;
-    try {
-      this.backendService.getXlsWorkspaces().subscribe(b => {
+    this.backendService.getXlsWorkspaces().subscribe(b => {
+      if (b) {
         const datePipe = new DatePipe(this.i18nService.fullLocale);
         const thisDate = datePipe.transform(new Date(), this.i18nService.fileDateFormat);
         saveAs(b, `${thisDate} ${this.translateService.instant('wsg-admin.report-workspaces')}.xlsx`);
-        this.appService.dataLoading = false;
-      });
-    } catch {
+      }
       this.appService.dataLoading = false;
-    }
+    });
   }
 
   // eslint-disable-next-line class-methods-use-this
