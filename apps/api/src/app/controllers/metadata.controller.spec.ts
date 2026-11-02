@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BadRequestException } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { MetadataVocabularyDto } from '@studio-lite-lib/api-dto';
 import { MetadataController } from './metadata.controller';
@@ -60,5 +61,13 @@ describe('MetadataController', () => {
       expect(result).toBe(mockVocabs);
       expect(metadataProfileService.getProfileVocabularies).toHaveBeenCalledWith('http://test');
     });
+  });
+
+  // TypeORM 1 throws on an undefined id in the lookup of the stored profile (#2095)
+  it('should refuse both profile routes without a url before asking the service', async () => {
+    await expect(controller.getMetadataProfileByUrl(undefined)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(controller.getMetadataVocabulariesForProfile('')).rejects.toBeInstanceOf(BadRequestException);
+    expect(metadataProfileService.getStoredMetadataProfile).not.toHaveBeenCalled();
+    expect(metadataProfileService.getProfileVocabularies).not.toHaveBeenCalled();
   });
 });

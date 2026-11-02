@@ -109,7 +109,7 @@ export class ItemCommentService {
       .find({
         where: { unitId: unitId, unitCommentId: commentId },
         order: { createdAt: 'ASC' },
-        select: ['unitItemUuid']
+        select: { unitItemUuid: true }
       });
   }
 

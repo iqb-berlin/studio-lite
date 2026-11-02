@@ -87,7 +87,7 @@ describe('UnitItemService', () => {
 
       const result = await service.getAll();
 
-      expect(repository.find).toHaveBeenCalledWith({ relations: ['unit', 'unit.workspace'] });
+      expect(repository.find).toHaveBeenCalledWith({ relations: { unit: { workspace: true } } });
       expect(result).toEqual([{
         uuid: 'u1',
         unitId: 136421,

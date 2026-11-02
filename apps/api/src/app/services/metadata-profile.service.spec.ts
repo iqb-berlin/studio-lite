@@ -170,5 +170,36 @@ describe('MetadataProfileService', () => {
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('vocab-url');
     });
+
+    // TypeORM 1 throws on an undefined value in a where (#2095), and the profile comes from outside
+    it('should skip vocabulary entries without a url instead of looking them up', async () => {
+      const profileDto = {
+        groups: [
+          {
+            entries: [
+              { type: 'vocabulary', parameters: {} },
+              { type: 'vocabulary' },
+              { type: 'vocabulary', parameters: { url: 'vocab-url' } }
+            ]
+          }
+        ]
+      } as unknown as MetadataProfileDto;
+      jest.spyOn(service, 'getStoredMetadataProfile').mockResolvedValue(profileDto);
+      metadataVocabularyService.getStoredMetadataVocabularyById
+        .mockResolvedValue({ id: 'vocab-url' } as MetadataVocabularyDto);
+
+      const result = await service.getProfileVocabularies('url');
+
+      expect(metadataVocabularyService.getStoredMetadataVocabularyById).toHaveBeenCalledTimes(1);
+      expect(metadataVocabularyService.getStoredMetadataVocabularyById).toHaveBeenCalledWith('vocab-url');
+      expect(result.map(vocabulary => vocabulary.id)).toEqual(['vocab-url']);
+    });
+
+    it('should answer a profile that can neither be read nor fetched with no vocabularies (#2095)', async () => {
+      jest.spyOn(service, 'getStoredMetadataProfile').mockResolvedValue(null);
+
+      await expect(service.getProfileVocabularies('no-profile')).resolves.toEqual([]);
+      expect(metadataVocabularyService.getStoredMetadataVocabularyById).not.toHaveBeenCalled();
+    });
   });
 });
