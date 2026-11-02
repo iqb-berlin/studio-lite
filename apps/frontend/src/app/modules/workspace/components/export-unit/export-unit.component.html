@@ -12,8 +12,7 @@
       </studio-lite-select-unit-list>
       <div class="fx-flex-row-50 settings">
         <studio-lite-export-unit-file-config
-          [exportFormat]="unitExportSettings.exportFormat"
-          (exportFormatChange)="setExportFormat($event)"
+          [(exportFormat)]="unitExportSettings.exportFormat"
           [selectedUnitIds]="unitExportSettings.unitIdList"
           [(addPlayers)]="unitExportSettings.addPlayers"
           (fileSelectionChange)="setFileSelection($event)"
@@ -22,17 +21,11 @@
         <mat-accordion multi>
           <mat-expansion-panel
             data-cy="export-test-taker-panel"
-            [expanded]="unitExportSettings.exportFormat === 'xml'"
-            [disabled]="unitExportSettings.exportFormat === 'json'">
+            [expanded]="true">
             <mat-expansion-panel-header>
               <mat-panel-title>
                 {{'workspace.test-taker-settings' | translate}}
               </mat-panel-title>
-              @if (unitExportSettings.exportFormat === 'json') {
-                <mat-panel-description>
-                  {{'unit-download.dialog.test-takers-xml-only' | translate}}
-                </mat-panel-description>
-              }
             </mat-expansion-panel-header>
               <studio-lite-export-test-taker-config [(addTestTakersReview)]="unitExportSettings.addTestTakersReview"
                                        [(addTestTakersHot)]="unitExportSettings.addTestTakersHot"
