@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { WrappedIconComponent } from '../../../../components/wrapped-icon/wrapped-icon.component';
 import { ItemSelectionComponent } from '../../../../components/item-selection/item-selection.component';
 import { BulletListExtension } from '../../../../extensions/bullet-list.extension';
-import { OrderedListExtension } from '../../../../extensions/ordered-list.extension';
+import { listStyleOf, OrderedListExtension } from '../../../../extensions/ordered-list.extension';
 import {
   RichTextEditorDirective
 } from '../../../../directives/rich-text-editor.directive';
@@ -77,8 +77,8 @@ export class RichNoteEditorComponent extends RichTextEditorDirective {
   updateEditorStates(): void {
     const bulletAttrs = this.editor.getAttributes('bulletList') as { listStyle?: string };
     this.currentBulletListStyle = bulletAttrs.listStyle || 'disc';
-    const orderedAttrs = this.editor.getAttributes('orderedList') as { listStyle?: string };
-    this.currentOrderedListStyle = orderedAttrs.listStyle || 'decimal';
+    const orderedAttrs = this.editor.getAttributes('orderedList') as { type?: string | null };
+    this.currentOrderedListStyle = listStyleOf(orderedAttrs.type);
   }
 
   setBulletListStyle(style: string): void {

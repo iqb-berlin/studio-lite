@@ -51,11 +51,22 @@ describe('Studio rich text with the real Tiptap 3 editor', () => {
     expect(view.isDestroyed).toBe(true);
   });
 
-  it('keeps pasted numeric and lettered labels in the note editor', () => {
+  const firstListOf = (html: string): HTMLOListElement | null => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    return host.querySelector('ol');
+  };
+
+  // As in comments, pasted labels become a list with their style and their first number (#2100)
+  it('turns pasted numeric, lettered and roman labels into a list in the note editor', () => {
     const note = new RichNoteEditorComponent();
     note.ngOnInit();
     try {
-      ['3. Third\n4. Fourth', 'a. Alpha\nb. Beta'].forEach(text => {
+      [
+        { text: '3. Third\n4. Fourth', start: '3', listStyle: 'decimal' },
+        { text: 'a. Alpha\nb. Beta', start: null, listStyle: 'lower-latin' },
+        { text: 'II. Two\nIII. Three', start: '2', listStyle: 'upper-roman' }
+      ].forEach(({ text, start, listStyle }) => {
         note.editor.commands.clearContent(false);
         const event = new Event('paste');
         Object.defineProperty(event, 'clipboardData', {
@@ -63,9 +74,51 @@ describe('Studio rich text with the real Tiptap 3 editor', () => {
         });
 
         expect(note.editor.view.pasteText(text, event as ClipboardEvent)).toBe(true);
-        expect(note.editor.getText({ blockSeparator: '\n' })).toBe(text);
-        expect(note.editor.getHTML()).not.toContain('<ol');
+        const list = firstListOf(note.editor.getHTML());
+        expect(list?.querySelectorAll('li')).toHaveLength(2);
+        expect(list?.getAttribute('start')).toBe(start);
+        expect(list?.getAttribute('style')).toBe(`list-style: ${listStyle};`);
+        expect(list?.hasAttribute('type')).toBe(false);
       });
+    } finally {
+      note.ngOnDestroy();
+    }
+  });
+
+  // Notes stored before #2100 keep their CSS, also a style without a list type of its own
+  it('opens stored note lists unchanged and shows their style in the menu', () => {
+    const stored = '<ol style="list-style: upper-roman;"><li><p>One</p></li></ol>' +
+      '<ol style="list-style: lower-greek;"><li><p>Two</p></li></ol>';
+    const note = new RichNoteEditorComponent();
+    const changed = jest.fn();
+    note.contentChange.subscribe(changed);
+    note.initialHTML = stored;
+    note.ngOnInit();
+    try {
+      expect(note.editor.getHTML()).toBe(stored);
+      expect(changed).not.toHaveBeenCalled();
+
+      note.editor.commands.setTextSelection(3);
+      note.updateEditorStates();
+      expect(note.currentOrderedListStyle).toBe('upper-roman');
+
+      note.setOrderedListStyle('lower-latin');
+      expect(firstListOf(note.editor.getHTML())?.getAttribute('style')).toBe('list-style: lower-latin;');
+    } finally {
+      note.ngOnDestroy();
+    }
+  });
+
+  // The list type ends up in the style of the note, so a pasted attribute brings no CSS of its own along (#2100)
+  it('takes only list types from the type attribute of pasted HTML', () => {
+    const note = new RichNoteEditorComponent();
+    note.ngOnInit();
+    try {
+      note.editor.commands.setContent('<ol type="a"><li><p>A</p></li></ol>');
+      expect(firstListOf(note.editor.getHTML())?.getAttribute('style')).toBe('list-style: lower-latin;');
+
+      note.editor.commands.setContent('<ol type="decimal; color: red"><li><p>B</p></li></ol>');
+      expect(firstListOf(note.editor.getHTML())?.getAttribute('style')).toBe('list-style: decimal;');
     } finally {
       note.ngOnDestroy();
     }
