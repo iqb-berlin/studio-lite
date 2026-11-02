@@ -108,6 +108,45 @@ describe('Unit Rich Notes', () => {
     cy.get('.note-content').should('have.length', '2');
   });
 
+  // As in comments, pasted labels become a list, kept in the style a note writes (#2100)
+  it('turns pasted lettered labels into a list', () => {
+    cy.intercept('POST', '/api/workspaces/*/units/*/rich-notes').as('addNote');
+    cy.visitWs(primaryWorkspace);
+    selectUnit(lightUnit.shortname);
+    clickIndexTabWorkspace('notes');
+    cy.wait('@getRichNotes');
+
+    cy.get('[data-cy="rich-note-add"]').first().click({ force: true });
+    cy.get('mat-select[formControlName="tagId"]').click();
+    cy.get('mat-option').last().click();
+    cy.get('tiptap-editor .ProseMirror').click().trigger('paste', {
+      clipboardData: { getData: (type: string) => (type === 'text/plain' ? 'a. Alpha\nb. Beta' : '') }
+    });
+    cy.get('tiptap-editor .ProseMirror ol li').should('have.length', 2);
+    cy.get('[data-cy="rich-note-dialog-save"]').click({ force: true });
+
+    waitForSuccess('@addNote');
+    cy.get<Interception>('@addNote').then(interception => {
+      expect(interception.request.body.content).to.include('<ol style="list-style: lower-latin;">');
+    });
+
+    // Opened again, the stored note goes through the browser's parser and keeps its style when saved
+    cy.contains('.note-item', 'Alpha').find('ol').should('have.css', 'list-style-type', 'lower-latin');
+    cy.intercept('PATCH', '/api/workspaces/*/units/*/rich-notes/*').as('editListNote');
+    cy.contains('.note-item', 'Alpha').find('[data-cy="rich-note-edit"]').click({ force: true });
+    cy.get('mat-dialog-container')
+      .should('have.class', 'mdc-dialog--open')
+      .and('not.have.class', 'mdc-dialog--opening');
+    cy.get('tiptap-editor .ProseMirror ol').should('have.css', 'list-style-type', 'lower-latin');
+    cy.get('tiptap-editor .ProseMirror').click().type('{moveToEnd} (bearbeitet)');
+    cy.get('[data-cy="rich-note-dialog-save"]').click({ force: true });
+    waitForSuccess('@editListNote');
+    cy.get<Interception>('@editListNote').then(interception => {
+      expect(interception.request.body.content).to.include('<ol style="list-style: lower-latin;">');
+      expect(interception.request.body.content).to.include('Beta (bearbeitet)');
+    });
+  });
+
   describe('Block configures personalised rich note tags', () => {
     // A group of its own, as the tag config belongs to the group, with a workspace and units in it.
     // The base's teardown deletes it with every other group.
