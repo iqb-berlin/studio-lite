@@ -85,8 +85,8 @@ export class UnitDownloadClass {
       unitDownloadSettings.addTestTakersHot +
       unitDownloadSettings.addTestTakersMonitor +
       unitDownloadSettings.addTestTakersReview;
-    // The testcenter reads units only as XML: beside JSON units a booklet would name units it cannot find.
-    if (loginCount > 0 && exportFormat === 'xml') {
+    // Booklet and test takers stay XML in both formats: a booklet names its units by id only (#2099).
+    if (loginCount > 0) {
       BookletDownloadClass.addBooklet(
         unitExportConfig,
         unitDownloadSettings,

@@ -129,8 +129,8 @@ describe('ExportUnitComponent', () => {
     expect(fileConfig.exportFormat).toBe('json');
   });
 
-  // The testcenter reads units only as XML (#1477)
-  it('should drop the logins and lock their panel for the JSON format', () => {
+  // Booklet and test takers stay XML beside JSON units, so the JSON format keeps the logins
+  it('should keep the logins and the open panel in the JSON format (#2099)', () => {
     const fileConfig = fixture.debugElement
       .query(By.directive(MockExportUnitFileConfigComponent))
       .componentInstance as MockExportUnitFileConfigComponent;
@@ -143,15 +143,9 @@ describe('ExportUnitComponent', () => {
 
     const panel = fixture.debugElement.query(By.css('[data-cy="export-test-taker-panel"]'))
       .injector.get(MatExpansionPanel);
-    expect(component.unitExportSettings.addTestTakersReview).toBe(0);
-    expect(component.unitExportSettings.addTestTakersHot).toBe(0);
-    expect(component.unitExportSettings.addTestTakersMonitor).toBe(0);
-    expect(panel.disabled).toBe(true);
-    expect(panel.expanded).toBe(false);
-
-    fileConfig.exportFormatChange.emit('xml');
-    fixture.detectChanges();
-
+    expect(component.unitExportSettings.addTestTakersReview).toBe(1);
+    expect(component.unitExportSettings.addTestTakersHot).toBe(2);
+    expect(component.unitExportSettings.addTestTakersMonitor).toBe(3);
     expect(panel.disabled).toBe(false);
     expect(panel.expanded).toBe(true);
   });

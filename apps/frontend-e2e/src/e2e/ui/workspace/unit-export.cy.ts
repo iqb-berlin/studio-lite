@@ -77,16 +77,21 @@ describe('Workspace Unit Export & Reports', () => {
     });
   });
 
-  it('exports selected units as JSON format', () => {
+  // Booklet and test takers stay XML beside JSON units, so the JSON format keeps the logins (#2099)
+  it('exports selected units with logins as JSON format', () => {
     cy.visitWs(primaryWorkspace);
     cy.contains('.unit-row, mat-row', exportUnits.exportUnit1.shortname, { timeout: 15000 }).should('be.visible');
     goToWsMenu();
     cy.get('[data-cy="workspace-edit-unit-download-unit"]').should('be.visible').click();
     selectListUnits([exportUnits.exportUnit1.shortname]);
     cy.get('mat-radio-button[value="json"]').click();
+    cy.get('studio-lite-export-test-taker-config input[type="number"]').first().clear().type('1');
     cy.intercept('POST', '/api/workspaces/*/download-units').as('downloadJsonReq');
     cy.get('[data-cy="workspace-export-unit-button"]').click();
     waitForSuccess('@downloadJsonReq');
+    cy.get<Interception>('@downloadJsonReq').then(interception => {
+      expect(interception.request.body).to.include({ exportFormat: 'json', addTestTakersReview: 1 });
+    });
   });
 
   it('exports selected units with the locked files left out', () => {
