@@ -19,6 +19,7 @@ import { ToTimePipe } from '../../pipes/to-time.pipe';
 import { AppConfig } from '../../../../classes/app-config.class';
 import { defaultAppConfig } from '../../../../services/app.service';
 import { BackendService } from '../../services/backend.service';
+import { SaveLock } from '../../../../classes/save-lock.class';
 
 @Component({
   selector: 'studio-lite-app-config',
@@ -34,6 +35,8 @@ export class AppConfigComponent implements OnInit, OnDestroy {
 
   configForm: UntypedFormGroup;
   dataChanged = false;
+  // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
+  readonly save = new SaveLock();
   private configDataChangedSubscription: Subscription | null = null;
   private readonly configNotLoadedState = signal(false);
   // Without the stored config the form is not shown: saving it would replace that config (#1968).
@@ -118,6 +121,7 @@ export class AppConfigComponent implements OnInit, OnDestroy {
 
   saveData(): void {
     if (this.appConfig && this.configForm) {
+      if (!this.save.start(this.configForm.getRawValue())) return;
       this.appConfig.appTitle = this.configForm.get('appTitle')?.value;
       this.appConfig.introHtml = this.configForm.get('introHtml')?.value;
       this.appConfig.imprintHtml = this.configForm.get('imprintHtml')?.value;
@@ -125,13 +129,14 @@ export class AppConfigComponent implements OnInit, OnDestroy {
       this.appConfig.globalWarningExpiredDay = this.configForm.get('globalWarningExpiredDay')?.value;
       this.appConfig.globalWarningExpiredHour = this.configForm.get('globalWarningExpiredHour')?.value;
       this.backendService.setAppConfig(this.appConfig).subscribe(isOk => {
+        this.save.finish();
         if (isOk) {
           this.snackBar.open(
             this.translateService.instant('config.config-data-saved'),
             '',
             { duration: 3000 }
           );
-          this.dataChanged = false;
+          this.dataChanged = this.save.differsFromSent(this.configForm.getRawValue());
         } else {
           this.snackBar.open(
             this.translateService.instant('config.config-data-not-saved'),

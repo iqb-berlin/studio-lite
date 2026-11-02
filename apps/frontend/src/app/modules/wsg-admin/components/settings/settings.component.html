@@ -50,7 +50,7 @@
               [matTooltip]="'save' | translate"
               matTooltipPosition="above"
               [color]="'primary'"
-              [disabled]="!this.wsgAdminService.settingsChanged"
+              [disabled]="!this.wsgAdminService.settingsChanged || save.saving()"
               (click)="saveGroupSettings()"
               data-cy="wsg-admin-settings-save-button">
         <mat-icon>save</mat-icon>

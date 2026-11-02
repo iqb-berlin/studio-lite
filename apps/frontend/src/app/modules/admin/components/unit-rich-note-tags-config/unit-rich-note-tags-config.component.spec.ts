@@ -1,10 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, TestBed, fakeAsync
+} from '@angular/core/testing';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import {
   MatSnackBar, MatSnackBarModule, MatSnackBarRef, TextOnlySnackBar
 } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -169,4 +171,19 @@ describe('UnitRichNoteTagsConfigComponent', () => {
     expect(snackBar.open).toHaveBeenCalledWith('workspace.tags-saved-error', 'error', { duration: 3000 });
     expect(component.dataChanged).toBe(true);
   });
+
+  // #2094: what is entered while the save is under way was not sent, and a second save waits
+  it('keeps an entry made while saving unsaved and does not save twice meanwhile', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    backendServiceMock.setUnitRichNoteTags.mockReturnValue(answer);
+    component.urls.clear();
+    component.addUrl('http://gesendet');
+    component.saveData();
+    component.addUrl('http://danach');
+    component.saveData();
+    answer.next(true);
+
+    expect(backendServiceMock.setUnitRichNoteTags).toHaveBeenCalledTimes(1);
+    expect(component.dataChanged).toBe(true);
+  }));
 });

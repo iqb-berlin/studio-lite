@@ -86,6 +86,20 @@ describe('UnitDefinitionStore', () => {
     expect(store.getData().definition).toBe('def-c');
   });
 
+  // #2087: set back to the loaded state while the save was under way, it differs from what was saved
+  it('keeps a definition set back while the save is under way as a change', () => {
+    const store = new UnitDefinitionStore(1, { variables: [buildVariable('v1', 'a1')], definition: 'def-a' });
+    store.setData([buildVariable('v2', 'a2')], 'def-b');
+    const sent = store.getChangedData();
+
+    store.setData([buildVariable('v1', 'a1')], 'def-a');
+    store.applyChanges(sent);
+
+    expect(store.changed()).toBe(true);
+    expect(store.getChangedData()).toEqual({ variables: [buildVariable('v1', 'a1')], definition: 'def-a' });
+    expect(store.getData().definition).toBe('def-a');
+  });
+
   it('restore resets change set and emits', () => {
     const original: UnitDefinitionDto = {
       variables: [buildVariable('v1', 'a1')],

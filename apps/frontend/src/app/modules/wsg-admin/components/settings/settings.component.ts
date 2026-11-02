@@ -1,4 +1,6 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component, OnDestroy, OnInit, signal
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   State, WorkspaceGroupSettingsDto
@@ -17,6 +19,7 @@ import { StatesComponent } from '../states/states.component';
 import {
   UnitRichNoteTagsConfigComponent
 } from '../../../admin/components/unit-rich-note-tags-config/unit-rich-note-tags-config.component';
+import { SaveLock } from '../../../../classes/save-lock.class';
 
 @Component({
   selector: 'studio-lite-settings',
@@ -27,6 +30,10 @@ import {
 })
 export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   settings!: WorkspaceGroupSettingsDto;
+  // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
+  readonly save = new SaveLock();
+  // Asked for while a save is under way, by deleting a state (#2009): sent once that save is answered.
+  private readonly saveRequested = signal(false);
   private ngUnsubscribe = new Subject<void>();
 
   constructor(
@@ -50,14 +57,24 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
   }
 
   async saveGroupSettings() {
+    // a copy: what is sent must not change with the edits made while it is under way
+    const sent = structuredClone(this.settings);
+    if (!this.save.start(sent)) {
+      this.saveRequested.set(true);
+      return;
+    }
     this.wsgAdminService.setWorkspaceGroupSettings(
-      this.wsgAdminService.selectedWorkspaceGroupId.value, this.settings)
+      this.wsgAdminService.selectedWorkspaceGroupId.value, sent)
       .pipe(
         takeUntil(this.ngUnsubscribe))
       .subscribe(
         respOk => {
+          this.save.finish();
           if (respOk) {
-            this.wsgAdminService.settingsChanged = false;
+            this.wsgAdminService.settingsChanged = this.save.differsFromSent(this.settings);
+            // What the page shows, not only what was sent: the form, the states and the profiles are built anew
+            // from what is published here, and also when the page is opened again, so the stored settings alone
+            // would drop what was entered while the save was under way. No reader takes it for what is stored.
             this.wsgAdminService.selectedWorkspaceGroupSettings.next(this.settings);
             this.snackBar.open(
               this.translateService.instant('wsg-settings.changed'),
@@ -70,6 +87,10 @@ export class WorkspaceSettingsComponent implements OnInit, OnDestroy {
               this.translateService.instant('error'),
               { duration: 3000 }
             );
+          }
+          if (this.saveRequested()) {
+            this.saveRequested.set(false);
+            this.saveGroupSettings();
           }
         }
       );

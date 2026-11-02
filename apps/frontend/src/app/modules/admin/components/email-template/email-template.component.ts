@@ -12,6 +12,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 
 import { EmailTemplateDto } from '@studio-lite-lib/api-dto';
 import { BackendService } from '../../../../services/backend.service';
+import { SaveLock } from '../../../../classes/save-lock.class';
 
 @Component({
   selector: 'studio-lite-email-template',
@@ -24,6 +25,8 @@ import { BackendService } from '../../../../services/backend.service';
 export class EmailTemplateComponent implements OnInit, OnDestroy {
   configForm: UntypedFormGroup;
   dataChanged = false;
+  // One save at a time, and what it sent: what is entered meanwhile stays a change (#2094).
+  readonly save = new SaveLock();
   private configDataChangedSubscription: Subscription | null = null;
 
   constructor(
@@ -71,19 +74,21 @@ export class EmailTemplateComponent implements OnInit, OnDestroy {
 
   saveData(): void {
     if (this.configForm) {
+      if (!this.save.start(this.configForm.getRawValue())) return;
       const emailTemplate: EmailTemplateDto = {
         emailSubject: this.configForm.get('emailSubject')?.value,
         emailBody: this.configForm.get('emailBody')?.value
       };
       this.backendService.setEmailTemplate(emailTemplate)
         .subscribe(isOk => {
+          this.save.finish();
           if (isOk) {
             this.snackBar.open(
               this.translateService.instant('email-template.template-saved'),
               '',
               { duration: 3000 }
             );
-            this.dataChanged = false;
+            this.dataChanged = this.save.differsFromSent(this.configForm.getRawValue());
           } else {
             this.snackBar.open(
               this.translateService.instant('email-template.template-not-saved'),

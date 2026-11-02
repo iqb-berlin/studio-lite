@@ -108,6 +108,33 @@ describe('Admin Settings Tab Configuration', () => {
         1
       );
     });
+
+    // What is typed while the save is under way was not sent: it stays unsaved, and the button stays locked
+    // until the answer, so that no second save overtakes the first (#2094)
+    it('keeps what was typed while saving unsaved and sends it with the next save', () => {
+      const saveButton = () => cy.get('[data-cy="admin-email-template-save-button"]');
+      goToSettings();
+      // the answer to the first save is held back until the test has typed on
+      let release = (): void => undefined;
+      const held = new Promise<void>(resolve => { release = resolve; });
+      let saves = 0;
+      cy.intercept('PATCH', '/api/admin/settings/email-template', req => {
+        saves += 1;
+        if (saves === 1) req.on('response', () => held);
+      }).as('saveEmailTemplateSlowly');
+
+      setFormControl('emailSubject', 'Vorher');
+      saveButton().click();
+      cy.get('[formcontrolname="emailSubject"]').type(' danach', { force: true });
+      // within the 10 s the held answer may wait, so that a missing lock fails here and says so
+      cy.get('[data-cy="admin-email-template-save-button"]', { timeout: 2000 }).should('be.disabled');
+      cy.then(() => release());
+      cy.wait('@saveEmailTemplateSlowly').its('request.body.emailSubject').should('equal', 'Vorher');
+
+      saveButton().should('be.enabled').click();
+      cy.wait('@saveEmailTemplateSlowly').its('request.body.emailSubject').should('equal', 'Vorher danach');
+      saveButton().should('be.disabled');
+    });
   });
 
   // -------------------------------------------------------------------------

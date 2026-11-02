@@ -1,8 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, TestBed, fakeAsync
+} from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { BackendService } from '../../services/backend.service';
 import { ProfilesRegistryComponent } from './profiles-registry.component';
 
@@ -86,4 +88,18 @@ describe('ProfilesRegistryComponent', () => {
       { duration: 3000 }
     );
   });
+
+  // #2094: what is entered while the save is under way was not sent, and a second save waits
+  it('keeps an entry made while saving unsaved and does not save twice meanwhile', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    backendService.setProfilesRegistry.mockReturnValue(answer);
+    component.configForm.get('csvUrl')?.setValue('gesendet.csv');
+    component.saveData();
+    component.configForm.get('csvUrl')?.setValue('danach.csv');
+    component.saveData();
+    answer.next(true);
+
+    expect(backendService.setProfilesRegistry).toHaveBeenCalledTimes(1);
+    expect(component.dataChanged).toBe(true);
+  }));
 });

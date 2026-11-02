@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { EmailTemplateDto } from '@studio-lite-lib/api-dto';
 import { EmailTemplateComponent } from './email-template.component';
 import { environment } from '../../../../../environments/environment';
@@ -136,4 +136,20 @@ describe('EmailTemplateComponent', () => {
     component.saveData();
     expect(backendService.setEmailTemplate).not.toHaveBeenCalled();
   });
+
+  // #2094: what is entered while the save is under way was not sent, and a second save waits
+  it('keeps an entry made while saving unsaved and does not save twice meanwhile', fakeAsync(() => {
+    const answer = new Subject<boolean>();
+    backendService.setEmailTemplate.mockReturnValue(answer);
+    component.ngOnInit();
+    tick();
+    component.configForm.get('emailSubject')?.setValue('Gesendet');
+    component.saveData();
+    component.configForm.get('emailSubject')?.setValue('Danach');
+    component.saveData();
+    answer.next(true);
+
+    expect(backendService.setEmailTemplate).toHaveBeenCalledTimes(1);
+    expect(component.dataChanged).toBe(true);
+  }));
 });
