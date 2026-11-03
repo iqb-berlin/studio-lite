@@ -78,6 +78,19 @@ Cypress.Commands.add('logoutAPI', (token: string, refreshToken: string) => {
   });
 });
 
+// 2c: the logout of a browser whose access token has expired, with nothing but its refresh token.
+Cypress.Commands.add('logoutSilentAPI', (refreshToken: string) => {
+  cy.request({
+    method: 'POST',
+    url: '/api/logout-silent',
+    headers: {
+      'app-version': Cypress.expose('version')
+    },
+    body: { refreshToken },
+    failOnStatusCode: false
+  });
+});
+
 // 3
 // ***************** IMPORTANT: changes MUST be reported to METHOD TEAM **********************
 Cypress.Commands.add('getUserIdAPI', (token: string) => {

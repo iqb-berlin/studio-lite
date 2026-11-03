@@ -180,4 +180,24 @@ describe('Auth API tests', () => {
       });
     });
   });
+
+  // A tab reloaded or closed while its refresh ran never received the new pair and logs out with the
+  // exchanged token. The session must not outlive that by the token nobody holds (#2110).
+  describe('6. POST /api/logout-silent', () => {
+    it('201 positive test: should end the session with a refresh token that was already exchanged', () => {
+      cy.loginAPI(Cypress.expose('username'), Cypress.expose('password')).then(login => {
+        expect(login.status).to.equal(201);
+        const exchangedToken = login.body.refreshToken;
+        cy.refreshTokenAPI(exchangedToken).then(refreshed => {
+          expect(refreshed.status).to.equal(201);
+          cy.logoutSilentAPI(exchangedToken).then(logout => {
+            expect(logout.status).to.equal(201);
+          });
+          cy.refreshTokenAPI(refreshed.body.refreshToken).then(replacement => {
+            expect(replacement.status).to.equal(401);
+          });
+        });
+      });
+    });
+  });
 });
