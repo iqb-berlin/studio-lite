@@ -3,8 +3,7 @@ import {
   HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpResponse
 } from '@angular/common/http';
 import {
-  finalize, Observable, throwError, BehaviorSubject, filter, take, switchMap, catchError, tap, fromEvent, timeout,
-  map, of
+  finalize, Observable, throwError, filter, take, switchMap, catchError, tap, fromEvent, timeout, map, of, shareReplay
 } from 'rxjs';
 import { Router } from '@angular/router';
 import { AppService } from '../services/app.service';
@@ -28,8 +27,9 @@ import { IS_BACKGROUND_REQUEST, SKIP_TOKEN_REFRESH } from './request-classificat
   providedIn: 'root'
 })
 export class AuthInterceptor implements HttpInterceptor {
-  private isRefreshing = false;
-  private refreshTokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
+  // The refresh this tab has under way, shared by every request waiting for it. It ends in the access
+  // token to go on with, or fails, and is null again once it has ended.
+  private refresh$: Observable<string> | null = null;
 
   constructor(
     @Inject('APP_VERSION') readonly appVersion: string,
@@ -127,12 +127,8 @@ export class AuthInterceptor implements HttpInterceptor {
     next: HttpHandler,
     failedToken: string | null
   ): Observable<HttpEvent<unknown>> {
-    if (this.isRefreshing) {
-      return this.refreshTokenSubject.pipe(
-        filter((token): token is string => token !== null),
-        take(1),
-        switchMap(jwt => this.repeat(request, next, jwt))
-      );
+    if (this.refresh$) {
+      return this.repeatAfter(this.refresh$, request, next);
     }
 
     const lockTime = parseInt(localStorage.getItem('st_refresh_lock') || '0', 10);
@@ -148,6 +144,10 @@ export class AuthInterceptor implements HttpInterceptor {
       // Wait for another tab to finish refreshing. If it times out or brings no token, refresh
       // ourselves. That fallback covers the waiting only: were it to sit behind the repetition,
       // a request failing for its own reason would set off a second refresh (#1694).
+      // A lock left by a tab that was reloaded or closed while refreshing makes every request of
+      // a page wait here at once. The first to time out refreshes, the others wait for it: a
+      // second refresh with the same token would be refused and log out a session that was just
+      // renewed (#2110).
       return fromEvent<StorageEvent>(window, 'storage').pipe(
         filter(event => event.key === 'id_token'),
         take(1),
@@ -157,57 +157,85 @@ export class AuthInterceptor implements HttpInterceptor {
         }),
         map(event => event.newValue),
         catchError(() => of(null)),
-        switchMap(newToken => (newToken ?
-          this.repeat(request, next, newToken) :
-          this.performRefresh(request, next)))
+        switchMap(newToken => {
+          if (newToken) return this.repeat(request, next, newToken);
+          if (this.refresh$) return this.repeatAfter(this.refresh$, request, next);
+          // This tab's own refresh may have ended while the request waited: storage events
+          // reach only the other tabs.
+          const storedToken = localStorage.getItem('id_token');
+          return storedToken && storedToken !== failedToken ?
+            this.repeat(request, next, storedToken) :
+            this.performRefresh(request, next);
+        })
       );
     }
 
     return this.performRefresh(request, next);
   }
 
+  /**
+   * Repeats a request with the token a refresh of this tab ends in, or fails it with that refresh.
+   * Only the request is repeated behind the refresh: a repetition that fails as well -- as it did for
+   * a workspace the user has no access to, which the API answered with 401 until #1706 -- must not
+   * count as a failed refresh, or a session that had just been renewed is logged out (#1694).
+   */
+  private repeatAfter(
+    refresh$: Observable<string>,
+    request: HttpRequest<unknown>,
+    next: HttpHandler
+  ): Observable<HttpEvent<unknown>> {
+    return refresh$.pipe(switchMap(accessToken => this.repeat(request, next, accessToken)));
+  }
+
   private performRefresh(
     request: HttpRequest<unknown>,
     next: HttpHandler
   ): Observable<HttpEvent<unknown>> {
-    this.isRefreshing = true;
-    this.refreshTokenSubject.next(null);
     localStorage.setItem('st_refresh_lock', Date.now().toString());
 
     const refreshToken = localStorage.getItem('refresh_token');
     if (refreshToken) {
-      return this.backendService.refresh(refreshToken).pipe(
-        // Only a failed refresh ends the session, so this catchError has to stay in front of the
-        // switchMap. Behind it, it also caught the repeated request: when that failed too -- as it
-        // did for a workspace the user has no access to, which the API answered with 401 until
-        // #1706 -- a session that had just been renewed was logged out (#1694).
-        catchError(err => {
-          this.isRefreshing = false;
-          localStorage.removeItem('st_refresh_lock');
-          this.backendService.logout();
-          this.router.navigate(['/home']);
-          return throwError(() => err);
-        }),
+      // A failure that reaches the requests unchanged is a refresh that got no answer about the
+      // session: no connection, or an error of the server. That is no reason to log out -- the
+      // session is fine, and logging out without reaching the server left it behind (#2110). The
+      // tokens stay, the refresh's own failure is reported by intercept(), and the next request
+      // refreshes again.
+      const refresh$ = this.backendService.refresh(refreshToken).pipe(
         switchMap(tokenData => {
-          this.isRefreshing = false;
-          localStorage.removeItem('st_refresh_lock');
           if (tokenData) {
             const { accessToken, refreshToken: newRefreshToken } = tokenData;
             localStorage.setItem('id_token', accessToken);
             localStorage.setItem('refresh_token', newRefreshToken);
-            this.refreshTokenSubject.next(accessToken);
-
-            return this.repeat(request, next, accessToken);
+            return of(accessToken);
+          }
+          // Refused. If this browser holds another pair by now, another tab exchanged the token
+          // first and the session goes on under that pair; logging out would end it for every
+          // tab (#2110).
+          const storedRefreshToken = localStorage.getItem('refresh_token');
+          const storedAccessToken = localStorage.getItem('id_token');
+          if (storedAccessToken && storedRefreshToken && storedRefreshToken !== refreshToken) {
+            return of(storedAccessToken);
           }
           this.backendService.logout();
           this.router.navigate(['/home']);
           return throwError(() => new Error('Refresh failed'));
-        })
+        }),
+        finalize(() => {
+          this.refresh$ = null;
+          localStorage.removeItem('st_refresh_lock');
+        }),
+        shareReplay({ bufferSize: 1, refCount: false })
       );
+      this.refresh$ = refresh$;
+      // The refresh runs to its end on a subscription of its own. Hanging on the request that set
+      // it off, it was aborted when that request was cancelled -- a second click, leaving the view
+      // -- after the server had exchanged the token: the answer was lost, and the tab waited for
+      // this refresh for good (#2110).
+      refresh$.subscribe({ error: () => {} });
+      return this.repeatAfter(refresh$, request, next);
     }
 
     // Safety fallback: if no refresh token
-    this.isRefreshing = false;
     localStorage.removeItem('st_refresh_lock');
     this.backendService.logout();
     this.router.navigate(['/home']);

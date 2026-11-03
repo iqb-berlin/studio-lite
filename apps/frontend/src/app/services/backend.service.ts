@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {
   AuthDataDto,
@@ -73,13 +73,20 @@ export class BackendService {
       );
   }
 
+  /**
+   * Answers null when the server has refused the token (4xx): the session cannot be continued. Any
+   * other failure -- no connection, or an error of the server -- says nothing about the session and
+   * is passed on, so that a network outage does not log out a browser whose session is fine (#2110).
+   */
   refresh(refreshToken: string): Observable<{ accessToken: string, refreshToken: string } | null> {
     return this.http.post<{ accessToken: string, refreshToken: string }>(
       `${this.serverUrl}refresh`,
       { refreshToken },
       { context: tokenRefreshContext() }
     ).pipe(
-      catchError(() => of(null))
+      catchError((error: HttpErrorResponse) => (error.status >= 400 && error.status < 500 ?
+        of(null) :
+        throwError(() => error)))
     );
   }
 
