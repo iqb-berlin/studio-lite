@@ -1,4 +1,5 @@
 import {
+  CommentData,
   primaryWorkspace,
   printUnits,
   unitCrudUnits
@@ -9,11 +10,16 @@ import {
   selectListUnits,
   selectUnit
 } from '../../../support/helpers';
-import { createTestBaseAPI, deleteTestBaseAPI } from '../../../support/helpers/test-base';
+import { createTestBaseAPI, deleteTestBaseAPI, TestBase } from '../../../support/helpers/test-base';
 
 describe('Unit Print Preview', () => {
+  let base: TestBase;
+
   before(() => {
-    createTestBaseAPI({ zip: 'test_studio_units_download.zip', units: [unitCrudUnits.crudPrint] });
+    createTestBaseAPI({ zip: 'test_studio_units_download.zip', units: [unitCrudUnits.crudPrint] })
+      .then(created => {
+        base = created;
+      });
   });
 
   after(() => {
@@ -244,16 +250,23 @@ describe('Unit Print Preview', () => {
       }
     }).as('getUnitScheme');
 
-    cy.intercept('GET', '**/workspaces/*/units/*/comments*', {
-      body: [
-        {
-          id: 1,
-          body: '<p>Test comment</p>',
-          userName: 'tester',
-          changedAt: new Date().toISOString()
-        }
-      ]
-    }).as('getComments');
+    // A reply written after a later comment was printed under that later comment (#2109).
+    const unitId = base.unitIds[0];
+    const comment = (body: string, parentId?: number): CommentData => ({
+      body: `<p>${body}</p>`,
+      userName: Cypress.expose('username'),
+      userId: Number(base.userId),
+      unitId: Number(unitId),
+      parentId
+    });
+    cy.postCommentAPI(base.wsId, unitId, comment('Kommentar A'), base.token).then(commentA => {
+      expect(commentA.status).to.equal(201);
+      cy.postCommentAPI(base.wsId, unitId, comment('Kommentar B'), base.token)
+        .its('status').should('equal', 201);
+      cy.postCommentAPI(base.wsId, unitId, comment('Antwort auf A', Number(commentA.body)), base.token)
+        .its('status').should('equal', 201);
+    });
+    cy.intercept('GET', '**/workspaces/*/units/*/comments*').as('getComments');
 
     cy.visitWs(primaryWorkspace);
     goToWsMenu();
@@ -281,7 +294,6 @@ describe('Unit Print Preview', () => {
     cy.url().should('include', '/print');
 
     cy.wait('@getUnitScheme');
-    cy.wait('@getComments');
 
     cy.get('studio-lite-unit-print-coding').should('exist');
     cy.get('studio-lite-unit-print-coding')
@@ -291,12 +303,15 @@ describe('Unit Print Preview', () => {
     cy.get('studio-lite-unit-print-code').should('exist');
     cy.get('studio-lite-unit-print-code').contains('111').should('exist');
 
-    cy.get('studio-lite-unit-print-comments').should('exist');
-    cy.get('studio-lite-unit-print-comments')
-      .contains('Test comment')
-      .should('exist');
-    cy.get('studio-lite-unit-print-comments')
-      .contains('tester')
-      .should('exist');
+    cy.get('studio-lite-unit-print-comments .comment')
+      .should('have.length', 3)
+      .then(printed => {
+        expect(printed.eq(0).text()).to.contain('Kommentar A');
+        expect(printed.eq(1).find('.reply').text()).to.contain('Antwort auf A');
+        expect(printed.eq(2).text()).to.contain('Kommentar B');
+      });
+    cy.wait('@getComments').its('response.body.0.userName').should('not.be.empty').then(author => {
+      cy.get('studio-lite-unit-print-comments .comment-user').first().should('contain.text', author);
+    });
   });
 });

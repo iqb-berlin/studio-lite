@@ -1491,7 +1491,8 @@ Cypress.Commands.add('postCommentAPI', (wsId: string, unitId: string, comment: C
       body: `${comment.body}`,
       userName: `${comment.userName}`,
       userId: `${comment.userId}`,
-      unitId: `${comment.unitId}`
+      unitId: `${comment.unitId}`,
+      ...(comment.parentId ? { parentId: comment.parentId } : {})
     },
     failOnStatusCode: false
   });

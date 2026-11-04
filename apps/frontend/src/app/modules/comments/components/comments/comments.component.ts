@@ -19,7 +19,7 @@ import { ScrollCommentIntoViewDirective } from '../../directives/scroll-comment-
 import { CommentComponent } from '../comment/comment.component';
 import { FilteredCommentsPipe } from '../../pipes/filtered-comments.pipe';
 import { FilteredRootCommentsPipe } from '../../pipes/filtered-root-comments.pipe';
-import { RootCommentWithReplies } from '../../models/root-comment-with-replies.interface';
+import { RootCommentsWithRepliesPipe } from '../../pipes/root-comments-with-replies.pipe';
 import { CommentFilterComponent } from '../comment-filter/comment-filter.component';
 import { HiddenCommentsCountPipe } from '../../pipes/hidden-comments-count.pipe';
 import { CommentService } from '../../services/comment.service';
@@ -37,7 +37,11 @@ import { VoterOverviewComponent } from '../voter-overview/voter-overview.compone
   templateUrl: './comments.component.html',
   styleUrls: ['./comments.component.scss'],
 
-  imports: [MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule, FilteredCommentsPipe, FormsModule, FilteredRootCommentsPipe, CommentFilterComponent, HiddenCommentsCountPipe],
+  imports: [
+    MatProgressSpinner, CommentComponent, ScrollCommentIntoViewDirective, CommentEditorComponent, TranslateModule,
+    FilteredCommentsPipe, FormsModule, FilteredRootCommentsPipe, RootCommentsWithRepliesPipe, CommentFilterComponent,
+    HiddenCommentsCountPipe
+  ],
   providers: [CommentService, BackendService]
 })
 export class CommentsComponent implements OnInit, OnDestroy {
@@ -54,7 +58,6 @@ export class CommentsComponent implements OnInit, OnDestroy {
   @Output() onCommentsUpdated = new EventEmitter<void>();
 
   comments: Comment[] = [];
-  rootCommentsWithReplies: RootCommentWithReplies[] = [];
   activeComment: ActiveComment | null = null;
   latestCommentId: Subject<number> = new Subject();
   isCommentProcessing: boolean = false;
@@ -248,17 +251,6 @@ export class CommentsComponent implements OnInit, OnDestroy {
 
   private setComments(comments: Comment[]): void {
     this.comments = comments;
-    this.setRootCommentsWithReplies();
-  }
-
-  private setRootCommentsWithReplies(): void {
-    this.rootCommentsWithReplies = this.comments
-      .filter(c => c.parentId === null)
-      .map(comment => (
-        {
-          rootComment: comment,
-          replies: this.comments.filter(reply => reply.parentId === comment.id)
-        }));
   }
 
   private getUpdatedComments(): Observable<boolean> {

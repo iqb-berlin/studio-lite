@@ -5,11 +5,12 @@
     </div>
   }
   @if (!newCommentOnly) {
+    @let threads = comments | rootCommentsWithReplies;
     <studio-lite-comment-filter class="filter-button"
                                      [(filteredItems)]="filteredItems"
                                      [(voteFilters)]="voteFilters"
                                      [unitItems]="unitItems"
-                                     [disabled] ="!rootCommentsWithReplies || !rootCommentsWithReplies.length"
+                                     [disabled] ="!threads.length"
                                      [showHiddenComments]="commentService.showHiddenComments">
     </studio-lite-comment-filter>
 
@@ -21,7 +22,7 @@
         }}
         @if (!commentService.showHiddenComments.value) {
           {{'comments.hidden-info' | translate : {
-            hidden: rootCommentsWithReplies | hiddenCommentsCount }
+            hidden: threads | hiddenCommentsCount }
           }}
         }
         @if (filteredItems.length || voteFilters.length) {
@@ -39,7 +40,7 @@
 
       </div>
 
-      @for (rootComment of rootCommentsWithReplies | filteredRootComments : filteredItems : voteFilters; track rootComment) {
+      @for (rootComment of threads | filteredRootComments : filteredItems : voteFilters; track rootComment) {
         @if (!rootComment.rootComment.hidden || (rootComment.rootComment.hidden && commentService.showHiddenComments.value)) {
           <studio-lite-comment
             [showHiddenComments]="commentService.showHiddenComments"
